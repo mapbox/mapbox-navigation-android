@@ -1,4 +1,4 @@
-package com.mapbox.navigation.base.trip.model
+package com.mapbox.navigation.core.trip.model.eh
 
 import java.util.LinkedList
 
@@ -24,14 +24,9 @@ import java.util.LinkedList
  * their outgoing connections. This can be done by simply looping over the Edges or using a Visitor.
  * For common cases, a number of utilities have been added which are described below.
  *
- * Electronic Horizon is still **experimental**, which means that the design of the
- * APIs has open issues which may (or may not) lead to their changes in the future.
- * Roughly speaking, there is a chance that those declarations will be deprecated in the near
- * future or the semantics of their behavior may change in some way that may break some code.
- *
  * @param start [Edge]
  */
-class EHorizon private constructor(
+class EHorizon internal constructor(
     val start: Edge
 ) {
 
@@ -46,7 +41,7 @@ class EHorizon private constructor(
         while (visitedEdges.isNotEmpty()) {
             val current = visitedEdges.poll()
             if (current.id != position.edgeId) {
-                val mppEdges = current.out.filter { e -> e.level == 0.toByte() }
+                val mppEdges = current.out.filter { it.isMpp() }
                 visitedEdges.addAll(mppEdges)
             } else {
                 return current
@@ -56,40 +51,21 @@ class EHorizon private constructor(
     }
 
     /**
-     * Get the MPP starting at the current [EHorizonPosition]
-     *
-     * @return the Edges starting at the current edge
-     */
-    fun mpp(position: EHorizonPosition): List<Edge> {
-        return this.current(position).collect { edge: Edge ->
-            if (edge.level == 0.toByte()) {
-                edge
-            } else {
-                null
-            }
-        }
-    }
-
-    /**
      * Get the MPP starting at the first Edge in the [EHorizon]
      *
      * @return entire MPP from the [EHorizon] as a list of ordered Edges
      */
-    fun mpp(): List<Edge> {
-        return this.start.collect { edge: Edge ->
-            if (edge.level == 0.toByte()) {
-                edge
-            } else {
-                null
-            }
-        }
+    fun mpp(): List<List<Edge>> {
+        return mpp(start)
     }
 
     /**
-     * @return the builder that created the [EHorizon]
+     * Get the MPP starting at the current [EHorizonPosition]
+     *
+     * @return the Edges starting at the current edge
      */
-    fun toBuilder(): Builder = Builder().apply {
-        start(start)
+    fun mpp(position: EHorizonPosition): List<List<Edge>> {
+        return mpp(current(position))
     }
 
     /**
@@ -122,26 +98,32 @@ class EHorizon private constructor(
             ")"
     }
 
-    /**
-     * Builder for [EHorizon].
-     */
-    class Builder {
-
-        private var start: Edge = Edge.Builder().build()
-
-        /**
-         * Defines the start [Edge]
-         */
-        fun start(start: Edge): Builder =
-            apply { this.start = start }
-
-        /**
-         * Build the [EHorizon]
-         */
-        fun build(): EHorizon {
-            return EHorizon(
-                start = start
-            )
+    private fun mpp(start: Edge): List<List<Edge>> {
+        // if it is not MPP return empty list
+        if (!start.isMpp()) return emptyList()
+        if (start.out.isEmpty()) return listOf(listOf(start))
+        val result = LinkedList<LinkedList<Edge>>()
+        // traverse through MPP nodes until a tip is found
+        val visitedEdges = LinkedList(start.out.filter { c -> c.isMpp() })
+        while (visitedEdges.isNotEmpty()) {
+            @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+            val current: Edge = visitedEdges.poll()
+            // check if is a tip of MPP
+            if (current.out.isEmpty()) {
+                val path = LinkedList<Edge>()
+                var b: Edge? = current
+                // trace back and form mpp
+                while (b != null) {
+                    path.push(b)
+                    if (b == start) break
+                    b = b.parent
+                }
+                result.add(path)
+            } else {
+                // push all MPP children to stack
+                visitedEdges.addAll(current.out.filter { c -> c.isMpp() })
+            }
         }
+        return result
     }
 }

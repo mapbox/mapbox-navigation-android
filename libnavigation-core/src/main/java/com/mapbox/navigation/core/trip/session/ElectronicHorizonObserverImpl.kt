@@ -2,19 +2,19 @@ package com.mapbox.navigation.core.trip.session
 
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.trip.model.EHorizon
-import com.mapbox.navigation.base.trip.model.EHorizonPosition
-import com.mapbox.navigation.base.trip.model.EHorizonResultType
-import com.mapbox.navigation.base.trip.model.Edge
-import com.mapbox.navigation.base.trip.model.FunctionalRoadClass.MOTORWAY
-import com.mapbox.navigation.base.trip.model.FunctionalRoadClass.PRIMARY
-import com.mapbox.navigation.base.trip.model.FunctionalRoadClass.RESIDENTIAL
-import com.mapbox.navigation.base.trip.model.FunctionalRoadClass.SECONDARY
-import com.mapbox.navigation.base.trip.model.FunctionalRoadClass.SERVICE_OTHER
-import com.mapbox.navigation.base.trip.model.FunctionalRoadClass.TERTIARY
-import com.mapbox.navigation.base.trip.model.FunctionalRoadClass.TRUNK
-import com.mapbox.navigation.base.trip.model.FunctionalRoadClass.UNCLASSIFIED
-import com.mapbox.navigation.base.trip.model.NameInfo
+import com.mapbox.navigation.core.trip.model.eh.EHorizon
+import com.mapbox.navigation.core.trip.model.eh.EHorizonPosition
+import com.mapbox.navigation.core.trip.model.eh.EHorizonResultType
+import com.mapbox.navigation.core.trip.model.eh.Edge
+import com.mapbox.navigation.core.trip.model.eh.FunctionalRoadClass.MOTORWAY
+import com.mapbox.navigation.core.trip.model.eh.FunctionalRoadClass.PRIMARY
+import com.mapbox.navigation.core.trip.model.eh.FunctionalRoadClass.RESIDENTIAL
+import com.mapbox.navigation.core.trip.model.eh.FunctionalRoadClass.SECONDARY
+import com.mapbox.navigation.core.trip.model.eh.FunctionalRoadClass.SERVICE_OTHER
+import com.mapbox.navigation.core.trip.model.eh.FunctionalRoadClass.TERTIARY
+import com.mapbox.navigation.core.trip.model.eh.FunctionalRoadClass.TRUNK
+import com.mapbox.navigation.core.trip.model.eh.FunctionalRoadClass.UNCLASSIFIED
+import com.mapbox.navigation.core.trip.model.eh.NameInfo
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.ElectronicHorizon
@@ -65,43 +65,39 @@ internal class ElectronicHorizonObserverImpl(
     }
 
     private fun ElectronicHorizon.mapToEHorizon(): EHorizon {
-        return EHorizon.Builder().start(start.mapToEdge()).build()
+        return EHorizon(start.mapToEdge())
     }
 
-    private fun ElectronicHorizonEdge.mapToEdge(): Edge {
-        return Edge.Builder()
-            .id(id)
-            .level(level)
-            .probability(probability)
-            .heading(heading)
-            .length(length)
-            .out(mapOut(out))
-            .frc(frc.mapToFRC())
-            .wayId(wayId)
-            .positiveDirection(positiveDirection)
-            .speed(speed)
-            .ramp(ramp)
-            .motorway(motorway)
-            .bridge(bridge)
-            .tunnel(tunnel)
-            .toll(toll)
-            .names(mapNames(names))
-            .curvature(curvature)
-            .geometry(mapGeometry(geometry))
-            .speedLimit(speedLimit)
-            .laneCount(laneCount)
-            .meanElevation(meanElevation)
-            .countryCode(countryCode)
-            .stateCode(stateCode)
-            .build()
-    }
-
-    private fun mapOut(out: List<ElectronicHorizonEdge>): List<Edge> {
-        val outEdges = mutableListOf<Edge>()
-        for (electronicHorizonEdge in out) {
-            outEdges.add(electronicHorizonEdge.mapToEdge())
+    private fun ElectronicHorizonEdge.mapToEdge(parent: Edge? = null): Edge {
+        val futureOut = mutableListOf<Edge>()
+        val edge = Edge(
+            id,
+            level,
+            probability,
+            heading,
+            length,
+            futureOut,
+            parent,
+            frc.mapToFRC(),
+            speed,
+            ramp,
+            motorway,
+            bridge,
+            tunnel,
+            toll,
+            mapNames(names),
+            curvature,
+            mapGeometry(geometry),
+            speedLimit,
+            laneCount,
+            meanElevation,
+            countryCode,
+            stateCode
+        )
+        for (e in out) {
+            futureOut.add(e.mapToEdge(edge))
         }
-        return outEdges.toList()
+        return edge
     }
 
     private fun FRC.mapToFRC(): String {
@@ -118,10 +114,10 @@ internal class ElectronicHorizonObserverImpl(
     }
 
     private fun RoadNameInfo.mapToNameInfo(): NameInfo {
-        return NameInfo.Builder()
-            .name(name)
-            .shielded(shielded)
-            .build()
+        return NameInfo(
+            name,
+            shielded
+        )
     }
 
     private fun mapNames(names: List<RoadNameInfo>): List<NameInfo> {
@@ -146,9 +142,9 @@ internal class ElectronicHorizonObserverImpl(
     }
 
     private fun GraphPosition.mapToEHorizonPosition(): EHorizonPosition {
-        return EHorizonPosition.Builder()
-            .edgeId(edgeId)
-            .percentAlong(percentAlong)
-            .build()
+        return EHorizonPosition(
+            edgeId,
+            percentAlong,
+        )
     }
 }

@@ -511,6 +511,72 @@ package com.mapbox.navigation.core.telemetry.events {
 
 }
 
+package com.mapbox.navigation.core.trip.model.eh {
+
+  public final class EHorizon {
+    method public com.mapbox.navigation.core.trip.model.eh.Edge current(com.mapbox.navigation.core.trip.model.eh.EHorizonPosition position);
+    method public com.mapbox.navigation.core.trip.model.eh.Edge getStart();
+    method public java.util.List<java.util.List<com.mapbox.navigation.core.trip.model.eh.Edge>> mpp();
+    method public java.util.List<java.util.List<com.mapbox.navigation.core.trip.model.eh.Edge>> mpp(com.mapbox.navigation.core.trip.model.eh.EHorizonPosition position);
+  }
+
+  public final class EHorizonPosition {
+    method public long getEdgeId();
+    method public double getPercentAlong();
+  }
+
+  public final class EHorizonResultType {
+    field public static final String INITIAL = "INITIAL";
+    field public static final com.mapbox.navigation.core.trip.model.eh.EHorizonResultType! INSTANCE;
+    field public static final String UPDATE = "UPDATE";
+  }
+
+  public final class Edge {
+    method public boolean getBridge();
+    method public String? getCountryCode();
+    method public byte getCurvature();
+    method public String getFunctionRoadClass();
+    method public com.mapbox.geojson.LineString? getGeometry();
+    method public double getHeading();
+    method public long getId();
+    method public Byte? getLaneCount();
+    method public double getLength();
+    method public byte getLevel();
+    method public Double? getMeanElevation();
+    method public boolean getMotorway();
+    method public java.util.List<com.mapbox.navigation.core.trip.model.eh.NameInfo> getNames();
+    method public java.util.List<com.mapbox.navigation.core.trip.model.eh.Edge> getOut();
+    method public com.mapbox.navigation.core.trip.model.eh.Edge? getParent();
+    method public double getProbability();
+    method public boolean getRamp();
+    method public double getSpeed();
+    method public Double? getSpeedLimit();
+    method public String? getStateCode();
+    method public boolean getToll();
+    method public boolean getTunnel();
+    method public boolean isMpp();
+    method public void setParent(com.mapbox.navigation.core.trip.model.eh.Edge? p);
+  }
+
+  public final class FunctionalRoadClass {
+    field public static final com.mapbox.navigation.core.trip.model.eh.FunctionalRoadClass! INSTANCE;
+    field public static final String MOTORWAY = "MOTORWAY";
+    field public static final String PRIMARY = "PRIMARY";
+    field public static final String RESIDENTIAL = "RESIDENTIAL";
+    field public static final String SECONDARY = "SECONDARY";
+    field public static final String SERVICE_OTHER = "SERVICE_OTHER";
+    field public static final String TERTIARY = "TERTIARY";
+    field public static final String TRUNK = "TRUNK";
+    field public static final String UNCLASSIFIED = "UNCLASSIFIED";
+  }
+
+  public final class NameInfo {
+    method public String getName();
+    method public boolean getShielded();
+  }
+
+}
+
 package com.mapbox.navigation.core.trip.session {
 
   public interface BannerInstructionsObserver {
@@ -518,8 +584,8 @@ package com.mapbox.navigation.core.trip.session {
   }
 
   public interface EHorizonObserver {
-    method public void onElectronicHorizonUpdated(com.mapbox.navigation.base.trip.model.EHorizon horizon, String type);
-    method public void onPositionUpdated(com.mapbox.navigation.base.trip.model.EHorizonPosition position);
+    method public void onElectronicHorizonUpdated(com.mapbox.navigation.core.trip.model.eh.EHorizon horizon, String type);
+    method public void onPositionUpdated(com.mapbox.navigation.core.trip.model.eh.EHorizonPosition position);
   }
 
   public interface LocationObserver {

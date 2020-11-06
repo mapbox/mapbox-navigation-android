@@ -38,8 +38,6 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.trip.model.EHorizon
-import com.mapbox.navigation.base.trip.model.EHorizonPosition
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -49,6 +47,8 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
+import com.mapbox.navigation.core.trip.model.eh.EHorizon
+import com.mapbox.navigation.core.trip.model.eh.EHorizonPosition
 import com.mapbox.navigation.core.trip.session.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -305,6 +305,7 @@ class SimpleMapboxNavigationKt :
         override fun onElectronicHorizonUpdated(horizon: EHorizon, type: String) {
             Timber.d("DEBUG EH horizon=$horizon")
             Timber.d("DEBUG EH type=$type")
+            Timber.d("DEBUG EH mpp=${horizon.mpp()}")
         }
 
         override fun onPositionUpdated(position: EHorizonPosition) {
