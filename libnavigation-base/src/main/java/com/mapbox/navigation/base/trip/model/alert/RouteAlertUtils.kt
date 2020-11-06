@@ -31,9 +31,6 @@ fun RouteAlertGeometry.toLineString(
  */
 fun RouteAlertGeometry.toLineString(routeLineString: LineString): LineString {
     return LineString.fromLngLats(
-        routeLineString.coordinates().subList(
-            this.startGeometryIndex,
-            this.endGeometryIndex
-        )
+        routeLineString.coordinates().slice(startGeometryIndex..endGeometryIndex)
     )
 }
