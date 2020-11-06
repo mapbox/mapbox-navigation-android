@@ -45,6 +45,11 @@ import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.summary.SummaryBottomSheet
 import kotlinx.android.synthetic.main.activity_summary_bottom_sheet.*
+import kotlinx.android.synthetic.main.activity_summary_bottom_sheet.mapView
+import kotlinx.android.synthetic.main.activity_summary_bottom_sheet.recenterBtn
+import kotlinx.android.synthetic.main.activity_summary_bottom_sheet.startNavigation
+import kotlinx.android.synthetic.main.activity_summary_bottom_sheet.summaryBottomSheet
+import kotlinx.android.synthetic.main.fragment_basic_navigation.*
 import java.lang.ref.WeakReference
 
 /**
@@ -141,12 +146,9 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(mapboxMap: MapboxMap) {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            navigationMapboxMap = NavigationMapboxMap(
-                mapView,
-                mapboxMap,
-                this,
-                true
-            )
+            navigationMapboxMap = NavigationMapboxMap.Builder(mapView, mapboxMap, this)
+                .vanishRouteLineEnabled(true)
+                .build()
 
             when (directionRoute) {
                 null -> {

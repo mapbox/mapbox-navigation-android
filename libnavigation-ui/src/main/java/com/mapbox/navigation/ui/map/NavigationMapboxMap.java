@@ -25,6 +25,7 @@ import com.mapbox.navigation.core.trip.session.MapMatcherResult;
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.core.trip.session.TripSessionState;
+import com.mapbox.navigation.ui.NavigationConstants;
 import com.mapbox.navigation.ui.R;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
@@ -60,6 +61,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import timber.log.Timber;
 
+import static com.mapbox.navigation.ui.NavigationConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO;
 import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGATION_MARKER_NAME;
 
 /**
@@ -119,7 +121,9 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * @param mapView for map size and Context
    * @param mapboxMap for APIs to interact with the map
    * @param lifecycleOwner provides lifecycle for component
+   * @deprecated use {@link Builder} instead
    */
+  @Deprecated
   public NavigationMapboxMap(@NonNull MapView mapView,
       @NonNull MapboxMap mapboxMap,
       @NonNull LifecycleOwner lifecycleOwner) {
@@ -134,7 +138,9 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * @param mapboxMap for APIs to interact with the map
    * @param lifecycleOwner provides lifecycle for component
    * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck during navigation.
+   * @deprecated use {@link Builder} instead
    */
+  @Deprecated
   public NavigationMapboxMap(@NonNull MapView mapView,
       @NonNull MapboxMap mapboxMap,
       @NonNull LifecycleOwner lifecycleOwner,
@@ -150,7 +156,9 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * @param mapboxMap for APIs to interact with the map
    * @param lifecycleOwner provides lifecycle for component
    * @param routeBelowLayerId optionally pass in a layer id to place the route line below
+   * @deprecated use {@link Builder} instead
    */
+  @Deprecated
   public NavigationMapboxMap(@NonNull MapView mapView,
       @NonNull MapboxMap mapboxMap,
       @NonNull LifecycleOwner lifecycleOwner,
@@ -168,12 +176,32 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * @param routeBelowLayerId optionally pass in a layer id to place the route line below
    * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck during navigation.
    * @param useSpecializedLocationLayer determines if the location puck should use a specialized render layer.
+   * @deprecated use {@link Builder} instead
    */
+  @Deprecated
   public NavigationMapboxMap(@NonNull MapView mapView,
       @NonNull MapboxMap mapboxMap,
       @NonNull LifecycleOwner lifecycleOwner,
       @Nullable String routeBelowLayerId,
       boolean vanishRouteLineEnabled,
+      boolean useSpecializedLocationLayer) {
+    this(
+        mapView,
+        mapboxMap,
+        lifecycleOwner,
+        routeBelowLayerId,
+        vanishRouteLineEnabled,
+        DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO,
+        useSpecializedLocationLayer
+    );
+  }
+
+  private NavigationMapboxMap(@NonNull MapView mapView,
+      @NonNull MapboxMap mapboxMap,
+      @NonNull LifecycleOwner lifecycleOwner,
+      @Nullable String routeBelowLayerId,
+      boolean vanishRouteLineEnabled,
+      long vanishingRouteLineUpdateIntervalNano,
       boolean useSpecializedLocationLayer) {
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
@@ -182,7 +210,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     initializeMapPaddingAdjustor(mapView, mapboxMap);
     initializeNavigationSymbolManager(mapView, mapboxMap);
     initializeMapLayerInteractor(mapboxMap);
-    initializeRoute(mapView, mapboxMap, routeBelowLayerId);
+    initializeRoute(mapView, mapboxMap, routeBelowLayerId, vanishingRouteLineUpdateIntervalNano);
     initializeCamera(mapboxMap);
     initializeLocationComponent(useSpecializedLocationLayer);
     registerLifecycleOwnerObserver();
@@ -1073,7 +1101,10 @@ public class NavigationMapboxMap implements LifecycleObserver {
     layerInteractor = new MapLayerInteractor(mapboxMap);
   }
 
-  private void initializeRoute(@NonNull MapView mapView, @NonNull MapboxMap map, String routeBelowLayerId) {
+  private void initializeRoute(
+      @NonNull MapView mapView,
+      @NonNull MapboxMap map, String routeBelowLayerId,
+      long vanishingRouteLineUpdateIntervalNano) {
     Context context = mapView.getContext();
     int routeStyleRes = ThemeSwitcher.retrieveAttrResourceId(
         context, R.attr.navigationViewRouteStyle, R.style.MapboxStyleNavigationMapRoute
@@ -1082,6 +1113,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
         .withStyle(routeStyleRes)
         .withBelowLayer(routeBelowLayerId)
         .withVanishRouteLineEnabled(vanishRouteLineEnabled)
+        .withVanishingRouteLineUpdateIntervalNano(vanishingRouteLineUpdateIntervalNano)
         .build();
   }
 
@@ -1224,4 +1256,87 @@ public class NavigationMapboxMap implements LifecycleObserver {
       updateLocation(mapMatcherResult.getKeyPoints(), animationDuration);
     }
   };
+
+  /**
+   * Creates {@link NavigationMapboxMap} object.
+   */
+  public static class Builder {
+    @NonNull
+    private final MapView mapView;
+    @NonNull
+    private final MapboxMap mapboxMap;
+    @NonNull
+    private final LifecycleOwner lifecycleOwner;
+    @Nullable
+    private String routeBelowLayerId = null;
+    private boolean vanishRouteLineEnabled = false;
+    private long vanishingRouteLineUpdateIntervalNano = DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO;
+    private boolean useSpecializedLocationLayer = false;
+
+    /**
+     * {@link NavigationMapboxMap} builder. Can be used once {@link OnMapReadyCallback}
+     * has been called via {@link MapView#getMapAsync(OnMapReadyCallback)}.
+     *
+     * @param mapView {@link MapView}
+     * @param mapboxMap {@link MapboxMap}
+     * @param lifecycleOwner {@link LifecycleOwner}
+     */
+    public Builder(
+        @NonNull MapView mapView,
+        @NonNull MapboxMap mapboxMap,
+        @NonNull LifecycleOwner lifecycleOwner) {
+      this.mapView = mapView;
+      this.mapboxMap = mapboxMap;
+      this.lifecycleOwner = lifecycleOwner;
+    }
+
+    /**
+     * @param routeBelowLayerId optionally pass in a layer id to place the route line below
+     */
+    public Builder routeBelowLayerId(String routeBelowLayerId) {
+      this.routeBelowLayerId = routeBelowLayerId;
+      return this;
+    }
+
+    /**
+     * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck during navigation.
+     */
+    public Builder vanishRouteLineEnabled(boolean vanishRouteLineEnabled) {
+      this.vanishRouteLineEnabled = vanishRouteLineEnabled;
+      return this;
+    }
+
+    /**
+     * Set minimum update interval (in nanoseconds) of the vanishing point when enabled.
+     * <p>
+     * Defaults to
+     * {@link NavigationConstants#DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO}.
+     * Decreasing this number will improve the smoothness of updates but impact the performance.
+     * @param vanishingRouteLineUpdateIntervalNano minimum update interval
+     */
+    public Builder vanishingRouteLineUpdateIntervalNano(long vanishingRouteLineUpdateIntervalNano) {
+      this.vanishingRouteLineUpdateIntervalNano = vanishingRouteLineUpdateIntervalNano;
+      return this;
+    }
+
+    /**
+     * @param useSpecializedLocationLayer determines if the location puck should use a specialized render layer.
+     */
+    public Builder useSpecializedLocationLayer(boolean useSpecializedLocationLayer) {
+      this.useSpecializedLocationLayer = useSpecializedLocationLayer;
+      return this;
+    }
+
+    public NavigationMapboxMap build() {
+      return new NavigationMapboxMap(
+          mapView,
+          mapboxMap,
+          lifecycleOwner,
+          routeBelowLayerId,
+          vanishRouteLineEnabled,
+          vanishingRouteLineUpdateIntervalNano,
+          useSpecializedLocationLayer
+      );
+    }
+  }
 }

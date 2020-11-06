@@ -66,4 +66,11 @@ object NavigationConstants {
      * Minimum duration of the tilt adjustment animation while tracking.
      */
     const val NAVIGATION_MIN_CAMERA_TILT_ADJUSTMENT_ANIMATION_DURATION = 750L
+
+    /**
+     * Minimum update interval (in nanoseconds) of the vanishing point when enabled.
+     *
+     * Represents a maximum 16 updates a second.
+     */
+    const val DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO = 62_500_000L
 }

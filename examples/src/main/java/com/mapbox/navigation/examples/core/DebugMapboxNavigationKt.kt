@@ -60,6 +60,9 @@ import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
 import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
+import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.mapView
+import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.startNavigation
+import kotlinx.android.synthetic.main.fragment_basic_navigation.*
 import kotlinx.coroutines.channels.Channel
 import okhttp3.Cache
 import timber.log.Timber
@@ -199,7 +202,8 @@ class DebugMapboxNavigationKt :
             style.addImage("raw", ContextCompat.getDrawable(this, R.drawable.ic_circle_red)!!)
             style.addImage("enhanced", ContextCompat.getDrawable(this, R.drawable.ic_circle_blue)!!)
 
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this)
+            navigationMapboxMap = NavigationMapboxMap.Builder(mapView, mapboxMap, this)
+                .build()
             navigationMapboxMap.setCamera(DynamicCamera(mapboxMap))
             navigationMapboxMap.addProgressChangeListener(mapboxNavigation)
             navigationMapboxMap.setOnRouteSelectionChangeListener { route ->
