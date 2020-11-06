@@ -82,9 +82,11 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
                 .zoom(16.5)
                 .build()
             mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true).also {
-                it.addProgressChangeListener(mapboxNavigation)
-            }
+            navigationMapboxMap = NavigationMapboxMap.Builder(mapView, mapboxMap, this)
+                .vanishRouteLineEnabled(true)
+                .build().also {
+                    it.addProgressChangeListener(mapboxNavigation)
+                }
 
             // Ideally we should use Mapbox.getAccessToken(), but to show GuidanceView we need a
             // specific access token for route request.

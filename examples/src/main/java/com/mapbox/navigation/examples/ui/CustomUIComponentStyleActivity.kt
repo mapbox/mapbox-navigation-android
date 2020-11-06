@@ -69,6 +69,14 @@ import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
 import kotlinx.android.synthetic.main.activity_custom_ui_component_style.*
+import kotlinx.android.synthetic.main.activity_custom_ui_component_style.instructionView
+import kotlinx.android.synthetic.main.activity_custom_ui_component_style.mapView
+import kotlinx.android.synthetic.main.activity_custom_ui_component_style.recenterBtn
+import kotlinx.android.synthetic.main.activity_custom_ui_component_style.screenshotView
+import kotlinx.android.synthetic.main.activity_custom_ui_component_style.startNavigation
+import kotlinx.android.synthetic.main.activity_custom_ui_component_style.summaryBottomSheet
+import kotlinx.android.synthetic.main.activity_custom_ui_component_style.wayNameView
+import kotlinx.android.synthetic.main.fragment_basic_navigation.*
 import okhttp3.Cache
 import timber.log.Timber
 import java.io.File
@@ -198,16 +206,13 @@ class CustomUIComponentStyleActivity :
                 isLocationComponentEnabled = true
             }
 
-            navigationMapboxMap = NavigationMapboxMap(
-                mapView,
-                mapboxMap,
-                this,
-                true
-            ).apply {
-                addOnCameraTrackingChangedListener(cameraTrackingChangedListener)
-                addProgressChangeListener(mapboxNavigation)
-                setCamera(DynamicCamera(mapboxMap))
-            }
+            navigationMapboxMap = NavigationMapboxMap.Builder(mapView, mapboxMap, this)
+                .vanishRouteLineEnabled(true)
+                .build().apply {
+                    addOnCameraTrackingChangedListener(cameraTrackingChangedListener)
+                    addProgressChangeListener(mapboxNavigation)
+                    setCamera(DynamicCamera(mapboxMap))
+                }
 
             if (shouldSimulateRoute()) {
                 mapboxNavigation

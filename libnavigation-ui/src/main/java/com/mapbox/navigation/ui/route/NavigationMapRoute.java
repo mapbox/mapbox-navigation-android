@@ -22,6 +22,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.R;
+import com.mapbox.navigation.ui.NavigationConstants;
 import com.mapbox.navigation.ui.internal.route.MapRouteSourceProvider;
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider;
 import com.mapbox.navigation.ui.internal.utils.CompareUtils;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.mapbox.navigation.ui.NavigationConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.LAYER_ABOVE_UPCOMING_MANEUVER_ARROW;
 import static com.mapbox.navigation.ui.route.MapboxRouteLayerProviderFactory.getLayerProvider;
 
@@ -499,7 +501,8 @@ public class NavigationMapRoute implements LifecycleObserver {
     private boolean vanishRouteLineEnabled = false;
     @Nullable private MapRouteLineInitializedCallback routeLineInitializedCallback;
     @Nullable private List<RouteStyleDescriptor> routeStyleDescriptors;
-    private long vanishingRouteLineUpdateIntervalNano = 62_500_000;
+    private long vanishingRouteLineUpdateIntervalNano =
+        DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO;
 
     /**
      * Instantiates a new Builder.
@@ -572,7 +575,8 @@ public class NavigationMapRoute implements LifecycleObserver {
     /**
      * Set minimum update interval (in nanoseconds) of the vanishing point when enabled.
      * <p>
-     * Defaults to 62 500 000, which is 16 times a second.
+     * Defaults to
+     * {@link NavigationConstants#DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO}.
      * Decreasing this number will improve the smoothness of updates but impact the performance.
      *
      * @return the builder

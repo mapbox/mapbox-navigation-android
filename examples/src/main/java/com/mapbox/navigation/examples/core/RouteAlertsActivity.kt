@@ -46,6 +46,7 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import kotlinx.android.synthetic.main.activity_replay_route_layout.mapView
 import kotlinx.android.synthetic.main.activity_route_alerts.distanceRemainingText
+import kotlinx.android.synthetic.main.fragment_basic_navigation.*
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
@@ -170,7 +171,7 @@ class RouteAlertsActivity : AppCompatActivity() {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(16.0))
             mapboxMap.moveCamera(CameraUpdateFactory.tiltTo(45.0))
             mapboxMap.setStyle(getString(R.string.mapbox_navigation_guidance_day)) { style ->
-                navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this)
+                navigationMapboxMap = NavigationMapboxMap.Builder(mapView, mapboxMap, this).build()
                 mapboxNavigation.setRoutes(listOf(directionsRoute))
                 navigationMapboxMap?.apply {
                     updateLocationLayerRenderMode(RenderMode.GPS)

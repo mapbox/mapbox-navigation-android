@@ -22,6 +22,7 @@ package com.mapbox.navigation.ui {
 
   public final class NavigationConstants {
     field public static final long ALERT_VIEW_PROBLEM_DURATION = 10000L; // 0x2710L
+    field public static final long DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO = 62500000L; // 0x3b9aca0L
     field public static final long FEEDBACK_BOTTOM_SHEET_DURATION = 10000L; // 0x2710L
     field public static final com.mapbox.navigation.ui.NavigationConstants! INSTANCE;
     field public static final int NAVIGATION_HIGH_ALERT_DURATION = 15; // 0xf
@@ -437,10 +438,10 @@ package com.mapbox.navigation.ui.listeners {
 package com.mapbox.navigation.ui.map {
 
   @UiThread public class NavigationMapboxMap implements androidx.lifecycle.LifecycleObserver {
-    ctor public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner);
-    ctor public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner, boolean);
-    ctor public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner, String?);
-    ctor public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner, String?, boolean, boolean);
+    ctor @Deprecated public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner);
+    ctor @Deprecated public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner, boolean);
+    ctor @Deprecated public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner, String?);
+    ctor @Deprecated public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner, String?, boolean, boolean);
     method public com.mapbox.mapboxsdk.plugins.annotation.Symbol! addCustomMarker(com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions!);
     method public void addDestinationMarker(com.mapbox.geojson.Point!);
     method public void addOnCameraTrackingChangedListener(com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener);
@@ -497,6 +498,15 @@ package com.mapbox.navigation.ui.map {
     method public void updateMapFpsThrottleEnabled(boolean);
     method public void updateTrafficVisibility(boolean);
     method public void updateWaynameQueryMap(boolean);
+  }
+
+  public static class NavigationMapboxMap.Builder {
+    ctor public NavigationMapboxMap.Builder(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner);
+    method public com.mapbox.navigation.ui.map.NavigationMapboxMap! build();
+    method public com.mapbox.navigation.ui.map.NavigationMapboxMap.Builder! routeBelowLayerId(String!);
+    method public com.mapbox.navigation.ui.map.NavigationMapboxMap.Builder! useSpecializedLocationLayer(boolean);
+    method public com.mapbox.navigation.ui.map.NavigationMapboxMap.Builder! vanishRouteLineEnabled(boolean);
+    method public com.mapbox.navigation.ui.map.NavigationMapboxMap.Builder! vanishingRouteLineUpdateIntervalNano(long);
   }
 
   public interface OnWayNameChangedListener {

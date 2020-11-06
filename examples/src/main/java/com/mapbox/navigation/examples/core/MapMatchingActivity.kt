@@ -104,10 +104,12 @@ class MapMatchingActivity : AppCompatActivity(), OnMapReadyCallback {
                 isLocationComponentEnabled = true
             }
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true).apply {
-                setCamera(DynamicCamera(mapboxMap))
-                addProgressChangeListener(mapboxNavigation!!)
-            }
+            navigationMapboxMap = NavigationMapboxMap.Builder(mapView, mapboxMap, this)
+                .vanishRouteLineEnabled(true)
+                .build().apply {
+                    setCamera(DynamicCamera(mapboxMap))
+                    addProgressChangeListener(mapboxNavigation!!)
+                }
             mapInstanceState?.let { state ->
                 navigationMapboxMap?.restoreStateFrom(state)
             }

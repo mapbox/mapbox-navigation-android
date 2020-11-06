@@ -67,6 +67,9 @@ import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
 import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
+import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.mapView
+import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.startNavigation
+import kotlinx.android.synthetic.main.fragment_basic_navigation.*
 import kotlinx.coroutines.channels.Channel
 import okhttp3.Cache
 import timber.log.Timber
@@ -193,12 +196,10 @@ class SimpleMapboxNavigationKt :
             symbolManager = SymbolManager(mapView, mapboxMap, style)
             style.addImage("marker", IconFactory.getInstance(this).defaultMarker().bitmap)
 
-            navigationMapboxMap = NavigationMapboxMap(
-                mapView,
-                mapboxMap,
-                this,
-                true
-            )
+            navigationMapboxMap = NavigationMapboxMap.Builder(mapView, mapboxMap, this)
+                .vanishRouteLineEnabled(true)
+                .useSpecializedLocationLayer(true)
+                .build()
             navigationMapboxMap.setCamera(DynamicCamera(mapboxMap))
             navigationMapboxMap.addProgressChangeListener(mapboxNavigation)
             navigationMapboxMap.setOnRouteSelectionChangeListener { route ->

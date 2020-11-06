@@ -221,11 +221,13 @@ class BasicNavigationFragment :
                 isLocationComponentEnabled = true
             }
 
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true).apply {
-                addOnCameraTrackingChangedListener(cameraTrackingChangedListener)
-                addProgressChangeListener(mapboxNavigation)
-                setCamera(DynamicCamera(mapboxMap))
-            }
+            navigationMapboxMap = NavigationMapboxMap.Builder(mapView, mapboxMap, this)
+                .vanishRouteLineEnabled(true)
+                .build().apply {
+                    addOnCameraTrackingChangedListener(cameraTrackingChangedListener)
+                    addProgressChangeListener(mapboxNavigation)
+                    setCamera(DynamicCamera(mapboxMap))
+                }
 
             if (shouldSimulateRoute()) {
                 mapboxNavigation
