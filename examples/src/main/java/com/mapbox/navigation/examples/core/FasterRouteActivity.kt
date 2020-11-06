@@ -39,6 +39,9 @@ import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_faster_route_layout.*
+import kotlinx.android.synthetic.main.content_faster_route_layout.mapView
+import kotlinx.android.synthetic.main.content_faster_route_layout.startNavigation
+import kotlinx.android.synthetic.main.fragment_basic_navigation.*
 import timber.log.Timber
 import java.lang.ref.WeakReference
 
@@ -205,7 +208,9 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
         mapboxMap.setStyle(Style.MAPBOX_STREETS) {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
+            navigationMapboxMap = NavigationMapboxMap.Builder(mapView, mapboxMap, this)
+                .vanishRouteLineEnabled(true)
+                .build()
             navigationMapboxMap?.setOnRouteSelectionChangeListener { route ->
                 mapboxNavigation.setRoutes(
                     mapboxNavigation.getRoutes().toMutableList().apply {
