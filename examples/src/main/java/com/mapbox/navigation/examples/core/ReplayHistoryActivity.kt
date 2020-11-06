@@ -41,6 +41,8 @@ import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import kotlinx.android.synthetic.main.activity_replay_history_layout.*
+import kotlinx.android.synthetic.main.activity_replay_history_layout.mapView
+import kotlinx.android.synthetic.main.fragment_basic_navigation.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -129,8 +131,13 @@ class ReplayHistoryActivity : AppCompatActivity() {
             val (mapboxMap, style) = deferredMapboxWithStyle.await()
             if (!isActive) return@launch
 
-            val navigationMapboxMap =
-                NavigationMapboxMap(mapView, mapboxMap, this@ReplayHistoryActivity, true)
+            val navigationMapboxMap = NavigationMapboxMap.Builder(
+                mapView,
+                mapboxMap,
+                this@ReplayHistoryActivity
+            )
+                .vanishRouteLineEnabled(true)
+                .build()
             val navigationContext = ReplayNavigationContext(
                 locationEngine,
                 mapboxMap,

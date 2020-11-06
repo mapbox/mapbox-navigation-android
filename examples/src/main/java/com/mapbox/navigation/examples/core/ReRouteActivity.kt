@@ -202,7 +202,9 @@ class ReRouteActivity :
     override fun onMapReady(mapboxMap: MapboxMap) {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
+            navigationMapboxMap = NavigationMapboxMap.Builder(mapView, mapboxMap, this)
+                .vanishRouteLineEnabled(true)
+                .build()
 
             mapboxNavigation?.navigationOptions?.locationEngine?.getLastLocation(
                 locationListenerCallback

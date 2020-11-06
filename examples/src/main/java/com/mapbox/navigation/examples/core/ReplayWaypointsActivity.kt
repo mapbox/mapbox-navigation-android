@@ -94,7 +94,9 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
         this.mapboxMap = mapboxMap
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
+            navigationMapboxMap = NavigationMapboxMap.Builder(mapView, mapboxMap, this)
+                .vanishRouteLineEnabled(true)
+                .build()
 
             // Center the map at current location. Using LocationEngineProvider because the
             // replay engine won't have your last location.
