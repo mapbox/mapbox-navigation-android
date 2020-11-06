@@ -1,12 +1,7 @@
-package com.mapbox.navigation.base.trip.model
+package com.mapbox.navigation.core.trip.model.eh
 
 /**
  * EHorizon type
- *
- * Electronic Horizon is still **experimental**, which means that the design of the
- * APIs has open issues which may (or may not) lead to their changes in the future.
- * Roughly speaking, there is a chance that those declarations will be deprecated in the near
- * future or the semantics of their behavior may change in some way that may break some code.
  *
  * @see EHorizonObserver
  */

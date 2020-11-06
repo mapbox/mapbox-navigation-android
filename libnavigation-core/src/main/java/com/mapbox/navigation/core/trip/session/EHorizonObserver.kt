@@ -1,16 +1,11 @@
 package com.mapbox.navigation.core.trip.session
 
-import com.mapbox.navigation.base.trip.model.EHorizon
-import com.mapbox.navigation.base.trip.model.EHorizonPosition
+import com.mapbox.navigation.core.trip.model.eh.EHorizon
+import com.mapbox.navigation.core.trip.model.eh.EHorizonPosition
 
 /**
  * The EHorizonObserver consists of two parts: onElectronicHorizonUpdated provides the
  * Electronic Horizon and onPositionUpdated the position thereon.
- *
- * Electronic Horizon is still **experimental**, which means that the design of the
- * APIs has open issues which may (or may not) lead to their changes in the future.
- * Roughly speaking, there is a chance that those declarations will be deprecated in the near
- * future or the semantics of their behavior may change in some way that may break some code.
  */
 interface EHorizonObserver {
 
