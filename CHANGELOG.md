@@ -2,6 +2,24 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 1.2.0-beta.1 - November 5, 2020
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Features
+* Exposed `MapMatcherResultObserver` that provides additional information about the status of the enhanced location update and the confidence of decisions that the map matcher made to generate this position. [#3730](https://github.com/mapbox/mapbox-navigation-android/pull/3730)
+* Added `resetTripSession` to `MapboxNavigation` useful to transport the navigator to a new location. [#3701](https://github.com/mapbox/mapbox-navigation-android/pull/3701)
+
+#### Improvements
+* Updated `EHorizon` `mpp` functions so they can return multiple Most Probable Paths if they have the same probability. [#3740](https://github.com/mapbox/mapbox-navigation-android/pull/3740)
+* For specified road classes, any section where the traffic is `'unknown'` can be represented using the `'low'` traffic congestion color rather than the `'unknown'` traffic color. [#3672](https://github.com/mapbox/mapbox-navigation-android/pull/3672)
+* Taking advantage of new the `MapMatcherResultObserver` do an immediate transition in `NavigationMapboxMap` when map matcher reports teleport. [#3731](https://github.com/mapbox/mapbox-navigation-android/pull/3731)
+* Improved vanishing point's state when completing the leg of a route or going off-route. [#3727](https://github.com/mapbox/mapbox-navigation-android/pull/3727)
+
+#### Bug fixes
+
+* Fixed an issue where `NavigationView` crashes when trying to build the `DistanceFormatter` object. [#3725](https://github.com/mapbox/mapbox-navigation-android/pull/3725)
+
 ## Mapbox Navigation SDK 1.2.0-alpha.5 - October 29, 2020
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
