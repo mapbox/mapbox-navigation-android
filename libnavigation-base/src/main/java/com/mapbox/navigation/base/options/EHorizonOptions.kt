@@ -3,11 +3,6 @@ package com.mapbox.navigation.base.options
 /**
  * Defines options for [EHorizon].
  *
- * Electronic Horizon is still **experimental**, which means that the design of the
- * APIs has open issues which may (or may not) lead to their changes in the future.
- * Roughly speaking, there is a chance that those declarations will be deprecated in the near
- * future or the semantics of their behavior may change in some way that may break some code.
- *
  * @param length the minimum length of the MPP in meters. This does not include the trailingLength.
  * The actual MPP length may be bigger
  * @param expansion the number of branches to include from the MPP. When set to 0 only the MPP
