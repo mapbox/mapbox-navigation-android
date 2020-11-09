@@ -1,42 +1,28 @@
-<!-- ⚠️ TEMPLATE ⚠️ -->
-<!-- Template for GitHub PR descriptions. Use it as a guide on how to describe your work. Feel free to remove any section when you're opening a PR if you think it does not apply for your committed changes. -->
+### Description
+<!--
+Include issue references (e.g., fixes [#issue](link))
+Include necessary implementation details (e.g. I opted to use this algorithm because ... and test it in this way ...).
+-->
 
-## Description
+### Changelog
+<!--
+Include changelog entry (e.g. Fixed an unexpected change in recenter button when resuming the app.).
+See https://github.com/mapbox/navigation-sdks/blob/main/documentation/android-changelog-guidelines.md.
+You can remove the changelog block and add a `skip changelog` label, when applicable.
+ -->
+```
+<changelog></changelog>
+```
 
-Please include a brief summary of the change and which issue is fixed (e.g., fixes [#issue](link))
+### Screenshots or Gifs
+<!-- Include media files to provide additional context. It's REALLY useful for UI related PRs (e.g. ![screenshot gif](link)) -->
 
-- [ ] I have added any issue links
-- [ ] I have added all related labels (`bug`, `feature`, `new API(s)`, `SEMVER`, etc.)
-- [ ] I have added the appropriate milestone and project boards
 
-### Goal
-
-Please describe the PR goals. Just the stuff needed to implement the fix / feature and a simple rationale. It could contain many check points if needed
-
-### Implementation
-
-Please include all the relevant things implemented and also rationale, clarifications / disclaimers etc. related to the approach used. It could be as self code companion comments
-
-## Screenshots or Gifs
-
-Please include all the media files to give some context about what's being implemented or fixed. It's not mandatory to upload screenshots or gifs, but for most of the cases it becomes really handy to get into the scope of the feature / bug being fixed and also it's REALLY useful for UI related PRs ![screenshot gif](link)
-
-## Testing
-
-Please describe the manual tests that you ran to verify your changes
-
-- [ ] I have tested locally (including `SNAPSHOT` upstream dependencies if needed) through testapp/demo app and run all activities to avoid regressions
-- [ ] I have tested via a test drive, or a simulation/mock location app
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
-
-## Checklist
-
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have updated the `CHANGELOG` including this PR
-- [ ] We might need to update / push `api/current.txt` files after running `$> make core-update-api` (Core) / `$> make ui-update-api` (UI) if there are changes / errors we're 🆗 with (e.g. `AddedMethod` changes are marked as errors but don't break SemVer) 🚀 If there are SemVer breaking changes add the `SEMVER` label. See [Metalava](https://github.com/mapbox/mapbox-navigation-android/blob/master/docs/metalava.md) docs
-<!-- - [ ] I have added an `Activity` example in the test app showing the new feature implemented (where applicable) -->
-<!-- - [ ] I have made corresponding changes to the documentation (where applicable) -->
-<!-- - [ ] Any changes to strings have been published to our translation tool (where applicable) -->
-<!-- - [ ] Publish `testapp` in Google Play `internal` test track (where applicable) -->
+<!--
+---------- CHECKLIST ----------
+1. Add related labels (`bug`, `feature`, `new API(s)`, `SEMVER-MAJOR`, `needs-backporting`, etc.).
+2. Update progress status on the project board.
+3. Request a review from the team, if not a draft.
+4. Add targeted milestone, when applicable.
+5. Create ticket tracking addition of public documentation pages entry, when applicable.
+-->
