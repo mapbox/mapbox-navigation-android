@@ -34,7 +34,7 @@ package com.mapbox.navigation.base.metrics {
     property public abstract String metricName;
   }
 
-  @StringDef({com.mapbox.navigation.base.metrics.DirectionsMetrics.ROUTE_RETRIEVAL, com.mapbox.navigation.base.metrics.NavigationMetrics.ARRIVE, com.mapbox.navigation.base.metrics.NavigationMetrics.CANCEL_SESSION, com.mapbox.navigation.base.metrics.NavigationMetrics.DEPART, com.mapbox.navigation.base.metrics.NavigationMetrics.REROUTE, com.mapbox.navigation.base.metrics.NavigationMetrics.FEEDBACK, com.mapbox.navigation.base.metrics.NavigationMetrics.INITIAL_GPS, com.mapbox.navigation.base.metrics.NavigationMetrics.FASTER_ROUTE, com.mapbox.navigation.base.metrics.NavigationMetrics.APP_USER_TURNSTILE}) public static @interface MetricEvent.Metric {
+  @StringDef({com.mapbox.navigation.base.metrics.DirectionsMetrics.ROUTE_RETRIEVAL, com.mapbox.navigation.base.metrics.NavigationMetrics.ARRIVE, com.mapbox.navigation.base.metrics.NavigationMetrics.CANCEL_SESSION, com.mapbox.navigation.base.metrics.NavigationMetrics.DEPART, com.mapbox.navigation.base.metrics.NavigationMetrics.REROUTE, com.mapbox.navigation.base.metrics.NavigationMetrics.FEEDBACK, com.mapbox.navigation.base.metrics.NavigationMetrics.INITIAL_GPS, com.mapbox.navigation.base.metrics.NavigationMetrics.FASTER_ROUTE, com.mapbox.navigation.base.metrics.NavigationMetrics.APP_USER_TURNSTILE, com.mapbox.navigation.base.metrics.NavigationMetrics.FREE_DRIVE}) public static @interface MetricEvent.Metric {
   }
 
   public interface MetricsObserver {
@@ -54,6 +54,7 @@ package com.mapbox.navigation.base.metrics {
     field public static final String DEPART = "navigation.depart";
     field public static final String FASTER_ROUTE = "navigation.fasterRoute";
     field public static final String FEEDBACK = "navigation.feedback";
+    field public static final String FREE_DRIVE = "navigation.freeDrive";
     field public static final String INITIAL_GPS = "initial_gps_event";
     field public static final com.mapbox.navigation.base.metrics.NavigationMetrics! INSTANCE;
     field public static final String REROUTE = "navigation.reroute";
