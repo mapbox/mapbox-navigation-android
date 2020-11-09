@@ -26,14 +26,20 @@ import com.mapbox.navigation.core.NavigationSession
 import com.mapbox.navigation.core.NavigationSession.State.ACTIVE_GUIDANCE
 import com.mapbox.navigation.core.NavigationSession.State.FREE_DRIVE
 import com.mapbox.navigation.core.NavigationSession.State.IDLE
+import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.START
+import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.STOP
 import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationCancelEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationDepartEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationFeedbackEvent
+import com.mapbox.navigation.core.telemetry.events.NavigationFreeDriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationRerouteEvent
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEvent
+import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.utils.internal.JobControl
+import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -44,14 +50,27 @@ import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotSame
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import org.junit.After
+import org.junit.Rule
 import org.junit.Test
 
+@InternalCoroutinesApi
+@ExperimentalCoroutinesApi
 class MapboxNavigationTelemetryTest {
 
     private companion object {
         private const val LAST_LOCATION_LAT = 55.5
         private const val LAST_LOCATION_LON = 88.8
+        private const val LAST_LOCATION_SPEED = 10.0f
+        private const val LAST_LOCATION_BEARING = 90.0f
+        private const val LAST_LOCATION_ALTITUDE = 15.0
+        private const val LAST_LOCATION_TIME = 1000L
+        private const val LAST_LOCATION_ACCURACY = 222.0f
+        private const val LAST_LOCATION_VERTICAL_ACCURACY = 111.0f
 
         private const val ORIGINAL_ROUTE_GEOMETRY = ""
         private const val ORIGINAL_ROUTE_DISTANCE = 1.1
@@ -82,6 +101,11 @@ class MapboxNavigationTelemetryTest {
         private const val SDK_IDENTIFIER = "mapbox-navigation-android"
     }
 
+    @get:Rule
+    var coroutineRule = MainCoroutineRule()
+    private val parentJob = SupervisorJob()
+    private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
+
     private val context: Context = mockk(relaxed = true)
     private val applicationContext: Context = mockk(relaxed = true)
     private val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
@@ -111,8 +135,8 @@ class MapboxNavigationTelemetryTest {
 
     @After
     fun cleanUp() {
-        updateSessionState(IDLE)
         unmockkObject(MapboxMetricsReporter)
+        unmockkObject(ThreadController)
     }
 
     @Test
@@ -190,11 +214,12 @@ class MapboxNavigationTelemetryTest {
         baseInitialization()
         updateSessionState(FREE_DRIVE)
 
-        val events = captureAndVerifyMetricsReporter(exactly = 3)
+        val events = captureAndVerifyMetricsReporter(exactly = 4)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
         assertTrue(events[1] is NavigationDepartEvent)
         assertTrue(events[2] is NavigationCancelEvent)
-        assertEquals(3, events.size)
+        assertTrue(events[3] is NavigationFreeDriveEvent)
+        assertEquals(4, events.size)
         verify { locationsCollector.flushBuffers() }
     }
 
@@ -295,7 +320,7 @@ class MapboxNavigationTelemetryTest {
         postUserFeedback()
         updateSessionState(FREE_DRIVE)
 
-        val events = captureAndVerifyMetricsReporter(exactly = 9)
+        val events = captureAndVerifyMetricsReporter(exactly = 10)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
         assertTrue(events[1] is NavigationDepartEvent)
         assertTrue(events[2] is NavigationFeedbackEvent)
@@ -305,7 +330,8 @@ class MapboxNavigationTelemetryTest {
         assertTrue(events[6] is NavigationFeedbackEvent)
         assertTrue(events[7] is NavigationFeedbackEvent)
         assertTrue(events[8] is NavigationCancelEvent)
-        assertEquals(9, events.size)
+        assertTrue(events[9] is NavigationFreeDriveEvent)
+        assertEquals(10, events.size)
     }
 
     @Test
@@ -430,7 +456,7 @@ class MapboxNavigationTelemetryTest {
         arrive()
         updateSessionState(FREE_DRIVE)
 
-        val events = captureAndVerifyMetricsReporter(exactly = 13)
+        val events = captureAndVerifyMetricsReporter(exactly = 14)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
         // origin
         assertTrue(events[1] is NavigationDepartEvent)
@@ -448,8 +474,10 @@ class MapboxNavigationTelemetryTest {
         // destination
         assertTrue(events[11] is NavigationArriveEvent)
         assertTrue(events[12] is NavigationCancelEvent)
+        // free drive
+        assertTrue(events[13] is NavigationFreeDriveEvent)
 
-        assertEquals(13, events.size)
+        assertEquals(14, events.size)
     }
 
     @Test
@@ -465,7 +493,7 @@ class MapboxNavigationTelemetryTest {
         updateRoute(anotherRoute)
         updateSessionState(FREE_DRIVE)
 
-        val events = captureAndVerifyMetricsReporter(exactly = 10)
+        val events = captureAndVerifyMetricsReporter(exactly = 11)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
         // origin
         assertTrue(events[1] is NavigationDepartEvent)
@@ -480,8 +508,95 @@ class MapboxNavigationTelemetryTest {
         // destination
         assertTrue(events[8] is NavigationRerouteEvent)
         assertTrue(events[9] is NavigationCancelEvent)
+        // free drive
+        assertTrue(events[10] is NavigationFreeDriveEvent)
 
-        assertEquals(10, events.size)
+        assertEquals(11, events.size)
+    }
+
+    @Test
+    fun freeDrive_sent_when_state_changes_from_idle_to_free_drive() {
+        baseMock()
+
+        initTelemetry()
+        updateSessionState(FREE_DRIVE)
+
+        val events = captureAndVerifyMetricsReporter(exactly = 2)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        assertTrue(events[1] is NavigationFreeDriveEvent)
+    }
+
+    @Test
+    fun freeDrive_sent_when_state_changes_from_active_guidance_to_free_drive() {
+        baseMock()
+
+        baseInitialization()
+        updateSessionState(FREE_DRIVE)
+
+        val events = captureAndVerifyMetricsReporter(exactly = 4)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        assertTrue(events[1] is NavigationDepartEvent)
+        assertTrue(events[2] is NavigationCancelEvent)
+        assertTrue(events[3] is NavigationFreeDriveEvent)
+    }
+
+    @Test
+    fun freeDrive_sent_when_state_changes_from_free_drive_to_active_guidance() {
+        baseMock()
+
+        initTelemetry()
+        updateSessionState(FREE_DRIVE)
+        updateSessionState(ACTIVE_GUIDANCE)
+        updateRoute(originalRoute)
+        updateRouteProgress()
+
+        val events = captureAndVerifyMetricsReporter(exactly = 4)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        assertTrue(events[1] is NavigationFreeDriveEvent) // start free drive
+        assertTrue(events[2] is NavigationFreeDriveEvent) // stop free drive
+        assertTrue(events[3] is NavigationDepartEvent)
+    }
+
+    @Test
+    fun freeDrive_sent_when_state_changes_from_free_drive_to_idle() {
+        baseMock()
+
+        initTelemetry()
+        updateSessionState(FREE_DRIVE)
+        updateSessionState(IDLE)
+
+        val events = captureAndVerifyMetricsReporter(exactly = 3)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        assertTrue(events[1] is NavigationFreeDriveEvent) // start free drive
+        assertTrue(events[2] is NavigationFreeDriveEvent) // stop free drive
+    }
+
+    @Test
+    fun freeDrive_not_sent_when_location_not_available() {
+        baseMock()
+        every { locationsCollector.lastLocation } returns null
+
+        initTelemetry()
+        updateSessionState(FREE_DRIVE)
+        updateSessionState(IDLE)
+
+        val events = captureAndVerifyMetricsReporter(exactly = 1)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+    }
+
+    @Test
+    fun freeDrive_start_and_stop_sent_when_state_changes_from_free_drive_to_idle() {
+        baseMock()
+        val events = captureMetricsReporter()
+
+        initTelemetry()
+        updateSessionState(FREE_DRIVE)
+        updateSessionState(IDLE)
+
+        val startFreeDriveEvent = events[1] as NavigationFreeDriveEvent
+        val stopFreeDriveEvent = events[2] as NavigationFreeDriveEvent
+        assertEquals(START.type, startFreeDriveEvent.eventType)
+        assertEquals(STOP.type, stopFreeDriveEvent.eventType)
     }
 
     @Test
@@ -624,6 +739,9 @@ class MapboxNavigationTelemetryTest {
     }
 
     private fun baseMock() {
+        mockkObject(ThreadController)
+        every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+
         mockMetricsReporter()
         mockContext()
         mockTelemetryUtils()
@@ -702,6 +820,12 @@ class MapboxNavigationTelemetryTest {
         every { locationsCollector.lastLocation } returns lastLocation
         every { lastLocation.latitude } returns LAST_LOCATION_LAT
         every { lastLocation.longitude } returns LAST_LOCATION_LON
+        every { lastLocation.speed } returns LAST_LOCATION_SPEED
+        every { lastLocation.bearing } returns LAST_LOCATION_BEARING
+        every { lastLocation.altitude } returns LAST_LOCATION_ALTITUDE
+        every { lastLocation.time } returns LAST_LOCATION_TIME
+        every { lastLocation.accuracy } returns LAST_LOCATION_ACCURACY
+        every { lastLocation.verticalAccuracyMeters } returns LAST_LOCATION_VERTICAL_ACCURACY
 
         mockFlushBuffers()
     }
