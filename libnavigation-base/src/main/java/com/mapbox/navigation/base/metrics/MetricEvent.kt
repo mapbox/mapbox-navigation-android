@@ -20,7 +20,8 @@ interface MetricEvent {
         NavigationMetrics.FEEDBACK,
         NavigationMetrics.INITIAL_GPS,
         NavigationMetrics.FASTER_ROUTE,
-        NavigationMetrics.APP_USER_TURNSTILE
+        NavigationMetrics.APP_USER_TURNSTILE,
+        NavigationMetrics.FREE_DRIVE
     )
     annotation class Metric
 
@@ -83,6 +84,11 @@ object NavigationMetrics {
      * Navigation Event "App User turnstile" name
      */
     const val APP_USER_TURNSTILE = "appUserTurnstile"
+
+    /**
+     * Navigation Event "FreeDrive" name
+     */
+    const val FREE_DRIVE = "navigation.freeDrive"
 }
 
 /**

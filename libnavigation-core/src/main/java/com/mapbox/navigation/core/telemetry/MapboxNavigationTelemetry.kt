@@ -29,12 +29,16 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
+import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType
+import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.START
+import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.STOP
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
 import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationCancelEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationDepartEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationFeedbackEvent
+import com.mapbox.navigation.core.telemetry.events.NavigationFreeDriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationRerouteEvent
 import com.mapbox.navigation.core.telemetry.events.PhoneState
 import com.mapbox.navigation.core.telemetry.events.TelemetryLocation
@@ -42,8 +46,13 @@ import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEvent
+import com.mapbox.navigation.utils.internal.JobControl
+import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.ifNonNull
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Date
 
 private data class DynamicSessionValues(
@@ -63,6 +72,16 @@ private data class DynamicSessionValues(
         sessionStartTime = null
         sessionArrivalTime = null
         sessionStarted = false
+    }
+}
+
+private data class DynamicFreeDriveValues(
+    var sessionId: String? = null,
+    var sessionStartTime: Date? = null
+) {
+    fun reset() {
+        sessionId = null
+        sessionStartTime = null
     }
 }
 
@@ -107,6 +126,7 @@ internal object MapboxNavigationTelemetry :
             }
         }
     private val dynamicValues = DynamicSessionValues()
+    private val dynamicFreeDriveValues = DynamicFreeDriveValues()
     private var locationEngineNameExternal: String = LocationEngine::javaClass.name
     private lateinit var locationsCollector: LocationsCollector
     private lateinit var sdkIdentifier: String
@@ -117,6 +137,7 @@ internal object MapboxNavigationTelemetry :
     private var routeProgress: RouteProgress? = null
     private var originalRoute: DirectionsRoute? = null
     private var needStartSession = false
+    private var jobControl: JobControl = ThreadController.getMainScopeAndRootJob()
 
     /**
      * This method must be called before using the Telemetry object
@@ -129,6 +150,7 @@ internal object MapboxNavigationTelemetry :
         locationsCollector: LocationsCollector = LocationsCollectorImpl(logger)
     ) {
         reset()
+        dynamicFreeDriveValues.reset()
         sessionState = IDLE
         this.logger = logger
         this.locationsCollector = locationsCollector
@@ -230,14 +252,70 @@ internal object MapboxNavigationTelemetry :
 
     override fun onNavigationSessionStateChanged(navigationSession: NavigationSession.State) {
         log("session state is $navigationSession")
-        sessionState = navigationSession
         when (navigationSession) {
-            IDLE, FREE_DRIVE -> sessionStop()
+            IDLE, FREE_DRIVE -> {
+                sessionStop()
+                handleStateChanged(sessionState, navigationSession)
+            }
             ACTIVE_GUIDANCE -> {
                 locationsCollector.flushBuffers()
+                handleStateChanged(sessionState, navigationSession)
                 needStartSession = true
                 startSessionIfNeedAndCan()
             }
+        }
+        sessionState = navigationSession
+    }
+
+    private fun handleStateChanged(
+        oldState: NavigationSession.State,
+        newState: NavigationSession.State
+    ) {
+        when {
+            oldState == FREE_DRIVE && newState == IDLE -> trackFreeDrive(STOP)
+            oldState == FREE_DRIVE && newState == ACTIVE_GUIDANCE -> trackFreeDrive(STOP)
+            oldState != FREE_DRIVE && newState == FREE_DRIVE -> trackFreeDrive(START)
+        }
+    }
+
+    private fun trackFreeDrive(type: FreeDriveEventType) {
+        log("trackFreeDrive $type")
+
+        fun createFreeDriveEvent() {
+            log("createFreeDriveEvent")
+            if (type == START) {
+                dynamicFreeDriveValues.run {
+                    sessionId = obtainUniversalUniqueIdentifier()
+                    sessionStartTime = Date()
+                }
+            }
+
+            val freeDriveEvent = NavigationFreeDriveEvent(PhoneState(context)).apply {
+                populate(type)
+            }
+
+            if (type == STOP) {
+                dynamicFreeDriveValues.reset()
+            }
+
+            log("${freeDriveEvent::class.java} event sent")
+            metricsReporter.addEvent(freeDriveEvent)
+        }
+
+        if (locationsCollector.lastLocation == null) {
+            log("wait for location")
+            jobControl.scope.launch {
+                var waitForLocation = true
+                while (waitForLocation) {
+                    delay(50)
+                    if (locationsCollector.lastLocation != null) {
+                        waitForLocation = false
+                        createFreeDriveEvent()
+                    }
+                }
+            }
+        } else {
+            createFreeDriveEvent()
         }
     }
 
@@ -294,7 +372,7 @@ internal object MapboxNavigationTelemetry :
 
     private fun sendMetricEvent(event: MetricEvent) {
         if (isTelemetryAvailable()) {
-            logger?.d(TAG, Message("${event::class.java} event sent"))
+            log("${event::class.java} event sent")
             metricsReporter.addEvent(event)
         } else {
             log(
@@ -435,12 +513,31 @@ internal object MapboxNavigationTelemetry :
         }
     }
 
+    private fun NavigationFreeDriveEvent.populate(type: FreeDriveEventType) {
+        log("populateNavigationFreeDriveEvent")
+
+        this.apply {
+            eventType = type.type
+            location = locationsCollector.lastLocation?.toTelemetryLocation()
+            eventVersion = EVENT_VERSION
+            locationEngine = locationEngineNameExternal
+            percentTimeInPortrait = lifecycleMonitor?.obtainPortraitPercentage() ?: 100
+            percentTimeInForeground = lifecycleMonitor?.obtainForegroundPercentage() ?: 100
+            simulation = locationEngineNameExternal == MOCK_PROVIDER
+            dynamicFreeDriveValues.run {
+                sessionIdentifier = sessionId
+                startTimestamp = generateCreateDateFormatted(sessionStartTime)
+            }
+        }
+    }
+
     private fun reset() {
         dynamicValues.reset()
         resetOriginalRoute()
         resetRouteProgress()
         needHandleReroute = false
         needStartSession = false
+        jobControl.job.cancelChildren()
     }
 
     private fun resetRouteProgress() {
@@ -466,26 +563,28 @@ internal object MapboxNavigationTelemetry :
 
     private fun List<Location>.toTelemetryLocations(): Array<TelemetryLocation> {
         val feedbackLocations = mutableListOf<TelemetryLocation>()
-        this.forEach {
-            feedbackLocations.add(
-                TelemetryLocation(
-                    it.latitude,
-                    it.longitude,
-                    it.speed,
-                    it.bearing,
-                    it.altitude,
-                    it.time.toString(),
-                    it.accuracy,
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        it.verticalAccuracyMeters
-                    } else {
-                        0f
-                    }
-                )
-            )
+        forEach {
+            feedbackLocations.add(it.toTelemetryLocation())
         }
 
         return feedbackLocations.toTypedArray()
+    }
+
+    private fun Location.toTelemetryLocation(): TelemetryLocation {
+        return TelemetryLocation(
+            latitude,
+            longitude,
+            speed,
+            bearing,
+            altitude,
+            time.toString(),
+            accuracy,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                verticalAccuracyMeters
+            } else {
+                0f
+            }
+        )
     }
 
     private fun log(message: String) {

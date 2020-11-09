@@ -105,6 +105,20 @@ class SchemaTest {
         schemaContainsPropertyFields(schema.properties, fields)
     }
 
+    @Test
+    fun checkNavigationFreeDriveEventSize() {
+        val schema = grabEventSchema(NavigationMetrics.FREE_DRIVE)
+        val fields = grabSchemaPropertyFields(NavigationFreeDriveEvent::class.java)
+        assertEquals(schema.properties.size().toLong(), fields.size.toLong())
+    }
+
+    @Test
+    fun checkNavigationFreeDriveEventFields() {
+        val schema = grabEventSchema(NavigationMetrics.FREE_DRIVE)
+        val fields = grabSchemaPropertyFields(NavigationFreeDriveEvent::class.java)
+        schemaContainsPropertyFields(schema.properties, fields)
+    }
+
     private fun schemaContainsPropertyFields(
         properties: JsonObject,
         fields: List<Field>
