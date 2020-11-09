@@ -28,6 +28,15 @@ workflows:
             - assemble-debug
             - static-analysis
             - unit-tests
+      - changelog-verification:
+          requires:
+            - assemble-release
+            - assemble-debug
+            - static-analysis
+            - unit-tests
+          filters:
+            branches:
+              ignore: /^(master|release-.*)/
       - release-snapshot:
           filters:
             branches:
@@ -59,11 +68,29 @@ commands:
             - ~/.gradle
           key: deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "examples/build.gradle" }}-{{ checksum  "libnavigation-router/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}-{{ checksum  "libnavigation-ui/build.gradle" }}
 
-  verify:
+  verify-codebase:
     steps:
       - run:
           name: Check codebase
           command: make check
+
+  verify-changelog:
+    steps:
+      - run:
+          name: Install python dependencies
+          command: python3 -m pip install requests
+      - run:
+          name: Verify that a changelog entry is present in the PR description
+          command: |
+            if [[ -n "$CIRCLE_PULL_REQUEST" ]]; then
+              if [[ -n "$GITHUB_ACCESS_TOKEN" ]]; then
+                python3 scripts/validate-changelog.py ${CIRCLE_PULL_REQUEST##*/} ${GITHUB_ACCESS_TOKEN}
+              else
+                echo "Missing access token, skipping changelog validation."
+              fi
+            else
+              echo "Not a PR, skipping changelog validation."
+            fi
 
   assemble-module:
     parameters:
@@ -327,10 +354,18 @@ jobs:
     steps:
       - checkout
       - restore-gradle-cache
-      - verify
+      - verify-codebase
       - check-api-core
       - check-api-ui
       - check-public-documentation
+
+  changelog-verification:
+    working_directory: ~/code
+    docker:
+      - image: << pipeline.parameters.docker-image-tag >>
+    steps:
+      - checkout
+      - verify-changelog
 
   ui-robo-tests:
     docker:
