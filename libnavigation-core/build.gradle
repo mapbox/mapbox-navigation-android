@@ -10,15 +10,17 @@ apply from: file("${rootDir}/gradle/artifact-settings.gradle")
 version = project.ext.versionName
 group = project.ext.mapboxArtifactGroupId
 
-dokka {
-    outputDirectory = "$buildDir/kdoc"
-    configuration {
-        moduleName = 'libnavigation-core'
-        reportUndocumented = true
+dokkaHtml {
+    outputDirectory.set(new File(buildDir.path, "kdoc"))
+    moduleName.set("Core")
+    dokkaSourceSets {
+        configureEach {
+            reportUndocumented.set(true)
 
-        perPackageOption {
-            prefix = "com.mapbox.navigation.core.internal"
-            suppress = true
+            perPackageOption {
+                matchingRegex.set("com.mapbox.navigation.core.internal.*")
+                suppress.set(true)
+            }
         }
     }
 }

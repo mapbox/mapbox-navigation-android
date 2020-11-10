@@ -4,15 +4,17 @@ apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'com.jaredsburrows.license'
 apply from: "${rootDir}/gradle/ktlint.gradle"
 
-dokka {
-    outputDirectory = "$buildDir/kdoc"
-    configuration {
-        moduleName = 'libnavigator'
-        reportUndocumented = true
+dokkaHtml {
+    outputDirectory.set(new File(buildDir.path, "kdoc"))
+    moduleName.set("LibNavigator")
+    dokkaSourceSets {
+        configureEach {
+            reportUndocumented.set(true)
 
-        perPackageOption {
-            prefix = "com.mapbox.navigation.navigator.internal"
-            suppress = true
+            perPackageOption {
+                matchingRegex.set("com.mapbox.navigation.navigator.internal.*")
+                suppress.set(true)
+            }
         }
     }
 }

@@ -73,7 +73,7 @@ task androidSourcesJar(type: Jar) {
     from android.sourceSets.main.kotlin
 }
 
-task androidJavadocsJar(type: Jar, dependsOn: dokka) {
+task androidJavadocsJar(type: Jar, dependsOn: dokkaHtml) {
     classifier = 'javadoc'
-    from dokka.outputDirectory
+    from dokkaHtml.outputDirectory
 }

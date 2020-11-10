@@ -4,15 +4,17 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'org.jetbrains.dokka'
 apply from: "${rootDir}/gradle/ktlint.gradle"
 
-dokka {
-    outputDirectory = "$buildDir/kdoc"
-    configuration {
-        moduleName = 'libnavigation-utils'
-        reportUndocumented = true
+dokkaHtml {
+    outputDirectory.set(new File(buildDir.path, "kdoc"))
+    moduleName.set("Utils")
+    dokkaSourceSets {
+        configureEach {
+            reportUndocumented.set(true)
 
-        perPackageOption {
-            prefix = "com.mapbox.navigation.utils.internal"
-            suppress = true
+            perPackageOption {
+                matchingRegex.set("com.mapbox.navigation.utils.internal.*")
+                suppress.set(true)
+            }
         }
     }
 }
