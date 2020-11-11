@@ -138,6 +138,8 @@ class ReplayHistoryActivity : AppCompatActivity() {
             )
                 .vanishRouteLineEnabled(true)
                 .build()
+            navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.GPS)
+
             val navigationContext = ReplayNavigationContext(
                 locationEngine,
                 mapboxMap,
