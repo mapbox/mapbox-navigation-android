@@ -26,6 +26,7 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
@@ -352,6 +353,31 @@ class MapboxNavigationTest {
         mapboxNavigation.onDestroy()
 
         verify(exactly = 1) { tripSession.unregisterAllMapMatcherResultObservers() }
+    }
+
+    @Test
+    fun unregisterAllTelemetryObservers() {
+        mockkObject(MapboxNavigationTelemetry)
+
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { MapboxNavigationTelemetry.unregisterListeners(eq(mapboxNavigation)) }
+
+        unmockkObject(MapboxNavigationTelemetry)
+    }
+
+    @Test
+    fun unregisterAllTelemetryObserversIsCalledAfterTripSessionStop() {
+        mockkObject(MapboxNavigationTelemetry)
+
+        mapboxNavigation.onDestroy()
+
+        verifyOrder {
+            tripSession.stop()
+            MapboxNavigationTelemetry.unregisterListeners(mapboxNavigation)
+        }
+
+        unmockkObject(MapboxNavigationTelemetry)
     }
 
     @Test

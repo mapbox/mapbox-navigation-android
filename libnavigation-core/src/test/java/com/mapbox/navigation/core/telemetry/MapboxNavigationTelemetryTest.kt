@@ -582,6 +582,7 @@ class MapboxNavigationTelemetryTest {
 
         val events = captureAndVerifyMetricsReporter(exactly = 1)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        resetTelemetry()
     }
 
     @Test
