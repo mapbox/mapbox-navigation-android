@@ -345,11 +345,7 @@ class MapboxNavigation(
      * Call this method whenever this instance of the [MapboxNavigation] is not going to be used anymore and should release all of its resources.
      */
     fun onDestroy() {
-        logger.d(
-            MapboxNavigationTelemetry.TAG,
-            Message("MapboxNavigation onDestroy")
-        )
-        MapboxNavigationTelemetry.unregisterListeners(this@MapboxNavigation)
+        logger.d(MapboxNavigationTelemetry.TAG, Message("MapboxNavigation onDestroy"))
         directionsSession.shutdown()
         directionsSession.unregisterAllRoutesObservers()
         tripSession.stop()
@@ -368,6 +364,7 @@ class MapboxNavigation(
         navigationSession.unregisterAllNavigationSessionStateObservers()
         fasterRouteController.stop()
         routeRefreshController.stop()
+        MapboxNavigationTelemetry.unregisterListeners(this@MapboxNavigation)
         ThreadController.cancelAllNonUICoroutines()
         ThreadController.cancelAllUICoroutines()
     }
