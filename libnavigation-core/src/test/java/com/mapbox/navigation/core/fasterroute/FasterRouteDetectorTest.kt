@@ -12,14 +12,14 @@ import org.junit.Test
 class FasterRouteDetectorTest {
 
     private val routeComparator: RouteComparator = mockk {
-        every { isRouteDescriptionDifferent(any(), any()) } returns true
+        every { isSameRoute(any(), any()) } returns false
     }
 
     private val fasterRouteDetector = FasterRouteDetector(routeComparator)
 
     @Test
     fun shouldDetectWhenRouteIsFaster() = runBlocking {
-        every { routeComparator.isRouteDescriptionDifferent(any(), any()) } returns true
+        every { routeComparator.isSameRoute(any(), any()) } returns false
         val newRoute: DirectionsRoute = mockk()
         every { newRoute.duration() } returns 402.6
         val routeProgress: RouteProgress = mockk()
@@ -32,7 +32,7 @@ class FasterRouteDetectorTest {
 
     @Test
     fun shouldDetectWhenRouteIsFasterOnlyIfDifferent() = runBlocking {
-        every { routeComparator.isRouteDescriptionDifferent(any(), any()) } returns false
+        every { routeComparator.isSameRoute(any(), any()) } returns true
         val newRoute: DirectionsRoute = mockk()
         every { newRoute.duration() } returns 402.6
         val routeProgress: RouteProgress = mockk()

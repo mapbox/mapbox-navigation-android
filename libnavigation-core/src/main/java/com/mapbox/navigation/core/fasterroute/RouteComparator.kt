@@ -15,10 +15,10 @@ internal class RouteComparator {
      * @param routeProgress current route progress
      * @param alternativeRoute suggested new route
      *
-     * @return true when the alternative route has different
-     * geometry from the current route progress
+     * @return true when the alternative is the same route,
+     * false if it is a different route.
      */
-    fun isRouteDescriptionDifferent(
+    fun isSameRoute(
         routeProgress: RouteProgress,
         alternativeRoute: DirectionsRoute
     ): Boolean {
@@ -28,7 +28,7 @@ internal class RouteComparator {
             return false
         }
 
-        return currentDescription != alternativeDescription
+        return currentDescription == alternativeDescription
     }
 
     private fun routeDescription(routeProgress: RouteProgress): String {
@@ -43,7 +43,6 @@ internal class RouteComparator {
 
     private fun alternativeDescription(directionsRoute: DirectionsRoute): String {
         val steps = directionsRoute.legs()?.firstOrNull()?.steps()
-        return steps?.asSequence()
-            ?.joinToString(transform = mapLegStepToName) ?: ""
+        return steps?.joinToString(transform = mapLegStepToName) ?: ""
     }
 }
