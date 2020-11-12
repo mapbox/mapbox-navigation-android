@@ -41,9 +41,9 @@ class RouteComparatorTest {
             )
         }
 
-        val isNewRoute = routeComparator.isRouteDescriptionDifferent(routeProgress, directionsRoute)
+        val isSameRoute = routeComparator.isSameRoute(routeProgress, directionsRoute)
 
-        assertTrue(isNewRoute)
+        assertFalse(isSameRoute)
     }
 
     @Test
@@ -75,9 +75,9 @@ class RouteComparatorTest {
             )
         }
 
-        val isNewRoute = routeComparator.isRouteDescriptionDifferent(routeProgress, directionsRoute)
+        val isSameRoute = routeComparator.isSameRoute(routeProgress, directionsRoute)
 
-        assertFalse(isNewRoute)
+        assertTrue(isSameRoute)
     }
 
     @Test
@@ -113,8 +113,8 @@ class RouteComparatorTest {
             )
         }
 
-        val isNewRoute = routeComparator.isRouteDescriptionDifferent(routeProgress, directionsRoute)
+        val isSameRoute = routeComparator.isSameRoute(routeProgress, directionsRoute)
 
-        assertFalse(isNewRoute)
+        assertTrue(isSameRoute)
     }
 }
