@@ -78,7 +78,7 @@ class Edge internal constructor(
         if (heading != other.heading) return false
         if (length != other.length) return false
         if (out != other.out) return false
-        if (parent != other.parent) return false
+        if (parent?.id != other.parent?.id) return false
         if (functionRoadClass != other.functionRoadClass) return false
         if (speed != other.speed) return false
         if (ramp != other.ramp) return false
@@ -108,7 +108,7 @@ class Edge internal constructor(
         result = 31 * result + heading.hashCode()
         result = 31 * result + length.hashCode()
         result = 31 * result + out.hashCode()
-        result = 31 * result + parent.hashCode()
+        result = 31 * result + parent?.id.hashCode()
         result = 31 * result + functionRoadClass.hashCode()
         result = 31 * result + speed.hashCode()
         result = 31 * result + ramp.hashCode()
