@@ -17,7 +17,9 @@ import com.mapbox.navigation.base.speed.model.SpeedLimit
  * @param isTeleport returns true if map matcher changed its opinion about most probable path on last update.
  * In practice it means we don't need to animate puck movement from previous to current location
  * and just do an immediate transition instead.
- * @param speedLimit current speed limit during free drive and active navigation session
+ * @param speedLimit current speed limit during free drive and active navigation session.
+ * In order to receive the speed limit make sure you add annotationsList with
+ * DirectionsCriteria.ANNOTATION_MAXSPEED annotation to the route request.
  * @param roadEdgeMatchProbability when map matcher snaps to a road, this is the confidence in the chosen edge from all nearest edges.
  */
 class MapMatcherResult internal constructor(

@@ -6,6 +6,8 @@ import androidx.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
+import com.mapbox.navigation.base.speed.model.SpeedLimit;
+import com.mapbox.navigation.ui.speed.SpeedLimitView;
 
 public interface NavigationContract {
 
@@ -59,5 +61,9 @@ public interface NavigationContract {
     );
 
     void onGuidanceViewChange(int left, int top, int width, int height);
+
+    void updateSpeedLimit(SpeedLimit limit);
+
+    SpeedLimitView retrieveSpeedLimitView();
   }
 }

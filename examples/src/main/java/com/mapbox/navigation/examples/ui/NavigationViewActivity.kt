@@ -9,6 +9,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.examples.R
+import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.ifNonNull
 import com.mapbox.navigation.ui.NavigationViewOptions
 import com.mapbox.navigation.ui.OnNavigationReadyCallback
@@ -132,11 +133,12 @@ class NavigationViewActivity :
     }
 
     private fun getDirectionsRoute(): DirectionsRoute {
+        val tokenHere = Utils.getMapboxAccessToken(applicationContext)
         val directionsRouteAsJson = resources
             .openRawResource(R.raw.sample_route_2_token_replacement)
             .bufferedReader()
             .use { it.readText() }
-
+            .replace("\$tokenHere", tokenHere, true)
         return DirectionsRoute.fromJson(directionsRouteAsJson)
     }
 }

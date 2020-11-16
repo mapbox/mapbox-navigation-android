@@ -73,6 +73,7 @@ package com.mapbox.navigation.ui {
     method public com.mapbox.navigation.ui.map.NavigationMapboxMap? retrieveNavigationMapboxMap();
     method public com.mapbox.navigation.ui.NavigationButton! retrieveRecenterButton();
     method public com.mapbox.navigation.ui.NavigationButton! retrieveSoundButton();
+    method public com.mapbox.navigation.ui.speed.SpeedLimitView! retrieveSpeedLimitView();
     method public String retrieveWayNameText();
     method public void setSummaryBehaviorHideable(boolean);
     method public void setSummaryBehaviorState(int);
@@ -86,6 +87,7 @@ package com.mapbox.navigation.ui {
     method public void toggleMute();
     method public boolean updateCameraRouteGeometryOverview();
     method @Deprecated public void updateCameraRouteOverview();
+    method public void updateSpeedLimit(com.mapbox.navigation.base.speed.model.SpeedLimit!);
     method public void updateWayNameView(String);
   }
 
@@ -95,6 +97,7 @@ package com.mapbox.navigation.ui {
     method public androidx.lifecycle.LiveData<com.mapbox.api.directions.v5.models.BannerInstructions!> retrieveBannerInstructions();
     method public androidx.lifecycle.LiveData<java.lang.Boolean!> retrieveIsOffRoute();
     method public androidx.lifecycle.LiveData<java.lang.Boolean!> retrieveOnFinalDestinationArrival();
+    method public androidx.lifecycle.LiveData<com.mapbox.navigation.base.speed.model.SpeedLimit!> retrieveOnSpeedLimit();
     method public androidx.lifecycle.LiveData<com.mapbox.navigation.base.trip.model.RouteProgress!> retrieveRouteProgress();
     method public void setMuted(boolean);
     method public void updateFeedback(com.mapbox.navigation.ui.feedback.FeedbackItem!);
@@ -667,6 +670,19 @@ package com.mapbox.navigation.ui.route {
     method public int getLineColorResourceId();
     method public int getLineShieldColorResourceId();
     method public String getRouteIdentifier();
+  }
+
+}
+
+package com.mapbox.navigation.ui.speed {
+
+  public class SpeedLimitView extends androidx.constraintlayout.widget.ConstraintLayout implements androidx.lifecycle.LifecycleObserver {
+    ctor public SpeedLimitView(android.content.Context!);
+    ctor public SpeedLimitView(android.content.Context!, android.util.AttributeSet?);
+    ctor public SpeedLimitView(android.content.Context!, android.util.AttributeSet?, int);
+    method public void hide();
+    method public void setSpeedLimit(com.mapbox.navigation.base.speed.model.SpeedLimit);
+    method public void show();
   }
 
 }

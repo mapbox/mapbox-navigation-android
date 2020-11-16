@@ -37,6 +37,7 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.navigation.base.TimeFormat;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.route.Router;
+import com.mapbox.navigation.base.speed.model.SpeedLimit;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.internal.telemetry.MapboxNavigationFeedbackCache;
 import com.mapbox.navigation.core.replay.MapboxReplayer;
@@ -54,6 +55,7 @@ import com.mapbox.navigation.ui.internal.utils.ViewUtils;
 import com.mapbox.navigation.ui.map.NavigationMapboxMap;
 import com.mapbox.navigation.ui.map.WayNameView;
 import com.mapbox.navigation.ui.puck.DefaultMapboxPuckDrawableSupplier;
+import com.mapbox.navigation.ui.speed.SpeedLimitView;
 import com.mapbox.navigation.ui.summary.SummaryBottomSheet;
 
 import java.util.List;
@@ -89,6 +91,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private static final int DEFAULT_PX_BETWEEN_BOTTOM_SHEET_LOGO_AND_ATTRIBUTION = 16;
   private static final long WAY_NAME_TRANSLATION_X_DURATION = 750L;
   private MapView mapView;
+  private SpeedLimitView speedLimitView;
   private InstructionView instructionView;
   private SummaryBottomSheet summaryBottomSheet;
   private BottomSheetBehavior summaryBehavior;
@@ -347,6 +350,16 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   /**
+   * Updates speed limit view to show appropriate speed limit text considering the sign and unit.
+   * @param limit to update the view
+   */
+  @Override public void updateSpeedLimit(SpeedLimit limit) {
+    if (limit != null) {
+      speedLimitView.setSpeedLimit(limit);
+    }
+  }
+
+  /**
    * Set the auto-query state to provide the default way names value
    * with {@link NavigationMapboxMap#updateWaynameQueryMap(boolean)}.
    *
@@ -595,6 +608,17 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   /**
+   * Returns the {@link SpeedLimitView} that allows to operate on other APIs exposed.
+   * Invoke this function to show or hide {@link SpeedLimitView}
+   *
+   * @return {@link SpeedLimitView}
+   */
+  @Override
+  public SpeedLimitView retrieveSpeedLimitView() {
+    return speedLimitView;
+  }
+
+  /**
    * Returns the state of speech player whether it is muted or unmuted
    * @return true if speech player is mute else false
    */
@@ -721,6 +745,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private void bind() {
     mapView = findViewById(R.id.navigationMapView);
     instructionView = findViewById(R.id.instructionView);
+    speedLimitView = findViewById(R.id.speedLimitView);
     ViewCompat.setElevation(instructionView, 10);
     summaryBottomSheet = findViewById(R.id.summaryBottomSheet);
     cancelBtn = findViewById(R.id.cancelBtn);

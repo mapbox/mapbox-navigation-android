@@ -2,7 +2,11 @@ package com.mapbox.navigation.ui;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 
+import com.mapbox.navigation.base.speed.model.SpeedLimit;
+import com.mapbox.navigation.base.speed.model.SpeedLimitSign;
+import com.mapbox.navigation.base.speed.model.SpeedLimitUnit;
 import com.mapbox.navigation.ui.internal.NavigationContract;
+import com.mapbox.navigation.ui.speed.SpeedLimitView;
 import org.junit.Test;
 
 import static org.mockito.Mockito.mock;
@@ -137,6 +141,8 @@ public class NavigationPresenterTest {
   public void onNavigationStopped_mapWayNameIsHidden() {
     NavigationContract.View view = mock(NavigationContract.View.class);
     NavigationPresenter presenter = new NavigationPresenter(view);
+    SpeedLimitView speedLimitView = mock(SpeedLimitView.class);
+    when(view.retrieveSpeedLimitView()).thenReturn(speedLimitView);
 
     presenter.onNavigationStopped();
 
@@ -177,5 +183,16 @@ public class NavigationPresenterTest {
     presenter.onRouteUpdate(directionsRoute);
 
     verify(view).startCamera(directionsRoute);
+  }
+
+  @Test
+  public void onSpeedLimitAvailable_mapSpeedLimitIsUpdated() {
+    SpeedLimit speedLimit = new SpeedLimit(56, SpeedLimitUnit.MILES_PER_HOUR, SpeedLimitSign.MUTCD);
+    NavigationContract.View view = mock(NavigationContract.View.class);
+    NavigationPresenter presenter = new NavigationPresenter(view);
+
+    presenter.onSpeedLimitAvailable(speedLimit);
+
+    verify(view).updateSpeedLimit(speedLimit);
   }
 }

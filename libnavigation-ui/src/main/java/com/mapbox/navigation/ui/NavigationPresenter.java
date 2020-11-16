@@ -8,6 +8,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
+import com.mapbox.navigation.base.speed.model.SpeedLimit;
 import com.mapbox.navigation.ui.internal.NavigationContract;
 
 class NavigationPresenter {
@@ -21,6 +22,10 @@ class NavigationPresenter {
 
   void updateResumeState(boolean resumeState) {
     this.resumeState = resumeState;
+  }
+
+  void onSpeedLimitAvailable(SpeedLimit speedLimit) {
+    view.updateSpeedLimit(speedLimit);
   }
 
   void onRecenterClick() {
@@ -87,6 +92,7 @@ class NavigationPresenter {
   void onNavigationStopped() {
     view.setWayNameActive(false);
     view.setWayNameVisibility(false);
+    view.retrieveSpeedLimitView().hide();
   }
 
   void onRouteOverviewClick() {
