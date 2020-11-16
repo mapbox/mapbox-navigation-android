@@ -28,6 +28,8 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
+import com.mapbox.navigation.core.trip.session.MapMatcherResult
+import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
@@ -35,13 +37,11 @@ import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.Utils.PRIMARY_ROUTE_BUNDLE_KEY
 import com.mapbox.navigation.examples.utils.Utils.getRouteFromBundle
+import com.mapbox.navigation.examples.utils.extensions.ifNonNull
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import kotlinx.android.synthetic.main.activity_basic_navigation_layout.container
-import kotlinx.android.synthetic.main.activity_basic_navigation_layout.fabToggleStyle
-import kotlinx.android.synthetic.main.activity_basic_navigation_layout.mapView
-import kotlinx.android.synthetic.main.activity_basic_navigation_layout.startNavigation
+import kotlinx.android.synthetic.main.activity_basic_navigation_layout.*
 import timber.log.Timber
 import java.lang.ref.WeakReference
 
@@ -86,6 +86,7 @@ open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         mapboxNavigation = MapboxNavigation(mapboxNavigationOptions).apply {
             registerTripSessionStateObserver(tripSessionStateObserver)
             registerRouteProgressObserver(routeProgressObserver)
+            registerMapMatcherResultObserver(mapMatcherResultObserver)
         }
 
         initListeners()
@@ -134,6 +135,7 @@ open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                         .accessToken(Utils.getMapboxAccessToken(applicationContext))
                         .coordinates(originLocation.toPoint(), null, latLng.toPoint())
                         .alternatives(true)
+                        .annotationsList(mutableListOf(DirectionsCriteria.ANNOTATION_MAXSPEED))
                         .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
                         .build(),
                     routesReqCallback
@@ -147,6 +149,14 @@ open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
             // do something with the route progress
             Timber.i("route progress: ${routeProgress.currentState}")
+        }
+    }
+
+    private val mapMatcherResultObserver = object : MapMatcherResultObserver {
+        override fun onNewMapMatcherResult(mapMatcherResult: MapMatcherResult) {
+            ifNonNull(mapMatcherResult.speedLimit) {
+                speedLimitView.setSpeedLimit(it)
+            } ?: speedLimitView.hide()
         }
     }
 

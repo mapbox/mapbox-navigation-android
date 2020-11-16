@@ -74,6 +74,7 @@ public class NavigationViewSubscriberTest {
     when(navigationViewModel.retrieveShouldRecordScreenshot()).thenReturn(mock(MutableLiveData.class));
     when(navigationViewModel.retrieveFeedbackFlowStatus()).thenReturn(mock(MutableLiveData.class));
     when(navigationViewModel.retrieveOnFinalDestinationArrival()).thenReturn(mock(MutableLiveData.class));
+    when(navigationViewModel.retrieveOnSpeedLimit()).thenReturn(mock(MutableLiveData.class));
 
     theNavigationViewSubscriber.subscribe();
 
@@ -83,5 +84,6 @@ public class NavigationViewSubscriberTest {
     verify(navigationViewModel.retrieveShouldRecordScreenshot()).observe(eq(lifecycleOwner), any(Observer.class));
     verify(navigationViewModel.retrieveFeedbackFlowStatus()).observe(eq(lifecycleOwner), any(Observer.class));
     verify(navigationViewModel.retrieveOnFinalDestinationArrival()).observe(eq(lifecycleOwner), any(Observer.class));
+    verify(navigationViewModel.retrieveOnSpeedLimit()).observe(eq(lifecycleOwner), any(Observer.class));
   }
 }

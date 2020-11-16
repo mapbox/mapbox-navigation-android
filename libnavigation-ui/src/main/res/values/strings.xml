@@ -12,6 +12,9 @@
     <!-- Indicates voice instructions are unmuted -->
     <string name="mapbox_unmuted">Unmuted</string>
 
+    <!-- Max Speed Limit -->
+    <string name="max_speed">MAX\n%1$d</string>
+
     <!-- Feedback -->
     <string name="mapbox_report_feedback">Report feedback</string>
 
