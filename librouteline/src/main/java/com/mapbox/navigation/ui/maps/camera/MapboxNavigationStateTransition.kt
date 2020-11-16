@@ -115,15 +115,11 @@ class MapboxNavigationStateTransition(
     }
 
     private fun getZoomLevelAndCenterCoordinate(points: List<Point>, bearing: Double, pitch: Double, edgeInsets: EdgeInsets): Pair<Double, Point> {
-        val cam = mapboxMap.cameraForCoordinates(points, edgeInsets, bearing, pitch)
+        val cam = mapboxMap.cameraForCoordinates(points, getScaledEdgeInsets(edgeInsets), bearing, pitch)
 
         if (cam.zoom != null && cam.center != null) {
             return Pair(cam.zoom!!, cam.center!!)
         }
         return Pair(2.0, Point.fromLngLat(0.0, 0.0))
-    }
-
-    private fun shortestRotation(from: Double, to: Double): Double {
-        return (to - from + 540) % 360 - 180
     }
 }
