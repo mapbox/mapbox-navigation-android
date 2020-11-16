@@ -2,7 +2,9 @@
 
 package com.mapbox.navigation.utils.internal
 
-
+/**
+This is internal and will move to a different package.
+ */
 inline fun <R1, T> ifNonNull(r1: R1?, func: (R1) -> T): T? =
     if (r1 != null) {
         func(r1)
@@ -10,6 +12,9 @@ inline fun <R1, T> ifNonNull(r1: R1?, func: (R1) -> T): T? =
         null
     }
 
+/**
+    This is internal and will move to a different package.
+ */
 inline fun <R1, R2, T> ifNonNull(r1: R1?, r2: R2?, func: (R1, R2) -> T): T? =
     if (r1 != null && r2 != null) {
         func(r1, r2)
@@ -17,6 +22,9 @@ inline fun <R1, R2, T> ifNonNull(r1: R1?, r2: R2?, func: (R1, R2) -> T): T? =
         null
     }
 
+/**
+    This is internal and will move to a different package.
+ */
 inline fun <R1, R2, R3, T> ifNonNull(r1: R1?, r2: R2?, r3: R3?, func: (R1, R2, R3) -> T): T? =
     if (r1 != null && r2 != null && r3 != null) {
         func(r1, r2, r3)
@@ -24,6 +32,9 @@ inline fun <R1, R2, R3, T> ifNonNull(r1: R1?, r2: R2?, r3: R3?, func: (R1, R2, R
         null
     }
 
+/**
+    This is internal and will move to a different package.
+ */
 inline fun <R1, R2, R3, R4, T> ifNonNull(
     r1: R1?,
     r2: R2?,
@@ -37,6 +48,9 @@ inline fun <R1, R2, R3, R4, T> ifNonNull(
         null
     }
 
+/**
+    This is internal and will move to a different package.
+ */
 inline fun <R1, R2, R3, R4, R5, T> ifNonNull(
     r1: R1?,
     r2: R2?,
@@ -51,6 +65,9 @@ inline fun <R1, R2, R3, R4, R5, T> ifNonNull(
         null
     }
 
+/**
+    This is internal and will move to a different package.
+ */
 inline fun <R1, R2, R3, R4, R5, R6, T> ifNonNull(
     r1: R1?,
     r2: R2?,
@@ -66,6 +83,9 @@ inline fun <R1, R2, R3, R4, R5, R6, T> ifNonNull(
         null
     }
 
+/**
+    This is internal and will move to a different package.
+ */
 inline fun <R1, R2, R3, R4, R5, R6, R7, T> ifNonNull(
     r1: R1?,
     r2: R2?,
