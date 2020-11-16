@@ -1,0 +1,11 @@
+codecov:
+  require_ci_to_pass: no
+  notify:
+    wait_for_ci: no
+
+comment:
+  layout: "header, diff, files"
+  behavior: default
+  require_changes: false
+  require_base: no
+  require_head: yes

@@ -1,13 +1,10 @@
 package com.mapbox.navigation.core.trip.model.eh
 
-import com.google.gson.Gson
-import com.mapbox.navigator.ElectronicHorizon
 import com.mapbox.navigator.ElectronicHorizonResultType
 import com.mapbox.navigator.FRC
 import com.mapbox.navigator.GraphPosition
 import io.mockk.every
 import io.mockk.mockk
-import org.apache.commons.io.IOUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -65,7 +62,7 @@ class EHorizonMapperTest {
 
     @Test
     fun `mapToEHorizon should have a null parent`() {
-        val electronicHorizon = resourceAsElectronicHorizon("ehorizon_small_graph.txt")
+        val electronicHorizon = EHorizonTestUtil.loadSmallGraph()
 
         val eHorizon = EHorizonMapper.mapToEHorizon(electronicHorizon)
 
@@ -74,7 +71,7 @@ class EHorizonMapperTest {
 
     @Test
     fun `mapToEHorizon should map geometry`() {
-        val electronicHorizon = resourceAsElectronicHorizon("ehorizon_small_graph.txt")
+        val electronicHorizon = EHorizonTestUtil.loadSmallGraph()
 
         val start = EHorizonMapper.mapToEHorizon(electronicHorizon).start
         val firstLocation = start.geometry?.coordinates()?.get(0)!!
@@ -89,7 +86,7 @@ class EHorizonMapperTest {
 
     @Test
     fun `mapToEHorizon should map all top level edge values`() {
-        val electronicHorizon = resourceAsElectronicHorizon("ehorizon_small_graph.txt")
+        val electronicHorizon = EHorizonTestUtil.loadSmallGraph()
 
         val start = EHorizonMapper.mapToEHorizon(electronicHorizon).start
 
@@ -119,7 +116,7 @@ class EHorizonMapperTest {
 
     @Test
     fun `mapToEHorizon should map all outgoing edges`() {
-        val electronicHorizon = resourceAsElectronicHorizon("ehorizon_long_branch.txt")
+        val electronicHorizon = EHorizonTestUtil.loadLongBranch()
 
         val eHorizon = EHorizonMapper.mapToEHorizon(electronicHorizon)
         var outCount = 0
@@ -147,8 +144,8 @@ class EHorizonMapperTest {
 
     @Test
     fun `two identical graphs should be equal`() {
-        val lhsFromNative = resourceAsElectronicHorizon("ehorizon_small_graph.txt")
-        val rhsFromNative = resourceAsElectronicHorizon("ehorizon_small_graph.txt")
+        val lhsFromNative = EHorizonTestUtil.loadSmallGraph()
+        val rhsFromNative = EHorizonTestUtil.loadSmallGraph()
 
         val lhs = EHorizonMapper.mapToEHorizon(lhsFromNative)
         val rhs = EHorizonMapper.mapToEHorizon(rhsFromNative)
@@ -159,17 +156,10 @@ class EHorizonMapperTest {
 
     @Test
     fun `toString should not overflow`() {
-        val lhsFromNative = resourceAsElectronicHorizon("ehorizon_long_branch.txt")
+        val lhsFromNative = EHorizonTestUtil.loadLongBranch()
 
         val stringValue = EHorizonMapper.mapToEHorizon(lhsFromNative).toString()
 
         assertTrue(stringValue.length > 5000)
-    }
-
-    private fun resourceAsElectronicHorizon(name: String): ElectronicHorizon {
-        val packageName = "com.mapbox.navigation.core.ehorizon"
-        val inputStream = javaClass.classLoader?.getResourceAsStream("$packageName/$name")
-        val resourceAsString = IOUtils.toString(inputStream, "UTF-8")
-        return Gson().fromJson(resourceAsString, ElectronicHorizon::class.java)
     }
 }
