@@ -64,7 +64,7 @@ class NavigationCameraZoomTransitionOptions private constructor(
     class Builder(private var center: Point,
                   private var zoom: Double) {
         private var bearing: Double = 0.0
-        private var pitch: Double = MAPBOX_CAMERA_OPTION_FOLLOWING_PITCH
+        private var pitch: Double = 0.0
         private var anchorOffset: ScreenCoordinate = ScreenCoordinate(0.0, 0.0)
         private var animatorListener: Animator.AnimatorListener? = null
 

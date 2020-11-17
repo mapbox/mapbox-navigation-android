@@ -6,7 +6,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
 
 /**
- * This value will be used for changing camera state to vehicle following.
+ * This value will be used for changing camera state to route overview.
  *
  * @param vehicleLocation current vehicle location
  * @param remainingPointsOfRoute the points remaining in the current route which will
@@ -76,7 +76,7 @@ class NavigationStateTransitionToRouteOverviewOptions private constructor(
     class Builder(private var vehicleLocation: Location,
                   private var remainingPointsOfRoute: List<Point>) {
         private var additionalPointsToFrame: List<Point> = emptyList()
-        private var pitch: Double = MAPBOX_CAMERA_OPTION_FOLLOWING_PITCH
+        private var pitch: Double = MAPBOX_CAMERA_OPTION_OVERVIEW_PITCH
         private var padding: EdgeInsets = EdgeInsets(0.0, 0.0, 0.0, 0.0)
         private var lookaheadDistanceForBearingSmoothing: Double = 0.0
         private var maxZoom: Double = MAPBOX_CAMERA_OPTION_MAX_ZOOM

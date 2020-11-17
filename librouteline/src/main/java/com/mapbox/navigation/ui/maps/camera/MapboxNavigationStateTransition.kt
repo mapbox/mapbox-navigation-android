@@ -18,18 +18,20 @@ class MapboxNavigationStateTransition(
     ): AnimatorSet {
         val points = listOf(transitionOptions.pointsAheadOfVehicleLocation,
             transitionOptions.additionalPointsToFrame).flatten()
+        val currentBearing = mapboxMap.getCameraOptions(null).bearing ?: 0.0
+        val bearing = currentBearing + shortestRotation(currentBearing, transitionOptions.vehicleLocation.bearing.toDouble())
         val zoomAndCenter = getZoomLevelAndCenterCoordinate(points,
             transitionOptions.vehicleLocation.bearing.toDouble(),
             transitionOptions.pitch, transitionOptions.padding)
         val center = Point.fromLngLat(transitionOptions.vehicleLocation.longitude,
             transitionOptions.vehicleLocation.latitude)
         val zoom = min(zoomAndCenter.first, transitionOptions.maxZoom)
-        val yOffset = mapboxMap.getSize().height / 2 - transitionOptions.padding.bottom
+        val yOffset = (mapboxMap.getSize().height / 2.0) - transitionOptions.padding.bottom
         return navigationCameraTransition.transitionFromLowZoomToHighZoom(
             NavigationCameraZoomTransitionOptions.Builder(
                 center, zoom).apply {
-                bearing(transitionOptions.vehicleLocation.bearing.toDouble())
-                pitch(transitionOptions.pitch)
+                bearing(bearing)
+                pitch(40.0)
                 anchorOffset(ScreenCoordinate(0.0, yOffset))
                 animatorListener(transitionOptions.animatorListener)
             }.build()
@@ -39,17 +41,18 @@ class MapboxNavigationStateTransition(
     override fun updateMapFrameForFollowing(transitionOptions: NavigationStateTransitionToFollowingOptions): AnimatorSet {
         val points = listOf(transitionOptions.pointsAheadOfVehicleLocation,
             transitionOptions.additionalPointsToFrame).flatten()
-        val bearing = transitionOptions.vehicleLocation.bearing.toDouble()
+        val currentBearing = mapboxMap.getCameraOptions(null).bearing ?: 0.0
+        val bearing = currentBearing + shortestRotation(currentBearing, transitionOptions.vehicleLocation.bearing.toDouble())
         val zoomAndCenter = getZoomLevelAndCenterCoordinate(points, bearing, 0.0, transitionOptions.padding)
         val center = Point.fromLngLat(transitionOptions.vehicleLocation.longitude,
             transitionOptions.vehicleLocation.latitude)
         val zoom = min(zoomAndCenter.first, transitionOptions.maxZoom)
-        val yOffset = mapboxMap.getSize().height - transitionOptions.padding.bottom
+        val yOffset = (mapboxMap.getSize().height / 2.0) - transitionOptions.padding.bottom
         return navigationCameraTransition.transitionLinear(
             NavigationCameraLinearTransitionOptions.Builder(
                 center, zoom).apply {
                 bearing(bearing)
-                pitch(transitionOptions.pitch)
+                pitch(40.0)
                 anchorOffset(ScreenCoordinate(0.0, yOffset))
                 animatorListener(transitionOptions.animatorListener)
             }.build()
@@ -61,21 +64,30 @@ class MapboxNavigationStateTransition(
     ): AnimatorSet {
         val points = listOf(transitionOptions.remainingPointsOfRoute,
             transitionOptions.additionalPointsToFrame).flatten()
+        val currentBearing = mapboxMap.getCameraOptions(null).bearing ?: 0.0
+        val bearing = currentBearing + shortestRotation(currentBearing, 0.0)
         val zoomAndCenter = getZoomLevelAndCenterCoordinate(points,
             0.0, 0.0, transitionOptions.padding)
         val center = zoomAndCenter.second
         val zoom = min(zoomAndCenter.first, transitionOptions.maxZoom)
+        val yOffset = 0.0
         val currentMapCamera = mapboxMap.getCameraOptions(null)
         return if (currentMapCamera.zoom ?: 2.0 < zoomAndCenter.first)
             navigationCameraTransition.transitionFromLowZoomToHighZoom(
                 NavigationCameraZoomTransitionOptions.Builder(
                     center, zoom).apply {
+                    bearing(bearing)
+                    pitch(0.0)
+                    anchorOffset(ScreenCoordinate(0.0, yOffset))
                     animatorListener(transitionOptions.animatorListener)
                 }.build())
         else
             navigationCameraTransition.transitionFromHighZoomToLowZoom(
                 NavigationCameraZoomTransitionOptions.Builder(
                     center, zoom).apply {
+                    bearing(bearing)
+                    pitch(0.0)
+                    anchorOffset(ScreenCoordinate(0.0, yOffset))
                     animatorListener(transitionOptions.animatorListener)
                 }.build())
     }
@@ -85,23 +97,28 @@ class MapboxNavigationStateTransition(
     ): AnimatorSet {
         val points = listOf(transitionOptions.remainingPointsOfRoute,
             transitionOptions.additionalPointsToFrame).flatten()
+        val currentBearing = mapboxMap.getCameraOptions(null).bearing ?: 0.0
+        val bearing = currentBearing + shortestRotation(currentBearing, 0.0)
         val zoomAndCenter = getZoomLevelAndCenterCoordinate(points,
             0.0, 0.0, transitionOptions.padding)
         val center = zoomAndCenter.second
         val zoom = min(zoomAndCenter.first, transitionOptions.maxZoom)
-
+        val yOffset = 0.0
         return navigationCameraTransition.transitionLinear(
             NavigationCameraLinearTransitionOptions.Builder(
                 center, zoom).apply {
+                bearing(bearing)
+                pitch(0.0)
+                anchorOffset(ScreenCoordinate(0.0, yOffset))
                 animatorListener(transitionOptions.animatorListener)
             }.build())
     }
 
     private fun getZoomLevelAndCenterCoordinate(points: List<Point>, bearing: Double, pitch: Double, edgeInsets: EdgeInsets): Pair<Double, Point> {
-        val cam = mapboxMap.cameraForCoordinates(points, edgeInsets, bearing, pitch)
+        val cam = mapboxMap.cameraForCoordinates(points, getScaledEdgeInsets(edgeInsets), bearing, pitch)
 
         if (cam.zoom != null && cam.center != null) {
-            return Pair(cam.zoom!! - 0.2, cam.center!!)
+            return Pair(cam.zoom!!, cam.center!!)
         }
         return Pair(2.0, Point.fromLngLat(0.0, 0.0))
     }

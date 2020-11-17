@@ -4,18 +4,15 @@ import com.mapbox.maps.EdgeInsets
 
 const val MAPBOX_CAMERA_OPTION_FOLLOWING_PITCH = 40.0
 const val MAPBOX_CAMERA_OPTION_MAX_ZOOM = 17.0
-const val MAPBOX_CAMERA_OPTION_EDGE_INSET = 20.0
 
 /**
  * This value will be used for navigation camera transition use.
  *
  * @param followingPitch the pitch for camera when following the vehicle
  * @param maxZoom the max camera zoom during the transition
- * @param edgeInsets the edge insets for the camera viewport
  */
 class NavigationCameraOptions private constructor(val followingPitch: Double,
-                                                  val maxZoom: Double,
-                                                  val edgeInsets: EdgeInsets) {
+                                                  val maxZoom: Double) {
 
     /**
      * Get a builder to customize a subset of current options.
@@ -23,7 +20,6 @@ class NavigationCameraOptions private constructor(val followingPitch: Double,
     fun toBuilder(): Builder = Builder().apply {
         followingPitch(followingPitch)
         maxZoom(maxZoom)
-        edgeInsets(edgeInsets)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -34,7 +30,6 @@ class NavigationCameraOptions private constructor(val followingPitch: Double,
 
         if (followingPitch != other.followingPitch) return false
         if (maxZoom != other.maxZoom) return false
-        if (edgeInsets != other.edgeInsets) return false
 
         return true
     }
@@ -42,7 +37,6 @@ class NavigationCameraOptions private constructor(val followingPitch: Double,
     override fun hashCode(): Int {
         var result = followingPitch.hashCode()
         result = 31 * result + maxZoom.hashCode()
-        result = 31 * result + edgeInsets.hashCode()
         return result
     }
 
@@ -52,10 +46,6 @@ class NavigationCameraOptions private constructor(val followingPitch: Double,
     class Builder {
         private var followingPitch = MAPBOX_CAMERA_OPTION_FOLLOWING_PITCH
         private var maxZoom = MAPBOX_CAMERA_OPTION_MAX_ZOOM
-        private var edgeInsets = EdgeInsets(MAPBOX_CAMERA_OPTION_EDGE_INSET,
-            MAPBOX_CAMERA_OPTION_EDGE_INSET,
-            MAPBOX_CAMERA_OPTION_EDGE_INSET,
-            MAPBOX_CAMERA_OPTION_EDGE_INSET)
 
         /**
          * Override [followingPitch] for camera when following the vehicle
@@ -72,20 +62,12 @@ class NavigationCameraOptions private constructor(val followingPitch: Double,
         }
 
         /**
-         * Override [edgeInsets] for the camera viewport
-         */
-        fun edgeInsets(edgeInsets: EdgeInsets): Builder = apply {
-            this.edgeInsets = edgeInsets
-        }
-
-        /**
          * Build a new instance of [NavigationCameraOptions]
          * @return NavigationCameraOptions
          */
         fun build(): NavigationCameraOptions = NavigationCameraOptions(
             followingPitch,
-            maxZoom,
-            edgeInsets
+            maxZoom
         )
     }
 }
