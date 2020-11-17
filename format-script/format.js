@@ -31,7 +31,6 @@ const glob = `${basePath}/**/*.html`;
  * Prepare custom HTML content to be added.
  * */
 const topBarContent = (depth, relativeFilePath) => {
-  if (relativeFilePath === 'index.html') console.log('🌈' + depth)
   const topPath = `<body>\n<div class="top-bar">\n<div class="limiter">\n<span class="shell-mb-logo"></span>\n<span class="product-name">Navigation SDK for Android Reference (${VERSION})</span>\n</div>\n</div>\n<div class="limiter">\n<a href="${
     depth === 1 ? `./` : '../'
   }${depth > 2 ? '../' : ''}${depth > 3 ? '../' : ''}${
@@ -40,7 +39,7 @@ const topBarContent = (depth, relativeFilePath) => {
   return topPath;
 };
 const allModulesPageContent = (folders) => {
-  return `<html>\n<head>\n<meta charset="UTF-8">\n<title>API reference | Mapbox Navigation SDK for Android</title>\n<link rel="stylesheet" href="style.css">\n</head>\n${topBarContent(
+  return `<html>\n<head>\n<meta charset="UTF-8">\n<title>API reference | Mapbox Navigation SDK for Android</title>\n<link rel="stylesheet" href="../style.css">\n</head>\n${topBarContent(
     1
   )}\n<h1>Mapbox Navigation SDK for Android</h1>\n<h2>Modules</h2>\n<table>\n<tbody>\n${folders.join(
     '\n'
@@ -64,7 +63,7 @@ globby(glob).then((htmlFiles) => {
         });
       }
     });
-  });
+  })
 });
 
 /**
@@ -89,6 +88,8 @@ fs.readdir(basePath, (err, subFolders) => {
   fixPackageList();
 });
 
+copyCss();
+
 function fixPackageList() {
   const topLevelIndexPath = `${basePath}/index.html`;
   fs.readFile(topLevelIndexPath, 'utf8', (err, data) => {
@@ -100,5 +101,20 @@ function fixPackageList() {
         console.log(`Updated link to package list.`);
       });
     }
+  });
+}
+
+/** 
+ * Copy stylesheet into dokka directory
+ * */
+function copyCss() {
+  const destPath = `./${FLAVOR}/${VERSION}/style.css`;
+  const sourceCss = fs.readFile(path.resolve(__dirname, 'style.css'), (err, data) => {
+    if (err) throw err;
+    return data;
+  });
+  fs.writeFile(destPath, sourceCss, 'utf8', function(err) {
+    if (err) throw err;
+    console.log('Copied stylesheet to destination');
   });
 }

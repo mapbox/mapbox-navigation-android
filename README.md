@@ -14,5 +14,6 @@ In addition to deploying documentation from this repo, you may also need to upda
 For docs generated with Dokka versions < 1.4, there is a small script you can use to add the Mapbox logo, some light styling, and relevant headings. To use it:
 
 0. Make sure you have Node and npm installed on your computer.
-1. `cd ./format-script && npm ci`
-2. `node ./scripts/format {version} {flavor}` where `version` is an existing version of docs in this repo (ex: `1.0.2`) and `flavor` is one of "ui" or "core".
+1. `cd ./format-script && npm ci` to install the format script's dependencies.
+2. `cd ..` to go back to the parent directory.
+3. `node ./scripts/format {version} {flavor}` where `version` is an existing version of docs in this repo (ex: `1.0.2`) and `flavor` is one of "ui" or "core".
