@@ -11,7 +11,8 @@ import com.mapbox.maps.MapChange;
 import com.mapbox.maps.MapView;
 import com.mapbox.maps.MapboxMap;
 import com.mapbox.maps.Style;
-import com.mapbox.maps.plugin.gesture.GesturePluginImpl;
+import com.mapbox.maps.plugin.delegates.listeners.OnMapChangedListener;
+import com.mapbox.maps.plugin.gestures.GesturesPluginImpl;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
@@ -53,7 +54,7 @@ public class NavigationMapRoute implements LifecycleObserver {
   private MapRouteLine routeLine;
   private MapRouteArrow routeArrow;
   private boolean vanishRouteLineEnabled;
-  private MapboxMap.OnMapChangedListener mapChangedListener;
+  private OnMapChangedListener mapChangedListener;
   @Nullable
   private MapboxNavigation navigation;
 
@@ -222,7 +223,7 @@ public class NavigationMapRoute implements LifecycleObserver {
 
   private void addListeners() {
     if (!isMapClickListenerAdded) {
-      getGesturePlugin().addOnMapClickListener(mapRouteClickListener);
+      getGesturesPlugin().addOnMapClickListener(mapRouteClickListener);
       isMapClickListenerAdded = true;
     }
     if (navigation != null) {
@@ -236,7 +237,7 @@ public class NavigationMapRoute implements LifecycleObserver {
 
   private void removeListeners() {
     if (isMapClickListenerAdded) {
-      getGesturePlugin().removeOnMapClickListener(mapRouteClickListener);
+      getGesturesPlugin().removeOnMapClickListener(mapRouteClickListener);
 
       isMapClickListenerAdded = false;
     }
@@ -407,15 +408,15 @@ public class NavigationMapRoute implements LifecycleObserver {
         routeLineInitializedCallback
     );
 
-    getGesturePlugin().removeOnMapClickListener(mapRouteClickListener);
+    getGesturesPlugin().removeOnMapClickListener(mapRouteClickListener);
     OnRouteSelectionChangeListener externalClickListener = mapRouteClickListener.getOnRouteSelectionChangeListener();
     mapRouteClickListener = new MapRouteClickListener(routeLine);
     mapRouteClickListener.setOnRouteSelectionChangeListener(externalClickListener);
-    getGesturePlugin().addOnMapClickListener(mapRouteClickListener);
+    getGesturesPlugin().addOnMapClickListener(mapRouteClickListener);
   }
 
-  private GesturePluginImpl getGesturePlugin() {
-    return mapView.getPlugin(GesturePluginImpl.class);
+  private GesturesPluginImpl getGesturesPlugin() {
+    return mapView.getPlugin(GesturesPluginImpl.class);
   }
 
   /**

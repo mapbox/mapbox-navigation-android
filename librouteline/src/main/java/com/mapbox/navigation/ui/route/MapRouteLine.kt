@@ -14,12 +14,11 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.location.LocationComponentConstants
-import com.mapbox.maps.plugin.style.expressions.generated.Expression
-import com.mapbox.maps.plugin.style.layers.generated.LineLayer
-import com.mapbox.maps.plugin.style.layers.getLayer
-import com.mapbox.maps.plugin.style.layers.properties.generated.Visibility
-import com.mapbox.maps.plugin.style.sources.generated.GeojsonSource
-import com.mapbox.maps.plugin.style.sources.generated.geojsonSource
+import com.mapbox.maps.extension.style.expressions.generated.Expression
+import com.mapbox.maps.extension.style.layers.generated.LineLayer
+import com.mapbox.maps.extension.style.layers.getLayer
+import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
+import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.navigation.ui.R
 import com.mapbox.navigation.ui.internal.route.RouteConstants
 import com.mapbox.navigation.ui.internal.route.RouteConstants.*
@@ -105,9 +104,9 @@ internal class MapRouteLine(
         FeatureCollection.fromFeatures(arrayOf())
     private val routeLineExpressionData = mutableListOf<RouteLineExpressionData>()
 
-    private var wayPointSource: GeojsonSource
-    private val primaryRouteLineSource: GeojsonSource
-    private val alternativeRouteLineSource: GeojsonSource
+    private var wayPointSource: GeoJsonSource
+    private val primaryRouteLineSource: GeoJsonSource
+    private val alternativeRouteLineSource: GeoJsonSource
     private val routeLayerIds = mutableSetOf<String>()
     private val directionsRoutes = mutableListOf<DirectionsRoute>()
     private val routeFeatureData = mutableListOf<RouteFeatureData>()
@@ -320,24 +319,27 @@ internal class MapRouteLine(
                 buildWayPointFeatureCollection(routeFeatureData.first().route)
         }
 
-        wayPointSource = geojsonSource(WAYPOINT_SOURCE_ID) {
-            featureCollection(drawnWaypointsFeatureCollection)
-            maxzoom(16)
-        }
+        wayPointSource = GeoJsonSource(
+            GeoJsonSource.Builder(WAYPOINT_SOURCE_ID)
+                .featureCollection(drawnWaypointsFeatureCollection)
+                .maxzoom(16)
+        )
         wayPointSource.bindTo(style)
 
-        primaryRouteLineSource = geojsonSource(PRIMARY_ROUTE_SOURCE_ID) {
-            featureCollection(drawnPrimaryRouteFeatureCollection)
-            maxzoom(16)
-            lineMetrics(true)
-        }
+        primaryRouteLineSource = GeoJsonSource(
+            GeoJsonSource.Builder(PRIMARY_ROUTE_SOURCE_ID)
+                .featureCollection(drawnPrimaryRouteFeatureCollection)
+                .maxzoom(16)
+                .lineMetrics(true)
+        )
         primaryRouteLineSource.bindTo(style)
 
-        alternativeRouteLineSource = geojsonSource(ALTERNATIVE_ROUTE_SOURCE_ID) {
-            featureCollection(drawnAlternativeRouteFeatureCollection)
-            maxzoom(16)
-            lineMetrics(true)
-        }
+        alternativeRouteLineSource = GeoJsonSource(
+            GeoJsonSource.Builder(ALTERNATIVE_ROUTE_SOURCE_ID)
+                .featureCollection(drawnAlternativeRouteFeatureCollection)
+                .maxzoom(16)
+                .lineMetrics(true)
+        )
         alternativeRouteLineSource.bindTo(style)
 
         val originWaypointIcon = getResourceStyledValue(

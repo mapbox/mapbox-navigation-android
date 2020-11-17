@@ -2,8 +2,8 @@ package com.mapbox.navigation.ui.internal.route
 
 import android.graphics.drawable.Drawable
 import com.mapbox.maps.Style
-import com.mapbox.maps.plugin.style.layers.generated.LineLayer
-import com.mapbox.maps.plugin.style.layers.generated.SymbolLayer
+import com.mapbox.maps.extension.style.layers.generated.LineLayer
+import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
 
 
 interface RouteLayerProvider {

@@ -19,14 +19,14 @@ import com.mapbox.maps.LayerPosition;
 import com.mapbox.maps.MapView;
 import com.mapbox.maps.MapboxMap;
 import com.mapbox.maps.Style;
-import com.mapbox.maps.plugin.style.expressions.generated.Expression;
-import com.mapbox.maps.plugin.style.layers.generated.LineLayer;
-import com.mapbox.maps.plugin.style.layers.generated.SymbolLayer;
-import com.mapbox.maps.plugin.style.layers.properties.generated.IconRotationAlignment;
-import com.mapbox.maps.plugin.style.layers.properties.generated.LineCap;
-import com.mapbox.maps.plugin.style.layers.properties.generated.LineJoin;
-import com.mapbox.maps.plugin.style.layers.properties.generated.Visibility;
-import com.mapbox.maps.plugin.style.sources.generated.GeojsonSource;
+import com.mapbox.maps.extension.style.expressions.generated.Expression;
+import com.mapbox.maps.extension.style.layers.generated.LineLayer;
+import com.mapbox.maps.extension.style.layers.generated.SymbolLayer;
+import com.mapbox.maps.extension.style.layers.properties.generated.IconRotationAlignment;
+import com.mapbox.maps.extension.style.layers.properties.generated.LineCap;
+import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin;
+import com.mapbox.maps.extension.style.layers.properties.generated.Visibility;
+import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.ui.R;
 import com.mapbox.navigation.ui.internal.utils.MapImageUtils;
@@ -48,8 +48,8 @@ class MapRouteArrow {
 
   private List<Point> maneuverPoints;
   private List<String> arrowLayerIds;
-  private GeojsonSource arrowShaftGeoJsonSource;
-  private GeojsonSource arrowHeadGeoJsonSource;
+  private GeoJsonSource arrowShaftGeoJsonSource;
+  private GeoJsonSource arrowHeadGeoJsonSource;
 
   @NonNull
   private final MapView mapView;
@@ -169,7 +169,7 @@ class MapRouteArrow {
   }
 
   private void initializeArrowShaft() {
-    arrowShaftGeoJsonSource = new GeojsonSource.Builder(ARROW_SHAFT_SOURCE_ID)
+    arrowShaftGeoJsonSource = new GeoJsonSource.Builder(ARROW_SHAFT_SOURCE_ID)
         .featureCollection(FeatureCollection.fromFeatures(new Feature[]{}))
         .maxzoom(16)
         .build();
@@ -180,7 +180,7 @@ class MapRouteArrow {
   }
 
   private void initializeArrowHead() {
-    arrowHeadGeoJsonSource = new GeojsonSource.Builder(ARROW_HEAD_SOURCE_ID)
+    arrowHeadGeoJsonSource = new GeoJsonSource.Builder(ARROW_HEAD_SOURCE_ID)
         .featureCollection(FeatureCollection.fromFeatures(new Feature[]{}))
         .maxzoom(16)
         .build();

@@ -51,7 +51,12 @@ class MapboxNavigationCameraTransition(mapView: MapView) : NavigationCameraTrans
         val zoomAnimationRate = 2.0
         val zoomDelay = centerDuration * 0.3
         val zoomDuration = min((zoomDelta / zoomAnimationRate) * 1000.0, 3000.0)
-        val zoomAnimator = CameraZoomAnimator.create(transitionOptions.zoom) {
+
+        val zoomAnimator = CameraZoomAnimator.create(
+            // workaround for https://github.com/mapbox/mapbox-maps-android/issues/785
+            AbstractCameraAnimator.StartValue(currentMapCameraOptions.zoom ?: transitionOptions.zoom),
+            transitionOptions.zoom
+        ) {
             startDelay = zoomDelay.toLong()
             duration = zoomDuration.toLong()
             interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
@@ -83,7 +88,7 @@ class MapboxNavigationCameraTransition(mapView: MapView) : NavigationCameraTrans
         }
         val endPadding = getEdgeInsetsFromScreenCenterOffset(
             mapboxMap.getSize(), transitionOptions.anchorOffset)
-        val anchorAnimator = CameraPaddingAnimator.create(CameraAnimator.StartValue(currentPadding), endPadding) {
+        val anchorAnimator = CameraPaddingAnimator.create(AbstractCameraAnimator.StartValue(currentPadding), endPadding) {
             startDelay = pitchAndAnchorDelay.toLong()
             duration = pitchAndAnchorDuration.toLong()
             interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
@@ -118,7 +123,11 @@ class MapboxNavigationCameraTransition(mapView: MapView) : NavigationCameraTrans
             duration = 1000
             interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
         }
-        val zoomAnimator = CameraZoomAnimator.create(transitionOptions.zoom) {
+        val zoomAnimator = CameraZoomAnimator.create(
+            // workaround for https://github.com/mapbox/mapbox-maps-android/issues/785
+            AbstractCameraAnimator.StartValue(currentMapCameraOptions.zoom ?: transitionOptions.zoom),
+            transitionOptions.zoom
+        ) {
             startDelay = 0
             duration = 1800
             interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
@@ -136,7 +145,7 @@ class MapboxNavigationCameraTransition(mapView: MapView) : NavigationCameraTrans
 
         val startPadding = currentPadding
         val endPadding = getEdgeInsetsFromScreenCenterOffset(mapboxMap.getSize(), transitionOptions.anchorOffset)
-        val anchorAnimator = CameraPaddingAnimator.create(CameraAnimator.StartValue(startPadding), endPadding) {
+        val anchorAnimator = CameraPaddingAnimator.create(AbstractCameraAnimator.StartValue(startPadding), endPadding) {
             startDelay = 0
             duration = 1200
             interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
@@ -160,7 +169,11 @@ class MapboxNavigationCameraTransition(mapView: MapView) : NavigationCameraTrans
             duration = 1000
             interpolator = PathInterpolatorCompat.create(0f, 0f, 1f, 1f)
         }
-        val zoomAnimator = CameraZoomAnimator.create(transitionOptions.zoom) {
+        val zoomAnimator = CameraZoomAnimator.create(
+            // workaround for https://github.com/mapbox/mapbox-maps-android/issues/785
+            AbstractCameraAnimator.StartValue(currentMapCamera.zoom ?: transitionOptions.zoom),
+            transitionOptions.zoom
+        ) {
             duration = 1000
             interpolator = PathInterpolatorCompat.create(0f, 0f, 1f, 1f)
         }
@@ -183,7 +196,7 @@ class MapboxNavigationCameraTransition(mapView: MapView) : NavigationCameraTrans
             currentPadding = it
         }
         val endPadding = getEdgeInsetsFromScreenCenterOffset(mapboxMap.getSize(), transitionOptions.anchorOffset)
-        val anchorAnimator = CameraPaddingAnimator.create(CameraAnimator.StartValue(currentPadding), endPadding) {
+        val anchorAnimator = CameraPaddingAnimator.create(AbstractCameraAnimator.StartValue(currentPadding), endPadding) {
             duration = 1000
             interpolator = PathInterpolatorCompat.create(0f, 0f, 1f, 1f)
         }

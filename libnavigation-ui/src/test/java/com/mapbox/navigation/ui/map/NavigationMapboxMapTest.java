@@ -423,10 +423,10 @@ public class NavigationMapboxMapTest {
     VectorSource vectorSource2 = mock(VectorSource.class);
     when(vectorSource2.getId()).thenReturn("composite");
     when(vectorSource2.getUrl()).thenReturn(url);
-    GeoJsonSource geoJsonSource = mock(GeoJsonSource.class);
+    GeoJsonSource GeoJsonSource = mock(GeoJsonSource.class);
     sources.add(vectorSource1);
     sources.add(vectorSource2);
-    sources.add(geoJsonSource);
+    sources.add(GeoJsonSource);
     return sources;
   }
 }

@@ -22,15 +22,15 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.*
-import com.mapbox.maps.MapboxMap.OnMapLoadErrorListener
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
-import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImpl
-import com.mapbox.maps.plugin.animation.animator.*
+import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
+import com.mapbox.maps.plugin.animation.CameraAnimatorChangeListener
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
-import com.mapbox.maps.plugin.gesture.GesturePluginImpl
-import com.mapbox.maps.plugin.gesture.OnMapLongClickListener
-import com.mapbox.maps.plugin.gesture.OnMoveListener
-import com.mapbox.maps.plugin.gesture.getGesturePlugin
+import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
+import com.mapbox.maps.plugin.gestures.GesturesPluginImpl
+import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
+import com.mapbox.maps.plugin.gestures.OnMoveListener
+import com.mapbox.maps.plugin.gestures.getGesturesPlugin
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions
 import com.mapbox.maps.plugin.location.LocationComponentConstants
 import com.mapbox.maps.plugin.location.LocationComponentPlugin
@@ -116,7 +116,7 @@ class CameraAnimationsActivity :
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_camera_animations)
         mapboxMap = mapView.getMapboxMap()
-        mapView.getGesturePlugin().addOnMoveListener(this)
+        mapView.getGesturesPlugin().addOnMoveListener(this)
         locationComponent = getLocationComponent()
         navigationStateTransitionProvider = MapboxNavigationStateTransition(
             mapView,
@@ -202,27 +202,27 @@ class CameraAnimationsActivity :
 
     private fun initCameraListeners() {
         getMapCamera().apply {
-            addCameraCenterChangeListener(object : CameraCenterAnimator.ChangeListener {
+            addCameraCenterChangeListener(object : CameraAnimatorChangeListener<Point> {
                 override fun onChanged(updatedValue: Point) {
                     updateCameraChangeView()
                 }
             })
-            addCameraZoomChangeListener(object : CameraZoomAnimator.ChangeListener {
+            addCameraZoomChangeListener(object : CameraAnimatorChangeListener<Double> {
                 override fun onChanged(updatedValue: Double) {
                     updateCameraChangeView()
                 }
             })
-            addCameraBearingChangeListener(object : CameraBearingAnimator.ChangeListener {
+            addCameraBearingChangeListener(object : CameraAnimatorChangeListener<Double> {
                 override fun onChanged(updatedValue: Double) {
                     updateCameraChangeView()
                 }
             })
-            addCameraPitchChangeListener(object : CameraPitchAnimator.ChangeListener {
+            addCameraPitchChangeListener(object : CameraAnimatorChangeListener<Double> {
                 override fun onChanged(updatedValue: Double) {
                     updateCameraChangeView()
                 }
             })
-            addCameraPaddingChangeListener(object : CameraPaddingAnimator.ChangeListener {
+            addCameraPaddingChangeListener(object : CameraAnimatorChangeListener<EdgeInsets> {
                 override fun onChanged(updatedValue: EdgeInsets) {
                     updateCameraChangeView()
                 }
@@ -263,7 +263,7 @@ class CameraAnimationsActivity :
             override fun onStyleLoaded(style: Style) {
                 initializeLocationComponent(style)
                 mapboxNavigation.navigationOptions.locationEngine.getLastLocation(locationEngineCallback)
-                getGesturePlugin()?.addOnMapLongClickListener(this@CameraAnimationsActivity)
+                getGesturesPlugin()?.addOnMapLongClickListener(this@CameraAnimationsActivity)
                 navigationMapRoute = NavigationMapRoute.Builder(mapView, mapboxMap, this@CameraAnimationsActivity)
                     .withBelowLayer(LocationComponentConstants.FOREGROUND_LAYER)
                     .withMapboxNavigation(mapboxNavigation)
@@ -421,7 +421,7 @@ class CameraAnimationsActivity :
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView.getGesturePlugin().removeOnMoveListener(this)
+        mapView.getGesturesPlugin().removeOnMoveListener(this)
         mapView.onDestroy()
         mapboxNavigation.onDestroy()
     }
@@ -445,12 +445,12 @@ class CameraAnimationsActivity :
         return mapView.getPlugin(LocationComponentPlugin::class.java)
     }
 
-    private fun getMapCamera(): CameraAnimationsPluginImpl {
+    private fun getMapCamera(): CameraAnimationsPlugin {
         return mapView.getCameraAnimationsPlugin()
     }
 
-    private fun getGesturePlugin(): GesturePluginImpl? {
-        return mapView.getPlugin(GesturePluginImpl::class.java)
+    private fun getGesturesPlugin(): GesturesPluginImpl? {
+        return mapView.getPlugin(GesturesPluginImpl::class.java)
     }
 
     override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {

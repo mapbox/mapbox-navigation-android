@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.mapbox.maps.LayerPosition;
 import com.mapbox.maps.Style;
-import com.mapbox.maps.plugin.style.layers.Layer;
+import com.mapbox.maps.extension.style.layers.Layer;
 
 /**
  * Utils class useful for performing map operations such as adding sources, layers, and more.

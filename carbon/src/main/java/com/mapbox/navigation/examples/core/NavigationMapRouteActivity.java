@@ -30,10 +30,10 @@ import com.mapbox.maps.EdgeInsets;
 import com.mapbox.maps.MapView;
 import com.mapbox.maps.MapboxMap;
 import com.mapbox.maps.Style;
-import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImpl;
+import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImplKt;
-import com.mapbox.maps.plugin.gesture.GesturePluginImpl;
-import com.mapbox.maps.plugin.gesture.OnMapLongClickListener;
+import com.mapbox.maps.plugin.gestures.GesturesPluginImpl;
+import com.mapbox.maps.plugin.gestures.OnMapLongClickListener;
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions;
 import com.mapbox.maps.plugin.location.LocationComponentPlugin;
 import com.mapbox.maps.plugin.location.modes.RenderMode;
@@ -69,7 +69,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements Per
   private MapView mapView;
   private MapboxMap mapboxMap;
   private LocationComponentPlugin locationComponent;
-  private CameraAnimationsPluginImpl mapCamera;
+  private CameraAnimationsPlugin mapCamera;
   private NavigationMapRoute navigationMapRoute;
   private MapboxReplayer mapboxReplayer = new MapboxReplayer();
   private MapboxNavigation mapboxNavigation;
@@ -132,7 +132,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements Per
         .withMapboxNavigation(mapboxNavigation)
         .build();
 
-      getGesturePlugin().addOnMapLongClickListener(this);
+      getGesturesPlugin().addOnMapLongClickListener(this);
 
     }, (mapLoadError, s) -> Timber.e("Error loading map: %s", mapLoadError.name()));
   }
@@ -286,6 +286,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements Per
         .padding(new EdgeInsets(1000, 0, 0, 0))
         .build(),
       1500L,
+      null,
       null
     );
   }
@@ -294,12 +295,12 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements Per
     return mapView.getPlugin(LocationComponentPlugin.class);
   }
 
-  private CameraAnimationsPluginImpl getMapCamera() {
+  private CameraAnimationsPlugin getMapCamera() {
     return CameraAnimationsPluginImplKt.getCameraAnimationsPlugin(mapView);
   }
 
-  private GesturePluginImpl getGesturePlugin() {
-    return mapView.getPlugin(GesturePluginImpl.class);
+  private GesturesPluginImpl getGesturesPlugin() {
+    return mapView.getPlugin(GesturesPluginImpl.class);
   }
 
   private ReplayProgressObserver replayProgressObserver = new ReplayProgressObserver(mapboxReplayer);
