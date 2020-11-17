@@ -17,7 +17,8 @@ import com.mapbox.navigation.ui.maps.route.routeline.model.RouteLineState
 
 class MapboxRouteLineAPI(
     private val routeLineActions: RouteLineActions,
-    private var routeLineStateConsumer: MapboxView<RouteLineState>): RouteLineAPI {
+    private var routeLineStateConsumer: MapboxView<RouteLineState>
+) : RouteLineAPI {
 
     override fun getAlternativeRoutesVisibility(style: Style): Visibility? {
         return getLayerVisibility(style, ALTERNATIVE_ROUTE_LAYER_ID)
@@ -32,7 +33,8 @@ class MapboxRouteLineAPI(
     }
 
     override fun updateViewStyle(style: Style) {
-        routeLineActions.getUpdateViewStyleState(style).apply { routeLineStateConsumer.render(this) }
+        routeLineActions.getUpdateViewStyleState(style)
+            .apply { routeLineStateConsumer.render(this) }
     }
 
     // todo account for the use case where is a reroute during navigation and the vanishing route line
@@ -46,7 +48,11 @@ class MapboxRouteLineAPI(
     // point is set to 0 and renders before the drawing of the new route(s) because drawing the routes
     // on the maps side is asynchronous
     override fun setIdentifiableRoutes(routes: List<IdentifiableRoute>) {
-        routeLineActions.getDrawIdentifiableRoutesState(routes).apply { routeLineStateConsumer.render(this) }
+        routeLineActions.getDrawIdentifiableRoutesState(routes).apply {
+            routeLineStateConsumer.render(
+                this
+            )
+        }
     }
 
     override fun clearRoutes() {
@@ -81,7 +87,9 @@ class MapboxRouteLineAPI(
         executeHideShow(routeLineActions::getShowOriginAndDestinationPointsState)
     }
 
-    private fun executeHideShow(block: () -> RouteLineState.UpdateLayerVisibilityState): Visibility? {
+    private fun executeHideShow(
+        block: () -> RouteLineState.UpdateLayerVisibilityState
+    ): Visibility? {
         block().apply {
             routeLineStateConsumer.render(this)
             this.getLayerVisibilityChanges().firstOrNull()?.apply {
@@ -92,19 +100,35 @@ class MapboxRouteLineAPI(
     }
 
     override fun updateUpcomingRoutePointIndex(routeProgress: RouteProgress) {
-        routeLineActions.updateUpcomingRoutePointIndex(routeProgress).apply { routeLineStateConsumer.render(this) }
+        routeLineActions.updateUpcomingRoutePointIndex(routeProgress).apply {
+            routeLineStateConsumer.render(
+                this
+            )
+        }
     }
 
     override fun updateVanishingPointState(routeProgressState: RouteProgressState) {
-        routeLineActions.updateVanishingPointState(routeProgressState).apply { routeLineStateConsumer.render(this) }
+        routeLineActions.updateVanishingPointState(routeProgressState).apply {
+            routeLineStateConsumer.render(
+                this
+            )
+        }
     }
 
     override fun updateTraveledRouteLine(point: Point) {
-        routeLineActions.getTraveledRouteLineUpdate(point).apply { routeLineStateConsumer.render(this) }
+        routeLineActions.getTraveledRouteLineUpdate(point).apply {
+            routeLineStateConsumer.render(
+                this
+            )
+        }
     }
 
     override fun updatePrimaryRouteIndex(route: DirectionsRoute) {
-        routeLineActions.getUpdatePrimaryRouteIndexState(route).apply { routeLineStateConsumer.render(this) }
+        routeLineActions.getUpdatePrimaryRouteIndexState(route).apply {
+            routeLineStateConsumer.render(
+                this
+            )
+        }
     }
 
     override fun getPrimaryRoute(): DirectionsRoute? = routeLineActions.getPrimaryRoute()

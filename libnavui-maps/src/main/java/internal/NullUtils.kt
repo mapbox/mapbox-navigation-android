@@ -13,7 +13,7 @@ inline fun <R1, T> ifNonNull(r1: R1?, func: (R1) -> T): T? =
     }
 
 /**
-    This is internal and will move to a different package.
+This is internal and will move to a different package.
  */
 inline fun <R1, R2, T> ifNonNull(r1: R1?, r2: R2?, func: (R1, R2) -> T): T? =
     if (r1 != null && r2 != null) {
@@ -23,7 +23,7 @@ inline fun <R1, R2, T> ifNonNull(r1: R1?, r2: R2?, func: (R1, R2) -> T): T? =
     }
 
 /**
-    This is internal and will move to a different package.
+This is internal and will move to a different package.
  */
 inline fun <R1, R2, R3, T> ifNonNull(r1: R1?, r2: R2?, r3: R3?, func: (R1, R2, R3) -> T): T? =
     if (r1 != null && r2 != null && r3 != null) {
@@ -33,7 +33,7 @@ inline fun <R1, R2, R3, T> ifNonNull(r1: R1?, r2: R2?, r3: R3?, func: (R1, R2, R
     }
 
 /**
-    This is internal and will move to a different package.
+This is internal and will move to a different package.
  */
 inline fun <R1, R2, R3, R4, T> ifNonNull(
     r1: R1?,
@@ -49,7 +49,7 @@ inline fun <R1, R2, R3, R4, T> ifNonNull(
     }
 
 /**
-    This is internal and will move to a different package.
+This is internal and will move to a different package.
  */
 inline fun <R1, R2, R3, R4, R5, T> ifNonNull(
     r1: R1?,
@@ -66,7 +66,7 @@ inline fun <R1, R2, R3, R4, R5, T> ifNonNull(
     }
 
 /**
-    This is internal and will move to a different package.
+This is internal and will move to a different package.
  */
 inline fun <R1, R2, R3, R4, R5, R6, T> ifNonNull(
     r1: R1?,
@@ -84,7 +84,7 @@ inline fun <R1, R2, R3, R4, R5, R6, T> ifNonNull(
     }
 
 /**
-    This is internal and will move to a different package.
+This is internal and will move to a different package.
  */
 inline fun <R1, R2, R3, R4, R5, R6, R7, T> ifNonNull(
     r1: R1?,

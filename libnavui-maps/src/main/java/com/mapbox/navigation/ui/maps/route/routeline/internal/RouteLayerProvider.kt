@@ -5,7 +5,6 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
 
-
 interface RouteLayerProvider {
     fun initializePrimaryRouteCasingLayer(style: Style, color: Int): LineLayer
     fun initializeAlternativeRouteCasingLayer(style: Style, color: Int): LineLayer

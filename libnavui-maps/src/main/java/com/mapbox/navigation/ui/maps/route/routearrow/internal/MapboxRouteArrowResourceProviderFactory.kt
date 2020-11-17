@@ -37,7 +37,12 @@ object MapboxRouteArrowResourceProviderFactory {
      * @return the resource value
      */
     @ColorInt
-    private fun getStyledColor(index: Int, colorResourceId: Int, context: Context, styleRes: Int): Int {
+    private fun getStyledColor(
+        index: Int,
+        colorResourceId: Int,
+        context: Context,
+        styleRes: Int
+    ): Int {
         val typedArray =
             context.obtainStyledAttributes(styleRes, R.styleable.MapboxStyleNavigationMapRoute)
         return typedArray.getColor(

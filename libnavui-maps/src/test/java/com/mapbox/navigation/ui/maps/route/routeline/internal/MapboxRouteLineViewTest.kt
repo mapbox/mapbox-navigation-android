@@ -7,7 +7,6 @@ import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
-
 import com.mapbox.navigation.ui.internal.route.RouteConstants
 import com.mapbox.navigation.ui.maps.route.routeline.model.RouteLineState
 import io.mockk.every
@@ -113,7 +112,8 @@ class MapboxRouteLineViewTest {
             every { getLayer(RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID) } returns casingLayer
         }
 
-        val updateStyleState: RouteLineState.UpdateViewStyleState = RouteLineState.UpdateViewStyleState(style)
+        val updateStyleState: RouteLineState.UpdateViewStyleState =
+            RouteLineState.UpdateViewStyleState(style)
 
         MapboxRouteLineView().also {
             it.render(updateStyleState)

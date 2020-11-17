@@ -19,7 +19,6 @@ import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.expressions.generated.Expression
-import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
@@ -28,8 +27,15 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants
 import com.mapbox.navigation.ui.internal.route.RouteConstants.LOW_CONGESTION_VALUE
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.route.routeline.api.RouteLineResourceProvider
-import com.mapbox.navigation.ui.maps.route.routeline.model.*
+import com.mapbox.navigation.ui.maps.route.routeline.model.IdentifiableRoute
 import com.mapbox.navigation.ui.maps.route.routeline.model.RouteFeatureData
+import com.mapbox.navigation.ui.maps.route.routeline.model.RouteLineDistancesIndex
+import com.mapbox.navigation.ui.maps.route.routeline.model.RouteLineExpressionData
+import com.mapbox.navigation.ui.maps.route.routeline.model.RouteLineGranularDistances
+import com.mapbox.navigation.ui.maps.route.routeline.model.RouteLineScaleValue
+import com.mapbox.navigation.ui.maps.route.routeline.model.RouteLineTrafficExpressionData
+import com.mapbox.navigation.ui.maps.route.routeline.model.RoutePoints
+import com.mapbox.navigation.ui.maps.route.routeline.model.RouteStyleDescriptor
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMisc
@@ -65,7 +71,7 @@ object MapboxRouteLineUtils {
                 literal(0.0)
             }
         }
-        val filteredItems= routeLineExpressionData.filter { it.offset > distanceOffset }
+        val filteredItems = routeLineExpressionData.filter { it.offset > distanceOffset }
         when (filteredItems.isEmpty()) {
             true -> when (routeLineExpressionData.isEmpty()) {
                 true -> listOf(RouteLineExpressionData(distanceOffset, fallbackRouteColor))
@@ -90,7 +96,11 @@ object MapboxRouteLineUtils {
         return expressionBuilder.build()
     }
 
-    fun getVanishingRouteLineExpression(offset: Double, traveledColor: Int, lineBaseColor: Int): Expression {
+    fun getVanishingRouteLineExpression(
+        offset: Double,
+        traveledColor: Int,
+        lineBaseColor: Int
+    ): Expression {
         val expressionBuilder = Expression.ExpressionBuilder("step")
         expressionBuilder.lineProgress()
         expressionBuilder.color(traveledColor)
@@ -101,14 +111,16 @@ object MapboxRouteLineUtils {
         return expressionBuilder.build()
     }
 
-    fun getRouteFeatureDataProvider(directionsRoutes: List<DirectionsRoute>):
-        () -> List<RouteFeatureData> = {
+    fun getRouteFeatureDataProvider(
+        directionsRoutes: List<DirectionsRoute>
+    ): () -> List<RouteFeatureData> = {
         directionsRoutes.map(::generateFeatureCollection)
     }
 
-    fun getIdentifiableRouteFeatureDataProvider(directionsRoutes: List<IdentifiableRoute>):
-        () -> List<RouteFeatureData> = {
-        directionsRoutes.map(::generateFeatureCollection, )
+    fun getIdentifiableRouteFeatureDataProvider(
+        directionsRoutes: List<IdentifiableRoute>
+    ): () -> List<RouteFeatureData> = {
+        directionsRoutes.map(::generateFeatureCollection)
     }
 
     /**
@@ -159,12 +171,12 @@ object MapboxRouteLineUtils {
 
     fun calculateRouteGranularDistances(coordinates: List<Point>):
         RouteLineGranularDistances? {
-        return if (coordinates.isNotEmpty()) {
-            calculateGranularDistances(coordinates)
-        } else {
-            null
+            return if (coordinates.isNotEmpty()) {
+                calculateGranularDistances(coordinates)
+            } else {
+                null
+            }
         }
-    }
 
     fun calculateGranularDistances(points: List<Point>): RouteLineGranularDistances {
         var distance = 0.0
@@ -184,24 +196,24 @@ object MapboxRouteLineUtils {
 
     private fun generateFeatureCollection(route: DirectionsRoute, identifier: String?):
         RouteFeatureData {
-        val routeGeometry = LineString.fromPolyline(
-            route.geometry() ?: "",
-            Constants.PRECISION_6
-        )
+            val routeGeometry = LineString.fromPolyline(
+                route.geometry() ?: "",
+                Constants.PRECISION_6
+            )
 
-        val routeFeature = when (identifier) {
-            null -> Feature.fromGeometry(routeGeometry)
-            else -> Feature.fromGeometry(routeGeometry).also {
-                it.addBooleanProperty(identifier, true)
+            val routeFeature = when (identifier) {
+                null -> Feature.fromGeometry(routeGeometry)
+                else -> Feature.fromGeometry(routeGeometry).also {
+                    it.addBooleanProperty(identifier, true)
+                }
             }
-        }
 
-        return RouteFeatureData(
-            route,
-            FeatureCollection.fromFeatures(listOf(routeFeature)),
-            routeGeometry
-        )
-    }
+            return RouteFeatureData(
+                route,
+                FeatureCollection.fromFeatures(listOf(routeFeature)),
+                routeGeometry
+            )
+        }
 
     /**
      * This will extract all of the road classes for the various sections of the route
@@ -217,8 +229,9 @@ object MapboxRouteLineUtils {
      *
      * @param route the the calculations should be performed on.
      */
-    fun getRouteLineTrafficExpressionData(route: DirectionsRoute):
-        List<RouteLineTrafficExpressionData> {
+    fun getRouteLineTrafficExpressionData(
+        route: DirectionsRoute
+    ): List<RouteLineTrafficExpressionData> {
         var runningDistance = 0.0
         val routeLineTrafficData = mutableListOf<RouteLineTrafficExpressionData>()
 
@@ -363,7 +376,8 @@ object MapboxRouteLineUtils {
             val trafficIdentifier =
                 if (
                     trafficOverrideRoadClasses.contains(trafficExpData.roadClass) &&
-                    trafficExpData.trafficCongestionIdentifier == RouteConstants.UNKNOWN_CONGESTION_VALUE
+                    trafficExpData.trafficCongestionIdentifier ==
+                    RouteConstants.UNKNOWN_CONGESTION_VALUE
                 ) {
                     LOW_CONGESTION_VALUE
                 } else {
@@ -426,7 +440,8 @@ object MapboxRouteLineUtils {
             Feature.fromGeometry(Point.fromLngLat(this.longitude(), this.latitude()))
         }?.also {
             val propValue =
-                if (index == 0) RouteConstants.WAYPOINT_ORIGIN_VALUE else RouteConstants.WAYPOINT_DESTINATION_VALUE
+                if (index == 0) RouteConstants.WAYPOINT_ORIGIN_VALUE
+                else RouteConstants.WAYPOINT_DESTINATION_VALUE
             it.addStringProperty(RouteConstants.WAYPOINT_PROPERTY_KEY, propValue)
         }
     }
@@ -605,17 +620,31 @@ object MapboxRouteLineUtils {
         return itemsToReturn
     }
 
-    fun initializeRouteLineLayers (
+    fun initializeRouteLineLayers(
         context: Context,
         style: Style,
         styleRes: Int,
         routeStyleDescriptors: List<RouteStyleDescriptor>,
         belowLayerId: String
     ) {
-        val routeLineResourceProvider = MapboxRouteLineResourceProviderFactory.getRouteLineResourceProvider(context, styleRes)
-        val originIcon = AppCompatResources.getDrawable(context, routeLineResourceProvider.getOriginWaypointIcon())
-        val destinationIcon = AppCompatResources.getDrawable(context, routeLineResourceProvider.getDestinationWaypointIcon())
-        val layerProvider = MapboxRouteLayerProviderFactory.getLayerProvider(routeStyleDescriptors, context, styleRes)
+        val routeLineResourceProvider =
+            MapboxRouteLineResourceProviderFactory.getRouteLineResourceProvider(
+                context,
+                styleRes
+            )
+        val originIcon = AppCompatResources.getDrawable(
+            context,
+            routeLineResourceProvider.getOriginWaypointIcon()
+        )
+        val destinationIcon = AppCompatResources.getDrawable(
+            context,
+            routeLineResourceProvider.getDestinationWaypointIcon()
+        )
+        val layerProvider = MapboxRouteLayerProviderFactory.getLayerProvider(
+            routeStyleDescriptors,
+            context,
+            styleRes
+        )
 
         initializeRouteLineLayers(
             style,
@@ -666,12 +695,33 @@ object MapboxRouteLineUtils {
             altRouteSource.bindTo(style)
         }
 
-        layerProvider.initializeAlternativeRouteCasingLayer(style, routeLineResourceProvider.getAlternativeRouteLineCasingColor()).bindTo(style, LayerPosition(null, belowLayerId, null))
-        layerProvider.initializeAlternativeRouteLayer(style, routeLineResourceProvider.getUseRoundedLineCap(), routeLineResourceProvider.getAlternativeRouteLineBaseColor()).bindTo(style, LayerPosition(null, belowLayerId, null))
-        layerProvider.initializePrimaryRouteCasingLayer(style, routeLineResourceProvider.getRouteLineCasingColor()).bindTo(style, LayerPosition(null, belowLayerId, null))
-        layerProvider.initializePrimaryRouteLayer(style, routeLineResourceProvider.getUseRoundedLineCap(), routeLineResourceProvider.getRouteLineBaseColor()).bindTo(style, LayerPosition(null, belowLayerId, null))
-        layerProvider.initializePrimaryRouteTrafficLayer(style, routeLineResourceProvider.getUseRoundedLineCap(), routeLineResourceProvider.getRouteLineBaseColor()).bindTo(style, LayerPosition(null, belowLayerId, null))
-        layerProvider.initializeWayPointLayer(style, originIcon, destinationIcon).bindTo(style, LayerPosition(null, belowLayerId, null))
+        layerProvider.initializeAlternativeRouteCasingLayer(
+            style,
+            routeLineResourceProvider.getAlternativeRouteLineCasingColor()
+        ).bindTo(style, LayerPosition(null, belowLayerId, null))
+        layerProvider.initializeAlternativeRouteLayer(
+            style,
+            routeLineResourceProvider.getUseRoundedLineCap(),
+            routeLineResourceProvider.getAlternativeRouteLineBaseColor()
+        ).bindTo(style, LayerPosition(null, belowLayerId, null))
+        layerProvider.initializePrimaryRouteCasingLayer(
+            style,
+            routeLineResourceProvider.getRouteLineCasingColor()
+        ).bindTo(style, LayerPosition(null, belowLayerId, null))
+        layerProvider.initializePrimaryRouteLayer(
+            style,
+            routeLineResourceProvider.getUseRoundedLineCap(),
+            routeLineResourceProvider.getRouteLineBaseColor()
+        ).bindTo(style, LayerPosition(null, belowLayerId, null))
+        layerProvider.initializePrimaryRouteTrafficLayer(
+            style,
+            routeLineResourceProvider.getUseRoundedLineCap(),
+            routeLineResourceProvider.getRouteLineBaseColor()
+        ).bindTo(style, LayerPosition(null, belowLayerId, null))
+        layerProvider.initializeWayPointLayer(style, originIcon, destinationIcon).bindTo(
+            style,
+            LayerPosition(null, belowLayerId, null)
+        )
     }
 
     fun getLayerVisibility(style: Style, layerId: String): Visibility? {
@@ -705,7 +755,8 @@ object MapboxRouteLineUtils {
                 """Tried placing route line below "$layerId" which doesn't exist"""
             )
         }
-        return foundId ?: LocationComponentConstants.FOREGROUND_LAYER //fixme is this the correct layer???
+        return foundId
+            ?: LocationComponentConstants.FOREGROUND_LAYER // fixme is this the correct layer???
     }
 
     /**
@@ -782,4 +833,3 @@ object MapboxRouteLineUtils {
         }
     }
 }
-

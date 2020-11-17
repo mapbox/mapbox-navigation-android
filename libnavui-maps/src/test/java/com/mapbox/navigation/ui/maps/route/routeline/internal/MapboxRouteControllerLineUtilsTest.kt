@@ -15,8 +15,10 @@ import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineUti
 import com.mapbox.navigation.ui.maps.route.routeline.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.utils.TestUtils.loadJsonFixture
 import com.mapbox.navigation.ui.maps.utils.ThemeSwitcher
-
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -88,7 +90,8 @@ class MapboxRouteControllerLineUtilsTest {
     fun calculateDistance() {
         val result = MapboxRouteLineUtils.calculateDistance(
             Point.fromLngLat(-122.525212, 37.974092),
-            Point.fromLngLat(-122.52509389295653, 37.974569579999944))
+            Point.fromLngLat(-122.52509389295653, 37.974569579999944)
+        )
 
         assertEquals(0.0000017145850113848236, result, 0.0)
     }
@@ -292,8 +295,14 @@ class MapboxRouteControllerLineUtilsTest {
         val trafficExpressionData = getRouteLineTrafficExpressionData(route)
         assertEquals("service", trafficExpressionData[0].roadClass)
         assertEquals("street", trafficExpressionData[1].roadClass)
-        assertEquals(RouteConstants.UNKNOWN_CONGESTION_VALUE, trafficExpressionData[0].trafficCongestionIdentifier)
-        assertEquals(RouteConstants.UNKNOWN_CONGESTION_VALUE, trafficExpressionData[1].trafficCongestionIdentifier)
+        assertEquals(
+            RouteConstants.UNKNOWN_CONGESTION_VALUE,
+            trafficExpressionData[0].trafficCongestionIdentifier
+        )
+        assertEquals(
+            RouteConstants.UNKNOWN_CONGESTION_VALUE,
+            trafficExpressionData[1].trafficCongestionIdentifier
+        )
 
         val result = getRouteLineExpressionDataWithStreetClassOverride(
             trafficExpressionData,

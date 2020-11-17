@@ -57,8 +57,12 @@ dependencies {
 
     implementation dependenciesList.timber
 
+    ktlint dependenciesList.ktlint
+
     testImplementation dependenciesList.junit
     testImplementation dependenciesList.mockk
     testImplementation dependenciesList.robolectric
     testImplementation dependenciesList.androidxTestCore
 }
+
+apply from: "${rootDir}/gradle/jacoco.gradle"

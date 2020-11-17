@@ -7,32 +7,33 @@ import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.ui.base.MapboxState
 
-sealed class RouteLineState: MapboxState {
+sealed class RouteLineState : MapboxState {
 
     class ClearRouteDataState(
         private val primaryRouteSource: FeatureCollection,
         private val altRoutesSource: FeatureCollection,
         private val waypointsSource: FeatureCollection
-    ): RouteLineState() {
+    ) : RouteLineState() {
         fun getPrimaryRouteSource(): FeatureCollection = primaryRouteSource
         fun getAlternateRoutesSource(): FeatureCollection = altRoutesSource
         fun getWaypointsSource(): FeatureCollection = waypointsSource
     }
 
-    sealed class TraveledRouteLineUpdateState: RouteLineState() {
+    sealed class TraveledRouteLineUpdateState : RouteLineState() {
         class TraveledRouteLineUpdate(
             private val trafficLineExp: Expression,
             private val routeLineExp: Expression,
             private val casingLineEx: Expression
-        ): TraveledRouteLineUpdateState() {
+        ) : TraveledRouteLineUpdateState() {
             fun getTrafficExpression(): Expression = trafficLineExp
             fun getRouteLineExpression(): Expression = routeLineExp
             fun getCasingLineExpression(): Expression = casingLineEx
         }
-        class TraveledRouteLineNoUpdate() :TraveledRouteLineUpdateState()
+
+        class TraveledRouteLineNoUpdate() : TraveledRouteLineUpdateState()
     }
 
-    class UnitState: RouteLineState()
+    class UnitState : RouteLineState()
 
     class DrawRouteState(
         private val primaryRouteSource: FeatureCollection,
@@ -41,7 +42,7 @@ sealed class RouteLineState: MapboxState {
         private val casingLineEx: Expression,
         private val altRoutesSource: FeatureCollection,
         private val waypointsSource: FeatureCollection
-    ): RouteLineState() {
+    ) : RouteLineState() {
         fun getPrimaryRouteSource(): FeatureCollection = primaryRouteSource
         fun getTrafficLineExpression(): Expression = trafficLineExp
         fun getWaypointsSource(): FeatureCollection = waypointsSource
@@ -50,7 +51,7 @@ sealed class RouteLineState: MapboxState {
         fun getAlternateRoutesSource(): FeatureCollection = altRoutesSource
     }
 
-    sealed class RouteProgressChangeState: RouteLineState() {
+    sealed class RouteProgressChangeState : RouteLineState() {
         class ReInitializeRouteLineState(
             private val primaryRouteSource: FeatureCollection,
             private val altRoutesSource: FeatureCollection,
@@ -58,7 +59,7 @@ sealed class RouteLineState: MapboxState {
             private val trafficLineExp: Expression,
             private val routeLineExp: Expression,
             private val casingLineEx: Expression
-        ): RouteProgressChangeState() {
+        ) : RouteProgressChangeState() {
             fun getPrimaryRouteSource(): FeatureCollection = primaryRouteSource
             fun getTrafficLineExpression(): Expression = trafficLineExp
             fun getWaypointsSource(): FeatureCollection = waypointsSource
@@ -67,26 +68,31 @@ sealed class RouteLineState: MapboxState {
             fun getAlternateRoutesSource(): FeatureCollection = altRoutesSource
         }
 
-        class RedrawRouteState(private val drawRouteState: DrawRouteState): RouteProgressChangeState() {
+        class RedrawRouteState(
+            private val drawRouteState: DrawRouteState
+        ) : RouteProgressChangeState() {
             fun getDrawRouteState(): DrawRouteState = drawRouteState
         }
 
-        class RouteProgressUpdatedState(): RouteProgressChangeState()
+        class RouteProgressUpdatedState() : RouteProgressChangeState()
     }
 
-    class UpdateLayerVisibilityState(private val layerVisibilityModifications: List<Pair<String, Visibility>>): RouteLineState() {
-        fun getLayerVisibilityChanges(): List<Pair<String, Visibility>> = layerVisibilityModifications
+    class UpdateLayerVisibilityState(
+        private val layerVisibilityModifications: List<Pair<String, Visibility>>
+    ) : RouteLineState() {
+        fun getLayerVisibilityChanges(): List<Pair<String, Visibility>> =
+            layerVisibilityModifications
     }
 
-    class PrimaryRouteState(private val route: DirectionsRoute?): RouteLineState() {
+    class PrimaryRouteState(private val route: DirectionsRoute?) : RouteLineState() {
         fun getPrimaryRoute(): DirectionsRoute? = route
     }
 
-    class UpdateVanishingPointState(private val state: VanishingPointState): RouteLineState() {
+    class UpdateVanishingPointState(private val state: VanishingPointState) : RouteLineState() {
         fun getVanishingPointState(): VanishingPointState = state
     }
 
-    class UpdateViewStyleState(private val style: Style): RouteLineState() {
+    class UpdateViewStyleState(private val style: Style) : RouteLineState() {
         fun getStyle() = style
     }
 }

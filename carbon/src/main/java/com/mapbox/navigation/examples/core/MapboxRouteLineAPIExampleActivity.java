@@ -479,4 +479,3 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
     }
   };
 }
-

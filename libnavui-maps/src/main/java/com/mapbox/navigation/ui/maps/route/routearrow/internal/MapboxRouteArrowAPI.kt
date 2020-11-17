@@ -13,14 +13,18 @@ import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineUti
 class MapboxRouteArrowAPI(
     private val routeArrowActions: RouteArrowActions,
     private var routeArrowStateConsumer: MapboxView<RouteArrowState>
-): RouteArrowAPI {
+) : RouteArrowAPI {
 
     override fun updateViewStyle(style: Style) {
-        routeArrowActions.getUpdateViewStyleState(style).apply { routeArrowStateConsumer.render(this) }
+        routeArrowActions.getUpdateViewStyleState(style).apply {
+            routeArrowStateConsumer.render(
+                this
+            )
+        }
     }
 
     override fun getRouteArrowVisibility(style: Style): Visibility? {
-        return MapboxRouteLineUtils.getLayerVisibility(style,ARROW_SHAFT_LINE_LAYER_ID)
+        return MapboxRouteLineUtils.getLayerVisibility(style, ARROW_SHAFT_LINE_LAYER_ID)
     }
 
     override fun redrawArrow() {

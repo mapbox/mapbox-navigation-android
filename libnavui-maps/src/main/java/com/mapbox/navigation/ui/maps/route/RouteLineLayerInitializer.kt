@@ -1,8 +1,6 @@
 package com.mapbox.navigation.ui.maps.route
 
 import android.content.Context
-import android.util.TypedValue
-import androidx.annotation.AnyRes
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.Style
 import com.mapbox.navigation.ui.maps.R
@@ -26,7 +24,13 @@ class RouteLineLayerInitializer private constructor(
 
     fun initializeLayers(style: Style) {
         val belowLayerIdToUse: String = getDefaultBelowLayer(routeLineBelowLayerId, style)
-        initializeRouteLineLayers(style, resourceProvider, routeLayerProvider, wayPointIconProvider, belowLayerIdToUse)
+        initializeRouteLineLayers(
+            style,
+            resourceProvider,
+            routeLayerProvider,
+            wayPointIconProvider,
+            belowLayerIdToUse
+        )
     }
 
     class Builder(private val context: Context) {
@@ -48,19 +52,27 @@ class RouteLineLayerInitializer private constructor(
         fun withRouteStyleDescriptors(routeStyleDescriptors: List<RouteStyleDescriptor>): Builder =
             apply { this.routeStyleDescriptors = routeStyleDescriptors }
 
-        fun withRouteLineBelowLayerId(layerId: String) : Builder =
+        fun withRouteLineBelowLayerId(layerId: String): Builder =
             apply { this.routeLineBelowLayerId = layerId }
 
         fun build(): RouteLineLayerInitializer {
             val styleResource: Int = styleRes ?: ThemeUtil.retrieveAttrResourceId(
-                context, R.attr.navigationViewRouteStyle, R.style.MapboxStyleNavigationMapRoute
+                context,
+                R.attr.navigationViewRouteStyle,
+                R.style.MapboxStyleNavigationMapRoute
             )
             val resourceProvider: RouteLineResourceProvider = routeLineResourceProvider
                 ?: getRouteLineResourceProvider(context, styleResource)
             val routeLineLayerProvider: RouteLayerProvider = routeLayerProvider
                 ?: getLayerProvider(routeStyleDescriptors, context, styleResource)
-            val originIcon = AppCompatResources.getDrawable(context, resourceProvider.getOriginWaypointIcon())
-            val destinationIcon = AppCompatResources.getDrawable(context, resourceProvider.getDestinationWaypointIcon())
+            val originIcon = AppCompatResources.getDrawable(
+                context,
+                resourceProvider.getOriginWaypointIcon()
+            )
+            val destinationIcon = AppCompatResources.getDrawable(
+                context,
+                resourceProvider.getDestinationWaypointIcon()
+            )
 
             return RouteLineLayerInitializer(
                 resourceProvider,

@@ -6,14 +6,20 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.ui.internal.route.RouteConstants.*
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ARROW_BEARING
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ARROW_HEAD_CASING_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ARROW_HEAD_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ARROW_SHAFT_LINE_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.MAX_DEGREES
+import com.mapbox.navigation.ui.internal.route.RouteConstants.TWO_POINTS
 import com.mapbox.navigation.ui.internal.utils.CompareUtils.areEqualContentsIgnoreOrder
 import com.mapbox.navigation.ui.maps.route.routearrow.api.RouteArrowActions
 import com.mapbox.navigation.ui.maps.route.routearrow.internal.RouteArrowUtils.obtainArrowPointsFrom
 import com.mapbox.navigation.ui.maps.route.routearrow.model.RouteArrowState
 import com.mapbox.turf.TurfMeasurement
 
-class MapboxRouteArrowActions: RouteArrowActions {
+class MapboxRouteArrowActions : RouteArrowActions {
     private val maneuverPoints = mutableListOf<Point>()
 
     override fun getUpdateViewStyleState(style: Style): RouteArrowState.UpdateViewStyleState {
@@ -36,18 +42,26 @@ class MapboxRouteArrowActions: RouteArrowActions {
             false -> {
                 val arrowShaftFeature = getFeatureForArrowShaft(maneuverPoints)
                 val arrowHeadFeature = getFeatureForArrowHead(maneuverPoints)
-                RouteArrowState.UpdateManeuverArrowState(listOf(), arrowShaftFeature, arrowHeadFeature)
+                RouteArrowState.UpdateManeuverArrowState(
+                    listOf(),
+                    arrowShaftFeature,
+                    arrowHeadFeature
+                )
             }
         }
     }
 
-    override fun getAddUpcomingManeuverArrowState(routeProgress: RouteProgress): RouteArrowState.UpdateManeuverArrowState {
-        val invalidUpcomingStepPoints = (routeProgress.upcomingStepPoints == null
-            || routeProgress.upcomingStepPoints!!.size < TWO_POINTS)
-        val invalidCurrentStepPoints = routeProgress.currentLegProgress == null
-            || routeProgress.currentLegProgress!!.currentStepProgress == null
-            || routeProgress.currentLegProgress!!.currentStepProgress!!.stepPoints == null
-            || routeProgress.currentLegProgress!!.currentStepProgress!!.stepPoints!!.size < TWO_POINTS
+    override fun getAddUpcomingManeuverArrowState(
+        routeProgress: RouteProgress
+    ): RouteArrowState.UpdateManeuverArrowState {
+        val invalidUpcomingStepPoints = (
+            routeProgress.upcomingStepPoints == null ||
+                routeProgress.upcomingStepPoints!!.size < TWO_POINTS
+            )
+        val invalidCurrentStepPoints = routeProgress.currentLegProgress == null ||
+            routeProgress.currentLegProgress!!.currentStepProgress == null ||
+            routeProgress.currentLegProgress!!.currentStepProgress!!.stepPoints == null ||
+            routeProgress.currentLegProgress!!.currentStepProgress!!.stepPoints!!.size < TWO_POINTS
 
         val visibilityChanges = if (invalidUpcomingStepPoints || invalidCurrentStepPoints) {
             getHideArrowModifications()
@@ -63,7 +77,11 @@ class MapboxRouteArrowActions: RouteArrowActions {
             val arrowShaftFeature = getFeatureForArrowShaft(maneuverPoints)
             val arrowHeadFeature = getFeatureForArrowHead(maneuverPoints)
 
-            RouteArrowState.UpdateManeuverArrowState(visibilityChanges, arrowShaftFeature, arrowHeadFeature)
+            RouteArrowState.UpdateManeuverArrowState(
+                visibilityChanges,
+                arrowShaftFeature,
+                arrowHeadFeature
+            )
         } else {
             RouteArrowState.UpdateManeuverArrowState(visibilityChanges, null, null)
         }

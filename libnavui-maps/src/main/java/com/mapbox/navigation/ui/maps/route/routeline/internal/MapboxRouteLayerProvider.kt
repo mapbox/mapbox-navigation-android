@@ -52,10 +52,12 @@ interface MapboxRouteLayerProvider : RouteLayerProvider {
             color(defaultColor)
         )
         routeStyleDescriptors.forEach {
-            expressions.add(eq {
-                get { it.routeIdentifier }
-                literal(true)
-            })
+            expressions.add(
+                eq {
+                    get { it.routeIdentifier }
+                    literal(true)
+                }
+            )
             expressions.add(color(routeColorProvider.get(it)))
         }
         return expressions.plus(color(defaultColor))

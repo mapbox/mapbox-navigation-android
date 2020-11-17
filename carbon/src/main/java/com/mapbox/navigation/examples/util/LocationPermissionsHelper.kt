@@ -1,6 +1,5 @@
 package com.mapbox.navigation.examples.util
 
-
 import android.Manifest
 import android.app.Activity
 import android.content.Context
@@ -120,5 +119,3 @@ class LocationPermissionsHelper(private val listener: PermissionsListener?) {
         }
     }
 }
-
-

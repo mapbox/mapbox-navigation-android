@@ -35,6 +35,7 @@ object MemoizeUtils {
                 this@memoize,
                 cacheSize
             )
+
             override fun invoke(p1: P1) = handler(MemoizeKey1(p1))
         }
     }
@@ -50,6 +51,7 @@ object MemoizeUtils {
                 this@memoize,
                 cacheSize
             )
+
             override fun invoke(p1: P1, p2: P2) = handler(MemoizeKey2(p1, p2))
         }
     }

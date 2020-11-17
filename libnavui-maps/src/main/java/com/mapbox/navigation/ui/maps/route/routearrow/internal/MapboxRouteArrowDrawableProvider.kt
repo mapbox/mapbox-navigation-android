@@ -5,7 +5,7 @@ import android.graphics.drawable.Drawable
 class MapboxRouteArrowDrawableProvider(
     private val arrowHeadDrawable: Drawable,
     private val arrowHeadCasingDrawable: Drawable
-): RouteArrowDrawableProvider {
+) : RouteArrowDrawableProvider {
 
     override fun getArrowHeadIconCasingDrawable(): Drawable = arrowHeadCasingDrawable
 

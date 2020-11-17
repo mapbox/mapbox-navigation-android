@@ -9,27 +9,47 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_CASING_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.HEAVY_CONGESTION_VALUE
+import com.mapbox.navigation.ui.internal.route.RouteConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO
+import com.mapbox.navigation.ui.internal.route.RouteConstants.MODERATE_CONGESTION_VALUE
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS
+import com.mapbox.navigation.ui.internal.route.RouteConstants.SEVERE_CONGESTION_VALUE
+import com.mapbox.navigation.ui.internal.route.RouteConstants.UNKNOWN_CONGESTION_VALUE
+import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.routeline.api.RouteLineActions
-import com.mapbox.navigation.ui.internal.route.RouteConstants.*
 import com.mapbox.navigation.ui.maps.route.routeline.api.RouteLineResourceProvider
 import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineUtils.calculateDistance
 import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineUtils.calculateRouteGranularDistances
 import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineUtils.calculateRouteLineSegments
 import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineUtils.findDistanceToNearestPointOnCurrentLine
 import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineUtils.getIdentifiableRouteFeatureDataProvider
-import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineUtils.getTrafficLineExpression
 import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineUtils.getRouteFeatureDataProvider
+import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineUtils.getTrafficLineExpression
 import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineUtils.getVanishingRouteLineExpression
 import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineUtils.parseRoutePoints
-import com.mapbox.navigation.ui.maps.route.routeline.model.*
+import com.mapbox.navigation.ui.maps.route.routeline.model.IdentifiableRoute
+import com.mapbox.navigation.ui.maps.route.routeline.model.RouteFeatureData
+import com.mapbox.navigation.ui.maps.route.routeline.model.RouteLineExpressionData
+import com.mapbox.navigation.ui.maps.route.routeline.model.RouteLineGranularDistances
+import com.mapbox.navigation.ui.maps.route.routeline.model.RouteLineState
+import com.mapbox.navigation.ui.maps.route.routeline.model.RoutePoints
+import com.mapbox.navigation.ui.maps.route.routeline.model.VanishingPointState
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMisc
 import timber.log.Timber
 
-class MapboxRouteLineActions(private val routeResourceProvider: RouteLineResourceProvider): RouteLineActions {
-    private val routeLineExpressionData: MutableList<RouteLineExpressionData> = mutableListOf<RouteLineExpressionData>()
+class MapboxRouteLineActions(
+    private val routeResourceProvider: RouteLineResourceProvider
+) : RouteLineActions {
+    private val routeLineExpressionData: MutableList<RouteLineExpressionData> =
+        mutableListOf<RouteLineExpressionData>()
     private val directionsRoutes: MutableList<DirectionsRoute> = mutableListOf()
     private var primaryRoute: DirectionsRoute? = null
     private var lastIndexUpdateTimeNano: Long = 0
@@ -47,7 +67,9 @@ class MapboxRouteLineActions(private val routeResourceProvider: RouteLineResourc
         return RouteLineState.UpdateViewStyleState(style)
     }
 
-    override fun updateVanishingPointState(routeProgressState: RouteProgressState): RouteLineState.UpdateVanishingPointState {
+    override fun updateVanishingPointState(
+        routeProgressState: RouteProgressState
+    ): RouteLineState.UpdateVanishingPointState {
         vanishingPointState = when (routeProgressState) {
             RouteProgressState.LOCATION_TRACKING -> VanishingPointState.ENABLED
             RouteProgressState.ROUTE_COMPLETE -> VanishingPointState.ONLY_INCREASE_PROGRESS
@@ -66,13 +88,14 @@ class MapboxRouteLineActions(private val routeResourceProvider: RouteLineResourc
         return RouteLineState.UpdateLayerVisibilityState(layerModifications)
     }
 
-    private fun getShowPrimaryRouteLayerModifications(visibility: Visibility): List<Pair<String, Visibility>> {
-        return listOf(
-            Pair(PRIMARY_ROUTE_TRAFFIC_LAYER_ID, visibility),
-            Pair(PRIMARY_ROUTE_LAYER_ID, visibility),
-            Pair(PRIMARY_ROUTE_CASING_LAYER_ID, visibility)
-        )
-    }
+    private fun getShowPrimaryRouteLayerModifications(visibility: Visibility):
+        List<Pair<String, Visibility>> {
+            return listOf(
+                Pair(PRIMARY_ROUTE_TRAFFIC_LAYER_ID, visibility),
+                Pair(PRIMARY_ROUTE_LAYER_ID, visibility),
+                Pair(PRIMARY_ROUTE_CASING_LAYER_ID, visibility)
+            )
+        }
 
     override fun getHideAlternativeRoutesState(): RouteLineState.UpdateLayerVisibilityState {
         val layerModifications = getShowAlternateRoutesLayerModifications(Visibility.NONE)
@@ -84,24 +107,30 @@ class MapboxRouteLineActions(private val routeResourceProvider: RouteLineResourc
         return RouteLineState.UpdateLayerVisibilityState(layerModifications)
     }
 
-    private fun getShowAlternateRoutesLayerModifications(visibility: Visibility): List<Pair<String, Visibility>> {
+    private fun getShowAlternateRoutesLayerModifications(
+        visibility: Visibility
+    ): List<Pair<String, Visibility>> {
         return listOf(
             Pair(ALTERNATIVE_ROUTE_LAYER_ID, visibility),
             Pair(ALTERNATIVE_ROUTE_CASING_LAYER_ID, visibility)
         )
     }
 
-    override fun getHideOriginAndDestinationPointsState(): RouteLineState.UpdateLayerVisibilityState {
-        val layerModifications = listOf(Pair(WAYPOINT_LAYER_ID, Visibility.NONE))
-        return RouteLineState.UpdateLayerVisibilityState(layerModifications)
-    }
+    override fun getHideOriginAndDestinationPointsState():
+        RouteLineState.UpdateLayerVisibilityState {
+            val layerModifications = listOf(Pair(WAYPOINT_LAYER_ID, Visibility.NONE))
+            return RouteLineState.UpdateLayerVisibilityState(layerModifications)
+        }
 
-    override fun getShowOriginAndDestinationPointsState(): RouteLineState.UpdateLayerVisibilityState {
-        val layerModifications = listOf(Pair(WAYPOINT_LAYER_ID, Visibility.VISIBLE))
-        return RouteLineState.UpdateLayerVisibilityState(layerModifications)
-    }
+    override fun getShowOriginAndDestinationPointsState():
+        RouteLineState.UpdateLayerVisibilityState {
+            val layerModifications = listOf(Pair(WAYPOINT_LAYER_ID, Visibility.VISIBLE))
+            return RouteLineState.UpdateLayerVisibilityState(layerModifications)
+        }
 
-    override fun getUpdatePrimaryRouteIndexState(route: DirectionsRoute): RouteLineState.DrawRouteState {
+    override fun getUpdatePrimaryRouteIndexState(
+        route: DirectionsRoute
+    ): RouteLineState.DrawRouteState {
         primaryRoute = route
         directionsRoutes.remove(route)
         directionsRoutes.add(0, route)
@@ -110,7 +139,9 @@ class MapboxRouteLineActions(private val routeResourceProvider: RouteLineResourc
         return buildDrawRoutesState(featureDataProvider)
     }
 
-    override fun getDrawRoutesState(newRoutes: List<DirectionsRoute>): RouteLineState.DrawRouteState {
+    override fun getDrawRoutesState(
+        newRoutes: List<DirectionsRoute>
+    ): RouteLineState.DrawRouteState {
         directionsRoutes.clear()
         directionsRoutes.addAll(newRoutes)
         primaryRoute = newRoutes.firstOrNull()
@@ -120,7 +151,9 @@ class MapboxRouteLineActions(private val routeResourceProvider: RouteLineResourc
         return buildDrawRoutesState(featureDataProvider)
     }
 
-    override fun getDrawIdentifiableRoutesState(newRoutes: List<IdentifiableRoute>): RouteLineState.DrawRouteState {
+    override fun getDrawIdentifiableRoutesState(
+        newRoutes: List<IdentifiableRoute>
+    ): RouteLineState.DrawRouteState {
         val routes = newRoutes.map { it.route }
         directionsRoutes.clear()
         directionsRoutes.addAll(routes)
@@ -137,15 +170,27 @@ class MapboxRouteLineActions(private val routeResourceProvider: RouteLineResourc
         return buildDrawRoutesState(featureDataProvider)
     }
 
-    private fun buildDrawRoutesState(featureDataProvider: () -> List<RouteFeatureData>): RouteLineState.DrawRouteState {
+    private fun buildDrawRoutesState(
+        featureDataProvider: () -> List<RouteFeatureData>
+    ): RouteLineState.DrawRouteState {
         val routeData = featureDataProvider()
         val partitionedRoutes = routeData.partition { it.route == directionsRoutes.first() }
-        val segments: List<RouteLineExpressionData> = partitionedRoutes.first.firstOrNull()?.route?.run {
-            calculateRouteLineSegments(this,  routeResourceProvider.getTrafficBackfillRoadClasses(),true, ::getRouteColorForCongestion)
-        } ?: listOf()
+        val segments: List<RouteLineExpressionData> =
+            partitionedRoutes.first.firstOrNull()?.route?.run {
+                calculateRouteLineSegments(
+                    this,
+                    routeResourceProvider.getTrafficBackfillRoadClasses(),
+                    true,
+                    ::getRouteColorForCongestion
+                )
+            } ?: listOf()
         routeLineExpressionData.clear()
         routeLineExpressionData.addAll(segments)
-        val trafficLineExpression = getTrafficLineExpression(vanishPointOffset, segments, routeResourceProvider.getRouteUnknownTrafficColor())
+        val trafficLineExpression = getTrafficLineExpression(
+            vanishPointOffset,
+            segments,
+            routeResourceProvider.getRouteUnknownTrafficColor()
+        )
         val routeLineExpression = getVanishingRouteLineExpression(
             vanishPointOffset,
             routeResourceProvider.getRouteLineTraveledColor(),
@@ -160,16 +205,22 @@ class MapboxRouteLineActions(private val routeResourceProvider: RouteLineResourc
         val alternativeRouteFeatures = partitionedRoutes.second.mapNotNull {
             it.featureCollection.features()
         }.flatten()
-        val alternativeRouteFeatureCollection = FeatureCollection.fromFeatures(alternativeRouteFeatures)
-        val wayPointsFeatureCollection: FeatureCollection = partitionedRoutes.first.firstOrNull()?.route?.run {
-            MapboxRouteLineUtils.buildWayPointFeatureCollection(this)
-        } ?: FeatureCollection.fromFeatures(listOf())
+        val alternativeRouteFeatureCollection = FeatureCollection.fromFeatures(
+            alternativeRouteFeatures
+        )
+        val wayPointsFeatureCollection: FeatureCollection =
+            partitionedRoutes.first.firstOrNull()?.route?.run {
+                MapboxRouteLineUtils.buildWayPointFeatureCollection(this)
+            } ?: FeatureCollection.fromFeatures(listOf())
         partitionedRoutes.first.firstOrNull()?.let {
             initPrimaryRoutePoints(it.route)
         }
 
         return RouteLineState.DrawRouteState(
-            partitionedRoutes.first.firstOrNull()?.featureCollection ?: FeatureCollection.fromFeatures(listOf()),
+            partitionedRoutes.first.firstOrNull()?.featureCollection
+                ?: FeatureCollection.fromFeatures(
+                    listOf()
+                ),
             trafficLineExpression,
             routeLineExpression,
             routeLineCasingExpression,
@@ -178,7 +229,9 @@ class MapboxRouteLineActions(private val routeResourceProvider: RouteLineResourc
         )
     }
 
-    override fun getTraveledRouteLineUpdate(point: Point): RouteLineState.TraveledRouteLineUpdateState {
+    override fun getTraveledRouteLineUpdate(
+        point: Point
+    ): RouteLineState.TraveledRouteLineUpdateState {
         if (vanishingPointState == VanishingPointState.DISABLED ||
             System.nanoTime() - lastIndexUpdateTimeNano > MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO
         ) {
@@ -301,7 +354,9 @@ class MapboxRouteLineActions(private val routeResourceProvider: RouteLineResourc
     /**
      * Tries to find and cache the index of the upcoming [RouteLineDistancesIndex].
      */
-    override fun updateUpcomingRoutePointIndex(routeProgress: RouteProgress): RouteLineState.UnitState {
+    override fun updateUpcomingRoutePointIndex(
+        routeProgress: RouteProgress
+    ): RouteLineState.UnitState {
         ifNonNull(
             routeProgress.currentLegProgress,
             routeProgress.currentLegProgress?.currentStepProgress,
@@ -376,10 +431,14 @@ class MapboxRouteLineActions(private val routeResourceProvider: RouteLineResourc
                 else -> routeResourceProvider.getRouteLowTrafficColor()
             }
             false -> when (congestionValue) {
-                MODERATE_CONGESTION_VALUE -> routeResourceProvider.getAlternativeRouteModerateTrafficColor()
-                HEAVY_CONGESTION_VALUE -> routeResourceProvider.getAlternativeRouteHeavyTrafficColor()
-                SEVERE_CONGESTION_VALUE -> routeResourceProvider.getAlternativeRouteSevereTrafficColor()
-                UNKNOWN_CONGESTION_VALUE -> routeResourceProvider.getAlternativeRouteUnknownTrafficColor()
+                MODERATE_CONGESTION_VALUE ->
+                    routeResourceProvider.getAlternativeRouteModerateTrafficColor()
+                HEAVY_CONGESTION_VALUE ->
+                    routeResourceProvider.getAlternativeRouteHeavyTrafficColor()
+                SEVERE_CONGESTION_VALUE ->
+                    routeResourceProvider.getAlternativeRouteSevereTrafficColor()
+                UNKNOWN_CONGESTION_VALUE ->
+                    routeResourceProvider.getAlternativeRouteUnknownTrafficColor()
                 else -> routeResourceProvider.getAlternativeRouteLineBaseColor()
             }
         }

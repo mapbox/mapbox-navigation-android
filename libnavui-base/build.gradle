@@ -52,4 +52,8 @@ dependencies {
     api dependenciesList.mapboxSdkGeoJSON
     api dependenciesList.androidXCore
     api dependenciesList.androidXAnnotation
+
+    ktlint dependenciesList.ktlint
 }
+
+apply from: "${rootDir}/gradle/jacoco.gradle"

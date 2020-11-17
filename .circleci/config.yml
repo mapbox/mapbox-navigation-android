@@ -1,0 +1,407 @@
+version: 2.1
+parameters:
+  docker-image-tag:
+    type: string
+    default: "mbgl/android-ndk-r21:latest"
+
+workflows:
+  version: 2
+  default:
+    jobs:
+      - assemble-debug
+      - assemble-release
+      - static-analysis:
+          requires:
+            - assemble-debug
+      - unit-tests:
+          requires:
+            - assemble-debug
+#      - ui-robo-tests:
+#          requires:
+#            - assemble-release
+#            - assemble-debug
+#            - static-analysis
+#            - unit-tests
+#      - ui-instrumentation-tests:
+#          requires:
+#            - assemble-release
+#            - assemble-debug
+#            - static-analysis
+#            - unit-tests
+#      - changelog-verification:
+#          requires:
+#            - assemble-release
+#            - assemble-debug
+#            - static-analysis
+#            - unit-tests
+#          filters:
+#            branches:
+#              ignore: /^(master|release-.*)/
+#      - release-snapshot:
+#          filters:
+#            branches:
+#              only:
+#                - master
+#      - release:
+#          filters:
+#            tags:
+#              only: /^v.*/
+#            branches:
+#              ignore: /.*/
+#      - mobile-metrics-dry-run:
+#          type: approval
+#      - mobile-metrics-benchmarks:
+#          requires:
+#            - mobile-metrics-dry-run
+commands:
+  restore-gradle-cache:
+    steps:
+      - restore_cache:
+          keys:
+            - deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "carbon/build.gradle" }}-{{ checksum  "libnavui-maps/build.gradle" }}-{{ checksum  "libnavui-base/build.gradle" }}-{{ checksum  "libnavui-util/build.gradle" }}
+            - deps-
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "carbon/build.gradle" }}-{{ checksum  "libnavui-maps/build.gradle" }}-{{ checksum  "libnavui-base/build.gradle" }}-{{ checksum  "libnavui-util/build.gradle" }}
+
+  verify-codebase:
+    steps:
+      - run:
+          name: Check codebase
+          command: make check -f carbon.mk
+
+  verify-changelog:
+    steps:
+      - run:
+          name: Install python dependencies
+          command: python3 -m pip install requests
+      - run:
+          name: Verify that a changelog entry is present in the PR description
+          command: |
+            if [[ -n "$CIRCLE_PULL_REQUEST" ]]; then
+              if [[ -n "$GITHUB_ACCESS_TOKEN" ]]; then
+                python3 scripts/validate-changelog.py ${CIRCLE_PULL_REQUEST##*/} ${GITHUB_ACCESS_TOKEN}
+              else
+                echo "Missing access token, skipping changelog validation."
+              fi
+            else
+              echo "Not a PR, skipping changelog validation."
+            fi
+
+  assemble-module:
+    parameters:
+      module_target:
+        description: module target
+        type: string
+      variant:
+        description: debug or release
+        type: string
+    steps:
+      - run:
+          name: Assemble << parameters.module_target >> APK in << parameters.variant >> mode
+          command: |
+            ./gradlew << parameters.module_target >>:assemble<< parameters.variant >>
+
+  assemble-app:
+    parameters:
+      variant:
+        description: debug or release
+        type: string
+    steps:
+      - run:
+          name: Assemble APK in << parameters.variant >> mode
+          command: |
+            echo "${MAPBOX_DEVELOPER_CONFIG}" > /root/code/carbon/src/main/res/values/mapbox_access_token.xml
+            ./gradlew carbon:assemble<< parameters.variant >>
+
+  assemble-instrumentation-test:
+    parameters:
+      module_target:
+        description: module target
+        type: string
+    steps:
+      - run:
+          name: Assemble Instrumentation Test APK
+          command: |
+            ./gradlew << parameters.module_target >>:assembleAndroidTest
+
+  login-google-cloud-platform:
+    steps:
+      - run:
+          name: Log in to Google Cloud Platform
+          shell: /bin/bash -euo pipefail
+          command: |
+            echo "${GCLOUD_SERVICE_ACCOUNT_JSON}" > secret.json
+            gcloud auth activate-service-account --key-file secret.json --project mapbox-navigation-android-internal
+            rm secret.json
+
+  store-results:
+    parameters:
+      module_target:
+        description: module target
+        type: string
+    steps:
+      - store_artifacts:
+          path: << parameters.module_target >>/build/reports
+          destination: << parameters.module_target >>/reports
+      - store_test_results:
+          path: << parameters.module_target >>/build/test-results
+
+  check-api-core:
+    steps:
+      - run:
+          name: Check Navigation Core SDK public API
+          command: |
+            make assemble-core-release
+            make core-check-api
+
+  check-api-ui:
+    steps:
+      - run:
+          name: Check Navigation UI SDK public API
+          command: |
+            make assemble-ui-release
+            make ui-check-api
+
+  codecov:
+    steps:
+      - run:
+          name: Post code coverage reports to Codecov.io
+          command: pip3 install --user codecov && /root/.local/bin/codecov
+
+  generate-version-name:
+    steps:
+      - run:
+          name: Generate Core version name
+          command: |
+            if [[ -n "$CIRCLE_TAG" ]]; then
+              if [[ $CIRCLE_TAG == v* ]]; then
+                POM_VERSION_NAME=`echo $CIRCLE_TAG | sed s/v//`
+              else
+                echo "Exiting the job as this is not a release TAG"
+                exit 1
+              fi
+              echo "export POM_VERSION_NAME=$POM_VERSION_NAME" >> $BASH_ENV
+            fi
+
+  run-firebase-instrumentation:
+    parameters:
+      module_wrapper:
+        description: module wrapper
+        type: string
+      module_target:
+        description: module target
+        type: string
+      variant:
+        description: debug or release
+        type: string
+    steps:
+      - run:
+          name: Run instrumentation tests on Firebase
+          no_output_timeout: 1200
+          shell: /bin/bash -euo pipefail
+          command: |
+            gcloud firebase test android run --type instrumentation \
+              --app << parameters.module_wrapper >>/build/outputs/apk/<< parameters.variant >>/<< parameters.module_wrapper >>-<< parameters.variant >>.apk \
+              --test << parameters.module_target >>/build/outputs/apk/androidTest/<< parameters.variant >>/<< parameters.module_target >>-<< parameters.variant >>-androidTest.apk \
+              --device model=hammerhead,version=21,locale=en,orientation=portrait  \
+              --device model=athene,version=23,locale=fr,orientation=landscape \
+              --device model=sailfish,version=26,locale=es,orientation=portrait \
+              --device model=walleye,version=28,locale=de,orientation=landscape \
+              --use-orchestrator \
+              --timeout 5m
+
+  run-firebase-robo:
+    parameters:
+      variant:
+        description: debug or release
+        type: string
+    steps:
+      - run:
+          name: Run robo tests on Firebase
+          no_output_timeout: 10m
+          command: |
+            gcloud firebase test android run --type robo \
+              --app carbon/build/outputs/apk/<< parameters.variant >>/carbon-<< parameters.variant >>.apk \
+              --device model=hammerhead,version=21,locale=en,orientation=portrait  \
+              --device model=athene,version=23,locale=fr,orientation=landscape \
+              --device model=sailfish,version=26,locale=es,orientation=portrait \
+              --device model=walleye,version=28,locale=de,orientation=landscape \
+              --timeout 5m
+
+  publish-artifacts:
+    parameters:
+      artifact-type:
+        description: core or ui
+        type: string
+    steps:
+      - deploy:
+          name: Upload Navigation SDK to SDK Registry
+          command: |
+            make << parameters.artifact-type >>-upload-to-sdk-registry
+
+  check-public-documentation:
+    steps:
+      - run:
+          name: Check public documentation
+          command: sh scripts/dokka-validate.sh
+
+  generate-documentation:
+    steps:
+      - run:
+          name: Generate documentation
+          command: make javadoc-dokka
+
+  trigger-mobile-metrics:
+    steps:
+      - run:
+          name: Track metrics of the Navigation SDK
+          command: |
+            pip3 install requests
+            python3 scripts/trigger-mobile-metrics.py
+
+jobs:
+  assemble-debug:
+    working_directory: ~/code
+    docker:
+      - image: << pipeline.parameters.docker-image-tag >>
+    steps:
+      - checkout
+      - run:
+          name: Assemble Navigation SDK (debug)
+          command: make assemble-debug -f carbon.mk
+
+  assemble-release:
+    working_directory: ~/code
+    docker:
+      - image: << pipeline.parameters.docker-image-tag >>
+    steps:
+      - checkout
+      - run:
+          name: Assemble Navigation SDK (release)
+          command: make assemble-release -f carbon.mk
+
+  unit-tests:
+    working_directory: ~/code
+    docker:
+      - image: << pipeline.parameters.docker-image-tag >>
+    steps:
+      - checkout
+      - run:
+          name: Run Navigation SDK Unit Tests and generate Jacoco test report
+          command: |
+            make unit-tests-jacoco -f carbon.mk
+      - store-results:
+            module_target: "libnavui-maps"
+      - store-results:
+          module_target: "libnavui-base"
+      - store-results:
+          module_target: "libnavui-util"
+      - codecov
+
+  static-analysis:
+    working_directory: ~/code
+    docker:
+      - image: << pipeline.parameters.docker-image-tag >>
+    steps:
+      - checkout
+      - restore-gradle-cache
+      - verify-codebase
+#      - check-api-core
+#      - check-api-ui
+#      - check-public-documentation
+
+  changelog-verification:
+    working_directory: ~/code
+    docker:
+      - image: << pipeline.parameters.docker-image-tag >>
+    steps:
+      - checkout
+      - verify-changelog
+
+  ui-robo-tests:
+    docker:
+      - image: << pipeline.parameters.docker-image-tag >>
+    working_directory: ~/code
+    environment:
+      JVM_OPTS: -Xmx3200m
+      BUILDTYPE: Debug
+      GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
+    steps:
+      - checkout
+      - restore-gradle-cache
+      - assemble-app:
+          variant: "Release"
+      - login-google-cloud-platform
+      - run-firebase-robo:
+          variant: "release"
+
+  ui-instrumentation-tests:
+    docker:
+      - image: << pipeline.parameters.docker-image-tag >>
+    working_directory: ~/code
+    environment:
+      JVM_OPTS: -Xmx3200m
+      BUILDTYPE: Debug
+      GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
+    steps:
+      - checkout
+      - restore-gradle-cache
+      - assemble-module:
+          module_target: "app-tests-wrapper"
+          variant: "Debug"
+      - assemble-module:
+          module_target: "libnavigation-core"
+          variant: "Debug"
+      - assemble-instrumentation-test:
+          module_target: "libnavigation-core"
+      - login-google-cloud-platform
+      - run-firebase-instrumentation:
+          module_target: "libnavigation-core"
+          module_wrapper: "app-tests-wrapper"
+          variant: "debug"
+
+  mobile-metrics-benchmarks:
+    working_directory: ~/code
+    docker:
+      - image: << pipeline.parameters.docker-image-tag >>
+    steps:
+      - checkout
+      - trigger-mobile-metrics
+
+  release-snapshot:
+    working_directory: ~/code
+    docker:
+      - image: << pipeline.parameters.docker-image-tag >>
+    steps:
+      - checkout
+      - generate-version-name
+      - assemble-core-release
+      - assemble-ui-release
+      - check-public-documentation
+      - generate-documentation
+      - publish-artifacts:
+          artifact-type: "core"
+      - publish-artifacts:
+          artifact-type: "ui"
+      - trigger-mobile-metrics
+
+  release:
+    working_directory: ~/code
+    docker:
+      - image: << pipeline.parameters.docker-image-tag >>
+    steps:
+      - checkout
+      - generate-version-name
+      - assemble-core-release
+      - assemble-ui-release
+      - check-public-documentation
+      - generate-documentation
+      - publish-artifacts:
+          artifact-type: "core"
+      - publish-artifacts:
+          artifact-type: "ui"

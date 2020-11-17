@@ -9,18 +9,27 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
 import com.mapbox.navigation.ui.base.MapboxView
-import com.mapbox.navigation.ui.internal.route.RouteConstants.*
-import com.mapbox.navigation.ui.maps.route.routeline.model.*
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_SOURCE_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.routeline.model.RouteLineState
 
-class MapboxRouteLineView(): MapboxView<RouteLineState> {
+class MapboxRouteLineView() : MapboxView<RouteLineState> {
 
     private var style: Style? = null
 
     override fun render(state: RouteLineState) {
         when (state) {
             is RouteLineState.ClearRouteDataState -> renderState(state)
-            is RouteLineState.TraveledRouteLineUpdateState.TraveledRouteLineUpdate -> renderState(state)
-            is RouteLineState.TraveledRouteLineUpdateState.TraveledRouteLineNoUpdate -> renderState(state)
+            is RouteLineState.TraveledRouteLineUpdateState.TraveledRouteLineUpdate -> renderState(
+                state
+            )
+            is RouteLineState.TraveledRouteLineUpdateState.TraveledRouteLineNoUpdate -> renderState(
+                state
+            )
             is RouteLineState.DrawRouteState -> renderState(state)
             is RouteLineState.UpdateLayerVisibilityState -> renderState(state)
             is RouteLineState.PrimaryRouteState -> renderState(state)
@@ -56,13 +65,17 @@ class MapboxRouteLineView(): MapboxView<RouteLineState> {
         updateSource(WAYPOINT_SOURCE_ID, state.getWaypointsSource())
     }
 
-    private fun renderState(state: RouteLineState.TraveledRouteLineUpdateState.TraveledRouteLineUpdate) {
+    private fun renderState(
+        state: RouteLineState.TraveledRouteLineUpdateState.TraveledRouteLineUpdate
+    ) {
         updateLineGradient(PRIMARY_ROUTE_TRAFFIC_LAYER_ID, state.getTrafficExpression())
         updateLineGradient(PRIMARY_ROUTE_LAYER_ID, state.getRouteLineExpression())
         updateLineGradient(PRIMARY_ROUTE_CASING_LAYER_ID, state.getCasingLineExpression())
     }
 
-    private fun renderState(state: RouteLineState.TraveledRouteLineUpdateState.TraveledRouteLineNoUpdate) {
+    private fun renderState(
+        state: RouteLineState.TraveledRouteLineUpdateState.TraveledRouteLineNoUpdate
+    ) {
         // nothing to do here
     }
 

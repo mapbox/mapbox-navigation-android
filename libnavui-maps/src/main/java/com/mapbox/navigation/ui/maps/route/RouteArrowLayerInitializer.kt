@@ -16,10 +16,15 @@ class RouteArrowLayerInitializer private constructor(
     private val routeArrowResourceProvider: RouteArrowResourceProvider,
     private val routeArrowDrawableProvider: RouteArrowDrawableProvider,
     private val aboveLayerId: String
-){
+) {
 
     fun initializeLayers(style: Style) {
-        initRouteArrowLayers(style, routeArrowDrawableProvider, routeArrowResourceProvider, aboveLayerId)
+        initRouteArrowLayers(
+            style,
+            routeArrowDrawableProvider,
+            routeArrowResourceProvider,
+            aboveLayerId
+        )
     }
 
     class Builder(private val context: Context) {
@@ -38,12 +43,20 @@ class RouteArrowLayerInitializer private constructor(
 
         fun build(): RouteArrowLayerInitializer {
             val styleResource: Int = styleRes ?: ThemeUtil.retrieveAttrResourceId(
-                context, R.attr.navigationViewRouteStyle, R.style.MapboxStyleNavigationMapRoute
+                context,
+                R.attr.navigationViewRouteStyle,
+                R.style.MapboxStyleNavigationMapRoute
             )
             val resourceProvider = routeArrowResourceProvider
                 ?: getRouteArrowResourceProvider(context, styleResource)
-            val arrowHeadIcon = AppCompatResources.getDrawable(context, resourceProvider.getArrowHeadIcon())
-            val arrowHeadCasingIcon = AppCompatResources.getDrawable(context, resourceProvider.getArrowHeadCasingIcon())
+            val arrowHeadIcon = AppCompatResources.getDrawable(
+                context,
+                resourceProvider.getArrowHeadIcon()
+            )
+            val arrowHeadCasingIcon = AppCompatResources.getDrawable(
+                context,
+                resourceProvider.getArrowHeadCasingIcon()
+            )
             val routeArrowAboveLayerId: String = aboveLayerId ?: LAYER_ABOVE_UPCOMING_MANEUVER_ARROW
 
             return RouteArrowLayerInitializer(

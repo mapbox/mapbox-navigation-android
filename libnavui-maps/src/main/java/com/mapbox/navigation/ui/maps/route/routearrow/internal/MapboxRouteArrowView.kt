@@ -11,7 +11,7 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants.ARROW_HEAD_SOURCE_
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ARROW_SHAFT_SOURCE_ID
 import com.mapbox.navigation.ui.maps.route.routearrow.model.RouteArrowState
 
-class MapboxRouteArrowView(): MapboxView<RouteArrowState> {
+class MapboxRouteArrowView() : MapboxView<RouteArrowState> {
 
     private var style: Style? = null
 

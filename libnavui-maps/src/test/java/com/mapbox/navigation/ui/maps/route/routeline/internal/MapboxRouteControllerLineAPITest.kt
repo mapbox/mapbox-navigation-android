@@ -64,7 +64,9 @@ class MapboxRouteControllerLineAPITest {
 
     @Test
     fun hidePrimaryRouteCallsRenderOnConsumer() {
-        val state = RouteLineState.UpdateLayerVisibilityState(listOf(Pair("foobar", Visibility.VISIBLE)))
+        val state = RouteLineState.UpdateLayerVisibilityState(
+            listOf(Pair("foobar", Visibility.VISIBLE))
+        )
         val stateConsumer = mockk<MapboxRouteLineView>(relaxUnitFun = true)
         val routeLineActions = mockk<RouteLineActions> {
             every { getHidePrimaryRouteState() } returns state
@@ -78,7 +80,9 @@ class MapboxRouteControllerLineAPITest {
 
     @Test
     fun showPrimaryRouteCallsRenderOnConsumer() {
-        val state = RouteLineState.UpdateLayerVisibilityState(listOf(Pair("foobar", Visibility.VISIBLE)))
+        val state = RouteLineState.UpdateLayerVisibilityState(
+            listOf(Pair("foobar", Visibility.VISIBLE))
+        )
         val stateConsumer = mockk<MapboxRouteLineView>(relaxUnitFun = true)
         val routeLineActions = mockk<RouteLineActions> {
             every { getShowPrimaryRouteState() } returns state
@@ -92,7 +96,9 @@ class MapboxRouteControllerLineAPITest {
 
     @Test
     fun hideAlternativeRoutesCallsRenderOnConsumer() {
-        val state = RouteLineState.UpdateLayerVisibilityState(listOf(Pair("foobar", Visibility.NONE)))
+        val state = RouteLineState.UpdateLayerVisibilityState(
+            listOf(Pair("foobar", Visibility.NONE))
+        )
         val stateConsumer = mockk<MapboxRouteLineView>(relaxUnitFun = true)
         val routeLineActions = mockk<RouteLineActions> {
             every { getHideAlternativeRoutesState() } returns state
@@ -106,7 +112,9 @@ class MapboxRouteControllerLineAPITest {
 
     @Test
     fun showAlternativeRoutesCallsRenderOnConsumer() {
-        val state = RouteLineState.UpdateLayerVisibilityState(listOf(Pair("foobar", Visibility.NONE)))
+        val state = RouteLineState.UpdateLayerVisibilityState(
+            listOf(Pair("foobar", Visibility.NONE))
+        )
         val stateConsumer = mockk<MapboxRouteLineView>(relaxUnitFun = true)
         val routeLineActions = mockk<RouteLineActions> {
             every { getShowAlternativeRoutesState() } returns state
@@ -120,7 +128,9 @@ class MapboxRouteControllerLineAPITest {
 
     @Test
     fun hideOriginAndDestinationPoints() {
-        val state = RouteLineState.UpdateLayerVisibilityState(listOf(Pair("foobar", Visibility.NONE)))
+        val state = RouteLineState.UpdateLayerVisibilityState(
+            listOf(Pair("foobar", Visibility.NONE))
+        )
         val stateConsumer = mockk<MapboxRouteLineView>(relaxUnitFun = true)
         val routeLineActions = mockk<RouteLineActions> {
             every { getHideOriginAndDestinationPointsState() } returns state
@@ -133,7 +143,9 @@ class MapboxRouteControllerLineAPITest {
 
     @Test
     fun showOriginAndDestinationPoints() {
-        val state = RouteLineState.UpdateLayerVisibilityState(listOf(Pair("foobar", Visibility.NONE)))
+        val state = RouteLineState.UpdateLayerVisibilityState(
+            listOf(Pair("foobar", Visibility.NONE))
+        )
         val stateConsumer = mockk<MapboxRouteLineView>(relaxUnitFun = true)
         val routeLineActions = mockk<RouteLineActions> {
             every { getShowOriginAndDestinationPointsState() } returns state
@@ -148,7 +160,11 @@ class MapboxRouteControllerLineAPITest {
     fun updateTraveledRouteLine() {
         val point = Point.fromLngLat(-122.4727051, 37.7577627)
         val expression = mockk<Expression>()
-        val state = RouteLineState.TraveledRouteLineUpdateState.TraveledRouteLineUpdate(expression, expression, expression)
+        val state = RouteLineState.TraveledRouteLineUpdateState.TraveledRouteLineUpdate(
+            expression,
+            expression,
+            expression
+        )
         val stateConsumer = mockk<MapboxRouteLineView>(relaxUnitFun = true)
         val routeLineActions = mockk<RouteLineActions> {
             every { getTraveledRouteLineUpdate(point) } returns state

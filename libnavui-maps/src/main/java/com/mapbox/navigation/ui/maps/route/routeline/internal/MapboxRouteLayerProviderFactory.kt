@@ -45,7 +45,7 @@ object MapboxRouteLayerProviderFactory {
                     R.styleable.MapboxStyleNavigationMapRoute
                 )
             override val routeLineCasingScaleValues: List<RouteLineScaleValue> =
-               getRouteLineScalingValues(
+                getRouteLineScalingValues(
                     styleRes,
                     context,
                     R.styleable.MapboxStyleNavigationMapRoute_routeLineCasingScaleStops,

@@ -9,20 +9,25 @@ import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
-import com.mapbox.navigation.ui.internal.route.RouteConstants.*
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_CASING_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.routeline.api.RouteLineResourceProvider
 import com.mapbox.navigation.ui.maps.route.routeline.model.IdentifiableRoute
 import com.mapbox.navigation.ui.maps.route.routeline.model.RouteLineState
 import com.mapbox.navigation.ui.maps.route.routeline.model.VanishingPointState
 import io.mockk.every
 import io.mockk.mockk
-
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import java.util.*
+import java.util.Scanner
 
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
 @RunWith(RobolectricTestRunner::class)
@@ -97,7 +102,8 @@ class MapboxRouteControllerLineActionsTest {
     fun getHideOriginAndDestinationPointsState() {
         val routeResourceProvider = mockk<RouteLineResourceProvider>()
 
-        val result = MapboxRouteLineActions(routeResourceProvider).getHideOriginAndDestinationPointsState()
+        val result =
+            MapboxRouteLineActions(routeResourceProvider).getHideOriginAndDestinationPointsState()
 
         assertEquals(result.getLayerVisibilityChanges()[0].first, WAYPOINT_LAYER_ID)
         assertEquals(result.getLayerVisibilityChanges()[0].second, Visibility.NONE)
@@ -107,7 +113,8 @@ class MapboxRouteControllerLineActionsTest {
     fun getShowOriginAndDestinationPointsState() {
         val routeResourceProvider = mockk<RouteLineResourceProvider>()
 
-        val result = MapboxRouteLineActions(routeResourceProvider).getShowOriginAndDestinationPointsState()
+        val result =
+            MapboxRouteLineActions(routeResourceProvider).getShowOriginAndDestinationPointsState()
 
         assertEquals(result.getLayerVisibilityChanges()[0].first, WAYPOINT_LAYER_ID)
         assertEquals(result.getLayerVisibilityChanges()[0].second, Visibility.VISIBLE)
@@ -116,7 +123,7 @@ class MapboxRouteControllerLineActionsTest {
     @Test // todo needs more testing
     fun getUpdatePrimaryRouteIndexStateSetsPrimaryRoute() {
         val route = getRoute()
-        val actions =  MapboxRouteLineActions(genericMockResourceProvider).also {
+        val actions = MapboxRouteLineActions(genericMockResourceProvider).also {
             it.getUpdatePrimaryRouteIndexState(route)
         }
 
@@ -139,8 +146,10 @@ class MapboxRouteControllerLineActionsTest {
             "Point{type=Point, bbox=null, coordinates=[-122.523579, 37.975173]}, " +
             "Point{type=Point, bbox=null, coordinates=[-122.523117, 37.975107]}, " +
             "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}]}"
-        val expectedWaypointFeature0 = "Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}"
-        val expectedWaypointFeature1 = "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}"
+        val expectedWaypointFeature0 =
+            "Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}"
+        val expectedWaypointFeature1 =
+            "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}"
         val route = getRoute()
         val routes = listOf(route)
 
@@ -152,10 +161,19 @@ class MapboxRouteControllerLineActionsTest {
         assertEquals(expectedCasingExpression, result.getCasingLineExpression().toString())
         assertEquals(expectedRouteLineExpression, result.getRouteLineExpression().toString())
         assertEquals(expectedTrafficLineExpression, result.getTrafficLineExpression().toString())
-        assertEquals(expectedPrimaryRouteSourceGeometry, result.getPrimaryRouteSource().features()!![0].geometry().toString())
+        assertEquals(
+            expectedPrimaryRouteSourceGeometry,
+            result.getPrimaryRouteSource().features()!![0].geometry().toString()
+        )
         assertTrue(result.getAlternateRoutesSource().features()!!.isEmpty())
-        assertEquals(expectedWaypointFeature0, result.getWaypointsSource().features()!![0].geometry().toString())
-        assertEquals(expectedWaypointFeature1, result.getWaypointsSource().features()!![1].geometry().toString())
+        assertEquals(
+            expectedWaypointFeature0,
+            result.getWaypointsSource().features()!![0].geometry().toString()
+        )
+        assertEquals(
+            expectedWaypointFeature1,
+            result.getWaypointsSource().features()!![1].geometry().toString()
+        )
     }
 
     @Test
@@ -187,20 +205,31 @@ class MapboxRouteControllerLineActionsTest {
             "Point{type=Point, bbox=null, coordinates=[-122.523579, 37.975173]}, " +
             "Point{type=Point, bbox=null, coordinates=[-122.523117, 37.975107]}, " +
             "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}]}"
-        val expectedWaypointFeature0 = "Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}"
-        val expectedWaypointFeature1 = "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}"
+        val expectedWaypointFeature0 =
+            "Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}"
+        val expectedWaypointFeature1 =
+            "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}"
         val route = getRoute()
         val routes = listOf(route)
 
-        val result =  MapboxRouteLineActions(genericMockResourceProvider).getDrawRoutesState(routes)
+        val result = MapboxRouteLineActions(genericMockResourceProvider).getDrawRoutesState(routes)
 
         assertEquals(expectedCasingExpression, result.getCasingLineExpression().toString())
         assertEquals(expectedRouteLineExpression, result.getRouteLineExpression().toString())
         assertEquals(expectedTrafficLineExpression, result.getTrafficLineExpression().toString())
-        assertEquals(expectedPrimaryRouteSourceGeometry, result.getPrimaryRouteSource().features()!![0].geometry().toString())
+        assertEquals(
+            expectedPrimaryRouteSourceGeometry,
+            result.getPrimaryRouteSource().features()!![0].geometry().toString()
+        )
         assertTrue(result.getAlternateRoutesSource().features()!!.isEmpty())
-        assertEquals(expectedWaypointFeature0, result.getWaypointsSource().features()!![0].geometry().toString())
-        assertEquals(expectedWaypointFeature1, result.getWaypointsSource().features()!![1].geometry().toString())
+        assertEquals(
+            expectedWaypointFeature0,
+            result.getWaypointsSource().features()!![0].geometry().toString()
+        )
+        assertEquals(
+            expectedWaypointFeature1,
+            result.getWaypointsSource().features()!![1].geometry().toString()
+        )
     }
 
     @Test
@@ -232,27 +261,47 @@ class MapboxRouteControllerLineActionsTest {
             "Point{type=Point, bbox=null, coordinates=[-122.523579, 37.975173]}, " +
             "Point{type=Point, bbox=null, coordinates=[-122.523117, 37.975107]}, " +
             "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}]}"
-        val expectedWaypointFeature0 = "Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}"
-        val expectedWaypointFeature1 = "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}"
+        val expectedWaypointFeature0 =
+            "Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}"
+        val expectedWaypointFeature1 =
+            "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}"
         val route = getRoute()
         val routes = listOf(IdentifiableRoute(route, ""))
 
-        val result =  MapboxRouteLineActions(genericMockResourceProvider).getDrawIdentifiableRoutesState(routes)
+        val result =
+            MapboxRouteLineActions(genericMockResourceProvider).getDrawIdentifiableRoutesState(
+                routes
+            )
 
         assertEquals(expectedCasingExpression, result.getCasingLineExpression().toString())
         assertEquals(expectedRouteLineExpression, result.getRouteLineExpression().toString())
         assertEquals(expectedTrafficLineExpression, result.getTrafficLineExpression().toString())
-        assertEquals(expectedPrimaryRouteSourceGeometry, result.getPrimaryRouteSource().features()!![0].geometry().toString())
+        assertEquals(
+            expectedPrimaryRouteSourceGeometry,
+            result.getPrimaryRouteSource().features()!![0].geometry().toString()
+        )
         assertTrue(result.getAlternateRoutesSource().features()!!.isEmpty())
-        assertEquals(expectedWaypointFeature0, result.getWaypointsSource().features()!![0].geometry().toString())
-        assertEquals(expectedWaypointFeature1, result.getWaypointsSource().features()!![1].geometry().toString())
+        assertEquals(
+            expectedWaypointFeature0,
+            result.getWaypointsSource().features()!![0].geometry().toString()
+        )
+        assertEquals(
+            expectedWaypointFeature1,
+            result.getWaypointsSource().features()!![1].geometry().toString()
+        )
     }
 
     @Test
     fun getTraveledRouteLineUpdate() {
-        val expectedCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 2.0, 0.0], 0.3240769449298392, [rgba, 0.0, 0.0, 4.0, 0.0]]"
-        val expectedRouteExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 2.0, 0.0], 0.3240769449298392, [rgba, 0.0, 0.0, 3.0, 0.0]]"
-        val expectedTrafficExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.3240769449298392, [rgba, 0.0, 0.0, 1.0, 0.0], 0.9429639111009005, [rgba, 0.0, 0.0, 6.0, 0.0]]"
+        val expectedCasingExpression =
+            "[step, [line-progress], [rgba, 0.0, 0.0, 2.0, 0.0], 0.3240769449298392, " +
+                "[rgba, 0.0, 0.0, 4.0, 0.0]]"
+        val expectedRouteExpression =
+            "[step, [line-progress], [rgba, 0.0, 0.0, 2.0, 0.0], 0.3240769449298392, " +
+                "[rgba, 0.0, 0.0, 3.0, 0.0]]"
+        val expectedTrafficExpression =
+            "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.3240769449298392, " +
+                "[rgba, 0.0, 0.0, 1.0, 0.0], 0.9429639111009005, [rgba, 0.0, 0.0, 6.0, 0.0]]"
         val route = getRoute()
         val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
         val routeProgress = mockk<RouteProgress> {
@@ -278,7 +327,9 @@ class MapboxRouteControllerLineActionsTest {
         actions.getDrawRoutesState(listOf(route))
         actions.updateUpcomingRoutePointIndex(routeProgress)
 
-        val result = actions.getTraveledRouteLineUpdate(lineString.coordinates()[1]) as RouteLineState.TraveledRouteLineUpdateState.TraveledRouteLineUpdate
+        val result =
+            actions.getTraveledRouteLineUpdate(lineString.coordinates()[1])
+                as RouteLineState.TraveledRouteLineUpdateState.TraveledRouteLineUpdate
 
         assertEquals(expectedCasingExpression, result.getCasingLineExpression().toString())
         assertEquals(expectedRouteExpression, result.getRouteLineExpression().toString())
@@ -303,27 +354,32 @@ class MapboxRouteControllerLineActionsTest {
         }
         val result = actions.getTraveledRouteLineUpdate(Point.fromLngLat(-122.4727051, 37.7577627))
 
-
         assertTrue(result is RouteLineState.TraveledRouteLineUpdateState.TraveledRouteLineNoUpdate)
     }
 
     @Test
     fun updateVanishingPointState_When_LOCATION_TRACKING() {
-        val result = MapboxRouteLineActions(genericMockResourceProvider).updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
+        val result = MapboxRouteLineActions(genericMockResourceProvider).updateVanishingPointState(
+            RouteProgressState.LOCATION_TRACKING
+        )
 
         assertEquals(VanishingPointState.ENABLED, result.getVanishingPointState())
     }
 
     @Test
     fun updateVanishingPointState_When_ROUTE_COMPLETE() {
-        val result = MapboxRouteLineActions(genericMockResourceProvider).updateVanishingPointState(RouteProgressState.ROUTE_COMPLETE)
+        val result = MapboxRouteLineActions(genericMockResourceProvider).updateVanishingPointState(
+            RouteProgressState.ROUTE_COMPLETE
+        )
 
         assertEquals(VanishingPointState.ONLY_INCREASE_PROGRESS, result.getVanishingPointState())
     }
 
     @Test
     fun updateVanishingPointState_When_other() {
-        val result = MapboxRouteLineActions(genericMockResourceProvider).updateVanishingPointState(RouteProgressState.OFF_ROUTE)
+        val result = MapboxRouteLineActions(genericMockResourceProvider).updateVanishingPointState(
+            RouteProgressState.OFF_ROUTE
+        )
 
         assertEquals(VanishingPointState.DISABLED, result.getVanishingPointState())
     }

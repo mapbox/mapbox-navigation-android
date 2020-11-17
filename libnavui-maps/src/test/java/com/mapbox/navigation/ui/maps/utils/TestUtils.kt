@@ -1,6 +1,6 @@
 package com.mapbox.navigation.ui.maps.utils
 
-import java.util.*
+import java.util.Scanner
 
 object TestUtils {
 

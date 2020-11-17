@@ -5,9 +5,11 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.ui.base.MapboxState
 
-sealed class RouteArrowState: MapboxState {
+sealed class RouteArrowState : MapboxState {
 
-    class UpdateRouteArrowVisibilityState(private val layerVisibilityModifications: List<Pair<String, Visibility>>): RouteArrowState() {
+    class UpdateRouteArrowVisibilityState(
+        private val layerVisibilityModifications: List<Pair<String, Visibility>>
+    ) : RouteArrowState() {
         fun getVisibilityChanges(): List<Pair<String, Visibility>> = layerVisibilityModifications
     }
 
@@ -15,13 +17,13 @@ sealed class RouteArrowState: MapboxState {
         private val layerVisibilityModifications: List<Pair<String, Visibility>>,
         private val arrowShaftFeature: Feature?,
         private val arrowHeadFeature: Feature?
-    ): RouteArrowState() {
+    ) : RouteArrowState() {
         fun getVisibilityChanges(): List<Pair<String, Visibility>> = layerVisibilityModifications
         fun getArrowHeadFeature(): Feature? = arrowHeadFeature
         fun getArrowShaftFeature(): Feature? = arrowShaftFeature
     }
 
-    class UpdateViewStyleState(private val style: Style): RouteArrowState() {
+    class UpdateViewStyleState(private val style: Style) : RouteArrowState() {
         fun getStyle() = style
     }
 }

@@ -23,7 +23,7 @@ internal class MapboxRouteLineResourceProvider(
     private val originWaypointIcon: Int,
     private val destinationWaypointIcon: Int,
     private val trafficBackfillRoadClasses: List<String>
-): RouteLineResourceProvider {
+) : RouteLineResourceProvider {
     override fun getRouteLineTraveledColor(): Int = routeLineTraveledColor
 
     override fun getRouteLineTraveledCasingColor(): Int = routeLineTraveledCasingColor
