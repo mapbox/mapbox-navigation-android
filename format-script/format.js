@@ -30,16 +30,18 @@ const glob = `${basePath}/**/*.html`;
 /**
  * Prepare custom HTML content to be added.
  * */
-const topBarContent = (depth) => {
-  return `<body>\n<div class="top-bar">\n<div class="limiter">\n<span class="shell-mb-logo"></span>\n<span class="product-name">Navigation SDK for Android Reference (${VERSION})</span>\n</div>\n</div>\n<div class="limiter">\n<a href="${
-    depth === 1 ? './' : '../'
+const topBarContent = (depth, relativeFilePath) => {
+  if (relativeFilePath === 'index.html') console.log('🌈' + depth)
+  const topPath = `<body>\n<div class="top-bar">\n<div class="limiter">\n<span class="shell-mb-logo"></span>\n<span class="product-name">Navigation SDK for Android Reference (${VERSION})</span>\n</div>\n</div>\n<div class="limiter">\n<a href="${
+    depth === 1 ? `./` : '../'
   }${depth > 2 ? '../' : ''}${depth > 3 ? '../' : ''}${
     depth > 4 ? '../' : ''
   }index.html">All modules</a>&nbsp;/&nbsp;`;
+  return topPath;
 };
 const allModulesPageContent = (folders) => {
   return `<html>\n<head>\n<meta charset="UTF-8">\n<title>API reference | Mapbox Navigation SDK for Android</title>\n<link rel="stylesheet" href="style.css">\n</head>\n${topBarContent(
-    6
+    1
   )}\n<h1>Mapbox Navigation SDK for Android</h1>\n<h2>Modules</h2>\n<table>\n<tbody>\n${folders.join(
     '\n'
   )} \n</tbody>\n</table>\n</div>\n</body>\n</html>`;
@@ -54,12 +56,11 @@ globby(glob).then((htmlFiles) => {
     const depth = relativeFilePath.split('/').length;
     fs.readFile(filePath, 'utf8', (err, data) => {
       if (err) throw err;
-      let result = data.replace(/<BODY>/, topBarContent(depth));
+      let result = data.replace(/<BODY>/, topBarContent(depth, relativeFilePath));
       result = result.replace(/<\/BODY>/, `</div>\n</body>`);
       if (result) {
         fs.writeFile(filePath, result, 'utf8', function (err) {
           if (err) return console.log(err);
-          console.log(`Added top-bar to ${filePath}`);
         });
       }
     });
