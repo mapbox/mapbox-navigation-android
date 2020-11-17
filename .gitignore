@@ -21,3 +21,6 @@ jacoco.exec
 
 # project files
 developer-config.xml
+
+# format script
+format-script/node_modules
