@@ -16,12 +16,25 @@
         android:name=".MapboxRouteLineAPIExampleActivity"
         android:label="@string/title_navigation_route_ui"
         android:screenOrientation="portrait">
+    </activity>
+
+    <activity
+        android:name=".SlackLineActivity"
+        android:label="@string/title_navigation_route_ui"
+        android:screenOrientation="portrait">
+    </activity>
+
+    <activity
+        android:name="com.mapbox.navigation.examples.MainActivity"
+        android:label="@string/title_navigation_route_ui"
+        android:screenOrientation="portrait">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
         <action android:name="android.intent.action.VIEW" />
       </intent-filter>
     </activity>
+
   </application>
 
 </manifest>

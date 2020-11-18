@@ -128,4 +128,8 @@
     <string name="history_local_history_file">Local history file</string>
     <string name="history_recorded_history_file">Recorded history file</string>
 
+    <string name="title_route_api" translatable="false">Routeline API example</string>
+    <string name="description_routeline_api" translatable="false">Demonstrates usage of the route line API.</string>
+    <string name="title_slackline" translatable="false">Slackline usage example</string>
+    <string name="slackline_description" translatable="false">Describes using Slackline as a route line setup shortcut.</string>
 </resources>
