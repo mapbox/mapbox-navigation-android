@@ -92,7 +92,7 @@ class CameraAnimationsActivity :
     private var remainingPointsOnCurrentStep: List<Point> = emptyList()
     private var remainingPointsOnRoute: List<Point> = emptyList()
 
-    private var edgeInsets = EdgeInsets(40.0, 40.0, 40.0, 40.0)
+    private var edgeInsetsDip = EdgeInsets(40.0, 40.0, 40.0, 40.0)
 
     private val locationObserver: LocationObserver = object : LocationObserver {
         override fun onRawLocationChanged(rawLocation: Location) {
@@ -179,7 +179,7 @@ class CameraAnimationsActivity :
             navigationStateTransitionProvider.updateMapFrameForFollowing(NavigationStateTransitionToFollowingOptions.Builder(
                 it, remainingPointsOnCurrentStep
             ).apply {
-                padding(getScaledEdgeInsets(edgeInsets))
+                padding(getScaledEdgeInsets(edgeInsetsDip))
                 maxZoom(navigationCameraOptions.maxZoom)
                 pitch(navigationCameraOptions.followingPitch)
             }.build()).start()
@@ -191,7 +191,7 @@ class CameraAnimationsActivity :
             navigationStateTransitionProvider.updateMapFrameForOverview(NavigationStateTransitionToRouteOverviewOptions.Builder(
                 it, remainingPointsOnRoute
             ).apply {
-                padding(getScaledEdgeInsets(edgeInsets))
+                padding(getScaledEdgeInsets(edgeInsetsDip))
                 maxZoom(navigationCameraOptions.maxZoom)
                 pitch(0.0)
             }.build()).start()
@@ -333,7 +333,7 @@ class CameraAnimationsActivity :
             locationComponent?.lastKnownLocation!!,
             remainingPointsOnCurrentStep).apply {
             pitch(navigationCameraOptions.followingPitch)
-            padding(getScaledEdgeInsets(edgeInsets))
+            padding(getScaledEdgeInsets(edgeInsetsDip))
             maxZoom(navigationCameraOptions.maxZoom)
         }.build()).apply { addListener(toFollowingTransitionAnimatorListener) }.start()
     }
@@ -348,7 +348,7 @@ class CameraAnimationsActivity :
             locationComponent?.lastKnownLocation!!,
             remainingPointsOnRoute).apply {
             pitch(navigationCameraOptions.followingPitch)
-            padding(getScaledEdgeInsets(edgeInsets))
+            padding(getScaledEdgeInsets(edgeInsetsDip))
             maxZoom(navigationCameraOptions.maxZoom)
         }.build()).apply { addListener(toRouteOverviewTransitionAnimatorListener) }.start()
     }
