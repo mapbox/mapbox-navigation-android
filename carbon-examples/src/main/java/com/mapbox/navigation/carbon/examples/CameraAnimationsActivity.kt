@@ -179,7 +179,7 @@ class CameraAnimationsActivity :
             navigationStateTransitionProvider.updateMapFrameForFollowing(NavigationStateTransitionToFollowingOptions.Builder(
                 it, remainingPointsOnCurrentStep
             ).apply {
-                padding(edgeInsets)
+                padding(getScaledEdgeInsets(edgeInsets))
                 maxZoom(navigationCameraOptions.maxZoom)
                 pitch(navigationCameraOptions.followingPitch)
             }.build()).start()
@@ -191,7 +191,7 @@ class CameraAnimationsActivity :
             navigationStateTransitionProvider.updateMapFrameForOverview(NavigationStateTransitionToRouteOverviewOptions.Builder(
                 it, remainingPointsOnRoute
             ).apply {
-                padding(edgeInsets)
+                padding(getScaledEdgeInsets(edgeInsets))
                 maxZoom(navigationCameraOptions.maxZoom)
                 pitch(0.0)
             }.build()).start()
@@ -333,7 +333,7 @@ class CameraAnimationsActivity :
             locationComponent?.lastKnownLocation!!,
             remainingPointsOnCurrentStep).apply {
             pitch(navigationCameraOptions.followingPitch)
-            padding(edgeInsets)
+            padding(getScaledEdgeInsets(edgeInsets))
             maxZoom(navigationCameraOptions.maxZoom)
         }.build()).apply { addListener(toFollowingTransitionAnimatorListener) }.start()
     }
@@ -348,9 +348,15 @@ class CameraAnimationsActivity :
             locationComponent?.lastKnownLocation!!,
             remainingPointsOnRoute).apply {
             pitch(navigationCameraOptions.followingPitch)
-            padding(edgeInsets)
+            padding(getScaledEdgeInsets(edgeInsets))
             maxZoom(navigationCameraOptions.maxZoom)
         }.build()).apply { addListener(toRouteOverviewTransitionAnimatorListener) }.start()
+    }
+
+    private fun getScaledEdgeInsets(edgeInsets: EdgeInsets): EdgeInsets {
+        val displayMetrics = Resources.getSystem().getDisplayMetrics()
+        val scale = displayMetrics.density
+        return EdgeInsets(edgeInsets.top * scale, edgeInsets.left * scale, edgeInsets.bottom * scale, edgeInsets.right * scale)
     }
 
     private fun findRoute(origin: Point, destination: Point) {

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.camera
 
 import android.animation.AnimatorSet
+import android.content.res.Resources
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
@@ -32,7 +33,7 @@ class MapboxNavigationStateTransition(
                 center, zoom).apply {
                 bearing(bearing)
                 pitch(40.0)
-                anchorOffset(ScreenCoordinate(0.0, yOffset))
+                anchorOffset(getScaledScreenCoordinate(ScreenCoordinate(0.0, yOffset)))
                 animatorListener(transitionOptions.animatorListener)
             }.build()
         )
@@ -53,7 +54,7 @@ class MapboxNavigationStateTransition(
                 center, zoom).apply {
                 bearing(bearing)
                 pitch(40.0)
-                anchorOffset(ScreenCoordinate(0.0, yOffset))
+                anchorOffset(getScaledScreenCoordinate(ScreenCoordinate(0.0, yOffset)))
                 animatorListener(transitionOptions.animatorListener)
             }.build()
         )
@@ -78,7 +79,7 @@ class MapboxNavigationStateTransition(
                     center, zoom).apply {
                     bearing(bearing)
                     pitch(0.0)
-                    anchorOffset(ScreenCoordinate(0.0, yOffset))
+                    anchorOffset(getScaledScreenCoordinate(ScreenCoordinate(0.0, yOffset)))
                     animatorListener(transitionOptions.animatorListener)
                 }.build())
         else
@@ -87,7 +88,7 @@ class MapboxNavigationStateTransition(
                     center, zoom).apply {
                     bearing(bearing)
                     pitch(0.0)
-                    anchorOffset(ScreenCoordinate(0.0, yOffset))
+                    anchorOffset(getScaledScreenCoordinate(ScreenCoordinate(0.0, yOffset)))
                     animatorListener(transitionOptions.animatorListener)
                 }.build())
     }
@@ -109,17 +110,23 @@ class MapboxNavigationStateTransition(
                 center, zoom).apply {
                 bearing(bearing)
                 pitch(0.0)
-                anchorOffset(ScreenCoordinate(0.0, yOffset))
+                anchorOffset(getScaledScreenCoordinate(ScreenCoordinate(0.0, yOffset)))
                 animatorListener(transitionOptions.animatorListener)
             }.build())
     }
 
     private fun getZoomLevelAndCenterCoordinate(points: List<Point>, bearing: Double, pitch: Double, edgeInsets: EdgeInsets): Pair<Double, Point> {
-        val cam = mapboxMap.cameraForCoordinates(points, getScaledEdgeInsets(edgeInsets), bearing, pitch)
+        val cam = mapboxMap.cameraForCoordinates(points, edgeInsets, bearing, pitch)
 
         if (cam.zoom != null && cam.center != null) {
             return Pair(cam.zoom!!, cam.center!!)
         }
         return Pair(2.0, Point.fromLngLat(0.0, 0.0))
+    }
+
+    private fun getScaledScreenCoordinate(screenCoordinate: ScreenCoordinate): ScreenCoordinate {
+        val displayMetrics = Resources.getSystem().getDisplayMetrics()
+        val scale = displayMetrics.density
+        return ScreenCoordinate(screenCoordinate.x * scale, screenCoordinate.y * scale)
     }
 }
