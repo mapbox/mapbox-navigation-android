@@ -51,6 +51,7 @@ public class RouteConstants {
   public static final double MINIMUM_ROUTE_LINE_OFFSET = .000000001;
   public static final String LAYER_ABOVE_UPCOMING_MANEUVER_ARROW = "com.mapbox.annotations.points";
   public static final String DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER = "mapboxDescriptorPlaceHolderUnused";
+  public static final float DEFAULT_ROUTE_CLICK_PADDING_IN_DIP = 30f;
   public static final double MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO = 1_500_000_000; // 1.5s
   public static final double ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS = 2.0;
 }

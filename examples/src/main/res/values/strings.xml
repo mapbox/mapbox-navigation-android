@@ -97,6 +97,9 @@
     <string name="title_route_alerts">Route alerts visualization</string>
     <string name="description_route_alerts">An example of how to request, interpret and display route alerts</string>
 
+    <string name="title_alternative_route_custom_click_padding">Custom alternative route click padding</string>
+    <string name="description_alternative_route_custom_click_padding">Visualize the click box that affects detection of alternative route selection.</string>
+
     <string name="settings">Settings</string>
     <string name="simulate_route">Simulate Route</string>
     <string name="language">Language</string>
@@ -133,5 +136,7 @@
     <string name="history_failed_to_load_list">Failed to load list</string>
     <string name="history_local_history_file">Local history file</string>
     <string name="history_recorded_history_file">Recorded history file</string>
+    <string name="alternative_route_click_padding">Click padding: %1$d</string>
+    <string name="alternative_route_click_instruction">Tap on the map to show the query RectF area</string>
 
 </resources>

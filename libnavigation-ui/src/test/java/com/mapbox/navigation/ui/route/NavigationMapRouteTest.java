@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.route;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -12,10 +13,10 @@ import com.mapbox.navigation.core.MapboxNavigation;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-
+import static com.mapbox.navigation.ui.internal.route.RouteConstants.DEFAULT_ROUTE_CLICK_PADDING_IN_DIP;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -28,16 +29,24 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
+
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
       mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
 
-    new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap, mockedLifecycleOwner, mockedStyleRes, "",
-      mockedMapClickListener, mockedDidFinishLoadingStyleListener, mockedProgressChangeListener);
+    new NavigationMapRoute(
+            mockedNavigation,
+            mockedMapView,
+            mockedMapboxMap,
+            mockedLifecycleOwner,
+            mockedStyleRes,
+            "",
+            mockedDidFinishLoadingStyleListener,
+            mockedProgressChangeListener
+    );
 
-    verify(mockedMapboxMap, times(1)).addOnMapClickListener(eq(mockedMapClickListener));
+    verify(mockedMapboxMap).addOnMapClickListener(any());
   }
 
   @Test
@@ -46,14 +55,13 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
       mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
 
     new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap, mockedLifecycleOwner, mockedStyleRes, "",
-      mockedMapClickListener, mockedDidFinishLoadingStyleListener, mockedProgressChangeListener);
+      mockedDidFinishLoadingStyleListener, mockedProgressChangeListener);
 
     verify(mockedMapView, times(1))
       .addOnDidFinishLoadingStyleListener(eq(mockedDidFinishLoadingStyleListener));
@@ -65,13 +73,12 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
       mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
     new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap, mockedLifecycleOwner,
-      mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+      mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
       mockedProgressChangeListener);
 
     verify(mockedNavigation, times(1))
@@ -84,7 +91,6 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
       mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
@@ -92,12 +98,12 @@ public class NavigationMapRouteTest {
     MapRouteLine mockedMapRouteLine = mock(MapRouteLine.class);
     MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
-            mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+            mockedLifecycleOwner, mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
 
     theNavigationMapRoute.onStart();
 
-    verify(mockedMapboxMap, times(1)).addOnMapClickListener(eq(mockedMapClickListener));
+    verify(mockedMapboxMap, times(1)).addOnMapClickListener(any());
   }
 
   @Test
@@ -106,7 +112,6 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
       mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
@@ -114,7 +119,7 @@ public class NavigationMapRouteTest {
     MapRouteLine mockedMapRouteLine = mock(MapRouteLine.class);
     MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
-            mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+            mockedLifecycleOwner, mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
 
     theNavigationMapRoute.onStart();
@@ -130,19 +135,18 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
       mock(MapView.OnDidFinishLoadingStyleListener.class);
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView,
-      mockedMapboxMap, mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+      mockedMapboxMap, mockedLifecycleOwner, mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
       mockedProgressChangeListener);
     when (mockedMapboxMap.getLocationComponent()).thenReturn(mockLocationComponent);
 
     theNavigationMapRoute.onStop();
 
-    verify(mockedMapboxMap, times(1)).removeOnMapClickListener(eq(mockedMapClickListener));
+    verify(mockedMapboxMap, times(1)).removeOnMapClickListener(any());
   }
 
   @Test
@@ -152,13 +156,12 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
       mock(MapView.OnDidFinishLoadingStyleListener.class);
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView,
-      mockedMapboxMap, mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+      mockedMapboxMap, mockedLifecycleOwner, mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
       mockedProgressChangeListener);
     when (mockedMapboxMap.getLocationComponent()).thenReturn(mockLocationComponent);
 
@@ -175,13 +178,12 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
       mock(MapView.OnDidFinishLoadingStyleListener.class);
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView,
-      mockedMapboxMap, mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener,
+      mockedMapboxMap, mockedLifecycleOwner, mockedStyleRes, "",
       mockedDidFinishLoadingStyleListener, mockedProgressChangeListener);
     when (mockedMapboxMap.getLocationComponent()).thenReturn(mockLocationComponent);
 
@@ -197,7 +199,6 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
       mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
@@ -205,7 +206,7 @@ public class NavigationMapRouteTest {
     MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
-            mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+            mockedLifecycleOwner, mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
       mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
 
     theNavigationMapRoute.removeProgressChangeListener(mockedNavigation);
@@ -220,7 +221,6 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
       mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
@@ -235,7 +235,6 @@ public class NavigationMapRouteTest {
       mockedLifecycleOwner,
       mockedStyleRes,
       "",
-      mockedMapClickListener,
       mockedDidFinishLoadingStyleListener,
       mockedProgressChangeListener,
       mockedMapRouteLine,
@@ -254,7 +253,6 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
             mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
@@ -263,7 +261,7 @@ public class NavigationMapRouteTest {
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
     List<DirectionsRoute> routes = Collections.singletonList(mockRoute);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
-            mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+            mockedLifecycleOwner, mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
     when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(Collections.singletonList(mockRoute));
 
@@ -279,7 +277,6 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
             mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
@@ -288,7 +285,7 @@ public class NavigationMapRouteTest {
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
     List<DirectionsRoute> routes = Collections.singletonList(mockRoute);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
-            mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+            mockedLifecycleOwner, mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
     when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(Collections.singletonList(mock(DirectionsRoute.class)));
 
@@ -303,7 +300,6 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
       mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
@@ -311,7 +307,7 @@ public class NavigationMapRouteTest {
     MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
-            mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+            mockedLifecycleOwner, mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
     boolean isVisible = false;
 
@@ -326,7 +322,6 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
             mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
@@ -335,7 +330,7 @@ public class NavigationMapRouteTest {
     List<IdentifiableRoute> routes = Collections.emptyList();
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
-            mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+            mockedLifecycleOwner, mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
 
 
@@ -353,7 +348,6 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
             mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
@@ -362,7 +356,7 @@ public class NavigationMapRouteTest {
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
     List<IdentifiableRoute> routes = Collections.singletonList(mockIdentifiableRoute);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
-            mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+            mockedLifecycleOwner, mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
     when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(Collections.singletonList(anotherMockRoute));
 
@@ -381,7 +375,6 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
             mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
@@ -390,7 +383,7 @@ public class NavigationMapRouteTest {
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
     List<IdentifiableRoute> routes = Arrays.asList(anotherMockIdentifiableRoute, mockIdentifiableRoute);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
-            mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+            mockedLifecycleOwner, mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
     when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(Arrays.asList(mockRoute, anotherMockRoute));
 
@@ -405,7 +398,6 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
       mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
@@ -413,7 +405,7 @@ public class NavigationMapRouteTest {
     MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
-            mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+            mockedLifecycleOwner, mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
 
     theNavigationMapRoute.updateRouteVisibilityTo(false);
@@ -427,7 +419,6 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
       mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
@@ -435,7 +426,7 @@ public class NavigationMapRouteTest {
     MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
-            mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+            mockedLifecycleOwner, mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
 
     theNavigationMapRoute.updateRouteArrowVisibilityTo(false);
@@ -449,7 +440,6 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
       mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
@@ -457,7 +447,7 @@ public class NavigationMapRouteTest {
     MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
-            mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+            mockedLifecycleOwner, mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
     boolean isVisible = false;
 
@@ -472,7 +462,6 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
       mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
@@ -480,7 +469,7 @@ public class NavigationMapRouteTest {
     MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
-            mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+            mockedLifecycleOwner, mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
     boolean isVisible = false;
 
@@ -495,7 +484,6 @@ public class NavigationMapRouteTest {
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
     int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
     MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
             mock(MapView.OnDidFinishLoadingStyleListener.class);
     MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
@@ -503,12 +491,193 @@ public class NavigationMapRouteTest {
     MapRouteLine mockedMapRouteLine = mock(MapRouteLine.class);
     MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
-            mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+            mockedLifecycleOwner, mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
 
     theNavigationMapRoute.onStart();
     theNavigationMapRoute.onNewRouteProgress(mock(RouteProgress.class, RETURNS_DEEP_STUBS));
 
     verify(mockedProgressChangeListener, never()).onRouteProgressChanged(any());
+  }
+
+  @Test
+  public void mapClickListenerUpdatesPrimaryRouteIndex() {
+    DirectionsRoute directionsRoute = mock(DirectionsRoute.class);
+    LatLng locationInput = new LatLng(37.9, -122.5);
+    MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
+    MapRouteLine mockedMapRouteLine = mock(MapRouteLine.class);
+    MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
+    MapView mockedMapView = mock(MapView.class);
+    MapboxMap mockedMapboxMap = mock(MapboxMap.class);
+    int mockedStyleRes = 0;
+    MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
+            mock(MapView.OnDidFinishLoadingStyleListener.class);
+    MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
+    LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
+    when(mockedMapRouteLine.retrieveVisibility()).thenReturn(true);
+    when(mockedMapRouteLine.retrieveAlternativesVisible()).thenReturn(true);
+    when(mockedMapRouteLine.findClosestRoute(locationInput, mockedMapboxMap, DEFAULT_ROUTE_CLICK_PADDING_IN_DIP)).thenReturn(0);
+    when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(Collections.singletonList(directionsRoute));
+
+    NavigationMapRoute navigationMapRoute = new NavigationMapRoute(
+            mockedNavigation,
+            mockedMapView,
+            mockedMapboxMap,
+            mockedLifecycleOwner,
+            mockedStyleRes,
+            "",
+            mockedDidFinishLoadingStyleListener,
+            mockedProgressChangeListener,
+            mockedMapRouteLine,
+            mockedMapRouteArrow);
+
+    navigationMapRoute.mapClickListener.onMapClick(new LatLng(37.9, -122.5));
+
+    verify(mockedMapRouteLine).updatePrimaryRouteIndex(directionsRoute);
+  }
+
+  @Test
+  public void mapClickListenerWhenNoRouteFound() {
+    DirectionsRoute directionsRoute = mock(DirectionsRoute.class);
+    LatLng locationInput = new LatLng(37.9, -122.5);
+    MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
+    MapRouteLine mockedMapRouteLine = mock(MapRouteLine.class);
+    MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
+    MapView mockedMapView = mock(MapView.class);
+    MapboxMap mockedMapboxMap = mock(MapboxMap.class);
+    int mockedStyleRes = 0;
+    MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
+            mock(MapView.OnDidFinishLoadingStyleListener.class);
+    MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
+    LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
+    when(mockedMapRouteLine.retrieveVisibility()).thenReturn(true);
+    when(mockedMapRouteLine.retrieveAlternativesVisible()).thenReturn(true);
+    when(mockedMapRouteLine.findClosestRoute(locationInput, mockedMapboxMap, 0f)).thenReturn(-1);
+    when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(Collections.singletonList(directionsRoute));
+
+    NavigationMapRoute navigationMapRoute = new NavigationMapRoute(
+            mockedNavigation,
+            mockedMapView,
+            mockedMapboxMap,
+            mockedLifecycleOwner,
+            mockedStyleRes,
+            "",
+            mockedDidFinishLoadingStyleListener,
+            mockedProgressChangeListener,
+            mockedMapRouteLine,
+            mockedMapRouteArrow);
+
+    navigationMapRoute.mapClickListener.onMapClick(new LatLng(37.9, -122.5));
+
+    verify(mockedMapRouteLine, times(0)).updatePrimaryRouteIndex(directionsRoute);
+  }
+
+  @Test
+  public void mapClickListenerWhenAlternativeRoutesNotVisibile() {
+    DirectionsRoute directionsRoute = mock(DirectionsRoute.class);
+    LatLng locationInput = new LatLng(37.9, -122.5);
+    MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
+    MapRouteLine mockedMapRouteLine = mock(MapRouteLine.class);
+    MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
+    MapView mockedMapView = mock(MapView.class);
+    MapboxMap mockedMapboxMap = mock(MapboxMap.class);
+    int mockedStyleRes = 0;
+    MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
+            mock(MapView.OnDidFinishLoadingStyleListener.class);
+    MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
+    LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
+    when(mockedMapRouteLine.retrieveVisibility()).thenReturn(true);
+    when(mockedMapRouteLine.retrieveAlternativesVisible()).thenReturn(false);
+    when(mockedMapRouteLine.findClosestRoute(locationInput, mockedMapboxMap, DEFAULT_ROUTE_CLICK_PADDING_IN_DIP)).thenReturn(0);
+    when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(Collections.singletonList(directionsRoute));
+
+    NavigationMapRoute navigationMapRoute = new NavigationMapRoute(
+            mockedNavigation,
+            mockedMapView,
+            mockedMapboxMap,
+            mockedLifecycleOwner,
+            mockedStyleRes,
+            "",
+            mockedDidFinishLoadingStyleListener,
+            mockedProgressChangeListener,
+            mockedMapRouteLine,
+            mockedMapRouteArrow);
+
+    navigationMapRoute.mapClickListener.onMapClick(new LatLng(37.9, -122.5));
+
+    verify(mockedMapRouteLine, times(0)).updatePrimaryRouteIndex(directionsRoute);
+  }
+
+  @Test
+  public void mapClickListenerWhenRouteVisibilityIsFalse() {
+    DirectionsRoute directionsRoute = mock(DirectionsRoute.class);
+    LatLng locationInput = new LatLng(37.9, -122.5);
+    MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
+    MapRouteLine mockedMapRouteLine = mock(MapRouteLine.class);
+    MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
+    MapView mockedMapView = mock(MapView.class);
+    MapboxMap mockedMapboxMap = mock(MapboxMap.class);
+    int mockedStyleRes = 0;
+    MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
+            mock(MapView.OnDidFinishLoadingStyleListener.class);
+    MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
+    LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
+    when(mockedMapRouteLine.retrieveVisibility()).thenReturn(false);
+    when(mockedMapRouteLine.retrieveAlternativesVisible()).thenReturn(true);
+    when(mockedMapRouteLine.findClosestRoute(locationInput, mockedMapboxMap, DEFAULT_ROUTE_CLICK_PADDING_IN_DIP)).thenReturn(0);
+    when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(Collections.singletonList(directionsRoute));
+
+    NavigationMapRoute navigationMapRoute = new NavigationMapRoute(
+            mockedNavigation,
+            mockedMapView,
+            mockedMapboxMap,
+            mockedLifecycleOwner,
+            mockedStyleRes,
+            "",
+            mockedDidFinishLoadingStyleListener,
+            mockedProgressChangeListener,
+            mockedMapRouteLine,
+            mockedMapRouteArrow);
+
+    navigationMapRoute.mapClickListener.onMapClick(new LatLng(37.9, -122.5));
+
+    verify(mockedMapRouteLine, times(0)).updatePrimaryRouteIndex(directionsRoute);
+  }
+
+  @Test
+  public void mapClickListenerCallsOnRouteSelectionChangeListener() {
+    DirectionsRoute directionsRoute = mock(DirectionsRoute.class);
+    LatLng locationInput = new LatLng(37.9, -122.5);
+    MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
+    MapRouteLine mockedMapRouteLine = mock(MapRouteLine.class);
+    MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
+    MapView mockedMapView = mock(MapView.class);
+    MapboxMap mockedMapboxMap = mock(MapboxMap.class);
+    int mockedStyleRes = 0;
+    MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
+            mock(MapView.OnDidFinishLoadingStyleListener.class);
+    MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
+    LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
+    OnRouteSelectionChangeListener onRouteSelectionChangeListener = mock(OnRouteSelectionChangeListener.class);
+    when(mockedMapRouteLine.retrieveVisibility()).thenReturn(true);
+    when(mockedMapRouteLine.retrieveAlternativesVisible()).thenReturn(true);
+    when(mockedMapRouteLine.findClosestRoute(locationInput, mockedMapboxMap, DEFAULT_ROUTE_CLICK_PADDING_IN_DIP)).thenReturn(0);
+    when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(Collections.singletonList(directionsRoute));
+    NavigationMapRoute navigationMapRoute = new NavigationMapRoute(
+            mockedNavigation,
+            mockedMapView,
+            mockedMapboxMap,
+            mockedLifecycleOwner,
+            mockedStyleRes,
+            "",
+            mockedDidFinishLoadingStyleListener,
+            mockedProgressChangeListener,
+            mockedMapRouteLine,
+            mockedMapRouteArrow);
+    navigationMapRoute.setOnRouteSelectionChangeListener(onRouteSelectionChangeListener);
+
+    navigationMapRoute.mapClickListener.onMapClick(new LatLng(37.9, -122.5));
+
+    verify(onRouteSelectionChangeListener).onNewPrimaryRouteSelected(directionsRoute);
   }
 }
