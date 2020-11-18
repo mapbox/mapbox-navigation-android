@@ -5,7 +5,6 @@ import android.location.Location
 import android.os.Looper
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
@@ -13,6 +12,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
+import com.mapbox.navigation.base.options.LocationPollingOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.alert.RouteAlert
@@ -57,19 +57,7 @@ internal class MapboxTripSession(
     private val accessToken: String?
 ) : TripSession {
 
-    companion object {
-
-        internal const val UNCONDITIONAL_STATUS_POLLING_PATIENCE = 2000L
-        internal const val UNCONDITIONAL_STATUS_POLLING_INTERVAL = 1000L
-        private const val LOCATION_POLLING_INTERVAL = 1000L
-        private const val LOCATION_FASTEST_INTERVAL = 500L
-        private val locationEngineRequest: LocationEngineRequest = LocationEngineRequest
-            .Builder(LOCATION_POLLING_INTERVAL)
-            .setFastestInterval(LOCATION_FASTEST_INTERVAL)
-            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-            .build()
-    }
-
+    private lateinit var locationPollingOptions: LocationPollingOptions
     private var updateNavigatorStatusDataJobs: MutableList<Job> = CopyOnWriteArrayList()
 
     override var route: DirectionsRoute? = null
@@ -167,8 +155,11 @@ internal class MapboxTripSession(
 
     /**
      * Start MapboxTripSession
+     *
+     * @param locationPollingOptions start the session with custom polling rates.
      */
-    override fun start() {
+    override fun start(locationPollingOptions: LocationPollingOptions) {
+        this.locationPollingOptions = locationPollingOptions
         if (state == TripSessionState.STARTED) {
             return
         }
@@ -179,7 +170,7 @@ internal class MapboxTripSession(
 
     private fun startLocationUpdates() {
         locationEngine.requestLocationUpdates(
-            locationEngineRequest,
+            locationPollingOptions.locationEngineRequest,
             locationEngineCallback,
             Looper.getMainLooper()
         )
@@ -492,12 +483,12 @@ internal class MapboxTripSession(
         }
 
         unconditionalStatusPollingJob = ioJobController.scope.launch {
-            delay(UNCONDITIONAL_STATUS_POLLING_PATIENCE)
+            delay(locationPollingOptions.navigatorPatienceMillis)
             while (isActive) {
                 mainJobController.scope.launch {
                     updateDataFromNavigatorStatus()
                 }
-                delay(UNCONDITIONAL_STATUS_POLLING_INTERVAL)
+                delay(locationPollingOptions.navigatorIntervalMillis)
             }
         }
     }
