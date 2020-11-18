@@ -26,6 +26,7 @@ import com.mapbox.navigation.core.NavigationSession
 import com.mapbox.navigation.core.NavigationSession.State.ACTIVE_GUIDANCE
 import com.mapbox.navigation.core.NavigationSession.State.FREE_DRIVE
 import com.mapbox.navigation.core.NavigationSession.State.IDLE
+import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.toTelemetryLocation
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.START
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.STOP
 import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent
@@ -572,7 +573,7 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
-    fun freeDrive_not_sent_when_location_not_available() {
+    fun freeDrive_sent_when_location_not_available() {
         baseMock()
         every { locationsCollector.lastLocation } returns null
 
@@ -580,9 +581,46 @@ class MapboxNavigationTelemetryTest {
         updateSessionState(FREE_DRIVE)
         updateSessionState(IDLE)
 
-        val events = captureAndVerifyMetricsReporter(exactly = 1)
+        val events = captureAndVerifyMetricsReporter(exactly = 3)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        resetTelemetry()
+        assertTrue(events[1] is NavigationFreeDriveEvent) // start free drive
+        assertTrue(events[2] is NavigationFreeDriveEvent) // stop free drive
+    }
+
+    @Test
+    fun freeDrive_sent_with_null_location_when_location_not_available_from_free_drive_to_idle() {
+        baseMock()
+        every { locationsCollector.lastLocation } returns null
+        val events = captureMetricsReporter()
+
+        initTelemetry()
+        updateSessionState(FREE_DRIVE)
+        every { locationsCollector.lastLocation } returns lastLocation
+        updateSessionState(IDLE)
+
+        val freeDriveStart = events[1] as NavigationFreeDriveEvent
+        val freeDriveStop = events[2] as NavigationFreeDriveEvent
+
+        assertEquals(null, freeDriveStart.location)
+        assertEquals(lastLocation.toTelemetryLocation(), freeDriveStop.location)
+    }
+
+    @Test
+    fun freeDrive_sent_with_null_location_when_location_not_available_from_free_drive_to_active() {
+        baseMock()
+        every { locationsCollector.lastLocation } returns null
+        val events = captureMetricsReporter()
+
+        initTelemetry()
+        updateSessionState(FREE_DRIVE)
+        every { locationsCollector.lastLocation } returns lastLocation
+        updateSessionState(ACTIVE_GUIDANCE)
+
+        val freeDriveStart = events[1] as NavigationFreeDriveEvent
+        val freeDriveStop = events[2] as NavigationFreeDriveEvent
+
+        assertEquals(null, freeDriveStart.location)
+        assertEquals(lastLocation.toTelemetryLocation(), freeDriveStop.location)
     }
 
     @Test
@@ -593,6 +631,21 @@ class MapboxNavigationTelemetryTest {
         initTelemetry()
         updateSessionState(FREE_DRIVE)
         updateSessionState(IDLE)
+
+        val startFreeDriveEvent = events[1] as NavigationFreeDriveEvent
+        val stopFreeDriveEvent = events[2] as NavigationFreeDriveEvent
+        assertEquals(START.type, startFreeDriveEvent.eventType)
+        assertEquals(STOP.type, stopFreeDriveEvent.eventType)
+    }
+
+    @Test
+    fun freeDrive_start_and_stop_sent_when_state_changes_from_free_drive_to_active_guidance() {
+        baseMock()
+        val events = captureMetricsReporter()
+
+        initTelemetry()
+        updateSessionState(FREE_DRIVE)
+        updateSessionState(ACTIVE_GUIDANCE)
 
         val startFreeDriveEvent = events[1] as NavigationFreeDriveEvent
         val stopFreeDriveEvent = events[2] as NavigationFreeDriveEvent

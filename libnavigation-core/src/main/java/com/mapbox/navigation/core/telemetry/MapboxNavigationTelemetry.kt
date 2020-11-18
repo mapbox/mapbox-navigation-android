@@ -46,13 +46,8 @@ import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEvent
-import com.mapbox.navigation.utils.internal.JobControl
-import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.ifNonNull
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.util.Date
 
 private data class DynamicSessionValues(
@@ -137,7 +132,6 @@ internal object MapboxNavigationTelemetry :
     private var routeProgress: RouteProgress? = null
     private var originalRoute: DirectionsRoute? = null
     private var needStartSession = false
-    private lateinit var jobControl: JobControl
 
     /**
      * This method must be called before using the Telemetry object
@@ -150,7 +144,6 @@ internal object MapboxNavigationTelemetry :
         locationsCollector: LocationsCollector = LocationsCollectorImpl(logger)
     ) {
         reset()
-        jobControl = ThreadController.getMainScopeAndRootJob()
         dynamicFreeDriveValues.reset()
         sessionState = IDLE
         this.logger = logger
@@ -218,7 +211,6 @@ internal object MapboxNavigationTelemetry :
             unregisterArrivalObserver(this@MapboxNavigationTelemetry)
         }
         MapboxMetricsReporter.disable()
-        jobControl.scope.cancel()
     }
 
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
@@ -282,45 +274,42 @@ internal object MapboxNavigationTelemetry :
 
     private fun trackFreeDrive(type: FreeDriveEventType) {
         log("trackFreeDrive $type")
-
-        fun createFreeDriveEvent() {
-            log("createFreeDriveEvent $type")
+        dynamicFreeDriveValues.run {
             if (type == START) {
-                dynamicFreeDriveValues.run {
-                    sessionId = obtainUniversalUniqueIdentifier()
-                    sessionStartTime = Date()
-                }
+                sessionId = obtainUniversalUniqueIdentifier()
+                sessionStartTime = Date()
             }
 
-            val freeDriveEvent = NavigationFreeDriveEvent(PhoneState(context)).apply {
-                populate(type)
-            }
+            createFreeDriveEvent(type, sessionId, sessionStartTime)
 
             if (type == STOP) {
-                dynamicFreeDriveValues.reset()
+                reset()
             }
-
-            log("${freeDriveEvent::class.java} event sent")
-            metricsReporter.addEvent(freeDriveEvent)
         }
+    }
 
-        if (locationsCollector.lastLocation == null) {
-            log("wait for location")
-            jobControl.scope.launch {
-                var waitForLocation = true
-                while (waitForLocation) {
-                    log("location not ready")
-                    delay(50)
-                    if (locationsCollector.lastLocation != null) {
-                        log("location ready")
-                        waitForLocation = false
-                        createFreeDriveEvent()
-                    }
-                }
+    private fun createFreeDriveEvent(
+        type: FreeDriveEventType,
+        sessionId: String?,
+        sessionStartTime: Date?
+    ) {
+        log("createFreeDriveEvent $type")
+        if (sessionId != null && sessionStartTime != null) {
+            val freeDriveEvent = NavigationFreeDriveEvent(PhoneState(context)).apply {
+                populate(type, sessionId, sessionStartTime)
             }
+            sendEvent(freeDriveEvent)
         } else {
-            createFreeDriveEvent()
+            log(
+                "FreeDriveEvent can't be sent. " +
+                    "sessionId = $sessionId, sessionStartTime = $sessionStartTime"
+            )
         }
+    }
+
+    private fun sendEvent(metricEvent: MetricEvent) {
+        log("${metricEvent::class.java} event sent")
+        metricsReporter.addEvent(metricEvent)
     }
 
     override fun onOffRouteStateChanged(offRoute: Boolean) {
@@ -376,8 +365,7 @@ internal object MapboxNavigationTelemetry :
 
     private fun sendMetricEvent(event: MetricEvent) {
         if (isTelemetryAvailable()) {
-            log("${event::class.java} event sent")
-            metricsReporter.addEvent(event)
+            sendEvent(event)
         } else {
             log(
                 "${event::class.java} not sent. Caused by: " +
@@ -447,7 +435,7 @@ internal object MapboxNavigationTelemetry :
                 it.setSkuId(MapboxNavigationAccounts.getInstance(context).obtainSkuId())
             }
         val event = NavigationAppUserTurnstileEvent(turnstileEvent)
-        metricsReporter.addEvent(event)
+        sendEvent(event)
     }
 
     private fun processArrival() {
@@ -517,8 +505,12 @@ internal object MapboxNavigationTelemetry :
         }
     }
 
-    private fun NavigationFreeDriveEvent.populate(type: FreeDriveEventType) {
-        log("populateNavigationFreeDriveEvent")
+    private fun NavigationFreeDriveEvent.populate(
+        type: FreeDriveEventType,
+        sessionId: String,
+        sessionStartTime: Date
+    ) {
+        log("populateFreeDriveEvent")
 
         this.apply {
             eventType = type.type
@@ -528,10 +520,8 @@ internal object MapboxNavigationTelemetry :
             percentTimeInPortrait = lifecycleMonitor?.obtainPortraitPercentage() ?: 100
             percentTimeInForeground = lifecycleMonitor?.obtainForegroundPercentage() ?: 100
             simulation = locationEngineNameExternal == MOCK_PROVIDER
-            dynamicFreeDriveValues.run {
-                sessionIdentifier = sessionId
-                startTimestamp = generateCreateDateFormatted(sessionStartTime)
-            }
+            sessionIdentifier = sessionId
+            startTimestamp = generateCreateDateFormatted(sessionStartTime)
         }
     }
 
@@ -573,7 +563,7 @@ internal object MapboxNavigationTelemetry :
         return feedbackLocations.toTypedArray()
     }
 
-    private fun Location.toTelemetryLocation(): TelemetryLocation {
+    internal fun Location.toTelemetryLocation(): TelemetryLocation {
         return TelemetryLocation(
             latitude,
             longitude,
