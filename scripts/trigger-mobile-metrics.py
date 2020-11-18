@@ -7,7 +7,7 @@ import json
 import requests
 import sys
 
-def TriggerPipeline(token, commit, job, run_benchmark):
+def TriggerWorkflow(token, commit, publish):
     url = "https://circleci.com/api/v2/project/github/mapbox/mobile-metrics/pipeline"
 
     headers = {
@@ -17,7 +17,7 @@ def TriggerPipeline(token, commit, job, run_benchmark):
 
     data = {
         "parameters": {
-          "run_android_navigation_benchmark": run_benchmark,
+          "run_android_navigation_benchmark": publish,
           "mapbox_slug": "mapbox/mapbox-navigation-android",
           "mapbox_hash": commit
         }
@@ -33,7 +33,32 @@ def TriggerPipeline(token, commit, job, run_benchmark):
       sys.exit(1)
     else:
       response_dict = json.loads(response.text)
-      print("Started %s: %s" % (job, response_dict))
+      print("Started run_android_navigation_benchmark: %s" % response_dict)
+
+def TriggerJob(token, commit, job):
+    url = "https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master"
+
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+
+    data = {
+        "build_parameters": {
+          "CIRCLE_JOB": job,
+          "BENCHMARK_COMMIT": commit
+        }
+    }
+
+    response = requests.post(url, auth=(token, ""), headers=headers, json=data)
+
+    if response.status_code != 201 and response.status_code != 200:
+      print("Error triggering the CircleCI: %s." % response.json()["message"])
+      sys.exit(1)
+    else:
+      response_dict = json.loads(response.text)
+      build_url = response_dict['build_url']
+      print("Started %s: %s" % (job, build_url))
 
 def Main():
   token = os.getenv("MOBILE_METRICS_TOKEN")
@@ -46,14 +71,15 @@ def Main():
   # Publish results that have been committed to the main branch.
   # Development runs can be found in CircleCI after manually triggered.
   publishResults = os.getenv("CIRCLE_BRANCH") == "master"
+  TriggerWorkflow(token, commit, publishResults)
+
+  # These jobs need to be refactored into workflows.
   if publishResults:
-    TriggerPipeline(token, commit, "android-navigation-benchmark", True)
-    TriggerPipeline(token, commit, "android-navigation-code-coverage", False)
-    TriggerPipeline(token, commit, "android-navigation-binary-size", False)
+    TriggerJob(token, commit, "android-navigation-code-coverage")
+    TriggerJob(token, commit, "android-navigation-binary-size")
   else:
-    TriggerPipeline(token, commit, "android-navigation-benchmark", False)
-    TriggerPipeline(token, commit, "android-navigation-code-coverage-ci", False)
-    TriggerPipeline(token, commit, "android-navigation-binary-size-ci", False)
+    TriggerJob(token, commit, "android-navigation-code-coverage-ci")
+    TriggerJob(token, commit, "android-navigation-binary-size-ci")
 
   return 0
 
