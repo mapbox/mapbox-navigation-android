@@ -8,7 +8,7 @@ import requests
 import sys
 
 def TriggerPipeline(token, commit, job, run_benchmark):
-    url = "https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master"
+    url = "https://circleci.com/api/v2/project/github/mapbox/mobile-metrics/pipeline"
 
     headers = {
         "Content-Type": "application/json",
@@ -17,13 +17,14 @@ def TriggerPipeline(token, commit, job, run_benchmark):
 
     data = {
         "parameters": {
-          "run_android_navigation_benchmark": run_benchmark
-        },
-        "build_parameters": {
-          "CIRCLE_JOB": job,
-          "BENCHMARK_COMMIT": commit
+          "run_android_navigation_benchmark": run_benchmark,
+          "mapbox_slug": "mapbox/mapbox-navigation-android",
+          "mapbox_hash": commit
         }
     }
+
+    # Use this to test your mobile-metrics branches.
+    # data["branch"]: "mobile-metrics-branch-name"
 
     response = requests.post(url, auth=(token, ""), headers=headers, json=data)
 
@@ -32,8 +33,7 @@ def TriggerPipeline(token, commit, job, run_benchmark):
       sys.exit(1)
     else:
       response_dict = json.loads(response.text)
-      build_url = response_dict['build_url']
-      print("Started %s: %s" % (job, build_url))
+      print("Started %s: %s" % (job, response_dict))
 
 def Main():
   token = os.getenv("MOBILE_METRICS_TOKEN")
