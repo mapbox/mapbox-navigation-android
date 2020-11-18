@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.camera
 
 import android.animation.AnimatorSet
+import android.content.res.Resources
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
@@ -26,7 +27,7 @@ class MapboxNavigationStateTransition(
         val center = Point.fromLngLat(transitionOptions.vehicleLocation.longitude,
             transitionOptions.vehicleLocation.latitude)
         val zoom = min(zoomAndCenter.first, transitionOptions.maxZoom)
-        val yOffset = (mapboxMap.getSize().height / 2.0) - transitionOptions.padding.bottom
+        val yOffset = getScaledScreenValue(mapboxMap.getSize().height / 2.0) - transitionOptions.padding.bottom
         return navigationCameraTransition.transitionFromLowZoomToHighZoom(
             NavigationCameraZoomTransitionOptions.Builder(
                 center, zoom).apply {
@@ -47,7 +48,7 @@ class MapboxNavigationStateTransition(
         val center = Point.fromLngLat(transitionOptions.vehicleLocation.longitude,
             transitionOptions.vehicleLocation.latitude)
         val zoom = min(zoomAndCenter.first, transitionOptions.maxZoom)
-        val yOffset = (mapboxMap.getSize().height / 2.0) - transitionOptions.padding.bottom
+        val yOffset = getScaledScreenValue(mapboxMap.getSize().height / 2.0) - transitionOptions.padding.bottom
         return navigationCameraTransition.transitionLinear(
             NavigationCameraLinearTransitionOptions.Builder(
                 center, zoom).apply {
@@ -115,11 +116,17 @@ class MapboxNavigationStateTransition(
     }
 
     private fun getZoomLevelAndCenterCoordinate(points: List<Point>, bearing: Double, pitch: Double, edgeInsets: EdgeInsets): Pair<Double, Point> {
-        val cam = mapboxMap.cameraForCoordinates(points, getScaledEdgeInsets(edgeInsets), bearing, pitch)
+        val cam = mapboxMap.cameraForCoordinates(points, edgeInsets, bearing, pitch)
 
         if (cam.zoom != null && cam.center != null) {
             return Pair(cam.zoom!!, cam.center!!)
         }
         return Pair(2.0, Point.fromLngLat(0.0, 0.0))
+    }
+
+    private fun getScaledScreenValue(screenValue: Double): Double {
+        val displayMetrics = Resources.getSystem().getDisplayMetrics()
+        val scale = displayMetrics.density
+        return screenValue * scale
     }
 }
