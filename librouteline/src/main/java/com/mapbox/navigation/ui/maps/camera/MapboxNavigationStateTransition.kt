@@ -27,13 +27,13 @@ class MapboxNavigationStateTransition(
         val center = Point.fromLngLat(transitionOptions.vehicleLocation.longitude,
             transitionOptions.vehicleLocation.latitude)
         val zoom = min(zoomAndCenter.first, transitionOptions.maxZoom)
-        val yOffset = (mapboxMap.getSize().height / 2.0) - transitionOptions.padding.bottom
+        val yOffset = getScaledScreenValue(mapboxMap.getSize().height / 2.0) - transitionOptions.padding.bottom
         return navigationCameraTransition.transitionFromLowZoomToHighZoom(
             NavigationCameraZoomTransitionOptions.Builder(
                 center, zoom).apply {
                 bearing(bearing)
                 pitch(40.0)
-                anchorOffset(getScaledScreenCoordinate(ScreenCoordinate(0.0, yOffset)))
+                anchorOffset(ScreenCoordinate(0.0, yOffset))
                 animatorListener(transitionOptions.animatorListener)
             }.build()
         )
@@ -48,13 +48,13 @@ class MapboxNavigationStateTransition(
         val center = Point.fromLngLat(transitionOptions.vehicleLocation.longitude,
             transitionOptions.vehicleLocation.latitude)
         val zoom = min(zoomAndCenter.first, transitionOptions.maxZoom)
-        val yOffset = (mapboxMap.getSize().height / 2.0) - transitionOptions.padding.bottom
+        val yOffset = getScaledScreenValue(mapboxMap.getSize().height / 2.0) - transitionOptions.padding.bottom
         return navigationCameraTransition.transitionLinear(
             NavigationCameraLinearTransitionOptions.Builder(
                 center, zoom).apply {
                 bearing(bearing)
                 pitch(40.0)
-                anchorOffset(getScaledScreenCoordinate(ScreenCoordinate(0.0, yOffset)))
+                anchorOffset(ScreenCoordinate(0.0, yOffset))
                 animatorListener(transitionOptions.animatorListener)
             }.build()
         )
@@ -79,7 +79,7 @@ class MapboxNavigationStateTransition(
                     center, zoom).apply {
                     bearing(bearing)
                     pitch(0.0)
-                    anchorOffset(getScaledScreenCoordinate(ScreenCoordinate(0.0, yOffset)))
+                    anchorOffset(ScreenCoordinate(0.0, yOffset))
                     animatorListener(transitionOptions.animatorListener)
                 }.build())
         else
@@ -88,7 +88,7 @@ class MapboxNavigationStateTransition(
                     center, zoom).apply {
                     bearing(bearing)
                     pitch(0.0)
-                    anchorOffset(getScaledScreenCoordinate(ScreenCoordinate(0.0, yOffset)))
+                    anchorOffset(ScreenCoordinate(0.0, yOffset))
                     animatorListener(transitionOptions.animatorListener)
                 }.build())
     }
@@ -110,7 +110,7 @@ class MapboxNavigationStateTransition(
                 center, zoom).apply {
                 bearing(bearing)
                 pitch(0.0)
-                anchorOffset(getScaledScreenCoordinate(ScreenCoordinate(0.0, yOffset)))
+                anchorOffset(ScreenCoordinate(0.0, yOffset))
                 animatorListener(transitionOptions.animatorListener)
             }.build())
     }
@@ -124,9 +124,9 @@ class MapboxNavigationStateTransition(
         return Pair(2.0, Point.fromLngLat(0.0, 0.0))
     }
 
-    private fun getScaledScreenCoordinate(screenCoordinate: ScreenCoordinate): ScreenCoordinate {
+    private fun getScaledScreenValue(screenValue: Double): Double {
         val displayMetrics = Resources.getSystem().getDisplayMetrics()
         val scale = displayMetrics.density
-        return ScreenCoordinate(screenCoordinate.x * scale, screenCoordinate.y * scale)
+        return screenValue * scale
     }
 }
