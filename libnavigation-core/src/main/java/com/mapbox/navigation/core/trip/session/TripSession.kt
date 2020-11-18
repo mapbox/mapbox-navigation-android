@@ -3,7 +3,6 @@ package com.mapbox.navigation.core.trip.session
 import android.hardware.SensorEvent
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.navigation.base.options.LocationPollingOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.service.TripService
 
@@ -17,7 +16,7 @@ internal interface TripSession {
     fun getRouteProgress(): RouteProgress?
     fun getState(): TripSessionState
 
-    fun start(locationPollingOptions: LocationPollingOptions)
+    fun start()
     fun stop()
 
     fun registerLocationObserver(locationObserver: LocationObserver)

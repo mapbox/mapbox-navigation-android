@@ -99,21 +99,6 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder length(double length);
   }
 
-  public final class LocationPollingOptions {
-    method public com.mapbox.android.core.location.LocationEngineRequest getLocationEngineRequest();
-    method public long getNavigatorIntervalMillis();
-    method public long getNavigatorPatienceMillis();
-    method public com.mapbox.navigation.base.options.LocationPollingOptions.Builder toBuilder();
-  }
-
-  public static final class LocationPollingOptions.Builder {
-    ctor public LocationPollingOptions.Builder();
-    method public com.mapbox.navigation.base.options.LocationPollingOptions build();
-    method public com.mapbox.navigation.base.options.LocationPollingOptions.Builder locationEngineRequest(com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest);
-    method public com.mapbox.navigation.base.options.LocationPollingOptions.Builder navigatorIntervalMillis(long navigatorIntervalMillis);
-    method public com.mapbox.navigation.base.options.LocationPollingOptions.Builder navigatorPatienceMillis(long navigatorPatienceMillis);
-  }
-
   public final class NavigationOptions {
     method public String? getAccessToken();
     method public android.content.Context getApplicationContext();
@@ -121,6 +106,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.formatter.DistanceFormatter? getDistanceFormatter();
     method public com.mapbox.navigation.base.options.EHorizonOptions getEHorizonOptions();
     method public com.mapbox.android.core.location.LocationEngine getLocationEngine();
+    method public com.mapbox.android.core.location.LocationEngineRequest getLocationEngineRequest();
     method public long getNavigatorPredictionMillis();
     method public com.mapbox.navigation.base.options.OnboardRouterOptions getOnboardRouterOptions();
     method public int getTimeFormatType();
@@ -139,6 +125,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder isDebugLoggingEnabled(boolean flag);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder isFromNavigationUi(boolean flag);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngine(com.mapbox.android.core.location.LocationEngine locationEngine);
+    method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngineRequest(com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder navigatorPredictionMillis(long predictionMillis);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder onboardRouterOptions(com.mapbox.navigation.base.options.OnboardRouterOptions onboardRouterOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder timeFormatType(int type);

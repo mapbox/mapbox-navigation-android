@@ -62,12 +62,12 @@ class MapboxNavigationTest {
     var coroutineRule = MainCoroutineRule()
 
     private val accessToken = "pk.1234"
-    private val locationEngine: LocationEngine = mockk()
     private val directionsSession: DirectionsSession = mockk(relaxUnitFun = true)
     private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     private val tripService: TripService = mockk(relaxUnitFun = true)
     private val tripSession: TripSession = mockk(relaxUnitFun = true)
     private val location: Location = mockk(relaxUnitFun = true)
+    private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
     private val distanceFormatter: MapboxDistanceFormatter = mockk(relaxed = true)
     private val onBoardRouterOptions: OnboardRouterOptions = mockk(relaxed = true)
     private val fasterRouteRequestCallback: RoutesRequestCallback = mockk(relaxed = true)
@@ -77,6 +77,7 @@ class MapboxNavigationTest {
     private val navigationSession: NavigationSession = mockk(relaxUnitFun = true)
     private val logger: Logger = mockk(relaxUnitFun = true)
     private lateinit var rerouteController: RerouteController
+    private lateinit var navigationOptions: NavigationOptions
 
     private val applicationContext: Context = mockk(relaxed = true) {
         every { inferDeviceLocale() } returns Locale.US
@@ -129,16 +130,7 @@ class MapboxNavigationTest {
 
         every { applicationContext.applicationContext } returns applicationContext
 
-        mockLocation()
-        mockNativeNavigator()
-        mockTripService()
-        mockTripSession()
-        mockDirectionSession()
-        mockNavigationSession()
-
-        every { navigator.create(any(), any(), any()) } returns navigator
-
-        val navigationOptions = NavigationOptions
+        navigationOptions = NavigationOptions
             .Builder(applicationContext)
             .accessToken(accessToken)
             .distanceFormatter(distanceFormatter)
@@ -147,6 +139,15 @@ class MapboxNavigationTest {
             .timeFormatType(NONE_SPECIFIED)
             .locationEngine(locationEngine)
             .build()
+
+        mockLocation()
+        mockNativeNavigator()
+        mockTripService()
+        mockTripSession()
+        mockDirectionSession()
+        mockNavigationSession()
+
+        every { navigator.create(any(), any(), any()) } returns navigator
 
         mapboxNavigation = MapboxNavigation(navigationOptions)
 
@@ -572,8 +573,7 @@ class MapboxNavigationTest {
         every {
             NavigationComponentProvider.createTripSession(
                 tripService,
-                locationEngine,
-                any(),
+                navigationOptions = navigationOptions,
                 navigator = navigator,
                 logger = logger,
                 accessToken = "pk.1234"
