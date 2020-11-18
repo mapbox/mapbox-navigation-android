@@ -3,6 +3,7 @@ package com.mapbox.navigation.base.options
 import android.content.Context
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineProvider
+import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 
@@ -23,6 +24,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * @param applicationContext the Context of the Android Application
  * @param accessToken [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
  * @param locationEngine the mechanism responsible for providing location approximations to navigation
+ * @param locationEngineRequest specifies the rate to request locations from the location engine.
  * @param timeFormatType defines time format for calculation remaining trip time
  * @param navigatorPredictionMillis defines approximate navigator prediction in milliseconds
  * @param distanceFormatter [DistanceFormatter] for format distances showing in notification during navigation
@@ -36,6 +38,7 @@ class NavigationOptions private constructor(
     val applicationContext: Context,
     val accessToken: String?,
     val locationEngine: LocationEngine,
+    val locationEngineRequest: LocationEngineRequest,
     @TimeFormat.Type val timeFormatType: Int,
     val navigatorPredictionMillis: Long,
     val distanceFormatter: DistanceFormatter?,
@@ -52,6 +55,7 @@ class NavigationOptions private constructor(
     fun toBuilder(): Builder = Builder(applicationContext).apply {
         accessToken(accessToken)
         locationEngine(locationEngine)
+        locationEngineRequest(locationEngineRequest)
         timeFormatType(timeFormatType)
         navigatorPredictionMillis(navigatorPredictionMillis)
         distanceFormatter(distanceFormatter)
@@ -74,6 +78,7 @@ class NavigationOptions private constructor(
         if (applicationContext != other.applicationContext) return false
         if (accessToken != other.accessToken) return false
         if (locationEngine != other.locationEngine) return false
+        if (locationEngineRequest != other.locationEngineRequest) return false
         if (timeFormatType != other.timeFormatType) return false
         if (navigatorPredictionMillis != other.navigatorPredictionMillis) return false
         if (distanceFormatter != other.distanceFormatter) return false
@@ -93,6 +98,7 @@ class NavigationOptions private constructor(
         var result = applicationContext.hashCode()
         result = 31 * result + (accessToken?.hashCode() ?: 0)
         result = 31 * result + locationEngine.hashCode()
+        result = 31 * result + locationEngineRequest.hashCode()
         result = 31 * result + timeFormatType
         result = 31 * result + navigatorPredictionMillis.hashCode()
         result = 31 * result + (distanceFormatter?.hashCode() ?: 0)
@@ -112,6 +118,7 @@ class NavigationOptions private constructor(
             "applicationContext=$applicationContext, " +
             "accessToken=$accessToken, " +
             "locationEngine=$locationEngine, " +
+            "locationEngineRequest=$locationEngineRequest, " +
             "timeFormatType=$timeFormatType, " +
             "navigatorPredictionMillis=$navigatorPredictionMillis, " +
             "distanceFormatter=$distanceFormatter, " +
@@ -131,6 +138,11 @@ class NavigationOptions private constructor(
         private val applicationContext = applicationContext.applicationContext
         private var accessToken: String? = null
         private var locationEngine: LocationEngine? = null // Default is created when built
+        private var locationEngineRequest = LocationEngineRequest
+            .Builder(1000L)
+            .setFastestInterval(500L)
+            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+            .build()
         private var timeFormatType: Int = TimeFormat.NONE_SPECIFIED
         private var navigatorPredictionMillis: Long = DEFAULT_NAVIGATOR_PREDICTION_MILLIS
         private var distanceFormatter: DistanceFormatter? = null
@@ -152,6 +164,12 @@ class NavigationOptions private constructor(
          */
         fun locationEngine(locationEngine: LocationEngine): Builder =
             apply { this.locationEngine = locationEngine }
+
+        /**
+         * Override the rate to request locations from the location engine.
+         */
+        fun locationEngineRequest(locationEngineRequest: LocationEngineRequest): Builder =
+            apply { this.locationEngineRequest = locationEngineRequest }
 
         /**
          * Defines the type of device creating localization data
@@ -211,6 +229,7 @@ class NavigationOptions private constructor(
                 accessToken = accessToken,
                 locationEngine = locationEngine
                     ?: LocationEngineProvider.getBestLocationEngine(applicationContext),
+                locationEngineRequest = locationEngineRequest,
                 timeFormatType = timeFormatType,
                 navigatorPredictionMillis = navigatorPredictionMillis,
                 distanceFormatter = distanceFormatter,

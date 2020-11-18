@@ -3,7 +3,6 @@ package com.mapbox.navigation.core.trip.session
 import android.hardware.SensorEvent
 import android.location.Location
 import android.os.Looper
-import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.BannerComponents
@@ -12,7 +11,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
-import com.mapbox.navigation.base.options.LocationPollingOptions
+import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.alert.RouteAlert
@@ -38,8 +37,7 @@ import java.util.concurrent.CopyOnWriteArraySet
  * Default implementation of [TripSession]
  *
  * @param tripService TripService
- * @param locationEngine LocationEngine
- * @param navigatorPredictionMillis millis for navigation status predictions
+ * @param navigationOptions the navigator options
  * For more information see [MapboxNativeNavigator.getStatus]. Unit is milliseconds
  * @param navigator Native navigator
  * @param threadController controller for main/io jobs
@@ -49,15 +47,18 @@ import java.util.concurrent.CopyOnWriteArraySet
  */
 internal class MapboxTripSession(
     override val tripService: TripService,
-    private val locationEngine: LocationEngine,
-    private val navigatorPredictionMillis: Long,
+    private val navigationOptions: NavigationOptions,
     private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl,
     threadController: ThreadController = ThreadController,
     private val logger: Logger,
     private val accessToken: String?
 ) : TripSession {
 
-    private lateinit var locationPollingOptions: LocationPollingOptions
+    companion object {
+        internal const val UNCONDITIONAL_STATUS_POLLING_PATIENCE = 2000L
+        internal const val UNCONDITIONAL_STATUS_POLLING_INTERVAL = 1000L
+    }
+
     private var updateNavigatorStatusDataJobs: MutableList<Job> = CopyOnWriteArrayList()
 
     override var route: DirectionsRoute? = null
@@ -155,11 +156,8 @@ internal class MapboxTripSession(
 
     /**
      * Start MapboxTripSession
-     *
-     * @param locationPollingOptions start the session with custom polling rates.
      */
-    override fun start(locationPollingOptions: LocationPollingOptions) {
-        this.locationPollingOptions = locationPollingOptions
+    override fun start() {
         if (state == TripSessionState.STARTED) {
             return
         }
@@ -169,12 +167,12 @@ internal class MapboxTripSession(
     }
 
     private fun startLocationUpdates() {
-        locationEngine.requestLocationUpdates(
-            locationPollingOptions.locationEngineRequest,
+        navigationOptions.locationEngine.requestLocationUpdates(
+            navigationOptions.locationEngineRequest,
             locationEngineCallback,
             Looper.getMainLooper()
         )
-        locationEngine.getLastLocation(locationEngineCallback)
+        navigationOptions.locationEngine.getLastLocation(locationEngineCallback)
     }
 
     /**
@@ -193,7 +191,7 @@ internal class MapboxTripSession(
     }
 
     private fun stopLocationUpdates() {
-        locationEngine.removeLocationUpdates(locationEngineCallback)
+        navigationOptions.locationEngine.removeLocationUpdates(locationEngineCallback)
     }
 
     private fun reset() {
@@ -483,12 +481,12 @@ internal class MapboxTripSession(
         }
 
         unconditionalStatusPollingJob = ioJobController.scope.launch {
-            delay(locationPollingOptions.navigatorPatienceMillis)
+            delay(UNCONDITIONAL_STATUS_POLLING_PATIENCE)
             while (isActive) {
                 mainJobController.scope.launch {
                     updateDataFromNavigatorStatus()
                 }
-                delay(locationPollingOptions.navigatorIntervalMillis)
+                delay(UNCONDITIONAL_STATUS_POLLING_INTERVAL)
             }
         }
     }
@@ -520,7 +518,7 @@ internal class MapboxTripSession(
     }
 
     private suspend fun getNavigatorStatus(): TripStatus {
-        return navigator.getStatus(navigatorPredictionMillis)
+        return navigator.getStatus(navigationOptions.navigatorPredictionMillis)
     }
 
     private fun updateEnhancedLocation(location: Location, keyPoints: List<Location>) {

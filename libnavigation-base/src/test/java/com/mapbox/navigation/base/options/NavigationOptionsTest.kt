@@ -3,6 +3,7 @@ package com.mapbox.navigation.base.options
 import android.content.Context
 import android.text.SpannableString
 import com.mapbox.android.core.location.LocationEngineProvider
+import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
@@ -51,6 +52,14 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
             .isDebugLoggingEnabled(true)
             .isFromNavigationUi(true)
             .locationEngine(mockk())
+            .locationEngineRequest(
+                LocationEngineRequest.Builder(1234L)
+                    .setMaxWaitTime(2345L)
+                    .setPriority(LocationEngineRequest.PRIORITY_LOW_POWER)
+                    .setFastestInterval(3456L)
+                    .setDisplacement(150.0f)
+                    .build()
+            )
             .navigatorPredictionMillis(1)
             .onboardRouterOptions(mockk())
             .timeFormatType(1)

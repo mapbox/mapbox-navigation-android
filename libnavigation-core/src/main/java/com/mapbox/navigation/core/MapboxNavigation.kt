@@ -16,7 +16,6 @@ import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.common.module.provider.ModuleProviderArgument
 import com.mapbox.navigation.base.internal.VoiceUnit
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
-import com.mapbox.navigation.base.options.LocationPollingOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.route.Router
@@ -191,8 +190,7 @@ class MapboxNavigation(
         )
         tripSession = NavigationComponentProvider.createTripSession(
             tripService = tripService,
-            locationEngine = navigationOptions.locationEngine,
-            navigatorPredictionMillis = navigationOptions.navigatorPredictionMillis,
+            navigationOptions = navigationOptions,
             navigator = navigator,
             logger = logger,
             accessToken = accessToken
@@ -255,15 +253,10 @@ class MapboxNavigation(
      *
      * @see [registerTripSessionStateObserver]
      * @see [registerRouteProgressObserver]
-     *
-     * @param locationPollingOptions override the frequencies for updating navigator locations.
      */
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
-    @JvmOverloads
-    fun startTripSession(
-        locationPollingOptions: LocationPollingOptions = LocationPollingOptions.Builder().build()
-    ) {
-        tripSession.start(locationPollingOptions)
+    fun startTripSession() {
+        tripSession.start()
         notificationChannelField?.let {
             monitorNotificationActionButton(it.get(null) as ReceiveChannel<NotificationAction>)
         }
