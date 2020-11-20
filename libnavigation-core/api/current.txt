@@ -170,6 +170,7 @@ package com.mapbox.navigation.core.replay {
 
   public final class MapboxReplayer {
     ctor public MapboxReplayer();
+    method public com.mapbox.navigation.core.replay.MapboxReplayer attachStream(com.mapbox.navigation.core.replay.history.ReplayEventStream eventStream);
     method public void clearEvents();
     method public double durationSeconds();
     method public double eventSeconds(double eventTimestamp);
@@ -250,6 +251,13 @@ package com.mapbox.navigation.core.replay.history {
     property public final Double? time;
   }
 
+  public final class ReplayEventStream implements java.io.Closeable java.util.Iterator<com.mapbox.navigation.core.replay.history.ReplayEventBase> kotlin.jvm.internal.markers.KMappedMarker {
+    ctor public ReplayEventStream(com.google.gson.stream.JsonReader jsonReader);
+    method public void close();
+    method public boolean hasNext();
+    method public com.mapbox.navigation.core.replay.history.ReplayEventBase next();
+  }
+
   public final class ReplayEventUpdateLocation implements com.mapbox.navigation.core.replay.history.ReplayEventBase {
     ctor public ReplayEventUpdateLocation(@com.google.gson.annotations.SerializedName("event_timestamp") double eventTimestamp, @com.google.gson.annotations.SerializedName("location") com.mapbox.navigation.core.replay.history.ReplayEventLocation location);
     method public double component1();
@@ -259,14 +267,6 @@ package com.mapbox.navigation.core.replay.history {
     method public com.mapbox.navigation.core.replay.history.ReplayEventLocation getLocation();
     property public double eventTimestamp;
     property public final com.mapbox.navigation.core.replay.history.ReplayEventLocation location;
-  }
-
-  public final class ReplayEvents {
-    ctor public ReplayEvents(java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> events);
-    method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> component1();
-    method public com.mapbox.navigation.core.replay.history.ReplayEvents copy(java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> events);
-    method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> getEvents();
-    property public final java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> events;
   }
 
   public interface ReplayEventsObserver {

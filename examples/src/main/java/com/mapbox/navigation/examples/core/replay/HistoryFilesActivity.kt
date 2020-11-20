@@ -10,15 +10,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import com.mapbox.navigation.core.replay.history.ReplayHistoryDTO
+import com.mapbox.navigation.core.replay.history.ReplayEventStream
 import com.mapbox.navigation.examples.core.R
 
 @SuppressLint("HardwareIds")
 class HistoryFilesActivity : AppCompatActivity() {
 
     companion object {
-        const val REQUEST_CODE: Int = 123
-        var selectedHistory: ReplayHistoryDTO? = null
+        val REQUEST_CODE: Int = 123
+        var selectedReplay: ReplayEventStream? = null
             private set
     }
 
@@ -56,7 +56,7 @@ class HistoryFilesActivity : AppCompatActivity() {
                     null
                 ).show()
             } else {
-                selectedHistory = historyDataResponse
+                selectedReplay = historyDataResponse
                 finish()
             }
         }

@@ -190,10 +190,10 @@ class ReplayHistoryActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun handleHistoryFileSelected() {
         loadNavigationJob = CoroutineScope(Dispatchers.Main).launch {
-            val events = historyFileLoader
-                .loadReplayHistory(this@ReplayHistoryActivity)
             mapboxReplayer.clearEvents()
-            mapboxReplayer.pushEvents(events)
+            val eventStream = historyFileLoader
+                .loadReplayHistory(this@ReplayHistoryActivity)
+            mapboxReplayer.attachStream(eventStream)
             binding.playReplay.visibility = View.VISIBLE
             mapboxNavigation.resetTripSession()
             mapboxReplayer.playFirstLocation()
