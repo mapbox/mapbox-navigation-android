@@ -13,7 +13,7 @@
       android:theme="@style/AppTheme">
 
     <activity
-        android:name=".MapboxRouteLineAPIExampleActivity"
+        android:name=".MapboxGuidanceImageActivity"
         android:label="@string/title_navigation_route_ui"
         android:screenOrientation="portrait">
     </activity>
