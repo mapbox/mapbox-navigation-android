@@ -69,8 +69,15 @@ class MapboxRouteArrowActions : RouteArrowActions {
             getShowArrowModifications()
         }
 
-        val newManeuverPoints = obtainArrowPointsFrom(routeProgress)
-        return if (!areEqualContentsIgnoreOrder<Point>(maneuverPoints, newManeuverPoints)) {
+        val newManeuverPoints = if (!invalidUpcomingStepPoints && !invalidCurrentStepPoints) {
+            obtainArrowPointsFrom(routeProgress)
+        } else {
+            listOf()
+        }
+        return if (
+            newManeuverPoints.isNotEmpty() &&
+            !areEqualContentsIgnoreOrder<Point>(maneuverPoints, newManeuverPoints)
+        ) {
             maneuverPoints.clear()
             maneuverPoints.addAll(newManeuverPoints)
 

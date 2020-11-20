@@ -55,6 +55,14 @@ object RouteArrowUtils {
         val arrowLineCurrent = LineString.fromLngLats(reversedCurrent)
         val arrowLineUpcoming = LineString.fromLngLats(routeProgress.upcomingStepPoints!!)
 
+        if (arrowLineCurrent.coordinates().size < 2) {
+            return listOf()
+        }
+
+        if (arrowLineUpcoming.coordinates().size < 2) {
+            return listOf()
+        }
+
         val arrowCurrentSliced = TurfMisc.lineSliceAlong(
             arrowLineCurrent,
             0.0,
