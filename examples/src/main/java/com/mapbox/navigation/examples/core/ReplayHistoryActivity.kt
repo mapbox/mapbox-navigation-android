@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.geojson.Point
@@ -190,10 +191,11 @@ class ReplayHistoryActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun handleHistoryFileSelected() {
         loadNavigationJob = CoroutineScope(Dispatchers.Main).launch {
-            val events = historyFileLoader
-                .loadReplayHistory(this@ReplayHistoryActivity)
             mapboxReplayer.clearEvents()
-            mapboxReplayer.pushEvents(events)
+            FirebaseCrashlytics.getInstance().log("handleHistoryFileSelected")
+            val eventStream = historyFileLoader
+                .loadReplayHistory(this@ReplayHistoryActivity)
+            mapboxReplayer.attachStream(eventStream)
             binding.playReplay.visibility = View.VISIBLE
             mapboxNavigation.resetTripSession()
             mapboxReplayer.playFirstLocation()
