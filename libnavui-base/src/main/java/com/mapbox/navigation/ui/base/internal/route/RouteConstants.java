@@ -1,13 +1,26 @@
 package com.mapbox.navigation.ui.base.internal.route;
 
+import android.graphics.Color;
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import com.mapbox.navigation.ui.base.R;
+
+import java.util.Collections;
+import java.util.List;
+
 public class RouteConstants {
   public static final String PRIMARY_ROUTE_SOURCE_ID = "mapbox-navigation-route-source";
   public static final String PRIMARY_ROUTE_LAYER_ID = "mapbox-navigation-route-layer";
   public static final String PRIMARY_ROUTE_TRAFFIC_LAYER_ID = "mapbox-navigation-route-traffic-layer";
   public static final String PRIMARY_ROUTE_CASING_LAYER_ID = "mapbox-navigation-route-casing-layer";
-  public static final String ALTERNATIVE_ROUTE_SOURCE_ID = "mapbox-navigation-alt-route-source";
-  public static final String ALTERNATIVE_ROUTE_LAYER_ID = "mapbox-navigation-alt-route-layer";
-  public static final String ALTERNATIVE_ROUTE_CASING_LAYER_ID = "mapbox-navigation-alt-route-casing-layer";
+  public static final String ALTERNATIVE_ROUTE1_SOURCE_ID = "mapbox-navigation-alt-route1-source";
+  public static final String ALTERNATIVE_ROUTE1_LAYER_ID = "mapbox-navigation-alt-route1-layer";
+  public static final String ALTERNATIVE_ROUTE1_CASING_LAYER_ID = "mapbox-navigation-alt-route1-casing-layer";
+  public static final String ALTERNATIVE_ROUTE2_SOURCE_ID = "mapbox-navigation-alt-route2-source";
+  public static final String ALTERNATIVE_ROUTE2_LAYER_ID = "mapbox-navigation-alt-route2-layer";
+  public static final String ALTERNATIVE_ROUTE2_CASING_LAYER_ID = "mapbox-navigation-alt-route2-casing-layer";
+  public static final String ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID = "mapbox-navigation-alt-route1-traffic-layer";
+  public static final String ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID = "mapbox-navigation-alt-route2-traffic-layer";
   public static final String WAYPOINT_SOURCE_ID = "mapbox-navigation-waypoint-source";
   public static final String WAYPOINT_LAYER_ID = "mapbox-navigation-waypoint-layer";
   public static final int TWO_POINTS = 2;
@@ -48,9 +61,53 @@ public class RouteConstants {
   public static final String ORIGIN_MARKER_NAME = "originMarker";
   public static final String DESTINATION_MARKER_NAME = "destinationMarker";
   public static final String MAPBOX_LOCATION_ID = "mapbox-location";
-  public static final double MINIMUM_ROUTE_LINE_OFFSET = .000000001;
   public static final double ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS = 1.0;
   public static final String DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER = "mapboxDescriptorPlaceHolderUnused";
-  public static final int POINT_DISTANCE_CALCULATION_FUN_CACHE_SIZE = 4500;
   public static final double MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO = 1_500_000_000; // 1.5s
+  @ColorInt
+  public static final int ROUTE_LINE_TRAVELED_COLOR = Color.parseColor("#00000000");
+  @ColorInt
+  public static final int ROUTE_LINE_TRAVELED_CASING_COLOR = Color.parseColor("#00000000");
+  @ColorInt
+  public static final int ROUTE_DEFAULT_COLOR = Color.parseColor("#56A8FB");
+  @ColorInt
+  public static final int ROUTE_UNKNOWN_TRAFFIC_COLOR = Color.parseColor("#56A8FB");
+  @ColorInt
+  public static final int ROUTE_LOW_TRAFFIC_COLOR = Color.parseColor("#56A8FB");
+  @ColorInt
+  public static final int ROUTE_MODERATE_TRAFFIC_COLOR = Color.parseColor("#ff9500");
+  @ColorInt
+  public static final int ROUTE_HEAVY_TRAFFIC_COLOR = Color.parseColor("#ff4d4d");
+  @ColorInt
+  public static final int ROUTE_SEVERE_TRAFFIC_COLOR = Color.parseColor("#8f2447");
+  @ColorInt
+  public static final int ROUTE_CASING_COLOR = Color.parseColor("#2F7AC6");
+  @ColorInt
+  public static final int ALTERNATE_ROUTE_DEFAULT_COLOR = Color.parseColor("#8694A5");
+  @ColorInt
+  public static final int ALTERNATE_ROUTE_CASING_COLOR = Color.parseColor("#727E8D");
+  @ColorInt
+  public static final int ALTERNATE_ROUTE_UNKNOWN_TRAFFIC_COLOR = Color.parseColor("#8694A5");
+  @ColorInt
+  public static final int ALTERNATE_ROUTE_LOW_TRAFFIC_COLOR = Color.parseColor("#8694A5");
+  @ColorInt
+  public static final int ALTERNATE_ROUTE_MODERATE_TRAFFIC_COLOR = Color.parseColor("#BEA087");
+  @ColorInt
+  public static final int ALTERNATE_ROUTE_HEAVY_TRAFFIC_COLOR = Color.parseColor("#B58281");
+  @ColorInt
+  public static final int ALTERNATE_ROUTE_SEVERE_TRAFFIC_COLOR = Color.parseColor("#B58281");
+  public static final boolean ROUNDED_LINE_CAP = true;
+  @DrawableRes
+  public static final int ORIGIN_WAYPOINT_ICON = R.drawable.mapbox_ic_route_origin;
+  @DrawableRes
+  public static final int DESTINATION_WAYPOINT_ICON = R.drawable.mapbox_ic_route_destination;
+  public static final List<String> TRAFFIC_BACKFILL_ROAD_CLASSES = Collections.emptyList();
+  @ColorInt
+  public static final int MANEUVER_ARROW_COLOR = Color.parseColor("#FFFFFF");
+  @ColorInt
+  public static final int MANEUVER_ARROW_BORDER_COLOR = Color.parseColor("#2D3F53");
+  @DrawableRes
+  public static final int MANEUVER_ARROWHEAD_ICON_DRAWABLE = R.drawable.mapbox_ic_arrow_head;
+  @DrawableRes
+  public static final int MANEUVER_ARROWHEAD_ICON_CASING_DRAWABLE = R.drawable.mapbox_ic_arrow_head_casing;
 }

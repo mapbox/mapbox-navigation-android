@@ -3,207 +3,221 @@ package com.mapbox.navigation.ui.maps.internal.route.line
 import android.graphics.drawable.Drawable
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.dsl.generated.color
-import com.mapbox.maps.extension.style.expressions.dsl.generated.eq
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
 import com.mapbox.maps.extension.style.expressions.dsl.generated.match
 import com.mapbox.maps.extension.style.expressions.generated.Expression
-import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.exponential
 import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.switchCase
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
 import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
 import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.ALTERNATIVE_ROUTE_CASING_LAYER_ID
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.DESTINATION_MARKER_NAME
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.ORIGIN_MARKER_NAME
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.PRIMARY_ROUTE_SOURCE_ID
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.WAYPOINT_DESTINATION_VALUE
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.WAYPOINT_LAYER_ID
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.WAYPOINT_ORIGIN_VALUE
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.WAYPOINT_PROPERTY_KEY
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.WAYPOINT_SOURCE_ID
+import com.mapbox.navigation.ui.base.internal.route.RouteConstants
 import com.mapbox.navigation.ui.base.internal.utils.MapImageUtils
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRouteLineColorExpressions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
-import kotlin.reflect.KProperty1
 
-interface MapboxRouteLayerProvider : RouteLayerProvider {
-    val routeStyleDescriptors: List<RouteStyleDescriptor>
-    val routeLineScaleValues: List<RouteLineScaleValue>
-    val routeLineCasingScaleValues: List<RouteLineScaleValue>
-    val routeLineTrafficScaleValues: List<RouteLineScaleValue>
+internal class MapboxRouteLayerProvider(
+    val routeStyleDescriptors: List<RouteStyleDescriptor>,
+    private val routeLineScaleExpression: Expression,
+    private val routeCasingLineScaleExpression: Expression,
+    private val routeTrafficLineScaleExpression: Expression
+) {
 
-    fun getRouteLineColorExpressions(
-        defaultColor: Int,
-        routeColorProvider: KProperty1<RouteStyleDescriptor, Int>
-    ): List<Expression> {
-        val expressions = mutableListOf<Expression>(
-            eq {
-                get { literal(DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER) }
-                literal(true)
-            },
-            color(defaultColor)
-        )
-        routeStyleDescriptors.forEach {
-            expressions.add(
-                eq {
-                    get { it.routeIdentifier }
-                    literal(true)
-                }
+    fun buildPrimaryRouteLayer(
+        style: Style,
+        roundedLineCap: Boolean,
+        color: Int
+    ): LineLayer {
+        val routeLineColorExpressions =
+            getRouteLineColorExpressions(
+                color,
+                routeStyleDescriptors,
+                RouteStyleDescriptor::lineColorResourceId
             )
-            expressions.add(color(routeColorProvider.get(it)))
-        }
-        return expressions.plus(color(defaultColor))
-    }
-
-    fun buildScalingExpression(scalingValues: List<RouteLineScaleValue>): Expression {
-        val expressionBuilder = Expression.ExpressionBuilder("interpolate")
-        expressionBuilder.addArgument(exponential { literal(1.5) })
-        expressionBuilder.zoom()
-        scalingValues.forEach { routeLineScaleValue ->
-            expressionBuilder.stop {
-                this.literal(routeLineScaleValue.scaleStop.toDouble())
-                product {
-                    literal(routeLineScaleValue.scaleMultiplier.toDouble())
-                    literal(routeLineScaleValue.scale.toDouble())
-                }
-            }
-        }
-        return expressionBuilder.build()
-    }
-
-    override fun initializePrimaryRouteLayer(
-        style: Style,
-        roundedLineCap: Boolean,
-        color: Int
-    ): LineLayer {
-        val lineWidthScaleExpression = buildScalingExpression(routeLineScaleValues)
-        val routeLineColorExpressions =
-            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
         return initializeRouteLayer(
             style,
             roundedLineCap,
-            PRIMARY_ROUTE_LAYER_ID,
-            PRIMARY_ROUTE_SOURCE_ID,
-            lineWidthScaleExpression,
+            RouteConstants.PRIMARY_ROUTE_LAYER_ID,
+            RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
+            routeLineScaleExpression,
             routeLineColorExpressions
         )
     }
 
-    override fun initializePrimaryRouteTrafficLayer(
+    fun buildPrimaryRouteTrafficLayer(
         style: Style,
         roundedLineCap: Boolean,
         color: Int
     ): LineLayer {
-        val lineWidthScaleExpression = buildScalingExpression(routeLineTrafficScaleValues)
         val routeLineColorExpressions =
-            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
+            getRouteLineColorExpressions(
+                color,
+                routeStyleDescriptors,
+                RouteStyleDescriptor::lineColorResourceId
+            )
         return initializeRouteLayer(
             style,
             roundedLineCap,
-            PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
-            PRIMARY_ROUTE_SOURCE_ID,
-            lineWidthScaleExpression,
+            RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+            RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
+            routeTrafficLineScaleExpression,
             routeLineColorExpressions
         )
     }
 
-    override fun initializePrimaryRouteCasingLayer(
+    fun buildPrimaryRouteCasingLayer(
         style: Style,
         color: Int
     ): LineLayer {
-        val lineWidthScaleExpression = buildScalingExpression(routeLineCasingScaleValues)
         val routeLineColorExpressions =
-            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineShieldColorResourceId)
+            getRouteLineColorExpressions(
+                color,
+                routeStyleDescriptors,
+                RouteStyleDescriptor::lineCasingColorResourceId
+            )
         return initializeRouteLayer(
             style,
             true,
-            PRIMARY_ROUTE_CASING_LAYER_ID,
-            PRIMARY_ROUTE_SOURCE_ID,
-            lineWidthScaleExpression,
+            RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+            RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
+            routeCasingLineScaleExpression,
             routeLineColorExpressions
         )
     }
 
-    override fun initializeAlternativeRouteLayer(
+    fun buildAlternativeRouteLayers(
         style: Style,
         roundedLineCap: Boolean,
         color: Int
-    ): LineLayer {
-        val lineWidthExpression = buildScalingExpression(routeLineScaleValues)
+    ): List<LineLayer> {
         val routeLineColorExpressions =
-            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
-        return initializeRouteLayer(
-            style,
-            roundedLineCap,
-            ALTERNATIVE_ROUTE_LAYER_ID,
-            ALTERNATIVE_ROUTE_SOURCE_ID,
-            lineWidthExpression,
-            routeLineColorExpressions
+            getRouteLineColorExpressions(
+                color,
+                routeStyleDescriptors,
+                RouteStyleDescriptor::lineColorResourceId
+            )
+
+        return listOf(
+            initializeRouteLayer(
+                style,
+                roundedLineCap,
+                RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
+                RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
+                routeTrafficLineScaleExpression,
+                routeLineColorExpressions
+            ),
+            initializeRouteLayer(
+                style,
+                roundedLineCap,
+                RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
+                RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                routeTrafficLineScaleExpression,
+                routeLineColorExpressions
+            )
         )
     }
 
-    override fun initializeAlternativeRouteCasingLayer(
+    fun buildAlternativeRouteCasingLayers(
         style: Style,
         color: Int
-    ): LineLayer {
-        val lineWidthScaleExpression = buildScalingExpression(routeLineCasingScaleValues)
+    ): List<LineLayer> {
         val routeLineColorExpressions =
-            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineShieldColorResourceId)
-        return initializeRouteLayer(
-            style,
-            true,
-            ALTERNATIVE_ROUTE_CASING_LAYER_ID,
-            ALTERNATIVE_ROUTE_SOURCE_ID,
-            lineWidthScaleExpression,
-            routeLineColorExpressions
+            getRouteLineColorExpressions(
+                color,
+                routeStyleDescriptors,
+                RouteStyleDescriptor::lineCasingColorResourceId
+            )
+
+        return listOf(
+            initializeRouteLayer(
+                style,
+                true,
+                RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
+                RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
+                routeCasingLineScaleExpression,
+                routeLineColorExpressions
+            ),
+            initializeRouteLayer(
+                style,
+                true,
+                RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID,
+                RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                routeCasingLineScaleExpression,
+                routeLineColorExpressions
+            )
         )
     }
 
-    override fun initializeWayPointLayer(
+    fun buildAlternativeRouteTrafficLayers(
+        style: Style,
+        roundedLineCap: Boolean,
+        color: Int
+    ): List<LineLayer> {
+        val routeLineColorExpressions =
+            getRouteLineColorExpressions(
+                color,
+                routeStyleDescriptors,
+                RouteStyleDescriptor::lineColorResourceId
+            )
+
+        return listOf(
+            initializeRouteLayer(
+                style,
+                roundedLineCap,
+                RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
+                RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
+                routeTrafficLineScaleExpression,
+                routeLineColorExpressions
+            ),
+            initializeRouteLayer(
+                style,
+                roundedLineCap,
+                RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
+                RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                routeTrafficLineScaleExpression,
+                routeLineColorExpressions
+            )
+        )
+    }
+
+    fun buildWayPointLayer(
         style: Style,
         originIcon: Drawable,
         destinationIcon: Drawable
     ): SymbolLayer {
-        if (style.styleLayerExists(WAYPOINT_LAYER_ID)) {
-            style.removeStyleLayer(WAYPOINT_LAYER_ID)
+        if (style.styleLayerExists(RouteConstants.WAYPOINT_LAYER_ID)) {
+            style.removeStyleLayer(RouteConstants.WAYPOINT_LAYER_ID)
         }
 
-        if (style.getStyleImage(ORIGIN_MARKER_NAME) != null) {
-            style.removeStyleImage(ORIGIN_MARKER_NAME)
+        if (style.getStyleImage(RouteConstants.ORIGIN_MARKER_NAME) != null) {
+            style.removeStyleImage(RouteConstants.ORIGIN_MARKER_NAME)
         }
         MapImageUtils.getBitmapFromDrawable(originIcon).let {
-            style.addImage(ORIGIN_MARKER_NAME, it)
+            style.addImage(RouteConstants.ORIGIN_MARKER_NAME, it)
         }
 
-        if (style.getStyleImage(DESTINATION_MARKER_NAME) != null) {
-            style.removeStyleImage(DESTINATION_MARKER_NAME)
+        if (style.getStyleImage(RouteConstants.DESTINATION_MARKER_NAME) != null) {
+            style.removeStyleImage(RouteConstants.DESTINATION_MARKER_NAME)
         }
         MapImageUtils.getBitmapFromDrawable(destinationIcon).let {
-            style.addImage(DESTINATION_MARKER_NAME, it)
+            style.addImage(RouteConstants.DESTINATION_MARKER_NAME, it)
         }
 
-        return SymbolLayer(WAYPOINT_LAYER_ID, WAYPOINT_SOURCE_ID)
+        return SymbolLayer(RouteConstants.WAYPOINT_LAYER_ID, RouteConstants.WAYPOINT_SOURCE_ID)
             .iconImage(
                 match {
                     toString {
-                        get { literal(WAYPOINT_PROPERTY_KEY) }
+                        get { literal(RouteConstants.WAYPOINT_PROPERTY_KEY) }
                     }
-                    literal(ORIGIN_MARKER_NAME)
+                    literal(RouteConstants.ORIGIN_MARKER_NAME)
                     stop {
-                        WAYPOINT_ORIGIN_VALUE
-                        literal(ORIGIN_MARKER_NAME)
+                        RouteConstants.WAYPOINT_ORIGIN_VALUE
+                        literal(RouteConstants.ORIGIN_MARKER_NAME)
                     }
                     stop {
-                        WAYPOINT_DESTINATION_VALUE
-                        literal(DESTINATION_MARKER_NAME)
+                        RouteConstants.WAYPOINT_DESTINATION_VALUE
+                        literal(RouteConstants.DESTINATION_MARKER_NAME)
                     }
                 }
             )

@@ -4,17 +4,26 @@ import android.content.Context
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.core.constants.Constants
+import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.maps.Style
+import com.mapbox.maps.StyleObjectInfo
+import com.mapbox.maps.plugin.location.LocationComponentConstants
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRouteLineScalingValues
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRouteLineTrafficExpressionData
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getStyledColor
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getStyledFloatArray
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
+import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.utils.ThemeSwitcher
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
@@ -27,7 +36,7 @@ import org.robolectric.annotation.Config
 
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
 @RunWith(RobolectricTestRunner::class)
-class MapboxRouteControllerLineUtilsTest {
+class MapboxRouteLineUtilsTest {
 
     lateinit var ctx: Context
     var styleRes: Int = 0
@@ -94,53 +103,6 @@ class MapboxRouteControllerLineUtilsTest {
         )
 
         assertEquals(0.0000017145850113848236, result, 0.0)
-    }
-
-    @Test
-    fun getStyledFloatArrayTest() {
-        val result = getStyledFloatArray(
-            R.styleable.MapboxStyleNavigationMapRoute_routeLineScaleStops,
-            ctx,
-            styleRes,
-            R.styleable.MapboxStyleNavigationMapRoute
-        )
-
-        assertEquals(6, result.size)
-        assertEquals(4.0f, result[0])
-        assertEquals(10.0f, result[1])
-        assertEquals(13.0f, result[2])
-        assertEquals(16.0f, result[3])
-        assertEquals(19.0f, result[4])
-        assertEquals(22.0f, result[5])
-    }
-
-    @Test
-    fun getStyledFloatArrayWhenResourceNotFount() {
-        val result = getStyledFloatArray(
-            0,
-            ctx,
-            styleRes,
-            R.styleable.MapboxStyleNavigationMapRoute
-        )
-
-        assertTrue(result.isEmpty())
-    }
-
-    @Test
-    fun getRouteLineScalingValuesTest() {
-        val result = getRouteLineScalingValues(
-            styleRes,
-            ctx,
-            R.styleable.MapboxStyleNavigationMapRoute_routeLineScaleStops,
-            R.styleable.MapboxStyleNavigationMapRoute_routeLineScaleMultipliers,
-            R.styleable.MapboxStyleNavigationMapRoute_routeLineScales,
-            R.styleable.MapboxStyleNavigationMapRoute
-        )
-
-        assertEquals(result.size, 6)
-        assertEquals(4.0f, result[0].scaleStop)
-        assertEquals(3.0f, result[0].scaleMultiplier)
-        assertEquals(1.0f, result[0].scale)
     }
 
     @Test
@@ -435,16 +397,292 @@ class MapboxRouteControllerLineUtilsTest {
         assertEquals(1, result.size)
     }
 
-    private fun getDirectionsRoute(): DirectionsRoute {
-        val tokenHere = "someToken"
-        val directionsRouteAsJson = loadJsonFixture("vanish_point_test.txt")
-            ?.replace("tokenHere", tokenHere)
+    @Test
+    fun getRouteLineColorExpressions() {
+        val blueLineDescriptor = RouteStyleDescriptor("blueLine", 1, 3)
+        val redLineDescriptor = RouteStyleDescriptor("redLine", 2, 4)
 
-        return DirectionsRoute.fromJson(directionsRouteAsJson)
+        val result = MapboxRouteLineUtils.getRouteLineColorExpressions(
+            7,
+            listOf(blueLineDescriptor, redLineDescriptor),
+            RouteStyleDescriptor::lineColorResourceId
+        )
+
+        assertEquals(7, result.size)
+        assertEquals("[==, [get, mapboxDescriptorPlaceHolderUnused], true]", result[0].toString())
+        assertEquals("[rgba, 0.0, 0.0, 7.0, 0.0]", result[1].toString())
+        assertEquals("[==, [get], true]", result[2].toString())
+        assertEquals("[rgba, 0.0, 0.0, 1.0, 0.0]", result[3].toString())
+        assertEquals("[==, [get], true]", result[4].toString())
+        assertEquals("[rgba, 0.0, 0.0, 2.0, 0.0]", result[5].toString())
+        assertEquals("[rgba, 0.0, 0.0, 7.0, 0.0]", result[6].toString())
     }
 
-    private fun getRoute(): DirectionsRoute {
-        val routeAsJson = loadJsonFixture("short_route.json")
+    @Test
+    fun layersAreInitialized() {
+        val style = mockk<Style> {
+            every { fullyLoaded } returns true
+            every { styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns true
+            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns true
+            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
+            every { styleLayerExists(RouteConstants.PRIMARY_ROUTE_LAYER_ID) } returns true
+            every { styleLayerExists(RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID) } returns true
+            every { styleLayerExists(RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID) } returns true
+            every { styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID) } returns true
+            every { styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID) } returns true
+            every {
+                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
+            } returns true
+            every {
+                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
+            } returns true
+            every {
+                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
+            } returns true
+            every {
+                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+            } returns true
+        }
+
+        val result = MapboxRouteLineUtils.layersAreInitialized(style)
+
+        assertTrue(result)
+        verify { style.fullyLoaded }
+        verify { style.styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) }
+        verify { style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) }
+        verify { style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) }
+        verify { style.styleLayerExists(RouteConstants.PRIMARY_ROUTE_LAYER_ID) }
+        verify { style.styleLayerExists(RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID) }
+        verify { style.styleLayerExists(RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID) }
+        verify { style.styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID) }
+        verify { style.styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID) }
+        verify { style.styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID) }
+        verify { style.styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID) }
+        verify { style.styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID) }
+        verify { style.styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID) }
+    }
+
+    @Test
+    fun initializeLayers_whenStyleNotLoaded() {
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val style = mockk<Style> {
+            every { fullyLoaded } returns false
+        }
+
+        MapboxRouteLineUtils.initializeLayers(style, options)
+
+        verify(exactly = 0) { style.styleSourceExists(any()) }
+    }
+
+    @Test
+    fun initializeLayers_whenLayersAreInitialized() {
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val style = mockk<Style> {
+            every { styleLayers } returns listOf()
+            every { fullyLoaded } returns true
+            every { styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns true
+            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns true
+            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
+            every { styleLayerExists(RouteConstants.PRIMARY_ROUTE_LAYER_ID) } returns true
+            every { styleLayerExists(RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID) } returns true
+            every { styleLayerExists(RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID) } returns true
+            every { styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID) } returns true
+            every { styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID) } returns true
+            every {
+                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
+            } returns true
+            every {
+                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
+            } returns true
+            every {
+                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
+            } returns true
+            every {
+                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+            } returns true
+            every { styleSourceExists(RouteConstants.WAYPOINT_SOURCE_ID) } returns false
+        }
+
+        MapboxRouteLineUtils.initializeLayers(style, options)
+
+        verify(exactly = 0) { style.styleLayers }
+        verify(exactly = 0) { style.addStyleSource(any(), any()) }
+    }
+
+    @Test
+    fun calculateRouteGranularDistances() {
+        val routeAsJsonJson = loadJsonFixture("short_route.json")
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
+        val lineString = LineString.fromPolyline(
+            route.geometry() ?: "",
+            Constants.PRECISION_6
+        )
+
+        val result = MapboxRouteLineUtils.calculateRouteGranularDistances(lineString.coordinates())
+
+        assertEquals(0.0000025451727518618744, result!!.distance, 0.0)
+        assertEquals(5, result.distancesArray.size())
+        assertEquals(Point.fromLngLat(-122.523671, 37.975379), result.distancesArray[0].point)
+        assertEquals(0.0000025451727518618744, result.distancesArray[0].distanceRemaining, 0.0)
+        assertEquals(Point.fromLngLat(-122.523131, 37.975067), result.distancesArray[4].point)
+        assertEquals(0.0, result.distancesArray[4].distanceRemaining, 0.0)
+    }
+
+    @Test
+    fun calculateRouteLineSegmentsMultilegRoute() {
+        val congestionColorProvider: (String, Boolean) -> Int = { trafficCongestion, _ ->
+            when (trafficCongestion) {
+                RouteConstants.UNKNOWN_CONGESTION_VALUE -> -9
+                RouteConstants.LOW_CONGESTION_VALUE -> -1
+                else -> 33
+            }
+        }
+        val route = getMultilegRoute()
+
+        val result = MapboxRouteLineUtils.calculateRouteLineSegments(
+            route,
+            listOf(),
+            true,
+            congestionColorProvider
+        )
+
+        assertEquals(19, result.size)
+        assertEquals(0.039793906743275334, result[1].offset, 0.0)
+        assertEquals(0.989831291992653, result.last().offset, 0.0)
+    }
+
+    @Test
+    fun calculateRouteLineSegmentsMultilegRouteFirstDistanceValueAboveMinimumOffset() {
+        val congestionColorProvider: (String, Boolean) -> Int = { trafficCongestion, _ ->
+            when (trafficCongestion) {
+                RouteConstants.UNKNOWN_CONGESTION_VALUE -> -9
+                RouteConstants.LOW_CONGESTION_VALUE -> -1
+                else -> 33
+            }
+        }
+        val route = getMultilegRoute()
+
+        val result = MapboxRouteLineUtils.calculateRouteLineSegments(
+            route,
+            listOf(),
+            true,
+            congestionColorProvider
+        )
+
+        assertTrue(result[1].offset > .001f)
+    }
+
+    @Test
+    fun getDefaultBelowLayer_whenLayerIdNotFoundReturnsDefault() {
+        val style = mockk<Style> {
+            every { styleLayers } returns listOf()
+        }
+
+        val result = MapboxRouteLineUtils.getDefaultBelowLayer("foobar", style)
+
+        assertEquals(LocationComponentConstants.FOREGROUND_LAYER, result)
+    }
+
+    @Test
+    fun getDefaultBelowLayer_whenLayerIdNotSpecified() {
+        val layer0 = mockk<StyleObjectInfo> {
+            every { id } returns "layer0"
+            every { type } returns "symbol"
+        }
+        val layer1 = mockk<StyleObjectInfo> {
+            every { id } returns "layer1"
+            every { type } returns "line"
+        }
+        val layer2 = mockk<StyleObjectInfo> {
+            every { id } returns RouteConstants.MAPBOX_LOCATION_ID
+            every { type } returns "line"
+        }
+        val layer3 = mockk<StyleObjectInfo> {
+            every { id } returns "layer3"
+            every { type } returns "line"
+        }
+        val layer4 = mockk<StyleObjectInfo> {
+            every { id } returns "layer4"
+            every { type } returns "symbol"
+        }
+        val style = mockk<Style> {
+            every { styleLayers } returns listOf(layer0, layer1, layer2, layer3, layer4)
+        }
+
+        val result = MapboxRouteLineUtils.getDefaultBelowLayer(null, style)
+
+        assertEquals(RouteConstants.MAPBOX_LOCATION_ID, result)
+    }
+
+    @Test
+    fun getDefaultBelowLayer_whenLayerIdNotSpecifiedAndSymbolLayerNotFound() {
+        val layer0 = mockk<StyleObjectInfo> {
+            every { id } returns "layer0"
+            every { type } returns "line"
+        }
+        val layer1 = mockk<StyleObjectInfo> {
+            every { id } returns "layer1"
+            every { type } returns "line"
+        }
+        val layer2 = mockk<StyleObjectInfo> {
+            every { id } returns "layer2"
+            every { type } returns "line"
+        }
+        val layer3 = mockk<StyleObjectInfo> {
+            every { id } returns "layer3"
+            every { type } returns "line"
+        }
+        val layer4 = mockk<StyleObjectInfo> {
+            every { id } returns "layer4"
+            every { type } returns "line"
+        }
+        val style = mockk<Style> {
+            every { styleLayers } returns listOf(layer0, layer1, layer2, layer3, layer4)
+        }
+
+        val result = MapboxRouteLineUtils.getDefaultBelowLayer(null, style)
+
+        assertEquals(LocationComponentConstants.FOREGROUND_LAYER, result)
+    }
+
+    @Test
+    fun findDistanceToNearestPointOnCurrentLine() {
+        val route = getMultilegRoute()
+        val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
+        val distances = MapboxRouteLineUtils.calculateRouteGranularDistances(
+            lineString.coordinates()
+        )
+
+        val result = MapboxRouteLineUtils.findDistanceToNearestPointOnCurrentLine(
+            lineString.coordinates()[15],
+            distances!!,
+            12
+        )
+
+        assertEquals(141.6772603078415, result, 0.0)
+    }
+
+    @Test
+    fun buildScalingExpression() {
+        val expectedExpression = "[interpolate, [exponential, 1.5], [zoom], 4.0, [*, 3.0, 1.0]," +
+            " 10.0, [*, 4.0, 1.0], 13.0, [*, 6.0, 1.0], 16.0, [*, 10.0, 1.0], 19.0, " +
+            "[*, 14.0, 1.0], 22.0, [*, 18.0, 1.0]]"
+        val values = listOf(
+            RouteLineScaleValue(4f, 3f, 1f),
+            RouteLineScaleValue(10f, 4f, 1f),
+            RouteLineScaleValue(13f, 6f, 1f),
+            RouteLineScaleValue(16f, 10f, 1f),
+            RouteLineScaleValue(19f, 14f, 1f),
+            RouteLineScaleValue(22f, 18f, 1f)
+        )
+
+        val result = MapboxRouteLineUtils.buildScalingExpression(values)
+
+        assertEquals(expectedExpression, result.toString())
+    }
+
+    private fun getMultilegRoute(): DirectionsRoute {
+        val routeAsJson = loadJsonFixture("multileg_route.json")
         return DirectionsRoute.fromJson(routeAsJson)
     }
 }

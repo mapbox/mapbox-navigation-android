@@ -23,7 +23,12 @@ import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
-import com.mapbox.maps.*;
+
+import com.mapbox.maps.CameraOptions;
+import com.mapbox.maps.EdgeInsets;
+import com.mapbox.maps.MapView;
+import com.mapbox.maps.MapboxMap;
+import com.mapbox.maps.Style;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImplKt;
 import com.mapbox.maps.plugin.gestures.GesturesPluginImpl;
@@ -95,7 +100,8 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
     initListeners();
   }
 
-  @SuppressLint("MissingPermission") private void initListeners() {
+  @SuppressLint("MissingPermission")
+  private void initListeners() {
     startNavigation.setOnClickListener(v -> {
       locationComponent.setRenderMode(RenderMode.GPS);
       mapboxNavigation.startTripSession();
@@ -330,7 +336,11 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
 
   @Override
   public void onExplanationNeeded(List<String> permissionsToExplain) {
-    Toast.makeText(this, "This app needs location and storage permissions in order to show its functionality.", Toast.LENGTH_LONG).show();
+    Toast.makeText(
+        this,
+        "This app needs location and storage permissions in order to show its functionality.",
+        Toast.LENGTH_LONG
+    ).show();
   }
 
   @Override

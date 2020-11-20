@@ -52,22 +52,16 @@ import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.camera.AnimationAdapter.OnAnimationButtonClicked
-import com.mapbox.navigation.examples.util.ThemeUtil
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
-import com.mapbox.navigation.ui.maps.internal.route.arrow.MapboxRouteArrowAPI
-import com.mapbox.navigation.ui.maps.internal.route.arrow.MapboxRouteArrowActions
-import com.mapbox.navigation.ui.maps.internal.route.arrow.MapboxRouteArrowView
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineAPI
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineActions
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineResourceProviderFactory.getRouteLineResourceProvider
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineView
-import com.mapbox.navigation.ui.maps.route.RouteArrowLayerInitializer
-import com.mapbox.navigation.ui.maps.route.RouteLineLayerInitializer
-import com.mapbox.navigation.ui.maps.route.arrow.api.RouteArrowAPI
-import com.mapbox.navigation.ui.maps.route.line.api.RouteLineAPI
+import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
+import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
+import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.android.synthetic.main.layout_camera_animations.*
 import timber.log.Timber
@@ -85,12 +79,10 @@ class CameraAnimationsActivity :
     private val replayRouteMapper = ReplayRouteMapper()
     private val mapboxReplayer = MapboxReplayer()
 
-    private var routeLineAPI: RouteLineAPI? = null
-    private var routeArrowAPI: RouteArrowAPI? = null
-    private val routeLineView = MapboxRouteLineView()
-    private val routeArrowView = MapboxRouteArrowView()
-    private var routeLineLayerInitializer: RouteLineLayerInitializer? = null
-    private var routeArrowLayerInitializer: RouteArrowLayerInitializer? = null
+    private var routeLineAPI: MapboxRouteLineApi? = null
+    private val routeArrowAPI: MapboxRouteArrowApi = MapboxRouteArrowApi()
+    private var routeLineView: MapboxRouteLineView? = null
+    private var routeArrowView: MapboxRouteArrowView? = null
 
     private lateinit var navigationCamera: NavigationCamera
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
@@ -159,16 +151,18 @@ class CameraAnimationsActivity :
             viewportDataSource.onRouteProgressChanged(routeProgress)
             viewportDataSource.evaluate()
 
-            routeLineAPI!!.updateUpcomingRoutePointIndex(routeProgress)
-            routeLineAPI!!.updateVanishingPointState(routeProgress.currentState)
-            routeArrowAPI!!.addUpComingManeuverArrow(routeProgress)
+            routeArrowAPI.updateUpcomingManeuverArrow(routeProgress).apply {
+                routeArrowView!!.render(mapboxMap.getStyle()!!, this)
+            }
         }
     }
 
     private val routesObserver = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
-                routeLineAPI!!.setRoutes(listOf(routes[0]))
+                routeLineAPI!!.setRoutes(listOf(RouteLine(routes[0], null))).apply {
+                    routeLineView!!.render(mapboxMap.getStyle()!!, this)
+                }
                 startSimulation(routes[0])
                 viewportDataSource.onRouteChanged(routes.first())
                 viewportDataSource.overviewPaddingPropertyOverride(overviewEdgeInsets)
@@ -204,13 +198,6 @@ class CameraAnimationsActivity :
             viewportDataSource
         )
 
-        routeLineLayerInitializer = RouteLineLayerInitializer.Builder(this).build()
-        routeArrowLayerInitializer = RouteArrowLayerInitializer.Builder(this)
-            // todo workaround, arrows currently do not perform any out-of-the-box z-ordering
-            //  and route line doesn't expose layer ID getter
-            .withAboveLayerId(RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
-            .build()
-
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
             init()
         } else {
@@ -229,14 +216,12 @@ class CameraAnimationsActivity :
     }
 
     private fun initRouteLine() {
-        val routeStyleRes = ThemeUtil.retrieveAttrResourceId(
-            this,
-            R.attr.navigationViewRouteStyle,
-            R.style.MapboxStyleNavigationMapRoute
-        )
-        val resourceProvider = getRouteLineResourceProvider(this, routeStyleRes)
-        routeLineAPI = MapboxRouteLineAPI(MapboxRouteLineActions(resourceProvider), routeLineView)
-        routeArrowAPI = MapboxRouteArrowAPI(MapboxRouteArrowActions(), routeArrowView)
+        val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(this).build()
+        routeLineAPI = MapboxRouteLineApi(mapboxRouteLineOptions)
+        routeLineView = MapboxRouteLineView(mapboxRouteLineOptions)
+
+        val routeArrowOptions = RouteArrowOptions.Builder(this).build()
+        routeArrowView = MapboxRouteArrowView(routeArrowOptions)
     }
 
     private fun initButtons() {
@@ -361,11 +346,6 @@ class CameraAnimationsActivity :
                     )
                     style.addSource(poiSource)
                     style.addLayer(poiLayer)
-
-                    routeLineLayerInitializer!!.initializeLayers(style)
-                    routeArrowLayerInitializer!!.initializeLayers(style)
-                    routeLineAPI!!.updateViewStyle(style)
-                    routeArrowAPI!!.updateViewStyle(style)
                 }
             },
             object : OnMapLoadErrorListener {

@@ -14,49 +14,44 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.examples.core.R
-import com.mapbox.navigation.ui.maps.internal.route.arrow.MapboxRouteArrowAPI
-import com.mapbox.navigation.ui.maps.internal.route.arrow.MapboxRouteArrowActions
-import com.mapbox.navigation.ui.maps.internal.route.arrow.MapboxRouteArrowView
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineAPI
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineActions
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineResourceProviderFactory.getRouteLineResourceProvider
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineView
-import com.mapbox.navigation.ui.maps.route.RouteArrowLayerInitializer
-import com.mapbox.navigation.ui.maps.route.RouteLineLayerInitializer
-import com.mapbox.navigation.ui.maps.route.arrow.api.RouteArrowAPI
-import com.mapbox.navigation.ui.maps.route.line.api.RouteLineAPI
+import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
+import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
+import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 
 class Slackline(private val activity: AppCompatActivity) : LifecycleObserver {
-
-    private val routeLineView = MapboxRouteLineView()
-    private val routeArrowView = MapboxRouteArrowView()
     private lateinit var mapView: MapView
     private lateinit var mapboxNavigation: MapboxNavigation
+    lateinit var style: Style
 
-    private val routeStyleRes: Int by lazy {
-        ThemeUtil.retrieveAttrResourceId(
-            activity,
-            R.attr.navigationViewRouteStyle,
-            R.style.MapboxStyleNavigationMapRoute
-        )
+    private val routeLineResources: RouteLineResources by lazy {
+        RouteLineResources.Builder().build()
     }
 
-    private val routeLineAPI: RouteLineAPI by lazy {
-        val resourceProvider = getRouteLineResourceProvider(activity, routeStyleRes)
-        MapboxRouteLineAPI(MapboxRouteLineActions(resourceProvider), routeLineView)
+    private val options: MapboxRouteLineOptions by lazy {
+        MapboxRouteLineOptions.Builder(activity)
+            .withRouteLineResources(routeLineResources)
+            .build()
     }
 
-    private val routeArrowAPI: RouteArrowAPI by lazy {
-        MapboxRouteArrowAPI(MapboxRouteArrowActions(), routeArrowView)
+    private val routeLineView by lazy {
+        MapboxRouteLineView(options)
     }
 
-    private val routeLineLayerInitializer: RouteLineLayerInitializer by lazy {
-        RouteLineLayerInitializer.Builder(activity).build()
+    private val routeLineApi: MapboxRouteLineApi by lazy {
+        MapboxRouteLineApi(options)
     }
 
-    private val routeArrowLayerInitializer: RouteArrowLayerInitializer by lazy {
-        RouteArrowLayerInitializer.Builder(activity).build()
+    private val routeArrowApi: MapboxRouteArrowApi by lazy {
+        MapboxRouteArrowApi()
+    }
+
+    private val routeArrowView: MapboxRouteArrowView by lazy {
+        MapboxRouteArrowView(RouteArrowOptions.Builder(activity).build())
     }
 
     init {
@@ -66,13 +61,11 @@ class Slackline(private val activity: AppCompatActivity) : LifecycleObserver {
     fun initialize(mapView: MapView, mapboxNavigation: MapboxNavigation) {
         this.mapView = mapView
         this.mapboxNavigation = mapboxNavigation
+
         mapView.getMapboxMap().getStyle(
             object : Style.OnStyleLoaded {
                 override fun onStyleLoaded(style: Style) {
-                    routeLineLayerInitializer.initializeLayers(style)
-                    routeArrowLayerInitializer.initializeLayers(style)
-                    routeLineAPI.updateViewStyle(style)
-                    routeArrowAPI.updateViewStyle(style)
+                    this@Slackline.style = style
                 }
             }
         )
@@ -89,21 +82,26 @@ class Slackline(private val activity: AppCompatActivity) : LifecycleObserver {
 
     private val onIndicatorPositionChangedListener = object : OnIndicatorPositionChangedListener {
         override fun onIndicatorPositionChanged(point: Point) {
-            routeLineAPI.updateTraveledRouteLine(point)
+            routeLineApi.updateTraveledRouteLine(point)?.apply {
+                routeLineView.render(style, this)
+            }
         }
     }
 
     private val routesObserver: RoutesObserver = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            routeLineAPI.setRoutes(listOf(routes[0]))
+            routeLineApi.setRoutes(listOf(RouteLine(routes[0], null))).apply {
+                routeLineView.render(style, this)
+            }
         }
     }
 
     private val routeProgressObserver: RouteProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            routeLineAPI.updateUpcomingRoutePointIndex(routeProgress)
-            routeLineAPI.updateVanishingPointState(routeProgress.currentState)
-            routeArrowAPI.addUpComingManeuverArrow(routeProgress)
+            routeLineApi.updateWithRouteProgress(routeProgress)
+            routeArrowApi.updateUpcomingManeuverArrow(routeProgress).apply {
+                routeArrowView.render(style, this)
+            }
 
             val currentRoute = routeProgress.route
             var hasGeometry = false
@@ -112,12 +110,14 @@ class Slackline(private val activity: AppCompatActivity) : LifecycleObserver {
             }
 
             var isNewRoute = false
-            if (hasGeometry && currentRoute !== routeLineAPI.getPrimaryRoute()) {
+            if (hasGeometry && currentRoute !== routeLineApi.getPrimaryRoute()) {
                 isNewRoute = true
             }
 
             if (isNewRoute) {
-                routeLineAPI.setRoutes(listOf(routeProgress.route))
+                routeLineApi.setRoutes(listOf(RouteLine(routeProgress.route, null))).apply {
+                    routeLineView.render(style, this)
+                }
             }
         }
     }

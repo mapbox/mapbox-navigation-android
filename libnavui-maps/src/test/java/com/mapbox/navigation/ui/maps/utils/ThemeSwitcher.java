@@ -31,35 +31,6 @@ public class ThemeSwitcher {
     }
   }
 
-  /**
-   * Called in onCreate() to check the UI Mode (day or night)
-   * and set the theme colors accordingly.
-   *
-   * @param context {@link NavigationView} where the theme will be set
-   * @param attrs   holding custom styles if any are set
-   */
-  //public static void setTheme(@NonNull Context context, AttributeSet attrs) {
-  //  boolean nightModeEnabled = isNightModeEnabled(context);
-  //
-  //  if (shouldSetThemeFromPreferences(context)) {
-  //    int prefLightTheme = retrieveThemeResIdFromPreferences(context, NavigationConstants.NAVIGATION_VIEW_LIGHT_THEME);
-  //    int prefDarkTheme = retrieveThemeResIdFromPreferences(context, NavigationConstants.NAVIGATION_VIEW_DARK_THEME);
-  //    prefLightTheme = prefLightTheme == 0 ? R.style.MapboxStyleNavigationViewLight : prefLightTheme;
-  //    prefDarkTheme = prefLightTheme == 0 ? R.style.MapboxStyleNavigationViewDark : prefDarkTheme;
-  //    context.setTheme(nightModeEnabled ? prefDarkTheme : prefLightTheme);
-  //    return;
-  //  }
-  //
-  //  TypedArray styledAttributes = context.obtainStyledAttributes(attrs, R.styleable.MapboxStyleNavigationView);
-  //  int lightTheme = styledAttributes.getResourceId(R.styleable.MapboxStyleNavigationView_navigationLightTheme,
-  //      R.style.MapboxStyleNavigationViewLight);
-  //  int darkTheme = styledAttributes.getResourceId(R.styleable.MapboxStyleNavigationView_navigationDarkTheme,
-  //      R.style.MapboxStyleNavigationViewDark);
-  //  styledAttributes.recycle();
-  //
-  //  context.setTheme(nightModeEnabled ? darkTheme : lightTheme);
-  //}
-
   @NonNull
   public static String retrieveMapStyle(@NonNull Context context) {
     TypedValue mapStyleAttr = resolveAttributeFromId(context, R.attr.navigationViewMapStyle);

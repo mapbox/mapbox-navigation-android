@@ -35,6 +35,7 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImplKt;
 import com.mapbox.maps.plugin.gestures.GesturesPluginImpl;
+import com.mapbox.maps.plugin.gestures.OnMapClickListener;
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener;
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions;
 import com.mapbox.maps.plugin.location.LocationComponentPlugin;
@@ -53,20 +54,17 @@ import com.mapbox.navigation.core.replay.route.ReplayProgressObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper;
-import com.mapbox.navigation.examples.util.ThemeUtil;
-
-import com.mapbox.navigation.ui.maps.internal.route.arrow.MapboxRouteArrowAPI;
-import com.mapbox.navigation.ui.maps.internal.route.arrow.MapboxRouteArrowActions;
-import com.mapbox.navigation.ui.maps.internal.route.arrow.MapboxRouteArrowView;
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineAPI;
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineActions;
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineView;
-import com.mapbox.navigation.ui.maps.route.RouteArrowLayerInitializer;
-import com.mapbox.navigation.ui.maps.route.RouteLineLayerInitializer;
-import com.mapbox.navigation.ui.maps.route.arrow.api.RouteArrowAPI;
-import com.mapbox.navigation.ui.maps.route.line.api.RouteLineAPI;
-import com.mapbox.navigation.ui.maps.route.line.api.RouteLineResourceProvider;
-
+import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer;
+import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi;
+import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView;
+import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions;
+import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowState;
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi;
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView;
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions;
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources;
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLine;
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineState;
 import org.jetbrains.annotations.NotNull;
 import timber.log.Timber;
 
@@ -76,37 +74,35 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+//import static com.mapbox.android.gestures.Utils.dpToPx;
 import static com.mapbox.navigation.examples.util.LocationPermissionsHelperKt.LOCATION_PERMISSIONS_REQUEST_CODE;
 import static com.mapbox.navigation.ui.base.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID;
-import static com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineResourceProviderFactory.getRouteLineResourceProvider;
 
-public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity implements PermissionsListener,
+public class MapboxRouteLineApiExampleActivity extends AppCompatActivity implements PermissionsListener,
     OnMapLongClickListener {
 
+  //private final float routeClickPadding = dpToPx(30f);
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
-  private LocationPermissionsHelper permissionsHelper = new LocationPermissionsHelper(this);
+  private final LocationPermissionsHelper permissionsHelper = new LocationPermissionsHelper(this);
   private MapView mapView;
   private MapboxMap mapboxMap;
   private LocationComponentPlugin locationComponent;
   private CameraAnimationsPlugin mapCamera;
-  private MapboxReplayer mapboxReplayer = new MapboxReplayer();
+  private final MapboxReplayer mapboxReplayer = new MapboxReplayer();
   private MapboxNavigation mapboxNavigation;
   private Button startNavigation;
   private ProgressBar routeLoading;
-  private List<String> mapStyles = Arrays.asList(
+  private final List<String> mapStyles = Arrays.asList(
       Style.MAPBOX_STREETS,
       Style.OUTDOORS,
       Style.LIGHT,
       Style.SATELLITE_STREETS
   );
-  private RouteLineAPI routeLineAPI;
-  private RouteArrowAPI routeArrowAPI;
-  private MapboxRouteLineView routeLineView = new MapboxRouteLineView();
-  private MapboxRouteArrowView routeArrowView = new MapboxRouteArrowView();
-  private RouteLineLayerInitializer routeLineLayerInitializer;
-  private RouteArrowLayerInitializer routeArrowLayerInitializer;
+  private MapboxRouteLineApi mapboxRouteLineApi;
+  private MapboxRouteLineView mapboxRouteLineView;
+  private final MapboxRouteArrowApi routeArrow = new MapboxRouteArrowApi();
+  private MapboxRouteArrowView routeArrowView;
 
   @SuppressLint("MissingPermission")
   @Override
@@ -119,12 +115,6 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
     mapboxMap = mapView.getMapboxMap();
     locationComponent = getLocationComponent();
     mapCamera = getMapCamera();
-    routeLineLayerInitializer = new RouteLineLayerInitializer.Builder(this).build();
-    routeArrowLayerInitializer = new RouteArrowLayerInitializer.Builder(this)
-      // todo workaround, arrows currently do not perform any out-of-the-box z-ordering
-      //  and route line doesn't expose layer ID getter
-      .withAboveLayerId(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
-      .build();
 
     if (LocationPermissionsHelper.areLocationPermissionsGranted(this)) {
       requestPermissionIfNotGranted(WRITE_EXTERNAL_STORAGE);
@@ -134,19 +124,27 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
   }
 
   private void init() {
-    int routeStyleRes = ThemeUtil.retrieveAttrResourceId(
-        this, R.attr.navigationViewRouteStyle, R.style.MapboxStyleNavigationMapRoute
-    );
-    RouteLineResourceProvider resourceProvider = getRouteLineResourceProvider(this, routeStyleRes);
-    routeLineAPI = new MapboxRouteLineAPI(new MapboxRouteLineActions(resourceProvider), routeLineView);
-    routeArrowAPI = new MapboxRouteArrowAPI(new MapboxRouteArrowActions(), routeArrowView);
-
     initNavigation();
     initStyle();
     initListeners();
+
+    RouteLineResources routeLineResources = new RouteLineResources.Builder().build();
+    MapboxRouteLineOptions mapboxRouteLineOptions = new MapboxRouteLineOptions.Builder(this)
+        .withRouteLineResources(routeLineResources)
+        .withVanishingRouteLineEnabled(true)
+        .build();
+
+    mapboxRouteLineApi = new MapboxRouteLineApi(mapboxRouteLineOptions);
+    mapboxRouteLineView = new MapboxRouteLineView(mapboxRouteLineOptions);
+
+    RouteArrowOptions routeArrowOptions = new RouteArrowOptions.Builder(this)
+        .withAboveLayerId(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+        .build();
+    routeArrowView = new MapboxRouteArrowView(routeArrowOptions);
   }
 
-  @SuppressLint("MissingPermission") private void initListeners() {
+  @SuppressLint("MissingPermission")
+  private void initListeners() {
     startNavigation.setOnClickListener(v -> {
       locationComponent.setRenderMode(RenderMode.GPS);
       mapboxNavigation.registerRouteProgressObserver(routeProgressObserver);
@@ -157,46 +155,56 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
 
     ((FloatingActionButton)findViewById(R.id.fabToggleStyle)).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
+        Visibility primaryRouteLineVisibility = mapboxRouteLineView.getPrimaryRouteVisibility(mapboxMap.getStyle());
+        Visibility alternativeRouteLineVisibility = mapboxRouteLineView.getAlternativeRoutesVisibility(mapboxMap.getStyle());
+        Visibility arrowVisibility = routeArrowView.getVisibility(mapboxMap.getStyle());
+
         Collections.shuffle(mapStyles);
         String style = mapStyles.get(0);
         Timber.e("*** Chosen map style is %s", style);
         mapboxMap.loadStyleUri(style, new Style.OnStyleLoaded() {
           @Override public void onStyleLoaded(@NotNull Style style) {
-            routeLineLayerInitializer.initializeLayers(style);
-            routeArrowLayerInitializer.initializeLayers(style);
-            routeLineAPI.updateViewStyle(style);
-            routeArrowAPI.updateViewStyle(style);
-
-            if (routeLineAPI.getPrimaryRouteVisibility(style) == Visibility.VISIBLE) {
-              routeLineAPI.showPrimaryRoute();
+            RouteLineState.UpdateLayerVisibilityState primaryRouteVisibilityState;
+            if (primaryRouteLineVisibility == Visibility.VISIBLE) {
+              primaryRouteVisibilityState = mapboxRouteLineApi.showPrimaryRoute();
             } else {
-              routeLineAPI.hidePrimaryRoute();
+              primaryRouteVisibilityState = mapboxRouteLineApi.hidePrimaryRoute();
             }
+            mapboxRouteLineView.render(style, primaryRouteVisibilityState);
 
-            if (routeLineAPI.getAlternativeRoutesVisibility(style) == Visibility.VISIBLE) {
-              routeLineAPI.showAlternativeRoutes();
+            RouteLineState.UpdateLayerVisibilityState alternateRouteVisibilityState;
+            if (alternativeRouteLineVisibility == Visibility.VISIBLE) {
+              alternateRouteVisibilityState = mapboxRouteLineApi.showAlternativeRoutes();
             } else {
-              routeLineAPI.hideAlternativeRoutes();
+              alternateRouteVisibilityState = mapboxRouteLineApi.hideAlternativeRoutes();
             }
-            routeLineAPI.redrawRoute();
+            mapboxRouteLineView.render(style, alternateRouteVisibilityState);
 
+            RouteLineState.RouteSetState redrawData = mapboxRouteLineApi.getRouteDrawData();
+            mapboxRouteLineView.render(style, redrawData);
 
-            if (routeArrowAPI.getRouteArrowVisibility(style) == Visibility.VISIBLE) {
-              routeArrowAPI.showManeuverArrow();
+            RouteArrowState.UpdateRouteArrowVisibilityState arrowVisibilityState;
+            if (arrowVisibility == Visibility.VISIBLE) {
+              arrowVisibilityState = routeArrow.showManeuverArrow();
             } else {
-              routeArrowAPI.hideManeuverArrow();
+              arrowVisibilityState = routeArrow.hideManeuverArrow();
             }
-            routeArrowAPI.redrawArrow();
+            routeArrowView.render(style, arrowVisibilityState);
+
+            RouteArrowState.UpdateManeuverArrowState redrawState = routeArrow.redraw();
+            routeArrowView.render(style, redrawState);
           }
         }, null);
       }
     });
+
+    getGesturePlugin().addOnMapClickListener(mapClickListener);
   }
 
   @SuppressLint("MissingPermission")
   private void initNavigation() {
     NavigationOptions navigationOptions = MapboxNavigation
-        .defaultNavigationOptionsBuilder(MapboxRouteLineAPIExampleActivity.this, getMapboxAccessTokenFromResources())
+        .defaultNavigationOptionsBuilder(MapboxRouteLineApiExampleActivity.this, getMapboxAccessTokenFromResources())
         .locationEngine(new ReplayLocationEngine(mapboxReplayer))
         .build();
     mapboxNavigation = new MapboxNavigation(navigationOptions);
@@ -213,11 +221,6 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
     mapboxMap.loadStyleUri(Style.MAPBOX_STREETS, style -> {
       initializeLocationComponent(style);
       mapboxNavigation.getNavigationOptions().getLocationEngine().getLastLocation(locationEngineCallback);
-
-      routeLineLayerInitializer.initializeLayers(style);
-      routeArrowLayerInitializer.initializeLayers(style);
-      routeLineAPI.updateViewStyle(style);
-      routeArrowAPI.updateViewStyle(style);
 
       getGesturePlugin().addOnMapLongClickListener(this);
     }, (mapLoadError, s) -> Timber.e("Error loading map: %s", mapLoadError.name()));
@@ -309,7 +312,12 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
   private RoutesObserver routesObserver = new RoutesObserver() {
     @Override
     public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
-      routeLineAPI.setRoutes(Collections.singletonList(routes.get(0)));
+      List<RouteLine> routeLines = new ArrayList<>();
+      for (DirectionsRoute route: routes) {
+        routeLines.add(new RouteLine(route, null));
+      }
+      RouteLineState.RouteSetState routeDrawData = mapboxRouteLineApi.setRoutes(routeLines);
+      mapboxRouteLineView.render(mapboxMap.getStyle(), routeDrawData);
     }
   };
 
@@ -400,16 +408,16 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
 
   private static class MyLocationEngineCallback implements LocationEngineCallback<LocationEngineResult> {
 
-    private WeakReference<MapboxRouteLineAPIExampleActivity> activityRef;
+    private WeakReference<MapboxRouteLineApiExampleActivity> activityRef;
 
-    MyLocationEngineCallback(MapboxRouteLineAPIExampleActivity activity) {
+    MyLocationEngineCallback(MapboxRouteLineApiExampleActivity activity) {
       this.activityRef = new WeakReference<>(activity);
     }
 
     @Override
     public void onSuccess(LocationEngineResult result) {
       Location location = result.getLastLocation();
-      MapboxRouteLineAPIExampleActivity activity = activityRef.get();
+      MapboxRouteLineApiExampleActivity activity = activityRef.get();
       if (location != null && activity != null) {
         Point point = Point.fromLngLat(location.getLongitude(), location.getLatitude());
         CameraOptions cameraOptions = new CameraOptions.Builder().center(point).zoom(13.0).build();
@@ -437,7 +445,11 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
 
   @Override
   public void onExplanationNeeded(List<String> permissionsToExplain) {
-    Toast.makeText(this, "This app needs location and storage permissions in order to show its functionality.", Toast.LENGTH_LONG).show();
+    Toast.makeText(
+        this,
+        "This app needs location and storage permissions in order to show its functionality.",
+        Toast.LENGTH_LONG
+    ).show();
   }
 
   @Override
@@ -460,14 +472,18 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
   }
 
   private OnIndicatorPositionChangedListener onIndicatorPositionChangedListener = point -> {
-    routeLineAPI.updateTraveledRouteLine(point);
+    RouteLineState.VanishingRouteLineUpdateState vanishingRouteLineData = mapboxRouteLineApi.updateTraveledRouteLine(point);
+    if (vanishingRouteLineData != null && mapboxMap.getStyle() != null) {
+      mapboxRouteLineView.render(mapboxMap.getStyle(), vanishingRouteLineData);
+    }
   };
 
-  private RouteProgressObserver routeProgressObserver = new RouteProgressObserver() {
+  private final RouteProgressObserver routeProgressObserver = new RouteProgressObserver() {
     @Override public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
-      routeLineAPI.updateUpcomingRoutePointIndex(routeProgress);
-      routeLineAPI.updateVanishingPointState(routeProgress.getCurrentState());
-      routeArrowAPI.addUpComingManeuverArrow(routeProgress);
+      mapboxRouteLineApi.updateWithRouteProgress(routeProgress);
+
+      RouteArrowState.UpdateManeuverArrowState updateArrowState = routeArrow.updateUpcomingManeuverArrow(routeProgress);
+      routeArrowView.render(mapboxMap.getStyle(), updateArrowState);
 
       DirectionsRoute currentRoute = routeProgress.getRoute();
       boolean hasGeometry = false;
@@ -476,13 +492,48 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
       }
 
       boolean isNewRoute = false;
-      if (hasGeometry && currentRoute != routeLineAPI.getPrimaryRoute()) {
+      if (hasGeometry && currentRoute != mapboxRouteLineApi.getPrimaryRoute()) {
         isNewRoute = true;
       }
 
       if (isNewRoute) {
-        routeLineAPI.setRoutes(Collections.singletonList(routeProgress.getRoute()));
+        RouteLineState.RouteSetState routeDrawData =
+            mapboxRouteLineApi.setRoutes(
+                Collections.singletonList(new RouteLine(routeProgress.getRoute(), null))
+            );
+        mapboxRouteLineView.render(mapboxMap.getStyle(), routeDrawData);
       }
+    }
+  };
+
+  private final MapboxNavigationConsumer<RouteLineState.ClosestRouteState> closestRouteResultConsumer =
+      new MapboxNavigationConsumer<RouteLineState.ClosestRouteState>() {
+        @Override public void accept(RouteLineState.ClosestRouteState closestRouteState) {
+          final int index = closestRouteState.getRouteIndex();
+          if (index >= 0) {
+            final DirectionsRoute selectedRoute = mapboxRouteLineApi.getRoutes().get(index);
+            if (selectedRoute != mapboxRouteLineApi.getPrimaryRoute()) {
+              mapboxRouteLineApi.updateToPrimaryRoute(selectedRoute);
+              // NOTE: We don't have to render the state because there is a RoutesObserver on the
+              // MapboxNavigation object which will draw the routes. Rendering the state would draw the routes
+              // twice unnecessarily in this implementation.
+              mapboxNavigation.setRoutes(mapboxRouteLineApi.getRoutes());
+            }
+          }
+        }
+  };
+
+  private final OnMapClickListener mapClickListener = new OnMapClickListener() {
+    @Override public boolean onMapClick(@NotNull Point point) {
+      Visibility primaryLineVisibility = mapboxRouteLineView.getPrimaryRouteVisibility(mapboxMap.getStyle());
+      Visibility alternativeRouteLinesVisibility = mapboxRouteLineView.getAlternativeRoutesVisibility(mapboxMap.getStyle());
+      if (primaryLineVisibility == Visibility.VISIBLE && alternativeRouteLinesVisibility == Visibility.VISIBLE) {
+        // temporarily commenting this out since there is a bug on the maps side that causes a crash when
+        // MapboxMap::queryRenderedFeatures is called.
+        // mapboxRouteLineApi.findClosestRoute(point, mapboxMap, routeClickPadding, closestRouteResultConsumer);
+        // issue: https://github.com/mapbox/mapbox-maps-android/issues/885
+      }
+      return false;
     }
   };
 }

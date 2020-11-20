@@ -11,7 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.permissions.PermissionsListener
-import com.mapbox.navigation.examples.core.MapboxRouteLineAPIExampleActivity
+import com.mapbox.navigation.examples.core.MapboxRouteLineApiExampleActivity
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.SlackLineActivity
 import com.mapbox.navigation.examples.core.camera.CameraAnimationsActivity
@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
             SampleItem(
                 getString(R.string.title_route_api),
                 getString(R.string.description_routeline_api),
-                MapboxRouteLineAPIExampleActivity::class.java
+                MapboxRouteLineApiExampleActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_slackline),
