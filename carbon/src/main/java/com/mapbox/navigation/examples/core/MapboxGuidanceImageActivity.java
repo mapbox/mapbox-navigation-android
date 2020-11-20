@@ -134,9 +134,10 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements Pe
 
   private void init() {
     initNavigation();
-    slackline.initialize(mapView, mapboxNavigation);
     initStyle();
+    slackline.initialize(mapView, mapboxNavigation);
     initListeners();
+    mapboxNavigation.setRoutes(Collections.singletonList(getDirectionsRoute()));
   }
 
   @SuppressLint("MissingPermission") private void initListeners() {
@@ -169,7 +170,6 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements Pe
     mapboxMap.loadStyleUri(Style.MAPBOX_STREETS, style -> {
       initializeLocationComponent(style);
       mapboxNavigation.getNavigationOptions().getLocationEngine().getLastLocation(locationEngineCallback);
-      mapboxNavigation.setRoutes(Collections.singletonList(getDirectionsRoute()));
     }, (mapLoadError, s) -> Timber.e("Error loading map: %s", mapLoadError.name()));
   }
 
