@@ -132,4 +132,6 @@
     <string name="description_routeline_api" translatable="false">Demonstrates usage of the route line API.</string>
     <string name="title_slackline" translatable="false">Slackline usage example</string>
     <string name="slackline_description" translatable="false">Describes using Slackline as a route line setup shortcut.</string>
+    <string name="title_guidance_api" translatable="false">Guidance API example</string>
+    <string name="description_guidance_api" translatable="false">Demonstrates usage of guidance image API.</string>
 </resources>

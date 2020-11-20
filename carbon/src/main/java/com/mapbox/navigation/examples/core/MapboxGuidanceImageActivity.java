@@ -51,6 +51,7 @@ import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper;
+import com.mapbox.navigation.examples.util.Slackline;
 import com.mapbox.navigation.examples.util.ThemeUtil;
 import com.mapbox.navigation.ui.base.api.guidanceimage.GuidanceImageApi;
 import com.mapbox.navigation.ui.base.domain.BannerInstructionsApi;
@@ -97,6 +98,7 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements Pe
   private MapboxNavigation mapboxNavigation;
   private Button startNavigation;
   private MapboxReplayer mapboxReplayer = new MapboxReplayer();
+  private Slackline slackline = new Slackline(this);
   private GuidanceImageApi guidanceImageApi;
   private MapboxGuidanceView guidanceView;
 
@@ -132,6 +134,7 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements Pe
 
   private void init() {
     initNavigation();
+    slackline.initialize(mapView, mapboxNavigation);
     initStyle();
     initListeners();
   }
@@ -139,10 +142,9 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements Pe
   @SuppressLint("MissingPermission") private void initListeners() {
     startNavigation.setOnClickListener(v -> {
       locationComponent.setRenderMode(RenderMode.GPS);
-      mapboxNavigation.registerRouteProgressObserver(routeProgressObserver);
-      mapboxNavigation.registerBannerInstructionsObserver(bannerInstructionsObserver);
       mapboxNavigation.startTripSession();
       startNavigation.setVisibility(View.GONE);
+      mapboxNavigation.registerBannerInstructionsObserver(bannerInstructionsObserver);
     });
   }
 
@@ -164,11 +166,11 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements Pe
 
   @SuppressLint("MissingPermission")
   private void initStyle() {
-    mapboxNavigation.getNavigationOptions().getLocationEngine().getLastLocation(locationEngineCallback);
-    mapboxMap.loadStyleUri(Style.MAPBOX_STREETS,
-        this::initializeLocationComponent,
-        (mapLoadError, s) -> Timber.e("Error loading map: %s", mapLoadError.name()));
-    mapboxNavigation.setRoutes(Collections.singletonList(getDirectionsRoute()));
+    mapboxMap.loadStyleUri(Style.MAPBOX_STREETS, style -> {
+      initializeLocationComponent(style);
+      mapboxNavigation.getNavigationOptions().getLocationEngine().getLastLocation(locationEngineCallback);
+      mapboxNavigation.setRoutes(Collections.singletonList(getDirectionsRoute()));
+    }, (mapLoadError, s) -> Timber.e("Error loading map: %s", mapLoadError.name()));
   }
 
   @Override
@@ -181,7 +183,8 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements Pe
   protected void onStop() {
     super.onStop();
     if (mapboxNavigation != null) {
-      mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver);
+      mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver);
+      mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver);
     }
     mapView.onStop();
   }
@@ -196,19 +199,6 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements Pe
   @Override public void onLowMemory() {
     super.onLowMemory();
     mapView.onLowMemory();
-  }
-
-  @SuppressLint("MissingPermission")
-  private void vibrate() {
-    Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-    if (vibrator == null) {
-      return;
-    }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      vibrator.vibrate(VibrationEffect.createOneShot(ONE_HUNDRED_MILLISECONDS, VibrationEffect.DEFAULT_AMPLITUDE));
-    } else {
-      vibrator.vibrate(ONE_HUNDRED_MILLISECONDS);
-    }
   }
 
   @SuppressWarnings("MissingPermission")
@@ -320,12 +310,6 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements Pe
     @Override public void onNewBannerInstructions(@NotNull BannerInstructions bannerInstructions) {
       Log.d("kjkjkj", "call API");
       guidanceImageApi.generateGuidanceImage(bannerInstructions, Point.fromLngLat(-121.966668, 37.555581));
-    }
-  };
-
-  private RouteProgressObserver routeProgressObserver = new RouteProgressObserver() {
-    @Override public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
-
     }
   };
 
