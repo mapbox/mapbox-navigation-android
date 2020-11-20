@@ -193,10 +193,9 @@ class ReplayHistoryMapper private constructor(
 
             private val DefaultSetRouteMapper =
                 ReplayHistoryEventMapper<HistoryEventSetRoute> {
-                    ReplaySetRoute(
-                        eventTimestamp = it.eventTimestamp,
-                        route = it.directionsRoute
-                    )
+                    ReplaySetNavigationRoute.Builder(eventTimestamp = it.eventTimestamp)
+                        .route(it.navigationRoute)
+                        .build()
                 }
 
             private val DefaultStatusMapper =

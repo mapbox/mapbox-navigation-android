@@ -5,6 +5,8 @@ Mapbox welcomes participation and contributions from everyone.
 ## Unreleased
 #### Features
 #### Bug fixes and improvements
+- Added `MapboxReplayer#attachStream` and `ReplayEventStream` for replaying events while using constant memory. [#6582](https://github.com/mapbox/mapbox-navigation-android/pull/6582)
+- Added `ReplayHistoryEventStream` for replaying history files as a stream. [#6582](https://github.com/mapbox/mapbox-navigation-android/pull/6582)
 
 ## Mapbox Navigation SDK 2.9.1 - 11 November, 2022
 ### Changelog

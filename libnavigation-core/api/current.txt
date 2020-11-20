@@ -251,10 +251,8 @@ package com.mapbox.navigation.core.history {
 
   public final class MapboxHistoryReader implements java.util.Iterator<com.mapbox.navigation.core.history.model.HistoryEvent> kotlin.jvm.internal.markers.KMappedMarker {
     ctor public MapboxHistoryReader(String filePath);
-    method public String getFilePath();
     method public boolean hasNext();
-    method public com.mapbox.navigation.core.history.model.HistoryEvent next();
-    property public final String filePath;
+    method @kotlin.jvm.Throws(exceptionClasses=NullPointerException::class) public com.mapbox.navigation.core.history.model.HistoryEvent next() throws java.lang.NullPointerException;
   }
 
   public final class MapboxHistoryRecorder {
@@ -435,6 +433,7 @@ package com.mapbox.navigation.core.replay {
 
   @UiThread public final class MapboxReplayer {
     ctor public MapboxReplayer();
+    method public com.mapbox.navigation.core.replay.MapboxReplayer attachStream(com.mapbox.navigation.core.replay.ReplayEventStream eventStream);
     method public void clearEvents();
     method public double durationSeconds();
     method public double eventRealtimeOffset(double eventTimestamp);
@@ -451,6 +450,10 @@ package com.mapbox.navigation.core.replay {
     method public void stop();
     method public void unregisterObserver(com.mapbox.navigation.core.replay.history.ReplayEventsObserver observer);
     method public void unregisterObservers();
+  }
+
+  public interface ReplayEventStream extends java.io.Closeable java.util.Iterator<com.mapbox.navigation.core.replay.history.ReplayEventBase> {
+    method public default void close();
   }
 
   @UiThread public final class ReplayLocationEngine implements com.mapbox.android.core.location.LocationEngine com.mapbox.navigation.core.replay.history.ReplayEventsObserver {
@@ -537,6 +540,13 @@ package com.mapbox.navigation.core.replay.history {
 
   public fun interface ReplayHistoryEventMapper<Event extends com.mapbox.navigation.core.history.model.HistoryEvent> {
     method public com.mapbox.navigation.core.replay.history.ReplayEventBase? map(Event event);
+  }
+
+  public final class ReplayHistoryEventStream implements com.mapbox.navigation.core.replay.ReplayEventStream {
+    ctor public ReplayHistoryEventStream(String filePath);
+    ctor public ReplayHistoryEventStream(String filePath, com.mapbox.navigation.core.replay.history.ReplayHistoryMapper replayHistoryMapper);
+    method public boolean hasNext();
+    method @kotlin.jvm.Throws(exceptionClasses=NullPointerException::class) public com.mapbox.navigation.core.replay.history.ReplayEventBase next() throws java.lang.NullPointerException;
   }
 
   public final class ReplayHistoryMapper {

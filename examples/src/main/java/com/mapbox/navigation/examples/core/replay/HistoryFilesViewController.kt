@@ -1,7 +1,7 @@
 package com.mapbox.navigation.examples.core.replay
 
 import android.content.Context
-import com.mapbox.navigation.core.history.MapboxHistoryReader
+import com.mapbox.navigation.core.replay.history.ReplayHistoryEventStream
 import com.mapbox.navigation.examples.core.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +14,6 @@ import java.util.Collections
 class HistoryFilesViewController(
     private val historyFileDirectory: String?
 ) {
-
     private var viewAdapter: HistoryFileAdapter? = null
     private val historyFilesRepository = HistoryFilesDirectory()
     private val historyFilesApi = HistoryFilesClient()
@@ -22,7 +21,7 @@ class HistoryFilesViewController(
     fun attach(
         context: Context,
         viewAdapter: HistoryFileAdapter,
-        result: (MapboxHistoryReader?) -> Unit
+        result: (ReplayHistoryEventStream?) -> Unit
     ) {
         this.viewAdapter = viewAdapter
         viewAdapter.itemClicked = { historyFileItem ->
@@ -90,10 +89,10 @@ class HistoryFilesViewController(
 
     private fun requestFromFileCache(
         historyFileItem: ReplayPath,
-        result: (MapboxHistoryReader) -> Unit
+        result: (ReplayHistoryEventStream) -> Unit
     ) {
         CoroutineScope(Dispatchers.Main).launch {
-            val data = MapboxHistoryReader(historyFileItem.path)
+            val data = ReplayHistoryEventStream(historyFileItem.path)
             result(data)
         }
     }
@@ -101,7 +100,7 @@ class HistoryFilesViewController(
     private fun requestFromServer(
         context: Context,
         replayPath: ReplayPath,
-        result: (MapboxHistoryReader?) -> Unit
+        result: (ReplayHistoryEventStream?) -> Unit
     ): Job {
         return CoroutineScope(Dispatchers.Main).launch {
             val outputFile = historyFilesRepository.outputFile(context, replayPath.path)
@@ -113,7 +112,7 @@ class HistoryFilesViewController(
     private fun requestFromAssets(
         context: Context,
         replayPath: ReplayPath,
-        result: (MapboxHistoryReader?) -> Unit
+        result: (ReplayHistoryEventStream?) -> Unit
     ) {
         CoroutineScope(Dispatchers.IO).launch {
             val inputStream = context.assets.open(replayPath.path)
@@ -121,7 +120,7 @@ class HistoryFilesViewController(
             outputFile.outputStream().use { fileOut ->
                 inputStream.copyTo(fileOut)
             }
-            val reader = MapboxHistoryReader(outputFile.absolutePath)
+            val reader = ReplayHistoryEventStream(outputFile.absolutePath)
             withContext(Dispatchers.Main) {
                 result(reader)
             }

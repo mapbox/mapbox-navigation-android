@@ -2,7 +2,7 @@ package com.mapbox.navigation.examples.core.replay
 
 import android.util.Log
 import androidx.annotation.Keep
-import com.mapbox.navigation.core.history.MapboxHistoryReader
+import com.mapbox.navigation.core.replay.history.ReplayHistoryEventStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -55,14 +55,14 @@ class HistoryFilesClient {
             }
         }
 
-    suspend fun requestJsonFile(pathName: String, outputFile: File): MapboxHistoryReader? =
+    suspend fun requestJsonFile(pathName: String, outputFile: File): ReplayHistoryEventStream? =
         withContext(Dispatchers.IO) {
             try {
                 val inputStream = URL(HISTORY_FILE_URL + pathName).openStream()
                 outputFile.outputStream().use { fileOut ->
                     inputStream.copyTo(fileOut)
                 }
-                MapboxHistoryReader(outputFile.absolutePath)
+                ReplayHistoryEventStream(outputFile.absolutePath)
             } catch (exception: IOException) {
                 Log.e(TAG, "requestJsonFile onFailure: $exception")
                 null

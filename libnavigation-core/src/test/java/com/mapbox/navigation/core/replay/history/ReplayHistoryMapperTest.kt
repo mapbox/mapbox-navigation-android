@@ -77,13 +77,13 @@ class ReplayHistoryMapperTest : BuilderTest<ReplayHistoryMapper, ReplayHistoryMa
     fun `should map HistoryEventSetRoute`() {
         val event: HistoryEventSetRoute = mockk {
             every { eventTimestamp } returns 1580744198.879556
-            every { directionsRoute } returns mockk(relaxed = true)
+            every { navigationRoute } returns mockk(relaxed = true)
         }
 
         val replayHistoryMapper = ReplayHistoryMapper.Builder().build()
         val replayEvent = replayHistoryMapper.mapToReplayEvent(event)!!
 
-        assertTrue(replayEvent is ReplaySetRoute)
+        assertTrue(replayEvent is ReplaySetNavigationRoute)
         assertEquals(1580744198.879556, replayEvent.eventTimestamp, 0.0001)
     }
 

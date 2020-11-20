@@ -24,7 +24,6 @@ import java.net.URL
 internal class HistoryEventMapper {
 
     private companion object {
-        private const val LOG_CATEGORY = "HistoryEventMapper"
         private const val NANOS_PER_SECOND = 1e-9
         private const val WAYPOINTS_JSON_KEY = "waypoints"
         private const val NAME_JSON_KEY = "name"

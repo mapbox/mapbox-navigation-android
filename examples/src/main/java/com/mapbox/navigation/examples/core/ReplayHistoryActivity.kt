@@ -47,7 +47,7 @@ import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import kotlinx.coroutines.CoroutineScope
@@ -272,10 +272,8 @@ class ReplayHistoryActivity : AppCompatActivity() {
         }
         viewportDataSource.evaluate()
 
-        val routeLines = result.routes.map { RouteLine(it, null) }
-        routeLineApi.setRoutes(
-            routeLines
-        ) { value ->
+        val routeLines = result.navigationRoutes.map { NavigationRouteLine(it, null) }
+        routeLineApi.setNavigationRouteLines(routeLines) { value ->
             binding.mapView.getMapboxMap().getStyle()?.apply {
                 routeLineView.renderRouteDrawData(this, value)
             }
@@ -336,13 +334,13 @@ class ReplayHistoryActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun handleHistoryFileSelected() {
         loadNavigationJob = CoroutineScope(Dispatchers.Main).launch {
-            val events = historyFileLoader
-                .loadReplayHistory(this@ReplayHistoryActivity)
             mapboxReplayer.clearEvents()
-            mapboxReplayer.pushEvents(events)
+            val eventStream = historyFileLoader
+                .loadReplayHistory(this@ReplayHistoryActivity)
+            mapboxReplayer.attachStream(eventStream)
             binding.playReplay.visibility = View.VISIBLE
             mapboxNavigation.resetTripSession()
-            mapboxNavigation.setRoutes(emptyList())
+            mapboxNavigation.setNavigationRoutes(emptyList())
             isLocationInitialized = false
             mapboxReplayer.playFirstLocation()
         }
