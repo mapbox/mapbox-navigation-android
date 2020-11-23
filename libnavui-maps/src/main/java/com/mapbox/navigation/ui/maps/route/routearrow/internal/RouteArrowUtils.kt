@@ -83,22 +83,22 @@ object RouteArrowUtils {
             return
         }
 
-        if (!style.sourceExists(ARROW_SHAFT_SOURCE_ID)) {
+        if (!style.styleSourceExists(ARROW_SHAFT_SOURCE_ID)) {
             geoJsonSource(ARROW_SHAFT_SOURCE_ID) {
                 maxzoom(16)
                 featureCollection(FeatureCollection.fromFeatures(listOf()))
             }.bindTo(style)
         }
 
-        if (!style.sourceExists(ARROW_HEAD_SOURCE_ID)) {
+        if (!style.styleSourceExists(ARROW_HEAD_SOURCE_ID)) {
             geoJsonSource(ARROW_HEAD_SOURCE_ID) {
                 maxzoom(16)
                 featureCollection(FeatureCollection.fromFeatures(listOf()))
             }.bindTo(style)
         }
 
-        if (style.getImage(ARROW_HEAD_ICON_CASING) != null) {
-            style.removeImage(ARROW_HEAD_ICON_CASING)
+        if (style.getStyleImage(ARROW_HEAD_ICON_CASING) != null) {
+            style.removeStyleImage(ARROW_HEAD_ICON_CASING)
         }
         val arrowHeadCasingDrawable = DrawableCompat.wrap(
             routeArrowDrawableProvider.getArrowHeadIconCasingDrawable()
@@ -110,8 +110,8 @@ object RouteArrowUtils {
         val arrowHeadCasingBitmap = MapImageUtils.getBitmapFromDrawable(arrowHeadCasingDrawable)
         style.addImage(ARROW_HEAD_ICON_CASING, arrowHeadCasingBitmap)
 
-        if (style.getImage(ARROW_HEAD_ICON) != null) {
-            style.removeImage(ARROW_HEAD_ICON)
+        if (style.getStyleImage(ARROW_HEAD_ICON) != null) {
+            style.removeStyleImage(ARROW_HEAD_ICON)
         }
         val arrowHeadDrawable = DrawableCompat.wrap(
             routeArrowDrawableProvider.getArrowHeadIconDrawable()
@@ -124,8 +124,8 @@ object RouteArrowUtils {
         style.addImage(ARROW_HEAD_ICON, arrowHeadBitmap)
 
         // arrow shaft casing
-        if (style.layerExists(ARROW_SHAFT_CASING_LINE_LAYER_ID)) {
-            style.removeLayer(ARROW_SHAFT_CASING_LINE_LAYER_ID)
+        if (style.styleLayerExists(ARROW_SHAFT_CASING_LINE_LAYER_ID)) {
+            style.removeStyleLayer(ARROW_SHAFT_CASING_LINE_LAYER_ID)
         }
         val arrowShaftCasingLayer = LineLayer(
             ARROW_SHAFT_CASING_LINE_LAYER_ID,
@@ -161,8 +161,8 @@ object RouteArrowUtils {
             )
 
         // arrow head casing
-        if (style.layerExists(ARROW_HEAD_CASING_LAYER_ID)) {
-            style.removeLayer(ARROW_HEAD_CASING_LAYER_ID)
+        if (style.styleLayerExists(ARROW_HEAD_CASING_LAYER_ID)) {
+            style.removeStyleLayer(ARROW_HEAD_CASING_LAYER_ID)
         }
         val arrowHeadCasingLayer = SymbolLayer(ARROW_HEAD_CASING_LAYER_ID, ARROW_HEAD_SOURCE_ID)
             .iconImage(ARROW_HEAD_ICON_CASING)
@@ -198,8 +198,8 @@ object RouteArrowUtils {
             )
 
         // arrow shaft
-        if (style.layerExists(ARROW_SHAFT_LINE_LAYER_ID)) {
-            style.removeLayer(ARROW_SHAFT_LINE_LAYER_ID)
+        if (style.styleLayerExists(ARROW_SHAFT_LINE_LAYER_ID)) {
+            style.removeStyleLayer(ARROW_SHAFT_LINE_LAYER_ID)
         }
         val arrowShaftLayer = LineLayer(ARROW_SHAFT_LINE_LAYER_ID, ARROW_SHAFT_SOURCE_ID)
             .lineColor(Expression.color(routeArrowResourceProvider.getArrowColor()))
@@ -232,8 +232,8 @@ object RouteArrowUtils {
             )
 
         // arrow head
-        if (style.layerExists(ARROW_HEAD_LAYER_ID)) {
-            style.removeLayer(ARROW_HEAD_LAYER_ID)
+        if (style.styleLayerExists(ARROW_HEAD_LAYER_ID)) {
+            style.removeStyleLayer(ARROW_HEAD_LAYER_ID)
         }
         val arrowHeadLayer = SymbolLayer(ARROW_HEAD_LAYER_ID, ARROW_HEAD_SOURCE_ID)
             .iconImage(ARROW_HEAD_ICON)

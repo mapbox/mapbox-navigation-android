@@ -171,7 +171,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
         destinationIcon: Drawable
     ): SymbolLayer {
         style.getLayerAs<SymbolLayer>(WAYPOINT_LAYER_ID)?.let {
-            style.removeLayer(WAYPOINT_LAYER_ID)
+            style.removeStyleLayer(WAYPOINT_LAYER_ID)
         }
 
         MapImageUtils.getBitmapFromDrawable(originIcon).let {
@@ -216,7 +216,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
         colorExpressions: List<Expression>
     ): LineLayer {
         style.getLayerAs<LineLayer>(layerId)?.let {
-            style.removeLayer(it)
+            style.removeStyleLayer(it)
         }
 
         val lineCapValue = when (roundedLineCap) {

@@ -402,7 +402,7 @@ class JunctionSnapshotActivity : AppCompatActivity() {
             colorExpressions: List<Expression>
         ): LineLayer {
             style.getLayerAs<LineLayer>(layerId)?.let {
-                style.removeLayer(it)
+                style.removeStyleLayer(it)
             }
 
             val lineCapValue = when (roundedLineCap) {

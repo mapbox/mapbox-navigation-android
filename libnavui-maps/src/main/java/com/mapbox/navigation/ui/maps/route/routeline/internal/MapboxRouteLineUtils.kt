@@ -670,14 +670,14 @@ object MapboxRouteLineUtils {
         val originIcon = wayPointIconProvider.getOriginIconDrawable()
         val destinationIcon = wayPointIconProvider.getOriginIconDrawable()
 
-        if (!style.sourceExists(RouteConstants.WAYPOINT_SOURCE_ID)) {
+        if (!style.styleSourceExists(RouteConstants.WAYPOINT_SOURCE_ID)) {
             geoJsonSource(RouteConstants.WAYPOINT_SOURCE_ID) {
                 maxzoom(16)
                 featureCollection(FeatureCollection.fromFeatures(listOf()))
             }.bindTo(style)
         }
 
-        if (!style.sourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID)) {
+        if (!style.styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID)) {
             val primaryRouteSource = geoJsonSource(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) {
                 maxzoom(16)
                 lineMetrics(true)
@@ -686,7 +686,7 @@ object MapboxRouteLineUtils {
             primaryRouteSource.bindTo(style)
         }
 
-        if (!style.sourceExists(RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID)) {
+        if (!style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID)) {
             val altRouteSource = geoJsonSource(RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID) {
                 maxzoom(16)
                 lineMetrics(true)
@@ -741,7 +741,7 @@ object MapboxRouteLineUtils {
      */
     @JvmStatic
     fun getDefaultBelowLayer(layerId: String?, style: Style): String {
-        val layers = style.getLayers()
+        val layers = style.styleLayers
         return when (layerId.isNullOrEmpty()) {
             false -> checkLayerIdPresent(layerId, layers)
             true -> findLayerBelow(layers)

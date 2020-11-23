@@ -172,19 +172,19 @@ interface MapboxRouteLayerProvider : RouteLayerProvider {
         originIcon: Drawable,
         destinationIcon: Drawable
     ): SymbolLayer {
-        if (style.layerExists(WAYPOINT_LAYER_ID)) {
-            style.removeLayer(WAYPOINT_LAYER_ID)
+        if (style.styleLayerExists(WAYPOINT_LAYER_ID)) {
+            style.removeStyleLayer(WAYPOINT_LAYER_ID)
         }
 
-        if (style.getImage(ORIGIN_MARKER_NAME) != null) {
-            style.removeImage(ORIGIN_MARKER_NAME)
+        if (style.getStyleImage(ORIGIN_MARKER_NAME) != null) {
+            style.removeStyleImage(ORIGIN_MARKER_NAME)
         }
         MapImageUtils.getBitmapFromDrawable(originIcon).let {
             style.addImage(ORIGIN_MARKER_NAME, it)
         }
 
-        if (style.getImage(DESTINATION_MARKER_NAME) != null) {
-            style.removeImage(DESTINATION_MARKER_NAME)
+        if (style.getStyleImage(DESTINATION_MARKER_NAME) != null) {
+            style.removeStyleImage(DESTINATION_MARKER_NAME)
         }
         MapImageUtils.getBitmapFromDrawable(destinationIcon).let {
             style.addImage(DESTINATION_MARKER_NAME, it)
@@ -242,8 +242,8 @@ interface MapboxRouteLayerProvider : RouteLayerProvider {
         lineWidthExpression: Expression,
         colorExpressions: List<Expression>
     ): LineLayer {
-        if (style.layerExists(layerId)) {
-            style.removeLayer(layerId)
+        if (style.styleLayerExists(layerId)) {
+            style.removeStyleLayer(layerId)
         }
 
         val lineCapValue = when (roundedLineCap) {
