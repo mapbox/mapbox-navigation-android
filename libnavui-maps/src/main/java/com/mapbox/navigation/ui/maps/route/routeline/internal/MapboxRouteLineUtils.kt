@@ -36,7 +36,7 @@ import com.mapbox.navigation.ui.maps.route.routeline.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.routeline.model.RouteLineTrafficExpressionData
 import com.mapbox.navigation.ui.maps.route.routeline.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.routeline.model.RouteStyleDescriptor
-import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.util.internal.ifNonNull
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMisc
 import timber.log.Timber

@@ -39,7 +39,7 @@ import com.mapbox.navigation.ui.maps.route.routeline.model.RouteLineGranularDist
 import com.mapbox.navigation.ui.maps.route.routeline.model.RouteLineState
 import com.mapbox.navigation.ui.maps.route.routeline.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.routeline.model.VanishingPointState
-import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.util.internal.ifNonNull
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMisc
