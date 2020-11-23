@@ -5,12 +5,7 @@ import android.graphics.Bitmap
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
-import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.MapSnapshotInterface
-import com.mapbox.maps.MapSnapshotOptions
-import com.mapbox.maps.MapSnapshotterObserver
-import com.mapbox.maps.MapboxOptions
-import com.mapbox.maps.snapshotting.Snapshotter
+import com.mapbox.maps.*
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.base.api.guidanceimage.GuidanceImageApi
 import com.mapbox.navigation.ui.maps.guidance.model.GuidanceImageOptions
@@ -18,7 +13,7 @@ import com.mapbox.navigation.ui.base.model.guidanceimage.GuidanceImageState
 import com.mapbox.navigation.ui.maps.guidance.internal.GuidanceImageAction
 import com.mapbox.navigation.ui.maps.guidance.internal.GuidanceImageProcessor
 import com.mapbox.navigation.ui.maps.guidance.internal.GuidanceImageResult
-import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.util.internal.ifNonNull
 import timber.log.Timber
 import java.nio.ByteBuffer
 
@@ -36,7 +31,7 @@ class MapboxGuidanceImageApi(
 
     private val snapshotter: Snapshotter
     private val snapshotterCallback = object : Snapshotter.SnapshotReadyCallback {
-        override fun run(snapshot: Expected<MapSnapshotInterface?, String?>) {
+        override fun onSnapshotCreated(snapshot: Expected<MapSnapshotInterface?, String?>) {
             when {
                 snapshot.isValue -> {
                     snapshot.value?.let { snapshotInterface ->
@@ -53,6 +48,10 @@ class MapboxGuidanceImageApi(
                 }
             }
         }
+
+        override fun onStyleLoaded(style: Style) {
+
+        }
     }
 
     init {
@@ -62,20 +61,8 @@ class MapboxGuidanceImageApi(
             .size(options.size)
             .pixelRatio(options.density)
             .build()
-        snapshotter = Snapshotter(context, snapshotOptions, object : MapSnapshotterObserver() {
-            override fun onDidFailLoadingStyle(message: String) {
-
-            }
-
-            override fun onDidFinishLoadingStyle() {
-
-            }
-
-            override fun onStyleImageMissing(imageId: String) {
-
-            }
-        })
-        snapshotter.styleURI = options.styleUri
+        snapshotter = Snapshotter(context, snapshotOptions)
+        snapshotter.setUri(options.styleUri)
     }
 
     override fun generateGuidanceImage(progress: RouteProgress, point: Point?) {
@@ -96,7 +83,12 @@ class MapboxGuidanceImageApi(
                         Timber.d("Url based guidance views to be shown")
                     }
                     (showSnapshotBased as GuidanceImageResult.ShouldShowSnapshotBasedGuidance).isSnapshotBased -> {
-                        snapshotter.cameraOptions = getCameraOptions(point, progress.currentLegProgress?.currentStepProgress?.step?.maneuver())
+                        snapshotter.setCameraOptions(
+                            getCameraOptions(
+                                point,
+                                progress.currentLegProgress?.currentStepProgress?.step?.maneuver()
+                            )
+                        )
                         snapshotter.start(snapshotterCallback)
                     }
                     else -> {
