@@ -11,6 +11,7 @@ class RouteStepProgressTest : BuilderTest<RouteStepProgress, RouteStepProgress.B
     override fun getFilledUpBuilder(): RouteStepProgress.Builder {
         return RouteStepProgress.Builder()
             .stepIndex(123)
+            .intersectionIndex(987)
             .step(mockk(relaxed = true))
             .stepPoints(mockk(relaxed = true))
             .distanceRemaining(456f)

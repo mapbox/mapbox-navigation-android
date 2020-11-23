@@ -10,6 +10,7 @@ import com.mapbox.geojson.Point
  * Note that the route step progress object's immutable.
  *
  * @param stepIndex [Int] Index representing the current step the user is on
+ * @param intersectionIndex [Int] Index representing the current intersection the user is on
  * @param step [LegStep] Returns the current step the user is traversing along
  * @param stepPoints [List][Point] that represent the current step geometry
  * @param distanceRemaining [Float] Total distance in meters from user to end of step
@@ -21,6 +22,7 @@ import com.mapbox.geojson.Point
  */
 class RouteStepProgress private constructor(
     val stepIndex: Int,
+    val intersectionIndex: Int,
     val step: LegStep?,
     val stepPoints: List<Point>?,
     val distanceRemaining: Float,
@@ -34,6 +36,7 @@ class RouteStepProgress private constructor(
      */
     fun toBuilder(): Builder = Builder()
         .stepIndex(stepIndex)
+        .intersectionIndex(intersectionIndex)
         .step(step)
         .stepPoints(stepPoints)
         .distanceRemaining(distanceRemaining)
@@ -51,6 +54,7 @@ class RouteStepProgress private constructor(
         other as RouteStepProgress
 
         if (stepIndex != other.stepIndex) return false
+        if (intersectionIndex != other.intersectionIndex) return false
         if (step != other.step) return false
         if (stepPoints != other.stepPoints) return false
         if (distanceRemaining != other.distanceRemaining) return false
@@ -66,6 +70,7 @@ class RouteStepProgress private constructor(
      */
     override fun hashCode(): Int {
         var result = stepIndex
+        result = 31 * result + intersectionIndex
         result = 31 * result + (step?.hashCode() ?: 0)
         result = 31 * result + (stepPoints?.hashCode() ?: 0)
         result = 31 * result + distanceRemaining.hashCode()
@@ -81,6 +86,7 @@ class RouteStepProgress private constructor(
     override fun toString(): String {
         return "RouteStepProgress(" +
             "stepIndex=$stepIndex, " +
+            "intersectionIndex=$intersectionIndex, " +
             "step=$step, " +
             "stepPoints=$stepPoints, " +
             "distanceRemaining=$distanceRemaining, " +
@@ -95,6 +101,7 @@ class RouteStepProgress private constructor(
      */
     class Builder {
         private var stepIndex: Int = 0
+        private var intersectionIndex: Int = 0
         private var step: LegStep? = null
         private var stepPoints: List<Point>? = null
         private var distanceRemaining: Float = 0f
@@ -109,6 +116,14 @@ class RouteStepProgress private constructor(
          */
         fun stepIndex(stepIndex: Int): Builder =
             apply { this.stepIndex = stepIndex }
+
+        /**
+         * Index representing the current intersection the user is on
+         *
+         * @return Builder
+         */
+        fun intersectionIndex(intersectionIndex: Int): Builder =
+            apply { this.intersectionIndex = intersectionIndex }
 
         /**
          * Returns the current step the user is traversing along
@@ -167,6 +182,7 @@ class RouteStepProgress private constructor(
         fun build(): RouteStepProgress {
             return RouteStepProgress(
                 stepIndex,
+                intersectionIndex,
                 step,
                 stepPoints,
                 distanceRemaining,
