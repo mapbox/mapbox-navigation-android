@@ -18,21 +18,26 @@ class MapboxGuidanceView @JvmOverloads constructor(
 
     init {
         LayoutInflater.from(context).inflate(R.layout.layout_guidance_view, this, true)
+        visibility = GONE
     }
 
     override fun render(state: GuidanceImageState) {
         when (state) {
             is GuidanceImageState.GuidanceImagePrepared -> {
+                visibility = VISIBLE
                 mapboxGuidanceView.setImageBitmap(state.bitmap)
             }
             is GuidanceImageState.GuidanceImageFailure.GuidanceImageUnavailable -> {
-                //mapboxGuidanceView.setImageBitmap(null)
+                mapboxGuidanceView.setImageBitmap(null)
+                visibility = GONE
             }
             is GuidanceImageState.GuidanceImageFailure.GuidanceImageEmpty -> {
-                // show error message
+                mapboxGuidanceView.setImageBitmap(null)
+                visibility = GONE
             }
             is GuidanceImageState.GuidanceImageFailure.GuidanceImageError -> {
-                // show error message
+                mapboxGuidanceView.setImageBitmap(null)
+                visibility = GONE
             }
         }
     }

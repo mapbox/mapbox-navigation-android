@@ -1,76 +1,42 @@
 package com.mapbox.navigation.examples.core;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ProgressBar;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mapbox.android.core.location.LocationEngineCallback;
-import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineResult;
-import com.mapbox.android.core.permissions.PermissionsListener;
-import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.maps.*;
-import com.mapbox.maps.extension.style.layers.properties.generated.Visibility;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImplKt;
-import com.mapbox.maps.plugin.gestures.GesturesPluginImpl;
-import com.mapbox.maps.plugin.gestures.OnMapLongClickListener;
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions;
 import com.mapbox.maps.plugin.location.LocationComponentPlugin;
-import com.mapbox.maps.plugin.location.OnIndicatorPositionChangedListener;
 import com.mapbox.maps.plugin.location.modes.RenderMode;
-import com.mapbox.navigation.base.internal.route.RouteUrl;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.directions.session.RoutesObserver;
-import com.mapbox.navigation.core.directions.session.RoutesRequestCallback;
 import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.core.replay.ReplayLocationEngine;
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver;
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
-import com.mapbox.navigation.examples.util.LocationPermissionsHelper;
 import com.mapbox.navigation.examples.util.Slackline;
-import com.mapbox.navigation.examples.util.ThemeUtil;
 import com.mapbox.navigation.ui.base.api.guidanceimage.GuidanceImageApi;
-import com.mapbox.navigation.ui.base.domain.BannerInstructionsApi;
 import com.mapbox.navigation.ui.base.model.guidanceimage.GuidanceImageState;
 import com.mapbox.navigation.ui.maps.guidance.api.MapboxGuidanceImageApi;
 import com.mapbox.navigation.ui.maps.guidance.api.OnGuidanceImageReady;
 import com.mapbox.navigation.ui.maps.guidance.model.GuidanceImageOptions;
 import com.mapbox.navigation.ui.maps.guidance.view.MapboxGuidanceView;
-import com.mapbox.navigation.ui.maps.route.RouteArrowLayerInitializer;
-import com.mapbox.navigation.ui.maps.route.RouteLineLayerInitializer;
-import com.mapbox.navigation.ui.maps.route.routearrow.api.RouteArrowAPI;
-import com.mapbox.navigation.ui.maps.route.routearrow.internal.MapboxRouteArrowAPI;
-import com.mapbox.navigation.ui.maps.route.routearrow.internal.MapboxRouteArrowActions;
-import com.mapbox.navigation.ui.maps.route.routearrow.internal.MapboxRouteArrowView;
-import com.mapbox.navigation.ui.maps.route.routeline.api.RouteLineAPI;
-import com.mapbox.navigation.ui.maps.route.routeline.api.RouteLineResourceProvider;
-import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineAPI;
-import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineActions;
-import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineView;
 import org.jetbrains.annotations.NotNull;
 import timber.log.Timber;
 
@@ -78,19 +44,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static com.mapbox.navigation.examples.util.LocationPermissionsHelperKt.LOCATION_PERMISSIONS_REQUEST_CODE;
-import static com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineResourceProviderFactory.getRouteLineResourceProvider;
+public class MapboxGuidanceImageActivity extends AppCompatActivity {
 
-public class MapboxGuidanceImageActivity extends AppCompatActivity implements PermissionsListener {
-
-  private static final int ONE_HUNDRED_MILLISECONDS = 100;
-  private LocationPermissionsHelper permissionsHelper = new LocationPermissionsHelper(this);
   private MapView mapView;
   private MapboxMap mapboxMap;
   private LocationComponentPlugin locationComponent;
@@ -104,12 +63,10 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements Pe
 
   private OnGuidanceImageReady callback = new OnGuidanceImageReady() {
     @Override public void onGuidanceImagePrepared(@NotNull GuidanceImageState.GuidanceImagePrepared bitmap) {
-      Log.d("kjkjkj", "result: "+bitmap);
       guidanceView.render(bitmap);
     }
 
     @Override public void onFailure(@NotNull GuidanceImageState.GuidanceImageFailure error) {
-      Log.d("kjkjkj", "error: "+error);
     }
   };
 
@@ -124,12 +81,7 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements Pe
     mapboxMap = mapView.getMapboxMap();
     locationComponent = getLocationComponent();
     mapCamera = getMapCamera();
-
-    if (LocationPermissionsHelper.areLocationPermissionsGranted(this)) {
-      requestPermissionIfNotGranted(WRITE_EXTERNAL_STORAGE);
-    } else {
-      permissionsHelper.requestLocationPermissions(this);
-    }
+    init();
   }
 
   private void init() {
@@ -137,15 +89,18 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements Pe
     initStyle();
     slackline.initialize(mapView, mapboxNavigation);
     initListeners();
-    mapboxNavigation.setRoutes(Collections.singletonList(getDirectionsRoute()));
+    new Handler().postDelayed(
+        () -> mapboxNavigation.setRoutes(Collections.singletonList(getDirectionsRoute())),
+        3000
+    );
   }
 
   @SuppressLint("MissingPermission") private void initListeners() {
     startNavigation.setOnClickListener(v -> {
+      mapboxNavigation.registerRouteProgressObserver(routeProgressObserver);
       locationComponent.setRenderMode(RenderMode.GPS);
       mapboxNavigation.startTripSession();
       startNavigation.setVisibility(View.GONE);
-      mapboxNavigation.registerBannerInstructionsObserver(bannerInstructionsObserver);
     });
   }
 
@@ -158,7 +113,10 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements Pe
     mapboxNavigation = new MapboxNavigation(navigationOptions);
     mapboxNavigation.registerLocationObserver(locationObserver);
     mapboxNavigation.registerRouteProgressObserver(replayProgressObserver);
-    GuidanceImageOptions options = new GuidanceImageOptions.Builder().build();
+    GuidanceImageOptions options = new GuidanceImageOptions.Builder()
+        .density(getResources().getDisplayMetrics().density)
+        .styleUri(Style.DARK)
+        .build();
     guidanceImageApi = new MapboxGuidanceImageApi(this, options, callback);
 
     mapboxReplayer.pushRealLocation(this, 0.0);
@@ -183,8 +141,8 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements Pe
   protected void onStop() {
     super.onStop();
     if (mapboxNavigation != null) {
+      mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver);
       mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver);
-      mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver);
     }
     mapView.onStop();
   }
@@ -264,52 +222,12 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements Pe
     return CameraAnimationsPluginImplKt.getCameraAnimationsPlugin(mapView);
   }
 
-  private GesturesPluginImpl getGesturePlugin() {
-    return mapView.getPlugin(GesturesPluginImpl.class);
-  }
-
   private ReplayProgressObserver replayProgressObserver = new ReplayProgressObserver(mapboxReplayer);
 
-  @Override
-  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    if (requestCode == LOCATION_PERMISSIONS_REQUEST_CODE) {
-      permissionsHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    } else if (grantResults.length > 0) {
-      init();
-    } else {
-      Toast.makeText(this, "You didn't grant storage and/or location permissions.", Toast.LENGTH_LONG).show();
-    }
-  }
-
-  @Override
-  public void onExplanationNeeded(List<String> permissionsToExplain) {
-    Toast.makeText(this, "This app needs location and storage permissions in order to show its functionality.",
-        Toast.LENGTH_LONG).show();
-  }
-
-  @Override
-  public void onPermissionResult(boolean granted) {
-    if (granted) {
-      requestPermissionIfNotGranted(WRITE_EXTERNAL_STORAGE);
-    } else {
-      Toast.makeText(this, "You didn't grant location permissions.", Toast.LENGTH_LONG).show();
-    }
-  }
-
-  private void requestPermissionIfNotGranted(String permission) {
-    List<String> permissionsNeeded = new ArrayList<>();
-    if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-      permissionsNeeded.add(permission);
-      ActivityCompat.requestPermissions(this, permissionsNeeded.toArray(new String[0]), 10);
-    } else {
-      init();
-    }
-  }
-
-  private BannerInstructionsObserver bannerInstructionsObserver = new BannerInstructionsObserver() {
-    @Override public void onNewBannerInstructions(@NotNull BannerInstructions bannerInstructions) {
-      Log.d("kjkjkj", "call API");
-      guidanceImageApi.generateGuidanceImage(bannerInstructions, Point.fromLngLat(-121.966668, 37.555581));
+  private RouteProgressObserver routeProgressObserver = new RouteProgressObserver() {
+    @Override public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
+      Log.d("oooooooo", "routeProgress");
+      guidanceImageApi.generateGuidanceImage(routeProgress, Point.fromLngLat(-121.966146, 37.554944));
     }
   };
 

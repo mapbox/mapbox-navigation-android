@@ -15,6 +15,7 @@ import com.mapbox.maps.Style
  */
 class GuidanceImageOptions private constructor(
     val size:Size,
+    val density: Float,
     val styleUri: String,
     val edgeInsets: EdgeInsets,
     val bitmapConfig: Bitmap.Config,
@@ -26,6 +27,7 @@ class GuidanceImageOptions private constructor(
      */
     fun toBuilder(): GuidanceImageOptions.Builder = GuidanceImageOptions.Builder().apply {
         size(size)
+        density(density)
         styleUri(styleUri)
         edgeInsets(edgeInsets)
         bitmapConfig(bitmapConfig)
@@ -42,6 +44,7 @@ class GuidanceImageOptions private constructor(
         other as GuidanceImageOptions
 
         if (size != other.size) return false
+        if (density != other.density) return false
         if (styleUri != other.styleUri) return false
         if (edgeInsets != other.edgeInsets) return false
         if (bitmapConfig != other.bitmapConfig) return false
@@ -55,6 +58,7 @@ class GuidanceImageOptions private constructor(
      */
     override fun hashCode(): Int {
         var result = size.hashCode()
+        result = 31 * result + density.hashCode()
         result = 31 * result + styleUri.hashCode()
         result = 31 * result + edgeInsets.hashCode()
         result = 31 * result + bitmapConfig.hashCode()
@@ -68,6 +72,7 @@ class GuidanceImageOptions private constructor(
     override fun toString(): String {
         return "GuidanceViewOptions(" +
             "size=$size, " +
+            "density=$density, " +
             "styleUri=$styleUri, " +
             "edgeInsets=$edgeInsets, " +
             "bitmapConfig=$bitmapConfig, " +
@@ -81,13 +86,17 @@ class GuidanceImageOptions private constructor(
     class Builder {
 
         private var size: Size = Size(1024f, 512f)
+        private var density: Float = 1f
         private var styleUri: String = Style.MAPBOX_STREETS
         private var bitmapConfig: Bitmap.Config = Bitmap.Config.ARGB_8888
-        private var edgeInsets: EdgeInsets = EdgeInsets(100.0, 100.0, 100.0, 100.0)
+        private var edgeInsets: EdgeInsets = EdgeInsets(0.0, 0.0, 0.0, 0.0)
         private var shouldRenderSignpost: Boolean = false
 
         fun size(size: Size): Builder =
             apply { this.size = size }
+
+        fun density(density: Float): Builder =
+            apply { this.density = density }
 
         fun styleUri(styleUri: String): Builder =
             apply { this.styleUri = styleUri }
@@ -107,6 +116,7 @@ class GuidanceImageOptions private constructor(
         fun build(): GuidanceImageOptions {
             return GuidanceImageOptions(
                 size = size,
+                density = density,
                 styleUri = styleUri,
                 edgeInsets = edgeInsets,
                 bitmapConfig = bitmapConfig,
