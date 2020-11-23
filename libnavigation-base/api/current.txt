@@ -282,6 +282,7 @@ package com.mapbox.navigation.base.trip.model {
     method public float getDistanceTraveled();
     method public double getDurationRemaining();
     method public float getFractionTraveled();
+    method public int getIntersectionIndex();
     method public com.mapbox.api.directions.v5.models.LegStep? getStep();
     method public int getStepIndex();
     method public java.util.List<com.mapbox.geojson.Point>? getStepPoints();
@@ -295,6 +296,7 @@ package com.mapbox.navigation.base.trip.model {
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder distanceTraveled(float distanceTraveled);
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder durationRemaining(double durationRemaining);
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder fractionTraveled(float fractionTraveled);
+    method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder intersectionIndex(int intersectionIndex);
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder step(com.mapbox.api.directions.v5.models.LegStep? step);
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder stepIndex(int stepIndex);
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder stepPoints(java.util.List<com.mapbox.geojson.Point>? stepPoints);
