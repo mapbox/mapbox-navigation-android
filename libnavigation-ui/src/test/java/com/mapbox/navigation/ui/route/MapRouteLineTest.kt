@@ -22,6 +22,7 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.R
 import com.mapbox.navigation.ui.internal.ThemeSwitcher
 import com.mapbox.navigation.ui.internal.route.MapRouteSourceProvider
@@ -38,25 +39,41 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getRouteLineExpressionDataWithStreetClassOverride
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getRouteLineTrafficExpressionData
+import com.mapbox.navigation.utils.internal.JobControl
+import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.slot
+import io.mockk.unmockkObject
 import io.mockk.verify
 import junit.framework.Assert.assertNull
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.robolectric.RobolectricTestRunner
 import java.util.Scanner
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class MapRouteLineTest {
+
+    @get:Rule
+    var coroutineRule = MainCoroutineRule()
+
+    private val parentJob = SupervisorJob()
+    private val testScope = CoroutineScope((parentJob + coroutineRule.testDispatcher))
 
     lateinit var ctx: Context
     var styleRes: Int = 0
@@ -79,6 +96,11 @@ class MapRouteLineTest {
 
     @Before
     fun setUp() {
+        mockkObject(ThreadController)
+        every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
+
         ctx = ApplicationProvider.getApplicationContext()
         styleRes = ThemeSwitcher.retrieveAttrResourceId(
             ctx,
@@ -194,7 +216,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun getPrimaryRoute() {
+    fun getPrimaryRoute() = coroutineRule.runBlockingTest {
         every { style.layers } returns listOf(primaryRouteLayer)
         val directionsRoute: DirectionsRoute = getDirectionsRoute(true)
         val mapRouteLine = MapRouteLine(
@@ -213,7 +235,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun getLineStringForRoute() {
+    fun getLineStringForRoute() = coroutineRule.runBlockingTest {
         every { style.layers } returns listOf(primaryRouteLayer)
         val directionsRoute: DirectionsRoute = getDirectionsRoute(true)
         val mapRouteLine = MapRouteLine(
@@ -232,7 +254,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun getLineStringForRouteWhenCalledWithUnknownRoute() {
+    fun getLineStringForRouteWhenCalledWithUnknownRoute() = coroutineRule.runBlockingTest {
         every { style.layers } returns listOf(primaryRouteLayer)
         val directionsRoute: DirectionsRoute = getDirectionsRoute(true)
         val directionsRoute2: DirectionsRoute = getDirectionsRoute(true)
@@ -252,7 +274,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun retrieveRouteFeatureData() {
+    fun retrieveRouteFeatureData() = coroutineRule.runBlockingTest {
         every { style.layers } returns listOf(primaryRouteLayer)
         val directionsRoute: DirectionsRoute = getDirectionsRoute(true)
         val mapRouteLine = MapRouteLine(
@@ -272,7 +294,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun retrieveRouteLineStrings() {
+    fun retrieveRouteLineStrings() = coroutineRule.runBlockingTest {
         every { style.layers } returns listOf(primaryRouteLayer)
         val directionsRoute: DirectionsRoute = getDirectionsRoute(true)
         val mapRouteLine = MapRouteLine(
@@ -291,7 +313,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun retrieveDirectionsRoutes() {
+    fun retrieveDirectionsRoutes() = coroutineRule.runBlockingTest {
         every { style.layers } returns listOf(primaryRouteLayer)
         val directionsRoute: DirectionsRoute = getDirectionsRoute(true)
         val mapRouteLine = MapRouteLine(
@@ -310,7 +332,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun retrieveDirectionsRoutesPrimaryRouteIsFirstInList() {
+    fun retrieveDirectionsRoutesPrimaryRouteIsFirstInList() = coroutineRule.runBlockingTest {
         every { style.layers } returns listOf(primaryRouteLayer)
         val primaryRoute: DirectionsRoute = getDirectionsRoute(true)
         val alternativeRoute: DirectionsRoute = getDirectionsRoute(false)
@@ -386,7 +408,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun updatePrimaryRouteIndex() {
+    fun updatePrimaryRouteIndex() = coroutineRule.runBlockingTest {
         every { style.layers } returns listOf(primaryRouteLayer)
         val directionsRoute: DirectionsRoute = getDirectionsRoute(true)
         val directionsRoute2: DirectionsRoute = getDirectionsRoute(true)
@@ -771,7 +793,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun buildRouteLineExpression() {
+    fun buildRouteLineExpression() = coroutineRule.runBlockingTest {
         every { style.layers } returns listOf(primaryRouteLayer)
         val expectedExpression = "[\"step\", [\"line-progress\"], " +
             "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.2, " +
@@ -794,7 +816,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun buildRouteLineExpressionMultileg() {
+    fun buildRouteLineExpressionMultileg() = coroutineRule.runBlockingTest {
         every { style.layers } returns listOf(primaryRouteLayer)
         val expectedExpression = loadJsonFixture("build_route_line_expression_multileg_text.txt")
         val route = getMultilegRoute()
@@ -814,7 +836,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun buildRouteLineExpressionWhenNoTraffic() {
+    fun buildRouteLineExpressionWhenNoTraffic() = coroutineRule.runBlockingTest {
         every { style.layers } returns listOf(primaryRouteLayer)
         val expectedExpression =
             "[\"step\", [\"line-progress\"], [\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.2, [\"rgba\", " +
@@ -836,7 +858,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun buildRouteLineExpressionOffsetAfterLastLeg() {
+    fun buildRouteLineExpressionOffsetAfterLastLeg() = coroutineRule.runBlockingTest {
         every { style.layers } returns listOf(primaryRouteLayer)
         val expectedExpression =
             "[\"step\", [\"line-progress\"], [\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.9, " +
@@ -858,7 +880,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun calculateRouteLineSegmentsMultilegRoute() {
+    fun calculateRouteLineSegmentsMultilegRoute() = coroutineRule.runBlockingTest {
         val congestionColorProvider: (String, Boolean) -> Int = { trafficCongestion, _ ->
             when (trafficCongestion) {
                 UNKNOWN_CONGESTION_VALUE -> -9
@@ -880,24 +902,25 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun calculateRouteLineSegmentsMultilegRouteFirstDistanceValueAboveMinimumOffset() {
-        val congestionColorProvider: (String, Boolean) -> Int = { trafficCongestion, _ ->
-            when (trafficCongestion) {
-                UNKNOWN_CONGESTION_VALUE -> -9
-                LOW_CONGESTION_VALUE -> -1
-                else -> 33
+    fun calculateRouteLineSegmentsMultilegRouteFirstDistanceValueAboveMinimumOffset() =
+        coroutineRule.runBlockingTest  {
+            val congestionColorProvider: (String, Boolean) -> Int = { trafficCongestion, _ ->
+                when (trafficCongestion) {
+                    UNKNOWN_CONGESTION_VALUE -> -9
+                    LOW_CONGESTION_VALUE -> -1
+                    else -> 33
+                }
             }
-        }
-        val route = getMultilegRoute()
-        val result = MapRouteLine.MapRouteLineSupport.calculateRouteLineSegments(
-            route,
-            listOf(),
-            true,
-            congestionColorProvider
-        )
+            val route = getMultilegRoute()
+            val result = MapRouteLine.MapRouteLineSupport.calculateRouteLineSegments(
+                route,
+                listOf(),
+                true,
+                congestionColorProvider
+            )
 
-        assertTrue(result[1].offset > .001f)
-    }
+            assertTrue(result[1].offset > .001f)
+        }
 
     @Test
     fun buildWayPointFeatureCollection() {
@@ -1221,7 +1244,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun updateVanishingPoint() {
+    fun updateVanishingPoint() = coroutineRule.runBlockingTest {
         val expectedRouteLineVanishingExpression = "[\"step\", [\"line-progress\"], " +
             "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.3259991, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
         val expectedRouteLineCasingVanishingExpression = "[\"step\", [\"line-progress\"], " +
@@ -1281,7 +1304,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun updateVanishingPoint_outsideOfRouteOnStart() {
+    fun updateVanishingPoint_outsideOfRouteOnStart() = coroutineRule.runBlockingTest {
         val expectedRouteLineVanishingExpression = "[\"step\", [\"line-progress\"], " +
             "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.0, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
         val expectedRouteLineCasingVanishingExpression = "[\"step\", [\"line-progress\"], " +
@@ -1339,7 +1362,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun updateVanishingPointMultiLeg() {
+    fun updateVanishingPointMultiLeg() = coroutineRule.runBlockingTest {
         val expectedRouteExpFirstLeg = "[\"step\", [\"line-progress\"], " +
             "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.101173036, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
         val expectedCasingExpFirstLeg = "[\"step\", [\"line-progress\"], " +
@@ -1448,7 +1471,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun doNotUpdateVanishingPointWhenUncertain() {
+    fun doNotUpdateVanishingPointWhenUncertain() = coroutineRule.runBlockingTest {
         val route = getDirectionsRoute()
         val secondStepCoordinates = LineString.fromPolyline(
             route.legs()!![0].steps()!![2].geometry()!!,
@@ -1484,7 +1507,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun doNotUpdateVanishingPointWhenRouteProgressOutdated() {
+    fun doNotUpdateVanishingPointWhenRouteProgressOutdated() = coroutineRule.runBlockingTest {
         val route = getDirectionsRoute()
         val secondStepCoordinates = LineString.fromPolyline(
             route.legs()!![0].steps()!![2].geometry()!!,
@@ -1522,7 +1545,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun updateVanishingPointInhibitedByDefault() {
+    fun updateVanishingPointInhibitedByDefault() = coroutineRule.runBlockingTest {
         val route = getDirectionsRoute()
         val secondStepCoordinates = LineString.fromPolyline(
             route.legs()!![0].steps()!![2].geometry()!!,
@@ -1557,55 +1580,57 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun doNotUpdateVanishingPointWhenPointDistanceBeyondThreshold() {
-        val route = getDirectionsRoute()
-        val inputPoint = Point.fromLngLat(-122.508527, 37.974846)
-        val mapRouteLine = getMapRouteLineForVanishingTest()
-        mapRouteLine.draw(listOf(route))
-        val routeProgress = mockk<RouteProgress> {
-            every { currentLegProgress } returns mockk {
-                every { legIndex } returns 0
-                every { currentStepProgress } returns mockk {
-                    every { stepPoints } returns PolylineUtils.decode(
-                        route.legs()!![0].steps()!![0].geometry()!!,
-                        6
-                    )
-                    every { distanceTraveled } returns 15f
-                    every { step } returns mockk {
-                        every { distance() } returns route.legs()!![0].steps()!![0].distance()
+    fun doNotUpdateVanishingPointWhenPointDistanceBeyondThreshold() =
+        coroutineRule.runBlockingTest {
+            val route = getDirectionsRoute()
+            val inputPoint = Point.fromLngLat(-122.508527, 37.974846)
+            val mapRouteLine = getMapRouteLineForVanishingTest()
+            mapRouteLine.draw(listOf(route))
+            val routeProgress = mockk<RouteProgress> {
+                every { currentLegProgress } returns mockk {
+                    every { legIndex } returns 0
+                    every { currentStepProgress } returns mockk {
+                        every { stepPoints } returns PolylineUtils.decode(
+                            route.legs()!![0].steps()!![0].geometry()!!,
+                            6
+                        )
+                        every { distanceTraveled } returns 15f
+                        every { step } returns mockk {
+                            every { distance() } returns route.legs()!![0].steps()!![0].distance()
+                        }
+                        every { stepIndex } returns 0
                     }
-                    every { stepIndex } returns 0
                 }
             }
+            mapRouteLine.updateUpcomingRoutePointIndex(routeProgress)
+            mapRouteLine.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
+
+            mapRouteLine.updateTraveledRouteLine(inputPoint)
+
+            verify(exactly = 0) { primaryRouteCasingLayer.setProperties(any()) }
+            verify(exactly = 0) { primaryRouteLayer.setProperties(any()) }
+            verify(exactly = 0) { primaryRouteTrafficLayer.setProperties(any()) }
         }
-        mapRouteLine.updateUpcomingRoutePointIndex(routeProgress)
-        mapRouteLine.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
-
-        mapRouteLine.updateTraveledRouteLine(inputPoint)
-
-        verify(exactly = 0) { primaryRouteCasingLayer.setProperties(any()) }
-        verify(exactly = 0) { primaryRouteLayer.setProperties(any()) }
-        verify(exactly = 0) { primaryRouteTrafficLayer.setProperties(any()) }
-    }
 
     @Test
-    fun updateVanishingPointWhenLineCoordinatesIsLessThanTwoPoints() {
-        val route = getSingleCoordinateDirectionsRoute()
-        val inputPoint = Point.fromLngLat(-122.508527, 37.974846)
-        val mapRouteLine = getMapRouteLineForVanishingTest()
-        mapRouteLine.draw(listOf(route))
-        val routeProgress = mockk<RouteProgress> {
-            every { currentLegProgress } returns null
+    fun updateVanishingPointWhenLineCoordinatesIsLessThanTwoPoints() =
+        coroutineRule.runBlockingTest {
+            val route = getSingleCoordinateDirectionsRoute()
+            val inputPoint = Point.fromLngLat(-122.508527, 37.974846)
+            val mapRouteLine = getMapRouteLineForVanishingTest()
+            mapRouteLine.draw(listOf(route))
+            val routeProgress = mockk<RouteProgress> {
+                every { currentLegProgress } returns null
+            }
+            mapRouteLine.updateUpcomingRoutePointIndex(routeProgress)
+            mapRouteLine.updateVanishingPointState(RouteProgressState.ROUTE_INVALID)
+
+            mapRouteLine.updateTraveledRouteLine(inputPoint)
+
+            verify(exactly = 0) { primaryRouteCasingLayer.setProperties(any()) }
+            verify(exactly = 0) { primaryRouteLayer.setProperties(any()) }
+            verify(exactly = 0) { primaryRouteTrafficLayer.setProperties(any()) }
         }
-        mapRouteLine.updateUpcomingRoutePointIndex(routeProgress)
-        mapRouteLine.updateVanishingPointState(RouteProgressState.ROUTE_INVALID)
-
-        mapRouteLine.updateTraveledRouteLine(inputPoint)
-
-        verify(exactly = 0) { primaryRouteCasingLayer.setProperties(any()) }
-        verify(exactly = 0) { primaryRouteLayer.setProperties(any()) }
-        verify(exactly = 0) { primaryRouteTrafficLayer.setProperties(any()) }
-    }
 
     private fun getDirectionsRoute(includeCongestion: Boolean): DirectionsRoute {
         val congestionValue = when (includeCongestion) {
@@ -2077,6 +2102,7 @@ class MapRouteLineTest {
             false,
             false,
             false,
+            false,
             true,
             true,
             true
@@ -2097,5 +2123,10 @@ class MapRouteLineTest {
             mapRouteSourceProvider,
             null
         )
+    }
+
+    @After
+    fun tearDown() {
+        unmockkObject(ThreadController)
     }
 }
