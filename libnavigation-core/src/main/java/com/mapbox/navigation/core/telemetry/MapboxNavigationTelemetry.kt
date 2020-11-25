@@ -184,7 +184,8 @@ internal object MapboxNavigationTelemetry :
             feedbackSource,
             screenshot,
             feedbackSubType,
-            appMetadata
+            appMetadata,
+            null
         ) {
             sendMetricEvent(it)
         }
@@ -204,13 +205,21 @@ internal object MapboxNavigationTelemetry :
             feedbackSource,
             screenshot,
             feedbackSubType,
-            appMetadata
-        ) {
-            feedbackEventCacheMap[it.feedbackId] = it
-        }
+            appMetadata,
+            {
+                feedbackEventCacheMap[it.feedbackId] = it
+            },
+            {
+                feedbackEventCacheMap[it.feedbackId]?.let { cachedEvent ->
+                    cachedEvent.locationsAfter = it.locationsAfter
+                    cachedEvent.locationsBefore = it.locationsBefore
+                } ?: feedbackEventCacheMap.put(it.feedbackId, it)
+            }
+        )
     }
 
     fun getCachedUserFeedback(): List<CachedNavigationFeedbackEvent> {
+        locationsCollector.flushBuffers()
         return feedbackEventCacheMap.map {
             it.value.getCachedNavigationFeedbackEvent()
         }
@@ -222,7 +231,7 @@ internal object MapboxNavigationTelemetry :
         feedbackEventCacheMap.clear()
 
         cachedFeedbackEventList.forEach { cachedFeedback ->
-            metricsReporter.addEvent(
+            sendEvent(
                 feedbackEventCache[cachedFeedback.feedbackId]?.apply {
                     update(cachedFeedback)
                 } ?: return@forEach
@@ -237,7 +246,8 @@ internal object MapboxNavigationTelemetry :
         screenshot: String?,
         feedbackSubType: Array<String>?,
         appMetadata: AppMetadata?,
-        onEventCreated: (NavigationFeedbackEvent) -> Unit
+        onEventCreated: ((NavigationFeedbackEvent) -> Unit)? = null,
+        onEventUpdated: ((NavigationFeedbackEvent) -> Unit)? = null
     ) {
         if (dynamicValues.sessionStarted && dataInitialized()) {
             log("collect post event locations for user feedback")
@@ -254,13 +264,15 @@ internal object MapboxNavigationTelemetry :
                 populate()
             }
 
+            onEventCreated?.let { it(feedbackEvent) }
+
             locationsCollector.collectLocations { preEventBuffer, postEventBuffer ->
                 log("locations ready")
                 feedbackEvent.apply {
                     locationsBefore = preEventBuffer.toTelemetryLocations()
                     locationsAfter = postEventBuffer.toTelemetryLocations()
                 }
-                onEventCreated(feedbackEvent)
+                onEventUpdated?.let { it(feedbackEvent) }
             }
         }
     }
