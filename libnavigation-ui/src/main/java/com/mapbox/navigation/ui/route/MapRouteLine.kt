@@ -111,7 +111,9 @@ internal class MapRouteLine(
     alternativesVisible: Boolean,
     mapRouteSourceProvider: MapRouteSourceProvider,
     vanishPoint: Double,
-    routeLineInitializedCallback: MapRouteLineInitializedCallback?
+    routeLineInitializedCallback: MapRouteLineInitializedCallback?,
+    sourceMaxZoom: Int,
+    sourceTolerance: Float
 ) {
 
     /**
@@ -129,7 +131,9 @@ internal class MapRouteLine(
         belowLayerId: String?,
         layerProvider: RouteLayerProvider,
         mapRouteSourceProvider: MapRouteSourceProvider,
-        routeLineInitializedCallback: MapRouteLineInitializedCallback?
+        routeLineInitializedCallback: MapRouteLineInitializedCallback?,
+        sourceMaxZoom: Int,
+        sourceTolerance: Float
     ) : this(
         context,
         style,
@@ -142,7 +146,9 @@ internal class MapRouteLine(
         true,
         mapRouteSourceProvider,
         0.0,
-        routeLineInitializedCallback
+        routeLineInitializedCallback,
+        sourceMaxZoom,
+        sourceTolerance
     )
 
     private var drawnWaypointsFeatureCollection: FeatureCollection =
@@ -375,7 +381,10 @@ internal class MapRouteLine(
             initPrimaryRoutePoints(routeFeatureData.first().route)
         }
 
-        val wayPointGeoJsonOptions = GeoJsonOptions().withMaxZoom(16)
+        val wayPointGeoJsonOptions = GeoJsonOptions().apply {
+            withMaxZoom(sourceMaxZoom)
+            withTolerance(sourceTolerance)
+        }
         wayPointSource = mapRouteSourceProvider.build(
             WAYPOINT_SOURCE_ID,
             drawnWaypointsFeatureCollection,
@@ -383,7 +392,11 @@ internal class MapRouteLine(
         )
         style.addSource(wayPointSource)
 
-        val routeLineGeoJsonOptions = GeoJsonOptions().withMaxZoom(16).withLineMetrics(true)
+        val routeLineGeoJsonOptions = GeoJsonOptions().apply {
+            withLineMetrics(true)
+            withMaxZoom(sourceMaxZoom)
+            withTolerance(sourceTolerance)
+        }
         primaryRouteLineSource = mapRouteSourceProvider.build(
             PRIMARY_ROUTE_SOURCE_ID,
             drawnPrimaryRouteFeatureCollection,
@@ -391,8 +404,11 @@ internal class MapRouteLine(
         )
         style.addSource(primaryRouteLineSource)
 
-        val alternativeRouteLineGeoJsonOptions =
-            GeoJsonOptions().withMaxZoom(16).withLineMetrics(true)
+        val alternativeRouteLineGeoJsonOptions = GeoJsonOptions().apply {
+            withLineMetrics(true)
+            withMaxZoom(sourceMaxZoom)
+            withTolerance(sourceTolerance)
+        }
         alternativeRouteLineSource = mapRouteSourceProvider.build(
             ALTERNATIVE_ROUTE_SOURCE_ID,
             drawnAlternativeRouteFeatureCollection,

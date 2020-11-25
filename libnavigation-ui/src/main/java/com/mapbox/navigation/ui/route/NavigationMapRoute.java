@@ -38,6 +38,8 @@ import static com.mapbox.android.gestures.Utils.dpToPx;
 import static com.mapbox.navigation.ui.NavigationConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.DEFAULT_ROUTE_CLICK_PADDING_IN_DIP;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.LAYER_ABOVE_UPCOMING_MANEUVER_ARROW;
+import static com.mapbox.navigation.ui.internal.route.RouteConstants.DEFAULT_ROUTE_SOURCES_MAX_ZOOM;
+import static com.mapbox.navigation.ui.internal.route.RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE;
 import static com.mapbox.navigation.ui.route.MapboxRouteLayerProviderFactory.getLayerProvider;
 
 /**
@@ -83,6 +85,8 @@ public class NavigationMapRoute implements LifecycleObserver {
   private float routeClickPadding;
   @Nullable
   private OnRouteSelectionChangeListener onRouteSelectionChangeListener;
+  private int sourceMaxZoom;
+  private float sourceTolerance;
 
   /**
    * Construct an instance of {@link NavigationMapRoute}.
@@ -107,7 +111,9 @@ public class NavigationMapRoute implements LifecycleObserver {
       @Nullable MapRouteLineInitializedCallback routeLineInitializedCallback,
       @Nullable List<RouteStyleDescriptor> routeStyleDescriptors,
       long vanishingRouteLineUpdateIntervalNano,
-      float routeClickPadding) {
+      float routeClickPadding,
+      int sourceMaxZoom,
+      float sourceTolerance) {
     this.routeStyleDescriptors = routeStyleDescriptors;
     this.vanishRouteLineEnabled = vanishRouteLineEnabled;
     this.vanishingRouteLineUpdateIntervalNano = vanishingRouteLineUpdateIntervalNano;
@@ -122,13 +128,19 @@ public class NavigationMapRoute implements LifecycleObserver {
             styleRes,
             belowLayer,
             routeStyleDescriptors,
-            routeLineInitializedCallback
+            routeLineInitializedCallback,
+            sourceMaxZoom,
+            sourceTolerance
     );
-    this.routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, LAYER_ABOVE_UPCOMING_MANEUVER_ARROW);
+    this.routeArrow = new MapRouteArrow(
+        mapView, mapboxMap, styleRes, LAYER_ABOVE_UPCOMING_MANEUVER_ARROW, sourceMaxZoom, sourceTolerance
+    );
     this.routeClickPadding = routeClickPadding;
     this.mapRouteProgressChangeListener = buildMapRouteProgressChangeListener();
     this.routeLineInitializedCallback = routeLineInitializedCallback;
     this.lifecycleOwner = lifecycleOwner;
+    this.sourceMaxZoom = sourceMaxZoom;
+    this.sourceTolerance = sourceTolerance;
     initializeDidFinishLoadingStyleListener();
     registerLifecycleObserver();
   }
@@ -141,6 +153,7 @@ public class NavigationMapRoute implements LifecycleObserver {
       @Nullable String belowLayer,
       MapView.OnDidFinishLoadingStyleListener didFinishLoadingStyleListener,
       MapRouteProgressChangeListener progressChangeListener) {
+    this.sourceTolerance = 0.375f;
     this.navigation = navigation;
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
@@ -162,6 +175,7 @@ public class NavigationMapRoute implements LifecycleObserver {
       MapRouteProgressChangeListener progressChangeListener,
       MapRouteLine routeLine,
       MapRouteArrow routeArrow) {
+    this.sourceTolerance = 0.375f;
     this.navigation = navigation;
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
@@ -372,7 +386,9 @@ public class NavigationMapRoute implements LifecycleObserver {
   private MapRouteLine buildMapRouteLine(@NonNull final MapView mapView, @NonNull final MapboxMap mapboxMap,
                                          @StyleRes final int styleRes, @Nullable final String belowLayer,
                                          @Nullable final List<RouteStyleDescriptor> routeStyleDescriptors,
-                                         final MapRouteLineInitializedCallback routeLineInitializedCallback) {
+                                         final MapRouteLineInitializedCallback routeLineInitializedCallback,
+                                         int sourceMaxZoom,
+                                         float sourceTolerance) {
     final Context context = mapView.getContext();
     final List<RouteStyleDescriptor> routeStyleDescriptorsToUse = routeStyleDescriptors == null
             ? Collections.emptyList() : routeStyleDescriptors;
@@ -385,7 +401,9 @@ public class NavigationMapRoute implements LifecycleObserver {
         belowLayer,
         layerProvider,
         new MapRouteSourceProvider(),
-        routeLineInitializedCallback
+        routeLineInitializedCallback,
+        sourceMaxZoom,
+        sourceTolerance
     );
   }
 
@@ -440,7 +458,8 @@ public class NavigationMapRoute implements LifecycleObserver {
   private void redraw(@NonNull Style style) {
     recreateRouteLine(style);
     boolean arrowVisibility = routeArrow.routeArrowIsVisible();
-    routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, routeLine.getTopLayerId());
+    routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, routeLine.getTopLayerId(),
+        sourceMaxZoom, sourceTolerance);
     routeArrow.updateVisibilityTo(arrowVisibility);
     updateProgressChangeListener();
   }
@@ -464,7 +483,9 @@ public class NavigationMapRoute implements LifecycleObserver {
         routeLine.retrieveAlternativesVisible(),
         new MapRouteSourceProvider(),
         vanishingPointOffset,
-        routeLineInitializedCallback
+        routeLineInitializedCallback,
+        sourceMaxZoom,
+        sourceTolerance
     );
   }
 
@@ -519,6 +540,8 @@ public class NavigationMapRoute implements LifecycleObserver {
     private float routeClickPadding = dpToPx(DEFAULT_ROUTE_CLICK_PADDING_IN_DIP);
     private long vanishingRouteLineUpdateIntervalNano =
         DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO;
+    private int sourceMaxZoom = DEFAULT_ROUTE_SOURCES_MAX_ZOOM;
+    private float sourceTolerance = DEFAULT_ROUTE_SOURCES_TOLERANCE;
 
     /**
      * Instantiates a new Builder.
@@ -640,6 +663,36 @@ public class NavigationMapRoute implements LifecycleObserver {
     }
 
     /**
+     * Maximum zoom level at which to route line tiles are created and over-zoomed otherwise
+     * (higher means greater detail at high zoom levels).
+     *
+     * Defaults to 16.
+     *
+     * @return the builder
+     * @see com.mapbox.mapboxsdk.style.sources.GeoJsonOptions#withMaxZoom(int)
+     */
+    @NonNull
+    public Builder withSourceMaxZoom(int sourceMaxZoom) {
+      this.sourceMaxZoom = sourceMaxZoom;
+      return this;
+    }
+
+    /**
+     * Douglas-Peucker simplification tolerance (higher means simpler geometries and faster performance)
+     * for the GeoJsonSources created to display the route line.
+     *
+     * Defaults to 0.375.
+     *
+     * @return the builder
+     * @see com.mapbox.mapboxsdk.style.sources.GeoJsonOptions#withTolerance(float)
+     */
+    @NonNull
+    public Builder withSourceTolerance(float sourceTolerance) {
+      this.sourceTolerance = sourceTolerance;
+      return this;
+    }
+
+    /**
      * Build an instance of {@link NavigationMapRoute}
      */
     @NonNull
@@ -655,7 +708,9 @@ public class NavigationMapRoute implements LifecycleObserver {
           routeLineInitializedCallback,
           routeStyleDescriptors,
           vanishingRouteLineUpdateIntervalNano,
-          routeClickPadding
+          routeClickPadding,
+          sourceMaxZoom,
+          sourceTolerance
       );
     }
   }

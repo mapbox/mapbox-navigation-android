@@ -25,6 +25,7 @@ import com.mapbox.mapboxsdk.style.layers.FillLayer
 import com.mapbox.mapboxsdk.style.layers.LineLayer
 import com.mapbox.mapboxsdk.style.layers.PropertyValue
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
+import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -232,12 +233,35 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         ).also { it.draw(listOf(directionsRoute)) }
 
         val result = mapRouteLine.getPrimaryRoute()
 
         assertEquals(result, directionsRoute)
+    }
+
+    @Test
+    fun createMapRouteLine_geoJsonOptionsCorrect() = coroutineRule.runBlockingTest {
+        val expected = GeoJsonOptions().withTolerance(0.2f).withMaxZoom(19)
+
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val directionsRoute: DirectionsRoute = getDirectionsRoute(true)
+        MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider,
+            null,
+            19,
+            0.2f
+        ).also { it.draw(listOf(directionsRoute)) }
+
+        verify { mapRouteSourceProvider.build(any(), any(), eq(expected)) }
     }
 
     @Test
@@ -251,7 +275,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         ).also { it.draw(listOf(directionsRoute)) }
 
         val result = mapRouteLine.getLineStringForRoute(directionsRoute)
@@ -271,7 +297,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         ).also { it.draw(listOf(directionsRoute)) }
 
         val result = mapRouteLine.getLineStringForRoute(directionsRoute2)
@@ -290,7 +318,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         ).also { it.draw(listOf(directionsRoute)) }
 
         val result = mapRouteLine.retrieveRouteFeatureData()
@@ -310,7 +340,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         ).also { it.draw(listOf(directionsRoute)) }
 
         val result = mapRouteLine.retrieveRouteLineStrings()
@@ -329,7 +361,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         ).also { it.draw(listOf(directionsRoute)) }
 
         val result = mapRouteLine.retrieveDirectionsRoutes()
@@ -350,7 +384,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         ).also { it.draw(directionsRoutes) }
         directionsRoutes.reverse()
 
@@ -387,7 +423,9 @@ class MapRouteLineTest {
             false,
             mapRouteSourceProvider,
             0.0,
-            null
+            null,
+            16,
+            0.375f
         )
 
         val result = mapRouteLine.retrieveDirectionsRoutes()
@@ -405,7 +443,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         )
 
         val result = mapRouteLine.getTopLayerId()
@@ -425,7 +465,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         ).also { it.draw(listOf(directionsRoute, directionsRoute2)) }
         val routeFeatureData = mapRouteLine.retrieveRouteFeatureData()
 
@@ -813,7 +855,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         ).also { it.draw(listOf(route)) }
 
         val expression = mapRouteLine.getExpressionAtOffset(.2)
@@ -833,7 +877,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         ).also { it.draw(listOf(route)) }
 
         val expression = mapRouteLine.getExpressionAtOffset(0.0)
@@ -855,7 +901,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         ).also { it.draw(listOf(route)) }
 
         val expression = mapRouteLine.getExpressionAtOffset(.2)
@@ -877,7 +925,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         ).also { it.draw(listOf(route)) }
 
         val expression = mapRouteLine.getExpressionAtOffset(.9)
@@ -989,7 +1039,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         )
 
         val result =
@@ -1008,7 +1060,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         )
 
         val result =
@@ -1027,7 +1081,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         )
 
         val result =
@@ -1046,7 +1102,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         )
 
         val result =
@@ -1065,7 +1123,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         )
 
         val result = mapRouteLine.getRouteColorForCongestion("foobar", true)
@@ -1083,7 +1143,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         )
 
         val result =
@@ -1102,7 +1164,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         )
 
         val result =
@@ -1121,7 +1185,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         )
 
         val result =
@@ -1140,7 +1206,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         )
 
         val result =
@@ -1159,7 +1227,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         )
 
         val result = mapRouteLine.getRouteColorForCongestion("foobar", false)
@@ -1178,7 +1248,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         )
 
         mapRouteLine.reinitializeWithRoutes(listOf(route))
@@ -1215,7 +1287,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         )
 
         mapRouteLine.reinitializeWithRoutes(listOf(route))
@@ -1241,7 +1315,9 @@ class MapRouteLineTest {
             false,
             mapRouteSourceProvider,
             0.0,
-            null
+            null,
+            16,
+            0.375f
         )
 
         val expression = mapRouteLine.getExpressionAtOffset(.2)
@@ -1687,7 +1763,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            callback
+            callback,
+            16,
+            0.375f
         )
 
         verify {
@@ -1775,7 +1853,9 @@ class MapRouteLineTest {
             false,
             mapRouteSourceProvider,
             0.0,
-            null
+            null,
+            16,
+            0.375f
         )
         val primaryRouteBeforeRecreate = mapRouteLine.getPrimaryRoute()
 
@@ -1792,7 +1872,9 @@ class MapRouteLineTest {
             mapRouteLine.retrieveAlternativesVisible(),
             mapRouteSourceProvider,
             0.0,
-            null
+            null,
+            16,
+            0.375f
         )
 
         assertEquals(primaryRouteBeforeRecreate, firstRoute)
@@ -2102,7 +2184,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         ).also { it.draw(listOf(primaryRoute, alternativeRoute)) }
         val featurePrimary = mockk<Feature> {
             every { id() } returns mapRouteLine.retrieveRouteFeatureData()[0]
@@ -2170,7 +2254,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         ).also { it.draw(listOf(primaryRoute, alternativeRoute)) }
         val featurePrimary = mockk<Feature> {
             every { id() } returns mapRouteLine.retrieveRouteFeatureData()[0]
@@ -2239,7 +2325,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         ).also { it.draw(listOf(primaryRoute, firstAlternativeRoute, secondAlternativeRoute)) }
         val featureAlternative = mockk<Feature> {
             every { id() } returns mapRouteLine.retrieveRouteFeatureData()[2]
@@ -2302,7 +2390,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         ).also { it.draw(listOf(primaryRoute, firstAlternativeRoute, secondAlternativeRoute)) }
         val featureAlternative = mockk<Feature> {
             every { id() } returns mapRouteLine.retrieveRouteFeatureData()[2]
@@ -2365,7 +2455,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         ).also { it.draw(listOf(primaryRoute, firstAlternativeRoute, secondAlternativeRoute)) }
         val featurePrimary = mockk<Feature> {
             every { id() } returns "whatever"
@@ -2452,7 +2544,9 @@ class MapRouteLineTest {
             null,
             layerProvider,
             mapRouteSourceProvider,
-            null
+            null,
+            16,
+            0.375f
         )
     }
 
