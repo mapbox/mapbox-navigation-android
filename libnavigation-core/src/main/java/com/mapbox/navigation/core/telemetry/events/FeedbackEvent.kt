@@ -75,10 +75,16 @@ object FeedbackEvent {
     const val POSITIONING_ISSUE = "positioning_issue"
 
     /**
-     * Feedback type *arrival information*: user's feelings about the arrival experience
+     * Feedback type *arrival information*: user's feelings is good about the arrival experience
      * as the device comes to the final destination
      */
-    const val ARRIVAL_FEEDBACK = "arrival_feedback"
+    const val ARRIVAL_FEEDBACK_GOOD = "arrival_feedback_good"
+
+    /**
+     * Feedback type *arrival information*: user's feelings is not good about the arrival experience
+     * as the device comes to the final destination
+     */
+    const val ARRIVAL_FEEDBACK_NOT_GOOD = "arrival_feedback_not_good"
 
     /**
      * Feedback source *reroute*: the user tapped a feedback button in response to a reroute
@@ -210,6 +216,26 @@ object FeedbackEvent {
     const val ROAD_IS_MISSING_FROM_MAP = "road_is_missing_from_map"
 
     /**
+     * Feedback description for *arrival feedback not good*: wrong location
+     */
+    const val ARRIVAL_FEEDBACK_WRONG_LOCATION = "arrival_feedback_wrong_location"
+
+    /**
+     * Feedback description for *arrival feedback not good*: wrong entrance
+     */
+    const val ARRIVAL_FEEDBACK_WRONG_ENTRANCE = "arrival_feedback_wrong_entrance"
+
+    /**
+     * Feedback description for *arrival feedback not good*: confusing instructions
+     */
+    const val ARRIVAL_FEEDBACK_CONFUSING_INSTRUCTIONS = "arrival_feedback_confusing_instructions"
+
+    /**
+     * Feedback description for *arrival feedback not good*: this place is closed
+     */
+    const val ARRIVAL_FEEDBACK_THIS_PLACE_IS_CLOSED = "arrival_feedback_this_place_is_closed"
+
+    /**
      * Type of feedback mean WHAT happen
      */
     @Retention(AnnotationRetention.SOURCE)
@@ -227,7 +253,8 @@ object FeedbackEvent {
         INCORRECT_VISUAL_GUIDANCE,
         INCORRECT_AUDIO_GUIDANCE,
         POSITIONING_ISSUE,
-        ARRIVAL_FEEDBACK
+        ARRIVAL_FEEDBACK_GOOD,
+        ARRIVAL_FEEDBACK_NOT_GOOD
     )
     annotation class Type
 
@@ -268,7 +295,11 @@ object FeedbackEvent {
         CARS_NOT_ALLOWED_ON_STREET,
         TURN_AT_INTERSECTION_WAS_UNPROTECTED,
         STREET_PERMANENTLY_BLOCKED_OFF,
-        ROAD_IS_MISSING_FROM_MAP
+        ROAD_IS_MISSING_FROM_MAP,
+        ARRIVAL_FEEDBACK_WRONG_LOCATION,
+        ARRIVAL_FEEDBACK_WRONG_ENTRANCE,
+        ARRIVAL_FEEDBACK_CONFUSING_INSTRUCTIONS,
+        ARRIVAL_FEEDBACK_THIS_PLACE_IS_CLOSED
     )
     annotation class Description
 }
