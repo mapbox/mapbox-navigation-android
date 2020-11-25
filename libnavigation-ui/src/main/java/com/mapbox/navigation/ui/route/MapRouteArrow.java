@@ -97,7 +97,8 @@ class MapRouteArrow {
   private final MapboxMap mapboxMap;
   private boolean isVisible = true;
 
-  MapRouteArrow(@NonNull MapView mapView, MapboxMap mapboxMap, @StyleRes int styleRes, @NonNull String aboveLayer) {
+  MapRouteArrow(@NonNull MapView mapView, MapboxMap mapboxMap, @StyleRes int styleRes, @NonNull String aboveLayer,
+                int sourceMaxZoom, float sourceTolerance) {
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
     this.maneuverPoints = new ArrayList<>();
@@ -110,7 +111,7 @@ class MapRouteArrow {
             ContextCompat.getColor(context, R.color.mapbox_navigation_route_upcoming_maneuver_arrow_border_color));
     typedArray.recycle();
 
-    initialize(aboveLayer);
+    initialize(aboveLayer, sourceMaxZoom, sourceTolerance);
     updateVisibilityTo(isVisible);
   }
 
@@ -191,9 +192,9 @@ class MapRouteArrow {
     arrowHeadGeoJsonSource.setGeoJson(arrowHeadGeoJsonFeature);
   }
 
-  private void initialize(@NonNull String aboveLayer) {
-    initializeArrowShaft();
-    initializeArrowHead();
+  private void initialize(@NonNull String aboveLayer, int sourceMaxZoom, float sourceTolerance) {
+    initializeArrowShaft(sourceMaxZoom, sourceTolerance);
+    initializeArrowHead(sourceMaxZoom, sourceTolerance);
 
     addArrowHeadIcon();
     addArrowHeadIconCasing();
@@ -212,20 +213,26 @@ class MapRouteArrow {
     createArrowLayerList(shaftLayer, shaftCasingLayer, headLayer, headCasingLayer);
   }
 
-  private void initializeArrowShaft() {
+  private void initializeArrowShaft(int sourceMaxZoom, float sourceTolerance) {
+    GeoJsonOptions geoJsonOptions = new GeoJsonOptions();
+    geoJsonOptions.withMaxZoom(sourceMaxZoom);
+    geoJsonOptions.withTolerance(sourceTolerance);
     arrowShaftGeoJsonSource = new GeoJsonSource(
             ARROW_SHAFT_SOURCE_ID,
             FeatureCollection.fromFeatures(new Feature[]{}),
-            new GeoJsonOptions().withMaxZoom(16)
+            geoJsonOptions
     );
     mapboxMap.getStyle().addSource(arrowShaftGeoJsonSource);
   }
 
-  private void initializeArrowHead() {
+  private void initializeArrowHead(int sourceMaxZoom, float sourceTolerance) {
+    GeoJsonOptions geoJsonOptions = new GeoJsonOptions();
+    geoJsonOptions.withMaxZoom(sourceMaxZoom);
+    geoJsonOptions.withTolerance(sourceTolerance);
     arrowHeadGeoJsonSource = new GeoJsonSource(
             ARROW_HEAD_SOURCE_ID,
             FeatureCollection.fromFeatures(new Feature[]{}),
-            new GeoJsonOptions().withMaxZoom(16)
+            geoJsonOptions
     );
     mapboxMap.getStyle().addSource(arrowHeadGeoJsonSource);
   }
