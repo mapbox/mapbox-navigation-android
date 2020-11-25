@@ -903,7 +903,7 @@ class MapRouteLineTest {
 
     @Test
     fun calculateRouteLineSegmentsMultilegRouteFirstDistanceValueAboveMinimumOffset() =
-        coroutineRule.runBlockingTest  {
+        coroutineRule.runBlockingTest {
             val congestionColorProvider: (String, Boolean) -> Int = { trafficCongestion, _ ->
                 when (trafficCongestion) {
                     UNKNOWN_CONGESTION_VALUE -> -9
