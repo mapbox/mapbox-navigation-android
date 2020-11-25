@@ -63,7 +63,8 @@ import java.util.Locale;
 
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getLocaleDirectionsRoute;
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale;
-import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ARRIVAL_FEEDBACK;
+import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ARRIVAL_FEEDBACK_GOOD;
+import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ARRIVAL_FEEDBACK_NOT_GOOD;
 import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.UI;
 
 public class NavigationViewModel extends AndroidViewModel {
@@ -316,6 +317,14 @@ public class NavigationViewModel extends AndroidViewModel {
     return onFinalDestinationArrival;
   }
 
+  boolean enableDetailedFeedbackFlowAfterTbt() {
+    return navigationViewOptions.navigationFeedbackOptions().getEnableDetailedFeedbackAfterNavigation();
+  }
+
+  boolean enableArrivalExperienceFeedback() {
+    return navigationViewOptions.navigationFeedbackOptions().getEnableArrivalExperienceFeedback();
+  }
+
   NavigationViewOptions getNavigationViewOptions() {
     return navigationViewOptions;
   }
@@ -433,7 +442,8 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private synchronized void sendFeedback() {
-    if (feedbackItem != null && (ARRIVAL_FEEDBACK.equals(feedbackItem.getFeedbackType())
+    if (feedbackItem != null && (ARRIVAL_FEEDBACK_GOOD.equals(feedbackItem.getFeedbackType())
+            || ARRIVAL_FEEDBACK_NOT_GOOD.equals(feedbackItem.getFeedbackType())
             || !TextUtils.isEmpty(feedbackEncodedScreenShot))) {
       if (navigation != null) {
         if (enableDetailedFeedbackAfterNavigation) {
@@ -530,6 +540,7 @@ public class NavigationViewModel extends AndroidViewModel {
     @Override
     public void onFinalDestinationArrival(@NotNull RouteProgress routeProgress) {
       onFinalDestinationArrival.setValue(true);
+      onFinalDestinationArrival.setValue(false);
     }
   };
 

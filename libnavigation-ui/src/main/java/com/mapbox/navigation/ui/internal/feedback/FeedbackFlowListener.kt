@@ -1,6 +1,7 @@
-package com.mapbox.navigation.ui.feedback
+package com.mapbox.navigation.ui.internal.feedback
 
 import com.mapbox.navigation.core.internal.telemetry.CachedNavigationFeedbackEvent
+import com.mapbox.navigation.ui.feedback.FeedbackItem
 
 /**
  * Interface notified on interaction with the possible feedback opportunities
