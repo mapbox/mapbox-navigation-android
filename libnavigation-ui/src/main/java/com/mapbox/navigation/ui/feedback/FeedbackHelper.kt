@@ -50,4 +50,13 @@ internal object FeedbackHelper {
             else -> throw IllegalArgumentException("feedback type $feedbackType is not supported")
         }
     }
+
+    fun getArrivalFeedbackItem(
+        feedbackText: String,
+        feedbackImage: Int,
+        @FeedbackEvent.Type feedbackType: String,
+        feedbackDescription: String
+    ): FeedbackItem {
+        return FeedbackItem(feedbackText, feedbackImage, feedbackType, feedbackDescription)
+    }
 }

@@ -31,6 +31,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.mapbox.navigation.ui.R;
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent;
 
+import com.mapbox.navigation.ui.internal.feedback.FeedbackDetailsFragment;
 import com.mapbox.navigation.ui.internal.utils.ViewUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -89,6 +90,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
    * The parameter flowType will be ignored and this FeedbackBottomSheet will only perform the original main flow.
    */
   @Deprecated
+  @NonNull
   public static FeedbackBottomSheet newInstance(FeedbackBottomSheetListener feedbackBottomSheetListener,
                                                 @FeedbackFlowType int flowType, long duration) {
     return newInstance(feedbackBottomSheetListener, duration);

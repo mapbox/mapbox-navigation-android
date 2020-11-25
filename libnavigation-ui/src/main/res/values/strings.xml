@@ -81,6 +81,12 @@
     <string name="mapbox_feedback_description_street_permanently_blocked_off">Street permanently blocked off</string>
     <string name="mapbox_feedback_description_road_is_missing_from_map">Road is missing from map</string>
 
+    <!-- Feedback description for Arrival Feedback Not Good -->
+    <string name="mapbox_feedback_description_wrong_location">Wrong location</string>
+    <string name="mapbox_feedback_description_wrong_entrance">Wrong entrance</string>
+    <string name="mapbox_feedback_description_confusing_instructions">Confusing Instructions</string>
+    <string name="mapbox_feedback_description_this_place_is_closed">This place is closed</string>
+
     <!-- Shown after a feedback type has been submitted -->
     <string name="mapbox_feedback_submitted">Feedback Submitted</string>
 
@@ -100,7 +106,9 @@
 
     <!-- Provide arrival experience TextView texts  -->
     <string name="mapbox_feedback_arrival_feedback">Arrival Feedback</string>
-    <string name="mapbox_feedback_arrival_experience_question">How was your arrival\nexperience today?</string>
+    <string name="mapbox_feedback_arrival_experience_question">How was your routing\nexperience?</string>
+    <string name="mapbox_feedback_arrival_experience_good">Good</string>
+    <string name="mapbox_feedback_arrival_experience_not_good">Not good</string>
 
     <!-- Shown in off-route scenarios to provide feedback -->
     <string name="mapbox_report_problem">Report Problem</string>

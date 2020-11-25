@@ -43,9 +43,9 @@ import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.core.internal.telemetry.CachedNavigationFeedbackEvent;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
-import com.mapbox.navigation.ui.feedback.FeedbackArrivalFragment;
-import com.mapbox.navigation.ui.feedback.FeedbackDetailsFragment;
-import com.mapbox.navigation.ui.feedback.FeedbackFlowListener;
+import com.mapbox.navigation.ui.internal.feedback.FeedbackArrivalFragment;
+import com.mapbox.navigation.ui.internal.feedback.FeedbackDetailsFragment;
+import com.mapbox.navigation.ui.internal.feedback.FeedbackFlowListener;
 import com.mapbox.navigation.ui.instruction.InstructionView;
 import com.mapbox.navigation.ui.instruction.NavigationAlertView;
 import com.mapbox.navigation.ui.internal.NavigationContract;
@@ -113,8 +113,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   @NonNull
   private Set<OnNavigationReadyCallback> onNavigationReadyCallbacks = new CopyOnWriteArraySet<>();
   private FeedbackFlowListener feedbackFlowListener;
-  private boolean enableDetailedFeedbackFlowAfterTbt;
-  private boolean enableArrivalExperienceFeedback;
 
   public NavigationView(@NonNull Context context) {
     this(context, null);
@@ -736,7 +734,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   @Override
-  public void onFinalDestinationArrival() {
+  public void onFinalDestinationArrival(
+          boolean enableDetailedFeedbackFlowAfterTbt,
+          boolean enableArrivalExperienceFeedback
+  ) {
     if (navigationMap != null) {
       navigationMap.clearMarkersWithIconImageProperty(MAPBOX_NAVIGATION_FEEDBACK_MARKER_NAME);
     }
@@ -749,9 +750,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
         FragmentTransaction fragmentTransaction = getFragmentActivity().getSupportFragmentManager().beginTransaction();
         fragmentTransaction.add(
                 R.id.feedbackFrameLayout,
-                FeedbackDetailsFragment.Companion.newInstance(
+                FeedbackDetailsFragment.newInstance(
                         cachedNavigationFeedbackEventList,
-                        feedbackFlowListener,
+                        getFeedbackFlowListener(),
                         enableArrivalExperienceFeedback
                 ),
                 FeedbackDetailsFragment.class.getSimpleName()).commit();
@@ -762,7 +763,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
         FragmentTransaction fragmentTransaction = getFragmentActivity().getSupportFragmentManager().beginTransaction();
         fragmentTransaction.add(
                 R.id.feedbackFrameLayout,
-                FeedbackArrivalFragment.Companion.newInstance(feedbackFlowListener),
+                FeedbackArrivalFragment.newInstance(getFeedbackFlowListener()),
                 FeedbackArrivalFragment.class.getSimpleName()).commit();
       }
     }
@@ -785,17 +786,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     instructionView.setGuidanceViewListener(new NavigationGuidanceViewListener(navigationPresenter));
   }
 
-  private void initializeFeedbackFlowListener() {
-    feedbackFlowListener = new NavigationFeedbackFlowListener(navigationViewModel);
-  }
-
-  private void initFeedbackPreferences(@NonNull NavigationViewOptions navigationOptions) {
-    enableDetailedFeedbackFlowAfterTbt = navigationOptions
-            .navigationFeedbackOptions()
-            .getEnableDetailedFeedbackAfterNavigation();
-    enableArrivalExperienceFeedback = navigationOptions
-            .navigationFeedbackOptions()
-            .getEnableArrivalExperienceFeedback();
+  private FeedbackFlowListener getFeedbackFlowListener() {
+    if (feedbackFlowListener == null) {
+      feedbackFlowListener = new NavigationFeedbackFlowListener(navigationViewModel);
+    }
+    return feedbackFlowListener;
   }
 
   private void initializeNavigationMap(@NonNull MapView mapView, @NonNull MapboxMap map) {
@@ -928,8 +923,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     } else {
       navigationMap.disableVanishingRouteLine();
     }
-    initFeedbackPreferences(options);
-    initializeFeedbackFlowListener();
     initializeVoiceGuidanceMuteState(options);
     initializeNavigationListeners(options, navigationViewModel);
     setupNavigationMapboxMap(options);

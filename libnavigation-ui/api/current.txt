@@ -55,7 +55,7 @@ package com.mapbox.navigation.ui {
     method public void onDestroy();
     method public void onFeedbackFlowStatusChanged(int);
     method @Deprecated public void onFeedbackSent();
-    method public void onFinalDestinationArrival();
+    method public void onFinalDestinationArrival(boolean, boolean);
     method public void onGuidanceViewChange(int, int, int, int);
     method public void onLowMemory();
     method public void onMapReady(com.mapbox.mapboxsdk.maps.MapboxMap);
@@ -293,19 +293,10 @@ package com.mapbox.navigation.ui.camera {
 
 package com.mapbox.navigation.ui.feedback {
 
-  public final class FeedbackArrivalFragment extends androidx.fragment.app.DialogFragment {
-    ctor public FeedbackArrivalFragment();
-    field public static final com.mapbox.navigation.ui.feedback.FeedbackArrivalFragment.Companion! Companion;
-  }
-
-  public static final class FeedbackArrivalFragment.Companion {
-    method public com.mapbox.navigation.ui.feedback.FeedbackArrivalFragment newInstance(com.mapbox.navigation.ui.feedback.FeedbackFlowListener feedbackFlowListener);
-  }
-
   public class FeedbackBottomSheet extends com.google.android.material.bottomsheet.BottomSheetDialogFragment implements android.animation.Animator.AnimatorListener {
     ctor public FeedbackBottomSheet();
     method public static com.mapbox.navigation.ui.feedback.FeedbackBottomSheet newInstance(com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener!, long);
-    method @Deprecated public static com.mapbox.navigation.ui.feedback.FeedbackBottomSheet! newInstance(com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener!, @com.mapbox.navigation.ui.feedback.FeedbackBottomSheet.FeedbackFlowType int, long);
+    method @Deprecated public static com.mapbox.navigation.ui.feedback.FeedbackBottomSheet newInstance(com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener!, @com.mapbox.navigation.ui.feedback.FeedbackBottomSheet.FeedbackFlowType int, long);
     method public void onAnimationCancel(android.animation.Animator!);
     method public void onAnimationEnd(android.animation.Animator!);
     method public void onAnimationRepeat(android.animation.Animator!);
@@ -323,20 +314,6 @@ package com.mapbox.navigation.ui.feedback {
   public interface FeedbackBottomSheetListener {
     method public void onFeedbackDismissed();
     method public void onFeedbackSelected(com.mapbox.navigation.ui.feedback.FeedbackItem!);
-  }
-
-  public final class FeedbackDetailsFragment extends androidx.fragment.app.DialogFragment {
-    ctor public FeedbackDetailsFragment();
-    field public static final com.mapbox.navigation.ui.feedback.FeedbackDetailsFragment.Companion! Companion;
-  }
-
-  public static final class FeedbackDetailsFragment.Companion {
-    method public com.mapbox.navigation.ui.feedback.FeedbackDetailsFragment newInstance(java.util.List<com.mapbox.navigation.core.internal.telemetry.CachedNavigationFeedbackEvent> feedbackItemList, com.mapbox.navigation.ui.feedback.FeedbackFlowListener feedbackFlowListener, boolean enableArrivalExperienceFeedback = true);
-  }
-
-  public interface FeedbackFlowListener {
-    method public void onArrivalExperienceFeedbackFinished(com.mapbox.navigation.ui.feedback.FeedbackItem arrivalFeedbackItem);
-    method public void onDetailedFeedbackFlowFinished(java.util.List<com.mapbox.navigation.core.internal.telemetry.CachedNavigationFeedbackEvent> cachedNavigationFeedbackEvents);
   }
 
   public class FeedbackItem {

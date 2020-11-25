@@ -56,8 +56,11 @@ class NavigationViewSubscriber implements LifecycleObserver {
             .retrieveOnFinalDestinationArrival()
             .observe(lifecycleOwner, shouldShowFeedbackDetailsFragment -> {
               if (shouldShowFeedbackDetailsFragment != null && shouldShowFeedbackDetailsFragment) {
-                navigationPresenter.onFinalDestinationArrival();
                 navigationViewModel.retrieveOnFinalDestinationArrival().removeObservers(lifecycleOwner);
+                navigationPresenter.onFinalDestinationArrival(
+                        navigationViewModel.enableDetailedFeedbackFlowAfterTbt(),
+                        navigationViewModel.enableArrivalExperienceFeedback()
+                );
               }
             });
   }

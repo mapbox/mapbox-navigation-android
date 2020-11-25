@@ -53,7 +53,10 @@ public interface NavigationContract {
 
     void onFeedbackFlowStatusChanged(int status);
 
-    void onFinalDestinationArrival();
+    void onFinalDestinationArrival(
+            boolean enableDetailedFeedbackFlowAfterTbt,
+            boolean enableArrivalExperienceFeedback
+    );
 
     void onGuidanceViewChange(int left, int top, int width, int height);
   }
