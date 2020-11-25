@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.feedback
+package com.mapbox.navigation.ui.internal.feedback
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -26,6 +26,9 @@ import com.mapbox.navigation.core.internal.telemetry.CachedNavigationFeedbackEve
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent.POSITIONING_ISSUE
 import com.mapbox.navigation.ui.R
+import com.mapbox.navigation.ui.feedback.FeedbackHelper
+import com.mapbox.navigation.ui.feedback.FeedbackSubTypeAdapter
+import com.mapbox.navigation.ui.feedback.FeedbackSubTypeItem
 import com.mapbox.navigation.ui.internal.utils.ViewUtils
 import kotlinx.android.synthetic.main.mapbox_edit_text_feedback_optional_comment.*
 import kotlinx.android.synthetic.main.mapbox_feedback_details_bottom_sheet.*
@@ -479,12 +482,14 @@ class FeedbackDetailsFragment : DialogFragment() {
          *  This listener will be passed to [FeedbackArrivalFragment] as the callback when the user finishes the arrival feedback.
          * @param enableArrivalExperienceFeedback true to display a [FeedbackArrivalFragment] when the [FeedbackDetailsFragment] flow is done.
          */
+        @JvmStatic
         fun newInstance(
             feedbackItemList: List<CachedNavigationFeedbackEvent>,
             feedbackFlowListener: FeedbackFlowListener,
             enableArrivalExperienceFeedback: Boolean = true
         ) =
             FeedbackDetailsFragment().apply {
+                retainInstance = true
                 this.arrivalExperienceFeedbackEnabled = enableArrivalExperienceFeedback
                 this.feedbackFlowListener = feedbackFlowListener
                 feedbackItemList.partition {

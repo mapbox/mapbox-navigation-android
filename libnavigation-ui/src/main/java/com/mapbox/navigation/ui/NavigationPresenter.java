@@ -101,8 +101,11 @@ class NavigationPresenter {
     view.onFeedbackFlowStatusChanged(status);
   }
 
-  void onFinalDestinationArrival() {
-    view.onFinalDestinationArrival();
+  void onFinalDestinationArrival(
+          boolean enableDetailedFeedbackFlowAfterTbt,
+          boolean enableArrivalExperienceFeedback
+  ) {
+    view.onFinalDestinationArrival(enableDetailedFeedbackFlowAfterTbt, enableArrivalExperienceFeedback);
   }
 
   void onGuidanceViewChange(int left, int top, int width, int height) {
