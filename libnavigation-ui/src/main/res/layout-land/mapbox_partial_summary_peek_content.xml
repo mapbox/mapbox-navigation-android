@@ -22,7 +22,7 @@
         android:layout_height="8dp"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
-        app:srcCompat="@drawable/mapbox_ic_circle"/>
+        app:srcCompat="@drawable/mapbox_ic_circle_black"/>
 
     <TextView
         android:id="@+id/distanceRemainingText"
@@ -42,7 +42,7 @@
         android:layout_height="8dp"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
-        app:srcCompat="@drawable/mapbox_ic_circle"/>
+        app:srcCompat="@drawable/mapbox_ic_circle_black"/>
 
     <TextView
         android:id="@+id/arrivalTimeText"

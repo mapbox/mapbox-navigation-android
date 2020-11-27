@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mapbox_feedback_arrival_fragment_parent_view_group"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/buttonLayout"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <include layout="@layout/mapbox_feedback_arrival_bottom_sheet" />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <include
+        android:id="@+id/buttonLayout"
+        layout="@layout/mapbox_partial_feedback_arrival_button_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/mapbox_feedback_details_button_bar_height"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

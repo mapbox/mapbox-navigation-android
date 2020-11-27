@@ -48,9 +48,13 @@ import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheet
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener
 import com.mapbox.navigation.ui.feedback.FeedbackItem
+import com.mapbox.navigation.ui.internal.utils.BitmapEncodeOptions
 import com.mapbox.navigation.ui.internal.utils.ViewUtils
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import kotlinx.android.synthetic.main.activity_feedback_button.*
+import kotlinx.android.synthetic.main.activity_feedback_button.feedbackButton
+import kotlinx.android.synthetic.main.activity_feedback_button.mapView
+import kotlinx.android.synthetic.main.activity_feedback_button.screenshotView
+import kotlinx.android.synthetic.main.activity_feedback_button.startNavigation
 import java.lang.ref.WeakReference
 
 /**
@@ -66,6 +70,7 @@ class FeedbackButtonActivity :
     FeedbackBottomSheetListener,
     ArrivalObserver {
 
+    private var TAG = "FeedbackButtonActivity"
     private var mapboxMap: MapboxMap? = null
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
@@ -75,6 +80,7 @@ class FeedbackButtonActivity :
 
     private var feedbackItem: FeedbackItem? = null
     private var feedbackEncodedScreenShot: String? = null
+    private val feedbackList = ArrayList<FeedbackItem>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -255,7 +261,6 @@ class FeedbackButtonActivity :
                 mapboxMap?.snapshot(this::encodeSnapshot)
                 FeedbackBottomSheet.newInstance(
                     this,
-                    FeedbackBottomSheet.FEEDBACK_DETAIL_FLOW,
                     NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION
                 ).show(it, FeedbackBottomSheet.TAG)
             }
@@ -343,7 +348,11 @@ class FeedbackButtonActivity :
         screenshotView.visibility = VISIBLE
         screenshotView.setImageBitmap(snapshot)
         mapView.visibility = View.INVISIBLE
-        feedbackEncodedScreenShot = ViewUtils.encodeView(ViewUtils.captureView(mapView))
+        feedbackEncodedScreenShot = ViewUtils.encodeView(
+            ViewUtils.captureView(mapView),
+            BitmapEncodeOptions.Builder()
+                .width(400).compressQuality(40).build()
+        )
         screenshotView.visibility = View.INVISIBLE
         mapView.visibility = VISIBLE
 

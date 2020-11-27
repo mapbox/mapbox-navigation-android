@@ -44,11 +44,25 @@ class NavigationViewSubscriber implements LifecycleObserver {
       }
     });
 
-    navigationViewModel.retrieveIsFeedbackSentSuccess().observe(lifecycleOwner, isFeedbackSentSuccess -> {
-      if (isFeedbackSentSuccess != null && isFeedbackSentSuccess) {
-        navigationPresenter.onFeedbackSent();
+    navigationViewModel.retrieveFeedbackFlowStatus().observe(lifecycleOwner, feedbackFlowStatus -> {
+      if (feedbackFlowStatus != null
+              && (feedbackFlowStatus == NavigationViewModel.FEEDBACK_FLOW_SENT
+              || feedbackFlowStatus == NavigationViewModel.FEEDBACK_FLOW_CANCEL)) {
+        navigationPresenter.onFeedbackFlowStatusChanged(feedbackFlowStatus);
       }
     });
+
+    navigationViewModel
+            .retrieveOnFinalDestinationArrival()
+            .observe(lifecycleOwner, shouldShowFeedbackDetailsFragment -> {
+              if (shouldShowFeedbackDetailsFragment != null && shouldShowFeedbackDetailsFragment) {
+                navigationViewModel.retrieveOnFinalDestinationArrival().removeObservers(lifecycleOwner);
+                navigationPresenter.onFinalDestinationArrival(
+                        navigationViewModel.enableDetailedFeedbackFlowAfterTbt(),
+                        navigationViewModel.enableArrivalExperienceFeedback()
+                );
+              }
+            });
   }
 
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -57,6 +71,7 @@ class NavigationViewSubscriber implements LifecycleObserver {
     navigationViewModel.retrieveDestination().removeObservers(lifecycleOwner);
     navigationViewModel.retrieveNavigationLocation().removeObservers(lifecycleOwner);
     navigationViewModel.retrieveShouldRecordScreenshot().removeObservers(lifecycleOwner);
-    navigationViewModel.retrieveIsFeedbackSentSuccess().removeObservers(lifecycleOwner);
+    navigationViewModel.retrieveFeedbackFlowStatus().removeObservers(lifecycleOwner);
+    navigationViewModel.retrieveOnFinalDestinationArrival().removeObservers(lifecycleOwner);
   }
 }

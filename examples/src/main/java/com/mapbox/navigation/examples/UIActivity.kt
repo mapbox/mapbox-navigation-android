@@ -11,6 +11,7 @@ import com.mapbox.navigation.examples.ui.BuildingFootprintHighlightActivity
 import com.mapbox.navigation.examples.ui.CustomCameraActivity
 import com.mapbox.navigation.examples.ui.CustomPuckActivity
 import com.mapbox.navigation.examples.ui.CustomUIComponentStyleActivity
+import com.mapbox.navigation.examples.ui.FeedbackOptionsActivity
 import com.mapbox.navigation.examples.ui.NavigationViewActivity
 import com.mapbox.navigation.examples.ui.NavigationViewFragmentActivity
 import com.mapbox.navigation.examples.ui.TrafficToggleActivity
@@ -78,6 +79,11 @@ class UIActivity : AppCompatActivity() {
                 getString(R.string.title_traffic_toggle),
                 getString(R.string.description_traffic_toggle),
                 TrafficToggleActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_feedback_options),
+                getString(R.string.description_feedback_options),
+                FeedbackOptionsActivity::class.java
             )
         )
     }

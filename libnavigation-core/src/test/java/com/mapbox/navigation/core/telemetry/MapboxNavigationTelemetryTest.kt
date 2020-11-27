@@ -444,6 +444,34 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
+    fun cache_feedback_available_before_location_buffers_are_full_or_session_finished() {
+        baseMock()
+        mockAnotherRoute()
+
+        baseInitialization()
+        cacheUserFeedback()
+        offRoute()
+        updateRoute(anotherRoute)
+        updateRouteProgress()
+        postUserFeedback()
+        cacheUserFeedback()
+        postCachedUserFeedback()
+        updateSessionState(FREE_DRIVE)
+
+        val events = captureAndVerifyMetricsReporter(exactly = 8)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        assertTrue(events[1] is NavigationDepartEvent)
+        assertTrue(events[2] is NavigationRerouteEvent)
+        assertTrue(events[3] is NavigationFeedbackEvent)
+        assertTrue(events[4] is NavigationFeedbackEvent)
+        assertTrue(events[5] is NavigationFeedbackEvent)
+        assertTrue(events[6] is NavigationCancelEvent)
+        assertTrue(events[7] is NavigationFreeDriveEvent)
+
+        assertEquals(8, events.size)
+    }
+
+    @Test
     fun only_internal_cached_feedback_sent() {
         baseMock()
         mockAnotherRoute()
@@ -1020,6 +1048,7 @@ class MapboxNavigationTelemetryTest {
         every { locationsCollector.collectLocations(capture(onBufferFull)) } just Runs
         every { locationsCollector.flushBuffers() } answers {
             onBufferFull.forEach { it.invoke(listOf(), listOf()) }
+            onBufferFull.clear()
         }
     }
 

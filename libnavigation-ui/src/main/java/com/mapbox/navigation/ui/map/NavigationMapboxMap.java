@@ -11,6 +11,7 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
@@ -64,7 +65,7 @@ import timber.log.Timber;
 import static com.mapbox.android.gestures.Utils.dpToPx;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.DEFAULT_ROUTE_CLICK_PADDING_IN_DIP;
 import static com.mapbox.navigation.ui.NavigationConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO;
-import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGATION_MARKER_NAME;
+import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGATION_DESTINATION_MARKER_NAME;
 
 /**
  * Wrapper class for {@link MapboxMap}.
@@ -77,8 +78,9 @@ import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGA
 @UiThread
 public class NavigationMapboxMap implements LifecycleObserver {
 
-  private static final String STATE_BUNDLE_KEY = "mapbox_navigation_sdk_state_bundle";
+  public static final String MAPBOX_NAVIGATION_FEEDBACK_MARKER_NAME = "mapbox-navigation-feedback-marker";
   static final String STREETS_LAYER_ID = "streetsLayer";
+  private static final String STATE_BUNDLE_KEY = "mapbox_navigation_sdk_state_bundle";
   private static final String MAPBOX_STREETS_V7_URL = "mapbox.mapbox-streets-v7";
   private static final String MAPBOX_STREETS_V8_URL = "mapbox.mapbox-streets-v8";
   private static final String STREETS_SOURCE_ID = "com.mapbox.services.android.navigation.streets";
@@ -1096,7 +1098,10 @@ public class NavigationMapboxMap implements LifecycleObserver {
 
   private void initializeNavigationSymbolManager(@NonNull MapView mapView, @NonNull MapboxMap mapboxMap) {
     Bitmap markerBitmap = ThemeSwitcher.retrieveThemeMapMarker(mapView.getContext());
-    mapboxMap.getStyle().addImage(MAPBOX_NAVIGATION_MARKER_NAME, markerBitmap);
+    mapboxMap.getStyle().addImage(MAPBOX_NAVIGATION_DESTINATION_MARKER_NAME, markerBitmap);
+    mapboxMap.getStyle()
+        .addImage(MAPBOX_NAVIGATION_FEEDBACK_MARKER_NAME,
+            AppCompatResources.getDrawable(mapView.getContext(), R.drawable.mapbox_ic_feedback_marker));
     SymbolManager symbolManager = new SymbolManager(mapView, mapboxMap, mapboxMap.getStyle());
     navigationSymbolManager = new NavigationSymbolManager(symbolManager);
     SymbolOnStyleLoadedListener onStyleLoadedListener = new SymbolOnStyleLoadedListener(mapboxMap, markerBitmap);

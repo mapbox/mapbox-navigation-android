@@ -51,7 +51,12 @@ public interface NavigationContract {
 
     boolean updateCameraRouteGeometryOverview();
 
-    void onFeedbackSent();
+    void onFeedbackFlowStatusChanged(int status);
+
+    void onFinalDestinationArrival(
+            boolean enableDetailedFeedbackFlowAfterTbt,
+            boolean enableArrivalExperienceFeedback
+    );
 
     void onGuidanceViewChange(int left, int top, int width, int height);
   }
