@@ -13,6 +13,7 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -46,6 +47,14 @@ class FeedbackDetailsFragment : DialogFragment() {
         set(value) {
             field = value
             value?.let {
+                context?.let { context ->
+                    feedbackDetailsRoot.setBackgroundColor(
+                        ContextCompat.getColor(
+                            context,
+                            R.color.mapbox_feedback_bottom_sheet_background
+                        )
+                    )
+                }
                 screenshotView.setImageBitmap(ViewUtils.decodeScreenshot(it.screenshot))
                 feedbackBottomSheetTitleText.text = buildTitleText(
                     FeedbackHelper.getFeedbackText(it.feedbackType, requireContext())
