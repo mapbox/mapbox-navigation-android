@@ -604,6 +604,7 @@ package com.mapbox.navigation.core.trip.session {
     method public java.util.List<android.location.Location> getKeyPoints();
     method public float getOffRoadProbability();
     method public float getRoadEdgeMatchProbability();
+    method public com.mapbox.navigation.base.speed.model.SpeedLimit? getSpeedLimit();
     method public boolean isOffRoad();
     method public boolean isTeleport();
   }

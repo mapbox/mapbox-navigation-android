@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.trip.session
 
 import android.location.Location
+import com.mapbox.navigation.base.speed.model.SpeedLimit
 
 /**
  * Provides information about the status of the enhanced location updates generated
@@ -16,6 +17,7 @@ import android.location.Location
  * @param isTeleport returns true if map matcher changed its opinion about most probable path on last update.
  * In practice it means we don't need to animate puck movement from previous to current location
  * and just do an immediate transition instead.
+ * @param speedLimit current speed limit during free drive and active navigation session
  * @param roadEdgeMatchProbability when map matcher snaps to a road, this is the confidence in the chosen edge from all nearest edges.
  */
 class MapMatcherResult internal constructor(
@@ -24,6 +26,7 @@ class MapMatcherResult internal constructor(
     val isOffRoad: Boolean,
     val offRoadProbability: Float,
     val isTeleport: Boolean,
+    val speedLimit: SpeedLimit?,
     val roadEdgeMatchProbability: Float
 ) {
 
@@ -41,6 +44,7 @@ class MapMatcherResult internal constructor(
         if (isOffRoad != other.isOffRoad) return false
         if (offRoadProbability != other.offRoadProbability) return false
         if (isTeleport != other.isTeleport) return false
+        if (speedLimit != other.speedLimit) return false
         if (roadEdgeMatchProbability != other.roadEdgeMatchProbability) return false
 
         return true
@@ -55,6 +59,7 @@ class MapMatcherResult internal constructor(
         result = 31 * result + isOffRoad.hashCode()
         result = 31 * result + offRoadProbability.hashCode()
         result = 31 * result + isTeleport.hashCode()
+        result = 31 * result + speedLimit.hashCode()
         result = 31 * result + roadEdgeMatchProbability.hashCode()
         return result
     }
@@ -65,6 +70,7 @@ class MapMatcherResult internal constructor(
     override fun toString(): String {
         return "MapMatcherResult(enhancedLocation=$enhancedLocation, " +
             "keyPoints=$keyPoints, isOffRoad=$isOffRoad, offRoadProbability=$offRoadProbability, " +
-            "isTeleport=$isTeleport, roadEdgeMatchProbability=$roadEdgeMatchProbability)"
+            "isTeleport=$isTeleport, speedLimit=$speedLimit, " +
+            "roadEdgeMatchProbability=$roadEdgeMatchProbability)"
     }
 }
