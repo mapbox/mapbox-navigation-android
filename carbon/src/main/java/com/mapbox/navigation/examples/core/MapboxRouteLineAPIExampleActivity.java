@@ -288,7 +288,6 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
   private RoutesRequestCallback routesReqCallback = new RoutesRequestCallback() {
     @Override
     public void onRoutesReady(@NotNull List<? extends DirectionsRoute> routes) {
-      String json = routes.get(0).toJson();
       if (!routes.isEmpty()) {
         routeLoading.setVisibility(View.INVISIBLE);
         startNavigation.setVisibility(View.VISIBLE);

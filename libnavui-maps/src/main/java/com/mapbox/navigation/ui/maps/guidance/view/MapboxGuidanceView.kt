@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.cardview.widget.CardView
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.mapbox.navigation.ui.base.MapboxView
 import com.mapbox.navigation.ui.base.model.guidanceimage.GuidanceImageState
 import com.mapbox.navigation.ui.maps.R
@@ -14,7 +13,7 @@ class MapboxGuidanceView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-): MapboxView<GuidanceImageState>, CardView(context, attrs, defStyleAttr) {
+) : MapboxView<GuidanceImageState>, CardView(context, attrs, defStyleAttr) {
 
     init {
         LayoutInflater.from(context).inflate(R.layout.layout_guidance_view, this, true)

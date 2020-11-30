@@ -5,21 +5,23 @@ import android.graphics.Bitmap
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
-import com.mapbox.maps.*
+import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.MapSnapshotInterface
+import com.mapbox.maps.MapSnapshotOptions
+import com.mapbox.maps.MapboxOptions
+import com.mapbox.maps.Snapshotter
+import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
-import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
-import com.mapbox.maps.extension.style.expressions.dsl.generated.skyRadialProgress
-import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.linear
 import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.SkyLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.SkyType
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.base.api.guidanceimage.GuidanceImageApi
-import com.mapbox.navigation.ui.maps.guidance.model.GuidanceImageOptions
 import com.mapbox.navigation.ui.base.model.guidanceimage.GuidanceImageState
 import com.mapbox.navigation.ui.maps.guidance.internal.GuidanceImageAction
 import com.mapbox.navigation.ui.maps.guidance.internal.GuidanceImageProcessor
 import com.mapbox.navigation.ui.maps.guidance.internal.GuidanceImageResult
+import com.mapbox.navigation.ui.maps.guidance.model.GuidanceImageOptions
 import com.mapbox.navigation.util.internal.ifNonNull
 import com.mapbox.turf.TurfMeasurement.destination
 import timber.log.Timber
@@ -40,6 +42,7 @@ class MapboxGuidanceImageApi(
     companion object {
         private const val REFERENCE_BEARING = 180.0
     }
+
     private val snapshotter: Snapshotter
     private val snapshotterCallback = object : Snapshotter.SnapshotReadyCallback {
         override fun onSnapshotCreated(snapshot: Expected<MapSnapshotInterface?, String?>) {
@@ -47,15 +50,27 @@ class MapboxGuidanceImageApi(
                 snapshot.isValue -> {
                     snapshot.value?.let { snapshotInterface ->
                         val image = snapshotInterface.image()
-                        val bitmap: Bitmap = Bitmap.createBitmap(image.width, image.height, options.bitmapConfig)
+                        val bitmap: Bitmap = Bitmap.createBitmap(
+                            image.width,
+                            image.height,
+                            options.bitmapConfig
+                        )
                         val buffer: ByteBuffer = ByteBuffer.wrap(image.data)
                         bitmap.copyPixelsFromBuffer(buffer)
-                        callback.onGuidanceImagePrepared(GuidanceImageState.GuidanceImagePrepared(bitmap))
+                        callback.onGuidanceImagePrepared(
+                            GuidanceImageState.GuidanceImagePrepared(bitmap)
+                        )
                     }
-                        ?: callback.onFailure(GuidanceImageState.GuidanceImageFailure.GuidanceImageEmpty(snapshot.error))
+                        ?: callback.onFailure(
+                            GuidanceImageState.GuidanceImageFailure.GuidanceImageEmpty(
+                                snapshot.error
+                            )
+                        )
                 }
                 snapshot.isError -> {
-                    callback.onFailure(GuidanceImageState.GuidanceImageFailure.GuidanceImageError(snapshot.error))
+                    callback.onFailure(
+                        GuidanceImageState.GuidanceImageFailure.GuidanceImageError(snapshot.error)
+                    )
                 }
             }
         }
@@ -63,14 +78,16 @@ class MapboxGuidanceImageApi(
         override fun onStyleLoaded(style: Style) {
             val skyLayer = SkyLayer("sky_snapshotter")
             skyLayer.skyType(SkyType.ATMOSPHERE)
-            skyLayer.skyGradient(interpolate {
-                linear()
-                skyRadialProgress()
-                literal(0.0)
-                literal("yellow")
-                literal(1.0)
-                literal("pink")
-            })
+            skyLayer.skyGradient(
+                interpolate {
+                    linear()
+                    skyRadialProgress()
+                    literal(0.0)
+                    literal("yellow")
+                    literal(1.0)
+                    literal("pink")
+                }
+            )
             skyLayer.skyGradientCenter(listOf(-34.0, 90.0))
             skyLayer.skyGradientRadius(8.0)
             skyLayer.skyAtmosphereSun(listOf(0.0, 90.0))
@@ -103,10 +120,16 @@ class MapboxGuidanceImageApi(
                     GuidanceImageAction.ShouldShowSnapshotBasedGuidance(it)
                 )
                 when {
-                    (showUrlBased as GuidanceImageResult.ShouldShowUrlBasedGuidance).isUrlBased -> {
+                    (
+                        showUrlBased as
+                            GuidanceImageResult.ShouldShowUrlBasedGuidance
+                        ).isUrlBased -> {
                         Timber.d("Url based guidance views to be shown")
                     }
-                    (showSnapshotBased as GuidanceImageResult.ShouldShowSnapshotBasedGuidance).isSnapshotBased -> {
+                    (
+                        showSnapshotBased as
+                            GuidanceImageResult.ShouldShowSnapshotBasedGuidance
+                        ).isSnapshotBased -> {
                         snapshotter.setCameraOptions(
                             getCameraOptions(
                                 progress.upcomingStepPoints,
@@ -118,18 +141,24 @@ class MapboxGuidanceImageApi(
                     else -> {
                     }
                 }
-            } ?: callback.onFailure(GuidanceImageState.GuidanceImageFailure.GuidanceImageUnavailable)
+            } ?: callback.onFailure(
+                GuidanceImageState.GuidanceImageFailure.GuidanceImageUnavailable
+            )
         } ?: callback.onFailure(GuidanceImageState.GuidanceImageFailure.GuidanceImageUnavailable)
     }
 
-    private fun getCameraOptions(upcomingPoints: List<Point>?, stepManeuver: StepManeuver?): CameraOptions {
+    private fun getCameraOptions(
+        upcomingPoints: List<Point>?,
+        stepManeuver: StepManeuver?
+    ): CameraOptions {
         return ifNonNull(upcomingPoints, stepManeuver) { points, maneuver ->
             val bearing = maneuver.bearingAfter()
             bearing?.let { b ->
                 val zoom = 17.0
                 val pitch = 75.0
                 val center = getCameraCenter(
-                    points[0], b,
+                    points[0],
+                    b,
                     options.cameraCenterDistanceFromJunction,
                     options.cameraCenterDistanceUnit
                 )
@@ -144,7 +173,12 @@ class MapboxGuidanceImageApi(
         } ?: CameraOptions.Builder().build()
     }
 
-    private fun getCameraCenter(point: Point, bearing: Double, distance: Double, unit: String): Point {
+    private fun getCameraCenter(
+        point: Point,
+        bearing: Double,
+        distance: Double,
+        unit: String
+    ): Point {
         return when {
             bearing <= REFERENCE_BEARING -> {
                 destination(point, distance, bearing + REFERENCE_BEARING, unit)

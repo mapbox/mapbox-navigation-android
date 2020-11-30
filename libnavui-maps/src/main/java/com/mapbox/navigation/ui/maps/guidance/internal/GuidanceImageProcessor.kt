@@ -5,10 +5,11 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.navigation.ui.base.MapboxProcessor
 import com.mapbox.navigation.ui.base.domain.BannerInstructionsApi
 
-object GuidanceImageProcessor: MapboxProcessor<GuidanceImageAction, GuidanceImageResult>, BannerInstructionsApi {
+object GuidanceImageProcessor :
+    MapboxProcessor<GuidanceImageAction, GuidanceImageResult>, BannerInstructionsApi {
 
     override fun process(action: GuidanceImageAction): GuidanceImageResult {
-        return when(action) {
+        return when (action) {
             is GuidanceImageAction.GuidanceImageAvailable -> {
                 GuidanceImageResult.GuidanceImageAvailable(
                     getComponentWithGuidanceImage(action.bannerInstruction)
@@ -27,7 +28,9 @@ object GuidanceImageProcessor: MapboxProcessor<GuidanceImageAction, GuidanceImag
         }
     }
 
-    private fun getComponentWithGuidanceImage(bannerInstructions: BannerInstructions): BannerComponents? {
+    private fun getComponentWithGuidanceImage(
+        bannerInstructions: BannerInstructions
+    ): BannerComponents? {
         val bannerComponents = getBannerComponents(bannerInstructions)
         return when {
             bannerComponents != null -> {
@@ -39,16 +42,17 @@ object GuidanceImageProcessor: MapboxProcessor<GuidanceImageAction, GuidanceImag
         }
     }
 
-    private fun findTypeGuidanceView(componentList: MutableList<BannerComponents>): BannerComponents? {
+    private fun findTypeGuidanceView(
+        componentList: MutableList<BannerComponents>
+    ): BannerComponents? {
         return componentList.find { it.type() == BannerComponents.GUIDANCE_VIEW }
     }
 
     private fun shouldShowUrlBasedGuidance(component: BannerComponents): Boolean =
-        //component.subType() == BannerComponents.URL
+        // component.subType() == BannerComponents.URL
         false
 
-
     private fun shouldShowSnapshotBasedGuidance(component: BannerComponents): Boolean =
-        //component.subType() == BannerComponents.SIGNBOARD
+        // component.subType() == BannerComponents.SIGNBOARD
         true
 }

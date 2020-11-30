@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.base.api.guidanceimage
 
 import com.mapbox.api.directions.v5.models.BannerInstructions
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
 
 interface GuidanceImageApi {

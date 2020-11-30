@@ -13,7 +13,9 @@ interface BannerInstructionsApi {
         }
     }
 
-    fun getBannerComponents(bannerInstructions: BannerInstructions): MutableList<BannerComponents>? {
+    fun getBannerComponents(
+        bannerInstructions: BannerInstructions
+    ): MutableList<BannerComponents>? {
         return ifNonNull(getBannerView(bannerInstructions)) { bannerView ->
             ifNonNull(bannerView.components()) {
                 it

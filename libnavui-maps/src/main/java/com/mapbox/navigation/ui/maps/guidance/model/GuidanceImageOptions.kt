@@ -15,7 +15,7 @@ import com.mapbox.turf.TurfConstants
  * @property shouldRenderSignpost Boolean Define whether API should render signposts
  */
 class GuidanceImageOptions private constructor(
-    val size:Size,
+    val size: Size,
     val density: Float,
     val styleUri: String,
     val edgeInsets: EdgeInsets,
