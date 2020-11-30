@@ -14,6 +14,7 @@ import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.navigation.examples.core.MapboxRouteLineAPIExampleActivity
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.SlackLineActivity
+import com.mapbox.navigation.examples.core.camera.CameraAnimationsActivity
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper.Companion.areLocationPermissionsGranted
 import kotlinx.android.synthetic.main.main_activity_layout.*
@@ -54,6 +55,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_slackline),
                 getString(R.string.slackline_description),
                 SlackLineActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_navigation_camera),
+                getString(R.string.description_navigation_camera),
+                CameraAnimationsActivity::class.java
             )
         )
     }

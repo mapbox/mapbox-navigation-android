@@ -82,6 +82,9 @@
     <string name="title_navigation_route_ui">Navigation Map Route</string>
     <string name="description_navigation_route_ui">An example using NavigationMapRoute</string>
 
+    <string name="title_navigation_camera">Navigation Camera</string>
+    <string name="description_navigation_camera">An example using Navigation Camera</string>
+
     <string name="title_traffic_toggle">Traffic toggle</string>
     <string name="description_traffic_toggle">Toggle the visibility of the NavigationView\'s traffic congestion layers.</string>
 

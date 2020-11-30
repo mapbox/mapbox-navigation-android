@@ -52,7 +52,7 @@ dependencies {
     implementation project(":libnavui-util")
 
     api dependenciesList.mapboxMapSdkCarbon
-    implementation dependenciesList.mapboxSdkTurf
+    api dependenciesList.mapboxSdkTurf
 
     implementation dependenciesList.androidXAppCompat
     implementation dependenciesList.androidXCardView
