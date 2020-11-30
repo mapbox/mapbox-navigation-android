@@ -12,11 +12,16 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ActiveGuidanceOptionsMapperTest {
+
+    // TODO: Mocking routeOptions.coordinates() to emptyList()
+    //  Tests need to be updated / new ones need to be added in https://github.com/mapbox/mapbox-navigation-android/pull/3581
+
     @Test
     fun checksDrivingModePolylineGeometry() {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns DirectionsCriteria.PROFILE_DRIVING
         every { routeOptions.geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -25,7 +30,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KDRIVING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE5
+                ActiveGuidanceGeometryEncoding.KPOLYLINE5,
+                emptyList()
             ),
             drivingPolyline
         )
@@ -36,6 +42,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns DirectionsCriteria.PROFILE_DRIVING
         every { routeOptions.geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE6
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -44,7 +51,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KDRIVING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE6
+                ActiveGuidanceGeometryEncoding.KPOLYLINE6,
+                emptyList()
             ),
             drivingPolyline6
         )
@@ -55,6 +63,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns DirectionsCriteria.PROFILE_DRIVING
         every { routeOptions.geometries() } returns "geojson"
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -63,7 +72,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KDRIVING,
-                ActiveGuidanceGeometryEncoding.KGEO_JSON
+                ActiveGuidanceGeometryEncoding.KGEO_JSON,
+                emptyList()
             ),
             drivingGeoJson
         )
@@ -74,6 +84,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns DirectionsCriteria.PROFILE_DRIVING
         every { routeOptions.geometries() } returns "unrecognized"
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -82,7 +93,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KDRIVING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE6
+                ActiveGuidanceGeometryEncoding.KPOLYLINE6,
+                emptyList()
             ),
             drivingPolyline6
         )
@@ -99,7 +111,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KDRIVING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE6
+                ActiveGuidanceGeometryEncoding.KPOLYLINE6,
+                emptyList()
             ),
             drivingPolyline6
         )
@@ -114,7 +127,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KDRIVING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE6
+                ActiveGuidanceGeometryEncoding.KPOLYLINE6,
+                emptyList()
             ),
             drivingPolyline6
         )
@@ -125,6 +139,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns "unrecognized"
         every { routeOptions.geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -133,7 +148,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KDRIVING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE5
+                ActiveGuidanceGeometryEncoding.KPOLYLINE5,
+                emptyList()
             ),
             drivingPolyline
         )
@@ -144,6 +160,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns "unrecognized"
         every { routeOptions.geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE6
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -152,7 +169,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KDRIVING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE6
+                ActiveGuidanceGeometryEncoding.KPOLYLINE6,
+                emptyList()
             ),
             drivingPolyline6
         )
@@ -163,6 +181,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns "unrecognized"
         every { routeOptions.geometries() } returns "geojson"
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -171,7 +190,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KDRIVING,
-                ActiveGuidanceGeometryEncoding.KGEO_JSON
+                ActiveGuidanceGeometryEncoding.KGEO_JSON,
+                emptyList()
             ),
             drivingGeoJson
         )
@@ -182,6 +202,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns "unrecognized"
         every { routeOptions.geometries() } returns "unrecognized"
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -190,7 +211,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KDRIVING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE6
+                ActiveGuidanceGeometryEncoding.KPOLYLINE6,
+                emptyList()
             ),
             drivingPolyline6
         )
@@ -201,6 +223,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
         every { routeOptions.geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -209,7 +232,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KDRIVING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE5
+                ActiveGuidanceGeometryEncoding.KPOLYLINE5,
+                emptyList()
             ),
             drivingPolyline
         )
@@ -220,6 +244,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
         every { routeOptions.geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE6
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -228,7 +253,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KDRIVING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE6
+                ActiveGuidanceGeometryEncoding.KPOLYLINE6,
+                emptyList()
             ),
             drivingPolyline6
         )
@@ -239,6 +265,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns DirectionsCriteria.PROFILE_DRIVING
         every { routeOptions.geometries() } returns "geojson"
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -247,7 +274,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KDRIVING,
-                ActiveGuidanceGeometryEncoding.KGEO_JSON
+                ActiveGuidanceGeometryEncoding.KGEO_JSON,
+                emptyList()
             ),
             drivingGeoJson
         )
@@ -258,6 +286,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns DirectionsCriteria.PROFILE_DRIVING
         every { routeOptions.geometries() } returns "unrecognized"
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -266,7 +295,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KDRIVING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE6
+                ActiveGuidanceGeometryEncoding.KPOLYLINE6,
+                emptyList()
             ),
             drivingPolyline6
         )
@@ -277,6 +307,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns DirectionsCriteria.PROFILE_WALKING
         every { routeOptions.geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -285,7 +316,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KWALKING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE5
+                ActiveGuidanceGeometryEncoding.KPOLYLINE5,
+                emptyList()
             ),
             walkingPolyline
         )
@@ -296,6 +328,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns DirectionsCriteria.PROFILE_WALKING
         every { routeOptions.geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE6
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -304,7 +337,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KWALKING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE6
+                ActiveGuidanceGeometryEncoding.KPOLYLINE6,
+                emptyList()
             ),
             walkingPolyline6
         )
@@ -315,6 +349,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns DirectionsCriteria.PROFILE_WALKING
         every { routeOptions.geometries() } returns "geojson"
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -323,7 +358,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KWALKING,
-                ActiveGuidanceGeometryEncoding.KGEO_JSON
+                ActiveGuidanceGeometryEncoding.KGEO_JSON,
+                emptyList()
             ),
             walkingGeoJson
         )
@@ -334,6 +370,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns DirectionsCriteria.PROFILE_WALKING
         every { routeOptions.geometries() } returns "unrecognized"
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -342,7 +379,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KWALKING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE6
+                ActiveGuidanceGeometryEncoding.KPOLYLINE6,
+                emptyList()
             ),
             walkingPolyline6
         )
@@ -353,6 +391,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns DirectionsCriteria.PROFILE_CYCLING
         every { routeOptions.geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -361,7 +400,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KCYCLING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE5
+                ActiveGuidanceGeometryEncoding.KPOLYLINE5,
+                emptyList()
             ),
             cyclingPolyline
         )
@@ -372,6 +412,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns DirectionsCriteria.PROFILE_CYCLING
         every { routeOptions.geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE6
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -380,7 +421,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KCYCLING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE6
+                ActiveGuidanceGeometryEncoding.KPOLYLINE6,
+                emptyList()
             ),
             cyclingPolyline6
         )
@@ -391,6 +433,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns DirectionsCriteria.PROFILE_CYCLING
         every { routeOptions.geometries() } returns "geojson"
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -399,7 +442,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KCYCLING,
-                ActiveGuidanceGeometryEncoding.KGEO_JSON
+                ActiveGuidanceGeometryEncoding.KGEO_JSON,
+                emptyList()
             ),
             cyclingGeoJson
         )
@@ -410,6 +454,7 @@ class ActiveGuidanceOptionsMapperTest {
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns DirectionsCriteria.PROFILE_CYCLING
         every { routeOptions.geometries() } returns "unrecognized"
+        every { routeOptions.coordinates() } returns emptyList()
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions
 
@@ -418,7 +463,8 @@ class ActiveGuidanceOptionsMapperTest {
         assertEquals(
             ActiveGuidanceOptions(
                 ActiveGuidanceMode.KCYCLING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE6
+                ActiveGuidanceGeometryEncoding.KPOLYLINE6,
+                emptyList()
             ),
             cyclingPolyline6
         )

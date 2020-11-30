@@ -8,7 +8,9 @@ import com.mapbox.navigator.ElectronicHorizon
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.ElectronicHorizonResultType
 import com.mapbox.navigator.GraphPosition
+import com.mapbox.navigator.RoadObjectDistanceInfo
 import kotlinx.coroutines.launch
+import java.util.HashMap
 import java.util.concurrent.CopyOnWriteArraySet
 
 internal class ElectronicHorizonObserverImpl(
@@ -38,7 +40,10 @@ internal class ElectronicHorizonObserverImpl(
         }
     }
 
-    override fun onPositionUpdated(graphPosition: GraphPosition) {
+    override fun onPositionUpdated(
+        graphPosition: GraphPosition,
+        distances: HashMap<String, RoadObjectDistanceInfo>
+    ) {
         val position = EHorizonMapper.mapToEHorizonPosition(graphPosition)
         jobController.scope.launch {
             eHorizonObservers.forEach {
@@ -46,5 +51,13 @@ internal class ElectronicHorizonObserverImpl(
                 it.onPositionUpdated(position)
             }
         }
+    }
+
+    override fun onRoadObjectEnter(roadObjectId: String, enterFromStart: Boolean) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onRoadObjectExit(roadObjectId: String, exitFromEnd: Boolean) {
+        TODO("Not yet implemented")
     }
 }
