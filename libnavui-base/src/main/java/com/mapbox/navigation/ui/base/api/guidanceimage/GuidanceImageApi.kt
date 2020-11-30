@@ -9,7 +9,6 @@ interface GuidanceImageApi {
     /**
      * It determines if an intersection has a junction given [BannerInstructions]
      * @param instruction BannerInstructions The object representing instruction for a maneuver.
-     * @param point Point? Required for snapshot based guidance image otherwise null
      */
-    fun generateGuidanceImage(progress: RouteProgress, point: Point?)
+    fun generateGuidanceImage(progress: RouteProgress)
 }

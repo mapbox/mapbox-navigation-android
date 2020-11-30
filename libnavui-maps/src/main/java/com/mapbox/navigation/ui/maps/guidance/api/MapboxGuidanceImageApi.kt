@@ -6,6 +6,13 @@ import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.*
+import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
+import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
+import com.mapbox.maps.extension.style.expressions.dsl.generated.skyRadialProgress
+import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.linear
+import com.mapbox.maps.extension.style.layers.addLayer
+import com.mapbox.maps.extension.style.layers.generated.SkyLayer
+import com.mapbox.maps.extension.style.layers.properties.generated.SkyType
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.base.api.guidanceimage.GuidanceImageApi
 import com.mapbox.navigation.ui.maps.guidance.model.GuidanceImageOptions
@@ -14,6 +21,7 @@ import com.mapbox.navigation.ui.maps.guidance.internal.GuidanceImageAction
 import com.mapbox.navigation.ui.maps.guidance.internal.GuidanceImageProcessor
 import com.mapbox.navigation.ui.maps.guidance.internal.GuidanceImageResult
 import com.mapbox.navigation.util.internal.ifNonNull
+import com.mapbox.turf.TurfMeasurement.destination
 import timber.log.Timber
 import java.nio.ByteBuffer
 
@@ -29,6 +37,9 @@ class MapboxGuidanceImageApi(
     private val callback: OnGuidanceImageReady
 ) : GuidanceImageApi {
 
+    companion object {
+        private const val REFERENCE_BEARING = 180.0
+    }
     private val snapshotter: Snapshotter
     private val snapshotterCallback = object : Snapshotter.SnapshotReadyCallback {
         override fun onSnapshotCreated(snapshot: Expected<MapSnapshotInterface?, String?>) {
@@ -50,7 +61,20 @@ class MapboxGuidanceImageApi(
         }
 
         override fun onStyleLoaded(style: Style) {
-
+            val skyLayer = SkyLayer("sky_snapshotter")
+            skyLayer.skyType(SkyType.ATMOSPHERE)
+            skyLayer.skyGradient(interpolate {
+                linear()
+                skyRadialProgress()
+                literal(0.0)
+                literal("yellow")
+                literal(1.0)
+                literal("pink")
+            })
+            skyLayer.skyGradientCenter(listOf(-34.0, 90.0))
+            skyLayer.skyGradientRadius(8.0)
+            skyLayer.skyAtmosphereSun(listOf(0.0, 90.0))
+            style.addLayer(skyLayer)
         }
     }
 
@@ -65,7 +89,7 @@ class MapboxGuidanceImageApi(
         snapshotter.setUri(options.styleUri)
     }
 
-    override fun generateGuidanceImage(progress: RouteProgress, point: Point?) {
+    override fun generateGuidanceImage(progress: RouteProgress) {
         val bannerInstructions = progress.bannerInstructions
         ifNonNull(bannerInstructions) { b ->
             val result = GuidanceImageProcessor.process(
@@ -85,7 +109,7 @@ class MapboxGuidanceImageApi(
                     (showSnapshotBased as GuidanceImageResult.ShouldShowSnapshotBasedGuidance).isSnapshotBased -> {
                         snapshotter.setCameraOptions(
                             getCameraOptions(
-                                point,
+                                progress.upcomingStepPoints,
                                 progress.currentLegProgress?.currentStepProgress?.step?.maneuver()
                             )
                         )
@@ -98,15 +122,36 @@ class MapboxGuidanceImageApi(
         } ?: callback.onFailure(GuidanceImageState.GuidanceImageFailure.GuidanceImageUnavailable)
     }
 
-    private fun getCameraOptions(point: Point?, maneuver: StepManeuver?): CameraOptions {
-        return ifNonNull(maneuver) {
-            CameraOptions.Builder()
-                .pitch(70.0)
-                .zoom(17.5)
-                .bearing(it.bearingAfter())
-                .padding(options.edgeInsets)
-                .center(point)
-                .build()
+    private fun getCameraOptions(upcomingPoints: List<Point>?, stepManeuver: StepManeuver?): CameraOptions {
+        return ifNonNull(upcomingPoints, stepManeuver) { points, maneuver ->
+            val bearing = maneuver.bearingAfter()
+            bearing?.let { b ->
+                val zoom = 17.0
+                val pitch = 75.0
+                val center = getCameraCenter(
+                    points[0], b,
+                    options.cameraCenterDistanceFromJunction,
+                    options.cameraCenterDistanceUnit
+                )
+                CameraOptions.Builder()
+                    .pitch(pitch)
+                    .zoom(zoom)
+                    .bearing(b)
+                    .padding(options.edgeInsets)
+                    .center(center)
+                    .build()
+            } ?: CameraOptions.Builder().build()
         } ?: CameraOptions.Builder().build()
+    }
+
+    private fun getCameraCenter(point: Point, bearing: Double, distance: Double, unit: String): Point {
+        return when {
+            bearing <= REFERENCE_BEARING -> {
+                destination(point, distance, bearing + REFERENCE_BEARING, unit)
+            }
+            else -> {
+                destination(point, distance, bearing - REFERENCE_BEARING, unit)
+            }
+        }
     }
 }

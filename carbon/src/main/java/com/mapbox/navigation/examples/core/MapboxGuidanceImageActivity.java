@@ -226,8 +226,7 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity {
 
   private RouteProgressObserver routeProgressObserver = new RouteProgressObserver() {
     @Override public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
-      Log.d("oooooooo", "routeProgress");
-      guidanceImageApi.generateGuidanceImage(routeProgress, Point.fromLngLat(-121.966146, 37.554944));
+      guidanceImageApi.generateGuidanceImage(routeProgress);
     }
   };
 

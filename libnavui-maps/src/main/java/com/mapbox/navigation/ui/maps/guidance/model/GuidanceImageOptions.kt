@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.Size
 import com.mapbox.maps.Style
+import com.mapbox.turf.TurfConstants
 
 /**
  * Options to allow customizing snapshot based GuidanceImage
@@ -19,7 +20,9 @@ class GuidanceImageOptions private constructor(
     val styleUri: String,
     val edgeInsets: EdgeInsets,
     val bitmapConfig: Bitmap.Config,
-    val shouldRenderSignpost: Boolean
+    val shouldRenderSignpost: Boolean,
+    val cameraCenterDistanceUnit: String,
+    val cameraCenterDistanceFromJunction: Double
 ) {
 
     /**
@@ -32,6 +35,8 @@ class GuidanceImageOptions private constructor(
         edgeInsets(edgeInsets)
         bitmapConfig(bitmapConfig)
         shouldRenderSignpost(shouldRenderSignpost)
+        cameraCenterDistanceUnit(cameraCenterDistanceUnit)
+        cameraCenterDistanceFromJunction(cameraCenterDistanceFromJunction)
     }
 
     /**
@@ -49,6 +54,8 @@ class GuidanceImageOptions private constructor(
         if (edgeInsets != other.edgeInsets) return false
         if (bitmapConfig != other.bitmapConfig) return false
         if (shouldRenderSignpost != other.shouldRenderSignpost) return false
+        if (cameraCenterDistanceUnit != other.cameraCenterDistanceUnit) return false
+        if (cameraCenterDistanceFromJunction != other.cameraCenterDistanceFromJunction) return false
 
         return true
     }
@@ -63,6 +70,8 @@ class GuidanceImageOptions private constructor(
         result = 31 * result + edgeInsets.hashCode()
         result = 31 * result + bitmapConfig.hashCode()
         result = 31 * result + shouldRenderSignpost.hashCode()
+        result = 31 * result + cameraCenterDistanceUnit.hashCode()
+        result = 31 * result + cameraCenterDistanceFromJunction.hashCode()
         return result
     }
 
@@ -76,7 +85,9 @@ class GuidanceImageOptions private constructor(
             "styleUri=$styleUri, " +
             "edgeInsets=$edgeInsets, " +
             "bitmapConfig=$bitmapConfig, " +
-            "shouldRenderSignpost=$shouldRenderSignpost" +
+            "shouldRenderSignpost=$shouldRenderSignpost, " +
+            "cameraCenterDistanceUnit=$cameraCenterDistanceUnit, " +
+            "cameraCenterDistanceFromJunction=$cameraCenterDistanceFromJunction" +
             ")"
     }
 
@@ -91,6 +102,8 @@ class GuidanceImageOptions private constructor(
         private var bitmapConfig: Bitmap.Config = Bitmap.Config.ARGB_8888
         private var edgeInsets: EdgeInsets = EdgeInsets(0.0, 0.0, 0.0, 0.0)
         private var shouldRenderSignpost: Boolean = false
+        private var cameraCenterDistanceUnit: String = TurfConstants.UNIT_METERS
+        private var cameraCenterDistanceFromJunction: Double = 100.0
 
         fun size(size: Size): Builder =
             apply { this.size = size }
@@ -110,6 +123,12 @@ class GuidanceImageOptions private constructor(
         fun shouldRenderSignpost(shouldRenderSignpost: Boolean): Builder =
             apply { this.shouldRenderSignpost = shouldRenderSignpost }
 
+        fun cameraCenterDistanceUnit(cameraCenterDistanceUnit: String): Builder =
+            apply { this.cameraCenterDistanceUnit = cameraCenterDistanceUnit }
+
+        fun cameraCenterDistanceFromJunction(cameraCenterDistanceFromJunction: Double): Builder =
+            apply { this.cameraCenterDistanceFromJunction = cameraCenterDistanceFromJunction }
+
         /**
          * Build the [GuidanceImageOptions]
          */
@@ -120,7 +139,9 @@ class GuidanceImageOptions private constructor(
                 styleUri = styleUri,
                 edgeInsets = edgeInsets,
                 bitmapConfig = bitmapConfig,
-                shouldRenderSignpost = shouldRenderSignpost
+                shouldRenderSignpost = shouldRenderSignpost,
+                cameraCenterDistanceUnit = cameraCenterDistanceUnit,
+                cameraCenterDistanceFromJunction = cameraCenterDistanceFromJunction
             )
         }
     }
