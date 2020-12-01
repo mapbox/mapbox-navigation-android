@@ -11,6 +11,7 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
@@ -61,8 +62,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import timber.log.Timber;
 
+import static com.mapbox.android.gestures.Utils.dpToPx;
+import static com.mapbox.navigation.ui.internal.route.RouteConstants.DEFAULT_ROUTE_CLICK_PADDING_IN_DIP;
 import static com.mapbox.navigation.ui.NavigationConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO;
-import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGATION_MARKER_NAME;
+import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGATION_DESTINATION_MARKER_NAME;
 
 /**
  * Wrapper class for {@link MapboxMap}.
@@ -75,8 +78,9 @@ import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGA
 @UiThread
 public class NavigationMapboxMap implements LifecycleObserver {
 
-  private static final String STATE_BUNDLE_KEY = "mapbox_navigation_sdk_state_bundle";
+  public static final String MAPBOX_NAVIGATION_FEEDBACK_MARKER_NAME = "mapbox-navigation-feedback-marker";
   static final String STREETS_LAYER_ID = "streetsLayer";
+  private static final String STATE_BUNDLE_KEY = "mapbox_navigation_sdk_state_bundle";
   private static final String MAPBOX_STREETS_V7_URL = "mapbox.mapbox-streets-v7";
   private static final String MAPBOX_STREETS_V8_URL = "mapbox.mapbox-streets-v8";
   private static final String STREETS_SOURCE_ID = "com.mapbox.services.android.navigation.streets";
@@ -112,6 +116,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
   private LocationFpsDelegate locationFpsDelegate;
   @Nullable
   private MapboxNavigation navigation;
+  private float routeClickPadding;
   private boolean vanishRouteLineEnabled;
 
   /**
@@ -192,7 +197,8 @@ public class NavigationMapboxMap implements LifecycleObserver {
         routeBelowLayerId,
         vanishRouteLineEnabled,
         DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO,
-        useSpecializedLocationLayer
+        useSpecializedLocationLayer,
+            DEFAULT_ROUTE_CLICK_PADDING_IN_DIP
     );
   }
 
@@ -202,11 +208,13 @@ public class NavigationMapboxMap implements LifecycleObserver {
       @Nullable String routeBelowLayerId,
       boolean vanishRouteLineEnabled,
       long vanishingRouteLineUpdateIntervalNano,
-      boolean useSpecializedLocationLayer) {
+      boolean useSpecializedLocationLayer,
+      float routeClickPadding) {
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
     this.vanishRouteLineEnabled = vanishRouteLineEnabled;
     this.lifecycleOwner = lifecycleOwner;
+    this.routeClickPadding = routeClickPadding;
     initializeMapPaddingAdjustor(mapView, mapboxMap);
     initializeNavigationSymbolManager(mapView, mapboxMap);
     initializeMapLayerInteractor(mapboxMap);
@@ -1090,7 +1098,10 @@ public class NavigationMapboxMap implements LifecycleObserver {
 
   private void initializeNavigationSymbolManager(@NonNull MapView mapView, @NonNull MapboxMap mapboxMap) {
     Bitmap markerBitmap = ThemeSwitcher.retrieveThemeMapMarker(mapView.getContext());
-    mapboxMap.getStyle().addImage(MAPBOX_NAVIGATION_MARKER_NAME, markerBitmap);
+    mapboxMap.getStyle().addImage(MAPBOX_NAVIGATION_DESTINATION_MARKER_NAME, markerBitmap);
+    mapboxMap.getStyle()
+        .addImage(MAPBOX_NAVIGATION_FEEDBACK_MARKER_NAME,
+            AppCompatResources.getDrawable(mapView.getContext(), R.drawable.mapbox_ic_feedback_marker));
     SymbolManager symbolManager = new SymbolManager(mapView, mapboxMap, mapboxMap.getStyle());
     navigationSymbolManager = new NavigationSymbolManager(symbolManager);
     SymbolOnStyleLoadedListener onStyleLoadedListener = new SymbolOnStyleLoadedListener(mapboxMap, markerBitmap);
@@ -1112,6 +1123,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     mapRoute = new NavigationMapRoute.Builder(mapView, map, lifecycleOwner)
         .withStyle(routeStyleRes)
         .withBelowLayer(routeBelowLayerId)
+        .withRouteClickPadding(routeClickPadding)
         .withVanishRouteLineEnabled(vanishRouteLineEnabled)
         .withVanishingRouteLineUpdateIntervalNano(vanishingRouteLineUpdateIntervalNano)
         .build();
@@ -1272,6 +1284,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     private boolean vanishRouteLineEnabled = false;
     private long vanishingRouteLineUpdateIntervalNano = DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO;
     private boolean useSpecializedLocationLayer = false;
+    private float routeClickPadding = dpToPx(DEFAULT_ROUTE_CLICK_PADDING_IN_DIP);
 
     /**
      * {@link NavigationMapboxMap} builder. Can be used once {@link OnMapReadyCallback}
@@ -1327,6 +1340,26 @@ public class NavigationMapboxMap implements LifecycleObserver {
       return this;
     }
 
+    /**
+     * Indicates the size of the bounding box used to determine which route line was clicked. Upon
+     * a map click an attempt will be made to find a route line intersecting the bounding box. This
+     * is used to select alternative route lines on the map.
+     *
+     * Larger values result in a larger bounding box requiring less accuracy on the part of the
+     * user.
+     *
+     * You should use the device's screen density in determining what value to use here rather than
+     * a single value for all devices.
+     *
+     * @param padding value in pixels
+     *
+     * @return the builder
+     */
+    public Builder withRouteClickPadding(float padding) {
+      this.routeClickPadding = padding;
+      return this;
+    }
+
     public NavigationMapboxMap build() {
       return new NavigationMapboxMap(
           mapView,
@@ -1335,7 +1368,8 @@ public class NavigationMapboxMap implements LifecycleObserver {
           routeBelowLayerId,
           vanishRouteLineEnabled,
           vanishingRouteLineUpdateIntervalNano,
-          useSpecializedLocationLayer
+          useSpecializedLocationLayer,
+          routeClickPadding
       );
     }
   }

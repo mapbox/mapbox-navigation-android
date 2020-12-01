@@ -24,6 +24,15 @@
         app:srcCompat="@drawable/mapbox_ic_cancel"
         tools:ignore="UnusedAttribute" />
 
+    <ImageView
+        android:id="@+id/feedbackCategoryImage"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:layout_marginStart="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/feedbackBottomSheetTitleText"
         style="@style/MapboxStyleFeedbackBottomSheetTitle"
@@ -33,7 +42,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/cancelBtn"
         app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/feedbackCategoryImage"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

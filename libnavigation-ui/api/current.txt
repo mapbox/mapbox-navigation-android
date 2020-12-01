@@ -53,7 +53,9 @@ package com.mapbox.navigation.ui {
     method public boolean onBackPressed();
     method public void onCreate(android.os.Bundle?);
     method public void onDestroy();
-    method public void onFeedbackSent();
+    method public void onFeedbackFlowStatusChanged(int);
+    method @Deprecated public void onFeedbackSent();
+    method public void onFinalDestinationArrival(boolean, boolean);
     method public void onGuidanceViewChange(int, int, int, int);
     method public void onLowMemory();
     method public void onMapReady(com.mapbox.mapboxsdk.maps.MapboxMap);
@@ -92,6 +94,7 @@ package com.mapbox.navigation.ui {
     method public void onDestroy(boolean);
     method public androidx.lifecycle.LiveData<com.mapbox.api.directions.v5.models.BannerInstructions!> retrieveBannerInstructions();
     method public androidx.lifecycle.LiveData<java.lang.Boolean!> retrieveIsOffRoute();
+    method public androidx.lifecycle.LiveData<java.lang.Boolean!> retrieveOnFinalDestinationArrival();
     method public androidx.lifecycle.LiveData<com.mapbox.navigation.base.trip.model.RouteProgress!> retrieveRouteProgress();
     method public void setMuted(boolean);
     method public void updateFeedback(com.mapbox.navigation.ui.feedback.FeedbackItem!);
@@ -114,6 +117,7 @@ package com.mapbox.navigation.ui {
     method public abstract com.mapbox.android.core.location.LocationEngine? locationEngine();
     method public abstract com.mapbox.navigation.core.trip.session.LocationObserver? locationObserver();
     method public abstract boolean muteVoiceGuidance();
+    method public abstract com.mapbox.navigation.ui.feedback.NavigationFeedbackOptions! navigationFeedbackOptions();
     method public abstract com.mapbox.navigation.ui.listeners.NavigationListener? navigationListener();
     method public abstract com.mapbox.navigation.base.options.NavigationOptions! navigationOptions();
     method public abstract com.mapbox.navigation.ui.puck.PuckDrawableSupplier? puckDrawableSupplier();
@@ -142,6 +146,7 @@ package com.mapbox.navigation.ui {
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! locationEngine(com.mapbox.android.core.location.LocationEngine!);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! locationObserver(com.mapbox.navigation.core.trip.session.LocationObserver!);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! muteVoiceGuidance(boolean);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! navigationFeedbackOptions(com.mapbox.navigation.ui.feedback.NavigationFeedbackOptions!);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! navigationListener(com.mapbox.navigation.ui.listeners.NavigationListener!);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! navigationOptions(com.mapbox.navigation.base.options.NavigationOptions!);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! puckDrawableSupplier(com.mapbox.navigation.ui.puck.PuckDrawableSupplier!);
@@ -291,19 +296,19 @@ package com.mapbox.navigation.ui.feedback {
   public class FeedbackBottomSheet extends com.google.android.material.bottomsheet.BottomSheetDialogFragment implements android.animation.Animator.AnimatorListener {
     ctor public FeedbackBottomSheet();
     method public static com.mapbox.navigation.ui.feedback.FeedbackBottomSheet newInstance(com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener!, long);
-    method public static com.mapbox.navigation.ui.feedback.FeedbackBottomSheet newInstance(com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener!, @com.mapbox.navigation.ui.feedback.FeedbackBottomSheet.FeedbackFlowType int, long);
+    method @Deprecated public static com.mapbox.navigation.ui.feedback.FeedbackBottomSheet newInstance(com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener!, @com.mapbox.navigation.ui.feedback.FeedbackBottomSheet.FeedbackFlowType int, long);
     method public void onAnimationCancel(android.animation.Animator!);
     method public void onAnimationEnd(android.animation.Animator!);
     method public void onAnimationRepeat(android.animation.Animator!);
     method public void onAnimationStart(android.animation.Animator!);
     method public void setDuration(long);
     method public void setFeedbackBottomSheetListener(com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener!);
-    field public static final int FEEDBACK_DETAIL_FLOW = 1; // 0x1
-    field public static final int FEEDBACK_MAIN_FLOW = 0; // 0x0
+    field @Deprecated public static final int FEEDBACK_DETAIL_FLOW = 1; // 0x1
+    field @Deprecated public static final int FEEDBACK_MAIN_FLOW = 0; // 0x0
     field public static final String! TAG;
   }
 
-  @IntDef({com.mapbox.navigation.ui.feedback.FeedbackBottomSheet.FEEDBACK_MAIN_FLOW, com.mapbox.navigation.ui.feedback.FeedbackBottomSheet.FEEDBACK_DETAIL_FLOW}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface FeedbackBottomSheet.FeedbackFlowType {
+  @Deprecated @IntDef({com.mapbox.navigation.ui.feedback.FeedbackBottomSheet.FEEDBACK_MAIN_FLOW, com.mapbox.navigation.ui.feedback.FeedbackBottomSheet.FEEDBACK_DETAIL_FLOW}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface FeedbackBottomSheet.FeedbackFlowType {
   }
 
   public interface FeedbackBottomSheetListener {
@@ -315,6 +320,19 @@ package com.mapbox.navigation.ui.feedback {
     method public String! getDescription();
     method public java.util.Set<java.lang.String!>! getFeedbackSubType();
     method @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type public String! getFeedbackType();
+  }
+
+  public final class NavigationFeedbackOptions {
+    method public boolean getEnableArrivalExperienceFeedback();
+    method public boolean getEnableDetailedFeedbackAfterNavigation();
+    method public com.mapbox.navigation.ui.feedback.NavigationFeedbackOptions.Builder toBuilder();
+  }
+
+  public static final class NavigationFeedbackOptions.Builder {
+    ctor public NavigationFeedbackOptions.Builder();
+    method public com.mapbox.navigation.ui.feedback.NavigationFeedbackOptions build();
+    method public com.mapbox.navigation.ui.feedback.NavigationFeedbackOptions.Builder enableArrivalExperienceFeedback(boolean enableArrivalExperienceFeedback);
+    method public com.mapbox.navigation.ui.feedback.NavigationFeedbackOptions.Builder enableDetailedFeedbackAfterNavigation(boolean enableDetailedFeedbackAfterNavigation);
   }
 
 }
@@ -498,6 +516,7 @@ package com.mapbox.navigation.ui.map {
     method public void updateMapFpsThrottleEnabled(boolean);
     method public void updateTrafficVisibility(boolean);
     method public void updateWaynameQueryMap(boolean);
+    field public static final String MAPBOX_NAVIGATION_FEEDBACK_MARKER_NAME = "mapbox-navigation-feedback-marker";
   }
 
   public static class NavigationMapboxMap.Builder {
@@ -507,6 +526,7 @@ package com.mapbox.navigation.ui.map {
     method public com.mapbox.navigation.ui.map.NavigationMapboxMap.Builder! useSpecializedLocationLayer(boolean);
     method public com.mapbox.navigation.ui.map.NavigationMapboxMap.Builder! vanishRouteLineEnabled(boolean);
     method public com.mapbox.navigation.ui.map.NavigationMapboxMap.Builder! vanishingRouteLineUpdateIntervalNano(long);
+    method public com.mapbox.navigation.ui.map.NavigationMapboxMap.Builder! withRouteClickPadding(float);
   }
 
   public interface OnWayNameChangedListener {
@@ -607,6 +627,7 @@ package com.mapbox.navigation.ui.route {
     method public void showAlternativeRoutes(boolean);
     method public void updateRouteArrowVisibilityTo(boolean);
     method public void updateRouteVisibilityTo(boolean);
+    field protected final com.mapbox.mapboxsdk.maps.MapboxMap.OnMapClickListener! mapClickListener;
   }
 
   public static class NavigationMapRoute.Builder {
@@ -614,6 +635,7 @@ package com.mapbox.navigation.ui.route {
     method public com.mapbox.navigation.ui.route.NavigationMapRoute build();
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withBelowLayer(String?);
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withMapboxNavigation(com.mapbox.navigation.core.MapboxNavigation?);
+    method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withRouteClickPadding(float);
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withRouteLineInitializedCallback(com.mapbox.navigation.ui.route.MapRouteLineInitializedCallback?);
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withRouteStyleDescriptors(java.util.List<com.mapbox.navigation.ui.route.RouteStyleDescriptor!>!);
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withStyle(@StyleRes int);

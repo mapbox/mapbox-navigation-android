@@ -3,6 +3,7 @@ package com.mapbox.navigation.base.options
 import android.content.Context
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineProvider
+import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 
@@ -23,6 +24,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * @param applicationContext the Context of the Android Application
  * @param accessToken [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
  * @param locationEngine the mechanism responsible for providing location approximations to navigation
+ * @param locationEngineRequest specifies the rate to request locations from the location engine.
  * @param timeFormatType defines time format for calculation remaining trip time
  * @param navigatorPredictionMillis defines approximate navigator prediction in milliseconds
  * @param distanceFormatter [DistanceFormatter] for format distances showing in notification during navigation
@@ -31,11 +33,13 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * @param isDebugLoggingEnabled Boolean
  * @param deviceProfile [DeviceProfile] defines how navigation data should be interpretation
  * @param eHorizonOptions [EHorizonOptions] defines configuration for the Electronic Horizon
+ * @param isRouteRefreshEnabled Boolean *true* if need to enable route refresh mechanism, otherwise *false*
  */
 class NavigationOptions private constructor(
     val applicationContext: Context,
     val accessToken: String?,
     val locationEngine: LocationEngine,
+    val locationEngineRequest: LocationEngineRequest,
     @TimeFormat.Type val timeFormatType: Int,
     val navigatorPredictionMillis: Long,
     val distanceFormatter: DistanceFormatter?,
@@ -43,7 +47,8 @@ class NavigationOptions private constructor(
     val isFromNavigationUi: Boolean,
     val isDebugLoggingEnabled: Boolean,
     val deviceProfile: DeviceProfile,
-    val eHorizonOptions: EHorizonOptions
+    val eHorizonOptions: EHorizonOptions,
+    val isRouteRefreshEnabled: Boolean
 ) {
 
     /**
@@ -52,6 +57,7 @@ class NavigationOptions private constructor(
     fun toBuilder(): Builder = Builder(applicationContext).apply {
         accessToken(accessToken)
         locationEngine(locationEngine)
+        locationEngineRequest(locationEngineRequest)
         timeFormatType(timeFormatType)
         navigatorPredictionMillis(navigatorPredictionMillis)
         distanceFormatter(distanceFormatter)
@@ -60,6 +66,7 @@ class NavigationOptions private constructor(
         isDebugLoggingEnabled(isDebugLoggingEnabled)
         deviceProfile(deviceProfile)
         eHorizonOptions(eHorizonOptions)
+        isRouteRefreshEnabled(isRouteRefreshEnabled)
     }
 
     /**
@@ -74,6 +81,7 @@ class NavigationOptions private constructor(
         if (applicationContext != other.applicationContext) return false
         if (accessToken != other.accessToken) return false
         if (locationEngine != other.locationEngine) return false
+        if (locationEngineRequest != other.locationEngineRequest) return false
         if (timeFormatType != other.timeFormatType) return false
         if (navigatorPredictionMillis != other.navigatorPredictionMillis) return false
         if (distanceFormatter != other.distanceFormatter) return false
@@ -82,6 +90,7 @@ class NavigationOptions private constructor(
         if (isDebugLoggingEnabled != other.isDebugLoggingEnabled) return false
         if (deviceProfile != other.deviceProfile) return false
         if (eHorizonOptions != other.eHorizonOptions) return false
+        if (isRouteRefreshEnabled != other.isRouteRefreshEnabled) return false
 
         return true
     }
@@ -93,6 +102,7 @@ class NavigationOptions private constructor(
         var result = applicationContext.hashCode()
         result = 31 * result + (accessToken?.hashCode() ?: 0)
         result = 31 * result + locationEngine.hashCode()
+        result = 31 * result + locationEngineRequest.hashCode()
         result = 31 * result + timeFormatType
         result = 31 * result + navigatorPredictionMillis.hashCode()
         result = 31 * result + (distanceFormatter?.hashCode() ?: 0)
@@ -101,6 +111,7 @@ class NavigationOptions private constructor(
         result = 31 * result + isDebugLoggingEnabled.hashCode()
         result = 31 * result + deviceProfile.hashCode()
         result = 31 * result + eHorizonOptions.hashCode()
+        result = 31 * result + isRouteRefreshEnabled.hashCode()
         return result
     }
 
@@ -112,6 +123,7 @@ class NavigationOptions private constructor(
             "applicationContext=$applicationContext, " +
             "accessToken=$accessToken, " +
             "locationEngine=$locationEngine, " +
+            "locationEngineRequest=$locationEngineRequest, " +
             "timeFormatType=$timeFormatType, " +
             "navigatorPredictionMillis=$navigatorPredictionMillis, " +
             "distanceFormatter=$distanceFormatter, " +
@@ -120,6 +132,7 @@ class NavigationOptions private constructor(
             "isDebugLoggingEnabled=$isDebugLoggingEnabled, " +
             "deviceProfile=$deviceProfile, " +
             "eHorizonOptions=$eHorizonOptions" +
+            "isRouteRefreshEnabled=$isRouteRefreshEnabled" +
             ")"
     }
 
@@ -131,6 +144,11 @@ class NavigationOptions private constructor(
         private val applicationContext = applicationContext.applicationContext
         private var accessToken: String? = null
         private var locationEngine: LocationEngine? = null // Default is created when built
+        private var locationEngineRequest = LocationEngineRequest
+            .Builder(1000L)
+            .setFastestInterval(500L)
+            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+            .build()
         private var timeFormatType: Int = TimeFormat.NONE_SPECIFIED
         private var navigatorPredictionMillis: Long = DEFAULT_NAVIGATOR_PREDICTION_MILLIS
         private var distanceFormatter: DistanceFormatter? = null
@@ -140,6 +158,7 @@ class NavigationOptions private constructor(
         private var isDebugLoggingEnabled: Boolean = false
         private var deviceProfile: DeviceProfile = DeviceProfile.Builder().build()
         private var eHorizonOptions: EHorizonOptions = EHorizonOptions.Builder().build()
+        private var isRouteRefreshEnabled: Boolean = true
 
         /**
          * Defines [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
@@ -152,6 +171,12 @@ class NavigationOptions private constructor(
          */
         fun locationEngine(locationEngine: LocationEngine): Builder =
             apply { this.locationEngine = locationEngine }
+
+        /**
+         * Override the rate to request locations from the location engine.
+         */
+        fun locationEngineRequest(locationEngineRequest: LocationEngineRequest): Builder =
+            apply { this.locationEngineRequest = locationEngineRequest }
 
         /**
          * Defines the type of device creating localization data
@@ -202,6 +227,12 @@ class NavigationOptions private constructor(
             apply { this.eHorizonOptions = eHorizonOptions }
 
         /**
+         * Defines if route refresh is enabled
+         */
+        fun isRouteRefreshEnabled(flag: Boolean): Builder =
+            apply { this.isRouteRefreshEnabled = flag }
+
+        /**
          * Build a new instance of [NavigationOptions]
          * @return NavigationOptions
          */
@@ -211,6 +242,7 @@ class NavigationOptions private constructor(
                 accessToken = accessToken,
                 locationEngine = locationEngine
                     ?: LocationEngineProvider.getBestLocationEngine(applicationContext),
+                locationEngineRequest = locationEngineRequest,
                 timeFormatType = timeFormatType,
                 navigatorPredictionMillis = navigatorPredictionMillis,
                 distanceFormatter = distanceFormatter,
@@ -218,7 +250,8 @@ class NavigationOptions private constructor(
                 isFromNavigationUi = isFromNavigationUi,
                 isDebugLoggingEnabled = isDebugLoggingEnabled,
                 deviceProfile = deviceProfile,
-                eHorizonOptions = eHorizonOptions
+                eHorizonOptions = eHorizonOptions,
+                isRouteRefreshEnabled = isRouteRefreshEnabled
             )
         }
     }

@@ -147,7 +147,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 PRIMARY_ROUTE_INDEX,
                 legIndex,
                 ActiveGuidanceOptionsMapper.mapFrom(route)
-            ).let { navigatorMapper.getRouteInitInfo(it) }
+            ).let { navigatorMapper.getRouteInitInfo(it.value) }
 
             val geometryWithBuffer = getRouteGeometryWithBuffer(GRID_SIZE, BUFFER_DILATION)
             routeBufferGeoJson = ifNonNull(geometryWithBuffer) {

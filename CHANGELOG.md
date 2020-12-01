@@ -2,6 +2,63 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 1.3.0-alpha.3 - November 27, 2020
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Features
+* Updated the detailed feedback flow to request additional information in a form after arrival instead of immediately when feedback is reported. See `NavigationFeedbackOptions` for `NavigationView` integration and `FeedbackDetailsFragment` for standalone. [#3758](https://github.com/mapbox/mapbox-navigation-android/pull/3758)
+* Exposed an option for the user to provide an arrival experience feedback when the navigation session is finished. See `NavigationFeedbackOptions` for `NavigationView` integration and `FeedbackArrivalFragment` for standalone. [#3758](https://github.com/mapbox/mapbox-navigation-android/pull/3758)
+* Exposed APIs to support caching user feedback events. [#3724](https://github.com/mapbox/mapbox-navigation-android/pull/3724)
+* Exposed current intersection index value in the `RouteProgress`. [#3810](https://github.com/mapbox/mapbox-navigation-android/pull/3810)
+
+#### Bug fixes and improvements
+* Updated default routing tiles version to `2020_11_21-03_00_00`. [#3812](https://github.com/mapbox/mapbox-navigation-android/pull/3812)
+* Increased map-matching to route geometry precision threshold need to keep updating vanishing point to 3m. [#3803](https://github.com/mapbox/mapbox-navigation-android/pull/3803)
+
+## Mapbox Navigation SDK 1.2.1 - November 26, 2020
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Features
+* Added options that allow for custom raw location polling rates via `NavigationOptions`. [#3800](https://github.com/mapbox/mapbox-navigation-android/pull/3800) [#3804](https://github.com/mapbox/mapbox-navigation-android/pull/3804)
+
+#### Bug fixes and improvements
+* Route line calculations moved off of the main thread in order to improve performance and resolve ANR issue for long routes. [#3789](https://github.com/mapbox/mapbox-navigation-android/pull/3789)
+* Added `equals` and `hashCode` support for `LocationEngineRequest` in Mapbox Events library so it's possible to compare `NavigationOptions` classes. [#3820](https://github.com/mapbox/mapbox-navigation-android/pull/3820)
+
+## Mapbox Navigation SDK 1.3.0-alpha.2 - November 18, 2020
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Features
+* Added options that allow for custom polling rates. [#3800](https://github.com/mapbox/mapbox-navigation-android/pull/3800)
+
+#### Bug fixes and improvements
+* A more performant and accurate method of finding an alternative route when the map is clicked. [#3723](https://github.com/mapbox/mapbox-navigation-android/pull/3723)
+* Route line calculations moved off of the main thread in order to improve performance and resolve ANR issue for long routes. [#3789](https://github.com/mapbox/mapbox-navigation-android/pull/3789)
+* Pass `null` to FreeDriveEvent if `location` is not available [#3791](https://github.com/mapbox/mapbox-navigation-android/pull/3791)
+
+#### Other changes
+* Explicitly mark the required min Android SDK version of 21. The Nav SDK v1 series always supported only devices running Lollipop or higher (due to transitive dependencies). [#3781](https://github.com/mapbox/mapbox-navigation-android/pull/3781)
+
+## Mapbox Navigation SDK 1.2.0 - November 18, 2020
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Bug fixes
+
+* Send _Free Drive_ events even if there're no `location` values. [#3796](https://github.com/mapbox/mapbox-navigation-android/pull/3796)
+
+## Mapbox Navigation SDK 1.3.0-alpha.1 - November 12, 2020
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Bug fixes
+
+* Avoid dropping events when destroying MapboxNavigation. [#3770](https://github.com/mapbox/mapbox-navigation-android/pull/3770)
+* Fixed Null Pointer Exception when formatting date in Telemetry. [#3770](https://github.com/mapbox/mapbox-navigation-android/pull/3770)
+
 ## Mapbox Navigation SDK 1.2.0-rc.2 - November 12, 2020
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 

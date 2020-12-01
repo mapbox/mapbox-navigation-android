@@ -14,7 +14,7 @@ import java.util.List;
 
 class NavigationSymbolManager {
 
-  static final String MAPBOX_NAVIGATION_MARKER_NAME = "mapbox-navigation-marker";
+  static final String MAPBOX_NAVIGATION_DESTINATION_MARKER_NAME = "mapbox-navigation-destination-marker";
   private final LongSparseArray<Symbol> markersSymbols = new LongSparseArray<>();
   private Symbol destinationSymbol = null;
   @NonNull
@@ -78,7 +78,7 @@ class NavigationSymbolManager {
         position.longitude());
     return new SymbolOptions()
         .withLatLng(markerPosition)
-        .withIconImage(MAPBOX_NAVIGATION_MARKER_NAME);
+        .withIconImage(MAPBOX_NAVIGATION_DESTINATION_MARKER_NAME);
   }
 
   private Symbol createSymbolFrom(@NonNull SymbolOptions options) {

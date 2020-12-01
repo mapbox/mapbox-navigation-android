@@ -1,6 +1,8 @@
 package com.mapbox.navigation.ui.route
 
 import android.content.Context
+import android.graphics.PointF
+import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.util.SparseArray
 import androidx.annotation.AnyRes
@@ -16,7 +18,9 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.LocationComponentConstants
+import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.layers.Layer
@@ -32,12 +36,14 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.R
 import com.mapbox.navigation.ui.internal.route.MapRouteSourceProvider
 import com.mapbox.navigation.ui.internal.route.RouteConstants
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_CASING_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.HEAVY_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.LOW_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO
 import com.mapbox.navigation.ui.internal.route.RouteConstants.MODERATE_CONGESTION_VALUE
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
@@ -66,7 +72,11 @@ import com.mapbox.navigation.utils.internal.parallelMap
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMisc
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.util.UUID
 import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.sin
@@ -160,6 +170,8 @@ internal class MapRouteLine(
     private var primaryRouteLineGranularDistances: RouteLineGranularDistances? = null
     private var primaryRouteRemainingDistancesIndex: Int? = null
     private var lastIndexUpdateTimeNano: Long = 0
+    private var trafficSegmentCalculationJob = ThreadController.getMainScopeAndRootJob()
+    private var calculateGranularDistancesJob = ThreadController.getMainScopeAndRootJob()
 
     @get:ColorInt
     private val routeLineTraveledColor: Int by lazy {
@@ -426,35 +438,17 @@ internal class MapRouteLine(
     }
 
     private fun initPrimaryRoutePoints(route: DirectionsRoute) {
-        primaryRoutePoints = parseRoutePoints(route)
-        primaryRouteLineGranularDistances =
-            calculateRouteGranularDistances(primaryRoutePoints?.flatList ?: emptyList())
-    }
-
-    /**
-     * Decodes the route geometry into nested arrays of legs -> steps -> points.
-     *
-     * The first and last point of adjacent steps overlap and are duplicated.
-     */
-    private fun parseRoutePoints(route: DirectionsRoute): RoutePoints? {
-        val precision =
-            if (route.routeOptions()?.geometries() == DirectionsCriteria.GEOMETRY_POLYLINE) {
-                Constants.PRECISION_5
-            } else {
-                Constants.PRECISION_6
-            }
-
-        val nestedList = route.legs()?.map { routeLeg ->
-            routeLeg.steps()?.map { legStep ->
-                legStep.geometry()?.let { geometry ->
-                    PolylineUtils.decode(geometry, precision).toList()
-                } ?: return null
-            } ?: return null
-        } ?: return null
-
-        val flatList = nestedList.flatten().flatten()
-
-        return RoutePoints(nestedList, flatList)
+        primaryRoutePoints = null
+        primaryRouteLineGranularDistances = null
+        calculateGranularDistancesJob.job.cancelChildren()
+        calculateGranularDistancesJob.scope.launch {
+            val parsedPoints = parseRoutePoints(route)
+            val parsedDistances = calculateRouteGranularDistances(
+                parsedPoints?.flatList ?: emptyList()
+            )
+            primaryRoutePoints = parsedPoints
+            primaryRouteLineGranularDistances = parsedDistances
+        }
     }
 
     /**
@@ -561,7 +555,6 @@ internal class MapRouteLine(
 
     fun reinitializePrimaryRoute() {
         this@MapRouteLine.routeFeatureData.firstOrNull { it.route == primaryRoute }?.let {
-            updateRouteTrafficSegments(it)
             drawPrimaryRoute(it)
             hideRouteLineAtOffset(vanishPointOffset)
             hideCasingLineAtOffset(vanishPointOffset)
@@ -578,14 +571,7 @@ internal class MapRouteLine(
             primaryRoute = this.directionsRoutes.first()
             alternativesVisible = directionsRoutes.size > 1
             allLayersAreVisible = true
-
-            val newRouteFeatureData = getRouteFeatureData().also {
-                routeFeatureData.addAll(it)
-            }
-
-            if (newRouteFeatureData.isNotEmpty()) {
-                updateRouteTrafficSegments(newRouteFeatureData.first())
-            }
+            routeFeatureData.addAll(getRouteFeatureData())
             drawWayPoints()
             updateAlternativeLayersVisibility(alternativesVisible, routeLayerIds)
             updateAllLayersVisibility(allLayersAreVisible)
@@ -604,7 +590,6 @@ internal class MapRouteLine(
             clear()
             addAll(listOf(partitionedRoutes.first, partitionedRoutes.second).flatten())
         }
-        updateRouteTrafficSegments(routeFeatureData.first())
         drawRoutes(routeFeatureData)
     }
 
@@ -697,6 +682,78 @@ internal class MapRouteLine(
         return routeFeatureData.firstOrNull {
             it.route == route
         }?.lineString ?: LineString.fromPolyline(route.geometry()!!, Constants.PRECISION_6)
+    }
+
+    /**
+     * The map will be queried for a route line feature at the target point or a bounding box
+     * centered at the target point with a padding value determining the box's size. If a route
+     * feature is found the index of that route in this class's route collection is returned. The
+     * primary route is given precedence if more than one route is found.
+     *
+     * @param target a target latitude/longitude serving as the search point
+     * @param mapboxMap a reference to the MapboxMap that will be queried
+     * @param padding a sizing value added to all sides of the target point  for creating a bounding
+     * box to search in.
+     *
+     * @return the index of the route in this class's route collection or -1 if no routes found.
+     */
+    fun findClosestRoute(
+        target: LatLng,
+        mapboxMap: MapboxMap,
+        padding: Float
+    ): Int {
+        val mapClickPointF = mapboxMap.projection.toScreenLocation(target)
+        val leftFloat = (mapClickPointF.x - padding)
+        val rightFloat = (mapClickPointF.x + padding)
+        val topFloat = (mapClickPointF.y - padding)
+        val bottomFloat = (mapClickPointF.y + padding)
+        val clickRectF = RectF(leftFloat, topFloat, rightFloat, bottomFloat)
+
+        val featureIndex = queryMapForFeatureIndex(
+            mapboxMap,
+            mapClickPointF,
+            clickRectF,
+            listOf(PRIMARY_ROUTE_LAYER_ID, PRIMARY_ROUTE_CASING_LAYER_ID)
+        )
+
+        if (featureIndex >= 0) {
+            return featureIndex
+        }
+
+        return queryMapForFeatureIndex(
+            mapboxMap,
+            mapClickPointF,
+            clickRectF,
+            listOf(ALTERNATIVE_ROUTE_LAYER_ID, ALTERNATIVE_ROUTE_CASING_LAYER_ID)
+        )
+    }
+
+    private fun queryMapForFeatureIndex(
+        mapboxMap: MapboxMap,
+        mapClickPointF: PointF,
+        clickRectF: RectF,
+        layerIds: List<String>
+    ): Int {
+        val featureIndex = mapboxMap.queryRenderedFeatures(
+            mapClickPointF,
+            *layerIds.toTypedArray()
+        ).run { getIndexOfFirstFeature(this) }
+
+        return when (featureIndex >= 0) {
+            true -> featureIndex
+            false -> mapboxMap.queryRenderedFeatures(
+                clickRectF,
+                *layerIds.toTypedArray()
+            ).run { getIndexOfFirstFeature(this) }
+        }
+    }
+
+    private fun getIndexOfFirstFeature(features: List<Feature>): Int {
+        return features.distinct().run {
+            routeFeatureData.indexOfFirst {
+                it.featureCollection.features()?.get(0) ?.id() ?: 0 == this.firstOrNull()?.id()
+            }
+        }
     }
 
     private fun getIdentifiableRouteFeatureDataProvider(directionsRoutes: List<IdentifiableRoute>):
@@ -833,17 +890,26 @@ internal class MapRouteLine(
             style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)?.setProperties(lineGradient(expression))
         }
         initPrimaryRoutePoints(routeData.route)
+        applyTrafficMarkers(routeData.route)
     }
 
-    private fun updateRouteTrafficSegments(routeData: RouteFeatureData) {
-        val segments = calculateRouteLineSegments(
-            routeData.route,
-            trafficBackfillRoadClasses,
-            true,
-            ::getRouteColorForCongestion
-        )
+    private fun applyTrafficMarkers(route: DirectionsRoute) {
         routeLineExpressionData.clear()
-        routeLineExpressionData.addAll(segments)
+        trafficSegmentCalculationJob.job.cancelChildren()
+        trafficSegmentCalculationJob.scope.launch {
+            val segments = calculateRouteLineSegments(
+                route,
+                trafficBackfillRoadClasses,
+                true,
+                ::getRouteColorForCongestion
+            )
+            routeLineExpressionData.addAll(segments)
+            if (style.isFullyLoaded) {
+                val expression = getExpressionAtOffset(vanishPointOffset)
+                style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+                    ?.setProperties(lineGradient(expression))
+            }
+        }
     }
 
     private fun drawAlternativeRoutes(routeData: List<RouteFeatureData>) {
@@ -900,6 +966,8 @@ internal class MapRouteLine(
     }
 
     fun clearRouteData() {
+        trafficSegmentCalculationJob.job.cancelChildren()
+        calculateGranularDistancesJob.job.cancelChildren()
         vanishPointOffset = 0.0
         primaryRoutePoints = null
         primaryRouteLineGranularDistances = null
@@ -919,9 +987,36 @@ internal class MapRouteLine(
         primaryRouteLineSource.setGeoJson(drawnPrimaryRouteFeatureCollection)
     }
 
-    private fun calculateRouteGranularDistances(coordinates: List<Point>):
-        RouteLineGranularDistances? {
-            return if (coordinates.isNotEmpty()) {
+    /**
+     * Decodes the route geometry into nested arrays of legs -> steps -> points.
+     *
+     * The first and last point of adjacent steps overlap and are duplicated.
+     */
+    private suspend fun parseRoutePoints(route: DirectionsRoute) =
+        withContext(ThreadController.IODispatcher) {
+            val precision =
+                if (route.routeOptions()?.geometries() == DirectionsCriteria.GEOMETRY_POLYLINE) {
+                    Constants.PRECISION_5
+                } else {
+                    Constants.PRECISION_6
+                }
+
+            val nestedList = route.legs()?.map { routeLeg ->
+                routeLeg.steps()?.map { legStep ->
+                    legStep.geometry()?.let { geometry ->
+                        PolylineUtils.decode(geometry, precision).toList()
+                    } ?: return@withContext null
+                } ?: return@withContext null
+            } ?: return@withContext null
+
+            val flatList = nestedList.flatten().flatten()
+
+            return@withContext RoutePoints(nestedList, flatList)
+        }
+
+    private suspend fun calculateRouteGranularDistances(coordinates: List<Point>) =
+        withContext(ThreadController.IODispatcher) {
+            return@withContext if (coordinates.isNotEmpty()) {
                 calculateGranularDistances(coordinates)
             } else {
                 null
@@ -1390,11 +1485,23 @@ internal class MapRouteLine(
                     route.geometry() ?: "",
                     Constants.PRECISION_6
                 )
-
+                val randomId = UUID.randomUUID().toString()
                 val routeFeature = when (identifier) {
-                    null -> Feature.fromGeometry(routeGeometry)
-                    else -> Feature.fromGeometry(routeGeometry).also {
-                        it.addBooleanProperty(identifier, true)
+                    null -> {
+                        Feature.fromGeometry(
+                            routeGeometry,
+                            null,
+                            randomId
+                        )
+                    }
+                    else -> {
+                        Feature.fromGeometry(
+                            routeGeometry,
+                            null,
+                            randomId
+                        ).also {
+                            it.addBooleanProperty(identifier, true)
+                        }
                     }
                 }
 
@@ -1423,14 +1530,14 @@ internal class MapRouteLine(
          * @return a list of items representing the distance offset of each route leg and the color
          * used to represent the traffic congestion.
          */
-        fun calculateRouteLineSegments(
+        suspend fun calculateRouteLineSegments(
             route: DirectionsRoute,
             trafficBackfillRoadClasses: List<String>,
             isPrimaryRoute: Boolean,
             congestionColorProvider: (String, Boolean) -> Int
-        ): List<RouteLineExpressionData> {
+        ) = withContext(ThreadController.IODispatcher) {
             val trafficExpressionData = getRouteLineTrafficExpressionData(route)
-            return when (trafficExpressionData.isEmpty()) {
+            return@withContext when (trafficExpressionData.isEmpty()) {
                 false -> getRouteLineExpressionDataWithStreetClassOverride(
                     trafficExpressionData,
                     route.distance(),

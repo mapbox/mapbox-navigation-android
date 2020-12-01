@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.internal.utils;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.util.Base64;
 import android.view.View;
@@ -40,6 +41,16 @@ public class ViewUtils {
     // Convert to base64 encoded string
     byte[] data = stream.toByteArray();
     return Base64.encodeToString(data, Base64.DEFAULT);
+  }
+
+  @Nullable
+  public static Bitmap decodeScreenshot(String screenshotBase64Format) {
+    try {
+      byte[] bytes = Base64.decode(screenshotBase64Format, Base64.DEFAULT);
+      return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+    } catch (Exception exception) {
+      return null;
+    }
   }
 
   @Nullable

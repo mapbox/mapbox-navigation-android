@@ -55,7 +55,7 @@ internal class RouteRefreshController(
     private val routeRefreshCallback = object : RouteRefreshCallback {
 
         override fun onRefresh(directionsRoute: DirectionsRoute) {
-            logger.i(msg = Message("Successful refresh"))
+            logger.i(msg = Message("Successful route refresh"))
             tripSession.route = directionsRoute
             val directionsSessionRoutes = directionsSession.routes.toMutableList()
             if (directionsSessionRoutes.isNotEmpty()) {

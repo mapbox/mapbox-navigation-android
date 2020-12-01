@@ -2,6 +2,8 @@ package com.mapbox.navigation.navigator
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
+import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo
 import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert
 import com.mapbox.navigation.base.trip.model.alert.IncidentAlert
@@ -19,6 +21,7 @@ import com.mapbox.navigation.base.trip.model.alert.TollCollectionType
 import com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert
 import com.mapbox.navigation.base.trip.model.alert.TunnelInfo
 import com.mapbox.navigation.navigator.internal.NavigatorMapper
+import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.RouteAlert
 import com.mapbox.navigator.RouteAlertAdminInfo
@@ -73,6 +76,28 @@ class NavigatorMapperTest {
     @Test
     fun `route init info is null when route info is null`() {
         assertNull(navigatorMapper.getRouteInitInfo(null))
+    }
+
+    @Test
+    fun `step progress correctly created`() {
+        val stepProgress = RouteStepProgress.Builder()
+            .step(directionsRoute.legs()!![0].steps()!![1])
+            .stepIndex(1)
+            .stepPoints(PolylineUtils.decode("sla~hA|didrCoDvx@", 6))
+            .distanceRemaining(15f)
+            .durationRemaining(300.0 / 1000.0)
+            .distanceTraveled(10f)
+            .fractionTraveled(50f)
+            .intersectionIndex(1)
+            .build()
+
+        val routeProgress = navigatorMapper.getRouteProgress(
+            directionsRoute,
+            null,
+            navigationStatus
+        )
+
+        assertEquals(stepProgress, routeProgress!!.currentLegProgress!!.currentStepProgress)
     }
 
     @Test
@@ -440,22 +465,13 @@ class NavigatorMapperTest {
         assertEquals(expected.alertType, RouteAlertType.Incident)
     }
 
-    private val directionsRoute: DirectionsRoute = mockk {
-        every { legs() } returns listOf(
-            mockk {
-                every { distance() } returns 100.0
-                every { steps() } returns listOf(
-                    mockk {
-                        every { distance() } returns 20.0
-                        every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
-                    }
-                )
-            }
-        )
-    }
+    private val directionsRoute = DirectionsRoute.fromJson(
+        FileUtils.loadJsonFixture("multileg_route.json")
+    )
 
     private val navigationStatus: NavigationStatus = mockk {
-        every { stepIndex } returns 0
+        every { intersectionIndex } returns 1
+        every { stepIndex } returns 1
         every { legIndex } returns 0
         every { activeGuidanceInfo?.routeProgress?.remainingDistance } returns 80.0
         every { activeGuidanceInfo?.routeProgress?.remainingDuration } returns 10000
@@ -470,9 +486,26 @@ class NavigatorMapperTest {
         every { activeGuidanceInfo?.stepProgress?.distanceTraveled } returns 10.0
         every { activeGuidanceInfo?.stepProgress?.fractionTraveled } returns 50.0
         every { routeState } returns RouteState.TRACKING
-        every { bannerInstruction } returns null
-        every { voiceInstruction } returns null
-        every { inTunnel } returns false
+        every { bannerInstruction } returns mockk {
+            every { remainingStepDistance } returns 111f
+            every { primary } returns mockk {
+                every { components } returns listOf()
+                every { degrees } returns 45
+                every { drivingSide } returns "drivingSide"
+                every { modifier } returns "modifier"
+                every { text } returns "text"
+                every { type } returns "type"
+            }
+            every { secondary } returns null
+            every { sub } returns null
+            every { index } returns 0
+        }
+        every { voiceInstruction } returns mockk {
+            every { announcement } returns "announcement"
+            every { remainingStepDistance } returns 111f
+            every { ssmlAnnouncement } returns "ssmlAnnouncement"
+        }
+        every { inTunnel } returns true
         every { upcomingRouteAlerts } returns emptyList()
     }
 

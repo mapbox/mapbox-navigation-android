@@ -134,6 +134,7 @@ internal class NavigatorMapper {
                         currentStep = steps[stepIndex]
                         stepProgressBuilder.stepIndex(stepIndex)
                         stepProgressBuilder.step(currentStep)
+                        stepProgressBuilder.intersectionIndex(intersectionIndex)
 
                         val stepGeometry = currentStep.geometry()
                         stepGeometry?.let {
