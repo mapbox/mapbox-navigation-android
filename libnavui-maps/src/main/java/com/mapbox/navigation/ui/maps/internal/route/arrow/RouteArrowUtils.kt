@@ -84,7 +84,7 @@ object RouteArrowUtils {
         style: Style,
         routeArrowDrawableProvider: RouteArrowDrawableProvider,
         routeArrowResourceProvider: RouteArrowResourceProvider,
-        aboveLayerId: String
+        aboveLayerId: String?
     ) {
 
         if (!style.isFullyLoaded()) {

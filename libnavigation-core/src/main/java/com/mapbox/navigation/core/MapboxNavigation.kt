@@ -820,13 +820,21 @@ class MapboxNavigation(
         // TODO StrictMode may report a violation as we're creating a File from the Main
         val offlineFilesPath = OnboardRouterFiles(navigationOptions.applicationContext, logger)
             .absolutePath(navigationOptions.onboardRouterOptions)
+        val dataset = StringBuilder().apply {
+            append(navigationOptions.onboardRouterOptions.tilesDataset)
+            append("/")
+            append(navigationOptions.onboardRouterOptions.tilesProfile)
+        }.toString()
+
         return TilesConfig(
             offlineFilesPath,
+            null,
             null,
             null,
             THREADS_COUNT,
             TileEndpointConfiguration(
                 navigationOptions.onboardRouterOptions.tilesUri.toString(),
+                dataset,
                 navigationOptions.onboardRouterOptions.tilesVersion,
                 navigationOptions.accessToken ?: "",
                 USER_AGENT,

@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.maps.route
 import android.content.Context
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.Style
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.LAYER_ABOVE_UPCOMING_MANEUVER_ARROW
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.internal.ThemeUtil
 import com.mapbox.navigation.ui.maps.internal.route.arrow.MapboxRouteArrowDrawableProvider
@@ -21,7 +20,7 @@ import com.mapbox.navigation.ui.maps.route.arrow.api.RouteArrowResourceProvider
 class RouteArrowLayerInitializer private constructor(
     private val routeArrowResourceProvider: RouteArrowResourceProvider,
     private val routeArrowDrawableProvider: RouteArrowDrawableProvider,
-    private val aboveLayerId: String
+    private val aboveLayerId: String?
 ) {
 
     /**
@@ -86,12 +85,11 @@ class RouteArrowLayerInitializer private constructor(
                 context,
                 resourceProvider.getArrowHeadCasingIcon()
             )
-            val routeArrowAboveLayerId: String = aboveLayerId ?: LAYER_ABOVE_UPCOMING_MANEUVER_ARROW
 
             return RouteArrowLayerInitializer(
                 resourceProvider,
                 MapboxRouteArrowDrawableProvider(arrowHeadIcon!!, arrowHeadCasingIcon!!),
-                routeArrowAboveLayerId
+                aboveLayerId
             )
         }
     }

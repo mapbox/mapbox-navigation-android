@@ -78,6 +78,7 @@ import java.util.List;
 
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static com.mapbox.navigation.examples.util.LocationPermissionsHelperKt.LOCATION_PERMISSIONS_REQUEST_CODE;
+import static com.mapbox.navigation.ui.base.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID;
 import static com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineResourceProviderFactory.getRouteLineResourceProvider;
 
 public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity implements PermissionsListener,
@@ -118,7 +119,11 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
     locationComponent = getLocationComponent();
     mapCamera = getMapCamera();
     routeLineLayerInitializer = new RouteLineLayerInitializer.Builder(this).build();
-    routeArrowLayerInitializer = new RouteArrowLayerInitializer.Builder(this).build();
+    routeArrowLayerInitializer = new RouteArrowLayerInitializer.Builder(this)
+      // todo workaround, arrows currently do not perform any out-of-the-box z-ordering
+      //  and route line doesn't expose layer ID getter
+      .withAboveLayerId(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+      .build();
 
     if (LocationPermissionsHelper.areLocationPermissionsGranted(this)) {
       requestPermissionIfNotGranted(WRITE_EXTERNAL_STORAGE);
