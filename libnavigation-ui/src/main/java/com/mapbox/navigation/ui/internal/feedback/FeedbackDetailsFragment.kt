@@ -16,6 +16,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -226,7 +227,7 @@ class FeedbackDetailsFragment : DialogFragment() {
     private fun goToArrivalExperienceFragment() {
         parentFragmentManager.beginTransaction()
             .add(
-                R.id.feedbackFrameLayout,
+                android.R.id.content,
                 FeedbackArrivalFragment.newInstance(
                     feedbackFlowListener
                 ),
