@@ -3,7 +3,6 @@ package com.mapbox.navigation.examples.core;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,7 +16,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -55,16 +53,19 @@ import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper;
 import com.mapbox.navigation.examples.util.ThemeUtil;
-import com.mapbox.navigation.ui.internal.route.RouteConstants;
 
+import com.mapbox.navigation.ui.maps.internal.route.arrow.MapboxRouteArrowAPI;
+import com.mapbox.navigation.ui.maps.internal.route.arrow.MapboxRouteArrowActions;
+import com.mapbox.navigation.ui.maps.internal.route.arrow.MapboxRouteArrowView;
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineAPI;
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineActions;
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineView;
 import com.mapbox.navigation.ui.maps.route.RouteArrowLayerInitializer;
 import com.mapbox.navigation.ui.maps.route.RouteLineLayerInitializer;
-import com.mapbox.navigation.ui.maps.route.routearrow.api.RouteArrowAPI;
-import com.mapbox.navigation.ui.maps.route.routearrow.api.RouteArrowResourceProvider;
-import com.mapbox.navigation.ui.maps.route.routearrow.internal.*;
-import com.mapbox.navigation.ui.maps.route.routeline.api.RouteLineAPI;
-import com.mapbox.navigation.ui.maps.route.routeline.api.RouteLineResourceProvider;
-import com.mapbox.navigation.ui.maps.route.routeline.internal.*;
+import com.mapbox.navigation.ui.maps.route.arrow.api.RouteArrowAPI;
+import com.mapbox.navigation.ui.maps.route.line.api.RouteLineAPI;
+import com.mapbox.navigation.ui.maps.route.line.api.RouteLineResourceProvider;
+
 import org.jetbrains.annotations.NotNull;
 import timber.log.Timber;
 
@@ -77,8 +78,7 @@ import java.util.List;
 
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static com.mapbox.navigation.examples.util.LocationPermissionsHelperKt.LOCATION_PERMISSIONS_REQUEST_CODE;
-import static com.mapbox.navigation.ui.maps.route.routearrow.internal.MapboxRouteArrowResourceProviderFactory.getRouteArrowResourceProvider;
-import static com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineResourceProviderFactory.getRouteLineResourceProvider;
+import static com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineResourceProviderFactory.getRouteLineResourceProvider;
 
 public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity implements PermissionsListener,
     OnMapLongClickListener {

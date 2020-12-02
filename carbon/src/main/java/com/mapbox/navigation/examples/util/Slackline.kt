@@ -15,17 +15,17 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.R
+import com.mapbox.navigation.ui.maps.internal.route.arrow.MapboxRouteArrowAPI
+import com.mapbox.navigation.ui.maps.internal.route.arrow.MapboxRouteArrowActions
+import com.mapbox.navigation.ui.maps.internal.route.arrow.MapboxRouteArrowView
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineAPI
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineActions
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineResourceProviderFactory.getRouteLineResourceProvider
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.RouteArrowLayerInitializer
 import com.mapbox.navigation.ui.maps.route.RouteLineLayerInitializer
-import com.mapbox.navigation.ui.maps.route.routearrow.api.RouteArrowAPI
-import com.mapbox.navigation.ui.maps.route.routearrow.internal.MapboxRouteArrowAPI
-import com.mapbox.navigation.ui.maps.route.routearrow.internal.MapboxRouteArrowActions
-import com.mapbox.navigation.ui.maps.route.routearrow.internal.MapboxRouteArrowView
-import com.mapbox.navigation.ui.maps.route.routeline.api.RouteLineAPI
-import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineAPI
-import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineActions
-import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineResourceProviderFactory.getRouteLineResourceProvider
-import com.mapbox.navigation.ui.maps.route.routeline.internal.MapboxRouteLineView
+import com.mapbox.navigation.ui.maps.route.arrow.api.RouteArrowAPI
+import com.mapbox.navigation.ui.maps.route.line.api.RouteLineAPI
 
 class Slackline(private val activity: AppCompatActivity) : LifecycleObserver {
 

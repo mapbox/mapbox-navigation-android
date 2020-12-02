@@ -18,7 +18,7 @@ dokka {
         reportUndocumented = true
 
         perPackageOption {
-            prefix = "com.mapbox.navigation.ui.maps"
+            prefix = "com.mapbox.navigation.ui.maps.internal"
             suppress = true
         }
     }
@@ -67,6 +67,8 @@ dependencies {
     testImplementation dependenciesList.mockk
     testImplementation dependenciesList.robolectric
     testImplementation dependenciesList.androidxTestCore
+    testImplementation(project(':libtesting-utils'))
 }
 
 apply from: "${rootDir}/gradle/jacoco.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"

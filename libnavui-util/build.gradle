@@ -17,7 +17,7 @@ dokka {
         reportUndocumented = true
 
         perPackageOption {
-            prefix = "com.mapbox.navigation.ui.util"
+            prefix = "com.mapbox.navigation.ui.utils.internal"
             suppress = true
         }
     }
@@ -58,3 +58,4 @@ dependencies {
 }
 
 apply from: "${rootDir}/gradle/jacoco.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"
