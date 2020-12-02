@@ -1,6 +1,6 @@
 {
   "name": "@mapbox/mapbox-navigation-android",
-  "version": "0.23.0",
+  "version": "2.0.0",
   "description": "Navigation Services",
   "keywords": [
     "mapbox",
@@ -9,7 +9,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/mapbox/mapbox-navigation-android.git"
+    "url": "git://github.com/mapbox/mapbox-navigation-android-internal.git"
   },
   "devDependencies": {
     "express": "^4.11.1",
