@@ -749,7 +749,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
       if (enableDetailedFeedbackFlowAfterTbt && !cachedNavigationFeedbackEventList.isEmpty()) {
         FragmentTransaction fragmentTransaction = getFragmentActivity().getSupportFragmentManager().beginTransaction();
         fragmentTransaction.add(
-                R.id.feedbackFrameLayout,
+                R.id.navigationViewLayout,
                 FeedbackDetailsFragment.newInstance(
                         cachedNavigationFeedbackEventList,
                         getFeedbackFlowListener(),
@@ -762,7 +762,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
       if (enableArrivalExperienceFeedback) {
         FragmentTransaction fragmentTransaction = getFragmentActivity().getSupportFragmentManager().beginTransaction();
         fragmentTransaction.add(
-                R.id.feedbackFrameLayout,
+                R.id.navigationViewLayout,
                 FeedbackArrivalFragment.newInstance(getFeedbackFlowListener()),
                 FeedbackArrivalFragment.class.getSimpleName()).commit();
       }
