@@ -59,7 +59,7 @@ sdkNameMap["libnavigation-util"] = "mobile-navigation-utils"
 sdkNameMap["libnavigation-ui"] = "mobile-navigation-ui"
 sdkNameMap["libnavui-base"] = "mobile-navigation-ui-base"
 sdkNameMap["libnavui-maps"] = "mobile-navigation-ui-maps"
-sdkNameMap["libnavui-util"] = "mobile-navigation-ui-util"
+sdkNameMap["libnavui-util"] = "mobile-navigation-ui-utils"
 
 registry {
     sdkName = sdkNameMap[project.name]
@@ -69,6 +69,7 @@ registry {
     dryRun = false
     publish = true
     publications = ["release"]
+    featureFlag = "navigation_sdks_private_beta"
 }
 
 task androidSourcesJar(type: Jar) {
