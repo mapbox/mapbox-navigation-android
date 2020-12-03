@@ -49,17 +49,17 @@ afterEvaluate {
 }
 
 def sdkNameMap = [:]
-sdkNameMap["libnavigation-base"] = "mobile-navigation-base"
-sdkNameMap["libnavigation-core"] = "mobile-navigation-core"
-sdkNameMap["libnavigation-metrics"] = "mobile-navigation-metrics"
-sdkNameMap["libnavigator"] = "mobile-navigation-navigator"
-sdkNameMap["libtrip-notification"] = "mobile-navigation-notification"
-sdkNameMap["libnavigation-router"] = "mobile-navigation-router"
-sdkNameMap["libnavigation-util"] = "mobile-navigation-utils"
-sdkNameMap["libnavigation-ui"] = "mobile-navigation-ui"
-sdkNameMap["libnavui-base"] = "mobile-navigation-ui-base"
-sdkNameMap["libnavui-maps"] = "mobile-navigation-ui-maps"
-sdkNameMap["libnavui-util"] = "mobile-navigation-ui-utils"
+sdkNameMap["libnavigation-base"] = "mobile-navigation-base-v2"
+sdkNameMap["libnavigation-core"] = "mobile-navigation-core-v2"
+sdkNameMap["libnavigation-metrics"] = "mobile-navigation-metrics-v2"
+sdkNameMap["libnavigator"] = "mobile-navigation-navigator-v2"
+sdkNameMap["libtrip-notification"] = "mobile-navigation-notification-v2"
+sdkNameMap["libnavigation-router"] = "mobile-navigation-router-v2"
+sdkNameMap["libnavigation-util"] = "mobile-navigation-utils-v2"
+sdkNameMap["libnavigation-ui"] = "mobile-navigation-ui-v2"
+sdkNameMap["libnavui-base"] = "mobile-navigation-ui-base-v2"
+sdkNameMap["libnavui-maps"] = "mobile-navigation-ui-maps-v2"
+sdkNameMap["libnavui-util"] = "mobile-navigation-ui-utils-v2"
 
 registry {
     sdkName = sdkNameMap[project.name]
