@@ -21,6 +21,6 @@
     "node": ">=6"
   },
   "dependencies": {
-    "@mapbox/cloudfriend": "^2.5.0"
+    "@mapbox/cloudfriend": "^4.5.0"
   }
 }
