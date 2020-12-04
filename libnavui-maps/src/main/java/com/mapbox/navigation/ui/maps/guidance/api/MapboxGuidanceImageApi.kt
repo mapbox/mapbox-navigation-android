@@ -2,12 +2,15 @@ package com.mapbox.navigation.ui.maps.guidance.api
 
 import android.content.Context
 import android.graphics.Bitmap
-import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.Expected
+import com.mapbox.core.constants.Constants.PRECISION_6
+import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapSnapshotInterface
 import com.mapbox.maps.MapSnapshotOptions
+import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.MapboxOptions
 import com.mapbox.maps.Snapshotter
 import com.mapbox.maps.Style
@@ -23,7 +26,8 @@ import com.mapbox.navigation.ui.maps.guidance.internal.GuidanceImageProcessor
 import com.mapbox.navigation.ui.maps.guidance.internal.GuidanceImageResult
 import com.mapbox.navigation.ui.maps.guidance.model.GuidanceImageOptions
 import com.mapbox.navigation.util.internal.ifNonNull
-import com.mapbox.turf.TurfMeasurement.destination
+import com.mapbox.turf.TurfConstants.UNIT_METERS
+import com.mapbox.turf.TurfMeasurement
 import timber.log.Timber
 import java.nio.ByteBuffer
 
@@ -35,13 +39,10 @@ import java.nio.ByteBuffer
  */
 class MapboxGuidanceImageApi(
     val context: Context,
+    val mapboxMap: MapboxMap,
     private val options: GuidanceImageOptions,
     private val callback: OnGuidanceImageReady
 ) : GuidanceImageApi {
-
-    companion object {
-        private const val REFERENCE_BEARING = 180.0
-    }
 
     private val snapshotter: Snapshotter
     private val snapshotterCallback = object : Snapshotter.SnapshotReadyCallback {
@@ -103,7 +104,6 @@ class MapboxGuidanceImageApi(
             .pixelRatio(options.density)
             .build()
         snapshotter = Snapshotter(context, snapshotOptions)
-        snapshotter.setUri(options.styleUri)
     }
 
     override fun generateGuidanceImage(progress: RouteProgress) {
@@ -133,9 +133,10 @@ class MapboxGuidanceImageApi(
                         snapshotter.setCameraOptions(
                             getCameraOptions(
                                 progress.upcomingStepPoints,
-                                progress.currentLegProgress?.currentStepProgress?.step?.maneuver()
+                                progress.currentLegProgress?.currentStepProgress?.step?.geometry()
                             )
                         )
+                        snapshotter.setUri(options.styleUri)
                         snapshotter.start(snapshotterCallback)
                     }
                     else -> {
@@ -149,43 +150,26 @@ class MapboxGuidanceImageApi(
 
     private fun getCameraOptions(
         upcomingPoints: List<Point>?,
-        stepManeuver: StepManeuver?
+        currentStepGeometry: String?
     ): CameraOptions {
-        return ifNonNull(upcomingPoints, stepManeuver) { points, maneuver ->
-            val bearing = maneuver.bearingAfter()
-            bearing?.let { b ->
-                val zoom = 17.0
-                val pitch = 75.0
-                val center = getCameraCenter(
-                    points[0],
-                    b,
-                    options.cameraCenterDistanceFromJunction,
-                    options.cameraCenterDistanceUnit
+        return ifNonNull(
+            upcomingPoints,
+            currentStepGeometry
+        ) { nextStepPoints, geometry ->
+            val pointSequence: List<Point> = PolylineUtils.decode(geometry, PRECISION_6)
+            val reversedLineString = LineString.fromLngLats(pointSequence.asReversed())
+            val pointAtDistance =
+                TurfMeasurement.along(
+                    reversedLineString,
+                    40.0,
+                    UNIT_METERS
                 )
-                CameraOptions.Builder()
-                    .pitch(pitch)
-                    .zoom(zoom)
-                    .bearing(b)
-                    .padding(options.edgeInsets)
-                    .center(center)
-                    .build()
-            } ?: CameraOptions.Builder().build()
+            return mapboxMap.cameraForCoordinates(
+                listOf(pointAtDistance, nextStepPoints[0]),
+                options.edgeInsets,
+                TurfMeasurement.bearing(pointAtDistance, nextStepPoints[0]),
+                80.0
+            )
         } ?: CameraOptions.Builder().build()
-    }
-
-    private fun getCameraCenter(
-        point: Point,
-        bearing: Double,
-        distance: Double,
-        unit: String
-    ): Point {
-        return when {
-            bearing <= REFERENCE_BEARING -> {
-                destination(point, distance, bearing + REFERENCE_BEARING, unit)
-            }
-            else -> {
-                destination(point, distance, bearing - REFERENCE_BEARING, unit)
-            }
-        }
     }
 }

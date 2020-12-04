@@ -113,11 +113,13 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity {
     mapboxNavigation = new MapboxNavigation(navigationOptions);
     mapboxNavigation.registerLocationObserver(locationObserver);
     mapboxNavigation.registerRouteProgressObserver(replayProgressObserver);
+    float density = getResources().getDisplayMetrics().density;
     GuidanceImageOptions options = new GuidanceImageOptions.Builder()
-        .density(getResources().getDisplayMetrics().density)
+        .density(density)
+        .edgeInsets(new EdgeInsets(200.0*density, 100.0*density, 70.0*density, 70.0*density))
         .styleUri(Style.DARK)
         .build();
-    guidanceImageApi = new MapboxGuidanceImageApi(this, options, callback);
+    guidanceImageApi = new MapboxGuidanceImageApi(this, mapboxMap, options, callback);
 
     mapboxReplayer.pushRealLocation(this, 0.0);
     mapboxReplayer.play();
