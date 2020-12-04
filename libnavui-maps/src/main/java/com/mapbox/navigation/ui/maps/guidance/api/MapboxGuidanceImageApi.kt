@@ -25,7 +25,7 @@ import com.mapbox.navigation.ui.maps.guidance.internal.GuidanceImageAction
 import com.mapbox.navigation.ui.maps.guidance.internal.GuidanceImageProcessor
 import com.mapbox.navigation.ui.maps.guidance.internal.GuidanceImageResult
 import com.mapbox.navigation.ui.maps.guidance.model.GuidanceImageOptions
-import com.mapbox.navigation.util.internal.ifNonNull
+import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.turf.TurfConstants.UNIT_METERS
 import com.mapbox.turf.TurfMeasurement
 import timber.log.Timber

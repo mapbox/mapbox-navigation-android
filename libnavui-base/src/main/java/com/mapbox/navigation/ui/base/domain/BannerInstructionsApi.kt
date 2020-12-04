@@ -3,7 +3,7 @@ package com.mapbox.navigation.ui.base.domain
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerView
-import com.mapbox.navigation.util.internal.ifNonNull
+import com.mapbox.navigation.ui.utils.internal.ifNonNull
 
 interface BannerInstructionsApi {
 
