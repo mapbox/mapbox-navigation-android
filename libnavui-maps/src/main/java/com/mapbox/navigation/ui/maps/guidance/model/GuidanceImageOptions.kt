@@ -96,7 +96,7 @@ class GuidanceImageOptions private constructor(
      */
     class Builder {
 
-        private var size: Size = Size(1024f, 512f)
+        private var size: Size = Size(1024f, 1024f)
         private var density: Float = 1f
         private var styleUri: String = Style.MAPBOX_STREETS
         private var bitmapConfig: Bitmap.Config = Bitmap.Config.ARGB_8888

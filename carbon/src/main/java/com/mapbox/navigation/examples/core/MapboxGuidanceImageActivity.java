@@ -116,7 +116,7 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity {
     float density = getResources().getDisplayMetrics().density;
     GuidanceImageOptions options = new GuidanceImageOptions.Builder()
         .density(density)
-        .edgeInsets(new EdgeInsets(200.0*density, 100.0*density, 70.0*density, 70.0*density))
+        .edgeInsets(new EdgeInsets(200.0*density, 40.0*density, 40.0*density, 40.0*density))
         .styleUri(Style.DARK)
         .build();
     guidanceImageApi = new MapboxGuidanceImageApi(this, mapboxMap, options, callback);
@@ -262,7 +262,7 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity {
   }
 
   private DirectionsRoute getDirectionsRoute() {
-    InputStream is = getResources().openRawResource(R.raw.route_guidance_1);
+    InputStream is = getResources().openRawResource(R.raw.route_guidance_2);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
     byte buf[] = new byte[1024];

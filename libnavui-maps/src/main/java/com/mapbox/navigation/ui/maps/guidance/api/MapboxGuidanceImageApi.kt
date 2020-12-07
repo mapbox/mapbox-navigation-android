@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.guidance.api
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import com.mapbox.bindgen.Expected
 import com.mapbox.core.constants.Constants.PRECISION_6
 import com.mapbox.geojson.LineString
@@ -17,9 +18,16 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
 import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.SkyLayer
+import com.mapbox.maps.extension.style.layers.generated.lineLayer
+import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
+import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
 import com.mapbox.maps.extension.style.layers.properties.generated.SkyType
+import com.mapbox.maps.extension.style.sources.addSource
+import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.base.api.guidanceimage.GuidanceImageApi
+import com.mapbox.navigation.ui.base.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
+import com.mapbox.navigation.ui.base.internal.route.RouteConstants.PRIMARY_ROUTE_SOURCE_ID
 import com.mapbox.navigation.ui.base.model.guidanceimage.GuidanceImageState
 import com.mapbox.navigation.ui.maps.guidance.internal.GuidanceImageAction
 import com.mapbox.navigation.ui.maps.guidance.internal.GuidanceImageProcessor
@@ -28,6 +36,7 @@ import com.mapbox.navigation.ui.maps.guidance.model.GuidanceImageOptions
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.turf.TurfConstants.UNIT_METERS
 import com.mapbox.turf.TurfMeasurement
+import com.mapbox.turf.TurfMisc
 import timber.log.Timber
 import java.nio.ByteBuffer
 
@@ -44,6 +53,7 @@ class MapboxGuidanceImageApi(
     private val callback: OnGuidanceImageReady
 ) : GuidanceImageApi {
 
+    private val routeLinePoints = mutableListOf<Point>()
     private val snapshotter: Snapshotter
     private val snapshotterCallback = object : Snapshotter.SnapshotReadyCallback {
         override fun onSnapshotCreated(snapshot: Expected<MapSnapshotInterface?, String?>) {
@@ -93,6 +103,18 @@ class MapboxGuidanceImageApi(
             skyLayer.skyGradientRadius(8.0)
             skyLayer.skyAtmosphereSun(listOf(0.0, 90.0))
             style.addLayer(skyLayer)
+
+            style.addSource(geoJsonSource(PRIMARY_ROUTE_SOURCE_ID) {
+                geometry(LineString.fromLngLats(routeLinePoints))
+            })
+            val layer = lineLayer(PRIMARY_ROUTE_LAYER_ID, PRIMARY_ROUTE_SOURCE_ID) {
+                lineWidth(40.0)
+                lineOpacity(1.0)
+                lineCap(LineCap.ROUND)
+                lineJoin(LineJoin.ROUND)
+                lineColor("#56A8FB")
+            }
+            style.addLayer(layer)
         }
     }
 
@@ -132,8 +154,8 @@ class MapboxGuidanceImageApi(
                         ).isSnapshotBased -> {
                         snapshotter.setCameraOptions(
                             getCameraOptions(
-                                progress.upcomingStepPoints,
-                                progress.currentLegProgress?.currentStepProgress?.step?.geometry()
+                                progress.currentLegProgress?.currentStepProgress?.step?.geometry(),
+                                progress.currentLegProgress?.upcomingStep?.geometry()
                             )
                         )
                         snapshotter.setUri(options.styleUri)
@@ -149,27 +171,47 @@ class MapboxGuidanceImageApi(
     }
 
     private fun getCameraOptions(
-        upcomingPoints: List<Point>?,
-        currentStepGeometry: String?
+        currentStepGeometry: String?,
+        upcomingStepGeometry: String?
     ): CameraOptions {
         return ifNonNull(
-            upcomingPoints,
-            currentStepGeometry
-        ) { nextStepPoints, geometry ->
-            val pointSequence: List<Point> = PolylineUtils.decode(geometry, PRECISION_6)
-            val reversedLineString = LineString.fromLngLats(pointSequence.asReversed())
-            val pointAtDistance =
-                TurfMeasurement.along(
-                    reversedLineString,
-                    40.0,
-                    UNIT_METERS
-                )
+            currentStepGeometry,
+            upcomingStepGeometry
+        ) { currentGeometry, nextGeometry ->
+            // retrieve list of points 100m to maneuver including maneuver point
+            val pointListFromDistanceToManeuver = getPointsAlongLineStringSlice(currentGeometry, true, 100.0)
+            // retrieve point 100m before maneuver point
+            val pointAtDistanceBeforeManeuver = pointListFromDistanceToManeuver.last()
+            // retrieve list of points 100m from maneuver including maneuver point
+            val pointListFromManeuverToDistance = getPointsAlongLineStringSlice(nextGeometry, false, 40.0)
+            // retrieve point 100m after maneuver point
+            val pointAtDistanceAfterManeuver = pointListFromDistanceToManeuver.last()
+            val nextManeuverPoint = pointListFromDistanceToManeuver.first()
+
+            routeLinePoints.clear()
+            routeLinePoints.addAll(pointListFromDistanceToManeuver)
             return mapboxMap.cameraForCoordinates(
-                listOf(pointAtDistance, nextStepPoints[0]),
+                pointListFromDistanceToManeuver,
                 options.edgeInsets,
-                TurfMeasurement.bearing(pointAtDistance, nextStepPoints[0]),
-                80.0
+                TurfMeasurement.bearing(pointAtDistanceBeforeManeuver, nextManeuverPoint),
+                72.0
             )
         } ?: CameraOptions.Builder().build()
+    }
+
+    private fun getPointsAlongLineStringSlice(geometry: String, shouldReverse: Boolean, distanceToManeuver: Double): MutableList<Point> {
+        // calculate the point sequence for the geometry
+        val pointSequence: List<Point> = PolylineUtils.decode(geometry, PRECISION_6)
+        val lineString = if (shouldReverse) {
+            // find the LineString using [pointSequence] and reverse it.
+            LineString.fromLngLats(pointSequence.asReversed())
+        } else {
+            // find the LineString using [pointSequence].
+            LineString.fromLngLats(pointSequence)
+        }
+        // slice the reversed line string to end at 100m from the start
+        val slicedLineString = TurfMisc.lineSliceAlong(lineString, 0.0, distanceToManeuver, UNIT_METERS)
+        // get all the points in this sliced line string
+        return slicedLineString.coordinates()
     }
 }
