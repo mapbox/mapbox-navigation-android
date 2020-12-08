@@ -78,6 +78,11 @@ class FeedbackArrivalFragment : DialogFragment() {
         initListeners()
     }
 
+    override fun dismiss() {
+        feedbackFlowListener.onFeedbackFlowFinished()
+        super.dismiss()
+    }
+
     private fun initView() {
         cancelBtn.setColorFilter(Color.WHITE)
         initTitleTextView()

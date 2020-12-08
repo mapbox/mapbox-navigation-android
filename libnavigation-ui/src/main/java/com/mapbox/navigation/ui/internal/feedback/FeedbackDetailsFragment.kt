@@ -219,6 +219,8 @@ class FeedbackDetailsFragment : DialogFragment() {
         )
         if (arrivalExperienceFeedbackEnabled) {
             goToArrivalExperienceFragment()
+        } else {
+            feedbackFlowListener.onFeedbackFlowFinished()
         }
         dismiss()
     }
