@@ -22,4 +22,8 @@ internal class NavigationFeedbackFlowListener(
     override fun onArrivalExperienceFeedbackFinished(arrivalFeedbackItem: FeedbackItem) {
         navigationViewModel.updateFeedback(arrivalFeedbackItem)
     }
+
+    override fun onFeedbackFlowFinished() {
+        // do nothing
+    }
 }

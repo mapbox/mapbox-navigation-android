@@ -23,4 +23,9 @@ interface FeedbackFlowListener {
      * @param arrivalFeedbackItem the overall experience of a navigation
      */
     fun onArrivalExperienceFeedbackFinished(arrivalFeedbackItem: FeedbackItem)
+
+    /**
+     * The callback gets triggered when **Feedback flow** finished.
+     */
+    fun onFeedbackFlowFinished()
 }
