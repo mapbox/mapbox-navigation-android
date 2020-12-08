@@ -88,20 +88,20 @@ class MapboxGuidanceImageApi(
 
         override fun onStyleLoaded(style: Style) {
             val skyLayer = SkyLayer("sky_snapshotter")
-            skyLayer.skyType(SkyType.ATMOSPHERE)
+            //skyLayer.skyType(SkyType.ATMOSPHERE)
             skyLayer.skyGradient(
                 interpolate {
                     linear()
                     skyRadialProgress()
                     literal(0.0)
-                    literal("yellow")
+                    literal("#B0C7CF")
                     literal(1.0)
-                    literal("pink")
+                    literal("#7CA7BE")
                 }
             )
-            skyLayer.skyGradientCenter(listOf(-34.0, 90.0))
-            skyLayer.skyGradientRadius(8.0)
-            skyLayer.skyAtmosphereSun(listOf(0.0, 90.0))
+            //skyLayer.skyGradientCenter(listOf(-34.0, 90.0))
+            //skyLayer.skyGradientRadius(8.0)
+            //skyLayer.skyAtmosphereSun(listOf(0.0, 90.0))
             style.addLayer(skyLayer)
 
             style.addSource(geoJsonSource(PRIMARY_ROUTE_SOURCE_ID) {
@@ -182,16 +182,16 @@ class MapboxGuidanceImageApi(
             val pointListFromDistanceToManeuver = getPointsAlongLineStringSlice(currentGeometry, true, 100.0)
             // retrieve point 100m before maneuver point
             val pointAtDistanceBeforeManeuver = pointListFromDistanceToManeuver.last()
-            // retrieve list of points 100m from maneuver including maneuver point
+            // retrieve list of points 40m from maneuver including maneuver point
             val pointListFromManeuverToDistance = getPointsAlongLineStringSlice(nextGeometry, false, 40.0)
-            // retrieve point 100m after maneuver point
-            val pointAtDistanceAfterManeuver = pointListFromDistanceToManeuver.last()
             val nextManeuverPoint = pointListFromDistanceToManeuver.first()
 
             routeLinePoints.clear()
-            routeLinePoints.addAll(pointListFromDistanceToManeuver)
+            routeLinePoints.addAll(pointListFromDistanceToManeuver.asReversed())
+            routeLinePoints.addAll(pointListFromManeuverToDistance)
+
             return mapboxMap.cameraForCoordinates(
-                pointListFromDistanceToManeuver,
+                routeLinePoints,
                 options.edgeInsets,
                 TurfMeasurement.bearing(pointAtDistanceBeforeManeuver, nextManeuverPoint),
                 72.0

@@ -52,11 +52,10 @@ import java.util.List;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static com.mapbox.navigation.examples.util.LocationPermissionsHelperKt.LOCATION_PERMISSIONS_REQUEST_CODE;
 
-public class SlackLineActivity  extends AppCompatActivity implements PermissionsListener, OnMapLongClickListener {
+public class SlackLineActivity  extends AppCompatActivity implements OnMapLongClickListener {
 
 
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
-  private LocationPermissionsHelper permissionsHelper = new LocationPermissionsHelper(this);
   private MapView mapView;
   private MapboxMap mapboxMap;
   private LocationComponentPlugin locationComponent;
@@ -79,12 +78,7 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
     mapboxMap = mapView.getMapboxMap();
     locationComponent = getLocationComponent();
     mapCamera = getMapCamera();
-
-    if (LocationPermissionsHelper.areLocationPermissionsGranted(this)) {
-      requestPermissionIfNotGranted(WRITE_EXTERNAL_STORAGE);
-    } else {
-      permissionsHelper.requestLocationPermissions(this);
-    }
+    init();
   }
 
   private void init() {
@@ -312,41 +306,6 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
     @Override
     public void onFailure(@NonNull Exception exception) {
       Timber.i(exception);
-    }
-  }
-
-  @Override
-  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    if (requestCode == LOCATION_PERMISSIONS_REQUEST_CODE) {
-      permissionsHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    } else if (grantResults.length > 0) {
-      init();
-    } else {
-      Toast.makeText(this, "You didn't grant storage and/or location permissions.", Toast.LENGTH_LONG).show();
-    }
-  }
-
-  @Override
-  public void onExplanationNeeded(List<String> permissionsToExplain) {
-    Toast.makeText(this, "This app needs location and storage permissions in order to show its functionality.", Toast.LENGTH_LONG).show();
-  }
-
-  @Override
-  public void onPermissionResult(boolean granted) {
-    if (granted) {
-      requestPermissionIfNotGranted(WRITE_EXTERNAL_STORAGE);
-    } else {
-      Toast.makeText(this, "You didn't grant location permissions.", Toast.LENGTH_LONG).show();
-    }
-  }
-
-  private void requestPermissionIfNotGranted(String permission) {
-    List<String> permissionsNeeded = new ArrayList<>();
-    if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-      permissionsNeeded.add(permission);
-      ActivityCompat.requestPermissions(this, permissionsNeeded.toArray(new String[0]), 10);
-    } else {
-      init();
     }
   }
 }
