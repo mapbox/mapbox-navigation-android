@@ -167,7 +167,7 @@ class MapboxGuidanceImageApi(
             } ?: callback.onFailure(
                 GuidanceImageState.GuidanceImageFailure.GuidanceImageUnavailable
             )
-        } ?: callback.onFailure(GuidanceImageState.GuidanceImageFailure.GuidanceImageUnavailable)
+        }
     }
 
     private fun getCameraOptions(

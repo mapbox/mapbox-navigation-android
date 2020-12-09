@@ -2,7 +2,6 @@ package com.mapbox.navigation.examples.core;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,15 +10,11 @@ import android.os.Vibrator;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineResult;
-import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
@@ -39,18 +34,13 @@ import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.core.replay.ReplayLocationEngine;
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
-import com.mapbox.navigation.examples.util.LocationPermissionsHelper;
 import com.mapbox.navigation.examples.util.Slackline;
 import org.jetbrains.annotations.NotNull;
 import timber.log.Timber;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static com.mapbox.navigation.examples.util.LocationPermissionsHelperKt.LOCATION_PERMISSIONS_REQUEST_CODE;
 
 public class SlackLineActivity  extends AppCompatActivity implements OnMapLongClickListener {
 
@@ -128,6 +118,10 @@ public class SlackLineActivity  extends AppCompatActivity implements OnMapLongCl
   @Override
   protected void onStop() {
     super.onStop();
+    if (mapboxNavigation != null) {
+      mapboxNavigation.unregisterLocationObserver(locationObserver);
+      mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver);
+    }
     mapView.onStop();
   }
 
