@@ -1,4 +1,5 @@
 <resources>
+
     <!-- Time formatting -->
     <plurals name="mapbox_number_of_days">
         <item quantity="one">μέρα</item>

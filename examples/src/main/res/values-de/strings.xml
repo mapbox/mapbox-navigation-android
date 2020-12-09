@@ -116,5 +116,4 @@
     <string name="history_failed_to_load_list">Fehler beim Laden der Liste</string>
     <string name="history_local_history_file">Lokale Verlaufsdatei</string>
     <string name="history_recorded_history_file">Aufgenommene Verlaufsdatei</string>
-
-</resources>
+    </resources>

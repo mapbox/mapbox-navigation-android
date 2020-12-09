@@ -39,9 +39,6 @@
     <!-- Feedback type for Road Closure -->
     <string name="mapbox_feedback_type_road_closure">Camino\nCerrado</string>
 
-    <!-- Shown after a feedback type has been submitted -->
-    <string name="mapbox_feedback_reported">¡Muchísimas gracias! Se ha reportado el problema.</string>
-
     <!-- Feedback description for Looks Incorrect -->
     <string name="mapbox_feedback_description_turn_icon_incorrect">Ícono de giro incorrecto</string>
     <string name="mapbox_feedback_description_street_name_incorrect">Nombre de calle incorrecto</string>
