@@ -2,6 +2,19 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 1.3.0-alpha.5 - December 9, 2020
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Features
+* Exposed GeoJsonOptions#withTolerance param for route line sources. [3819](https://github.com/mapbox/mapbox-navigation-android/pull/3819)
+* Added speedLimit to MapMatcher. [3839](https://github.com/mapbox/mapbox-navigation-android/pull/3839)
+* Added `onFeedbackFlowFinished` method to `FeedbackFlowListener`. [3850](https://github.com/mapbox/mapbox-navigation-android/pull/3850)
+
+#### Bug fixes and improvements
+* Updated assets and resources translations. [3856](https://github.com/mapbox/mapbox-navigation-android/pull/3856)
+* Updated default routing tiles version to `2020_12_05-03_00_00`. [3857](https://github.com/mapbox/mapbox-navigation-android/pull/3857)
+
 ## Mapbox Navigation SDK 1.3.0-alpha.4 - December 2, 2020
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
