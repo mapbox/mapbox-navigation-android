@@ -1,6 +1,6 @@
 [main]
 host = https://www.transifex.com
-lang_map = pt_BR: pt-rBR, pt_PT: pt-rPT
+lang_map = pt_BR: pt-rBR, pt_PT: pt-rPT, es_ES: es-rES
 minimum_perc = 20
 
 [mapbox-navigation-sdk-for-android.examples-app-strings-file]

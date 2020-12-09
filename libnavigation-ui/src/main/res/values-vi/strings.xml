@@ -39,9 +39,6 @@
     <!-- Feedback type for Road Closure -->
     <string name="mapbox_feedback_type_road_closure">Đường\nĐóng cửa</string>
 
-    <!-- Shown after a feedback type has been submitted -->
-    <string name="mapbox_feedback_reported">Cảm ơn, đã gửi lời báo cáo!</string>
-
     <!-- Feedback description for Looks Incorrect -->
     <string name="mapbox_feedback_description_turn_icon_incorrect">Hình quẹo phía sai</string>
     <string name="mapbox_feedback_description_street_name_incorrect">Tên đường sai</string>

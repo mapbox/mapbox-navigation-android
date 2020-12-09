@@ -1,9 +1,47 @@
 <resources>
-    <string name="app_name">Mapbox 1.0 Navigation SDK для Android</string>
+    <string name="app_name">Mapbox 1.0 Navigation SDK for Android</string>
+
+    <!-- MainActivity -->
+    <string name="navigation_core_sdk_title">Navigation Core SDK</string>
+    <string name="navigation_core_sdk_description">Приклади використання основних функцій Navigation SDK.</string>
+
+    <string name="navigation_ui_sdk_title">Navigation UI SDK</string>
+    <string name="navigation_ui_sdk_description">Приклади використання функцій Navigation UI SDK.</string>
+
+    <string name="title_simple_navigation_kotlin">Приклад MapboxNavigation в Kotlin</string>
+    <string name="description_simple_navigation_kotlin">Показує, як використовувати клас MapboxNavigation в коді Kotlin.</string>
+
+    <string name="title_navigation_view">NavigationView</string>
+    <string name="description_navigation_view">Показує, як використовувати NavigationView для покрокової навігації.</string>
+
+    <string name="title_reroute_view">Події зміни маршруту</string>
+    <string name="description_reroute_view">Приклади відстеження відхилення від маршруту та реалізації власної логіки його перебудування.</string>
+
+    <string name="title_basic_navigation_kotlin">Базова навігація</string>
+    <string name="description_basic_navigation_kotlin">Показує, як створити навігацію з місця положення пристрою до пункту призначення використовуючи клас MapboxNavigation.</string>
+
+    <string name="title_basic_navigation_fragment">Базова навігація з Fragment</string>
+    <string name="description_basic_navigation_fragment">Показує, як створити навігацію з місця положення пристрою до пункту призначення використовуючи клас MapboxNavigation з Fragment.</string>
+
+    <string name="title_basic_navigation_sdk_only_kotlin">Інтеграція базової навігації та Maps SDK</string>
+    <string name="description_basic_navigation_sdk_only_kotlin">Показує приклади, як поєднати Maps SDK лише з Navigation SDK без використання Navigation UI SDK.</string>
 
     <string name="settings">Налаштування</string>
     <string name="simulate_route">Імітация маршрута</string>
     <string name="language">Мова</string>
     <string name="unit_type">Одиниці виміру</string>
     <string name="route_profile">Тип маршрута</string>
-</resources>
+    <string name="nav_native_history_collect">Запис історії</string>
+    <string name="start_navigation">Розпочати навігацію</string>
+    <string name="navigate_waypoints_next_stop">Наступна зупинка</string>
+    <string name="play_history">Програти історію</string>
+    <string name="select_history">Обрати історію</string>
+    <string name="msg_long_press_map_to_place_waypoint">Довге натискання на мапі для додавання дорожньої точки</string>
+    <string name="no_routes">Неможливо створити маршрут до пункту призначення</string>
+    <string name="steps_in_route">Маршрут складається з %1$d кроків(у)</string>
+    <string name="route_request_failed">Помилка отримання маршруту</string>
+    <string name="offline_category_title">Офлайн</string>
+    <string name="offline_enabled_title">Прокладання маршрутів в режимі офлайн</string>
+    <string name="offline_version_title">Оберіть версію для офлайн маршрутів</string>
+    <string name="general_category_title">Загальні</string>
+    </resources>
