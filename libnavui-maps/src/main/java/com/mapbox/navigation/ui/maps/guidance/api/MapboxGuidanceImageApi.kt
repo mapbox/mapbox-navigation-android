@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.maps.guidance.api
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.util.Log
 import com.mapbox.bindgen.Expected
 import com.mapbox.core.constants.Constants.PRECISION_6
 import com.mapbox.geojson.LineString
@@ -21,7 +20,6 @@ import com.mapbox.maps.extension.style.layers.generated.SkyLayer
 import com.mapbox.maps.extension.style.layers.generated.lineLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
 import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
-import com.mapbox.maps.extension.style.layers.properties.generated.SkyType
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -179,11 +177,19 @@ class MapboxGuidanceImageApi(
             upcomingStepGeometry
         ) { currentGeometry, nextGeometry ->
             // retrieve list of points 100m to maneuver including maneuver point
-            val pointListFromDistanceToManeuver = getPointsAlongLineStringSlice(currentGeometry, true, 100.0)
+            val pointListFromDistanceToManeuver = getPointsAlongLineStringSlice(
+                currentGeometry,
+                true,
+                100.0
+            )
             // retrieve point 100m before maneuver point
             val pointAtDistanceBeforeManeuver = pointListFromDistanceToManeuver.last()
             // retrieve list of points 40m from maneuver including maneuver point
-            val pointListFromManeuverToDistance = getPointsAlongLineStringSlice(nextGeometry, false, 40.0)
+            val pointListFromManeuverToDistance = getPointsAlongLineStringSlice(
+                nextGeometry,
+                false,
+                40.0
+            )
             val nextManeuverPoint = pointListFromDistanceToManeuver.first()
 
             routeLinePoints.clear()
@@ -199,7 +205,11 @@ class MapboxGuidanceImageApi(
         } ?: CameraOptions.Builder().build()
     }
 
-    private fun getPointsAlongLineStringSlice(geometry: String, shouldReverse: Boolean, distanceToManeuver: Double): MutableList<Point> {
+    private fun getPointsAlongLineStringSlice(
+        geometry: String,
+        shouldReverse: Boolean,
+        distanceToManeuver: Double
+    ): MutableList<Point> {
         // calculate the point sequence for the geometry
         val pointSequence: List<Point> = PolylineUtils.decode(geometry, PRECISION_6)
         val lineString = if (shouldReverse) {
@@ -210,7 +220,12 @@ class MapboxGuidanceImageApi(
             LineString.fromLngLats(pointSequence)
         }
         // slice the reversed line string to end at 100m from the start
-        val slicedLineString = TurfMisc.lineSliceAlong(lineString, 0.0, distanceToManeuver, UNIT_METERS)
+        val slicedLineString = TurfMisc.lineSliceAlong(
+            lineString,
+            0.0,
+            distanceToManeuver,
+            UNIT_METERS
+        )
         // get all the points in this sliced line string
         return slicedLineString.coordinates()
     }
