@@ -34,6 +34,7 @@ license:
 .PHONY: javadoc-dokka
 javadoc-dokka:
 	./gradlew dokkaHtmlMultiModule
+	./docs/replace-styles.sh
 
 .PHONY: dependency-graphs
 dependency-graphs:
