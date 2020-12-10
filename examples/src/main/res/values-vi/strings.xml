@@ -65,5 +65,4 @@
     <string name="history_failed_to_load_list">Thất bại khi tải danh sách</string>
     <string name="history_local_history_file">Tập tin lịch sử trên thiết bị</string>
     <string name="history_recorded_history_file">Tập tin lịch sử đã thu thập</string>
-
-</resources>
+    </resources>

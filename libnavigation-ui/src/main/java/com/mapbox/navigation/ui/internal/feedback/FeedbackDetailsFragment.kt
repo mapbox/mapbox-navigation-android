@@ -219,6 +219,8 @@ class FeedbackDetailsFragment : DialogFragment() {
         )
         if (arrivalExperienceFeedbackEnabled) {
             goToArrivalExperienceFragment()
+        } else {
+            feedbackFlowListener.onFeedbackFlowFinished()
         }
         dismiss()
     }
@@ -226,7 +228,7 @@ class FeedbackDetailsFragment : DialogFragment() {
     private fun goToArrivalExperienceFragment() {
         parentFragmentManager.beginTransaction()
             .add(
-                R.id.feedbackFrameLayout,
+                android.R.id.content,
                 FeedbackArrivalFragment.newInstance(
                     feedbackFlowListener
                 ),

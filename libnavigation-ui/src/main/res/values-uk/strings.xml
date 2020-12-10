@@ -18,8 +18,14 @@
     <!-- Feedback Guidance Issue -->
     <string name="mapbox_feedback_guidance_issue">Вади супроводження</string>
 
+    <!-- Feedback type for Looks Incorrect -->
+    <string name="mapbox_feedback_type_looks_incorrect">Виглядає\nнеправильно</string>
+
     <!-- Feedback type for Confusing Audio -->
     <string name="mapbox_feedback_type_confusing_audio">Голосова\nпідказка</string>
+
+    <!-- Feedback type for Positioning Issue -->
+    <string name="mapbox_feedback_type_positioning_issue">Проблема\nпозиціювання</string>
 
     <!-- Feedback Navigation Issue -->
     <string name="mapbox_feedback_navigation_issue">Вади навігації</string>
@@ -32,6 +38,39 @@
 
     <!-- Feedback type for Road Closure -->
     <string name="mapbox_feedback_type_road_closure">Перекриття\nдороги</string>
+
+    <!-- Feedback description for Looks Incorrect -->
+    <string name="mapbox_feedback_description_turn_icon_incorrect">Значок повороту неправильний</string>
+    <string name="mapbox_feedback_description_street_name_incorrect">Неправильна назва вулиці</string>
+    <string name="mapbox_feedback_description_instruction_unnecessary">Непотрібні інструкції</string>
+    <string name="mapbox_feedback_description_instruction_missing">Інструкції відсутні</string>
+    <string name="mapbox_feedback_description_maneuver_incorrect">Неправильний маневр</string>
+    <string name="mapbox_feedback_description_exit_info_incorrect">Неправильний з\'їзд</string>
+    <string name="mapbox_feedback_description_lane_guidance_incorrect">Рух по смугах неправильний</string>
+    <string name="mapbox_feedback_description_road_known_by_different_name">Ця дорога має іншу назву</string>
+
+    <!-- Feedback description for Confusing Audio -->
+    <string name="mapbox_feedback_description_guidance_too_early">Повідомлення передчасне</string>
+    <string name="mapbox_feedback_description_guidance_too_late">Повідомлення запізніле</string>
+    <string name="mapbox_feedback_description_pronunciation_incorrect">Неправильна вимова</string>
+    <string name="mapbox_feedback_description_road_name_repeated">Назва дороги повторюється</string>
+
+    <!-- Feedback description for Route Quality -->
+    <string name="mapbox_feedback_description_route_not_drive_able">Маршрут не проїзний</string>
+    <string name="mapbox_feedback_description_route_not_preferred">Маршрут не бажаний</string>
+    <string name="mapbox_feedback_description_alternative_route_not_expected">Немає альтернативного маршруту</string>
+    <string name="mapbox_feedback_description_route_included_missing_roads">Маршрут містить відсутні дороги</string>
+    <string name="mapbox_feedback_description_route_had_roads_too_narrow_to_pass">Вздовж маршруту були дуже вузькі дороги</string>
+
+    <!-- Feedback description for Illegal Route -->
+    <string name="mapbox_feedback_description_routed_down_a_one_way">Маршрут проти одностороннього руху</string>
+    <string name="mapbox_feedback_description_turn_was_not_allowed">Маневр був заборонений</string>
+    <string name="mapbox_feedback_description_cars_not_allowed_on_street">Вулиця закрита для автівок</string>
+    <string name="mapbox_feedback_description_turn_at_intersection_was_unprotected">Поворот на перехресті був небезпечним</string>
+
+    <!-- Feedback description for Road Closure -->
+    <string name="mapbox_feedback_description_street_permanently_blocked_off">Вулицю закрито постійно</string>
+    <string name="mapbox_feedback_description_road_is_missing_from_map">Дороги немає на мапі</string>
 
     <!-- Shown after a feedback type has been submitted -->
     <string name="mapbox_feedback_submitted">Відгук надіслано</string>

@@ -1,9 +1,12 @@
 package com.mapbox.navigation.core.navigator
 
 import android.location.Location
+import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.navigator.internal.TripStatus
+import com.mapbox.navigator.SpeedLimitSign
+import com.mapbox.navigator.SpeedLimitUnit
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -25,6 +28,7 @@ class NavigatorMapperTest {
             offRoute,
             mockk {
                 every { offRoadProba } returns 0f
+                every { speedLimit } returns createSpeedLimit()
                 every { map_matcher_output } returns mockk {
                     every { isTeleport } returns false
                     every { matches } returns listOf(
@@ -41,6 +45,11 @@ class NavigatorMapperTest {
             isOffRoad = false,
             offRoadProbability = 0f,
             isTeleport = false,
+            SpeedLimit(
+                10,
+                com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
+            ),
             roadEdgeMatchProbability = 1f
         )
 
@@ -58,6 +67,7 @@ class NavigatorMapperTest {
             offRoute,
             mockk {
                 every { offRoadProba } returns 0.5f
+                every { speedLimit } returns createSpeedLimit()
                 every { map_matcher_output } returns mockk {
                     every { isTeleport } returns false
                     every { matches } returns listOf(
@@ -74,6 +84,11 @@ class NavigatorMapperTest {
             isOffRoad = false,
             offRoadProbability = 0.5f,
             isTeleport = false,
+            SpeedLimit(
+                10,
+                com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
+            ),
             roadEdgeMatchProbability = 1f
         )
 
@@ -91,6 +106,7 @@ class NavigatorMapperTest {
             offRoute,
             mockk {
                 every { offRoadProba } returns 0.500009f
+                every { speedLimit } returns createSpeedLimit()
                 every { map_matcher_output } returns mockk {
                     every { isTeleport } returns false
                     every { matches } returns listOf(
@@ -107,6 +123,11 @@ class NavigatorMapperTest {
             isOffRoad = true,
             offRoadProbability = 0.500009f,
             isTeleport = false,
+            SpeedLimit(
+                10,
+                com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
+            ),
             roadEdgeMatchProbability = 1f
         )
 
@@ -124,6 +145,7 @@ class NavigatorMapperTest {
             offRoute,
             mockk {
                 every { offRoadProba } returns 0f
+                every { speedLimit } returns createSpeedLimit()
                 every { map_matcher_output } returns mockk {
                     every { isTeleport } returns true
                     every { matches } returns listOf(
@@ -140,6 +162,11 @@ class NavigatorMapperTest {
             isOffRoad = false,
             offRoadProbability = 0f,
             isTeleport = true,
+            SpeedLimit(
+                10,
+                com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
+            ),
             roadEdgeMatchProbability = 1f
         )
 
@@ -157,6 +184,7 @@ class NavigatorMapperTest {
             offRoute,
             mockk {
                 every { offRoadProba } returns 1f
+                every { speedLimit } returns createSpeedLimit()
                 every { map_matcher_output } returns mockk {
                     every { isTeleport } returns false
                     every { matches } returns listOf()
@@ -169,11 +197,24 @@ class NavigatorMapperTest {
             isOffRoad = true,
             offRoadProbability = 1f,
             isTeleport = false,
+            SpeedLimit(
+                10,
+                com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
+            ),
             roadEdgeMatchProbability = 0f
         )
 
         val result = tripStatus.getMapMatcherResult()
 
         assertEquals(expected, result)
+    }
+
+    private fun createSpeedLimit(): com.mapbox.navigator.SpeedLimit {
+        return com.mapbox.navigator.SpeedLimit(
+            10,
+            SpeedLimitUnit.KILOMETRES_PER_HOUR,
+            SpeedLimitSign.MUTCD
+        )
     }
 }

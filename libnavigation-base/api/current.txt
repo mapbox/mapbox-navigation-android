@@ -190,6 +190,31 @@ package com.mapbox.navigation.base.route {
 
 }
 
+package com.mapbox.navigation.base.speed.model {
+
+  public final class SpeedLimit {
+    ctor public SpeedLimit(Integer? speedKmph, com.mapbox.navigation.base.speed.model.SpeedLimitUnit speedLimitUnit, com.mapbox.navigation.base.speed.model.SpeedLimitSign speedLimitSign);
+    method public Integer? component1();
+    method public com.mapbox.navigation.base.speed.model.SpeedLimitUnit component2();
+    method public com.mapbox.navigation.base.speed.model.SpeedLimitSign component3();
+    method public com.mapbox.navigation.base.speed.model.SpeedLimit copy(Integer? speedKmph, com.mapbox.navigation.base.speed.model.SpeedLimitUnit speedLimitUnit, com.mapbox.navigation.base.speed.model.SpeedLimitSign speedLimitSign);
+    method public Integer? getSpeedKmph();
+    method public com.mapbox.navigation.base.speed.model.SpeedLimitSign getSpeedLimitSign();
+    method public com.mapbox.navigation.base.speed.model.SpeedLimitUnit getSpeedLimitUnit();
+  }
+
+  public enum SpeedLimitSign {
+    enum_constant public static final com.mapbox.navigation.base.speed.model.SpeedLimitSign MUTCD;
+    enum_constant public static final com.mapbox.navigation.base.speed.model.SpeedLimitSign VIENNA;
+  }
+
+  public enum SpeedLimitUnit {
+    enum_constant public static final com.mapbox.navigation.base.speed.model.SpeedLimitUnit KILOMETRES_PER_HOUR;
+    enum_constant public static final com.mapbox.navigation.base.speed.model.SpeedLimitUnit MILES_PER_HOUR;
+  }
+
+}
+
 package com.mapbox.navigation.base.time.span {
 
   public final class SpanExKt {

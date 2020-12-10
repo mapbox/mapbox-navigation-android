@@ -527,6 +527,8 @@ package com.mapbox.navigation.ui.map {
     method public com.mapbox.navigation.ui.map.NavigationMapboxMap.Builder! vanishRouteLineEnabled(boolean);
     method public com.mapbox.navigation.ui.map.NavigationMapboxMap.Builder! vanishingRouteLineUpdateIntervalNano(long);
     method public com.mapbox.navigation.ui.map.NavigationMapboxMap.Builder! withRouteClickPadding(float);
+    method public com.mapbox.navigation.ui.map.NavigationMapboxMap.Builder withSourceMaxZoom(int);
+    method public com.mapbox.navigation.ui.map.NavigationMapboxMap.Builder withSourceTolerance(float);
   }
 
   public interface OnWayNameChangedListener {
@@ -638,6 +640,8 @@ package com.mapbox.navigation.ui.route {
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withRouteClickPadding(float);
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withRouteLineInitializedCallback(com.mapbox.navigation.ui.route.MapRouteLineInitializedCallback?);
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withRouteStyleDescriptors(java.util.List<com.mapbox.navigation.ui.route.RouteStyleDescriptor!>!);
+    method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withSourceMaxZoom(int);
+    method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withSourceTolerance(float);
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withStyle(@StyleRes int);
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withVanishRouteLineEnabled(boolean);
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withVanishingRouteLineUpdateIntervalNano(long);
