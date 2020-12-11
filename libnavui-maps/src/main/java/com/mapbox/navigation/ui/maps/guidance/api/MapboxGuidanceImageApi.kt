@@ -2,17 +2,20 @@ package com.mapbox.navigation.ui.maps.guidance.api
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import com.mapbox.bindgen.Expected
 import com.mapbox.core.constants.Constants.PRECISION_6
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapInterface
 import com.mapbox.maps.MapSnapshotInterface
 import com.mapbox.maps.MapSnapshotOptions
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.MapboxOptions
+import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
 import com.mapbox.maps.Snapshotter
 import com.mapbox.maps.Style
@@ -154,13 +157,24 @@ class MapboxGuidanceImageApi(
                             GuidanceImageResult.ShouldShowSnapshotBasedGuidance
                         ).isSnapshotBased -> {
                         val oldSize = mapInterface.size
-                        mapInterface.size = Size(500f, 500f)
-                        snapshotter.setCameraOptions(
-                            getCameraOptions(
-                                progress.currentLegProgress?.currentStepProgress?.step?.geometry(),
-                                progress.currentLegProgress?.upcomingStep?.geometry()
-                            )
+                        mapInterface.size = Size(1024f, 512f)
+                        val cameraOptions = getCameraOptions(
+                            progress.currentLegProgress?.currentStepProgress?.step?.geometry(),
+                            progress.currentLegProgress?.upcomingStep?.geometry()
                         )
+                        /*
+                        let top = screenCoordinate.y
+                            let left = screenCoordinate.x
+                            let bottom = view.bounds.size.height - top
+                        let right = view.bounds.size.width - left
+                        val displayMetrics = Resources.getSystem().getDisplayMetrics()
+
+    */
+                        val centerTop = ((mapInterface.size.height*options.density) - (options.edgeInsets.top + options.edgeInsets.bottom))/2 + (options.edgeInsets.top)
+                        val centerLeft = ((mapInterface.size.width*options.density) - (options.edgeInsets.left + options.edgeInsets.right))/2 + (options.edgeInsets.left)
+                        Log.d("TESTING", "centerTop: $centerTop + centerLeft: $centerLeft")
+                        cameraOptions.padding = getEdgeInsets(mapInterface.size, ScreenCoordinate(centerLeft/options.density, centerTop/options.density))
+                        snapshotter.setCameraOptions(cameraOptions)
                         mapInterface.size = oldSize
                         snapshotter.setUri(options.styleUri)
                         snapshotter.start(snapshotterCallback)
@@ -172,6 +186,13 @@ class MapboxGuidanceImageApi(
                 GuidanceImageState.GuidanceImageFailure.GuidanceImageUnavailable
             )
         }
+    }
+
+    private fun getEdgeInsets(mapSize: Size, centerOffset: ScreenCoordinate = ScreenCoordinate(0.0, 0.0)): EdgeInsets {
+        val mapCenterScreenCoordinate = ScreenCoordinate((mapSize.width / 2).toDouble(), (mapSize.height / 2).toDouble())
+        val top = mapCenterScreenCoordinate.y + centerOffset.y
+        val left = mapCenterScreenCoordinate.x + centerOffset.x
+        return EdgeInsets(top, left, mapSize.height - top, mapSize.width - left)
     }
 
     private fun getCameraOptions(
