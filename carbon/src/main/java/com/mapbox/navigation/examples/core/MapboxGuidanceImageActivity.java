@@ -26,6 +26,7 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener;
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions;
 import com.mapbox.maps.plugin.location.LocationComponentPlugin;
 import com.mapbox.maps.plugin.location.modes.RenderMode;
+import com.mapbox.maps.renderer.MapboxRenderer;
 import com.mapbox.navigation.base.internal.route.RouteUrl;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
@@ -47,6 +48,8 @@ import org.jetbrains.annotations.NotNull;
 import timber.log.Timber;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
@@ -73,7 +76,7 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements On
     }
 
     @Override public void onFailure(@NotNull GuidanceImageState.GuidanceImageFailure error) {
-      guidanceView.render(error);
+      //guidanceView.render(error);
     }
   };
 
@@ -121,10 +124,30 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements On
     float density = getResources().getDisplayMetrics().density;
     GuidanceImageOptions options = new GuidanceImageOptions.Builder()
       .density(density)
-      .edgeInsets(new EdgeInsets(80.0*density, 40.0*density, 40.0*density, 40.0*density))
+      .edgeInsets(new EdgeInsets(60.0*density, 10.0*density, 10.0*density, 10.0*density))
       .styleUri("mapbox://styles/mapbox-map-design/ckifcx2i84huf19pbvgi0cka6")
       .build();
-    guidanceImageApi = new MapboxGuidanceImageApi(this, mapboxMap, options, callback);
+
+    MapInterface mapInterface = null;
+    try {
+
+      Field privateMapViewField = MapView.class.getDeclaredField("mapController");
+      privateMapViewField.setAccessible(true);
+      MapController controller = (MapController) privateMapViewField.get(mapView);
+
+      Field privateMapControllerField = MapController.class.getDeclaredField("renderer");
+      privateMapControllerField.setAccessible(true);
+      MapboxRenderer renderer = (MapboxRenderer) privateMapControllerField.get(controller);
+
+      Field privateMapRendererField = MapboxRenderer.class.getDeclaredField("map");
+      privateMapRendererField.setAccessible(true);
+      mapInterface = (MapInterface) privateMapRendererField.get(renderer);
+    } catch (NoSuchFieldException e) {
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
+    }
+    guidanceImageApi = new MapboxGuidanceImageApi(this, mapboxMap, mapInterface, options, callback);
 
     mapboxReplayer.pushRealLocation(this, 0.0);
     mapboxReplayer.play();
@@ -179,7 +202,7 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements On
               currentLocation.getLongitude(),
               currentLocation.getLatitude()
       );
-      Point or = Point.fromLngLat(-3.607689,40.551350);
+      Point or = Point.fromLngLat(-3.5870,40.5719);
       Point de = Point.fromLngLat(-3.607835,40.551486);
       findRoute(or, de);
     }

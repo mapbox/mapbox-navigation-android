@@ -8,10 +8,12 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.MapInterface
 import com.mapbox.maps.MapSnapshotInterface
 import com.mapbox.maps.MapSnapshotOptions
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.MapboxOptions
+import com.mapbox.maps.Size
 import com.mapbox.maps.Snapshotter
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
@@ -47,6 +49,7 @@ import java.nio.ByteBuffer
 class MapboxGuidanceImageApi(
     val context: Context,
     val mapboxMap: MapboxMap,
+    private val mapInterface: MapInterface,
     private val options: GuidanceImageOptions,
     private val callback: OnGuidanceImageReady
 ) : GuidanceImageApi {
@@ -106,7 +109,7 @@ class MapboxGuidanceImageApi(
                 geometry(LineString.fromLngLats(routeLinePoints))
             })
             val layer = lineLayer(PRIMARY_ROUTE_LAYER_ID, PRIMARY_ROUTE_SOURCE_ID) {
-                lineWidth(40.0)
+                lineWidth(16.0)
                 lineOpacity(1.0)
                 lineCap(LineCap.ROUND)
                 lineJoin(LineJoin.ROUND)
@@ -150,12 +153,15 @@ class MapboxGuidanceImageApi(
                         showSnapshotBased as
                             GuidanceImageResult.ShouldShowSnapshotBasedGuidance
                         ).isSnapshotBased -> {
+                        val oldSize = mapInterface.size
+                        mapInterface.size = Size(500f, 500f)
                         snapshotter.setCameraOptions(
                             getCameraOptions(
                                 progress.currentLegProgress?.currentStepProgress?.step?.geometry(),
                                 progress.currentLegProgress?.upcomingStep?.geometry()
                             )
                         )
+                        mapInterface.size = oldSize
                         snapshotter.setUri(options.styleUri)
                         snapshotter.start(snapshotterCallback)
                     }
@@ -180,7 +186,7 @@ class MapboxGuidanceImageApi(
             val pointListFromDistanceToManeuver = getPointsAlongLineStringSlice(
                 currentGeometry,
                 true,
-                100.0
+                70.0
             )
             // retrieve point 100m before maneuver point
             val pointAtDistanceBeforeManeuver = pointListFromDistanceToManeuver.last()
@@ -188,7 +194,7 @@ class MapboxGuidanceImageApi(
             val pointListFromManeuverToDistance = getPointsAlongLineStringSlice(
                 nextGeometry,
                 false,
-                40.0
+                10.0
             )
             val nextManeuverPoint = pointListFromDistanceToManeuver.first()
 
