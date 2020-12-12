@@ -9,9 +9,11 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.View;
 import android.widget.Button;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -43,24 +45,27 @@ import com.mapbox.navigation.core.replay.route.ReplayProgressObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.examples.util.Slackline;
-import com.mapbox.navigation.ui.base.api.guidanceimage.GuidanceImageApi;
-import com.mapbox.navigation.ui.base.model.guidanceimage.GuidanceImageState;
-import com.mapbox.navigation.ui.maps.guidance.api.MapboxGuidanceImageApi;
-import com.mapbox.navigation.ui.maps.guidance.api.OnGuidanceImageReady;
-import com.mapbox.navigation.ui.maps.guidance.model.GuidanceImageOptions;
-import com.mapbox.navigation.ui.maps.guidance.view.MapboxGuidanceView;
+import com.mapbox.navigation.ui.base.api.snapshotter.SnapshotterApi;
+import com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState;
+import com.mapbox.navigation.ui.maps.snapshotter.api.MapboxSnapshotterApi;
+import com.mapbox.navigation.ui.maps.snapshotter.api.SnapshotReadyCallback;
+import com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotOptions;
+import com.mapbox.navigation.ui.maps.snapshotter.view.MapboxSnapshotView;
+
 import org.jetbrains.annotations.NotNull;
-import timber.log.Timber;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+
+import timber.log.Timber;
 
 import static com.mapbox.navigation.examples.util.Utils.getMapboxAccessToken;
 import static com.mapbox.navigation.examples.util.Utils.getMapboxRouteAccessToken;
 
-public class MapboxGuidanceImageActivity extends AppCompatActivity implements OnMapLongClickListener {
+public class MapboxSnapshotActivity extends AppCompatActivity implements OnMapLongClickListener {
 
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
   private MapView mapView;
@@ -71,16 +76,16 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements On
   private MapboxNavigation mapboxNavigation;
   private Button startNavigation;
   private Slackline slackline = new Slackline(this);
-  private GuidanceImageApi guidanceImageApi;
-  private MapboxGuidanceView guidanceView;
+  private SnapshotterApi snapshotterApi;
+  private MapboxSnapshotView snapshotView;
 
-  private OnGuidanceImageReady callback = new OnGuidanceImageReady() {
-    @Override public void onGuidanceImagePrepared(@NotNull GuidanceImageState.GuidanceImagePrepared bitmap) {
-      guidanceView.render(bitmap);
+  private SnapshotReadyCallback callback = new SnapshotReadyCallback() {
+    @Override public void onSnapshotReady(@NotNull SnapshotState.SnapshotReady bitmap) {
+      snapshotView.render(bitmap);
     }
 
-    @Override public void onFailure(@NotNull GuidanceImageState.GuidanceImageFailure error) {
-      guidanceView.render(error);
+    @Override public void onFailure(@NotNull SnapshotState.SnapshotFailure error) {
+      snapshotView.render(error);
     }
   };
 
@@ -88,10 +93,10 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements On
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.layout_activity_guidance_image);
+    setContentView(R.layout.layout_activity_snapshot);
     mapView = findViewById(R.id.mapView);
     startNavigation = findViewById(R.id.startNavigation);
-    guidanceView = findViewById(R.id.guidanceView);
+    snapshotView = findViewById(R.id.snapshotView);
     mapboxMap = mapView.getMapboxMap();
     locationComponent = getLocationComponent();
     mapCamera = getMapCamera();
@@ -117,7 +122,7 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements On
   @SuppressLint("MissingPermission")
   private void initNavigation() {
     NavigationOptions navigationOptions = MapboxNavigation
-        .defaultNavigationOptionsBuilder(MapboxGuidanceImageActivity.this, getMapboxAccessTokenFromResources())
+        .defaultNavigationOptionsBuilder(this, getMapboxAccessTokenFromResources())
         .locationEngine(new ReplayLocationEngine(mapboxReplayer))
         .build();
     mapboxNavigation = new MapboxNavigation(navigationOptions);
@@ -126,7 +131,7 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements On
     mapboxNavigation.registerRouteProgressObserver(routeProgressObserver);
 
     float density = getResources().getDisplayMetrics().density;
-    GuidanceImageOptions options = new GuidanceImageOptions.Builder()
+    SnapshotOptions options = new SnapshotOptions.Builder()
         .density(density)
         .edgeInsets(new EdgeInsets(60.0 * density, 10.0 * density, 10.0 * density, 10.0 * density))
         .styleUri("mapbox://styles/mapbox-map-design/ckifcx2i84huf19pbvgi0cka6")
@@ -151,7 +156,7 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements On
     } catch (IllegalAccessException exception) {
       exception.printStackTrace();
     }
-    guidanceImageApi = new MapboxGuidanceImageApi(this, mapboxMap, mapInterface, options, callback);
+    snapshotterApi = new MapboxSnapshotterApi(this, mapboxMap, options, mapInterface, callback);
 
     mapboxReplayer.pushRealLocation(this, 0.0);
     mapboxReplayer.play();
@@ -202,10 +207,6 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements On
 
     Location currentLocation = getLocationComponent().getLastKnownLocation();
     if (currentLocation != null) {
-      Point originPoint = Point.fromLngLat(
-          currentLocation.getLongitude(),
-          currentLocation.getLatitude()
-      );
       Point or = Point.fromLngLat(-3.5870, 40.5719);
       Point de = Point.fromLngLat(-3.607835, 40.551486);
       findRoute(or, de);
@@ -220,7 +221,7 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements On
         .profile(RouteUrl.PROFILE_DRIVING_TRAFFIC)
         .geometries(RouteUrl.GEOMETRY_POLYLINE6)
         .requestUuid("")
-        .accessToken(getMapboxRouteAccessToken(this))
+        .accessToken(Objects.requireNonNull(getMapboxRouteAccessToken(this)))
         .coordinates(Arrays.asList(origin, destination))
         .alternatives(true)
         .build();
@@ -302,7 +303,6 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements On
   private void updateLocation(List<Location> locations) {
     Location location = locations.get(0);
     getLocationComponent().forceLocationUpdate(locations, false);
-
     mapCamera.easeTo(
         new CameraOptions.Builder()
             .center(Point.fromLngLat(location.getLongitude(), location.getLatitude()))
@@ -333,7 +333,7 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements On
 
   private RouteProgressObserver routeProgressObserver = new RouteProgressObserver() {
     @Override public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
-      guidanceImageApi.generateGuidanceImage(routeProgress);
+      snapshotterApi.generateSnapshot(routeProgress);
     }
   };
 
@@ -341,16 +341,16 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements On
 
   private static class MyLocationEngineCallback implements LocationEngineCallback<LocationEngineResult> {
 
-    private WeakReference<MapboxGuidanceImageActivity> activityRef;
+    private WeakReference<MapboxSnapshotActivity> activityRef;
 
-    MyLocationEngineCallback(MapboxGuidanceImageActivity activity) {
+    MyLocationEngineCallback(MapboxSnapshotActivity activity) {
       this.activityRef = new WeakReference<>(activity);
     }
 
     @Override
     public void onSuccess(LocationEngineResult result) {
       Location location = result.getLastLocation();
-      MapboxGuidanceImageActivity activity = activityRef.get();
+      MapboxSnapshotActivity activity = activityRef.get();
       if (location != null && activity != null) {
         Point point = Point.fromLngLat(location.getLongitude(), location.getLatitude());
         CameraOptions cameraOptions = new CameraOptions.Builder().center(point).zoom(13.0).build();

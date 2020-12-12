@@ -81,7 +81,7 @@ import static com.mapbox.navigation.examples.util.LocationPermissionsHelperKt.LO
 import static com.mapbox.navigation.ui.base.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID;
 import static com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineResourceProviderFactory.getRouteLineResourceProvider;
 
-public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity implements PermissionsListener,
+public class MapboxRouteLineExampleActivity extends AppCompatActivity implements PermissionsListener,
     OnMapLongClickListener {
 
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
@@ -100,8 +100,8 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
       Style.LIGHT,
       Style.SATELLITE_STREETS
   );
-  private RouteLineAPI routeLineAPI;
-  private RouteArrowAPI routeArrowAPI;
+  private RouteLineAPI routeLineApi;
+  private RouteArrowAPI routeArrowApi;
   private MapboxRouteLineView routeLineView = new MapboxRouteLineView();
   private MapboxRouteArrowView routeArrowView = new MapboxRouteArrowView();
   private RouteLineLayerInitializer routeLineLayerInitializer;
@@ -137,15 +137,16 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
         this, R.attr.navigationViewRouteStyle, R.style.MapboxStyleNavigationMapRoute
     );
     RouteLineResourceProvider resourceProvider = getRouteLineResourceProvider(this, routeStyleRes);
-    routeLineAPI = new MapboxRouteLineAPI(new MapboxRouteLineActions(resourceProvider), routeLineView);
-    routeArrowAPI = new MapboxRouteArrowAPI(new MapboxRouteArrowActions(), routeArrowView);
+    routeLineApi = new MapboxRouteLineAPI(new MapboxRouteLineActions(resourceProvider), routeLineView);
+    routeArrowApi = new MapboxRouteArrowAPI(new MapboxRouteArrowActions(), routeArrowView);
 
     initNavigation();
     initStyle();
     initListeners();
   }
 
-  @SuppressLint("MissingPermission") private void initListeners() {
+  @SuppressLint("MissingPermission")
+  private void initListeners() {
     startNavigation.setOnClickListener(v -> {
       locationComponent.setRenderMode(RenderMode.GPS);
       mapboxNavigation.registerRouteProgressObserver(routeProgressObserver);
@@ -163,29 +164,29 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
           @Override public void onStyleLoaded(@NotNull Style style) {
             routeLineLayerInitializer.initializeLayers(style);
             routeArrowLayerInitializer.initializeLayers(style);
-            routeLineAPI.updateViewStyle(style);
-            routeArrowAPI.updateViewStyle(style);
+            routeLineApi.updateViewStyle(style);
+            routeArrowApi.updateViewStyle(style);
 
-            if (routeLineAPI.getPrimaryRouteVisibility(style) == Visibility.VISIBLE) {
-              routeLineAPI.showPrimaryRoute();
+            if (routeLineApi.getPrimaryRouteVisibility(style) == Visibility.VISIBLE) {
+              routeLineApi.showPrimaryRoute();
             } else {
-              routeLineAPI.hidePrimaryRoute();
+              routeLineApi.hidePrimaryRoute();
             }
 
-            if (routeLineAPI.getAlternativeRoutesVisibility(style) == Visibility.VISIBLE) {
-              routeLineAPI.showAlternativeRoutes();
+            if (routeLineApi.getAlternativeRoutesVisibility(style) == Visibility.VISIBLE) {
+              routeLineApi.showAlternativeRoutes();
             } else {
-              routeLineAPI.hideAlternativeRoutes();
+              routeLineApi.hideAlternativeRoutes();
             }
-            routeLineAPI.redrawRoute();
+            routeLineApi.redrawRoute();
 
 
-            if (routeArrowAPI.getRouteArrowVisibility(style) == Visibility.VISIBLE) {
-              routeArrowAPI.showManeuverArrow();
+            if (routeArrowApi.getRouteArrowVisibility(style) == Visibility.VISIBLE) {
+              routeArrowApi.showManeuverArrow();
             } else {
-              routeArrowAPI.hideManeuverArrow();
+              routeArrowApi.hideManeuverArrow();
             }
-            routeArrowAPI.redrawArrow();
+            routeArrowApi.redrawArrow();
           }
         }, null);
       }
@@ -195,7 +196,7 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
   @SuppressLint("MissingPermission")
   private void initNavigation() {
     NavigationOptions navigationOptions = MapboxNavigation
-        .defaultNavigationOptionsBuilder(MapboxRouteLineAPIExampleActivity.this, getMapboxAccessTokenFromResources())
+        .defaultNavigationOptionsBuilder(MapboxRouteLineExampleActivity.this, getMapboxAccessTokenFromResources())
         .locationEngine(new ReplayLocationEngine(mapboxReplayer))
         .build();
     mapboxNavigation = new MapboxNavigation(navigationOptions);
@@ -215,8 +216,8 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
 
       routeLineLayerInitializer.initializeLayers(style);
       routeArrowLayerInitializer.initializeLayers(style);
-      routeLineAPI.updateViewStyle(style);
-      routeArrowAPI.updateViewStyle(style);
+      routeLineApi.updateViewStyle(style);
+      routeArrowApi.updateViewStyle(style);
 
       getGesturePlugin().addOnMapLongClickListener(this);
     }, (mapLoadError, s) -> Timber.e("Error loading map: %s", mapLoadError.name()));
@@ -308,7 +309,7 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
   private RoutesObserver routesObserver = new RoutesObserver() {
     @Override
     public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
-      routeLineAPI.setRoutes(Collections.singletonList(routes.get(0)));
+      routeLineApi.setRoutes(Collections.singletonList(routes.get(0)));
     }
   };
 
@@ -398,16 +399,16 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
 
   private static class MyLocationEngineCallback implements LocationEngineCallback<LocationEngineResult> {
 
-    private WeakReference<MapboxRouteLineAPIExampleActivity> activityRef;
+    private WeakReference<MapboxRouteLineExampleActivity> activityRef;
 
-    MyLocationEngineCallback(MapboxRouteLineAPIExampleActivity activity) {
+    MyLocationEngineCallback(MapboxRouteLineExampleActivity activity) {
       this.activityRef = new WeakReference<>(activity);
     }
 
     @Override
     public void onSuccess(LocationEngineResult result) {
       Location location = result.getLastLocation();
-      MapboxRouteLineAPIExampleActivity activity = activityRef.get();
+      MapboxRouteLineExampleActivity activity = activityRef.get();
       if (location != null && activity != null) {
         Point point = Point.fromLngLat(location.getLongitude(), location.getLatitude());
         CameraOptions cameraOptions = new CameraOptions.Builder().center(point).zoom(13.0).build();
@@ -435,7 +436,10 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
 
   @Override
   public void onExplanationNeeded(List<String> permissionsToExplain) {
-    Toast.makeText(this, "This app needs location and storage permissions in order to show its functionality.", Toast.LENGTH_LONG).show();
+    Toast.makeText(
+        this,
+        "This app needs location and storage permissions in order to show its functionality.",
+        Toast.LENGTH_LONG).show();
   }
 
   @Override
@@ -458,14 +462,14 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
   }
 
   private OnIndicatorPositionChangedListener onIndicatorPositionChangedListener = point -> {
-    routeLineAPI.updateTraveledRouteLine(point);
+    routeLineApi.updateTraveledRouteLine(point);
   };
 
   private RouteProgressObserver routeProgressObserver = new RouteProgressObserver() {
     @Override public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
-      routeLineAPI.updateUpcomingRoutePointIndex(routeProgress);
-      routeLineAPI.updateVanishingPointState(routeProgress.getCurrentState());
-      routeArrowAPI.addUpComingManeuverArrow(routeProgress);
+      routeLineApi.updateUpcomingRoutePointIndex(routeProgress);
+      routeLineApi.updateVanishingPointState(routeProgress.getCurrentState());
+      routeArrowApi.addUpComingManeuverArrow(routeProgress);
 
       DirectionsRoute currentRoute = routeProgress.getRoute();
       boolean hasGeometry = false;
@@ -474,12 +478,12 @@ public class MapboxRouteLineAPIExampleActivity extends AppCompatActivity impleme
       }
 
       boolean isNewRoute = false;
-      if (hasGeometry && currentRoute != routeLineAPI.getPrimaryRoute()) {
+      if (hasGeometry && currentRoute != routeLineApi.getPrimaryRoute()) {
         isNewRoute = true;
       }
 
       if (isNewRoute) {
-        routeLineAPI.setRoutes(Collections.singletonList(routeProgress.getRoute()));
+        routeLineApi.setRoutes(Collections.singletonList(routeProgress.getRoute()));
       }
     }
   };

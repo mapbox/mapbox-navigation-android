@@ -13,27 +13,33 @@
       android:theme="@style/AppTheme">
 
     <activity
-        android:name=".MapboxRouteLineAPIExampleActivity"
-        android:label="@string/title_navigation_route_ui"
+        android:name=".MapboxRouteLineExampleActivity"
+        android:label="@string/title_routeline_api"
         android:screenOrientation="portrait">
     </activity>
 
     <activity
         android:name=".MapboxGuidanceImageActivity"
-        android:label="@string/title_navigation_route_ui"
+        android:label="@string/title_guidance_api"
+        android:screenOrientation="portrait">
+    </activity>
+
+    <activity
+        android:name=".MapboxSnapshotActivity"
+        android:label="@string/title_snapshot_api"
         android:screenOrientation="portrait">
     </activity>
 
     <activity
         android:name=".SlackLineActivity"
-        android:label="@string/title_navigation_route_ui"
+        android:label="@string/title_slackline"
         android:screenOrientation="portrait">
     </activity>
 
     <activity
         android:name="com.mapbox.navigation.examples.MainActivity"
-        android:label="@string/title_navigation_route_ui"
         android:screenOrientation="portrait">
+
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />

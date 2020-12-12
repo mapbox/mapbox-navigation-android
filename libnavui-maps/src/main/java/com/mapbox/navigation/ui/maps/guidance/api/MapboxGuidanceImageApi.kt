@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.maps.guidance.api
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.util.Log
 import com.mapbox.bindgen.Expected
 import com.mapbox.core.constants.Constants.PRECISION_6
 import com.mapbox.geojson.LineString
@@ -92,7 +91,7 @@ class MapboxGuidanceImageApi(
 
         override fun onStyleLoaded(style: Style) {
             val skyLayer = SkyLayer("sky_snapshotter")
-            //skyLayer.skyType(SkyType.ATMOSPHERE)
+            // skyLayer.skyType(SkyType.ATMOSPHERE)
             skyLayer.skyGradient(
                 interpolate {
                     linear()
@@ -103,14 +102,16 @@ class MapboxGuidanceImageApi(
                     literal("#7CA7BE")
                 }
             )
-            //skyLayer.skyGradientCenter(listOf(-34.0, 90.0))
-            //skyLayer.skyGradientRadius(8.0)
-            //skyLayer.skyAtmosphereSun(listOf(0.0, 90.0))
+            // skyLayer.skyGradientCenter(listOf(-34.0, 90.0))
+            // skyLayer.skyGradientRadius(8.0)
+            // skyLayer.skyAtmosphereSun(listOf(0.0, 90.0))
             style.addLayer(skyLayer)
 
-            style.addSource(geoJsonSource(PRIMARY_ROUTE_SOURCE_ID) {
-                geometry(LineString.fromLngLats(routeLinePoints))
-            })
+            style.addSource(
+                geoJsonSource(PRIMARY_ROUTE_SOURCE_ID) {
+                    geometry(LineString.fromLngLats(routeLinePoints))
+                }
+            )
             val layer = lineLayer(PRIMARY_ROUTE_LAYER_ID, PRIMARY_ROUTE_SOURCE_ID) {
                 lineWidth(16.0)
                 lineOpacity(1.0)
@@ -162,18 +163,23 @@ class MapboxGuidanceImageApi(
                             progress.currentLegProgress?.currentStepProgress?.step?.geometry(),
                             progress.currentLegProgress?.upcomingStep?.geometry()
                         )
-                        /*
-                        let top = screenCoordinate.y
-                            let left = screenCoordinate.x
-                            let bottom = view.bounds.size.height - top
-                        let right = view.bounds.size.width - left
-                        val displayMetrics = Resources.getSystem().getDisplayMetrics()
-
-    */
-                        val centerTop = ((mapInterface.size.height*options.density) - (options.edgeInsets.top + options.edgeInsets.bottom))/2 + (options.edgeInsets.top)
-                        val centerLeft = ((mapInterface.size.width*options.density) - (options.edgeInsets.left + options.edgeInsets.right))/2 + (options.edgeInsets.left)
-                        Log.d("TESTING", "centerTop: $centerTop + centerLeft: $centerLeft")
-                        cameraOptions.padding = getEdgeInsets(mapInterface.size, ScreenCoordinate(centerLeft/options.density, centerTop/options.density))
+                        val centerTop =
+                            (
+                                (mapInterface.size.height * options.density) -
+                                    (options.edgeInsets.top + options.edgeInsets.bottom)
+                                ) / 2 + (options.edgeInsets.top)
+                        val centerLeft =
+                            (
+                                (mapInterface.size.width * options.density) -
+                                    (options.edgeInsets.left + options.edgeInsets.right)
+                                ) / 2 + (options.edgeInsets.left)
+                        cameraOptions.padding = getEdgeInsets(
+                            mapInterface.size,
+                            ScreenCoordinate(
+                                centerLeft / options.density,
+                                centerTop / options.density
+                            )
+                        )
                         snapshotter.setCameraOptions(cameraOptions)
                         mapInterface.size = oldSize
                         snapshotter.setUri(options.styleUri)
@@ -188,8 +194,14 @@ class MapboxGuidanceImageApi(
         }
     }
 
-    private fun getEdgeInsets(mapSize: Size, centerOffset: ScreenCoordinate = ScreenCoordinate(0.0, 0.0)): EdgeInsets {
-        val mapCenterScreenCoordinate = ScreenCoordinate((mapSize.width / 2).toDouble(), (mapSize.height / 2).toDouble())
+    private fun getEdgeInsets(
+        mapSize: Size,
+        centerOffset: ScreenCoordinate = ScreenCoordinate(0.0, 0.0)
+    ): EdgeInsets {
+        val mapCenterScreenCoordinate = ScreenCoordinate(
+            (mapSize.width / 2).toDouble(),
+            (mapSize.height / 2).toDouble()
+        )
         val top = mapCenterScreenCoordinate.y + centerOffset.y
         val left = mapCenterScreenCoordinate.x + centerOffset.x
         return EdgeInsets(top, left, mapSize.height - top, mapSize.width - left)

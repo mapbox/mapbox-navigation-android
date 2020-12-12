@@ -1,137 +1,15 @@
 <resources>
     <string name="app_name">Mapbox 1.0 Navigation SDK for Android</string>
 
-    <!-- MainActivity -->
-    <string name="navigation_core_sdk_title">Navigation Core SDK</string>
-    <string name="navigation_core_sdk_description">Hosts examples to demonstrate the use of the core Navigation SDK.</string>
-
-    <string name="navigation_ui_sdk_title">Navigation UI SDK</string>
-    <string name="navigation_ui_sdk_description">Hosts examples to demonstrate the use of the Navigation UI SDK.</string>
-
-    <string name="title_simple_navigation_kotlin">Simple MapboxNavigation Kotlin</string>
-    <string name="description_simple_navigation_kotlin">Shows how to use the MapboxNavigation class in Kotlin code.</string>
-
-    <string name="title_navigation_view">NavigationView</string>
-    <string name="description_navigation_view">Shows how to use NavigationView to implement turn by turn.</string>
-
-    <string name="title_custom_puck_example">Custom puck</string>
-    <string name="description_custom_puck_example">Shows how to use NavigationView with a custom puck.</string>
-
-    <string name="title_custom_camera_example">Custom camera</string>
-    <string name="description_custom_camera_example">Shows how to use NavigationView with a custom camera tilt and zoom.</string>
-
-    <string name="title_custom_ui_component_style">Custom UI component style</string>
-    <string name="description_custom_ui_component_style">Shows how to use your own colors to style the UI SDK Components: InstructionView, SummaryBottomSheet, and so on.</string>
-
-    <string name="title_building_highlight_kotlin">Building footprint highlight</string>
-    <string name="description_building_highlight_kotlin">Use the Navigation UI SDK\'s to show and customize a single highlighted building footprint.</string>
-
-    <string name="title_ui_building_extrusions_kotlin">Building extrusions highlight</string>
-    <string name="description_ui_building_extrusions_kotlin">Use the Navigation UI SDK\'s to show and customize a single highlighted 3D building extrusion.</string>
-
-    <string name="title_replay_route">Replay route</string>
-    <string name="description_replay_route">Shows how to use the MapboxNavigation class with the replay engine in Kotlin code.</string>
-    <string name="replay_playback_speed_seekbar">Replay speed %d</string>
-
-    <string name="title_replay_history_kotlin">Replay history</string>
-    <string name="description_replay_history_kotlin">Shows how to use replay ride history in Kotlin code.</string>
-    <string name="title_select_replay_history">Select history</string>
-
-    <string name="title_replay_waypoints">Replay waypoints</string>
-    <string name="description_replay_waypoints">Shows how to use navigate to waypoints.</string>
-
-    <string name="title_reroute_view">Reroute events</string>
-    <string name="description_reroute_view">Shows how to observe off-route events and how to implement custom re-route logic.</string>
-
-    <string name="title_basic_navigation_kotlin">Basic navigation</string>
-    <string name="description_basic_navigation_kotlin">Shows how to navigate from the device location to a destination using the MapboxNavigation class.</string>
-
-    <string name="title_basic_navigation_fragment">Basic navigation with Fragment</string>
-    <string name="description_basic_navigation_fragment">Shows how to navigate from the device location to a destination using the MapboxNavigation class from a Fragment.</string>
-
-    <string name="title_basic_navigation_sdk_only_kotlin">Basic Navigation + Maps SDK integration</string>
-    <string name="description_basic_navigation_sdk_only_kotlin">Shows how to combine the Maps SDK with only the Navigation SDK and no Navigation UI SDK code of any kind.</string>
-
-    <string name="title_free_drive_kotlin">Free drive navigation</string>
-    <string name="description_free_drive_kotlin">Shows how to navigate in a free drive scenario using the MapboxNavigation class.</string>
-
-    <string name="title_guidance_view">GuidanceView</string>
-    <string name="description_guidance_view">Demonstrates the use of a GuidanceView to show an instructional image at proper junctions.</string>
-
-    <string name="title_faster_route">Faster route</string>
-    <string name="description_faster_route">Demonstrate how to use the MapboxNavigation class to listen for a faster route.</string>
-
-    <string name="title_summary_bottom_sheet">SummaryBottomSheet</string>
-    <string name="description_summary_bottom_sheet">Shows how to integrate SummaryBottomSheet and a recenter button with the Navigation SDK.</string>
-
-    <string name="title_feedback_button">Feedback button</string>
-    <string name="description_feedback_button">Shows how to integrate FeedbackButton about the Feedback Flow with the Navigation SDK.</string>
-
-    <string name="title_instruction_view">InstructionView</string>
-    <string name="description_instruction_view">Shows how to integrate InstructionView, FeedbackButton and SoundButton with the Navigation SDK.</string>
-
-    <string name="title_debug_navigation_kotlin">Debug MapboxNavigation Kotlin</string>
-    <string name="description_debug_navigation_kotlin">Shows debug points for raw(red) and enhanced(blue) location update.</string>
-
-    <string name="title_custom_route_styling_kotlin">Custom Route Styling Kotlin</string>
-    <string name="description_custom_route_styling_kotlin">Demonstrates applying a custom style for the routes.</string>
-
-    <string name="title_navigation_view_fragment">NavigationView In A Fragment</string>
-    <string name="description_navigation_view_fragment">Shows how to use NavigationView to implement turn by turn in a fragment.</string>
-
-    <string name="title_navigation_route_ui">Navigation Map Route</string>
-    <string name="description_navigation_route_ui">An example using NavigationMapRoute</string>
-
-    <string name="title_traffic_toggle">Traffic toggle</string>
-    <string name="description_traffic_toggle">Toggle the visibility of the NavigationView\'s traffic congestion layers.</string>
-
-    <string name="title_runtime_styling">Runtime Route Styling</string>
-    <string name="description_runtime_styling">An example using RuntimeRouteStyling</string>
-
-    <string name="title_map_matching">Map Matching</string>
-    <string name="description_map_matching">Use MapMatching to fetch DirectionsRoute</string>
-
-    <string name="settings">Settings</string>
-    <string name="simulate_route">Simulate Route</string>
-    <string name="language">Language</string>
-    <string name="unit_type">Unit Type</string>
-    <string name="route_profile">Route Profile</string>
-    <string name="unit_type_key" translatable="false">unit_type</string>
-    <string name="simulate_route_key" translatable="false">simulate_route</string>
-    <string name="language_key" translatable="false">language</string>
-    <string name="route_profile_key" translatable="false">route_profile</string>
-    <string name="default_route_profile" translatable="false">driving-traffic</string>
-    <string name="git_hash_key" translatable="false">git_hash</string>
-    <string name="nav_native_history_collect_key" translatable="false">nav_native_history_collect</string>
-    <string name="nav_native_history_collect">Record history</string>
-    <string name="offline_version_key" translatable="false">offline_preference_key</string>
-    <string name="offline_enabled" translatable="false">offline_region_download</string>
-    <string name="default_locale" translatable="false">default_for_device</string>
-    <string name="default_unit_type" translatable="false">default_for_device</string>
     <string name="start_navigation">Start Navigation</string>
-    <string name="navigate_waypoints_next_stop">Next stop</string>
-    <string name="play_history">Play history</string>
-    <string name="select_history">Select history</string>
-    <string name="msg_long_press_map_to_place_waypoint">Long press on the map to place a waypoint</string>
-    <string name="no_routes">No available routes to that destination</string>
-    <string name="steps_in_route">There are %1$d steps in the route</string>
-    <string name="route_request_failed">The route request failed</string>
-    <string name="offline_category_title">Offline</string>
-    <string name="offline_enabled_title">Offline routing enabled</string>
-    <string name="offline_version_title">Choose offline version</string>
-    <string name="general_category_title">General</string>
-    <string name="send_user_feedback">Send User Feedback</string>
-    <string name="simple_mapbox_navigation_clear_routes">CLEAR ROUTES</string>
-    <string name="simple_mapbox_navigation_add_original_route">ADD ORIGINAL ROUTE</string>
-    <string name="history_failed_to_load_item">History failed to load item</string>
-    <string name="history_failed_to_load_list">Failed to load list</string>
-    <string name="history_local_history_file">Local history file</string>
-    <string name="history_recorded_history_file">Recorded history file</string>
-
-    <string name="title_route_api" translatable="false">Routeline API example</string>
+    <string name="title_routeline_api" translatable="false">Routeline API example</string>
     <string name="description_routeline_api" translatable="false">Demonstrates usage of the route line API.</string>
     <string name="title_slackline" translatable="false">Slackline usage example</string>
     <string name="slackline_description" translatable="false">Describes using Slackline as a route line setup shortcut.</string>
-    <string name="title_guidance_api" translatable="false">Guidance API example</string>
-    <string name="description_guidance_api" translatable="false">Demonstrates usage of guidance image API.</string>
+    <string name="title_snapshot_api" translatable="false">Snapshot API example</string>
+    <string name="description_snapshot_api" translatable="false">Demonstrates usage of snapshot API.</string>
+    <string name="title_signboard_api" translatable="false">Signboard API example</string>
+    <string name="description_signboard_api" translatable="false">Demonstrates usage of signboard API.</string>
+    <string name="title_guidance_api" translatable="false">Visual Guidance API example</string>
+    <string name="description_guidance_api" translatable="false">Demonstrates usage of visual guidance API.</string>
 </resources>

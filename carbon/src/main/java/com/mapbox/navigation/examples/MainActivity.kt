@@ -12,7 +12,8 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.navigation.examples.core.MapboxGuidanceImageActivity
-import com.mapbox.navigation.examples.core.MapboxRouteLineAPIExampleActivity
+import com.mapbox.navigation.examples.core.MapboxRouteLineExampleActivity
+import com.mapbox.navigation.examples.core.MapboxSnapshotActivity
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.SlackLineActivity
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper
@@ -47,9 +48,9 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
     private fun buildSampleList(): List<SampleItem> {
         return listOf(
             SampleItem(
-                getString(R.string.title_route_api),
+                getString(R.string.title_routeline_api),
                 getString(R.string.description_routeline_api),
-                MapboxRouteLineAPIExampleActivity::class.java
+                MapboxRouteLineExampleActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_slackline),
@@ -60,6 +61,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_guidance_api),
                 getString(R.string.description_guidance_api),
                 MapboxGuidanceImageActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_snapshot_api),
+                getString(R.string.description_snapshot_api),
+                MapboxSnapshotActivity::class.java
             )
         )
     }
