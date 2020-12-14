@@ -28,6 +28,7 @@ import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coVerifyOrder
+import io.mockk.coVerifySequence
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -44,6 +45,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -626,6 +628,34 @@ class MapboxTripSessionTest {
     }
 
     @Test
+    fun sessionStopWaitsForCompleteOfSetRouteJob() = coroutineRule.runBlockingTest {
+        val routeInitInfo = mockk<RouteInitInfo>()
+        val routeAlert = mockk<RouteAlert>()
+        every { routeInitInfo.routeAlerts } returns listOf(routeAlert)
+        coEvery { navigator.setRoute(any()) } coAnswers {
+            // we need to check weather we wait until setRouteJob finishes when we stop the session.
+            // without the delay coroutine might be finished too fast and our test will be useless
+            // (it will pass even if we don't wait for a coroutine)
+            delay(10)
+            routeInitInfo
+        }
+
+        val routeAlertsObserver = mockk<RouteAlertsObserver>(relaxUnitFun = true)
+        tripSession.registerRouteAlertsObserver(routeAlertsObserver)
+
+        tripSession.start()
+        tripSession.route = null
+        tripSession.stop()
+
+        tripSession.stopSessionJob?.join()
+
+        coVerifySequence {
+            navigator.setRoute(null)
+            navigator.getStatus(any())
+        }
+    }
+
+    @Test
     fun checksGetNavigatorStatusIsCalledAfterSettingARouteWhenTripSessionHasStarted() {
         tripSession.start()
 
@@ -1143,7 +1173,7 @@ class MapboxTripSessionTest {
             accessToken = "pk.1234"
         )
         tripSession.start()
-        updateLocationAndJoin()
+        locationCallbackSlot.captured.onSuccess(locationEngineResult)
         tripSession.stop()
         val observer: MapMatcherResultObserver = mockk(relaxUnitFun = true)
         tripSession.registerMapMatcherResultObserver(observer)

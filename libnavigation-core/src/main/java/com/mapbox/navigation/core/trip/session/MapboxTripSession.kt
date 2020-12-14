@@ -49,7 +49,7 @@ internal class MapboxTripSession(
     override val tripService: TripService,
     private val navigationOptions: NavigationOptions,
     private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl,
-    threadController: ThreadController = ThreadController,
+    private val threadController: ThreadController = ThreadController,
     private val logger: Logger,
     private val accessToken: String?
 ) : TripSession {
@@ -60,6 +60,9 @@ internal class MapboxTripSession(
     }
 
     private var updateNavigatorStatusDataJobs: MutableList<Job> = CopyOnWriteArrayList()
+    private var setRouteJob: Job? = null
+    // internal for tests
+    internal var stopSessionJob: Job? = null
 
     override var route: DirectionsRoute? = null
         set(value) {
@@ -69,7 +72,7 @@ internal class MapboxTripSession(
                 routeProgress = null
             }
             cancelOngoingUpdateNavigatorStatusDataJobs()
-            mainJobController.scope.launch {
+            setRouteJob = mainJobController.scope.launch {
                 navigator.setRoute(value)?.let {
                     routeAlerts = it.routeAlerts
                 }
@@ -182,12 +185,16 @@ internal class MapboxTripSession(
         if (state == TripSessionState.STOPPED) {
             return
         }
-        tripService.stopService()
-        stopLocationUpdates()
-        ioJobController.job.cancelChildren()
-        mainJobController.job.cancelChildren()
-        reset()
-        state = TripSessionState.STOPPED
+
+        stopSessionJob = threadController.getMainScopeAndRootJob().scope.launch {
+            setRouteJob?.join()
+            tripService.stopService()
+            stopLocationUpdates()
+            ioJobController.job.cancelChildren()
+            mainJobController.job.cancelChildren()
+            reset()
+            state = TripSessionState.STOPPED
+        }
     }
 
     private fun stopLocationUpdates() {
