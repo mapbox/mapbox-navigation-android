@@ -13,26 +13,26 @@ class MapboxSnapshotView @JvmOverloads constructor(
 ) : MapboxView<SnapshotState>, AppCompatImageView(context, attrs, defStyleAttr) {
 
     init {
-        visibility = AppCompatImageView.GONE
+        visibility = GONE
     }
 
     override fun render(state: SnapshotState) {
         when (state) {
             is SnapshotState.SnapshotReady -> {
-                visibility = AppCompatImageView.VISIBLE
+                visibility = VISIBLE
                 setImageBitmap(state.bitmap)
             }
             is SnapshotState.SnapshotFailure.SnapshotUnavailable -> {
                 setImageBitmap(null)
-                visibility = AppCompatImageView.GONE
+                visibility = GONE
             }
             is SnapshotState.SnapshotFailure.SnapshotEmpty -> {
                 setImageBitmap(null)
-                visibility = AppCompatImageView.GONE
+                visibility = GONE
             }
             is SnapshotState.SnapshotFailure.SnapshotError -> {
                 setImageBitmap(null)
-                visibility = AppCompatImageView.GONE
+                visibility = GONE
             }
         }
     }

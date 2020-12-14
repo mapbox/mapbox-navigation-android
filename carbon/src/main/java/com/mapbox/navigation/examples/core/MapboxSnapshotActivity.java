@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineResult;
+import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
@@ -42,11 +43,17 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback;
 import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.core.replay.ReplayLocationEngine;
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver;
+import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.examples.util.Slackline;
+import com.mapbox.navigation.ui.base.api.signboard.SignboardApi;
 import com.mapbox.navigation.ui.base.api.snapshotter.SnapshotterApi;
+import com.mapbox.navigation.ui.base.model.signboard.SignboardState;
 import com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState;
+import com.mapbox.navigation.ui.maps.signboard.api.MapboxSignboardApi;
+import com.mapbox.navigation.ui.maps.signboard.api.SignboardReadyCallback;
+import com.mapbox.navigation.ui.maps.signboard.view.MapboxSignboardView;
 import com.mapbox.navigation.ui.maps.snapshotter.api.MapboxSnapshotterApi;
 import com.mapbox.navigation.ui.maps.snapshotter.api.SnapshotReadyCallback;
 import com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotOptions;
@@ -77,7 +84,9 @@ public class MapboxSnapshotActivity extends AppCompatActivity implements OnMapLo
   private Button startNavigation;
   private Slackline slackline = new Slackline(this);
   private SnapshotterApi snapshotterApi;
+  private SignboardApi signboardApi;
   private MapboxSnapshotView snapshotView;
+  private MapboxSignboardView signboardView;
 
   private SnapshotReadyCallback callback = new SnapshotReadyCallback() {
     @Override public void onSnapshotReady(@NotNull SnapshotState.SnapshotReady bitmap) {
@@ -89,6 +98,18 @@ public class MapboxSnapshotActivity extends AppCompatActivity implements OnMapLo
     }
   };
 
+  private SignboardReadyCallback signboardReadyCallback = new SignboardReadyCallback() {
+    @Override
+    public void onSignboardReady(@NotNull SignboardState.SignboardReady stream) {
+      signboardView.render(stream);
+    }
+
+    @Override
+    public void onFailure(@NotNull SignboardState.SignboardFailure error) {
+      signboardView.render(error);
+    }
+  };
+
   @SuppressLint("MissingPermission")
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -97,6 +118,7 @@ public class MapboxSnapshotActivity extends AppCompatActivity implements OnMapLo
     mapView = findViewById(R.id.mapView);
     startNavigation = findViewById(R.id.startNavigation);
     snapshotView = findViewById(R.id.snapshotView);
+    signboardView = findViewById(R.id.signboardView);
     mapboxMap = mapView.getMapboxMap();
     locationComponent = getLocationComponent();
     mapCamera = getMapCamera();
@@ -157,6 +179,9 @@ public class MapboxSnapshotActivity extends AppCompatActivity implements OnMapLo
       exception.printStackTrace();
     }
     snapshotterApi = new MapboxSnapshotterApi(this, mapboxMap, options, mapInterface, callback);
+    signboardApi = new MapboxSignboardApi(
+      Objects.requireNonNull(getMapboxRouteAccessToken(this)), signboardReadyCallback
+    );
 
     mapboxReplayer.pushRealLocation(this, 0.0);
     mapboxReplayer.play();
@@ -333,7 +358,10 @@ public class MapboxSnapshotActivity extends AppCompatActivity implements OnMapLo
 
   private RouteProgressObserver routeProgressObserver = new RouteProgressObserver() {
     @Override public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
-      snapshotterApi.generateSnapshot(routeProgress);
+      //snapshotterApi.generateSnapshot(routeProgress);
+      if (routeProgress.getBannerInstructions() != null) {
+        signboardApi.generateSignboard(routeProgress.getBannerInstructions());
+      }
     }
   };
 

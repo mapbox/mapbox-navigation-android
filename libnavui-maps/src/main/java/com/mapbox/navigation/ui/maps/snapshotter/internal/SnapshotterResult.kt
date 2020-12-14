@@ -8,11 +8,9 @@ import com.mapbox.navigation.ui.base.MapboxResult
 import com.mapbox.navigation.ui.maps.snapshotter.model.CameraPosition
 
 sealed class SnapshotterResult : MapboxResult {
-    data class SnapshotAvailable(
-        val bannerComponent: BannerComponents
-    ) : SnapshotterResult()
-
+    object SnapshotAvailable : SnapshotterResult()
     object SnapshotUnavailable : SnapshotterResult()
+
     data class SnapshotterCameraPosition(
         val cameraPosition: CameraPosition?
     ) : SnapshotterResult()

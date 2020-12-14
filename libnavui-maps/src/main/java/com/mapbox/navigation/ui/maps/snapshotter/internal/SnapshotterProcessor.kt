@@ -58,7 +58,7 @@ internal object SnapshotterProcessor :
 
     private fun isSnapshotAvailable(instruction: BannerInstructions): SnapshotterResult {
         return ifNonNull(getComponentContainingSnapshot(instruction)) { component ->
-            SnapshotterResult.SnapshotAvailable(component)
+            SnapshotterResult.SnapshotAvailable
         } ?: SnapshotterResult.SnapshotUnavailable
     }
 

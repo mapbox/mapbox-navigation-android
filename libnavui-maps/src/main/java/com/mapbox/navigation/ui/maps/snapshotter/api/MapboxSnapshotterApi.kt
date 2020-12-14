@@ -41,7 +41,7 @@ class MapboxSnapshotterApi(
     private val mapboxMap: MapboxMap,
     private val options: SnapshotOptions,
     private val mapInterface: MapInterface,
-    val onSnapshotReadyCallback: SnapshotReadyCallback
+    val onSnapshotCallback: SnapshotReadyCallback
 ) : SnapshotterApi {
 
     private val routeLinePoints: MutableList<Point?> = mutableListOf()
@@ -52,19 +52,19 @@ class MapboxSnapshotterApi(
                 SnapshotterProcessor.process(SnapshotterAction.GenerateBitmap(options, snapshot))
             when (result) {
                 is SnapshotterResult.Snapshot.Success -> {
-                    onSnapshotReadyCallback.onSnapshotReady(
+                    onSnapshotCallback.onSnapshotReady(
                         SnapshotState.SnapshotReady(result.bitmap)
                     )
                 }
                 is SnapshotterResult.Snapshot.Failure -> {
-                    onSnapshotReadyCallback.onFailure(
+                    onSnapshotCallback.onFailure(
                         SnapshotState.SnapshotFailure.SnapshotError(
                             snapshot.error
                         )
                     )
                 }
                 is SnapshotterResult.Snapshot.Empty -> {
-                    onSnapshotReadyCallback.onFailure(
+                    onSnapshotCallback.onFailure(
                         SnapshotState.SnapshotFailure.SnapshotEmpty(
                             snapshot.error
                         )
@@ -118,7 +118,7 @@ class MapboxSnapshotterApi(
                 SnapshotterProcessor.process(SnapshotterAction.GenerateSnapshot(instruction))
             when (result) {
                 is SnapshotterResult.SnapshotUnavailable -> {
-                    onSnapshotReadyCallback.onFailure(
+                    onSnapshotCallback.onFailure(
                         SnapshotState.SnapshotFailure.SnapshotUnavailable
                     )
                 }
@@ -156,7 +156,7 @@ class MapboxSnapshotterApi(
                         snapshotter.setCameraOptions(cameraOptions)
                         mapInterface.size = oldSize
                         snapshotter.start(snapshotterCallback)
-                    } ?: onSnapshotReadyCallback.onFailure(
+                    } ?: onSnapshotCallback.onFailure(
                         SnapshotState.SnapshotFailure.SnapshotError(
                             "Camera position cannot be null"
                         )

@@ -50,6 +50,7 @@ android {
 dependencies {
     api project(":libnavui-base")
     implementation project(":libnavui-util")
+    implementation project(":libnavigation-util")
 
     api dependenciesList.mapboxMapSdkCarbon
     implementation dependenciesList.mapboxSdkTurf
@@ -58,6 +59,7 @@ dependencies {
     implementation dependenciesList.androidXCardView
     implementation dependenciesList.androidXConstraintLayout
     implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.coroutinesAndroid
 
     implementation dependenciesList.timber
 
