@@ -32,7 +32,13 @@
 
     <activity
         android:name=".MapboxSnapshotActivity"
-        android:label="@string/title_navigation_route_ui"
+        android:label="@string/title_snapshotter"
+        android:screenOrientation="portrait">
+    </activity>
+
+    <activity
+        android:name=".MapboxSignboardActivity"
+        android:label="@string/title_signboard"
         android:screenOrientation="portrait">
     </activity>
 

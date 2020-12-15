@@ -60,13 +60,11 @@ dependencies {
     implementation dependenciesList.kotlinStdLib
 
     implementation dependenciesList.timber
+    implementation dependenciesList.coroutinesAndroid
 
     ktlint dependenciesList.ktlint
 
-    testImplementation dependenciesList.junit
-    testImplementation dependenciesList.mockk
-    testImplementation dependenciesList.robolectric
-    testImplementation dependenciesList.androidxTestCore
+    apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
     testImplementation(project(':libtesting-utils'))
 }
 

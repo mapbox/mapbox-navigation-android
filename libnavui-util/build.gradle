@@ -48,14 +48,13 @@ android {
 }
 
 dependencies {
-    //implementation project(":libnavui-util")
     api project(":libnavigation-util")
     implementation dependenciesList.kotlinStdLib
 
     ktlint dependenciesList.ktlint
 
-    testImplementation dependenciesList.junit
-    testImplementation dependenciesList.robolectric
+    apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
+    testImplementation(project(':libtesting-utils'))
 }
 
 apply from: "${rootDir}/gradle/jacoco.gradle"

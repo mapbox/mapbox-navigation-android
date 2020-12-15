@@ -137,4 +137,6 @@
     <string name="slackline_description" translatable="false">Describes using Slackline as a route line setup shortcut.</string>
     <string name="title_snapshotter" translatable="false">Snapshotter</string>
     <string name="description_snapshotter" translatable="false">Demonstrates the use of snapshotter during active guidance</string>
+    <string name="title_signboard" translatable="false">Signboard</string>
+    <string name="description_signboard" translatable="false">Demonstrates the use of signboard during active guidance</string>
 </resources>
