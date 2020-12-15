@@ -35,6 +35,7 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.getGesturesPlugin
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions
 import com.mapbox.maps.plugin.location.LocationComponentPlugin
+import com.mapbox.maps.plugin.location.LocationUpdate
 import com.mapbox.maps.plugin.location.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.location.modes.RenderMode
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
@@ -130,11 +131,11 @@ class CameraAnimationsActivity :
 
     private val mapMatcherResultObserver = object : MapMatcherResultObserver {
         override fun onNewMapMatcherResult(mapMatcherResult: MapMatcherResult) {
-            if (mapMatcherResult.keyPoints.isEmpty()) {
-                locationComponent?.forceLocationUpdate(mapMatcherResult.enhancedLocation)
-            } else {
-                locationComponent?.forceLocationUpdate(mapMatcherResult.keyPoints, false)
-            }
+            val locationUpdate = LocationUpdate(
+                mapMatcherResult.enhancedLocation,
+                mapMatcherResult.keyPoints.dropLast(1)
+            )
+            locationComponent?.forceLocationUpdate(locationUpdate)
             viewportDataSource.onLocationChanged(mapMatcherResult.enhancedLocation)
 
             lookAtPoint?.run {

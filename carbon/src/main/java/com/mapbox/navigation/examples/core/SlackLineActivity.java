@@ -30,6 +30,7 @@ import com.mapbox.maps.plugin.gestures.GesturesPluginImpl;
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener;
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions;
 import com.mapbox.maps.plugin.location.LocationComponentPlugin;
+import com.mapbox.maps.plugin.location.LocationUpdate;
 import com.mapbox.maps.plugin.location.modes.RenderMode;
 import com.mapbox.navigation.base.internal.route.RouteUrl;
 import com.mapbox.navigation.base.options.NavigationOptions;
@@ -256,7 +257,8 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
 
   private void updateLocation(List<Location> locations) {
     Location location = locations.get(0);
-    getLocationComponent().forceLocationUpdate(locations, false);
+    LocationUpdate locationUpdate = new LocationUpdate(location, null, null);
+    locationComponent.forceLocationUpdate(locationUpdate);
 
     mapCamera.easeTo(
         new CameraOptions.Builder()
