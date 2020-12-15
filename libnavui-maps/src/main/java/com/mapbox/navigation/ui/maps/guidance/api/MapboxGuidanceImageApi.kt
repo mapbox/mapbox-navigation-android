@@ -158,7 +158,7 @@ class MapboxGuidanceImageApi(
                             GuidanceImageResult.ShouldShowSnapshotBasedGuidance
                         ).isSnapshotBased -> {
                         val oldSize = mapInterface.size
-                        mapInterface.size = Size(1024f, 512f)
+                        mapInterface.size = Size(512f, 1024f)
                         val cameraOptions = getCameraOptions(
                             progress.currentLegProgress?.currentStepProgress?.step?.geometry(),
                             progress.currentLegProgress?.upcomingStep?.geometry()
@@ -174,10 +174,11 @@ class MapboxGuidanceImageApi(
                                     (options.edgeInsets.left + options.edgeInsets.right)
                                 ) / 2 + (options.edgeInsets.left)
                         cameraOptions.padding = getEdgeInsets(
-                            mapInterface.size,
+//                            mapInterface.size,
+                            Size(mapInterface.size.width * options.density, mapInterface.size.height * options.density),
                             ScreenCoordinate(
-                                centerLeft / options.density,
-                                centerTop / options.density
+                                centerLeft,
+                                centerTop
                             )
                         )
                         snapshotter.setCameraOptions(cameraOptions)
@@ -199,8 +200,9 @@ class MapboxGuidanceImageApi(
         centerOffset: ScreenCoordinate = ScreenCoordinate(0.0, 0.0)
     ): EdgeInsets {
         val mapCenterScreenCoordinate = ScreenCoordinate(
-            (mapSize.width / 2).toDouble(),
-            (mapSize.height / 2).toDouble()
+            0.0, 0.0
+//            (mapSize.width / 2).toDouble(),
+//            (mapSize.height / 2).toDouble()
         )
         val top = mapCenterScreenCoordinate.y + centerOffset.y
         val left = mapCenterScreenCoordinate.x + centerOffset.x

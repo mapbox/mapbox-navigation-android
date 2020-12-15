@@ -128,7 +128,7 @@ public class MapboxGuidanceImageActivity extends AppCompatActivity implements On
     float density = getResources().getDisplayMetrics().density;
     GuidanceImageOptions options = new GuidanceImageOptions.Builder()
         .density(density)
-        .edgeInsets(new EdgeInsets(60.0 * density, 10.0 * density, 10.0 * density, 10.0 * density))
+        .edgeInsets(new EdgeInsets(10.0 * density, 300.0 * density, 10.0 * density, 10.0 * density))
         .styleUri("mapbox://styles/mapbox-map-design/ckifcx2i84huf19pbvgi0cka6")
         .build();
 

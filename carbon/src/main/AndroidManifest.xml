@@ -21,7 +21,7 @@
     <activity
         android:name=".MapboxGuidanceImageActivity"
         android:label="@string/title_guidance_api"
-        android:screenOrientation="portrait">
+        android:configChanges="orientation">
     </activity>
 
     <activity
