@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.internal
 
+import com.itkacher.okhttpprofiler.OkHttpProfilerInterceptor
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.ThreadController
 import kotlinx.coroutines.withContext
@@ -16,7 +17,7 @@ internal object FetchImageProcessor {
     private const val USER_AGENT_KEY = "User-Agent"
     private const val USER_AGENT_VALUE = "MapboxJava/"
 
-    private val okHttpClient = OkHttpClient.Builder().build()
+    private val okHttpClient = OkHttpClient.Builder().addInterceptor(OkHttpProfilerInterceptor()).build()
 
     internal suspend fun fetchImage(urlToFetch: String): ImageResponse =
         withContext(ThreadController.IODispatcher) {
@@ -25,7 +26,6 @@ internal object FetchImageProcessor {
                     .url(urlToFetch)
                     .header(USER_AGENT_KEY, USER_AGENT_VALUE)
                     .build()
-                val response = okHttpClient.newCall(req).execute()
                 okHttpClient.newCall(req).enqueue(
                     object : Callback {
                         override fun onFailure(call: Call, e: IOException) {
@@ -33,9 +33,9 @@ internal object FetchImageProcessor {
                         }
 
                         override fun onResponse(call: Call, response: Response) {
-                            ifNonNull(response.body()) { body ->
-                                resumeCoroutine(ImageResponse.Success(body.bytes()))
-                            } ?: resumeCoroutine(ImageResponse.Failure("Data stream is null"))
+                            ifNonNull(response.body?.source()) { source ->
+                                resumeCoroutine(ImageResponse.Success(source.buffer.readByteArray()))
+                            } ?: resumeCoroutine(ImageResponse.Failure("Data from source response is null"))
                         }
 
                         private fun resumeCoroutine(result: ImageResponse) {

@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.base.model.signboard
 
 import com.mapbox.navigation.ui.base.MapboxState
-import java.io.InputStream
 
 sealed class SignboardState : MapboxState {
 

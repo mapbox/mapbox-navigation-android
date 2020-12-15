@@ -100,8 +100,8 @@ public class MapboxSnapshotActivity extends AppCompatActivity implements OnMapLo
 
   private SignboardReadyCallback signboardReadyCallback = new SignboardReadyCallback() {
     @Override
-    public void onSignboardReady(@NotNull SignboardState.SignboardReady stream) {
-      signboardView.render(stream);
+    public void onSignboardReady(@NotNull SignboardState.SignboardReady bytes) {
+      signboardView.render(bytes);
     }
 
     @Override

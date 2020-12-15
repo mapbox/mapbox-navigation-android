@@ -60,6 +60,8 @@ dependencies {
     implementation dependenciesList.androidXConstraintLayout
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
+    implementation("com.squareup.okhttp3:okhttp:4.9.0")
+    implementation 'com.itkacher.okhttpprofiler:okhttpprofiler:1.0.7'
 
     implementation dependenciesList.timber
 
