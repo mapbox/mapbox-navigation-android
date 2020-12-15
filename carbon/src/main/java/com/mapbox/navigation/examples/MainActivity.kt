@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.navigation.examples.core.MapboxRouteLineApiExampleActivity
+import com.mapbox.navigation.examples.core.MapboxSnapshotActivity
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.SlackLineActivity
 import com.mapbox.navigation.examples.core.camera.CameraAnimationsActivity
@@ -60,6 +61,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_navigation_camera),
                 getString(R.string.description_navigation_camera),
                 CameraAnimationsActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_snapshotter),
+                getString(R.string.description_snapshotter),
+                MapboxSnapshotActivity::class.java
             )
         )
     }

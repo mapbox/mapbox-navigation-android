@@ -48,8 +48,8 @@ android {
 }
 
 dependencies {
-    //api project(":libnavui-base")
     //implementation project(":libnavui-util")
+    api project(":libnavigation-util")
     implementation dependenciesList.kotlinStdLib
 
     ktlint dependenciesList.ktlint

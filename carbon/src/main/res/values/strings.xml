@@ -135,4 +135,6 @@
     <string name="description_routeline_api" translatable="false">Demonstrates usage of the route line API.</string>
     <string name="title_slackline" translatable="false">Slackline usage example</string>
     <string name="slackline_description" translatable="false">Describes using Slackline as a route line setup shortcut.</string>
+    <string name="title_snapshotter" translatable="false">Snapshotter</string>
+    <string name="description_snapshotter" translatable="false">Demonstrates the use of snapshotter during active guidance</string>
 </resources>

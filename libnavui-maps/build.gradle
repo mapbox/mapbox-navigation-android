@@ -50,7 +50,6 @@ android {
 
 dependencies {
     api project(":libnavui-base")
-    implementation project(":libnavui-util")
 
     api dependenciesList.mapboxMapSdkCarbon
     api dependenciesList.mapboxSdkTurf

@@ -31,6 +31,12 @@
     </activity>
 
     <activity
+        android:name=".MapboxSnapshotActivity"
+        android:label="@string/title_navigation_route_ui"
+        android:screenOrientation="portrait">
+    </activity>
+
+    <activity
         android:name="com.mapbox.navigation.examples.MainActivity"
         android:label="@string/title_navigation_route_ui"
         android:screenOrientation="portrait">
