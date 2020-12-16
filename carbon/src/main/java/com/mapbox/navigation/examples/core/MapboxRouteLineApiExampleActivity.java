@@ -6,11 +6,13 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,6 +32,8 @@ import com.mapbox.maps.CameraOptions;
 import com.mapbox.maps.EdgeInsets;
 import com.mapbox.maps.MapView;
 import com.mapbox.maps.MapboxMap;
+import com.mapbox.maps.MapboxMapOptions;
+import com.mapbox.maps.ResourceOptions;
 import com.mapbox.maps.Style;
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin;
@@ -55,6 +59,7 @@ import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper;
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer;
+import com.mapbox.navigation.ui.maps.PredictiveCacheController;
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi;
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView;
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions;
@@ -87,6 +92,7 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
   private final LocationPermissionsHelper permissionsHelper = new LocationPermissionsHelper(this);
   private MapView mapView;
   private MapboxMap mapboxMap;
+  private PredictiveCacheController predictiveCacheController;
   private LocationComponentPlugin locationComponent;
   private CameraAnimationsPlugin mapCamera;
   private final MapboxReplayer mapboxReplayer = new MapboxReplayer();
@@ -109,7 +115,19 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_navigation_map_route);
-    mapView = findViewById(R.id.mapView);
+    MapboxMapOptions mapboxMapOptions = new MapboxMapOptions(this, null, getResources().getDisplayMetrics().density);
+    ResourceOptions resourceOptions = new ResourceOptions.Builder()
+        .accessToken(getMapboxAccessTokenFromResources())
+        .assetPath(getFilesDir().getAbsolutePath())
+        .cachePath(getFilesDir().getAbsolutePath() + "/mbx.db")
+        .cacheSize(100_000_000L) // 100 MB
+        .tileStorePath(getFilesDir().getAbsolutePath() + "/maps_tile_store/")
+        .build();
+    mapboxMapOptions.setResourceOptions(resourceOptions);
+    mapView = new MapView(this, mapboxMapOptions);
+    RelativeLayout mapLayout = findViewById(R.id.mapView_container);
+    mapLayout.addView(mapView);
+
     startNavigation = findViewById(R.id.startNavigation);
     routeLoading = findViewById(R.id.routeLoadingProgressBar);
     mapboxMap = mapView.getMapboxMap();
@@ -141,6 +159,11 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
         .withAboveLayerId(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
         .build();
     routeArrowView = new MapboxRouteArrowView(routeArrowOptions);
+
+    predictiveCacheController = new PredictiveCacheController(mapboxNavigation, message -> {
+      Timber.e("predictive cache error: %s", message);
+    });
+    predictiveCacheController.setMapInstance(mapboxMap);
   }
 
   @SuppressLint("MissingPermission")
@@ -162,8 +185,16 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
         Collections.shuffle(mapStyles);
         String style = mapStyles.get(0);
         Timber.e("*** Chosen map style is %s", style);
+        locationComponent.setEnabled(false);
         mapboxMap.loadStyleUri(style, new Style.OnStyleLoaded() {
           @Override public void onStyleLoaded(@NotNull Style style) {
+            new Handler().post(new Runnable() {
+              @Override
+              public void run() {
+                // workaround for https://github.com/mapbox/mapbox-maps-android/issues/900
+                locationComponent.setEnabled(true);
+              }
+            });
             RouteLineState.UpdateLayerVisibilityState primaryRouteVisibilityState;
             if (primaryRouteLineVisibility == Visibility.VISIBLE) {
               primaryRouteVisibilityState = mapboxRouteLineApi.showPrimaryRoute();
@@ -218,7 +249,9 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
 
   @SuppressLint("MissingPermission")
   private void initStyle() {
-    mapboxMap.loadStyleUri(Style.MAPBOX_STREETS, style -> {
+    // a style without composite sources
+    String styleId = "mapbox://styles/lukaspaczos/ckirf03jn7hv817nrr69ndwdw";
+    mapboxMap.loadStyleUri(styleId, style -> {
       initializeLocationComponent(style);
       mapboxNavigation.getNavigationOptions().getLocationEngine().getLastLocation(locationEngineCallback);
 
@@ -245,6 +278,9 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
   @Override
   protected void onDestroy() {
     super.onDestroy();
+    if (predictiveCacheController != null) {
+      predictiveCacheController.onDestroy();
+    }
     mapView.onDestroy();
     mapboxNavigation.onDestroy();
   }
@@ -480,6 +516,9 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
 
   private final RouteProgressObserver routeProgressObserver = new RouteProgressObserver() {
     @Override public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
+      if (mapboxMap.getStyle() == null) {
+        return;
+      }
       mapboxRouteLineApi.updateWithRouteProgress(routeProgress);
 
       RouteArrowState.UpdateManeuverArrowState updateArrowState = routeArrow.updateUpcomingManeuverArrow(routeProgress);

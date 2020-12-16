@@ -62,6 +62,7 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
             )
             .navigatorPredictionMillis(1)
             .onboardRouterOptions(mockk())
+            .predictiveCacheLocationOptions(mockk())
             .timeFormatType(1)
             .eHorizonOptions(mockk())
             .isRouteRefreshEnabled(false)

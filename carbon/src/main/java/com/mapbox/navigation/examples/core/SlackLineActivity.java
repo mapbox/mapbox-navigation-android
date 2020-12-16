@@ -11,6 +11,7 @@ import android.os.Vibrator;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,6 +29,8 @@ import com.mapbox.maps.CameraOptions;
 import com.mapbox.maps.EdgeInsets;
 import com.mapbox.maps.MapView;
 import com.mapbox.maps.MapboxMap;
+import com.mapbox.maps.MapboxMapOptions;
+import com.mapbox.maps.ResourceOptions;
 import com.mapbox.maps.Style;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImplKt;
@@ -79,7 +82,18 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_navigation_map_route);
     findViewById(R.id.fabToggleStyle).setVisibility(View.INVISIBLE);
-    mapView = findViewById(R.id.mapView);
+    MapboxMapOptions mapboxMapOptions = new MapboxMapOptions(this, null, getResources().getDisplayMetrics().density);
+    ResourceOptions resourceOptions = new ResourceOptions.Builder()
+      .accessToken(getMapboxAccessTokenFromResources())
+      .assetPath(getFilesDir().getAbsolutePath())
+      .cachePath(getFilesDir().getAbsolutePath() + "/mbx.db")
+      .cacheSize(100_000_000L) // 100 MB
+      .tileStorePath(getFilesDir().getAbsolutePath() + "/maps_tile_store/")
+      .build();
+    mapboxMapOptions.setResourceOptions(resourceOptions);
+    mapView = new MapView(this, mapboxMapOptions);
+    RelativeLayout mapLayout = findViewById(R.id.mapView_container);
+    mapLayout.addView(mapView);
     startNavigation = findViewById(R.id.startNavigation);
     routeLoading = findViewById(R.id.routeLoadingProgressBar);
     mapboxMap = mapView.getMapboxMap();

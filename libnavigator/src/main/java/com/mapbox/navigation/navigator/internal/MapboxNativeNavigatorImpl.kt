@@ -3,10 +3,13 @@ package com.mapbox.navigation.navigator.internal
 import android.location.Location
 import android.os.SystemClock
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.common.TileStore
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.gson.GeometryGeoJson
 import com.mapbox.navigation.base.options.DeviceProfile
+import com.mapbox.navigation.base.options.OnboardRouterOptions
+import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.navigator.ActiveGuidanceOptionsMapper
 import com.mapbox.navigation.navigator.toFixLocation
 import com.mapbox.navigation.navigator.toLocation
@@ -16,6 +19,9 @@ import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
+import com.mapbox.navigator.PredictiveCacheController
+import com.mapbox.navigator.PredictiveCacheControllerOptions
+import com.mapbox.navigator.PredictiveLocationTrackerOptions
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
@@ -37,6 +43,9 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private const val BUFFER_DILATION: Short = 1
     private const val PRIMARY_ROUTE_INDEX = 0
     private const val SINGLE_THREAD = 1
+
+    // TODO: What should be the default value? Should we expose it publicly?
+    private const val MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS = 2
 
     private val NavigatorDispatcher: CoroutineDispatcher =
         Executors.newFixedThreadPool(SINGLE_THREAD).asCoroutineDispatcher()
@@ -315,4 +324,68 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override fun setElectronicHorizonObserver(eHorizonObserver: ElectronicHorizonObserver?) {
         navigator!!.setElectronicHorizonObserver(eHorizonObserver)
     }
+
+    /**
+     * Creates a Maps [PredictiveCacheController].
+     *
+     * @param tileStore Maps [TileStore]
+     * @param tileVariant Maps tileset
+     * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
+     *
+     * @return [PredictiveCacheController]
+     */
+    override fun createMapsPredictiveCacheController(
+        tileStore: TileStore,
+        tileVariant: String,
+        predictiveCacheLocationOptions: PredictiveCacheLocationOptions
+    ): PredictiveCacheController =
+        navigator!!.createPredictiveCacheController(
+            tileStore,
+            createDefaultMapsPredictiveCacheControllerOptions(tileVariant),
+            createDefaultPredictiveLocationTrackerOptions(predictiveCacheLocationOptions)
+        )
+
+    /**
+     * Creates a Navigation [PredictiveCacheController].
+     *
+     * @param onboardRouterOptions Navigation [OnboardRouterOptions]
+     * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
+     *
+     * @return [PredictiveCacheController]
+     */
+    override fun createNavigationPredictiveCacheController(
+        onboardRouterOptions: OnboardRouterOptions,
+        predictiveCacheLocationOptions: PredictiveCacheLocationOptions
+    ): PredictiveCacheController =
+        navigator!!.createPredictiveCacheController(
+            createDefaultNavigationPredictiveCacheControllerOptions(onboardRouterOptions),
+            createDefaultPredictiveLocationTrackerOptions(predictiveCacheLocationOptions)
+        )
+
+    private fun createDefaultPredictiveLocationTrackerOptions(
+        predictiveCacheLocationOptions: PredictiveCacheLocationOptions
+    ): PredictiveLocationTrackerOptions =
+        PredictiveLocationTrackerOptions(
+            predictiveCacheLocationOptions.currentLocationRadiusInMeters,
+            predictiveCacheLocationOptions.routeBufferRadiusInMeters,
+            predictiveCacheLocationOptions.destinationLocationRadiusInMeters
+        )
+
+    private fun createDefaultMapsPredictiveCacheControllerOptions(
+        tileVariant: String
+    ): PredictiveCacheControllerOptions =
+        PredictiveCacheControllerOptions(
+            "",
+            tileVariant,
+            MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS
+        )
+
+    private fun createDefaultNavigationPredictiveCacheControllerOptions(
+        onboardRouterOptions: OnboardRouterOptions
+    ): PredictiveCacheControllerOptions =
+        PredictiveCacheControllerOptions(
+            onboardRouterOptions.tilesVersion,
+            "${onboardRouterOptions.tilesDataset}/${onboardRouterOptions.tilesProfile}",
+            MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS
+        )
 }

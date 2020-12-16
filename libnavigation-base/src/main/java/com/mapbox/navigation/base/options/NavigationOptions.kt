@@ -29,6 +29,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * @param navigatorPredictionMillis defines approximate navigator prediction in milliseconds
  * @param distanceFormatter [DistanceFormatter] for format distances showing in notification during navigation
  * @param onboardRouterOptions [OnboardRouterOptions] defines configuration for the default on-board router
+ * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions] defines location configuration for predictive caching
  * @param isFromNavigationUi Boolean *true* if is called from UI, otherwise *false*
  * @param isDebugLoggingEnabled Boolean
  * @param deviceProfile [DeviceProfile] defines how navigation data should be interpretation
@@ -44,6 +45,7 @@ class NavigationOptions private constructor(
     val navigatorPredictionMillis: Long,
     val distanceFormatter: DistanceFormatter?,
     val onboardRouterOptions: OnboardRouterOptions,
+    val predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
     val isFromNavigationUi: Boolean,
     val isDebugLoggingEnabled: Boolean,
     val deviceProfile: DeviceProfile,
@@ -62,6 +64,7 @@ class NavigationOptions private constructor(
         navigatorPredictionMillis(navigatorPredictionMillis)
         distanceFormatter(distanceFormatter)
         onboardRouterOptions(onboardRouterOptions)
+        predictiveCacheLocationOptions(predictiveCacheLocationOptions)
         isFromNavigationUi(isFromNavigationUi)
         isDebugLoggingEnabled(isDebugLoggingEnabled)
         deviceProfile(deviceProfile)
@@ -86,6 +89,7 @@ class NavigationOptions private constructor(
         if (navigatorPredictionMillis != other.navigatorPredictionMillis) return false
         if (distanceFormatter != other.distanceFormatter) return false
         if (onboardRouterOptions != other.onboardRouterOptions) return false
+        if (predictiveCacheLocationOptions != other.predictiveCacheLocationOptions) return false
         if (isFromNavigationUi != other.isFromNavigationUi) return false
         if (isDebugLoggingEnabled != other.isDebugLoggingEnabled) return false
         if (deviceProfile != other.deviceProfile) return false
@@ -107,6 +111,7 @@ class NavigationOptions private constructor(
         result = 31 * result + navigatorPredictionMillis.hashCode()
         result = 31 * result + (distanceFormatter?.hashCode() ?: 0)
         result = 31 * result + onboardRouterOptions.hashCode()
+        result = 31 * result + predictiveCacheLocationOptions.hashCode()
         result = 31 * result + isFromNavigationUi.hashCode()
         result = 31 * result + isDebugLoggingEnabled.hashCode()
         result = 31 * result + deviceProfile.hashCode()
@@ -128,6 +133,7 @@ class NavigationOptions private constructor(
             "navigatorPredictionMillis=$navigatorPredictionMillis, " +
             "distanceFormatter=$distanceFormatter, " +
             "onboardRouterOptions=$onboardRouterOptions, " +
+            "predictiveCacheLocationOptions=$predictiveCacheLocationOptions, " +
             "isFromNavigationUi=$isFromNavigationUi, " +
             "isDebugLoggingEnabled=$isDebugLoggingEnabled, " +
             "deviceProfile=$deviceProfile, " +
@@ -154,6 +160,8 @@ class NavigationOptions private constructor(
         private var distanceFormatter: DistanceFormatter? = null
         private var onboardRouterOptions: OnboardRouterOptions =
             OnboardRouterOptions.Builder().build()
+        private var predictiveCacheLocationOptions: PredictiveCacheLocationOptions =
+            PredictiveCacheLocationOptions.Builder().build()
         private var isFromNavigationUi: Boolean = false
         private var isDebugLoggingEnabled: Boolean = false
         private var deviceProfile: DeviceProfile = DeviceProfile.Builder().build()
@@ -209,6 +217,14 @@ class NavigationOptions private constructor(
             apply { this.onboardRouterOptions = onboardRouterOptions }
 
         /**
+         * Defines location configuration for predictive caching
+         */
+        fun predictiveCacheLocationOptions(
+            predictiveCacheLocationOptions: PredictiveCacheLocationOptions
+        ): Builder =
+            apply { this.predictiveCacheLocationOptions = predictiveCacheLocationOptions }
+
+        /**
          * Defines if the builder instance is created from the Navigation UI
          */
         fun isFromNavigationUi(flag: Boolean): Builder =
@@ -247,6 +263,7 @@ class NavigationOptions private constructor(
                 navigatorPredictionMillis = navigatorPredictionMillis,
                 distanceFormatter = distanceFormatter,
                 onboardRouterOptions = onboardRouterOptions,
+                predictiveCacheLocationOptions = predictiveCacheLocationOptions,
                 isFromNavigationUi = isFromNavigationUi,
                 isDebugLoggingEnabled = isDebugLoggingEnabled,
                 deviceProfile = deviceProfile,

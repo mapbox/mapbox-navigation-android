@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.internal;
 
 import android.content.Context;
 import android.util.TypedValue;
+
 import androidx.annotation.AnyRes;
 import androidx.annotation.NonNull;
 
