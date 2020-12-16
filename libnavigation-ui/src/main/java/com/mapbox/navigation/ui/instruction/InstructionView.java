@@ -65,6 +65,7 @@ import com.mapbox.navigation.ui.internal.summary.InstructionListAdapter;
 import com.mapbox.navigation.ui.internal.utils.ViewUtils;
 import com.mapbox.navigation.ui.listeners.InstructionListListener;
 
+import com.mapbox.navigation.utils.internal.PrimitivesEx;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -841,9 +842,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
       String maneuverModifier = subText.modifier();
       subManeuverView.setManeuverTypeAndModifier(maneuverType, maneuverModifier);
       Double roundaboutAngle = subText.degrees();
-      if (roundaboutAngle != null) {
-        subManeuverView.setRoundaboutAngle(roundaboutAngle.floatValue());
-      }
+      subManeuverView.setRoundaboutAngle(PrimitivesEx.toFloatOrNull(roundaboutAngle));
       subManeuverView.setDrivingSide(drivingSide);
       InstructionLoader instructionLoader = createInstructionLoader(subStepText, subText);
       if (instructionLoader != null) {
@@ -1039,9 +1038,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private void updateManeuverView(@NonNull String maneuverViewType, String maneuverViewModifier,
                                   @Nullable Double roundaboutAngle, String drivingSide) {
     maneuverView.setManeuverTypeAndModifier(maneuverViewType, maneuverViewModifier);
-    if (roundaboutAngle != null) {
-      maneuverView.setRoundaboutAngle(roundaboutAngle.floatValue());
-    }
+    maneuverView.setRoundaboutAngle(PrimitivesEx.toFloatOrNull(roundaboutAngle));
     maneuverView.setDrivingSide(drivingSide);
   }
 

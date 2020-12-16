@@ -2,19 +2,16 @@ package com.mapbox.navigation.utils.internal.maneuver
 
 import android.graphics.Canvas
 import android.graphics.PointF
+import androidx.annotation.DrawableRes
 import androidx.core.util.Pair
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
+import com.mapbox.navigation.utils.R
 
 /**
  * A helping class for creating maneuvers that are draw on the [Canvas]
  */
 object ManeuverIconHelper {
-
-    /**
-     * Default *roundabout* angle
-     */
-    const val DEFAULT_ROUNDABOUT_ANGLE = 180f
 
     private const val TOP_ROUNDABOUT_ANGLE_LIMIT = 300f
     private const val BOTTOM_ROUNDABOUT_ANGLE_LIMIT = 60f
@@ -460,4 +457,18 @@ object ManeuverIconHelper {
             roundaboutAngle > TOP_ROUNDABOUT_ANGLE_LIMIT -> TOP_ROUNDABOUT_ANGLE_LIMIT
             else -> roundaboutAngle
         }
+
+    /**
+     * Provide a generic roundabout resource.
+     * @param drivingSide can be [ManeuverModifier.RIGHT] or [ManeuverModifier.LEFT]
+     */
+    @JvmStatic
+    @DrawableRes
+    fun provideGenericRoundabout(drivingSide: String): Int {
+        return if (drivingSide == ManeuverModifier.RIGHT) {
+            R.drawable.mapbox_roundabout_generic_driving_side_right
+        } else {
+            R.drawable.mapbox_roundabout_generic_driving_side_left
+        }
+    }
 }

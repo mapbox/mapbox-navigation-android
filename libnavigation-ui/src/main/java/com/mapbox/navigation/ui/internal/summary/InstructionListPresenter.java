@@ -14,6 +14,7 @@ import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.trip.model.RouteLegProgress;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 
+import com.mapbox.navigation.utils.internal.PrimitivesEx;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -118,9 +119,7 @@ class InstructionListPresenter {
     listView.updateManeuverViewTypeAndModifier(maneuverType, maneuverModifier);
 
     Double roundaboutDegrees = bannerInstructions.primary().degrees();
-    if (roundaboutDegrees != null) {
-      listView.updateManeuverViewRoundaboutDegrees(roundaboutDegrees.floatValue());
-    }
+    listView.updateManeuverViewRoundaboutDegrees(PrimitivesEx.toFloatOrNull(roundaboutDegrees));
     listView.updateManeuverViewDrivingSide(drivingSide);
   }
 

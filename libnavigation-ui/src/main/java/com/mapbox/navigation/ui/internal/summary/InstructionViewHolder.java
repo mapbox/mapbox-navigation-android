@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -35,7 +36,7 @@ class InstructionViewHolder extends RecyclerView.ViewHolder implements Instructi
   }
 
   @Override
-  public void updateManeuverViewRoundaboutDegrees(float roundaboutAngle) {
+  public void updateManeuverViewRoundaboutDegrees(@Nullable Float roundaboutAngle) {
     maneuverView.setRoundaboutAngle(roundaboutAngle);
   }
 

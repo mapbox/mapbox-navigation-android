@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.PointF;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -21,6 +22,7 @@ import com.mapbox.navigation.ui.R;
 import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconDrawer;
 import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper;
 import com.mapbox.navigation.utils.internal.maneuver.ManeuversStyleKit;
+import java.util.Objects;
 
 import static com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.MANEUVER_ICON_DRAWER_MAP;
 import static com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS;
@@ -42,7 +44,8 @@ public class ManeuverView extends View {
   private int primaryColor;
   @ColorInt
   private int secondaryColor;
-  private float roundaboutAngle = ManeuverIconHelper.DEFAULT_ROUNDABOUT_ANGLE;
+  @Nullable
+  private Float roundaboutAngle = null;
   @Nullable
   private Pair<String, String> maneuverTypeAndModifier = new Pair<>(null, null);
   private PointF size;
@@ -118,11 +121,20 @@ public class ManeuverView extends View {
    * This value will only be considered if the current maneuver type is
    * a roundabout.
    *
-   * @param roundaboutAngle angle to be rendered
+   * @param roundaboutAngle angle to be rendered. If <b>null</b> value is set will be used general
+   *                        roundabout resource.
    */
-  public void setRoundaboutAngle(@FloatRange(from = 60f, to = 300f) float roundaboutAngle) {
-    if (ROUNDABOUT_MANEUVER_TYPES.contains(maneuverType) && this.roundaboutAngle != roundaboutAngle) {
-      updateRoundaboutAngle(roundaboutAngle);
+  public void setRoundaboutAngle(@Nullable @FloatRange(from = 60f, to = 300f) Float roundaboutAngle) {
+    if (Objects.equals(this.roundaboutAngle, roundaboutAngle)) {
+      return;
+    }
+
+    if (ROUNDABOUT_MANEUVER_TYPES.contains(maneuverType)) {
+      if (roundaboutAngle == null) {
+        this.roundaboutAngle = roundaboutAngle;
+      } else {
+        updateRoundaboutAngle(roundaboutAngle);
+      }
       invalidate();
     }
   }
@@ -190,7 +202,21 @@ public class ManeuverView extends View {
 
     ManeuverIconDrawer maneuverIconDrawer = MANEUVER_ICON_DRAWER_MAP.get(maneuverTypeAndModifier);
     if (maneuverIconDrawer != null) {
-      maneuverIconDrawer.drawManeuverIcon(canvas, primaryColor, secondaryColor, size, roundaboutAngle);
+      // FIXME temp solution, data issue: roundabout turn 360 degree are set with null angle
+      if (StepManeuver.ROUNDABOUT.equals(maneuverType) && roundaboutAngle == null) {
+        Drawable left = getResources()
+          .getDrawable(ManeuverIconHelper.provideGenericRoundabout(drivingSide));
+        left.setBounds(0, 0, getWidth(), getHeight());
+        left.draw(canvas);
+      } else  {
+        maneuverIconDrawer.drawManeuverIcon(
+          canvas,
+          primaryColor,
+          secondaryColor,
+          size,
+          ManeuverIconHelper.adjustRoundaboutAngle(roundaboutAngle != null ? roundaboutAngle : 0)
+        );
+      }
     }
 
     boolean flip = ManeuverIconHelper.isManeuverIconNeedFlip(maneuverType, maneuverModifier, drivingSide);
