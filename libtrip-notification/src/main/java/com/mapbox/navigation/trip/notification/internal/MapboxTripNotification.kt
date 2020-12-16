@@ -45,7 +45,7 @@ import com.mapbox.navigation.utils.internal.NOTIFICATION_ID
 import com.mapbox.navigation.utils.internal.SET_BACKGROUND_COLOR
 import com.mapbox.navigation.utils.internal.ifChannelException
 import com.mapbox.navigation.utils.internal.ifNonNull
-import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.DEFAULT_ROUNDABOUT_ANGLE
+import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper
 import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.MANEUVER_ICON_DRAWER_MAP
 import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS
 import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.ROUNDABOUT_MANEUVER_TYPES
@@ -87,7 +87,7 @@ class MapboxTripNotification constructor(
         private set
     var currentManeuverModifier: String? = null
         private set
-    private var currentRoundaboutAngle = DEFAULT_ROUNDABOUT_ANGLE
+    private var currentRoundaboutAngle: Float? = null
 
     private var currentInstructionText: String? = null
     private var currentDistanceText: SpannableString? = null
@@ -446,7 +446,7 @@ class MapboxTripNotification constructor(
         if (isFreeDriveMode) {
             currentManeuverType = null
             currentManeuverModifier = null
-            currentRoundaboutAngle = DEFAULT_ROUNDABOUT_ANGLE
+            currentRoundaboutAngle = null
         }
     }
 
@@ -479,9 +479,11 @@ class MapboxTripNotification constructor(
         currentManeuverModifier = bannerInstruction.primary().modifier()
 
         currentRoundaboutAngle = if (ROUNDABOUT_MANEUVER_TYPES.contains(currentManeuverType)) {
-            adjustRoundaboutAngle(bannerInstruction.primary().degrees()?.toFloat() ?: 0f)
+            bannerInstruction.primary().degrees()?.toFloat()?.let {
+                adjustRoundaboutAngle(it)
+            }
         } else {
-            DEFAULT_ROUNDABOUT_ANGLE
+            null
         }
     }
 
@@ -489,7 +491,7 @@ class MapboxTripNotification constructor(
         maneuverType: String,
         maneuverModifier: String?,
         drivingSide: String,
-        roundaboutAngle: Float
+        roundaboutAngle: Float?
     ): Bitmap? {
         val maneuver = when {
             MANEUVER_TYPES_WITH_NULL_MODIFIERS.contains(maneuverType) -> Pair(maneuverType, null)
@@ -512,6 +514,18 @@ class MapboxTripNotification constructor(
         val maneuverImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val maneuverCanvas = Canvas(maneuverImage)
 
+        // FIXME temp solution, data issue: roundabout turn 360 degree are set with null angle
+        if (maneuverType == StepManeuver.ROUNDABOUT && roundaboutAngle == null) {
+            val drawable =
+                ContextCompat.getDrawable(
+                    applicationContext,
+                    ManeuverIconHelper.provideGenericRoundabout(drivingSide)
+                )
+            drawable?.setBounds(0, 0, maneuverCanvas.width, maneuverCanvas.height)
+            drawable?.draw(maneuverCanvas)
+            return maneuverImage
+        }
+
         MANEUVER_ICON_DRAWER_MAP[maneuver]?.drawManeuverIcon(
             maneuverCanvas,
             ContextCompat.getColor(
@@ -523,7 +537,7 @@ class MapboxTripNotification constructor(
                 R.color.mapbox_navigation_view_color_banner_maneuver_secondary
             ),
             PointF(width.toFloat(), height.toFloat()),
-            roundaboutAngle
+            roundaboutAngle ?: 0f
         )
 
         maneuverCanvas.restoreToCount(maneuverCanvas.saveCount)
