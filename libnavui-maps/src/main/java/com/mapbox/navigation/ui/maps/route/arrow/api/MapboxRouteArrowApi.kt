@@ -17,7 +17,42 @@ import com.mapbox.turf.TurfMeasurement
  * be rendered on the map using the MapRouteArrowView class. Generally this class should be called
  * on each route progress update in order to ensure the arrow displayed is kept consistent
  * with the state of navigation.
+ *
+ * The two principal classes for the maneuver arrow are the [MapboxRouteArrowApi] and the
+ * [MapboxRouteArrowView].
+ *
+ * Like the route line components the [MapboxRouteArrowApi] consumes data from the Navigation SDK,
+ * specifically the [RouteProgress], and produces data for rendering on the map by the
+ * [MapboxRouteArrowView]. While the route line has no dependency on the [MapboxRouteArrowApi],
+ * the [MapboxRouteArrowApi] indirectly depends on the [MapboxRouteLineApi]. So the
+ * [MapboxRouteLineApi]can be used without the [MapboxRouteArrowApi] the inverse is not currently
+ * supported. Simple usage of the maneuver arrows would look like:
+ *
+ * RouteArrowOptions routeArrowOptions = new RouteArrowOptions.Builder(context)
+ * MapboxRouteArrowApi routeArrow = new MapboxRouteArrowApi()
+ * MapboxRouteArrowView routeArrowView = new MapboxRouteArrowView(routeArrowOptions)
+ *
+ * or
+ *
+ * val routeArrowOptions = RouteArrowOptions.Builder(context)
+ * val routeArrow = MapboxRouteArrowApi()
+ * val routeArrowView = MapboxRouteArrowView(routeArrowOptions)
+ *
+ * In order for the [MapboxRouteArrowApi] to function it needs route progress updates.
+ * An application should register a RouteProgressObserver with the [MapboxNavigation] class
+ * instance and pass the route progress updates to the [MapboxRouteArrowApi] class. Be sure to
+ * unregister this listener appropriately according to the lifecycle of your activity in order to
+ * prevent resource leaks.
+ *
+ * At a minimum an application should do the following with route progress updates:
+ * ...
+ * override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+ * val updateState = routeArrow.updateUpcomingManeuverArrow(routeProgress)
+ * routeArrowView.render(mapboxMap.getStyle(), updateState)
+ * }
+ * ...
  */
+
 class MapboxRouteArrowApi {
     private val maneuverPoints = mutableListOf<Point>()
 

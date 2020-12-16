@@ -30,9 +30,97 @@ import com.mapbox.turf.TurfMisc
 /**
  * Responsible for generating route line related data which can be rendered on the map to
  * visualize a line representing a route. The route related data returned should be rendered
- * with the MapboxRouteLineView class. In addition to setting route data this class can
+ * with the [MapboxRouteLineView] class. In addition to setting route data this class can
  * be used to generate the data necessary to hide and show routes already drawn on the map and
  * generally control the visual aspects of a route line.
+ *
+ * The two principal classes for the route line are the [MapboxRouteLineApi] and the
+ * [MapboxRouteLineView]. The [MapboxRouteLineApi] consumes data produced by the Navigation SDK and
+ * produces data that can be used to visualize the data on the map. The [MapboxRouteLineView] consumes
+ * the data from the [MapboxRouteLineApi] and calls the appropriate map related commands to produce
+ * a line on the map representing one or more routes.
+ *
+ * A simple example would involve an activity instantiating the [MapboxRouteLineApi] and
+ * [MapboxRouteLineView] classes and maintaining a reference to them. Both classes need a reference
+ * to an instance of [MapboxRouteLineOptions]. The default options can be used as a starting point
+ * so the simplest usage would look like:
+ *
+ * MapboxRouteLineOptions mapboxRouteLineOptions = new MapboxRouteLineOptions.Builder(context).build();
+ * MapboxRouteLineApi mapboxRouteLineApi = new MapboxRouteLineApi(mapboxRouteLineOptions);
+ * MapboxRouteLineView mapboxRouteLineView = new MapboxRouteLineView(mapboxRouteLineOptions);
+ *
+ * or
+ *
+ * val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(context).build()
+ * val mapboxRouteLineApi = MapboxRouteLineApi(mapboxRouteLineOptions)
+ * val mapboxRouteLineView = MapboxRouteLineView(mapboxRouteLineOptions)
+ *
+ *
+ * When one or more DirectionsRoute objects are retrieved from [MapboxNavigation] they can be displayed
+ * on the map by calling mapboxRouteLineApi.setRoutes() and then passing the object returned to the
+ * view class via [mapboxRouteLineView.render()] which will draw the route(s) on the map. Note, if
+ * passing more than one route to the setRoutes method, the first route in the collection will be
+ * considered the primary route. There is a known bug in the Map SDK that prevents clicking on a
+ * drawn alternative route in order to select it as the primary route. This issue will be resolved
+ * in an upcoming build.
+ *
+ * Calls to the MapboxRouteLineView::render command always take the current Map Style object as an
+ * argument. It is important to ensure the Style object is always current. If the application
+ * changes the map style at runtime the new Style should be passed as an argument to the render
+ * method following the style change.
+ *
+ * In almost all cases the [MapboxRouteLineApi] class methods return a state object that should be
+ * passed to the [MapboxRouteLineView] render method.
+ *
+ * Customizing the route line and arrow appearance can be done via the [MapboxRouteLineOptions] and
+ * RouteArrowOptions. In the 1.x version of the Navigation SDK this customization was done by
+ * overriding the Mapbox defaults defined in the styles.xml. In this version of the SDK the
+ * customization is done by providing values to the [MapboxRouteLineOptions.Builder] and
+ * RouteArrowOptions.Builder. Default values are used for any custom values that are not provided.
+ *
+ * Vanishing Route Line:
+ * The "vanishing route line" is a feature which changes the appearance of the route line
+ * behind the puck to a specific color or makes it transparent. This creates a visual difference
+ * between the section of the route that has been traveled and the section that has yet to be
+ * traveled. In order to enable and use this feature do the following:
+ *
+ * 1. Enable the feature in the [MapboxRouteLineOptions]
+ * ```kotlin
+ * MapboxRouteLineOptions.Builder(context)
+ * .withVanishingRouteLineEnabled(true)
+ * .build()
+ * ```
+ * 2. Register an [OnIndicatorPositionChangedListener] with the LocationComponent:
+ *
+ * ```kotlin
+ * locationComponent.addOnIndicatorPositionChangedListener(myIndicatorPositionChangedListener)
+ * ```
+ * (Be sure to unregister this listener appropriately according to the lifecycle of your activity
+ * in order to prevent resource leaks.)
+ *
+ * 3. In your [OnIndicatorPositionChangedListener] implementation update the [MapboxRouteLineApi]
+ * with the Point provided by the listener and render the state returned by [MapboxRouteLineApi].
+ *
+ * ```kotlin
+ * val vanishingRouteLineData = mapboxRouteLineApi.updateTraveledRouteLine(point)
+ * if (vanishingRouteLineData != null && mapboxMap.getStyle() != null) {
+ * mapboxRouteLineView.render(mapboxMap.getStyle(), vanishingRouteLineData);
+ * }
+ * ```
+ *
+ * 4. Register a [RouteProgressObserver] with [MapboxNavigation] and pass the data to the
+ * [MapboxRouteLineApi] (Be sure to unregister this listener appropriately according to the
+ * lifecycle of your activity in order to prevent resource leaks.)
+ *
+ * ```kotlin
+ * override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+ * mapboxRouteLineApi.updateWithRouteProgress(routeProgress) // nothing to render in this case
+ * }
+ * ```
+ *
+ * In order to keep the the point on the route line indicating traveled vs not traveled in sync
+ * with the puck data from both [OnIndicatorPositionChangedListener] and the [RouteProgressObserver]
+ * are needed.
  *
  * @param routeLineOptions used for determining the appearance and/or behavior of the route line
  */
