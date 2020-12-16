@@ -274,6 +274,14 @@ internal object MapboxNavigationTelemetry :
                 }
                 onEventUpdated?.let { it(feedbackEvent) }
             }
+        } else {
+            logger?.e(
+                TAG,
+                Message(
+                    "User Feedback event creation failed. The event can only be created in " +
+                        "active guidance (trips session started and route is available)."
+                )
+            )
         }
     }
 
