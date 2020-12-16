@@ -196,18 +196,18 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
               }
             });
             RouteLineState.UpdateLayerVisibilityState primaryRouteVisibilityState;
-            if (primaryRouteLineVisibility == Visibility.VISIBLE) {
-              primaryRouteVisibilityState = mapboxRouteLineApi.showPrimaryRoute();
-            } else {
+            if (primaryRouteLineVisibility == Visibility.NONE) {
               primaryRouteVisibilityState = mapboxRouteLineApi.hidePrimaryRoute();
+            } else {
+              primaryRouteVisibilityState = mapboxRouteLineApi.showPrimaryRoute();
             }
             mapboxRouteLineView.render(style, primaryRouteVisibilityState);
 
             RouteLineState.UpdateLayerVisibilityState alternateRouteVisibilityState;
-            if (alternativeRouteLineVisibility == Visibility.VISIBLE) {
-              alternateRouteVisibilityState = mapboxRouteLineApi.showAlternativeRoutes();
-            } else {
+            if (alternativeRouteLineVisibility == Visibility.NONE) {
               alternateRouteVisibilityState = mapboxRouteLineApi.hideAlternativeRoutes();
+            } else {
+              alternateRouteVisibilityState = mapboxRouteLineApi.showAlternativeRoutes();
             }
             mapboxRouteLineView.render(style, alternateRouteVisibilityState);
 
@@ -215,10 +215,10 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
             mapboxRouteLineView.render(style, redrawData);
 
             RouteArrowState.UpdateRouteArrowVisibilityState arrowVisibilityState;
-            if (arrowVisibility == Visibility.VISIBLE) {
-              arrowVisibilityState = routeArrow.showManeuverArrow();
-            } else {
+            if (arrowVisibility == Visibility.NONE) {
               arrowVisibilityState = routeArrow.hideManeuverArrow();
+            } else {
+              arrowVisibilityState = routeArrow.showManeuverArrow();
             }
             routeArrowView.render(style, arrowVisibilityState);
 
