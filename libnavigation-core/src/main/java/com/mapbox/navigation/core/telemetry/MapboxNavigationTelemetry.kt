@@ -274,6 +274,13 @@ internal object MapboxNavigationTelemetry :
                 }
                 onEventUpdated?.let { it(feedbackEvent) }
             }
+        } else {
+            logger?.e(
+                TAG,
+                Message(
+                    "Cannot create User feedback if session is stopped or data is not initialized"
+                )
+            )
         }
     }
 
