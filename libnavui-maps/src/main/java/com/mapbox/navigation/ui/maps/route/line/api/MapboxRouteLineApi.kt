@@ -45,26 +45,29 @@ import com.mapbox.turf.TurfMisc
  * to an instance of [MapboxRouteLineOptions]. The default options can be used as a starting point
  * so the simplest usage would look like:
  *
+ * ```java
  * MapboxRouteLineOptions mapboxRouteLineOptions = new MapboxRouteLineOptions.Builder(context).build();
  * MapboxRouteLineApi mapboxRouteLineApi = new MapboxRouteLineApi(mapboxRouteLineOptions);
  * MapboxRouteLineView mapboxRouteLineView = new MapboxRouteLineView(mapboxRouteLineOptions);
+ * ```
  *
  * or
  *
+ * ```kotlin
  * val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(context).build()
  * val mapboxRouteLineApi = MapboxRouteLineApi(mapboxRouteLineOptions)
  * val mapboxRouteLineView = MapboxRouteLineView(mapboxRouteLineOptions)
+ * ```
  *
- *
- * When one or more DirectionsRoute objects are retrieved from [MapboxNavigation] they can be displayed
- * on the map by calling mapboxRouteLineApi.setRoutes() and then passing the object returned to the
+ * When one or more [DirectionsRoute] objects are retrieved from [MapboxNavigation] they can be displayed
+ * on the map by calling [mapboxRouteLineApi.setRoutes()] and then passing the object returned to the
  * view class via [mapboxRouteLineView.render()] which will draw the route(s) on the map. Note, if
  * passing more than one route to the setRoutes method, the first route in the collection will be
  * considered the primary route. There is a known bug in the Map SDK that prevents clicking on a
  * drawn alternative route in order to select it as the primary route. This issue will be resolved
  * in an upcoming build.
  *
- * Calls to the MapboxRouteLineView::render command always take the current Map Style object as an
+ * Calls to the [MapboxRouteLineView::render] command always take the current Map Style object as an
  * argument. It is important to ensure the Style object is always current. If the application
  * changes the map style at runtime the new Style should be passed as an argument to the render
  * method following the style change.
@@ -73,10 +76,10 @@ import com.mapbox.turf.TurfMisc
  * passed to the [MapboxRouteLineView] render method.
  *
  * Customizing the route line and arrow appearance can be done via the [MapboxRouteLineOptions] and
- * RouteArrowOptions. In the 1.x version of the Navigation SDK this customization was done by
+ * [RouteArrowOptions]. In the 1.x version of the Navigation SDK this customization was done by
  * overriding the Mapbox defaults defined in the styles.xml. In this version of the SDK the
  * customization is done by providing values to the [MapboxRouteLineOptions.Builder] and
- * RouteArrowOptions.Builder. Default values are used for any custom values that are not provided.
+ * [RouteArrowOptions.Builder]. Default values are used for any custom values that are not provided.
  *
  * Vanishing Route Line:
  * The "vanishing route line" is a feature which changes the appearance of the route line
@@ -90,13 +93,13 @@ import com.mapbox.turf.TurfMisc
  * .withVanishingRouteLineEnabled(true)
  * .build()
  * ```
- * 2. Register an [OnIndicatorPositionChangedListener] with the LocationComponent:
+ * 2. Register an [OnIndicatorPositionChangedListener] with the [LocationComponent]:
  *
  * ```kotlin
  * locationComponent.addOnIndicatorPositionChangedListener(myIndicatorPositionChangedListener)
  * ```
  * (Be sure to unregister this listener appropriately according to the lifecycle of your activity
- * in order to prevent resource leaks.)
+ * or Fragment in order to prevent resource leaks.)
  *
  * 3. In your [OnIndicatorPositionChangedListener] implementation update the [MapboxRouteLineApi]
  * with the Point provided by the listener and render the state returned by [MapboxRouteLineApi].
@@ -110,7 +113,7 @@ import com.mapbox.turf.TurfMisc
  *
  * 4. Register a [RouteProgressObserver] with [MapboxNavigation] and pass the data to the
  * [MapboxRouteLineApi] (Be sure to unregister this listener appropriately according to the
- * lifecycle of your activity in order to prevent resource leaks.)
+ * lifecycle of your activity or Fragment in order to prevent resource leaks.)
  *
  * ```kotlin
  * override fun onRouteProgressChanged(routeProgress: RouteProgress) {
@@ -118,8 +121,8 @@ import com.mapbox.turf.TurfMisc
  * }
  * ```
  *
- * In order to keep the the point on the route line indicating traveled vs not traveled in sync
- * with the puck data from both [OnIndicatorPositionChangedListener] and the [RouteProgressObserver]
+ * In order to keep the point on the route line indicating traveled vs not traveled in sync
+ * with the puck, data from both [OnIndicatorPositionChangedListener] and the [RouteProgressObserver]
  * are needed.
  *
  * @param routeLineOptions used for determining the appearance and/or behavior of the route line

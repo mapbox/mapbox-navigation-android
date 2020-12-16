@@ -14,7 +14,7 @@ import com.mapbox.turf.TurfMeasurement
 /**
  * Responsible for displaying a maneuver arrow representing the next maneuver.
  * The maneuver arrow is calculated based on the route progress and the data returned should
- * be rendered on the map using the MapRouteArrowView class. Generally this class should be called
+ * be rendered on the map using the [MapRouteArrowView] class. Generally this class should be called
  * on each route progress update in order to ensure the arrow displayed is kept consistent
  * with the state of navigation.
  *
@@ -25,32 +25,38 @@ import com.mapbox.turf.TurfMeasurement
  * specifically the [RouteProgress], and produces data for rendering on the map by the
  * [MapboxRouteArrowView]. While the route line has no dependency on the [MapboxRouteArrowApi],
  * the [MapboxRouteArrowApi] indirectly depends on the [MapboxRouteLineApi]. So the
- * [MapboxRouteLineApi]can be used without the [MapboxRouteArrowApi] the inverse is not currently
+ * [MapboxRouteLineApi] can be used without the [MapboxRouteArrowApi] the inverse is not currently
  * supported. Simple usage of the maneuver arrows would look like:
  *
+ * ```java
  * RouteArrowOptions routeArrowOptions = new RouteArrowOptions.Builder(context)
  * MapboxRouteArrowApi routeArrow = new MapboxRouteArrowApi()
  * MapboxRouteArrowView routeArrowView = new MapboxRouteArrowView(routeArrowOptions)
+ * ```
  *
  * or
  *
+ * ```kotlin
  * val routeArrowOptions = RouteArrowOptions.Builder(context)
  * val routeArrow = MapboxRouteArrowApi()
  * val routeArrowView = MapboxRouteArrowView(routeArrowOptions)
+ * ```
  *
  * In order for the [MapboxRouteArrowApi] to function it needs route progress updates.
- * An application should register a RouteProgressObserver with the [MapboxNavigation] class
+ * An application should register a [RouteProgressObserver] with the [MapboxNavigation] class
  * instance and pass the route progress updates to the [MapboxRouteArrowApi] class. Be sure to
- * unregister this listener appropriately according to the lifecycle of your activity in order to
- * prevent resource leaks.
+ * unregister this listener appropriately according to the lifecycle of your activity or Fragment
+ * in order to prevent resource leaks.
  *
  * At a minimum an application should do the following with route progress updates:
- * ...
+ *
+ * ```kotlin
  * override fun onRouteProgressChanged(routeProgress: RouteProgress) {
  * val updateState = routeArrow.updateUpcomingManeuverArrow(routeProgress)
  * routeArrowView.render(mapboxMap.getStyle(), updateState)
  * }
- * ...
+ * ```
+ *
  */
 
 class MapboxRouteArrowApi {
