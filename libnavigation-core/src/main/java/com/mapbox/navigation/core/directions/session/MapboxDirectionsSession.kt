@@ -171,7 +171,7 @@ internal class MapboxDirectionsSession(
      * Current Directions API doesn't support more than one waypoint
      * for [DirectionsCriteria.PROFILE_DRIVING_TRAFFIC].
      * Also NavNative returns "null" in "routeOptions" field.
-     * TODO After these two points will fixed - this method can be removed.
+     * TODO After these two points are fixed - this method can be removed.
      */
     private fun getFixedRoutes(
         routes: List<DirectionsRoute>,
