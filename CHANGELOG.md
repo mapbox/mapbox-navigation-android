@@ -2,6 +2,14 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 1.4.0-beta.1 - December 17, 2020
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Bug fixes and improvements
+* Fixed maneuver view so that shows a generic roundabout icon if there's no angle data. [#3867](https://github.com/mapbox/mapbox-navigation-android/pull/3867)
+* Fixed rerouting and requesting faster routes when silent waypoints are present. The waypoints are now persisted and not dropped. [#3581](https://github.com/mapbox/mapbox-navigation-android/pull/3581)
+
 ## Mapbox Navigation SDK 1.3.0-alpha.5 - December 9, 2020
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
