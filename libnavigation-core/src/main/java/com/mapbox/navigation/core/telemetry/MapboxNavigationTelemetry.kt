@@ -27,8 +27,8 @@ import com.mapbox.navigation.core.NavigationSessionStateObserver
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
+import com.mapbox.navigation.core.internal.telemetry.CachedNavigationFeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
-import com.mapbox.navigation.core.telemetry.events.CachedNavigationFeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.START

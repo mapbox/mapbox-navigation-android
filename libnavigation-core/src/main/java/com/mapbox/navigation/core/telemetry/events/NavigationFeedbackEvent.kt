@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.telemetry.events
 
 import android.annotation.SuppressLint
 import com.mapbox.navigation.base.metrics.NavigationMetrics
+import com.mapbox.navigation.core.internal.telemetry.CachedNavigationFeedbackEvent
 
 @SuppressLint("ParcelCreator")
 internal class NavigationFeedbackEvent(

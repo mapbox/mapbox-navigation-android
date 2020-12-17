@@ -3,7 +3,6 @@ package com.mapbox.navigation.core.internal.telemetry
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
-import com.mapbox.navigation.core.telemetry.events.CachedNavigationFeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 
 /**

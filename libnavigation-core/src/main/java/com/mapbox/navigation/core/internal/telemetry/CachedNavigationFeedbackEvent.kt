@@ -1,4 +1,6 @@
-package com.mapbox.navigation.core.telemetry.events
+package com.mapbox.navigation.core.internal.telemetry
+
+import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 
 /**
  * A cache version of an internal MapboxTelemetry feedback event.

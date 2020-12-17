@@ -310,15 +310,6 @@
         </activity>
 
         <activity
-            android:name=".core.CustomAlternativeRouteClickPaddingActivity"
-            android:label="@string/title_alternative_route_custom_click_padding"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".UIActivity" />
-        </activity>
-
-        <activity
             android:name=".ui.FeedbackOptionsActivity"
             android:label="@string/title_feedback_options"
             android:windowSoftInputMode="adjustResize">
