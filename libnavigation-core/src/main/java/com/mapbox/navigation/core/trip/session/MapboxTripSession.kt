@@ -55,8 +55,10 @@ internal class MapboxTripSession(
 ) : TripSession {
 
     companion object {
-        internal const val UNCONDITIONAL_STATUS_POLLING_PATIENCE = 2000L
-        internal const val UNCONDITIONAL_STATUS_POLLING_INTERVAL = 1000L
+        @Volatile
+        internal var UNCONDITIONAL_STATUS_POLLING_PATIENCE = 2000L
+        @Volatile
+        internal var UNCONDITIONAL_STATUS_POLLING_INTERVAL = 1000L
     }
 
     private var updateNavigatorStatusDataJobs: MutableList<Job> = CopyOnWriteArrayList()
