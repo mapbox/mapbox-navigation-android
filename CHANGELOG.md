@@ -2,6 +2,40 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 1.3.0 - December 17, 2020
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Features
+* Added `onFeedbackFlowFinished` method to `FeedbackFlowListener`. [3850](https://github.com/mapbox/mapbox-navigation-android/pull/3850)
+* Exposed an option for the user to provide an arrival experience feedback when the navigation session is finished. See `NavigationFeedbackOptions` for `NavigationView` integration and `FeedbackArrivalFragment` for standalone. [3758](https://github.com/mapbox/mapbox-navigation-android/pull/3758)
+* Exposed APIs to support caching user feedback events. [3724](https://github.com/mapbox/mapbox-navigation-android/pull/3724)
+
+#### Bug fixes and improvements
+* Fixed Exception `Resource not found` when using `FeedbackDetailsFragment`. [3842](https://github.com/mapbox/mapbox-navigation-android/pull/3842)
+* Updated the detailed feedback flow to request additional information in a form after arrival instead of immediately when feedback is reported. See `NavigationFeedbackOptions` for `NavigationView` integration and `FeedbackDetailsFragment` for standalone. [3758](https://github.com/mapbox/mapbox-navigation-android/pull/3758)
+
+## Mapbox Navigation SDK 1.4.0-beta.1 - December 17, 2020
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Bug fixes and improvements
+* Fixed maneuver view so that shows a generic roundabout icon if there's no angle data. [#3867](https://github.com/mapbox/mapbox-navigation-android/pull/3867)
+* Fixed rerouting and requesting faster routes when silent waypoints are present. The waypoints are now persisted and not dropped. [#3581](https://github.com/mapbox/mapbox-navigation-android/pull/3581)
+
+## Mapbox Navigation SDK 1.3.0-alpha.5 - December 9, 2020
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Features
+* Exposed GeoJsonOptions#withTolerance param for route line sources. [3819](https://github.com/mapbox/mapbox-navigation-android/pull/3819)
+* Added speedLimit to MapMatcher. [3839](https://github.com/mapbox/mapbox-navigation-android/pull/3839)
+* Added `onFeedbackFlowFinished` method to `FeedbackFlowListener`. [3850](https://github.com/mapbox/mapbox-navigation-android/pull/3850)
+
+#### Bug fixes and improvements
+* Updated assets and resources translations. [3856](https://github.com/mapbox/mapbox-navigation-android/pull/3856)
+* Updated default routing tiles version to `2020_12_05-03_00_00`. [3857](https://github.com/mapbox/mapbox-navigation-android/pull/3857)
+
 ## Mapbox Navigation SDK 1.3.0-alpha.4 - December 2, 2020
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
@@ -184,7 +218,7 @@ Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-an
 
 ### Changelog
 
-#### Features 
+#### Features
 * Added incident alerts [#3640](https://github.com/mapbox/mapbox-navigation-android/pull/3640)
 
 #### Bug fixes
@@ -222,13 +256,13 @@ Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-an
 * Updated Nav UI day and night styles to new stable production v1 versions [#3520](https://github.com/mapbox/mapbox-navigation-android/pull/3520)
 
 ## Mapbox Navigation SDK 1.0.0 - October 2, 2020
-Today, we are releasing Navigation SDK (Core & UI components) v.1.0 for Android 🎉 🚀 
+Today, we are releasing Navigation SDK (Core & UI components) v.1.0 for Android 🎉 🚀
 
 ### Core Components
-This upgrade features 
-- a higher accuracy location engine which functions even in low GPS quality scenarios such as tunnels or overpasses, 
-- free-drive mode which enables accurate location positioning even without an active route for daily commuting, 
-- a new modular architecture that allows developers to customize the navigation experience for their use case, 
+This upgrade features
+- a higher accuracy location engine which functions even in low GPS quality scenarios such as tunnels or overpasses,
+- free-drive mode which enables accurate location positioning even without an active route for daily commuting,
+- a new modular architecture that allows developers to customize the navigation experience for their use case,
 - and MAUs-based billing that provides predictability in costs to developers.
 
 ### UI Components
@@ -1160,10 +1194,10 @@ Note: This release breaks `SEMVER` / contains API breaking changes.
 ### v0.6.3 -October 18, 2017
 
 * Significant reroute metric fixes [#348](https://github.com/mapbox/mapbox-navigation-android/pull/348)
-* Avoid index out of bounds when drawing route line traffic [#384](https://github.com/mapbox/mapbox-navigation-android/pull/384) 
+* Avoid index out of bounds when drawing route line traffic [#384](https://github.com/mapbox/mapbox-navigation-android/pull/384)
 
 ### v0.6.2 - October 7, 2017
- 
+
 * Fixed an issue with the Location Engine not being activated correctly inside the Navigation-UI lib [#321](https://github.com/mapbox/mapbox-navigation-android/pull/321)
 * Fixed bottom sheet not getting placed correctly when the device is rotated [#320](https://github.com/mapbox/mapbox-navigation-android/pull/320)
 * Fixed missing reroute UI when a navigation session reroute occurs [#319](https://github.com/mapbox/mapbox-navigation-android/pull/319)

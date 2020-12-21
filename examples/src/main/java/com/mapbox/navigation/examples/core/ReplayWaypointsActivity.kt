@@ -15,9 +15,7 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
-import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
@@ -38,8 +36,8 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
+import com.mapbox.navigation.examples.core.utils.WaypointsController
 import com.mapbox.navigation.examples.utils.Utils
-import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import kotlinx.android.synthetic.main.activity_replay_waypoints_layout.container
@@ -66,7 +64,7 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
     private val firstLocationCallback = FirstLocationCallback(this)
-    private val stopsController = StopsController()
+    private val stopsController = WaypointsController()
 
     private val mapboxReplayer = MapboxReplayer()
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
@@ -308,24 +306,5 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
                 updateLocationLayerRenderMode(RenderMode.COMPASS)
             }
         }
-    }
-}
-
-private class StopsController {
-    private val stops = mutableListOf<Point>()
-
-    fun add(latLng: LatLng) {
-        stops.add(latLng.toPoint())
-    }
-
-    fun clear() {
-        stops.clear()
-    }
-
-    fun coordinates(originLocation: Location): List<Point> {
-        val coordinates = mutableListOf<Point>()
-        coordinates.add(originLocation.toPoint())
-        coordinates.addAll(stops)
-        return coordinates
     }
 }

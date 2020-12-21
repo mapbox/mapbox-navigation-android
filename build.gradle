@@ -1,5 +1,3 @@
-apply plugin: 'jacoco'
-
 buildscript {
   apply from: "${rootDir}/gradle/dependencies.gradle"
     repositories {
@@ -26,11 +24,14 @@ buildscript {
     classpath pluginDependencies.googleServices
     classpath pluginDependencies.license
     classpath pluginDependencies.mapboxSdkVersions
-    classpath pluginDependencies.dokka
     classpath pluginDependencies.mapboxSdkRegistry
     classpath pluginDependencies.mapboxAccessToken
+    classpath pluginDependencies.dokka
   }
 }
+
+apply plugin: 'jacoco'
+apply plugin: 'org.jetbrains.dokka'
 
 task testReport(type: TestReport, group: 'Build') {
   description = 'Generates an aggregate test report'
@@ -105,6 +106,10 @@ subprojects {
       }
     }
   }
+}
+
+dokkaHtmlMultiModule {
+  outputDirectory.set(new File(buildDir.path, "kdoc"))
 }
 
 task clean(type: Delete) {

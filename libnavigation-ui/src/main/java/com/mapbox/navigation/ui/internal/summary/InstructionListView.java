@@ -1,12 +1,13 @@
 package com.mapbox.navigation.ui.internal.summary;
 
 import android.text.SpannableString;
+import androidx.annotation.Nullable;
 
 interface InstructionListView {
 
   void updateManeuverViewTypeAndModifier(String maneuverType, String maneuverModifier);
 
-  void updateManeuverViewRoundaboutDegrees(float roundaboutAngle);
+  void updateManeuverViewRoundaboutDegrees(@Nullable Float roundaboutAngle);
 
   void updateManeuverViewDrivingSide(String drivingSide);
 

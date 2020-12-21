@@ -408,7 +408,7 @@ package com.mapbox.navigation.ui.instruction.maneuver {
     method public void setDrivingSide(String!);
     method public void setManeuverTypeAndModifier(String, String?);
     method public void setPrimaryColor(@ColorInt int);
-    method public void setRoundaboutAngle(@FloatRange(from=60.0f, to=300.0f) float);
+    method public void setRoundaboutAngle(@FloatRange(from=60.0f, to=300.0f) Float?);
     method public void setSecondaryColor(@ColorInt int);
   }
 

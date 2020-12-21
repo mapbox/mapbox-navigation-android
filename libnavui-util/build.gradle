@@ -10,15 +10,16 @@ apply from: file("${rootDir}/gradle/artifact-settings.gradle")
 version = project.ext.versionName
 group = project.ext.mapboxArtifactGroupId
 
-dokka {
-    outputDirectory = "$buildDir/kdoc"
-    configuration {
-        moduleName = 'libnavui-util'
-        reportUndocumented = true
-
-        perPackageOption {
-            prefix = "com.mapbox.navigation.ui.utils.internal"
-            suppress = true
+dokkaHtml {
+    outputDirectory.set(new File(buildDir.path, "kdoc"))
+    moduleName.set("UI Maps")
+    dokkaSourceSets {
+        configureEach {
+            reportUndocumented.set(true)
+            perPackageOption {
+                matchingRegex.set("com.mapbox.navigation.ui.utils.internal.*")
+                suppress.set(true)
+            }
         }
     }
 }
