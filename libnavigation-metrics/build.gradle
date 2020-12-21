@@ -42,9 +42,6 @@ dependencies {
         exclude group: "com.mapbox.mapboxsdk", module: "mapbox-android-core"
     }
 
-    //ktlint
-    ktlint dependenciesList.ktlint
-
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
 

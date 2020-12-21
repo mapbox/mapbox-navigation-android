@@ -1,5 +1,11 @@
+apply from: "${rootDir}/gradle/dependencies.gradle"
+
 configurations {
     ktlint
+}
+
+dependencies {
+    ktlint dependenciesList.ktlint
 }
 
 def inputFiles = project.fileTree(dir: "src", include: "**/*.kt")

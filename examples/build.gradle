@@ -88,9 +88,6 @@ dependencies {
     androidTestImplementation dependenciesList.testRunner
     androidTestUtil dependenciesList.testOrchestrator
 
-    //ktlint
-    ktlint dependenciesList.ktlint
-
     // Kotlin support
     implementation dependenciesList.kotlinStdLib
 

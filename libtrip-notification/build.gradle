@@ -47,9 +47,6 @@ dependencies {
 
     api project(':libnavigation-base')
 
-    //ktlint
-    ktlint dependenciesList.ktlint
-
     implementation dependenciesList.kotlinStdLib
     implementation project(':libnavigation-util')
 

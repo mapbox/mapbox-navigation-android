@@ -50,9 +50,6 @@ dependencies {
     api dependenciesList.mapboxSdkGeoJSON
 
     implementation dependenciesList.mapboxAndroidCommon
-    
-    //ktlint
-    ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
 
