@@ -190,7 +190,7 @@ public class NavigationMapRoute implements LifecycleObserver {
 
   /**
    * Allows adding a single primary route for the user to traverse along. No alternative routes will
-   * be drawn on top of the map.
+   * be drawn on top of the map. The route added will replace any previously added route(s).
    *
    * @param directionsRoute the directions route which you'd like to display on the map
    */
@@ -203,12 +203,13 @@ public class NavigationMapRoute implements LifecycleObserver {
   /**
    * Provide a list of {@link DirectionsRoute}s, the primary route will default to the first route
    * in the directions route list. All other routes in the list will be drawn on the map using the
-   * alternative route style.
+   * alternative route style. The routes passed to this method will replace any previously added
+   * routes. Passing an empty list will clear the routes.
    *
    * @param directionsRoutes a list of direction routes, first one being the primary and the rest of
    * the routes are considered alternatives.
    */
-  public void addRoutes(@NonNull @Size(min = 1) List<? extends DirectionsRoute> directionsRoutes) {
+  public void addRoutes(@NonNull List<? extends DirectionsRoute> directionsRoutes) {
     if (directionsRoutes.isEmpty()) {
       routeLine.clearRouteData();
     } else if (CompareUtils.areEqualContentsIgnoreOrder(
