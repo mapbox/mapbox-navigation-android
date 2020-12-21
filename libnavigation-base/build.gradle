@@ -40,9 +40,6 @@ dependencies {
 
     implementation dependenciesList.androidXAnnotation
 
-    //ktlint
-    ktlint dependenciesList.ktlint
-
     implementation dependenciesList.kotlinStdLib
 
     testImplementation project(':libtesting-utils')

@@ -49,9 +49,6 @@ dependencies {
     implementation(dependenciesList.okhttp)
     implementation(dependenciesList.okhttpInterceptor)
 
-    //ktlint
-    ktlint dependenciesList.ktlint
-
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
 
