@@ -16,3 +16,7 @@ For docs generated with Dokka versions < 1.4, there is a small script you can us
 0. Make sure you have Node and npm installed on your computer.
 1. `cd ./format-script && npm ci`
 2. `node ./scripts/format {version} {flavor}` where `version` is an existing version of docs in this repo (ex: `1.0.2`) and `flavor` is one of "ui" or "core".
+
+## Versions
+
+Most versions prior to 1.0.0 are comprised of two main packages: `core` and `ui`. There are corresponding directories in this branch for storing docs for those two packages. Starting with 1.0.0, Mapbox Navigation Android is published as a single package, stored in the `navigation` directory.
