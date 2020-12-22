@@ -606,6 +606,13 @@ object MapboxRouteLineUtils {
                 style
             )
 
+        if (!style.styleLayerExists(belowLayerIdToUse)) {
+            Timber.w(
+                """Tried placing route line below "$belowLayerIdToUse" which doesn't exist"""
+            )
+            return
+        }
+
         if (!style.styleSourceExists(RouteConstants.WAYPOINT_SOURCE_ID)) {
             geoJsonSource(RouteConstants.WAYPOINT_SOURCE_ID) {
                 maxzoom(16)

@@ -510,6 +510,53 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
+    fun initializeLayers_whenBelowLayerDoesNotExist() {
+        val appleLayer = mockk<StyleObjectInfo> {
+            every { id } returns "apple"
+            every { type } returns "fruit"
+        }
+        val bananaLayer = mockk<StyleObjectInfo> {
+            every { id } returns "banana"
+            every { type } returns "fruit"
+        }
+        val cherryLayer = mockk<StyleObjectInfo> {
+            every { id } returns "cherry"
+            every { type } returns "fruit"
+        }
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val style = mockk<Style> {
+            every { fullyLoaded } returns true
+            every { styleLayers } returns listOf(appleLayer, bananaLayer, cherryLayer)
+            every { styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns true
+            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns true
+            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
+            every { styleLayerExists(RouteConstants.PRIMARY_ROUTE_LAYER_ID) } returns true
+            every { styleLayerExists(RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID) } returns true
+            every { styleLayerExists(RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID) } returns true
+            every { styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID) } returns true
+            every { styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID) } returns true
+            every {
+                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
+            } returns false
+            every {
+                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
+            } returns false
+            every {
+                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
+            } returns false
+            every {
+                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+            } returns false
+            every { styleSourceExists(RouteConstants.WAYPOINT_SOURCE_ID) } returns false
+            every { styleLayerExists(any()) } returns false
+        }
+
+        MapboxRouteLineUtils.initializeLayers(style, options)
+
+        verify(exactly = 0) { style.addStyleSource(any(), any()) }
+    }
+
+    @Test
     fun calculateRouteGranularDistances() {
         val routeAsJsonJson = loadJsonFixture("short_route.json")
         val route = DirectionsRoute.fromJson(routeAsJsonJson)
