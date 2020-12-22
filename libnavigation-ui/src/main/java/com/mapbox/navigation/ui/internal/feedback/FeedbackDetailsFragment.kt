@@ -24,8 +24,8 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPS
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
 import com.google.android.material.bottomsheet.BottomSheetBehavior.from
 import com.mapbox.navigation.core.internal.telemetry.CachedNavigationFeedbackEvent
+import com.mapbox.navigation.core.internal.utils.hasDetailedFeedback
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
-import com.mapbox.navigation.core.telemetry.events.FeedbackEvent.POSITIONING_ISSUE
 import com.mapbox.navigation.ui.R
 import com.mapbox.navigation.ui.feedback.FeedbackHelper
 import com.mapbox.navigation.ui.feedback.FeedbackSubTypeAdapter
@@ -503,11 +503,9 @@ class FeedbackDetailsFragment : DialogFragment() {
                 retainInstance = true
                 this.arrivalExperienceFeedbackEnabled = enableArrivalExperienceFeedback
                 this.feedbackFlowListener = feedbackFlowListener
-                feedbackItemList.partition {
-                    it.feedbackType == POSITIONING_ISSUE
-                }.run {
-                    itemsThatDontNeedDetailedFeedback.addAll(first)
-                    itemsToProvideMoreDetailsOn.addAll(second)
+                feedbackItemList.partition { it.hasDetailedFeedback() }.run {
+                    itemsToProvideMoreDetailsOn.addAll(first)
+                    itemsThatDontNeedDetailedFeedback.addAll(second)
                 }
             }
     }
