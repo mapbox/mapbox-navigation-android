@@ -39,6 +39,7 @@ import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.internal.telemetry.MapboxNavigationFeedbackCache;
+import com.mapbox.navigation.core.internal.utils.CachedNavigationFeedbackEventEx;
 import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.core.internal.telemetry.CachedNavigationFeedbackEvent;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
@@ -746,7 +747,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     if (navigation != null) {
       List<CachedNavigationFeedbackEvent> cachedNavigationFeedbackEventList =
               MapboxNavigationFeedbackCache.INSTANCE.getCachedUserFeedback();
-      if (enableDetailedFeedbackFlowAfterTbt && !cachedNavigationFeedbackEventList.isEmpty()) {
+      if (enableDetailedFeedbackFlowAfterTbt
+        && !cachedNavigationFeedbackEventList.isEmpty()
+        && CachedNavigationFeedbackEventEx.hasDetailedFeedbackItems(cachedNavigationFeedbackEventList)
+      ) {
         FragmentTransaction fragmentTransaction = getFragmentActivity().getSupportFragmentManager().beginTransaction();
         fragmentTransaction.add(
                 R.id.navigationViewLayout,
