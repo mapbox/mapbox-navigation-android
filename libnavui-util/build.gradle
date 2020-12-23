@@ -12,7 +12,7 @@ group = project.ext.mapboxArtifactGroupId
 
 dokkaHtml {
     outputDirectory.set(new File(buildDir.path, "kdoc"))
-    moduleName.set("UI Maps")
+    moduleName.set("UI Utils")
     dokkaSourceSets {
         configureEach {
             reportUndocumented.set(true)
