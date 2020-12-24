@@ -19,4 +19,14 @@ For docs generated with Dokka versions < 1.4, there is a small script you can us
 
 ## Versions
 
-Most versions prior to 1.0.0 are comprised of two main packages: `core` and `ui`. There are corresponding directories in this branch for storing docs for those two packages. Starting with 1.0.0, Mapbox Navigation Android is published as a single package, stored in the `navigation` directory.
+Most versions prior to 1.0.0 are comprised of two main packages: `core` and `ui`. There are corresponding directories in this branch for storing docs for those two packages. Starting with 1.0.0, Mapbox Navigation Android is published as a single package, stored in folders corresponding to that packages version number.
+
+```
+mapbox-navigation-android
+├── ui
+├── core
+├── 1.0.0
+├── 1.1.0
+├── 1.2.0
+└── x.x.x
+```
