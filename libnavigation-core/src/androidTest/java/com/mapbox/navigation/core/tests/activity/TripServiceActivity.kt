@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core
+package com.mapbox.navigation.core.tests.activity
 
 import android.os.Bundle
 import android.widget.Button
@@ -14,6 +14,7 @@ import com.mapbox.navigation.base.internal.VoiceUnit.METRIC
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.notification.TripNotification
+import com.mapbox.navigation.core.Rounding
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.test.R
 import com.mapbox.navigation.core.trip.service.MapboxTripService

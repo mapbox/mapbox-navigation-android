@@ -12,6 +12,7 @@ libnavigation-ui \
 
 APPLICATION_MODULES = \
 examples \
+instrumentation-tests \
 
 define run-gradle-tasks
 	for module in $(1) ; do \

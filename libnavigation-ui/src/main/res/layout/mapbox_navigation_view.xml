@@ -57,5 +57,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <com.mapbox.navigation.ui.speed.SpeedLimitView
+            android:id="@+id/speedLimitView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:paddingTop="8dp"
+            android:layout_marginStart="8dp"
+            app:layout_anchor="@id/extraInstructionContentLayout"
+            app:layout_anchorGravity="bottom|left"/>
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </FrameLayout>

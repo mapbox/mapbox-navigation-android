@@ -44,6 +44,8 @@ class NavigationViewSubscriber implements LifecycleObserver {
       }
     });
 
+    navigationViewModel.retrieveOnSpeedLimit().observe(lifecycleOwner, navigationPresenter::onSpeedLimitAvailable);
+
     navigationViewModel.retrieveFeedbackFlowStatus().observe(lifecycleOwner, feedbackFlowStatus -> {
       if (feedbackFlowStatus != null
               && (feedbackFlowStatus == NavigationViewModel.FEEDBACK_FLOW_SENT

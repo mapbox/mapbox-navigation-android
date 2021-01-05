@@ -22,6 +22,10 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.options.NavigationOptions;
+<<<<<<< HEAD
+=======
+import com.mapbox.navigation.base.speed.model.SpeedLimit;
+>>>>>>> upstream/master
 import com.mapbox.navigation.base.trip.model.RouteLegProgress;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
@@ -36,6 +40,7 @@ import com.mapbox.navigation.core.replay.route.ReplayProgressObserver;
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper;
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent;
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver;
+import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
 import com.mapbox.navigation.core.trip.session.TripSessionState;
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver;
@@ -72,6 +77,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private static final String OKHTTP_INSTRUCTION_CACHE = "okhttp-instruction-cache";
   private static final long TEN_MEGABYTE_CACHE_SIZE = 10 * 1024 * 1024;
 
+  private final MutableLiveData<SpeedLimit> onSpeedLimit = new MutableLiveData<>();
   private final MutableLiveData<RouteProgress> routeProgress = new MutableLiveData<>();
   private final MutableLiveData<BannerInstructions> bannerInstructions = new MutableLiveData<>();
   private final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
@@ -215,7 +221,7 @@ public class NavigationViewModel extends AndroidViewModel {
 
       NavigationOptions updatedOptions = updatedOptionsBuilder.build();
       initializeNavigation(updatedOptions);
-      initializeVoiceInstructionLoader();
+      initializeVoiceInstructionLoader(navigationViewOptions.voiceInstructionLoaderBaseUrl());
       initializeVoiceInstructionCache();
       initializeNavigationSpeechPlayer(options);
     }
@@ -254,6 +260,10 @@ public class NavigationViewModel extends AndroidViewModel {
       navigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver);
       navigation.unregisterTripSessionStateObserver(tripSessionStateObserver);
       navigation.unregisterArrivalObserver(arrivalObserver);
+<<<<<<< HEAD
+=======
+      navigation.unregisterMapMatcherResultObserver(mapMatcherResultObserver);
+>>>>>>> upstream/master
       navigation.stopTripSession();
     }
   }
@@ -315,6 +325,11 @@ public class NavigationViewModel extends AndroidViewModel {
   @NonNull
   public LiveData<Boolean> retrieveOnFinalDestinationArrival() {
     return onFinalDestinationArrival;
+  }
+
+  @NonNull
+  public LiveData<SpeedLimit> retrieveOnSpeedLimit() {
+    return onSpeedLimit;
   }
 
   boolean enableDetailedFeedbackFlowAfterTbt() {
@@ -390,10 +405,10 @@ public class NavigationViewModel extends AndroidViewModel {
     this.speechPlayer = new NavigationSpeechPlayer(speechPlayerProvider);
   }
 
-  private void initializeVoiceInstructionLoader() {
+  private void initializeVoiceInstructionLoader(@Nullable String baseUrl) {
     Cache cache = new Cache(new File(getApplication().getCacheDir(), OKHTTP_INSTRUCTION_CACHE),
         TEN_MEGABYTE_CACHE_SIZE);
-    voiceInstructionLoader = new VoiceInstructionLoader(getApplication(), accessToken, cache);
+    voiceInstructionLoader = new VoiceInstructionLoader(getApplication(), accessToken, cache, baseUrl);
   }
 
   private void initializeVoiceInstructionCache() {
@@ -436,6 +451,7 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.registerVoiceInstructionsObserver(voiceInstructionsObserver);
     navigation.registerTripSessionStateObserver(tripSessionStateObserver);
     navigation.registerArrivalObserver(arrivalObserver);
+    navigation.registerMapMatcherResultObserver(mapMatcherResultObserver);
     if (navigationViewOptions.shouldSimulateRoute()) {
       navigation.registerRouteProgressObserver(new ReplayProgressObserver(mapboxReplayer));
     }
@@ -506,6 +522,10 @@ public class NavigationViewModel extends AndroidViewModel {
   @NonNull
   private BannerInstructionsObserver bannerInstructionsObserver = bannerInstructions ->
           this.bannerInstructions.setValue(retrieveInstructionsFromBannerEvent(bannerInstructions));
+
+  @NonNull
+  private MapMatcherResultObserver mapMatcherResultObserver = mapMatcherResult ->
+      this.onSpeedLimit.setValue(mapMatcherResult.getSpeedLimit());
 
   @NonNull
   private TripSessionStateObserver tripSessionStateObserver = new TripSessionStateObserver() {

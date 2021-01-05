@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">instrumentation-tests</string>
+    <string name="map_style_blank">asset://map_style_blank.json</string>
+</resources>

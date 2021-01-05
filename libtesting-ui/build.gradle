@@ -18,10 +18,14 @@ android {
 }
 
 dependencies {
+    implementation dependenciesList.multidex
     api dependenciesList.androidxTestJunit
     api dependenciesList.junit
     api(dependenciesList.barista) {
         exclude group: 'org.jetbrains.kotlin'
         exclude group: 'androidx.annotation'
     }
+    api dependenciesList.mapboxMapSdk
+    api dependenciesList.androidXConstraintLayout
+    api dependenciesList.mockwebserver
 }
