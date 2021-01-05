@@ -109,8 +109,10 @@ subprojects {
   }
 }
 
+apply from: "${rootDir}/gradle/kdoc-settings.gradle"
+
 dokkaHtmlMultiModule {
-  outputDirectory.set(new File(buildDir.path, "kdoc"))
+  outputDirectory.set(kdocPath)
 }
 
 task clean(type: Delete) {
