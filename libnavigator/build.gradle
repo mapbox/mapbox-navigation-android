@@ -1,23 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'com.jaredsburrows.license'
 apply from: "${rootDir}/gradle/ktlint.gradle"
-
-dokkaHtml {
-    outputDirectory.set(new File(buildDir.path, "kdoc"))
-    moduleName.set("LibNavigator")
-    dokkaSourceSets {
-        configureEach {
-            reportUndocumented.set(true)
-
-            perPackageOption {
-                matchingRegex.set("com.mapbox.navigation.navigator.internal.*")
-                suppress.set(true)
-            }
-        }
-    }
-}
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion

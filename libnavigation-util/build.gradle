@@ -3,21 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'org.jetbrains.dokka'
 apply from: "${rootDir}/gradle/ktlint.gradle"
-
-dokkaHtml {
-    outputDirectory.set(new File(buildDir.path, "kdoc"))
-    moduleName.set("Utils")
-    dokkaSourceSets {
-        configureEach {
-            reportUndocumented.set(true)
-
-            perPackageOption {
-                matchingRegex.set("com.mapbox.navigation.utils.internal.*")
-                suppress.set(true)
-            }
-        }
-    }
-}
+apply from: "${rootDir}/gradle/kdoc-settings.gradle"
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -44,6 +30,21 @@ dependencies {
 
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
     testImplementation project(':libtesting-utils')
+}
+
+dokkaHtml {
+    outputDirectory.set(kdocPath)
+    moduleName.set("Utils")
+    dokkaSourceSets {
+        configureEach {
+            reportUndocumented.set(true)
+
+            perPackageOption {
+                matchingRegex.set("com.mapbox.navigation.utils.internal.*")
+                suppress.set(true)
+            }
+        }
+    }
 }
 
 apply from: "${rootDir}/gradle/track-public-apis.gradle"
