@@ -622,33 +622,30 @@ object MapboxRouteLineUtils {
         }
 
         if (!style.styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID)) {
-            val primaryRouteSource = geoJsonSource(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) {
+            geoJsonSource(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) {
                 maxzoom(16)
                 lineMetrics(true)
+                featureCollection(FeatureCollection.fromFeatures(listOf<Feature>()))
                 tolerance(options.tolerance)
-            }
-            primaryRouteSource.featureCollection(FeatureCollection.fromFeatures(listOf<Feature>()))
-            primaryRouteSource.bindTo(style)
+            }.bindTo(style)
         }
 
         if (!style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID)) {
-            val altRouteSource = geoJsonSource(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) {
+            geoJsonSource(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) {
                 maxzoom(16)
                 lineMetrics(true)
                 tolerance(options.tolerance)
-            }
-            altRouteSource.featureCollection(FeatureCollection.fromFeatures(listOf<Feature>()))
-            altRouteSource.bindTo(style)
+                featureCollection(FeatureCollection.fromFeatures(listOf<Feature>()))
+            }.bindTo(style)
         }
 
         if (!style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID)) {
-            val altRouteSource = geoJsonSource(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) {
+            geoJsonSource(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) {
                 maxzoom(16)
                 lineMetrics(true)
+                featureCollection(FeatureCollection.fromFeatures(listOf<Feature>()))
                 tolerance(options.tolerance)
-            }
-            altRouteSource.featureCollection(FeatureCollection.fromFeatures(listOf<Feature>()))
-            altRouteSource.bindTo(style)
+            }.bindTo(style)
         }
 
         options.routeLayerProvider.buildAlternativeRouteCasingLayers(
@@ -695,10 +692,7 @@ object MapboxRouteLineUtils {
             style,
             options.originIcon,
             options.destinationIcon
-        ).bindTo(
-            style,
-            LayerPosition(null, belowLayerIdToUse, null)
-        )
+        ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
     }
 
     internal fun layersAreInitialized(style: Style): Boolean {

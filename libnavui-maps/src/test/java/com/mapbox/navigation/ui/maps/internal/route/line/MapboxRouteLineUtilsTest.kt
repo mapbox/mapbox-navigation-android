@@ -1,18 +1,22 @@
 package com.mapbox.navigation.ui.maps.internal.route.line
 
 import android.content.Context
-import android.os.Build
+import android.graphics.Bitmap
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.bindgen.Value
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.plugin.location.LocationComponentConstants
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants
 import com.mapbox.navigation.ui.maps.R
+import com.mapbox.navigation.ui.maps.common.ShadowValueConverter
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRouteLineTrafficExpressionData
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getStyledColor
@@ -23,6 +27,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.utils.ThemeSwitcher
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -34,7 +39,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-@Config(sdk = [Build.VERSION_CODES.O_MR1])
+@Config(shadows = [ShadowValueConverter::class])
 @RunWith(RobolectricTestRunner::class)
 class MapboxRouteLineUtilsTest {
 
@@ -554,6 +559,273 @@ class MapboxRouteLineUtilsTest {
         MapboxRouteLineUtils.initializeLayers(style, options)
 
         verify(exactly = 0) { style.addStyleSource(any(), any()) }
+    }
+
+    @Test
+    fun initializeLayers() {
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val waypointSourceValueSlot = slot<Value>()
+        val primaryRouteSourceValueSlot = slot<Value>()
+        val alternativeRoute1SourceValueSlot = slot<Value>()
+        val alternativeRoute2SourceValueSlot = slot<Value>()
+        val addStyleLayerSlots = mutableListOf<Value>()
+        val addStyleLayerPositionSlots = mutableListOf<LayerPosition>()
+        val style = mockk<Style> {
+            every { fullyLoaded } returns true
+            every { styleLayers } returns listOf()
+            every { styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns false
+            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns false
+            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns false
+            every { styleSourceExists(RouteConstants.WAYPOINT_SOURCE_ID) } returns false
+            every { styleLayerExists(RouteConstants.PRIMARY_ROUTE_LAYER_ID) } returns false
+            every { styleLayerExists(RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID) } returns false
+            every { styleLayerExists(RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID) } returns false
+            every { styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID) } returns false
+            every { styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID) } returns false
+            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON) } returns null
+            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) } returns null
+            every { getStyleImage(RouteConstants.ORIGIN_MARKER_NAME) } returns null
+            every { getStyleImage(RouteConstants.DESTINATION_MARKER_NAME) } returns null
+            every {
+                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
+            } returns false
+            every {
+                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
+            } returns false
+            every {
+                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
+            } returns false
+            every {
+                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+            } returns false
+            every { styleLayerExists(RouteConstants.WAYPOINT_LAYER_ID) } returns false
+            every { styleLayerExists("mapbox-location-foreground-layer") } returns true
+            every {
+                addStyleSource(RouteConstants.WAYPOINT_SOURCE_ID, any())
+            } returns ExpectedFactory.createValue()
+            every {
+                addStyleSource(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any())
+            } returns ExpectedFactory.createValue()
+            every {
+                addStyleSource(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID, any())
+            } returns ExpectedFactory.createValue()
+            every {
+                addStyleSource(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID, any())
+            } returns ExpectedFactory.createValue()
+            every { addStyleLayer(any(), any()) } returns ExpectedFactory.createValue()
+            every {
+                addImage(RouteConstants.ORIGIN_MARKER_NAME, any<Bitmap>())
+            } returns ExpectedFactory.createValue()
+            every {
+                addImage(RouteConstants.DESTINATION_MARKER_NAME, any<Bitmap>())
+            } returns ExpectedFactory.createValue()
+        }
+
+        MapboxRouteLineUtils.initializeLayers(style, options)
+
+        verify {
+            style.addStyleSource(
+                RouteConstants.WAYPOINT_SOURCE_ID, capture(waypointSourceValueSlot)
+            )
+        }
+        assertEquals(
+            "geojson",
+            (waypointSourceValueSlot.captured.contents as HashMap<String, Value>)["type"]!!.contents
+        )
+        assertEquals(
+            16L,
+            (waypointSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!
+                .contents
+        )
+        assertEquals(
+            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            (waypointSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
+        )
+        assertEquals(
+            RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
+            (waypointSourceValueSlot.captured.contents as HashMap<String, Value>)
+            ["tolerance"]!!.contents
+        )
+
+        verify {
+            style.addStyleSource(
+                RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
+                capture(primaryRouteSourceValueSlot)
+            )
+        }
+        assertEquals(
+            "geojson",
+            (primaryRouteSourceValueSlot.captured.contents as HashMap<String, Value>)["type"]
+            !!.contents
+        )
+        assertEquals(
+            16L,
+            (primaryRouteSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]
+            !!.contents
+        )
+        assertEquals(
+            true,
+            (primaryRouteSourceValueSlot.captured.contents as HashMap<String, Value>)["lineMetrics"]
+            !!.contents
+        )
+        assertEquals(
+            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            (primaryRouteSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]
+            !!.contents
+        )
+        assertEquals(
+            RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
+            (primaryRouteSourceValueSlot.captured.contents as HashMap<String, Value>)
+            ["tolerance"]!!.contents
+        )
+
+        verify {
+            style.addStyleSource(
+                RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
+                capture(alternativeRoute1SourceValueSlot)
+            )
+        }
+        assertEquals(
+            "geojson",
+            (alternativeRoute1SourceValueSlot.captured.contents as HashMap<String, Value>)
+            ["type"]!!.contents
+        )
+        assertEquals(
+            16L,
+            (alternativeRoute1SourceValueSlot.captured.contents as HashMap<String, Value>)
+            ["maxzoom"]!!.contents
+        )
+        assertEquals(
+            true,
+            (alternativeRoute1SourceValueSlot.captured.contents as HashMap<String, Value>)
+            ["lineMetrics"]!!.contents
+        )
+        assertEquals(
+            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            (alternativeRoute1SourceValueSlot.captured.contents as HashMap<String, Value>)
+            ["data"]!!.contents
+        )
+        assertEquals(
+            RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
+            (alternativeRoute1SourceValueSlot.captured.contents as HashMap<String, Value>)
+            ["tolerance"]!!.contents
+        )
+
+        verify {
+            style.addStyleSource(
+                RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                capture(alternativeRoute2SourceValueSlot)
+            )
+        }
+        assertEquals(
+            "geojson",
+            (alternativeRoute2SourceValueSlot.captured.contents as HashMap<String, Value>)
+            ["type"]!!.contents
+        )
+        assertEquals(
+            16L,
+            (alternativeRoute2SourceValueSlot.captured.contents as HashMap<String, Value>)
+            ["maxzoom"]!!.contents
+        )
+        assertEquals(
+            true,
+            (alternativeRoute2SourceValueSlot.captured.contents as HashMap<String, Value>)
+            ["lineMetrics"]!!.contents
+        )
+        assertEquals(
+            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            (alternativeRoute2SourceValueSlot.captured.contents as HashMap<String, Value>)
+            ["data"]!!.contents
+        )
+        assertEquals(
+            RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
+            (alternativeRoute2SourceValueSlot.captured.contents as HashMap<String, Value>)
+            ["tolerance"]!!.contents
+        )
+
+        verify {
+            style.addStyleLayer(capture(addStyleLayerSlots), capture(addStyleLayerPositionSlots))
+        }
+        assertEquals(
+            "mapbox-navigation-alt-route1-casing-layer",
+            (addStyleLayerSlots[0].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-navigation-alt-route2-casing-layer",
+            (addStyleLayerSlots[1].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-navigation-alt-route1-layer",
+            (addStyleLayerSlots[2].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-navigation-alt-route2-layer",
+            (addStyleLayerSlots[3].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-navigation-alt-route1-traffic-layer",
+            (addStyleLayerSlots[4].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-navigation-alt-route2-traffic-layer",
+            (addStyleLayerSlots[5].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-navigation-route-casing-layer",
+            (addStyleLayerSlots[6].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-navigation-route-layer",
+            (addStyleLayerSlots[7].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-navigation-route-traffic-layer",
+            (addStyleLayerSlots[8].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-navigation-waypoint-layer",
+            (addStyleLayerSlots[9].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-location-foreground-layer",
+            addStyleLayerPositionSlots[0].below
+        )
+        assertEquals(
+            "mapbox-location-foreground-layer",
+            addStyleLayerPositionSlots[1].below
+        )
+        assertEquals(
+            "mapbox-location-foreground-layer",
+            addStyleLayerPositionSlots[2].below
+        )
+        assertEquals(
+            "mapbox-location-foreground-layer",
+            addStyleLayerPositionSlots[3].below
+        )
+        assertEquals(
+            "mapbox-location-foreground-layer",
+            addStyleLayerPositionSlots[4].below
+        )
+        assertEquals(
+            "mapbox-location-foreground-layer",
+            addStyleLayerPositionSlots[5].below
+        )
+        assertEquals(
+            "mapbox-location-foreground-layer",
+            addStyleLayerPositionSlots[6].below
+        )
+        assertEquals(
+            "mapbox-location-foreground-layer",
+            addStyleLayerPositionSlots[7].below
+        )
+        assertEquals(
+            "mapbox-location-foreground-layer",
+            addStyleLayerPositionSlots[8].below
+        )
+        assertEquals(
+            "mapbox-location-foreground-layer",
+            addStyleLayerPositionSlots[9].below
+        )
     }
 
     @Test
