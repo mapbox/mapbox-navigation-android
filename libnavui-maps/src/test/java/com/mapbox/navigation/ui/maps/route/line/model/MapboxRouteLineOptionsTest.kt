@@ -43,6 +43,15 @@ class MapboxRouteLineOptionsTest {
     }
 
     @Test
+    fun withTolerance() {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withTolerance(.111)
+            .build()
+
+        assertEquals(.111, options.tolerance, 0.0)
+    }
+
+    @Test
     fun toBuilder() {
         val routeLineResources = RouteLineResources.Builder().build()
 
@@ -50,6 +59,7 @@ class MapboxRouteLineOptionsTest {
             .withRouteLineResources(routeLineResources)
             .withVanishingRouteLineEnabled(true)
             .withRouteLineBelowLayerId("someLayerId")
+            .withTolerance(.111)
             .build()
             .toBuilder(ctx)
             .build()
@@ -57,5 +67,6 @@ class MapboxRouteLineOptionsTest {
         assertEquals(routeLineResources, options.resourceProvider)
         assertEquals("someLayerId", options.routeLineBelowLayerId)
         assertNotNull(options.vanishingRouteLine)
+        assertEquals(.111, options.tolerance, 0.0)
     }
 }

@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.route.line.model
 import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.appcompat.content.res.AppCompatResources
+import com.mapbox.navigation.ui.base.internal.route.RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLayerProvider
 import com.mapbox.navigation.ui.maps.route.line.api.VanishingRouteLine
 
@@ -15,6 +16,7 @@ import com.mapbox.navigation.ui.maps.route.line.api.VanishingRouteLine
  * @param destinationIcon the drawable for representing the destination icon
  * @param routeLineBelowLayerId determines the elevation of the route layers
  * @param vanishingRouteLine an instance of the VanishingRouteLine
+ * @param tolerance the tolerance value used when configuring the underlying map source
  */
 class MapboxRouteLineOptions private constructor(
     val resourceProvider: RouteLineResources,
@@ -22,7 +24,8 @@ class MapboxRouteLineOptions private constructor(
     val originIcon: Drawable,
     val destinationIcon: Drawable,
     val routeLineBelowLayerId: String?,
-    internal var vanishingRouteLine: VanishingRouteLine? = null
+    internal var vanishingRouteLine: VanishingRouteLine? = null,
+    val tolerance: Double
 ) {
 
     /**
@@ -37,7 +40,8 @@ class MapboxRouteLineOptions private constructor(
             resourceProvider,
             routeLineBelowLayerId,
             routeLayerProvider.routeStyleDescriptors,
-            vanishingRouteLineEnabled
+            vanishingRouteLineEnabled,
+            tolerance
         )
     }
 
@@ -56,6 +60,7 @@ class MapboxRouteLineOptions private constructor(
         if (destinationIcon != other.destinationIcon) return false
         if (routeLineBelowLayerId != other.routeLineBelowLayerId) return false
         if (vanishingRouteLine != other.vanishingRouteLine) return false
+        if (tolerance != other.tolerance) return false
 
         return true
     }
@@ -70,6 +75,7 @@ class MapboxRouteLineOptions private constructor(
         result = 31 * result + destinationIcon.hashCode()
         result = 31 * result + (routeLineBelowLayerId?.hashCode() ?: 0)
         result = 31 * result + (vanishingRouteLine?.hashCode() ?: 0)
+        result = 31 * result + (tolerance.hashCode())
         return result
     }
 
@@ -82,7 +88,8 @@ class MapboxRouteLineOptions private constructor(
             "originIcon=$originIcon, " +
             "destinationIcon=$destinationIcon, " +
             "routeLineBelowLayerId=$routeLineBelowLayerId, " +
-            "vanishingRouteLine=$vanishingRouteLine)"
+            "vanishingRouteLine=$vanishingRouteLine, " +
+            "tolerance=$tolerance)"
     }
 
     /**
@@ -99,7 +106,8 @@ class MapboxRouteLineOptions private constructor(
         private var routeLineResources: RouteLineResources?,
         private var routeLineBelowLayerId: String?,
         private var routeStyleDescriptors: List<RouteStyleDescriptor>,
-        private var vanishingRouteLineEnabled: Boolean
+        private var vanishingRouteLineEnabled: Boolean,
+        private var tolerance: Double
     ) {
 
         /**
@@ -112,7 +120,8 @@ class MapboxRouteLineOptions private constructor(
             null,
             null,
             listOf(),
-            false
+            false,
+            DEFAULT_ROUTE_SOURCES_TOLERANCE
         )
 
         /**
@@ -138,6 +147,20 @@ class MapboxRouteLineOptions private constructor(
          */
         fun withVanishingRouteLineEnabled(isEnabled: Boolean): Builder =
             apply { this.vanishingRouteLineEnabled = isEnabled }
+
+        /**
+         * Douglas-Peucker simplification tolerance (higher means simpler geometries and faster performance)
+         * for the GeoJsonSources created to display the route line.
+         *
+         * Defaults to 0.375.
+         *
+         * @return the builder
+         * @see <a href="https://docs.mapbox.com/mapbox-gl-js/style-spec/sources/#geojson-tolerance">The online documentation</a>
+         */
+        fun withTolerance(tolerance: Double): Builder {
+            this.tolerance = tolerance
+            return this
+        }
 
         /**
          * @return an instance of MapboxRouteLineOptions
@@ -175,7 +198,8 @@ class MapboxRouteLineOptions private constructor(
                 originIcon!!,
                 destinationIcon!!,
                 routeLineBelowLayerId,
-                vanishingRouteLine
+                vanishingRouteLine,
+                tolerance
             )
         }
     }

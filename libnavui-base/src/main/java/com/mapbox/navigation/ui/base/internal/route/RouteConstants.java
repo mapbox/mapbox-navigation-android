@@ -110,4 +110,5 @@ public class RouteConstants {
   public static final int MANEUVER_ARROWHEAD_ICON_DRAWABLE = R.drawable.mapbox_ic_arrow_head;
   @DrawableRes
   public static final int MANEUVER_ARROWHEAD_ICON_CASING_DRAWABLE = R.drawable.mapbox_ic_arrow_head_casing;
+  public static final double DEFAULT_ROUTE_SOURCES_TOLERANCE = 0.375;
 }

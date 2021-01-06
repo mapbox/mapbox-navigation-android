@@ -617,6 +617,7 @@ object MapboxRouteLineUtils {
             geoJsonSource(RouteConstants.WAYPOINT_SOURCE_ID) {
                 maxzoom(16)
                 featureCollection(FeatureCollection.fromFeatures(listOf()))
+                tolerance(options.tolerance)
             }.bindTo(style)
         }
 
@@ -624,6 +625,7 @@ object MapboxRouteLineUtils {
             val primaryRouteSource = geoJsonSource(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) {
                 maxzoom(16)
                 lineMetrics(true)
+                tolerance(options.tolerance)
             }
             primaryRouteSource.featureCollection(FeatureCollection.fromFeatures(listOf<Feature>()))
             primaryRouteSource.bindTo(style)
@@ -633,6 +635,7 @@ object MapboxRouteLineUtils {
             val altRouteSource = geoJsonSource(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) {
                 maxzoom(16)
                 lineMetrics(true)
+                tolerance(options.tolerance)
             }
             altRouteSource.featureCollection(FeatureCollection.fromFeatures(listOf<Feature>()))
             altRouteSource.bindTo(style)
@@ -642,6 +645,7 @@ object MapboxRouteLineUtils {
             val altRouteSource = geoJsonSource(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) {
                 maxzoom(16)
                 lineMetrics(true)
+                tolerance(options.tolerance)
             }
             altRouteSource.featureCollection(FeatureCollection.fromFeatures(listOf<Feature>()))
             altRouteSource.bindTo(style)

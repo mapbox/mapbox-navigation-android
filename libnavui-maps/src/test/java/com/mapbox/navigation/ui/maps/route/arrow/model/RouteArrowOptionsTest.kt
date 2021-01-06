@@ -63,6 +63,13 @@ class RouteArrowOptionsTest {
     }
 
     @Test
+    fun withToleranceTest() {
+        val options = RouteArrowOptions.Builder(ctx).withTolerance(.111).build()
+
+        assertEquals(.111, options.tolerance, 0.0)
+    }
+
+    @Test
     fun toBuilder() {
         val options = RouteArrowOptions.Builder(ctx)
             .withArrowColor(1)
@@ -70,6 +77,7 @@ class RouteArrowOptionsTest {
             .withArrowBorderColor(2)
             .withArrowHeadIconDrawable(RouteConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE)
             .withArrowHeadIconCasingDrawable(RouteConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE)
+            .withTolerance(.111)
             .build()
             .toBuilder(ctx)
             .build()
@@ -79,5 +87,6 @@ class RouteArrowOptionsTest {
         assertEquals("someLayerId", options.aboveLayerId)
         assertNotNull(options.arrowHeadIcon)
         assertNotNull(options.arrowHeadIconBorder)
+        assertEquals(.111, options.tolerance, 0.0)
     }
 }

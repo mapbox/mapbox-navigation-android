@@ -16,6 +16,7 @@ import com.mapbox.navigation.ui.base.internal.route.RouteConstants.PRIMARY_ROUTE
  * @param arrowHeadIcon the drawable to represent the arrow head
  * @param arrowHeadIconBorder the drawable to represent the arrow head border
  * @param aboveLayerId indicates the maneuver arrow map layers appear above this layer on the map
+ * @param tolerance the tolerance value used when configuring the underlying map source
  */
 class RouteArrowOptions private constructor(
     @ColorInt val arrowColor: Int,
@@ -24,7 +25,8 @@ class RouteArrowOptions private constructor(
     private val arrowHeadIconCasingDrawable: Int,
     val arrowHeadIcon: Drawable,
     val arrowHeadIconBorder: Drawable,
-    val aboveLayerId: String
+    val aboveLayerId: String,
+    val tolerance: Double
 ) {
 
     /**
@@ -39,7 +41,8 @@ class RouteArrowOptions private constructor(
             arrowBorderColor,
             arrowHeadIconDrawable,
             arrowHeadIconCasingDrawable,
-            aboveLayerId
+            aboveLayerId,
+            tolerance
         )
     }
 
@@ -59,6 +62,7 @@ class RouteArrowOptions private constructor(
         if (arrowHeadIcon != other.arrowHeadIcon) return false
         if (arrowHeadIconBorder != other.arrowHeadIconBorder) return false
         if (aboveLayerId != other.aboveLayerId) return false
+        if (tolerance != other.tolerance) return false
 
         return true
     }
@@ -74,6 +78,7 @@ class RouteArrowOptions private constructor(
         result = 31 * result + arrowHeadIcon.hashCode()
         result = 31 * result + arrowHeadIconBorder.hashCode()
         result = 31 * result + aboveLayerId.hashCode()
+        result = 31 * result + (tolerance.hashCode())
         return result
     }
 
@@ -87,7 +92,8 @@ class RouteArrowOptions private constructor(
             "arrowHeadIconCasingDrawable=$arrowHeadIconCasingDrawable, " +
             "arrowHeadIcon=$arrowHeadIcon, " +
             "arrowHeadIconBorder=$arrowHeadIconBorder, " +
-            "aboveLayerId='$aboveLayerId')"
+            "aboveLayerId='$aboveLayerId', " +
+            "tolerance=$tolerance)"
     }
 
     /**
@@ -99,7 +105,8 @@ class RouteArrowOptions private constructor(
         private var arrowBorderColor: Int,
         private var arrowHeadIconDrawable: Int,
         private var arrowHeadIconCasingDrawable: Int,
-        private var aboveLayerId: String?
+        private var aboveLayerId: String?,
+        private var tolerance: Double
     ) {
 
         /**
@@ -111,7 +118,8 @@ class RouteArrowOptions private constructor(
             RouteConstants.MANEUVER_ARROW_BORDER_COLOR,
             RouteConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE,
             RouteConstants.MANEUVER_ARROWHEAD_ICON_CASING_DRAWABLE,
-            null
+            null,
+            RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
         )
 
         /**
@@ -155,6 +163,20 @@ class RouteArrowOptions private constructor(
             apply { this.aboveLayerId = layerId }
 
         /**
+         * Douglas-Peucker simplification tolerance (higher means simpler geometries and faster performance)
+         * for the GeoJsonSources created to display the route line.
+         *
+         * Defaults to 0.375.
+         *
+         * @return the builder
+         * @see <a href="https://docs.mapbox.com/mapbox-gl-js/style-spec/sources/#geojson-tolerance">The online documentation</a>
+         */
+        fun withTolerance(tolerance: Double): Builder {
+            this.tolerance = tolerance
+            return this
+        }
+
+        /**
          * Applies the supplied parameters and instantiates a RouteArrowOptions
          *
          * @return a RouteArrowOptions object
@@ -177,7 +199,8 @@ class RouteArrowOptions private constructor(
                 arrowHeadIconCasingDrawable,
                 arrowHeadIcon!!,
                 arrowHeadCasingIcon!!,
-                routeArrowAboveLayerId
+                routeArrowAboveLayerId,
+                tolerance
             )
         }
     }

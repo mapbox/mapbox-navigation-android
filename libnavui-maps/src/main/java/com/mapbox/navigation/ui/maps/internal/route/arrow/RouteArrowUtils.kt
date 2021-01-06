@@ -67,6 +67,7 @@ internal object RouteArrowUtils {
             geoJsonSource(RouteConstants.ARROW_SHAFT_SOURCE_ID) {
                 maxzoom(16)
                 featureCollection(FeatureCollection.fromFeatures(listOf()))
+                tolerance(options.tolerance)
             }.bindTo(style)
         }
 
@@ -74,6 +75,7 @@ internal object RouteArrowUtils {
             geoJsonSource(RouteConstants.ARROW_HEAD_SOURCE_ID) {
                 maxzoom(16)
                 featureCollection(FeatureCollection.fromFeatures(listOf()))
+                tolerance(options.tolerance)
             }.bindTo(style)
         }
 
