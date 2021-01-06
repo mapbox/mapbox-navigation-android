@@ -1,39 +1,40 @@
 version: 2.1
-parameters:
-  docker-image-tag:
-    type: string
-    default: "mbgl/android-ndk-r21:latest"
 
+#-------------------------------
+#---------- EXECUTORS ----------
+#-------------------------------
+executors:
+  ndk-r21-latest-executor:
+    docker:
+      - image: mbgl/android-ndk-r21:latest
+    working_directory: ~/code
+
+#-------------------------------
+#---------- WORKFLOWS ----------
+#-------------------------------
 workflows:
   version: 2
   default:
     jobs:
-      - assemble-debug
-      - assemble-release
+      - prepare-and-assemble
       - static-analysis:
           requires:
-            - assemble-debug
+            - prepare-and-assemble
       - unit-tests:
           requires:
-            - assemble-debug
+            - prepare-and-assemble
       - ui-robo-tests:
           requires:
-            - assemble-release
-            - assemble-debug
-            - static-analysis
-            - unit-tests
-      - ui-instrumentation-tests:
+            - prepare-and-assemble
+      - internal-instrumentation-tests:
           requires:
-            - assemble-release
-            - assemble-debug
-            - static-analysis
-            - unit-tests
+            - prepare-and-assemble
+      - instrumentation-tests:
+          requires:
+            - prepare-and-assemble
       - changelog-verification:
           requires:
-            - assemble-release
-            - assemble-debug
             - static-analysis
-            - unit-tests
           filters:
             branches:
               ignore: /^(master|release-.*)/
@@ -53,7 +54,23 @@ workflows:
       - mobile-metrics-benchmarks:
           requires:
             - mobile-metrics-dry-run
+
+#------------------------------
+#---------- COMMANDS ----------
+#------------------------------
 commands:
+  write-workspace:
+    steps:
+      - persist_to_workspace:
+          root: ~/code
+          paths:
+            - ./
+
+  read-workspace:
+    steps:
+      - attach_workspace:
+          at: ~/code
+
   restore-gradle-cache:
     steps:
       - restore_cache:
@@ -106,6 +123,17 @@ commands:
           command: |
             ./gradlew << parameters.module_target >>:assemble<< parameters.variant >>
 
+  assemble-instrumentation-test:
+    parameters:
+      module_target:
+        description: module target
+        type: string
+    steps:
+      - run:
+          name: Assemble Instrumentation Test APK for << parameters.module_target >>
+          command: |
+            ./gradlew << parameters.module_target >>:assembleAndroidTest
+
   assemble-example-app:
     parameters:
       variant:
@@ -117,17 +145,6 @@ commands:
           command: |
             echo "${MAPBOX_DEVELOPER_CONFIG}" > /root/code/examples/src/main/res/values/mapbox_access_token.xml
             ./gradlew examples:assemble<< parameters.variant >>
-
-  assemble-instrumentation-test:
-    parameters:
-      module_target:
-        description: module target
-        type: string
-    steps:
-      - run:
-          name: Assemble Instrumentation Test APK
-          command: |
-            ./gradlew << parameters.module_target >>:assembleAndroidTest
 
   login-google-cloud-platform:
     steps:
@@ -179,17 +196,13 @@ commands:
     steps:
       - run:
           name: Check Navigation Core SDK public API
-          command: |
-            make assemble-core-release
-            make core-check-api
+          command: make core-check-api
 
   check-api-ui:
     steps:
       - run:
           name: Check Navigation UI SDK public API
-          command: |
-            make assemble-ui-release
-            make ui-check-api
+          command: make ui-check-api
 
   unit-tests-core:
     steps:
@@ -242,20 +255,20 @@ commands:
               echo "export POM_VERSION_NAME=$POM_VERSION_NAME" >> $BASH_ENV
             fi
 
-  run-firebase-instrumentation:
+  run-internal-firebase-instrumentation:
     parameters:
       module_wrapper:
-        description: module wrapper
+        description: tests wrapper
         type: string
       module_target:
-        description: module target
+        description: SDK module target
         type: string
       variant:
         description: debug or release
         type: string
     steps:
       - run:
-          name: Run instrumentation tests on Firebase
+          name: Run instrumentation tests on intenral SDK classes on Firebase
           no_output_timeout: 1200
           shell: /bin/bash -euo pipefail
           command: |
@@ -266,7 +279,27 @@ commands:
               --device model=sailfish,version=26,locale=es,orientation=portrait \
               --device model=walleye,version=28,locale=de,orientation=landscape \
               --use-orchestrator \
-              --timeout 5m
+              --timeout 10m
+
+  run-firebase-instrumentation:
+    parameters:
+      variant:
+        description: debug or release
+        type: string
+    steps:
+      - run:
+          name: Run instrumentation tests on public SDK classes on Firebase
+          no_output_timeout: 1200
+          shell: /bin/bash -euo pipefail
+          command: |
+            gcloud firebase test android run --type instrumentation \
+              --app instrumentation-tests/build/outputs/apk/<< parameters.variant >>/instrumentation-tests-<< parameters.variant >>.apk \
+              --test instrumentation-tests/build/outputs/apk/androidTest/<< parameters.variant >>/instrumentation-tests-<< parameters.variant >>-androidTest.apk \
+              --device model=athene,version=23,locale=fr,orientation=landscape \
+              --device model=sailfish,version=26,locale=es,orientation=portrait \
+              --device model=walleye,version=28,locale=de,orientation=landscape \
+              --use-orchestrator \
+              --timeout 15m
 
   run-firebase-robo:
     parameters:
@@ -317,109 +350,102 @@ commands:
             pip3 install requests
             python3 scripts/trigger-mobile-metrics.py
 
+#--------------------------
+#---------- JOBS ----------
+#--------------------------
 jobs:
-  assemble-debug:
-    working_directory: ~/code
-    docker:
-      - image: << pipeline.parameters.docker-image-tag >>
+  prepare-and-assemble:
+    executor: ndk-r21-latest-executor
     steps:
       - checkout
+      - restore-gradle-cache
       - assemble-core-debug
       - assemble-ui-debug
-
-  assemble-release:
-    working_directory: ~/code
-    docker:
-      - image: << pipeline.parameters.docker-image-tag >>
-    steps:
-      - checkout
       - assemble-core-release
       - assemble-ui-release
+      - assemble-module:
+          module_target: "instrumentation-tests"
+          variant: "Debug"
+      - assemble-instrumentation-test:
+          module_target: "instrumentation-tests"
+      - assemble-module:
+          module_target: "app-tests-wrapper"
+          variant: "Debug"
+      - assemble-instrumentation-test:
+          module_target: "libnavigation-core"
+      - write-workspace
 
   unit-tests:
-    working_directory: ~/code
-    docker:
-      - image: << pipeline.parameters.docker-image-tag >>
+    executor: ndk-r21-latest-executor
     steps:
-      - checkout
+      - read-workspace
       - unit-tests-core
       - unit-tests-ui
       - codecov
 
   static-analysis:
-    working_directory: ~/code
-    docker:
-      - image: << pipeline.parameters.docker-image-tag >>
+    executor: ndk-r21-latest-executor
     steps:
-      - checkout
-      - restore-gradle-cache
+      - read-workspace
       - verify-codebase
       - check-api-core
       - check-api-ui
       - check-public-documentation
 
   changelog-verification:
-    working_directory: ~/code
-    docker:
-      - image: << pipeline.parameters.docker-image-tag >>
+    executor: ndk-r21-latest-executor
     steps:
-      - checkout
+      - read-workspace
       - verify-changelog
 
   ui-robo-tests:
-    docker:
-      - image: << pipeline.parameters.docker-image-tag >>
-    working_directory: ~/code
+    executor: ndk-r21-latest-executor
     environment:
       JVM_OPTS: -Xmx3200m
       BUILDTYPE: Debug
       GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
     steps:
-      - checkout
-      - restore-gradle-cache
+      - read-workspace
       - assemble-example-app:
           variant: "Release"
       - login-google-cloud-platform
       - run-firebase-robo:
           variant: "release"
 
-  ui-instrumentation-tests:
-    docker:
-      - image: << pipeline.parameters.docker-image-tag >>
-    working_directory: ~/code
+  internal-instrumentation-tests:
+    executor: ndk-r21-latest-executor
     environment:
       JVM_OPTS: -Xmx3200m
       BUILDTYPE: Debug
       GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
     steps:
-      - checkout
-      - restore-gradle-cache
-      - assemble-module:
-          module_target: "app-tests-wrapper"
-          variant: "Debug"
-      - assemble-module:
-          module_target: "libnavigation-core"
-          variant: "Debug"
-      - assemble-instrumentation-test:
-          module_target: "libnavigation-core"
+      - read-workspace
       - login-google-cloud-platform
-      - run-firebase-instrumentation:
+      - run-internal-firebase-instrumentation:
           module_target: "libnavigation-core"
           module_wrapper: "app-tests-wrapper"
           variant: "debug"
 
+  instrumentation-tests:
+    executor: ndk-r21-latest-executor
+    environment:
+      JVM_OPTS: -Xmx3200m
+      BUILDTYPE: Debug
+      GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
+    steps:
+      - read-workspace
+      - login-google-cloud-platform
+      - run-firebase-instrumentation:
+          variant: "debug"
+
   mobile-metrics-benchmarks:
-    working_directory: ~/code
-    docker:
-      - image: << pipeline.parameters.docker-image-tag >>
+    executor: ndk-r21-latest-executor
     steps:
       - checkout
       - trigger-mobile-metrics
 
   release-snapshot:
-    working_directory: ~/code
-    docker:
-      - image: << pipeline.parameters.docker-image-tag >>
+    executor: ndk-r21-latest-executor
     steps:
       - checkout
       - generate-version-name
@@ -434,9 +460,7 @@ jobs:
       - trigger-mobile-metrics
 
   release:
-    working_directory: ~/code
-    docker:
-      - image: << pipeline.parameters.docker-image-tag >>
+    executor: ndk-r21-latest-executor
     steps:
       - checkout
       - generate-version-name
