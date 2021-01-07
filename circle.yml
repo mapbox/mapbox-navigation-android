@@ -268,7 +268,7 @@ commands:
         type: string
     steps:
       - run:
-          name: Run instrumentation tests on intenral SDK classes on Firebase
+          name: Run instrumentation tests on internal SDK classes on Firebase
           no_output_timeout: 1200
           shell: /bin/bash -euo pipefail
           command: |
