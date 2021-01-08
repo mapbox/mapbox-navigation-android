@@ -22,10 +22,7 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.options.NavigationOptions;
-<<<<<<< HEAD
-=======
 import com.mapbox.navigation.base.speed.model.SpeedLimit;
->>>>>>> upstream/master
 import com.mapbox.navigation.base.trip.model.RouteLegProgress;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
@@ -260,10 +257,7 @@ public class NavigationViewModel extends AndroidViewModel {
       navigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver);
       navigation.unregisterTripSessionStateObserver(tripSessionStateObserver);
       navigation.unregisterArrivalObserver(arrivalObserver);
-<<<<<<< HEAD
-=======
       navigation.unregisterMapMatcherResultObserver(mapMatcherResultObserver);
->>>>>>> upstream/master
       navigation.stopTripSession();
     }
   }

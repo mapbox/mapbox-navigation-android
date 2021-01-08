@@ -41,10 +41,7 @@ import com.mapbox.navigation.examples.utils.extensions.ifNonNull
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import kotlinx.android.synthetic.main.activity_basic_navigation_layout.container
-import kotlinx.android.synthetic.main.activity_basic_navigation_layout.fabToggleStyle
-import kotlinx.android.synthetic.main.activity_basic_navigation_layout.mapView
-import kotlinx.android.synthetic.main.activity_basic_navigation_layout.startNavigation
+import kotlinx.android.synthetic.main.activity_basic_navigation_layout.*
 import timber.log.Timber
 import java.lang.ref.WeakReference
 
