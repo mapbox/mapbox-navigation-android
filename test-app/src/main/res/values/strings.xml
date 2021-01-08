@@ -139,4 +139,6 @@
     <string name="description_snapshotter" translatable="false">Demonstrates the use of snapshotter during active guidance</string>
     <string name="title_signboard" translatable="false">Signboard</string>
     <string name="description_signboard" translatable="false">Demonstrates the use of signboard during active guidance</string>
+    <string name="title_trip_progress" translatable="false">Trip Progess</string>
+    <string name="description_trip_progress" translatable="false">Used for developing the trip progress feature.</string>
 </resources>

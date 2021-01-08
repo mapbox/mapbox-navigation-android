@@ -135,13 +135,9 @@
     <attr name="wayNameViewSecondaryColor" format="reference|color"/>
   </declare-styleable>
 
-  <declare-styleable name="MapboxStyleSummaryBottomSheet">
-    <attr name="summaryBottomSheetPrimaryColor" format="reference|color"/>
-    <attr name="summaryBottomSheetSecondaryColor" format="reference|color"/>
-    <attr name="summaryBottomSheetDividerColor" format="reference|color"/>
-    <attr name="summaryBottomSheetProgressBarColor" format="reference|color"/>
-    <attr name="summaryBottomSheetRouteOverviewDrawable" format="reference"/>
-    <attr name="summaryBottomSheetPrimaryTextColor" format="reference|color"/>
-    <attr name="summaryBottomSheetSecondaryTextColor" format="reference|color"/>
+  <declare-styleable name="MapboxTripProgressView">
+    <attr name="tripProgressDividerColor" format="reference|color"/>
+    <attr name="tripProgressPrimaryTextColor" format="reference|color"/>
+    <attr name="tripProgressViewBackgroundColor" format="reference|color"/>
   </declare-styleable>
 </resources>

@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
-import androidx.annotation.ColorInt
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
@@ -272,18 +271,19 @@ class MapboxRouteLineApi(
             val trafficLineExpression = MapboxRouteLineUtils.getTrafficLineExpression(
                 offset,
                 routeLineExpressionData,
-                routeLineOptions.resourceProvider.routeUnknownTrafficColor
+                routeLineOptions.resourceProvider.routeLineColorResources.routeUnknownTrafficColor
             )
             val routeLineExpression = MapboxRouteLineUtils.getVanishingRouteLineExpression(
                 offset,
-                routeLineOptions.resourceProvider.routeLineTraveledColor,
-                routeLineOptions.resourceProvider.routeDefaultColor
+                routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor,
+                routeLineOptions.resourceProvider.routeLineColorResources.routeDefaultColor
             )
             val routeLineCasingExpression =
                 MapboxRouteLineUtils.getVanishingRouteLineExpression(
                     offset,
-                    routeLineOptions.resourceProvider.routeLineTraveledCasingColor,
-                    routeLineOptions.resourceProvider.routeCasingColor
+                    routeLineOptions
+                        .resourceProvider.routeLineColorResources.routeLineTraveledCasingColor,
+                    routeLineOptions.resourceProvider.routeLineColorResources.routeCasingColor
                 )
 
             RouteLineState.VanishingRouteLineUpdateState(
@@ -619,7 +619,7 @@ class MapboxRouteLineApi(
                     this,
                     routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
                     true,
-                    ::getRouteColorForCongestion
+                    routeLineOptions.resourceProvider.routeLineColorResources
                 )
             } ?: listOf()
         routeLineExpressionData.clear()
@@ -627,17 +627,17 @@ class MapboxRouteLineApi(
         val trafficLineExpression = MapboxRouteLineUtils.getTrafficLineExpression(
             routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
             segments,
-            routeLineOptions.resourceProvider.routeUnknownTrafficColor
+            routeLineOptions.resourceProvider.routeLineColorResources.routeUnknownTrafficColor
         )
         val routeLineExpression = MapboxRouteLineUtils.getVanishingRouteLineExpression(
             routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
-            routeLineOptions.resourceProvider.routeLineTraveledColor,
-            routeLineOptions.resourceProvider.routeDefaultColor
+            routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor,
+            routeLineOptions.resourceProvider.routeLineColorResources.routeDefaultColor
         )
         val routeLineCasingExpression = MapboxRouteLineUtils.getVanishingRouteLineExpression(
             routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
-            routeLineOptions.resourceProvider.routeLineTraveledColor,
-            routeLineOptions.resourceProvider.routeCasingColor
+            routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor,
+            routeLineOptions.resourceProvider.routeLineColorResources.routeCasingColor
         )
         val alternativeRoute1TrafficSegments: List<RouteLineExpressionData> =
             partitionedRoutes.second.firstOrNull()?.route?.run {
@@ -645,13 +645,14 @@ class MapboxRouteLineApi(
                     this,
                     routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
                     false,
-                    ::getRouteColorForCongestion
+                    routeLineOptions.resourceProvider.routeLineColorResources
                 )
             } ?: listOf()
         val alternativeRoute1TrafficExpression = MapboxRouteLineUtils.getTrafficLineExpression(
             routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
             alternativeRoute1TrafficSegments,
-            routeLineOptions.resourceProvider.alternativeRouteUnknownTrafficColor
+            routeLineOptions
+                .resourceProvider.routeLineColorResources.alternativeRouteUnknownTrafficColor
         )
         val alternativeRoute2TrafficSegments: List<RouteLineExpressionData> =
             if (partitionedRoutes.second.size > 1) {
@@ -660,7 +661,7 @@ class MapboxRouteLineApi(
                         this,
                         routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
                         false,
-                        ::getRouteColorForCongestion
+                        routeLineOptions.resourceProvider.routeLineColorResources
                     )
                 }
             } else {
@@ -669,7 +670,8 @@ class MapboxRouteLineApi(
         val alternativeRoute2TrafficExpression = MapboxRouteLineUtils.getTrafficLineExpression(
             routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
             alternativeRoute2TrafficSegments,
-            routeLineOptions.resourceProvider.alternativeRouteUnknownTrafficColor
+            routeLineOptions
+                .resourceProvider.routeLineColorResources.alternativeRouteUnknownTrafficColor
         )
         val alternativeRoute1FeatureCollection: FeatureCollection =
             partitionedRoutes.second.firstOrNull()?.featureCollection
@@ -703,56 +705,5 @@ class MapboxRouteLineApi(
             alternativeRoute2FeatureCollection,
             wayPointsFeatureCollection
         )
-    }
-
-    /**
-     * Returns the color that is used to represent traffic congestion.
-     *
-     * @param congestionValue as string value coming from the DirectionsRoute
-     * @param isPrimaryRoute indicates if the congestion value for the primary route should
-     * be returned or the color for an alternative route.
-     */
-    @ColorInt
-    private fun getRouteColorForCongestion(congestionValue: String, isPrimaryRoute: Boolean): Int {
-        return when (isPrimaryRoute) {
-            true -> when (congestionValue) {
-                RouteConstants.LOW_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.routeLowCongestionColor
-                }
-                RouteConstants.MODERATE_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.routeModerateColor
-                }
-                RouteConstants.HEAVY_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.routeHeavyColor
-                }
-                RouteConstants.SEVERE_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.routeSevereColor
-                }
-                RouteConstants.UNKNOWN_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.routeUnknownTrafficColor
-                }
-                else -> routeLineOptions.resourceProvider.routeDefaultColor
-            }
-            false -> when (congestionValue) {
-                RouteConstants.LOW_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.alternativeRouteLowColor
-                }
-                RouteConstants.MODERATE_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.alternativeRouteModerateColor
-                }
-                RouteConstants.HEAVY_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.alternativeRouteHeavyColor
-                }
-                RouteConstants.SEVERE_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.alternativeRouteSevereColor
-                }
-                RouteConstants.UNKNOWN_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.alternativeRouteUnknownTrafficColor
-                }
-                else -> {
-                    routeLineOptions.resourceProvider.alternativeRouteDefaultColor
-                }
-            }
-        }
     }
 }

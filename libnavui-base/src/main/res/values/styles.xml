@@ -217,17 +217,11 @@
         <item name="wayNameViewSecondaryColor">?attr/navigationViewAccent</item>
     </style>
 
-    <!-- Default SummaryBottomSheet style -->
-    <style name="MapboxStyleSummaryBottomSheet">
-        <item name="summaryBottomSheetPrimaryColor">?attr/navigationViewPrimary</item>
-        <item name="summaryBottomSheetSecondaryColor">?attr/navigationViewSecondary</item>
-        <item name="summaryBottomSheetDividerColor">?attr/navigationViewDivider</item>
-        <item name="summaryBottomSheetProgressBarColor">?attr/navigationViewAccent</item>
-        <item name="summaryBottomSheetRouteOverviewDrawable">
-            ?attr/navigationViewRouteOverviewDrawable
-        </item>
-        <item name="summaryBottomSheetPrimaryTextColor">?attr/navigationViewPrimaryText</item>
-        <item name="summaryBottomSheetSecondaryTextColor">?attr/navigationViewSecondaryText</item>
+    <!-- Default TripProgressView style -->
+    <style name="TripProgressView">
+        <item name="tripProgressPrimaryTextColor">?attr/tripProgressPrimaryTextColor</item>
+        <item name="tripProgressDividerColor">?attr/tripProgressDividerColor</item>
+        <item name="tripProgressViewBackgroundColor">?attr/tripProgressViewBackgroundColor</item>
     </style>
 
     <style name="MapboxStyleTextView" parent="android:TextAppearance" />

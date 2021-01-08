@@ -16,6 +16,7 @@ import com.mapbox.navigation.examples.core.MapboxSignboardActivity
 import com.mapbox.navigation.examples.core.MapboxSnapshotActivity
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.SlackLineActivity
+import com.mapbox.navigation.examples.core.TripProgressActivity
 import com.mapbox.navigation.examples.core.camera.CameraAnimationsActivity
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper.Companion.areLocationPermissionsGranted
@@ -72,6 +73,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_signboard),
                 getString(R.string.description_signboard),
                 MapboxSignboardActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_trip_progress),
+                getString(R.string.description_trip_progress),
+                TripProgressActivity::class.java
             )
         )
     }

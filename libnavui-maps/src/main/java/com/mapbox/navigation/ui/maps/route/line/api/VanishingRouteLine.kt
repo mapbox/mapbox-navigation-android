@@ -174,17 +174,17 @@ internal class VanishingRouteLine {
             val trafficLineExpression = MapboxRouteLineUtils.getTrafficLineExpression(
                 offset,
                 routeLineExpressionData,
-                routeResourceProvider.routeUnknownTrafficColor
+                routeResourceProvider.routeLineColorResources.routeUnknownTrafficColor
             )
             val routeLineExpression = MapboxRouteLineUtils.getVanishingRouteLineExpression(
                 offset,
-                routeResourceProvider.routeLineTraveledColor,
-                routeResourceProvider.routeDefaultColor
+                routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
+                routeResourceProvider.routeLineColorResources.routeDefaultColor
             )
             val routeLineCasingExpression = MapboxRouteLineUtils.getVanishingRouteLineExpression(
                 offset,
-                routeResourceProvider.routeLineTraveledColor,
-                routeResourceProvider.routeCasingColor
+                routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
+                routeResourceProvider.routeLineColorResources.routeCasingColor
             )
             return VanishingRouteLineExpressions(
                 trafficLineExpression,

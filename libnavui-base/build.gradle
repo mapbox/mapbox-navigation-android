@@ -43,6 +43,9 @@ dependencies {
     api dependenciesList.androidXCore
     api dependenciesList.androidXAnnotation
 
+    apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
+    testImplementation(project(':libtesting-utils'))
+
     ktlint dependenciesList.ktlint
 }
 

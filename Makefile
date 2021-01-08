@@ -11,6 +11,7 @@ UI_MODULES = \
 libnavui-maps \
 libnavui-base \
 libnavui-util \
+libnavui-tripprogress \
 
 APPLICATION_MODULES = \
 test-app \

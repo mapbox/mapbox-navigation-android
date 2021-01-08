@@ -13,14 +13,14 @@ import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.plugin.location.LocationComponentConstants
+import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.common.ShadowValueConverter
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRouteLineTrafficExpressionData
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getStyledColor
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
@@ -29,9 +29,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import org.junit.Assert
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -108,298 +107,6 @@ class MapboxRouteLineUtilsTest {
         )
 
         assertEquals(0.0000017145850113848236, result, 0.0)
-    }
-
-    @Test
-    fun getRouteLineTrafficExpressionDataWhenUniqueStreetClassDataExists() {
-        val routeAsJsonJson = loadJsonFixture("route-unique-road-classes.json")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson)
-        val distances = route.legs()!!.mapNotNull { it.annotation()!!.distance() }.flatten()
-        val distancesSum = distances.subList(0, distances.lastIndex).sum()
-        val roadClasses = route.legs()?.asSequence()
-            ?.mapNotNull { it.steps() }
-            ?.flatten()
-            ?.mapNotNull { it.intersections() }
-            ?.flatten()
-            ?.filter {
-                it.geometryIndex() != null && it.mapboxStreetsV8()?.roadClass() != null
-            }
-            ?.map { it.mapboxStreetsV8()!!.roadClass() }
-            ?.toList()
-
-        val result = getRouteLineTrafficExpressionData(route)
-
-        assertEquals(distances.size, result.size)
-        assertEquals(distances.first(), result[1].distanceFromOrigin, 0.0)
-        assertEquals(result[0].roadClass, roadClasses!!.first())
-        assertEquals(result[2].distanceFromOrigin, distances.subList(0, 2).sum(), 0.0)
-        assertEquals(distancesSum, result.last().distanceFromOrigin, 0.0)
-        assertEquals(RouteConstants.LOW_CONGESTION_VALUE, result.last().trafficCongestionIdentifier)
-        assertEquals("service", result.last().roadClass)
-    }
-
-    @Test
-    fun getRouteLineTrafficExpressionWithRoadClassesDuplicatesRemoved() {
-        val routeAsJsonJson = loadJsonFixture("route-with-road-classes.txt")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson)
-
-        val result = getRouteLineTrafficExpressionData(route)
-
-        assertEquals(10, result.size)
-        assertEquals(1300.0000000000002, result.last().distanceFromOrigin, 0.0)
-        assertEquals(RouteConstants.LOW_CONGESTION_VALUE, result.last().trafficCongestionIdentifier)
-        assertEquals("service", result.last().roadClass)
-    }
-
-    @Test
-    fun getRouteLineTrafficExpressionDataWithSomeRoadClassesDuplicatesRemoved() {
-        val routeAsJsonJson = loadJsonFixture("motorway-route-with-road-classes-mixed.json")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson)
-
-        val result = getRouteLineTrafficExpressionData(route)
-
-        assertEquals(5, result.size)
-        assertEquals(0.0, result[0].distanceFromOrigin, 0.0)
-        assertEquals("unknown", result[0].trafficCongestionIdentifier)
-        assertEquals("motorway", result[0].roadClass)
-        assertEquals(3.7, result[1].distanceFromOrigin, 0.0)
-        assertEquals("severe", result[1].trafficCongestionIdentifier)
-        assertEquals("motorway", result[1].roadClass)
-        assertEquals(27.5, result[2].distanceFromOrigin, 0.0)
-        assertEquals("unknown", result[2].trafficCongestionIdentifier)
-        assertEquals("motorway", result[2].roadClass)
-        assertEquals(39.9, result[3].distanceFromOrigin, 0.0)
-        assertEquals("severe", result[3].trafficCongestionIdentifier)
-        assertEquals("motorway", result[3].roadClass)
-        assertEquals(99.6, result[4].distanceFromOrigin, 0.0)
-        assertEquals("unknown", result[4].trafficCongestionIdentifier)
-        assertEquals("motorway", result[4].roadClass)
-    }
-
-    @Test
-    fun getRouteLineExpressionDataWithStreetClassOverrideWhenHasStreetClassesOnMotorway() {
-        val congestionColorProvider: (String, Boolean) -> Int = { trafficCongestion, _ ->
-            when (trafficCongestion) {
-                RouteConstants.UNKNOWN_CONGESTION_VALUE -> -9
-                RouteConstants.LOW_CONGESTION_VALUE -> -1
-                else -> 33
-            }
-        }
-        val routeAsJsonJson = loadJsonFixture("motorway-route-with-road-classes.json")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson)
-
-        val trafficExpressionData = getRouteLineTrafficExpressionData(route)
-        val result = getRouteLineExpressionDataWithStreetClassOverride(
-            trafficExpressionData,
-            route.distance(),
-            congestionColorProvider,
-            true,
-            listOf("motorway")
-        )
-
-        assertTrue(result.all { it.segmentColor == -1 })
-        assertEquals(1, result.size)
-    }
-
-    @Test
-    fun getRouteLineExpressionDataWithSomeRoadClassesDuplicatesRemoved() {
-        val congestionColorProvider: (String, Boolean) -> Int = { trafficCongestion, _ ->
-            when (trafficCongestion) {
-                RouteConstants.UNKNOWN_CONGESTION_VALUE -> -9
-                RouteConstants.LOW_CONGESTION_VALUE -> -1
-                else -> 33
-            }
-        }
-        val routeAsJsonJson = loadJsonFixture("motorway-route-with-road-classes-mixed.json")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson)
-
-        val trafficExpressionData = getRouteLineTrafficExpressionData(route)
-        val result = getRouteLineExpressionDataWithStreetClassOverride(
-            trafficExpressionData,
-            route.distance(),
-            congestionColorProvider,
-            true,
-            listOf("motorway")
-        )
-
-        assertEquals(5, result.size)
-        assertEquals(0.0, result[0].offset, 0.0)
-        assertEquals(-1, result[0].segmentColor)
-        assertEquals(0.002337691548550063, result[1].offset, 0.0)
-        assertEquals(33, result[1].segmentColor)
-        assertEquals(0.01737473448246668, result[2].offset, 0.0)
-        assertEquals(-1, result[2].segmentColor)
-        assertEquals(0.025209160212742564, result[3].offset, 0.0)
-        assertEquals(33, result[3].segmentColor)
-        assertEquals(0.06292812925286113, result[4].offset, 0.0)
-        assertEquals(-1, result[4].segmentColor)
-    }
-
-    @Test
-    fun getRouteLineTrafficExpressionDataWithOutStreetClassesDuplicatesRemoved() {
-        val routeAsJsonJson = loadJsonFixture("route-with-traffic-no-street-classes.txt")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson)
-
-        val result = getRouteLineTrafficExpressionData(route)
-
-        assertEquals(5, result.size)
-        assertEquals(1188.7000000000003, result.last().distanceFromOrigin, 0.0)
-        assertEquals(RouteConstants.LOW_CONGESTION_VALUE, result.last().trafficCongestionIdentifier)
-        assertNull(result.last().roadClass)
-    }
-
-    @Test
-    fun getRouteLineTrafficExpressionDataWithStreetClassesDuplicatesRemoved() {
-        val congestionColorProvider: (String, Boolean) -> Int = { trafficCongestion, _ ->
-            when (trafficCongestion) {
-                RouteConstants.UNKNOWN_CONGESTION_VALUE -> -9
-                RouteConstants.LOW_CONGESTION_VALUE -> -1
-                else -> 33
-            }
-        }
-        val routeAsJsonJson = loadJsonFixture("route-with-road-classes.txt")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson)
-        val trafficExpressionData = getRouteLineTrafficExpressionData(route)
-        assertEquals("service", trafficExpressionData[0].roadClass)
-        assertEquals("street", trafficExpressionData[1].roadClass)
-        assertEquals(
-            RouteConstants.UNKNOWN_CONGESTION_VALUE,
-            trafficExpressionData[0].trafficCongestionIdentifier
-        )
-        assertEquals(
-            RouteConstants.UNKNOWN_CONGESTION_VALUE,
-            trafficExpressionData[1].trafficCongestionIdentifier
-        )
-
-        val result = getRouteLineExpressionDataWithStreetClassOverride(
-            trafficExpressionData,
-            route.distance(),
-            congestionColorProvider,
-            true,
-            listOf("street")
-        )
-
-        assertEquals(-9, result[0].segmentColor)
-        assertEquals(7, result.size)
-        assertEquals(0.016404052025563352, result[1].offset, 0.0)
-        assertEquals(-1, result[1].segmentColor)
-    }
-
-    @Test
-    fun getRouteLineExpressionDataWithStreetClassOverrideWhenDoesNotHaveStreetClasses() {
-        val congestionColorProvider: (String, Boolean) -> Int = { trafficCongestion, _ ->
-            when (trafficCongestion) {
-                RouteConstants.UNKNOWN_CONGESTION_VALUE -> -9
-                RouteConstants.LOW_CONGESTION_VALUE -> -1
-                else -> 33
-            }
-        }
-        val routeAsJsonJson = loadJsonFixture("route-with-traffic-no-street-classes.txt")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson)
-        val trafficExpressionData = getRouteLineTrafficExpressionData(route)
-
-        val result = getRouteLineExpressionDataWithStreetClassOverride(
-            trafficExpressionData,
-            route.distance(),
-            congestionColorProvider,
-            true,
-            listOf()
-        )
-
-        assertEquals(5, result.size)
-        assertEquals(0.23460041526970057, result[1].offset, 0.0)
-        assertEquals(-1, result[1].segmentColor)
-    }
-
-    @Test
-    fun getTrafficExpressionWithStreetClassOverrideOnMotorwayWhenChangeOutsideOfIntersections() {
-        val congestionColorProvider: (String, Boolean) -> Int = { trafficCongestion, _ ->
-            when (trafficCongestion) {
-                RouteConstants.UNKNOWN_CONGESTION_VALUE -> -9
-                RouteConstants.LOW_CONGESTION_VALUE -> -1
-                RouteConstants.SEVERE_CONGESTION_VALUE -> -2
-                else -> 33
-            }
-        }
-        val routeAsJsonJson = loadJsonFixture(
-            "motorway-route-with-road-classes-unknown-not-on-intersection.json"
-        )
-        val route = DirectionsRoute.fromJson(routeAsJsonJson)
-
-        val trafficExpressionData = getRouteLineTrafficExpressionData(route)
-        val result = getRouteLineExpressionDataWithStreetClassOverride(
-            trafficExpressionData,
-            route.distance(),
-            congestionColorProvider,
-            true,
-            listOf("motorway")
-        )
-
-        assertEquals(-2, result[0].segmentColor)
-        assertNotEquals(-9, result[1].segmentColor)
-        assertEquals(-1, result[1].segmentColor)
-        assertEquals(-2, result[2].segmentColor)
-    }
-
-    @Test
-    fun getRouteLineTrafficExpressionDataMissingRoadClass() {
-        val routeAsJsonJson = loadJsonFixture(
-            "route-with-missing-road-classes.json"
-        )
-        val route = DirectionsRoute.fromJson(routeAsJsonJson)
-
-        val result = getRouteLineTrafficExpressionData(route)
-
-        assertEquals(7, result.size)
-        assertEquals(0.0, result[0].distanceFromOrigin, 0.0)
-        assertEquals("severe", result[0].trafficCongestionIdentifier)
-        assertEquals("motorway", result[0].roadClass)
-        assertEquals(3.7, result[1].distanceFromOrigin, 0.0)
-        assertEquals("unknown", result[1].trafficCongestionIdentifier)
-        assertEquals("motorway", result[1].roadClass)
-        assertEquals(27.5, result[2].distanceFromOrigin, 0.0)
-        assertEquals("severe", result[2].trafficCongestionIdentifier)
-        assertEquals("motorway", result[2].roadClass)
-        assertEquals(271.8, result[3].distanceFromOrigin, 0.0)
-        assertEquals("severe", result[3].trafficCongestionIdentifier)
-        assertEquals("intersection_without_class_fallback", result[3].roadClass)
-        assertEquals(305.2, result[4].distanceFromOrigin, 0.0)
-        assertEquals("severe", result[4].trafficCongestionIdentifier)
-        assertEquals("motorway", result[4].roadClass)
-        assertEquals(545.6, result[5].distanceFromOrigin, 0.0)
-        assertEquals("severe", result[5].trafficCongestionIdentifier)
-        assertEquals("intersection_without_class_fallback", result[5].roadClass)
-        assertEquals(1168.3000000000002, result[6].distanceFromOrigin, 0.0)
-        assertEquals("severe", result[6].trafficCongestionIdentifier)
-        assertEquals("motorway", result[6].roadClass)
-    }
-
-    @Test
-    fun getRouteLineExpressionDataWithStreetClassOverrideWhenHasStreetClassesOnMotorwayMultiLeg() {
-        // test case for overlapping geometry indices across multiple legs
-        val congestionColorProvider: (String, Boolean) -> Int = { trafficCongestion, _ ->
-            when (trafficCongestion) {
-                RouteConstants.UNKNOWN_CONGESTION_VALUE -> -9
-                RouteConstants.LOW_CONGESTION_VALUE -> -1
-                else -> 33
-            }
-        }
-        val routeAsJsonJson = loadJsonFixture(
-            "motorway-with-road-classes-multi-leg.json"
-        )
-        val route = DirectionsRoute.fromJson(routeAsJsonJson)
-
-        val trafficExpressionData = getRouteLineTrafficExpressionData(route)
-        val result = getRouteLineExpressionDataWithStreetClassOverride(
-            trafficExpressionData,
-            route.distance(),
-            congestionColorProvider,
-            true,
-            listOf("motorway")
-        )
-
-        assertTrue(result.all { it.segmentColor == -1 })
-        assertEquals(1, result.size)
     }
 
     @Test
@@ -848,50 +555,6 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
-    fun calculateRouteLineSegmentsMultilegRoute() {
-        val congestionColorProvider: (String, Boolean) -> Int = { trafficCongestion, _ ->
-            when (trafficCongestion) {
-                RouteConstants.UNKNOWN_CONGESTION_VALUE -> -9
-                RouteConstants.LOW_CONGESTION_VALUE -> -1
-                else -> 33
-            }
-        }
-        val route = getMultilegRoute()
-
-        val result = MapboxRouteLineUtils.calculateRouteLineSegments(
-            route,
-            listOf(),
-            true,
-            congestionColorProvider
-        )
-
-        assertEquals(19, result.size)
-        assertEquals(0.039793906743275334, result[1].offset, 0.0)
-        assertEquals(0.989831291992653, result.last().offset, 0.0)
-    }
-
-    @Test
-    fun calculateRouteLineSegmentsMultilegRouteFirstDistanceValueAboveMinimumOffset() {
-        val congestionColorProvider: (String, Boolean) -> Int = { trafficCongestion, _ ->
-            when (trafficCongestion) {
-                RouteConstants.UNKNOWN_CONGESTION_VALUE -> -9
-                RouteConstants.LOW_CONGESTION_VALUE -> -1
-                else -> 33
-            }
-        }
-        val route = getMultilegRoute()
-
-        val result = MapboxRouteLineUtils.calculateRouteLineSegments(
-            route,
-            listOf(),
-            true,
-            congestionColorProvider
-        )
-
-        assertTrue(result[1].offset > .001f)
-    }
-
-    @Test
     fun getDefaultBelowLayer_whenLayerIdNotFoundReturnsDefault() {
         val style = mockk<Style> {
             every { styleLayers } returns listOf()
@@ -998,6 +661,517 @@ class MapboxRouteLineUtilsTest {
         val result = MapboxRouteLineUtils.buildScalingExpression(values)
 
         assertEquals(expectedExpression, result.toString())
+    }
+
+    @Test
+    fun getRouteLineTrafficExpressionDataWhenUniqueStreetClassDataExists() {
+        val routeAsJsonJson = FileUtils.loadJsonFixture("route-unique-road-classes.json")
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
+        val distances = route.legs()!!.mapNotNull { it.annotation()!!.distance() }.flatten()
+        val distancesSum = distances.subList(0, distances.lastIndex).sum()
+        val roadClasses = route.legs()?.asSequence()
+            ?.mapNotNull { it.steps() }
+            ?.flatten()
+            ?.mapNotNull { it.intersections() }
+            ?.flatten()
+            ?.filter {
+                it.geometryIndex() != null && it.mapboxStreetsV8()?.roadClass() != null
+            }
+            ?.map { it.mapboxStreetsV8()!!.roadClass() }
+            ?.toList()
+
+        val result = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
+
+        assertEquals(distances.size, result.size)
+        assertEquals(distances.first(), result[1].distanceFromOrigin, 0.0)
+        assertEquals(result[0].roadClass, roadClasses!!.first())
+        assertEquals(result[2].distanceFromOrigin, distances.subList(0, 2).sum(), 0.0)
+        assertEquals(distancesSum, result.last().distanceFromOrigin, 0.0)
+        assertEquals(RouteConstants.LOW_CONGESTION_VALUE, result.last().trafficCongestionIdentifier)
+        assertEquals("service", result.last().roadClass)
+    }
+
+    @Test
+    fun getRouteLineTrafficExpressionWithRoadClassesDuplicatesRemoved() {
+        val routeAsJsonJson = FileUtils.loadJsonFixture("route-with-road-classes.txt")
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
+
+        val result = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
+
+        assertEquals(10, result.size)
+        assertEquals(1300.0000000000002, result.last().distanceFromOrigin, 0.0)
+        assertEquals(RouteConstants.LOW_CONGESTION_VALUE, result.last().trafficCongestionIdentifier)
+        assertEquals("service", result.last().roadClass)
+    }
+
+    @Test
+    fun getRouteLineTrafficExpressionDataWithSomeRoadClassesDuplicatesRemoved() {
+        val routeAsJsonJson =
+            FileUtils.loadJsonFixture("motorway-route-with-road-classes-mixed.json")
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
+
+        val result = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
+
+        assertEquals(5, result.size)
+        assertEquals(0.0, result[0].distanceFromOrigin, 0.0)
+        assertEquals("unknown", result[0].trafficCongestionIdentifier)
+        assertEquals("motorway", result[0].roadClass)
+        assertEquals(3.7, result[1].distanceFromOrigin, 0.0)
+        assertEquals("severe", result[1].trafficCongestionIdentifier)
+        assertEquals("motorway", result[1].roadClass)
+        assertEquals(27.5, result[2].distanceFromOrigin, 0.0)
+        assertEquals("unknown", result[2].trafficCongestionIdentifier)
+        assertEquals("motorway", result[2].roadClass)
+        assertEquals(39.9, result[3].distanceFromOrigin, 0.0)
+        assertEquals("severe", result[3].trafficCongestionIdentifier)
+        assertEquals("motorway", result[3].roadClass)
+        assertEquals(99.6, result[4].distanceFromOrigin, 0.0)
+        assertEquals("unknown", result[4].trafficCongestionIdentifier)
+        assertEquals("motorway", result[4].roadClass)
+    }
+
+    @Test
+    fun getRouteLineExpressionDataWithStreetClassOverrideWhenHasStreetClassesOnMotorway() {
+        val colorResources = RouteLineColorResources.Builder()
+            .routeUnknownTrafficColor(-9)
+            .routeLowCongestionColor(-1)
+            .routeCasingColor(33)
+            .routeDefaultColor(33)
+            .routeHeavyColor(33)
+            .routeLineTraveledCasingColor(33)
+            .routeLineTraveledColor(33)
+            .routeModerateColor(33)
+            .routeSevereColor(33)
+            .build()
+
+        val routeAsJsonJson = FileUtils.loadJsonFixture("motorway-route-with-road-classes.json")
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
+
+        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
+        val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
+            trafficExpressionData,
+            route.distance(),
+            colorResources,
+            true,
+            listOf("motorway")
+        )
+
+        assertTrue(result.all { it.segmentColor == -1 })
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun getRouteLineExpressionDataWithSomeRoadClassesDuplicatesRemoved() {
+        val colorResources = RouteLineColorResources.Builder()
+            .routeUnknownTrafficColor(-1)
+            .routeLowCongestionColor(-1)
+            .routeCasingColor(33)
+            .routeDefaultColor(33)
+            .routeHeavyColor(33)
+            .routeLineTraveledCasingColor(33)
+            .routeLineTraveledColor(33)
+            .routeModerateColor(33)
+            .routeSevereColor(33)
+            .build()
+
+        val routeAsJsonJson =
+            FileUtils.loadJsonFixture("motorway-route-with-road-classes-mixed.json")
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
+
+        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
+        val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
+            trafficExpressionData,
+            route.distance(),
+            colorResources,
+            true,
+            listOf("motorway")
+        )
+
+        assertEquals(5, result.size)
+        assertEquals(0.0, result[0].offset, 0.0)
+        assertEquals(-1, result[0].segmentColor)
+        assertEquals(0.002337691548550063, result[1].offset, 0.0)
+        assertEquals(33, result[1].segmentColor)
+        assertEquals(0.01737473448246668, result[2].offset, 0.0)
+        assertEquals(-1, result[2].segmentColor)
+        assertEquals(0.025209160212742564, result[3].offset, 0.0)
+        assertEquals(33, result[3].segmentColor)
+        assertEquals(0.06292812925286113, result[4].offset, 0.0)
+        assertEquals(-1, result[4].segmentColor)
+    }
+
+    @Test
+    fun getRouteLineTrafficExpressionDataWithOutStreetClassesDuplicatesRemoved() {
+        val routeAsJsonJson = FileUtils.loadJsonFixture("route-with-traffic-no-street-classes.txt")
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
+
+        val result = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
+
+        assertEquals(5, result.size)
+        assertEquals(1188.7000000000003, result.last().distanceFromOrigin, 0.0)
+        assertEquals(RouteConstants.LOW_CONGESTION_VALUE, result.last().trafficCongestionIdentifier)
+        Assert.assertNull(result.last().roadClass)
+    }
+
+    @Test
+    fun getRouteLineTrafficExpressionDataWithStreetClassesDuplicatesRemoved() {
+        val colorResources = RouteLineColorResources.Builder()
+            .routeUnknownTrafficColor(-9)
+            .routeLowCongestionColor(-1)
+            .routeCasingColor(33)
+            .routeDefaultColor(33)
+            .routeHeavyColor(33)
+            .routeLineTraveledCasingColor(33)
+            .routeLineTraveledColor(33)
+            .routeModerateColor(33)
+            .routeSevereColor(33)
+            .build()
+
+        val routeAsJsonJson = FileUtils.loadJsonFixture("route-with-road-classes.txt")
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
+        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
+        assertEquals("service", trafficExpressionData[0].roadClass)
+        assertEquals("street", trafficExpressionData[1].roadClass)
+        assertEquals(
+            RouteConstants.UNKNOWN_CONGESTION_VALUE,
+            trafficExpressionData[0].trafficCongestionIdentifier
+        )
+        assertEquals(
+            RouteConstants.UNKNOWN_CONGESTION_VALUE,
+            trafficExpressionData[1].trafficCongestionIdentifier
+        )
+
+        val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
+            trafficExpressionData,
+            route.distance(),
+            colorResources,
+            true,
+            listOf("street")
+        )
+
+        assertEquals(-9, result[0].segmentColor)
+        assertEquals(7, result.size)
+        assertEquals(0.016404052025563352, result[1].offset, 0.0)
+        assertEquals(-1, result[1].segmentColor)
+    }
+
+    @Test
+    fun getRouteLineExpressionDataWithStreetClassOverrideWhenDoesNotHaveStreetClasses() {
+        val colorResources = RouteLineColorResources.Builder()
+            .routeUnknownTrafficColor(-9)
+            .routeLowCongestionColor(-1)
+            .routeCasingColor(33)
+            .routeDefaultColor(33)
+            .routeHeavyColor(33)
+            .routeLineTraveledCasingColor(33)
+            .routeLineTraveledColor(33)
+            .routeModerateColor(33)
+            .routeSevereColor(33)
+            .build()
+
+        val routeAsJsonJson = FileUtils.loadJsonFixture("route-with-traffic-no-street-classes.txt")
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
+        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
+
+        val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
+            trafficExpressionData,
+            route.distance(),
+            colorResources,
+            true,
+            listOf()
+        )
+
+        assertEquals(5, result.size)
+        assertEquals(0.23460041526970057, result[1].offset, 0.0)
+        assertEquals(-1, result[1].segmentColor)
+    }
+
+    @Test
+    fun getTrafficExpressionWithStreetClassOverrideOnMotorwayWhenChangeOutsideOfIntersections() {
+        val colorResources = RouteLineColorResources.Builder()
+            .routeUnknownTrafficColor(-9)
+            .routeLowCongestionColor(-1)
+            .routeCasingColor(33)
+            .routeDefaultColor(33)
+            .routeHeavyColor(33)
+            .routeLineTraveledCasingColor(33)
+            .routeLineTraveledColor(33)
+            .routeModerateColor(33)
+            .routeSevereColor(-2)
+            .build()
+
+        val routeAsJsonJson = FileUtils.loadJsonFixture(
+            "motorway-route-with-road-classes-unknown-not-on-intersection.json"
+        )
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
+
+        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
+        val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
+            trafficExpressionData,
+            route.distance(),
+            colorResources,
+            true,
+            listOf("motorway")
+        )
+
+        assertEquals(-2, result[0].segmentColor)
+        Assert.assertNotEquals(-9, result[1].segmentColor)
+        assertEquals(-1, result[1].segmentColor)
+        assertEquals(-2, result[2].segmentColor)
+    }
+
+    @Test
+    fun getRouteLineTrafficExpressionDataMissingRoadClass() {
+        val routeAsJsonJson = FileUtils.loadJsonFixture(
+            "route-with-missing-road-classes.json"
+        )
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
+
+        val result = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
+
+        assertEquals(7, result.size)
+        assertEquals(0.0, result[0].distanceFromOrigin, 0.0)
+        assertEquals("severe", result[0].trafficCongestionIdentifier)
+        assertEquals("motorway", result[0].roadClass)
+        assertEquals(3.7, result[1].distanceFromOrigin, 0.0)
+        assertEquals("unknown", result[1].trafficCongestionIdentifier)
+        assertEquals("motorway", result[1].roadClass)
+        assertEquals(27.5, result[2].distanceFromOrigin, 0.0)
+        assertEquals("severe", result[2].trafficCongestionIdentifier)
+        assertEquals("motorway", result[2].roadClass)
+        assertEquals(271.8, result[3].distanceFromOrigin, 0.0)
+        assertEquals("severe", result[3].trafficCongestionIdentifier)
+        assertEquals("intersection_without_class_fallback", result[3].roadClass)
+        assertEquals(305.2, result[4].distanceFromOrigin, 0.0)
+        assertEquals("severe", result[4].trafficCongestionIdentifier)
+        assertEquals("motorway", result[4].roadClass)
+        assertEquals(545.6, result[5].distanceFromOrigin, 0.0)
+        assertEquals("severe", result[5].trafficCongestionIdentifier)
+        assertEquals("intersection_without_class_fallback", result[5].roadClass)
+        assertEquals(1168.3000000000002, result[6].distanceFromOrigin, 0.0)
+        assertEquals("severe", result[6].trafficCongestionIdentifier)
+        assertEquals("motorway", result[6].roadClass)
+    }
+
+    @Test
+    fun getRouteLineExpressionDataWithStreetClassOverrideWhenHasStreetClassesOnMotorwayMultiLeg() {
+        // test case for overlapping geometry indices across multiple legs
+        val colorResources = RouteLineColorResources.Builder()
+            .routeUnknownTrafficColor(-9)
+            .routeLowCongestionColor(-1)
+            .routeCasingColor(33)
+            .routeDefaultColor(33)
+            .routeHeavyColor(33)
+            .routeLineTraveledCasingColor(33)
+            .routeLineTraveledColor(33)
+            .routeModerateColor(33)
+            .routeSevereColor(33)
+            .build()
+        val routeAsJsonJson = FileUtils.loadJsonFixture(
+            "motorway-with-road-classes-multi-leg.json"
+        )
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
+
+        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
+        val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
+            trafficExpressionData,
+            route.distance(),
+            colorResources,
+            true,
+            listOf("motorway")
+        )
+
+        assertTrue(result.all { it.segmentColor == -1 })
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun calculateRouteLineSegmentsMultilegRoute() {
+        val colorResources = RouteLineColorResources.Builder()
+            .routeUnknownTrafficColor(-9)
+            .routeLowCongestionColor(-1)
+            .routeCasingColor(33)
+            .routeDefaultColor(33)
+            .routeHeavyColor(33)
+            .routeLineTraveledCasingColor(33)
+            .routeLineTraveledColor(33)
+            .routeModerateColor(33)
+            .routeSevereColor(33)
+            .build()
+        val route = getMultilegRoute()
+
+        val result = MapboxRouteLineUtils.calculateRouteLineSegments(
+            route,
+            listOf(),
+            true,
+            colorResources
+        )
+
+        assertEquals(19, result.size)
+        assertEquals(0.039793906743275334, result[1].offset, 0.0)
+        assertEquals(0.989831291992653, result.last().offset, 0.0)
+    }
+
+    @Test
+    fun calculateRouteLineSegmentsMultilegRouteFirstDistanceValueAboveMinimumOffset() {
+        val colorResources = RouteLineColorResources.Builder()
+            .routeUnknownTrafficColor(-9)
+            .routeLowCongestionColor(-1)
+            .routeCasingColor(33)
+            .routeDefaultColor(33)
+            .routeHeavyColor(33)
+            .routeLineTraveledCasingColor(33)
+            .routeLineTraveledColor(33)
+            .routeModerateColor(33)
+            .routeSevereColor(33)
+            .build()
+        val route = getMultilegRoute()
+
+        val result = MapboxRouteLineUtils.calculateRouteLineSegments(
+            route,
+            listOf(),
+            true,
+            colorResources
+        )
+
+        assertTrue(result[1].offset > .001f)
+    }
+
+    @Test
+    fun getRouteColorForCongestionPrimaryRouteCongestionModerate() {
+        val resources = RouteLineColorResources.Builder().build()
+
+        val result = MapboxRouteLineUtils.getRouteColorForCongestion(
+            RouteConstants.MODERATE_CONGESTION_VALUE,
+            true,
+            resources
+        )
+
+        assertEquals(resources.routeModerateColor, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionPrimaryRouteCongestionHeavy() {
+        val resources = RouteLineColorResources.Builder().build()
+
+        val result =
+            MapboxRouteLineUtils.getRouteColorForCongestion(
+                RouteConstants.HEAVY_CONGESTION_VALUE,
+                true,
+                resources
+            )
+
+        assertEquals(resources.routeHeavyColor, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionPrimaryRouteCongestionSevere() {
+        val resources = RouteLineColorResources.Builder().build()
+
+        val result =
+            MapboxRouteLineUtils.getRouteColorForCongestion(
+                RouteConstants.SEVERE_CONGESTION_VALUE,
+                true,
+                resources
+            )
+
+        assertEquals(resources.routeSevereColor, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionPrimaryRouteCongestionUnknown() {
+        val resources = RouteLineColorResources.Builder().build()
+
+        val result =
+            MapboxRouteLineUtils.getRouteColorForCongestion(
+                RouteConstants.UNKNOWN_CONGESTION_VALUE,
+                true,
+                resources
+            )
+
+        assertEquals(resources.routeUnknownTrafficColor, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionPrimaryRouteCongestionDefault() {
+        val resources = RouteLineColorResources.Builder().build()
+
+        val result = MapboxRouteLineUtils.getRouteColorForCongestion(
+            "foobar",
+            true,
+            resources
+        )
+
+        assertEquals(resources.routeDefaultColor, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionNonPrimaryRouteCongestionModerate() {
+        val resources = RouteLineColorResources.Builder().build()
+
+        val result =
+            MapboxRouteLineUtils.getRouteColorForCongestion(
+                RouteConstants.MODERATE_CONGESTION_VALUE,
+                false,
+                resources
+            )
+
+        assertEquals(resources.alternativeRouteModerateColor, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionNonPrimaryRouteCongestionHeavy() {
+        val resources = RouteLineColorResources.Builder().build()
+
+        val result =
+            MapboxRouteLineUtils.getRouteColorForCongestion(
+                RouteConstants.HEAVY_CONGESTION_VALUE,
+                false,
+                resources
+            )
+
+        assertEquals(resources.alternativeRouteHeavyColor, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionNonPrimaryRouteCongestionSevere() {
+        val resources = RouteLineColorResources.Builder().build()
+
+        val result =
+            MapboxRouteLineUtils.getRouteColorForCongestion(
+                RouteConstants.SEVERE_CONGESTION_VALUE,
+                false,
+                resources
+            )
+
+        assertEquals(resources.alternativeRouteSevereColor, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionNonPrimaryRouteCongestionUnknown() {
+        val resources = RouteLineColorResources.Builder().build()
+
+        val result =
+            MapboxRouteLineUtils.getRouteColorForCongestion(
+                RouteConstants.UNKNOWN_CONGESTION_VALUE,
+                false,
+                resources
+            )
+
+        assertEquals(resources.alternativeRouteUnknownTrafficColor, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionNonPrimaryRouteCongestionDefault() {
+        val resources = RouteLineColorResources.Builder().build()
+
+        val result = MapboxRouteLineUtils.getRouteColorForCongestion(
+            "foobar",
+            false,
+            resources
+        )
+
+        assertEquals(resources.alternativeRouteDefaultColor, result)
     }
 
     private fun getMultilegRoute(): DirectionsRoute {

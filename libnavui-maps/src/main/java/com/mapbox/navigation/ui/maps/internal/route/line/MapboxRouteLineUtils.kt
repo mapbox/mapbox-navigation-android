@@ -22,11 +22,11 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.maps.plugin.location.LocationComponentConstants
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.LOW_CONGESTION_VALUE
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
@@ -136,70 +136,105 @@ object MapboxRouteLineUtils {
     }
 
     /**
-     * Generates a FeatureCollection and LineString based on the @param route.
-     * @param route the DirectionsRoute to used to derive the result
+     * Returns the color that is used to represent traffic congestion.
      *
-     * @return a RouteFeatureData containing the original route and a FeatureCollection and
-     * LineString
+     * @param congestionValue as string value coming from the DirectionsRoute
+     * @param isPrimaryRoute indicates if the congestion value for the primary route should
+     * be returned or the color for an alternative route.
      */
-    private fun generateFeatureCollection(route: DirectionsRoute): RouteFeatureData =
-        generateFeatureCollection(route, null)
-
-    /**
-     * Generates a FeatureCollection and LineString based on the @param route.
-     * @param route the DirectionsRoute to used to derive the result
-     *
-     * @return a RouteFeatureData containing the original route and a FeatureCollection and
-     * LineString
-     */
-    private fun generateFeatureCollection(routeData: RouteLine): RouteFeatureData =
-        generateFeatureCollection(routeData.route, routeData.identifier)
-
-    internal fun calculateRouteGranularDistances(coordinates: List<Point>):
-        RouteLineGranularDistances? {
-            return if (coordinates.isNotEmpty()) {
-                calculateGranularDistances(coordinates)
-            } else {
-                null
+    @ColorInt
+    fun getRouteColorForCongestion(
+        congestionValue: String,
+        isPrimaryRoute: Boolean,
+        routeLineColorResources: RouteLineColorResources
+    ): Int {
+        return when (isPrimaryRoute) {
+            true -> when (congestionValue) {
+                RouteConstants.LOW_CONGESTION_VALUE -> {
+                    routeLineColorResources.routeLowCongestionColor
+                }
+                RouteConstants.MODERATE_CONGESTION_VALUE -> {
+                    routeLineColorResources.routeModerateColor
+                }
+                RouteConstants.HEAVY_CONGESTION_VALUE -> {
+                    routeLineColorResources.routeHeavyColor
+                }
+                RouteConstants.SEVERE_CONGESTION_VALUE -> {
+                    routeLineColorResources.routeSevereColor
+                }
+                RouteConstants.UNKNOWN_CONGESTION_VALUE -> {
+                    routeLineColorResources.routeUnknownTrafficColor
+                }
+                else -> routeLineColorResources.routeDefaultColor
             }
-        }
-
-    private fun calculateGranularDistances(points: List<Point>): RouteLineGranularDistances {
-        var distance = 0.0
-        val indexArray = SparseArray<RouteLineDistancesIndex>(points.size)
-        for (i in (points.size - 1) downTo 1) {
-            val curr = points[i]
-            val prev = points[i - 1]
-            distance += calculateDistance(curr, prev)
-            indexArray.append(i - 1, RouteLineDistancesIndex(prev, distance))
-        }
-        indexArray.append(
-            points.size - 1,
-            RouteLineDistancesIndex(points[points.size - 1], 0.0)
-        )
-        return RouteLineGranularDistances(distance, indexArray)
-    }
-
-    private fun generateFeatureCollection(route: DirectionsRoute, identifier: String?):
-        RouteFeatureData {
-            val routeGeometry = LineString.fromPolyline(
-                route.geometry() ?: "",
-                Constants.PRECISION_6
-            )
-            val randomId = UUID.randomUUID().toString()
-            val routeFeature = when (identifier) {
-                null -> Feature.fromGeometry(routeGeometry, null, randomId)
-                else -> Feature.fromGeometry(routeGeometry, null, randomId).also {
-                    it.addBooleanProperty(identifier, true)
+            false -> when (congestionValue) {
+                RouteConstants.LOW_CONGESTION_VALUE -> {
+                    routeLineColorResources.alternativeRouteLowColor
+                }
+                RouteConstants.MODERATE_CONGESTION_VALUE -> {
+                    routeLineColorResources.alternativeRouteModerateColor
+                }
+                RouteConstants.HEAVY_CONGESTION_VALUE -> {
+                    routeLineColorResources.alternativeRouteHeavyColor
+                }
+                RouteConstants.SEVERE_CONGESTION_VALUE -> {
+                    routeLineColorResources.alternativeRouteSevereColor
+                }
+                RouteConstants.UNKNOWN_CONGESTION_VALUE -> {
+                    routeLineColorResources.alternativeRouteUnknownTrafficColor
+                }
+                else -> {
+                    routeLineColorResources.alternativeRouteDefaultColor
                 }
             }
+        }
+    }
 
-            return RouteFeatureData(
-                route,
-                FeatureCollection.fromFeatures(listOf(routeFeature)),
-                routeGeometry
+    /**
+     * Calculates line segments based on the legs in the route line and color representation
+     * of the traffic congestion. The items returned can be used to create a style expression
+     * which can be used to style the route line. The styled route line will be colored
+     * according to the traffic conditions indicated in the @param route. For any road class
+     * included in the @param trafficBackfillRoadClasses, all route segments with an 'unknown'
+     * traffic congestion annotation and a matching road class will be colored with the low
+     * traffic color instead of the color configured for unknown traffic congestion.
+     *
+     * @param route the DirectionsRoute used for the [Expression] calculations
+     * @param trafficBackfillRoadClasses a collection of road classes defined in the styles.xml
+     * @param isPrimaryRoute indicates if the route used is the primary route
+     * @param congestionColorProvider a function that provides the colors used for various
+     * traffic congestion values
+     *
+     * @return a list of items representing the distance offset of each route leg and the color
+     * used to represent the traffic congestion.
+     */
+    fun calculateRouteLineSegments(
+        route: DirectionsRoute,
+        trafficBackfillRoadClasses: List<String>,
+        isPrimaryRoute: Boolean,
+        routeLineColorResources: RouteLineColorResources
+    ): List<RouteLineExpressionData> {
+        val trafficExpressionData = getRouteLineTrafficExpressionData(route)
+        return when (trafficExpressionData.isEmpty()) {
+            false -> getRouteLineExpressionDataWithStreetClassOverride(
+                trafficExpressionData,
+                route.distance(),
+                routeLineColorResources,
+                isPrimaryRoute,
+                trafficBackfillRoadClasses
+            )
+            true -> listOf(
+                RouteLineExpressionData(
+                    0.0,
+                    getRouteColorForCongestion(
+                        "",
+                        isPrimaryRoute,
+                        routeLineColorResources
+                    )
+                )
             )
         }
+    }
 
     /**
      * This will extract all of the road classes for the various sections of the route
@@ -292,48 +327,6 @@ object MapboxRouteLineUtils {
     }
 
     /**
-     * Calculates line segments based on the legs in the route line and color representation
-     * of the traffic congestion. The items returned can be used to create a style expression
-     * which can be used to style the route line. The styled route line will be colored
-     * according to the traffic conditions indicated in the @param route. For any road class
-     * included in the @param trafficBackfillRoadClasses, all route segments with an 'unknown'
-     * traffic congestion annotation and a matching road class will be colored with the low
-     * traffic color instead of the color configured for unknown traffic congestion.
-     *
-     * @param route the DirectionsRoute used for the [Expression] calculations
-     * @param trafficBackfillRoadClasses a collection of road classes defined in the styles.xml
-     * @param isPrimaryRoute indicates if the route used is the primary route
-     * @param congestionColorProvider a function that provides the colors used for various
-     * traffic congestion values
-     *
-     * @return a list of items representing the distance offset of each route leg and the color
-     * used to represent the traffic congestion.
-     */
-    internal fun calculateRouteLineSegments(
-        route: DirectionsRoute,
-        trafficBackfillRoadClasses: List<String>,
-        isPrimaryRoute: Boolean,
-        congestionColorProvider: (String, Boolean) -> Int
-    ): List<RouteLineExpressionData> {
-        val trafficExpressionData = getRouteLineTrafficExpressionData(route)
-        return when (trafficExpressionData.isEmpty()) {
-            false -> getRouteLineExpressionDataWithStreetClassOverride(
-                trafficExpressionData,
-                route.distance(),
-                congestionColorProvider,
-                isPrimaryRoute,
-                trafficBackfillRoadClasses
-            )
-            true -> listOf(
-                RouteLineExpressionData(
-                    0.0,
-                    congestionColorProvider("", isPrimaryRoute)
-                )
-            )
-        }
-    }
-
-    /**
      * For each item in the trafficExpressionData collection a color substitution will take
      * place that has a road class contained in the trafficOverrideRoadClasses
      * collection. For each of these items the color for 'unknown' traffic congestion
@@ -352,7 +345,7 @@ object MapboxRouteLineUtils {
     internal fun getRouteLineExpressionDataWithStreetClassOverride(
         trafficExpressionData: List<RouteLineTrafficExpressionData>,
         routeDistance: Double,
-        congestionColorProvider: (String, Boolean) -> Int,
+        routeLineColorResources: RouteLineColorResources,
         isPrimaryRoute: Boolean,
         trafficOverrideRoadClasses: List<String>
     ): List<RouteLineExpressionData> {
@@ -365,12 +358,16 @@ object MapboxRouteLineUtils {
                     trafficExpData.trafficCongestionIdentifier ==
                     RouteConstants.UNKNOWN_CONGESTION_VALUE
                 ) {
-                    LOW_CONGESTION_VALUE
+                    RouteConstants.LOW_CONGESTION_VALUE
                 } else {
                     trafficExpData.trafficCongestionIdentifier
                 }
 
-            val trafficColor = congestionColorProvider(trafficIdentifier, isPrimaryRoute)
+            val trafficColor = getRouteColorForCongestion(
+                trafficIdentifier,
+                isPrimaryRoute,
+                routeLineColorResources
+            )
             if (index == 0) {
                 expressionDataToReturn.add(
                     RouteLineExpressionData(
@@ -389,6 +386,72 @@ object MapboxRouteLineUtils {
         }
         return expressionDataToReturn
     }
+
+    /**
+     * Generates a FeatureCollection and LineString based on the @param route.
+     * @param route the DirectionsRoute to used to derive the result
+     *
+     * @return a RouteFeatureData containing the original route and a FeatureCollection and
+     * LineString
+     */
+    private fun generateFeatureCollection(route: DirectionsRoute): RouteFeatureData =
+        generateFeatureCollection(route, null)
+
+    /**
+     * Generates a FeatureCollection and LineString based on the @param route.
+     * @param route the DirectionsRoute to used to derive the result
+     *
+     * @return a RouteFeatureData containing the original route and a FeatureCollection and
+     * LineString
+     */
+    private fun generateFeatureCollection(routeData: RouteLine): RouteFeatureData =
+        generateFeatureCollection(routeData.route, routeData.identifier)
+
+    internal fun calculateRouteGranularDistances(coordinates: List<Point>):
+        RouteLineGranularDistances? {
+            return if (coordinates.isNotEmpty()) {
+                calculateGranularDistances(coordinates)
+            } else {
+                null
+            }
+        }
+
+    private fun calculateGranularDistances(points: List<Point>): RouteLineGranularDistances {
+        var distance = 0.0
+        val indexArray = SparseArray<RouteLineDistancesIndex>(points.size)
+        for (i in (points.size - 1) downTo 1) {
+            val curr = points[i]
+            val prev = points[i - 1]
+            distance += calculateDistance(curr, prev)
+            indexArray.append(i - 1, RouteLineDistancesIndex(prev, distance))
+        }
+        indexArray.append(
+            points.size - 1,
+            RouteLineDistancesIndex(points[points.size - 1], 0.0)
+        )
+        return RouteLineGranularDistances(distance, indexArray)
+    }
+
+    private fun generateFeatureCollection(route: DirectionsRoute, identifier: String?):
+        RouteFeatureData {
+            val routeGeometry = LineString.fromPolyline(
+                route.geometry() ?: "",
+                Constants.PRECISION_6
+            )
+            val randomId = UUID.randomUUID().toString()
+            val routeFeature = when (identifier) {
+                null -> Feature.fromGeometry(routeGeometry, null, randomId)
+                else -> Feature.fromGeometry(routeGeometry, null, randomId).also {
+                    it.addBooleanProperty(identifier, true)
+                }
+            }
+
+            return RouteFeatureData(
+                route,
+                FeatureCollection.fromFeatures(listOf(routeFeature)),
+                routeGeometry
+            )
+        }
 
     /**
      * Builds a FeatureCollection representing waypoints from a DirectionsRoute
@@ -650,7 +713,7 @@ object MapboxRouteLineUtils {
 
         options.routeLayerProvider.buildAlternativeRouteCasingLayers(
             style,
-            options.resourceProvider.alternativeRouteCasingColor
+            options.resourceProvider.routeLineColorResources.alternativeRouteCasingColor
         ).forEach {
             it.bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
         }
@@ -658,7 +721,7 @@ object MapboxRouteLineUtils {
         options.routeLayerProvider.buildAlternativeRouteLayers(
             style,
             options.resourceProvider.roundedLineCap,
-            options.resourceProvider.alternativeRouteDefaultColor
+            options.resourceProvider.routeLineColorResources.alternativeRouteDefaultColor
         ).forEach {
             it.bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
         }
@@ -666,26 +729,26 @@ object MapboxRouteLineUtils {
         options.routeLayerProvider.buildAlternativeRouteTrafficLayers(
             style,
             options.resourceProvider.roundedLineCap,
-            options.resourceProvider.alternativeRouteDefaultColor
+            options.resourceProvider.routeLineColorResources.alternativeRouteDefaultColor
         ).forEach {
             it.bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
         }
 
         options.routeLayerProvider.buildPrimaryRouteCasingLayer(
             style,
-            options.resourceProvider.routeCasingColor
+            options.resourceProvider.routeLineColorResources.routeCasingColor
         ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
 
         options.routeLayerProvider.buildPrimaryRouteLayer(
             style,
             options.resourceProvider.roundedLineCap,
-            options.resourceProvider.routeDefaultColor
+            options.resourceProvider.routeLineColorResources.routeDefaultColor
         ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
 
         options.routeLayerProvider.buildPrimaryRouteTrafficLayer(
             style,
             options.resourceProvider.roundedLineCap,
-            options.resourceProvider.routeDefaultColor
+            options.resourceProvider.routeLineColorResources.routeDefaultColor
         ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
 
         options.routeLayerProvider.buildWayPointLayer(

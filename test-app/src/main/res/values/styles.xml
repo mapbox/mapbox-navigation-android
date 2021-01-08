@@ -92,25 +92,6 @@
         <item name="wayNameViewSecondaryColor">@color/navigation_secondary_background</item>
     </style>
 
-    <style name="CustomSummaryBottomSheet">
-        <!-- Summary bottom sheet background color -->
-        <item name="summaryBottomSheetPrimaryColor">@color/navigation_primary_background</item>
-        <!-- Summary bottom sheet icon tint color -->
-        <item name="summaryBottomSheetSecondaryColor">@color/navigation_secondary_background</item>
-        <!-- Summary bottom sheet divider view color -->
-        <item name="summaryBottomSheetDividerColor">@color/navigation_divider</item>
-        <!-- Summary bottom sheet reroute progress bar background color -->
-        <item name="summaryBottomSheetProgressBarColor">@color/navigation_accent</item>
-        <!-- Summary bottom sheet primary text color (e.g. the remaining time label) -->
-        <item name="summaryBottomSheetPrimaryTextColor">@color/navigation_primary_text</item>
-        <!-- Summary bottom sheet secondary text color (e.g. the remaining distance label) -->
-        <item name="summaryBottomSheetSecondaryTextColor">@color/navigation_secondary_text</item>
-    </style>
-
-<!--    <style name="CustomRouteTheme" parent="MapboxStyleNavigationViewLight">-->
-<!--        <item name="navigationViewRouteStyle">@style/CustomRouteStyle</item>-->
-<!--    </style>-->
-
     <style name="CustomRouteStyle" parent="@style/MapboxStyleNavigationMapRoute">
         <item name="routeColor">@color/customRouteColor</item>
         <item name="routeLowCongestionColor">@color/customRouteLowCongestionColor</item>

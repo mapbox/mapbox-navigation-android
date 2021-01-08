@@ -6,6 +6,7 @@ import com.mapbox.geojson.LineString
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
@@ -74,9 +75,13 @@ class VanishingRouteLineTest {
         val expectedCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 2.0, 0.0]," +
             " 0.0, [rgba, 0.0, 0.0, 4.0, 0.0]]"
 
+        val colorResources = RouteLineColorResources.Builder()
+            .routeModerateColor(-1)
+            .routeUnknownTrafficColor(-1)
+            .build()
+
         val route = getRoute()
         val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
-        val congestionColorProvider: (String, Boolean) -> Int = { _, _ -> -1 }
         val vanishingRouteLine = VanishingRouteLine()
         vanishingRouteLine.initWithRoute(route)
         vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
@@ -85,7 +90,7 @@ class VanishingRouteLineTest {
                 getRoute(),
                 listOf(),
                 true,
-                congestionColorProvider
+                colorResources
             )
 
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(
@@ -105,16 +110,18 @@ class VanishingRouteLineTest {
     }
 
     private val genericMockResourceProvider = mockk<RouteLineResources> {
-        every { routeUnknownTrafficColor } returns 1
-        every { routeLineTraveledColor } returns 2
-        every { routeDefaultColor } returns 3
-        every { routeCasingColor } returns 4
-        every { routeLowCongestionColor } returns 5
-        every { routeModerateColor } returns 6
-        every { routeSevereColor } returns 7
-        every { routeHeavyColor } returns 8
+        every { routeLineColorResources } returns mockk<RouteLineColorResources> {
+            every { routeUnknownTrafficColor } returns 1
+            every { routeLineTraveledColor } returns 2
+            every { routeDefaultColor } returns 3
+            every { routeCasingColor } returns 4
+            every { routeLowCongestionColor } returns 5
+            every { routeModerateColor } returns 6
+            every { routeSevereColor } returns 7
+            every { routeHeavyColor } returns 8
+            every { alternativeRouteUnknownTrafficColor } returns 9
+            every { routeLineTraveledCasingColor } returns 10
+        }
         every { trafficBackfillRoadClasses } returns listOf()
-        every { alternativeRouteUnknownTrafficColor } returns 9
-        every { routeLineTraveledCasingColor } returns 10
     }
 }

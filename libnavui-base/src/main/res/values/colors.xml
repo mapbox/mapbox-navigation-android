@@ -38,6 +38,11 @@
   <color name="mapbox_navigation_view_color_banner_maneuver_primary">#FFFFFF</color>
   <color name="mapbox_navigation_view_color_banner_maneuver_secondary">#4DFFFFFF</color>
 
+  <!-- Default Trip Progress View -->
+  <color name="mapbox_trip_progress_primary_text_color">#424242</color>
+  <color name="mapbox_trip_progress_divider_color">#424242</color>
+  <color name="mapbox_trip_progress_background_color">#ffffff</color>
+
   <!-- Default Dark Theme -->
   <color name="mapbox_navigation_view_color_primary_dark">#2D3F53</color>
   <color name="mapbox_navigation_view_color_secondary_dark">#D8D8D8</color>

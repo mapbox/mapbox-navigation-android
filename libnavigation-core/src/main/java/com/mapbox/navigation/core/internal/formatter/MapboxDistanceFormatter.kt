@@ -32,11 +32,13 @@ import kotlin.math.roundToInt
  * @param roundingIncrement increment by which to round small distances
  */
 class MapboxDistanceFormatter private constructor(
-    private val applicationContext: Context,
+    context: Context,
     private val locale: Locale,
     @VoiceUnit.Type private val unitType: String,
     @Rounding.Increment private val roundingIncrement: Int
 ) : DistanceFormatter {
+
+    private val applicationContext = context.applicationContext
 
     private val smallUnit = when (unitType) {
         VoiceUnit.IMPERIAL -> TurfConstants.UNIT_FEET
@@ -87,17 +89,25 @@ class MapboxDistanceFormatter private constructor(
     }
 
     private fun formatDistanceAndSuffixForSmallUnit(distance: Double): Pair<String, String> {
+        val resources = applicationContext.resourcesWithLocale(locale)
+        val unitStringSuffix = getUnitString(resources, smallUnit)
+
+        if (distance <= 0) {
+            return Pair("0", unitStringSuffix)
+        }
+
         val distanceUnit = TurfConversion.convertLength(
             distance,
             TurfConstants.UNIT_METERS,
             smallUnit
         )
-        val resources = applicationContext.resourcesWithLocale(locale)
-        val unitStringSuffix = getUnitString(resources, smallUnit)
-        val roundedNumber = distanceUnit.roundToInt() / roundingIncrement * roundingIncrement
-        val roundedValue =
-            (if (roundedNumber < roundingIncrement) roundingIncrement else roundedNumber)
-                .toString()
+
+        val roundedValue = if (roundingIncrement > 0) {
+            distanceUnit.roundToInt() / roundingIncrement * roundingIncrement
+        } else {
+            distanceUnit.roundToInt()
+        }.toString()
+
         return Pair(roundedValue, unitStringSuffix)
     }
 
@@ -136,7 +146,7 @@ class MapboxDistanceFormatter private constructor(
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
         spannableString.setSpan(
-            RelativeSizeSpan(0.65f),
+            RelativeSizeSpan(0.75f),
             distanceAndSuffix.first.length + 1,
             spannableString.length,
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -247,7 +257,7 @@ class MapboxDistanceFormatter private constructor(
             }
 
             return MapboxDistanceFormatter(
-                applicationContext = applicationContext,
+                context = applicationContext,
                 locale = localeToUse,
                 unitType = unitTypeToUse,
                 roundingIncrement = roundingIncrement

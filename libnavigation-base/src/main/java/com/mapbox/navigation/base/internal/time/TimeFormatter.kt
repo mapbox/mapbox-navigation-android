@@ -42,6 +42,23 @@ object TimeFormatter {
         isDeviceTwentyFourHourFormat: Boolean
     ): String {
         time.add(Calendar.SECOND, routeDuration.toInt())
+        return formatTime(time, type, isDeviceTwentyFourHourFormat)
+    }
+
+    /**
+     * Format time
+     *
+     * @param time Calendar
+     * @param type [TimeFormat.Type]
+     * @param isDeviceTwentyFourHourFormat *true* if 24-hour format, *false* otherwise
+     * @return String
+     */
+    @JvmStatic
+    fun formatTime(
+        time: Calendar,
+        @TimeFormat.Type type: Int,
+        isDeviceTwentyFourHourFormat: Boolean
+    ): String {
         val chain = TimeFormattingChain()
         return chain.setup(isDeviceTwentyFourHourFormat).obtainTimeFormatted(type, time)
     }
@@ -126,7 +143,8 @@ object TimeFormatter {
         if (days == 0L && hours == 0L && minutes == 0L) {
             val minuteString =
                 String.format(TIME_STRING_FORMAT, resources.getString(R.string.mapbox_unit_min))
-            textSpanItems.add(TextSpanItem(StyleSpan(Typeface.BOLD), 1.toString()))
+            textSpanItems.add(TextSpanItem(RelativeSizeSpan(1f), "< "))
+            textSpanItems.add(TextSpanItem(StyleSpan(Typeface.BOLD), "1"))
             textSpanItems.add(TextSpanItem(RelativeSizeSpan(1f), minuteString))
         }
     }
