@@ -168,7 +168,7 @@ class MapboxNavigation(
         electronicHorizonOptions,
         null,
         incidentsOptions,
-        false
+        null
     )
 
     private var notificationChannelField: Field? = null
