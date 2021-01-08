@@ -12,6 +12,8 @@ import androidx.core.util.Pair;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -160,17 +162,28 @@ class MapboxSpeechPlayer implements SpeechPlayer {
   }
 
   private void playInstruction(@NonNull File instruction) {
-    setupMediaPlayer(instruction.getPath());
+    setupMediaPlayer(instruction);
   }
 
-  private void setupMediaPlayer(String instructionPath) {
-    if (TextUtils.isEmpty(instructionPath)) {
+  private void setupMediaPlayer(@NonNull File instruction) {
+    if (!instruction.canRead()) {
+      String msg = "Cannot read file " + instruction.getAbsolutePath();
+      Timber.e(ERROR_TEXT, msg);
       return;
     }
-    mediaPlayer = new MediaPlayer();
-    setDataSource(instructionPath);
-    mediaPlayer.prepareAsync();
-    addListeners();
+
+    try (FileInputStream fis = new FileInputStream(instruction)) {
+      mediaPlayer = new MediaPlayer();
+      setDataSource(fis);
+      mediaPlayer.prepareAsync();
+      addListeners();
+    } catch (FileNotFoundException ex) {
+      String msg = "Instructions file not found for " + instruction.getAbsolutePath() + ". " + ex.getMessage();
+      Timber.e(ERROR_TEXT, msg);
+    } catch (IOException ex) {
+      String msg = "Error for " + instruction.getAbsolutePath() + ". " + ex.getMessage();
+      Timber.e(ERROR_TEXT, msg);
+    }
   }
 
   private void pauseInstruction() {
@@ -180,15 +193,22 @@ class MapboxSpeechPlayer implements SpeechPlayer {
     }
   }
 
-  private void setDataSource(String instruction) {
+  private void setDataSource(FileInputStream fis) {
     try {
-      mediaPlayer.setDataSource(instruction);
+      mediaPlayer.setDataSource(fis.getFD());
     } catch (IOException ioException) {
       Timber.e(ERROR_TEXT, ioException.getMessage());
     }
   }
 
   private void addListeners() {
+    mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+      @Override
+      public boolean onError(MediaPlayer mp, int what, int extra) {
+        Timber.e(ERROR_TEXT, "code_what: " + what + " code_extra: " + extra);
+        return false;
+      }
+    });
     mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
       @Override
       public void onPrepared(@NonNull MediaPlayer mp) {
