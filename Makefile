@@ -8,10 +8,12 @@ libtrip-notification \
 libnavigation-core \
 
 UI_MODULES = \
-libnavigation-ui \
+libnavui-maps \
+libnavui-base \
+libnavui-util \
 
 APPLICATION_MODULES = \
-examples \
+carbon \
 instrumentation-tests \
 
 define run-gradle-tasks
@@ -136,11 +138,15 @@ ui-upload-to-sdk-registry:
 .PHONY: ui-check-api
 ui-check-api:
 	# TODO Remove -PhideId=ReferencesHidden after fixing errors
-	./gradlew :libnavigation-ui:checkApi -PhidePackage=com.mapbox.navigation.ui.internal -PhideId=ReferencesHidden
+	./gradlew :libnavui-maps:checkApi -PhidePackage=com.mapbox.navigation.ui.maps.internal -PhideId=ReferencesHidden
+	./gradlew :libnavui-base:checkApi -PhidePackage=com.mapbox.navigation.ui.base.internal -PhideId=ReferencesHidden
+	./gradlew :libnavui-util:checkApi -PhidePackage=com.mapbox.navigation.ui.utils.internal -PhideId=ReferencesHidden
 
 .PHONY: ui-update-api
 ui-update-api:
-	./gradlew :libnavigation-ui:updateApi -PhidePackage=com.mapbox.navigation.ui.internal
+	./gradlew :libnavui-maps:updateApi -PhidePackage=com.mapbox.navigation.ui.maps.internal
+	./gradlew :libnavui-base:updateApi -PhidePackage=com.mapbox.navigation.ui.base.internal
+	./gradlew :libnavui-util:updateApi -PhidePackage=com.mapbox.navigation.ui.utils.internal
 
 .PHONY: update-metalava
 update-metalava:
