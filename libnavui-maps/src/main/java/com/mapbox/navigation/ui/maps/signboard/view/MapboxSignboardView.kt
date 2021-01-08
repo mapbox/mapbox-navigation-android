@@ -1,10 +1,15 @@
 package com.mapbox.navigation.ui.maps.signboard.view
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
+import com.caverock.androidsvg.SVG
 import com.mapbox.navigation.ui.base.MapboxView
 import com.mapbox.navigation.ui.base.model.signboard.SignboardState
+import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import java.io.ByteArrayInputStream
 
 /**
  * Default Signboard View that renders snapshot based on [SignboardState]
@@ -28,7 +33,10 @@ class MapboxSignboardView @JvmOverloads constructor(
     override fun render(state: SignboardState) {
         when (state) {
             is SignboardState.SignboardReady -> {
-                visibility = VISIBLE
+                ifNonNull(renderSignboard(state.bytes)) { bitmap ->
+                    visibility = VISIBLE
+                    setImageBitmap(bitmap)
+                }
             }
             is SignboardState.SignboardFailure.SignboardUnavailable -> {
                 visibility = GONE
@@ -39,5 +47,24 @@ class MapboxSignboardView @JvmOverloads constructor(
                 setImageBitmap(null)
             }
         }
+    }
+
+    private fun renderSignboard(data: ByteArray): Bitmap? {
+        val stream = ByteArrayInputStream(data)
+        val svg = SVG.getFromInputStream(stream)
+
+        svg.setDocumentViewBox(0f, 0f, 220f, 170f)
+        val aspectRatio = svg.documentViewBox.bottom / svg.documentViewBox.right
+        val definedWidth = 400
+        val calculatedHeight = (definedWidth * aspectRatio).toInt()
+
+        val signboard = Bitmap.createBitmap(
+            definedWidth,
+            calculatedHeight,
+            Bitmap.Config.ARGB_8888
+        )
+        val signboardCanvas = Canvas(signboard)
+        svg.renderToCanvas(signboardCanvas)
+        return signboard
     }
 }
