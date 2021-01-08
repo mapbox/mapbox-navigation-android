@@ -342,7 +342,9 @@ class MapboxRouteLineApi(
                 Pair(RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID, Visibility.VISIBLE),
                 Pair(RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID, Visibility.VISIBLE),
                 Pair(RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID, Visibility.VISIBLE),
-                Pair(RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID, Visibility.VISIBLE)
+                Pair(RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID, Visibility.VISIBLE),
+                Pair(RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID, Visibility.VISIBLE),
+                Pair(RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID, Visibility.VISIBLE)
             )
         )
     }
@@ -357,7 +359,9 @@ class MapboxRouteLineApi(
                 Pair(RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID, Visibility.NONE),
                 Pair(RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID, Visibility.NONE),
                 Pair(RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID, Visibility.NONE),
-                Pair(RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID, Visibility.NONE)
+                Pair(RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID, Visibility.NONE),
+                Pair(RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID, Visibility.NONE),
+                Pair(RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID, Visibility.NONE)
             )
         )
     }

@@ -13,8 +13,10 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID
+import com.mapbox.navigation.ui.base.internal.route.RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID
+import com.mapbox.navigation.ui.base.internal.route.RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
@@ -62,6 +64,7 @@ class MapboxRouteLineApiTest {
 
         val result = api.hidePrimaryRoute()
 
+        assertEquals(3, result.getLayerVisibilityChanges().size)
         assertEquals(result.getLayerVisibilityChanges()[0].first, PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
         assertEquals(result.getLayerVisibilityChanges()[0].second, Visibility.NONE)
         assertEquals(result.getLayerVisibilityChanges()[1].first, PRIMARY_ROUTE_LAYER_ID)
@@ -77,6 +80,7 @@ class MapboxRouteLineApiTest {
 
         val result = api.showPrimaryRoute()
 
+        assertEquals(3, result.getLayerVisibilityChanges().size)
         assertEquals(result.getLayerVisibilityChanges()[0].first, PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
         assertEquals(result.getLayerVisibilityChanges()[0].second, Visibility.VISIBLE)
         assertEquals(result.getLayerVisibilityChanges()[1].first, PRIMARY_ROUTE_LAYER_ID)
@@ -92,6 +96,7 @@ class MapboxRouteLineApiTest {
 
         val result = api.hideAlternativeRoutes()
 
+        assertEquals(6, result.getLayerVisibilityChanges().size)
         assertEquals(result.getLayerVisibilityChanges()[0].first, ALTERNATIVE_ROUTE1_LAYER_ID)
         assertEquals(result.getLayerVisibilityChanges()[0].second, Visibility.NONE)
         assertEquals(
@@ -106,6 +111,16 @@ class MapboxRouteLineApiTest {
             ALTERNATIVE_ROUTE2_CASING_LAYER_ID
         )
         assertEquals(result.getLayerVisibilityChanges()[3].second, Visibility.NONE)
+        assertEquals(
+            result.getLayerVisibilityChanges()[4].first,
+            ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID
+        )
+        assertEquals(result.getLayerVisibilityChanges()[4].second, Visibility.NONE)
+        assertEquals(
+            result.getLayerVisibilityChanges()[5].first,
+            ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID
+        )
+        assertEquals(result.getLayerVisibilityChanges()[5].second, Visibility.NONE)
     }
 
     @Test
@@ -115,6 +130,7 @@ class MapboxRouteLineApiTest {
 
         val result = api.showAlternativeRoutes()
 
+        assertEquals(6, result.getLayerVisibilityChanges().size)
         assertEquals(result.getLayerVisibilityChanges()[0].first, ALTERNATIVE_ROUTE1_LAYER_ID)
         assertEquals(result.getLayerVisibilityChanges()[0].second, Visibility.VISIBLE)
         assertEquals(
@@ -129,6 +145,16 @@ class MapboxRouteLineApiTest {
             ALTERNATIVE_ROUTE2_CASING_LAYER_ID
         )
         assertEquals(result.getLayerVisibilityChanges()[3].second, Visibility.VISIBLE)
+        assertEquals(
+            result.getLayerVisibilityChanges()[4].first,
+            ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID
+        )
+        assertEquals(result.getLayerVisibilityChanges()[4].second, Visibility.VISIBLE)
+        assertEquals(
+            result.getLayerVisibilityChanges()[5].first,
+            ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID
+        )
+        assertEquals(result.getLayerVisibilityChanges()[5].second, Visibility.VISIBLE)
     }
 
     @Test // todo needs more testing
