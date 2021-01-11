@@ -117,11 +117,17 @@ commands:
       variant:
         description: debug or release
         type: string
+      inject_token:
+        description: whether to inject an access token file
+        type: boolean
+        default: false
     steps:
       - run:
           name: Assemble << parameters.module_target >> APK in << parameters.variant >> mode
           command: |
-            echo "${MAPBOX_DEVELOPER_CONFIG}" > /root/code/<< parameters.module_target >>/src/main/res/values/mapbox_access_token.xml
+            if << parameters.inject_token >>; then
+                echo "${MAPBOX_DEVELOPER_CONFIG}" > /root/code/<< parameters.module_target >>/src/main/res/values/mapbox_access_token.xml
+            fi
             ./gradlew << parameters.module_target >>:assemble<< parameters.variant >>
 
   assemble-instrumentation-test:
@@ -134,18 +140,6 @@ commands:
           name: Assemble Instrumentation Test APK for << parameters.module_target >>
           command: |
             ./gradlew << parameters.module_target >>:assembleAndroidTest
-
-  assemble-example-app:
-    parameters:
-      variant:
-        description: debug or release
-        type: string
-    steps:
-      - run:
-          name: Assemble examples APK in << parameters.variant >> mode
-          command: |
-            echo "${MAPBOX_DEVELOPER_CONFIG}" > /root/code/carbon/src/main/res/values/mapbox_access_token.xml
-            ./gradlew carbon:assemble<< parameters.variant >>
 
   login-google-cloud-platform:
     steps:
@@ -311,13 +305,16 @@ commands:
       variant:
         description: debug or release
         type: string
+      module_target:
+        description: module target
+        type: string
     steps:
       - run:
           name: Run robo tests on Firebase
           no_output_timeout: 10m
           command: |
             gcloud firebase test android run --type robo \
-              --app carbon/build/outputs/apk/<< parameters.variant >>/carbon-<< parameters.variant >>.apk \
+              --app << parameters.module_target >>/build/outputs/apk/<< parameters.variant >>/<< parameters.module_target >>-<< parameters.variant >>.apk \
               --device model=hammerhead,version=21,locale=en,orientation=portrait  \
               --device model=athene,version=23,locale=fr,orientation=landscape \
               --device model=sailfish,version=26,locale=es,orientation=portrait \
@@ -371,6 +368,7 @@ jobs:
       - assemble-module:
           module_target: "instrumentation-tests"
           variant: "Debug"
+          inject_token: true
       - assemble-instrumentation-test:
           module_target: "instrumentation-tests"
       - assemble-module:
@@ -411,10 +409,13 @@ jobs:
       GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
     steps:
       - read-workspace
-      - assemble-example-app:
+      - assemble-module:
+          module_target: "carbon"
           variant: "Release"
+          inject_token: true
       - login-google-cloud-platform
       - run-firebase-robo:
+          module_target: "carbon"
           variant: "release"
 
   internal-instrumentation-tests:
