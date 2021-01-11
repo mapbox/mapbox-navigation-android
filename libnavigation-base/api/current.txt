@@ -109,6 +109,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.android.core.location.LocationEngineRequest getLocationEngineRequest();
     method public long getNavigatorPredictionMillis();
     method public com.mapbox.navigation.base.options.OnboardRouterOptions getOnboardRouterOptions();
+    method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions getPredictiveCacheLocationOptions();
     method public int getTimeFormatType();
     method public boolean isDebugLoggingEnabled();
     method public boolean isFromNavigationUi();
@@ -130,6 +131,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngineRequest(com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder navigatorPredictionMillis(long predictionMillis);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder onboardRouterOptions(com.mapbox.navigation.base.options.OnboardRouterOptions onboardRouterOptions);
+    method public com.mapbox.navigation.base.options.NavigationOptions.Builder predictiveCacheLocationOptions(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder timeFormatType(int type);
   }
 
@@ -154,6 +156,21 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesProfile(String tilesProfile);
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesUri(java.net.URI tilesUri);
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesVersion(String version);
+  }
+
+  public final class PredictiveCacheLocationOptions {
+    method public int getCurrentLocationRadiusInMeters();
+    method public int getDestinationLocationRadiusInMeters();
+    method public int getRouteBufferRadiusInMeters();
+    method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder toBuilder();
+  }
+
+  public static final class PredictiveCacheLocationOptions.Builder {
+    ctor public PredictiveCacheLocationOptions.Builder();
+    method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions build();
+    method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder currentLocationRadiusInMeters(int radiusInMeters);
+    method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder destinationLocationRadiusInMeters(int radiusInMeters);
+    method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder routeBufferRadiusInMeters(int radiusInMeters);
   }
 
 }
