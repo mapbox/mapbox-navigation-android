@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_marginEnd="@dimen/mapbox_dimen_4dp"
+    android:layout_marginStart="@dimen/mapbox_dimen_4dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+    
+  <com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidance
+      android:id="@+id/itemLaneGuidance"
+      android:layout_width="@dimen/mapbox_dimen_30dp"
+      android:layout_height="@dimen/mapbox_dimen_30dp"
+      tools:srcCompat="@drawable/mapbox_ic_turn_left"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintBottom_toBottomOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

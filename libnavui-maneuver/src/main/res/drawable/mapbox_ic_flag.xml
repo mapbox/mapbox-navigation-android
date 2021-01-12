@@ -1,0 +1,9 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="20dp"
+    android:viewportHeight="20"
+    android:viewportWidth="20"
+    android:width="20dp">
+  <path
+      android:fillColor="?attr/maneuverTurnIconColor"
+      android:pathData="M3.5,18h0a.5.5,0,0,1-.5-.5v-14a.5.5,0,0,1,.5-.5h0a.5.5,0,0,1,.5.5v14a.5.5,0,0,1-.5.5Zm9.83333-11l3.66667-4h-11v8h11Z" />
+</vector>

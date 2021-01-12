@@ -10,6 +10,34 @@ package com.mapbox.navigation.ui.base {
 
 }
 
+package com.mapbox.navigation.ui.base.api.maneuver {
+
+  public interface ManeuverApi extends com.mapbox.navigation.ui.base.api.maneuver.UpcomingManeuverApi {
+    method public void cancelManeuver();
+    method public void cancelStepDistanceRemaining();
+    method public void retrieveManeuver(com.mapbox.api.directions.v5.models.BannerInstructions bannerInstruction, com.mapbox.navigation.ui.base.api.maneuver.ManeuverCallback callback);
+    method public void retrieveStepDistanceRemaining(com.mapbox.navigation.base.trip.model.RouteStepProgress routeStepProgress, com.mapbox.navigation.ui.base.api.maneuver.StepDistanceRemainingCallback callback);
+  }
+
+  public interface ManeuverCallback {
+    method public void onManeuver(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.CurrentManeuver currentManeuver);
+  }
+
+  public interface StepDistanceRemainingCallback {
+    method public void onStepDistanceRemaining(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.DistanceRemainingToFinishStep distanceRemaining);
+  }
+
+  public interface UpcomingManeuverApi {
+    method public void cancelUpcomingManeuver();
+    method public void retrieveUpcomingManeuvers(com.mapbox.api.directions.v5.models.RouteLeg routeLeg, com.mapbox.navigation.ui.base.api.maneuver.UpcomingManeuversCallback callback);
+  }
+
+  public interface UpcomingManeuversCallback {
+    method public void onUpcomingManeuvers(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers.Upcoming state);
+  }
+
+}
+
 package com.mapbox.navigation.ui.base.api.signboard {
 
   public interface SignboardApi {
@@ -51,6 +79,331 @@ package com.mapbox.navigation.ui.base.formatter {
 
   public interface ValueFormatter<T, R> {
     method public R! format(T? t);
+  }
+
+}
+
+package com.mapbox.navigation.ui.base.model.maneuver {
+
+  public final class Component {
+    ctor public Component(String type, com.mapbox.navigation.ui.base.model.maneuver.ComponentNode node);
+    method public String component1();
+    method public com.mapbox.navigation.ui.base.model.maneuver.ComponentNode component2();
+    method public com.mapbox.navigation.ui.base.model.maneuver.Component copy(String type, com.mapbox.navigation.ui.base.model.maneuver.ComponentNode node);
+    method public com.mapbox.navigation.ui.base.model.maneuver.ComponentNode getNode();
+    method public String getType();
+  }
+
+  public interface ComponentNode {
+  }
+
+  public final class DelimiterComponentNode implements com.mapbox.navigation.ui.base.model.maneuver.ComponentNode {
+    method public String getText();
+    method public com.mapbox.navigation.ui.base.model.maneuver.DelimiterComponentNode.Builder toBuilder();
+  }
+
+  public static final class DelimiterComponentNode.Builder {
+    ctor public DelimiterComponentNode.Builder();
+    method public com.mapbox.navigation.ui.base.model.maneuver.DelimiterComponentNode build();
+    method public com.mapbox.navigation.ui.base.model.maneuver.DelimiterComponentNode.Builder text(String text);
+  }
+
+  public final class ExitComponentNode implements com.mapbox.navigation.ui.base.model.maneuver.ComponentNode {
+    method public String getText();
+    method public com.mapbox.navigation.ui.base.model.maneuver.ExitComponentNode.Builder toBuilder();
+  }
+
+  public static final class ExitComponentNode.Builder {
+    ctor public ExitComponentNode.Builder();
+    method public com.mapbox.navigation.ui.base.model.maneuver.ExitComponentNode build();
+    method public com.mapbox.navigation.ui.base.model.maneuver.ExitComponentNode.Builder text(String text);
+  }
+
+  public final class ExitNumberComponentNode implements com.mapbox.navigation.ui.base.model.maneuver.ComponentNode {
+    method public String getText();
+    method public com.mapbox.navigation.ui.base.model.maneuver.ExitNumberComponentNode.Builder toBuilder();
+  }
+
+  public static final class ExitNumberComponentNode.Builder {
+    ctor public ExitNumberComponentNode.Builder();
+    method public com.mapbox.navigation.ui.base.model.maneuver.ExitNumberComponentNode build();
+    method public com.mapbox.navigation.ui.base.model.maneuver.ExitNumberComponentNode.Builder text(String text);
+  }
+
+  public final class Lane {
+    method public String? getActiveDirection();
+    method public java.util.List<com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator> getAllLanes();
+    method public com.mapbox.navigation.ui.base.model.maneuver.Lane.Builder toBuilder();
+  }
+
+  public static final class Lane.Builder {
+    ctor public Lane.Builder();
+    method public com.mapbox.navigation.ui.base.model.maneuver.Lane.Builder activeDirection(String? activeDirection);
+    method public com.mapbox.navigation.ui.base.model.maneuver.Lane.Builder allLanes(java.util.List<com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator> allLanes);
+    method public com.mapbox.navigation.ui.base.model.maneuver.Lane build();
+  }
+
+  public final class LaneIndicator {
+    method public java.util.List<java.lang.String> getDirections();
+    method public boolean isActive();
+    method public com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator.Builder toBuilder();
+  }
+
+  public static final class LaneIndicator.Builder {
+    ctor public LaneIndicator.Builder();
+    method public com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator build();
+    method public com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator.Builder directions(java.util.List<java.lang.String> directions);
+    method public com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator.Builder isActive(boolean isActive);
+  }
+
+  public final class Maneuver {
+    method public com.mapbox.navigation.ui.base.model.maneuver.Lane? getLaneGuidance();
+    method public com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver getPrimary();
+    method public com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver? getSecondary();
+    method public com.mapbox.navigation.ui.base.model.maneuver.SubManeuver? getSub();
+    method public com.mapbox.navigation.ui.base.model.maneuver.TotalManeuverDistance getTotalManeuverDistance();
+    method public com.mapbox.navigation.ui.base.model.maneuver.Maneuver.Builder toBuilder();
+  }
+
+  public static final class Maneuver.Builder {
+    ctor public Maneuver.Builder();
+    method public com.mapbox.navigation.ui.base.model.maneuver.Maneuver build();
+    method public com.mapbox.navigation.ui.base.model.maneuver.Maneuver.Builder laneGuidance(com.mapbox.navigation.ui.base.model.maneuver.Lane? laneGuidance);
+    method public com.mapbox.navigation.ui.base.model.maneuver.Maneuver.Builder primary(com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver primary);
+    method public com.mapbox.navigation.ui.base.model.maneuver.Maneuver.Builder secondary(com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver? secondary);
+    method public com.mapbox.navigation.ui.base.model.maneuver.Maneuver.Builder sub(com.mapbox.navigation.ui.base.model.maneuver.SubManeuver? sub);
+    method public com.mapbox.navigation.ui.base.model.maneuver.Maneuver.Builder totalManeuverDistance(com.mapbox.navigation.ui.base.model.maneuver.TotalManeuverDistance totalManeuverDistance);
+  }
+
+  public abstract sealed class ManeuverState implements com.mapbox.navigation.ui.base.MapboxState {
+  }
+
+  public static final class ManeuverState.CurrentManeuver extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState {
+    ctor public ManeuverState.CurrentManeuver(com.mapbox.navigation.ui.base.model.maneuver.Maneuver maneuver);
+    method public com.mapbox.navigation.ui.base.model.maneuver.Maneuver component1();
+    method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.CurrentManeuver copy(com.mapbox.navigation.ui.base.model.maneuver.Maneuver maneuver);
+    method public com.mapbox.navigation.ui.base.model.maneuver.Maneuver getManeuver();
+    method public void setManeuver(com.mapbox.navigation.ui.base.model.maneuver.Maneuver p);
+  }
+
+  public static final class ManeuverState.DistanceRemainingToFinishStep extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState {
+    ctor public ManeuverState.DistanceRemainingToFinishStep(com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter, double distanceRemaining);
+    method public com.mapbox.navigation.base.formatter.DistanceFormatter component1();
+    method public double component2();
+    method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.DistanceRemainingToFinishStep copy(com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter, double distanceRemaining);
+    method public com.mapbox.navigation.base.formatter.DistanceFormatter getDistanceFormatter();
+    method public double getDistanceRemaining();
+  }
+
+  public abstract static sealed class ManeuverState.LaneGuidanceManeuver extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState {
+  }
+
+  public static final class ManeuverState.LaneGuidanceManeuver.AddLanes extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver {
+    ctor public ManeuverState.LaneGuidanceManeuver.AddLanes(com.mapbox.navigation.ui.base.model.maneuver.Lane lane);
+    method public com.mapbox.navigation.ui.base.model.maneuver.Lane component1();
+    method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver.AddLanes copy(com.mapbox.navigation.ui.base.model.maneuver.Lane lane);
+    method public com.mapbox.navigation.ui.base.model.maneuver.Lane getLane();
+  }
+
+  public static final class ManeuverState.LaneGuidanceManeuver.Hide extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver {
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver.Hide! INSTANCE;
+  }
+
+  public static final class ManeuverState.LaneGuidanceManeuver.RemoveLanes extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver {
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver.RemoveLanes! INSTANCE;
+  }
+
+  public static final class ManeuverState.LaneGuidanceManeuver.Show extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver {
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver.Show! INSTANCE;
+  }
+
+  public abstract static sealed class ManeuverState.ManeuverPrimary extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState {
+  }
+
+  public static final class ManeuverState.ManeuverPrimary.Hide extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary {
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary.Hide! INSTANCE;
+  }
+
+  public static final class ManeuverState.ManeuverPrimary.Instruction extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary {
+    ctor public ManeuverState.ManeuverPrimary.Instruction(com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver maneuver);
+    method public com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver component1();
+    method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary.Instruction copy(com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver maneuver);
+    method public com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver getManeuver();
+    method public void setManeuver(com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver p);
+  }
+
+  public static final class ManeuverState.ManeuverPrimary.Show extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary {
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary.Show! INSTANCE;
+  }
+
+  public abstract static sealed class ManeuverState.ManeuverSecondary extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState {
+  }
+
+  public static final class ManeuverState.ManeuverSecondary.Hide extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary {
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary.Hide! INSTANCE;
+  }
+
+  public static final class ManeuverState.ManeuverSecondary.Instruction extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary {
+    ctor public ManeuverState.ManeuverSecondary.Instruction(com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver? maneuver);
+    method public com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver? component1();
+    method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary.Instruction copy(com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver? maneuver);
+    method public com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver? getManeuver();
+    method public void setManeuver(com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver? p);
+  }
+
+  public static final class ManeuverState.ManeuverSecondary.Show extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary {
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary.Show! INSTANCE;
+  }
+
+  public abstract static sealed class ManeuverState.ManeuverSub extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState {
+  }
+
+  public static final class ManeuverState.ManeuverSub.Hide extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub {
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub.Hide! INSTANCE;
+  }
+
+  public static final class ManeuverState.ManeuverSub.Instruction extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub {
+    ctor public ManeuverState.ManeuverSub.Instruction(com.mapbox.navigation.ui.base.model.maneuver.SubManeuver? maneuver);
+    method public com.mapbox.navigation.ui.base.model.maneuver.SubManeuver? component1();
+    method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub.Instruction copy(com.mapbox.navigation.ui.base.model.maneuver.SubManeuver? maneuver);
+    method public com.mapbox.navigation.ui.base.model.maneuver.SubManeuver? getManeuver();
+    method public void setManeuver(com.mapbox.navigation.ui.base.model.maneuver.SubManeuver? p);
+  }
+
+  public static final class ManeuverState.ManeuverSub.Show extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub {
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub.Show! INSTANCE;
+  }
+
+  public static final class ManeuverState.TotalStepDistance extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState {
+    ctor public ManeuverState.TotalStepDistance(com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter, double totalStepDistance);
+    method public com.mapbox.navigation.base.formatter.DistanceFormatter component1();
+    method public double component2();
+    method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.TotalStepDistance copy(com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter, double totalStepDistance);
+    method public com.mapbox.navigation.base.formatter.DistanceFormatter getDistanceFormatter();
+    method public double getTotalStepDistance();
+  }
+
+  public abstract static sealed class ManeuverState.UpcomingManeuvers extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState {
+  }
+
+  public static final class ManeuverState.UpcomingManeuvers.Hide extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers {
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers.Hide! INSTANCE;
+  }
+
+  public static final class ManeuverState.UpcomingManeuvers.RemoveUpcoming extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers {
+    ctor public ManeuverState.UpcomingManeuvers.RemoveUpcoming(com.mapbox.navigation.ui.base.model.maneuver.Maneuver maneuver);
+    method public com.mapbox.navigation.ui.base.model.maneuver.Maneuver component1();
+    method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers.RemoveUpcoming copy(com.mapbox.navigation.ui.base.model.maneuver.Maneuver maneuver);
+    method public com.mapbox.navigation.ui.base.model.maneuver.Maneuver getManeuver();
+  }
+
+  public static final class ManeuverState.UpcomingManeuvers.Show extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers {
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers.Show! INSTANCE;
+  }
+
+  public static final class ManeuverState.UpcomingManeuvers.Upcoming extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers {
+    ctor public ManeuverState.UpcomingManeuvers.Upcoming(java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Maneuver> upcomingManeuverList);
+    method public java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Maneuver> component1();
+    method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers.Upcoming copy(java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Maneuver> upcomingManeuverList);
+    method public java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Maneuver> getUpcomingManeuverList();
+  }
+
+  public final class PrimaryManeuver {
+    method public java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Component> getComponentList();
+    method public Double? getDegrees();
+    method public String? getDrivingSide();
+    method public String? getModifier();
+    method public String getText();
+    method public String? getType();
+    method public com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver.Builder toBuilder();
+  }
+
+  public static final class PrimaryManeuver.Builder {
+    ctor public PrimaryManeuver.Builder();
+    method public com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver build();
+    method public com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver.Builder componentList(java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Component> componentList);
+    method public com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver.Builder degrees(Double? degrees);
+    method public com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver.Builder drivingSide(String? drivingSide);
+    method public com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver.Builder modifier(String? modifier);
+    method public com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver.Builder text(String text);
+    method public com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver.Builder type(String? type);
+  }
+
+  public final class RoadShieldComponentNode implements com.mapbox.navigation.ui.base.model.maneuver.ComponentNode {
+    method public byte[]? getShieldIcon();
+    method public String getText();
+    method public com.mapbox.navigation.ui.base.model.maneuver.RoadShieldComponentNode.Builder toBuilder();
+  }
+
+  public static final class RoadShieldComponentNode.Builder {
+    ctor public RoadShieldComponentNode.Builder();
+    method public com.mapbox.navigation.ui.base.model.maneuver.RoadShieldComponentNode build();
+    method public com.mapbox.navigation.ui.base.model.maneuver.RoadShieldComponentNode.Builder shieldIcon(byte[]? shieldIcon);
+    method public com.mapbox.navigation.ui.base.model.maneuver.RoadShieldComponentNode.Builder text(String text);
+  }
+
+  public final class SecondaryManeuver {
+    method public java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Component> getComponentList();
+    method public Double? getDegrees();
+    method public String? getDrivingSide();
+    method public String? getModifier();
+    method public String getText();
+    method public String? getType();
+    method public com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver.Builder toBuilder();
+  }
+
+  public static final class SecondaryManeuver.Builder {
+    ctor public SecondaryManeuver.Builder();
+    method public com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver build();
+    method public com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver.Builder componentList(java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Component> componentList);
+    method public com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver.Builder degrees(Double? degrees);
+    method public com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver.Builder drivingSide(String? drivingSide);
+    method public com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver.Builder modifier(String? modifier);
+    method public com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver.Builder text(String text);
+    method public com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver.Builder type(String? type);
+  }
+
+  public final class SubManeuver {
+    method public java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Component> getComponentList();
+    method public Double? getDegrees();
+    method public String? getDrivingSide();
+    method public String? getModifier();
+    method public String getText();
+    method public String? getType();
+    method public com.mapbox.navigation.ui.base.model.maneuver.SubManeuver.Builder toBuilder();
+  }
+
+  public static final class SubManeuver.Builder {
+    ctor public SubManeuver.Builder();
+    method public com.mapbox.navigation.ui.base.model.maneuver.SubManeuver build();
+    method public com.mapbox.navigation.ui.base.model.maneuver.SubManeuver.Builder componentList(java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Component> componentList);
+    method public com.mapbox.navigation.ui.base.model.maneuver.SubManeuver.Builder degrees(Double? degrees);
+    method public com.mapbox.navigation.ui.base.model.maneuver.SubManeuver.Builder drivingSide(String? drivingSide);
+    method public com.mapbox.navigation.ui.base.model.maneuver.SubManeuver.Builder modifier(String? modifier);
+    method public com.mapbox.navigation.ui.base.model.maneuver.SubManeuver.Builder text(String text);
+    method public com.mapbox.navigation.ui.base.model.maneuver.SubManeuver.Builder type(String? type);
+  }
+
+  public final class TextComponentNode implements com.mapbox.navigation.ui.base.model.maneuver.ComponentNode {
+    method public String? getAbbr();
+    method public Integer? getAbbrPriority();
+    method public String getText();
+    method public com.mapbox.navigation.ui.base.model.maneuver.TextComponentNode.Builder toBuilder();
+  }
+
+  public static final class TextComponentNode.Builder {
+    ctor public TextComponentNode.Builder();
+    method public com.mapbox.navigation.ui.base.model.maneuver.TextComponentNode.Builder abbr(String? abbr);
+    method public com.mapbox.navigation.ui.base.model.maneuver.TextComponentNode.Builder abbrPriority(Integer? abbrPriority);
+    method public com.mapbox.navigation.ui.base.model.maneuver.TextComponentNode build();
+    method public com.mapbox.navigation.ui.base.model.maneuver.TextComponentNode.Builder text(String text);
+  }
+
+  public final class TotalManeuverDistance {
+    ctor public TotalManeuverDistance(double totalDistance);
+    method public double component1();
+    method public com.mapbox.navigation.ui.base.model.maneuver.TotalManeuverDistance copy(double totalDistance);
+    method public double getTotalDistance();
   }
 
 }

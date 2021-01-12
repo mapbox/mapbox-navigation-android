@@ -75,7 +75,7 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "test-app/build.gradle" }}-{{ checksum  "libnavigation-router/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}-{{ checksum  "libnavui-maps/build.gradle" }}-{{ checksum  "libnavui-base/build.gradle" }}-{{ checksum  "libnavui-util/build.gradle" }}-{{ checksum  "libnavui-tripprogress/build.gradle" }}
+            - deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "test-app/build.gradle" }}-{{ checksum  "libnavigation-router/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}-{{ checksum  "libnavui-maps/build.gradle" }}-{{ checksum  "libnavui-base/build.gradle" }}-{{ checksum  "libnavui-util/build.gradle" }}-{ checksum  "libnavui-resources/build.gradle" }}-{ checksum  "libnavui-maneuver/build.gradle" }}-{{ checksum  "libnavui-tripprogress/build.gradle" }}
             - deps-
       - run:
           name: Download Dependencies
@@ -83,7 +83,7 @@ commands:
       - save_cache:
           paths:
             - ~/.gradle
-          key: deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "test-app/build.gradle" }}-{{ checksum  "libnavigation-router/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}-{{ checksum  "libnavui-maps/build.gradle" }}-{{ checksum  "libnavui-base/build.gradle" }}-{{ checksum  "libnavui-util/build.gradle" }}-{{ checksum  "libnavui-tripprogress/build.gradle" }}
+          key: deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "test-app/build.gradle" }}-{{ checksum  "libnavigation-router/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}-{{ checksum  "libnavui-maps/build.gradle" }}-{{ checksum  "libnavui-base/build.gradle" }}-{{ checksum  "libnavui-util/build.gradle" }}-{ checksum  "libnavui-resources/build.gradle" }}-{ checksum  "libnavui-maneuver/build.gradle" }}-{{ checksum  "libnavui-tripprogress/build.gradle" }}
 
   verify-codebase:
     steps:
@@ -232,6 +232,10 @@ commands:
           module_target: "libnavui-base"
       - store-results:
           module_target: "libnavui-util"
+      - store-results:
+          module_target: "libnavui-maneuver"
+      - store-results:
+          module_target: "libnavui-tripprogress"
 
   codecov:
     steps:

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <style name="MapboxStylePrimaryManeuver">
+    <item name="android:textColor">@color/primaryManeuverTextColor</item>
+    <item name="android:textSize">@dimen/mapbox_dimen_text_30sp</item>
+    <item name="android:includeFontPadding">false</item>
+    <item name="android:textDirection">locale</item>
+    <item name="android:ellipsize">end</item>
+  </style>
+
+  <style name="MapboxStyleSecondaryManeuver">
+    <item name="android:textColor">@color/secondaryManeuverTextColor</item>
+    <item name="android:textSize">@dimen/mapbox_dimen_text_24sp</item>
+    <item name="android:includeFontPadding">false</item>
+    <item name="android:textDirection">locale</item>
+    <item name="android:ellipsize">end</item>
+  </style>
+
+  <style name="MapboxStyleSubManeuver">
+    <item name="android:textColor">@color/subManeuverTextColor</item>
+    <item name="android:textSize">@dimen/mapbox_dimen_text_18sp</item>
+    <item name="android:includeFontPadding">false</item>
+    <item name="android:textDirection">locale</item>
+    <item name="android:ellipsize">end</item>
+  </style>
+
+  <style name="MapboxStyleStepDistance">
+    <item name="android:textColor">@color/stepDistanceTextColor</item>
+    <item name="android:textSize">@dimen/mapbox_dimen_text_22sp</item>
+    <item name="android:includeFontPadding">false</item>
+  </style>
+
+  <style name="MapboxStyleTurnIconManeuver">
+    <item name="maneuverTurnIconColor">@color/maneuverTurnIconColor</item>
+    <item name="maneuverTurnIconShadowColor">@color/maneuverTurnIconShadowColor</item>
+  </style>
+
+  <style name="MapboxStyleManeuverView">
+    <item name="maneuverViewBackgroundColor">@color/mainManeuverCardBackgroundColor</item>
+    <item name="subManeuverViewBackgroundColor">@color/subManeuverBackgroundColor</item>
+    <item name="upcomingManeuverViewBackgroundColor">@color/upcomingManeuverBackgroundColor</item>
+    <item name="laneGuidanceViewBackgroundColor">@color/laneGuidanceBackgroundColor</item>
+    <item name="laneGuidanceManeuverArrowStyle">@style/MapboxStyleTurnIconManeuver</item>
+  </style>
+</resources>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- The primary brand color of your app, used most predominantly in theming -->
+  <color name="colorPrimary">#212121</color>
+  <!-- A lighter/darker variant of your primary brand color, used sparingly in theming -->
+  <color name="colorPrimaryVariant">#000000</color>
+  <!-- The color used for elements displayed on top of your primary colors
+   (eg. Text and icons, often white or semi-transparent black depending on accessibility) -->
+  <color name="colorOnPrimary">#FFFFFF</color>
+  <!-- The color used for elements displayed on top of your primary variant colors -->
+  <color name="colorOnPrimaryVariant">#FFFFFF</color>
+  <!-- The secondary brand color of your app, used mostly as an accent for certain widgets
+   that need to stand out -->
+  <color name="colorSecondary">#37516F</color>
+  <!-- A lighter/darker variant of your secondary brand color, used sparingly in theming -->
+  <color name="colorSecondaryVariant">#2D3F53</color>
+  <!-- The color used for elements displayed on top of your secondary colors -->
+  <color name="colorOnSecondary">#FFFFFF</color>
+  <!-- The color used for elements displayed on top of your secondary variant colors -->
+  <color name="colorOnSecondaryVariant">#E6FFFFFF</color>
+  <!-- The color used for errors (often a shade of red) -->
+  <color name="colorError">#F44336</color>
+  <!-- The color used for elements displayed on top of your error color -->
+  <color name="colorOnError">#FFFFFF</color>
+  <!-- The color used for surfaces (e.g. “Bottom sheets”) -->
+  <color name="colorSurface">#FFFFFF</color>
+  <!-- The color used for elements displayed on top of your surface color -->
+  <color name="colorOnSurface">#212121</color>
+</resources>

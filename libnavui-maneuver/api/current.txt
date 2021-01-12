@@ -1,0 +1,320 @@
+// Signature format: 3.0
+package com.mapbox.navigation.ui.maneuver.api {
+
+  public final class MapboxManeuverApi implements com.mapbox.navigation.ui.base.api.maneuver.ManeuverApi {
+    ctor public MapboxManeuverApi(com.mapbox.navigation.base.formatter.DistanceFormatter formatter);
+    method public void cancelManeuver();
+    method public void cancelStepDistanceRemaining();
+    method public void cancelUpcomingManeuver();
+    method public void retrieveManeuver(com.mapbox.api.directions.v5.models.BannerInstructions bannerInstruction, com.mapbox.navigation.ui.base.api.maneuver.ManeuverCallback callback);
+    method public void retrieveStepDistanceRemaining(com.mapbox.navigation.base.trip.model.RouteStepProgress routeStepProgress, com.mapbox.navigation.ui.base.api.maneuver.StepDistanceRemainingCallback callback);
+    method public void retrieveUpcomingManeuvers(com.mapbox.api.directions.v5.models.RouteLeg routeLeg, com.mapbox.navigation.ui.base.api.maneuver.UpcomingManeuversCallback callback);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maneuver.model {
+
+  public final class TurnIconResources {
+    method public int getTurnIconArrive();
+    method public int getTurnIconArriveLeft();
+    method public int getTurnIconArriveRight();
+    method public int getTurnIconArriveStraight();
+    method public int getTurnIconContinue();
+    method public int getTurnIconContinueLeft();
+    method public int getTurnIconContinueRight();
+    method public int getTurnIconContinueSlightLeft();
+    method public int getTurnIconContinueSlightRight();
+    method public int getTurnIconContinueStraight();
+    method public int getTurnIconContinueUturn();
+    method public int getTurnIconDepart();
+    method public int getTurnIconDepartLeft();
+    method public int getTurnIconDepartRight();
+    method public int getTurnIconDepartStraight();
+    method public int getTurnIconEndRoadLeft();
+    method public int getTurnIconEndRoadRight();
+    method public int getTurnIconFlag();
+    method public int getTurnIconFork();
+    method public int getTurnIconForkLeft();
+    method public int getTurnIconForkRight();
+    method public int getTurnIconForkSlightLeft();
+    method public int getTurnIconForkSlightRight();
+    method public int getTurnIconForkStraight();
+    method public int getTurnIconInvalid();
+    method public int getTurnIconInvalidLeft();
+    method public int getTurnIconInvalidRight();
+    method public int getTurnIconInvalidSlightLeft();
+    method public int getTurnIconInvalidSlightRight();
+    method public int getTurnIconInvalidStraight();
+    method public int getTurnIconInvalidUturn();
+    method public int getTurnIconMergeLeft();
+    method public int getTurnIconMergeRight();
+    method public int getTurnIconMergeSlightLeft();
+    method public int getTurnIconMergeSlightRight();
+    method public int getTurnIconMergeStraight();
+    method public int getTurnIconNewNameLeft();
+    method public int getTurnIconNewNameRight();
+    method public int getTurnIconNewNameSharpLeft();
+    method public int getTurnIconNewNameSharpRight();
+    method public int getTurnIconNewNameSlightLeft();
+    method public int getTurnIconNewNameSlightRight();
+    method public int getTurnIconNewNameStraight();
+    method public int getTurnIconNotificationLeft();
+    method public int getTurnIconNotificationRight();
+    method public int getTurnIconNotificationSharpLeft();
+    method public int getTurnIconNotificationSharpRight();
+    method public int getTurnIconNotificationSlightLeft();
+    method public int getTurnIconNotificationSlightRight();
+    method public int getTurnIconNotificationStraight();
+    method public int getTurnIconOffRamp();
+    method public int getTurnIconOffRampLeft();
+    method public int getTurnIconOffRampRight();
+    method public int getTurnIconOffRampSlightLeft();
+    method public int getTurnIconOffRampSlightRight();
+    method public int getTurnIconOnRamp();
+    method public int getTurnIconOnRampLeft();
+    method public int getTurnIconOnRampRight();
+    method public int getTurnIconOnRampSharpLeft();
+    method public int getTurnIconOnRampSharpRight();
+    method public int getTurnIconOnRampSlightLeft();
+    method public int getTurnIconOnRampSlightRight();
+    method public int getTurnIconOnRampStraight();
+    method public int getTurnIconRamp();
+    method public int getTurnIconRotary();
+    method public int getTurnIconRotaryLeft();
+    method public int getTurnIconRotaryRight();
+    method public int getTurnIconRotarySharpLeft();
+    method public int getTurnIconRotarySharpRight();
+    method public int getTurnIconRotarySlightLeft();
+    method public int getTurnIconRotarySlightRight();
+    method public int getTurnIconRotaryStraight();
+    method public int getTurnIconRoundabout();
+    method public int getTurnIconRoundaboutLeft();
+    method public int getTurnIconRoundaboutRight();
+    method public int getTurnIconRoundaboutSharpLeft();
+    method public int getTurnIconRoundaboutSharpRight();
+    method public int getTurnIconRoundaboutSlightLeft();
+    method public int getTurnIconRoundaboutSlightRight();
+    method public int getTurnIconRoundaboutStraight();
+    method public int getTurnIconTrafficCircle();
+    method public int getTurnIconTrafficCircleLeft();
+    method public int getTurnIconTrafficCircleRight();
+    method public int getTurnIconTrafficCircleSlightLeft();
+    method public int getTurnIconTrafficCircleSlightRight();
+    method public int getTurnIconTurnLeft();
+    method public int getTurnIconTurnRight();
+    method public int getTurnIconTurnSharpLeft();
+    method public int getTurnIconTurnSharpRight();
+    method public int getTurnIconTurnSlightLeft();
+    method public int getTurnIconTurnSlightRight();
+    method public int getTurnIconTurnStraight();
+    method public int getTurnIconUpdown();
+    method public int getTurnIconUturn();
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder toBuilder();
+  }
+
+  public static final class TurnIconResources.Builder {
+    ctor public TurnIconResources.Builder();
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources build();
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconArrive(@DrawableRes int turnIconArrive);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconArriveLeft(@DrawableRes int turnIconArriveLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconArriveRight(@DrawableRes int turnIconArriveRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconArriveStraight(@DrawableRes int turnIconArriveStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconContinue(@DrawableRes int turnIconContinue);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconContinueLeft(@DrawableRes int turnIconContinueLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconContinueRight(@DrawableRes int turnIconContinueRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconContinueSlightLeft(@DrawableRes int turnIconContinueSlightLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconContinueSlightRight(@DrawableRes int turnIconContinueSlightRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconContinueStraight(@DrawableRes int turnIconContinueStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconContinueUturn(@DrawableRes int turnIconContinueUturn);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconDepart(@DrawableRes int turnIconDepart);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconDepartLeft(@DrawableRes int turnIconDepartLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconDepartRight(@DrawableRes int turnIconDepartRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconDepartStraight(@DrawableRes int turnIconDepartStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconEndRoadLeft(@DrawableRes int turnIconEndRoadLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconEndRoadRight(@DrawableRes int turnIconEndRoadRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconFlag(@DrawableRes int turnIconFlag);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconFork(@DrawableRes int turnIconFork);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconForkLeft(@DrawableRes int turnIconForkLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconForkRight(@DrawableRes int turnIconForkRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconForkSlightLeft(@DrawableRes int turnIconForkSlightLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconForkSlightRight(@DrawableRes int turnIconForkSlightRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconForkStraight(@DrawableRes int turnIconForkStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconInvalid(@DrawableRes int turnIconInvalid);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconInvalidLeft(@DrawableRes int turnIconInvalidLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconInvalidRight(@DrawableRes int turnIconInvalidRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconInvalidSlightLeft(@DrawableRes int turnIconInvalidSlightLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconInvalidSlightRight(@DrawableRes int turnIconInvalidSlightRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconInvalidStraight(@DrawableRes int turnIconInvalidStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconInvalidUturn(@DrawableRes int turnIconInvalidUturn);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconMergeLeft(@DrawableRes int turnIconMergeLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconMergeRight(@DrawableRes int turnIconMergeRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconMergeSlightLeft(@DrawableRes int turnIconMergeSlightLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconMergeSlightRight(@DrawableRes int turnIconMergeSlightRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconMergeStraight(@DrawableRes int turnIconMergeStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconNewNameLeft(@DrawableRes int turnIconNewNameLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconNewNameRight(@DrawableRes int turnIconNewNameRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconNewNameSharpLeft(@DrawableRes int turnIconNewNameSharpLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconNewNameSharpRight(@DrawableRes int turnIconNewNameSharpRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconNewNameSlightLeft(@DrawableRes int turnIconNewNameSlightLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconNewNameSlightRight(@DrawableRes int turnIconNewNameSlightRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconNewNameStraight(@DrawableRes int turnIconNewNameStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconNotificationLeft(@DrawableRes int turnIconNotificationLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconNotificationRight(@DrawableRes int turnIconNotificationRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconNotificationSharpLeft(@DrawableRes int turnIconNotificationSharpLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconNotificationSharpRight(@DrawableRes int turnIconNotificationSharpRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconNotificationSlightLeft(@DrawableRes int turnIconNotificationSlightLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconNotificationSlightRight(@DrawableRes int turnIconNotificationSlightRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconNotificationStraight(@DrawableRes int turnIconNotificationStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconOffRamp(@DrawableRes int turnIconOffRamp);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconOffRampLeft(@DrawableRes int turnIconOffRampLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconOffRampRight(@DrawableRes int turnIconOffRampRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconOffRampSlightLeft(@DrawableRes int turnIconOffRampSlightLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconOffRampSlightRight(@DrawableRes int turnIconOffRampSlightRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconOnRamp(@DrawableRes int turnIconOnRamp);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconOnRampLeft(@DrawableRes int turnIconOnRampLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconOnRampRight(@DrawableRes int turnIconOnRampRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconOnRampSharpLeft(@DrawableRes int turnIconOnRampSharpLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconOnRampSharpRight(@DrawableRes int turnIconOnRampSharpRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconOnRampSlightLeft(@DrawableRes int turnIconOnRampSlightLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconOnRampSlightRight(@DrawableRes int turnIconOnRampSlightRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconOnRampStraight(@DrawableRes int turnIconOnRampStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRamp(@DrawableRes int turnIconRamp);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRotary(@DrawableRes int turnIconRotary);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRotaryLeft(@DrawableRes int turnIconRotaryLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRotaryRight(@DrawableRes int turnIconRotaryRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRotarySharpLeft(@DrawableRes int turnIconRotarySharpLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRotarySharpRight(@DrawableRes int turnIconRotarySharpRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRotarySlightLeft(@DrawableRes int turnIconRotarySlightLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRotarySlightRight(@DrawableRes int turnIconRotarySlightRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRotaryStraight(@DrawableRes int turnIconRotaryStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRoundabout(@DrawableRes int turnIconRoundabout);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRoundaboutLeft(@DrawableRes int turnIconRoundaboutLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRoundaboutRight(@DrawableRes int turnIconRoundaboutRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRoundaboutSharpLeft(@DrawableRes int turnIconRoundaboutSharpLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRoundaboutSharpRight(@DrawableRes int turnIconRoundaboutSharpRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRoundaboutSlightLeft(@DrawableRes int turnIconRoundaboutSlightLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRoundaboutSlightRight(@DrawableRes int turnIconRoundaboutSlightRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRoundaboutStraight(@DrawableRes int turnIconRoundaboutStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTrafficCircle(@DrawableRes int turnIconTrafficCircle);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTrafficCircleLeft(@DrawableRes int turnIconTrafficCircleLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTrafficCircleRight(@DrawableRes int turnIconTrafficCircleRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTrafficCircleSlightLeft(@DrawableRes int turnIconTrafficCircleSlightLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTrafficCircleSlightRight(@DrawableRes int turnIconTrafficCircleSlightRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTurnLeft(@DrawableRes int turnIconTurnLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTurnRight(@DrawableRes int turnIconTurnRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTurnSharpLeft(@DrawableRes int turnIconTurnSharpLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTurnSharpRight(@DrawableRes int turnIconTurnSharpRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTurnSlightLeft(@DrawableRes int turnIconTurnSlightLeft);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTurnSlightRight(@DrawableRes int turnIconTurnSlightRight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTurnStraight(@DrawableRes int turnIconTurnStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconUpdown(@DrawableRes int turnIconUpdown);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconUturn(@DrawableRes int turnIconUturn);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maneuver.view {
+
+  public final class MapboxExitText extends androidx.appcompat.widget.AppCompatTextView {
+    ctor public MapboxExitText(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    ctor public MapboxExitText(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxExitText(android.content.Context context);
+    method public android.graphics.Bitmap getViewAsBitmap();
+    method public void setExit(String? modifier, com.mapbox.navigation.ui.base.model.maneuver.ExitNumberComponentNode exit);
+    method public void setExitStyle(android.graphics.drawable.Drawable? background, android.graphics.drawable.Drawable? leftDrawable, android.graphics.drawable.Drawable? rightDrawable);
+    method public android.graphics.drawable.Drawable styleExitWith(android.graphics.Bitmap bitmap, int drawableHeight);
+  }
+
+  public final class MapboxLaneGuidance extends androidx.appcompat.widget.AppCompatImageView {
+    ctor public MapboxLaneGuidance(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    ctor public MapboxLaneGuidance(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxLaneGuidance(android.content.Context context);
+    method public void renderLane(com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator laneIndicator, String? activeDirection, androidx.appcompat.view.ContextThemeWrapper wrapper);
+  }
+
+  public final class MapboxLaneGuidanceAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder> {
+    ctor public MapboxLaneGuidanceAdapter(android.content.Context context);
+    method public void addLanes(java.util.List<com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator> laneIndicatorList, String? activeDirection);
+    method public int getItemCount();
+    method public void onBindViewHolder(com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder holder, int position);
+    method public com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType);
+    method public void removeLanes();
+    method public void updateStyle(@StyleRes int style);
+  }
+
+  public final class MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
+    ctor public MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder(android.view.View view);
+    method public void bindLaneIndicator(com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator laneIndicator);
+    method public android.view.View getView();
+  }
+
+  public final class MapboxManeuverView extends androidx.constraintlayout.widget.ConstraintLayout implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState> {
+    ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxManeuverView(android.content.Context context);
+    method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState state);
+    method public void updatePrimaryManeuverTextAppearance(@StyleRes int style);
+    method public void updateSecondaryManeuverTextAppearance(@StyleRes int style);
+    method public void updateStepDistanceTextAppearance(@StyleRes int style);
+    method public void updateStyle(@StyleRes int style);
+    method public void updateSubManeuverTextAppearance(@StyleRes int style);
+    method public void updateTurnIconResources(com.mapbox.navigation.ui.maneuver.model.TurnIconResources turnIconResources);
+    method public void updateTurnIconStyle(@StyleRes int style);
+  }
+
+  public final class MapboxPrimaryManeuver extends androidx.appcompat.widget.AppCompatTextView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary> {
+    ctor public MapboxPrimaryManeuver(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    ctor public MapboxPrimaryManeuver(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxPrimaryManeuver(android.content.Context context);
+    method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary state);
+  }
+
+  public final class MapboxSecondaryManeuver extends androidx.appcompat.widget.AppCompatTextView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary> {
+    ctor public MapboxSecondaryManeuver(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    ctor public MapboxSecondaryManeuver(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxSecondaryManeuver(android.content.Context context);
+    method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary state);
+  }
+
+  public final class MapboxStepDistance extends androidx.appcompat.widget.AppCompatTextView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState> {
+    ctor public MapboxStepDistance(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    ctor public MapboxStepDistance(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxStepDistance(android.content.Context context);
+    method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState state);
+  }
+
+  public final class MapboxSubManeuver extends androidx.appcompat.widget.AppCompatTextView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub> {
+    ctor public MapboxSubManeuver(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    ctor public MapboxSubManeuver(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxSubManeuver(android.content.Context context);
+    method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub state);
+  }
+
+  public final class MapboxTurnIconManeuver extends androidx.appcompat.widget.AppCompatImageView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState> {
+    ctor public MapboxTurnIconManeuver(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    ctor public MapboxTurnIconManeuver(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxTurnIconManeuver(android.content.Context context);
+    method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState state);
+    method public void updateTurnIconResources(com.mapbox.navigation.ui.maneuver.model.TurnIconResources turnIcon);
+    method public void updateTurnIconStyle(androidx.appcompat.view.ContextThemeWrapper wrapper);
+  }
+
+  public final class MapboxUpcomingManeuverAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder> {
+    ctor public MapboxUpcomingManeuverAdapter(android.content.Context context);
+    method public void addUpcomingManeuvers(java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Maneuver> upcomingManeuvers);
+    method public int getItemCount();
+    method public void onBindViewHolder(com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder holder, int position);
+    method public com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType);
+    method public void removeManeuver(com.mapbox.navigation.ui.base.model.maneuver.Maneuver maneuverToRemove);
+    method public void removeManeuvers();
+  }
+
+  public final class MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
+    ctor public MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder(android.view.View view);
+    method public void bindUpcomingManeuver(com.mapbox.navigation.ui.base.model.maneuver.Maneuver maneuver);
+    method public android.view.View getView();
+  }
+
+}
+

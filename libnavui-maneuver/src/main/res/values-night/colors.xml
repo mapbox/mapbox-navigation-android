@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- ManeuverView color resources -->
+  <color name="primaryManeuverTextColor">@color/colorOnSecondary</color>
+  <color name="secondaryManeuverTextColor">@color/colorOnSecondary</color>
+  <color name="subManeuverTextColor">@color/colorOnSecondaryVariant</color>
+  <color name="stepDistanceTextColor">@color/colorOnSecondary</color>
+  <color name="mainManeuverCardBackgroundColor">@color/colorSecondary</color>
+  <color name="subManeuverBackgroundColor">@color/colorSecondaryVariant</color>
+  <color name="laneGuidanceBackgroundColor">@color/colorSecondaryVariant</color>
+  <color name="maneuverExitTextColor">@android:color/black</color>
+  <color name="maneuverTurnIconColor">@color/colorOnSecondary</color>
+  <color name="maneuverTurnIconShadowColor">#969696</color>
+</resources>

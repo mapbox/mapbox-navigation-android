@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:parentTag="android.widget.LinearLayout">
+
+  <com.mapbox.navigation.ui.maneuver.view.MapboxTurnIconManeuver
+      android:id="@+id/subManeuverIcon"
+      android:layout_width="0dp"
+      android:layout_height="@dimen/mapbox_dimen_30dp"
+      android:layout_gravity="center"
+      android:layout_weight="18"
+      tools:src="@drawable/mapbox_ic_turn_sharp_left"
+      />
+
+  <com.mapbox.navigation.ui.maneuver.view.MapboxSubManeuver
+      android:id="@+id/subManeuverText"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="82"
+      android:paddingEnd="@dimen/mapbox_dimen_4dp"
+      android:paddingStart="@dimen/mapbox_dimen_4dp"
+      android:gravity="start|center_vertical"
+      android:textStyle="bold"
+      android:maxLines="1"
+      android:textAppearance="@style/MapboxStyleSubManeuver"
+      tools:text="Stivers Street"
+      />
+</merge>
