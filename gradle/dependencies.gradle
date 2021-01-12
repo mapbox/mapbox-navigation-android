@@ -33,8 +33,6 @@ ext {
       butterknife               : '10.1.0',
       leakCanaryVersion         : '2.3',
       timber                    : '4.7.1',
-      testRunnerVersion         : '1.2.0',
-      orchestratorVersion       : '1.2.0',
       espressoVersion           : '3.1.0',
       commonsIO                 : '2.6',
       robolectric               : '4.3.1',
@@ -52,7 +50,7 @@ ext {
       okhttp                    : '3.12.10',
       okio                      : '2.4.3',
       androidxTestJunit         : '1.1.1',
-      androidxTestCore          : '1.2.0',
+      androidxTest              : '1.3.0',
       barista                   : '3.2.0'
   ]
   dependenciesList = [
@@ -125,9 +123,9 @@ ext {
       leakCanaryDebug           : "com.squareup.leakcanary:leakcanary-android:${version.leakCanaryVersion}",
 
       // instrumentation test
-      testRunner                : "androidx.test:runner:${version.testRunnerVersion}",
-      testOrchestrator          : "androidx.test:orchestrator:${version.orchestratorVersion}",
-      testRules                 : "androidx.test:rules:${version.testRunnerVersion}",
+      testRunner                : "androidx.test:runner:${version.androidxTest}",
+      testOrchestrator          : "androidx.test:orchestrator:${version.androidxTest}",
+      testRules                 : "androidx.test:rules:${version.androidxTest}",
       testEspressoCore          : "androidx.test.espresso:espresso-core:${version.espressoVersion}",
       testEspressoContrib       : "androidx.test.espresso:espresso-contrib:${version.espressoVersion}",
       testEspressoIntents       : "androidx.test.espresso:espresso-intents:${version.espressoVersion}",
@@ -142,7 +140,7 @@ ext {
       robolectric               : "org.robolectric:robolectric:${version.robolectric}",
       mockwebserver             : "com.squareup.okhttp3:mockwebserver:${version.mockwebserver}",
       json                      : "org.json:json:${version.json}",
-      androidxTestCore          : "androidx.test:core:${version.androidxTestCore}",
+      androidxTestCore          : "androidx.test:core:${version.androidxTest}",
 
       // play services
       gmsLocation               : "com.google.android.gms:play-services-location:${version.gmsLocation}",
