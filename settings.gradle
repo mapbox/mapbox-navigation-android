@@ -13,4 +13,6 @@ include ':test-app',
         ':libnavui-base',
         ':libnavui-maps',
         ':libnavui-util',
-        ':libnavui-tripprogress'
+        ':libnavui-tripprogress',
+        ':libnavui-maneuver',
+        ':libnavui-resources'

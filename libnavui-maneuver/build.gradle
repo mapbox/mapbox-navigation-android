@@ -1,0 +1,72 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'org.jetbrains.dokka'
+apply plugin: 'com.jaredsburrows.license'
+apply plugin: 'com.mapbox.android.sdk.versions'
+apply from: "${rootDir}/gradle/ktlint.gradle"
+apply from: file("${rootDir}/gradle/artifact-settings.gradle")
+apply from: "${rootDir}/gradle/kdoc-settings.gradle"
+
+version = project.ext.versionName
+group = project.ext.mapboxArtifactGroupId
+
+android {
+    compileSdkVersion androidVersions.compileSdkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro"
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+        unitTests.includeAndroidResources = true
+    }
+}
+
+dependencies {
+    api project(":libnavui-base")
+    api project(":libnavui-resources")
+
+    implementation dependenciesList.androidXAppCompat
+    implementation dependenciesList.androidXCardView
+    implementation dependenciesList.androidXRecyclerView
+    implementation dependenciesList.androidXConstraintLayout
+    implementation dependenciesList.kotlinStdLib
+
+    implementation dependenciesList.timber
+    implementation dependenciesList.svgParser
+    implementation dependenciesList.coroutinesAndroid
+
+    ktlint dependenciesList.ktlint
+
+    apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
+    testImplementation(project(':libtesting-utils'))
+}
+
+dokkaHtml {
+    outputDirectory.set(kdocPath)
+    moduleName.set("UI Maneuver")
+    dokkaSourceSets {
+        configureEach {
+            reportUndocumented.set(true)
+            perPackageOption {
+                matchingRegex.set("com.mapbox.navigation.ui.maneuver.internal.*")
+                suppress.set(true)
+            }
+        }
+    }
+}
+
+apply from: "${rootDir}/gradle/track-public-apis.gradle"
+apply from: "${rootDir}/gradle/jacoco.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"

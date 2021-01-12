@@ -80,6 +80,7 @@ dependencies {
     // Mapbox Navigation SDK
     implementation project(':libnavui-maps')
     implementation project(':libnavui-tripprogress')
+    implementation project(':libnavui-maneuver')
 
     // test
     androidTestImplementation project(':libtesting-ui')

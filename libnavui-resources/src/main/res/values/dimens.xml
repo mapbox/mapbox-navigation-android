@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <dimen name="mapbox_dimen_2dp">2dp</dimen>
+  <dimen name="mapbox_dimen_4dp">4dp</dimen>
+  <dimen name="mapbox_dimen_6dp">6dp</dimen>
+  <dimen name="mapbox_dimen_8dp">8dp</dimen>
+  <dimen name="mapbox_dimen_10dp">10dp</dimen>
+  <dimen name="mapbox_dimen_12dp">12dp</dimen>
+  <dimen name="mapbox_dimen_14dp">14dp</dimen>
+  <dimen name="mapbox_dimen_16dp">16dp</dimen>
+  <dimen name="mapbox_dimen_18dp">18dp</dimen>
+  <dimen name="mapbox_dimen_20dp">20dp</dimen>
+  <dimen name="mapbox_dimen_22dp">22dp</dimen>
+  <dimen name="mapbox_dimen_24dp">24dp</dimen>
+  <dimen name="mapbox_dimen_26dp">26dp</dimen>
+  <dimen name="mapbox_dimen_28dp">28dp</dimen>
+  <dimen name="mapbox_dimen_30dp">30dp</dimen>
+  <dimen name="mapbox_dimen_36dp">36dp</dimen>
+  <dimen name="mapbox_dimen_48dp">48dp</dimen>
+  <dimen name="mapbox_dimen_54dp">54dp</dimen>
+  <dimen name="mapbox_dimen_64dp">64dp</dimen>
+  <dimen name="mapbox_dimen_72dp">72dp</dimen>
+  <dimen name="mapbox_dimen_96dp">96dp</dimen>
+
+  <!-- Text sizes -->
+  <dimen name="mapbox_dimen_text_2sp">2sp</dimen>
+  <dimen name="mapbox_dimen_text_4sp">4sp</dimen>
+  <dimen name="mapbox_dimen_text_6sp">6sp</dimen>
+  <dimen name="mapbox_dimen_text_8sp">8sp</dimen>
+  <dimen name="mapbox_dimen_text_10sp">10sp</dimen>
+  <dimen name="mapbox_dimen_text_12sp">12sp</dimen>
+  <dimen name="mapbox_dimen_text_14sp">14sp</dimen>
+  <dimen name="mapbox_dimen_text_16sp">16sp</dimen>
+  <dimen name="mapbox_dimen_text_18sp">18sp</dimen>
+  <dimen name="mapbox_dimen_text_20sp">20sp</dimen>
+  <dimen name="mapbox_dimen_text_22sp">22sp</dimen>
+  <dimen name="mapbox_dimen_text_24sp">24sp</dimen>
+  <dimen name="mapbox_dimen_text_26sp">26sp</dimen>
+  <dimen name="mapbox_dimen_text_28sp">28sp</dimen>
+  <dimen name="mapbox_dimen_text_30sp">30sp</dimen>
+  <dimen name="mapbox_dimen_text_36sp">36sp</dimen>
+  <dimen name="mapbox_dimen_text_48sp">48sp</dimen>
+  <dimen name="mapbox_dimen_text_54sp">54sp</dimen>
+  <dimen name="mapbox_dimen_text_64sp">64sp</dimen>
+  <dimen name="mapbox_dimen_text_72sp">72sp</dimen>
+  <dimen name="mapbox_dimen_text_96sp">96sp</dimen>
+</resources>

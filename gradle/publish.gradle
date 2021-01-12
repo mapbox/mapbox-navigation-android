@@ -61,6 +61,8 @@ sdkNameMap["libnavui-base"] = "mobile-navigation-ui-base"
 sdkNameMap["libnavui-maps"] = "mobile-navigation-ui-maps"
 sdkNameMap["libnavui-util"] = "mobile-navigation-ui-utils"
 sdkNameMap["libnavui-tripprogress"] = "mobile-navigation-ui-tripprogress"
+sdkNameMap["libnavui-maneuver"] = "mobile-navigation-ui-maneuver"
+sdkNameMap["libnavui-resources"] = "mobile-navigation-ui-resources"
 
 registry {
     sdkName = sdkNameMap[project.name]

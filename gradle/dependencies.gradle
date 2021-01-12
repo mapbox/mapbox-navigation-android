@@ -145,6 +145,7 @@ ext {
       gmsLocation               : "com.google.android.gms:play-services-location:${version.gmsLocation}",
 
       multidex                  : "androidx.multidex:multidex:${version.multidex}",
+
       svgParser                 : "com.caverock:androidsvg-aar:${version.svgParser}"
   ]
 

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <declare-styleable name="MapboxManeuverView">
+    <!-- Defines the background color of MapboxManeuverView primary and secondary instructions as
+     well as step distance remaining and turn icon -->
+    <attr name="maneuverViewBackgroundColor" format="reference|color"/>
+    <!-- Defines the background color of MapboxManeuverView sub instructions and turn icon -->
+    <attr name="subManeuverViewBackgroundColor" format="reference|color"/>
+    <!-- Defines the background color of upcoming maneuvers -->
+    <attr name="upcomingManeuverViewBackgroundColor" format="reference|color"/>
+    <!-- Defines the background color of MapboxLaneGuidance view -->
+    <attr name="laneGuidanceViewBackgroundColor" format="reference|color"/>
+    <!-- Defines the style of maneuver arrow in the lane guidance view -->
+    <attr name="laneGuidanceManeuverArrowStyle" format="reference" />
+  </declare-styleable>
+
+  <declare-styleable name="MapboxTurnIconManeuver">
+    <!-- Defines the color of turn icon -->
+    <attr name="maneuverTurnIconColor" format="reference|color"/>
+    <!-- Defines the color of shadow in the turn icon -->
+    <attr name="maneuverTurnIconShadowColor" format="reference|color"/>
+  </declare-styleable>
+</resources>

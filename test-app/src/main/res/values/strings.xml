@@ -141,4 +141,6 @@
     <string name="description_signboard" translatable="false">Demonstrates the use of signboard during active guidance</string>
     <string name="title_trip_progress" translatable="false">Trip Progess</string>
     <string name="description_trip_progress" translatable="false">Used for developing the trip progress feature.</string>
+    <string name="title_maneuver" translatable="false">Maneuver</string>
+    <string name="description_maneuver" translatable="false">Demonstrates the use of maneuver during active guidance</string>
 </resources>
