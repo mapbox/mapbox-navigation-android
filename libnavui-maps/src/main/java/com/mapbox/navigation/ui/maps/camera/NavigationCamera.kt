@@ -315,6 +315,7 @@ class NavigationCamera(
             }
             finishAnimation(animation as AnimatorSet)
             externalListener?.onAnimationEnd(animation)
+            updateFrame(viewportDataSource.getViewportData(), instant = false)
         }
 
         override fun onAnimationCancel(animation: Animator?) {
