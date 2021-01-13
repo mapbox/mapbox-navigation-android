@@ -54,7 +54,7 @@ class PredictiveCacheController @JvmOverloads constructor(
     private val onMapChangeListener = object : OnMapChangedListener {
         override fun onMapChange(mapChange: MapChange) {
             when (mapChange) {
-                MapChange.DID_FINISH_LOADING_MAP -> {
+                MapChange.DID_FINISH_LOADING_STYLE -> {
                     map?.let { map ->
                         val tileStoreResult =
                             TileStoreManager.getTileStore(map.getResourceOptions())
