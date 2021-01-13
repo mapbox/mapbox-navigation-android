@@ -2,6 +2,15 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 1.4.0-rc.1 - January 13, 2021
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Bug fixes and improvements
+* Fixed MapboxRouteOptionsUpdater: IndexOutOfBoundsException with 'bearings' combining. [#3899](https://github.com/mapbox/mapbox-navigation-android/pull/3899)
+* Fixed FeedbackFlow to skip Detailed Screen when detailed items aren't presented. [#3882](https://github.com/mapbox/mapbox-navigation-android/pull/3882)
+* Removed misleading min size annotation for addRoutes method and updated the documentation. [#3877](https://github.com/mapbox/mapbox-navigation-android/pull/3877)
+
 ## Mapbox Navigation SDK 1.3.0 - December 17, 2020
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
