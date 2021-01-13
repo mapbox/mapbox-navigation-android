@@ -2,6 +2,28 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 1.4.0-rc.1 - January 13, 2021
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Bug fixes and improvements
+* Fixed MapboxRouteOptionsUpdater: IndexOutOfBoundsException with 'bearings' combining. [#3899](https://github.com/mapbox/mapbox-navigation-android/pull/3899)
+* Fixed FeedbackFlow to skip Detailed Screen when detailed items aren't presented. [#3882](https://github.com/mapbox/mapbox-navigation-android/pull/3882)
+* Removed misleading min size annotation for addRoutes method and updated the documentation. [#3877](https://github.com/mapbox/mapbox-navigation-android/pull/3877)
+
+## Mapbox Navigation SDK 1.3.0 - December 17, 2020
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Features
+* Added `onFeedbackFlowFinished` method to `FeedbackFlowListener`. [3850](https://github.com/mapbox/mapbox-navigation-android/pull/3850)
+* Exposed an option for the user to provide an arrival experience feedback when the navigation session is finished. See `NavigationFeedbackOptions` for `NavigationView` integration and `FeedbackArrivalFragment` for standalone. [3758](https://github.com/mapbox/mapbox-navigation-android/pull/3758)
+* Exposed APIs to support caching user feedback events. [3724](https://github.com/mapbox/mapbox-navigation-android/pull/3724)
+
+#### Bug fixes and improvements
+* Fixed Exception `Resource not found` when using `FeedbackDetailsFragment`. [3842](https://github.com/mapbox/mapbox-navigation-android/pull/3842)
+* Updated the detailed feedback flow to request additional information in a form after arrival instead of immediately when feedback is reported. See `NavigationFeedbackOptions` for `NavigationView` integration and `FeedbackDetailsFragment` for standalone. [3758](https://github.com/mapbox/mapbox-navigation-android/pull/3758)
+
 ## Mapbox Navigation SDK 1.4.0-beta.1 - December 17, 2020
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
