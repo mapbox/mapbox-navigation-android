@@ -27,6 +27,7 @@ import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.CircleLayer
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
 import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
@@ -411,7 +412,9 @@ class CameraAnimationsActivity :
                         .zoom(14.0)
                         .pitch(0.0)
                         .build(),
-                    1500
+                    MapAnimationOptions.mapAnimationOptions {
+                        duration = 1500
+                    }
                 )
             }
             AnimationType.LookAtPOIWhenFollowing -> {

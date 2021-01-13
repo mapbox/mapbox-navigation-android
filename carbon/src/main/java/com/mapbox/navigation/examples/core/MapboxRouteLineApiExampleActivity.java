@@ -38,6 +38,7 @@ import com.mapbox.maps.Style;
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImplKt;
+import com.mapbox.maps.plugin.animation.MapAnimationOptions;
 import com.mapbox.maps.plugin.gestures.GesturesPluginImpl;
 import com.mapbox.maps.plugin.gestures.OnMapClickListener;
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener;
@@ -115,7 +116,7 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_navigation_map_route);
-    MapboxMapOptions mapboxMapOptions = new MapboxMapOptions(this, null, getResources().getDisplayMetrics().density);
+    MapboxMapOptions mapboxMapOptions = new MapboxMapOptions(this, getResources().getDisplayMetrics().density, null);
     ResourceOptions resourceOptions = new ResourceOptions.Builder()
         .accessToken(getMapboxAccessTokenFromResources())
         .assetPath(getFilesDir().getAbsolutePath())
@@ -412,6 +413,8 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
     LocationUpdate locationUpdate = new LocationUpdate(location, null, null);
     locationComponent.forceLocationUpdate(locationUpdate);
 
+    MapAnimationOptions.Builder mapAnimationOptionsBuilder = new MapAnimationOptions.Builder();
+    mapAnimationOptionsBuilder.setDuration(1500L);
     mapCamera.easeTo(
         new CameraOptions.Builder()
             .center(Point.fromLngLat(location.getLongitude(), location.getLatitude()))
@@ -420,9 +423,7 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
             .zoom(17.0)
             .padding(new EdgeInsets(1000, 0, 0, 0))
             .build(),
-        1500L,
-        null,
-        null
+        mapAnimationOptionsBuilder.build()
     );
   }
 

@@ -34,6 +34,7 @@ import com.mapbox.maps.ResourceOptions;
 import com.mapbox.maps.Style;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImplKt;
+import com.mapbox.maps.plugin.animation.MapAnimationOptions;
 import com.mapbox.maps.plugin.gestures.GesturesPluginImpl;
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener;
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions;
@@ -82,7 +83,7 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_navigation_map_route);
     findViewById(R.id.fabToggleStyle).setVisibility(View.INVISIBLE);
-    MapboxMapOptions mapboxMapOptions = new MapboxMapOptions(this, null, getResources().getDisplayMetrics().density);
+    MapboxMapOptions mapboxMapOptions = new MapboxMapOptions(this, getResources().getDisplayMetrics().density, null);
     ResourceOptions resourceOptions = new ResourceOptions.Builder()
       .accessToken(getMapboxAccessTokenFromResources())
       .assetPath(getFilesDir().getAbsolutePath())
@@ -280,6 +281,8 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
     LocationUpdate locationUpdate = new LocationUpdate(location, null, null);
     locationComponent.forceLocationUpdate(locationUpdate);
 
+    MapAnimationOptions.Builder mapAnimationOptionsBuilder = new MapAnimationOptions.Builder();
+    mapAnimationOptionsBuilder.setDuration(1500L);
     mapCamera.easeTo(
         new CameraOptions.Builder()
             .center(Point.fromLngLat(location.getLongitude(), location.getLatitude()))
@@ -288,9 +291,7 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
             .zoom(17.0)
             .padding(new EdgeInsets(1000, 0, 0, 0))
             .build(),
-        1500L,
-        null,
-        null
+        mapAnimationOptionsBuilder.build()
     );
   }
 

@@ -27,6 +27,7 @@ import com.mapbox.maps.MapboxMap;
 import com.mapbox.maps.Style;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImplKt;
+import com.mapbox.maps.plugin.animation.MapAnimationOptions;
 import com.mapbox.maps.plugin.gestures.GesturesPluginImpl;
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener;
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions;
@@ -289,6 +290,9 @@ public class MapboxSnapshotActivity extends AppCompatActivity implements OnMapLo
   private void updateLocation(List<Location> locations) {
     Location location = locations.get(0);
     getLocationComponent().forceLocationUpdate(new LocationUpdate(location, null, null));
+
+    MapAnimationOptions.Builder mapAnimationOptionsBuilder = new MapAnimationOptions.Builder();
+    mapAnimationOptionsBuilder.setDuration(1500L);
     mapCamera.easeTo(
         new CameraOptions.Builder()
             .center(Point.fromLngLat(location.getLongitude(), location.getLatitude()))
@@ -297,9 +301,7 @@ public class MapboxSnapshotActivity extends AppCompatActivity implements OnMapLo
             .zoom(17.0)
             .padding(new EdgeInsets(1000, 0, 0, 0))
             .build(),
-        1500L,
-        null,
-        null
+        mapAnimationOptionsBuilder.build()
     );
   }
 
