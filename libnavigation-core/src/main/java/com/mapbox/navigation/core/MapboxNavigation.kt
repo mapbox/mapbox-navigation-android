@@ -152,7 +152,8 @@ class MapboxNavigation(
         navigationOptions.eHorizonOptions.expansion.toByte(),
         navigationOptions.eHorizonOptions.branchLength,
         navigationOptions.eHorizonOptions.includeGeometries,
-        false
+        false,
+        null
     )
     private val navigatorConfig = NavigatorConfig(null, electronicHorizonOptions, null)
 
