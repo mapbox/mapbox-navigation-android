@@ -6,24 +6,10 @@ apply plugin: 'com.jaredsburrows.license'
 apply plugin: 'com.mapbox.android.sdk.versions'
 apply from: "${rootDir}/gradle/ktlint.gradle"
 apply from: file("${rootDir}/gradle/artifact-settings.gradle")
+apply from: "${rootDir}/gradle/kdoc-settings.gradle"
 
 version = project.ext.versionName
 group = project.ext.mapboxArtifactGroupId
-
-dokkaHtml {
-  outputDirectory.set(new File(buildDir.path, "kdoc"))
-  moduleName.set("UI")
-  dokkaSourceSets {
-    configureEach {
-      reportUndocumented.set(true)
-
-      perPackageOption {
-        matchingRegex.set("com.mapbox.navigation.ui.internal.*")
-        suppress.set(true)
-      }
-    }
-  }
-}
 
 android {
   compileSdkVersion androidVersions.compileSdkVersion
@@ -111,6 +97,21 @@ dependencies {
   testImplementation dependenciesList.mockwebserver
   testImplementation dependenciesList.coroutinesTestAndroid
   testImplementation project(':libtesting-utils')
+}
+
+dokkaHtml {
+  outputDirectory.set(kdocPath)
+  moduleName.set("UI")
+  dokkaSourceSets {
+    configureEach {
+      reportUndocumented.set(true)
+
+      perPackageOption {
+        matchingRegex.set("com.mapbox.navigation.ui.internal.*")
+        suppress.set(true)
+      }
+    }
+  }
 }
 
 apply from: "${rootDir}/gradle/track-public-apis.gradle"
