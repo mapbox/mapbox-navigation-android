@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <resources xmlns:tools="http://schemas.android.com/tools">
+<!--  Production  -->
+    <string name="mapbox_access_token" translatable="false" tools:ignore="UnusedResources">pk.eyJ1IjoicmluZ2VyamsiLCJhIjoiY2p1aWxpN2p4MWE5ZTQ0cGRod2RyMG5kYSJ9.869b3-55xeJVWd1B1UhH7A</string>
+<!--  Stage  -->
+<!--    <string name="mapbox_access_token" translatable="false" tools:ignore="UnusedResources">pk.eyJ1Ijoic3ZjLW9rdGEtbWFwYm94LXN0YWZmLWFjY2VzcyIsImEiOiJjazZjbG9ucGIxOGV1M2tvN2Fyb2c0dTU1In0.nTI6qRoxXoGHWaTOdCyyYw</string>-->
+</resources>
