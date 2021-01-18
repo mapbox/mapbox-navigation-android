@@ -9,13 +9,13 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.routesRequestCallback
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
-import com.mapbox.navigation.instrumentation_tests.utils.Utils
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.RouteProgressStateTransitionAssertion
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
 import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
 import com.mapbox.navigation.testing.ui.BaseTest
+import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -38,7 +38,7 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
 
         val options = MapboxNavigation.defaultNavigationOptionsBuilder(
             activity,
-            Utils.getMapboxAccessToken(activity)!!
+            getMapboxAccessTokenFromResources(activity)
         ).build()
         mapboxNavigation = MapboxNavigationProvider.create(options)
         routeCompleteIdlingResource = RouteProgressStateIdlingResource(
@@ -72,7 +72,7 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
             mapboxNavigation.requestRoutes(
                 RouteOptions.builder().applyDefaultParams()
                     .baseUrl(mockWebServerRule.baseUrl)
-                    .accessToken(Utils.getMapboxAccessToken(activity)!!)
+                    .accessToken(getMapboxAccessTokenFromResources(activity))
                     .coordinates(mockRoute.routeWaypoints).build(),
                 routesRequestCallback(
                     onRoutesReady = { mockLocationReplayerRule.playRoute(it[0]) }

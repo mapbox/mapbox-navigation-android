@@ -11,6 +11,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoute
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
 import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
 import com.mapbox.navigation.testing.ui.BaseTest
+import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.ui.NavigationViewOptions
 import kotlinx.android.synthetic.main.activity_basic_navigation_view.*
 import org.junit.After
@@ -54,6 +55,12 @@ abstract class SimpleNavigationViewTest :
             mockLocationReplayerRule.playRoute(route)
             activity.navigationView.startNavigation(
                 NavigationViewOptions.builder(activity)
+                    .navigationOptions(
+                        MapboxNavigation.defaultNavigationOptionsBuilder(
+                            activity,
+                            getMapboxAccessTokenFromResources(activity)
+                        ).build()
+                    )
                     .directionsRoute(route)
                     .voiceInstructionLoaderBaseUrl(mockWebServerRule.baseUrl)
                     .build()
