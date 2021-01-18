@@ -63,6 +63,7 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.android.synthetic.main.layout_camera_animations.*
 import timber.log.Timber
@@ -153,7 +154,9 @@ class CameraAnimationsActivity :
             viewportDataSource.evaluate()
 
             routeArrowAPI.updateUpcomingManeuverArrow(routeProgress).apply {
-                routeArrowView!!.render(mapboxMap.getStyle()!!, this)
+                ifNonNull(routeArrowView, mapboxMap.getStyle()) { view, style ->
+                    view.render(style, this)
+                }
             }
         }
     }
@@ -161,8 +164,10 @@ class CameraAnimationsActivity :
     private val routesObserver = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
-                routeLineAPI!!.setRoutes(listOf(RouteLine(routes[0], null))).apply {
-                    routeLineView!!.render(mapboxMap.getStyle()!!, this)
+                routeLineAPI?.setRoutes(listOf(RouteLine(routes[0], null)))?.apply {
+                    ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
+                        view.render(style, this)
+                    }
                 }
                 startSimulation(routes[0])
                 viewportDataSource.onRouteChanged(routes.first())
@@ -177,7 +182,7 @@ class CameraAnimationsActivity :
 
     private val onIndicatorPositionChangedListener = object : OnIndicatorPositionChangedListener {
         override fun onIndicatorPositionChanged(point: Point) {
-            routeLineAPI!!.updateTraveledRouteLine(point)
+            routeLineAPI?.updateTraveledRouteLine(point)
         }
     }
 
@@ -190,7 +195,7 @@ class CameraAnimationsActivity :
 
         viewportDataSource = MapboxNavigationViewportDataSource(
             MapboxNavigationViewportDataSourceOptions.Builder().build(),
-            mapboxMap
+            mapView.getMapboxMap()
         )
         navigationCamera = NavigationCamera(
             mapView.getMapboxMap(),
@@ -227,51 +232,55 @@ class CameraAnimationsActivity :
 
     private fun initButtons() {
         gravitate_left.setOnClickListener {
-            val currentPadding = mapboxMap.getCameraOptions(null).padding!!
-            val padding = EdgeInsets(
-                currentPadding.top,
-                0.0,
-                currentPadding.bottom,
-                120.0 * pixelDensity
-            )
-            viewportDataSource.followingPaddingPropertyOverride(padding)
-            viewportDataSource.evaluate()
+            mapboxMap.getCameraOptions(null).padding?.let {
+                val padding = EdgeInsets(
+                    it.top,
+                    0.0,
+                    it.bottom,
+                    120.0 * pixelDensity
+                )
+                viewportDataSource.followingPaddingPropertyOverride(padding)
+                viewportDataSource.evaluate()
+            }
         }
 
         gravitate_right.setOnClickListener {
-            val currentPadding = mapboxMap.getCameraOptions(null).padding!!
-            val padding = EdgeInsets(
-                currentPadding.top,
-                120.0 * pixelDensity,
-                currentPadding.bottom,
-                0.0
-            )
-            viewportDataSource.followingPaddingPropertyOverride(padding)
-            viewportDataSource.evaluate()
+            mapboxMap.getCameraOptions(null).padding?.let {
+                val padding = EdgeInsets(
+                    it.top,
+                    120.0 * pixelDensity,
+                    it.bottom,
+                    0.0
+                )
+                viewportDataSource.followingPaddingPropertyOverride(padding)
+                viewportDataSource.evaluate()
+            }
         }
 
         gravitate_top.setOnClickListener {
-            val currentPadding = mapboxMap.getCameraOptions(null).padding!!
-            val padding = EdgeInsets(
-                0.0,
-                currentPadding.left,
-                120.0 * pixelDensity,
-                currentPadding.right
-            )
-            viewportDataSource.followingPaddingPropertyOverride(padding)
-            viewportDataSource.evaluate()
+            mapboxMap.getCameraOptions(null).padding?.let {
+                val padding = EdgeInsets(
+                    0.0,
+                    it.left,
+                    120.0 * pixelDensity,
+                    it.right
+                )
+                viewportDataSource.followingPaddingPropertyOverride(padding)
+                viewportDataSource.evaluate()
+            }
         }
 
         gravitate_bottom.setOnClickListener {
-            val currentPadding = mapboxMap.getCameraOptions(null).padding!!
-            val padding = EdgeInsets(
-                120.0 * pixelDensity,
-                currentPadding.left,
-                0.0,
-                currentPadding.right
-            )
-            viewportDataSource.followingPaddingPropertyOverride(padding)
-            viewportDataSource.evaluate()
+            mapboxMap.getCameraOptions(null).padding?.let {
+                val padding = EdgeInsets(
+                    120.0 * pixelDensity,
+                    it.left,
+                    0.0,
+                    it.right
+                )
+                viewportDataSource.followingPaddingPropertyOverride(padding)
+                viewportDataSource.evaluate()
+            }
         }
     }
 
@@ -399,36 +408,36 @@ class CameraAnimationsActivity :
                 navigationCamera.requestNavigationCameraToOverview()
             }
             AnimationType.ToPOI -> {
-                val lastLocation = locationComponent!!.lastKnownLocation!!
-                val center = Point.fromLngLat(
-                    lastLocation.longitude + 0.0123,
-                    lastLocation.latitude + 0.0123
-                )
-                navigationCamera.requestNavigationCameraToIdle()
-                mapView.getCameraAnimationsPlugin().flyTo(
-                    CameraOptions.Builder()
-                        .center(center)
-                        .bearing(0.0)
-                        .zoom(14.0)
-                        .pitch(0.0)
-                        .build(),
-                    MapAnimationOptions.mapAnimationOptions {
-                        duration = 1500
-                    }
-                )
+                locationComponent?.lastKnownLocation?.let {
+                    val center = Point.fromLngLat(
+                        it.longitude + 0.0123,
+                        it.latitude + 0.0123
+                    )
+                    navigationCamera.requestNavigationCameraToIdle()
+                    mapView.getCameraAnimationsPlugin().flyTo(
+                        CameraOptions.Builder()
+                            .center(center)
+                            .bearing(0.0)
+                            .zoom(14.0)
+                            .pitch(0.0)
+                            .build(),
+                        MapAnimationOptions.mapAnimationOptions {
+                            duration = 1500
+                        }
+                    )
+                }
             }
             AnimationType.LookAtPOIWhenFollowing -> {
                 if (lookAtPoint == null) {
                     val center = mapboxMap.getCameraOptions(null).center
-                    lookAtPoint = center.let {
-                        Point.fromLngLat(
-                            (it?.longitude() ?: 0.0) + 0.003,
-                            (it?.latitude() ?: 0.0) + 0.003
-                        )
-                    }?.also {
+                        ?: Point.fromLngLat(0.0, 0.0)
+                    lookAtPoint = Point.fromLngLat(
+                        (center.longitude()) + 0.003,
+                        (center.latitude()) + 0.003
+                    ).also {
                         viewportDataSource.additionalPointsToFrameForFollowing(listOf(it))
                         viewportDataSource.followingBearingPropertyOverride(
-                            TurfMeasurement.bearing(center!!, it)
+                            TurfMeasurement.bearing(center, it)
                         )
                         viewportDataSource.evaluate()
                     }
