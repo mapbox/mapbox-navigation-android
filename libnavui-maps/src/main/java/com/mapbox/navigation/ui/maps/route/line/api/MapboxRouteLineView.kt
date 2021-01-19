@@ -3,8 +3,10 @@ package com.mapbox.navigation.ui.maps.route.line.api
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.generated.Expression
+import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.switchCase
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.getLayer
+import com.mapbox.maps.extension.style.layers.getLayerAs
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
@@ -32,7 +34,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param routeDrawData a RouteSetState object
      */
     fun render(style: Style, routeDrawData: RouteLineState.RouteSetState) {
-        initializeLayers(style, options)
+        initializeLayers(style, options, routeDrawData.getUIMode())
 
         updateLineGradient(
             style,
@@ -91,7 +93,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         style: Style,
         vanishingRouteLineState: RouteLineState.VanishingRouteLineUpdateState
     ) {
-        initializeLayers(style, options)
+        initializeLayers(style, options, vanishingRouteLineState.getUIMode())
 
         updateLineGradient(
             style,
@@ -117,7 +119,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param clearRouteLineData an instance of ClearRouteLineState
      */
     fun render(style: Style, clearRouteLineData: RouteLineState.ClearRouteLineState) {
-        initializeLayers(style, options)
+        initializeLayers(style, options, clearRouteLineData.getUIMode())
 
         updateSource(
             style,
@@ -148,10 +150,17 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param state an instance of UpdateLayerVisibilityState
      */
     fun render(style: Style, state: RouteLineState.UpdateLayerVisibilityState) {
-        initializeLayers(style, options)
+        initializeLayers(style, options, state.getUIMode())
 
         state.getLayerVisibilityChanges().forEach {
             updateLayerVisibility(style, it.first, it.second)
+        }
+    }
+
+    fun render(style: Style, state: RouteLineState.UpdateColorPropertiesState) {
+        initializeLayers(style, options, state.getUIMode())
+        state.getColorUpdates().forEach {
+            updateLayerColor(style, it.first, it.second)
         }
     }
 
@@ -208,6 +217,14 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
             style.getSource(sourceId)?.let {
                 (it as GeoJsonSource).featureCollection(featureCollection)
             }
+        }
+    }
+
+    private fun updateLayerColor(style: Style, layerId: String, colorExpressions: List<Expression>) {
+        if (style.isFullyLoaded()) {
+            style.getLayerAs<LineLayer>(layerId).lineColor(
+                switchCase(*colorExpressions.toTypedArray())
+            )
         }
     }
 

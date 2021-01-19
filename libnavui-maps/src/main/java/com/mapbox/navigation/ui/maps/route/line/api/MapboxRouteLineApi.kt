@@ -13,15 +13,14 @@ import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.ui.base.UIMode
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants
+import com.mapbox.navigation.ui.base.model.route.line.RouteLineColorResources
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
-import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineState
-import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getColorResourceProvider
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRouteLineColorExpressions
+import com.mapbox.navigation.ui.maps.route.line.model.*
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
@@ -135,6 +134,8 @@ class MapboxRouteLineApi(
     private val routeLineExpressionData: MutableList<RouteLineExpressionData> = mutableListOf()
     private var lastIndexUpdateTimeNano: Long = 0
     private val routeFeatureData: MutableList<RouteFeatureData> = mutableListOf()
+    var uiMode: UIMode = UIMode.LightMode()
+    private set
 
     /**
      * @return the vanishing point of the route line if an instance of VanishingRouteLine
@@ -197,6 +198,115 @@ class MapboxRouteLineApi(
         return buildDrawRoutesState(featureDataProvider)
     }
 
+    fun updateUIMode(uiMode: UIMode): RouteLineState.UpdateColorPropertiesState {
+        this.uiMode = uiMode
+
+        val primaryRouteLineColorExpressions = getRouteLineColorExpressions(
+            getColorResourceProvider(uiMode, routeLineOptions.resourceProvider).routeDefaultColor,
+            routeLineOptions.routeLayerProvider.routeStyleDescriptors,
+            RouteStyleDescriptor::lineColorResourceId
+        )
+
+        val primaryRouteCasingLineColorExpressions = getRouteLineColorExpressions(
+            getColorResourceProvider(uiMode, routeLineOptions.resourceProvider).routeCasingColor,
+            routeLineOptions.routeLayerProvider.routeStyleDescriptors,
+            RouteStyleDescriptor::lineColorResourceId
+        )
+
+        val primaryRouteTrafficLineColorExpressions = getRouteLineColorExpressions(
+            getColorResourceProvider(uiMode, routeLineOptions.resourceProvider).routeDefaultColor,
+            routeLineOptions.routeLayerProvider.routeStyleDescriptors,
+            RouteStyleDescriptor::lineColorResourceId
+        )
+
+        val alternativeRouteLineColorExpressions = getRouteLineColorExpressions(
+            getColorResourceProvider(
+                uiMode,
+                routeLineOptions.resourceProvider
+            ).alternativeRouteDefaultColor,
+            routeLineOptions.routeLayerProvider.routeStyleDescriptors,
+            RouteStyleDescriptor::lineColorResourceId
+        )
+
+        val alternativeRouteCasingLineColorExpressions = getRouteLineColorExpressions(
+            getColorResourceProvider(
+                uiMode,
+                routeLineOptions.resourceProvider
+            ).alternativeRouteCasingColor,
+            routeLineOptions.routeLayerProvider.routeStyleDescriptors,
+            RouteStyleDescriptor::lineColorResourceId
+        )
+
+        val alternativeRouteTrafficLineColorExpressions = getRouteLineColorExpressions(
+            getColorResourceProvider(
+                uiMode,
+                routeLineOptions.resourceProvider
+            ).alternativeRouteDefaultColor,
+            routeLineOptions.routeLayerProvider.routeStyleDescriptors,
+            RouteStyleDescriptor::lineColorResourceId
+        )
+
+        val primaryRouteUpdate = Pair(
+            RouteConstants.PRIMARY_ROUTE_LAYER_ID,
+            primaryRouteLineColorExpressions
+        )
+
+        val primaryRouteCasingUpdate = Pair(
+            RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+            primaryRouteCasingLineColorExpressions
+        )
+
+        val primaryRouteTrafficUpdate = Pair(
+            RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+            primaryRouteTrafficLineColorExpressions
+        )
+
+        val alternativeRoute1Update = Pair(
+            RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
+            alternativeRouteLineColorExpressions
+        )
+
+        val alternativeRoute2Update = Pair(
+            RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
+            alternativeRouteLineColorExpressions
+        )
+
+        val alternativeRouteCasing1Update = Pair(
+            RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
+            alternativeRouteCasingLineColorExpressions
+        )
+
+        val alternativeRouteCasing2Update = Pair(
+            RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID,
+            alternativeRouteCasingLineColorExpressions
+        )
+
+        val alternativeRouteTraffic1Update = Pair(
+            RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
+            alternativeRouteTrafficLineColorExpressions
+        )
+
+        val alternativeRouteTraffic2Update = Pair(
+            RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
+            alternativeRouteTrafficLineColorExpressions
+        )
+
+        return RouteLineState.UpdateColorPropertiesState(
+            listOf(
+                primaryRouteUpdate,
+                primaryRouteCasingUpdate,
+                primaryRouteTrafficUpdate,
+                alternativeRoute1Update,
+                alternativeRoute2Update,
+                alternativeRouteCasing1Update,
+                alternativeRouteCasing2Update,
+                alternativeRouteTraffic1Update,
+                alternativeRouteTraffic2Update
+            ),
+            uiMode
+        )
+    }
+
     /**
      * Indicates the point the route line should change from its default color to the vanishing
      * color behind the puck. Calling this method has no effect if null was passed for the
@@ -219,7 +329,8 @@ class MapboxRouteLineApi(
             routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(
                 point,
                 routeLineExpressionData,
-                routeLineOptions.resourceProvider
+                routeLineOptions.resourceProvider,
+                uiMode
             )
 
         return when (routeLineExpressions) {
@@ -227,7 +338,8 @@ class MapboxRouteLineApi(
             else -> RouteLineState.VanishingRouteLineUpdateState(
                 routeLineExpressions.trafficLineExpression,
                 routeLineExpressions.routeLineExpression,
-                routeLineExpressions.routeLineCasingExpression
+                routeLineExpressions.routeLineCasingExpression,
+                uiMode
             )
         }
     }
@@ -248,7 +360,8 @@ class MapboxRouteLineApi(
             FeatureCollection.fromFeatures(listOf()),
             FeatureCollection.fromFeatures(listOf()),
             FeatureCollection.fromFeatures(listOf()),
-            FeatureCollection.fromFeatures(listOf())
+            FeatureCollection.fromFeatures(listOf()),
+            uiMode
         )
     }
 
@@ -268,24 +381,40 @@ class MapboxRouteLineApi(
             val trafficLineExpression = MapboxRouteLineUtils.getTrafficLineExpression(
                 offset,
                 routeLineExpressionData,
-                routeLineOptions.resourceProvider.routeUnknownTrafficColor
+                getColorResourceProvider(
+                    uiMode,
+                    routeLineOptions.resourceProvider
+                ).routeUnknownTrafficColor
             )
             val routeLineExpression = MapboxRouteLineUtils.getVanishingRouteLineExpression(
                 offset,
-                routeLineOptions.resourceProvider.routeLineTraveledColor,
-                routeLineOptions.resourceProvider.routeDefaultColor
+                getColorResourceProvider(
+                    uiMode,
+                    routeLineOptions.resourceProvider
+                ).routeLineTraveledColor,
+                getColorResourceProvider(
+                    uiMode,
+                    routeLineOptions.resourceProvider
+                ).routeDefaultColor
             )
             val routeLineCasingExpression =
                 MapboxRouteLineUtils.getVanishingRouteLineExpression(
                     offset,
-                    routeLineOptions.resourceProvider.routeLineTraveledCasingColor,
-                    routeLineOptions.resourceProvider.routeCasingColor
+                    getColorResourceProvider(
+                        uiMode,
+                        routeLineOptions.resourceProvider
+                    ).routeLineTraveledCasingColor,
+                    getColorResourceProvider(
+                        uiMode,
+                        routeLineOptions.resourceProvider
+                    ).routeCasingColor
                 )
 
             RouteLineState.VanishingRouteLineUpdateState(
                 trafficLineExpression,
                 routeLineExpression,
-                routeLineCasingExpression
+                routeLineCasingExpression,
+                uiMode
             )
         } else {
             null
@@ -314,7 +443,8 @@ class MapboxRouteLineApi(
                 Pair(RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID, Visibility.VISIBLE),
                 Pair(RouteConstants.PRIMARY_ROUTE_LAYER_ID, Visibility.VISIBLE),
                 Pair(RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID, Visibility.VISIBLE)
-            )
+            ),
+            uiMode
         )
     }
 
@@ -328,7 +458,8 @@ class MapboxRouteLineApi(
                 Pair(RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID, Visibility.NONE),
                 Pair(RouteConstants.PRIMARY_ROUTE_LAYER_ID, Visibility.NONE),
                 Pair(RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID, Visibility.NONE)
-            )
+            ),
+            uiMode
         )
     }
 
@@ -345,7 +476,8 @@ class MapboxRouteLineApi(
                 Pair(RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID, Visibility.VISIBLE),
                 Pair(RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID, Visibility.VISIBLE),
                 Pair(RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID, Visibility.VISIBLE)
-            )
+            ),
+            uiMode
         )
     }
 
@@ -362,7 +494,8 @@ class MapboxRouteLineApi(
                 Pair(RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID, Visibility.NONE),
                 Pair(RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID, Visibility.NONE),
                 Pair(RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID, Visibility.NONE)
-            )
+            ),
+            uiMode
         )
     }
 
@@ -594,17 +727,29 @@ class MapboxRouteLineApi(
         val trafficLineExpression = MapboxRouteLineUtils.getTrafficLineExpression(
             routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
             segments,
-            routeLineOptions.resourceProvider.routeUnknownTrafficColor
+            getColorResourceProvider(
+                uiMode,
+                routeLineOptions.resourceProvider
+            ).routeUnknownTrafficColor
         )
         val routeLineExpression = MapboxRouteLineUtils.getVanishingRouteLineExpression(
             routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
-            routeLineOptions.resourceProvider.routeLineTraveledColor,
-            routeLineOptions.resourceProvider.routeDefaultColor
+            getColorResourceProvider(
+                uiMode,
+                routeLineOptions.resourceProvider
+            ).routeLineTraveledColor,
+            getColorResourceProvider(
+                uiMode,
+                routeLineOptions.resourceProvider
+            ).routeDefaultColor
         )
         val routeLineCasingExpression = MapboxRouteLineUtils.getVanishingRouteLineExpression(
             routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
-            routeLineOptions.resourceProvider.routeLineTraveledColor,
-            routeLineOptions.resourceProvider.routeCasingColor
+            getColorResourceProvider(
+                uiMode,
+                routeLineOptions.resourceProvider
+            ).routeLineTraveledColor,
+            getColorResourceProvider(uiMode, routeLineOptions.resourceProvider).routeCasingColor
         )
         val alternativeRoute1TrafficSegments: List<RouteLineExpressionData> =
             partitionedRoutes.second.firstOrNull()?.route?.run {
@@ -618,7 +763,10 @@ class MapboxRouteLineApi(
         val alternativeRoute1TrafficExpression = MapboxRouteLineUtils.getTrafficLineExpression(
             routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
             alternativeRoute1TrafficSegments,
-            routeLineOptions.resourceProvider.alternativeRouteUnknownTrafficColor
+            getColorResourceProvider(
+                uiMode,
+                routeLineOptions.resourceProvider
+            ).alternativeRouteUnknownTrafficColor
         )
         val alternativeRoute2TrafficSegments: List<RouteLineExpressionData> =
             if (partitionedRoutes.second.size > 1) {
@@ -636,7 +784,10 @@ class MapboxRouteLineApi(
         val alternativeRoute2TrafficExpression = MapboxRouteLineUtils.getTrafficLineExpression(
             routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
             alternativeRoute2TrafficSegments,
-            routeLineOptions.resourceProvider.alternativeRouteUnknownTrafficColor
+            getColorResourceProvider(
+                uiMode,
+                routeLineOptions.resourceProvider
+            ).alternativeRouteUnknownTrafficColor
         )
         val alternativeRoute1FeatureCollection: FeatureCollection =
             partitionedRoutes.second.firstOrNull()?.featureCollection
@@ -668,7 +819,8 @@ class MapboxRouteLineApi(
             alternativeRoute2TrafficExpression,
             alternativeRoute1FeatureCollection,
             alternativeRoute2FeatureCollection,
-            wayPointsFeatureCollection
+            wayPointsFeatureCollection,
+            uiMode
         )
     }
 
@@ -684,40 +836,76 @@ class MapboxRouteLineApi(
         return when (isPrimaryRoute) {
             true -> when (congestionValue) {
                 RouteConstants.LOW_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.routeLowCongestionColor
+                    getColorResourceProvider(
+                        uiMode,
+                        routeLineOptions.resourceProvider
+                    ).routeLowCongestionColor
                 }
                 RouteConstants.MODERATE_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.routeModerateColor
+                    getColorResourceProvider(
+                        uiMode,
+                        routeLineOptions.resourceProvider
+                    ).routeModerateColor
                 }
                 RouteConstants.HEAVY_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.routeHeavyColor
+                    getColorResourceProvider(
+                        uiMode,
+                        routeLineOptions.resourceProvider
+                    ).routeHeavyColor
                 }
                 RouteConstants.SEVERE_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.routeSevereColor
+                    getColorResourceProvider(
+                        uiMode,
+                        routeLineOptions.resourceProvider
+                    ).routeSevereColor
                 }
                 RouteConstants.UNKNOWN_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.routeUnknownTrafficColor
+                    getColorResourceProvider(
+                        uiMode,
+                        routeLineOptions.resourceProvider
+                    ).routeUnknownTrafficColor
                 }
-                else -> routeLineOptions.resourceProvider.routeDefaultColor
+                else -> getColorResourceProvider(
+                    uiMode,
+                    routeLineOptions.resourceProvider
+                ).routeDefaultColor
             }
             false -> when (congestionValue) {
                 RouteConstants.LOW_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.alternativeRouteLowColor
+                    getColorResourceProvider(
+                        uiMode,
+                        routeLineOptions.resourceProvider
+                    ).alternativeRouteLowColor
                 }
                 RouteConstants.MODERATE_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.alternativeRouteModerateColor
+                    getColorResourceProvider(
+                        uiMode,
+                        routeLineOptions.resourceProvider
+                    ).alternativeRouteModerateColor
                 }
                 RouteConstants.HEAVY_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.alternativeRouteHeavyColor
+                    getColorResourceProvider(
+                        uiMode,
+                        routeLineOptions.resourceProvider
+                    ).alternativeRouteHeavyColor
                 }
                 RouteConstants.SEVERE_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.alternativeRouteSevereColor
+                    getColorResourceProvider(
+                        uiMode,
+                        routeLineOptions.resourceProvider
+                    ).alternativeRouteSevereColor
                 }
                 RouteConstants.UNKNOWN_CONGESTION_VALUE -> {
-                    routeLineOptions.resourceProvider.alternativeRouteUnknownTrafficColor
+                    getColorResourceProvider(
+                        uiMode,
+                        routeLineOptions.resourceProvider
+                    ).alternativeRouteUnknownTrafficColor
                 }
                 else -> {
-                    routeLineOptions.resourceProvider.alternativeRouteDefaultColor
+                    getColorResourceProvider(
+                        uiMode,
+                        routeLineOptions.resourceProvider
+                    ).alternativeRouteDefaultColor
                 }
             }
         }

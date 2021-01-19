@@ -6,8 +6,10 @@ import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.ui.base.UIMode
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getColorResourceProvider
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
@@ -109,6 +111,7 @@ internal class VanishingRouteLine {
         point: Point,
         routeLineExpressionData: List<RouteLineExpressionData>,
         routeResourceProvider: RouteLineResources,
+        uiMode: UIMode
     ): VanishingRouteLineExpressions? {
         ifNonNull(
             primaryRouteLineGranularDistances,
@@ -174,17 +177,17 @@ internal class VanishingRouteLine {
             val trafficLineExpression = MapboxRouteLineUtils.getTrafficLineExpression(
                 offset,
                 routeLineExpressionData,
-                routeResourceProvider.routeUnknownTrafficColor
+                getColorResourceProvider(uiMode, routeResourceProvider).routeUnknownTrafficColor
             )
             val routeLineExpression = MapboxRouteLineUtils.getVanishingRouteLineExpression(
                 offset,
-                routeResourceProvider.routeLineTraveledColor,
-                routeResourceProvider.routeDefaultColor
+                getColorResourceProvider(uiMode, routeResourceProvider).routeLineTraveledColor,
+                getColorResourceProvider(uiMode, routeResourceProvider).routeDefaultColor
             )
             val routeLineCasingExpression = MapboxRouteLineUtils.getVanishingRouteLineExpression(
                 offset,
-                routeResourceProvider.routeLineTraveledColor,
-                routeResourceProvider.routeCasingColor
+                getColorResourceProvider(uiMode, routeResourceProvider).routeLineTraveledColor,
+                getColorResourceProvider(uiMode, routeResourceProvider).routeCasingColor
             )
             return VanishingRouteLineExpressions(
                 trafficLineExpression,

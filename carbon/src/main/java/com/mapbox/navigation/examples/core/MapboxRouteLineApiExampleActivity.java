@@ -59,6 +59,7 @@ import com.mapbox.navigation.core.replay.route.ReplayProgressObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper;
+import com.mapbox.navigation.ui.base.UIMode;
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer;
 import com.mapbox.navigation.ui.maps.PredictiveCacheController;
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi;
@@ -179,54 +180,63 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
 
     ((FloatingActionButton)findViewById(R.id.fabToggleStyle)).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
-        Visibility primaryRouteLineVisibility = mapboxRouteLineView.getPrimaryRouteVisibility(mapboxMap.getStyle());
-        Visibility alternativeRouteLineVisibility = mapboxRouteLineView.getAlternativeRoutesVisibility(mapboxMap.getStyle());
-        Visibility arrowVisibility = routeArrowView.getVisibility(mapboxMap.getStyle());
 
-        Collections.shuffle(mapStyles);
-        String style = mapStyles.get(0);
-        Timber.e("*** Chosen map style is %s", style);
-        locationComponent.setEnabled(false);
-        mapboxMap.loadStyleUri(style, new Style.OnStyleLoaded() {
-          @Override public void onStyleLoaded(@NotNull Style style) {
-            new Handler().post(new Runnable() {
-              @Override
-              public void run() {
-                // workaround for https://github.com/mapbox/mapbox-maps-android/issues/900
-                locationComponent.setEnabled(true);
-              }
-            });
-            RouteLineState.UpdateLayerVisibilityState primaryRouteVisibilityState;
-            if (primaryRouteLineVisibility == Visibility.NONE) {
-              primaryRouteVisibilityState = mapboxRouteLineApi.hidePrimaryRoute();
-            } else {
-              primaryRouteVisibilityState = mapboxRouteLineApi.showPrimaryRoute();
-            }
-            mapboxRouteLineView.render(style, primaryRouteVisibilityState);
+        RouteLineState.UpdateColorPropertiesState updateColorState = null;
+        if (mapboxRouteLineApi.getUiMode() instanceof UIMode.LightMode) {
+          updateColorState = mapboxRouteLineApi.updateUIMode(new UIMode.DarkMode());
+        } else {
+          updateColorState = mapboxRouteLineApi.updateUIMode(new UIMode.LightMode());
+        }
+        mapboxRouteLineView.render(mapboxMap.getStyle(), updateColorState);
 
-            RouteLineState.UpdateLayerVisibilityState alternateRouteVisibilityState;
-            if (alternativeRouteLineVisibility == Visibility.NONE) {
-              alternateRouteVisibilityState = mapboxRouteLineApi.hideAlternativeRoutes();
-            } else {
-              alternateRouteVisibilityState = mapboxRouteLineApi.showAlternativeRoutes();
-            }
-            mapboxRouteLineView.render(style, alternateRouteVisibilityState);
-
-            RouteLineState.RouteSetState redrawData = mapboxRouteLineApi.getRouteDrawData();
-            mapboxRouteLineView.render(style, redrawData);
-
-            RouteArrowState.UpdateRouteArrowVisibilityState arrowVisibilityState;
-            if (arrowVisibility == Visibility.NONE) {
-              arrowVisibilityState = routeArrow.hideManeuverArrow();
-            } else {
-              arrowVisibilityState = routeArrow.showManeuverArrow();
-            }
-            routeArrowView.render(style, arrowVisibilityState);
-
-            RouteArrowState.UpdateManeuverArrowState redrawState = routeArrow.redraw();
-            routeArrowView.render(style, redrawState);
-          }
-        }, null);
+        //Visibility primaryRouteLineVisibility = mapboxRouteLineView.getPrimaryRouteVisibility(mapboxMap.getStyle());
+        //Visibility alternativeRouteLineVisibility = mapboxRouteLineView.getAlternativeRoutesVisibility(mapboxMap.getStyle());
+        //Visibility arrowVisibility = routeArrowView.getVisibility(mapboxMap.getStyle());
+        //
+        //Collections.shuffle(mapStyles);
+        //String style = mapStyles.get(0);
+        //Timber.e("*** Chosen map style is %s", style);
+        //locationComponent.setEnabled(false);
+        //mapboxMap.loadStyleUri(style, new Style.OnStyleLoaded() {
+        //  @Override public void onStyleLoaded(@NotNull Style style) {
+        //    new Handler().post(new Runnable() {
+        //      @Override
+        //      public void run() {
+        //        // workaround for https://github.com/mapbox/mapbox-maps-android/issues/900
+        //        locationComponent.setEnabled(true);
+        //      }
+        //    });
+        //    RouteLineState.UpdateLayerVisibilityState primaryRouteVisibilityState;
+        //    if (primaryRouteLineVisibility == Visibility.NONE) {
+        //      primaryRouteVisibilityState = mapboxRouteLineApi.hidePrimaryRoute();
+        //    } else {
+        //      primaryRouteVisibilityState = mapboxRouteLineApi.showPrimaryRoute();
+        //    }
+        //    mapboxRouteLineView.render(style, primaryRouteVisibilityState);
+        //
+        //    RouteLineState.UpdateLayerVisibilityState alternateRouteVisibilityState;
+        //    if (alternativeRouteLineVisibility == Visibility.NONE) {
+        //      alternateRouteVisibilityState = mapboxRouteLineApi.hideAlternativeRoutes();
+        //    } else {
+        //      alternateRouteVisibilityState = mapboxRouteLineApi.showAlternativeRoutes();
+        //    }
+        //    mapboxRouteLineView.render(style, alternateRouteVisibilityState);
+        //
+        //    RouteLineState.RouteSetState redrawData = mapboxRouteLineApi.getRouteDrawData();
+        //    mapboxRouteLineView.render(style, redrawData);
+        //
+        //    RouteArrowState.UpdateRouteArrowVisibilityState arrowVisibilityState;
+        //    if (arrowVisibility == Visibility.NONE) {
+        //      arrowVisibilityState = routeArrow.hideManeuverArrow();
+        //    } else {
+        //      arrowVisibilityState = routeArrow.showManeuverArrow();
+        //    }
+        //    routeArrowView.render(style, arrowVisibilityState);
+        //
+        //    RouteArrowState.UpdateManeuverArrowState redrawState = routeArrow.redraw();
+        //    routeArrowView.render(style, redrawState);
+        //  }
+        //}, null);
       }
     });
 

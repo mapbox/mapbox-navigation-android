@@ -4,6 +4,7 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.ui.base.MapboxState
+import com.mapbox.navigation.ui.base.UIMode
 
 /**
  * Represents side effects which can be rendered to change the appearance of the routes displayed
@@ -14,15 +15,39 @@ sealed class RouteLineState : MapboxState {
      * A state representing the side effects for updating the route visibility.
      *
      * @param layerVisibilityModifications a collection of visibility modifications
+     * @param uiMode a value indicating a light or dark UI mode
      */
     class UpdateLayerVisibilityState(
-        private val layerVisibilityModifications: List<Pair<String, Visibility>>
+        private val layerVisibilityModifications: List<Pair<String, Visibility>>,
+        private val uiMode: UIMode
     ) : RouteLineState() {
         /**
          * @return a collection of visibility modifications
          */
         fun getLayerVisibilityChanges(): List<Pair<String, Visibility>> =
             layerVisibilityModifications
+
+        /**
+         * @return a value indicating a light or dark UI mode
+         */
+        fun getUIMode(): UIMode = uiMode
+    }
+
+    // todo docs
+    class UpdateColorPropertiesState(
+        private val colorUpdates: List<Pair<String, List<Expression>>>,
+        private val uiMode: UIMode
+    ) : RouteLineState() {
+
+        /**
+         * @return a list of color updates consisting of pairs of layer Ids and [Expression] objects
+         */
+        fun getColorUpdates() = colorUpdates
+
+        /**
+         * @return a value indicating a light or dark UI mode
+         */
+        fun getUIMode(): UIMode = uiMode
     }
 
     /**
@@ -50,6 +75,7 @@ sealed class RouteLineState : MapboxState {
      * @param altRoute1Source the feature collection for an alternative route line
      * @param altRoute2Source the feature collection for an alternative route line
      * @param waypointsSource the feature collection for the origin and destination icons
+     * * @param uiMode a value indicating a light or dark UI mode
      */
     class RouteSetState(
         private val primaryRouteSource: FeatureCollection,
@@ -60,7 +86,8 @@ sealed class RouteLineState : MapboxState {
         private val altRoute2TrafficExpression: Expression,
         private val altRoute1Source: FeatureCollection,
         private val altRoute2Source: FeatureCollection,
-        private val waypointsSource: FeatureCollection
+        private val waypointsSource: FeatureCollection,
+        private val uiMode: UIMode
     ) : RouteLineState() {
         /**
          * @return the feature collection for the primary route
@@ -104,6 +131,11 @@ sealed class RouteLineState : MapboxState {
          * @return a feature collection for the origin and destination icons
          */
         fun getOriginAndDestinationPointsSource(): FeatureCollection = waypointsSource
+
+        /**
+         * @return a value indicating a light or dark UI mode
+         */
+        fun getUIMode(): UIMode = uiMode
     }
 
     /**
@@ -112,11 +144,13 @@ sealed class RouteLineState : MapboxState {
      * @param trafficLineExpression the expression for the primary route traffic line
      * @param routeLineExpression the expression for the primary route line
      * @param casingLineExpression the expression for the primary route casing line
+     * @param uiMode a value indicating a light or dark UI mode
      */
     class VanishingRouteLineUpdateState(
         private val trafficLineExpression: Expression,
         private val routeLineExpression: Expression,
-        private val casingLineExpression: Expression
+        private val casingLineExpression: Expression,
+        private val uiMode: UIMode
     ) : RouteLineState() {
         /**
          * @return the expression for the primary route traffic line
@@ -130,6 +164,11 @@ sealed class RouteLineState : MapboxState {
          * @return the expression for the primary route casing line
          */
         fun getCasingLineExpression(): Expression = casingLineExpression
+
+        /**
+         * @return a value indicating a light or dark UI mode
+         */
+        fun getUIMode(): UIMode = uiMode
     }
 
     /**
@@ -139,12 +178,14 @@ sealed class RouteLineState : MapboxState {
      * @param altRoute1Source a feature collection representing an alternative route
      * @param altRoute2Source a feature collection representing an alternative route
      * @param waypointsSource a feature collection representing the origin and destination icons
+     * @param uiMode a value indicating a light or dark UI mode
      */
     class ClearRouteLineState(
         private val primaryRouteSource: FeatureCollection,
         private val altRoute1Source: FeatureCollection,
         private val altRoute2Source: FeatureCollection,
-        private val waypointsSource: FeatureCollection
+        private val waypointsSource: FeatureCollection,
+        private val uiMode: UIMode
     ) : RouteLineState() {
         /**
          * @return the primary route feature collection
@@ -162,5 +203,10 @@ sealed class RouteLineState : MapboxState {
          * @return a feature collection for displaying the origin and destination points
          */
         fun getOriginAndDestinationPointsSource(): FeatureCollection = waypointsSource
+
+        /**
+         * @return a value indicating a light or dark UI mode
+         */
+        fun getUIMode(): UIMode = uiMode
     }
 }

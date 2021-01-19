@@ -21,18 +21,13 @@ import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.maps.plugin.location.LocationComponentConstants
+import com.mapbox.navigation.ui.base.UIMode
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants.LOW_CONGESTION_VALUE
+import com.mapbox.navigation.ui.base.model.route.line.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.R
-import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
+import com.mapbox.navigation.ui.maps.route.line.model.*
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrafficExpressionData
-import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMisc
@@ -595,7 +590,7 @@ object MapboxRouteLineUtils {
         return expressions.plus(color(defaultColor))
     }
 
-    internal fun initializeLayers(style: Style, options: MapboxRouteLineOptions) {
+    internal fun initializeLayers(style: Style, options: MapboxRouteLineOptions, uiMode: UIMode) {
         if (!style.fullyLoaded || layersAreInitialized(style)) {
             return
         }
@@ -650,7 +645,7 @@ object MapboxRouteLineUtils {
 
         options.routeLayerProvider.buildAlternativeRouteCasingLayers(
             style,
-            options.resourceProvider.alternativeRouteCasingColor
+            getColorResourceProvider(uiMode, options.resourceProvider).alternativeRouteCasingColor
         ).forEach {
             it.bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
         }
@@ -658,7 +653,7 @@ object MapboxRouteLineUtils {
         options.routeLayerProvider.buildAlternativeRouteLayers(
             style,
             options.resourceProvider.roundedLineCap,
-            options.resourceProvider.alternativeRouteDefaultColor
+            getColorResourceProvider(uiMode, options.resourceProvider).alternativeRouteDefaultColor
         ).forEach {
             it.bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
         }
@@ -666,26 +661,26 @@ object MapboxRouteLineUtils {
         options.routeLayerProvider.buildAlternativeRouteTrafficLayers(
             style,
             options.resourceProvider.roundedLineCap,
-            options.resourceProvider.alternativeRouteDefaultColor
+            getColorResourceProvider(uiMode, options.resourceProvider).alternativeRouteDefaultColor
         ).forEach {
             it.bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
         }
 
         options.routeLayerProvider.buildPrimaryRouteCasingLayer(
             style,
-            options.resourceProvider.routeCasingColor
+            getColorResourceProvider(uiMode, options.resourceProvider).routeCasingColor
         ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
 
         options.routeLayerProvider.buildPrimaryRouteLayer(
             style,
             options.resourceProvider.roundedLineCap,
-            options.resourceProvider.routeDefaultColor
+            getColorResourceProvider(uiMode, options.resourceProvider).routeDefaultColor
         ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
 
         options.routeLayerProvider.buildPrimaryRouteTrafficLayer(
             style,
             options.resourceProvider.roundedLineCap,
-            options.resourceProvider.routeDefaultColor
+            getColorResourceProvider(uiMode, options.resourceProvider).routeDefaultColor
         ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
 
         options.routeLayerProvider.buildWayPointLayer(
@@ -709,6 +704,13 @@ object MapboxRouteLineUtils {
             style.styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID) &&
             style.styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID) &&
             style.styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+    }
+
+    fun getColorResourceProvider(uiMode: UIMode, routeLineResources: RouteLineResources): RouteLineColorResources {
+        return when (uiMode) {
+            is UIMode.LightMode -> routeLineResources.routeLineColorResourcesLight
+            is UIMode.DarkMode -> routeLineResources.routeLineColorResourcesDark
+        }
     }
 
     private fun projectX(x: Double): Double {

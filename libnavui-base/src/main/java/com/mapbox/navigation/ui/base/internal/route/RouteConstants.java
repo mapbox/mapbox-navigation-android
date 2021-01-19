@@ -96,6 +96,38 @@ public class RouteConstants {
   public static final int ALTERNATE_ROUTE_HEAVY_TRAFFIC_COLOR = Color.parseColor("#B58281");
   @ColorInt
   public static final int ALTERNATE_ROUTE_SEVERE_TRAFFIC_COLOR = Color.parseColor("#B58281");
+  @ColorInt
+  public static final int ROUTE_LINE_TRAVELED_COLOR_DARK = Color.parseColor("#00000000");
+  @ColorInt
+  public static final int ROUTE_LINE_TRAVELED_CASING_COLOR_DARK = Color.parseColor("#00000000");
+  @ColorInt
+  public static final int ROUTE_DEFAULT_COLOR_DARK = Color.parseColor("#56A8FB");
+  @ColorInt
+  public static final int ROUTE_UNKNOWN_TRAFFIC_COLOR_DARK = Color.parseColor("#56A8FB");
+  @ColorInt
+  public static final int ROUTE_LOW_TRAFFIC_COLOR_DARK = Color.parseColor("#56A8FB");
+  @ColorInt
+  public static final int ROUTE_MODERATE_TRAFFIC_COLOR_DARK = Color.parseColor("#ff9500");
+  @ColorInt
+  public static final int ROUTE_HEAVY_TRAFFIC_COLOR_DARK = Color.parseColor("#ff4d4d");
+  @ColorInt
+  public static final int ROUTE_SEVERE_TRAFFIC_COLOR_DARK = Color.parseColor("#8f2447");
+  @ColorInt
+  public static final int ROUTE_CASING_COLOR_DARK = Color.parseColor("#2F7AC6");
+  @ColorInt
+  public static final int ALTERNATE_ROUTE_DEFAULT_COLOR_DARK = Color.parseColor("#8694A5");
+  @ColorInt
+  public static final int ALTERNATE_ROUTE_CASING_COLOR_DARK = Color.parseColor("#727E8D");
+  @ColorInt
+  public static final int ALTERNATE_ROUTE_UNKNOWN_TRAFFIC_COLOR_DARK = Color.parseColor("#8694A5");
+  @ColorInt
+  public static final int ALTERNATE_ROUTE_LOW_TRAFFIC_COLOR_DARK = Color.parseColor("#8694A5");
+  @ColorInt
+  public static final int ALTERNATE_ROUTE_MODERATE_TRAFFIC_COLOR_DARK = Color.parseColor("#BEA087");
+  @ColorInt
+  public static final int ALTERNATE_ROUTE_HEAVY_TRAFFIC_COLOR_DARK = Color.parseColor("#B58281");
+  @ColorInt
+  public static final int ALTERNATE_ROUTE_SEVERE_TRAFFIC_COLOR_DARK = Color.parseColor("#B58281");
   public static final boolean ROUNDED_LINE_CAP = true;
   @DrawableRes
   public static final int ORIGIN_WAYPOINT_ICON = R.drawable.mapbox_ic_route_origin;

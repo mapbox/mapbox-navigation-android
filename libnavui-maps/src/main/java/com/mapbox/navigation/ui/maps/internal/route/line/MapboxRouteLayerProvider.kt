@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.maps.internal.route.line
 
 import android.graphics.drawable.Drawable
 import com.mapbox.maps.Style
-import com.mapbox.maps.extension.style.expressions.dsl.generated.color
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
 import com.mapbox.maps.extension.style.expressions.dsl.generated.match
 import com.mapbox.maps.extension.style.expressions.generated.Expression
