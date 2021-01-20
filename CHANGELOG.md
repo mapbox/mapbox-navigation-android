@@ -2,6 +2,13 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 1.4.0 - January 20, 2021
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Bug fixes and improvements
+* Removed the `ACCESS_BACKGROUND_LOCATION` permission requirement. [3913](https://github.com/mapbox/mapbox-navigation-android/pull/3913)
+
 ## Mapbox Navigation SDK 1.4.0-rc.1 - January 13, 2021
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
