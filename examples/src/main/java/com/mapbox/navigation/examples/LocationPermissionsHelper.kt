@@ -12,7 +12,6 @@ import java.util.ArrayList
 
 private const val COARSE_LOCATION_PERMISSION = Manifest.permission.ACCESS_COARSE_LOCATION
 private const val FINE_LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION
-private const val BACKGROUND_LOCATION_PERMISSION = "android.permission.ACCESS_BACKGROUND_LOCATION"
 const val LOCATION_PERMISSIONS_REQUEST_CODE = 1612
 
 /**
@@ -23,23 +22,19 @@ class LocationPermissionsHelper(private val listener: PermissionsListener?) {
 
     fun requestLocationPermissions(activity: Activity) {
         // Request fine location permissions by default
-        requestLocationPermissions(activity, true, true)
+        requestLocationPermissions(activity, true)
     }
 
     // suppressed to have the same API as PermissionsManager from com.mapbox.android.core.permissions
     @Suppress("SameParameterValue")
     private fun requestLocationPermissions(
         activity: Activity,
-        requestFineLocation: Boolean,
-        requestBackgroundLocation: Boolean
+        requestFineLocation: Boolean
     ) {
         val permissions = if (requestFineLocation) {
             mutableListOf(FINE_LOCATION_PERMISSION)
         } else {
             mutableListOf(COARSE_LOCATION_PERMISSION)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && requestBackgroundLocation) {
-            permissions.add(BACKGROUND_LOCATION_PERMISSION)
         }
         requestPermissions(activity, permissions.toTypedArray())
     }
@@ -100,17 +95,9 @@ class LocationPermissionsHelper(private val listener: PermissionsListener?) {
             return isPermissionGranted(context, FINE_LOCATION_PERMISSION)
         }
 
-        private fun isBackgroundLocationPermissionGranted(context: Context): Boolean {
-            return isPermissionGranted(context, BACKGROUND_LOCATION_PERMISSION)
-        }
-
         fun areLocationPermissionsGranted(context: Context): Boolean {
             return isCoarseLocationPermissionGranted(context) ||
-                isFineLocationPermissionGranted(context) ||
-                (
-                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) &&
-                        isBackgroundLocationPermissionGranted(context)
-                    )
+                isFineLocationPermissionGranted(context)
         }
 
         fun areRuntimePermissionsRequired(): Boolean {
