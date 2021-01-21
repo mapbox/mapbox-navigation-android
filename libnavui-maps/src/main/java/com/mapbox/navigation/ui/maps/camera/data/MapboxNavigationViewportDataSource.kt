@@ -144,9 +144,11 @@ class MapboxNavigationViewportDataSource(
     private var remainingPointsOnRoute: List<Point> = emptyList()
     private var targetLocation: Location? = null
 
+    /* -------- GENERATED OPTIONS -------- */
     private var followingCameraOptions = CameraOptions.Builder().build()
     private var overviewCameraOptions = CameraOptions.Builder().build()
 
+    /* -------- OVERRIDES -------- */
     private val followingCenterProperty = ViewportProperty.CenterProperty(null, NULL_ISLAND_POINT)
     private val followingZoomProperty = ViewportProperty.ZoomProperty(null, 0.0)
     private val followingBearingProperty = ViewportProperty.BearingProperty(null, 0.0)
@@ -159,7 +161,6 @@ class MapboxNavigationViewportDataSource(
         null,
         CENTER_SCREEN_COORDINATE
     )
-
     private val overviewCenterProperty = ViewportProperty.CenterProperty(null, NULL_ISLAND_POINT)
     private val overviewZoomProperty = ViewportProperty.ZoomProperty(null, 0.0)
     private val overviewBearingProperty = ViewportProperty.BearingProperty(null, 0.0)
@@ -169,6 +170,127 @@ class MapboxNavigationViewportDataSource(
         null,
         CENTER_SCREEN_COORDINATE
     )
+
+    /* -------- ALLOWED UPDATES -------- */
+    /**
+     * If `true`, the source will manipulate Camera Center Property when producing following frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Center Property.
+     *
+     * Default to `true`.
+     */
+    var followingCenterUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Zoom Property when producing following frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Zoom Center Property.
+     *
+     * Default to `true`.
+     */
+    var followingZoomUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Bearing Property when producing following frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Bearing Property.
+     *
+     * Default to `true`.
+     */
+    var followingBearingUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Pitch Property when producing following frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Pitch Property.
+     *
+     * Default to `true`.
+     */
+    var followingPitchUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Padding Property when producing following frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Padding Property.
+     *
+     * Default to `true`.
+     */
+    var followingPaddingUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Anchor Property when producing following frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Anchor Property.
+     *
+     * Default to `true`.
+     */
+    var followingAnchorUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Center Property when producing overview frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Center Property.
+     *
+     * Default to `true`.
+     */
+    var overviewCenterUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Zoom Property when producing overview frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Zoom Center Property.
+     *
+     * Default to `true`.
+     */
+    var overviewZoomUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Bearing Property when producing overview frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Bearing Property.
+     *
+     * Default to `true`.
+     */
+    var overviewBearingUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Pitch Property when producing overview frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Pitch Property.
+     *
+     * Default to `true`.
+     */
+    var overviewPitchUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Padding Property when producing overview frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Padding Property.
+     *
+     * Default to `true`.
+     */
+    var overviewPaddingUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Anchor Property when producing overview frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Anchor Property.
+     *
+     * Default to `true`.
+     */
+    var overviewAnchorUpdatesAllowed = true
 
     private var additionalPointsToFrameForFollowing: List<Point> = emptyList()
     private var additionalPointsToFrameForOverview: List<Point> = emptyList()
@@ -565,24 +687,48 @@ class MapboxNavigationViewportDataSource(
         updateOverviewData(pointsForOverview)
 
         followingCameraOptions =
-            CameraOptions.Builder()
-                .center(followingCenterProperty.get())
-                .zoom(followingZoomProperty.get())
-                .bearing(followingBearingProperty.get())
-                .pitch(followingPitchProperty.get())
-                .padding(followingPaddingProperty.get())
-                .anchor(followingAnchorProperty.get())
-                .build()
+            CameraOptions.Builder().apply {
+                if (followingCenterUpdatesAllowed) {
+                    center(followingCenterProperty.get())
+                }
+                if (followingZoomUpdatesAllowed) {
+                    zoom(followingZoomProperty.get())
+                }
+                if (followingBearingUpdatesAllowed) {
+                    bearing(followingBearingProperty.get())
+                }
+                if (followingPitchUpdatesAllowed) {
+                    pitch(followingPitchProperty.get())
+                }
+                if (followingPaddingUpdatesAllowed) {
+                    padding(followingPaddingProperty.get())
+                }
+                if (followingAnchorUpdatesAllowed) {
+                    anchor(followingAnchorProperty.get())
+                }
+            }.build()
 
         overviewCameraOptions =
-            CameraOptions.Builder()
-                .center(overviewCenterProperty.get())
-                .zoom(overviewZoomProperty.get())
-                .bearing(overviewBearingProperty.get())
-                .pitch(overviewPitchProperty.get())
-                .padding(overviewPaddingProperty.get())
-                .anchor(overviewAnchorProperty.get())
-                .build()
+            CameraOptions.Builder().apply {
+                if (overviewCenterUpdatesAllowed) {
+                    center(overviewCenterProperty.get())
+                }
+                if (overviewZoomUpdatesAllowed) {
+                    zoom(overviewZoomProperty.get())
+                }
+                if (overviewBearingUpdatesAllowed) {
+                    bearing(overviewBearingProperty.get())
+                }
+                if (overviewPitchUpdatesAllowed) {
+                    pitch(overviewPitchProperty.get())
+                }
+                if (overviewPaddingUpdatesAllowed) {
+                    padding(overviewPaddingProperty.get())
+                }
+                if (overviewAnchorUpdatesAllowed) {
+                    anchor(overviewAnchorProperty.get())
+                }
+            }.build()
     }
 
     private fun updateFollowingData(pointsForFollowing: List<Point>) {

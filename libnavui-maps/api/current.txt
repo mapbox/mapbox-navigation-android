@@ -21,7 +21,7 @@ package com.mapbox.navigation.ui.maps {
 package com.mapbox.navigation.ui.maps.camera {
 
   @UiThread public final class NavigationCamera {
-    ctor public NavigationCamera(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin, com.mapbox.maps.plugin.gestures.GesturesPlugin gesturesPlugin, com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource viewportDataSource, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition stateTransition);
+    ctor public NavigationCamera(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin, com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource viewportDataSource, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition stateTransition);
     method public com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState getState();
     method public void registerNavigationCameraStateChangeObserver(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver navigationCameraStateChangedObserver);
     method public void requestNavigationCameraToFollowing(android.animation.Animator.AnimatorListener? animatorListener = null);
@@ -30,6 +30,11 @@ package com.mapbox.navigation.ui.maps.camera {
     method public void resetFrame();
     method public void unregisterNavigationCameraStateChangeObserver(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver navigationCameraStateChangedObserver);
     property public final com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state;
+    field public static final com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion! Companion;
+    field public static final String NAVIGATION_CAMERA_OWNER = "NAVIGATION_CAMERA_OWNER";
+  }
+
+  public static final class NavigationCamera.Companion {
   }
 
 }
@@ -50,6 +55,18 @@ package com.mapbox.navigation.ui.maps.camera.data {
     method public void followingPaddingPropertyOverride(com.mapbox.maps.EdgeInsets? value);
     method public void followingPitchPropertyOverride(Double? value);
     method public void followingZoomPropertyOverride(Double? value);
+    method public boolean getFollowingAnchorUpdatesAllowed();
+    method public boolean getFollowingBearingUpdatesAllowed();
+    method public boolean getFollowingCenterUpdatesAllowed();
+    method public boolean getFollowingPaddingUpdatesAllowed();
+    method public boolean getFollowingPitchUpdatesAllowed();
+    method public boolean getFollowingZoomUpdatesAllowed();
+    method public boolean getOverviewAnchorUpdatesAllowed();
+    method public boolean getOverviewBearingUpdatesAllowed();
+    method public boolean getOverviewCenterUpdatesAllowed();
+    method public boolean getOverviewPaddingUpdatesAllowed();
+    method public boolean getOverviewPitchUpdatesAllowed();
+    method public boolean getOverviewZoomUpdatesAllowed();
     method public com.mapbox.navigation.ui.maps.camera.data.ViewportData getViewportData();
     method public void onLocationChanged(android.location.Location location);
     method public void onRouteChanged(com.mapbox.api.directions.v5.models.DirectionsRoute route);
@@ -61,7 +78,31 @@ package com.mapbox.navigation.ui.maps.camera.data {
     method public void overviewPitchPropertyOverride(Double? value);
     method public void overviewZoomPropertyOverride(Double? value);
     method public void registerUpdateObserver(com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceUpdateObserver viewportDataSourceUpdateObserver);
+    method public void setFollowingAnchorUpdatesAllowed(boolean p);
+    method public void setFollowingBearingUpdatesAllowed(boolean p);
+    method public void setFollowingCenterUpdatesAllowed(boolean p);
+    method public void setFollowingPaddingUpdatesAllowed(boolean p);
+    method public void setFollowingPitchUpdatesAllowed(boolean p);
+    method public void setFollowingZoomUpdatesAllowed(boolean p);
+    method public void setOverviewAnchorUpdatesAllowed(boolean p);
+    method public void setOverviewBearingUpdatesAllowed(boolean p);
+    method public void setOverviewCenterUpdatesAllowed(boolean p);
+    method public void setOverviewPaddingUpdatesAllowed(boolean p);
+    method public void setOverviewPitchUpdatesAllowed(boolean p);
+    method public void setOverviewZoomUpdatesAllowed(boolean p);
     method public void unregisterUpdateObserver(com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceUpdateObserver viewportDataSourceUpdateObserver);
+    property public final boolean followingAnchorUpdatesAllowed;
+    property public final boolean followingBearingUpdatesAllowed;
+    property public final boolean followingCenterUpdatesAllowed;
+    property public final boolean followingPaddingUpdatesAllowed;
+    property public final boolean followingPitchUpdatesAllowed;
+    property public final boolean followingZoomUpdatesAllowed;
+    property public final boolean overviewAnchorUpdatesAllowed;
+    property public final boolean overviewBearingUpdatesAllowed;
+    property public final boolean overviewCenterUpdatesAllowed;
+    property public final boolean overviewPaddingUpdatesAllowed;
+    property public final boolean overviewPitchUpdatesAllowed;
+    property public final boolean overviewZoomUpdatesAllowed;
   }
 
   public final class MapboxNavigationViewportDataSourceKt {
@@ -97,6 +138,53 @@ package com.mapbox.navigation.ui.maps.camera.data {
 
   public interface ViewportDataSourceUpdateObserver {
     method public void viewportDataSourceUpdated(com.mapbox.navigation.ui.maps.camera.data.ViewportData viewportData);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.camera.lifecycle {
+
+  public final class NavigationBasicGesturesHandler implements com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener {
+    ctor public NavigationBasicGesturesHandler(com.mapbox.navigation.ui.maps.camera.NavigationCamera navigationCamera);
+    method public void onAnimatorCancelling(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator animator, String? owner);
+    method public void onAnimatorEnding(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator animator, String? owner);
+    method public void onAnimatorInterrupting(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator runningAnimator, String? runningAnimatorOwner, android.animation.ValueAnimator newAnimator, String? newAnimatorOwner);
+    method public void onAnimatorStarting(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator animator, String? owner);
+  }
+
+  public interface NavigationScaleGestureActionListener {
+    method public void onNavigationScaleGestureAction();
+  }
+
+  public final class NavigationScaleGestureHandler implements com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener {
+    ctor public NavigationScaleGestureHandler(android.content.Context context, com.mapbox.navigation.ui.maps.camera.NavigationCamera navigationCamera, com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.gestures.GesturesPlugin gesturesPlugin, com.mapbox.maps.plugin.location.LocationComponentPlugin locationPlugin, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener? scaleActionListener, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions options);
+    method public void cleanup();
+    method public com.mapbox.android.gestures.AndroidGesturesManager getCustomGesturesManager();
+    method public com.mapbox.android.gestures.AndroidGesturesManager getInitialGesturesManager();
+    method public void initialize();
+    method public boolean isInitialized();
+    method public void onAnimatorCancelling(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator animator, String? owner);
+    method public void onAnimatorEnding(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator animator, String? owner);
+    method public void onAnimatorInterrupting(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator runningAnimator, String? runningAnimatorOwner, android.animation.ValueAnimator newAnimator, String? newAnimatorOwner);
+    method public void onAnimatorStarting(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator animator, String? owner);
+    property public final com.mapbox.android.gestures.AndroidGesturesManager customGesturesManager;
+    property public final com.mapbox.android.gestures.AndroidGesturesManager initialGesturesManager;
+    property public final boolean isInitialized;
+  }
+
+  public final class NavigationScaleGestureHandlerOptions {
+    method public float getFollowingInitialMoveThreshold();
+    method public float getFollowingMultiFingerMoveThreshold();
+    method public android.graphics.RectF? getFollowingMultiFingerProtectedMoveArea();
+    method public com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions.Builder toBuilder();
+  }
+
+  public static final class NavigationScaleGestureHandlerOptions.Builder {
+    ctor public NavigationScaleGestureHandlerOptions.Builder(android.content.Context context);
+    method public com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions build();
+    method public com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions.Builder followingInitialMoveThreshold(float followingInitialMoveThreshold);
+    method public com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions.Builder followingMultiFingerMoveThreshold(float followingMultiFingerMoveThreshold);
+    method public com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions.Builder followingMultiFingerProtectedMoveArea(android.graphics.RectF? followingMultiFingerProtectedMoveArea);
   }
 
 }
@@ -498,7 +586,6 @@ package com.mapbox.navigation.ui.maps.snapshotter.model {
 
   public final class MapboxSnapshotterOptions {
     method public android.graphics.Bitmap.Config getBitmapConfig();
-    method public android.content.Context getContext();
     method public float getDensity();
     method public com.mapbox.maps.EdgeInsets getEdgeInsets();
     method public com.mapbox.maps.Size getSize();

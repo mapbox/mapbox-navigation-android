@@ -10,7 +10,6 @@ import com.mapbox.navigation.ui.maps.snapshotter.api.MapboxSnapshotterApi
 /**
  * A class that allows you to control the look of the snapshot that will be generated using
  * [MapboxSnapshotterApi]
- * @property context context
  * @property size bitmap size
  * @property density bitmap density
  * @property styleUri style uri
@@ -18,7 +17,10 @@ import com.mapbox.navigation.ui.maps.snapshotter.api.MapboxSnapshotterApi
  * @property bitmapConfig bitmap config, either RGB565 or ARGB8888
  */
 class MapboxSnapshotterOptions private constructor(
-    val context: Context,
+    /* fixme we shouldn't hold on to context,
+     * we need to change the BuilderTest to unlock this use-case
+     */
+    private val context: Context,
     val size: Size,
     val density: Float,
     val styleUri: String,

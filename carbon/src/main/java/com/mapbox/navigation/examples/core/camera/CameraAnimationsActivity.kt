@@ -5,6 +5,7 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,13 +30,14 @@ import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
 import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
-import com.mapbox.maps.plugin.gestures.GesturesPluginImpl
+import com.mapbox.maps.plugin.gestures.GesturesPlugin
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.getGesturesPlugin
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions
 import com.mapbox.maps.plugin.location.LocationComponentPlugin
 import com.mapbox.maps.plugin.location.LocationUpdate
 import com.mapbox.maps.plugin.location.OnIndicatorPositionChangedListener
+import com.mapbox.maps.plugin.location.getLocationPlugin
 import com.mapbox.maps.plugin.location.modes.RenderMode
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -54,6 +56,8 @@ import com.mapbox.navigation.examples.core.camera.AnimationAdapter.OnAnimationBu
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
+import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener
+import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandler
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
@@ -64,7 +68,6 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.android.synthetic.main.layout_camera_animations.*
-import timber.log.Timber
 
 class CameraAnimationsActivity :
     AppCompatActivity(),
@@ -124,8 +127,9 @@ class CameraAnimationsActivity :
     private val mapMatcherResultObserver = object : MapMatcherResultObserver {
         override fun onNewMapMatcherResult(mapMatcherResult: MapMatcherResult) {
             val locationUpdate = LocationUpdate(
-                mapMatcherResult.enhancedLocation,
-                mapMatcherResult.keyPoints.dropLast(1)
+                location = mapMatcherResult.enhancedLocation,
+                intermediatePoints = null, // fixme mapMatcherResult.keyPoints.dropLast(1),
+                animationDuration = 1000L
             )
             locationComponent?.forceLocationUpdate(locationUpdate)
             viewportDataSource.onLocationChanged(mapMatcherResult.enhancedLocation)
@@ -198,8 +202,25 @@ class CameraAnimationsActivity :
         navigationCamera = NavigationCamera(
             mapView.getMapboxMap(),
             mapView.getCameraAnimationsPlugin(),
-            mapView.getGesturesPlugin(),
             viewportDataSource
+        )
+        /* Alternative to the NavigationScaleGestureHandler
+        mapView.getCameraAnimationsPlugin().addCameraAnimationsLifecycleListener(
+            NavigationBasicGesturesHandler(navigationCamera)
+        )*/
+        mapView.getCameraAnimationsPlugin().addCameraAnimationsLifecycleListener(
+            NavigationScaleGestureHandler(
+                this,
+                navigationCamera,
+                mapboxMap,
+                getGesturesPlugin(),
+                getLocationComponent(),
+                object : NavigationScaleGestureActionListener {
+                    override fun onNavigationScaleGestureAction() {
+                        viewportDataSource.followingZoomUpdatesAllowed = false
+                    }
+                }
+            ).apply { initialize() }
         )
 
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
@@ -349,7 +370,7 @@ class CameraAnimationsActivity :
             object : Style.OnStyleLoaded {
                 override fun onStyleLoaded(style: Style) {
                     initializeLocationComponent(style)
-                    getGesturesPlugin()?.addOnMapLongClickListener(
+                    getGesturesPlugin().addOnMapLongClickListener(
                         this@CameraAnimationsActivity
                     )
                     style.addSource(poiSource)
@@ -358,7 +379,10 @@ class CameraAnimationsActivity :
             },
             object : OnMapLoadErrorListener {
                 override fun onMapLoadError(mapViewLoadError: MapLoadError, msg: String) {
-                    Timber.e("Error loading map: %s", mapViewLoadError.name)
+                    Log.e(
+                        "CameraAnimationsAct",
+                        "Error loading map: %s".format(mapViewLoadError.name)
+                    )
                 }
             }
         )
@@ -396,6 +420,7 @@ class CameraAnimationsActivity :
     override fun onButtonClicked(animationType: AnimationType) {
         when (animationType) {
             AnimationType.Following -> {
+                viewportDataSource.followingZoomUpdatesAllowed = true
                 viewportDataSource.followingPaddingPropertyOverride(followingEdgeInsets)
                 viewportDataSource.evaluate()
                 navigationCamera.requestNavigationCameraToFollowing()
@@ -411,7 +436,6 @@ class CameraAnimationsActivity :
                         it.longitude + 0.0123,
                         it.latitude + 0.0123
                     )
-                    navigationCamera.requestNavigationCameraToIdle()
                     mapView.getCameraAnimationsPlugin().flyTo(
                         CameraOptions.Builder()
                             .center(center)
@@ -517,12 +541,12 @@ class CameraAnimationsActivity :
         return getString(this.resources.getIdentifier("mapbox_access_token", "string", packageName))
     }
 
-    private fun getLocationComponent(): LocationComponentPlugin? {
-        return mapView.getPlugin(LocationComponentPlugin::class.java)
+    private fun getLocationComponent(): LocationComponentPlugin {
+        return mapView.getLocationPlugin()
     }
 
-    private fun getGesturesPlugin(): GesturesPluginImpl? {
-        return mapView.getPlugin(GesturesPluginImpl::class.java)
+    private fun getGesturesPlugin(): GesturesPlugin {
+        return mapView.getGesturesPlugin()
     }
 
     override fun onRequestPermissionsResult(

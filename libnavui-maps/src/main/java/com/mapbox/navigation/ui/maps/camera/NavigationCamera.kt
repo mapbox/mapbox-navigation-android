@@ -4,17 +4,17 @@ import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import androidx.annotation.UiThread
-import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.animator.CameraAnimator
-import com.mapbox.maps.plugin.gestures.GesturesPlugin
-import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.ViewportData
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceUpdateObserver
+import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
+import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandler
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState.FOLLOWING
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState.IDLE
@@ -37,12 +37,6 @@ import java.util.concurrent.CopyOnWriteArraySet
  * ## States
  * The `NavigationCamera` is an entity that offers to maintain 3 distinct [NavigationCameraState]s:
  * [IDLE], [FOLLOWING], and [OVERVIEW]. States can be requested at any point in runtime.
- *
- * When [FOLLOWING] or [OVERVIEW] states are engaged, the `NavigationCamera` assumes full ownership
- * of the [CameraAnimationsPlugin]. This means that if any other camera transition is scheduled
- * outside of the `NavigationCamera`’s context, there might be side-effects or glitches.
- * Consequently, if you want to perform other camera transitions,
- * first call [requestNavigationCameraToIdle], and only after that perform the desired transition.
  *
  * When the camera is transitioning between states, it reports that status with
  * [TRANSITION_TO_FOLLOWING] and [TRANSITION_TO_OVERVIEW] helper states.
@@ -78,19 +72,39 @@ import java.util.concurrent.CopyOnWriteArraySet
  * After generating the transitions, `NavigationCamera` handles registering them to Maps SDK,
  * executing, listening for cancellation, adjusting states, etc.
  *
- * ## Gestures
- * When map is interacted with (whenever [OnMoveListener.onMoveBegin] fires), `NavigationCamera`
- * automatically jumps to [IDLE] state.
+ * ## Gestures and other camera interactions
+ * When [FOLLOWING] or [OVERVIEW] states are engaged, the `NavigationCamera` assumes full ownership
+ * of the [CameraAnimationsPlugin]. This means that if any other camera transition is scheduled
+ * outside of the `NavigationCamera`’s context, there might be side-effects or glitches.
+ * Consequently, if you want to perform other camera transitions,
+ * first call [requestNavigationCameraToIdle], and only after that perform the desired transition.
+ *
+ * Alternatively, you can use one of the default implementations
+ * of [CameraAnimationsLifecycleListener] that automate the response of the `NavigationCamera` for
+ * gesture interactions and other camera animations:
+ * - [NavigationBasicGesturesHandler] transitions `NavigationCamera` to [NavigationCameraState.IDLE]
+ * when any camera transitions outside of the `NavigationCamera` context is started.
+ * - [NavigationScaleGestureHandler] behaves as above, but allows for executing various scale
+ * gestures to manipulate the camera's zoom level when in [NavigationCameraState.FOLLOWING] without
+ * immediately falling back to [NavigationCameraState.IDLE].
  */
 @UiThread
 class NavigationCamera(
     mapboxMap: MapboxMap,
     private val cameraPlugin: CameraAnimationsPlugin,
-    gesturesPlugin: GesturesPlugin,
     private val viewportDataSource: ViewportDataSource,
     private val stateTransition: NavigationCameraStateTransition =
         MapboxNavigationCameraStateTransition(mapboxMap, cameraPlugin)
 ) {
+
+    companion object {
+        /**
+         * Constant used to recognize the owner of transitions initiated by the [NavigationCamera].
+         *
+         * @see CameraAnimator.owner
+         */
+        const val NAVIGATION_CAMERA_OWNER = "NAVIGATION_CAMERA_OWNER"
+    }
 
     private var runningAnimation: AnimatorSet? = null
 
@@ -117,22 +131,8 @@ class NavigationCamera(
         }
     }
 
-    private val moveListener = object : OnMoveListener {
-        override fun onMoveBegin(detector: MoveGestureDetector) {
-            requestNavigationCameraToIdle()
-        }
-
-        override fun onMove(detector: MoveGestureDetector): Boolean {
-            return false
-        }
-
-        override fun onMoveEnd(detector: MoveGestureDetector) {
-        }
-    }
-
     init {
         viewportDataSource.registerUpdateObserver(sourceUpdateObserver)
-        gesturesPlugin.addOnMoveListener(moveListener)
     }
 
     /**

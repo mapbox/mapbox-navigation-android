@@ -6,8 +6,6 @@ import android.animation.ValueAnimator
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
-import com.mapbox.maps.plugin.gestures.GesturesPlugin
-import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.navigation.ui.maps.camera.data.ViewportData
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceUpdateObserver
@@ -29,11 +27,6 @@ class NavigationCameraTest {
 
     private val mapboxMap: MapboxMap = mockk(relaxUnitFun = true)
     private val cameraPlugin: CameraAnimationsPlugin = mockk(relaxUnitFun = true)
-
-    private val internalMoveListenerSlot = slot<OnMoveListener>()
-    private val gesturesPlugin: GesturesPlugin = mockk(relaxUnitFun = true) {
-        every { addOnMoveListener(capture(internalMoveListenerSlot)) } just Runs
-    }
 
     private val internalTransitionListenerSlot = slot<Animator.AnimatorListener>()
     private val internalFrameListenerSlot = slot<Animator.AnimatorListener>()
@@ -99,7 +92,6 @@ class NavigationCameraTest {
         navigationCamera = NavigationCamera(
             mapboxMap,
             cameraPlugin,
-            gesturesPlugin,
             viewportDataSource,
             stateTransition
         )
@@ -113,11 +105,6 @@ class NavigationCameraTest {
     @Test
     fun `init registers data source listener`() {
         verify(exactly = 1) { viewportDataSource.registerUpdateObserver(any()) }
-    }
-
-    @Test
-    fun `init registers move listener`() {
-        verify(exactly = 1) { gesturesPlugin.addOnMoveListener(any()) }
     }
 
     @Test
@@ -569,17 +556,6 @@ class NavigationCameraTest {
         internalFrameListenerSlot.captured.onAnimationEnd(frameTransition.frameAnimatorSet)
 
         verify(exactly = 1) { frameTransition.frameAnimatorSet.cancel() }
-        assertEquals(NavigationCameraState.IDLE, navigationCamera.state)
-    }
-
-    @Test
-    fun `gesture interaction cancels animation and sets idle`() {
-        navigationCamera.requestNavigationCameraToOverview()
-        internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
-
-        internalMoveListenerSlot.captured.onMoveBegin(mockk())
-
-        verify(exactly = 1) { overviewAnimatorSet.cancel() }
         assertEquals(NavigationCameraState.IDLE, navigationCamera.state)
     }
 

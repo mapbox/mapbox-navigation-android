@@ -8,6 +8,7 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.CameraAnimatorOptions
+import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.NAVIGATION_CAMERA_OWNER
 import com.mapbox.navigation.ui.maps.camera.utils.shortestRotation
 import kotlin.math.abs
 import kotlin.math.hypot
@@ -44,7 +45,9 @@ class MapboxNavigationCameraTransition(
                 ).toLong()
                 .coerceAtMost(MAXIMUM_LOW_TO_HIGH_DURATION)
             val centerAnimator = cameraPlugin.createCenterAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(center)
+                CameraAnimatorOptions.cameraAnimatorOptions(center) {
+                    owner = NAVIGATION_CAMERA_OWNER
+                }
             ) {
                 duration = centerDuration
                 interpolator = SLOW_OUT_SLOW_IN_INTERPOLATOR
@@ -66,7 +69,9 @@ class MapboxNavigationCameraTransition(
                 .coerceAtMost(MAXIMUM_LOW_TO_HIGH_DURATION)
 
             val zoomAnimator = cameraPlugin.createZoomAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(zoom)
+                CameraAnimatorOptions.cameraAnimatorOptions(zoom) {
+                    owner = NAVIGATION_CAMERA_OWNER
+                }
             ) {
                 startDelay = zoomDelay.toLong()
                 duration = zoomDuration
@@ -83,7 +88,9 @@ class MapboxNavigationCameraTransition(
             val bearingDuration = 1800.0
             val bearingDelay = (zoomDelay + zoomDuration - bearingDuration).coerceAtLeast(0.0)
             val bearingAnimator = cameraPlugin.createBearingAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(bearingShortestRotation)
+                CameraAnimatorOptions.cameraAnimatorOptions(bearingShortestRotation) {
+                    owner = NAVIGATION_CAMERA_OWNER
+                }
             ) {
                 startDelay = bearingDelay.toLong()
                 duration = bearingDuration.toLong()
@@ -99,7 +106,9 @@ class MapboxNavigationCameraTransition(
             .coerceAtLeast(0.0)
         cameraOptions.pitch?.let { pitch ->
             val pitchAnimator = cameraPlugin.createPitchAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(pitch)
+                CameraAnimatorOptions.cameraAnimatorOptions(pitch) {
+                    owner = NAVIGATION_CAMERA_OWNER
+                }
             ) {
                 startDelay = pitchAndPaddingDelay.toLong()
                 duration = pitchAndPaddingDuration.toLong()
@@ -110,7 +119,9 @@ class MapboxNavigationCameraTransition(
 
         cameraOptions.padding?.let { padding ->
             val paddingAnimator = cameraPlugin.createPaddingAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(padding)
+                CameraAnimatorOptions.cameraAnimatorOptions(padding) {
+                    owner = NAVIGATION_CAMERA_OWNER
+                }
             ) {
                 startDelay = pitchAndPaddingDelay.toLong()
                 duration = pitchAndPaddingDuration.toLong()
@@ -132,7 +143,9 @@ class MapboxNavigationCameraTransition(
 
         cameraOptions.center?.let { center ->
             val centerAnimator = cameraPlugin.createCenterAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(center)
+                CameraAnimatorOptions.cameraAnimatorOptions(center) {
+                    owner = NAVIGATION_CAMERA_OWNER
+                }
             ) {
                 startDelay = 800
                 duration = 1000
@@ -143,7 +156,9 @@ class MapboxNavigationCameraTransition(
 
         cameraOptions.zoom?.let { zoom ->
             val zoomAnimator = cameraPlugin.createZoomAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(zoom)
+                CameraAnimatorOptions.cameraAnimatorOptions(zoom) {
+                    owner = NAVIGATION_CAMERA_OWNER
+                }
             ) {
                 startDelay = 0
                 duration = 1800
@@ -158,7 +173,9 @@ class MapboxNavigationCameraTransition(
                 bearingShortestRotation = it + shortestRotation(it, bearing)
             }
             val bearingAnimator = cameraPlugin.createBearingAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(bearingShortestRotation)
+                CameraAnimatorOptions.cameraAnimatorOptions(bearingShortestRotation) {
+                    owner = NAVIGATION_CAMERA_OWNER
+                }
             ) {
                 startDelay = 600
                 duration = 1200
@@ -169,7 +186,9 @@ class MapboxNavigationCameraTransition(
 
         cameraOptions.pitch?.let { pitch ->
             val pitchAnimator = cameraPlugin.createPitchAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(pitch)
+                CameraAnimatorOptions.cameraAnimatorOptions(pitch) {
+                    owner = NAVIGATION_CAMERA_OWNER
+                }
             ) {
                 startDelay = 0
                 duration = 1000
@@ -180,7 +199,9 @@ class MapboxNavigationCameraTransition(
 
         cameraOptions.padding?.let { padding ->
             val paddingAnimator = cameraPlugin.createPaddingAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(padding)
+                CameraAnimatorOptions.cameraAnimatorOptions(padding) {
+                    owner = NAVIGATION_CAMERA_OWNER
+                }
             ) {
                 startDelay = 0
                 duration = 1200
@@ -202,7 +223,9 @@ class MapboxNavigationCameraTransition(
 
         cameraOptions.center?.let { center ->
             val centerAnimator = cameraPlugin.createCenterAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(center)
+                CameraAnimatorOptions.cameraAnimatorOptions(center) {
+                    owner = NAVIGATION_CAMERA_OWNER
+                }
             ) {
                 duration = LINEAR_ANIMATION_DURATION
                 interpolator = LINEAR_INTERPOLATOR
@@ -212,7 +235,9 @@ class MapboxNavigationCameraTransition(
 
         cameraOptions.zoom?.let { zoom ->
             val zoomAnimator = cameraPlugin.createZoomAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(zoom)
+                CameraAnimatorOptions.cameraAnimatorOptions(zoom) {
+                    owner = NAVIGATION_CAMERA_OWNER
+                }
             ) {
                 duration = LINEAR_ANIMATION_DURATION
                 interpolator = LINEAR_INTERPOLATOR
@@ -226,7 +251,9 @@ class MapboxNavigationCameraTransition(
                 bearingShortestRotation = it + shortestRotation(it, bearing)
             }
             val bearingAnimator = cameraPlugin.createBearingAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(bearingShortestRotation)
+                CameraAnimatorOptions.cameraAnimatorOptions(bearingShortestRotation) {
+                    owner = NAVIGATION_CAMERA_OWNER
+                }
             ) {
                 duration = LINEAR_ANIMATION_DURATION
                 interpolator = LINEAR_INTERPOLATOR
@@ -236,7 +263,9 @@ class MapboxNavigationCameraTransition(
 
         cameraOptions.pitch?.let { pitch ->
             val pitchAnimator = cameraPlugin.createPitchAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(pitch)
+                CameraAnimatorOptions.cameraAnimatorOptions(pitch) {
+                    owner = NAVIGATION_CAMERA_OWNER
+                }
             ) {
                 duration = LINEAR_ANIMATION_DURATION
                 interpolator = LINEAR_INTERPOLATOR
@@ -246,7 +275,9 @@ class MapboxNavigationCameraTransition(
 
         cameraOptions.padding?.let { padding ->
             val paddingAnimator = cameraPlugin.createPaddingAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(padding)
+                CameraAnimatorOptions.cameraAnimatorOptions(padding) {
+                    owner = NAVIGATION_CAMERA_OWNER
+                }
             ) {
                 duration = LINEAR_ANIMATION_DURATION
                 interpolator = LINEAR_INTERPOLATOR
