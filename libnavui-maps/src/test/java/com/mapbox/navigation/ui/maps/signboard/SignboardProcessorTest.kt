@@ -130,7 +130,7 @@ class SignboardProcessorTest {
 
     @Test
     fun `process action signboard process response result unauthorized access`() {
-        val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(401L, null)
+        val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(401L, ByteArray(0))
         val response: Expected<HttpResponseData?, HttpRequestError?> =
             createValue(mockHttpResponseData)
         val action = SignboardAction.ProcessSignboardResponse(response)
@@ -146,7 +146,7 @@ class SignboardProcessorTest {
 
     @Test
     fun `process action signboard process response result resource missing`() {
-        val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(404L, null)
+        val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(404L, ByteArray(0))
         val response: Expected<HttpResponseData?, HttpRequestError?> =
             createValue(mockHttpResponseData)
         val expected = SignboardResult.Signboard.Failure("Resource is missing")
@@ -159,7 +159,7 @@ class SignboardProcessorTest {
 
     @Test
     fun `process action signboard process response result unknown error`() {
-        val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(500L, null)
+        val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(500L, ByteArray(0))
         val response: Expected<HttpResponseData?, HttpRequestError?> =
             createValue(mockHttpResponseData)
         val expected = SignboardResult.Signboard.Failure("Unknown error")
@@ -238,7 +238,7 @@ class SignboardProcessorTest {
             .build()
     }
 
-    private fun getMockHttpResponseData(code: Long, data: ByteArray?): HttpResponseData {
+    private fun getMockHttpResponseData(code: Long, data: ByteArray): HttpResponseData {
         val httpResponseData: HttpResponseData = mockk()
         every { httpResponseData.code } returns code
         every { httpResponseData.data } returns data

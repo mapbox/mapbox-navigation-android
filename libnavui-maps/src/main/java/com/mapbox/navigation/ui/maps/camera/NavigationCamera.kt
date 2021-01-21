@@ -122,7 +122,8 @@ class NavigationCamera(
             requestNavigationCameraToIdle()
         }
 
-        override fun onMove(detector: MoveGestureDetector) {
+        override fun onMove(detector: MoveGestureDetector): Boolean {
+            return false
         }
 
         override fun onMoveEnd(detector: MoveGestureDetector) {

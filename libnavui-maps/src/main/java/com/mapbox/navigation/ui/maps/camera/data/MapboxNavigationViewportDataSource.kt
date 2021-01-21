@@ -631,9 +631,11 @@ class MapboxNavigationViewportDataSource(
         pitch: Double,
         padding: EdgeInsets
     ): Pair<Double, Point> {
-        val cam = mapboxMap.cameraForCoordinates(points, padding, bearing, pitch)
+        val cam = if (points.isNotEmpty()) {
+            mapboxMap.cameraForCoordinates(points, padding, bearing, pitch)
+        } else null
 
-        return Pair(cam.zoom ?: MINIMUM_ZOOM_LEVEL_FOR_GEO, cam.center ?: NULL_ISLAND_POINT)
+        return Pair(cam?.zoom ?: MINIMUM_ZOOM_LEVEL_FOR_GEO, cam?.center ?: NULL_ISLAND_POINT)
     }
 }
 

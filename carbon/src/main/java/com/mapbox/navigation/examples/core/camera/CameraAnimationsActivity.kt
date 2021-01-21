@@ -15,8 +15,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
-import com.mapbox.maps.CameraChange
-import com.mapbox.maps.CameraChangeMode
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapLoadError
@@ -287,7 +285,7 @@ class CameraAnimationsActivity :
     private fun initCameraListeners() {
         mapboxMap.addOnCameraChangeListener(
             object : OnCameraChangeListener {
-                override fun onCameraChange(changeEvent: CameraChange, mode: CameraChangeMode) {
+                override fun onCameraChanged() {
                     updateCameraChangeView()
                 }
             }
