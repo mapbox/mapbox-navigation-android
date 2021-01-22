@@ -224,6 +224,7 @@ package com.mapbox.navigation.ui.maps.route.line.api {
     ctor public MapboxRouteLineApi(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions routeLineOptions);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineState.ClearRouteLineState clearRouteLine();
     method public void findClosestRoute(com.mapbox.geojson.Point target, com.mapbox.maps.MapboxMap mapboxMap, float padding, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.maps.route.line.model.RouteLineState.ClosestRouteState> resultConsumer);
+    method public suspend Object? findClosestRoute(com.mapbox.geojson.Point target, com.mapbox.maps.MapboxMap mapboxMap, float padding, kotlin.coroutines.Continuation<? super com.mapbox.navigation.ui.maps.route.line.model.RouteLineState.ClosestRouteState> p);
     method public com.mapbox.api.directions.v5.models.DirectionsRoute? getPrimaryRoute();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineState.RouteSetState getRouteDrawData();
     method public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();

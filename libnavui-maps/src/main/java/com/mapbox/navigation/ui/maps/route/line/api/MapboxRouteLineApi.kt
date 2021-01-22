@@ -23,9 +23,13 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineState
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMisc
+import kotlinx.coroutines.launch
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Responsible for generating route line related data which can be rendered on the map to
@@ -373,9 +377,10 @@ class MapboxRouteLineApi(
      * primary route is given precedence if more than one route is found.
      *
      * @param target a target latitude/longitude serving as the search point
-     * @param mapboxMap a reference to the MapboxMap that will be queried
-     * @param padding a sizing value added to all sides of the target point  for creating a bounding
+     * @param mapboxMap a reference to the []MapboxMap] that will be queried
+     * @param padding a sizing value added to all sides of the target point for creating a bounding
      * box to search in.
+     * @param resultConsumer a callback to receive the result
      *
      * @return the index of the route in this class's route collection or -1 if no routes found.
      */
@@ -385,6 +390,30 @@ class MapboxRouteLineApi(
         padding: Float,
         resultConsumer: MapboxNavigationConsumer<RouteLineState.ClosestRouteState>
     ) {
+        ThreadController.getMainScopeAndRootJob().scope.launch {
+            val state = findClosestRoute(target, mapboxMap, padding)
+            resultConsumer.accept(state)
+        }
+    }
+
+    /**
+     * The map will be queried for a route line feature at the target point or a bounding box
+     * centered at the target point with a padding value determining the box's size. If a route
+     * feature is found the index of that route in this class's route collection is returned. The
+     * primary route is given precedence if more than one route is found.
+     *
+     * @param target a target latitude/longitude serving as the search point
+     * @param mapboxMap a reference to the []MapboxMap] that will be queried
+     * @param padding a sizing value added to all sides of the target point for creating a bounding
+     * box to search in.
+     *
+     * @return the index of the route in this class's route collection or -1 if no routes found.
+     */
+    suspend fun findClosestRoute(
+        target: Point,
+        mapboxMap: MapboxMap,
+        padding: Float,
+    ): RouteLineState.ClosestRouteState {
         val mapClickPoint = mapboxMap.pixelForCoordinate(target)
         val leftFloat = (mapClickPoint.x - padding)
         val rightFloat = (mapClickPoint.x + padding)
@@ -394,77 +423,81 @@ class MapboxRouteLineApi(
             ScreenCoordinate(leftFloat, topFloat),
             ScreenCoordinate(rightFloat, bottomFloat)
         )
-        val queryWithClickRectConsumer = object : MapboxNavigationConsumer<Int> {
-            override fun accept(featureIndex: Int) {
-                RouteLineState.ClosestRouteState(featureIndex)
-            }
-        }
-        val queryWithClickPointConsumer = object : MapboxNavigationConsumer<Int> {
-            override fun accept(featureIndex: Int) {
-                if (featureIndex >= 0) {
-                    resultConsumer.accept(RouteLineState.ClosestRouteState(featureIndex))
-                } else {
-                    queryMapForFeatureIndex(
-                        mapboxMap,
-                        mapClickPoint,
-                        clickRect,
-                        listOf(
-                            RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
-                            RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
-                            RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
-                            RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID
-                        ),
-                        routeFeatureData.map { it.featureCollection },
-                        queryWithClickRectConsumer
-                    )
-                }
-            }
-        }
+        val features = routeFeatureData.map { it.featureCollection }
 
-        queryWithClickPointConsumer.accept(-1)
-        queryMapForFeatureIndex(
+        val clickPointFeatureIndex = queryMapForFeatureIndex(
             mapboxMap,
             mapClickPoint,
-            clickRect,
             listOf(
-                RouteConstants.PRIMARY_ROUTE_LAYER_ID,
-                RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID
+                RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
+                RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
+                RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
+                RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID
             ),
-            routeFeatureData.map { it.featureCollection },
-            queryWithClickPointConsumer
+            features
         )
+
+        return if (clickPointFeatureIndex >= 0) {
+            RouteLineState.ClosestRouteState(clickPointFeatureIndex)
+        } else {
+            val clickRectFeatureIndex = queryMapForFeatureIndex(
+                mapboxMap,
+                clickRect,
+                listOf(
+                    RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
+                    RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
+                    RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
+                    RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID
+                ),
+                features
+            )
+            if (clickRectFeatureIndex >= 0) {
+                RouteLineState.ClosestRouteState(clickRectFeatureIndex)
+            } else {
+                val index = queryMapForFeatureIndex(
+                    mapboxMap,
+                    mapClickPoint,
+                    listOf(
+                        RouteConstants.PRIMARY_ROUTE_LAYER_ID,
+                        RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+                    ),
+                    features
+                )
+                RouteLineState.ClosestRouteState(index)
+            }
+        }
     }
 
-    private fun queryMapForFeatureIndex(
+    private suspend fun queryMapForFeatureIndex(
         mapboxMap: MapboxMap,
         mapClickPoint: ScreenCoordinate,
+        layerIds: List<String>,
+        routeFeatures: List<FeatureCollection>
+    ): Int {
+        return suspendCoroutine { continuation ->
+            mapboxMap.queryRenderedFeatures(
+                mapClickPoint,
+                RenderedQueryOptions(layerIds, null)
+            ) {
+                val index = getIndexOfFirstFeature(it.value ?: listOf(), routeFeatures)
+                continuation.resume(index)
+            }
+        }
+    }
+
+    private suspend fun queryMapForFeatureIndex(
+        mapboxMap: MapboxMap,
         clickRect: ScreenBox,
         layerIds: List<String>,
-        routeFeatures: List<FeatureCollection>,
-        resultConsumer: MapboxNavigationConsumer<Int>
-    ) {
-
-        mapboxMap.queryRenderedFeatures(
-            mapClickPoint,
-            RenderedQueryOptions(layerIds, null)
-        ) { features ->
-            var featureIndex = getIndexOfFirstFeature(features.value ?: listOf(), routeFeatures)
-            when (featureIndex >= 0) {
-                true -> {
-                    resultConsumer.accept(featureIndex)
-                }
-                false -> {
-                    mapboxMap.queryRenderedFeatures(
-                        clickRect,
-                        RenderedQueryOptions(layerIds, null)
-                    ) {
-                        featureIndex = getIndexOfFirstFeature(
-                            features.value ?: listOf(),
-                            routeFeatures
-                        )
-                        resultConsumer.accept(featureIndex)
-                    }
-                }
+        routeFeatures: List<FeatureCollection>
+    ): Int {
+        return suspendCoroutine { continuation ->
+            mapboxMap.queryRenderedFeatures(
+                clickRect,
+                RenderedQueryOptions(layerIds, null)
+            ) {
+                val index = getIndexOfFirstFeature(it.value ?: listOf(), routeFeatures)
+                continuation.resume(index)
             }
         }
     }
