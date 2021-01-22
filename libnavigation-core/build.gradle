@@ -27,6 +27,7 @@ android {
         consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro"
 
         buildConfigField 'String', "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.ext.versionName)
+        buildConfigField 'String', "NAV_NATIVE_SDK_VERSION", String.format("\"%s\"", project.ext.version.mapboxNavigator)
     }
 
     testOptions {
