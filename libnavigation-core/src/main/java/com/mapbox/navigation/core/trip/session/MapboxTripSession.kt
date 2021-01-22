@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.trip.session
 import android.hardware.SensorEvent
 import android.location.Location
 import android.os.Looper
+import android.util.Log
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.BannerComponents
@@ -76,6 +77,7 @@ internal class MapboxTripSession(
                     routeAlerts = it.routeAlerts
                 }
                 if (state == TripSessionState.STARTED) {
+                    Log.i("kyle_debug", "kyle_debug from route update")
                     updateDataFromNavigatorStatus()
                 }
             }
@@ -461,6 +463,7 @@ internal class MapboxTripSession(
     private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
         override fun onSuccess(result: LocationEngineResult?) {
             result?.locations?.lastOrNull()?.let {
+                Log.i("kyle_debug", "kyle_debug locationEngineCallback $it")
                 updateRawLocation(it)
             }
         }
@@ -479,6 +482,7 @@ internal class MapboxTripSession(
         locationObservers.forEach { it.onRawLocationChanged(rawLocation) }
         mainJobController.scope.launch {
             navigator.updateLocation(rawLocation)
+            Log.i("kyle_debug", "kyle_debug unconditional location update")
             updateDataFromNavigatorStatus()
         }
 
@@ -486,6 +490,7 @@ internal class MapboxTripSession(
             delay(UNCONDITIONAL_STATUS_POLLING_PATIENCE)
             while (isActive) {
                 mainJobController.scope.launch {
+                    Log.i("kyle_debug", "kyle_debug unconditional status poll")
                     updateDataFromNavigatorStatus()
                 }
                 delay(UNCONDITIONAL_STATUS_POLLING_INTERVAL)
