@@ -21,13 +21,14 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
-import com.mapbox.navigation.base.internal.extensions.coordinates
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
@@ -35,11 +36,12 @@ import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import kotlinx.android.synthetic.main.activity_basic_navigation_layout.*
 import kotlinx.android.synthetic.main.activity_replay_route_layout.*
-import kotlinx.android.synthetic.main.activity_replay_route_layout.container
-import kotlinx.android.synthetic.main.activity_replay_route_layout.mapView
-import kotlinx.android.synthetic.main.activity_replay_route_layout.startNavigation
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.lang.ref.WeakReference
 
 /**
@@ -78,6 +80,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
             .show()
     }
 
+    @SuppressLint("MissingPermission")
     override fun onMapReady(mapboxMap: MapboxMap) {
         this.mapboxMap = mapboxMap
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
@@ -100,6 +103,17 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                 }
             )
+
+            mapboxNavigation?.registerRouteProgressObserver(object : RouteProgressObserver {
+                override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+                    Timber.i("kyle_debug onRouteProgressChanged ${routeProgress.currentState}")
+                }
+            })
+            mapboxNavigation?.registerTripSessionStateObserver(object : TripSessionStateObserver {
+                override fun onSessionStateChanged(tripSessionState: TripSessionState) {
+                    Timber.i("kyle_debug onSessionStateChanged ${tripSessionState.name}")
+                }
+            })
         }
         mapboxMap.addOnMapLongClickListener { latLng ->
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
@@ -133,6 +147,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
                             .build(),
                         routesReqCallback
                     )
+
                     lastRequestPoint = point
                 }
             }
@@ -140,6 +155,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun initializeFirstLocation() {
         // Center the map at current location. Using LocationEngineProvider because the
         // replay engine won't have your last location.
@@ -148,6 +164,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private val routesReqCallback = object : RoutesRequestCallback {
+        @SuppressLint("MissingPermission")
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             MapboxLogger.d(Message("route request success $routes"))
             if (routes.isNotEmpty()) {
@@ -156,11 +173,22 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
                 val replayEvents = replayRouteMapper.mapDirectionsRouteLegAnnotation(routes[0])
                 mapboxReplayer.pushEvents(replayEvents)
                 mapboxReplayer.seekTo(replayEvents.first())
-
-                startNavigation.visibility = View.VISIBLE
-            } else {
-                startNavigation.visibility = View.GONE
             }
+
+            GlobalScope.launch {
+                testThis()
+            }
+        }
+
+        private suspend fun testThis() = withContext(Dispatchers.Main) {
+//            delay(0)
+            mapboxNavigation?.setRoutes(emptyList())
+            mapboxNavigation?.stopTripSession()
+            Timber.i("kyle_debug stopTripSession")
+
+//            delay(1000)
+//            mapboxNavigation?.startTripSession()
+//            Timber.i("kyle_debug startTripSession")
         }
 
         override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
@@ -184,6 +212,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
                 navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
             }
             mapboxNavigation?.startTripSession()
+            Timber.i("kyle_debug startTripSession")
             startNavigation.visibility = View.GONE
             mapboxReplayer.play()
         }

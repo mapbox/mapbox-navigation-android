@@ -27,7 +27,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:background="@color/colorPrimary"
         android:text="@string/start_navigation"
-        android:textColor="@android:color/white"
-        android:visibility="gone" />
+        android:textColor="@android:color/white" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
