@@ -49,7 +49,7 @@ internal class MapboxTripSession(
     override val tripService: TripService,
     private val navigationOptions: NavigationOptions,
     private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl,
-    threadController: ThreadController = ThreadController,
+    private val threadController: ThreadController = ThreadController,
     private val logger: Logger,
     private val accessToken: String?
 ) : TripSession {
@@ -71,13 +71,14 @@ internal class MapboxTripSession(
                 routeProgress = null
             }
             cancelOngoingUpdateNavigatorStatusDataJobs()
-            mainJobController.scope.launch {
+            val setRouteJob = threadController.getMainScopeAndRootJob().scope.launch {
                 navigator.setRoute(value)?.let {
                     routeAlerts = it.routeAlerts
                 }
-                if (state == TripSessionState.STARTED) {
-                    updateDataFromNavigatorStatus()
-                }
+            }
+            mainJobController.scope.launch {
+                setRouteJob.join()
+                updateDataFromNavigatorStatus()
             }
             isOffRoute = false
         }
@@ -475,6 +476,8 @@ internal class MapboxTripSession(
 
     private fun updateRawLocation(rawLocation: Location) {
         unconditionalStatusPollingJob?.cancel()
+        if (state != TripSessionState.STARTED) return
+
         this.rawLocation = rawLocation
         locationObservers.forEach { it.onRawLocationChanged(rawLocation) }
         mainJobController.scope.launch {
@@ -495,6 +498,10 @@ internal class MapboxTripSession(
 
     private fun updateDataFromNavigatorStatus() {
         val updateNavigatorStatusDataJob = mainJobController.scope.launch {
+            if (state != TripSessionState.STARTED) {
+                return@launch
+            }
+
             val status = getNavigatorStatus()
             if (!isActive) {
                 return@launch
