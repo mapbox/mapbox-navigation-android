@@ -9,9 +9,9 @@ class PredictiveCacheLocationOptionsTest :
     override fun getImplementationClass() = PredictiveCacheLocationOptions::class
 
     override fun getFilledUpBuilder() = PredictiveCacheLocationOptions.Builder()
-        .currentLocationRadiusInMeters(25)
-        .routeBufferRadiusInMeters(15)
-        .destinationLocationRadiusInMeters(55)
+        .currentLocationRadiusInMeters(25000)
+        .routeBufferRadiusInMeters(15000)
+        .destinationLocationRadiusInMeters(55000)
 
     @Test
     override fun trigger() {

@@ -65,24 +65,24 @@ class PredictiveCacheLocationOptions private constructor(
      */
     class Builder {
 
-        private var currentLocationRadiusInMeters: Int = 20
-        private var routeBufferRadiusInMeters: Int = 5
-        private var destinationLocationRadiusInMeters: Int = 50
+        private var currentLocationRadiusInMeters: Int = 20000
+        private var routeBufferRadiusInMeters: Int = 50000
+        private var destinationLocationRadiusInMeters: Int = 50000
 
         /**
-         * How far around the user's location we're going to cache, in meters. Defaults to 20
+         * How far around the user's location we're going to cache, in meters. Defaults to 20000 (20 km)
          */
         fun currentLocationRadiusInMeters(radiusInMeters: Int): Builder =
             apply { this.currentLocationRadiusInMeters = radiusInMeters }
 
         /**
-         * How far around the active route we're going to cache, in meters (if route is set). Defaults to 5
+         * How far around the active route we're going to cache, in meters (if route is set). Defaults to 5000 (5 km)
          */
         fun routeBufferRadiusInMeters(radiusInMeters: Int): Builder =
             apply { this.routeBufferRadiusInMeters = radiusInMeters }
 
         /**
-         * How far around the destination location we're going to cache, in meters (if route is set). Defaults to 50
+         * How far around the destination location we're going to cache, in meters (if route is set). Defaults to 50000 (50 km)
          */
         fun destinationLocationRadiusInMeters(radiusInMeters: Int): Builder =
             apply { this.destinationLocationRadiusInMeters = radiusInMeters }
