@@ -1,5 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.ui
 
+import android.content.Context
 import androidx.core.content.ContextCompat
 import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -67,7 +68,7 @@ abstract class SimpleMapViewNavigationTest :
         initIdlingResource.register()
         Espresso.onIdle()
 
-        mockRoute = MockRoutesProvider.dc_very_short(activity)
+        mockRoute = getRoute(activity)
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
 
         val route = mockRoute.routeResponse.routes()[0]
@@ -170,5 +171,9 @@ abstract class SimpleMapViewNavigationTest :
     @After
     fun tearDown() {
         initIdlingResource.unregister()
+    }
+
+    open fun getRoute(context: Context): MockRoute {
+        return MockRoutesProvider.dc_very_short(context)
     }
 }
