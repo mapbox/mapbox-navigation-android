@@ -1,5 +1,6 @@
 package com.mapbox.navigation.navigator.internal
 
+import androidx.annotation.NonNull
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.navigator.internal.NavigatorLoader.customConfig
@@ -7,6 +8,7 @@ import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
+import com.mapbox.navigator.Router
 import com.mapbox.navigator.SettingsProfile
 import com.mapbox.navigator.TilesConfig
 
@@ -15,6 +17,10 @@ import com.mapbox.navigator.TilesConfig
  * The custom config can be exposed through the [DeviceProfile]
  */
 internal object NavigatorLoader {
+
+    fun createRouter(
+        return Router(CacheHandle() cache, @NonNull HistoryRecorderHandle historyRecorder)
+    ): Router
 
     fun createNavigator(
         deviceProfile: DeviceProfile,

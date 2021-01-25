@@ -17,6 +17,7 @@ import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RouteState
+import com.mapbox.navigator.Router
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.TilesConfig
@@ -41,6 +42,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private val NavigatorDispatcher: CoroutineDispatcher =
         Executors.newFixedThreadPool(SINGLE_THREAD).asCoroutineDispatcher()
     private var navigator: Navigator? = null
+    private var router: Router? = null
     private var route: DirectionsRoute? = null
     private var routeBufferGeoJson: Geometry? = null
     private val navigatorMapper = NavigatorMapper()
@@ -61,6 +63,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             navigatorConfig,
             tilesConfig
         )
+        router = NavigatorLoader.createRouter()
         route = null
         routeBufferGeoJson = null
         return this

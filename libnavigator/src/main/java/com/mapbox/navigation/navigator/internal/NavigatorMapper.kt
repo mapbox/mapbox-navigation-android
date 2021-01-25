@@ -31,32 +31,26 @@ import com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert
 import com.mapbox.navigation.base.trip.model.alert.TunnelInfo
 import com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigator.AdminInfo
 import com.mapbox.navigator.BannerComponent
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
-import com.mapbox.navigator.RouteAlertAdminInfo
-import com.mapbox.navigator.RouteAlertIncidentCongestionInfo
-import com.mapbox.navigator.RouteAlertIncidentInfo
-import com.mapbox.navigator.RouteAlertIncidentType
-import com.mapbox.navigator.RouteAlertServiceAreaInfo
-import com.mapbox.navigator.RouteAlertServiceAreaType
-import com.mapbox.navigator.RouteAlertTollCollectionInfo
-import com.mapbox.navigator.RouteAlertTollCollectionType
-import com.mapbox.navigator.RouteAlertTunnelInfo
 import com.mapbox.navigator.RouteAlertType
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteState
+import com.mapbox.navigator.ServiceAreaInfo
+import com.mapbox.navigator.ServiceAreaType
 import com.mapbox.navigator.VoiceInstruction
 
 private val SUPPORTED_ROUTE_ALERTS = arrayOf(
-    RouteAlertType.KTUNNEL_ENTRANCE,
-    RouteAlertType.KBORDER_CROSSING,
-    RouteAlertType.KTOLL_COLLECTION_POINT,
-    RouteAlertType.KSERVICE_AREA,
-    RouteAlertType.KRESTRICTED_AREA,
-    RouteAlertType.KINCIDENT
+    RouteAlertType.TUNNEL_ENTRANCE,
+    RouteAlertType.BORDER_CROSSING,
+    RouteAlertType.TOLL_COLLECTION_POINT,
+    RouteAlertType.SERVICE_AREA,
+    RouteAlertType.RESTRICTED_AREA,
+    RouteAlertType.INCIDENT
 )
 
 internal class NavigatorMapper {
@@ -292,7 +286,7 @@ internal class NavigatorMapper {
     private fun com.mapbox.navigator.RouteAlert.toRouteAlert(): RouteAlert {
         val alert = this
         return when (alert.type) {
-            RouteAlertType.KTUNNEL_ENTRANCE -> {
+            RouteAlertType.TUNNEL_ENTRANCE -> {
                 TunnelEntranceAlert.Builder(
                     alert.beginCoordinate,
                     alert.distance
@@ -301,7 +295,7 @@ internal class NavigatorMapper {
                     .info(alert.tunnelInfo?.toTunnelInfo())
                     .build()
             }
-            RouteAlertType.KBORDER_CROSSING -> {
+            RouteAlertType.BORDER_CROSSING -> {
                 CountryBorderCrossingAlert.Builder(
                     alert.beginCoordinate,
                     alert.distance
@@ -311,7 +305,7 @@ internal class NavigatorMapper {
                     .to(alert.borderCrossingInfo?.to.toBorderCrossingAdminInfo())
                     .build()
             }
-            RouteAlertType.KTOLL_COLLECTION_POINT -> {
+            RouteAlertType.TOLL_COLLECTION_POINT -> {
                 TollCollectionAlert.Builder(
                     alert.beginCoordinate,
                     alert.distance
@@ -325,7 +319,7 @@ internal class NavigatorMapper {
                     }
                     .build()
             }
-            RouteAlertType.KSERVICE_AREA -> {
+            RouteAlertType.SERVICE_AREA -> {
                 RestStopAlert.Builder(
                     alert.beginCoordinate,
                     alert.distance
@@ -339,7 +333,7 @@ internal class NavigatorMapper {
                     }
                     .build()
             }
-            RouteAlertType.KRESTRICTED_AREA -> {
+            RouteAlertType.RESTRICTED_AREA -> {
                 RestrictedAreaAlert.Builder(
                     alert.beginCoordinate,
                     alert.distance
@@ -347,7 +341,7 @@ internal class NavigatorMapper {
                     .alertGeometry(alert.getAlertGeometry())
                     .build()
             }
-            RouteAlertType.KINCIDENT -> {
+            RouteAlertType.INCIDENT -> {
                 IncidentAlert.Builder(
                     alert.beginCoordinate,
                     alert.distance
@@ -387,7 +381,7 @@ internal class NavigatorMapper {
         private const val FIRST_BANNER_INSTRUCTION = 0
     }
 
-    private fun RouteAlertTunnelInfo?.toTunnelInfo() = ifNonNull(
+    private fun com.mapbox.navigator.TunnelInfo?.toTunnelInfo() = ifNonNull(
         this?.name,
     ) { name ->
         TunnelInfo.Builder(
@@ -395,7 +389,7 @@ internal class NavigatorMapper {
         ).build()
     }
 
-    private fun RouteAlertAdminInfo?.toBorderCrossingAdminInfo() = ifNonNull(
+    private fun AdminInfo?.toBorderCrossingAdminInfo() = ifNonNull(
         this?.iso_3166_1,
         this?.iso_3166_1_alpha3,
     ) { countryCode, countryCodeAlpha3 ->
@@ -405,42 +399,36 @@ internal class NavigatorMapper {
         ).build()
     }
 
-    private fun RouteAlertTollCollectionInfo?.toTollCollectionType() = ifNonNull(
+    private fun com.mapbox.navigator.TollCollectionInfo?.toTollCollectionType() = ifNonNull(
         this?.type
     ) { type ->
         when (type) {
-            RouteAlertTollCollectionType.KTOLL_BOOTH -> TollCollectionType.TollBooth
-            RouteAlertTollCollectionType.KTOLL_GANTRY -> TollCollectionType.TollGantry
+            com.mapbox.navigator.TollCollectionType.TOLL_BOOTH -> TollCollectionType.TollBooth
+            com.mapbox.navigator.TollCollectionType.TOLL_GANTRY -> TollCollectionType.TollGantry
         }
     }
 
-    private fun RouteAlertServiceAreaInfo?.toRestStopType() = ifNonNull(
+    private fun ServiceAreaInfo?.toRestStopType() = ifNonNull(
         this?.type
     ) { type ->
         when (type) {
-            RouteAlertServiceAreaType.KREST_AREA -> RestStopType.RestArea
-            RouteAlertServiceAreaType.KSERVICE_AREA -> RestStopType.ServiceArea
+            ServiceAreaType.REST_AREA -> RestStopType.RestArea
+            ServiceAreaType.SERVICE_AREA -> RestStopType.ServiceArea
         }
     }
 
-    private fun RouteAlertIncidentInfo.toIncidentInfo(): IncidentInfo? =
+    private fun com.mapbox.navigator.IncidentInfo.toIncidentInfo(): IncidentInfo? =
         ifNonNull(this) { info ->
             IncidentInfo.Builder(info.id)
                 .type(info.type.toIncidentType())
                 .also { builder ->
-                    ifNonNull(info.impact) { impactInfo ->
-                        val impact = if (
-                            arrayOfValidIncidentImpacts.any { it == impactInfo }
-                        ) {
-                            impactInfo
-                        } else {
-                            IncidentImpact.UNKNOWN
-                        }
-                        builder.impact(impact)
-                    }
+                    val incidentImpact = arrayOfValidIncidentImpacts
+                        .firstOrNull { it == info.impact.name }
+                        ?: IncidentImpact.UNKNOWN
+                    builder.impact(incidentImpact)
                 }
                 .congestion(info.congestion?.toIncidentCongestion())
-                .isClosed(info.closed)
+                .isClosed(info.roadClosed)
                 .creationTime(info.creationTime)
                 .startTime(info.startTime)
                 .endTime(info.endTime)
@@ -451,24 +439,24 @@ internal class NavigatorMapper {
                 .build()
         }
 
-    private fun RouteAlertIncidentType.toIncidentType(): Int =
+    private fun com.mapbox.navigator.IncidentType.toIncidentType(): Int =
         when (this) {
-            RouteAlertIncidentType.KACCIDENT -> IncidentType.ACCIDENT
-            RouteAlertIncidentType.KCONGESTION -> IncidentType.CONGESTION
-            RouteAlertIncidentType.KCONSTRUCTION -> IncidentType.CONSTRUCTION
-            RouteAlertIncidentType.KDISABLED_VEHICLE -> IncidentType.DISABLED_VEHICLE
-            RouteAlertIncidentType.KLANE_RESTRICTION -> IncidentType.LANE_RESTRICTION
-            RouteAlertIncidentType.KMASS_TRANSIT -> IncidentType.MASS_TRANSIT
-            RouteAlertIncidentType.KMISCELLANEOUS -> IncidentType.MISCELLANEOUS
-            RouteAlertIncidentType.KOTHER_NEWS -> IncidentType.OTHER_NEWS
-            RouteAlertIncidentType.KPLANNED_EVENT -> IncidentType.PLANNED_EVENT
-            RouteAlertIncidentType.KROAD_CLOSURE -> IncidentType.ROAD_CLOSURE
-            RouteAlertIncidentType.KROAD_HAZARD -> IncidentType.ROAD_HAZARD
-            RouteAlertIncidentType.KWEATHER -> IncidentType.WEATHER
+            com.mapbox.navigator.IncidentType.ACCIDENT -> IncidentType.ACCIDENT
+            com.mapbox.navigator.IncidentType.CONGESTION -> IncidentType.CONGESTION
+            com.mapbox.navigator.IncidentType.CONSTRUCTION -> IncidentType.CONSTRUCTION
+            com.mapbox.navigator.IncidentType.DISABLED_VEHICLE -> IncidentType.DISABLED_VEHICLE
+            com.mapbox.navigator.IncidentType.LANE_RESTRICTION -> IncidentType.LANE_RESTRICTION
+            com.mapbox.navigator.IncidentType.MASS_TRANSIT -> IncidentType.MASS_TRANSIT
+            com.mapbox.navigator.IncidentType.MISCELLANEOUS -> IncidentType.MISCELLANEOUS
+            com.mapbox.navigator.IncidentType.OTHER_NEWS -> IncidentType.OTHER_NEWS
+            com.mapbox.navigator.IncidentType.PLANNED_EVENT -> IncidentType.PLANNED_EVENT
+            com.mapbox.navigator.IncidentType.ROAD_CLOSURE -> IncidentType.ROAD_CLOSURE
+            com.mapbox.navigator.IncidentType.ROAD_HAZARD -> IncidentType.ROAD_HAZARD
+            com.mapbox.navigator.IncidentType.WEATHER -> IncidentType.WEATHER
             else -> IncidentType.UNKNOWN
         }
 
-    private fun RouteAlertIncidentCongestionInfo?.toIncidentCongestion(): IncidentCongestion? =
+    private fun com.mapbox.navigator.IncidentCongestion?.toIncidentCongestion(): IncidentCongestion? =
         ifNonNull(this) { congestion ->
             IncidentCongestion.Builder().value(congestion.value).build()
         }
