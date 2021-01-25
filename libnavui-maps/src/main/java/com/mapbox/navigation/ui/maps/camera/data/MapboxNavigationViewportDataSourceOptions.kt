@@ -3,11 +3,13 @@ package com.mapbox.navigation.ui.maps.camera.data
 /**
  * Set of options used to customize [MapboxNavigationViewportDataSource].
  *
- * @param maxFollowingPitch the max pitch that will be generate for camera frames when following
- * @param maxZoom the max zoom that will be generate for all camera frames
+ * @param maxFollowingPitch the max pitch that will be generated for camera frames when following
+ * @param minFollowingZoom the min zoom that will be generated for all following camera frames
+ * @param maxZoom the max zoom that will be generated for all camera frames
  */
 class MapboxNavigationViewportDataSourceOptions private constructor(
     val maxFollowingPitch: Double,
+    val minFollowingZoom: Double,
     val maxZoom: Double
 ) {
 
@@ -16,6 +18,7 @@ class MapboxNavigationViewportDataSourceOptions private constructor(
      */
     fun toBuilder(): Builder = Builder().apply {
         maxFollowingPitch(maxFollowingPitch)
+        minFollowingZoom(minFollowingZoom)
         maxZoom(maxZoom)
     }
 
@@ -29,6 +32,7 @@ class MapboxNavigationViewportDataSourceOptions private constructor(
         other as MapboxNavigationViewportDataSourceOptions
 
         if (maxFollowingPitch != other.maxFollowingPitch) return false
+        if (minFollowingZoom != other.minFollowingZoom) return false
         if (maxZoom != other.maxZoom) return false
 
         return true
@@ -39,6 +43,7 @@ class MapboxNavigationViewportDataSourceOptions private constructor(
      */
     override fun hashCode(): Int {
         var result = maxFollowingPitch.hashCode()
+        result = 31 * result + minFollowingZoom.hashCode()
         result = 31 * result + maxZoom.hashCode()
         return result
     }
@@ -49,6 +54,7 @@ class MapboxNavigationViewportDataSourceOptions private constructor(
     override fun toString(): String {
         return "MapboxNavigationViewportDataSourceOptions(" +
             "maxFollowingPitch=$maxFollowingPitch, " +
+            "minFollowingZoom=$minFollowingZoom" +
             "maxZoom=$maxZoom" +
             ")"
     }
@@ -58,6 +64,7 @@ class MapboxNavigationViewportDataSourceOptions private constructor(
      */
     class Builder {
         private var maxFollowingPitch = 40.0
+        private var minFollowingZoom = 12.0
         private var maxZoom = 19.0
 
         /**
@@ -67,6 +74,15 @@ class MapboxNavigationViewportDataSourceOptions private constructor(
          */
         fun maxFollowingPitch(maxFollowingPitch: Double): Builder = apply {
             this.maxFollowingPitch = maxFollowingPitch
+        }
+
+        /**
+         * Override [MapboxNavigationViewportDataSourceOptions.minFollowingZoom].
+         *
+         * Defaults to 12.0.
+         */
+        fun minFollowingZoom(minFollowingZoom: Double): Builder = apply {
+            this.minFollowingZoom = minFollowingZoom
         }
 
         /**
@@ -83,8 +99,9 @@ class MapboxNavigationViewportDataSourceOptions private constructor(
          */
         fun build(): MapboxNavigationViewportDataSourceOptions =
             MapboxNavigationViewportDataSourceOptions(
-                maxFollowingPitch,
-                maxZoom
+                maxFollowingPitch = maxFollowingPitch,
+                minFollowingZoom = minFollowingZoom,
+                maxZoom = maxZoom
             )
     }
 }

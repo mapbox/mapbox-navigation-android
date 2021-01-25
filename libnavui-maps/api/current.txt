@@ -111,6 +111,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
   public final class MapboxNavigationViewportDataSourceOptions {
     method public double getMaxFollowingPitch();
     method public double getMaxZoom();
+    method public double getMinFollowingZoom();
     method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions.Builder toBuilder();
   }
 
@@ -119,6 +120,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
     method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions build();
     method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions.Builder maxFollowingPitch(double maxFollowingPitch);
     method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions.Builder maxZoom(double maxZoom);
+    method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions.Builder minFollowingZoom(double minFollowingZoom);
   }
 
   public final class ViewportData {

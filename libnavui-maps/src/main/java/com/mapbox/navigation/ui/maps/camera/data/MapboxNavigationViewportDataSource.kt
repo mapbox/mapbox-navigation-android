@@ -20,6 +20,7 @@ import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMisc
 import java.util.concurrent.CopyOnWriteArraySet
+import kotlin.math.max
 import kotlin.math.min
 
 private val NULL_ISLAND_POINT = Point.fromLngLat(0.0, 0.0)
@@ -747,7 +748,8 @@ class MapboxNavigationViewportDataSource(
         followingCenterProperty.fallback = pointsForFollowing.firstOrNull()
             ?: Point.fromLngLat(0.0, 0.0) // todo how about "zoomAndCenter.second"?
 
-        followingZoomProperty.fallback = min(zoomAndCenter.first, options.maxZoom)
+        followingZoomProperty.fallback =
+            max(min(zoomAndCenter.first, options.maxZoom), options.minFollowingZoom)
     }
 
     private fun updateOverviewData(pointsForOverview: List<Point>) {

@@ -10,6 +10,7 @@ class MapboxNavigationViewportDataSourceOptionsTest :
 
     override fun getFilledUpBuilder() = MapboxNavigationViewportDataSourceOptions.Builder()
         .maxFollowingPitch(12.3)
+        .minFollowingZoom(14.213)
         .maxZoom(45.6)
 
     @Test
