@@ -97,6 +97,7 @@ task downloadUnstrippedNativeLibsDir(type: com.mapbox.gradle.NativeDownloadTask)
 dependencies {
     // Mapbox Navigation SDK
     implementation project(':libnavigation-android')
+    implementation project(':libnavui-speedlimit')
 
     // test
     androidTestImplementation project(':libtesting-ui')

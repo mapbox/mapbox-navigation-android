@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="mapbox_speed_limit_text_color">@color/colorOnSurface</color>
+    <color name="mapbox_speed_limit_view_background">@color/colorSurface</color>
+    <color name="mapbox_speed_limit_view_mutcd_border">@android:color/black</color>
+    <color name="mapbox_speed_limit_view_vienna_border">#EE0000</color>
+</resources>

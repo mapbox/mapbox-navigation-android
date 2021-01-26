@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MapboxSpeedLimitView" >
+        <attr name="speedLimitMutcdBorderColor" format="reference|color" />
+        <attr name="speedLimitBackgroundColor" format="reference|color" />
+        <attr name="speedLimitViennaBorderColor" format="reference|color" />
+        <attr name="speedLimitTextColor" format="reference|color"/>
+    </declare-styleable>
+</resources>
