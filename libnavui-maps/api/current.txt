@@ -159,7 +159,7 @@ package com.mapbox.navigation.ui.maps.camera.lifecycle {
   }
 
   public final class NavigationScaleGestureHandler implements com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener {
-    ctor public NavigationScaleGestureHandler(android.content.Context context, com.mapbox.navigation.ui.maps.camera.NavigationCamera navigationCamera, com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.gestures.GesturesPlugin gesturesPlugin, com.mapbox.maps.plugin.location.LocationComponentPlugin locationPlugin, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener? scaleActionListener, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions options);
+    ctor public NavigationScaleGestureHandler(android.content.Context context, com.mapbox.navigation.ui.maps.camera.NavigationCamera navigationCamera, com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.gestures.GesturesPlugin gesturesPlugin, com.mapbox.maps.plugin.location.LocationPluginImpl locationPlugin, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener? scaleActionListener, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions options);
     method public void cleanup();
     method public com.mapbox.android.gestures.AndroidGesturesManager getCustomGesturesManager();
     method public com.mapbox.android.gestures.AndroidGesturesManager getInitialGesturesManager();

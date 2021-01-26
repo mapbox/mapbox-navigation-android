@@ -34,7 +34,7 @@ import com.mapbox.maps.plugin.gestures.GesturesPlugin
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.getGesturesPlugin
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions
-import com.mapbox.maps.plugin.location.LocationComponentPlugin
+import com.mapbox.maps.plugin.location.LocationPluginImpl
 import com.mapbox.maps.plugin.location.LocationUpdate
 import com.mapbox.maps.plugin.location.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.location.getLocationPlugin
@@ -76,7 +76,7 @@ class CameraAnimationsActivity :
     OnMapLongClickListener {
 
     private val permissionsManager = PermissionsManager(this)
-    private var locationComponent: LocationComponentPlugin? = null
+    private var locationComponent: LocationPluginImpl? = null
     private lateinit var mapboxMap: MapboxMap
     private lateinit var mapboxNavigation: MapboxNavigation
     private val replayRouteMapper = ReplayRouteMapper()
@@ -541,7 +541,7 @@ class CameraAnimationsActivity :
         return getString(this.resources.getIdentifier("mapbox_access_token", "string", packageName))
     }
 
-    private fun getLocationComponent(): LocationComponentPlugin {
+    private fun getLocationComponent(): LocationPluginImpl {
         return mapView.getLocationPlugin()
     }
 

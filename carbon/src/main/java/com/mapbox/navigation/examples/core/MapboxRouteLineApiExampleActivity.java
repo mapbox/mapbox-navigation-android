@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.View;
@@ -43,7 +42,7 @@ import com.mapbox.maps.plugin.gestures.GesturesPluginImpl;
 import com.mapbox.maps.plugin.gestures.OnMapClickListener;
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener;
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions;
-import com.mapbox.maps.plugin.location.LocationComponentPlugin;
+import com.mapbox.maps.plugin.location.LocationPluginImpl;
 import com.mapbox.maps.plugin.location.LocationUpdate;
 import com.mapbox.maps.plugin.location.OnIndicatorPositionChangedListener;
 import com.mapbox.maps.plugin.location.modes.RenderMode;
@@ -94,7 +93,7 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
   private MapView mapView;
   private MapboxMap mapboxMap;
   private PredictiveCacheController predictiveCacheController;
-  private LocationComponentPlugin locationComponent;
+  private LocationPluginImpl locationComponent;
   private CameraAnimationsPlugin mapCamera;
   private final MapboxReplayer mapboxReplayer = new MapboxReplayer();
   private MapboxNavigation mapboxNavigation;
@@ -186,16 +185,8 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
         Collections.shuffle(mapStyles);
         String style = mapStyles.get(0);
         Timber.e("*** Chosen map style is %s", style);
-        locationComponent.setEnabled(false);
         mapboxMap.loadStyleUri(style, new Style.OnStyleLoaded() {
           @Override public void onStyleLoaded(@NotNull Style style) {
-            new Handler().post(new Runnable() {
-              @Override
-              public void run() {
-                // workaround for https://github.com/mapbox/mapbox-maps-android/issues/900
-                locationComponent.setEnabled(true);
-              }
-            });
             RouteLineState.UpdateLayerVisibilityState primaryRouteVisibilityState;
             if (primaryRouteLineVisibility == Visibility.NONE) {
               primaryRouteVisibilityState = mapboxRouteLineApi.hidePrimaryRoute();
@@ -427,8 +418,8 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
     );
   }
 
-  private LocationComponentPlugin getLocationComponent() {
-    return mapView.getPlugin(LocationComponentPlugin.class);
+  private LocationPluginImpl getLocationComponent() {
+    return mapView.getPlugin(LocationPluginImpl.class);
   }
 
   private CameraAnimationsPlugin getMapCamera() {
@@ -568,7 +559,7 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
       Visibility primaryLineVisibility = mapboxRouteLineView.getPrimaryRouteVisibility(mapboxMap.getStyle());
       Visibility alternativeRouteLinesVisibility = mapboxRouteLineView.getAlternativeRoutesVisibility(mapboxMap.getStyle());
       if (primaryLineVisibility == Visibility.VISIBLE && alternativeRouteLinesVisibility == Visibility.VISIBLE) {
-        mapboxRouteLineApi.findClosestRoute(point, mapboxMap, routeClickPadding, closestRouteResultConsumer);
+         mapboxRouteLineApi.findClosestRoute(point, mapboxMap, routeClickPadding, closestRouteResultConsumer);
       }
       return false;
     }

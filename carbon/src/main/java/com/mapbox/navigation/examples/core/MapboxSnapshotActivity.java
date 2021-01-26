@@ -31,7 +31,7 @@ import com.mapbox.maps.plugin.animation.MapAnimationOptions;
 import com.mapbox.maps.plugin.gestures.GesturesPluginImpl;
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener;
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions;
-import com.mapbox.maps.plugin.location.LocationComponentPlugin;
+import com.mapbox.maps.plugin.location.LocationPluginImpl;
 import com.mapbox.maps.plugin.location.LocationUpdate;
 import com.mapbox.maps.plugin.location.modes.RenderMode;
 import com.mapbox.navigation.base.internal.route.RouteUrl;
@@ -73,7 +73,7 @@ public class MapboxSnapshotActivity extends AppCompatActivity implements OnMapLo
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
   private MapView mapView;
   private MapboxMap mapboxMap;
-  private LocationComponentPlugin locationComponent;
+  private LocationPluginImpl locationComponent;
   private CameraAnimationsPlugin mapCamera;
   private MapboxReplayer mapboxReplayer = new MapboxReplayer();
   private MapboxNavigation mapboxNavigation;
@@ -305,8 +305,8 @@ public class MapboxSnapshotActivity extends AppCompatActivity implements OnMapLo
     );
   }
 
-  private LocationComponentPlugin getLocationComponent() {
-    return mapView.getPlugin(LocationComponentPlugin.class);
+  private LocationPluginImpl getLocationComponent() {
+    return mapView.getPlugin(LocationPluginImpl.class);
   }
 
   private CameraAnimationsPlugin getMapCamera() {
