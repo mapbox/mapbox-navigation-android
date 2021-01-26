@@ -81,14 +81,14 @@ import java.util.Collections;
 import java.util.List;
 
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-//import static com.mapbox.android.gestures.Utils.dpToPx;
+import static com.mapbox.android.gestures.Utils.dpToPx;
 import static com.mapbox.navigation.examples.util.LocationPermissionsHelperKt.LOCATION_PERMISSIONS_REQUEST_CODE;
 import static com.mapbox.navigation.ui.base.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID;
 
 public class MapboxRouteLineApiExampleActivity extends AppCompatActivity implements PermissionsListener,
     OnMapLongClickListener {
 
-  //private final float routeClickPadding = dpToPx(30f);
+  private final float routeClickPadding = dpToPx(30f);
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
   private final LocationPermissionsHelper permissionsHelper = new LocationPermissionsHelper(this);
   private MapView mapView;
@@ -550,7 +550,7 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
       new MapboxNavigationConsumer<RouteLineState.ClosestRouteState>() {
         @Override public void accept(RouteLineState.ClosestRouteState closestRouteState) {
           final int index = closestRouteState.getRouteIndex();
-          if (index >= 0) {
+          if (index > 0) {
             final DirectionsRoute selectedRoute = mapboxRouteLineApi.getRoutes().get(index);
             if (selectedRoute != mapboxRouteLineApi.getPrimaryRoute()) {
               mapboxRouteLineApi.updateToPrimaryRoute(selectedRoute);
@@ -568,10 +568,7 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
       Visibility primaryLineVisibility = mapboxRouteLineView.getPrimaryRouteVisibility(mapboxMap.getStyle());
       Visibility alternativeRouteLinesVisibility = mapboxRouteLineView.getAlternativeRoutesVisibility(mapboxMap.getStyle());
       if (primaryLineVisibility == Visibility.VISIBLE && alternativeRouteLinesVisibility == Visibility.VISIBLE) {
-        // temporarily commenting this out since there is a bug on the maps side that causes a crash when
-        // MapboxMap::queryRenderedFeatures is called.
-        // mapboxRouteLineApi.findClosestRoute(point, mapboxMap, routeClickPadding, closestRouteResultConsumer);
-        // issue: https://github.com/mapbox/mapbox-maps-android/issues/885
+        mapboxRouteLineApi.findClosestRoute(point, mapboxMap, routeClickPadding, closestRouteResultConsumer);
       }
       return false;
     }
