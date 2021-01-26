@@ -1,0 +1,58 @@
+// Signature format: 3.0
+package com.mapbox.navigation.ui.speedlimit.api {
+
+  public final class MapboxSpeedLimitApi {
+    ctor public MapboxSpeedLimitApi(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> formatter);
+    method public com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> getFormatter();
+    method public void setFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> p);
+    method public com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError> updateSpeedLimit(com.mapbox.navigation.base.speed.model.SpeedLimit? speedLimit);
+    property public final com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> formatter;
+  }
+
+}
+
+package com.mapbox.navigation.ui.speedlimit.model {
+
+  public final class SpeedLimitFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> {
+    ctor public SpeedLimitFormatter(android.content.Context context);
+    method public String format(com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue update);
+    field public static final double KILO_MILES_FACTOR = 0.621371;
+  }
+
+  public final class UpdateSpeedLimitError {
+    method public String getErrorMessage();
+    method public Throwable? getThrowable();
+    property public final String errorMessage;
+    property public final Throwable? throwable;
+  }
+
+  public final class UpdateSpeedLimitValue {
+    method public com.mapbox.navigation.base.speed.model.SpeedLimitSign getSignFormat();
+    method public int getSpeedKPH();
+    method public com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> getSpeedLimitFormatter();
+    method public com.mapbox.navigation.base.speed.model.SpeedLimitUnit getSpeedUnit();
+    property public final com.mapbox.navigation.base.speed.model.SpeedLimitSign signFormat;
+    property public final int speedKPH;
+    property public final com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> speedLimitFormatter;
+    property public final com.mapbox.navigation.base.speed.model.SpeedLimitUnit speedUnit;
+  }
+
+}
+
+package com.mapbox.navigation.ui.speedlimit.view {
+
+  public final class MapboxSpeedLimitView extends androidx.appcompat.widget.AppCompatTextView {
+    ctor public MapboxSpeedLimitView(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
+    ctor public MapboxSpeedLimitView(android.content.Context context, android.util.AttributeSet? attrs = null);
+    ctor public MapboxSpeedLimitView(android.content.Context context);
+    method public void render(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError> expected);
+    method public void updateStyle(@StyleRes int styleResource);
+    field public static final int BORDER_INSET = 6; // 0x6
+    field public static final int INNER_BACKGROUND_MUTCD_INSET = 9; // 0x9
+    field public static final int INNER_BACKGROUND_VIENNA_INSET = 14; // 0xe
+    field public static final int OUTER_BACKGROUND_INSET = 3; // 0x3
+    field public static final float RADIUS = 10.0f;
+  }
+
+}
+

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="MapboxStyleSpeedLimit">
+        <item name="speedLimitTextColor">@color/mapbox_speed_limit_text_color</item>
+        <item name="speedLimitMutcdBorderColor">@color/mapbox_speed_limit_view_mutcd_border</item>
+        <item name="speedLimitBackgroundColor">@color/mapbox_speed_limit_view_background</item>
+        <item name="speedLimitViennaBorderColor">@color/mapbox_speed_limit_view_vienna_border</item>
+    </style>
+</resources>

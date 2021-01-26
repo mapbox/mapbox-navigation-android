@@ -8,14 +8,19 @@ import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.mapbox.android.core.location.LocationEngineCallback;
+import com.mapbox.android.core.location.LocationEngineResult;
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
@@ -35,6 +40,7 @@ import com.mapbox.maps.plugin.gestures.GesturesPluginImpl;
 import com.mapbox.maps.plugin.gestures.OnMapClickListener;
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener;
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin;
+
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPluginImpl;
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener;
 import com.mapbox.navigation.base.internal.route.RouteUrl;
@@ -45,10 +51,15 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback;
 import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.core.replay.ReplayLocationEngine;
+import com.mapbox.navigation.core.replay.history.ReplayEventBase;
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver;
+import com.mapbox.navigation.core.replay.route.ReplayRouteMapper;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
+import com.mapbox.navigation.core.trip.session.MapMatcherResult;
+import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.base.model.Expected;
+import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter;
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer;
 import com.mapbox.navigation.ui.maps.PredictiveCacheController;
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider;
@@ -63,11 +74,16 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources;
+import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi;
+import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError;
+import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue;
+import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue;
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -85,11 +101,13 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   private MapView mapView;
   private MapboxMap mapboxMap;
   private PredictiveCacheController predictiveCacheController;
-  private NavigationLocationProvider navigationLocationProvider;
+  protected NavigationLocationProvider navigationLocationProvider;
   private LocationComponentPlugin locationComponent;
   private CameraAnimationsPlugin mapCamera;
+  private final ReplayRouteMapper replayRouteMapper = new ReplayRouteMapper();
   private final MapboxReplayer mapboxReplayer = new MapboxReplayer();
   private MapboxNavigation mapboxNavigation;
+  private Button startNavigation;
   private ProgressBar routeLoading;
   private final List<String> mapStyles = Arrays.asList(
       Style.MAPBOX_STREETS,
@@ -101,6 +119,8 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   private MapboxRouteLineView mapboxRouteLineView;
   private final MapboxRouteArrowApi routeArrow = new MapboxRouteArrowApi();
   private MapboxRouteArrowView routeArrowView;
+  private MapboxSpeedLimitApi speedLimitApi;
+  private MapboxSpeedLimitView speedLimitView;
 
   @SuppressLint("MissingPermission")
   @Override
@@ -120,6 +140,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     RelativeLayout mapLayout = findViewById(R.id.mapView_container);
     mapLayout.addView(mapView);
 
+    startNavigation = findViewById(R.id.startNavigation);
     routeLoading = findViewById(R.id.routeLoadingProgressBar);
     mapboxMap = mapView.getMapboxMap();
     navigationLocationProvider = new NavigationLocationProvider();
@@ -158,10 +179,24 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
       Timber.e("predictive cache error: %s", message);
     });
     predictiveCacheController.setMapInstance(mapboxMap);
+
+    SpeedLimitFormatter speedLimitFormatter = new SpeedLimitFormatter(this);
+    speedLimitApi = new MapboxSpeedLimitApi(speedLimitFormatter);
+    speedLimitView = (MapboxSpeedLimitView)findViewById(R.id.speedLimitView);
   }
 
   @SuppressLint("MissingPermission")
   private void initListeners() {
+    startNavigation.setOnClickListener(v -> {
+      mapboxNavigation.registerRouteProgressObserver(routeProgressObserver);
+      mapboxNavigation.registerMapMatcherResultObserver(mapMatcherResultObserver);
+      mapboxNavigation.startTripSession();
+      startNavigation.setVisibility(View.GONE);
+      getLocationComponent().addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener);
+      startSimulation(mapboxNavigation.getRoutes().get(0));
+    });
+
+
     ((FloatingActionButton) findViewById(R.id.fabToggleStyle)).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -219,9 +254,18 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     mapboxNavigation.registerLocationObserver(locationObserver);
     mapboxNavigation.registerRouteProgressObserver(replayProgressObserver);
     mapboxNavigation.registerRoutesObserver(routesObserver);
-    mapboxNavigation.startTripSession();
 
     mapboxReplayer.pushRealLocation(this, 0.0);
+    mapboxReplayer.playbackSpeed(1.5);
+    mapboxReplayer.play();
+  }
+
+  private void startSimulation(DirectionsRoute route) {
+    mapboxReplayer.stop();
+    mapboxReplayer.clearEvents();
+    List<ReplayEventBase> replayData = replayRouteMapper.mapDirectionsRouteGeometry(route);
+    mapboxReplayer.pushEvents(replayData);
+    mapboxReplayer.seekTo(replayData.get(0));
     mapboxReplayer.play();
   }
 
@@ -230,6 +274,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     // a style without composite sources
     String styleId = "mapbox://styles/lukaspaczos/ckirf03jn7hv817nrr69ndwdw";
     mapboxMap.loadStyleUri(styleId, style -> {
+      mapboxNavigation.getNavigationOptions().getLocationEngine().getLastLocation(locationEngineCallback);
       getGesturePlugin().addOnMapLongClickListener(this);
     }, (mapLoadError, s) -> Timber.e("Error loading map: %s", mapLoadError.name()));
   }
@@ -243,7 +288,6 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
       mapboxNavigation.registerRouteProgressObserver(routeProgressObserver);
       mapboxNavigation.registerRoutesObserver(routesObserver);
     }
-    getLocationComponent().addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener);
     mapView.onStart();
   }
 
@@ -256,6 +300,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
       mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver);
       mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver);
       mapboxNavigation.unregisterRoutesObserver(routesObserver);
+      mapboxNavigation.unregisterMapMatcherResultObserver(mapMatcherResultObserver);
     }
     mapView.onStop();
   }
@@ -279,6 +324,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   @Override
   public boolean onMapLongClick(@NotNull Point point) {
     vibrate();
+    startNavigation.setVisibility(View.GONE);
     Location currentLocation = navigationLocationProvider.getLastLocation();
     if (currentLocation != null) {
       Point originPoint = Point.fromLngLat(
@@ -301,6 +347,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
         .accessToken(getMapboxAccessTokenFromResources())
         .coordinates(Arrays.asList(origin, destination))
         .alternatives(true)
+        .annotationsList(Collections.singletonList(DirectionsCriteria.ANNOTATION_MAXSPEED))
         .build();
 
     mapboxNavigation.requestRoutes(
@@ -312,7 +359,10 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   private RoutesRequestCallback routesReqCallback = new RoutesRequestCallback() {
     @Override
     public void onRoutesReady(@NotNull List<? extends DirectionsRoute> routes) {
-      routeLoading.setVisibility(View.INVISIBLE);
+      if (!routes.isEmpty()) {
+        routeLoading.setVisibility(View.INVISIBLE);
+        startNavigation.setVisibility(View.VISIBLE);
+      }
     }
 
     @Override
@@ -375,7 +425,6 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
   private void updateCamera(Location location) {
     MapAnimationOptions.Builder mapAnimationOptionsBuilder = new MapAnimationOptions.Builder();
-    mapAnimationOptionsBuilder.duration(1500L);
     mapCamera.easeTo(
         new CameraOptions.Builder()
             .center(Point.fromLngLat(location.getLongitude(), location.getLatitude()))
@@ -441,12 +490,22 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     }
   };
 
-  private final MapboxNavigationConsumer<Expected<ClosestRouteValue, RouteLineError>> closestRouteResultConsumer =
-      new MapboxNavigationConsumer<Expected<ClosestRouteValue, RouteLineError>>() {
+  private final MapMatcherResultObserver mapMatcherResultObserver = new MapMatcherResultObserver() {
+    @Override public void onNewMapMatcherResult(@NotNull MapMatcherResult mapMatcherResult) {
+      Expected<UpdateSpeedLimitValue, UpdateSpeedLimitError> update =
+        speedLimitApi.updateSpeedLimit(mapMatcherResult.getSpeedLimit());
+      speedLimitView.render(update);
+    }
+  };
+
+    private final MapboxNavigationConsumer<Expected<ClosestRouteValue, RouteLineError>> closestRouteResultConsumer =
+            new MapboxNavigationConsumer<Expected<ClosestRouteValue, RouteLineError>>() {
         @Override
         public void accept(Expected<ClosestRouteValue, RouteLineError> closestRouteResult) {
           if (closestRouteResult instanceof Expected.Success) {
-            final int index = ((int)((Expected.Success) closestRouteResult).getValue());
+            final int index = ((ClosestRouteValue)((Expected.Success) closestRouteResult)
+                    .getValue())
+                    .getRouteIndex();
             if (index > 0) {
               final DirectionsRoute selectedRoute = mapboxRouteLineApi.getRoutes().get(index);
               if (selectedRoute != mapboxRouteLineApi.getPrimaryRoute()) {
@@ -472,4 +531,32 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
       return false;
     }
   };
+
+  private MyLocationEngineCallback locationEngineCallback = new MyLocationEngineCallback(this);
+
+  private static class MyLocationEngineCallback implements LocationEngineCallback<LocationEngineResult> {
+
+    private WeakReference<MapboxRouteLineActivity> activityRef;
+
+    MyLocationEngineCallback(com.mapbox.navigation.examples.core.MapboxRouteLineActivity activity) {
+      this.activityRef = new WeakReference<>(activity);
+    }
+
+    @Override
+    public void onSuccess(LocationEngineResult result) {
+      Location location = result.getLastLocation();
+      MapboxRouteLineActivity activity = activityRef.get();
+      if (location != null && activity != null) {
+        Point point = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+        CameraOptions cameraOptions = new CameraOptions.Builder().center(point).zoom(13.0).build();
+        activity.mapboxMap.jumpTo(cameraOptions);
+        activityRef.get().navigationLocationProvider.changePosition(location, Collections.emptyList(), null, null);
+      }
+    }
+
+    @Override
+    public void onFailure(@NonNull Exception exception) {
+      Timber.i(exception);
+    }
+  }
 }

@@ -17,4 +17,5 @@
     <string name="description_maneuver" translatable="false">Demonstrates the use of maneuver API.</string>
     <string name="title_voice" translatable="false">Voice Example</string>
     <string name="description_voice" translatable="false">Demonstrates the use of voice API.</string>
+    <string name="label_start_navigation">Start Navigation</string>
 </resources>
