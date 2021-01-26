@@ -143,4 +143,6 @@
     <string name="description_trip_progress" translatable="false">Used for developing the trip progress feature.</string>
     <string name="title_maneuver" translatable="false">Maneuver</string>
     <string name="description_maneuver" translatable="false">Demonstrates the use of maneuver during active guidance</string>
+    <string name="title_voice">Voice</string>
+    <string name="description_voice">Used for developing the voice feature.</string>
 </resources>

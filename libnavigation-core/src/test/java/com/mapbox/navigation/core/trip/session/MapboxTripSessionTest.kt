@@ -1038,6 +1038,7 @@ class MapboxTripSessionTest {
     fun cleanUp() {
         unmockkObject(ThreadController)
         unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapperKt")
+        unmockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
     }
 
     private suspend fun updateLocationAndJoin() {

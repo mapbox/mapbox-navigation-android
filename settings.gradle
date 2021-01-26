@@ -15,4 +15,5 @@ include ':test-app',
         ':libnavui-util',
         ':libnavui-tripprogress',
         ':libnavui-maneuver',
-        ':libnavui-resources'
+        ':libnavui-resources',
+        ':libnavui-voice'
