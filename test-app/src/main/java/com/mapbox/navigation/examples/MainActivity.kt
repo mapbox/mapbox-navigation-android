@@ -18,6 +18,7 @@ import com.mapbox.navigation.examples.core.MapboxSnapshotActivity
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.SlackLineActivity
 import com.mapbox.navigation.examples.core.TripProgressActivity
+import com.mapbox.navigation.examples.core.VoiceActivity
 import com.mapbox.navigation.examples.core.camera.CameraAnimationsActivity
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper.Companion.areLocationPermissionsGranted
@@ -84,6 +85,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_maneuver),
                 getString(R.string.description_maneuver),
                 MapboxManeuverActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_voice),
+                getString(R.string.description_voice),
+                VoiceActivity::class.java
             )
         )
     }

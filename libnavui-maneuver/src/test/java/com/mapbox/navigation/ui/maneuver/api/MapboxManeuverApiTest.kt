@@ -48,7 +48,6 @@ class MapboxManeuverApiTest {
 
     @Test
     fun `process step distance remaining`() = coroutineRule.runBlockingTest {
-
         val callback: StepDistanceRemainingCallback = mockk(relaxed = true)
         val mockRouteStepProgress = mockk<RouteStepProgress>()
         val mockResult = mockk<ManeuverResult.StepDistanceRemaining>()
@@ -69,7 +68,6 @@ class MapboxManeuverApiTest {
 
     @Test
     fun `process current maneuver`() = coroutineRule.runBlockingTest {
-
         val callback: ManeuverCallback = mockk(relaxed = true)
         val expected = Maneuver
             .Builder()
@@ -107,7 +105,6 @@ class MapboxManeuverApiTest {
 
     @Test
     fun `process upcoming maneuvers`() = coroutineRule.runBlockingTest {
-
         val callback: UpcomingManeuversCallback = mockk(relaxed = true)
         val expected = listOf(
             Maneuver

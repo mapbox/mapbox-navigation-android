@@ -14,6 +14,7 @@ libnavui-util \
 libnavui-tripprogress \
 libnavui-maneuver \
 libnavui-resources \
+libnavui-voice \
 
 APPLICATION_MODULES = \
 test-app \
@@ -29,7 +30,6 @@ endef
 check: license-verification
 	$(call run-gradle-tasks,$(CORE_MODULES),ktlint) \
 	&& $(call run-gradle-tasks,$(UI_MODULES),ktlint) \
-	&& $(call run-gradle-tasks,$(UI_MODULES),checkstyle) \
 	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),ktlint)
 
 .PHONY: license-verification
@@ -146,6 +146,7 @@ ui-check-api:
 	./gradlew :libnavui-util:checkApi -PhidePackage=com.mapbox.navigation.ui.utils.internal -PhideId=ReferencesHidden
 	./gradlew :libnavui-maneuver:checkApi -PhidePackage=com.mapbox.navigation.ui.maneuver.internal -PhideId=ReferencesHidden
 	./gradlew :libnavui-tripprogress:checkApi -PhidePackage=com.mapbox.navigation.ui.tripprogress.internal -PhideId=ReferencesHidden
+	./gradlew :libnavui-voice:checkApi -PhidePackage=com.mapbox.navigation.ui.voice.internal -PhideId=ReferencesHidden
 
 .PHONY: ui-update-api
 ui-update-api:
@@ -154,6 +155,7 @@ ui-update-api:
 	./gradlew :libnavui-util:updateApi -PhidePackage=com.mapbox.navigation.ui.utils.internal
 	./gradlew :libnavui-maneuver:updateApi -PhidePackage=com.mapbox.navigation.ui.maneuver.internal
 	./gradlew :libnavui-tripprogress:updateApi -PhidePackage=com.mapbox.navigation.ui.tripprogress.internal
+	./gradlew :libnavui-voice:updateApi -PhidePackage=com.mapbox.navigation.ui.voice.internal
 
 .PHONY: update-metalava
 update-metalava:

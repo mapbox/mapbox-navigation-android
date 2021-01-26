@@ -87,6 +87,8 @@ with codecs.open(licensePath, 'w', encoding='utf-8') as licenseFile:
     writeToFile(licenseFile, "/libnavui-maneuver/build/reports/licenses/licenseReleaseReport.json")
     licenseFile.write("\n\n#### Navigation UI Resources SDK module\n")
     writeToFile(licenseFile, "/libnavui-resources/build/reports/licenses/licenseReleaseReport.json")
+    licenseFile.write("\n\n#### Navigation UI Voice SDK module\n")
+    writeToFile(licenseFile, "/libnavui-voice/build/reports/licenses/licenseReleaseReport.json")
 
 removeLicenseHtmlFileForModule("libnavigation-router")
 removeLicenseHtmlFileForModule("libnavigation-base")
@@ -100,3 +102,4 @@ removeLicenseHtmlFileForModule("libnavui-util")
 removeLicenseHtmlFileForModule("libnavui-tripprogress")
 removeLicenseHtmlFileForModule("libnavui-maneuver")
 removeLicenseHtmlFileForModule("libnavui-resources")
+removeLicenseHtmlFileForModule("libnavui-voice")
