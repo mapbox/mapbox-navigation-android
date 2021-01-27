@@ -39,7 +39,7 @@
     <activity
         android:name=".MapboxSignboardActivity"
         android:label="@string/title_signboard"
-        android:screenOrientation="portrait">
+        android:screenOrientation="landscape">
     </activity>
 
     <activity

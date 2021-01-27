@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
+import com.caverock.androidsvg.RenderOptions
 import com.caverock.androidsvg.SVG
 import com.mapbox.navigation.ui.base.MapboxView
 import com.mapbox.navigation.ui.base.model.signboard.SignboardState
@@ -53,9 +54,8 @@ class MapboxSignboardView @JvmOverloads constructor(
         val stream = ByteArrayInputStream(data)
         val svg = SVG.getFromInputStream(stream)
 
-        svg.setDocumentViewBox(0f, 0f, 220f, 170f)
         val aspectRatio = svg.documentViewBox.bottom / svg.documentViewBox.right
-        val definedWidth = 400
+        val definedWidth = 300
         val calculatedHeight = (definedWidth * aspectRatio).toInt()
 
         val signboard = Bitmap.createBitmap(
@@ -63,8 +63,10 @@ class MapboxSignboardView @JvmOverloads constructor(
             calculatedHeight,
             Bitmap.Config.ARGB_8888
         )
+        val renderOptions = RenderOptions.create()
+        renderOptions.css("text { font-family: Arial, Helvetica, sans-serif; }")
         val signboardCanvas = Canvas(signboard)
-        svg.renderToCanvas(signboardCanvas)
+        svg.renderToCanvas(signboardCanvas, renderOptions)
         return signboard
     }
 }

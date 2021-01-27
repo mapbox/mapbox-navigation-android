@@ -23,6 +23,7 @@ import com.mapbox.maps.CameraOptions;
 import com.mapbox.maps.EdgeInsets;
 import com.mapbox.maps.MapView;
 import com.mapbox.maps.MapboxMap;
+import com.mapbox.maps.Size;
 import com.mapbox.maps.Style;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImplKt;
@@ -45,11 +46,17 @@ import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.examples.util.Slackline;
 import com.mapbox.navigation.ui.base.api.signboard.SignboardApi;
+import com.mapbox.navigation.ui.base.api.snapshotter.SnapshotReadyCallback;
+import com.mapbox.navigation.ui.base.api.snapshotter.SnapshotterApi;
 import com.mapbox.navigation.ui.base.model.signboard.SignboardState;
+import com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState;
 import com.mapbox.navigation.ui.maps.signboard.api.MapboxSignboardApi;
 import com.mapbox.navigation.ui.base.api.signboard.SignboardReadyCallback;
 import com.mapbox.navigation.ui.maps.signboard.view.MapboxSignboardView;
 
+import com.mapbox.navigation.ui.maps.snapshotter.api.MapboxSnapshotterApi;
+import com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions;
+import com.mapbox.navigation.ui.maps.snapshotter.view.MapboxSnapshotView;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
@@ -71,7 +78,9 @@ public class MapboxSignboardActivity extends AppCompatActivity implements OnMapL
   private Button startNavigation;
   private Slackline slackline = new Slackline(this);
   private SignboardApi signboardApi;
+  private SnapshotterApi snapshotterApi;
   private MapboxSignboardView signboardView;
+  private MapboxSnapshotView snapshotView;
 
   private SignboardReadyCallback signboardCallback = new SignboardReadyCallback() {
     @Override public void onSignboardReady(@NotNull SignboardState.SignboardReady data) {
@@ -83,6 +92,16 @@ public class MapboxSignboardActivity extends AppCompatActivity implements OnMapL
     }
   };
 
+  private SnapshotReadyCallback callback = new SnapshotReadyCallback() {
+    @Override public void onSnapshotReady(@NotNull SnapshotState.SnapshotReady bitmap) {
+      snapshotView.render(bitmap);
+    }
+
+    @Override public void onFailure(@NotNull SnapshotState.SnapshotFailure error) {
+      snapshotView.render(error);
+    }
+  };
+
   @SuppressLint("MissingPermission")
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -91,6 +110,7 @@ public class MapboxSignboardActivity extends AppCompatActivity implements OnMapL
     mapView = findViewById(R.id.mapView);
     startNavigation = findViewById(R.id.startNavigation);
     signboardView = findViewById(R.id.signboardView);
+    snapshotView = findViewById(R.id.snapshotView);
     mapboxMap = mapView.getMapboxMap();
     locationComponent = getLocationComponent();
     mapCamera = getMapCamera();
@@ -123,6 +143,16 @@ public class MapboxSignboardActivity extends AppCompatActivity implements OnMapL
     mapboxNavigation.registerLocationObserver(locationObserver);
     mapboxNavigation.registerRouteProgressObserver(replayProgressObserver);
     mapboxNavigation.registerRouteProgressObserver(routeProgressObserver);
+
+    float density = getResources().getDisplayMetrics().density;
+    MapboxSnapshotterOptions options = new MapboxSnapshotterOptions.Builder(getApplicationContext())
+        .size(new Size(175 * density, 200 * density))
+        .edgeInsets(new EdgeInsets(150.0 * density, 0.0 * density, 0.0 * density, 90.0 * density))
+        .styleUri("mapbox://styles/mapbox-map-design/ckifbgpa44g5q1aqp4206fxcn")
+        //.styleUri("mapbox://styles/mapbox-map-design/ckifcx2i84huf19pbvgi0cka6")
+        .build();
+
+    snapshotterApi = new MapboxSnapshotterApi(this, mapboxMap, options, mapView);
 
     signboardApi = new MapboxSignboardApi(getMapboxRouteAccessToken(this));
 
@@ -161,6 +191,7 @@ public class MapboxSignboardActivity extends AppCompatActivity implements OnMapL
     super.onDestroy();
     mapView.onDestroy();
     mapboxNavigation.onDestroy();
+    snapshotterApi.cancel();
   }
 
   @Override public void onLowMemory() {
@@ -175,8 +206,10 @@ public class MapboxSignboardActivity extends AppCompatActivity implements OnMapL
 
     Location currentLocation = getLocationComponent().getLastKnownLocation();
     if (currentLocation != null) {
-      Point or = Point.fromLngLat(-3.5870, 40.5719);
-      Point de = Point.fromLngLat(-3.607835, 40.551486);
+      //Point or = Point.fromLngLat(-3.5870, 40.5719);
+      //Point de = Point.fromLngLat(-3.607835, 40.551486);
+      Point or = Point.fromLngLat(-121.971171,37.502348);
+      Point de = Point.fromLngLat(-121.934380,37.488618);
       findRoute(or, de);
     }
     return false;
@@ -302,6 +335,7 @@ public class MapboxSignboardActivity extends AppCompatActivity implements OnMapL
     public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
       if (routeProgress.getBannerInstructions() != null) {
         signboardApi.generateSignboard(routeProgress.getBannerInstructions(), signboardCallback);
+        snapshotterApi.generateSnapshot(routeProgress, callback);
       }
     }
   };

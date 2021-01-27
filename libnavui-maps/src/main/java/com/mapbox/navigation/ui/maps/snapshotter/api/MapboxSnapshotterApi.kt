@@ -1,22 +1,27 @@
 package com.mapbox.navigation.ui.maps.snapshotter.api
 
 import android.content.Context
+import android.graphics.Color
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapInterface
-import com.mapbox.maps.MapSnapshotInterface
-import com.mapbox.maps.MapSnapshotOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.MapboxOptions
+import com.mapbox.maps.MapSnapshotInterface
+import com.mapbox.maps.MapSnapshotOptions
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
 import com.mapbox.maps.Snapshotter
 import com.mapbox.maps.Style
+import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.eq
+import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.get
+import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.literal
 import com.mapbox.maps.extension.style.layers.addLayer
+import com.mapbox.maps.extension.style.layers.generated.FillExtrusionLayer
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -179,6 +184,16 @@ class MapboxSnapshotterApi(
                                             as SnapshotterResult.SnapshotLineLayer
                                         ).layer
                                 )
+
+                                val fillExtrusionLayer = FillExtrusionLayer("3d-buildings", "composite")
+                                fillExtrusionLayer.sourceLayer("building")
+                                fillExtrusionLayer.filter(eq(get("extrude"), literal("true")))
+                                fillExtrusionLayer.minZoom(15.0)
+                                fillExtrusionLayer.fillExtrusionColor(Color.LTGRAY)
+                                fillExtrusionLayer.fillExtrusionHeight(get("height"))
+                                fillExtrusionLayer.fillExtrusionBase(get("min_height"))
+                                fillExtrusionLayer.fillExtrusionOpacity(0.9)
+                                style.addLayer(fillExtrusionLayer)
                             }
                         })
                     } ?: callback.onFailure(

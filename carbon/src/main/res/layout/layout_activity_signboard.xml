@@ -26,13 +26,38 @@
         android:text="@string/start_navigation"
         android:textColor="@android:color/white" />
 
-    <com.mapbox.navigation.ui.maps.signboard.view.MapboxSignboardView
-        android:id="@+id/signboardView"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/visualGuidanceCard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:cardUseCompatPadding="false"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:cardElevation="3dp"
+        app:cardCornerRadius="3dp" >
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <com.mapbox.navigation.ui.maps.snapshotter.view.MapboxSnapshotView
+                android:id="@+id/snapshotView"
+                android:layout_width="350dp"
+                android:layout_height="400dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <com.mapbox.navigation.ui.maps.signboard.view.MapboxSignboardView
+                android:id="@+id/signboardView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="4dp"
+                app:layout_constraintTop_toTopOf="@id/snapshotView"
+                app:layout_constraintEnd_toEndOf="@id/snapshotView"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
