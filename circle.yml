@@ -75,7 +75,7 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "carbon/build.gradle" }}-{{ checksum  "libnavigation-router/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}-{{ checksum  "libnavui-maps/build.gradle" }}-{{ checksum  "libnavui-base/build.gradle" }}-{{ checksum  "libnavui-util/build.gradle" }}
+            - deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "test-app/build.gradle" }}-{{ checksum  "libnavigation-router/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}-{{ checksum  "libnavui-maps/build.gradle" }}-{{ checksum  "libnavui-base/build.gradle" }}-{{ checksum  "libnavui-util/build.gradle" }}
             - deps-
       - run:
           name: Download Dependencies
@@ -83,7 +83,7 @@ commands:
       - save_cache:
           paths:
             - ~/.gradle
-          key: deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "carbon/build.gradle" }}-{{ checksum  "libnavigation-router/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}-{{ checksum  "libnavui-maps/build.gradle" }}-{{ checksum  "libnavui-base/build.gradle" }}-{{ checksum  "libnavui-util/build.gradle" }}
+          key: deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "test-app/build.gradle" }}-{{ checksum  "libnavigation-router/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}-{{ checksum  "libnavui-maps/build.gradle" }}-{{ checksum  "libnavui-base/build.gradle" }}-{{ checksum  "libnavui-util/build.gradle" }}
 
   verify-codebase:
     steps:
@@ -410,12 +410,12 @@ jobs:
     steps:
       - read-workspace
       - assemble-module:
-          module_target: "carbon"
+          module_target: "test-app"
           variant: "Release"
           inject_token: true
       - login-google-cloud-platform
       - run-firebase-robo:
-          module_target: "carbon"
+          module_target: "test-app"
           variant: "release"
 
   internal-instrumentation-tests:

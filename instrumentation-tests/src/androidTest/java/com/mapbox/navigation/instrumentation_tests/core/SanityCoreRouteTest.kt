@@ -1,13 +1,14 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import androidx.test.espresso.Espresso
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
-import com.mapbox.navigation.instrumentation_tests.routesRequestCallback
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.RouteProgressStateTransitionAssertion
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
@@ -74,9 +75,22 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
                     .baseUrl(mockWebServerRule.baseUrl)
                     .accessToken(getMapboxAccessTokenFromResources(activity))
                     .coordinates(mockRoute.routeWaypoints).build(),
-                routesRequestCallback(
-                    onRoutesReady = { mockLocationReplayerRule.playRoute(it[0]) }
-                )
+                object : RoutesRequestCallback {
+                    override fun onRoutesReady(routes: List<DirectionsRoute>) {
+                        mockLocationReplayerRule.playRoute(routes[0])
+                    }
+
+                    override fun onRoutesRequestFailure(
+                        throwable: Throwable,
+                        routeOptions: RouteOptions
+                    ) {
+                        // no impl
+                    }
+
+                    override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
+                        // no impl
+                    }
+                }
             )
         }
 

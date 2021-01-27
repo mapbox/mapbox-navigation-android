@@ -1,66 +1,49 @@
 package com.mapbox.navigation.instrumentation_tests.activity
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.maps.MapLoadError
+import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
 import com.mapbox.navigation.instrumentation_tests.R
-import com.mapbox.navigation.instrumentation_tests.utils.getMapboxAccessTokenFromResources
 import kotlinx.android.synthetic.main.activity_basic_navigation_view.*
 
 class BasicNavigationViewActivity : AppCompatActivity() {
 
+    lateinit var mapboxMap: MapboxMap
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Mapbox.getInstance(this, getMapboxAccessTokenFromResources(this))
         setContentView(R.layout.activity_basic_navigation_view)
-
-        navigationView.onCreate(savedInstanceState)
+        mapboxMap = mapView.getMapboxMap()
+        mapboxMap.loadStyleUri(
+            "asset://map_style_blank.json",
+            onMapLoadErrorListener = object : OnMapLoadErrorListener {
+                override fun onMapLoadError(mapViewLoadError: MapLoadError, msg: String) {
+                    Log.e("onMapLoadError", mapViewLoadError.name + ": " + msg)
+                }
+            }
+        )
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        navigationView.onLowMemory()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        navigationView.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        navigationView.onPause()
+        mapView?.onLowMemory()
     }
 
     override fun onStart() {
         super.onStart()
-        navigationView.onStart()
+        mapView.onStart()
     }
 
     override fun onStop() {
         super.onStop()
-        navigationView.onStop()
+        mapView.onStop()
     }
 
     override fun onDestroy() {
-        navigationView.onDestroy()
+        mapView.onDestroy()
         super.onDestroy()
-    }
-
-    override fun onBackPressed() {
-        // If the navigation view didn't need to do anything, call super
-        if (!navigationView.onBackPressed()) {
-            super.onBackPressed()
-        }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        navigationView.onSaveInstanceState(outState)
-        super.onSaveInstanceState(outState)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        navigationView.onRestoreInstanceState(savedInstanceState)
     }
 }

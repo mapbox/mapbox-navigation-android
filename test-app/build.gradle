@@ -27,7 +27,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.mapbox.navigation.examples"
+        applicationId "com.mapbox.navigation.test_app"
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
         multiDexEnabled true
@@ -76,15 +76,17 @@ android {
 }
 
 dependencies {
-    implementation dependenciesList.mapboxAndroidCommon
-    implementation dependenciesList.mapboxLogger
-    implementation dependenciesList.mapboxAnnotationPlugin
-    implementation dependenciesList.mapboxSdkTurf
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    // Mapbox Navigation SDK
+    implementation project(':libnavui-maps')
 
     // test
     androidTestImplementation project(':libtesting-ui')
     androidTestImplementation dependenciesList.testRunner
     androidTestUtil dependenciesList.testOrchestrator
+
+    //ktlint
+    ktlint dependenciesList.ktlint
 
     // Kotlin support
     implementation dependenciesList.kotlinStdLib
@@ -106,13 +108,6 @@ dependencies {
     // Logging
     implementation dependenciesList.timber
 
-    // Butter Knife
-    implementation dependenciesList.butterKnife
-    annotationProcessor dependenciesList.butterKnifeProcessor
-
     // Leak Canary
     debugImplementation dependenciesList.leakCanaryDebug
-
-    // Networking
-    implementation dependenciesList.mapboxSdkServices
 }

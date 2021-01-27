@@ -13,7 +13,7 @@ libnavui-base \
 libnavui-util \
 
 APPLICATION_MODULES = \
-carbon \
+test-app \
 instrumentation-tests \
 
 define run-gradle-tasks

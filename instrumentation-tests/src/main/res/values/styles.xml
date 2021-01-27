@@ -7,8 +7,4 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="InstrumentationTestNavigationViewTheme" parent="MapboxStyleNavigationViewLight">
-        <item name="navigationViewMapStyle">@string/map_style_blank</item>
-    </style>
-
 </resources>

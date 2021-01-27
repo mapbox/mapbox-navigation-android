@@ -8,7 +8,7 @@ If you want to contribute code:
 
 2. Add an `SDK_REGISTRY_TOKEN` gradle property or env variable with a **secret token**. The token needs to have the `DOWNLOADS:READ` scope. You can obtain the token from your [Mapbox Account page](https://account.mapbox.com/access-tokens/).
 
-3. Add your **public token** to `examples/src/main/res/values/mapbox-access-token.xml` to be able to run the examples app. You can obtain the token from your [Mapbox Account page](https://account.mapbox.com/access-tokens/).
+3. Add your **public token** to `test-app/src/main/res/values/mapbox-access-token.xml` to be able to run the test app. You can obtain the token from your [Mapbox Account page](https://account.mapbox.com/access-tokens/).
 
 4. Pull requests are gladly accepted. If there are any changes that developers should be aware of, please update the [change log](CHANGELOG.md)
 
