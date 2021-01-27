@@ -2,10 +2,12 @@ package com.mapbox.navigation.ui.maps.route.arrow
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
+import com.mapbox.maps.Image
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
@@ -172,50 +174,7 @@ class RouteArrowUtilsTest {
         val headSourceValueSlot = slot<Value>()
         val addStyleLayerSlots = mutableListOf<Value>()
         val addStyleLayerPositionSlots = mutableListOf<LayerPosition>()
-        val style = mockk<Style> {
-            every { fullyLoaded } returns true
-            every { styleLayers } returns listOf()
-            every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns false
-            every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns false
-            every { styleLayerExists(RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(RouteConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
-            every { styleLayerExists(RouteConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(RouteConstants.ARROW_HEAD_LAYER_ID) } returns true
-            every { styleLayerExists("mapbox-navigation-route-traffic-layer") } returns true
-            every {
-                addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
-            } returns ExpectedFactory.createValue()
-            every {
-                addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, any())
-            } returns ExpectedFactory.createValue()
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) } returns mockk()
-            every {
-                removeStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING)
-            } returns ExpectedFactory.createValue()
-            every {
-                addImage(RouteConstants.ARROW_HEAD_ICON_CASING, any<Bitmap>())
-            } returns ExpectedFactory.createValue()
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON) } returns mockk()
-            every {
-                removeStyleImage(RouteConstants.ARROW_HEAD_ICON)
-            } returns ExpectedFactory.createValue()
-            every {
-                addImage(RouteConstants.ARROW_HEAD_ICON, any<Bitmap>())
-            } returns ExpectedFactory.createValue()
-            every {
-                removeStyleLayer(RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
-            } returns ExpectedFactory.createValue()
-            every {
-                removeStyleLayer(RouteConstants.ARROW_HEAD_CASING_LAYER_ID)
-            } returns ExpectedFactory.createValue()
-            every {
-                removeStyleLayer(RouteConstants.ARROW_SHAFT_LINE_LAYER_ID)
-            } returns ExpectedFactory.createValue()
-            every {
-                removeStyleLayer(RouteConstants.ARROW_HEAD_LAYER_ID)
-            } returns ExpectedFactory.createValue()
-            every { addStyleLayer(any(), any()) } returns ExpectedFactory.createValue()
-        }
+        val style = getFullMockedStyle()
 
         RouteArrowUtils.initializeLayers(style, options)
 
@@ -310,5 +269,140 @@ class RouteArrowUtilsTest {
             "mapbox-navigation-arrow-shaft-layer",
             addStyleLayerPositionSlots[3].above
         )
+    }
+
+    @Test
+    fun initializeLayers_whenArrowHeadHeightZero() {
+        val options = RouteArrowOptions.Builder(ctx).build()
+        val mockOptions = mockk<RouteArrowOptions> {
+            every { aboveLayerId } returns options.aboveLayerId
+            every { tolerance } returns options.tolerance
+            every { arrowBorderColor } returns options.arrowBorderColor
+            every { arrowColor } returns options.arrowColor
+            every { arrowHeadIconBorder } returns options.arrowHeadIconBorder
+            every { arrowHeadIcon } returns mockk<Drawable> {
+                every { intrinsicHeight } returns 0
+                every { intrinsicWidth } returns 1
+            }
+        }
+        val style = getFullMockedStyle()
+
+        RouteArrowUtils.initializeLayers(style, mockOptions)
+
+        verify(exactly = 0) { style.addImage(RouteConstants.ARROW_HEAD_ICON, any<Bitmap>()) }
+        verify(exactly = 0) { style.addImage(RouteConstants.ARROW_HEAD_ICON, any<Image>()) }
+    }
+
+    @Test
+    fun initializeLayers_whenArrowHeadWidthZero() {
+        val options = RouteArrowOptions.Builder(ctx).build()
+        val mockOptions = mockk<RouteArrowOptions> {
+            every { aboveLayerId } returns options.aboveLayerId
+            every { tolerance } returns options.tolerance
+            every { arrowBorderColor } returns options.arrowBorderColor
+            every { arrowColor } returns options.arrowColor
+            every { arrowHeadIconBorder } returns options.arrowHeadIconBorder
+            every { arrowHeadIcon } returns mockk<Drawable> {
+                every { intrinsicHeight } returns 1
+                every { intrinsicWidth } returns 0
+            }
+        }
+        val style = getFullMockedStyle()
+
+        RouteArrowUtils.initializeLayers(style, mockOptions)
+
+        verify(exactly = 0) { style.addImage(RouteConstants.ARROW_HEAD_ICON, any<Bitmap>()) }
+        verify(exactly = 0) { style.addImage(RouteConstants.ARROW_HEAD_ICON, any<Image>()) }
+    }
+
+    @Test
+    fun initializeLayers_whenArrowHeadCasingHeightZero() {
+        val options = RouteArrowOptions.Builder(ctx).build()
+        val mockOptions = mockk<RouteArrowOptions> {
+            every { aboveLayerId } returns options.aboveLayerId
+            every { tolerance } returns options.tolerance
+            every { arrowBorderColor } returns options.arrowBorderColor
+            every { arrowColor } returns options.arrowColor
+            every { arrowHeadIcon } returns options.arrowHeadIcon
+            every { arrowHeadIconBorder } returns mockk<Drawable> {
+                every { intrinsicHeight } returns 0
+                every { intrinsicWidth } returns 1
+            }
+        }
+        val style = getFullMockedStyle()
+
+        RouteArrowUtils.initializeLayers(style, mockOptions)
+
+        verify(exactly = 0) { style.addImage(RouteConstants.ARROW_HEAD_ICON_CASING, any<Bitmap>()) }
+        verify(exactly = 0) { style.addImage(RouteConstants.ARROW_HEAD_ICON_CASING, any<Image>()) }
+    }
+
+    @Test
+    fun initializeLayers_whenArrowHeadCasingWidthZero() {
+        val options = RouteArrowOptions.Builder(ctx).build()
+        val mockOptions = mockk<RouteArrowOptions> {
+            every { aboveLayerId } returns options.aboveLayerId
+            every { tolerance } returns options.tolerance
+            every { arrowBorderColor } returns options.arrowBorderColor
+            every { arrowColor } returns options.arrowColor
+            every { arrowHeadIcon } returns options.arrowHeadIcon
+            every { arrowHeadIconBorder } returns mockk<Drawable> {
+                every { intrinsicHeight } returns 0
+                every { intrinsicWidth } returns 1
+            }
+        }
+        val style = getFullMockedStyle()
+
+        RouteArrowUtils.initializeLayers(style, mockOptions)
+
+        verify(exactly = 0) { style.addImage(RouteConstants.ARROW_HEAD_ICON_CASING, any<Bitmap>()) }
+        verify(exactly = 0) { style.addImage(RouteConstants.ARROW_HEAD_ICON_CASING, any<Image>()) }
+    }
+
+    private fun getFullMockedStyle(): Style {
+        return mockk<Style> {
+            every { fullyLoaded } returns true
+            every { styleLayers } returns listOf()
+            every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns false
+            every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns false
+            every { styleLayerExists(RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(RouteConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
+            every { styleLayerExists(RouteConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(RouteConstants.ARROW_HEAD_LAYER_ID) } returns true
+            every { styleLayerExists("mapbox-navigation-route-traffic-layer") } returns true
+            every {
+                addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
+            } returns ExpectedFactory.createValue()
+            every {
+                addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, any())
+            } returns ExpectedFactory.createValue()
+            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) } returns mockk()
+            every {
+                removeStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING)
+            } returns ExpectedFactory.createValue()
+            every {
+                addImage(RouteConstants.ARROW_HEAD_ICON_CASING, any<Bitmap>())
+            } returns ExpectedFactory.createValue()
+            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON) } returns mockk()
+            every {
+                removeStyleImage(RouteConstants.ARROW_HEAD_ICON)
+            } returns ExpectedFactory.createValue()
+            every {
+                addImage(RouteConstants.ARROW_HEAD_ICON, any<Bitmap>())
+            } returns ExpectedFactory.createValue()
+            every {
+                removeStyleLayer(RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+            } returns ExpectedFactory.createValue()
+            every {
+                removeStyleLayer(RouteConstants.ARROW_HEAD_CASING_LAYER_ID)
+            } returns ExpectedFactory.createValue()
+            every {
+                removeStyleLayer(RouteConstants.ARROW_SHAFT_LINE_LAYER_ID)
+            } returns ExpectedFactory.createValue()
+            every {
+                removeStyleLayer(RouteConstants.ARROW_HEAD_LAYER_ID)
+            } returns ExpectedFactory.createValue()
+            every { addStyleLayer(any(), any()) } returns ExpectedFactory.createValue()
+        }
     }
 }

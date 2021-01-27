@@ -82,28 +82,37 @@ internal object RouteArrowUtils {
         if (style.getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) != null) {
             style.removeStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING)
         }
-        val arrowHeadCasingDrawable = DrawableCompat.wrap(
-            options.arrowHeadIconBorder
-        )
-        DrawableCompat.setTint(
-            arrowHeadCasingDrawable.mutate(),
-            options.arrowBorderColor
-        )
-        val arrowHeadCasingBitmap = arrowHeadCasingDrawable.getBitmap()
-        style.addImage(RouteConstants.ARROW_HEAD_ICON_CASING, arrowHeadCasingBitmap)
+
+        if (
+            options.arrowHeadIconBorder.intrinsicHeight > 0 &&
+            options.arrowHeadIconBorder.intrinsicWidth > 0
+        ) {
+            val arrowHeadCasingDrawable = DrawableCompat.wrap(
+                options.arrowHeadIconBorder
+            )
+            DrawableCompat.setTint(
+                arrowHeadCasingDrawable.mutate(),
+                options.arrowBorderColor
+            )
+            val arrowHeadCasingBitmap = arrowHeadCasingDrawable.getBitmap()
+            style.addImage(RouteConstants.ARROW_HEAD_ICON_CASING, arrowHeadCasingBitmap)
+        }
 
         if (style.getStyleImage(RouteConstants.ARROW_HEAD_ICON) != null) {
             style.removeStyleImage(RouteConstants.ARROW_HEAD_ICON)
         }
-        val arrowHeadDrawable = DrawableCompat.wrap(
-            options.arrowHeadIcon
-        )
-        DrawableCompat.setTint(
-            arrowHeadDrawable.mutate(),
-            options.arrowColor
-        )
-        val arrowHeadBitmap = arrowHeadDrawable.getBitmap()
-        style.addImage(RouteConstants.ARROW_HEAD_ICON, arrowHeadBitmap)
+
+        if (options.arrowHeadIcon.intrinsicHeight > 0 && options.arrowHeadIcon.intrinsicWidth > 0) {
+            val arrowHeadDrawable = DrawableCompat.wrap(
+                options.arrowHeadIcon
+            )
+            DrawableCompat.setTint(
+                arrowHeadDrawable.mutate(),
+                options.arrowColor
+            )
+            val arrowHeadBitmap = arrowHeadDrawable.getBitmap()
+            style.addImage(RouteConstants.ARROW_HEAD_ICON, arrowHeadBitmap)
+        }
 
         // arrow shaft casing
         if (style.styleLayerExists(RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)) {
