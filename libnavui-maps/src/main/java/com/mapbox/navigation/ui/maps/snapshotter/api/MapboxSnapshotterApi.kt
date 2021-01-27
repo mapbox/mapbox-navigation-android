@@ -1,9 +1,10 @@
 package com.mapbox.navigation.ui.maps.snapshotter.api
 
 import android.content.Context
-import android.graphics.Color
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.bindgen.Expected
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
@@ -17,23 +18,28 @@ import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
 import com.mapbox.maps.Snapshotter
 import com.mapbox.maps.Style
-import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.eq
-import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.get
-import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.literal
 import com.mapbox.maps.extension.style.layers.addLayer
-import com.mapbox.maps.extension.style.layers.generated.FillExtrusionLayer
+import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.base.api.snapshotter.SnapshotReadyCallback
 import com.mapbox.navigation.ui.base.api.snapshotter.SnapshotterApi
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants
+import com.mapbox.navigation.ui.base.internal.route.RouteConstants.MAX_DEGREES
 import com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState
+import com.mapbox.navigation.ui.maps.internal.route.arrow.RouteArrowUtils
+import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
+import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
+import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
+import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowState
 import com.mapbox.navigation.ui.maps.snapshotter.internal.SnapshotterAction
 import com.mapbox.navigation.ui.maps.snapshotter.internal.SnapshotterProcessor
 import com.mapbox.navigation.ui.maps.snapshotter.internal.SnapshotterResult
 import com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.turf.TurfMeasurement
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Implementation of [SnapshotterApi] allowing you to generate snapshot showing a junction for select maneuvers.
@@ -49,8 +55,21 @@ class MapboxSnapshotterApi(
     private val mapView: MapView
 ) : SnapshotterApi {
 
+    companion object {
+        const val ARROW_BEARING_ADVANCED = "mapbox-navigation-arrow-bearing-advanced"
+        const val ARROW_SHAFT_SOURCE_ID_ADVANCED = "mapbox-navigation-arrow-shaft-source-advanced"
+        const val ARROW_HEAD_SOURCE_ID_ADVANCED = "mapbox-navigation-arrow-head-source-advanced"
+    }
     private val routeLinePoints: MutableList<Point?> = mutableListOf()
+    private val arrows: CopyOnWriteArrayList<List<Point>> = CopyOnWriteArrayList()
     private val snapshotter: Snapshotter
+    private lateinit var routeArrowState: RouteArrowState.UpdateManeuverArrowState
+    private val mapboxRouteArrowView = MapboxRouteArrowView(
+        RouteArrowOptions
+            .Builder(context)
+            .withAboveLayerId(RouteConstants.PRIMARY_ROUTE_LAYER_ID)
+            .build()
+    )
 
     init {
         val resourceOptions = MapboxOptions.getDefaultResourceOptions(context)
@@ -93,6 +112,12 @@ class MapboxSnapshotterApi(
                     ) as SnapshotterResult.SnapshotterCameraPosition
                     ifNonNull(camera.cameraPosition) {
                         routeLinePoints.addAll(it.points.plus(progress.upcomingStepPoints!!))
+                        val head = getFeatureForArrowHead(routeLinePoints.mapNotNull { it })
+                        routeArrowState = RouteArrowState.UpdateManeuverArrowState(
+                            listOf(),
+                            Feature.fromGeometry(LineString.fromLngLats(routeLinePoints)),
+                            head
+                        )
                         val mapInterface = getMapInterface()
                         val oldSize = mapInterface.size
                         mapInterface.size = Size(options.size.width, options.size.height)
@@ -165,16 +190,9 @@ class MapboxSnapshotterApi(
                             }
 
                             override fun onStyleLoaded(style: Style) {
-                                style.addLayer(
-                                    (
-                                        SnapshotterProcessor
-                                            .process(SnapshotterAction.GenerateSkyLayer)
-                                            as SnapshotterResult.SnapshotSkyLayer
-                                        ).layer
-                                )
                                 style.addSource(
                                     geoJsonSource(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) {
-                                        geometry(LineString.fromLngLats(routeLinePoints))
+                                        geometry(LineString.fromLngLats(listOf()))
                                     }
                                 )
                                 style.addLayer(
@@ -184,16 +202,24 @@ class MapboxSnapshotterApi(
                                             as SnapshotterResult.SnapshotLineLayer
                                         ).layer
                                 )
+                                mapboxRouteArrowView.render(style, routeArrowState)
 
-                                val fillExtrusionLayer = FillExtrusionLayer("3d-buildings", "composite")
-                                fillExtrusionLayer.sourceLayer("building")
-                                fillExtrusionLayer.filter(eq(get("extrude"), literal("true")))
-                                fillExtrusionLayer.minZoom(15.0)
-                                fillExtrusionLayer.fillExtrusionColor(Color.LTGRAY)
-                                fillExtrusionLayer.fillExtrusionHeight(get("height"))
-                                fillExtrusionLayer.fillExtrusionBase(get("min_height"))
-                                fillExtrusionLayer.fillExtrusionOpacity(0.9)
-                                style.addLayer(fillExtrusionLayer)
+                                /*style.addSource(
+                                    geoJsonSource(ARROW_SHAFT_SOURCE_ID_ADVANCED) {
+                                        featureCollection(getArrowShaftFeatureCollection())
+                                    }
+                                )
+                                style.addSource(
+                                    geoJsonSource(ARROW_HEAD_SOURCE_ID_ADVANCED) {
+                                        featureCollection(getArrowHeadFeatureCollection())
+                                    }
+                                )
+                                RouteArrowUtils.initializeLayers(style,
+                                    RouteArrowOptions
+                                        .Builder(context)
+                                        .withAboveLayerId(RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+                                        .build()
+                                )*/
                             }
                         })
                     } ?: callback.onFailure(
@@ -242,5 +268,60 @@ class MapboxSnapshotterApi(
         val top = centerOffset.y
         val left = centerOffset.x
         return EdgeInsets(top, left, mapSize.height - top, mapSize.width - left)
+    }
+
+    private fun getArrowShaftFeatureCollection(): FeatureCollection {
+        val shaftFeatures = arrows.map { pointList ->
+            LineString.fromLngLats(pointList)
+        }.map { lineString ->
+            Feature.fromGeometry(lineString)
+        }
+        return FeatureCollection.fromFeatures(shaftFeatures)
+    }
+
+    private fun getArrowHeadFeatureCollection(): FeatureCollection {
+        val arrowHeadFeatures = arrows.map { pointList ->
+            val azimuth = TurfMeasurement.bearing(pointList[pointList.size - 2], pointList[pointList.size - 1])
+            val delta: Double = MAX_DEGREES - 0.0
+
+            val firstMod: Double = (azimuth - 0.0) % delta
+            val secondMod = (firstMod + delta) % delta
+
+            val value = secondMod + 0.0
+            Feature.fromGeometry(pointList[pointList.size - 1]).also { feature ->
+                feature.addNumberProperty(
+                    ARROW_BEARING_ADVANCED,
+                    value
+                )
+            }
+        }
+        return FeatureCollection.fromFeatures(arrowHeadFeatures)
+    }
+
+    private fun getShowArrowModifications(): List<Pair<String, Visibility>> {
+        return listOf(
+            Pair(RouteConstants.ARROW_SHAFT_LINE_LAYER_ID, Visibility.VISIBLE),
+            Pair(RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID, Visibility.VISIBLE),
+            Pair(RouteConstants.ARROW_HEAD_CASING_LAYER_ID, Visibility.VISIBLE),
+            Pair(RouteConstants.ARROW_HEAD_LAYER_ID, Visibility.VISIBLE)
+        )
+    }
+
+    // This came from MathUtils in the Maps SDK which may have been removed.
+    private fun wrap(value: Double, min: Double, max: Double): Double {
+        val delta = max - min
+        val firstMod = (value - min) % delta
+        val secondMod = (firstMod + delta) % delta
+        return secondMod + min
+    }
+
+    private fun getFeatureForArrowHead(points: List<Point>): Feature {
+        val azimuth = TurfMeasurement.bearing(points[points.size - 2], points[points.size - 1])
+        return Feature.fromGeometry(points[points.size - 1]).also {
+            it.addNumberProperty(
+                RouteConstants.ARROW_BEARING,
+                wrap(azimuth, 0.0, RouteConstants.MAX_DEGREES)
+            )
+        }
     }
 }

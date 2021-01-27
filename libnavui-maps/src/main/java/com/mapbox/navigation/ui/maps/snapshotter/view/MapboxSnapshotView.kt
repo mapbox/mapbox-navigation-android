@@ -32,16 +32,16 @@ class MapboxSnapshotView @JvmOverloads constructor(
                 setImageBitmap(state.bitmap)
             }
             is SnapshotState.SnapshotFailure.SnapshotUnavailable -> {
-                setImageBitmap(null)
-                visibility = GONE
+                //setImageBitmap(null)
+                //visibility = GONE
             }
             is SnapshotState.SnapshotFailure.SnapshotEmpty -> {
-                setImageBitmap(null)
-                visibility = GONE
+                //setImageBitmap(null)
+                //visibility = GONE
             }
             is SnapshotState.SnapshotFailure.SnapshotError -> {
-                setImageBitmap(null)
-                visibility = GONE
+                //setImageBitmap(null)
+                //visibility = GONE
             }
         }
     }

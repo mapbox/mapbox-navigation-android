@@ -234,11 +234,11 @@ internal object SnapshotterProcessor {
             RouteConstants.PRIMARY_ROUTE_LAYER_ID,
             RouteConstants.PRIMARY_ROUTE_SOURCE_ID
         ) {
-            lineWidth(20.0)
+            lineWidth(18.0)
             lineOpacity(1.0)
             lineCap(LineCap.ROUND)
             lineJoin(LineJoin.ROUND)
-            lineColor("#0F77FF")
+            lineColor("#4994F6")
         }
         return SnapshotterResult.SnapshotLineLayer(lineLayer)
     }

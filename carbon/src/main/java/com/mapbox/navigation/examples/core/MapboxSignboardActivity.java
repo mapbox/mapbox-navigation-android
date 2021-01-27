@@ -147,9 +147,12 @@ public class MapboxSignboardActivity extends AppCompatActivity implements OnMapL
     float density = getResources().getDisplayMetrics().density;
     MapboxSnapshotterOptions options = new MapboxSnapshotterOptions.Builder(getApplicationContext())
         .size(new Size(175 * density, 200 * density))
-        .edgeInsets(new EdgeInsets(150.0 * density, 0.0 * density, 0.0 * density, 90.0 * density))
-        .styleUri("mapbox://styles/mapbox-map-design/ckifbgpa44g5q1aqp4206fxcn")
-        //.styleUri("mapbox://styles/mapbox-map-design/ckifcx2i84huf19pbvgi0cka6")
+        .edgeInsets(new EdgeInsets(136.0 * density, 0.0 * density, 0.0 * density, 0.0 * density))
+        //.styleUri("mapbox://styles/mapbox-map-design/ckkftwlaz02rs17lplbxm1dfe") // day style v2
+        //.styleUri("mapbox://styles/mapbox-map-design/ckkez57if068x18n0ujv4r9r8") // day style v2
+        .styleUri("mapbox://styles/mapbox-map-design/ckkfnaak605mv17pgmmxgmlvd") //night style v2
+        //.styleUri("mapbox://styles/mapbox-map-design/ckifbgpa44g5q1aqp4206fxcn") night style v1
+        //.styleUri("mapbox://styles/mapbox-map-design/ckifcx2i84huf19pbvgi0cka6") day style v1
         .build();
 
     snapshotterApi = new MapboxSnapshotterApi(this, mapboxMap, options, mapView);
@@ -157,6 +160,7 @@ public class MapboxSignboardActivity extends AppCompatActivity implements OnMapL
     signboardApi = new MapboxSignboardApi(getMapboxRouteAccessToken(this));
 
     mapboxReplayer.pushRealLocation(this, 0.0);
+    mapboxReplayer.playbackSpeed(2.0);
     mapboxReplayer.play();
   }
 

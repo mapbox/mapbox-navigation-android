@@ -40,12 +40,12 @@ class MapboxSignboardView @JvmOverloads constructor(
                 }
             }
             is SignboardState.SignboardFailure.SignboardUnavailable -> {
-                visibility = GONE
-                setImageBitmap(null)
+                //visibility = GONE
+                //setImageBitmap(null)
             }
             is SignboardState.SignboardFailure.SignboardError -> {
-                visibility = GONE
-                setImageBitmap(null)
+                //visibility = GONE
+                //setImageBitmap(null)
             }
         }
     }
@@ -55,7 +55,7 @@ class MapboxSignboardView @JvmOverloads constructor(
         val svg = SVG.getFromInputStream(stream)
 
         val aspectRatio = svg.documentViewBox.bottom / svg.documentViewBox.right
-        val definedWidth = 300
+        val definedWidth = 400
         val calculatedHeight = (definedWidth * aspectRatio).toInt()
 
         val signboard = Bitmap.createBitmap(
@@ -64,7 +64,7 @@ class MapboxSignboardView @JvmOverloads constructor(
             Bitmap.Config.ARGB_8888
         )
         val renderOptions = RenderOptions.create()
-        renderOptions.css("text { font-family: Arial, Helvetica, sans-serif; }")
+        renderOptions.css("text { font-family: Arial, Helvetica, sans-serif; font-size: 0.8em}")
         val signboardCanvas = Canvas(signboard)
         svg.renderToCanvas(signboardCanvas, renderOptions)
         return signboard
