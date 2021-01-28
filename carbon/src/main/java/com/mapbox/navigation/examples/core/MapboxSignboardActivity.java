@@ -148,11 +148,7 @@ public class MapboxSignboardActivity extends AppCompatActivity implements OnMapL
     MapboxSnapshotterOptions options = new MapboxSnapshotterOptions.Builder(getApplicationContext())
         .size(new Size(175 * density, 200 * density))
         .edgeInsets(new EdgeInsets(136.0 * density, 0.0 * density, 0.0 * density, 0.0 * density))
-        //.styleUri("mapbox://styles/mapbox-map-design/ckkftwlaz02rs17lplbxm1dfe") // day style v2
-        //.styleUri("mapbox://styles/mapbox-map-design/ckkez57if068x18n0ujv4r9r8") // day style v2
-        .styleUri("mapbox://styles/mapbox-map-design/ckkfnaak605mv17pgmmxgmlvd") //night style v2
-        //.styleUri("mapbox://styles/mapbox-map-design/ckifbgpa44g5q1aqp4206fxcn") night style v1
-        //.styleUri("mapbox://styles/mapbox-map-design/ckifcx2i84huf19pbvgi0cka6") day style v1
+        .styleUri("mapbox://styles/mapbox-map-design/ckkfnaak605mv17pgmmxgmlvd")
         .build();
 
     snapshotterApi = new MapboxSnapshotterApi(this, mapboxMap, options, mapView);
@@ -210,10 +206,10 @@ public class MapboxSignboardActivity extends AppCompatActivity implements OnMapL
 
     Location currentLocation = getLocationComponent().getLastKnownLocation();
     if (currentLocation != null) {
-      //Point or = Point.fromLngLat(-3.5870, 40.5719);
-      //Point de = Point.fromLngLat(-3.607835, 40.551486);
-      Point or = Point.fromLngLat(-121.971171,37.502348);
-      Point de = Point.fromLngLat(-121.934380,37.488618);
+      Point or = Point.fromLngLat(-3.5870, 40.5719);
+      Point de = Point.fromLngLat(-3.607835, 40.551486);
+      //Point or = Point.fromLngLat(-121.971171,37.502348);
+      //Point de = Point.fromLngLat(-121.934380,37.488618);
       findRoute(or, de);
     }
     return false;
