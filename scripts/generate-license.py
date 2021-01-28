@@ -1,7 +1,9 @@
+# encoding: utf-8
 #!/usr/bin/python
 
 import os
 import json
+import codecs
 
 path = os.getcwd()
 licensePath = path + "/LICENSE.md"
@@ -46,41 +48,41 @@ def writeToFile(file, filePath) :
                                       "License: [%s](%s)" % (licenseName, licenseUrl) +
                                       "\n\n===========================================================================\n\n")
 
-with open(licensePath, 'w') as licenseFile:
-    licenseFile.write("The MIT License (MIT)\n\nCopyright (c) 2021 Mapbox\n\n")
-    licenseFile.write("Permission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\n")
-    licenseFile.write("The above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software\n\n")
-    licenseFile.write("THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n\n")
-    licenseFile.write("## License of Dependencies\n\n")
-    licenseFile.write("This SDK uses [Mapbox Navigator](https://github.com/mapbox/mapbox-navigation-android/blob/45b2aeb5f21fe8d008f533d036774dbe891252d4/libandroid-navigation/build.gradle#L47), a private binary, as a dependency. The Mapbox Navigator binary may be used with a\nMapbox account and under the [Mapbox TOS](https://www.mapbox.com/tos/). If you do not wish to use this binary, make sure you swap out this\ndependency in [libandroid-navigation/build.gradle](https://github.com/mapbox/mapbox-navigation-android/blob/master/libandroid-navigation/build.gradle). Code in this repo falls under the [MIT license](https://github.com/mapbox/mapbox-navigation-android/blob/master/LICENSE).\n\n")
-    licenseFile.write("## Additional Mapbox Navigation Licenses\n\n")
-    licenseFile.write("### Licenses are generated using:\n")
+with codecs.open(licensePath, 'w', encoding='utf-8') as licenseFile:
+    licenseFile.write("### License\n")
+    licenseFile.write("Mapbox Navigation for Android version 2.0\n\n")
+    licenseFile.write("Mapbox Navigation Android SDK\n\n")
+    licenseFile.write("Copyright " + u'©' + "2021 Mapbox\n\n")
+    licenseFile.write("All rights reserved.\n\n")
+    licenseFile.write("Mapbox Navigation for Android version 2.0 (" + u"“" + "Mapbox Navigation Android SDK" + u"“" + ") or higher must be used according to the Mapbox Terms of Service. This license allows developers with a current active Mapbox account to use and modify the Mapbox Navigation Android SDK. Developers may modify the Mapbox Navigation Android SDK code so long as the modifications do not change or interfere with marked portions of the code related to billing, accounting, and anonymized data collection. The Mapbox Navigation Android SDK sends anonymized location and usage data, which Mapbox uses for fixing bugs and errors, accounting, and generating aggregated anonymized statistics. This license terminates automatically if a user no longer has an active Mapbox account.\n\n")
+    licenseFile.write("For the full license terms, please see the Mapbox Terms of Service at https://www.mapbox.com/legal/tos/\n\n")
     licenseFile.write("---------------------------------------\n")
     project = "Gradle License Plugin"
     url = "https://github.com/jaredsburrows/gradle-license-plugin"
     license = "The Apache Software License, Version 2.0"
     license_url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-    licenseFile.write("URL: [%s](%s)  \n" % (project, url) + "License: [%s](%s)" % (license, license_url) + "\n\n\n")
+    licenseFile.write("URL: [%s](%s)  \n" % (project, url) + "License: [%s](%s)" % (license, license_url))
 
-    licenseFile.write("### Navigation SDK  \n")
-    licenseFile.write("\n\n\n### Hybrid Router SDK module  \n")
-    licenseFile.write("---------------------------------------\n")
+    licenseFile.write("\n\n#### Hybrid Router SDK module\n")
     writeToFile(licenseFile, "/libnavigation-router/build/reports/licenses/licenseReleaseReport.json")
-    licenseFile.write("\n\n\n### Navigation Base SDK module  \n")
-    licenseFile.write("---------------------------------------\n")
+    licenseFile.write("\n\n#### Navigation Base SDK module\n")
     writeToFile(licenseFile, "/libnavigation-base/build/reports/licenses/licenseReleaseReport.json")
-    licenseFile.write("\n\n\n### Navigation Core SDK module  \n")
-    licenseFile.write("---------------------------------------\n")
+    licenseFile.write("\n\n#### Navigation Core SDK module\n")
     writeToFile(licenseFile, "/libnavigation-core/build/reports/licenses/licenseReleaseReport.json")
-    licenseFile.write("\n\n\n### Metrics SDK module  \n")
-    licenseFile.write("---------------------------------------\n")
+    licenseFile.write("\n\n#### Metrics SDK module\n")
     writeToFile(licenseFile, "/libnavigation-metrics/build/reports/licenses/licenseReleaseReport.json")
-    licenseFile.write("\n\n\n### Navigator SDK module  \n")
-    licenseFile.write("---------------------------------------\n")
+    licenseFile.write("\n\n#### Navigator SDK module\n")
     writeToFile(licenseFile, "/libnavigator/build/reports/licenses/licenseReleaseReport.json")
-    licenseFile.write("\n\n\n### Trip Notification SDK module  \n")
-    licenseFile.write("---------------------------------------\n")
+    licenseFile.write("\n\n#### Trip Notification SDK module\n")
     writeToFile(licenseFile, "/libtrip-notification/build/reports/licenses/licenseReleaseReport.json")
+    licenseFile.write("\n\n#### Navigation UI Base SDK module\n")
+    writeToFile(licenseFile, "/libnavui-base/build/reports/licenses/licenseReleaseReport.json")
+    licenseFile.write("\n\n#### Navigation UI Maps SDK module\n")
+    writeToFile(licenseFile, "/libnavui-maps/build/reports/licenses/licenseReleaseReport.json")
+    licenseFile.write("\n\n#### Navigation UI Util SDK module\n")
+    writeToFile(licenseFile, "/libnavui-util/build/reports/licenses/licenseReleaseReport.json")
+    licenseFile.write("\n\n#### Navigation UI Trip Progress SDK module\n")
+    writeToFile(licenseFile, "/libnavui-tripprogress/build/reports/licenses/licenseReleaseReport.json")
 
 removeLicenseHtmlFileForModule("libnavigation-router")
 removeLicenseHtmlFileForModule("libnavigation-base")
@@ -88,3 +90,7 @@ removeLicenseHtmlFileForModule("libnavigation-core")
 removeLicenseHtmlFileForModule("libnavigation-metrics")
 removeLicenseHtmlFileForModule("libnavigator")
 removeLicenseHtmlFileForModule("libtrip-notification")
+removeLicenseHtmlFileForModule("libnavui-base")
+removeLicenseHtmlFileForModule("libnavui-maps")
+removeLicenseHtmlFileForModule("libnavui-util")
+removeLicenseHtmlFileForModule("libnavui-tripprogress")

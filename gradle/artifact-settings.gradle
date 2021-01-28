@@ -8,7 +8,7 @@ ext {
     mapboxArtifactUrl = 'https://github.com/mapbox/mapbox-navigation-android'
     mapboxArtifactVcsUrl = 'https://github.com/mapbox/mapbox-navigation-android.git'
     mapboxArtifactScmUrl = 'scm:git@github.com:mapbox/mapbox-navigation-android.git'
-    mapboxArtifactLicenseName = 'BSD'
-    mapboxArtifactLicenseUrl = 'https://opensource.org/licenses/BSD-2-Clause'
+    mapboxArtifactLicenseName = 'Mapbox Terms of Service'
+    mapboxArtifactLicenseUrl = 'https://www.mapbox.com/legal/tos/'
     versionName = System.getenv('POM_VERSION_NAME') ?: project.property('POM_SNAPSHOT_VERSION_NAME')
 }
