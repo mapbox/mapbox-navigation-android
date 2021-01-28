@@ -1,5 +1,5 @@
 ext {
-    mapboxArtifactGroupId = 'com.mapbox.navigation.v2'
+    mapboxArtifactGroupId = 'com.mapbox.navigation'
     mapboxArtifactId = project.property('POM_ARTIFACT_ID')
     mapboxArtifactTitle = project.property('POM_ARTIFACT_TITLE')
     mapboxArtifactDescription = project.property('POM_DESCRIPTION')
