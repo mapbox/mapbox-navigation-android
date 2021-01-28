@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.maps.internal.route.arrow
+package com.mapbox.navigation.ui.maps.route.arrow
 
 import androidx.core.graphics.drawable.DrawableCompat
 import com.mapbox.geojson.FeatureCollection

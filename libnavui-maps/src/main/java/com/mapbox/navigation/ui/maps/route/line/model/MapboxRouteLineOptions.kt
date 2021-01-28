@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLayerProvider
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLayerProvider
 import com.mapbox.navigation.ui.maps.route.line.api.VanishingRouteLine
 
 /**

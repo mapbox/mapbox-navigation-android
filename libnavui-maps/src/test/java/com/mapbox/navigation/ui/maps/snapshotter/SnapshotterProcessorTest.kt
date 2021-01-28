@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.maps.snapshotter.internal
+package com.mapbox.navigation.ui.maps.snapshotter
 
 import android.content.Context
 import android.graphics.Bitmap

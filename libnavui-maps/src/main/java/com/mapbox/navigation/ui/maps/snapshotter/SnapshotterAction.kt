@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.maps.snapshotter.internal
+package com.mapbox.navigation.ui.maps.snapshotter
 
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.bindgen.Expected

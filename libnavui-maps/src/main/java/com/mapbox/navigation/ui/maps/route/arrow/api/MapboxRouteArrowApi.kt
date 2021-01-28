@@ -7,7 +7,7 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants
 import com.mapbox.navigation.ui.base.internal.utils.CompareUtils
-import com.mapbox.navigation.ui.maps.internal.route.arrow.RouteArrowUtils
+import com.mapbox.navigation.ui.maps.route.arrow.RouteArrowUtils
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowState
 import com.mapbox.turf.TurfMeasurement
 

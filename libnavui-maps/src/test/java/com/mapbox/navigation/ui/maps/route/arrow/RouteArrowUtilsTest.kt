@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.maps.internal.route.arrow
+package com.mapbox.navigation.ui.maps.route.arrow
 
 import android.content.Context
 import android.graphics.Bitmap

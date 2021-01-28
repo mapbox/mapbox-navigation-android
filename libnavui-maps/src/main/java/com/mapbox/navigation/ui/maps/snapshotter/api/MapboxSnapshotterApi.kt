@@ -24,9 +24,9 @@ import com.mapbox.navigation.ui.base.api.snapshotter.SnapshotReadyCallback
 import com.mapbox.navigation.ui.base.api.snapshotter.SnapshotterApi
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState
-import com.mapbox.navigation.ui.maps.snapshotter.internal.SnapshotterAction
-import com.mapbox.navigation.ui.maps.snapshotter.internal.SnapshotterProcessor
-import com.mapbox.navigation.ui.maps.snapshotter.internal.SnapshotterResult
+import com.mapbox.navigation.ui.maps.snapshotter.SnapshotterAction
+import com.mapbox.navigation.ui.maps.snapshotter.SnapshotterProcessor
+import com.mapbox.navigation.ui.maps.snapshotter.SnapshotterResult
 import com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 

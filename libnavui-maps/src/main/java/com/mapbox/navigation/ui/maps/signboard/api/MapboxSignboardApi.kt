@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 /**
  * Implementation of [SignboardApi] allowing you to generate signboard for select maneuvers.
  * @property accessToken String
- * @property onSignboardCallback callback that informs about the state of the signboard
  */
 class MapboxSignboardApi(
     private val accessToken: String
