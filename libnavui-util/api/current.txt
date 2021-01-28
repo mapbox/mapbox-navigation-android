@@ -1,10 +1,1 @@
 // Signature format: 3.0
-package com.mapbox.navigation.ui.utils.extension {
-
-  public final class BannerInstructionExKt {
-    method public static java.util.List<com.mapbox.api.directions.v5.models.BannerComponents>? getBannerComponents(com.mapbox.api.directions.v5.models.BannerInstructions);
-    method public static com.mapbox.api.directions.v5.models.BannerView? getBannerView(com.mapbox.api.directions.v5.models.BannerInstructions);
-  }
-
-}
-

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.utils.extension
+package com.mapbox.navigation.ui.utils.internal.extensions
 
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions

@@ -12,9 +12,9 @@ import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlig
 import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
 import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants
-import com.mapbox.navigation.ui.base.internal.utils.MapImageUtils
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRouteLineColorExpressions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
+import com.mapbox.navigation.ui.utils.internal.extensions.getBitmap
 
 internal class MapboxRouteLayerProvider(
     val routeStyleDescriptors: List<RouteStyleDescriptor>,
@@ -192,14 +192,14 @@ internal class MapboxRouteLayerProvider(
         if (style.getStyleImage(RouteConstants.ORIGIN_MARKER_NAME) != null) {
             style.removeStyleImage(RouteConstants.ORIGIN_MARKER_NAME)
         }
-        MapImageUtils.getBitmapFromDrawable(originIcon).let {
+        originIcon.getBitmap().let {
             style.addImage(RouteConstants.ORIGIN_MARKER_NAME, it)
         }
 
         if (style.getStyleImage(RouteConstants.DESTINATION_MARKER_NAME) != null) {
             style.removeStyleImage(RouteConstants.DESTINATION_MARKER_NAME)
         }
-        MapImageUtils.getBitmapFromDrawable(destinationIcon).let {
+        destinationIcon.getBitmap().let {
             style.addImage(RouteConstants.DESTINATION_MARKER_NAME, it)
         }
 

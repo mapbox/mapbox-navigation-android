@@ -16,8 +16,8 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants
-import com.mapbox.navigation.ui.base.internal.utils.MapImageUtils
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
+import com.mapbox.navigation.ui.utils.internal.extensions.getBitmap
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMisc
 
@@ -89,7 +89,7 @@ internal object RouteArrowUtils {
             arrowHeadCasingDrawable.mutate(),
             options.arrowBorderColor
         )
-        val arrowHeadCasingBitmap = MapImageUtils.getBitmapFromDrawable(arrowHeadCasingDrawable)
+        val arrowHeadCasingBitmap = arrowHeadCasingDrawable.getBitmap()
         style.addImage(RouteConstants.ARROW_HEAD_ICON_CASING, arrowHeadCasingBitmap)
 
         if (style.getStyleImage(RouteConstants.ARROW_HEAD_ICON) != null) {
@@ -102,7 +102,7 @@ internal object RouteArrowUtils {
             arrowHeadDrawable.mutate(),
             options.arrowColor
         )
-        val arrowHeadBitmap = MapImageUtils.getBitmapFromDrawable(arrowHeadDrawable)
+        val arrowHeadBitmap = arrowHeadDrawable.getBitmap()
         style.addImage(RouteConstants.ARROW_HEAD_ICON, arrowHeadBitmap)
 
         // arrow shaft casing

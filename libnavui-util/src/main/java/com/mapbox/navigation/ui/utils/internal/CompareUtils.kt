@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.base.internal.utils
+package com.mapbox.navigation.ui.utils.internal
 
 object CompareUtils {
 

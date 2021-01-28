@@ -249,6 +249,17 @@ package com.mapbox.navigation.ui.maps.camera.utils {
 
 }
 
+package com.mapbox.navigation.ui.maps.internal.route.line {
+
+  public final class MapboxRouteLineUtils {
+    method public static String getDefaultBelowLayer(String? layerId, com.mapbox.maps.Style style);
+    method public kotlin.jvm.functions.Function0<java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData>> getRouteFeatureDataProvider(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> directionsRoutes);
+    method public kotlin.jvm.functions.Function0<java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData>> getRouteLineFeatureDataProvider(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLine> directionsRoutes);
+    field public static final com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils! INSTANCE;
+  }
+
+}
+
 package com.mapbox.navigation.ui.maps.route.arrow.api {
 
   public final class MapboxRouteArrowApi {

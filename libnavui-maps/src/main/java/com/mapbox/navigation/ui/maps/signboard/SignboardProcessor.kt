@@ -8,7 +8,7 @@ import com.mapbox.common.HttpRequest
 import com.mapbox.common.HttpRequestError
 import com.mapbox.common.HttpResponseData
 import com.mapbox.common.UserAgentComponents
-import com.mapbox.navigation.ui.utils.extension.getBannerComponents
+import com.mapbox.navigation.ui.utils.internal.extensions.getBannerComponents
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 
 internal object SignboardProcessor {

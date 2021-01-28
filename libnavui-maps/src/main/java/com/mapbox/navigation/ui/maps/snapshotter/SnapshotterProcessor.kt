@@ -18,7 +18,7 @@ import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants
 import com.mapbox.navigation.ui.maps.snapshotter.model.CameraPosition
 import com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions
-import com.mapbox.navigation.ui.utils.extension.getBannerComponents
+import com.mapbox.navigation.ui.utils.internal.extensions.getBannerComponents
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
