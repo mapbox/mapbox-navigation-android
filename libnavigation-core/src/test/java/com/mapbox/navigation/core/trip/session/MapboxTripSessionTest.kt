@@ -177,6 +177,16 @@ class MapboxTripSessionTest {
     }
 
     @Test
+    fun stopTripSessionShouldStopRouteProgress() = coroutineRule.runBlockingTest {
+        tripSession.route = route
+        tripSession.start()
+        tripSession.route = null
+        tripSession.stop()
+
+        coVerify(exactly = 1) { navigator.getStatus(any()) }
+    }
+
+    @Test
     fun locationObserverSuccess() = coroutineRule.runBlockingTest {
         tripSession.start()
         val observer: LocationObserver = mockk(relaxUnitFun = true)

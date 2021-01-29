@@ -807,7 +807,7 @@ class MapboxNavigation(
                 navigationOptions.onboardRouterOptions.tilesVersion,
                 navigationOptions.accessToken ?: "",
                 USER_AGENT,
-                "",
+                BuildConfig.NAV_NATIVE_SDK_VERSION,
                 NativeSkuTokenProvider(
                     MapboxNavigationAccounts.getInstance(navigationOptions.applicationContext)
                 )
