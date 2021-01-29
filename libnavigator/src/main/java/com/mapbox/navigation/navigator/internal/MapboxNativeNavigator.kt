@@ -161,7 +161,7 @@ interface MapboxNativeNavigator {
      * @param url the directions-based uri used when hitting the http service
      * @return a [RouterResult] object with the json and a success/fail boolean
      */
-    fun getRoute(url: String): RouterResult
+    suspend fun getRoute(url: String): RouterResult
 
     /**
      * Passes in an input path to the tar file and output path.

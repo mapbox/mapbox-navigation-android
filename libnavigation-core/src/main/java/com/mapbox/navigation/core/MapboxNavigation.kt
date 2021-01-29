@@ -49,7 +49,6 @@ import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
-import com.mapbox.navigation.core.trip.session.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
@@ -68,7 +67,6 @@ import com.mapbox.navigation.utils.internal.NetworkStatusService
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
-import com.mapbox.navigator.ElectronicHorizonOptions
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
@@ -147,14 +145,7 @@ class MapboxNavigation(
     private val fasterRouteController: FasterRouteController
     private val routeRefreshController: RouteRefreshController
     private val arrivalProgressObserver: ArrivalProgressObserver
-    private val electronicHorizonOptions: ElectronicHorizonOptions = ElectronicHorizonOptions(
-        navigationOptions.eHorizonOptions.length,
-        navigationOptions.eHorizonOptions.expansion.toByte(),
-        navigationOptions.eHorizonOptions.branchLength,
-        navigationOptions.eHorizonOptions.includeGeometries,
-        false
-    )
-    private val navigatorConfig = NavigatorConfig(null, electronicHorizonOptions, null)
+    private val navigatorConfig = NavigatorConfig(null, null, null, null)
 
     private var notificationChannelField: Field? = null
 
@@ -363,7 +354,6 @@ class MapboxNavigation(
         tripSession.unregisterAllBannerInstructionsObservers()
         tripSession.unregisterAllVoiceInstructionsObservers()
         tripSession.unregisterAllRouteAlertsObservers()
-        tripSession.unregisterAllEHorizonObservers()
         tripSession.unregisterAllMapMatcherResultObservers()
         directionsSession.routes = emptyList()
         resetTripSession()
@@ -618,28 +608,6 @@ class MapboxNavigation(
      */
     fun unregisterRouteAlertsObserver(routeAlertsObserver: RouteAlertsObserver) {
         tripSession.unregisterRouteAlertsObserver(routeAlertsObserver)
-    }
-
-    /**
-     * Observer will be called when the EHorizon changes.
-     *
-     * Registering an EHorizonObserver activates the Electronic Horizon module.
-     *
-     * @see unregisterEHorizonObserver
-     */
-    fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver) {
-        tripSession.registerEHorizonObserver(eHorizonObserver)
-    }
-
-    /**
-     * Unregisters a EHorizon observer.
-     *
-     * Unregistering all observers deactivates the module.
-     *
-     * @see registerEHorizonObserver
-     */
-    fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver) {
-        tripSession.unregisterEHorizonObserver(eHorizonObserver)
     }
 
     /**

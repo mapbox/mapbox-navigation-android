@@ -3,10 +3,15 @@ package com.mapbox.navigation.navigator.internal
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.navigator.internal.NavigatorLoader.customConfig
+import com.mapbox.navigator.CacheFactory
+import com.mapbox.navigator.ConfigFactory
+import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
+import com.mapbox.navigator.Router
+import com.mapbox.navigator.RunLoopExecutorFactory
 import com.mapbox.navigator.SettingsProfile
 import com.mapbox.navigator.TilesConfig
 
@@ -20,13 +25,24 @@ internal object NavigatorLoader {
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig
-    ): Navigator {
-        return Navigator(
+    ): NativeComponents {
+        val config = ConfigFactory.build(
             settingsProfile(deviceProfile),
             navigatorConfig,
-            customConfig(deviceProfile),
-            tilesConfig
+            deviceProfile.customConfig
         )
+        val runLoopExecutor = RunLoopExecutorFactory.build()
+        val historyRecorder = HistoryRecorderHandle.build(config)
+        val cache = CacheFactory.build(tilesConfig, config, runLoopExecutor, historyRecorder)
+
+        val navigator = Navigator(
+            config,
+            runLoopExecutor,
+            cache,
+            historyRecorder
+        )
+        val nativeRouter = Router(cache, historyRecorder)
+        return NativeComponents(navigator, nativeRouter, historyRecorder)
     }
 
     private fun settingsProfile(deviceProfile: DeviceProfile): SettingsProfile {
@@ -44,4 +60,10 @@ internal object NavigatorLoader {
     private fun customConfig(deviceProfile: DeviceProfile): String {
         return deviceProfile.customConfig
     }
+
+    internal data class NativeComponents(
+        val navigator: Navigator,
+        val nativeRouter: Router,
+        val historyRecorderHandle: HistoryRecorderHandle
+    )
 }

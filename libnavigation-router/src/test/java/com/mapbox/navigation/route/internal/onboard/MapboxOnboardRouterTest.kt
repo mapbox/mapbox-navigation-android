@@ -14,6 +14,7 @@ import com.mapbox.navigation.utils.NavigationException
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouterResult
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -85,22 +86,22 @@ class MapboxOnboardRouterTest {
     @Test
     fun checkCallbackCalledOnFailure() = coroutineRule.runBlockingTest {
         val exceptionSlot = slot<NavigationException>()
-        every { navigator.getRoute(any()) } returns routerResultFailure
+        coEvery { navigator.getRoute(any()) } returns routerResultFailure
 
         onboardRouter.getRoute(routerOptions, routerCallback)
 
-        verify { navigator.getRoute(URL.toString()) }
+        coVerify { navigator.getRoute(URL.toString()) }
         verify { routerCallback.onFailure(capture(exceptionSlot)) }
         assertEquals(ERROR_MESSAGE, exceptionSlot.captured.message)
     }
 
     @Test
     fun checkCallbackCalledOnSuccess() = coroutineRule.runBlockingTest {
-        every { navigator.getRoute(any()) } returns routerResultSuccess
+        coEvery { navigator.getRoute(any()) } returns routerResultSuccess
 
         onboardRouter.getRoute(routerOptions, routerCallback)
 
-        verify { navigator.getRoute(URL.toString()) }
+        coVerify { navigator.getRoute(URL.toString()) }
         verify { routerCallback.onResponse(any()) }
     }
 
@@ -182,7 +183,7 @@ class MapboxOnboardRouterTest {
     @Test
     fun checkModelOnSuccess() = coroutineRule.runBlockingTest {
         val routesSlot = slot<List<DirectionsRoute>>()
-        every { navigator.getRoute(any()) } returns routerResultSuccess
+        coEvery { navigator.getRoute(any()) } returns routerResultSuccess
 
         onboardRouter.getRoute(routerOptions, routerCallback)
 

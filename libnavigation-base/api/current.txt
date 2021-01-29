@@ -408,7 +408,7 @@ package com.mapbox.navigation.base.trip.model.alert {
     method public String? getDescription();
     method public java.util.Date? getEndTime();
     method public String getId();
-    method public String? getImpact();
+    method public String getImpact();
     method public java.util.Date? getStartTime();
     method public String? getSubType();
     method public String? getSubTypeDescription();
@@ -425,7 +425,7 @@ package com.mapbox.navigation.base.trip.model.alert {
     method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder creationTime(java.util.Date? creationTime);
     method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder description(String? description);
     method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder endTime(java.util.Date? endTime);
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder impact(@com.mapbox.navigation.base.trip.model.alert.IncidentImpact.Impact String? impact);
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder impact(@com.mapbox.navigation.base.trip.model.alert.IncidentImpact.Impact String impact);
     method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder isClosed(boolean isClosed);
     method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder startTime(java.util.Date? startTime);
     method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder subType(String? subType);
