@@ -49,6 +49,7 @@ import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
+import com.mapbox.navigation.core.trip.session.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
@@ -608,6 +609,30 @@ class MapboxNavigation(
      */
     fun unregisterRouteAlertsObserver(routeAlertsObserver: RouteAlertsObserver) {
         tripSession.unregisterRouteAlertsObserver(routeAlertsObserver)
+    }
+
+    /**
+     * Observer will be called when the EHorizon changes.
+     *
+     * Registering an EHorizonObserver activates the Electronic Horizon module.
+     *
+     * @see unregisterEHorizonObserver
+     */
+    @Deprecated("Temporarily no-op. Functionality will be reintroduced in future releases.")
+    fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver) {
+        // no-op
+    }
+
+    /**
+     * Unregisters a EHorizon observer.
+     *
+     * Unregistering all observers deactivates the module.
+     *
+     * @see registerEHorizonObserver
+     */
+    @Deprecated("Temporarily no-op. Functionality will be reintroduced in future releases.")
+    fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver) {
+        // no-op
     }
 
     /**
