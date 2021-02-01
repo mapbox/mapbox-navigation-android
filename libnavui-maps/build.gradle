@@ -39,6 +39,8 @@ dependencies {
     api dependenciesList.mapboxMapSdk
     api dependenciesList.mapboxSdkTurf
 
+    api dependenciesList.materialDesign
+
     implementation dependenciesList.androidXAppCompat
     implementation dependenciesList.androidXCardView
     implementation dependenciesList.androidXConstraintLayout
