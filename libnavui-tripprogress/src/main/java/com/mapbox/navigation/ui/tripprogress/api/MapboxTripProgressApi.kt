@@ -14,7 +14,6 @@ import com.mapbox.navigation.ui.tripprogress.TripProgressResult
  *
  * @param formatter an instance of [TripProgressUpdateFormatter]
  * @param processor an instance of [TripProgressProcessor]
- * @param colorResources an instance of [RouteLineColorResources]
  */
 class MapboxTripProgressApi internal constructor(
     var formatter: TripProgressUpdateFormatter,

@@ -142,12 +142,14 @@ ui-check-api:
 	./gradlew :libnavui-maps:checkApi -PhidePackage=com.mapbox.navigation.ui.maps.internal -PhideId=ReferencesHidden
 	./gradlew :libnavui-base:checkApi -PhidePackage=com.mapbox.navigation.ui.base.internal -PhideId=ReferencesHidden
 	./gradlew :libnavui-util:checkApi -PhidePackage=com.mapbox.navigation.ui.utils.internal -PhideId=ReferencesHidden
+	./gradlew :libnavui-tripprogress:checkApi -PhidePackage=com.mapbox.navigation.ui.tripprogress.internal -PhideId=ReferencesHidden
 
 .PHONY: ui-update-api
 ui-update-api:
 	./gradlew :libnavui-maps:updateApi -PhidePackage=com.mapbox.navigation.ui.maps.internal
 	./gradlew :libnavui-base:updateApi -PhidePackage=com.mapbox.navigation.ui.base.internal
 	./gradlew :libnavui-util:updateApi -PhidePackage=com.mapbox.navigation.ui.utils.internal
+	./gradlew :libnavui-tripprogress:updateApi -PhidePackage=com.mapbox.navigation.ui.tripprogress.internal
 
 .PHONY: update-metalava
 update-metalava:
