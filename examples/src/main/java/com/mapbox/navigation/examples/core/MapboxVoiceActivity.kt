@@ -200,9 +200,9 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            routeArrowApi.updateUpcomingManeuverArrow(routeProgress).apply {
+            routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
                 ifNonNull(routeArrowView, mapboxMap.getStyle()) { view, style ->
-                    view.render(style, this)
+                    view.renderManeuverUpdate(style, this)
                 }
             }
         }

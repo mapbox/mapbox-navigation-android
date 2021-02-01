@@ -423,22 +423,70 @@ package com.mapbox.navigation.ui.maps.route.arrow.api {
 
   public final class MapboxRouteArrowApi {
     ctor public MapboxRouteArrowApi();
-    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowState.UpdateRouteArrowVisibilityState hideManeuverArrow();
-    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowState.UpdateManeuverArrowState redraw();
-    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowState.UpdateRouteArrowVisibilityState showManeuverArrow();
-    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowState.UpdateManeuverArrowState updateUpcomingManeuverArrow(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+    method public com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue,com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError> addArrow(com.mapbox.navigation.ui.maps.route.arrow.model.ManeuverArrow arrow);
+    method public com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue,com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError> addUpcomingManeuverArrow(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.ClearArrowsValue clearArrows();
+    method public java.util.List<com.mapbox.navigation.ui.maps.route.arrow.model.ManeuverArrow> getArrows();
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue hideManeuverArrow();
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue redraw();
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RemoveArrowValue removeArrow(com.mapbox.navigation.ui.maps.route.arrow.model.ManeuverArrow arrow);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue showManeuverArrow();
   }
 
   public final class MapboxRouteArrowView {
     ctor public MapboxRouteArrowView(com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions options);
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getVisibility(com.mapbox.maps.Style style);
-    method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowState.UpdateRouteArrowVisibilityState state);
-    method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowState.UpdateManeuverArrowState state);
+    method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue visibilityChange);
+    method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue arrowAdded);
+    method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue,com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError> expectedValue);
+    method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.arrow.model.RemoveArrowValue state);
+    method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.arrow.model.ClearArrowsValue state);
+    method public void renderManeuverUpdate(com.mapbox.maps.Style style, com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue,com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError> expectedValue);
   }
 
 }
 
 package com.mapbox.navigation.ui.maps.route.arrow.model {
+
+  public final class ArrowAddedValue {
+    method public com.mapbox.geojson.FeatureCollection getArrowHeadFeatureCollection();
+    method public com.mapbox.geojson.FeatureCollection getArrowShaftFeatureCollection();
+    property public final com.mapbox.geojson.FeatureCollection arrowHeadFeatureCollection;
+    property public final com.mapbox.geojson.FeatureCollection arrowShaftFeatureCollection;
+  }
+
+  public final class ArrowVisibilityChangeValue {
+    method public java.util.List<kotlin.Pair<java.lang.String,com.mapbox.maps.extension.style.layers.properties.generated.Visibility>> getLayerVisibilityModifications();
+    property public final java.util.List<kotlin.Pair<java.lang.String,com.mapbox.maps.extension.style.layers.properties.generated.Visibility>> layerVisibilityModifications;
+  }
+
+  public final class ClearArrowsValue {
+    method public com.mapbox.geojson.FeatureCollection getArrowHeadFeatureCollection();
+    method public com.mapbox.geojson.FeatureCollection getArrowShaftFeatureCollection();
+    property public final com.mapbox.geojson.FeatureCollection arrowHeadFeatureCollection;
+    property public final com.mapbox.geojson.FeatureCollection arrowShaftFeatureCollection;
+  }
+
+  public final class InvalidPointError {
+    ctor public InvalidPointError(String errorMessage, Throwable? throwable);
+    method public String getErrorMessage();
+    method public Throwable? getThrowable();
+    property public final String errorMessage;
+    property public final Throwable? throwable;
+  }
+
+  public final class ManeuverArrow {
+    ctor public ManeuverArrow(java.util.List<com.mapbox.geojson.Point> points);
+    method public java.util.List<com.mapbox.geojson.Point> getPoints();
+    property public final java.util.List<com.mapbox.geojson.Point> points;
+  }
+
+  public final class RemoveArrowValue {
+    method public com.mapbox.geojson.FeatureCollection getArrowHeadFeatureCollection();
+    method public com.mapbox.geojson.FeatureCollection getArrowShaftFeatureCollection();
+    property public final com.mapbox.geojson.FeatureCollection arrowHeadFeatureCollection;
+    property public final com.mapbox.geojson.FeatureCollection arrowShaftFeatureCollection;
+  }
 
   public final class RouteArrowOptions {
     method public String getAboveLayerId();
@@ -467,19 +515,13 @@ package com.mapbox.navigation.ui.maps.route.arrow.model {
     method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withTolerance(double tolerance);
   }
 
-  public abstract sealed class RouteArrowState implements com.mapbox.navigation.ui.base.MapboxState {
-  }
-
-  public static final class RouteArrowState.UpdateManeuverArrowState extends com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowState {
-    ctor public RouteArrowState.UpdateManeuverArrowState(java.util.List<? extends kotlin.Pair<java.lang.String,? extends com.mapbox.maps.extension.style.layers.properties.generated.Visibility>> layerVisibilityModifications, com.mapbox.geojson.Feature? arrowShaftFeature, com.mapbox.geojson.Feature? arrowHeadFeature);
+  public final class UpdateManeuverArrowValue {
     method public com.mapbox.geojson.Feature? getArrowHeadFeature();
     method public com.mapbox.geojson.Feature? getArrowShaftFeature();
-    method public java.util.List<kotlin.Pair<java.lang.String,com.mapbox.maps.extension.style.layers.properties.generated.Visibility>> getVisibilityChanges();
-  }
-
-  public static final class RouteArrowState.UpdateRouteArrowVisibilityState extends com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowState {
-    ctor public RouteArrowState.UpdateRouteArrowVisibilityState(java.util.List<? extends kotlin.Pair<java.lang.String,? extends com.mapbox.maps.extension.style.layers.properties.generated.Visibility>> layerVisibilityModifications);
-    method public java.util.List<kotlin.Pair<java.lang.String,com.mapbox.maps.extension.style.layers.properties.generated.Visibility>> getVisibilityChanges();
+    method public java.util.List<kotlin.Pair<java.lang.String,com.mapbox.maps.extension.style.layers.properties.generated.Visibility>> getLayerVisibilityModifications();
+    property public final com.mapbox.geojson.Feature? arrowHeadFeature;
+    property public final com.mapbox.geojson.Feature? arrowShaftFeature;
+    property public final java.util.List<kotlin.Pair<java.lang.String,com.mapbox.maps.extension.style.layers.properties.generated.Visibility>> layerVisibilityModifications;
   }
 
 }

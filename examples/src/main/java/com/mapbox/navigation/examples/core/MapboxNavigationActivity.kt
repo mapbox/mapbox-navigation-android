@@ -281,9 +281,9 @@ class MapboxNavigationActivity :
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
             viewportDataSource.onRouteProgressChanged(routeProgress)
             viewportDataSource.evaluate()
-            routeArrowAPI.updateUpcomingManeuverArrow(routeProgress).apply {
+            routeArrowAPI.addUpcomingManeuverArrow(routeProgress).apply {
                 ifNonNull(routeArrowView, mapboxMap.getStyle()) { view, style ->
-                    view.render(style, this)
+                    view.renderManeuverUpdate(style, this)
                 }
             }
             binding.tripProgressView.render(tripProgressApi.getTripProgress(routeProgress))

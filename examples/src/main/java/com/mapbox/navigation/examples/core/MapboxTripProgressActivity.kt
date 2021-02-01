@@ -144,8 +144,8 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
                 binding.tripProgressView.render(update)
             }
 
-            routeArrowApi.updateUpcomingManeuverArrow(routeProgress).apply {
-                routeArrowView.render(mapboxMap.getStyle()!!, this)
+            routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
+                routeArrowView.renderManeuverUpdate(mapboxMap.getStyle()!!, this)
             }
         }
     }

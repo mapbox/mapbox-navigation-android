@@ -205,8 +205,8 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
                     maneuverApi.getStepDistanceRemaining(it, stepDistanceRemainingCallback)
                 }
             }
-            routeArrowApi.updateUpcomingManeuverArrow(routeProgress).apply {
-                routeArrowView.render(mapboxMap.getStyle()!!, this)
+            routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
+                routeArrowView.renderManeuverUpdate(mapboxMap.getStyle()!!, this)
             }
         }
     }

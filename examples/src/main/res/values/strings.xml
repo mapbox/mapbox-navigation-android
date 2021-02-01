@@ -27,6 +27,10 @@
     <string name="description_replay" translatable="false">Demonstrates the use of replay API.</string>
     <string name="title_custom_style" translatable="false">Custom Style Example</string>
     <string name="description_custom_style" translatable="false">Demonstrates the use of custom styling.</string>
+
+    <string name="title_multiple_arrows" translatable="false">Multiple Arrow Example</string>
+    <string name="description_multiple_arrows" translatable="false">Demonstrates adding multiple arrows.</string>
+
     <string name="title_draw_utility" translatable="false">Route Drawing Utility</string>
     <string name="description_draw_utility" translatable="false">Utility for drawing routes with long presses.</string>
 
