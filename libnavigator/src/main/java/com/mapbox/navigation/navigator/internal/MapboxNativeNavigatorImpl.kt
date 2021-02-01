@@ -78,6 +78,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         )
         navigator = nativeComponents.navigator
         nativeRouter = nativeComponents.nativeRouter
+        historyRecorderHandle = nativeComponents.historyRecorderHandle
         route = null
         routeBufferGeoJson = null
         return this
@@ -297,7 +298,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return a json representing the series of events that happened since the last time
      * the history was toggled on.
      */
-    override fun getHistory(): String = String(historyRecorderHandle!!.history)
+    override fun getHistory(): String = String(historyRecorderHandle?.history ?: byteArrayOf())
 
     /**
      * Toggles the recording of history on or off.
@@ -306,7 +307,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @param isEnabled set this to true to turn on history recording and false to turn it off
      */
     override fun toggleHistory(isEnabled: Boolean) {
-        historyRecorderHandle!!.enable(isEnabled)
+        historyRecorderHandle?.enable(isEnabled)
     }
 
     /**
@@ -317,7 +318,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @param eventJsonProperties the json to attach to the "properties" key of the event
      */
     override fun addHistoryEvent(eventType: String, eventJsonProperties: String) {
-        historyRecorderHandle!!.pushHistory(eventType, eventJsonProperties)
+        historyRecorderHandle?.pushHistory(eventType, eventJsonProperties)
     }
 
     // Other
