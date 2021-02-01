@@ -60,13 +60,17 @@ import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.examples.core.R;
 import com.mapbox.navigation.ui.base.model.Expected;
+import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue;
+import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue;
+import com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError;
+import com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue;
+import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter;
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer;
 import com.mapbox.navigation.ui.maps.PredictiveCacheController;
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider;
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi;
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView;
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions;
-import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowState;
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi;
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView;
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue;
@@ -235,7 +239,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
               }
             });
 
-            RouteArrowState.UpdateRouteArrowVisibilityState arrowVisibilityState;
+            ArrowVisibilityChangeValue arrowVisibilityState;
             if (arrowVisibility == Visibility.NONE) {
               arrowVisibilityState = routeArrow.hideManeuverArrow();
             } else {
@@ -243,7 +247,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
             }
             routeArrowView.render(style, arrowVisibilityState);
 
-            RouteArrowState.UpdateManeuverArrowState redrawState = routeArrow.redraw();
+            ArrowAddedValue redrawState = routeArrow.redraw();
             routeArrowView.render(style, redrawState);
           }
         }, null);
@@ -477,8 +481,8 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
       }
       mapboxRouteLineApi.updateWithRouteProgress(routeProgress);
 
-      RouteArrowState.UpdateManeuverArrowState updateArrowState = routeArrow.updateUpcomingManeuverArrow(routeProgress);
-      routeArrowView.render(mapboxMap.getStyle(), updateArrowState);
+      Expected<UpdateManeuverArrowValue, InvalidPointError> updateArrowState = routeArrow.addUpcomingManeuverArrow(routeProgress);
+      routeArrowView.renderManeuverUpdate(mapboxMap.getStyle(), updateArrowState);
 
       DirectionsRoute currentRoute = routeProgress.getRoute();
       boolean hasGeometry = false;

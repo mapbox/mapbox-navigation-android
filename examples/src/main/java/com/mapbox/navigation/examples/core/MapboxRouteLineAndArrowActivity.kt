@@ -252,10 +252,10 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
             // RouteArrow: The next maneuver arrows are driven by route progress events.
             // Generate the next maneuver arrow update data and pass it to the view class
             // to visualize the updates on the map.
-            val arrowUpdate = routeArrowApi.updateUpcomingManeuverArrow(routeProgress)
+            val arrowUpdate = routeArrowApi.addUpcomingManeuverArrow(routeProgress)
             mapboxMap.getStyle()?.apply {
                 // Render the result to update the map.
-                routeArrowView.render(this, arrowUpdate)
+                routeArrowView.renderManeuverUpdate(this, arrowUpdate)
             }
         }
     }

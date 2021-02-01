@@ -13,6 +13,7 @@ import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.navigation.examples.core.MapboxCustomStyleActivity
 import com.mapbox.navigation.examples.core.MapboxJunctionActivity
 import com.mapbox.navigation.examples.core.MapboxManeuverActivity
+import com.mapbox.navigation.examples.core.MapboxMultipleArrowActivity
 import com.mapbox.navigation.examples.core.MapboxNavigationActivity
 import com.mapbox.navigation.examples.core.MapboxRouteLineAndArrowActivity
 import com.mapbox.navigation.examples.core.MapboxSignboardActivity
@@ -116,6 +117,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_replay),
                 getString(R.string.description_replay),
                 ReplayHistoryActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_multiple_arrows),
+                getString(R.string.description_multiple_arrows),
+                MapboxMultipleArrowActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_route_line_internal),

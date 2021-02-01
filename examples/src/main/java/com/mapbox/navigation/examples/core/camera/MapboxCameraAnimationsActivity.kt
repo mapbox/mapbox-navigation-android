@@ -170,9 +170,9 @@ class MapboxCameraAnimationsActivity :
             viewportDataSource.onRouteProgressChanged(routeProgress)
             viewportDataSource.evaluate()
 
-            routeArrowAPI.updateUpcomingManeuverArrow(routeProgress).apply {
+            routeArrowAPI.addUpcomingManeuverArrow(routeProgress).apply {
                 ifNonNull(routeArrowView, mapboxMap.getStyle()) { view, style ->
-                    view.render(style, this)
+                    view.renderManeuverUpdate(style, this)
                 }
             }
         }

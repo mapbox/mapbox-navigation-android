@@ -167,8 +167,8 @@ class MapboxSnapshotActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            routeArrowApi.updateUpcomingManeuverArrow(routeProgress).apply {
-                routeArrowView.render(mapboxMap.getStyle()!!, this)
+            routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
+                routeArrowView.renderManeuverUpdate(mapboxMap.getStyle()!!, this)
             }
             // The snapshot component is driven by route progress updates.
             // Passing the route progress to the MapboxSnapshotterApi generates the data

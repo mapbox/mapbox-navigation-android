@@ -87,8 +87,8 @@ class RouteLineUtil(private val activity: AppCompatActivity) : LifecycleObserver
     private val routeProgressObserver: RouteProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
             routeLineApi.updateWithRouteProgress(routeProgress)
-            routeArrowApi.updateUpcomingManeuverArrow(routeProgress).apply {
-                routeArrowView.render(style, this)
+            routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
+                routeArrowView.renderManeuverUpdate(style, this)
             }
 
             val currentRoute = routeProgress.route

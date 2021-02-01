@@ -215,8 +215,8 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            routeArrowApi.updateUpcomingManeuverArrow(routeProgress).apply {
-                routeArrowView.render(mapboxMap.getStyle()!!, this)
+            routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
+                routeArrowView.renderManeuverUpdate(mapboxMap.getStyle()!!, this)
             }
             tripProgressApiApi.getTripProgress(routeProgress).let { update ->
                 binding.tripProgressView.render(update)
