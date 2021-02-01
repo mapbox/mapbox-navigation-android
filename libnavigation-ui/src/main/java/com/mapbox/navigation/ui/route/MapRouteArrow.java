@@ -240,7 +240,9 @@ class MapRouteArrow {
   private void addArrowHeadIcon() {
     int headResId = R.drawable.mapbox_ic_arrow_head;
     Drawable arrowHead = AppCompatResources.getDrawable(mapView.getContext(), headResId);
-    if (arrowHead == null) {
+    if (arrowHead == null
+            || arrowHead.getIntrinsicHeight() < 0
+            || arrowHead.getIntrinsicWidth() < 0) {
       return;
     }
     Drawable head = DrawableCompat.wrap(arrowHead);
