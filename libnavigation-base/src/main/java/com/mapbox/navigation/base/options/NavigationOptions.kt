@@ -5,7 +5,7 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.TimeFormat
-import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 
 /**
  * Default navigator approximate prediction in milliseconds
@@ -27,7 +27,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * @param locationEngineRequest specifies the rate to request locations from the location engine.
  * @param timeFormatType defines time format for calculation remaining trip time
  * @param navigatorPredictionMillis defines approximate navigator prediction in milliseconds
- * @param distanceFormatter [DistanceFormatter] for format distances showing in notification during navigation
+ * @param distanceFormatterOptions [DistanceFormatterOptions] options to format distances showing in notification during navigation
  * @param onboardRouterOptions [OnboardRouterOptions] defines configuration for the default on-board router
  * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions] defines location configuration for predictive caching
  * @param isFromNavigationUi Boolean *true* if is called from UI, otherwise *false*
@@ -43,7 +43,7 @@ class NavigationOptions private constructor(
     val locationEngineRequest: LocationEngineRequest,
     @TimeFormat.Type val timeFormatType: Int,
     val navigatorPredictionMillis: Long,
-    val distanceFormatter: DistanceFormatter?,
+    val distanceFormatterOptions: DistanceFormatterOptions,
     val onboardRouterOptions: OnboardRouterOptions,
     val predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
     val isFromNavigationUi: Boolean,
@@ -62,7 +62,7 @@ class NavigationOptions private constructor(
         locationEngineRequest(locationEngineRequest)
         timeFormatType(timeFormatType)
         navigatorPredictionMillis(navigatorPredictionMillis)
-        distanceFormatter(distanceFormatter)
+        distanceFormatterOptions(distanceFormatterOptions)
         onboardRouterOptions(onboardRouterOptions)
         predictiveCacheLocationOptions(predictiveCacheLocationOptions)
         isFromNavigationUi(isFromNavigationUi)
@@ -87,7 +87,7 @@ class NavigationOptions private constructor(
         if (locationEngineRequest != other.locationEngineRequest) return false
         if (timeFormatType != other.timeFormatType) return false
         if (navigatorPredictionMillis != other.navigatorPredictionMillis) return false
-        if (distanceFormatter != other.distanceFormatter) return false
+        if (distanceFormatterOptions != other.distanceFormatterOptions) return false
         if (onboardRouterOptions != other.onboardRouterOptions) return false
         if (predictiveCacheLocationOptions != other.predictiveCacheLocationOptions) return false
         if (isFromNavigationUi != other.isFromNavigationUi) return false
@@ -109,7 +109,7 @@ class NavigationOptions private constructor(
         result = 31 * result + locationEngineRequest.hashCode()
         result = 31 * result + timeFormatType
         result = 31 * result + navigatorPredictionMillis.hashCode()
-        result = 31 * result + (distanceFormatter?.hashCode() ?: 0)
+        result = 31 * result + distanceFormatterOptions.hashCode()
         result = 31 * result + onboardRouterOptions.hashCode()
         result = 31 * result + predictiveCacheLocationOptions.hashCode()
         result = 31 * result + isFromNavigationUi.hashCode()
@@ -131,7 +131,7 @@ class NavigationOptions private constructor(
             "locationEngineRequest=$locationEngineRequest, " +
             "timeFormatType=$timeFormatType, " +
             "navigatorPredictionMillis=$navigatorPredictionMillis, " +
-            "distanceFormatter=$distanceFormatter, " +
+            "distanceFormatterOptions=$distanceFormatterOptions, " +
             "onboardRouterOptions=$onboardRouterOptions, " +
             "predictiveCacheLocationOptions=$predictiveCacheLocationOptions, " +
             "isFromNavigationUi=$isFromNavigationUi, " +
@@ -157,7 +157,8 @@ class NavigationOptions private constructor(
             .build()
         private var timeFormatType: Int = TimeFormat.NONE_SPECIFIED
         private var navigatorPredictionMillis: Long = DEFAULT_NAVIGATOR_PREDICTION_MILLIS
-        private var distanceFormatter: DistanceFormatter? = null
+        private var distanceFormatterOptions: DistanceFormatterOptions =
+            DistanceFormatterOptions.Builder(applicationContext).build()
         private var onboardRouterOptions: OnboardRouterOptions =
             OnboardRouterOptions.Builder().build()
         private var predictiveCacheLocationOptions: PredictiveCacheLocationOptions =
@@ -207,8 +208,8 @@ class NavigationOptions private constructor(
         /**
          *  Defines format distances showing in notification during navigation
          */
-        fun distanceFormatter(distanceFormatter: DistanceFormatter?): Builder =
-            apply { this.distanceFormatter = distanceFormatter }
+        fun distanceFormatterOptions(distanceFormatterOptions: DistanceFormatterOptions): Builder =
+            apply { this.distanceFormatterOptions = distanceFormatterOptions }
 
         /**
          * Defines configuration for the default on-board router
@@ -261,7 +262,7 @@ class NavigationOptions private constructor(
                 locationEngineRequest = locationEngineRequest,
                 timeFormatType = timeFormatType,
                 navigatorPredictionMillis = navigatorPredictionMillis,
-                distanceFormatter = distanceFormatter,
+                distanceFormatterOptions = distanceFormatterOptions,
                 onboardRouterOptions = onboardRouterOptions,
                 predictiveCacheLocationOptions = predictiveCacheLocationOptions,
                 isFromNavigationUi = isFromNavigationUi,

@@ -12,6 +12,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -24,7 +25,6 @@ import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
@@ -75,7 +75,7 @@ class MapboxNavigationTest {
     private val tripSession: TripSession = mockk(relaxUnitFun = true)
     private val location: Location = mockk(relaxUnitFun = true)
     private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
-    private val distanceFormatter: MapboxDistanceFormatter = mockk(relaxed = true)
+    private val distanceFormatterOptions: DistanceFormatterOptions = mockk(relaxed = true)
     private val onBoardRouterOptions: OnboardRouterOptions = mockk(relaxed = true)
     private val fasterRouteRequestCallback: RoutesRequestCallback = mockk(relaxed = true)
     private val routeRefreshController: RouteRefreshController = mockk(relaxUnitFun = true)
@@ -694,7 +694,7 @@ class MapboxNavigationTest {
         NavigationOptions
             .Builder(applicationContext)
             .accessToken(accessToken)
-            .distanceFormatter(distanceFormatter)
+            .distanceFormatterOptions(distanceFormatterOptions)
             .navigatorPredictionMillis(1500L)
             .onboardRouterOptions(onBoardRouterOptions)
             .timeFormatType(NONE_SPECIFIED)

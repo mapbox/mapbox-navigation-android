@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.base.model.tripprogress
 import android.content.Context
 import android.text.SpannableString
 import com.mapbox.navigation.base.TimeFormat
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.ui.base.formatter.ValueFormatter
 
 /**
@@ -198,7 +199,9 @@ class TripProgressUpdateFormatter private constructor(
                     )
 
             val theDistanceRemainingFormatter: ValueFormatter<TripProgressUpdate, SpannableString> =
-                distanceRemainingFormatter ?: DistanceRemainingFormatter(context.applicationContext)
+                distanceRemainingFormatter ?: DistanceRemainingFormatter(
+                    DistanceFormatterOptions.Builder(context).build()
+                )
 
             val theTimeRemainingFormatter: ValueFormatter<TripProgressUpdate, SpannableString> =
                 timeRemainingFormatter ?: TimeRemainingFormatter(context.applicationContext)

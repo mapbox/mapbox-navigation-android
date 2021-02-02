@@ -126,11 +126,12 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
 
   @SuppressLint("MissingPermission")
   private void initNavigation() {
-    NavigationOptions navigationOptions = MapboxNavigation
-        .defaultNavigationOptionsBuilder(SlackLineActivity.this, getMapboxAccessTokenFromResources())
-        .locationEngine(new ReplayLocationEngine(mapboxReplayer))
-        .build();
-    mapboxNavigation = new MapboxNavigation(navigationOptions);
+    mapboxNavigation = new MapboxNavigation(
+            new NavigationOptions.Builder(this)
+                    .accessToken(getMapboxAccessTokenFromResources())
+                    .locationEngine(new ReplayLocationEngine(mapboxReplayer))
+                    .build()
+    );
     mapboxNavigation.registerLocationObserver(locationObserver);
     mapboxNavigation.registerRouteProgressObserver(replayProgressObserver);
 

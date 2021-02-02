@@ -14,7 +14,7 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.common.module.provider.ModuleProviderArgument
-import com.mapbox.navigation.base.internal.VoiceUnit
+import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.OnboardRouterOptions
@@ -23,7 +23,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert
 import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
-import com.mapbox.navigation.core.MapboxNavigation.Companion.defaultNavigationOptionsBuilder
 import com.mapbox.navigation.core.accounts.NavigationAccountsSession
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
@@ -790,7 +789,11 @@ class MapboxNavigation(
                 )
             )
             MapboxModuleType.NavigationTripNotification -> arrayOf(
-                ModuleProviderArgument(NavigationOptions::class.java, navigationOptions)
+                ModuleProviderArgument(NavigationOptions::class.java, navigationOptions),
+                ModuleProviderArgument(
+                    DistanceFormatter::class.java,
+                    MapboxDistanceFormatter(navigationOptions.distanceFormatterOptions)
+                ),
             )
             MapboxModuleType.CommonLogger -> arrayOf()
             MapboxModuleType.CommonLibraryLoader ->
@@ -841,31 +844,7 @@ class MapboxNavigation(
     }
 
     companion object {
-
         private const val USER_AGENT: String = "MapboxNavigationNative"
         private const val THREADS_COUNT = 2
-
-        /**
-         * Returns a pre-build set of [NavigationOptions] with smart defaults.
-         *
-         * Use [NavigationOptions.toBuilder] to easily customize selected options.
-         *
-         * @param context [Context]
-         * @param accessToken Mapbox access token
-         * @return default [NavigationOptions]
-         */
-        @JvmStatic
-        fun defaultNavigationOptionsBuilder(
-            context: Context,
-            accessToken: String?
-        ): NavigationOptions.Builder {
-            val distanceFormatter = MapboxDistanceFormatter.Builder(context)
-                .unitType(VoiceUnit.UNDEFINED)
-                .roundingIncrement(Rounding.INCREMENT_FIFTY)
-                .build()
-            return NavigationOptions.Builder(context)
-                .accessToken(accessToken)
-                .distanceFormatter(distanceFormatter)
-        }
     }
 }
