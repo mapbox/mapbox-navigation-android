@@ -45,6 +45,7 @@ import com.mapbox.navigation.core.replay.route.ReplayProgressObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.examples.util.Slackline;
+import com.mapbox.navigation.examples.util.Utils;
 import com.mapbox.navigation.ui.base.api.snapshotter.SnapshotterApi;
 import com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState;
 import com.mapbox.navigation.ui.maps.snapshotter.api.MapboxSnapshotterApi;
@@ -58,8 +59,6 @@ import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-
-import static com.mapbox.navigation.examples.util.Utils.getMapboxAccessToken;
 
 /**
  * Note:
@@ -261,7 +260,7 @@ public class MapboxSnapshotActivity extends AppCompatActivity implements OnMapLo
   }
 
   private String getMapboxAccessTokenFromResources() {
-    return getMapboxAccessToken(this);
+    return Utils.INSTANCE.getMapboxAccessToken(this);
   }
 
   private LocationObserver locationObserver = new LocationObserver() {

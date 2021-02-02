@@ -15,8 +15,8 @@ internal sealed class SignboardResult {
     ) : SignboardResult()
 
     sealed class Signboard : SignboardResult() {
-        data class Success(val data: ByteArray) : Signboard()
+        object Empty : Signboard()
         data class Failure(val error: String?) : Signboard()
-        data class Empty(val error: String?) : Signboard()
+        data class Success(val data: ByteArray) : Signboard()
     }
 }

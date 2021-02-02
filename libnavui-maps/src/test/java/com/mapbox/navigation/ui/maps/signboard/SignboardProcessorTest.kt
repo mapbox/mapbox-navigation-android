@@ -173,12 +173,12 @@ class SignboardProcessorTest {
     @Test
     fun `process action signboard process response result no data`() {
         val response: Expected<HttpResponseData?, HttpRequestError?> = createValue()
-        val expected = SignboardResult.Signboard.Empty("No data available")
+        val expected = SignboardResult.Signboard.Empty
         val action = SignboardAction.ProcessSignboardResponse(response)
 
         val result = SignboardProcessor.process(action) as SignboardResult.Signboard.Empty
 
-        assertEquals(expected.error, result.error)
+        assertEquals(expected, result)
     }
 
     @Test

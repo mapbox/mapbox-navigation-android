@@ -18,8 +18,9 @@ package com.mapbox.navigation.ui.base.api.signboard {
   }
 
   public interface SignboardReadyCallback {
-    method public void onFailure(com.mapbox.navigation.ui.base.model.signboard.SignboardState.SignboardFailure error);
-    method public void onSignboardReady(com.mapbox.navigation.ui.base.model.signboard.SignboardState.SignboardReady bytes);
+    method public void onAvailable(com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Available state);
+    method public void onError(com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Error state);
+    method public void onUnavailable(com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Empty state);
   }
 
 }
@@ -59,25 +60,36 @@ package com.mapbox.navigation.ui.base.model.signboard {
   public abstract sealed class SignboardState implements com.mapbox.navigation.ui.base.MapboxState {
   }
 
-  public abstract static sealed class SignboardState.SignboardFailure extends com.mapbox.navigation.ui.base.model.signboard.SignboardState {
+  public static final class SignboardState.Hide extends com.mapbox.navigation.ui.base.model.signboard.SignboardState {
+    field public static final com.mapbox.navigation.ui.base.model.signboard.SignboardState.Hide! INSTANCE;
   }
 
-  public static final class SignboardState.SignboardFailure.SignboardError extends com.mapbox.navigation.ui.base.model.signboard.SignboardState.SignboardFailure {
-    ctor public SignboardState.SignboardFailure.SignboardError(String? exception);
-    method public String? component1();
-    method public com.mapbox.navigation.ui.base.model.signboard.SignboardState.SignboardFailure.SignboardError copy(String? exception);
-    method public String? getException();
+  public static final class SignboardState.Show extends com.mapbox.navigation.ui.base.model.signboard.SignboardState {
+    field public static final com.mapbox.navigation.ui.base.model.signboard.SignboardState.Show! INSTANCE;
   }
 
-  public static final class SignboardState.SignboardFailure.SignboardUnavailable extends com.mapbox.navigation.ui.base.model.signboard.SignboardState.SignboardFailure {
-    field public static final com.mapbox.navigation.ui.base.model.signboard.SignboardState.SignboardFailure.SignboardUnavailable! INSTANCE;
+  public abstract static sealed class SignboardState.Signboard extends com.mapbox.navigation.ui.base.model.signboard.SignboardState {
   }
 
-  public static final class SignboardState.SignboardReady extends com.mapbox.navigation.ui.base.model.signboard.SignboardState {
-    ctor public SignboardState.SignboardReady(byte[] bytes);
-    method public byte[] component1();
-    method public com.mapbox.navigation.ui.base.model.signboard.SignboardState.SignboardReady copy(byte[] bytes);
+  public static final class SignboardState.Signboard.Available extends com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard {
+    ctor public SignboardState.Signboard.Available(int desiredSignboardWidth, byte[] bytes);
+    ctor public SignboardState.Signboard.Available(byte[] bytes);
+    method public int component1();
+    method public byte[] component2();
+    method public com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Available copy(int desiredSignboardWidth, byte[] bytes);
     method public byte[] getBytes();
+    method public int getDesiredSignboardWidth();
+  }
+
+  public static final class SignboardState.Signboard.Empty extends com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard {
+    field public static final com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Empty! INSTANCE;
+  }
+
+  public static final class SignboardState.Signboard.Error extends com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard {
+    ctor public SignboardState.Signboard.Error(String? exception);
+    method public String? component1();
+    method public com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Error copy(String? exception);
+    method public String? getException();
   }
 
 }

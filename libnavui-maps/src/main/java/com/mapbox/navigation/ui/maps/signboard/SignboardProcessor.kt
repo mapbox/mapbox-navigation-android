@@ -87,7 +87,11 @@ internal object SignboardProcessor {
                 return response.value?.let { responseData ->
                     when (responseData.code) {
                         CODE_200 -> {
-                            SignboardResult.Signboard.Success(responseData.data)
+                            if (responseData.data.isEmpty()) {
+                                SignboardResult.Signboard.Empty
+                            } else {
+                                SignboardResult.Signboard.Success(responseData.data)
+                            }
                         }
                         CODE_401 -> {
                             SignboardResult.Signboard.Failure(
@@ -102,7 +106,7 @@ internal object SignboardProcessor {
                             SignboardResult.Signboard.Failure("Unknown error")
                         }
                     }
-                } ?: SignboardResult.Signboard.Empty("No data available")
+                } ?: SignboardResult.Signboard.Empty
             }
             response.isError -> {
                 return SignboardResult.Signboard.Failure(response.error?.message)

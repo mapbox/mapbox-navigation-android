@@ -9,13 +9,19 @@ interface SignboardReadyCallback {
 
     /**
      * Invoked when signboard is ready.
-     * @param bytes represents the signboard to be rendered on the view.
+     * @param state represents the signboard to be rendered on the view.
      */
-    fun onSignboardReady(bytes: SignboardState.SignboardReady)
+    fun onAvailable(state: SignboardState.Signboard.Available)
+
+    /**
+     * Invoked when the route doesn't have a signboard or the signboard request returns empty data.
+     * @param state represents the empty data.
+     */
+    fun onUnavailable(state: SignboardState.Signboard.Empty)
 
     /**
      * Invoked when there is an error generating the signboard.
-     * @param error error message.
+     * @param state error message.
      */
-    fun onFailure(error: SignboardState.SignboardFailure)
+    fun onError(state: SignboardState.Signboard.Error)
 }

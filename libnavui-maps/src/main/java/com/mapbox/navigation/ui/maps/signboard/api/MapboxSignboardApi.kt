@@ -43,7 +43,7 @@ class MapboxSignboardApi(
         val result = SignboardProcessor.process(action)
         when (result) {
             is SignboardResult.SignboardUnavailable -> {
-                callback.onFailure(SignboardState.SignboardFailure.SignboardUnavailable)
+                callback.onUnavailable(SignboardState.Signboard.Empty)
             }
             is SignboardResult.SignboardAvailable -> {
                 val signboardRequest = SignboardProcessor.process(
@@ -66,21 +66,23 @@ class MapboxSignboardApi(
                         val res = SignboardProcessor.process(signboardAction)
                         when (res) {
                             is SignboardResult.Signboard.Success -> {
-                                callback.onSignboardReady(SignboardState.SignboardReady(res.data))
+                                callback.onAvailable(
+                                    SignboardState.Signboard.Available(res.data)
+                                )
                             }
                             is SignboardResult.Signboard.Failure -> {
-                                callback.onFailure(
-                                    SignboardState.SignboardFailure.SignboardError(res.error)
+                                callback.onError(
+                                    SignboardState.Signboard.Error(res.error)
                                 )
                             }
                             is SignboardResult.Signboard.Empty -> {
-                                callback.onFailure(
-                                    SignboardState.SignboardFailure.SignboardUnavailable
+                                callback.onUnavailable(
+                                    SignboardState.Signboard.Empty
                                 )
                             }
                             else -> {
-                                callback.onFailure(
-                                    SignboardState.SignboardFailure.SignboardError(
+                                callback.onError(
+                                    SignboardState.Signboard.Error(
                                         "Inappropriate result $result emitted for " +
                                             "$action processed."
                                     )
@@ -92,8 +94,8 @@ class MapboxSignboardApi(
                 requestList.add(MapboxSignboardRequest(requestId, httpRequest))
             }
             else -> {
-                callback.onFailure(
-                    SignboardState.SignboardFailure.SignboardError(
+                callback.onError(
+                    SignboardState.Signboard.Error(
                         "Inappropriate result $result emitted for " +
                             "$action processed."
                     )

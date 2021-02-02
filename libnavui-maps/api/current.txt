@@ -593,6 +593,7 @@ package com.mapbox.navigation.ui.maps.signboard.view {
     ctor public MapboxSignboardView(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxSignboardView(android.content.Context context);
     method public void render(com.mapbox.navigation.ui.base.model.signboard.SignboardState state);
+    field @Deprecated public static final com.mapbox.navigation.ui.maps.signboard.view.MapboxSignboardView.Companion! Companion;
   }
 
 }

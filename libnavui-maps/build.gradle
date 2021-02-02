@@ -52,6 +52,7 @@ dependencies {
 
     implementation dependenciesList.timber
     implementation dependenciesList.coroutinesAndroid
+    implementation dependenciesList.svgParser
 
     ktlint dependenciesList.ktlint
 
