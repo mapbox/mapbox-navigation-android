@@ -132,8 +132,8 @@ package com.mapbox.navigation.ui.base.model.snapshotter {
 package com.mapbox.navigation.ui.base.model.tripprogress {
 
   public final class DistanceRemainingFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,android.text.SpannableString> {
-    ctor public DistanceRemainingFormatter(android.content.Context context, String unitType, java.util.Locale? locale, @com.mapbox.navigation.core.Rounding.Increment int roundingIncrement);
-    method public android.text.SpannableString format(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate update);
+    ctor public DistanceRemainingFormatter(com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions);
+    method public android.text.SpannableString format(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate t);
   }
 
   public final class EstimatedTimeToArrivalFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,android.text.SpannableString> {

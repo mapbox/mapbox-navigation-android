@@ -36,9 +36,9 @@ import com.mapbox.maps.plugin.location.getLocationPlugin
 import com.mapbox.maps.plugin.location.modes.RenderMode
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.internal.route.RouteUrl
+import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.MapboxNavigation.Companion.defaultNavigationOptionsBuilder
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
@@ -52,7 +52,6 @@ import com.mapbox.navigation.ui.base.model.tripprogress.PercentDistanceTraveledF
 import com.mapbox.navigation.ui.base.model.tripprogress.TimeRemainingFormatter
 import com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
-import kotlinx.android.synthetic.main.layout_camera_animations.*
 import kotlinx.android.synthetic.main.trip_progress_activity_layout.*
 import java.lang.ref.WeakReference
 
@@ -85,7 +84,11 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private fun getTripProgressFormatter(): TripProgressUpdateFormatter {
         return TripProgressUpdateFormatter.Builder(this)
-            .distanceRemainingFormatter(DistanceRemainingFormatter(this))
+            .distanceRemainingFormatter(
+                DistanceRemainingFormatter(
+                    mapboxNavigation.navigationOptions.distanceFormatterOptions
+                )
+            )
             .timeRemainingFormatter(TimeRemainingFormatter(this))
             .percentRouteTraveledFormatter(PercentDistanceTraveledFormatter())
             .estimatedTimeToArrivalFormatter(
@@ -119,13 +122,12 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 
     @SuppressLint("MissingPermission")
     private fun initNavigation() {
-        val navigationOptions = defaultNavigationOptionsBuilder(
-            this@TripProgressActivity,
-            getMapboxAccessTokenFromResources()
+        mapboxNavigation = MapboxNavigation(
+            NavigationOptions.Builder(this@TripProgressActivity)
+                .accessToken(getMapboxAccessTokenFromResources())
+                .locationEngine(ReplayLocationEngine(mapboxReplayer))
+                .build()
         )
-            .locationEngine(ReplayLocationEngine(mapboxReplayer))
-            .build()
-        mapboxNavigation = MapboxNavigation(navigationOptions)
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
         mapboxReplayer.pushRealLocation(this, 0.0)

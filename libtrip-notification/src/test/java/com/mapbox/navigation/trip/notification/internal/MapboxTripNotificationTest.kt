@@ -58,7 +58,6 @@ class MapboxTripNotificationTest {
         val distanceSlot = slot<Double>()
         distanceFormatter = mockk()
         every { distanceFormatter.formatDistance(capture(distanceSlot)) } returns distanceSpannable
-        every { navigationOptions.distanceFormatter } returns distanceFormatter
     }
 
     @Before
@@ -70,7 +69,8 @@ class MapboxTripNotificationTest {
         every { navigationOptions.applicationContext } returns mockedContext
         mockRemoteViews()
         notification = MapboxTripNotification(
-            navigationOptions
+            navigationOptions,
+            distanceFormatter
         )
     }
 

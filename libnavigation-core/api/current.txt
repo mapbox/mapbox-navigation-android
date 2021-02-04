@@ -5,7 +5,6 @@ package com.mapbox.navigation.core {
     ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public void addHistoryEvent(String eventType, String eventJsonProperties);
     method public void attachFasterRouteObserver(com.mapbox.navigation.core.fasterroute.FasterRouteObserver fasterRouteObserver);
-    method public static com.mapbox.navigation.base.options.NavigationOptions.Builder defaultNavigationOptionsBuilder(android.content.Context context, String? accessToken);
     method public void detachFasterRouteObserver();
     method public com.mapbox.navigation.base.options.NavigationOptions getNavigationOptions();
     method public com.mapbox.navigation.core.reroute.RerouteController? getRerouteController();
@@ -54,7 +53,6 @@ package com.mapbox.navigation.core {
   }
 
   public static final class MapboxNavigation.Companion {
-    method public com.mapbox.navigation.base.options.NavigationOptions.Builder defaultNavigationOptionsBuilder(android.content.Context context, String? accessToken);
   }
 
   public final class MapboxNavigationKt {
@@ -66,18 +64,6 @@ package com.mapbox.navigation.core {
     method public static boolean isCreated();
     method public static com.mapbox.navigation.core.MapboxNavigation retrieve();
     field public static final com.mapbox.navigation.core.MapboxNavigationProvider! INSTANCE;
-  }
-
-  public final class Rounding {
-    field public static final int INCREMENT_FIFTY = 50; // 0x32
-    field public static final int INCREMENT_FIVE = 5; // 0x5
-    field public static final int INCREMENT_ONE_HUNDRED = 100; // 0x64
-    field public static final int INCREMENT_TEN = 10; // 0xa
-    field public static final int INCREMENT_TWENTY_FIVE = 25; // 0x19
-    field public static final com.mapbox.navigation.core.Rounding! INSTANCE;
-  }
-
-  @IntDef({com.mapbox.navigation.core.Rounding.INCREMENT_FIVE, com.mapbox.navigation.core.Rounding.INCREMENT_TEN, com.mapbox.navigation.core.Rounding.INCREMENT_TWENTY_FIVE, com.mapbox.navigation.core.Rounding.INCREMENT_FIFTY, com.mapbox.navigation.core.Rounding.INCREMENT_ONE_HUNDRED}) @kotlin.annotation.Retention(AnnotationRetention.SOURCE) public static @interface Rounding.Increment {
   }
 
 }

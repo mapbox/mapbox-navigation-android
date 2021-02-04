@@ -8,6 +8,7 @@ import com.mapbox.maps.plugin.location.LocationPluginImpl
 import com.mapbox.maps.plugin.location.LocationUpdate
 import com.mapbox.maps.plugin.location.getLocationPlugin
 import com.mapbox.maps.plugin.location.modes.RenderMode
+import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -77,10 +78,9 @@ abstract class SimpleMapViewNavigationTest :
             mockLocationReplayerRule.playRoute(route)
 
             mapboxNavigation = MapboxNavigation(
-                MapboxNavigation.defaultNavigationOptionsBuilder(
-                    activity,
-                    getMapboxAccessTokenFromResources(activity)
-                ).build()
+                NavigationOptions.Builder(activity)
+                    .accessToken(getMapboxAccessTokenFromResources(activity))
+                    .build()
             )
             mapboxNavigation.setRoutes(listOf(route))
             mapboxNavigation.startTripSession()

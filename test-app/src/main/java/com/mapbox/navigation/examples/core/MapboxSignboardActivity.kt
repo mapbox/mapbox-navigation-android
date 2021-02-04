@@ -33,9 +33,9 @@ import com.mapbox.maps.plugin.location.LocationPluginImpl
 import com.mapbox.maps.plugin.location.LocationUpdate
 import com.mapbox.maps.plugin.location.modes.RenderMode
 import com.mapbox.navigation.base.internal.route.RouteUrl
+import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.MapboxNavigation.Companion.defaultNavigationOptionsBuilder
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -201,11 +201,12 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
 
     @SuppressLint("MissingPermission")
     private fun initNavigation() {
-        val navigationOptions =
-            defaultNavigationOptionsBuilder(this, getMapboxAccessTokenFromResources())
+        mapboxNavigation = MapboxNavigation(
+            NavigationOptions.Builder(this)
+                .accessToken(getMapboxAccessTokenFromResources())
                 .locationEngine(ReplayLocationEngine(mapboxReplayer))
                 .build()
-        mapboxNavigation = MapboxNavigation(navigationOptions)
+        )
         signboardApi = MapboxSignboardApi(getMapboxRouteAccessToken(this))
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.play()

@@ -123,11 +123,12 @@ public class MapboxSnapshotActivity extends AppCompatActivity implements OnMapLo
 
   @SuppressLint("MissingPermission")
   private void initNavigation() {
-    NavigationOptions navigationOptions = MapboxNavigation
-        .defaultNavigationOptionsBuilder(this, getMapboxAccessTokenFromResources())
-        .locationEngine(new ReplayLocationEngine(mapboxReplayer))
-        .build();
-    mapboxNavigation = new MapboxNavigation(navigationOptions);
+    mapboxNavigation = new MapboxNavigation(
+            new NavigationOptions.Builder(this)
+                    .accessToken(getMapboxAccessTokenFromResources())
+                    .locationEngine(new ReplayLocationEngine(mapboxReplayer))
+                    .build()
+    );
 
     float density = getResources().getDisplayMetrics().density;
     MapboxSnapshotterOptions options = new MapboxSnapshotterOptions.Builder(getApplicationContext())

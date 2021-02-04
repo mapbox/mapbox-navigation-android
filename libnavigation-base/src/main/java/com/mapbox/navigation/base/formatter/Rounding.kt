@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core
+package com.mapbox.navigation.base.formatter
 
 import androidx.annotation.IntDef
 

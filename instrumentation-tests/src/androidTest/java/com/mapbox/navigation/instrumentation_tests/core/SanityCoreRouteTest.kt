@@ -4,6 +4,7 @@ import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
+import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
@@ -37,11 +38,11 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
     fun setup() {
         Espresso.onIdle()
 
-        val options = MapboxNavigation.defaultNavigationOptionsBuilder(
-            activity,
-            getMapboxAccessTokenFromResources(activity)
-        ).build()
-        mapboxNavigation = MapboxNavigationProvider.create(options)
+        mapboxNavigation = MapboxNavigationProvider.create(
+            NavigationOptions.Builder(activity)
+                .accessToken(getMapboxAccessTokenFromResources(activity))
+                .build()
+        )
         routeCompleteIdlingResource = RouteProgressStateIdlingResource(
             mapboxNavigation,
             RouteProgressState.ROUTE_COMPLETE

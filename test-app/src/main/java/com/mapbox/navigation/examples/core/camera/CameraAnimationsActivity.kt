@@ -40,9 +40,9 @@ import com.mapbox.maps.plugin.location.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.location.getLocationPlugin
 import com.mapbox.maps.plugin.location.modes.RenderMode
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
+import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.MapboxNavigation.Companion.defaultNavigationOptionsBuilder
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
@@ -314,13 +314,12 @@ class CameraAnimationsActivity :
     }
 
     private fun initNavigation() {
-        val navigationOptions = defaultNavigationOptionsBuilder(
-            this,
-            getMapboxAccessTokenFromResources()
-        )
-            .locationEngine(ReplayLocationEngine(mapboxReplayer))
-            .build()
-        mapboxNavigation = MapboxNavigation(navigationOptions).apply {
+        mapboxNavigation = MapboxNavigation(
+            NavigationOptions.Builder(this)
+                .accessToken(getMapboxAccessTokenFromResources())
+                .locationEngine(ReplayLocationEngine(mapboxReplayer))
+                .build()
+        ).apply {
             registerLocationObserver(
                 object : LocationObserver {
 
