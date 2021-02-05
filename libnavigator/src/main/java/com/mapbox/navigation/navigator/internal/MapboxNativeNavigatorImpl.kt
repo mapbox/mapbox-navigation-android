@@ -3,6 +3,7 @@ package com.mapbox.navigation.navigator.internal
 import android.location.Location
 import android.os.SystemClock
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.bindgen.Expected
 import com.mapbox.common.TileStore
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
@@ -25,6 +26,7 @@ import com.mapbox.navigator.PredictiveCacheControllerOptions
 import com.mapbox.navigator.PredictiveLocationTrackerOptions
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.Router
+import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.TilesConfig
@@ -258,10 +260,10 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @param url the directions-based uri used when hitting the http service
      * @return a [RouterResult] object with the json and a success/fail boolean
      */
-    override suspend fun getRoute(url: String): RouterResult {
+    override suspend fun getRoute(url: String): Expected<String, RouterError> {
         return suspendCoroutine { continuation ->
             nativeRouter!!.getRoute(url) {
-                continuation.resume(RouterResult(it.value ?: "", it.isError))
+                continuation.resume(it)
             }
         }
     }
