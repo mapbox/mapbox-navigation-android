@@ -65,7 +65,7 @@ class OnboardRouterOptions private constructor(
      */
     class Builder {
         private var tilesUri: URI = URI("https://api.mapbox.com")
-        private var tilesVersion: String = "2020_12_05-03_00_00"
+        private var tilesVersion: String = "2021_01_30-03_00_00"
         private var filePath: String? = null
 
         /**
