@@ -5,7 +5,6 @@ package com.mapbox.navigation.core.trip.model.eh
  *
  * @see EHorizonObserver
  */
-@Deprecated("Temporarily no-op. Functionality will be reintroduced in future releases.")
 object EHorizonResultType {
 
     /**

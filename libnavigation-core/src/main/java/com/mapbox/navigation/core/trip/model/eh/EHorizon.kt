@@ -26,7 +26,6 @@ import java.util.LinkedList
  *
  * @param start [Edge]
  */
-@Deprecated("Temporarily no-op. Functionality will be reintroduced in future releases.")
 class EHorizon internal constructor(
     val start: Edge
 ) {
@@ -40,15 +39,15 @@ class EHorizon internal constructor(
         val visitedEdges = LinkedList<Edge>()
         visitedEdges.push(start)
         while (visitedEdges.isNotEmpty()) {
-            val current = visitedEdges.poll()
-            if (current.id != position.edgeId) {
+            val current = visitedEdges.poll()!!
+            if (current.id != position.eHorizonGraphPosition.edgeId) {
                 val mppEdges = current.out.filter { it.isMpp() }
                 visitedEdges.addAll(mppEdges)
             } else {
                 return current
             }
         }
-        throw IllegalArgumentException("No edge with id ${position.edgeId}")
+        throw IllegalArgumentException("No edge with id ${position.eHorizonGraphPosition.edgeId}")
     }
 
     /**

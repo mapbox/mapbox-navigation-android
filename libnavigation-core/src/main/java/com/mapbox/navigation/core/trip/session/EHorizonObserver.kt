@@ -1,22 +1,10 @@
 package com.mapbox.navigation.core.trip.session
 
-import com.mapbox.navigation.core.trip.model.eh.EHorizon
+import com.mapbox.navigation.core.trip.model.eh.EHorizonObject
+import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectDistanceInfo
 import com.mapbox.navigation.core.trip.model.eh.EHorizonPosition
 
-/**
- * The EHorizonObserver consists of two parts: onElectronicHorizonUpdated provides the
- * Electronic Horizon and onPositionUpdated the position thereon.
- */
-@Deprecated("Temporarily no-op. Functionality will be reintroduced in future releases.")
 interface EHorizonObserver {
-
-    /**
-     * This callback is fired whenever the Electronic Horizon itself changes.
-     *
-     * @see EHorizon
-     * @see EHorizonResultType
-     */
-    fun onElectronicHorizonUpdated(horizon: EHorizon, type: String)
 
     /**
      * This callback is fired whenever the location on the EHorizon changes.
@@ -26,5 +14,18 @@ interface EHorizonObserver {
      *
      * @see EHorizonPosition
      */
-    fun onPositionUpdated(position: EHorizonPosition)
+    fun onPositionUpdated(
+        position: EHorizonPosition,
+        distances: Map<String, EHorizonObjectDistanceInfo>
+    )
+
+    fun onRoadObjectEnter(eHorizonObject: EHorizonObject)
+
+    fun onRoadObjectExit(eHorizonObject: EHorizonObject)
+
+    fun onRoadObjectAdded(eHorizonObject: EHorizonObject)
+
+    fun onRoadObjectUpdated(eHorizonObject: EHorizonObject)
+
+    fun onRoadObjectRemoved(eHorizonObject: EHorizonObject)
 }

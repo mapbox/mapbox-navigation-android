@@ -67,6 +67,7 @@ import com.mapbox.navigation.utils.internal.NetworkStatusService
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
+import com.mapbox.navigator.ElectronicHorizonOptions
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
@@ -145,7 +146,14 @@ class MapboxNavigation(
     private val fasterRouteController: FasterRouteController
     private val routeRefreshController: RouteRefreshController
     private val arrivalProgressObserver: ArrivalProgressObserver
-    private val navigatorConfig = NavigatorConfig(null, null, null, null)
+    private val electronicHorizonOptions: ElectronicHorizonOptions = ElectronicHorizonOptions(
+        navigationOptions.eHorizonOptions.length,
+        navigationOptions.eHorizonOptions.expansion.toByte(),
+        navigationOptions.eHorizonOptions.branchLength,
+        true, // doNotRecalculateInUncertainState is not exposed and can't be changed at the moment
+        navigationOptions.eHorizonOptions.minTimeDeltaBetweenUpdates
+    )
+    private val navigatorConfig = NavigatorConfig(null, electronicHorizonOptions, null, null)
 
     private var notificationChannelField: Field? = null
 
@@ -354,6 +362,7 @@ class MapboxNavigation(
         tripSession.unregisterAllBannerInstructionsObservers()
         tripSession.unregisterAllVoiceInstructionsObservers()
         tripSession.unregisterAllRouteAlertsObservers()
+        tripSession.unregisterAllEHorizonObservers()
         tripSession.unregisterAllMapMatcherResultObservers()
         directionsSession.routes = emptyList()
         resetTripSession()
@@ -617,9 +626,8 @@ class MapboxNavigation(
      *
      * @see unregisterEHorizonObserver
      */
-    @Deprecated("Temporarily no-op. Functionality will be reintroduced in future releases.")
     fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver) {
-        // no-op
+        tripSession.registerEHorizonObserver(eHorizonObserver)
     }
 
     /**
@@ -629,9 +637,8 @@ class MapboxNavigation(
      *
      * @see registerEHorizonObserver
      */
-    @Deprecated("Temporarily no-op. Functionality will be reintroduced in future releases.")
     fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver) {
-        // no-op
+        tripSession.unregisterEHorizonObserver(eHorizonObserver)
     }
 
     /**
