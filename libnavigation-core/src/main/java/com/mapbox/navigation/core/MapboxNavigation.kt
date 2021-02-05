@@ -48,6 +48,10 @@ import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
+import com.mapbox.navigation.core.trip.session.EHorizonGraphAccessor
+import com.mapbox.navigation.core.trip.session.EHorizonGraphAccessorImpl
+import com.mapbox.navigation.core.trip.session.EHorizonObjectsStore
+import com.mapbox.navigation.core.trip.session.EHorizonObjectsStoreImpl
 import com.mapbox.navigation.core.trip.session.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.MapMatcherResult
@@ -162,6 +166,8 @@ class MapboxNavigation(
      */
     private var rerouteController: RerouteController?
     private val defaultRerouteController: RerouteController
+    private val eHorizonObjectsStore: EHorizonObjectsStore
+    private val eHorizonGraphAccessor: EHorizonGraphAccessor
 
     init {
         ThreadController.init()
@@ -252,6 +258,9 @@ class MapboxNavigation(
         internalOffRouteObserver = createInternalOffRouteObserver()
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
         directionsSession.registerRoutesObserver(internalRoutesObserver)
+
+        eHorizonObjectsStore = EHorizonObjectsStoreImpl(navigator)
+        eHorizonGraphAccessor = EHorizonGraphAccessorImpl(navigator)
     }
 
     /**
@@ -640,6 +649,10 @@ class MapboxNavigation(
     fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver) {
         tripSession.unregisterEHorizonObserver(eHorizonObserver)
     }
+
+    fun getEHorizonGraphAccessor(): EHorizonGraphAccessor = eHorizonGraphAccessor
+
+    fun getEHorizonObjectsStore(): EHorizonObjectsStore = eHorizonObjectsStore
 
     /**
      * Registers an observer that gets notified whenever a new enhanced location update is available

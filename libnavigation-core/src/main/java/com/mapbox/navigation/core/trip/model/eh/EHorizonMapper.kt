@@ -1,11 +1,14 @@
 package com.mapbox.navigation.core.trip.model.eh
 
+import com.mapbox.navigator.EdgeMetadata
 import com.mapbox.navigator.ElectronicHorizon
 import com.mapbox.navigator.ElectronicHorizonEdge
 import com.mapbox.navigator.ElectronicHorizonPosition
 import com.mapbox.navigator.ElectronicHorizonResultType
+import com.mapbox.navigator.FunctionalRoadClass
 import com.mapbox.navigator.GraphPosition
 import com.mapbox.navigator.RoadObjectDistanceInfo
+import com.mapbox.navigator.RoadObjectEdgeLocation
 import com.mapbox.navigator.RoadObjectEnterExitInfo
 import com.mapbox.navigator.RoadObjectLocation
 import com.mapbox.navigator.RoadObjectProvider
@@ -14,42 +17,43 @@ import com.mapbox.navigator.RoadObjectType
 /**
  * Map the ElectronicHorizonPosition.
  */
-fun ElectronicHorizonPosition.mapToEHorizonPosition(): EHorizonPosition {
+internal fun ElectronicHorizonPosition.mapToEHorizonPosition(): EHorizonPosition {
     return EHorizonPosition(
-        this.position().mapToEHorizonGraphPosition(),
-        this.tree().mapToEHorizon(),
-        this.type().mapToEHorizonResultType()
+        position().mapToEHorizonGraphPosition(),
+        tree().mapToEHorizon(),
+        type().mapToEHorizonResultType()
     )
 }
 
 /**
  * Map the RoadObjectEnterExitInfo.
  */
-fun RoadObjectEnterExitInfo.mapToEHorizonObjectEnterExitInfo(): EHorizonObjectEnterExitInfo {
-    return EHorizonObjectEnterExitInfo(
-        this.roadObjectId,
-        this.enterFromStartOrExitFromEnd,
-        this.type.mapToEHorizonObjectType()
-    )
-}
+internal fun RoadObjectEnterExitInfo.mapToEHorizonObjectEnterExitInfo():
+    EHorizonObjectEnterExitInfo {
+        return EHorizonObjectEnterExitInfo(
+            roadObjectId,
+            enterFromStartOrExitFromEnd,
+            type.mapToEHorizonObjectType()
+        )
+    }
 
 /**
  * Map the RoadObjectDistanceInfo.
  */
-fun RoadObjectDistanceInfo.mapToEHorizonObjectDistanceInfo(): EHorizonObjectDistanceInfo {
+internal fun RoadObjectDistanceInfo.mapToEHorizonObjectDistanceInfo(): EHorizonObjectDistanceInfo {
     return EHorizonObjectDistanceInfo(
-        this.distanceToEntry,
-        this.distanceToEnd,
-        this.entryFromStart,
-        this.length,
-        this.type.mapToEHorizonObjectType()
+        distanceToEntry,
+        distanceToEnd,
+        entryFromStart,
+        length,
+        type.mapToEHorizonObjectType()
     )
 }
 
 /**
  * Map the ElectronicHorizonPosition.
  */
-fun RoadObjectLocation.mapToEHorizonObjectLocation(): EHorizonObjectLocation {
+internal fun RoadObjectLocation.mapToEHorizonObjectLocation(): EHorizonObjectLocation {
     return EHorizonObjectLocation(
         edges,
         percentAlongBegin,
@@ -60,7 +64,7 @@ fun RoadObjectLocation.mapToEHorizonObjectLocation(): EHorizonObjectLocation {
 /**
  * Map the RoadObjectType.
  */
-fun RoadObjectType.mapToEHorizonObjectType(): String {
+internal fun RoadObjectType.mapToEHorizonObjectType(): String {
     return when (this) {
         RoadObjectType.INCIDENT -> EHorizonObjectType.INCIDENT
         RoadObjectType.CUSTOM -> EHorizonObjectType.CUSTOM
@@ -68,13 +72,75 @@ fun RoadObjectType.mapToEHorizonObjectType(): String {
 }
 
 /**
- * Map the RoadObjectType.
+ * Map the RoadObjectProvider.
  */
-fun RoadObjectProvider.mapToEHorizonObjectProvider(): String {
+internal fun RoadObjectProvider.mapToEHorizonObjectProvider(): String {
     return when (this) {
         RoadObjectProvider.MAPBOX -> EHorizonObjectProvider.MAPBOX
         RoadObjectProvider.CUSTOM -> EHorizonObjectProvider.CUSTOM
     }
+}
+
+/**
+ * Map the RoadObjectEdgeLocation.
+ */
+internal fun RoadObjectEdgeLocation.mapToEHorizonObjectEdgeLocation(): EHorizonObjectEdgeLocation {
+    return EHorizonObjectEdgeLocation(
+        percentAlongBegin,
+        percentAlongEnd
+    )
+}
+
+/**
+ * Map the EdgeMetadata.
+ */
+internal fun EdgeMetadata.mapToEHorizonEdgeMetadata(): EHorizonEdgeMetadata {
+    return EHorizonEdgeMetadata(
+        heading,
+        length,
+        frc.mapToRoadClass(),
+        speedLimit,
+        speed,
+        ramp,
+        motorway,
+        bridge,
+        tunnel,
+        toll,
+        mapNames(names),
+        laneCount,
+        meanElevation,
+        curvature,
+        countryCode,
+        stateCode
+    )
+}
+
+private fun FunctionalRoadClass.mapToRoadClass(): String {
+    return when (this) {
+        FunctionalRoadClass.MOTORWAY -> RoadClass.MOTORWAY
+        FunctionalRoadClass.TRUNK -> RoadClass.TRUNK
+        FunctionalRoadClass.PRIMARY -> RoadClass.PRIMARY
+        FunctionalRoadClass.SECONDARY -> RoadClass.SECONDARY
+        FunctionalRoadClass.TERTIARY -> RoadClass.TERTIARY
+        FunctionalRoadClass.UNCLASSIFIED -> RoadClass.UNCLASSIFIED
+        FunctionalRoadClass.RESIDENTIAL -> RoadClass.RESIDENTIAL
+        FunctionalRoadClass.SERVICE_OTHER -> RoadClass.SERVICE_OTHER
+    }
+}
+
+private fun mapNames(names: List<com.mapbox.navigator.RoadName>): List<RoadName> {
+    val namesNames = mutableListOf<RoadName>()
+    names.forEach {
+        namesNames.add(it.mapToRoadName())
+    }
+    return namesNames.toList()
+}
+
+private fun com.mapbox.navigator.RoadName.mapToRoadName(): RoadName {
+    return RoadName(
+        name,
+        shielded
+    )
 }
 
 /**
@@ -87,9 +153,9 @@ private fun ElectronicHorizon.mapToEHorizon(): EHorizon {
 /**
  * Recursively map each edge of the graph.
  */
-private fun ElectronicHorizonEdge.mapToEdge(parent: Edge?): Edge {
-    val outgoingEdges = mutableListOf<Edge>()
-    val edge = Edge(
+private fun ElectronicHorizonEdge.mapToEdge(parent: EHorizonEdge?): EHorizonEdge {
+    val outgoingEdges = mutableListOf<EHorizonEdge>()
+    val edge = EHorizonEdge(
         id,
         level,
         probability,
@@ -111,14 +177,12 @@ private fun ElectronicHorizonResultType.mapToEHorizonResultType(): String {
     }
 }
 
-
-
 /**
  * Map the GraphPosition.
  */
 private fun GraphPosition.mapToEHorizonGraphPosition(): EHorizonGraphPosition {
     return EHorizonGraphPosition(
-        this.edgeId,
-        this.percentAlong
+        edgeId,
+        percentAlong
     )
 }

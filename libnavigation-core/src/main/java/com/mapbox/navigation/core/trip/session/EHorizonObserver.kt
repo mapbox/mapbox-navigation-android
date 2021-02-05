@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core.trip.session
 
-import com.mapbox.navigation.core.trip.model.eh.EHorizonObject
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectDistanceInfo
+import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectEnterExitInfo
 import com.mapbox.navigation.core.trip.model.eh.EHorizonPosition
 
 interface EHorizonObserver {
@@ -19,13 +19,13 @@ interface EHorizonObserver {
         distances: Map<String, EHorizonObjectDistanceInfo>
     )
 
-    fun onRoadObjectEnter(eHorizonObject: EHorizonObject)
+    fun onRoadObjectEnter(objectEnterExitInfo: EHorizonObjectEnterExitInfo)
 
-    fun onRoadObjectExit(eHorizonObject: EHorizonObject)
+    fun onRoadObjectExit(objectEnterExitInfo: EHorizonObjectEnterExitInfo)
 
-    fun onRoadObjectAdded(eHorizonObject: EHorizonObject)
+    fun onRoadObjectAdded(roadObjectId: String)
 
-    fun onRoadObjectUpdated(eHorizonObject: EHorizonObject)
+    fun onRoadObjectUpdated(roadObjectId: String)
 
-    fun onRoadObjectRemoved(eHorizonObject: EHorizonObject)
+    fun onRoadObjectRemoved(roadObjectId: String)
 }

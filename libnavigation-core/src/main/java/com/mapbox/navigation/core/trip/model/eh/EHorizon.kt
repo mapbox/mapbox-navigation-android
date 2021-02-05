@@ -24,10 +24,10 @@ import java.util.LinkedList
  * their outgoing connections. This can be done by simply looping over the Edges or using a Visitor.
  * For common cases, a number of utilities have been added which are described below.
  *
- * @param start [Edge]
+ * @param start [EHorizonEdge]
  */
 class EHorizon internal constructor(
-    val start: Edge
+    val start: EHorizonEdge
 ) {
 
     /**
@@ -35,8 +35,8 @@ class EHorizon internal constructor(
      *
      * @return current Edge given the position
      */
-    fun current(position: EHorizonPosition): Edge {
-        val visitedEdges = LinkedList<Edge>()
+    fun current(position: EHorizonPosition): EHorizonEdge {
+        val visitedEdges = LinkedList<EHorizonEdge>()
         visitedEdges.push(start)
         while (visitedEdges.isNotEmpty()) {
             val current = visitedEdges.poll()!!
@@ -55,7 +55,7 @@ class EHorizon internal constructor(
      *
      * @return entire MPP from the [EHorizon] as a list of ordered Edges
      */
-    fun mpp(): List<List<Edge>> {
+    fun mpp(): List<List<EHorizonEdge>> {
         return mpp(start)
     }
 
@@ -64,7 +64,7 @@ class EHorizon internal constructor(
      *
      * @return the Edges starting at the current edge
      */
-    fun mpp(position: EHorizonPosition): List<List<Edge>> {
+    fun mpp(position: EHorizonPosition): List<List<EHorizonEdge>> {
         return mpp(current(position))
     }
 
@@ -98,20 +98,20 @@ class EHorizon internal constructor(
             ")"
     }
 
-    private fun mpp(start: Edge): List<List<Edge>> {
+    private fun mpp(start: EHorizonEdge): List<List<EHorizonEdge>> {
         // if it is not MPP return empty list
         if (!start.isMpp()) return emptyList()
         if (start.out.isEmpty()) return listOf(listOf(start))
-        val result = LinkedList<LinkedList<Edge>>()
+        val result = LinkedList<LinkedList<EHorizonEdge>>()
         // traverse through MPP nodes until a tip is found
         val visitedEdges = LinkedList(start.out.filter { c -> c.isMpp() })
         while (visitedEdges.isNotEmpty()) {
             @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-            val current: Edge = visitedEdges.poll()
+            val current: EHorizonEdge = visitedEdges.poll()
             // check if is a tip of MPP
             if (current.out.isEmpty()) {
-                val path = LinkedList<Edge>()
-                var b: Edge? = current
+                val path = LinkedList<EHorizonEdge>()
+                var b: EHorizonEdge? = current
                 // trace back and form mpp
                 while (b != null) {
                     path.push(b)
