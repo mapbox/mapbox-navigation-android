@@ -10,15 +10,15 @@ package com.mapbox.navigation.base.options
  * @param branchLength when expansion is set to anything but 0, this specifies the minimum length
  * in meters branches will be expanded from the MPP. Double in range [1.0, 5000.0].
  * Default value 50.0
- * @param includeGeometries will geometries be included for edges. Excluding the edge shapes may
- * save some processing time on shape extraction and decoding. Boolean to enable/disable.
- * Default value false
+ * @param minTimeDeltaBetweenUpdates the minimum time which should pass between consecutive
+ * navigation statuses to update electronic horizon (seconds). If null electronic horizon will be
+ * updated on each navigation status. Default value null
  */
 class EHorizonOptions private constructor(
     val length: Double,
     val expansion: Int,
     val branchLength: Double,
-    val includeGeometries: Boolean
+    val minTimeDeltaBetweenUpdates: Double?
 ) {
 
     /**
@@ -28,7 +28,7 @@ class EHorizonOptions private constructor(
         length(length)
         expansion(expansion)
         branchLength(branchLength)
-        includeGeometries(includeGeometries)
+        minTimeDeltaBetweenUpdates(minTimeDeltaBetweenUpdates)
     }
 
     /**
@@ -43,7 +43,7 @@ class EHorizonOptions private constructor(
         if (length != other.length) return false
         if (expansion != other.expansion) return false
         if (branchLength != other.branchLength) return false
-        if (includeGeometries != other.includeGeometries) return false
+        if (minTimeDeltaBetweenUpdates != other.minTimeDeltaBetweenUpdates) return false
 
         return true
     }
@@ -55,7 +55,7 @@ class EHorizonOptions private constructor(
         var result = length.hashCode()
         result = 31 * result + expansion.hashCode()
         result = 31 * result + branchLength.hashCode()
-        result = 31 * result + includeGeometries.hashCode()
+        result = 31 * result + minTimeDeltaBetweenUpdates.hashCode()
         return result
     }
 
@@ -67,7 +67,7 @@ class EHorizonOptions private constructor(
             "length=$length, " +
             "expansion=$expansion, " +
             "branchLength=$branchLength, " +
-            "includeGeometries=$includeGeometries" +
+            "minTimeDeltaBetweenUpdates=$minTimeDeltaBetweenUpdates" +
             ")"
     }
 
@@ -79,10 +79,10 @@ class EHorizonOptions private constructor(
         private var length: Double = 500.0
         private var expansion: Int = 0
         private var branchLength: Double = 50.0
-        private var includeGeometries: Boolean = false
+        private var minTimeDeltaBetweenUpdates: Double? = null
 
         /**
-         * Override he minimum length of the EHorizon ahead of the current position.
+         * Override the minimum length of the EHorizon ahead of the current position.
          */
         fun length(length: Double): Builder =
             apply { this.length = length }
@@ -100,10 +100,10 @@ class EHorizonOptions private constructor(
             apply { this.branchLength = branchLength }
 
         /**
-         * Override the flag to enable/disable geometries in the EHorizon.
+         * Override the minimum time delta between EHorizon updates.
          */
-        fun includeGeometries(includeGeometries: Boolean): Builder =
-            apply { this.includeGeometries = includeGeometries }
+        fun minTimeDeltaBetweenUpdates(minTimeDeltaBetweenUpdates: Double?): Builder =
+            apply { this.minTimeDeltaBetweenUpdates = minTimeDeltaBetweenUpdates }
 
         /**
          * Build the [EHorizonOptions]
@@ -113,7 +113,7 @@ class EHorizonOptions private constructor(
                 length = length,
                 expansion = expansion,
                 branchLength = branchLength,
-                includeGeometries = includeGeometries
+                minTimeDeltaBetweenUpdates = minTimeDeltaBetweenUpdates
             )
         }
     }

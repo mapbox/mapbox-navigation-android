@@ -1,15 +1,9 @@
 package com.mapbox.navigation.core.trip.model.eh
 
-/**
- * The position on the current [EHorizon].
- *
- * @param edgeId the current Edge id
- * @param percentAlong the progress along the current edge [0,1)
- */
-@Deprecated("Temporarily no-op. Functionality will be reintroduced in future releases.")
 class EHorizonPosition internal constructor(
-    val edgeId: Long,
-    val percentAlong: Double
+    val eHorizonGraphPosition: EHorizonGraphPosition,
+    val eHorizon: EHorizon,
+    val eHorizonResultType: String
 ) {
 
     /**
@@ -21,8 +15,9 @@ class EHorizonPosition internal constructor(
 
         other as EHorizonPosition
 
-        if (edgeId != other.edgeId) return false
-        if (percentAlong != other.percentAlong) return false
+        if (eHorizonGraphPosition != other.eHorizonGraphPosition) return false
+        if (eHorizon != other.eHorizon) return false
+        if (eHorizonResultType != other.eHorizonResultType) return false
 
         return true
     }
@@ -31,8 +26,9 @@ class EHorizonPosition internal constructor(
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        var result = edgeId.hashCode()
-        result = 31 * result + percentAlong.hashCode()
+        var result = eHorizonGraphPosition.hashCode()
+        result = 31 * result + eHorizon.hashCode()
+        result = 31 * result + eHorizonResultType.hashCode()
         return result
     }
 
@@ -41,8 +37,9 @@ class EHorizonPosition internal constructor(
      */
     override fun toString(): String {
         return "EHorizonPosition(" +
-            "edgeId=$edgeId, " +
-            "percentAlong=$percentAlong" +
+            "eHorizonGraphPosition=$eHorizonGraphPosition, " +
+            "eHorizon=$eHorizon, " +
+            "eHorizonResultType=$eHorizonResultType" +
             ")"
     }
 }

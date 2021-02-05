@@ -101,6 +101,8 @@ internal class MapboxTripSession(
     private val voiceInstructionsObservers = CopyOnWriteArraySet<VoiceInstructionsObserver>()
     private val routeAlertsObservers = CopyOnWriteArraySet<RouteAlertsObserver>()
     private val mapMatcherResultObservers = CopyOnWriteArraySet<MapMatcherResultObserver>()
+    private val eHorizonSubscriptionManager: EHorizonSubscriptionManager =
+        EHorizonSubscriptionManagerImpl(navigator, mainJobController)
 
     private val bannerInstructionEvent = BannerInstructionEvent()
     private val voiceInstructionEvent = VoiceInstructionEvent()
@@ -203,6 +205,7 @@ internal class MapboxTripSession(
         routeProgress = null
         isOffRoute = false
         updateNavigatorStatusDataJobs.clear()
+        eHorizonSubscriptionManager.reset()
     }
 
     /**
@@ -404,6 +407,18 @@ internal class MapboxTripSession(
 
     override fun unregisterAllRouteAlertsObservers() {
         routeAlertsObservers.clear()
+    }
+
+    override fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver) {
+        eHorizonSubscriptionManager.registerObserver(eHorizonObserver)
+    }
+
+    override fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver) {
+        eHorizonSubscriptionManager.unregisterObserver(eHorizonObserver)
+    }
+
+    override fun unregisterAllEHorizonObservers() {
+        eHorizonSubscriptionManager.unregisterAllObservers()
     }
 
     override fun registerMapMatcherResultObserver(
