@@ -42,5 +42,4 @@ class EHorizonObjectLocation internal constructor(
             "percentAlongEnd=$percentAlongEnd" +
             ")"
     }
-
 }

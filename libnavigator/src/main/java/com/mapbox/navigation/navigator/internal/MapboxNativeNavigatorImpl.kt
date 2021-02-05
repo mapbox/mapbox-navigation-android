@@ -16,7 +16,6 @@ import com.mapbox.navigation.navigator.toFixLocation
 import com.mapbox.navigation.navigator.toLocation
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.BannerInstruction
-import com.mapbox.navigator.EdgeMetadata
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
@@ -26,9 +25,6 @@ import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.PredictiveCacheController
 import com.mapbox.navigator.PredictiveCacheControllerOptions
 import com.mapbox.navigator.PredictiveLocationTrackerOptions
-import com.mapbox.navigator.RoadObjectEdgeLocation
-import com.mapbox.navigator.RoadObjectLocation
-import com.mapbox.navigator.RoadObjectMetadata
 import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteState
@@ -67,8 +63,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private var route: DirectionsRoute? = null
     private var routeBufferGeoJson: Geometry? = null
     override val navigatorMapper = NavigatorMapper()
-    private var graphAccessor: GraphAccessor? = null
-    private var roadObjectsStore: RoadObjectsStore? = null
+    override var graphAccessor: GraphAccessor? = null
+    override var roadObjectsStore: RoadObjectsStore? = null
 
     // Route following
 
@@ -405,24 +401,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             createDefaultNavigationPredictiveCacheControllerOptions(onboardRouterOptions),
             createDefaultPredictiveLocationTrackerOptions(predictiveCacheLocationOptions)
         )
-
-    override fun getEdgeShape(edgeId: Long): List<Point>? =
-        graphAccessor?.getEdgeShape(edgeId)
-
-    override fun getEdgeMetadata(edgeId: Long): EdgeMetadata? =
-        graphAccessor?.getEdgeMetadata(edgeId)
-
-    override fun getRoadObjectsOnTheEdge(edgeId: Long): Map<String, RoadObjectEdgeLocation> =
-        roadObjectsStore?.get(edgeId) ?: emptyMap()
-
-    override fun getRoadObjectMetadata(roadObjectId: String): RoadObjectMetadata? =
-        roadObjectsStore?.getRoadObjectMetadata(roadObjectId)
-
-    override fun getRoadObjectLocation(roadObjectId: String): RoadObjectLocation? =
-        roadObjectsStore?.getRoadObjectLocation(roadObjectId)
-
-    override fun getRoadObjectIdsByEdgeIds(edgeIds: List<Long>): List<String?> =
-        roadObjectsStore?.getRoadObjectIdsByEdgeIds(edgeIds) ?: emptyList()
 
     private fun createDefaultPredictiveLocationTrackerOptions(
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions

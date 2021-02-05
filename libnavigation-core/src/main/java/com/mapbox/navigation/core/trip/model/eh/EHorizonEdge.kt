@@ -11,12 +11,12 @@ package com.mapbox.navigation.core.trip.model.eh
  * @param out the outgoing Edges
  * @param parent the parent Edge
  */
-class Edge internal constructor(
+class EHorizonEdge internal constructor(
     val id: Long,
     val level: Byte,
     val probability: Double,
-    val out: List<Edge>,
-    val parent: Edge?,
+    val out: List<EHorizonEdge>,
+    val parent: EHorizonEdge?,
 ) {
 
     /**
@@ -33,7 +33,7 @@ class Edge internal constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Edge
+        other as EHorizonEdge
 
         if (id != other.id) return false
         if (level != other.level) return false
