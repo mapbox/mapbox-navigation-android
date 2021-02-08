@@ -26,6 +26,7 @@ import java.util.LinkedList
  *
  * @param start [Edge]
  */
+@Deprecated("Temporarily no-op. Functionality will be reintroduced in future releases.")
 class EHorizon internal constructor(
     val start: Edge
 ) {

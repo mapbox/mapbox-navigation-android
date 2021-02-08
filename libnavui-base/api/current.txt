@@ -1,0 +1,201 @@
+// Signature format: 3.0
+package com.mapbox.navigation.ui.base {
+
+  public interface MapboxState {
+  }
+
+  public interface MapboxView<S extends com.mapbox.navigation.ui.base.MapboxState> {
+    method public void render(S state);
+  }
+
+}
+
+package com.mapbox.navigation.ui.base.api.signboard {
+
+  public interface SignboardApi {
+    method public void cancelAll();
+    method public void generateSignboard(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.api.signboard.SignboardReadyCallback callback);
+  }
+
+  public interface SignboardReadyCallback {
+    method public void onAvailable(com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Available state);
+    method public void onError(com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Error state);
+    method public void onUnavailable(com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Empty state);
+  }
+
+}
+
+package com.mapbox.navigation.ui.base.api.snapshotter {
+
+  public interface SnapshotReadyCallback {
+    method public void onFailure(com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure error);
+    method public void onSnapshotReady(com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotReady bitmap);
+  }
+
+  public interface SnapshotterApi {
+    method public void cancel();
+    method public void generateSnapshot(com.mapbox.navigation.base.trip.model.RouteProgress progress, com.mapbox.navigation.ui.base.api.snapshotter.SnapshotReadyCallback callback);
+  }
+
+}
+
+package com.mapbox.navigation.ui.base.api.tripprogress {
+
+  public interface TripProgressApi {
+    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressState.Update getTripProgress(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+  }
+
+}
+
+package com.mapbox.navigation.ui.base.formatter {
+
+  public interface ValueFormatter<T, R> {
+    method public R! format(T? t);
+  }
+
+}
+
+package com.mapbox.navigation.ui.base.model.signboard {
+
+  public abstract sealed class SignboardState implements com.mapbox.navigation.ui.base.MapboxState {
+  }
+
+  public static final class SignboardState.Hide extends com.mapbox.navigation.ui.base.model.signboard.SignboardState {
+    field public static final com.mapbox.navigation.ui.base.model.signboard.SignboardState.Hide! INSTANCE;
+  }
+
+  public static final class SignboardState.Show extends com.mapbox.navigation.ui.base.model.signboard.SignboardState {
+    field public static final com.mapbox.navigation.ui.base.model.signboard.SignboardState.Show! INSTANCE;
+  }
+
+  public abstract static sealed class SignboardState.Signboard extends com.mapbox.navigation.ui.base.model.signboard.SignboardState {
+  }
+
+  public static final class SignboardState.Signboard.Available extends com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard {
+    ctor public SignboardState.Signboard.Available(int desiredSignboardWidth, byte[] bytes);
+    ctor public SignboardState.Signboard.Available(byte[] bytes);
+    method public int component1();
+    method public byte[] component2();
+    method public com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Available copy(int desiredSignboardWidth, byte[] bytes);
+    method public byte[] getBytes();
+    method public int getDesiredSignboardWidth();
+  }
+
+  public static final class SignboardState.Signboard.Empty extends com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard {
+    field public static final com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Empty! INSTANCE;
+  }
+
+  public static final class SignboardState.Signboard.Error extends com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard {
+    ctor public SignboardState.Signboard.Error(String? exception);
+    method public String? component1();
+    method public com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Error copy(String? exception);
+    method public String? getException();
+  }
+
+}
+
+package com.mapbox.navigation.ui.base.model.snapshotter {
+
+  public abstract sealed class SnapshotState implements com.mapbox.navigation.ui.base.MapboxState {
+  }
+
+  public abstract static sealed class SnapshotState.SnapshotFailure extends com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState {
+  }
+
+  public static final class SnapshotState.SnapshotFailure.SnapshotEmpty extends com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure {
+    ctor public SnapshotState.SnapshotFailure.SnapshotEmpty(String? exception);
+    method public String? component1();
+    method public com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure.SnapshotEmpty copy(String? exception);
+    method public String? getException();
+  }
+
+  public static final class SnapshotState.SnapshotFailure.SnapshotError extends com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure {
+    ctor public SnapshotState.SnapshotFailure.SnapshotError(String? exception);
+    method public String? component1();
+    method public com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure.SnapshotError copy(String? exception);
+    method public String? getException();
+  }
+
+  public static final class SnapshotState.SnapshotFailure.SnapshotUnavailable extends com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure {
+    field public static final com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure.SnapshotUnavailable! INSTANCE;
+  }
+
+  public static final class SnapshotState.SnapshotReady extends com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState {
+    ctor public SnapshotState.SnapshotReady(android.graphics.Bitmap bitmap);
+    method public android.graphics.Bitmap component1();
+    method public com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotReady copy(android.graphics.Bitmap bitmap);
+    method public android.graphics.Bitmap getBitmap();
+  }
+
+}
+
+package com.mapbox.navigation.ui.base.model.tripprogress {
+
+  public final class DistanceRemainingFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,android.text.SpannableString> {
+    ctor public DistanceRemainingFormatter(com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions);
+    method public android.text.SpannableString format(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate t);
+  }
+
+  public final class EstimatedTimeToArrivalFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,android.text.SpannableString> {
+    ctor public EstimatedTimeToArrivalFormatter(android.content.Context context, @com.mapbox.navigation.base.TimeFormat.Type int timeFormatType);
+    method public android.text.SpannableString format(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate update);
+  }
+
+  public final class PercentDistanceTraveledFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,android.text.SpannableString> {
+    ctor public PercentDistanceTraveledFormatter();
+    method public android.text.SpannableString format(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate update);
+  }
+
+  public class TimeRemainingFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,android.text.SpannableString> {
+    ctor public TimeRemainingFormatter(android.content.Context context, java.util.Locale? locale);
+    method public android.text.SpannableString format(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate update);
+    method public final java.util.Locale? getLocale();
+    method public final void setLocale(java.util.Locale? p);
+  }
+
+  public abstract sealed class TripProgressState implements com.mapbox.navigation.ui.base.MapboxState {
+  }
+
+  public static final class TripProgressState.Update extends com.mapbox.navigation.ui.base.model.tripprogress.TripProgressState {
+    ctor public TripProgressState.Update(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate tripProgressUpdate, com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter formatter);
+    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter getFormatter();
+    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate getTripProgressUpdate();
+  }
+
+  public final class TripProgressUpdate {
+    ctor public TripProgressUpdate(long estimatedTimeToArrival, double distanceRemaining, double currentLegTimeRemaining, double totalTimeRemaining, double percentRouteTraveled, @ColorInt int trafficCongestionColor);
+    method public double getCurrentLegTimeRemaining();
+    method public double getDistanceRemaining();
+    method public long getEstimatedTimeToArrival();
+    method public double getPercentRouteTraveled();
+    method public double getTotalTimeRemaining();
+    method public int getTrafficCongestionColor();
+  }
+
+  public final class TripProgressUpdateFormatter {
+    method public android.text.SpannableString getDistanceRemaining(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate update);
+    method public android.text.SpannableString getEstimatedTimeToArrival(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate update);
+    method public android.text.SpannableString getPercentRouteTraveled(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate update);
+    method public android.text.SpannableString getTimeRemaining(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate update);
+    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder toBuilder(android.content.Context context);
+  }
+
+  public static final class TripProgressUpdateFormatter.Builder {
+    ctor public TripProgressUpdateFormatter.Builder(android.content.Context context);
+    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter build();
+    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder distanceRemainingFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,android.text.SpannableString> formatter);
+    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder estimatedTimeToArrivalFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,android.text.SpannableString> formatter);
+    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder percentRouteTraveledFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,android.text.SpannableString> formatter);
+    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder timeRemainingFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,android.text.SpannableString> formatter);
+  }
+
+}
+
+package com.mapbox.navigation.ui.base.util {
+
+  @java.lang.FunctionalInterface public interface MapboxNavigationConsumer<T> {
+    method public default void accept(T? t);
+  }
+
+}
+

@@ -24,7 +24,7 @@ import java.util.Date
 class IncidentInfo private constructor(
     val id: String,
     val type: Int,
-    @IncidentImpact.Impact val impact: String?,
+    @IncidentImpact.Impact val impact: String,
     val congestion: IncidentCongestion?,
     val isClosed: Boolean,
     val creationTime: Date?,
@@ -128,7 +128,7 @@ class IncidentInfo private constructor(
         private var type: Int = IncidentType.UNKNOWN
 
         @IncidentImpact.Impact
-        private var impact: String? = null
+        private var impact: String = IncidentImpact.UNKNOWN
         private var congestion: IncidentCongestion? = null
         private var isClosed: Boolean = false
         private var creationTime: Date? = null
@@ -149,7 +149,7 @@ class IncidentInfo private constructor(
         /**
          * Severity level of incident.
          */
-        fun impact(@IncidentImpact.Impact impact: String?): Builder = apply {
+        fun impact(@IncidentImpact.Impact impact: String): Builder = apply {
             this.impact = impact
         }
 

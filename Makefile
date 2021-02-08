@@ -8,10 +8,13 @@ libtrip-notification \
 libnavigation-core \
 
 UI_MODULES = \
-libnavigation-ui \
+libnavui-maps \
+libnavui-base \
+libnavui-util \
+libnavui-tripprogress \
 
 APPLICATION_MODULES = \
-examples \
+test-app \
 instrumentation-tests \
 
 define run-gradle-tasks
@@ -21,7 +24,7 @@ define run-gradle-tasks
 endef
 
 .PHONY: check
-check:
+check: license-verification
 	$(call run-gradle-tasks,$(CORE_MODULES),ktlint) \
 	&& $(call run-gradle-tasks,$(UI_MODULES),ktlint) \
 	&& $(call run-gradle-tasks,$(UI_MODULES),checkstyle) \
@@ -136,11 +139,17 @@ ui-upload-to-sdk-registry:
 .PHONY: ui-check-api
 ui-check-api:
 	# TODO Remove -PhideId=ReferencesHidden after fixing errors
-	./gradlew :libnavigation-ui:checkApi -PhidePackage=com.mapbox.navigation.ui.internal -PhideId=ReferencesHidden
+	./gradlew :libnavui-maps:checkApi -PhidePackage=com.mapbox.navigation.ui.maps.internal -PhideId=ReferencesHidden
+	./gradlew :libnavui-base:checkApi -PhidePackage=com.mapbox.navigation.ui.base.internal -PhideId=ReferencesHidden
+	./gradlew :libnavui-util:checkApi -PhidePackage=com.mapbox.navigation.ui.utils.internal -PhideId=ReferencesHidden
+	./gradlew :libnavui-tripprogress:checkApi -PhidePackage=com.mapbox.navigation.ui.tripprogress.internal -PhideId=ReferencesHidden
 
 .PHONY: ui-update-api
 ui-update-api:
-	./gradlew :libnavigation-ui:updateApi -PhidePackage=com.mapbox.navigation.ui.internal
+	./gradlew :libnavui-maps:updateApi -PhidePackage=com.mapbox.navigation.ui.maps.internal
+	./gradlew :libnavui-base:updateApi -PhidePackage=com.mapbox.navigation.ui.base.internal
+	./gradlew :libnavui-util:updateApi -PhidePackage=com.mapbox.navigation.ui.utils.internal
+	./gradlew :libnavui-tripprogress:updateApi -PhidePackage=com.mapbox.navigation.ui.tripprogress.internal
 
 .PHONY: update-metalava
 update-metalava:

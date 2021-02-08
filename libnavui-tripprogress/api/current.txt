@@ -1,0 +1,23 @@
+// Signature format: 3.0
+package com.mapbox.navigation.ui.tripprogress.api {
+
+  public final class MapboxTripProgressApi implements com.mapbox.navigation.ui.base.api.tripprogress.TripProgressApi {
+    ctor public MapboxTripProgressApi(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter formatter);
+    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter getFormatter();
+    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressState.Update getTripProgress(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+    method public void setFormatter(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter p);
+  }
+
+}
+
+package com.mapbox.navigation.ui.tripprogress.view {
+
+  public final class MapboxTripProgressView extends android.widget.FrameLayout implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressState> {
+    ctor public MapboxTripProgressView(android.content.Context context);
+    ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void render(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressState state);
+  }
+
+}
+

@@ -1,8 +1,10 @@
 package com.mapbox.navigation.route.internal.onboard
 
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
+import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
@@ -12,8 +14,9 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.NavigationException
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigator.RouterResult
+import com.mapbox.navigator.RouterError
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -56,17 +59,24 @@ class MapboxOnboardRouterTest {
 
     private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     private val routerCallback: Router.Callback = mockk(relaxUnitFun = true)
-    private val routerResultSuccess: RouterResult = mockk(relaxUnitFun = true)
-    private val routerResultFailure: RouterResult = mockk(relaxUnitFun = true)
+    private val routerResultSuccess: Expected<String, RouterError> = mockk {
+        every { isValue } returns true
+        every { isError } returns false
+        every { value } returns SUCCESS_RESPONSE
+        every { error } returns null
+    }
+    private val routerResultFailure: Expected<String, RouterError> = mockk {
+        every { isValue } returns false
+        every { isError } returns true
+        every { value } returns null
+        every { error } returns RouterError(FAILURE_MESSAGE, FAILURE_CODE)
+    }
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
     private val logger: Logger = mockk(relaxUnitFun = true)
 
     @Before
     fun setUp() {
         onboardRouter = MapboxOnboardRouter(navigator, logger)
-
-        every { routerResultSuccess.json } returns SUCCESS_RESPONSE
-        every { routerResultFailure.json } returns FAILURE_RESPONSE
 
         mockkObject(ThreadController)
         every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
@@ -85,23 +95,23 @@ class MapboxOnboardRouterTest {
     @Test
     fun checkCallbackCalledOnFailure() = coroutineRule.runBlockingTest {
         val exceptionSlot = slot<NavigationException>()
-        every { navigator.getRoute(any()) } returns routerResultFailure
+        coEvery { navigator.getRoute(any()) } returns routerResultFailure
 
         onboardRouter.getRoute(routerOptions, routerCallback)
 
-        verify { navigator.getRoute(URL.toString()) }
+        coVerify { navigator.getRoute(URL.toString()) }
         verify { routerCallback.onFailure(capture(exceptionSlot)) }
         assertEquals(ERROR_MESSAGE, exceptionSlot.captured.message)
     }
 
     @Test
     fun checkCallbackCalledOnSuccess() = coroutineRule.runBlockingTest {
-        every { navigator.getRoute(any()) } returns routerResultSuccess
+        coEvery { navigator.getRoute(any()) } returns routerResultSuccess
 
         onboardRouter.getRoute(routerOptions, routerCallback)
 
-        verify { navigator.getRoute(URL.toString()) }
-        verify { routerCallback.onResponse(any()) }
+        coVerify { navigator.getRoute(URL.toString()) }
+        verify { routerCallback.onResponse(DirectionsResponse.fromJson(SUCCESS_RESPONSE).routes()) }
     }
 
     @Test
@@ -182,7 +192,7 @@ class MapboxOnboardRouterTest {
     @Test
     fun checkModelOnSuccess() = coroutineRule.runBlockingTest {
         val routesSlot = slot<List<DirectionsRoute>>()
-        every { navigator.getRoute(any()) } returns routerResultSuccess
+        coEvery { navigator.getRoute(any()) } returns routerResultSuccess
 
         onboardRouter.getRoute(routerOptions, routerCallback)
 
@@ -345,9 +355,8 @@ class MapboxOnboardRouterTest {
 
         private const val ERROR_MESSAGE =
             "Error occurred fetching offline route: No suitable edges near location - Code: 171"
-        private const val FAILURE_RESPONSE =
-            "{\"status\": \"Bad Request\", \"status_code\": 400, \"error\": \"No suitable " +
-                "edges near location\", \"error_code\": 171}"
+        private const val FAILURE_MESSAGE = "No suitable edges near location"
+        private const val FAILURE_CODE = 171
         private const val SUCCESS_RESPONSE = "{\n" +
             "  \"routes\": [\n" +
             "    {\n" +

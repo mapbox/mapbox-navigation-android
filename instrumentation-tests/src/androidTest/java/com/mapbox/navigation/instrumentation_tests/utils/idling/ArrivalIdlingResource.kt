@@ -35,7 +35,7 @@ class ArrivalIdlingResource(
         )
     }
 
-    override fun getName() = "ArrivalIdlingResource"
+    override fun getName() = this::class.simpleName
 
     override fun isIdleNow() = arrived
 

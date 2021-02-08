@@ -10,11 +10,9 @@ import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.common.module.provider.ModuleProviderArgument
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
-import com.mapbox.navigation.base.internal.VoiceUnit.METRIC
-import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
+import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.notification.TripNotification
-import com.mapbox.navigation.core.Rounding
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.test.R
 import com.mapbox.navigation.core.trip.service.MapboxTripService
@@ -71,18 +69,17 @@ internal class TripServiceActivity : AppCompatActivity() {
     private fun paramsProvider(type: MapboxModuleType): Array<ModuleProviderArgument> {
         return when (type) {
             MapboxModuleType.NavigationTripNotification -> {
-                val formatter = MapboxDistanceFormatter.Builder(this)
-                    .roundingIncrement(Rounding.INCREMENT_FIFTY)
-                    .unitType(METRIC)
-                    .locale(inferDeviceLocale())
-                    .build()
-
                 val options = NavigationOptions.Builder(applicationContext)
-                    .distanceFormatter(formatter)
                     .timeFormatType(TWENTY_FOUR_HOURS)
                     .build()
 
-                arrayOf(ModuleProviderArgument(NavigationOptions::class.java, options))
+                arrayOf(
+                    ModuleProviderArgument(NavigationOptions::class.java, options),
+                    ModuleProviderArgument(
+                        DistanceFormatter::class.java,
+                        MapboxDistanceFormatter(options.distanceFormatterOptions)
+                    )
+                )
             }
             else -> throw IllegalArgumentException("not supported: $type")
         }

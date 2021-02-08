@@ -14,7 +14,7 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.common.module.provider.ModuleProviderArgument
-import com.mapbox.navigation.base.internal.VoiceUnit
+import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.OnboardRouterOptions
@@ -23,7 +23,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert
 import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
-import com.mapbox.navigation.core.MapboxNavigation.Companion.defaultNavigationOptionsBuilder
 import com.mapbox.navigation.core.accounts.NavigationAccountsSession
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
@@ -68,7 +67,6 @@ import com.mapbox.navigation.utils.internal.NetworkStatusService
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
-import com.mapbox.navigator.ElectronicHorizonOptions
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
@@ -147,15 +145,7 @@ class MapboxNavigation(
     private val fasterRouteController: FasterRouteController
     private val routeRefreshController: RouteRefreshController
     private val arrivalProgressObserver: ArrivalProgressObserver
-    private val electronicHorizonOptions: ElectronicHorizonOptions = ElectronicHorizonOptions(
-        navigationOptions.eHorizonOptions.length,
-        navigationOptions.eHorizonOptions.expansion.toByte(),
-        navigationOptions.eHorizonOptions.branchLength,
-        navigationOptions.eHorizonOptions.includeGeometries,
-        false,
-        null
-    )
-    private val navigatorConfig = NavigatorConfig(null, electronicHorizonOptions, null)
+    private val navigatorConfig = NavigatorConfig(null, null, null, null)
 
     private var notificationChannelField: Field? = null
 
@@ -364,7 +354,6 @@ class MapboxNavigation(
         tripSession.unregisterAllBannerInstructionsObservers()
         tripSession.unregisterAllVoiceInstructionsObservers()
         tripSession.unregisterAllRouteAlertsObservers()
-        tripSession.unregisterAllEHorizonObservers()
         tripSession.unregisterAllMapMatcherResultObservers()
         directionsSession.routes = emptyList()
         resetTripSession()
@@ -628,8 +617,9 @@ class MapboxNavigation(
      *
      * @see unregisterEHorizonObserver
      */
+    @Deprecated("Temporarily no-op. Functionality will be reintroduced in future releases.")
     fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver) {
-        tripSession.registerEHorizonObserver(eHorizonObserver)
+        // no-op
     }
 
     /**
@@ -639,8 +629,9 @@ class MapboxNavigation(
      *
      * @see registerEHorizonObserver
      */
+    @Deprecated("Temporarily no-op. Functionality will be reintroduced in future releases.")
     fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver) {
-        tripSession.unregisterEHorizonObserver(eHorizonObserver)
+        // no-op
     }
 
     /**
@@ -798,7 +789,11 @@ class MapboxNavigation(
                 )
             )
             MapboxModuleType.NavigationTripNotification -> arrayOf(
-                ModuleProviderArgument(NavigationOptions::class.java, navigationOptions)
+                ModuleProviderArgument(NavigationOptions::class.java, navigationOptions),
+                ModuleProviderArgument(
+                    DistanceFormatter::class.java,
+                    MapboxDistanceFormatter(navigationOptions.distanceFormatterOptions)
+                ),
             )
             MapboxModuleType.CommonLogger -> arrayOf()
             MapboxModuleType.CommonLibraryLoader ->
@@ -822,13 +817,21 @@ class MapboxNavigation(
         // TODO StrictMode may report a violation as we're creating a File from the Main
         val offlineFilesPath = OnboardRouterFiles(navigationOptions.applicationContext, logger)
             .absolutePath(navigationOptions.onboardRouterOptions)
+        val dataset = StringBuilder().apply {
+            append(navigationOptions.onboardRouterOptions.tilesDataset)
+            append("/")
+            append(navigationOptions.onboardRouterOptions.tilesProfile)
+        }.toString()
+
         return TilesConfig(
             offlineFilesPath,
+            null,
             null,
             null,
             THREADS_COUNT,
             TileEndpointConfiguration(
                 navigationOptions.onboardRouterOptions.tilesUri.toString(),
+                dataset,
                 navigationOptions.onboardRouterOptions.tilesVersion,
                 navigationOptions.accessToken ?: "",
                 USER_AGENT,
@@ -841,31 +844,7 @@ class MapboxNavigation(
     }
 
     companion object {
-
         private const val USER_AGENT: String = "MapboxNavigationNative"
         private const val THREADS_COUNT = 2
-
-        /**
-         * Returns a pre-build set of [NavigationOptions] with smart defaults.
-         *
-         * Use [NavigationOptions.toBuilder] to easily customize selected options.
-         *
-         * @param context [Context]
-         * @param accessToken Mapbox access token
-         * @return default [NavigationOptions]
-         */
-        @JvmStatic
-        fun defaultNavigationOptionsBuilder(
-            context: Context,
-            accessToken: String?
-        ): NavigationOptions.Builder {
-            val distanceFormatter = MapboxDistanceFormatter.Builder(context)
-                .unitType(VoiceUnit.UNDEFINED)
-                .roundingIncrement(Rounding.INCREMENT_FIFTY)
-                .build()
-            return NavigationOptions.Builder(context)
-                .accessToken(accessToken)
-                .distanceFormatter(distanceFormatter)
-        }
     }
 }

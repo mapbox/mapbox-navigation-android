@@ -6,6 +6,7 @@ package com.mapbox.navigation.core.trip.model.eh
  * @param name road name
  * @param shielded is the road shielded?
  */
+@Deprecated("Temporarily no-op. Functionality will be reintroduced in future releases.")
 class NameInfo internal constructor(
     val name: String,
     val shielded: Boolean

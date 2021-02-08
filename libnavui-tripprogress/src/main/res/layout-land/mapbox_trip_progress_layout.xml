@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:padding="@dimen/mapbox_dimen_16dp"
+    android:background="@color/mapbox_trip_progress_background_color"
+    android:gravity="center">
+
+  <TextView
+      android:id="@+id/txtMapboxTripProgressTimeRemaining"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginEnd="16dp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toStartOf="@id/mapboxTripProgressDividerLeft"
+      app:layout_constraintTop_toTopOf="parent"
+      tools:text="10 min"
+      android:textSize="@dimen/mapbox_dimen_16sp"/>
+
+  <TextView
+      android:id="@+id/mapboxTripProgressDividerLeft"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginEnd="16dp"
+      android:text="•"
+      android:textSize="@dimen/mapbox_dimen_32sp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toStartOf="@id/txtMapboxTripProgressDistanceRemaining"
+      app:layout_constraintTop_toTopOf="parent"
+      tools:ignore="HardcodedText"
+      />
+
+  <TextView
+      android:id="@+id/txtMapboxTripProgressDistanceRemaining"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginEnd="8dp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      tools:text="1056 ft"
+      android:textSize="@dimen/mapbox_dimen_24sp"/>
+
+  <TextView
+      android:id="@+id/mapboxTripProgressDividerRight"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:text="•"
+      android:textSize="@dimen/mapbox_dimen_32sp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toEndOf="@id/txtMapboxTripProgressDistanceRemaining"
+      app:layout_constraintTop_toTopOf="parent"
+      tools:ignore="HardcodedText"/>
+
+  <TextView
+      android:id="@+id/txtMapboxTripProgressEstimatedTimeToArrive"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toEndOf="@id/mapboxTripProgressDividerRight"
+      app:layout_constraintTop_toTopOf="parent"
+      tools:text="4:28 pm"
+      android:textSize="@dimen/mapbox_dimen_24sp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

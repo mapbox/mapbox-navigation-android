@@ -3,18 +3,6 @@ host = https://www.transifex.com
 lang_map = pt_BR: pt-rBR, pt_PT: pt-rPT, es_ES: es-rES
 minimum_perc = 20
 
-[mapbox-navigation-sdk-for-android.examples-app-strings-file]
-file_filter = examples/src/main/res/values-<lang>/strings.xml
-source_file = examples/src/main/res/values/strings.xml
-source_lang = en
-type = ANDROID
-
-[mapbox-navigation-sdk-for-android.libnavigation-ui-strings-file]
-file_filter = libnavigation-ui/src/main/res/values-<lang>/strings.xml
-source_file = libnavigation-ui/src/main/res/values/strings.xml
-source_lang = en
-type = ANDROID
-
 [mapbox-navigation-sdk-for-android.libtrip-notification-strings-file]
 file_filter = libtrip-notification/src/main/res/values-<lang>/strings.xml
 source_file = libtrip-notification/src/main/res/values/strings.xml

@@ -3,20 +3,30 @@ package com.mapbox.navigation.navigator.internal
 import android.location.Location
 import android.os.SystemClock
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.bindgen.Expected
+import com.mapbox.common.TileStore
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.gson.GeometryGeoJson
 import com.mapbox.navigation.base.options.DeviceProfile
+import com.mapbox.navigation.base.options.OnboardRouterOptions
+import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.navigator.ActiveGuidanceOptionsMapper
 import com.mapbox.navigation.navigator.toFixLocation
 import com.mapbox.navigation.navigator.toLocation
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.ElectronicHorizonObserver
+import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
+import com.mapbox.navigator.PredictiveCacheController
+import com.mapbox.navigator.PredictiveCacheControllerOptions
+import com.mapbox.navigator.PredictiveLocationTrackerOptions
 import com.mapbox.navigator.RouteState
+import com.mapbox.navigator.Router
+import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.TilesConfig
@@ -27,6 +37,8 @@ import kotlinx.coroutines.withContext
 import java.lang.Error
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Default implementation of [MapboxNativeNavigator] interface.
@@ -38,9 +50,14 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private const val PRIMARY_ROUTE_INDEX = 0
     private const val SINGLE_THREAD = 1
 
+    // TODO: What should be the default value? Should we expose it publicly?
+    private const val MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS = 2
+
     private val NavigatorDispatcher: CoroutineDispatcher =
         Executors.newFixedThreadPool(SINGLE_THREAD).asCoroutineDispatcher()
     private var navigator: Navigator? = null
+    private var nativeRouter: Router? = null
+    private var historyRecorderHandle: HistoryRecorderHandle? = null
     private var route: DirectionsRoute? = null
     private var routeBufferGeoJson: Geometry? = null
     private val navigatorMapper = NavigatorMapper()
@@ -56,11 +73,14 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig
     ): MapboxNativeNavigator {
-        navigator = NavigatorLoader.createNavigator(
+        val nativeComponents = NavigatorLoader.createNavigator(
             deviceProfile,
             navigatorConfig,
             tilesConfig
         )
+        navigator = nativeComponents.navigator
+        nativeRouter = nativeComponents.nativeRouter
+        historyRecorderHandle = nativeComponents.historyRecorderHandle
         route = null
         routeBufferGeoJson = null
         return this
@@ -113,6 +133,9 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 navigatorPredictionMillis
             )
             val status = navigator!!.getStatus(nanos)
+            val remainingWaypoints = ifNonNull(route?.routeOptions()?.waypointIndicesList()?.size) {
+                it - status.nextWaypointIndex
+            } ?: 0
             TripStatus(
                 status.location.toLocation(),
                 status.key_points.map { it.toLocation() },
@@ -120,7 +143,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                     route,
                     routeBufferGeoJson,
                     status,
-                    navigator!!.remainingWaypoints().size
+                    remainingWaypoints
                 ),
                 status.routeState == RouteState.OFF_ROUTE,
                 status
@@ -237,7 +260,13 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @param url the directions-based uri used when hitting the http service
      * @return a [RouterResult] object with the json and a success/fail boolean
      */
-    override fun getRoute(url: String): RouterResult = navigator!!.getRoute(url)
+    override suspend fun getRoute(url: String): Expected<String, RouterError> {
+        return suspendCoroutine { continuation ->
+            nativeRouter!!.getRoute(url) {
+                continuation.resume(it)
+            }
+        }
+    }
 
     /**
      * Passes in an input path to the tar file and output path.
@@ -248,7 +277,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return the number of unpacked tiles
      */
     override fun unpackTiles(tarPath: String, destinationPath: String): Long =
-        navigator!!.unpackTiles(tarPath, destinationPath)
+        Router.unpackTiles(tarPath, destinationPath)
 
     /**
      * Removes tiles wholly within the supplied bounding box. If the tile is not
@@ -263,7 +292,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return the number of tiles removed
      */
     override fun removeTiles(tilePath: String, southwest: Point, northeast: Point): Long =
-        navigator!!.removeTiles(tilePath, southwest, northeast)
+        Router.removeTiles(tilePath, southwest, northeast)
 
     // History traces
 
@@ -274,7 +303,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return a json representing the series of events that happened since the last time
      * the history was toggled on.
      */
-    override fun getHistory(): String = navigator!!.history
+    override fun getHistory(): String = String(historyRecorderHandle?.history ?: byteArrayOf())
 
     /**
      * Toggles the recording of history on or off.
@@ -283,7 +312,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @param isEnabled set this to true to turn on history recording and false to turn it off
      */
     override fun toggleHistory(isEnabled: Boolean) {
-        navigator!!.toggleHistory(isEnabled)
+        historyRecorderHandle?.enable(isEnabled)
     }
 
     /**
@@ -294,7 +323,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @param eventJsonProperties the json to attach to the "properties" key of the event
      */
     override fun addHistoryEvent(eventType: String, eventJsonProperties: String) {
-        navigator!!.pushHistory(eventType, eventJsonProperties)
+        historyRecorderHandle?.pushHistory(eventType, eventJsonProperties)
     }
 
     // Other
@@ -320,4 +349,68 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override fun setElectronicHorizonObserver(eHorizonObserver: ElectronicHorizonObserver?) {
         navigator!!.setElectronicHorizonObserver(eHorizonObserver)
     }
+
+    /**
+     * Creates a Maps [PredictiveCacheController].
+     *
+     * @param tileStore Maps [TileStore]
+     * @param tileVariant Maps tileset
+     * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
+     *
+     * @return [PredictiveCacheController]
+     */
+    override fun createMapsPredictiveCacheController(
+        tileStore: TileStore,
+        tileVariant: String,
+        predictiveCacheLocationOptions: PredictiveCacheLocationOptions
+    ): PredictiveCacheController =
+        navigator!!.createPredictiveCacheController(
+            tileStore,
+            createDefaultMapsPredictiveCacheControllerOptions(tileVariant),
+            createDefaultPredictiveLocationTrackerOptions(predictiveCacheLocationOptions)
+        )
+
+    /**
+     * Creates a Navigation [PredictiveCacheController].
+     *
+     * @param onboardRouterOptions Navigation [OnboardRouterOptions]
+     * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
+     *
+     * @return [PredictiveCacheController]
+     */
+    override fun createNavigationPredictiveCacheController(
+        onboardRouterOptions: OnboardRouterOptions,
+        predictiveCacheLocationOptions: PredictiveCacheLocationOptions
+    ): PredictiveCacheController =
+        navigator!!.createPredictiveCacheController(
+            createDefaultNavigationPredictiveCacheControllerOptions(onboardRouterOptions),
+            createDefaultPredictiveLocationTrackerOptions(predictiveCacheLocationOptions)
+        )
+
+    private fun createDefaultPredictiveLocationTrackerOptions(
+        predictiveCacheLocationOptions: PredictiveCacheLocationOptions
+    ): PredictiveLocationTrackerOptions =
+        PredictiveLocationTrackerOptions(
+            predictiveCacheLocationOptions.currentLocationRadiusInMeters,
+            predictiveCacheLocationOptions.routeBufferRadiusInMeters,
+            predictiveCacheLocationOptions.destinationLocationRadiusInMeters
+        )
+
+    private fun createDefaultMapsPredictiveCacheControllerOptions(
+        tileVariant: String
+    ): PredictiveCacheControllerOptions =
+        PredictiveCacheControllerOptions(
+            "",
+            tileVariant,
+            MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS
+        )
+
+    private fun createDefaultNavigationPredictiveCacheControllerOptions(
+        onboardRouterOptions: OnboardRouterOptions
+    ): PredictiveCacheControllerOptions =
+        PredictiveCacheControllerOptions(
+            onboardRouterOptions.tilesVersion,
+            "${onboardRouterOptions.tilesDataset}/${onboardRouterOptions.tilesProfile}",
+            MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS
+        )
 }

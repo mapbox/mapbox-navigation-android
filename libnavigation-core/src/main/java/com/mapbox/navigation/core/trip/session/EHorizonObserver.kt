@@ -7,6 +7,7 @@ import com.mapbox.navigation.core.trip.model.eh.EHorizonPosition
  * The EHorizonObserver consists of two parts: onElectronicHorizonUpdated provides the
  * Electronic Horizon and onPositionUpdated the position thereon.
  */
+@Deprecated("Temporarily no-op. Functionality will be reintroduced in future releases.")
 interface EHorizonObserver {
 
     /**

@@ -100,7 +100,6 @@ internal class MapboxTripSession(
     private val bannerInstructionsObservers = CopyOnWriteArraySet<BannerInstructionsObserver>()
     private val voiceInstructionsObservers = CopyOnWriteArraySet<VoiceInstructionsObserver>()
     private val routeAlertsObservers = CopyOnWriteArraySet<RouteAlertsObserver>()
-    private val electronicHorizonObserver = ElectronicHorizonObserverImpl(mainJobController)
     private val mapMatcherResultObservers = CopyOnWriteArraySet<MapMatcherResultObserver>()
 
     private val bannerInstructionEvent = BannerInstructionEvent()
@@ -204,9 +203,6 @@ internal class MapboxTripSession(
         routeProgress = null
         isOffRoute = false
         updateNavigatorStatusDataJobs.clear()
-        electronicHorizonObserver.currentHorizon = null
-        electronicHorizonObserver.currentType = null
-        electronicHorizonObserver.currentPosition = null
     }
 
     /**
@@ -408,36 +404,6 @@ internal class MapboxTripSession(
 
     override fun unregisterAllRouteAlertsObservers() {
         routeAlertsObservers.clear()
-    }
-
-    override fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver) {
-        val eHorizonObservers = electronicHorizonObserver.eHorizonObservers
-        if (eHorizonObservers.isEmpty()) {
-            navigator.setElectronicHorizonObserver(electronicHorizonObserver)
-        }
-        eHorizonObservers.add(eHorizonObserver)
-        ifNonNull(
-            electronicHorizonObserver.currentHorizon,
-            electronicHorizonObserver.currentType,
-            electronicHorizonObserver.currentPosition
-        ) { horizon, type, position ->
-            eHorizonObserver.onElectronicHorizonUpdated(horizon, type)
-            eHorizonObserver.onPositionUpdated(position)
-        }
-    }
-
-    override fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver) {
-        val eHorizonObservers = electronicHorizonObserver.eHorizonObservers
-        eHorizonObservers.remove(eHorizonObserver)
-        if (eHorizonObservers.isEmpty()) {
-            navigator.setElectronicHorizonObserver(null)
-        }
-    }
-
-    override fun unregisterAllEHorizonObservers() {
-        val eHorizonObservers = electronicHorizonObserver.eHorizonObservers
-        eHorizonObservers.clear()
-        navigator.setElectronicHorizonObserver(null)
     }
 
     override fun registerMapMatcherResultObserver(

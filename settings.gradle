@@ -1,4 +1,4 @@
-include ':examples',
+include ':test-app',
         ':app-tests-wrapper',
         ':instrumentation-tests',
         ':libnavigator',
@@ -8,6 +8,9 @@ include ':examples',
         ':libtrip-notification',
         ':libnavigation-util',
         ':libnavigation-core',
-        ':libnavigation-ui',
         ':libtesting-ui',
-        ':libtesting-utils'
+        ':libtesting-utils',
+        ':libnavui-base',
+        ':libnavui-maps',
+        ':libnavui-util',
+        ':libnavui-tripprogress'

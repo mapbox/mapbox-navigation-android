@@ -22,18 +22,9 @@ import com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert
 import com.mapbox.navigation.base.trip.model.alert.TunnelInfo
 import com.mapbox.navigation.navigator.internal.NavigatorMapper
 import com.mapbox.navigation.testing.FileUtils
+import com.mapbox.navigator.IncidentCongestionDescription
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.RouteAlert
-import com.mapbox.navigator.RouteAlertAdminInfo
-import com.mapbox.navigator.RouteAlertBorderCrossingInfo
-import com.mapbox.navigator.RouteAlertIncidentCongestionInfo
-import com.mapbox.navigator.RouteAlertIncidentInfo
-import com.mapbox.navigator.RouteAlertIncidentType
-import com.mapbox.navigator.RouteAlertServiceAreaInfo
-import com.mapbox.navigator.RouteAlertServiceAreaType
-import com.mapbox.navigator.RouteAlertTollCollectionInfo
-import com.mapbox.navigator.RouteAlertTollCollectionType
-import com.mapbox.navigator.RouteAlertTunnelInfo
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.UpcomingRouteAlert
@@ -525,97 +516,103 @@ class NavigatorMapperTest {
 
     private val incidentRouteAlert = createRouteAlert(
         hasLength = true,
-        type = com.mapbox.navigator.RouteAlertType.KINCIDENT,
-        incidentInfo = RouteAlertIncidentInfo(
+        type = com.mapbox.navigator.RouteAlertType.INCIDENT,
+        incidentInfo = com.mapbox.navigator.IncidentInfo(
             "some_id",
-            RouteAlertIncidentType.KCONSTRUCTION,
+            null,
+            com.mapbox.navigator.IncidentType.CONSTRUCTION,
             Date(60),
             Date(80),
             Date(40),
             null,
             emptyList(),
             true,
-            RouteAlertIncidentCongestionInfo(4, null),
-            "low",
+            com.mapbox.navigator.IncidentCongestion(4, IncidentCongestionDescription.LIGHT),
+            com.mapbox.navigator.IncidentImpact.LOW,
             "incident description",
             "incident sub-type",
             "incident sub-type description",
-            listOf(10, 20, 30)
+            listOf(10, 20, 30),
+            null,
+            null,
+            null
         )
     )
 
     private val tunnelEntranceRouteAlert = createRouteAlert(
         hasLength = true,
-        type = com.mapbox.navigator.RouteAlertType.KTUNNEL_ENTRANCE,
-        tunnelInfo = RouteAlertTunnelInfo(
+        type = com.mapbox.navigator.RouteAlertType.TUNNEL_ENTRANCE,
+        tunnelInfo = com.mapbox.navigator.TunnelInfo(
             "Ted Williams Tunnel"
         )
     )
 
     private val countryBorderCrossingRouteAlert = createRouteAlert(
         hasLength = false,
-        type = com.mapbox.navigator.RouteAlertType.KBORDER_CROSSING,
-        countryBorderCrossingInfo = RouteAlertBorderCrossingInfo(
-            RouteAlertAdminInfo("USA", "US"),
-            RouteAlertAdminInfo("CAN", "CA")
+        type = com.mapbox.navigator.RouteAlertType.BORDER_CROSSING,
+        countryBorderCrossingInfo = com.mapbox.navigator.BorderCrossingInfo(
+            com.mapbox.navigator.AdminInfo("USA", "US"),
+            com.mapbox.navigator.AdminInfo("CAN", "CA")
         )
     )
 
     private val tollCollectionGantryRouteAlert = createRouteAlert(
         hasLength = false,
-        type = com.mapbox.navigator.RouteAlertType.KTOLL_COLLECTION_POINT,
-        tollCollectionInfo = RouteAlertTollCollectionInfo(
-            RouteAlertTollCollectionType.KTOLL_GANTRY
+        type = com.mapbox.navigator.RouteAlertType.TOLL_COLLECTION_POINT,
+        tollCollectionInfo = com.mapbox.navigator.TollCollectionInfo(
+            com.mapbox.navigator.TollCollectionType.TOLL_GANTRY
         )
     )
 
     private val tollCollectionBoothRouteAlert = createRouteAlert(
         hasLength = false,
-        type = com.mapbox.navigator.RouteAlertType.KTOLL_COLLECTION_POINT,
-        tollCollectionInfo = RouteAlertTollCollectionInfo(
-            RouteAlertTollCollectionType.KTOLL_BOOTH
+        type = com.mapbox.navigator.RouteAlertType.TOLL_COLLECTION_POINT,
+        tollCollectionInfo = com.mapbox.navigator.TollCollectionInfo(
+            com.mapbox.navigator.TollCollectionType.TOLL_BOOTH
         )
     )
 
     private val unknownTollCollectionRouteAlert = createRouteAlert(
         hasLength = false,
-        type = com.mapbox.navigator.RouteAlertType.KTOLL_COLLECTION_POINT,
+        type = com.mapbox.navigator.RouteAlertType.TOLL_COLLECTION_POINT,
         tollCollectionInfo = null
     )
 
     private val restStopRestRouteAlert = createRouteAlert(
         hasLength = false,
-        type = com.mapbox.navigator.RouteAlertType.KSERVICE_AREA,
-        serviceAreaInfo = RouteAlertServiceAreaInfo(RouteAlertServiceAreaType.KREST_AREA)
+        type = com.mapbox.navigator.RouteAlertType.SERVICE_AREA,
+        serviceAreaInfo = com.mapbox.navigator.ServiceAreaInfo(
+            com.mapbox.navigator.ServiceAreaType.REST_AREA
+        )
     )
 
     private val restStopServiceRouteAlert = createRouteAlert(
         hasLength = false,
-        type = com.mapbox.navigator.RouteAlertType.KSERVICE_AREA,
-        serviceAreaInfo = RouteAlertServiceAreaInfo(
-            RouteAlertServiceAreaType.KSERVICE_AREA
+        type = com.mapbox.navigator.RouteAlertType.SERVICE_AREA,
+        serviceAreaInfo = com.mapbox.navigator.ServiceAreaInfo(
+            com.mapbox.navigator.ServiceAreaType.SERVICE_AREA
         )
     )
 
     private val unknownRestStopRouteAlert = createRouteAlert(
         hasLength = false,
-        type = com.mapbox.navigator.RouteAlertType.KSERVICE_AREA,
+        type = com.mapbox.navigator.RouteAlertType.SERVICE_AREA,
         serviceAreaInfo = null
     )
 
     private val restrictedAreaRouteAlert = createRouteAlert(
         hasLength = true,
-        type = com.mapbox.navigator.RouteAlertType.KRESTRICTED_AREA
+        type = com.mapbox.navigator.RouteAlertType.RESTRICTED_AREA
     )
 
     private fun createRouteAlert(
         hasLength: Boolean,
         type: com.mapbox.navigator.RouteAlertType,
-        incidentInfo: RouteAlertIncidentInfo? = null,
-        tunnelInfo: RouteAlertTunnelInfo? = null,
-        countryBorderCrossingInfo: RouteAlertBorderCrossingInfo? = null,
-        tollCollectionInfo: RouteAlertTollCollectionInfo? = null,
-        serviceAreaInfo: RouteAlertServiceAreaInfo? = null
+        incidentInfo: com.mapbox.navigator.IncidentInfo? = null,
+        tunnelInfo: com.mapbox.navigator.TunnelInfo? = null,
+        countryBorderCrossingInfo: com.mapbox.navigator.BorderCrossingInfo? = null,
+        tollCollectionInfo: com.mapbox.navigator.TollCollectionInfo? = null,
+        serviceAreaInfo: com.mapbox.navigator.ServiceAreaInfo? = null
     ) = RouteAlert(
         type,
         123.0,

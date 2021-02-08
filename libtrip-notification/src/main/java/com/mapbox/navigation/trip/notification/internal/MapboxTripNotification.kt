@@ -66,7 +66,8 @@ import java.util.Calendar
  */
 @MapboxModule(MapboxModuleType.NavigationTripNotification)
 class MapboxTripNotification constructor(
-    private val navigationOptions: NavigationOptions
+    private val navigationOptions: NavigationOptions,
+    private val distanceFormatter: DistanceFormatter
 ) : TripNotification {
 
     companion object {
@@ -74,10 +75,6 @@ class MapboxTripNotification constructor(
          * Broadcast of [MapboxTripNotification] actions
          */
         var notificationActionButtonChannel = Channel<NotificationAction>(1)
-
-        private const val MAPBOX_NAVIGATION_NOTIFICATION_FORMATTER_EXCEPTION =
-            "You need to provide a DistanceFormatter in order to use the default " +
-                "TripNotification. Also see MapboxNavigation#defaultNavigationOptionsBuilder"
     }
 
     private val applicationContext = navigationOptions.applicationContext
@@ -97,9 +94,6 @@ class MapboxTripNotification constructor(
     private var pendingCloseIntent: PendingIntent? = null
     private val etaFormat: String = applicationContext.getString(R.string.mapbox_eta_format)
     private val notificationReceiver = NotificationActionReceiver()
-    private val distanceFormatter: DistanceFormatter =
-        navigationOptions.distanceFormatter
-            ?: throw IllegalArgumentException(MAPBOX_NAVIGATION_NOTIFICATION_FORMATTER_EXCEPTION)
     private lateinit var notification: Notification
     private lateinit var notificationManager: NotificationManager
 
@@ -404,7 +398,7 @@ class MapboxTripNotification constructor(
     private fun updateDistanceText(routeProgress: RouteProgress) {
         val distanceRemaining =
             routeProgress.currentLegProgress?.currentStepProgress?.distanceRemaining
-        val formattedDistance = distanceRemaining?.let { distanceRemaining ->
+        val formattedDistance = distanceRemaining?.let {
             distanceFormatter.formatDistance(distanceRemaining.toDouble())
         } ?: return
 

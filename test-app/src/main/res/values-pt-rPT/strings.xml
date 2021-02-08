@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Navegação 1.0 Mapbox SDK para Android</string>
+
+    <string name="settings">Definições</string>
+    <string name="simulate_route">Simular Rota</string>
+    <string name="language">Idioma</string>
+    <string name="unit_type">Tipo de Unidade</string>
+    <string name="route_profile">Perfil da Rota</string>
+</resources>
