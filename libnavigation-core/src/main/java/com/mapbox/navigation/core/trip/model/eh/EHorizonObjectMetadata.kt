@@ -2,6 +2,13 @@ package com.mapbox.navigation.core.trip.model.eh
 
 import com.mapbox.navigation.base.trip.model.alert.IncidentInfo
 
+/**
+ * RoadObject metadata
+ *
+ * @param type type of road object
+ * @param objectProvider provider of road object
+ * @param incidentInfo will be filled only if `type` is `Incident` and `objectProvider` is `Mapbox`
+ */
 class EHorizonObjectMetadata internal constructor(
     val type: String,
     val objectProvider: String,

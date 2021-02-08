@@ -1,5 +1,12 @@
 package com.mapbox.navigation.core.trip.model.eh
 
+/**
+ * EHorizonPosition
+ *
+ * @param eHorizonGraphPosition current graph position
+ * @param eHorizon tree of edges
+ * @param eHorizonResultType result type. see [EHorizonResultType]
+ */
 class EHorizonPosition internal constructor(
     val eHorizonGraphPosition: EHorizonGraphPosition,
     val eHorizon: EHorizon,

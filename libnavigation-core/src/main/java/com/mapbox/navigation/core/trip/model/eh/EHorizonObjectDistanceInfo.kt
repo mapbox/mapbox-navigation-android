@@ -1,5 +1,16 @@
 package com.mapbox.navigation.core.trip.model.eh
 
+/**
+ * EHorizonObjectDistanceInfo
+ *
+ * @param distanceToEntry distance along the road graph from current position to entry point of
+ * object in meters, if already "within" object will be equal to zero
+ * @param distanceToEnd distance along the road graph from current position to end of road object
+ * @param entryFromStart if we enter road object from it's start, if already "within" object -
+ * always false
+ * @param length length of "long" objects
+ * @param type type of road object
+ */
 class EHorizonObjectDistanceInfo internal constructor(
     val distanceToEntry: Double,
     val distanceToEnd: Double,

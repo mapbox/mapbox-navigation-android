@@ -1,5 +1,15 @@
 package com.mapbox.navigation.core.trip.model.eh
 
+/**
+ * EHorizonObjectLocation represents location of road object on road graph.
+ * For point-like objects will contain single edge with `percentAlongBegin == percentAlongEnd`
+ *
+ * @param edges list of edge ids belong to object
+ * @param percentAlongBegin offset from the start of edge (0 - 1) pointing to the start of road
+ * object on the very first edge
+ * @param percentAlongEnd offset from the start of edge (0 - 1) pointing to the end of road object
+ * on the very last edge
+ */
 class EHorizonObjectLocation internal constructor(
     val edges: List<Long>,
     val percentAlongBegin: Double,

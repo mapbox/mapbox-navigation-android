@@ -9,6 +9,7 @@ import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
+import com.mapbox.navigator.OpenLRDecoder
 import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
 import com.mapbox.navigator.Router
@@ -44,8 +45,15 @@ internal object NavigatorLoader {
         )
         val nativeRouter = Router(cache, historyRecorder)
         val graphAccessor = GraphAccessor(cache)
+        val openLRDecoder = OpenLRDecoder(cache)
 
-        return NativeComponents(navigator, nativeRouter, historyRecorder, graphAccessor)
+        return NativeComponents(
+            navigator,
+            nativeRouter,
+            historyRecorder,
+            graphAccessor,
+            openLRDecoder
+        )
     }
 
     private fun settingsProfile(deviceProfile: DeviceProfile): SettingsProfile {
@@ -69,5 +77,6 @@ internal object NavigatorLoader {
         val nativeRouter: Router,
         val historyRecorderHandle: HistoryRecorderHandle,
         val graphAccessor: GraphAccessor,
+        val openLRDecoder: OpenLRDecoder,
     )
 }

@@ -1,9 +1,7 @@
 package com.mapbox.navigation.core.trip.model.eh
 
 /**
- * EHorizon type
- *
- * @see EHorizonObserver
+ * EHorizonResultType
  */
 object EHorizonResultType {
 
