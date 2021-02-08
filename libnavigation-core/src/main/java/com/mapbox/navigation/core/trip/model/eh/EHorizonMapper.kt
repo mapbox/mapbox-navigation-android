@@ -13,6 +13,7 @@ import com.mapbox.navigator.RoadObjectEnterExitInfo
 import com.mapbox.navigator.RoadObjectLocation
 import com.mapbox.navigator.RoadObjectProvider
 import com.mapbox.navigator.RoadObjectType
+import com.mapbox.navigator.Standard
 
 /**
  * Map the ElectronicHorizonPosition.
@@ -113,6 +114,13 @@ internal fun EdgeMetadata.mapToEHorizonEdgeMetadata(): EHorizonEdgeMetadata {
         countryCode,
         stateCode
     )
+}
+
+internal fun OpenLRStandard.mapToStandard(): Standard {
+    return when (this) {
+        OpenLRStandard.TOM_TOM -> Standard.TOM_TOM
+        OpenLRStandard.TPEG -> Standard.TPEG
+    }
 }
 
 private fun FunctionalRoadClass.mapToRoadClass(): String {

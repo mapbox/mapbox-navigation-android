@@ -5,7 +5,8 @@ import com.mapbox.navigation.core.trip.model.eh.EHorizonEdgeMetadata
 
 interface EHorizonGraphAccessor {
     /**
-     * Gets the shape of the EHorizon Edge
+     * Returns Graph Edge geometry for the given GraphId of the edge.
+     * If edge with given edgeId is not accessible, returns null
      * @param edgeId
      *
      * @return list of Points representing edge shape
@@ -13,10 +14,11 @@ interface EHorizonGraphAccessor {
     fun getEdgeShape(edgeId: Long): List<Point>?
 
     /**
-     * Gets the metadata of the EHorizon Edge
+     * Returns Graph Edge meta-information for the given GraphId of the edge.
+     * If edge with given edgeId is not accessible, returns null
      * @param edgeId
      *
-     * @return EdgeMetadata
+     * @return EHorizonEdgeMetadata
      */
     fun getEdgeMetadata(edgeId: Long): EHorizonEdgeMetadata?
 }

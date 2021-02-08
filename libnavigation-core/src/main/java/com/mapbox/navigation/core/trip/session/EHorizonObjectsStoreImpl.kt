@@ -3,10 +3,12 @@ package com.mapbox.navigation.core.trip.session
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectEdgeLocation
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectLocation
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectMetadata
+import com.mapbox.navigation.core.trip.model.eh.OpenLRStandard
 import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonObjectEdgeLocation
 import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonObjectLocation
 import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonObjectProvider
 import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonObjectType
+import com.mapbox.navigation.core.trip.model.eh.mapToStandard
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 
 class EHorizonObjectsStoreImpl(
@@ -39,5 +41,24 @@ class EHorizonObjectsStoreImpl(
 
     override fun getRoadObjectIdsByEdgeIds(edgeIds: List<Long>): List<String> {
         return navigator.roadObjectsStore?.getRoadObjectIdsByEdgeIds(edgeIds) ?: emptyList()
+    }
+
+    override fun addCustomRoadObject(
+        roadObjectId: String,
+        openLRLocation: String,
+        openLRStandard: OpenLRStandard
+    ) {
+        navigator.openLRDecoder?.decode(
+            listOf(openLRLocation),
+            openLRStandard.mapToStandard()
+        ) { locations ->
+            locations.first().value?.let { openLRLocation ->
+                navigator.roadObjectsStore?.addCustomRoadObject(roadObjectId, openLRLocation)
+            }
+        }
+    }
+
+    override fun removeCustomRoadObject(roadObjectId: String) {
+        navigator.roadObjectsStore?.removeCustomRoadObject(roadObjectId)
     }
 }

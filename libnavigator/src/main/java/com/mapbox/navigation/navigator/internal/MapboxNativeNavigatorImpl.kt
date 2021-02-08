@@ -22,6 +22,7 @@ import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
+import com.mapbox.navigator.OpenLRDecoder
 import com.mapbox.navigator.PredictiveCacheController
 import com.mapbox.navigator.PredictiveCacheControllerOptions
 import com.mapbox.navigator.PredictiveLocationTrackerOptions
@@ -64,6 +65,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private var routeBufferGeoJson: Geometry? = null
     override val navigatorMapper = NavigatorMapper()
     override var graphAccessor: GraphAccessor? = null
+    override var openLRDecoder: OpenLRDecoder? = null
     override var roadObjectsStore: RoadObjectsStore? = null
 
     // Route following
@@ -86,6 +88,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         nativeRouter = nativeComponents.nativeRouter
         historyRecorderHandle = nativeComponents.historyRecorderHandle
         graphAccessor = nativeComponents.graphAccessor
+        openLRDecoder = nativeComponents.openLRDecoder
         roadObjectsStore = nativeComponents.navigator.roadObjectStore()
         route = null
         routeBufferGeoJson = null
