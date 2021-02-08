@@ -102,9 +102,8 @@ License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the Okio (A modern I/O API for Java).
-URL: [https://github.com/square/okio/](https://github.com/square/okio/)
-License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+Mapbox Navigation uses portions of the Okio.
+License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
