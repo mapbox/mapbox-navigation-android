@@ -3,6 +3,7 @@ package com.mapbox.navigation.base.options
 import com.mapbox.navigation.testing.BuilderTest
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -21,6 +22,8 @@ class OnboardRouterOptionsTest : BuilderTest<OnboardRouterOptions, OnboardRouter
             .filePath("123")
             .tilesUri(mockk(relaxed = true))
             .tilesVersion("456")
+            .keepOlderTilesVersions(true)
+            .minDaysBetweenServerAndLocalTilesVersion(0)
     }
 
     @Test
@@ -28,8 +31,7 @@ class OnboardRouterOptionsTest : BuilderTest<OnboardRouterOptions, OnboardRouter
         // only used to trigger JUnit4 to run this class if all test cases come from the parent
     }
 
-    private val validFilePath = "/data/user/0/com.mapbox.navigation.examples/files/" +
-        "Offline/api.mapbox.com/2020_02_02-03_00_00/tiles"
+    private val validFilePath = "/data/user/0/com.mapbox.navigation.examples/files/Offline"
 
     @Test
     fun `filePath should build with defaults`() {
@@ -40,6 +42,8 @@ class OnboardRouterOptionsTest : BuilderTest<OnboardRouterOptions, OnboardRouter
         assertNotNull(onboardRouterOptions.tilesUri)
         assertNotNull(onboardRouterOptions.tilesVersion)
         assertNotNull(onboardRouterOptions.filePath)
+        assertFalse(onboardRouterOptions.keepOlderTilesVersions)
+        assertNotNull(onboardRouterOptions.minDaysBetweenServerAndLocalTilesVersion)
     }
 
     @Test
@@ -92,5 +96,12 @@ class OnboardRouterOptionsTest : BuilderTest<OnboardRouterOptions, OnboardRouter
             .build()
 
         assertNotEquals(options, otherOptions)
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun `cannot pass min days value less than zero`() {
+        OnboardRouterOptions.Builder()
+            .minDaysBetweenServerAndLocalTilesVersion(-1)
+            .build()
     }
 }

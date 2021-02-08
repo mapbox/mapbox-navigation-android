@@ -826,6 +826,7 @@ class MapboxNavigation(
             offlineFilesPath,
             null,
             null,
+            null,
             THREADS_COUNT,
             TileEndpointConfiguration(
                 navigationOptions.onboardRouterOptions.tilesUri.toString(),
@@ -835,7 +836,9 @@ class MapboxNavigation(
                 BuildConfig.NAV_NATIVE_SDK_VERSION,
                 NativeSkuTokenProvider(
                     MapboxNavigationAccounts.getInstance(navigationOptions.applicationContext)
-                )
+                ),
+                navigationOptions.onboardRouterOptions.minDaysBetweenServerAndLocalTilesVersion,
+                navigationOptions.onboardRouterOptions.keepOlderTilesVersions
             )
         )
     }

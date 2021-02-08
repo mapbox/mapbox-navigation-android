@@ -13,7 +13,7 @@ internal class OnboardRouterFiles(
 ) {
 
     fun absolutePath(options: OnboardRouterOptions): String {
-        val fileDirectory = options.filePath ?: defaultFilePath(options)
+        val fileDirectory = options.filePath ?: defaultFilePath()
         val tileDir = File(fileDirectory)
         if (!tileDir.exists()) {
             tileDir.mkdirs()
@@ -33,14 +33,11 @@ internal class OnboardRouterFiles(
         }
     }
 
-    private fun defaultFilePath(options: OnboardRouterOptions): String {
-        val tilesUri = options.tilesUri
-        val tilesVersion = options.tilesVersion
-        val directoryVersion = "Offline/${tilesUri.host}/$tilesVersion/tiles"
-        return File(applicationContext.filesDir, directoryVersion).absolutePath
-    }
+    private fun defaultFilePath(): String =
+        File(applicationContext.filesDir, DEFAULT_TILES_FOLDER_NAME).absolutePath
 
     private companion object {
+        private const val DEFAULT_TILES_FOLDER_NAME = "Offline"
         private val loggerTag = Tag("OnboardRouterFiles")
     }
 }
