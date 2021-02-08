@@ -139,6 +139,8 @@ package com.mapbox.navigation.base.options {
 
   public final class OnboardRouterOptions {
     method public String? getFilePath();
+    method public boolean getKeepOlderTilesVersions();
+    method public int getMinDaysBetweenServerAndLocalTilesVersion();
     method public java.net.URI getTilesUri();
     method public String getTilesVersion();
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder toBuilder();
@@ -148,6 +150,8 @@ package com.mapbox.navigation.base.options {
     ctor public OnboardRouterOptions.Builder();
     method public com.mapbox.navigation.base.options.OnboardRouterOptions build();
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder filePath(String? filePath);
+    method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder keepOlderTilesVersions(boolean keepOlderTilesVersions);
+    method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder minDaysBetweenServerAndLocalTilesVersion(int minDaysBetweenServerAndLocalTilesVersion);
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesUri(java.net.URI tilesUri);
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesVersion(String version);
   }
