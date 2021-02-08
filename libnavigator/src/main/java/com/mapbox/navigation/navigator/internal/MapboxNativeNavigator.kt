@@ -2,12 +2,18 @@ package com.mapbox.navigation.navigator.internal
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.bindgen.Expected
+import com.mapbox.common.TileStore
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.options.DeviceProfile
+import com.mapbox.navigation.base.options.OnboardRouterOptions
+import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigatorConfig
+import com.mapbox.navigator.PredictiveCacheController
+import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.TilesConfig
@@ -157,7 +163,7 @@ interface MapboxNativeNavigator {
      * @param url the directions-based uri used when hitting the http service
      * @return a [RouterResult] object with the json and a success/fail boolean
      */
-    fun getRoute(url: String): RouterResult
+    suspend fun getRoute(url: String): Expected<String, RouterError>
 
     /**
      * Passes in an input path to the tar file and output path.
@@ -231,4 +237,34 @@ interface MapboxNativeNavigator {
      * @param eHorizonObserver
      */
     fun setElectronicHorizonObserver(eHorizonObserver: ElectronicHorizonObserver?)
+
+    // Predictive cache
+
+    /**
+     * Creates a Maps [PredictiveCacheController].
+     *
+     * @param tileStore Maps [TileStore]
+     * @param tileVariant Maps tileset
+     * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
+     *
+     * @return [PredictiveCacheController]
+     */
+    fun createMapsPredictiveCacheController(
+        tileStore: TileStore,
+        tileVariant: String,
+        predictiveCacheLocationOptions: PredictiveCacheLocationOptions
+    ): PredictiveCacheController
+
+    /**
+     * Creates a Navigation [PredictiveCacheController].
+     *
+     * @param onboardRouterOptions Navigation [OnboardRouterOptions]
+     * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
+     *
+     * @return [PredictiveCacheController]
+     */
+    fun createNavigationPredictiveCacheController(
+        onboardRouterOptions: OnboardRouterOptions,
+        predictiveCacheLocationOptions: PredictiveCacheLocationOptions
+    ): PredictiveCacheController
 }

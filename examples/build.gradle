@@ -76,8 +76,6 @@ android {
 }
 
 dependencies {
-    // Mapbox Navigation SDK
-    implementation project(':libnavigation-ui')
     implementation dependenciesList.mapboxAndroidCommon
     implementation dependenciesList.mapboxLogger
     implementation dependenciesList.mapboxAnnotationPlugin

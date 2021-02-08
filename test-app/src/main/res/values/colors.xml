@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#2D4E73</color>
+    <color name="colorPrimaryDark">#2D4E73</color>
+    <color name="colorAccent">#2D4E73</color>
+
+    <!-- Custom Navigation View Colors -->
+    <color name="navigation_primary_background">#FEFFFF</color>
+    <color name="navigation_secondary_background">#4164FB</color>
+    <color name="navigation_primary_text">#4164FB</color>
+    <color name="navigation_secondary_text">#000000</color>
+    <color name="navigation_accent">#4164FB</color>
+    <color name="navigation_divider">#263D56</color>
+    <color name="navigation_progress_bar_background">#FEFFFF</color>
+    <color name="navigation_progress_bar">#4164FB</color>
+
+    <color name="navigation_instruction_view_primary_background">#FEFFFF</color>
+    <color name="navigation_instruction_view_secondary_background">#4164FB</color>
+    <color name="navigation_instruction_list_view_background">#FEFFFF</color>
+    <color name="navigation_instruction_view_primary_text">#263D56</color>
+    <color name="navigation_instruction_view_secondary_text">#929EAB</color>
+
+    <color name="navigation_maneuver_view_primary">#4164FB</color>
+    <color name="navigation_maneuver_view_secondary">@android:color/holo_blue_light</color>
+
+    <!-- Custom Route Colors -->
+    <color name="customRouteCasingColor">#FA0A4E</color>
+    <color name="customRouteColor">#ffffff</color>
+    <color name="customRouteLowCongestionColor">#00ff00</color>
+    <color name="customRouteUnknownCongestionColor">#a8aaba</color>
+    <color name="customRouteModerateCongestionColor">#CFAC00</color>
+    <color name="customRouteHeavyCongestionColor">#D16100</color>
+    <color name="customRouteSevereCongestionColor">#FF0000</color>
+    <color name="customRouteLineTraveledColor">#a8aaba</color>
+    <color name="customRouteLineCasingTraveledColor">#6E707A</color>
+
+    <color name="customAlternativeRouteColor">#7EC8CF</color>
+    <color name="customAlternativeRouteUnknownCongestionColor">#7EC8CF</color>
+    <color name="customAlternativeRouteModerateCongestionColor">#76BCC2</color>
+    <color name="customAlternativeRouteHeavyCongestionColor">#67A3A8</color>
+    <color name="customAlternativeRouteSevereCongestionColor">#4F7E82</color>
+    <color name="customAlternativeRouteCasingColor">#284042</color>
+</resources>

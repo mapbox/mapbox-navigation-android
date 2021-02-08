@@ -184,4 +184,20 @@ class TimeFormatterTest {
 
         assertEquals("5 hr ", result.toString())
     }
+
+    @Config(qualifiers = "en")
+    @Test
+    fun formatTimeRemainingZero() {
+        val result = TimeFormatter.formatTimeRemaining(ctx, 0.0, null)
+
+        assertEquals("< 1 min ", result.toString())
+    }
+
+    @Config(qualifiers = "en")
+    @Test
+    fun formatTimeRemainingLessThan30Seconds() {
+        val result = TimeFormatter.formatTimeRemaining(ctx, 23.3, null)
+
+        assertEquals("< 1 min ", result.toString())
+    }
 }

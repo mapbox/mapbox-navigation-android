@@ -19,6 +19,34 @@ package com.mapbox.navigation.base.formatter {
     method public android.text.SpannableString formatDistance(double distance);
   }
 
+  public final class DistanceFormatterOptions {
+    method public android.content.Context getApplicationContext();
+    method public java.util.Locale getLocale();
+    method public int getRoundingIncrement();
+    method public String getUnitType();
+    method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions.Builder toBuilder();
+  }
+
+  public static final class DistanceFormatterOptions.Builder {
+    ctor public DistanceFormatterOptions.Builder(android.content.Context applicationContext);
+    method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions build();
+    method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions.Builder locale(java.util.Locale? locale);
+    method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions.Builder roundingIncrement(@com.mapbox.navigation.base.formatter.Rounding.Increment int roundingIncrement);
+    method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions.Builder unitType(String unitType);
+  }
+
+  public final class Rounding {
+    field public static final int INCREMENT_FIFTY = 50; // 0x32
+    field public static final int INCREMENT_FIVE = 5; // 0x5
+    field public static final int INCREMENT_ONE_HUNDRED = 100; // 0x64
+    field public static final int INCREMENT_TEN = 10; // 0xa
+    field public static final int INCREMENT_TWENTY_FIVE = 25; // 0x19
+    field public static final com.mapbox.navigation.base.formatter.Rounding! INSTANCE;
+  }
+
+  @IntDef({com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TEN, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TWENTY_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIFTY, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_ONE_HUNDRED}) @kotlin.annotation.Retention(AnnotationRetention.SOURCE) public static @interface Rounding.Increment {
+  }
+
 }
 
 package com.mapbox.navigation.base.metrics {
@@ -103,12 +131,13 @@ package com.mapbox.navigation.base.options {
     method public String? getAccessToken();
     method public android.content.Context getApplicationContext();
     method public com.mapbox.navigation.base.options.DeviceProfile getDeviceProfile();
-    method public com.mapbox.navigation.base.formatter.DistanceFormatter? getDistanceFormatter();
+    method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions getDistanceFormatterOptions();
     method public com.mapbox.navigation.base.options.EHorizonOptions getEHorizonOptions();
     method public com.mapbox.android.core.location.LocationEngine getLocationEngine();
     method public com.mapbox.android.core.location.LocationEngineRequest getLocationEngineRequest();
     method public long getNavigatorPredictionMillis();
     method public com.mapbox.navigation.base.options.OnboardRouterOptions getOnboardRouterOptions();
+    method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions getPredictiveCacheLocationOptions();
     method public int getTimeFormatType();
     method public boolean isDebugLoggingEnabled();
     method public boolean isFromNavigationUi();
@@ -121,7 +150,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder accessToken(String? accessToken);
     method public com.mapbox.navigation.base.options.NavigationOptions build();
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder deviceProfile(com.mapbox.navigation.base.options.DeviceProfile deviceProfile);
-    method public com.mapbox.navigation.base.options.NavigationOptions.Builder distanceFormatter(com.mapbox.navigation.base.formatter.DistanceFormatter? distanceFormatter);
+    method public com.mapbox.navigation.base.options.NavigationOptions.Builder distanceFormatterOptions(com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder eHorizonOptions(com.mapbox.navigation.base.options.EHorizonOptions eHorizonOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder isDebugLoggingEnabled(boolean flag);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder isFromNavigationUi(boolean flag);
@@ -130,6 +159,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngineRequest(com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder navigatorPredictionMillis(long predictionMillis);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder onboardRouterOptions(com.mapbox.navigation.base.options.OnboardRouterOptions onboardRouterOptions);
+    method public com.mapbox.navigation.base.options.NavigationOptions.Builder predictiveCacheLocationOptions(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder timeFormatType(int type);
   }
 
@@ -139,6 +169,8 @@ package com.mapbox.navigation.base.options {
 
   public final class OnboardRouterOptions {
     method public String? getFilePath();
+    method public String getTilesDataset();
+    method public String getTilesProfile();
     method public java.net.URI getTilesUri();
     method public String getTilesVersion();
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder toBuilder();
@@ -148,8 +180,25 @@ package com.mapbox.navigation.base.options {
     ctor public OnboardRouterOptions.Builder();
     method public com.mapbox.navigation.base.options.OnboardRouterOptions build();
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder filePath(String? filePath);
+    method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesDataset(String tilesDataset);
+    method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesProfile(String tilesProfile);
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesUri(java.net.URI tilesUri);
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesVersion(String version);
+  }
+
+  public final class PredictiveCacheLocationOptions {
+    method public int getCurrentLocationRadiusInMeters();
+    method public int getDestinationLocationRadiusInMeters();
+    method public int getRouteBufferRadiusInMeters();
+    method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder toBuilder();
+  }
+
+  public static final class PredictiveCacheLocationOptions.Builder {
+    ctor public PredictiveCacheLocationOptions.Builder();
+    method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions build();
+    method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder currentLocationRadiusInMeters(int radiusInMeters);
+    method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder destinationLocationRadiusInMeters(int radiusInMeters);
+    method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder routeBufferRadiusInMeters(int radiusInMeters);
   }
 
 }
@@ -387,7 +436,7 @@ package com.mapbox.navigation.base.trip.model.alert {
     method public String? getDescription();
     method public java.util.Date? getEndTime();
     method public String getId();
-    method public String? getImpact();
+    method public String getImpact();
     method public java.util.Date? getStartTime();
     method public String? getSubType();
     method public String? getSubTypeDescription();
@@ -404,7 +453,7 @@ package com.mapbox.navigation.base.trip.model.alert {
     method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder creationTime(java.util.Date? creationTime);
     method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder description(String? description);
     method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder endTime(java.util.Date? endTime);
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder impact(@com.mapbox.navigation.base.trip.model.alert.IncidentImpact.Impact String? impact);
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder impact(@com.mapbox.navigation.base.trip.model.alert.IncidentImpact.Impact String impact);
     method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder isClosed(boolean isClosed);
     method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder startTime(java.util.Date? startTime);
     method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder subType(String? subType);

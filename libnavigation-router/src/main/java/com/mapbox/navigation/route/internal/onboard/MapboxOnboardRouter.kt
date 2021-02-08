@@ -1,6 +1,5 @@
 package com.mapbox.navigation.route.internal.onboard
 
-import com.google.gson.Gson
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -13,9 +12,9 @@ import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.route.onboard.OfflineRoute
-import com.mapbox.navigation.route.onboard.model.OfflineRouteError
 import com.mapbox.navigation.utils.NavigationException
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigator.RouterError
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
@@ -40,7 +39,6 @@ class MapboxOnboardRouter(
     }
 
     private val mainJobControl by lazy { ThreadController.getMainScopeAndRootJob() }
-    private val gson = Gson()
 
     /**
      * Fetch route based on [RouteOptions]
@@ -126,18 +124,12 @@ class MapboxOnboardRouter(
         mainJobControl.scope.launch {
             try {
                 val routerResult = getRoute(url)
-
-                val routes: List<DirectionsRoute> = try {
-                    parseDirectionsRoutes(routerResult.json)
-                } catch (e: RuntimeException) {
-                    emptyList()
-                }
-
-                when {
-                    !routes.isNullOrEmpty() -> callback.onResponse(routes)
-                    else ->
-                        callback
-                            .onFailure(NavigationException(generateErrorMessage(routerResult.json)))
+                if (routerResult.isValue) {
+                    val routes: List<DirectionsRoute> = parseDirectionsRoutes(routerResult.value!!)
+                    callback.onResponse(routes)
+                } else {
+                    callback
+                        .onFailure(NavigationException(generateErrorMessage(routerResult.error!!)))
                 }
             } catch (e: CancellationException) {
                 callback.onCanceled()
@@ -154,9 +146,9 @@ class MapboxOnboardRouter(
             DirectionsResponse.fromJson(json).routes()
         }
 
-    private fun generateErrorMessage(response: String): String {
-        val (_, _, error, errorCode) = gson.fromJson(response, OfflineRouteError::class.java)
-        val errorMessage = "Error occurred fetching offline route: $error - Code: $errorCode"
+    private fun generateErrorMessage(error: RouterError): String {
+        val errorMessage =
+            "Error occurred fetching offline route: ${error.error} - Code: ${error.code}"
         logger.e(loggerTag, Message(errorMessage))
         return errorMessage
     }

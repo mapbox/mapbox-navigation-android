@@ -34,9 +34,7 @@ internal class OnboardRouterFiles(
     }
 
     private fun defaultFilePath(options: OnboardRouterOptions): String {
-        val tilesUri = options.tilesUri
-        val tilesVersion = options.tilesVersion
-        val directoryVersion = "Offline/${tilesUri.host}/$tilesVersion/tiles"
+        val directoryVersion = "mbx_nav/tiles/${options.tilesUri.host}"
         return File(applicationContext.filesDir, directoryVersion).absolutePath
     }
 

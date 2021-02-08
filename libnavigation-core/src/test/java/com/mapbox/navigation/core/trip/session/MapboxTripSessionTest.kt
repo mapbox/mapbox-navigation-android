@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.trip.session
 import android.content.Context
 import android.location.Location
 import android.os.Looper
+import androidx.test.core.app.ApplicationProvider
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
@@ -69,7 +70,7 @@ class MapboxTripSessionTest {
     private val tripService: TripService = mockk(relaxUnitFun = true)
     private val route: DirectionsRoute = mockk()
 
-    private val context: Context = mockk()
+    private val context: Context = ApplicationProvider.getApplicationContext()
     private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
     private lateinit var navigationOptions: NavigationOptions
     private val locationCallbackSlot = slot<LocationEngineCallback<LocationEngineResult>>()
@@ -97,7 +98,6 @@ class MapboxTripSessionTest {
         mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapperKt")
         every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
         every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
-        every { context.applicationContext } returns context
         navigationOptions = NavigationOptions.Builder(context)
             .locationEngine(locationEngine)
             .build()

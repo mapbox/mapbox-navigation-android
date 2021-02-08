@@ -12,18 +12,19 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
@@ -37,6 +38,7 @@ import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigator.TilesConfig
 import io.mockk.Ordering
 import io.mockk.every
 import io.mockk.mockk
@@ -49,11 +51,14 @@ import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
+import java.io.File
 import java.util.Locale
 
 @InternalCoroutinesApi
@@ -70,7 +75,7 @@ class MapboxNavigationTest {
     private val tripSession: TripSession = mockk(relaxUnitFun = true)
     private val location: Location = mockk(relaxUnitFun = true)
     private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
-    private val distanceFormatter: MapboxDistanceFormatter = mockk(relaxed = true)
+    private val distanceFormatterOptions: DistanceFormatterOptions = mockk(relaxed = true)
     private val onBoardRouterOptions: OnboardRouterOptions = mockk(relaxed = true)
     private val fasterRouteRequestCallback: RoutesRequestCallback = mockk(relaxed = true)
     private val routeRefreshController: RouteRefreshController = mockk(relaxUnitFun = true)
@@ -98,6 +103,7 @@ class MapboxNavigationTest {
         }
         every { packageManager } returns mockk(relaxed = true)
         every { packageName } returns "com.mapbox.navigation.core.MapboxNavigationTest"
+        every { filesDir } returns File("some/path")
     }
 
     private lateinit var mapboxNavigation: MapboxNavigation
@@ -128,6 +134,12 @@ class MapboxNavigationTest {
                 any()
             )
         } returns logger
+        every {
+            MapboxModuleProvider.createModule<TripNotification>(
+                MapboxModuleType.NavigationTripNotification,
+                any()
+            )
+        } returns mockk()
 
         mockkObject(NavigationComponentProvider)
 
@@ -572,6 +584,47 @@ class MapboxNavigationTest {
         verify { navigator.resetRideSession() }
     }
 
+    @Test
+    fun `verify tile config path`() {
+        ThreadController.cancelAllUICoroutines()
+        val slot = slot<TilesConfig>()
+        every {
+            NavigationComponentProvider.createNativeNavigator(any(), any(), capture(slot))
+        } returns navigator
+        val options = navigationOptions.toBuilder()
+            .onboardRouterOptions(OnboardRouterOptions.Builder().build())
+            .build()
+
+        mapboxNavigation = MapboxNavigation(options)
+
+        assertTrue(slot.captured.tilesPath.endsWith("/mbx_nav/tiles/api.mapbox.com"))
+
+        mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun `verify tile config dataset`() {
+        ThreadController.cancelAllUICoroutines()
+        val slot = slot<TilesConfig>()
+        every {
+            NavigationComponentProvider.createNativeNavigator(any(), any(), capture(slot))
+        } returns navigator
+        val options = navigationOptions.toBuilder()
+            .onboardRouterOptions(
+                OnboardRouterOptions.Builder()
+                    .tilesDataset("someUser.osm")
+                    .tilesProfile("truck")
+                    .build()
+            )
+            .build()
+
+        mapboxNavigation = MapboxNavigation(options)
+
+        assertEquals(slot.captured.endpointConfig!!.dataset, "someUser.osm/truck")
+
+        mapboxNavigation.onDestroy()
+    }
+
     private fun mockLocation() {
         every { location.longitude } returns -122.789876
         every { location.latitude } returns 37.657483
@@ -641,7 +694,7 @@ class MapboxNavigationTest {
         NavigationOptions
             .Builder(applicationContext)
             .accessToken(accessToken)
-            .distanceFormatter(distanceFormatter)
+            .distanceFormatterOptions(distanceFormatterOptions)
             .navigatorPredictionMillis(1500L)
             .onboardRouterOptions(onBoardRouterOptions)
             .timeFormatType(NONE_SPECIFIED)

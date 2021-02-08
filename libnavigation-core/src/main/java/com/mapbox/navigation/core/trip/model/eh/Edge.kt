@@ -31,6 +31,7 @@ import com.mapbox.geojson.LineString
  * @param countryCode ISO 3166-1 alpha-3 country code
  * @param stateCode a state inside a country (ISO 3166-2)
  */
+@Deprecated("Temporarily no-op. Functionality will be reintroduced in future releases.")
 class Edge internal constructor(
     val id: Long,
     val level: Byte,

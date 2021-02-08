@@ -5,7 +5,6 @@ package com.mapbox.navigation.core {
     ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public void addHistoryEvent(String eventType, String eventJsonProperties);
     method public void attachFasterRouteObserver(com.mapbox.navigation.core.fasterroute.FasterRouteObserver fasterRouteObserver);
-    method public static com.mapbox.navigation.base.options.NavigationOptions.Builder defaultNavigationOptionsBuilder(android.content.Context context, String? accessToken);
     method public void detachFasterRouteObserver();
     method public com.mapbox.navigation.base.options.NavigationOptions getNavigationOptions();
     method public com.mapbox.navigation.core.reroute.RerouteController? getRerouteController();
@@ -16,7 +15,7 @@ package com.mapbox.navigation.core {
     method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray(), com.mapbox.navigation.core.telemetry.events.AppMetadata? appMetadata = null);
     method public void registerArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
     method public void registerBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
-    method public void registerEHorizonObserver(com.mapbox.navigation.core.trip.session.EHorizonObserver eHorizonObserver);
+    method @Deprecated public void registerEHorizonObserver(com.mapbox.navigation.core.trip.session.EHorizonObserver eHorizonObserver);
     method public void registerLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
     method public void registerMapMatcherResultObserver(com.mapbox.navigation.core.trip.session.MapMatcherResultObserver mapMatcherResultObserver);
     method public void registerOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
@@ -40,7 +39,7 @@ package com.mapbox.navigation.core {
     method public void toggleHistory(boolean isEnabled);
     method public void unregisterArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
     method public void unregisterBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
-    method public void unregisterEHorizonObserver(com.mapbox.navigation.core.trip.session.EHorizonObserver eHorizonObserver);
+    method @Deprecated public void unregisterEHorizonObserver(com.mapbox.navigation.core.trip.session.EHorizonObserver eHorizonObserver);
     method public void unregisterLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
     method public void unregisterMapMatcherResultObserver(com.mapbox.navigation.core.trip.session.MapMatcherResultObserver mapMatcherResultObserver);
     method public void unregisterOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
@@ -54,7 +53,6 @@ package com.mapbox.navigation.core {
   }
 
   public static final class MapboxNavigation.Companion {
-    method public com.mapbox.navigation.base.options.NavigationOptions.Builder defaultNavigationOptionsBuilder(android.content.Context context, String? accessToken);
   }
 
   public final class MapboxNavigationKt {
@@ -66,18 +64,6 @@ package com.mapbox.navigation.core {
     method public static boolean isCreated();
     method public static com.mapbox.navigation.core.MapboxNavigation retrieve();
     field public static final com.mapbox.navigation.core.MapboxNavigationProvider! INSTANCE;
-  }
-
-  public final class Rounding {
-    field public static final int INCREMENT_FIFTY = 50; // 0x32
-    field public static final int INCREMENT_FIVE = 5; // 0x5
-    field public static final int INCREMENT_ONE_HUNDRED = 100; // 0x64
-    field public static final int INCREMENT_TEN = 10; // 0xa
-    field public static final int INCREMENT_TWENTY_FIVE = 25; // 0x19
-    field public static final com.mapbox.navigation.core.Rounding! INSTANCE;
-  }
-
-  @IntDef({com.mapbox.navigation.core.Rounding.INCREMENT_FIVE, com.mapbox.navigation.core.Rounding.INCREMENT_TEN, com.mapbox.navigation.core.Rounding.INCREMENT_TWENTY_FIVE, com.mapbox.navigation.core.Rounding.INCREMENT_FIFTY, com.mapbox.navigation.core.Rounding.INCREMENT_ONE_HUNDRED}) @kotlin.annotation.Retention(AnnotationRetention.SOURCE) public static @interface Rounding.Increment {
   }
 
 }
@@ -519,66 +505,66 @@ package com.mapbox.navigation.core.telemetry.events {
 
 package com.mapbox.navigation.core.trip.model.eh {
 
-  public final class EHorizon {
-    method public com.mapbox.navigation.core.trip.model.eh.Edge current(com.mapbox.navigation.core.trip.model.eh.EHorizonPosition position);
-    method public com.mapbox.navigation.core.trip.model.eh.Edge getStart();
-    method public java.util.List<java.util.List<com.mapbox.navigation.core.trip.model.eh.Edge>> mpp();
-    method public java.util.List<java.util.List<com.mapbox.navigation.core.trip.model.eh.Edge>> mpp(com.mapbox.navigation.core.trip.model.eh.EHorizonPosition position);
+  @Deprecated public final class EHorizon {
+    method @Deprecated public com.mapbox.navigation.core.trip.model.eh.Edge current(com.mapbox.navigation.core.trip.model.eh.EHorizonPosition position);
+    method @Deprecated public com.mapbox.navigation.core.trip.model.eh.Edge getStart();
+    method @Deprecated public java.util.List<java.util.List<com.mapbox.navigation.core.trip.model.eh.Edge>> mpp();
+    method @Deprecated public java.util.List<java.util.List<com.mapbox.navigation.core.trip.model.eh.Edge>> mpp(com.mapbox.navigation.core.trip.model.eh.EHorizonPosition position);
   }
 
-  public final class EHorizonPosition {
-    method public long getEdgeId();
-    method public double getPercentAlong();
+  @Deprecated public final class EHorizonPosition {
+    method @Deprecated public long getEdgeId();
+    method @Deprecated public double getPercentAlong();
   }
 
-  public final class EHorizonResultType {
-    field public static final String INITIAL = "INITIAL";
-    field public static final com.mapbox.navigation.core.trip.model.eh.EHorizonResultType! INSTANCE;
-    field public static final String UPDATE = "UPDATE";
+  @Deprecated public final class EHorizonResultType {
+    field @Deprecated public static final String INITIAL = "INITIAL";
+    field @Deprecated public static final com.mapbox.navigation.core.trip.model.eh.EHorizonResultType! INSTANCE;
+    field @Deprecated public static final String UPDATE = "UPDATE";
   }
 
-  public final class Edge {
-    method public boolean getBridge();
-    method public String? getCountryCode();
-    method public byte getCurvature();
-    method public String getFunctionRoadClass();
-    method public com.mapbox.geojson.LineString? getGeometry();
-    method public double getHeading();
-    method public long getId();
-    method public Byte? getLaneCount();
-    method public double getLength();
-    method public byte getLevel();
-    method public Double? getMeanElevation();
-    method public boolean getMotorway();
-    method public java.util.List<com.mapbox.navigation.core.trip.model.eh.NameInfo> getNames();
-    method public java.util.List<com.mapbox.navigation.core.trip.model.eh.Edge> getOut();
-    method public com.mapbox.navigation.core.trip.model.eh.Edge? getParent();
-    method public double getProbability();
-    method public boolean getRamp();
-    method public double getSpeed();
-    method public Double? getSpeedLimit();
-    method public String? getStateCode();
-    method public boolean getToll();
-    method public boolean getTunnel();
-    method public boolean isMpp();
-    method public void setParent(com.mapbox.navigation.core.trip.model.eh.Edge? p);
+  @Deprecated public final class Edge {
+    method @Deprecated public boolean getBridge();
+    method @Deprecated public String? getCountryCode();
+    method @Deprecated public byte getCurvature();
+    method @Deprecated public String getFunctionRoadClass();
+    method @Deprecated public com.mapbox.geojson.LineString? getGeometry();
+    method @Deprecated public double getHeading();
+    method @Deprecated public long getId();
+    method @Deprecated public Byte? getLaneCount();
+    method @Deprecated public double getLength();
+    method @Deprecated public byte getLevel();
+    method @Deprecated public Double? getMeanElevation();
+    method @Deprecated public boolean getMotorway();
+    method @Deprecated public java.util.List<com.mapbox.navigation.core.trip.model.eh.NameInfo> getNames();
+    method @Deprecated public java.util.List<com.mapbox.navigation.core.trip.model.eh.Edge> getOut();
+    method @Deprecated public com.mapbox.navigation.core.trip.model.eh.Edge? getParent();
+    method @Deprecated public double getProbability();
+    method @Deprecated public boolean getRamp();
+    method @Deprecated public double getSpeed();
+    method @Deprecated public Double? getSpeedLimit();
+    method @Deprecated public String? getStateCode();
+    method @Deprecated public boolean getToll();
+    method @Deprecated public boolean getTunnel();
+    method @Deprecated public boolean isMpp();
+    method @Deprecated public void setParent(com.mapbox.navigation.core.trip.model.eh.Edge? p);
   }
 
-  public final class FunctionalRoadClass {
-    field public static final com.mapbox.navigation.core.trip.model.eh.FunctionalRoadClass! INSTANCE;
-    field public static final String MOTORWAY = "MOTORWAY";
-    field public static final String PRIMARY = "PRIMARY";
-    field public static final String RESIDENTIAL = "RESIDENTIAL";
-    field public static final String SECONDARY = "SECONDARY";
-    field public static final String SERVICE_OTHER = "SERVICE_OTHER";
-    field public static final String TERTIARY = "TERTIARY";
-    field public static final String TRUNK = "TRUNK";
-    field public static final String UNCLASSIFIED = "UNCLASSIFIED";
+  @Deprecated public final class FunctionalRoadClass {
+    field @Deprecated public static final com.mapbox.navigation.core.trip.model.eh.FunctionalRoadClass! INSTANCE;
+    field @Deprecated public static final String MOTORWAY = "MOTORWAY";
+    field @Deprecated public static final String PRIMARY = "PRIMARY";
+    field @Deprecated public static final String RESIDENTIAL = "RESIDENTIAL";
+    field @Deprecated public static final String SECONDARY = "SECONDARY";
+    field @Deprecated public static final String SERVICE_OTHER = "SERVICE_OTHER";
+    field @Deprecated public static final String TERTIARY = "TERTIARY";
+    field @Deprecated public static final String TRUNK = "TRUNK";
+    field @Deprecated public static final String UNCLASSIFIED = "UNCLASSIFIED";
   }
 
-  public final class NameInfo {
-    method public String getName();
-    method public boolean getShielded();
+  @Deprecated public final class NameInfo {
+    method @Deprecated public String getName();
+    method @Deprecated public boolean getShielded();
   }
 
 }
@@ -589,9 +575,9 @@ package com.mapbox.navigation.core.trip.session {
     method public void onNewBannerInstructions(com.mapbox.api.directions.v5.models.BannerInstructions bannerInstructions);
   }
 
-  public interface EHorizonObserver {
-    method public void onElectronicHorizonUpdated(com.mapbox.navigation.core.trip.model.eh.EHorizon horizon, String type);
-    method public void onPositionUpdated(com.mapbox.navigation.core.trip.model.eh.EHorizonPosition position);
+  @Deprecated public interface EHorizonObserver {
+    method @Deprecated public void onElectronicHorizonUpdated(com.mapbox.navigation.core.trip.model.eh.EHorizon horizon, String type);
+    method @Deprecated public void onPositionUpdated(com.mapbox.navigation.core.trip.model.eh.EHorizonPosition position);
   }
 
   public interface LocationObserver {

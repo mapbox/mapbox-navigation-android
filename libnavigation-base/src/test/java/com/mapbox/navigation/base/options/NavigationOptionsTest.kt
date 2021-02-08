@@ -1,13 +1,12 @@
 package com.mapbox.navigation.base.options
 
 import android.content.Context
-import android.text.SpannableString
+import androidx.test.core.app.ApplicationProvider
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
-import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.testing.BuilderTest
 import io.mockk.every
 import io.mockk.mockk
@@ -19,16 +18,19 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import kotlin.reflect.KClass
 
+@RunWith(RobolectricTestRunner::class)
+@Config(manifest = Config.NONE)
 class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.Builder>() {
 
-    private val context: Context = mockk()
+    private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Before
     fun setup() {
-        every { context.applicationContext } returns context
-
         mockkStatic(LocationEngineProvider::class)
         every { LocationEngineProvider.getBestLocationEngine(any()) } returns mockk()
     }
@@ -48,7 +50,7 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
         return NavigationOptions.Builder(context)
             .accessToken("pk.123")
             .deviceProfile(mockk())
-            .distanceFormatter(mockk())
+            .distanceFormatterOptions(mockk())
             .isDebugLoggingEnabled(true)
             .isFromNavigationUi(true)
             .locationEngine(mockk())
@@ -62,6 +64,7 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
             )
             .navigatorPredictionMillis(1)
             .onboardRouterOptions(mockk())
+            .predictiveCacheLocationOptions(mockk())
             .timeFormatType(1)
             .eHorizonOptions(mockk())
             .isRouteRefreshEnabled(false)
@@ -78,7 +81,6 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
 
         assertEquals(options.timeFormatType, NONE_SPECIFIED)
         assertEquals(options.navigatorPredictionMillis, DEFAULT_NAVIGATOR_PREDICTION_MILLIS)
-        assertEquals(options.distanceFormatter, null)
         assertNotNull(options.onboardRouterOptions)
     }
 
@@ -86,37 +88,24 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
     fun whenBuilderBuildCalledThenProperNavigationOptionsCreated() {
         val timeFormat = TWELVE_HOURS
         val navigatorPredictionMillis = 1020L
-        val distanceFormatter = object : DistanceFormatter {
-            override fun formatDistance(distance: Double): SpannableString {
-                throw NotImplementedError()
-            }
-        }
 
         val options = NavigationOptions.Builder(context)
             .timeFormatType(timeFormat)
             .navigatorPredictionMillis(navigatorPredictionMillis)
-            .distanceFormatter(distanceFormatter)
             .build()
 
         assertEquals(options.timeFormatType, timeFormat)
         assertEquals(options.navigatorPredictionMillis, navigatorPredictionMillis)
-        assertEquals(options.distanceFormatter, distanceFormatter)
     }
 
     @Test
     fun whenOptionsValuesChangedThenAllOtherValuesSaved() {
         val timeFormat = TWELVE_HOURS
         val navigatorPredictionMillis = 1020L
-        val distanceFormatter = object : DistanceFormatter {
-            override fun formatDistance(distance: Double): SpannableString {
-                throw NotImplementedError()
-            }
-        }
 
         var options = NavigationOptions.Builder(context)
             .timeFormatType(timeFormat)
             .navigatorPredictionMillis(navigatorPredictionMillis)
-            .distanceFormatter(distanceFormatter)
             .build()
 
         val builder = options.toBuilder()
@@ -129,7 +118,6 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
 
         assertEquals(options.timeFormatType, newTimeFormat)
         assertEquals(options.navigatorPredictionMillis, newNavigatorPredictionMillis)
-        assertEquals(options.distanceFormatter, distanceFormatter)
     }
 
     @Test

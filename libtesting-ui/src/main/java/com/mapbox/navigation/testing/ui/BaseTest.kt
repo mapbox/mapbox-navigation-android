@@ -1,8 +1,10 @@
 package com.mapbox.navigation.testing.ui
 
+import android.Manifest
 import androidx.appcompat.app.AppCompatActivity
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ActivityTestRule
+import androidx.test.rule.GrantPermissionRule
 import androidx.test.uiautomator.UiDevice
 import com.mapbox.navigation.testing.ui.http.MockWebServerRule
 import com.schibsted.spain.barista.rule.cleardata.ClearDatabaseRule
@@ -18,6 +20,11 @@ open class BaseTest<A : AppCompatActivity>(activityClass: Class<A>) {
         @JvmField
         val mockLocationUpdatesRule = MockLocationUpdatesRule()
     }
+
+    @get:Rule
+    val permissionsRule: GrantPermissionRule = GrantPermissionRule.grant(
+        Manifest.permission.ACCESS_FINE_LOCATION
+    )
 
     @get:Rule
     val activityRule = ActivityTestRule(activityClass)

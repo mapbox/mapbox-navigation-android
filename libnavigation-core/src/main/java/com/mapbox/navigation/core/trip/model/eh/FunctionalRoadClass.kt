@@ -13,6 +13,7 @@ package com.mapbox.navigation.core.trip.model.eh
  * - [FunctionalRoadClass.RESIDENTIAL]
  * - [FunctionalRoadClass.SERVICE_OTHER]
  */
+@Deprecated("Temporarily no-op. Functionality will be reintroduced in future releases.")
 object FunctionalRoadClass {
 
     /**

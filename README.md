@@ -80,7 +80,7 @@ dependencies {
 
 ## <a name="sample-code">Sample code
 
-[We've added several navigation examples to this repo's `examples` module's test app](https://github.com/mapbox/mapbox-navigation-android/tree/master/examples/src/main/java/com/mapbox/navigation/examples/core) to help you get started with the Navigation SDK and to inspire you.
+[We've added several navigation examples to this repo's `test-app` module](https://github.com/mapbox/mapbox-navigation-android/tree/master/test-app) to help you get started with the Navigation SDK and to inspire you.
 
 ## Contributing
 

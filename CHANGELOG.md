@@ -234,7 +234,7 @@ Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-an
 
 ### Changelog
 
-#### Features 
+#### Features
 * Added incident alerts [#3640](https://github.com/mapbox/mapbox-navigation-android/pull/3640)
 
 #### Bug fixes
@@ -272,13 +272,13 @@ Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-an
 * Updated Nav UI day and night styles to new stable production v1 versions [#3520](https://github.com/mapbox/mapbox-navigation-android/pull/3520)
 
 ## Mapbox Navigation SDK 1.0.0 - October 2, 2020
-Today, we are releasing Navigation SDK (Core & UI components) v.1.0 for Android 🎉 🚀 
+Today, we are releasing Navigation SDK (Core & UI components) v.1.0 for Android 🎉 🚀
 
 ### Core Components
-This upgrade features 
-- a higher accuracy location engine which functions even in low GPS quality scenarios such as tunnels or overpasses, 
-- free-drive mode which enables accurate location positioning even without an active route for daily commuting, 
-- a new modular architecture that allows developers to customize the navigation experience for their use case, 
+This upgrade features
+- a higher accuracy location engine which functions even in low GPS quality scenarios such as tunnels or overpasses,
+- free-drive mode which enables accurate location positioning even without an active route for daily commuting,
+- a new modular architecture that allows developers to customize the navigation experience for their use case,
 - and MAUs-based billing that provides predictability in costs to developers.
 
 ### UI Components
@@ -1210,10 +1210,10 @@ Note: This release breaks `SEMVER` / contains API breaking changes.
 ### v0.6.3 -October 18, 2017
 
 * Significant reroute metric fixes [#348](https://github.com/mapbox/mapbox-navigation-android/pull/348)
-* Avoid index out of bounds when drawing route line traffic [#384](https://github.com/mapbox/mapbox-navigation-android/pull/384) 
+* Avoid index out of bounds when drawing route line traffic [#384](https://github.com/mapbox/mapbox-navigation-android/pull/384)
 
 ### v0.6.2 - October 7, 2017
- 
+
 * Fixed an issue with the Location Engine not being activated correctly inside the Navigation-UI lib [#321](https://github.com/mapbox/mapbox-navigation-android/pull/321)
 * Fixed bottom sheet not getting placed correctly when the device is rotated [#320](https://github.com/mapbox/mapbox-navigation-android/pull/320)
 * Fixed missing reroute UI when a navigation session reroute occurs [#319](https://github.com/mapbox/mapbox-navigation-android/pull/319)
