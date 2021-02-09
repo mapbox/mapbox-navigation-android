@@ -43,6 +43,6 @@ The table below lists the languages that are supported for user interface elemen
 
 ## Contributing
 
-See the [contributing guide](https://github.com/mapbox/mapbox-navigation-ios/blob/master/CONTRIBUTING.md#adding-or-updating-a-localization) for instructions on adding a new localization or improving an existing localization.
+See the [contributing guide](https://github.com/mapbox/mapbox-navigation-ios/blob/main/CONTRIBUTING.md#adding-or-updating-a-localization) for instructions on adding a new localization or improving an existing localization.
 
 [apidoc]: https://www.mapbox.com/api-documentation/#instructions-languages

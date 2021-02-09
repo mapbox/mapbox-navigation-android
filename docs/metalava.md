@@ -1,6 +1,6 @@
 ## [Metalava](https://android.googlesource.com/platform/tools/metalava/) setup
 
-Use `$> make core-check-api` / `$> make core-update-api` (Core) `$> make ui-check-api` / `$> make ui-update-api` (UI) from the [`Makefile`](https://github.com/mapbox/mapbox-navigation-android/blob/master/Makefile) to interact. Make sure to run `$> make assemble-core-release` (Core) and `$> make assemble-ui-release` (UI) first so all deps (`jar`s) are available in the `classpath` and no errors are thrown i.e.
+Use `$> make core-check-api` / `$> make core-update-api` (Core) `$> make ui-check-api` / `$> make ui-update-api` (UI) from the [`Makefile`](https://github.com/mapbox/mapbox-navigation-android/blob/main/Makefile) to interact. Make sure to run `$> make assemble-core-release` (Core) and `$> make assemble-ui-release` (UI) first so all deps (`jar`s) are available in the `classpath` and no errors are thrown i.e.
 
 ```
 $> make assemble-core-release
@@ -37,10 +37,10 @@ org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.72
 org.jetbrains.kotlin:kotlin-reflect:1.3.72
 ```
 
-- That places the latest `metalava.jar` into [`metalava`](https://github.com/mapbox/mapbox-navigation-android/blob/master/metalava) folder and prints out its deps 👀
+- That places the latest `metalava.jar` into [`metalava`](https://github.com/mapbox/mapbox-navigation-android/blob/main/metalava) folder and prints out its deps 👀
 
 ```groovy
 // Metalava isn't released yet. Check in its jar and explicitly track its transitive deps.
 ```
 
-- Copy and paste (update) the new deps into [`gradle/metalava-dependencies.gradle`](https://github.com/mapbox/mapbox-navigation-android/blob/master/gradle/metalava-dependencies.gradle)
+- Copy and paste (update) the new deps into [`gradle/metalava-dependencies.gradle`](https://github.com/mapbox/mapbox-navigation-android/blob/main/gradle/metalava-dependencies.gradle)
