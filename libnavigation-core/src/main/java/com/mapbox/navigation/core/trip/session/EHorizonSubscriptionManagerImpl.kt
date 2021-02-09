@@ -6,7 +6,7 @@ import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonObjectDistanceInfo
 import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonObjectEnterExitInfo
 import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonPosition
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
-import com.mapbox.navigation.utils.internal.JobControl
+import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.ElectronicHorizonPosition
@@ -18,10 +18,10 @@ import java.util.HashMap
 import java.util.concurrent.CopyOnWriteArraySet
 
 internal class EHorizonSubscriptionManagerImpl(
-    private val navigator: MapboxNativeNavigator,
-    private val jobController: JobControl
+    private val navigator: MapboxNativeNavigator
 ) : EHorizonSubscriptionManager {
 
+    private val jobController = ThreadController.getMainScopeAndRootJob()
     private val eHorizonObservers = CopyOnWriteArraySet<EHorizonObserver>()
     private var currentPosition: EHorizonPosition? = null
     private var currentDistances: Map<String, EHorizonObjectDistanceInfo>? = null
@@ -43,17 +43,20 @@ internal class EHorizonSubscriptionManagerImpl(
             position: ElectronicHorizonPosition,
             distances: HashMap<String, RoadObjectDistanceInfo>
         ) {
-            val eHorizonPosition = position.mapToEHorizonPosition()
-            val eHorizonDistances = mutableMapOf<String, EHorizonObjectDistanceInfo>()
-            distances.forEach { (objectId, objectDistanceInfo) ->
-                eHorizonDistances[objectId] = objectDistanceInfo.mapToEHorizonObjectDistanceInfo()
-            }
+            jobController.scope.launch {
+                val eHorizonPosition = position.mapToEHorizonPosition()
+                val eHorizonDistances = mutableMapOf<String, EHorizonObjectDistanceInfo>()
+                distances.forEach { (objectId, objectDistanceInfo) ->
+                    eHorizonDistances[objectId] =
+                        objectDistanceInfo.mapToEHorizonObjectDistanceInfo()
+                }
 
-            currentPosition = eHorizonPosition
-            currentDistances = eHorizonDistances
+                currentPosition = eHorizonPosition
+                currentDistances = eHorizonDistances
 
-            notifyAllObservers {
-                onPositionUpdated(eHorizonPosition, eHorizonDistances)
+                notifyAllObservers {
+                    onPositionUpdated(eHorizonPosition, eHorizonDistances)
+                }
             }
         }
     }
@@ -72,7 +75,7 @@ internal class EHorizonSubscriptionManagerImpl(
         }
     }
 
-    private fun notifyAllObservers(action: EHorizonObserver.() -> Unit) {
+    private fun notifyAllObservers(action: suspend EHorizonObserver.() -> Unit) {
         jobController.scope.launch {
             eHorizonObservers.forEach {
                 it.action()

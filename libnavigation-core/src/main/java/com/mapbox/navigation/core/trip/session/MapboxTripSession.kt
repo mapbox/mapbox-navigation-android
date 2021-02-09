@@ -51,7 +51,8 @@ internal class MapboxTripSession(
     private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl,
     private val threadController: ThreadController = ThreadController,
     private val logger: Logger,
-    private val accessToken: String?
+    private val accessToken: String?,
+    private val eHorizonSubscriptionManager: EHorizonSubscriptionManager,
 ) : TripSession {
 
     companion object {
@@ -101,8 +102,6 @@ internal class MapboxTripSession(
     private val voiceInstructionsObservers = CopyOnWriteArraySet<VoiceInstructionsObserver>()
     private val routeAlertsObservers = CopyOnWriteArraySet<RouteAlertsObserver>()
     private val mapMatcherResultObservers = CopyOnWriteArraySet<MapMatcherResultObserver>()
-    private val eHorizonSubscriptionManager: EHorizonSubscriptionManager =
-        EHorizonSubscriptionManagerImpl(navigator, mainJobController)
 
     private val bannerInstructionEvent = BannerInstructionEvent()
     private val voiceInstructionEvent = VoiceInstructionEvent()
