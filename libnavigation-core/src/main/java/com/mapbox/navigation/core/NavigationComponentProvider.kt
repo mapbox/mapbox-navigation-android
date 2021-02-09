@@ -10,6 +10,7 @@ import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.core.trip.service.MapboxTripService
 import com.mapbox.navigation.core.trip.service.TripService
+import com.mapbox.navigation.core.trip.session.EHorizonSubscriptionManagerImpl
 import com.mapbox.navigation.core.trip.session.MapboxTripSession
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -51,7 +52,8 @@ internal object NavigationComponentProvider {
         navigationOptions,
         navigator = navigator,
         logger = logger,
-        accessToken = accessToken
+        accessToken = accessToken,
+        eHorizonSubscriptionManager = EHorizonSubscriptionManagerImpl(navigator),
     )
 
     fun createNavigationSession(): NavigationSession = NavigationSession()

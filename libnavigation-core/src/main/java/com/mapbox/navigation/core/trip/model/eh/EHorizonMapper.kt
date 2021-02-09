@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.trip.model.eh
 
+import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.EdgeMetadata
 import com.mapbox.navigator.ElectronicHorizon
 import com.mapbox.navigator.ElectronicHorizonEdge
@@ -14,42 +15,50 @@ import com.mapbox.navigator.RoadObjectLocation
 import com.mapbox.navigator.RoadObjectProvider
 import com.mapbox.navigator.RoadObjectType
 import com.mapbox.navigator.Standard
+import kotlinx.coroutines.withContext
 
 /**
  * Map the ElectronicHorizonPosition.
  */
-internal fun ElectronicHorizonPosition.mapToEHorizonPosition(): EHorizonPosition {
-    return EHorizonPosition(
-        position().mapToEHorizonGraphPosition(),
-        tree().mapToEHorizon(),
-        type().mapToEHorizonResultType()
-    )
+internal suspend fun ElectronicHorizonPosition.mapToEHorizonPosition(): EHorizonPosition {
+    return withContext(ThreadController.IODispatcher) {
+        EHorizonPosition(
+            position().mapToEHorizonGraphPosition(),
+            tree().mapToEHorizon(),
+            type().mapToEHorizonResultType()
+        )
+    }
 }
 
 /**
  * Map the RoadObjectEnterExitInfo.
  */
-internal fun RoadObjectEnterExitInfo.mapToEHorizonObjectEnterExitInfo():
+internal suspend fun RoadObjectEnterExitInfo.mapToEHorizonObjectEnterExitInfo():
     EHorizonObjectEnterExitInfo {
-        return EHorizonObjectEnterExitInfo(
-            roadObjectId,
-            enterFromStartOrExitFromEnd,
-            type.mapToEHorizonObjectType()
-        )
+        return withContext(ThreadController.IODispatcher) {
+            EHorizonObjectEnterExitInfo(
+                roadObjectId,
+                enterFromStartOrExitFromEnd,
+                type.mapToEHorizonObjectType()
+            )
+        }
     }
 
 /**
  * Map the RoadObjectDistanceInfo.
  */
-internal fun RoadObjectDistanceInfo.mapToEHorizonObjectDistanceInfo(): EHorizonObjectDistanceInfo {
-    return EHorizonObjectDistanceInfo(
-        distanceToEntry,
-        distanceToEnd,
-        entryFromStart,
-        length,
-        type.mapToEHorizonObjectType()
-    )
-}
+internal suspend fun RoadObjectDistanceInfo.mapToEHorizonObjectDistanceInfo():
+    EHorizonObjectDistanceInfo {
+        return withContext(ThreadController.IODispatcher) {
+            EHorizonObjectDistanceInfo(
+                distanceToEntry,
+                distanceToEnd,
+                entryFromStart,
+                length,
+                type.mapToEHorizonObjectType()
+            )
+        }
+    }
 
 /**
  * Map the ElectronicHorizonPosition.

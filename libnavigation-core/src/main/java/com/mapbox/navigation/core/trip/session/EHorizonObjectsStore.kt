@@ -38,9 +38,13 @@ interface EHorizonObjectsStore {
      * exists updates it.
      * @param roadObjectId unique id of the object
      * @param openLRLocation road object location
-     * @param standard standard used to encode openLRLocation
+     * @param openLRStandard standard used to encode openLRLocation
      */
-    fun addCustomRoadObject(roadObjectId: String, openLRLocation: String, standard: OpenLRStandard)
+    fun addCustomRoadObject(
+        roadObjectId: String,
+        openLRLocation: String,
+        openLRStandard: OpenLRStandard
+    )
 
     /**
      * Removes road object(i.e. stops tracking it in electronic horizon)
