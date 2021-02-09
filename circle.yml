@@ -37,12 +37,13 @@ workflows:
             - static-analysis
           filters:
             branches:
-              ignore: /^(master|release-.*)/
+              ignore: /^(main|release-.*)/
       - release-snapshot:
           filters:
             branches:
               only:
-                - master
+                - main
+                - release-1.x
       - release:
           filters:
             tags:
