@@ -4,7 +4,7 @@ This project uses SDK Registry to distribute the binaries.
 1. Push an artifact:
 - Cut and push a new tag. It will publish new artifacts to `https://api.mapbox.com/downloads/v2/releases/maven`. The tag has to match the following pattern:
   - `/^v{VERSION}/` for Navigation SDK
-- Each merge to `master` pushes new snapshots to `https://api.mapbox.com/downloads/v2/snapshots/maven`. To build a snapshot from a custom branch, modify the `branches` filter of the `release-snapshot` CI job.
+- Each merge to `main` pushes new snapshots to `https://api.mapbox.com/downloads/v2/snapshots/maven`. To build a snapshot from a custom branch, modify the `branches` filter of the `release-snapshot` CI job.
 
 2. (**only for stable artifacts, skip for snapshots**) Go to https://github.com/mapbox/api-downloads and create a new PR that adds/modifies a `config/mobile-navigation-{artifact}}/{VERSION}.yaml` file. The file should contain this Android entry (next to anything that might be present for iOS):
 ```yaml

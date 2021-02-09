@@ -36,7 +36,7 @@ def TriggerWorkflow(token, commit, publish):
       print("Started run_android_navigation_benchmark: %s" % response_dict)
 
 def TriggerJob(token, commit, job):
-    url = "https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master"
+    url = "https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/main"
 
     headers = {
         "Content-Type": "application/json",
@@ -70,7 +70,7 @@ def Main():
 
   # Publish results that have been committed to the main branch.
   # Development runs can be found in CircleCI after manually triggered.
-  publishResults = os.getenv("CIRCLE_BRANCH") == "master"
+  publishResults = os.getenv("CIRCLE_BRANCH") == "main"
   TriggerWorkflow(token, commit, publishResults)
 
   # These jobs need to be refactored into workflows.

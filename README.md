@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://www.mapbox.com/android-docs/navigation/overview/"><img src="https://github.com/mapbox/mapbox-navigation-android/blob/master/.github/splash-img.png?raw=true" alt="Mapbox Service"></a>
+  <a href="https://www.mapbox.com/android-docs/navigation/overview/"><img src="https://github.com/mapbox/mapbox-navigation-android/blob/main/.github/splash-img.png?raw=true" alt="Mapbox Service"></a>
 </div>
 <br>
 <p align="center">
@@ -7,7 +7,7 @@
     <img src="https://circleci.com/gh/mapbox/mapbox-navigation-android.svg?style=shield&circle-token=:circle-token">
   </a>
   <a href="https://codecov.io/gh/mapbox/mapbox-navigation-android">
-    <img src="https://codecov.io/gh/mapbox/mapbox-navigation-android/branch/master/graph/badge.svg">
+    <img src="https://codecov.io/gh/mapbox/mapbox-navigation-android/branch/main/graph/badge.svg">
   </a>
 </p>
 
@@ -80,7 +80,7 @@ dependencies {
 
 ## <a name="sample-code">Sample code
 
-[We've added several navigation examples to this repo's `test-app` module](https://github.com/mapbox/mapbox-navigation-android/tree/master/test-app) to help you get started with the Navigation SDK and to inspire you.
+[We've added several navigation examples to this repo's `test-app` module](https://github.com/mapbox/mapbox-navigation-android/tree/main/test-app) to help you get started with the Navigation SDK and to inspire you.
 
 ## Contributing
 
