@@ -2,10 +2,10 @@ package com.mapbox.navigation.ui.maps.route.line.model
 
 import androidx.annotation.DrawableRes
 import com.mapbox.maps.extension.style.expressions.generated.Expression
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.DESTINATION_WAYPOINT_ICON
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.ORIGIN_WAYPOINT_ICON
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.ROUNDED_LINE_CAP
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.TRAFFIC_BACKFILL_ROAD_CLASSES
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.DESTINATION_WAYPOINT_ICON
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.ORIGIN_WAYPOINT_ICON
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.ROUNDED_LINE_CAP
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.TRAFFIC_BACKFILL_ROAD_CLASSES
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.buildScalingExpression
 
 /**

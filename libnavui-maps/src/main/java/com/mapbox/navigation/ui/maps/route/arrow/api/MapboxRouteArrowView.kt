@@ -6,7 +6,8 @@ import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
+import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.arrow.RouteArrowUtils.initializeLayers
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
@@ -69,7 +70,7 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
     fun getVisibility(style: Style): Visibility? {
         return MapboxRouteLineUtils.getLayerVisibility(
             style,
-            RouteConstants.ARROW_SHAFT_LINE_LAYER_ID
+            RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID
         )
     }
 

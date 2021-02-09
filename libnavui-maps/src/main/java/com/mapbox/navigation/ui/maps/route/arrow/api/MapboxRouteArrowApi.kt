@@ -5,7 +5,8 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
+import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.RouteArrowUtils
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowState
 import com.mapbox.navigation.ui.utils.internal.CompareUtils
@@ -159,19 +160,19 @@ class MapboxRouteArrowApi {
 
     private fun getHideArrowModifications(): List<Pair<String, Visibility>> {
         return listOf(
-            Pair(RouteConstants.ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE),
-            Pair(RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID, Visibility.NONE),
-            Pair(RouteConstants.ARROW_HEAD_CASING_LAYER_ID, Visibility.NONE),
-            Pair(RouteConstants.ARROW_HEAD_LAYER_ID, Visibility.NONE)
+            Pair(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE),
+            Pair(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID, Visibility.NONE),
+            Pair(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID, Visibility.NONE),
+            Pair(RouteLayerConstants.ARROW_HEAD_LAYER_ID, Visibility.NONE)
         )
     }
 
     private fun getShowArrowModifications(): List<Pair<String, Visibility>> {
         return listOf(
-            Pair(RouteConstants.ARROW_SHAFT_LINE_LAYER_ID, Visibility.VISIBLE),
-            Pair(RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID, Visibility.VISIBLE),
-            Pair(RouteConstants.ARROW_HEAD_CASING_LAYER_ID, Visibility.VISIBLE),
-            Pair(RouteConstants.ARROW_HEAD_LAYER_ID, Visibility.VISIBLE)
+            Pair(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, Visibility.VISIBLE),
+            Pair(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID, Visibility.VISIBLE),
+            Pair(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID, Visibility.VISIBLE),
+            Pair(RouteLayerConstants.ARROW_HEAD_LAYER_ID, Visibility.VISIBLE)
         )
     }
 

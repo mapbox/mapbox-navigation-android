@@ -6,7 +6,7 @@ import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.trip.model.RouteProgressState
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances

@@ -2,7 +2,7 @@ package com.mapbox.navigation.ui.maps.route.arrow.model
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before

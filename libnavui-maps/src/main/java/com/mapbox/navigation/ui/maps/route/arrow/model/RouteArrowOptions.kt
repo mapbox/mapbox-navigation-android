@@ -5,8 +5,8 @@ import android.graphics.drawable.Drawable
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
+import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
 
 /**
  * Options for determining the appearance of maneuver arrow(s)
@@ -155,7 +155,8 @@ class RouteArrowOptions private constructor(
             apply { this.arrowHeadIconCasingDrawable = drawable }
 
         /**
-         * Indicates the maneuver arrow map layers appear above this layer on the map.
+         * Indicates the maneuver arrow map layers appear above this layer on the map. A good
+         * starting point for this is [PRIMARY_ROUTE_TRAFFIC_LAYER_ID].
          *
          * @param layerId the map layer ID
          */

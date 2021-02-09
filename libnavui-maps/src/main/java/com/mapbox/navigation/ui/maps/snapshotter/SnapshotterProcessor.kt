@@ -13,7 +13,8 @@ import com.mapbox.maps.MapSnapshotInterface
 import com.mapbox.maps.extension.style.layers.generated.lineLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
 import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
+import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.snapshotter.model.CameraPosition
 import com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions
 import com.mapbox.navigation.ui.utils.internal.extensions.getBannerComponents
@@ -211,7 +212,7 @@ internal object SnapshotterProcessor {
 
     private fun generateLineLayer(): SnapshotterResult {
         val lineLayer = lineLayer(
-            RouteConstants.PRIMARY_ROUTE_LAYER_ID,
+            RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
             RouteConstants.PRIMARY_ROUTE_SOURCE_ID
         ) {
             lineWidth(40.0)

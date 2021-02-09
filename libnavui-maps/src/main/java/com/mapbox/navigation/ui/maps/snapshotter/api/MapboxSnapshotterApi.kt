@@ -22,7 +22,7 @@ import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.base.api.snapshotter.SnapshotReadyCallback
 import com.mapbox.navigation.ui.base.api.snapshotter.SnapshotterApi
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState
 import com.mapbox.navigation.ui.maps.snapshotter.SnapshotterAction
 import com.mapbox.navigation.ui.maps.snapshotter.SnapshotterProcessor

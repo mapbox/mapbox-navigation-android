@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.base.internal.route
+package com.mapbox.navigation.ui.base.internal.model.route
 
 import android.graphics.Color
 import androidx.annotation.ColorInt
@@ -7,32 +7,18 @@ import com.mapbox.navigation.ui.base.R
 
 object RouteConstants {
     const val PRIMARY_ROUTE_SOURCE_ID = "mapbox-navigation-route-source"
-    const val PRIMARY_ROUTE_LAYER_ID = "mapbox-navigation-route-layer"
-    const val PRIMARY_ROUTE_TRAFFIC_LAYER_ID = "mapbox-navigation-route-traffic-layer"
-    const val PRIMARY_ROUTE_CASING_LAYER_ID = "mapbox-navigation-route-casing-layer"
     const val ALTERNATIVE_ROUTE1_SOURCE_ID = "mapbox-navigation-alt-route1-source"
-    const val ALTERNATIVE_ROUTE1_LAYER_ID = "mapbox-navigation-alt-route1-layer"
-    const val ALTERNATIVE_ROUTE1_CASING_LAYER_ID = "mapbox-navigation-alt-route1-casing-layer"
     const val ALTERNATIVE_ROUTE2_SOURCE_ID = "mapbox-navigation-alt-route2-source"
-    const val ALTERNATIVE_ROUTE2_LAYER_ID = "mapbox-navigation-alt-route2-layer"
-    const val ALTERNATIVE_ROUTE2_CASING_LAYER_ID = "mapbox-navigation-alt-route2-casing-layer"
-    const val ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID = "mapbox-navigation-alt-route1-traffic-layer"
-    const val ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID = "mapbox-navigation-alt-route2-traffic-layer"
     const val WAYPOINT_SOURCE_ID = "mapbox-navigation-waypoint-source"
-    const val WAYPOINT_LAYER_ID = "mapbox-navigation-waypoint-layer"
     const val TWO_POINTS = 2
     const val THIRTY = 30
     const val ARROW_BEARING = "mapbox-navigation-arrow-bearing"
     const val ARROW_SHAFT_SOURCE_ID = "mapbox-navigation-arrow-shaft-source"
     const val ARROW_HEAD_SOURCE_ID = "mapbox-navigation-arrow-head-source"
-    const val ARROW_SHAFT_CASING_LINE_LAYER_ID = "mapbox-navigation-arrow-shaft-casing-layer"
-    const val ARROW_SHAFT_LINE_LAYER_ID = "mapbox-navigation-arrow-shaft-layer"
     const val ARROW_HEAD_ICON = "mapbox-navigation-arrow-head-icon"
     const val ARROW_HEAD_ICON_CASING = "mapbox-navigation-arrow-head-icon-casing"
     const val MAX_DEGREES = 360.0
-    const val ARROW_HEAD_CASING_LAYER_ID = "mapbox-navigation-arrow-head-casing-layer"
     val ARROW_HEAD_CASING_OFFSET = arrayOf(0.0, -7.0)
-    const val ARROW_HEAD_LAYER_ID = "mapbox-navigation-arrow-head-layer"
     val ARROW_HEAD_OFFSET = arrayOf(0.0, -7.0)
     const val MIN_ARROW_ZOOM = 10.0
     const val MAX_ARROW_ZOOM = 22.0
@@ -57,7 +43,6 @@ object RouteConstants {
     const val UNKNOWN_CONGESTION_VALUE = "unknown"
     const val ORIGIN_MARKER_NAME = "originMarker"
     const val DESTINATION_MARKER_NAME = "destinationMarker"
-    const val MAPBOX_LOCATION_ID = "mapbox-location"
     const val ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS = 1.0
     const val DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER = "mapboxDescriptorPlaceHolderUnused"
     const val MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO = 1500000000.0 // 1.5s

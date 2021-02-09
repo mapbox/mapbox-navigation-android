@@ -263,7 +263,9 @@ class CameraAnimationsActivity :
     }
 
     private fun initRouteLine() {
-        val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(this).build()
+        val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(this)
+            .withRouteLineBelowLayerId("road-label")
+            .build()
         routeLineAPI = MapboxRouteLineApi(mapboxRouteLineOptions)
         routeLineView = MapboxRouteLineView(mapboxRouteLineOptions)
 

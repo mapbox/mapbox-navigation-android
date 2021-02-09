@@ -5,7 +5,7 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants
+import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import io.mockk.every
 import io.mockk.mockk
 import junit.framework.Assert.assertEquals
@@ -70,21 +70,24 @@ class MapboxRouteArrowApiTest {
 
         assertEquals(4, result.getVisibilityChanges().size)
         assertEquals(
-            RouteConstants.ARROW_SHAFT_LINE_LAYER_ID,
+            RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
             result.getVisibilityChanges()[0].first
         )
         assertEquals(Visibility.NONE, result.getVisibilityChanges()[0].second)
         assertEquals(
-            RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID,
+            RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID,
             result.getVisibilityChanges()[1].first
         )
         assertEquals(Visibility.NONE, result.getVisibilityChanges()[1].second)
         assertEquals(
-            RouteConstants.ARROW_HEAD_CASING_LAYER_ID,
+            RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID,
             result.getVisibilityChanges()[2].first
         )
         assertEquals(Visibility.NONE, result.getVisibilityChanges()[2].second)
-        assertEquals(RouteConstants.ARROW_HEAD_LAYER_ID, result.getVisibilityChanges()[3].first)
+        assertEquals(
+            RouteLayerConstants.ARROW_HEAD_LAYER_ID,
+            result.getVisibilityChanges()[3].first
+        )
         assertEquals(Visibility.NONE, result.getVisibilityChanges()[3].second)
     }
 
@@ -94,21 +97,24 @@ class MapboxRouteArrowApiTest {
 
         assertEquals(4, result.getVisibilityChanges().size)
         assertEquals(
-            RouteConstants.ARROW_SHAFT_LINE_LAYER_ID,
+            RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
             result.getVisibilityChanges()[0].first
         )
         assertEquals(Visibility.VISIBLE, result.getVisibilityChanges()[0].second)
         assertEquals(
-            RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID,
+            RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID,
             result.getVisibilityChanges()[1].first
         )
         assertEquals(Visibility.VISIBLE, result.getVisibilityChanges()[1].second)
         assertEquals(
-            RouteConstants.ARROW_HEAD_CASING_LAYER_ID,
+            RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID,
             result.getVisibilityChanges()[2].first
         )
         assertEquals(Visibility.VISIBLE, result.getVisibilityChanges()[2].second)
-        assertEquals(RouteConstants.ARROW_HEAD_LAYER_ID, result.getVisibilityChanges()[3].first)
+        assertEquals(
+            RouteLayerConstants.ARROW_HEAD_LAYER_ID,
+            result.getVisibilityChanges()[3].first
+        )
         assertEquals(Visibility.VISIBLE, result.getVisibilityChanges()[3].second)
     }
 }
