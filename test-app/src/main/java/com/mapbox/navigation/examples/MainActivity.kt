@@ -18,6 +18,7 @@ import com.mapbox.navigation.examples.core.MapboxSnapshotActivity
 import com.mapbox.navigation.examples.core.MapboxTripProgressActivity
 import com.mapbox.navigation.examples.core.MapboxVoiceActivity
 import com.mapbox.navigation.examples.core.R
+import com.mapbox.navigation.examples.core.ReplayHistoryActivity
 import com.mapbox.navigation.examples.core.camera.MapboxCameraAnimationsActivity
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityMainBinding
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper
@@ -96,6 +97,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_voice),
                 getString(R.string.description_voice),
                 MapboxVoiceActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_replay),
+                getString(R.string.description_replay),
+                ReplayHistoryActivity::class.java
             )
         )
     }
