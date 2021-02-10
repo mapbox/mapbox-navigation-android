@@ -5,6 +5,9 @@ import com.mapbox.navigation.core.trip.model.eh.EHorizonEdgeMetadata
 import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonEdgeMetadata
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 
+/**
+ * Implementation of [EHorizonGraphAccessor]
+ */
 class EHorizonGraphAccessorImpl(
     private val navigator: MapboxNativeNavigator,
 ) : EHorizonGraphAccessor {

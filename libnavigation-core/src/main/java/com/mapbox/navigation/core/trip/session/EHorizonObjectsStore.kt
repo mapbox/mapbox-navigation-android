@@ -5,6 +5,9 @@ import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectLocation
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectMetadata
 import com.mapbox.navigation.core.trip.model.eh.OpenLRStandard
 
+/**
+ * Electronic horizon objects store interface
+ */
 interface EHorizonObjectsStore {
     /**
      * Returns mapping `road object id -> EHorizonObjectEdgeLocation` for all road objects

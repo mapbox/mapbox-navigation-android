@@ -11,7 +11,7 @@ class EHorizonOptionsTest : BuilderTest<EHorizonOptions, EHorizonOptions.Builder
         .length(1500.0)
         .expansion(1)
         .branchLength(150.0)
-        .includeGeometries(true)
+        .minTimeDeltaBetweenUpdates(1.0)
 
     @Test
     override fun trigger() {

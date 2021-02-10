@@ -3,6 +3,9 @@ package com.mapbox.navigation.core.trip.session
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.trip.model.eh.EHorizonEdgeMetadata
 
+/**
+ * Electronic horizon graph accessor interface
+*/
 interface EHorizonGraphAccessor {
     /**
      * Returns Graph Edge geometry for the given GraphId of the edge.
