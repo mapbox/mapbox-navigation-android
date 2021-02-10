@@ -15,9 +15,9 @@ import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.OpenLRDecoder
 import com.mapbox.navigator.PredictiveCacheController
-import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
+import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.TilesConfig

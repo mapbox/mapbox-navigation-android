@@ -128,7 +128,6 @@ internal fun EdgeMetadata.mapToEHorizonEdgeMetadata(): EHorizonEdgeMetadata {
 internal fun OpenLRStandard.mapToStandard(): Standard {
     return when (this) {
         OpenLRStandard.TOM_TOM -> Standard.TOM_TOM
-        OpenLRStandard.TPEG -> Standard.TPEG
     }
 }
 
