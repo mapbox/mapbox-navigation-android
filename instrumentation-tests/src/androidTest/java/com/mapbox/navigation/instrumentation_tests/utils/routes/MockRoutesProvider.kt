@@ -25,7 +25,7 @@ object MockRoutesProvider {
             listOf(
                 MockDirectionsRequestHandler(
                     profile = "driving",
-                    jsonResponse = readRawFileText(context, R.raw.route_response_dc_very_short),
+                    jsonResponse = jsonResponse,
                     expectedCoordinates = coordinates
                 ),
                 MockVoiceRequestHandler(

@@ -6,6 +6,7 @@ import android.os.SystemClock
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
+import com.mapbox.navigation.core.replay.history.ReplayEventLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
@@ -52,6 +53,22 @@ class MockLocationReplayerRule(mockLocationUpdatesRule: MockLocationUpdatesRule)
         mapboxReplayer?.seekTo(replayEvents.first())
         mapboxReplayer?.play()
     }
+
+    fun loopUpdate(location: Location, times: Int) {
+        val events: List<ReplayEventUpdateLocation> =
+            mutableListOf<ReplayEventUpdateLocation>().apply {
+                repeat(times) {
+                    this.add(location.toReplayEventUpdateLocation(it.toDouble()))
+                }
+            }
+        mapboxReplayer?.run {
+            stop()
+            clearEvents()
+            pushEvents(events)
+            seekTo(events.first())
+            play()
+        }
+    }
 }
 
 fun ReplayEventUpdateLocation.toLocation(
@@ -69,4 +86,22 @@ fun ReplayEventUpdateLocation.toLocation(
     eventLocation.speed?.toFloat()?.let { location.speed = it }
 
     return location
+}
+
+fun Location.toReplayEventUpdateLocation(
+    timestamp: Double
+): ReplayEventUpdateLocation {
+    return ReplayEventUpdateLocation(
+        timestamp,
+        ReplayEventLocation(
+            this.longitude,
+            this.latitude,
+            this.provider,
+            this.time.toDouble(),
+            this.altitude,
+            this.accuracy.toDouble(),
+            this.bearing.toDouble(),
+            this.speed.toDouble()
+        )
+    )
 }
