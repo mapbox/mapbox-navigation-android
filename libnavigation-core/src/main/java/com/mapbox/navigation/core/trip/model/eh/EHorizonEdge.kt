@@ -38,7 +38,6 @@ class EHorizonEdge internal constructor(
         if (id != other.id) return false
         if (level != other.level) return false
         if (probability != other.probability) return false
-        if (out != other.out) return false
         if (parent != other.parent) return false
 
         return true
@@ -51,7 +50,6 @@ class EHorizonEdge internal constructor(
         var result = id.hashCode()
         result = 31 * result + level
         result = 31 * result + probability.hashCode()
-        result = 31 * result + out.hashCode()
         result = 31 * result + (parent?.hashCode() ?: 0)
         return result
     }
