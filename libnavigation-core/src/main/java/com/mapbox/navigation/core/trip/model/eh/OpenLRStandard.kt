@@ -5,5 +5,4 @@ package com.mapbox.navigation.core.trip.model.eh
  */
 enum class OpenLRStandard {
     TOM_TOM,
-    TPEG,
 }
