@@ -113,8 +113,8 @@ package com.mapbox.navigation.base.options {
   public final class EHorizonOptions {
     method public double getBranchLength();
     method public int getExpansion();
-    method public boolean getIncludeGeometries();
     method public double getLength();
+    method public Double? getMinTimeDeltaBetweenUpdates();
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder toBuilder();
   }
 
@@ -123,8 +123,8 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder branchLength(double branchLength);
     method public com.mapbox.navigation.base.options.EHorizonOptions build();
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder expansion(int expansion);
-    method public com.mapbox.navigation.base.options.EHorizonOptions.Builder includeGeometries(boolean includeGeometries);
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder length(double length);
+    method public com.mapbox.navigation.base.options.EHorizonOptions.Builder minTimeDeltaBetweenUpdates(Double? minTimeDeltaBetweenUpdates);
   }
 
   public final class NavigationOptions {
