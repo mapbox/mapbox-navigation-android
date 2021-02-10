@@ -133,7 +133,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 navigatorPredictionMillis
             )
             val status = navigator!!.getStatus(nanos)
-            val remainingWaypoints = ifNonNull(route?.routeOptions()?.waypointIndicesList()?.size) {
+            val remainingWaypoints = ifNonNull(route?.routeOptions()?.coordinates()?.size) {
                 it - status.nextWaypointIndex
             } ?: 0
             TripStatus(

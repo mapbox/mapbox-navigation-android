@@ -84,7 +84,7 @@ class MockLocationUpdatesRule : ExternalResource() {
         locationManager.setTestProviderLocation(mockProviderName, location)
     }
 
-    private fun generateLocationUpdate(modifyFn: (Location.() -> Unit)? = null): Location {
+    fun generateLocationUpdate(modifyFn: (Location.() -> Unit)? = null): Location {
         val location = Location(mockProviderName)
         location.time = Date().time
         location.elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()

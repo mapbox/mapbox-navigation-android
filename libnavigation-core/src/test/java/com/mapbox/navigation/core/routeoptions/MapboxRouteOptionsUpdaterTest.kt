@@ -82,7 +82,9 @@ class MapboxRouteOptionsUpdaterTest {
     @Test
     fun new_options_return_with_null_bearings() {
         val routeOptions = provideRouteOptionsWithCoordinates()
-        val routeProgress: RouteProgress = mockk(relaxed = true)
+        val routeProgress: RouteProgress = mockk(relaxed = true) {
+            every { remainingWaypoints } returns 1
+        }
 
         val newRouteOptions =
             routeRefreshAdapter.update(routeOptions, routeProgress, location)
@@ -109,7 +111,9 @@ class MapboxRouteOptionsUpdaterTest {
     @Test
     fun new_options_return_with_bearing() {
         val routeOptions = provideRouteOptionsWithCoordinatesAndBearings()
-        val routeProgress: RouteProgress = mockk(relaxed = true)
+        val routeProgress: RouteProgress = mockk(relaxed = true) {
+            every { remainingWaypoints } returns 1
+        }
 
         val newRouteOptions =
             routeRefreshAdapter.update(routeOptions, routeProgress, location)
@@ -128,6 +132,19 @@ class MapboxRouteOptionsUpdaterTest {
         val actualBearings = newRouteOptions.bearingsList()
 
         assertEquals(expectedBearings, actualBearings)
+    }
+
+    @Test
+    fun new_options_invalid_remaining_points() {
+        val routeOptions = provideRouteOptionsWithCoordinatesAndBearings()
+        val routeProgress: RouteProgress = mockk(relaxed = true) {
+            every { remainingWaypoints } returns 0
+        }
+
+        val newRouteOptions =
+            routeRefreshAdapter.update(routeOptions, routeProgress, location)
+
+        assertTrue(newRouteOptions is RouteOptionsUpdater.RouteOptionsResult.Error)
     }
 
     @Test
@@ -226,7 +243,9 @@ class MapboxRouteOptionsUpdaterTest {
 
         @Test
         fun bearingOptions() {
-            val routeProgress: RouteProgress = mockk(relaxed = true)
+            val routeProgress: RouteProgress = mockk(relaxed = true) {
+                every { remainingWaypoints } returns routeOptions.coordinates().size - 1
+            }
 
             val newRouteOptions =
                 routeRefreshAdapter.update(routeOptions, routeProgress, location)

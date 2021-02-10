@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import kotlin.math.min
 
 private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
+private const val TAG = "MapboxRouteOptionsProvider"
 
 /**
  * Default implementation of [RouteOptionsUpdater].
@@ -32,8 +33,8 @@ class MapboxRouteOptionsUpdater(
         if (routeOptions == null || routeProgress == null || location == null) {
             val msg = "Cannot combine RouteOptions, invalid inputs. routeOptions, " +
                 "routeProgress, and location mustn't be null"
-            logger?.w(
-                Tag("MapboxRouteOptionsProvider"),
+            logger?.e(
+                Tag(TAG),
                 Message(msg)
             )
             return RouteOptionsUpdater.RouteOptionsResult.Error(Throwable(msg))
@@ -42,6 +43,20 @@ class MapboxRouteOptionsUpdater(
         val optionsBuilder = routeOptions.toBuilder()
         val coordinates = routeOptions.coordinates()
         val remainingWaypoints = routeProgress.remainingWaypoints
+
+        if (remainingWaypoints == 0) {
+            val msg = """
+                Reroute failed. There are no remaining waypoints on the route.
+                routeOptions=$routeOptions
+                routeProgress=$routeProgress
+                location=$location
+            """.trimIndent()
+            logger?.e(
+                Tag(TAG),
+                Message(msg)
+            )
+            return RouteOptionsUpdater.RouteOptionsResult.Error(Throwable(msg))
+        }
 
         try {
             routeProgress.currentLegProgress?.legIndex?.let { index ->
