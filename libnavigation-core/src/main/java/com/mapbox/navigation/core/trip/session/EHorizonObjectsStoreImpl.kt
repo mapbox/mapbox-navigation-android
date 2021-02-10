@@ -11,6 +11,9 @@ import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonObjectType
 import com.mapbox.navigation.core.trip.model.eh.mapToStandard
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 
+/**
+ * Implementation of [EHorizonObjectsStore]
+ */
 class EHorizonObjectsStoreImpl(
     private val navigator: MapboxNativeNavigator,
 ) : EHorizonObjectsStore {

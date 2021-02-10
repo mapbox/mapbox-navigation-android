@@ -650,8 +650,14 @@ class MapboxNavigation(
         tripSession.unregisterEHorizonObserver(eHorizonObserver)
     }
 
+    /**
+     * Provides [EHorizonGraphAccessor] interface
+     */
     fun getEHorizonGraphAccessor(): EHorizonGraphAccessor = eHorizonGraphAccessor
 
+    /**
+     * Provides [EHorizonObjectsStore] interface
+     */
     fun getEHorizonObjectsStore(): EHorizonObjectsStore = eHorizonObjectsStore
 
     /**
