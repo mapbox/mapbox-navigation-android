@@ -327,14 +327,6 @@ class SnapshotterProcessorTest {
     }
 
     @Test
-    fun `process action generate sky layer`() {
-        val action = SnapshotterAction.GenerateSkyLayer
-        val result = SnapshotterProcessor.process(action)
-
-        assert(result is SnapshotterResult.SnapshotSkyLayer)
-    }
-
-    @Test
     fun `process action generate line layer`() {
         val action = SnapshotterAction.GenerateLineLayer
         val result = SnapshotterProcessor.process(action)

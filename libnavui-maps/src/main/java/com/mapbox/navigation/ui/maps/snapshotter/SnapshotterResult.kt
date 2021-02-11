@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.maps.snapshotter
 
 import android.graphics.Bitmap
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
-import com.mapbox.maps.extension.style.layers.generated.SkyLayer
 import com.mapbox.navigation.ui.maps.snapshotter.model.CameraPosition
 
 internal sealed class SnapshotterResult {
@@ -18,10 +17,6 @@ internal sealed class SnapshotterResult {
         data class Failure(val error: String?) : Snapshot()
         data class Empty(val error: String?) : Snapshot()
     }
-
-    data class SnapshotSkyLayer(
-        val layer: SkyLayer
-    ) : SnapshotterResult()
 
     data class SnapshotLineLayer(
         val layer: LineLayer

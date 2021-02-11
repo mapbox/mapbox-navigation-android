@@ -99,7 +99,7 @@ class MapboxSnapshotterOptions private constructor(
 
         private var size = Size(
             context.resources.displayMetrics.widthPixels.toFloat(),
-            context.resources.displayMetrics.widthPixels.toFloat() / 2
+            context.resources.displayMetrics.widthPixels.toFloat()
         )
         private var density = context.resources.displayMetrics.density
         private var styleUri = Style.MAPBOX_STREETS

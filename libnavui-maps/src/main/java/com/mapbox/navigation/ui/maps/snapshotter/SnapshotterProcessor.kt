@@ -10,8 +10,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapSnapshotInterface
-import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
-import com.mapbox.maps.extension.style.layers.generated.SkyLayer
 import com.mapbox.maps.extension.style.layers.generated.lineLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
 import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
@@ -52,9 +50,6 @@ internal object SnapshotterProcessor {
             }
             is SnapshotterAction.GenerateBitmap -> {
                 generateBitmap(action.options, action.snapshot)
-            }
-            is SnapshotterAction.GenerateSkyLayer -> {
-                generateSkyLayer()
             }
             is SnapshotterAction.GenerateLineLayer -> {
                 generateLineLayer()
@@ -214,31 +209,16 @@ internal object SnapshotterProcessor {
         }
     }
 
-    private fun generateSkyLayer(): SnapshotterResult {
-        val skyLayer = SkyLayer(SKY_LAYER_ID)
-        skyLayer.skyGradient(
-            interpolate {
-                linear()
-                skyRadialProgress()
-                literal(0.0)
-                literal("#B0C7CF")
-                literal(1.0)
-                literal("#7CA7BE")
-            }
-        )
-        return SnapshotterResult.SnapshotSkyLayer(skyLayer)
-    }
-
     private fun generateLineLayer(): SnapshotterResult {
         val lineLayer = lineLayer(
             RouteConstants.PRIMARY_ROUTE_LAYER_ID,
             RouteConstants.PRIMARY_ROUTE_SOURCE_ID
         ) {
-            lineWidth(25.0)
+            lineWidth(40.0)
             lineOpacity(1.0)
             lineCap(LineCap.ROUND)
             lineJoin(LineJoin.ROUND)
-            lineColor("#0F77FF")
+            lineColor("#4994F6")
         }
         return SnapshotterResult.SnapshotLineLayer(lineLayer)
     }
