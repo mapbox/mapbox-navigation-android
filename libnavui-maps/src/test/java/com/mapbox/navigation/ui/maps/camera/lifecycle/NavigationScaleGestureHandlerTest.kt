@@ -12,8 +12,8 @@ import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
 import com.mapbox.maps.plugin.gestures.GesturesPlugin
 import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.generated.GesturesSettings
-import com.mapbox.maps.plugin.location.LocationPluginImpl
-import com.mapbox.maps.plugin.location.OnIndicatorPositionChangedListener
+import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.NAVIGATION_CAMERA_OWNER
@@ -53,7 +53,7 @@ class NavigationScaleGestureHandlerTest {
     private val customGesturesManager: AndroidGesturesManager = mockk(relaxUnitFun = true)
     private val customMoveGestureDetector: MoveGestureDetector = mockk(relaxUnitFun = true)
     private val gesturesPlugin: GesturesPlugin = mockk(relaxUnitFun = true)
-    private val locationPlugin: LocationPluginImpl = mockk(relaxUnitFun = true)
+    private val locationPlugin: LocationComponentPlugin = mockk(relaxUnitFun = true)
     private val scaleActionListener: NavigationScaleGestureActionListener =
         mockk(relaxUnitFun = true)
     private val options = NavigationScaleGestureHandlerOptions.Builder(context)

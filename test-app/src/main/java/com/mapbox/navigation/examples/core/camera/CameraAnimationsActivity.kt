@@ -1,5 +1,6 @@
 package com.mapbox.navigation.examples.core.camera
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.graphics.Color
@@ -8,6 +9,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
@@ -26,6 +28,7 @@ import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.CircleLayer
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
 import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
@@ -33,12 +36,9 @@ import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
 import com.mapbox.maps.plugin.gestures.GesturesPlugin
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.getGesturesPlugin
-import com.mapbox.maps.plugin.location.LocationComponentActivationOptions
-import com.mapbox.maps.plugin.location.LocationPluginImpl
-import com.mapbox.maps.plugin.location.LocationUpdate
-import com.mapbox.maps.plugin.location.OnIndicatorPositionChangedListener
-import com.mapbox.maps.plugin.location.getLocationPlugin
-import com.mapbox.maps.plugin.location.modes.RenderMode
+import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
+import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -58,6 +58,7 @@ import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSou
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandler
+import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
@@ -76,7 +77,8 @@ class CameraAnimationsActivity :
     OnMapLongClickListener {
 
     private val permissionsManager = PermissionsManager(this)
-    private var locationComponent: LocationPluginImpl? = null
+    private val navigationLocationProvider = NavigationLocationProvider()
+    private lateinit var locationComponent: LocationComponentPlugin
     private lateinit var mapboxMap: MapboxMap
     private lateinit var mapboxNavigation: MapboxNavigation
     private val replayRouteMapper = ReplayRouteMapper()
@@ -126,12 +128,21 @@ class CameraAnimationsActivity :
 
     private val mapMatcherResultObserver = object : MapMatcherResultObserver {
         override fun onNewMapMatcherResult(mapMatcherResult: MapMatcherResult) {
-            val locationUpdate = LocationUpdate(
-                location = mapMatcherResult.enhancedLocation,
-                intermediatePoints = null, // fixme mapMatcherResult.keyPoints.dropLast(1),
-                animationDuration = 1000L
+            val transitionOptions: (ValueAnimator.() -> Unit)? = if (mapMatcherResult.isTeleport) {
+                {
+                    duration = 0
+                }
+            } else {
+                {
+                    duration = 1000
+                }
+            }
+            navigationLocationProvider.changePosition(
+                mapMatcherResult.enhancedLocation,
+                mapMatcherResult.keyPoints,
+                latLngTransitionOptions = transitionOptions,
+                bearingTransitionOptions = transitionOptions
             )
-            locationComponent?.forceLocationUpdate(locationUpdate)
             viewportDataSource.onLocationChanged(mapMatcherResult.enhancedLocation)
 
             lookAtPoint?.run {
@@ -192,6 +203,17 @@ class CameraAnimationsActivity :
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_camera_animations)
         mapboxMap = mapView.getMapboxMap()
+        locationComponent = mapView.getLocationComponentPlugin().apply {
+            this.locationPuck = LocationPuck2D(
+                bearingImage = ContextCompat.getDrawable(
+                    this@CameraAnimationsActivity,
+                    R.drawable.mapbox_navigation_puck_icon
+                )
+            )
+            setLocationProvider(navigationLocationProvider)
+            addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
+            enabled = true
+        }
 
         initNavigation()
 
@@ -214,7 +236,7 @@ class CameraAnimationsActivity :
                 navigationCamera,
                 mapboxMap,
                 getGesturesPlugin(),
-                getLocationComponent(),
+                locationComponent,
                 object : NavigationScaleGestureActionListener {
                     override fun onNavigationScaleGestureAction() {
                         viewportDataSource.followingZoomUpdatesAllowed = false
@@ -331,7 +353,7 @@ class CameraAnimationsActivity :
                             .zoom(13.0)
                             .build()
                         mapboxMap.jumpTo(cameraOptions)
-                        locationComponent?.forceLocationUpdate(rawLocation)
+                        navigationLocationProvider.changePosition(rawLocation)
                         mapboxNavigation.unregisterLocationObserver(this)
                     }
 
@@ -368,7 +390,6 @@ class CameraAnimationsActivity :
             MAPBOX_STREETS,
             object : Style.OnStyleLoaded {
                 override fun onStyleLoaded(style: Style) {
-                    initializeLocationComponent(style)
                     getGesturesPlugin().addOnMapLongClickListener(
                         this@CameraAnimationsActivity
                     )
@@ -430,7 +451,7 @@ class CameraAnimationsActivity :
                 navigationCamera.requestNavigationCameraToOverview()
             }
             AnimationType.ToPOI -> {
-                locationComponent?.lastKnownLocation?.let {
+                navigationLocationProvider.lastLocation?.let {
                     val center = Point.fromLngLat(
                         it.longitude + 0.0123,
                         it.latitude + 0.0123
@@ -493,15 +514,13 @@ class CameraAnimationsActivity :
     }
 
     override fun onMapLongClick(point: Point): Boolean {
-        locationComponent?.let { locComp ->
-            val currentLocation = locComp.lastKnownLocation
-            if (currentLocation != null) {
-                val originPoint = Point.fromLngLat(
-                    currentLocation.longitude,
-                    currentLocation.latitude
-                )
-                findRoute(originPoint, point)
-            }
+        val currentLocation = navigationLocationProvider.lastLocation
+        if (currentLocation != null) {
+            val originPoint = Point.fromLngLat(
+                currentLocation.longitude,
+                currentLocation.latitude
+            )
+            findRoute(originPoint, point)
         }
         return false
     }
@@ -523,25 +542,8 @@ class CameraAnimationsActivity :
         mapboxNavigation.onDestroy()
     }
 
-    private fun initializeLocationComponent(style: Style) {
-        locationComponent = getLocationComponent()
-        val activationOptions = LocationComponentActivationOptions.builder(this, style)
-            .useDefaultLocationEngine(false) // SBNOTE: I think this should be false eventually
-            .build()
-        locationComponent?.let {
-            it.activateLocationComponent(activationOptions)
-            it.enabled = true
-            it.renderMode = RenderMode.GPS
-            it.addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
-        }
-    }
-
     private fun getMapboxAccessTokenFromResources(): String {
         return getString(this.resources.getIdentifier("mapbox_access_token", "string", packageName))
-    }
-
-    private fun getLocationComponent(): LocationPluginImpl {
-        return mapView.getLocationPlugin()
     }
 
     private fun getGesturesPlugin(): GesturesPlugin {

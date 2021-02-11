@@ -14,8 +14,8 @@ import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
 import com.mapbox.maps.plugin.gestures.GesturesPlugin
 import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.generated.GesturesSettings
-import com.mapbox.maps.plugin.location.LocationPluginImpl
-import com.mapbox.maps.plugin.location.OnIndicatorPositionChangedListener
+import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.NAVIGATION_CAMERA_OWNER
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
@@ -78,7 +78,7 @@ class NavigationScaleGestureHandler(
     private val navigationCamera: NavigationCamera,
     private val mapboxMap: MapboxMap,
     private val gesturesPlugin: GesturesPlugin,
-    private val locationPlugin: LocationPluginImpl,
+    private val locationPlugin: LocationComponentPlugin,
     private val scaleActionListener: NavigationScaleGestureActionListener? = null,
     private val options: NavigationScaleGestureHandlerOptions =
         NavigationScaleGestureHandlerOptions.Builder(context).build()

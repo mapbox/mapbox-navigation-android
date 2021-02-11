@@ -20,7 +20,7 @@ import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
-import com.mapbox.maps.plugin.location.LocationComponentConstants
+import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -555,7 +555,7 @@ object MapboxRouteLineUtils {
                 """Tried placing route line below "$layerId" which doesn't exist"""
             )
         }
-        return foundId ?: LocationComponentConstants.FOREGROUND_LAYER
+        return foundId ?: LocationComponentConstants.MODEL_LAYER
     }
 
     /**
@@ -575,7 +575,7 @@ object MapboxRouteLineUtils {
         } else {
             lastSymbolLayerFromTopIndex
         }
-        return layers.getOrNull(index)?.id ?: LocationComponentConstants.FOREGROUND_LAYER
+        return layers.getOrNull(index)?.id ?: LocationComponentConstants.MODEL_LAYER
     }
 
     /**
