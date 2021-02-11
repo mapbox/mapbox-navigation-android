@@ -1065,9 +1065,9 @@ License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the JetBrains Java Annotations (A set of annotations used for code inspection support and code documentation.).
-URL: [https://github.com/JetBrains/java-annotations](https://github.com/JetBrains/java-annotations)
-License: [The Apache Software License, Version 2.0](http://www.apache.org/license/LICENSE-2.0.txt)
+Mapbox Navigation uses portions of the IntelliJ IDEA Annotations (A set of annotations used for code inspection support and code documentation.).
+URL: [http://www.jetbrains.org](http://www.jetbrains.org)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
@@ -1215,12 +1215,6 @@ License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENS
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the Telemetry for the Mapbox Maps SDK Carbon.
-URL: [https://github.com/mapbox/mapbox-maps-android](https://github.com/mapbox/mapbox-maps-android)
-License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
-
-===========================================================================
-
 Mapbox Navigation uses portions of the The annotation module for the Mapbox Maps SDK Carbon.
 URL: [https://github.com/mapbox/mapbox-maps-android](https://github.com/mapbox/mapbox-maps-android)
 License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
@@ -1278,12 +1272,6 @@ License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 Mapbox Navigation uses portions of the The style extension for the Mapbox Maps SDK for Android.
 URL: [https://github.com/mapbox/mapbox-maps-android](https://github.com/mapbox/mapbox-maps-android)
 License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the Timber (No-nonsense injectable logging.).
-URL: [https://github.com/JakeWharton/timber](https://github.com/JakeWharton/timber)
-License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
