@@ -9,14 +9,12 @@ package com.mapbox.navigation.core.trip.model.eh
  * @param probability the probability for this edge in percentage to be taken by the driver.
  * The probabilities of all outgoing edges on a single intersection sum up to 1.
  * @param out the outgoing Edges
- * @param parent the parent Edge
  */
 class EHorizonEdge internal constructor(
     val id: Long,
     val level: Byte,
     val probability: Double,
     val out: List<EHorizonEdge>,
-    val parent: EHorizonEdge?,
 ) {
 
     /**
@@ -38,7 +36,7 @@ class EHorizonEdge internal constructor(
         if (id != other.id) return false
         if (level != other.level) return false
         if (probability != other.probability) return false
-        if (parent != other.parent) return false
+        if (out != other.out) return false
 
         return true
     }
@@ -50,7 +48,7 @@ class EHorizonEdge internal constructor(
         var result = id.hashCode()
         result = 31 * result + level
         result = 31 * result + probability.hashCode()
-        result = 31 * result + (parent?.hashCode() ?: 0)
+        result = 31 * result + out.hashCode()
         return result
     }
 
@@ -63,7 +61,6 @@ class EHorizonEdge internal constructor(
             "level=$level, " +
             "probability=$probability, " +
             "out=$out, " +
-            "parent=$parent" +
             ")"
     }
 }

@@ -518,7 +518,6 @@ package com.mapbox.navigation.core.trip.model.eh {
     method public long getId();
     method public byte getLevel();
     method public java.util.List<com.mapbox.navigation.core.trip.model.eh.EHorizonEdge> getOut();
-    method public com.mapbox.navigation.core.trip.model.eh.EHorizonEdge? getParent();
     method public double getProbability();
     method public boolean isMpp();
   }

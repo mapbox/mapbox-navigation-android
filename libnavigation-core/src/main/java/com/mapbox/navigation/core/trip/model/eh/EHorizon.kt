@@ -99,31 +99,24 @@ class EHorizon internal constructor(
     }
 
     private fun mpp(start: EHorizonEdge): List<List<EHorizonEdge>> {
-        // if it is not MPP return empty list
         if (!start.isMpp()) return emptyList()
-        if (start.out.isEmpty()) return listOf(listOf(start))
-        val result = LinkedList<LinkedList<EHorizonEdge>>()
-        // traverse through MPP nodes until a tip is found
-        val visitedEdges = LinkedList(start.out.filter { c -> c.isMpp() })
-        while (visitedEdges.isNotEmpty()) {
-            @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-            val current: EHorizonEdge = visitedEdges.poll()
-            // check if is a tip of MPP
-            if (current.out.isEmpty()) {
-                val path = LinkedList<EHorizonEdge>()
-                var b: EHorizonEdge? = current
-                // trace back and form mpp
-                while (b != null) {
-                    path.push(b)
-                    if (b == start) break
-                    b = b.parent
+
+        return getChildEdges(start)
+    }
+
+    private fun getChildEdges(edge: EHorizonEdge): List<MutableList<EHorizonEdge>> {
+        val mppEdges = edge.out.filter { it.isMpp() }
+        return if (mppEdges.isEmpty()) {
+            listOf(mutableListOf(edge))
+        } else {
+            val result: MutableList<MutableList<EHorizonEdge>> = mutableListOf()
+            mppEdges.forEach {
+                getChildEdges(it).forEach { childEdge ->
+                    childEdge.add(0, edge) // add current edge as a parent node for children
+                    result.add(childEdge)
                 }
-                result.add(path)
-            } else {
-                // push all MPP children to stack
-                visitedEdges.addAll(current.out.filter { c -> c.isMpp() })
             }
+            result
         }
-        return result
     }
 }

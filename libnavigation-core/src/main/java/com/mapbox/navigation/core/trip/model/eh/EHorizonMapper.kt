@@ -16,7 +16,6 @@ import com.mapbox.navigator.RoadObjectProvider
 import com.mapbox.navigator.RoadObjectType
 import com.mapbox.navigator.Standard
 import kotlinx.coroutines.withContext
-import java.lang.Exception
 
 /**
  * Map the ElectronicHorizonPosition.
@@ -165,23 +164,22 @@ private fun com.mapbox.navigator.RoadName.mapToRoadName(): RoadName {
  * Map the electronic horizon graph.
  */
 private fun ElectronicHorizon.mapToEHorizon(): EHorizon {
-    return EHorizon(this.start.mapToEdge(null))
+    return EHorizon(this.start.mapToEdge())
 }
 
 /**
  * Recursively map each edge of the graph.
  */
-private fun ElectronicHorizonEdge.mapToEdge(parent: EHorizonEdge?): EHorizonEdge {
+private fun ElectronicHorizonEdge.mapToEdge(): EHorizonEdge {
     val outgoingEdges = mutableListOf<EHorizonEdge>()
     val edge = EHorizonEdge(
         id,
         level,
         probability,
         outgoingEdges,
-        parent
     )
     // Recursively map the outgoing edges
-    out.forEach { outgoingEdges.add(it.mapToEdge(edge)) }
+    out.forEach { outgoingEdges.add(it.mapToEdge()) }
     return edge
 }
 
