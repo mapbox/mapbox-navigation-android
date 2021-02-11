@@ -587,10 +587,16 @@ package com.mapbox.navigation.core.trip.model.eh {
     field public static final String MAPBOX = "MAPBOX";
   }
 
+  @StringDef({com.mapbox.navigation.core.trip.model.eh.EHorizonObjectProvider.MAPBOX, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectProvider.CUSTOM}) @kotlin.annotation.Retention public static @interface EHorizonObjectProvider.Type {
+  }
+
   public final class EHorizonObjectType {
     field public static final String CUSTOM = "CUSTOM";
     field public static final String INCIDENT = "INCIDENT";
     field public static final com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType! INSTANCE;
+  }
+
+  @StringDef({com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.INCIDENT, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.CUSTOM}) @kotlin.annotation.Retention public static @interface EHorizonObjectType.Type {
   }
 
   public final class EHorizonPosition {
@@ -605,8 +611,15 @@ package com.mapbox.navigation.core.trip.model.eh {
     field public static final String UPDATE = "UPDATE";
   }
 
-  public enum OpenLRStandard {
-    enum_constant public static final com.mapbox.navigation.core.trip.model.eh.OpenLRStandard TOM_TOM;
+  @StringDef({com.mapbox.navigation.core.trip.model.eh.EHorizonResultType.INITIAL, com.mapbox.navigation.core.trip.model.eh.EHorizonResultType.UPDATE}) @kotlin.annotation.Retention public static @interface EHorizonResultType.Type {
+  }
+
+  public final class OpenLRStandard {
+    field public static final com.mapbox.navigation.core.trip.model.eh.OpenLRStandard! INSTANCE;
+    field public static final String TOM_TOM = "TOM_TOM";
+  }
+
+  @StringDef(com.mapbox.navigation.core.trip.model.eh.OpenLRStandard.TOM_TOM) @kotlin.annotation.Retention public static @interface OpenLRStandard.Type {
   }
 
   public final class RoadClass {
@@ -646,7 +659,7 @@ package com.mapbox.navigation.core.trip.session {
   }
 
   public interface EHorizonObjectsStore {
-    method public void addCustomRoadObject(String roadObjectId, String openLRLocation, com.mapbox.navigation.core.trip.model.eh.OpenLRStandard openLRStandard);
+    method public void addCustomRoadObject(String roadObjectId, String openLRLocation, @com.mapbox.navigation.core.trip.model.eh.OpenLRStandard.Type String openLRStandard);
     method public java.util.List<java.lang.String> getRoadObjectIdsByEdgeIds(java.util.List<java.lang.Long> edgeIds);
     method public com.mapbox.navigation.core.trip.model.eh.EHorizonObjectLocation? getRoadObjectLocation(String roadObjectId);
     method public com.mapbox.navigation.core.trip.model.eh.EHorizonObjectMetadata? getRoadObjectMetadata(String roadObjectId);
@@ -656,7 +669,7 @@ package com.mapbox.navigation.core.trip.session {
 
   public final class EHorizonObjectsStoreImpl implements com.mapbox.navigation.core.trip.session.EHorizonObjectsStore {
     ctor public EHorizonObjectsStoreImpl(com.mapbox.navigation.navigator.internal.MapboxNativeNavigator navigator);
-    method public void addCustomRoadObject(String roadObjectId, String openLRLocation, com.mapbox.navigation.core.trip.model.eh.OpenLRStandard openLRStandard);
+    method public void addCustomRoadObject(String roadObjectId, String openLRLocation, @com.mapbox.navigation.core.trip.model.eh.OpenLRStandard.Type String openLRStandard);
     method public java.util.List<java.lang.String> getRoadObjectIdsByEdgeIds(java.util.List<java.lang.Long> edgeIds);
     method public com.mapbox.navigation.core.trip.model.eh.EHorizonObjectLocation? getRoadObjectLocation(String roadObjectId);
     method public com.mapbox.navigation.core.trip.model.eh.EHorizonObjectMetadata? getRoadObjectMetadata(String roadObjectId);

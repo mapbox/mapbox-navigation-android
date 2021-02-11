@@ -8,7 +8,7 @@ import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonObjectEdgeLocation
 import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonObjectLocation
 import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonObjectProvider
 import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonObjectType
-import com.mapbox.navigation.core.trip.model.eh.mapToStandard
+import com.mapbox.navigation.core.trip.model.eh.mapToOpenLRStandard
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 
 /**
@@ -32,7 +32,7 @@ class EHorizonObjectsStoreImpl(
             EHorizonObjectMetadata(
                 it.type.mapToEHorizonObjectType(),
                 it.provider.mapToEHorizonObjectProvider(),
-                navigator.navigatorMapper.toIncidentInfo(it.incident)
+                navigator.navigatorMapper.getIncidentInfo(it.incident)
             )
         }
     }
@@ -49,11 +49,11 @@ class EHorizonObjectsStoreImpl(
     override fun addCustomRoadObject(
         roadObjectId: String,
         openLRLocation: String,
-        openLRStandard: OpenLRStandard
+        @OpenLRStandard.Type openLRStandard: String
     ) {
         navigator.openLRDecoder?.decode(
             listOf(openLRLocation),
-            openLRStandard.mapToStandard()
+            openLRStandard.mapToOpenLRStandard()
         ) { locations ->
             locations.first().value?.let { openLRLocation ->
                 navigator.roadObjectsStore?.addCustomRoadObject(roadObjectId, openLRLocation)

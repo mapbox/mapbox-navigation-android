@@ -5,7 +5,6 @@ package com.mapbox.navigation.core.trip.model.eh
  *
  * @param edgeId the current Edge id
  * @param percentAlong the progress along the current edge [0,1)
- * @param
  */
 class EHorizonGraphPosition internal constructor(
     val edgeId: Long,

@@ -1,5 +1,7 @@
 package com.mapbox.navigation.core.trip.model.eh
 
+import androidx.annotation.StringDef
+
 /**
  * RoadObject provider
  */
@@ -14,4 +16,11 @@ object EHorizonObjectProvider {
      * (via `mapboxNavigation.getEHorizonObjectsStore.addCustomRoadObject()`)
      */
     const val CUSTOM = "CUSTOM"
+
+    /**
+     * Retention policy for the EHorizonObjectProvider
+     */
+    @Retention
+    @StringDef(MAPBOX, CUSTOM)
+    annotation class Type
 }

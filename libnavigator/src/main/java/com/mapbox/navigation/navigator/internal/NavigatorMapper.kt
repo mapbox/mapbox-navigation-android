@@ -71,22 +71,7 @@ class NavigatorMapper internal constructor() {
         return status.getRouteProgress(directionsRoute, routeBufferGeoJson, remainingWaypoints)
     }
 
-    fun toIncidentInfo(info: com.mapbox.navigator.IncidentInfo?): IncidentInfo? =
-        info?.run {
-            IncidentInfo.Builder(id)
-                .type(info.type.toIncidentType())
-                .impact(info.impact.toIncidentImpact())
-                .congestion(info.congestion?.toIncidentCongestion())
-                .isClosed(info.roadClosed)
-                .creationTime(info.creationTime)
-                .startTime(info.startTime)
-                .endTime(info.endTime)
-                .description(info.description)
-                .subType(info.subType)
-                .subTypeDescription(info.subTypeDescription)
-                .alertcCodes(info.alertcCodes)
-                .build()
-        }
+    fun getIncidentInfo(info: com.mapbox.navigator.IncidentInfo?) = info?.toIncidentInfo()
 
     private fun NavigationStatus.getRouteProgress(
         route: DirectionsRoute?,
@@ -358,7 +343,7 @@ class NavigatorMapper internal constructor() {
                     alert.beginCoordinate,
                     alert.distance
                 )
-                    .info(toIncidentInfo(alert.incidentInfo))
+                    .info(alert.incidentInfo?.toIncidentInfo())
                     .alertGeometry(alert.getAlertGeometry())
                     .build()
             }
@@ -428,6 +413,23 @@ class NavigatorMapper internal constructor() {
             ServiceAreaType.SERVICE_AREA -> RestStopType.ServiceArea
         }
     }
+
+    private fun com.mapbox.navigator.IncidentInfo.toIncidentInfo(): IncidentInfo? =
+        ifNonNull(this) { info ->
+            IncidentInfo.Builder(info.id)
+                .type(info.type.toIncidentType())
+                .impact(info.impact.toIncidentImpact())
+                .congestion(info.congestion?.toIncidentCongestion())
+                .isClosed(info.roadClosed)
+                .creationTime(info.creationTime)
+                .startTime(info.startTime)
+                .endTime(info.endTime)
+                .description(info.description)
+                .subType(info.subType)
+                .subTypeDescription(info.subTypeDescription)
+                .alertcCodes(info.alertcCodes)
+                .build()
+        }
 
     private fun com.mapbox.navigator.IncidentType.toIncidentType(): Int =
         when (this) {

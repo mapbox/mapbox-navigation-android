@@ -83,27 +83,37 @@ class EHorizonOptions private constructor(
 
         /**
          * Override the minimum length of the EHorizon ahead of the current position.
+         * If negative default value will be used.
          */
         fun length(length: Double): Builder =
-            apply { this.length = length }
+            apply { this.length = if (length >= 0) length else DEFAULT_LENGTH }
 
         /**
          * Override the number of levels to expand.
+         * If negative default value will be used.
          */
         fun expansion(expansion: Int): Builder =
-            apply { this.expansion = expansion }
+            apply { this.expansion = if (expansion >= 0) expansion else DEFAULT_EXPANSION }
 
         /**
          * Override the minimum length to expand branches.
+         * If negative default value will be used.
          */
         fun branchLength(branchLength: Double): Builder =
-            apply { this.branchLength = branchLength }
+            apply {
+                this.branchLength = if (branchLength >= 0) branchLength else DEFAULT_BRANCH_LENGTH
+            }
 
         /**
          * Override the minimum time delta between EHorizon updates.
+         * If negative default value will be used.
          */
         fun minTimeDeltaBetweenUpdates(minTimeDeltaBetweenUpdates: Double?): Builder =
-            apply { this.minTimeDeltaBetweenUpdates = minTimeDeltaBetweenUpdates }
+            apply {
+                this.minTimeDeltaBetweenUpdates = minTimeDeltaBetweenUpdates?.let { delta ->
+                    if (delta >= 0) delta else DEFAULT_DELTA
+                }
+            }
 
         /**
          * Build the [EHorizonOptions]
@@ -115,6 +125,13 @@ class EHorizonOptions private constructor(
                 branchLength = branchLength,
                 minTimeDeltaBetweenUpdates = minTimeDeltaBetweenUpdates
             )
+        }
+
+        private companion object {
+            private const val DEFAULT_LENGTH = 500.0
+            private const val DEFAULT_EXPANSION = 0
+            private const val DEFAULT_BRANCH_LENGTH = 50.0
+            private val DEFAULT_DELTA = null
         }
     }
 }

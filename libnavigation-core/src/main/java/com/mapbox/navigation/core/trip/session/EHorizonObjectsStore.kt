@@ -46,7 +46,7 @@ interface EHorizonObjectsStore {
     fun addCustomRoadObject(
         roadObjectId: String,
         openLRLocation: String,
-        openLRStandard: OpenLRStandard
+        @OpenLRStandard.Type openLRStandard: String
     )
 
     /**
