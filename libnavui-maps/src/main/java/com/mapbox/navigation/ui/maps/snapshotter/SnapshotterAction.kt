@@ -21,6 +21,5 @@ internal sealed class SnapshotterAction {
         val snapshot: Expected<MapSnapshotInterface?, String?>
     ) : SnapshotterAction()
 
-    object GenerateSkyLayer : SnapshotterAction()
     object GenerateLineLayer : SnapshotterAction()
 }

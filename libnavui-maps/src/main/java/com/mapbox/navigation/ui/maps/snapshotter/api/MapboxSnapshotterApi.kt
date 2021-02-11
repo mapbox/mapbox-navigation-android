@@ -160,13 +160,6 @@ class MapboxSnapshotterApi(
                             }
 
                             override fun onStyleLoaded(style: Style) {
-                                style.addLayer(
-                                    (
-                                        SnapshotterProcessor
-                                            .process(SnapshotterAction.GenerateSkyLayer)
-                                            as SnapshotterResult.SnapshotSkyLayer
-                                        ).layer
-                                )
                                 style.addSource(
                                     geoJsonSource(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) {
                                         geometry(LineString.fromLngLats(routeLinePoints))

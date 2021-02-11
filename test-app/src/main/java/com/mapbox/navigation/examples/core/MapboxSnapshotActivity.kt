@@ -46,21 +46,24 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.util.Slackline
 import com.mapbox.navigation.examples.util.Utils.getMapboxAccessToken
-import com.mapbox.navigation.ui.base.api.signboard.SignboardApi
-import com.mapbox.navigation.ui.base.api.signboard.SignboardReadyCallback
-import com.mapbox.navigation.ui.base.model.signboard.SignboardState
-import com.mapbox.navigation.ui.maps.signboard.api.MapboxSignboardApi
+import com.mapbox.navigation.ui.base.api.snapshotter.SnapshotReadyCallback
+import com.mapbox.navigation.ui.base.api.snapshotter.SnapshotterApi
+import com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState
+import com.mapbox.navigation.ui.maps.snapshotter.api.MapboxSnapshotterApi
+import com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
-import kotlinx.android.synthetic.main.layout_activity_signboard.*
+import kotlinx.android.synthetic.main.layout_activity_signboard.mapView
+import kotlinx.android.synthetic.main.layout_activity_signboard.startNavigation
+import kotlinx.android.synthetic.main.layout_activity_snapshot.*
 import java.lang.ref.WeakReference
 import java.util.Objects
 
-class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
+class MapboxSnapshotActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private lateinit var mapboxMap: MapboxMap
     private lateinit var mapCamera: CameraAnimationsPlugin
     private lateinit var mapboxNavigation: MapboxNavigation
-    private lateinit var signboardApi: SignboardApi
+    private lateinit var snapshotApi: SnapshotterApi
     private var locationComponent: LocationPluginImpl? = null
 
     private val mapboxReplayer = MapboxReplayer()
@@ -69,20 +72,13 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
     private val locationEngineCallback = MyLocationEngineCallback(this)
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
-    private val signboardCallback: SignboardReadyCallback = object : SignboardReadyCallback {
-        override fun onAvailable(state: SignboardState.Signboard.Available) {
-            signboardView.render(SignboardState.Show)
-            signboardView.render(state)
+    private val snapshotCallback: SnapshotReadyCallback = object : SnapshotReadyCallback {
+        override fun onSnapshotReady(bitmap: SnapshotState.SnapshotReady) {
+            snapshotView.render(bitmap)
         }
 
-        override fun onUnavailable(state: SignboardState.Signboard.Empty) {
-            signboardView.render(SignboardState.Hide)
-            signboardView.render(state)
-        }
-
-        override fun onError(state: SignboardState.Signboard.Error) {
-            signboardView.render(SignboardState.Hide)
-            signboardView.render(state)
+        override fun onFailure(error: SnapshotState.SnapshotFailure) {
+            snapshotView.render(error)
         }
     }
 
@@ -120,9 +116,7 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            routeProgress.bannerInstructions?.let { instruction ->
-                signboardApi.generateSignboard(instruction, signboardCallback)
-            }
+            snapshotApi.generateSnapshot(routeProgress, snapshotCallback)
         }
     }
 
@@ -138,7 +132,7 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.layout_activity_signboard)
+        setContentView(R.layout.layout_activity_snapshot)
         mapboxMap = mapView.getMapboxMap()
         locationComponent = getLocationComponent()
         mapCamera = getMapCamera()
@@ -206,7 +200,12 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
                 .locationEngine(ReplayLocationEngine(mapboxReplayer))
                 .build()
         )
-        signboardApi = MapboxSignboardApi(getMapboxRouteAccessToken(this))
+        val density = resources.displayMetrics.density
+        val options = MapboxSnapshotterOptions.Builder(applicationContext)
+            .edgeInsets(EdgeInsets(250.0 * density, 0.0 * density, 0.0 * density, 0.0 * density))
+            .styleUri("mapbox://styles/mapbox-map-design/ckkfnaak605mv17pgmmxgmlvd")
+            .build()
+        snapshotApi = MapboxSnapshotterApi(this, mapboxMap, options, mapView)
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.play()
     }
@@ -312,10 +311,10 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private class MyLocationEngineCallback constructor(
-        activity: MapboxSignboardActivity
+        activity: MapboxSnapshotActivity
     ) : LocationEngineCallback<LocationEngineResult> {
 
-        private val activityRef: WeakReference<MapboxSignboardActivity> = WeakReference(activity)
+        private val activityRef: WeakReference<MapboxSnapshotActivity> = WeakReference(activity)
 
         override fun onSuccess(result: LocationEngineResult) {
             ifNonNull(result.lastLocation, activityRef.get()) { loc, act ->
