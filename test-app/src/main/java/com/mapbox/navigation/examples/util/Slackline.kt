@@ -8,9 +8,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
-import com.mapbox.maps.plugin.location.LocationPluginImpl
-import com.mapbox.maps.plugin.location.OnIndicatorPositionChangedListener
-import com.mapbox.maps.plugin.location.getLocationPlugin
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
+import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -70,15 +69,6 @@ class Slackline(private val activity: AppCompatActivity) : LifecycleObserver {
                 }
             }
         )
-        getLocationComponent(mapView).addOnIndicatorPositionChangedListener(
-            onIndicatorPositionChangedListener
-        )
-        mapboxNavigation.registerRoutesObserver(routesObserver)
-        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-    }
-
-    private fun getLocationComponent(mapView: MapView): LocationPluginImpl {
-        return mapView.getLocationPlugin()
     }
 
     private val onIndicatorPositionChangedListener = object : OnIndicatorPositionChangedListener {
@@ -123,9 +113,18 @@ class Slackline(private val activity: AppCompatActivity) : LifecycleObserver {
         }
     }
 
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    private fun onStart() {
+        mapView.getLocationComponentPlugin().addOnIndicatorPositionChangedListener(
+            onIndicatorPositionChangedListener
+        )
+        mapboxNavigation.registerRoutesObserver(routesObserver)
+        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+    }
+
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     private fun onStop() {
-        getLocationComponent(mapView).removeOnIndicatorPositionChangedListener(
+        mapView.getLocationComponentPlugin().removeOnIndicatorPositionChangedListener(
             onIndicatorPositionChangedListener
         )
         mapboxNavigation.unregisterRoutesObserver(routesObserver)

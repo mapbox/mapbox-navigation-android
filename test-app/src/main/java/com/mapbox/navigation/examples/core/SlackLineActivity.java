@@ -9,38 +9,31 @@ import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import com.mapbox.android.core.location.LocationEngineCallback;
-import com.mapbox.android.core.location.LocationEngineResult;
+
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
-
 import com.mapbox.maps.CameraOptions;
 import com.mapbox.maps.EdgeInsets;
 import com.mapbox.maps.MapView;
 import com.mapbox.maps.MapboxMap;
-import com.mapbox.maps.MapboxMapOptions;
-import com.mapbox.maps.ResourceOptions;
 import com.mapbox.maps.Style;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImplKt;
 import com.mapbox.maps.plugin.animation.MapAnimationOptions;
 import com.mapbox.maps.plugin.gestures.GesturesPluginImpl;
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener;
-import com.mapbox.maps.plugin.location.LocationComponentActivationOptions;
-import com.mapbox.maps.plugin.location.LocationPluginImpl;
-import com.mapbox.maps.plugin.location.LocationUpdate;
-import com.mapbox.maps.plugin.location.modes.RenderMode;
+import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin;
+import com.mapbox.maps.plugin.locationcomponent.LocationComponentPluginImpl;
 import com.mapbox.navigation.base.internal.route.RouteUrl;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.core.MapboxNavigation;
@@ -51,29 +44,30 @@ import com.mapbox.navigation.core.replay.route.ReplayProgressObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper;
 import com.mapbox.navigation.examples.util.Slackline;
-import org.jetbrains.annotations.NotNull;
-import timber.log.Timber;
+import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider;
 
-import java.lang.ref.WeakReference;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import timber.log.Timber;
+
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static com.mapbox.navigation.examples.util.LocationPermissionsHelperKt.LOCATION_PERMISSIONS_REQUEST_CODE;
 
-public class SlackLineActivity  extends AppCompatActivity implements PermissionsListener, OnMapLongClickListener {
-
+public class SlackLineActivity extends AppCompatActivity implements PermissionsListener, OnMapLongClickListener {
 
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
   private LocationPermissionsHelper permissionsHelper = new LocationPermissionsHelper(this);
   private MapView mapView;
   private MapboxMap mapboxMap;
-  private LocationPluginImpl locationComponent;
+  private NavigationLocationProvider navigationLocationProvider;
+  private LocationComponentPlugin locationComponent;
   private CameraAnimationsPlugin mapCamera;
   private MapboxReplayer mapboxReplayer = new MapboxReplayer();
   private MapboxNavigation mapboxNavigation;
-  private Button startNavigation;
   private ProgressBar routeLoading;
   private Slackline slackline = new Slackline(this);
 
@@ -83,21 +77,10 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_navigation_map_route);
     findViewById(R.id.fabToggleStyle).setVisibility(View.INVISIBLE);
-    MapboxMapOptions mapboxMapOptions = new MapboxMapOptions(this, getResources().getDisplayMetrics().density, null);
-    ResourceOptions resourceOptions = new ResourceOptions.Builder()
-      .accessToken(getMapboxAccessTokenFromResources())
-      .assetPath(getFilesDir().getAbsolutePath())
-      .cachePath(getFilesDir().getAbsolutePath() + "/mbx.db")
-      .cacheSize(100_000_000L) // 100 MB
-      .tileStorePath(getFilesDir().getAbsolutePath() + "/maps_tile_store/")
-      .build();
-    mapboxMapOptions.setResourceOptions(resourceOptions);
-    mapView = new MapView(this, mapboxMapOptions);
-    RelativeLayout mapLayout = findViewById(R.id.mapView_container);
-    mapLayout.addView(mapView);
-    startNavigation = findViewById(R.id.startNavigation);
+    mapView = findViewById(R.id.mapView);
     routeLoading = findViewById(R.id.routeLoadingProgressBar);
     mapboxMap = mapView.getMapboxMap();
+    navigationLocationProvider = new NavigationLocationProvider();
     locationComponent = getLocationComponent();
     mapCamera = getMapCamera();
 
@@ -112,28 +95,19 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
     initNavigation();
     initStyle();
     slackline.initialize(mapView, mapboxNavigation);
-    initListeners();
-  }
-
-  @SuppressLint("MissingPermission")
-  private void initListeners() {
-    startNavigation.setOnClickListener(v -> {
-      locationComponent.setRenderMode(RenderMode.GPS);
-      mapboxNavigation.startTripSession();
-      startNavigation.setVisibility(View.GONE);
-    });
   }
 
   @SuppressLint("MissingPermission")
   private void initNavigation() {
     mapboxNavigation = new MapboxNavigation(
-            new NavigationOptions.Builder(this)
-                    .accessToken(getMapboxAccessTokenFromResources())
-                    .locationEngine(new ReplayLocationEngine(mapboxReplayer))
-                    .build()
+        new NavigationOptions.Builder(this)
+            .accessToken(getMapboxAccessTokenFromResources())
+            .locationEngine(new ReplayLocationEngine(mapboxReplayer))
+            .build()
     );
     mapboxNavigation.registerLocationObserver(locationObserver);
     mapboxNavigation.registerRouteProgressObserver(replayProgressObserver);
+    mapboxNavigation.startTripSession();
 
     mapboxReplayer.pushRealLocation(this, 0.0);
     mapboxReplayer.play();
@@ -142,8 +116,7 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
   @SuppressLint("MissingPermission")
   private void initStyle() {
     mapboxMap.loadStyleUri(Style.MAPBOX_STREETS, style -> {
-      initializeLocationComponent(style);
-      mapboxNavigation.getNavigationOptions().getLocationEngine().getLastLocation(locationEngineCallback);
+      initializeLocationComponent();
       getGesturePlugin().addOnMapLongClickListener(this);
     }, (mapLoadError, s) -> Timber.e("Error loading map: %s", mapLoadError.name()));
   }
@@ -167,7 +140,8 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
     mapboxNavigation.onDestroy();
   }
 
-  @Override public void onLowMemory() {
+  @Override
+  public void onLowMemory() {
     super.onLowMemory();
     mapView.onLowMemory();
   }
@@ -175,9 +149,7 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
   @Override
   public boolean onMapLongClick(@NotNull Point point) {
     vibrate();
-    startNavigation.setVisibility(View.GONE);
-
-    Location currentLocation = getLocationComponent().getLastKnownLocation();
+    Location currentLocation = navigationLocationProvider.getLastLocation();
     if (currentLocation != null) {
       Point originPoint = Point.fromLngLat(
           currentLocation.getLongitude(),
@@ -212,7 +184,6 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
     public void onRoutesReady(@NotNull List<? extends DirectionsRoute> routes) {
       if (!routes.isEmpty()) {
         routeLoading.setVisibility(View.INVISIBLE);
-        startNavigation.setVisibility(View.VISIBLE);
       }
     }
 
@@ -241,13 +212,9 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
   }
 
   @SuppressWarnings("MissingPermission")
-  private void initializeLocationComponent(Style style) {
-    LocationComponentActivationOptions activationOptions = LocationComponentActivationOptions.builder(this, style)
-        .useDefaultLocationEngine(false)
-        .build();
-    locationComponent.activateLocationComponent(activationOptions);
+  private void initializeLocationComponent() {
+    locationComponent.setLocationProvider(navigationLocationProvider);
     locationComponent.setEnabled(true);
-    locationComponent.setRenderMode(RenderMode.COMPASS);
   }
 
   private String getMapboxAccessTokenFromResources() {
@@ -265,23 +232,12 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
         @NotNull Location enhancedLocation,
         @NotNull List<? extends Location> keyPoints
     ) {
-      if (keyPoints.isEmpty()) {
-        updateLocation(enhancedLocation);
-      } else {
-        updateLocation((List<Location>) keyPoints);
-      }
+      navigationLocationProvider.changePosition(enhancedLocation, keyPoints, null, null);
+      updateCamera(enhancedLocation);
     }
   };
 
-  private void updateLocation(Location location) {
-    updateLocation(Arrays.asList(location));
-  }
-
-  private void updateLocation(List<Location> locations) {
-    Location location = locations.get(0);
-    LocationUpdate locationUpdate = new LocationUpdate(location, null, null);
-    locationComponent.forceLocationUpdate(locationUpdate);
-
+  private void updateCamera(Location location) {
     MapAnimationOptions.Builder mapAnimationOptionsBuilder = new MapAnimationOptions.Builder();
     mapAnimationOptionsBuilder.setDuration(1500L);
     mapCamera.easeTo(
@@ -296,8 +252,8 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
     );
   }
 
-  private LocationPluginImpl getLocationComponent() {
-    return mapView.getPlugin(LocationPluginImpl.class);
+  private LocationComponentPlugin getLocationComponent() {
+    return mapView.getPlugin(LocationComponentPluginImpl.class);
   }
 
   private CameraAnimationsPlugin getMapCamera() {
@@ -309,35 +265,6 @@ public class SlackLineActivity  extends AppCompatActivity implements Permissions
   }
 
   private ReplayProgressObserver replayProgressObserver = new ReplayProgressObserver(mapboxReplayer);
-
-  private SlackLineActivity.MyLocationEngineCallback
-      locationEngineCallback = new SlackLineActivity.MyLocationEngineCallback(this);
-
-  private static class MyLocationEngineCallback implements LocationEngineCallback<LocationEngineResult> {
-
-    private WeakReference<SlackLineActivity> activityRef;
-
-    MyLocationEngineCallback(SlackLineActivity activity) {
-      this.activityRef = new WeakReference<>(activity);
-    }
-
-    @Override
-    public void onSuccess(LocationEngineResult result) {
-      Location location = result.getLastLocation();
-      SlackLineActivity activity = activityRef.get();
-      if (location != null && activity != null) {
-        Point point = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-        CameraOptions cameraOptions = new CameraOptions.Builder().center(point).zoom(13.0).build();
-        activity.mapboxMap.jumpTo(cameraOptions);
-        activity.locationComponent.forceLocationUpdate(location);
-      }
-    }
-
-    @Override
-    public void onFailure(@NonNull Exception exception) {
-      Timber.i(exception);
-    }
-  }
 
   @Override
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

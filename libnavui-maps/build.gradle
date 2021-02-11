@@ -36,11 +36,7 @@ android {
 dependencies {
     api project(":libnavui-base")
 
-    // workaround for https://github.com/mapbox/mapbox-maps-android-internal/issues/215
-    api (dependenciesList.mapboxMapSdk) {
-        exclude group: "com.mapbox.plugin", module: "maps-locationcomponent"
-    }
-    api "com.mapbox.plugin:maps-location:10.0.0-beta.12"
+    api dependenciesList.mapboxMapSdk
     api dependenciesList.mapboxSdkTurf
 
     implementation dependenciesList.androidXAppCompat

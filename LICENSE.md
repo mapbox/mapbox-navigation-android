@@ -1142,7 +1142,7 @@ License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the The location module for the Mapbox Maps SDK for Android.
+Mapbox Navigation uses portions of the The location component module for the Mapbox Maps SDK for Android.
 URL: [https://github.com/mapbox/mapbox-maps-android](https://github.com/mapbox/mapbox-maps-android)
 License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 

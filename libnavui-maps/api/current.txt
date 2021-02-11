@@ -159,7 +159,7 @@ package com.mapbox.navigation.ui.maps.camera.lifecycle {
   }
 
   public final class NavigationScaleGestureHandler implements com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener {
-    ctor public NavigationScaleGestureHandler(android.content.Context context, com.mapbox.navigation.ui.maps.camera.NavigationCamera navigationCamera, com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.gestures.GesturesPlugin gesturesPlugin, com.mapbox.maps.plugin.location.LocationPluginImpl locationPlugin, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener? scaleActionListener, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions options);
+    ctor public NavigationScaleGestureHandler(android.content.Context context, com.mapbox.navigation.ui.maps.camera.NavigationCamera navigationCamera, com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.gestures.GesturesPlugin gesturesPlugin, com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin locationPlugin, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener? scaleActionListener, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions options);
     method public void cleanup();
     method public com.mapbox.android.gestures.AndroidGesturesManager getCustomGesturesManager();
     method public com.mapbox.android.gestures.AndroidGesturesManager getInitialGesturesManager();
@@ -258,6 +258,21 @@ package com.mapbox.navigation.ui.maps.internal.route.line {
     method public kotlin.jvm.functions.Function0<java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData>> getRouteFeatureDataProvider(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> directionsRoutes);
     method public kotlin.jvm.functions.Function0<java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData>> getRouteLineFeatureDataProvider(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLine> directionsRoutes);
     field public static final com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils! INSTANCE;
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.location {
+
+  public final class NavigationLocationProvider implements com.mapbox.maps.plugin.locationcomponent.LocationProvider {
+    ctor public NavigationLocationProvider();
+    method public void changePosition(android.location.Location location, java.util.List<? extends android.location.Location> keyPoints = emptyList(), kotlin.jvm.functions.Function1<? super android.animation.ValueAnimator,kotlin.Unit>? latLngTransitionOptions = null, kotlin.jvm.functions.Function1<? super android.animation.ValueAnimator,kotlin.Unit>? bearingTransitionOptions = null);
+    method public java.util.List<android.location.Location> getLastKeyPoints();
+    method public android.location.Location? getLastLocation();
+    method public void registerLocationConsumer(com.mapbox.maps.plugin.locationcomponent.LocationConsumer locationConsumer);
+    method public void unRegisterLocationConsumer(com.mapbox.maps.plugin.locationcomponent.LocationConsumer locationConsumer);
+    property public final java.util.List<android.location.Location> lastKeyPoints;
+    property public final android.location.Location? lastLocation;
   }
 
 }

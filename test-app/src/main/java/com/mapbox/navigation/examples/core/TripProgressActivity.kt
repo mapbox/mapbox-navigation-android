@@ -9,18 +9,13 @@ import android.os.Vibrator
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapLoadError
-import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.MapboxMapOptions
-import com.mapbox.maps.ResourceOptions
 import com.mapbox.maps.Style
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
@@ -29,20 +24,18 @@ import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.getGesturesPlugin
-import com.mapbox.maps.plugin.location.LocationComponentActivationOptions
-import com.mapbox.maps.plugin.location.LocationPluginImpl
-import com.mapbox.maps.plugin.location.LocationUpdate
-import com.mapbox.maps.plugin.location.getLocationPlugin
-import com.mapbox.maps.plugin.location.modes.RenderMode
+import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
+import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
+import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
+import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.util.Slackline
@@ -51,16 +44,16 @@ import com.mapbox.navigation.ui.base.model.tripprogress.EstimatedTimeToArrivalFo
 import com.mapbox.navigation.ui.base.model.tripprogress.PercentDistanceTraveledFormatter
 import com.mapbox.navigation.ui.base.model.tripprogress.TimeRemainingFormatter
 import com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter
+import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
 import kotlinx.android.synthetic.main.trip_progress_activity_layout.*
-import java.lang.ref.WeakReference
 
 class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val slackline = Slackline(this)
-    private lateinit var mapView: MapView
     private lateinit var mapboxMap: MapboxMap
-    private lateinit var locationComponent: LocationPluginImpl
+    private val navigationLocationProvider = NavigationLocationProvider()
+    private lateinit var locationComponent: LocationComponentPlugin
     private lateinit var mapCamera: CameraAnimationsPlugin
     private lateinit var mapboxNavigation: MapboxNavigation
     private val mapboxReplayer = MapboxReplayer()
@@ -69,17 +62,15 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.trip_progress_activity_layout)
-        addMap()
         mapboxMap = mapView.getMapboxMap()
-        locationComponent = getLocationComponent()
+        locationComponent = mapView.getLocationComponentPlugin().apply {
+            setLocationProvider(navigationLocationProvider)
+            enabled = true
+        }
         mapCamera = getMapCamera()
         init()
 
         tripProgressApiApi = MapboxTripProgressApi(getTripProgressFormatter())
-    }
-
-    private fun getLocationComponent(): LocationPluginImpl {
-        return mapView.getLocationPlugin()
     }
 
     private fun getTripProgressFormatter(): TripProgressUpdateFormatter {
@@ -99,25 +90,10 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
             ).build()
     }
 
-    private fun addMap() {
-        val mapboxMapOptions = MapboxMapOptions(this, resources.displayMetrics.density, null)
-        val resourceOptions = ResourceOptions.Builder()
-            .accessToken(getMapboxAccessTokenFromResources())
-            .assetPath(filesDir.absolutePath)
-            .cachePath(filesDir.absolutePath + "/mbx.db")
-            .cacheSize(100000000L) // 100 MB
-            .tileStorePath(filesDir.absolutePath + "/maps_tile_store/")
-            .build()
-        mapboxMapOptions.resourceOptions = resourceOptions
-        mapView = MapView(this, mapboxMapOptions)
-        mapView_container.addView(mapView)
-    }
-
     private fun init() {
         initNavigation()
         initStyle()
         slackline.initialize(mapView, mapboxNavigation)
-        initListeners()
     }
 
     @SuppressLint("MissingPermission")
@@ -128,8 +104,10 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
                 .locationEngine(ReplayLocationEngine(mapboxReplayer))
                 .build()
         )
+        mapboxNavigation.startTripSession()
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
+        mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.play()
     }
@@ -139,10 +117,6 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxMap.loadStyleUri(
             MAPBOX_STREETS,
             Style.OnStyleLoaded { style: Style ->
-                initializeLocationComponent(style)
-                mapboxNavigation.navigationOptions.locationEngine.getLastLocation(
-                    locationEngineCallback
-                )
                 mapView.getGesturesPlugin().addOnMapLongClickListener(this)
             },
             object : OnMapLoadErrorListener {
@@ -154,17 +128,6 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
                 }
             }
         )
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun initListeners() {
-        startNavigation.setOnClickListener {
-            locationComponent.renderMode = RenderMode.GPS
-            mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-            mapboxNavigation.startTripSession()
-            startNavigation.visibility = View.GONE
-            tripProgressView.visibility = View.VISIBLE
-        }
     }
 
     @SuppressLint("MissingPermission")
@@ -188,44 +151,42 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
-    private val locationObserver: LocationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {
-            Log.d(
-                TripProgressActivity::class.java.simpleName,
-                "raw location " + rawLocation.toString()
-            )
-        }
-
+    private val locationObserver = object : LocationObserver {
+        override fun onRawLocationChanged(rawLocation: Location) {}
         override fun onEnhancedLocationChanged(
             enhancedLocation: Location,
             keyPoints: List<Location>
         ) {
-            if (keyPoints.isEmpty()) {
-                updateLocation(enhancedLocation)
+            navigationLocationProvider.changePosition(
+                enhancedLocation,
+                keyPoints,
+            )
+            updateCamera(enhancedLocation)
+        }
+    }
+
+    private val routesObserver = object : RoutesObserver {
+        override fun onRoutesChanged(routes: List<DirectionsRoute>) {
+            if (routes.isNotEmpty()) {
+                startSimulation(routes[0])
+                tripProgressView.visibility = View.VISIBLE
             } else {
-                updateLocation(keyPoints)
+                tripProgressView.visibility = View.GONE
             }
         }
     }
 
-    private fun initializeLocationComponent(style: Style) {
-        val activationOptions = LocationComponentActivationOptions.builder(this, style)
-            .useDefaultLocationEngine(false)
-            .build()
-        locationComponent.activateLocationComponent(activationOptions)
-        locationComponent.enabled = true
-        locationComponent.renderMode = RenderMode.COMPASS
+    private fun startSimulation(route: DirectionsRoute) {
+        mapboxReplayer.stop()
+        mapboxReplayer.clearEvents()
+        mapboxReplayer.pushRealLocation(this, 0.0)
+        val replayEvents = ReplayRouteMapper().mapDirectionsRouteGeometry(route)
+        mapboxReplayer.pushEvents(replayEvents)
+        mapboxReplayer.seekTo(replayEvents.first())
+        mapboxReplayer.play()
     }
 
-    private fun updateLocation(location: Location) {
-        updateLocation(listOf(location))
-    }
-
-    private fun updateLocation(locations: List<Location>) {
-        val location = locations[0]
-        val locationUpdate = LocationUpdate(location, null, null)
-        locationComponent.forceLocationUpdate(locationUpdate)
-
+    private fun updateCamera(location: Location) {
         val mapAnimationOptionsBuilder = MapAnimationOptions.Builder()
         mapAnimationOptionsBuilder.duration = 1500L
         mapCamera.easeTo(
@@ -242,9 +203,8 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onMapLongClick(point: Point): Boolean {
         vibrate()
-        startNavigation.visibility = View.GONE
 
-        val currentLocation = mapView.getLocationPlugin().lastKnownLocation
+        val currentLocation = navigationLocationProvider.lastLocation
         if (currentLocation != null) {
             val originPoint = Point.fromLngLat(
                 currentLocation.longitude,
@@ -266,29 +226,7 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
             .coordinates(listOf(origin, destination))
             .alternatives(true)
             .build()
-        mapboxNavigation.requestRoutes(
-            routeOptions,
-            routesReqCallback
-        )
-    }
-
-    private val routesReqCallback: RoutesRequestCallback = object : RoutesRequestCallback {
-        override fun onRoutesReady(routes: List<DirectionsRoute>) {
-            if (routes.isNotEmpty()) {
-                startNavigation.visibility = View.VISIBLE
-            }
-        }
-
-        override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
-            Log.e(
-                TripProgressActivity::class.java.simpleName,
-                "route request failure " + throwable.toString()
-            )
-        }
-
-        override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
-            Log.d(TripProgressActivity::class.java.simpleName, "route request canceled")
-        }
+        mapboxNavigation.requestRoutes(routeOptions)
     }
 
     private val routeProgressObserver = object : RouteProgressObserver {
@@ -299,36 +237,19 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
-    private val locationEngineCallback = MyLocationEngineCallback(WeakReference(this))
-
-    private class MyLocationEngineCallback(
-        private val activityRef: WeakReference<TripProgressActivity>
-    ) : LocationEngineCallback<LocationEngineResult> {
-
-        override fun onSuccess(result: LocationEngineResult?) {
-            val location = result!!.lastLocation
-            val activity = activityRef.get()
-            if (location != null && activity != null) {
-                val point = Point.fromLngLat(location.longitude, location.latitude)
-                val cameraOptions = CameraOptions.Builder().center(point).zoom(13.0).build()
-                activity.mapboxMap.jumpTo(cameraOptions)
-                activity.locationComponent.forceLocationUpdate(location)
-            }
-        }
-
-        override fun onFailure(exception: Exception) {
-            Log.i(TripProgressActivity::class.java.simpleName, exception.toString())
-        }
-    }
-
     override fun onStart() {
         super.onStart()
+        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.registerLocationObserver(locationObserver)
+        mapboxNavigation.registerRoutesObserver(routesObserver)
         mapView.onStart()
     }
 
     override fun onStop() {
         super.onStop()
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.unregisterLocationObserver(locationObserver)
+        mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapView.onStop()
     }
 

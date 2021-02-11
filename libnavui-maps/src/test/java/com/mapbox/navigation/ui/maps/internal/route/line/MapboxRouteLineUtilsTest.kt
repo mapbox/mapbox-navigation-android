@@ -12,7 +12,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
-import com.mapbox.maps.plugin.location.LocationComponentConstants
+import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants
@@ -306,7 +306,7 @@ class MapboxRouteLineUtilsTest {
                 styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
             } returns false
             every { styleLayerExists(RouteConstants.WAYPOINT_LAYER_ID) } returns false
-            every { styleLayerExists("mapbox-location-foreground-layer") } returns true
+            every { styleLayerExists(LocationComponentConstants.MODEL_LAYER) } returns true
             every {
                 addStyleSource(RouteConstants.WAYPOINT_SOURCE_ID, any())
             } returns ExpectedFactory.createValue()
@@ -494,43 +494,43 @@ class MapboxRouteLineUtilsTest {
             (addStyleLayerSlots[9].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-location-foreground-layer",
+            LocationComponentConstants.MODEL_LAYER,
             addStyleLayerPositionSlots[0].below
         )
         assertEquals(
-            "mapbox-location-foreground-layer",
+            LocationComponentConstants.MODEL_LAYER,
             addStyleLayerPositionSlots[1].below
         )
         assertEquals(
-            "mapbox-location-foreground-layer",
+            LocationComponentConstants.MODEL_LAYER,
             addStyleLayerPositionSlots[2].below
         )
         assertEquals(
-            "mapbox-location-foreground-layer",
+            LocationComponentConstants.MODEL_LAYER,
             addStyleLayerPositionSlots[3].below
         )
         assertEquals(
-            "mapbox-location-foreground-layer",
+            LocationComponentConstants.MODEL_LAYER,
             addStyleLayerPositionSlots[4].below
         )
         assertEquals(
-            "mapbox-location-foreground-layer",
+            LocationComponentConstants.MODEL_LAYER,
             addStyleLayerPositionSlots[5].below
         )
         assertEquals(
-            "mapbox-location-foreground-layer",
+            LocationComponentConstants.MODEL_LAYER,
             addStyleLayerPositionSlots[6].below
         )
         assertEquals(
-            "mapbox-location-foreground-layer",
+            LocationComponentConstants.MODEL_LAYER,
             addStyleLayerPositionSlots[7].below
         )
         assertEquals(
-            "mapbox-location-foreground-layer",
+            LocationComponentConstants.MODEL_LAYER,
             addStyleLayerPositionSlots[8].below
         )
         assertEquals(
-            "mapbox-location-foreground-layer",
+            LocationComponentConstants.MODEL_LAYER,
             addStyleLayerPositionSlots[9].below
         )
     }
@@ -562,7 +562,7 @@ class MapboxRouteLineUtilsTest {
 
         val result = MapboxRouteLineUtils.getDefaultBelowLayer("foobar", style)
 
-        assertEquals(LocationComponentConstants.FOREGROUND_LAYER, result)
+        assertEquals(LocationComponentConstants.MODEL_LAYER, result)
     }
 
     @Test
@@ -624,7 +624,7 @@ class MapboxRouteLineUtilsTest {
 
         val result = MapboxRouteLineUtils.getDefaultBelowLayer(null, style)
 
-        assertEquals(LocationComponentConstants.FOREGROUND_LAYER, result)
+        assertEquals(LocationComponentConstants.MODEL_LAYER, result)
     }
 
     @Test
