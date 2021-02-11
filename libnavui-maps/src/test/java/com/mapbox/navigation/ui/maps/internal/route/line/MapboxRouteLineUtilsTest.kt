@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.base.common.logger.Logger
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.bindgen.Value
@@ -47,9 +48,13 @@ class MapboxRouteLineUtilsTest {
 
     lateinit var ctx: Context
 
+    private val logger: Logger = mockk()
+
     @Before
     fun setUp() {
         ctx = ApplicationProvider.getApplicationContext()
+        every { logger.e(any(), any(), any()) } returns Unit
+        every { logger.w(any(), any(), any()) } returns Unit
     }
 
     @Test
@@ -189,7 +194,7 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun initializeLayers_whenStyleNotLoaded() {
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val style = mockk<Style> {
             every { fullyLoaded } returns false
         }
@@ -201,7 +206,7 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun initializeLayers_whenLayersAreInitialized() {
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val style = mockk<Style> {
             every { styleLayers } returns listOf()
             every { fullyLoaded } returns true
@@ -240,7 +245,7 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun initializeLayers() {
-        val options = MapboxRouteLineOptions.Builder(ctx)
+        val options = MapboxRouteLineOptions.Builder(ctx, logger)
             .withRouteLineBelowLayerId(LocationComponentConstants.MODEL_LAYER)
             .build()
         val waypointSourceValueSlot = slot<Value>()
@@ -561,7 +566,7 @@ class MapboxRouteLineUtilsTest {
             every { styleLayerExists("foobar") } returns false
         }
 
-        val result = MapboxRouteLineUtils.getBelowLayerIdToUse("foobar", style)
+        val result = MapboxRouteLineUtils.getBelowLayerIdToUse("foobar", style, logger)
 
         assertNull(result)
     }
@@ -570,7 +575,7 @@ class MapboxRouteLineUtilsTest {
     fun getBelowLayerIdToUse_whenLayerIdNotSpecified() {
         val style = mockk<Style>()
 
-        val result = MapboxRouteLineUtils.getBelowLayerIdToUse(null, style)
+        val result = MapboxRouteLineUtils.getBelowLayerIdToUse(null, style, logger)
 
         assertNull(result)
     }

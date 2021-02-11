@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.base.common.logger.Logger
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.bindgen.Value
@@ -36,6 +37,8 @@ import org.robolectric.annotation.Config
 class MapboxRouteLineViewTest {
 
     lateinit var ctx: Context
+
+    private val logger: Logger = mockk()
 
     private val layerTypeValue = mockk<Value> {
         every { contents } returns "line"
@@ -143,7 +146,7 @@ class MapboxRouteLineViewTest {
     @Test
     fun renderClearRouteDataState() {
         mockkObject(MapboxRouteLineUtils)
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val primaryRouteFeatureCollection = FeatureCollection.fromFeatures(listOf())
         val altRoutesFeatureCollection = FeatureCollection.fromFeatures(listOf())
         val waypointsFeatureCollection = FeatureCollection.fromFeatures(listOf())
@@ -244,7 +247,7 @@ class MapboxRouteLineViewTest {
     @Test
     fun renderTraveledRouteLineUpdate() {
         mockkObject(MapboxRouteLineUtils)
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val trafficLineExp = mockk<Expression>()
         val routeLineExp = mockk<Expression>()
         val casingLineEx = mockk<Expression>()
@@ -322,7 +325,7 @@ class MapboxRouteLineViewTest {
     @Test
     fun renderDrawRouteState() {
         mockkObject(MapboxRouteLineUtils)
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val primaryRouteFeatureCollection = FeatureCollection.fromFeatures(listOf())
         val alternativeRoute1FeatureCollection = FeatureCollection.fromFeatures(listOf())
         val alternativeRoute2FeatureCollection = FeatureCollection.fromFeatures(listOf())
@@ -519,7 +522,7 @@ class MapboxRouteLineViewTest {
     @Test
     fun showPrimaryRoute() {
         mockkObject(MapboxRouteLineUtils)
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val primaryRouteValueSlot = slot<Value>()
         val trafficValueSlot = slot<Value>()
         val casingValueSlot = slot<Value>()

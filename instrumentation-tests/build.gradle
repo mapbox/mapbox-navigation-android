@@ -40,7 +40,6 @@ dependencies {
     androidTestImplementation project(':libtesting-ui')
     androidTestImplementation dependenciesList.testRunner
     androidTestUtil dependenciesList.testOrchestrator
-    implementation dependenciesList.timber
 
     // Kotlin support
     implementation dependenciesList.kotlinStdLib

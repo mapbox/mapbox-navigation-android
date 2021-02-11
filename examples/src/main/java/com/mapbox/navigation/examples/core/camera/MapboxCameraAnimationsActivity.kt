@@ -16,6 +16,7 @@ import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.Logger
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -84,6 +85,7 @@ class MapboxCameraAnimationsActivity :
     private lateinit var locationComponent: LocationComponentPlugin
     private lateinit var mapboxMap: MapboxMap
     private lateinit var mapboxNavigation: MapboxNavigation
+    private lateinit var mapboxLogger: Logger
     private val replayRouteMapper = ReplayRouteMapper()
     private val mapboxReplayer = MapboxReplayer()
 
@@ -270,7 +272,7 @@ class MapboxCameraAnimationsActivity :
     }
 
     private fun initRouteLine() {
-        val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(this)
+        val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(this, mapboxLogger)
             .withRouteLineBelowLayerId("road-label")
             .build()
         routeLineAPI = MapboxRouteLineApi(mapboxRouteLineOptions)
@@ -376,6 +378,8 @@ class MapboxCameraAnimationsActivity :
             registerRoutesObserver(routesObserver)
             registerMapMatcherResultObserver(mapMatcherResultObserver)
         }
+
+        mapboxLogger = mapboxNavigation.getLogger()
 
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.playbackSpeed(1.0)

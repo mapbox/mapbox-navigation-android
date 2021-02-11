@@ -1,6 +1,9 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
@@ -13,7 +16,6 @@ import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineExpressions
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
-import timber.log.Timber
 
 /**
  * This class implements a feature that can change the appearance of the route line behind the puck.
@@ -25,7 +27,7 @@ import timber.log.Timber
  * OnIndicatorPositionChangedListener to the MapboxRouteLineApi. See the documentation for more
  * information.
  */
-internal class VanishingRouteLine {
+internal class VanishingRouteLine(private val logger: Logger) {
     /**
      * the route points for the indicated primary route
      */
@@ -86,12 +88,14 @@ internal class VanishingRouteLine {
         ) { granularDistances, index ->
             val upcomingIndex = granularDistances.distancesArray[index]
             if (upcomingIndex == null) {
-                Timber.e(
-                    """
-                       Upcoming route line index is null.
-                       primaryRouteLineGranularDistances: $primaryRouteLineGranularDistances
-                       primaryRouteRemainingDistancesIndex: $primaryRouteRemainingDistancesIndex
-                    """.trimIndent()
+                logger.e(
+                    msg = Message(
+                        """
+                           Upcoming route line index is null.
+                           primaryRouteLineGranularDistances: $primaryRouteLineGranularDistances
+                           primaryRouteRemainingDistancesIndex: $primaryRouteRemainingDistancesIndex
+                        """.trimIndent()
+                    )
                 )
                 return null
             }

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.base.common.logger.Logger
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -21,6 +22,8 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class VanishingRouteLineTest {
+
+    private val logger: Logger = mockk()
 
     @Test
     fun initWithRoute() {
@@ -43,7 +46,7 @@ class VanishingRouteLineTest {
 
     @Test
     fun updateVanishingPointState_when_LOCATION_TRACKING() {
-        val vanishingRouteLine = VanishingRouteLine().also {
+        val vanishingRouteLine = VanishingRouteLine(logger).also {
             it.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
         }
 
@@ -52,7 +55,7 @@ class VanishingRouteLineTest {
 
     @Test
     fun updateVanishingPointState_when_ROUTE_COMPLETE() {
-        val vanishingRouteLine = VanishingRouteLine().also {
+        val vanishingRouteLine = VanishingRouteLine(logger).also {
             it.updateVanishingPointState(RouteProgressState.ROUTE_COMPLETE)
         }
 
@@ -64,7 +67,7 @@ class VanishingRouteLineTest {
 
     @Test
     fun updateVanishingPointState_when_other() {
-        val vanishingRouteLine = VanishingRouteLine().also {
+        val vanishingRouteLine = VanishingRouteLine(logger).also {
             it.updateVanishingPointState(RouteProgressState.OFF_ROUTE)
         }
 
@@ -73,7 +76,7 @@ class VanishingRouteLineTest {
 
     @Test
     fun clear() {
-        val vanishingRouteLine = VanishingRouteLine().also {
+        val vanishingRouteLine = VanishingRouteLine(logger).also {
             it.initWithRoute(getRoute())
         }
         assertNotNull(vanishingRouteLine.primaryRoutePoints)
@@ -101,7 +104,7 @@ class VanishingRouteLineTest {
 
         val route = getRoute()
         val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
-        val vanishingRouteLine = VanishingRouteLine()
+        val vanishingRouteLine = VanishingRouteLine(logger)
         vanishingRouteLine.initWithRoute(route)
         vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
         val segments: List<RouteLineExpressionData> =

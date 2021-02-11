@@ -5,6 +5,7 @@ import androidx.core.content.ContextCompat
 import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.maps.plugin.LocationPuck2D
+import com.mapbox.base.common.logger.Logger
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
@@ -56,6 +57,8 @@ abstract class SimpleMapViewNavigationTest :
 
     protected lateinit var mapboxNavigation: MapboxNavigation
 
+    private lateinit var logger: Logger
+
     protected lateinit var routeLineApi: MapboxRouteLineApi
     protected lateinit var routeLineView: MapboxRouteLineView
 
@@ -88,6 +91,9 @@ abstract class SimpleMapViewNavigationTest :
                     .accessToken(getMapboxAccessTokenFromResources(activity))
                     .build()
             )
+
+            logger = mapboxNavigation.getLogger()
+
             mapboxNavigation.setRoutes(listOf(route))
             mapboxNavigation.startTripSession()
         }
@@ -95,8 +101,18 @@ abstract class SimpleMapViewNavigationTest :
 
     protected fun addRouteLine() {
         runOnMainSync {
-            routeLineView = MapboxRouteLineView(MapboxRouteLineOptions.Builder(activity).build())
-            routeLineApi = MapboxRouteLineApi(MapboxRouteLineOptions.Builder(activity).build())
+            routeLineView = MapboxRouteLineView(
+                MapboxRouteLineOptions.Builder(
+                    activity,
+                    logger
+                ).build()
+            )
+            routeLineApi = MapboxRouteLineApi(
+                MapboxRouteLineOptions.Builder(
+                    activity,
+                    logger
+                ).build()
+            )
 
             mapboxNavigation.registerRoutesObserver(object : RoutesObserver {
                 override fun onRoutesChanged(routes: List<DirectionsRoute>) {

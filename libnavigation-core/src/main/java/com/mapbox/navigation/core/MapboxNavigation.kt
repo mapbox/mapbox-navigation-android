@@ -740,6 +740,11 @@ class MapboxNavigation(
     }
 
     /**
+     * Get currently set [Logger].
+     */
+    fun getLogger(): Logger = logger
+
+    /**
      * Register a [NavigationSessionStateObserver] to be notified of the various Session states. Not publicly available
      */
     internal fun registerNavigationSessionObserver(

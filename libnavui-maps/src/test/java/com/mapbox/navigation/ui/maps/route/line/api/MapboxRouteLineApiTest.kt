@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.base.common.logger.Logger
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.LineString
@@ -71,6 +72,8 @@ class MapboxRouteLineApiTest {
     private val parentJob = SupervisorJob()
     private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
 
+    private val logger: Logger = mockk()
+
     @Before
     fun setUp() {
         ctx = ApplicationProvider.getApplicationContext()
@@ -86,7 +89,7 @@ class MapboxRouteLineApiTest {
 
     @Test
     fun getPrimaryRoute() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val route = getRoute()
         val api = MapboxRouteLineApi(options).also {
             it.setRoutes(listOf(RouteLine(route, null)))
@@ -115,7 +118,7 @@ class MapboxRouteLineApiTest {
     fun updateToPrimaryRoute_NoDuplicates() = coroutineRule.runBlockingTest {
         val route1 = getRoute()
         val route2 = getMultilegRoute()
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val api = MapboxRouteLineApi(options).also {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
@@ -131,7 +134,7 @@ class MapboxRouteLineApiTest {
     fun updateToPrimaryRouteWithCallback() = coroutineRule.runBlockingTest {
         val route1 = getRoute()
         val route2 = getRoute()
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         var consumerCalled = false
         val api = MapboxRouteLineApi(options).also {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
@@ -150,7 +153,7 @@ class MapboxRouteLineApiTest {
 
     @Test
     fun getVanishPointOffset() {
-        val options = MapboxRouteLineOptions.Builder(ctx)
+        val options = MapboxRouteLineOptions.Builder(ctx, logger)
             .withVanishingRouteLineEnabled(true)
             .build()
         options.vanishingRouteLine!!.vanishPointOffset = 99.9
@@ -162,7 +165,7 @@ class MapboxRouteLineApiTest {
 
     @Test
     fun getRoutes() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val route = getRoute()
         val routes = listOf(RouteLine(route, null))
 
@@ -177,7 +180,7 @@ class MapboxRouteLineApiTest {
 
     @Test
     fun setRoutes_setsVanishPointToZero() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx)
+        val options = MapboxRouteLineOptions.Builder(ctx, logger)
             .withVanishingRouteLineEnabled(true)
             .build()
         options.vanishingRouteLine!!.vanishPointOffset = 99.9
@@ -195,7 +198,7 @@ class MapboxRouteLineApiTest {
 
     @Test
     fun setRoutes() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val api = MapboxRouteLineApi(options)
         val expectedCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0," +
             " [rgba, 47.0, 122.0, 198.0, 1.0]]"
@@ -243,7 +246,7 @@ class MapboxRouteLineApiTest {
 
     @Test
     fun setRoutesNoAlternativeRouteDuplicates() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val api = MapboxRouteLineApi(options)
         val routes = listOf(
             RouteLine(getRoute(), null),
@@ -337,7 +340,7 @@ class MapboxRouteLineApiTest {
             "0.8647489907014745, [rgba, 190.0, 160.0, 135.0, 1.0], 0.8661754437401568, [rgba, " +
             "134.0, 148.0, 165.0, 1.0], 0.8880749995256708, [rgba, 181.0, 130.0, 129.0, 1.0], " +
             "0.92754943810966, [rgba, 134.0, 148.0, 165.0, 1.0]]"
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val api = MapboxRouteLineApi(options)
         val route = getRoute()
         val altRoute1 = getRouteWithRoadClasses()
@@ -370,7 +373,7 @@ class MapboxRouteLineApiTest {
             RouteStyleDescriptor("alternativeRoute1", Color.YELLOW, Color.CYAN),
             RouteStyleDescriptor("alternativeRoute2", Color.BLUE, Color.GREEN)
         )
-        val options = MapboxRouteLineOptions.Builder(ctx)
+        val options = MapboxRouteLineOptions.Builder(ctx, logger)
             .withRouteStyleDescriptors(routeStyleDescriptors)
             .build()
         val api = MapboxRouteLineApi(options)
@@ -397,7 +400,7 @@ class MapboxRouteLineApiTest {
 
     @Test
     fun getRouteDrawData() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val api = MapboxRouteLineApi(options)
         val expectedCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0," +
             " [rgba, 47.0, 122.0, 198.0, 1.0]]"
@@ -443,7 +446,7 @@ class MapboxRouteLineApiTest {
 
     @Test
     fun updateTraveledRouteLine() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx)
+        val options = MapboxRouteLineOptions.Builder(ctx, logger)
             .withVanishingRouteLineEnabled(true)
             .build()
         val api = MapboxRouteLineApi(options)
@@ -490,7 +493,7 @@ class MapboxRouteLineApiTest {
 
     @Test
     fun updateUpcomingRoutePointIndex() = coroutineRule.runBlockingTest {
-        val realOptions = MapboxRouteLineOptions.Builder(ctx).build()
+        val realOptions = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val route = getRoute()
         val mockVanishingRouteLine = mockk<VanishingRouteLine>(relaxUnitFun = true) {
             every { primaryRoutePoints } returns parseRoutePoints(route)
@@ -671,7 +674,7 @@ class MapboxRouteLineApiTest {
 
     @Test
     fun updateTraveledRouteLineWhenPointOffRouteLine() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx)
+        val options = MapboxRouteLineOptions.Builder(ctx, logger)
             .withVanishingRouteLineEnabled(true)
             .build()
         val route = getRoute()
@@ -687,7 +690,7 @@ class MapboxRouteLineApiTest {
 
     @Test
     fun updateVanishingPointState_When_LOCATION_TRACKING() {
-        val options = MapboxRouteLineOptions.Builder(ctx)
+        val options = MapboxRouteLineOptions.Builder(ctx, logger)
             .withVanishingRouteLineEnabled(true)
             .build()
 
@@ -703,7 +706,7 @@ class MapboxRouteLineApiTest {
 
     @Test
     fun clearRouteLine() = coroutineRule.runBlockingTest {
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val api = MapboxRouteLineApi(options)
 
         val result = api.clearRouteLine() as Expected.Success
@@ -716,7 +719,7 @@ class MapboxRouteLineApiTest {
 
     @Test
     fun setVanishingOffset() {
-        val options = MapboxRouteLineOptions.Builder(ctx)
+        val options = MapboxRouteLineOptions.Builder(ctx, logger)
             .withVanishingRouteLineEnabled(true)
             .build()
         val trafficExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.5," +
@@ -751,7 +754,7 @@ class MapboxRouteLineApiTest {
         }
         val route1 = getRoute()
         val route2 = getRoute()
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val api = MapboxRouteLineApi(options).also {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
@@ -791,7 +794,7 @@ class MapboxRouteLineApiTest {
         }
         val route1 = getRoute()
         val route2 = getRoute()
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val api = MapboxRouteLineApi(options).also {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
@@ -837,7 +840,7 @@ class MapboxRouteLineApiTest {
         }
         val route1 = getRoute()
         val route2 = getRoute()
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = MapboxRouteLineOptions.Builder(ctx, logger).build()
         val api = MapboxRouteLineApi(options).also {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }

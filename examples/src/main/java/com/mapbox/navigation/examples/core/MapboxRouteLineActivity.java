@@ -24,6 +24,8 @@ import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
+import com.mapbox.base.common.logger.Logger;
+import com.mapbox.base.common.logger.model.Message;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Point;
 import com.mapbox.maps.CameraOptions;
@@ -108,6 +110,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   private final ReplayRouteMapper replayRouteMapper = new ReplayRouteMapper();
   private final MapboxReplayer mapboxReplayer = new MapboxReplayer();
   private MapboxNavigation mapboxNavigation;
+  private Logger mapboxLogger;
   private Button startNavigation;
   private ProgressBar routeLoading;
   private final List<String> mapStyles = Arrays.asList(
@@ -162,7 +165,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     initListeners();
 
     RouteLineResources routeLineResources = new RouteLineResources.Builder().build();
-    MapboxRouteLineOptions mapboxRouteLineOptions = new MapboxRouteLineOptions.Builder(this)
+    MapboxRouteLineOptions mapboxRouteLineOptions = new MapboxRouteLineOptions.Builder(this, mapboxLogger)
         .withRouteLineResources(routeLineResources)
         .withVanishingRouteLineEnabled(true)
         .withRouteLineBelowLayerId("road-label")
@@ -177,7 +180,11 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     routeArrowView = new MapboxRouteArrowView(routeArrowOptions);
 
     predictiveCacheController = new PredictiveCacheController(mapboxNavigation, message -> {
-      Timber.e("predictive cache error: %s", message);
+      mapboxLogger.e(
+        null,
+        new Message(String.format("predictive cache error: %s", message)),
+        null
+      );
     });
     predictiveCacheController.setMapInstance(mapboxMap);
 
@@ -210,7 +217,11 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
         Collections.shuffle(mapStyles);
         String style = mapStyles.get(0);
-        Timber.e("*** Chosen map style is %s", style);
+        mapboxLogger.e(
+          null,
+          new Message(String.format("*** Chosen map style is %s", style)),
+          null
+        );
         mapboxMap.loadStyleUri(style, new Style.OnStyleLoaded() {
           @Override
           public void onStyleLoaded(@NotNull Style style) {
@@ -262,6 +273,8 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
             .build()
     );
 
+    mapboxLogger = mapboxNavigation.getLogger();
+
     mapboxReplayer.pushRealLocation(this, 0.0);
     mapboxReplayer.playbackSpeed(1.5);
     mapboxReplayer.play();
@@ -283,7 +296,11 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     mapboxMap.loadStyleUri(styleId, style -> {
       mapboxNavigation.getNavigationOptions().getLocationEngine().getLastLocation(locationEngineCallback);
       getGesturePlugin().addOnMapLongClickListener(this);
-    }, (mapLoadError, s) -> Timber.e("Error loading map: %s", mapLoadError.name()));
+    }, (mapLoadError, s) -> mapboxLogger.e(
+      null,
+      new Message(String.format("Error loading map: %s", mapLoadError.name())),
+      null
+    ));
   }
 
   @Override
@@ -374,13 +391,21 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
     @Override
     public void onRoutesRequestFailure(@NotNull Throwable throwable, @NotNull RouteOptions routeOptions) {
-      Timber.e("route request failure %s", throwable.toString());
+      mapboxLogger.e(
+        null,
+        new Message(String.format("route request failure %s", throwable.toString())),
+        null
+      );
       routeLoading.setVisibility(View.INVISIBLE);
     }
 
     @Override
     public void onRoutesRequestCanceled(@NotNull RouteOptions routeOptions) {
-      Timber.d("route request canceled");
+      mapboxLogger.d(
+        null,
+        new Message("route request canceled"),
+        null
+      );
       routeLoading.setVisibility(View.INVISIBLE);
     }
   };
@@ -421,7 +446,11 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   private LocationObserver locationObserver = new LocationObserver() {
     @Override
     public void onRawLocationChanged(@NotNull Location rawLocation) {
-      Timber.d("raw location %s", rawLocation.toString());
+      mapboxLogger.d(
+        null,
+        new Message(String.format("raw location %s", rawLocation.toString())),
+        null
+      );
     }
 
     @Override
