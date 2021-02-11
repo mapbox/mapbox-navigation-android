@@ -16,7 +16,7 @@ class EHorizonObjectDistanceInfo internal constructor(
     val distanceToEnd: Double,
     val entryFromStart: Boolean,
     val length: Double?,
-    val type: String
+    @EHorizonObjectType.Type val type: String
 ) {
 
     /**

@@ -1,5 +1,7 @@
 package com.mapbox.navigation.core.trip.model.eh
 
+import androidx.annotation.StringDef
+
 /**
  * EHorizonResultType
  */
@@ -21,4 +23,11 @@ object EHorizonResultType {
      * The EHorizon is an update of the previous state.
      */
     const val UPDATE = "UPDATE"
+
+    /**
+     * Retention policy for the EHorizonResultType
+     */
+    @Retention
+    @StringDef(INITIAL, UPDATE)
+    annotation class Type
 }

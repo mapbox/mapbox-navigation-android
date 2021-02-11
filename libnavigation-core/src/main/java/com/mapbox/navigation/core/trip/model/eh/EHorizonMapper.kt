@@ -16,6 +16,7 @@ import com.mapbox.navigator.RoadObjectProvider
 import com.mapbox.navigator.RoadObjectType
 import com.mapbox.navigator.Standard
 import kotlinx.coroutines.withContext
+import java.lang.Exception
 
 /**
  * Map the ElectronicHorizonPosition.
@@ -125,9 +126,10 @@ internal fun EdgeMetadata.mapToEHorizonEdgeMetadata(): EHorizonEdgeMetadata {
     )
 }
 
-internal fun OpenLRStandard.mapToStandard(): Standard {
+internal fun String.mapToOpenLRStandard(): Standard {
     return when (this) {
         OpenLRStandard.TOM_TOM -> Standard.TOM_TOM
+        else -> throw Exception("Invalid OpenLRStandard.")
     }
 }
 

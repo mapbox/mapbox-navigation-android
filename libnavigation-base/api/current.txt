@@ -125,6 +125,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder expansion(int expansion);
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder length(double length);
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder minTimeDeltaBetweenUpdates(Double? minTimeDeltaBetweenUpdates);
+    field @Deprecated public static final com.mapbox.navigation.base.options.EHorizonOptions.Builder.Companion! Companion;
   }
 
   public final class NavigationOptions {

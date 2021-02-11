@@ -21,7 +21,7 @@ internal class EHorizonSubscriptionManagerImpl(
     private val navigator: MapboxNativeNavigator
 ) : EHorizonSubscriptionManager {
 
-    private val jobController = ThreadController.getMainScopeAndRootJob()
+    private val mainJobController = ThreadController.getMainScopeAndRootJob()
     private val eHorizonObservers = CopyOnWriteArraySet<EHorizonObserver>()
     private var currentPosition: EHorizonPosition? = null
     private var currentDistances: Map<String, EHorizonObjectDistanceInfo>? = null
@@ -43,7 +43,7 @@ internal class EHorizonSubscriptionManagerImpl(
             position: ElectronicHorizonPosition,
             distances: HashMap<String, RoadObjectDistanceInfo>
         ) {
-            jobController.scope.launch {
+            mainJobController.scope.launch {
                 val eHorizonPosition = position.mapToEHorizonPosition()
                 val eHorizonDistances = mutableMapOf<String, EHorizonObjectDistanceInfo>()
                 distances.forEach { (objectId, objectDistanceInfo) ->
@@ -76,7 +76,7 @@ internal class EHorizonSubscriptionManagerImpl(
     }
 
     private fun notifyAllObservers(action: suspend EHorizonObserver.() -> Unit) {
-        jobController.scope.launch {
+        mainJobController.scope.launch {
             eHorizonObservers.forEach {
                 it.action()
             }

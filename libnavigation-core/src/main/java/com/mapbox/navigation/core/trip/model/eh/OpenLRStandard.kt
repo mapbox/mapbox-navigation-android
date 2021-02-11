@@ -1,11 +1,20 @@
 package com.mapbox.navigation.core.trip.model.eh
 
+import androidx.annotation.StringDef
+
 /**
  * OpenLRStandard
  */
-enum class OpenLRStandard {
+object OpenLRStandard {
     /**
      * OpenLR standard developer by TomTom
      */
-    TOM_TOM,
+    const val TOM_TOM = "TOM_TOM"
+
+    /**
+     * Retention policy for the OpenLRStandard
+     */
+    @Retention
+    @StringDef(TOM_TOM)
+    annotation class Type
 }

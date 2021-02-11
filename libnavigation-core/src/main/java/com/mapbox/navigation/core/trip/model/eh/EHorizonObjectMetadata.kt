@@ -10,8 +10,8 @@ import com.mapbox.navigation.base.trip.model.alert.IncidentInfo
  * @param incidentInfo will be filled only if `type` is `Incident` and `objectProvider` is `Mapbox`
  */
 class EHorizonObjectMetadata internal constructor(
-    val type: String,
-    val objectProvider: String,
+    @EHorizonObjectType.Type val type: String,
+    @EHorizonObjectProvider.Type val objectProvider: String,
     val incidentInfo: IncidentInfo?,
 ) {
 
