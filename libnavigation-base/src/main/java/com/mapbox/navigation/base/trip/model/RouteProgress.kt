@@ -139,7 +139,7 @@ class RouteProgress private constructor(
             "distanceTraveled=$distanceTraveled, " +
             "durationRemaining=$durationRemaining, " +
             "fractionTraveled=$fractionTraveled, " +
-            "remainingWaypoints=$remainingWaypoints" +
+            "remainingWaypoints=$remainingWaypoints, " +
             "upcomingRouteAlerts=$upcomingRouteAlerts" +
             ")"
     }
