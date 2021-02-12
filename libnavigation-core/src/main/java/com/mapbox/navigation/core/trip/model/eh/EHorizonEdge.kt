@@ -60,7 +60,7 @@ class EHorizonEdge internal constructor(
             "id=$id, " +
             "level=$level, " +
             "probability=$probability, " +
-            "out=$out, " +
+            "out=$out" +
             ")"
     }
 }

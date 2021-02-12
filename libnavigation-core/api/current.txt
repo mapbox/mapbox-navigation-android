@@ -646,28 +646,12 @@ package com.mapbox.navigation.core.trip.session {
     method public void onNewBannerInstructions(com.mapbox.api.directions.v5.models.BannerInstructions bannerInstructions);
   }
 
-  public interface EHorizonGraphAccessor {
+  public final class EHorizonGraphAccessor {
     method public com.mapbox.navigation.core.trip.model.eh.EHorizonEdgeMetadata? getEdgeMetadata(long edgeId);
     method public java.util.List<com.mapbox.geojson.Point>? getEdgeShape(long edgeId);
   }
 
-  public final class EHorizonGraphAccessorImpl implements com.mapbox.navigation.core.trip.session.EHorizonGraphAccessor {
-    ctor public EHorizonGraphAccessorImpl(com.mapbox.navigation.navigator.internal.MapboxNativeNavigator navigator);
-    method public com.mapbox.navigation.core.trip.model.eh.EHorizonEdgeMetadata? getEdgeMetadata(long edgeId);
-    method public java.util.List<com.mapbox.geojson.Point>? getEdgeShape(long edgeId);
-  }
-
-  public interface EHorizonObjectsStore {
-    method public void addCustomRoadObject(String roadObjectId, String openLRLocation, @com.mapbox.navigation.core.trip.model.eh.OpenLRStandard.Type String openLRStandard);
-    method public java.util.List<java.lang.String> getRoadObjectIdsByEdgeIds(java.util.List<java.lang.Long> edgeIds);
-    method public com.mapbox.navigation.core.trip.model.eh.EHorizonObjectLocation? getRoadObjectLocation(String roadObjectId);
-    method public com.mapbox.navigation.core.trip.model.eh.EHorizonObjectMetadata? getRoadObjectMetadata(String roadObjectId);
-    method public java.util.Map<java.lang.String,com.mapbox.navigation.core.trip.model.eh.EHorizonObjectEdgeLocation> getRoadObjectsOnTheEdge(long edgeId);
-    method public void removeCustomRoadObject(String roadObjectId);
-  }
-
-  public final class EHorizonObjectsStoreImpl implements com.mapbox.navigation.core.trip.session.EHorizonObjectsStore {
-    ctor public EHorizonObjectsStoreImpl(com.mapbox.navigation.navigator.internal.MapboxNativeNavigator navigator);
+  public final class EHorizonObjectsStore {
     method public void addCustomRoadObject(String roadObjectId, String openLRLocation, @com.mapbox.navigation.core.trip.model.eh.OpenLRStandard.Type String openLRStandard);
     method public java.util.List<java.lang.String> getRoadObjectIdsByEdgeIds(java.util.List<java.lang.Long> edgeIds);
     method public com.mapbox.navigation.core.trip.model.eh.EHorizonObjectLocation? getRoadObjectLocation(String roadObjectId);

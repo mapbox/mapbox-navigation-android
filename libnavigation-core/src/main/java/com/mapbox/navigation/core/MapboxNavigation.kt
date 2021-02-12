@@ -46,12 +46,12 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
+import com.mapbox.navigation.core.trip.model.eh.EHorizonEdge
+import com.mapbox.navigation.core.trip.model.eh.EHorizonEdgeMetadata
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.EHorizonGraphAccessor
-import com.mapbox.navigation.core.trip.session.EHorizonGraphAccessorImpl
 import com.mapbox.navigation.core.trip.session.EHorizonObjectsStore
-import com.mapbox.navigation.core.trip.session.EHorizonObjectsStoreImpl
 import com.mapbox.navigation.core.trip.session.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.MapMatcherResult
@@ -259,8 +259,8 @@ class MapboxNavigation(
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
         directionsSession.registerRoutesObserver(internalRoutesObserver)
 
-        eHorizonObjectsStore = EHorizonObjectsStoreImpl(navigator)
-        eHorizonGraphAccessor = EHorizonGraphAccessorImpl(navigator)
+        eHorizonObjectsStore = EHorizonObjectsStore(navigator)
+        eHorizonGraphAccessor = EHorizonGraphAccessor(navigator)
     }
 
     /**
@@ -629,7 +629,11 @@ class MapboxNavigation(
     }
 
     /**
+     * To start listening EHorizon updates [EHorizonObserver] should be registered.
      * Observer will be called when the EHorizon changes.
+     * To save resources and be more efficient callbacks return minimum data.
+     * To get [EHorizonEdge] shape or [EHorizonEdgeMetadata] use [EHorizonGraphAccessor]
+     * To get more data about EHorizon road object use [EHorizonObjectsStore]
      *
      * Registering an EHorizonObserver activates the Electronic Horizon module.
      *

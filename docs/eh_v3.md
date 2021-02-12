@@ -18,7 +18,7 @@ interface EHorizonObserver {
 
     /**
      * This callback might be called multiple times when the position changes.
-     * @param position current electronic horizon position(map matched position + e-horizon tree)
+     * @param position current electronic horizon position (map matched position + e-horizon tree)
      * @param distances map road object id -> EHorizonObjectDistanceInfo for upcoming road objects
      *
      */
@@ -28,13 +28,13 @@ interface EHorizonObserver {
     )
 
     /**
-     * Called when entry to line-like(i.e. which has length != null) road object was detected
+     * Called when entry to line-like (i.e. which has length != null) road object was detected
      * @param objectEnterExitInfo contains info related to the object
      */
     fun onRoadObjectEnter(objectEnterExitInfo: EHorizonObjectEnterExitInfo)
 
     /**
-     * Called when exit from line-like(i.e. which has length != null) road object was detected
+     * Called when exit from line-like (i.e. which has length != null) road object was detected
      * @param objectEnterExitInfo contains info related to the object
      */
     fun onRoadObjectExit(objectEnterExitInfo: EHorizonObjectEnterExitInfo)
@@ -132,7 +132,7 @@ interface EHorizonObjectsStore {
     fun addCustomRoadObject(roadObjectId: String, openLRLocation: String, standard: OpenLRStandard)
 
     /**
-     * Removes road object(i.e. stops tracking it in electronic horizon)
+     * Removes road object (i.e. stops tracking it in electronic horizon)
      * @param roadObjectId of road object
      */
     fun removeCustomRoadObject(roadObjectId: String)
