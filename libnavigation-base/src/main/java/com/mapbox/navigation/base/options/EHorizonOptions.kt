@@ -76,43 +76,59 @@ class EHorizonOptions private constructor(
      */
     class Builder {
 
-        private var length: Double = 500.0
-        private var expansion: Int = 0
-        private var branchLength: Double = 50.0
-        private var minTimeDeltaBetweenUpdates: Double? = null
+        private var length: Double = DEFAULT_LENGTH
+        private var expansion: Int = DEFAULT_EXPANSION
+        private var branchLength: Double = DEFAULT_BRANCH_LENGTH
+        private var minTimeDeltaBetweenUpdates: Double? = DEFAULT_MIN_DELTA
 
         /**
          * Override the minimum length of the EHorizon ahead of the current position.
-         * If negative default value will be used.
+         * If negative exception will be thrown.
          */
         fun length(length: Double): Builder =
-            apply { this.length = if (length >= 0) length else DEFAULT_LENGTH }
+            apply {
+                if (length < 0) throw IllegalArgumentException(
+                    "EHorizonOptions.length can't be negative."
+                )
+                this.length = length
+            }
 
         /**
          * Override the number of levels to expand.
-         * If negative default value will be used.
+         * If negative exception will be thrown.
          */
         fun expansion(expansion: Int): Builder =
-            apply { this.expansion = if (expansion >= 0) expansion else DEFAULT_EXPANSION }
+            apply {
+                if (expansion < 0) throw IllegalArgumentException(
+                    "EHorizonOptions.expansion can't be negative."
+                )
+                this.expansion = expansion
+            }
 
         /**
          * Override the minimum length to expand branches.
-         * If negative default value will be used.
+         * If negative exception will be thrown.
          */
         fun branchLength(branchLength: Double): Builder =
             apply {
-                this.branchLength = if (branchLength >= 0) branchLength else DEFAULT_BRANCH_LENGTH
+                if (branchLength < 0) throw IllegalArgumentException(
+                    "EHorizonOptions.branchLength can't be negative."
+                )
+                this.branchLength = branchLength
             }
 
         /**
          * Override the minimum time delta between EHorizon updates.
-         * If negative default value will be used.
+         * If negative exception will be thrown.
          */
         fun minTimeDeltaBetweenUpdates(minTimeDeltaBetweenUpdates: Double?): Builder =
             apply {
-                this.minTimeDeltaBetweenUpdates = minTimeDeltaBetweenUpdates?.let { delta ->
-                    if (delta >= 0) delta else DEFAULT_DELTA
+                minTimeDeltaBetweenUpdates?.let {
+                    if (it < 0) throw IllegalArgumentException(
+                        "EHorizonOptions.minTimeDeltaBetweenUpdates can't be negative."
+                    )
                 }
+                this.minTimeDeltaBetweenUpdates = minTimeDeltaBetweenUpdates
             }
 
         /**
@@ -131,7 +147,7 @@ class EHorizonOptions private constructor(
             private const val DEFAULT_LENGTH = 500.0
             private const val DEFAULT_EXPANSION = 0
             private const val DEFAULT_BRANCH_LENGTH = 50.0
-            private val DEFAULT_DELTA = null
+            private val DEFAULT_MIN_DELTA = null
         }
     }
 }

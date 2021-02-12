@@ -7,7 +7,7 @@ import androidx.annotation.StringDef
  */
 object OpenLRStandard {
     /**
-     * OpenLR standard developer by TomTom
+     * OpenLR standard developed by TomTom
      */
     const val TOM_TOM = "TOM_TOM"
 

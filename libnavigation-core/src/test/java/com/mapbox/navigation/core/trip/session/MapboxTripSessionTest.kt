@@ -963,6 +963,7 @@ class MapboxTripSessionTest {
         tripSession = buildTripSession()
         tripSession.start()
         val observer: EHorizonObserver = mockk(relaxUnitFun = true)
+
         tripSession.registerEHorizonObserver(observer)
 
         verify(exactly = 1) { eHorizonSubscriptionManager.registerObserver(observer) }
@@ -974,6 +975,7 @@ class MapboxTripSessionTest {
         tripSession = buildTripSession()
         tripSession.start()
         val observer: EHorizonObserver = mockk(relaxUnitFun = true)
+
         tripSession.unregisterEHorizonObserver(observer)
 
         verify(exactly = 1) { eHorizonSubscriptionManager.unregisterObserver(observer) }
@@ -984,6 +986,7 @@ class MapboxTripSessionTest {
     fun `all eHorizonObservers removed from subscriptionManager on unregisterAllObservers`() {
         tripSession = buildTripSession()
         tripSession.start()
+
         tripSession.unregisterAllEHorizonObservers()
 
         verify(exactly = 1) { eHorizonSubscriptionManager.unregisterAllObservers() }

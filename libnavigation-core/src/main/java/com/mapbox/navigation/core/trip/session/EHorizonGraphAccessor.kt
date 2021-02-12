@@ -1,12 +1,18 @@
 package com.mapbox.navigation.core.trip.session
 
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.core.trip.model.eh.EHorizonEdge
 import com.mapbox.navigation.core.trip.model.eh.EHorizonEdgeMetadata
+import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonEdgeMetadata
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 
 /**
- * Electronic horizon graph accessor interface
-*/
-interface EHorizonGraphAccessor {
+ * [EHorizonGraphAccessor] provides methods to get [EHorizonEdge] shape and metadata.
+ */
+class EHorizonGraphAccessor internal constructor(
+    private val navigator: MapboxNativeNavigator,
+) {
+
     /**
      * Returns Graph Edge geometry for the given GraphId of the edge.
      * If edge with given edgeId is not accessible, returns null
@@ -14,7 +20,9 @@ interface EHorizonGraphAccessor {
      *
      * @return list of Points representing edge shape
      */
-    fun getEdgeShape(edgeId: Long): List<Point>?
+    fun getEdgeShape(edgeId: Long): List<Point>? {
+        return navigator.graphAccessor?.getEdgeShape(edgeId)
+    }
 
     /**
      * Returns Graph Edge meta-information for the given GraphId of the edge.
@@ -23,5 +31,7 @@ interface EHorizonGraphAccessor {
      *
      * @return EHorizonEdgeMetadata
      */
-    fun getEdgeMetadata(edgeId: Long): EHorizonEdgeMetadata?
+    fun getEdgeMetadata(edgeId: Long): EHorizonEdgeMetadata? {
+        return navigator.graphAccessor?.getEdgeMetadata(edgeId)?.mapToEHorizonEdgeMetadata()
+    }
 }

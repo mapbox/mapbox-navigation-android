@@ -7,7 +7,8 @@ import com.mapbox.navigation.base.trip.model.alert.IncidentInfo
  *
  * @param type type of road object
  * @param objectProvider provider of road object
- * @param incidentInfo will be filled only if `type` is `Incident` and `objectProvider` is `Mapbox`
+ * @param incidentInfo will be filled only if [type] is [EHorizonObjectType.INCIDENT] and
+ * [objectProvider] is [EHorizonObjectProvider.MAPBOX]
  */
 class EHorizonObjectMetadata internal constructor(
     @EHorizonObjectType.Type val type: String,

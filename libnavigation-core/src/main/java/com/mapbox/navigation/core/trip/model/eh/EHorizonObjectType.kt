@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.trip.model.eh
 
 import androidx.annotation.StringDef
+import com.mapbox.navigation.core.trip.session.EHorizonObjectsStore
 
 /**
  * RoadObject type
@@ -14,7 +15,7 @@ object EHorizonObjectType {
 
     /**
      * Road object was added by user
-     * (via `mapboxNavigation.getEHorizonObjectsStore.addCustomRoadObject()`)
+     * (via [EHorizonObjectsStore.addCustomRoadObject])
      */
     const val CUSTOM = "CUSTOM"
 

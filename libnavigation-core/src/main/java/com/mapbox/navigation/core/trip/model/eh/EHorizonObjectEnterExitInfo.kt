@@ -1,11 +1,14 @@
 package com.mapbox.navigation.core.trip.model.eh
 
+import com.mapbox.navigation.core.trip.session.EHorizonObserver
+
 /**
  * EHorizonObjectEnterExitInfo
  *
  * @param roadObjectId road object id
- * @param enterFromStartOrExitFromEnd if object was entered via it's start for `onRoadObjectEnter`
- * or if object was exited via it's end for `onRoadObjectExit`
+ * @param enterFromStartOrExitFromEnd if object was entered via it's start for
+ * [EHorizonObserver.onRoadObjectEnter] or if object was exited via it's end for
+ * [EHorizonObserver.onRoadObjectExit]
  * @param type type of road object
  */
 class EHorizonObjectEnterExitInfo internal constructor(

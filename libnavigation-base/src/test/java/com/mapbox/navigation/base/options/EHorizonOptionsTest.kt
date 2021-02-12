@@ -1,10 +1,13 @@
 package com.mapbox.navigation.base.options
 
 import com.mapbox.navigation.testing.BuilderTest
-import org.junit.Assert.assertEquals
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ExpectedException
 
 class EHorizonOptionsTest : BuilderTest<EHorizonOptions, EHorizonOptions.Builder>() {
+    @get:Rule
+    val expectedException = ExpectedException.none()
 
     override fun getImplementationClass() = EHorizonOptions::class
 
@@ -20,43 +23,37 @@ class EHorizonOptionsTest : BuilderTest<EHorizonOptions, EHorizonOptions.Builder
     }
 
     @Test
-    fun `when negative length passed default value used`() {
-        buildEHorizonOptions(length = NEGATIVE_DOUBLE).apply {
-            assertEquals(DEFAULT_LENGTH, length, 0.0) // changed to default
-            assertEquals(EXPANSION, expansion)
-            assertEquals(BRANCH_LENGTH, branchLength, 0.0)
-            assertEquals(MIN_DELTA, minTimeDeltaBetweenUpdates)
-        }
+    fun `when negative length passed exception is thrown`() {
+        expectedException.expect(IllegalArgumentException::class.java)
+        expectedException.expectMessage("EHorizonOptions.length can't be negative.")
+
+        buildEHorizonOptions(length = NEGATIVE_DOUBLE)
     }
 
     @Test
-    fun `when negative expansion passed default value used`() {
-        buildEHorizonOptions(expansion = NEGATIVE_INT).apply {
-            assertEquals(LENGTH, length, 0.0)
-            assertEquals(DEFAULT_EXPANSION, expansion) // changed to default
-            assertEquals(BRANCH_LENGTH, branchLength, 0.0)
-            assertEquals(MIN_DELTA, minTimeDeltaBetweenUpdates)
-        }
+    fun `when negative expansion passed exception is thrown`() {
+        expectedException.expect(IllegalArgumentException::class.java)
+        expectedException.expectMessage("EHorizonOptions.expansion can't be negative.")
+
+        buildEHorizonOptions(expansion = NEGATIVE_INT)
     }
 
     @Test
-    fun `when negative branchLength passed default value used`() {
-        buildEHorizonOptions(branchLength = NEGATIVE_DOUBLE).apply {
-            assertEquals(LENGTH, length, 0.0)
-            assertEquals(EXPANSION, expansion)
-            assertEquals(DEFAULT_BRANCH_LENGTH, branchLength, 0.0) // changed to default
-            assertEquals(MIN_DELTA, minTimeDeltaBetweenUpdates)
-        }
+    fun `when negative branchLength passed exception is thrown`() {
+        expectedException.expect(IllegalArgumentException::class.java)
+        expectedException.expectMessage("EHorizonOptions.branchLength can't be negative.")
+
+        buildEHorizonOptions(branchLength = NEGATIVE_DOUBLE)
     }
 
     @Test
-    fun `when negative minTimeDeltaBetweenUpdates passed default value used`() {
-        buildEHorizonOptions(minTimeDeltaBetweenUpdates = NEGATIVE_DOUBLE).apply {
-            assertEquals(LENGTH, length, 0.0)
-            assertEquals(EXPANSION, expansion)
-            assertEquals(BRANCH_LENGTH, branchLength, 0.0)
-            assertEquals(DEFAULT_MIN_DELTA, minTimeDeltaBetweenUpdates) // changed to default
-        }
+    fun `when negative minTimeDeltaBetweenUpdates passed exception is thrown`() {
+        expectedException.expect(IllegalArgumentException::class.java)
+        expectedException.expectMessage(
+            "EHorizonOptions.minTimeDeltaBetweenUpdates can't be negative."
+        )
+
+        buildEHorizonOptions(minTimeDeltaBetweenUpdates = NEGATIVE_DOUBLE)
     }
 
     private fun buildEHorizonOptions(
@@ -80,10 +77,5 @@ class EHorizonOptionsTest : BuilderTest<EHorizonOptions, EHorizonOptions.Builder
         private const val EXPANSION = 0
         private const val BRANCH_LENGTH = 0.0
         private val MIN_DELTA: Double? = 0.0
-
-        private const val DEFAULT_LENGTH = 500.0
-        private const val DEFAULT_EXPANSION = 0
-        private const val DEFAULT_BRANCH_LENGTH = 50.0
-        private val DEFAULT_MIN_DELTA: Double? = null
     }
 }
