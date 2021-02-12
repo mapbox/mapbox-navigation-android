@@ -340,6 +340,7 @@ class SchemaTest {
         properties.remove("locationEnabled")
         // temporary need to work out a solution to include this data
         properties.remove("platform")
+        properties.remove("version")
         return properties
     }
 
