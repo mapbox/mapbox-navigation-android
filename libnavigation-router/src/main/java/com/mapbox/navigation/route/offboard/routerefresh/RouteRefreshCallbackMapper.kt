@@ -1,7 +1,10 @@
 package com.mapbox.navigation.route.offboard.routerefresh
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.LegAnnotation
+import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
+import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import retrofit2.Call
@@ -10,7 +13,6 @@ import retrofit2.Response
 
 internal class RouteRefreshCallbackMapper(
     private val originalRoute: DirectionsRoute,
-    private val currentLegIndex: Int,
     private val callback: RouteRefreshCallback
 ) : Callback<DirectionsRefreshResponse> {
 
@@ -42,19 +44,34 @@ internal class RouteRefreshCallbackMapper(
         callback.onError(RouteRefreshError(throwable = t))
     }
 
-    private fun mapToDirectionsRoute(routeAnnotations: DirectionsRoute?): DirectionsRoute? {
+    private fun mapToDirectionsRoute(routeAnnotations: DirectionsRouteRefresh?): DirectionsRoute? {
         val validRouteAnnotations = routeAnnotations ?: return null
-        val refreshedRouteLegs = originalRoute.legs()?.let { oldRouteLegsList ->
-            val legs = oldRouteLegsList.toMutableList()
-            for (i in currentLegIndex until legs.size) {
-                validRouteAnnotations.legs()?.let { annotationHolderRouteLegsList ->
-                    val updatedAnnotation =
-                        annotationHolderRouteLegsList[i - currentLegIndex].annotation()
-                    legs[i] = legs[i].toBuilder().annotation(updatedAnnotation).build()
-                }
+        val updatedLegs = mutableListOf<RouteLeg?>()
+        originalRoute.legs()?.let { oldRouteLegsList ->
+            oldRouteLegsList.forEachIndexed { index, routeLeg ->
+                val newAnnotation = routeLeg.annotation()?.toBuilder()
+                    ?.congestion(
+                        validRouteAnnotations.annotationOfLeg(index)?.congestion()
+                    )
+                    ?.distance(
+                        validRouteAnnotations.annotationOfLeg(index)?.distance()
+                    )
+                    ?.duration(
+                        validRouteAnnotations.annotationOfLeg(index)?.duration()
+                    )
+                    ?.maxspeed(
+                        validRouteAnnotations.annotationOfLeg(index)?.maxspeed()
+                    )
+                    ?.speed(
+                        validRouteAnnotations.annotationOfLeg(index)?.speed()
+                    )
+                    ?.build()
+                updatedLegs.add(routeLeg.toBuilder().annotation(newAnnotation).build())
             }
-            legs.toList()
         }
-        return originalRoute.toBuilder().legs(refreshedRouteLegs).build()
+        return originalRoute.toBuilder().legs(updatedLegs).build()
     }
+
+    private fun DirectionsRouteRefresh.annotationOfLeg(index: Int): LegAnnotation? =
+        this.legs()?.getOrNull(index)?.annotation()
 }

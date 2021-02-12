@@ -127,7 +127,7 @@ class MapboxOffboardRouter(
 
             mapboxDirectionsRefresh = refreshBuilder.build()
             mapboxDirectionsRefresh
-                ?.enqueueCall(RouteRefreshCallbackMapper(route, legIndex, callback))
+                ?.enqueueCall(RouteRefreshCallbackMapper(route, callback))
         } catch (throwable: Throwable) {
             callback.onError(
                 RouteRefreshError(
