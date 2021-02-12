@@ -590,12 +590,21 @@ package com.mapbox.navigation.core.trip.model.eh {
   }
 
   public final class EHorizonObjectType {
+    field public static final String BORDER_CROSSING = "BORDER_CROSSING";
+    field public static final String BRIDGE_ENTRANCE = "BRIDGE_ENTRANCE";
+    field public static final String BRIDGE_EXIT = "BRIDGE_EXIT";
     field public static final String CUSTOM = "CUSTOM";
     field public static final String INCIDENT = "INCIDENT";
     field public static final com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType! INSTANCE;
+    field public static final String RESTRICTED_AREA_ENTRANCE = "RESTRICTED_AREA_ENTRANCE";
+    field public static final String RESTRICTED_AREA_EXIT = "RESTRICTED_AREA_EXIT";
+    field public static final String SERVICE_AREA = "SERVICE_AREA";
+    field public static final String TOLL_COLLECTION_POINT = "TOLL_COLLECTION_POINT";
+    field public static final String TUNNEL_ENTRANCE = "TUNNEL_ENTRANCE";
+    field public static final String TUNNEL_EXIT = "TUNNEL_EXIT";
   }
 
-  @StringDef({com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.INCIDENT, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.CUSTOM}) @kotlin.annotation.Retention public static @interface EHorizonObjectType.Type {
+  @StringDef({com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.INCIDENT, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.TOLL_COLLECTION_POINT, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.BORDER_CROSSING, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.TUNNEL_ENTRANCE, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.TUNNEL_EXIT, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.RESTRICTED_AREA_ENTRANCE, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.RESTRICTED_AREA_EXIT, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.SERVICE_AREA, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.BRIDGE_ENTRANCE, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.BRIDGE_EXIT, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.CUSTOM}) @kotlin.annotation.Retention public static @interface EHorizonObjectType.Type {
   }
 
   public final class EHorizonPosition {

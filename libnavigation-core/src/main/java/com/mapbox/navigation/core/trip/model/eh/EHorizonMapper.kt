@@ -77,6 +77,15 @@ internal fun RoadObjectLocation.mapToEHorizonObjectLocation(): EHorizonObjectLoc
 internal fun RoadObjectType.mapToEHorizonObjectType(): String {
     return when (this) {
         RoadObjectType.INCIDENT -> EHorizonObjectType.INCIDENT
+        RoadObjectType.TOLL_COLLECTION_POINT -> EHorizonObjectType.TOLL_COLLECTION_POINT
+        RoadObjectType.BORDER_CROSSING -> EHorizonObjectType.BORDER_CROSSING
+        RoadObjectType.TUNNEL_ENTRANCE -> EHorizonObjectType.TUNNEL_ENTRANCE
+        RoadObjectType.TUNNEL_EXIT -> EHorizonObjectType.TUNNEL_EXIT
+        RoadObjectType.RESTRICTED_AREA_ENTRANCE -> EHorizonObjectType.RESTRICTED_AREA_ENTRANCE
+        RoadObjectType.RESTRICTED_AREA_EXIT -> EHorizonObjectType.RESTRICTED_AREA_EXIT
+        RoadObjectType.SERVICE_AREA -> EHorizonObjectType.SERVICE_AREA
+        RoadObjectType.BRIDGE_ENTRANCE -> EHorizonObjectType.BRIDGE_ENTRANCE
+        RoadObjectType.BRIDGE_EXIT -> EHorizonObjectType.BRIDGE_EXIT
         RoadObjectType.CUSTOM -> EHorizonObjectType.CUSTOM
     }
 }
