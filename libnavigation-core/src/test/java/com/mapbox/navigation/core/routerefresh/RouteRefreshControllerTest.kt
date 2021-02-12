@@ -73,7 +73,7 @@ class RouteRefreshControllerTest {
     }
 
     @Test
-    fun `should not refresh route without maxspeed or congestion annotation`() =
+    fun `should refresh route with any annotation`() =
         coroutineRule.runBlockingTest {
             every { tripSession.route } returns mockk {
                 every { routeOptions() } returns mockk {
@@ -89,6 +89,6 @@ class RouteRefreshControllerTest {
             coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
             routeRefreshController.stop()
 
-            verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
+            verify(exactly = 1) { directionsSession.requestRouteRefresh(any(), any(), any()) }
         }
 }

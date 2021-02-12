@@ -105,7 +105,7 @@ interface MapboxNativeNavigator {
      *
      * @return True if the annotations could be updated false if not (wrong number of annotations)
      */
-    fun updateAnnotations(legAnnotationJson: String, routeIndex: Int, legIndex: Int): Boolean
+    suspend fun updateAnnotations(legAnnotationJson: String, legIndex: Int): Boolean
 
     /**
      * Gets the banner at a specific step index in the route. If there is no

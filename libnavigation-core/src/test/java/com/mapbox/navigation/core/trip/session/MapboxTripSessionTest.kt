@@ -16,6 +16,7 @@ import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_PREDICTION_MILLIS
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.alert.RouteAlert
+import com.mapbox.navigation.core.internal.utils.isSameRoute
 import com.mapbox.navigation.core.navigator.getMapMatcherResult
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -95,6 +96,7 @@ class MapboxTripSessionTest {
     fun setUp() {
         mockkObject(ThreadController)
         mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapperKt")
+        mockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
         every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
         every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
         every { context.applicationContext } returns context
@@ -118,6 +120,8 @@ class MapboxTripSessionTest {
         every { tripStatus.getMapMatcherResult() } returns mapMatcherResult
         every { routeProgress.bannerInstructions } returns null
         every { routeProgress.voiceInstructions } returns null
+        every { route.isSameRoute(any()) } returns false
+        every { route.routeOptions()?.requestUuid() } returns "uuid"
 
         every {
             locationEngine.requestLocationUpdates(
