@@ -34,7 +34,6 @@ import com.mapbox.navigator.VoiceInstruction
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
-import java.lang.Error
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
@@ -170,8 +169,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         withContext(NavigatorDispatcher) {
             MapboxNativeNavigatorImpl.route = route
             val result = navigator!!.setRoute(
-                route?.toJson()
-                    ?: "{}",
+                route?.toJson() ?: "{}",
                 PRIMARY_ROUTE_INDEX,
                 legIndex,
                 ActiveGuidanceOptionsMapper.mapFrom(route)
@@ -195,11 +193,14 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      *
      * @return True if the annotations could be updated false if not (wrong number of annotations)
      */
-    override fun updateAnnotations(
+    override suspend fun updateAnnotations(
         legAnnotationJson: String,
-        routeIndex: Int,
         legIndex: Int
-    ): Boolean = navigator!!.updateAnnotations(legAnnotationJson, routeIndex, legIndex)
+    ): Boolean = withContext(NavigatorDispatcher) {
+        navigator!!.updateAnnotations(
+            legAnnotationJson, PRIMARY_ROUTE_INDEX, legIndex
+        )
+    }
 
     /**
      * Gets the banner at a specific step index in the route. If there is no
