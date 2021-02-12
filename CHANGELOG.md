@@ -7,16 +7,15 @@ Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-an
 
 ### Changelog
 #### Features
-* Added Nav-Native SDK version to `TileEndpointConfiguration`. [3918](https://github.com/mapbox/mapbox-navigation-android/pull/3918)
 * Added auto-choosing the latest tiles version. [3931](https://github.com/mapbox/mapbox-navigation-android/pull/3931)
+* Added Nav-Native SDK version to `TileEndpointConfiguration`. [3918](https://github.com/mapbox/mapbox-navigation-android/pull/3918)
 
 #### Bug fixes and improvements
-* Fixed stop trip session issue. [3919](https://github.com/mapbox/mapbox-navigation-android/pull/3919)
-* Added check for arrow head icon height and width to prevent reported crash. [3922](https://github.com/mapbox/mapbox-navigation-android/pull/3922)
-* Updated default routing tiles version to `2021_01_30-03_00_00`. [3929](https://github.com/mapbox/mapbox-navigation-android/pull/3929)
-* Changed the default routing tiles version to `2021_01_24-03_00_00`. [3933](https://github.com/mapbox/mapbox-navigation-android/pull/3933)
-* Updated Maps SDK to `v9.6.1`. [3963](https://github.com/mapbox/mapbox-navigation-android/pull/3963)
 * Fixed the Route Refresh feature which was failing on each request due to parser incompatibilities. [3986](https://github.com/mapbox/mapbox-navigation-android/pull/3986)
+* Changed the default routing tiles version to `2021_01_24-03_00_00`. [3933](https://github.com/mapbox/mapbox-navigation-android/pull/3933)
+* Updated default routing tiles version to `2021_01_30-03_00_00`. [3929](https://github.com/mapbox/mapbox-navigation-android/pull/3929)
+* Added check for arrow head icon height and width to prevent reported crash. [3922](https://github.com/mapbox/mapbox-navigation-android/pull/3922)
+* Fixed stop trip session issue. [3919](https://github.com/mapbox/mapbox-navigation-android/pull/3919)
 
 ## Mapbox Navigation SDK 1.4.0 - January 20, 2021
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
