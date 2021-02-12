@@ -11,10 +11,12 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.alert.RouteAlert
+import com.mapbox.navigation.core.internal.utils.isSameRoute
 import com.mapbox.navigation.core.navigator.getMapMatcherResult
 import com.mapbox.navigation.core.sensors.SensorMapper
 import com.mapbox.navigation.core.trip.service.TripService
@@ -57,27 +59,47 @@ internal class MapboxTripSession(
     companion object {
         @Volatile
         internal var UNCONDITIONAL_STATUS_POLLING_PATIENCE = 2000L
+
         @Volatile
         internal var UNCONDITIONAL_STATUS_POLLING_INTERVAL = 1000L
+
+        private const val TAG = "MapboxTripSession"
     }
 
     private var updateNavigatorStatusDataJobs: MutableList<Job> = CopyOnWriteArrayList()
 
     override var route: DirectionsRoute? = null
         set(value) {
+            val isSameRoute = field.isSameRoute(value)
             field = value
             if (value == null) {
                 routeAlerts = emptyList()
                 routeProgress = null
             }
             cancelOngoingUpdateNavigatorStatusDataJobs()
-            val setRouteJob = threadController.getMainScopeAndRootJob().scope.launch {
-                navigator.setRoute(value)?.let {
-                    routeAlerts = it.routeAlerts
+            val updateRouteJob = threadController.getMainScopeAndRootJob().scope.launch {
+                if (isSameRoute && value != null) {
+                    value.legs()?.forEachIndexed { index, routeLeg ->
+                        routeLeg.annotation()?.toJson()?.let { annotations ->
+                            navigator.updateAnnotations(annotations, index).let { success ->
+                                logger.d(
+                                    tag = Tag(TAG),
+                                    msg = Message(
+                                        "Annotation updated successfully=$success, for leg " +
+                                            "index $index, annotations: [$annotations]"
+                                    )
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    navigator.setRoute(value)?.let {
+                        routeAlerts = it.routeAlerts
+                    }
                 }
             }
             mainJobController.scope.launch {
-                setRouteJob.join()
+                updateRouteJob.join()
                 updateDataFromNavigatorStatus()
             }
             isOffRoute = false
