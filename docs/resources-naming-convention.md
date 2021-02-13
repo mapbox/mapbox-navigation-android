@@ -16,12 +16,12 @@ mapbox_<bg/ic/drawable>_<function/feature name>[_state].xml
 
 ### Layout files
 
-mapbox[_view-type]_<function/feature name>.xml
+mapbox[_view-type]_<function/feature name>_layout.xml
 
-* mapbox_button_feedback.xml            -- _for view component layout_
-* mapbox_instruction_view.xml           -- _for view component layout_
-* mapbox_item_instruction.xml           -- _for list view item layout_
-* mapbox_partial_instruction_view.xml   -- _for partial view layout_
+* mapbox_maneuver_layout              -- _for custom view layout_
+* mapbox_trip_progess_layout          -- _for custom view layout_
+* mapbox_activity_maneuver_layout     -- _for example activity layout_
+* mapbox_item_lane_guidance_layout    -- _for recycler view item layout_
 
 ### Animation files
 
@@ -32,8 +32,8 @@ mapbox_animation_<function/feature name>.xml
 
 ### Values naming
 
-* Styles always start with **MapboxStyle**
-* Colors/Dimens/Strings always start with **mapbox_** 
+* Resources under `styles.xml` always start with **MapboxStyle**
+* Colors/Dimens/Strings always start with **mapbox_**
 
 #### Styles
 
@@ -42,10 +42,9 @@ mapbox_animation_<function/feature name>.xml
 
 #### Colors
 
-* mapbox_navigation_route_layer_blue
-* mapbox_navigation_view_color_primary
-* mapbox_navigation_view_color_primary_text
-* mapbox_navigation_view_color_banner_maneuver_secondary
+* mapbox_trip_progress_text_color
+* mapbox_primary_maneuver_text_color
+* mapbox_secondary_maneuver_text_color
 
 #### Dimens
 

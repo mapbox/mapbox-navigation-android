@@ -12,7 +12,7 @@ import com.mapbox.navigation.ui.base.model.maneuver.Maneuver
 import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder
-import kotlinx.android.synthetic.main.mapbox_layout_main_maneuver_view.view.*
+import kotlinx.android.synthetic.main.mapbox_main_maneuver_layout.view.*
 
 /**
  * Default recycler adapter to render upcoming maneuvers for the [RouteLeg].
@@ -38,7 +38,7 @@ class MapboxUpcomingManeuverAdapter(
         parent: ViewGroup,
         viewType: Int
     ): MapboxUpcomingManeuverViewHolder {
-        val view = inflater.inflate(R.layout.mapbox_item_upcoming_maneuvers, parent, false)
+        val view = inflater.inflate(R.layout.mapbox_item_upcoming_maneuvers_layout, parent, false)
         return MapboxUpcomingManeuverViewHolder(view)
     }
 

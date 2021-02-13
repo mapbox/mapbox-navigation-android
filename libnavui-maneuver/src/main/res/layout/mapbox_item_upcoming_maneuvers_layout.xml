@@ -6,5 +6,5 @@
     android:orientation="horizontal"
     android:weightSum="100">
 
-  <include layout="@layout/mapbox_layout_main_maneuver_view" />
+  <include layout="@layout/mapbox_main_maneuver_layout" />
 </LinearLayout>

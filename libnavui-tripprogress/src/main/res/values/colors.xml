@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <color name="mapbox_trip_progress_text_color">@color/colorOnSurface</color>
+  <color name="mapbox_trip_progress_divider_color">@color/colorOnSurface</color>
+  <color name="mapbox_trip_progress_view_background_color">@color/colorSurface</color>
+</resources>

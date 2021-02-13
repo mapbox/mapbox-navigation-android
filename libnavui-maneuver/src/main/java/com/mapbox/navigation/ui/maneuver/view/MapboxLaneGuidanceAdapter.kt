@@ -11,7 +11,7 @@ import com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder
 import com.mapbox.navigation.ui.utils.internal.ThemeUtil
-import kotlinx.android.synthetic.main.mapbox_item_lane_guidance.view.*
+import kotlinx.android.synthetic.main.mapbox_item_lane_guidance_layout.view.*
 
 /**
  * Default recycler adapter to render lanes for the upcoming turn.
@@ -42,7 +42,7 @@ class MapboxLaneGuidanceAdapter(
         parent: ViewGroup,
         viewType: Int
     ): MapboxLaneGuidanceViewHolder {
-        val view = inflater.inflate(R.layout.mapbox_item_lane_guidance, parent, false)
+        val view = inflater.inflate(R.layout.mapbox_item_lane_guidance_layout, parent, false)
         return MapboxLaneGuidanceViewHolder(view)
     }
 

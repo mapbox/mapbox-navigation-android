@@ -47,7 +47,7 @@ class MapboxManeuverViewTest {
 
     @Test
     fun `init attribute primary maneuver text color`() {
-        val expectedTextColor = ctx.getColor(R.color.primaryManeuverTextColor)
+        val expectedTextColor = ctx.getColor(R.color.mapbox_primary_maneuver_text_color)
         val view = MapboxManeuverView(ctx)
 
         assertEquals(
@@ -58,7 +58,7 @@ class MapboxManeuverViewTest {
 
     @Test
     fun `init attribute secondary maneuver text color`() {
-        val expectedTextColor = ctx.getColor(R.color.secondaryManeuverTextColor)
+        val expectedTextColor = ctx.getColor(R.color.mapbox_secondary_maneuver_text_color)
         val view = MapboxManeuverView(ctx)
 
         assertEquals(
@@ -69,7 +69,7 @@ class MapboxManeuverViewTest {
 
     @Test
     fun `init attribute sub maneuver text color`() {
-        val expectedTextColor = ctx.getColor(R.color.subManeuverTextColor)
+        val expectedTextColor = ctx.getColor(R.color.mapbox_sub_maneuver_text_color)
         val view = MapboxManeuverView(ctx)
 
         assertEquals(
@@ -80,7 +80,7 @@ class MapboxManeuverViewTest {
 
     @Test
     fun `init attribute main maneuver card background color`() {
-        val expectedBackgroundColor = ctx.getColor(R.color.mainManeuverCardBackgroundColor)
+        val expectedBackgroundColor = ctx.getColor(R.color.mapbox_main_maneuver_background_color)
         val view = MapboxManeuverView(ctx)
 
         assertEquals(
@@ -91,7 +91,7 @@ class MapboxManeuverViewTest {
 
     @Test
     fun `init attribute sub maneuver card background color`() {
-        val expectedBackgroundColor = ctx.getColor(R.color.subManeuverBackgroundColor)
+        val expectedBackgroundColor = ctx.getColor(R.color.mapbox_sub_maneuver_background_color)
         val view = MapboxManeuverView(ctx)
 
         assertEquals(
@@ -102,7 +102,7 @@ class MapboxManeuverViewTest {
 
     @Test
     fun `init attribute lane guidance card background color`() {
-        val expectedBackgroundColor = ctx.getColor(R.color.laneGuidanceBackgroundColor)
+        val expectedBackgroundColor = ctx.getColor(R.color.mapbox_lane_guidance_background_color)
         val view = MapboxManeuverView(ctx)
 
         assertEquals(

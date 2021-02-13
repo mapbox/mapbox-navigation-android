@@ -39,7 +39,7 @@ class MapboxExitText @JvmOverloads constructor(
     )
 
     init {
-        setTextColor(ContextCompat.getColor(context, R.color.maneuverExitTextColor))
+        setTextColor(ContextCompat.getColor(context, R.color.mapbox_exit_text_color))
         includeFontPadding = false
         setTypeface(typeface, Typeface.BOLD)
         textSize = 10 * context.resources.displayMetrics.scaledDensity

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <dimen name="mapbox_dimen_1dp">1dp</dimen>
   <dimen name="mapbox_dimen_2dp">2dp</dimen>
   <dimen name="mapbox_dimen_4dp">4dp</dimen>
   <dimen name="mapbox_dimen_6dp">6dp</dimen>
@@ -15,6 +16,7 @@
   <dimen name="mapbox_dimen_26dp">26dp</dimen>
   <dimen name="mapbox_dimen_28dp">28dp</dimen>
   <dimen name="mapbox_dimen_30dp">30dp</dimen>
+  <dimen name="mapbox_dimen_32dp">32dp</dimen>
   <dimen name="mapbox_dimen_36dp">36dp</dimen>
   <dimen name="mapbox_dimen_48dp">48dp</dimen>
   <dimen name="mapbox_dimen_54dp">54dp</dimen>
@@ -38,6 +40,7 @@
   <dimen name="mapbox_dimen_text_26sp">26sp</dimen>
   <dimen name="mapbox_dimen_text_28sp">28sp</dimen>
   <dimen name="mapbox_dimen_text_30sp">30sp</dimen>
+  <dimen name="mapbox_dimen_text_32sp">32sp</dimen>
   <dimen name="mapbox_dimen_text_36sp">36sp</dimen>
   <dimen name="mapbox_dimen_text_48sp">48sp</dimen>
   <dimen name="mapbox_dimen_text_54sp">54sp</dimen>
