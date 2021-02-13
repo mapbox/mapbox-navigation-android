@@ -4,49 +4,51 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/mapbox_trip_progress_background_color">
+    android:background="@color/mapbox_trip_progress_view_background_color">
 
   <TextView
-      android:id="@+id/txtMapboxTripProgressDistanceRemaining"
+      android:id="@+id/distanceRemainingText"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginEnd="8dp"
       android:textAlignment="textEnd"
-      app:layout_constraintBottom_toBottomOf="@+id/mapboxTripProgressDivider"
-      app:layout_constraintEnd_toStartOf="@id/mapboxTripProgressDivider"
-      app:layout_constraintTop_toTopOf="@+id/mapboxTripProgressDivider"
+      app:layout_constraintBottom_toBottomOf="@+id/tripProgressDivider"
+      app:layout_constraintEnd_toStartOf="@id/tripProgressDivider"
+      app:layout_constraintTop_toTopOf="@+id/tripProgressDivider"
       tools:text="1056 ft"
-      android:textSize="@dimen/mapbox_dimen_16sp"/>
+      android:textSize="@dimen/mapbox_dimen_text_16sp"/>
+
   <TextView
-      android:id="@+id/txtMapboxTripProgressEstimatedTimeToArrive"
+      android:id="@+id/estimatedTimeToArriveText"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginStart="8dp"
-      app:layout_constraintBottom_toBottomOf="@+id/mapboxTripProgressDivider"
-      app:layout_constraintStart_toEndOf="@id/mapboxTripProgressDivider"
-      app:layout_constraintTop_toTopOf="@+id/mapboxTripProgressDivider"
+      app:layout_constraintBottom_toBottomOf="@+id/tripProgressDivider"
+      app:layout_constraintStart_toEndOf="@id/tripProgressDivider"
+      app:layout_constraintTop_toTopOf="@+id/tripProgressDivider"
       tools:text="4:28 pm"/>
+
   <View
-      android:id="@+id/mapboxTripProgressDivider"
+      android:id="@+id/tripProgressDivider"
       android:layout_width="@dimen/mapbox_dimen_24dp"
       android:layout_height="@dimen/mapbox_dimen_1dp"
-      android:layout_marginBottom="32dp"
-      android:background="@color/mapbox_trip_progress_divider_color"
+      android:layout_marginBottom="@dimen/mapbox_dimen_32dp"
+      android:background="@color/mapbox_trip_progress_view_background_color"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       />
 
   <TextView
-      android:id="@+id/txtMapboxTripProgressTimeRemaining"
+      android:id="@+id/timeRemainingText"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="8dp"
       android:layout_marginTop="8dp"
-      app:layout_constraintBottom_toTopOf="@id/mapboxTripProgressDivider"
+      app:layout_constraintBottom_toTopOf="@id/tripProgressDivider"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
       tools:text="10 min"
-      android:textSize="@dimen/mapbox_dimen_16sp"/>
+      android:textSize="@dimen/mapbox_dimen_text_16sp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

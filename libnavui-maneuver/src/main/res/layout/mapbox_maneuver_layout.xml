@@ -26,7 +26,7 @@
                 android:weightSum="100"
                 android:orientation="horizontal">
 
-                <include layout="@layout/mapbox_layout_main_maneuver_view" />
+                <include layout="@layout/mapbox_main_maneuver_layout" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -34,7 +34,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 android:visibility="gone"
-                android:background="@color/upcomingManeuverBackgroundColor"
+                android:background="@color/mapbox_upcoming_maneuver_background_color"
                 />
         </LinearLayout>
 
@@ -61,7 +61,7 @@
             android:weightSum="100"
             android:orientation="horizontal">
 
-            <include layout="@layout/mapbox_layout_sub_maneuver_view" />
+            <include layout="@layout/mapbox_sub_maneuver_layout" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

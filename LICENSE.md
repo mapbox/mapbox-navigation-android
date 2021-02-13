@@ -1244,6 +1244,12 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Kotlin Android Extensions Runtime.
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Kotlin Stdlib (Kotlin Standard Library for JVM).
 URL: [https://kotlinlang.org/](https://kotlinlang.org/)
 License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)

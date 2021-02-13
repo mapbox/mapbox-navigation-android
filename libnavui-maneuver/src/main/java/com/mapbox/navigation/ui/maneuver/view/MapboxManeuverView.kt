@@ -15,9 +15,9 @@ import com.mapbox.navigation.ui.base.MapboxView
 import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.model.TurnIconResources
-import kotlinx.android.synthetic.main.mapbox_layout_main_maneuver_view.view.*
-import kotlinx.android.synthetic.main.mapbox_layout_sub_maneuver_view.view.*
-import kotlinx.android.synthetic.main.mapbox_maneuver_view.view.*
+import kotlinx.android.synthetic.main.mapbox_main_maneuver_layout.view.*
+import kotlinx.android.synthetic.main.mapbox_maneuver_layout.view.*
+import kotlinx.android.synthetic.main.mapbox_sub_maneuver_layout.view.*
 
 /**
  * Default view to render a maneuver.
@@ -38,7 +38,7 @@ class MapboxManeuverView @JvmOverloads constructor(
      * Initialize.
      */
     init {
-        inflate(context, R.layout.mapbox_maneuver_view, this)
+        inflate(context, R.layout.mapbox_maneuver_layout, this)
 
         laneGuidanceRecycler.apply {
             layoutManager = LinearLayoutManager(context, HORIZONTAL, false)
@@ -192,7 +192,7 @@ class MapboxManeuverView @JvmOverloads constructor(
                 context,
                 typedArray.getResourceId(
                     R.styleable.MapboxManeuverView_maneuverViewBackgroundColor,
-                    R.color.mainManeuverCardBackgroundColor
+                    R.color.mapbox_main_maneuver_background_color
                 )
             )
         )
@@ -201,7 +201,7 @@ class MapboxManeuverView @JvmOverloads constructor(
                 context,
                 typedArray.getResourceId(
                     R.styleable.MapboxManeuverView_subManeuverViewBackgroundColor,
-                    R.color.subManeuverBackgroundColor
+                    R.color.mapbox_sub_maneuver_background_color
                 )
             )
         )
@@ -210,7 +210,7 @@ class MapboxManeuverView @JvmOverloads constructor(
                 context,
                 typedArray.getResourceId(
                     R.styleable.MapboxManeuverView_laneGuidanceViewBackgroundColor,
-                    R.color.laneGuidanceBackgroundColor
+                    R.color.mapbox_lane_guidance_background_color
                 )
             )
         )
@@ -219,7 +219,7 @@ class MapboxManeuverView @JvmOverloads constructor(
                 context,
                 typedArray.getResourceId(
                     R.styleable.MapboxManeuverView_upcomingManeuverViewBackgroundColor,
-                    R.color.upcomingManeuverBackgroundColor
+                    R.color.mapbox_upcoming_maneuver_background_color
                 )
             )
         )

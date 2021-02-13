@@ -1,9 +1,7 @@
 package com.mapbox.navigation.ui.maps.internal.route.line
 
-import android.content.Context
 import android.util.SparseArray
 import androidx.annotation.ColorInt
-import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.core.constants.Constants
@@ -22,7 +20,6 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants
-import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
@@ -200,7 +197,8 @@ object MapboxRouteLineUtils {
      * traffic color instead of the color configured for unknown traffic congestion.
      *
      * @param route the DirectionsRoute used for the [Expression] calculations
-     * @param trafficBackfillRoadClasses a collection of road classes defined in the styles.xml
+     * @param trafficBackfillRoadClasses a collection of road classes for overriding the traffic
+     * congestion color for unknown traffic conditions
      * @param isPrimaryRoute indicates if the route used is the primary route
      * @param congestionColorProvider a function that provides the colors used for various
      * traffic congestion values
@@ -492,35 +490,6 @@ object MapboxRouteLineUtils {
                 if (index == 0) RouteConstants.WAYPOINT_ORIGIN_VALUE
                 else RouteConstants.WAYPOINT_DESTINATION_VALUE
             it.addStringProperty(RouteConstants.WAYPOINT_PROPERTY_KEY, propValue)
-        }
-    }
-
-    /**
-     * Returns a resource value from the style or a default value
-     * @param index the index of the item in the styled attributes.
-     * @param colorResourceId the default value to use if no value is found
-     * @param context the context to obtain the resource from
-     * @param styleRes the style resource to look in
-     *
-     * @return the resource value
-     */
-    @ColorInt
-    internal fun getStyledColor(
-        index: Int,
-        colorResourceId: Int,
-        context: Context,
-        styleRes: Int
-    ): Int {
-        val typedArray =
-            context.obtainStyledAttributes(styleRes, R.styleable.MapboxStyleNavigationMapRoute)
-        return typedArray.getColor(
-            index,
-            ContextCompat.getColor(
-                context,
-                colorResourceId
-            )
-        ).also {
-            typedArray.recycle()
         }
     }
 

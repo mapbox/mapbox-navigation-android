@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <declare-styleable name="MapboxTripProgressView">
+    <!-- Defines the color of divider in the trip progress view. -->
+    <attr name="tripProgressDividerColor" format="reference|color"/>
+    <!-- Defines the color of text representing distance remaining, estimated time to arrival and
+     time remaining. -->
+    <attr name="tripProgressTextColor" format="reference|color"/>
+    <!-- Defines the background color of trip progress view itself. -->
+    <attr name="tripProgressViewBackgroundColor" format="reference|color"/>
+  </declare-styleable>
+</resources>

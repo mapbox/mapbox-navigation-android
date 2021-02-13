@@ -17,7 +17,7 @@ import com.mapbox.navigation.ui.base.model.maneuver.TextComponentNode
 import com.mapbox.navigation.ui.base.model.maneuver.TotalManeuverDistance
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.android.synthetic.main.mapbox_layout_main_maneuver_view.view.*
+import kotlinx.android.synthetic.main.mapbox_main_maneuver_layout.view.*
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

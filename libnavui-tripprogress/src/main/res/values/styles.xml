@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-  <style name="TripProgressView">
-    <item name="tripProgressPrimaryTextColor">?attr/tripProgressPrimaryTextColor</item>
-    <item name="tripProgressDividerColor">?attr/tripProgressDividerColor</item>
-    <item name="tripProgressViewBackgroundColor">?attr/tripProgressViewBackgroundColor</item>
+
+  <style name="MapboxStyleTripProgressView">
+    <item name="tripProgressTextColor">@color/mapbox_trip_progress_text_color</item>
+    <item name="tripProgressDividerColor">@color/mapbox_trip_progress_divider_color</item>
+    <item name="tripProgressViewBackgroundColor">@color/mapbox_trip_progress_view_background_color</item>
   </style>
+
 </resources>

@@ -32,7 +32,7 @@ class MapboxExitTextTest {
 
     @Test
     fun `init text color`() {
-        val expectedTextColor = ctx.getColor(R.color.maneuverExitTextColor)
+        val expectedTextColor = ctx.getColor(R.color.mapbox_exit_text_color)
 
         val view = MapboxExitText(ctx)
 

@@ -31,32 +31,34 @@ class MapboxTripProgressViewTest {
 
     @Test
     fun initAttributes() {
-        val expectedTextColor = ctx.getColor(R.color.mapbox_trip_progress_primary_text_color)
+        val expectedTextColor = ctx.getColor(R.color.mapbox_trip_progress_text_color)
         val expectedDividerColor = ctx.getColor(R.color.mapbox_trip_progress_divider_color)
-        val expectedBackgroundColor = ctx.getColor(R.color.mapbox_trip_progress_background_color)
+        val expectedBackgroundColor = ctx.getColor(
+            R.color.mapbox_trip_progress_view_background_color
+        )
 
         val view = MapboxTripProgressView(ctx)
 
         assertEquals(
             expectedTextColor,
             view.findViewById<TextView>(
-                R.id.txtMapboxTripProgressDistanceRemaining
+                R.id.distanceRemainingText
             ).currentTextColor
         )
         assertEquals(
             expectedTextColor,
             view.findViewById<TextView>(
-                R.id.txtMapboxTripProgressEstimatedTimeToArrive
+                R.id.estimatedTimeToArriveText
             ).currentTextColor
         )
         assertEquals(
             expectedTextColor,
-            view.findViewById<TextView>(R.id.txtMapboxTripProgressTimeRemaining).currentTextColor
+            view.findViewById<TextView>(R.id.timeRemainingText).currentTextColor
         )
         assertEquals(
             expectedDividerColor,
             (
-                view.findViewById<View>(R.id.mapboxTripProgressDivider).background as ColorDrawable
+                view.findViewById<View>(R.id.tripProgressDivider).background as ColorDrawable
                 ).color
         )
         assertEquals(
@@ -74,11 +76,17 @@ class MapboxTripProgressViewTest {
 
         assertEquals(
             expectedDividerColor,
-            view.findViewById<TextView>(R.id.mapboxTripProgressDividerLeft).currentTextColor
+            (
+                view.findViewById<TextView>(R.id.tripProgressDividerLeft)
+                    .background as ColorDrawable
+                ).color
         )
         assertEquals(
             expectedDividerColor,
-            view.findViewById<TextView>(R.id.mapboxTripProgressDividerRight).currentTextColor
+            (
+                view.findViewById<TextView>(R.id.tripProgressDividerRight)
+                    .background as ColorDrawable
+                ).color
         )
     }
 
@@ -121,17 +129,17 @@ class MapboxTripProgressViewTest {
 
         assertEquals(
             "44 mi",
-            view.findViewById<TextView>(R.id.txtMapboxTripProgressDistanceRemaining).text.toString()
+            view.findViewById<TextView>(R.id.distanceRemainingText).text.toString()
         )
         assertEquals(
             "11:59",
             view.findViewById<TextView>(
-                R.id.txtMapboxTripProgressEstimatedTimeToArrive
+                R.id.estimatedTimeToArriveText
             ).text.toString()
         )
         assertEquals(
             "5 min",
-            view.findViewById<TextView>(R.id.txtMapboxTripProgressTimeRemaining).text.toString()
+            view.findViewById<TextView>(R.id.timeRemainingText).text.toString()
         )
     }
 }

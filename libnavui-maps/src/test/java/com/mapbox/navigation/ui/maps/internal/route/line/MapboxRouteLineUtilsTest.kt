@@ -16,15 +16,12 @@ import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.ui.base.internal.route.RouteConstants
-import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.common.ShadowValueConverter
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getStyledColor
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
-import com.mapbox.navigation.ui.maps.utils.ThemeSwitcher
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -43,28 +40,10 @@ import org.robolectric.annotation.Config
 class MapboxRouteLineUtilsTest {
 
     lateinit var ctx: Context
-    var styleRes: Int = 0
 
     @Before
     fun setUp() {
         ctx = ApplicationProvider.getApplicationContext()
-        styleRes = ThemeSwitcher.retrieveAttrResourceId(
-            ctx,
-            R.attr.navigationViewRouteStyle,
-            R.style.MapboxStyleNavigationMapRoute
-        )
-    }
-
-    @Test
-    fun getStyledColorTest() {
-        val result = getStyledColor(
-            R.styleable.MapboxStyleNavigationMapRoute_routeColor,
-            R.color.mapbox_navigation_route_layer_blue,
-            ctx,
-            styleRes
-        )
-
-        assertEquals(-11097861, result)
     }
 
     @Test
