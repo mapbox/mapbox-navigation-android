@@ -275,7 +275,7 @@ commands:
     steps:
       - run:
           name: Check public documentation
-          command: sh scripts/dokka-validate.sh
+          command: ./scripts/dokka-validate.sh
 
   generate-documentation:
     steps:
