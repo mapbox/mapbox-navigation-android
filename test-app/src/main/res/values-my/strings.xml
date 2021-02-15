@@ -1,9 +1,0 @@
-<resources>
-    <string name="app_name">Mapbox 1.0 လမ်းညွန်ခြင်း development tookkit</string>
-
-    <string name="settings">ချိန်ညှိမှုများ</string>
-    <string name="simulate_route">လမ်းကြောင်းစမ်းသပ်သည်</string>
-    <string name="language">ဘာသာစကား</string>
-    <string name="unit_type">ယူနစ်အမျိုးအစား</string>
-    <string name="route_profile">လမ်းကြောင်းပရိုဖိုင်</string>
-</resources>

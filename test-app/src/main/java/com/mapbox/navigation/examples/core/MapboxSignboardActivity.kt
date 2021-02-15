@@ -36,7 +36,7 @@ import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivitySignboardBinding
-import com.mapbox.navigation.examples.util.Slackline
+import com.mapbox.navigation.examples.util.RouteLine
 import com.mapbox.navigation.examples.util.Utils.getMapboxAccessToken
 import com.mapbox.navigation.ui.base.api.signboard.SignboardApi
 import com.mapbox.navigation.ui.base.api.signboard.SignboardReadyCallback
@@ -57,7 +57,7 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val mapboxReplayer = MapboxReplayer()
     private val replayRouteMapper = ReplayRouteMapper()
-    private val slackLine = Slackline(this)
+    private val routeLine = RouteLine(this)
     private val navigationLocationProvider = NavigationLocationProvider()
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
@@ -177,7 +177,7 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
     private fun init() {
         initNavigation()
         initStyle()
-        slackLine.initialize(binding.mapView, mapboxNavigation)
+        routeLine.initialize(binding.mapView, mapboxNavigation)
     }
 
     @SuppressLint("MissingPermission")

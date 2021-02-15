@@ -79,7 +79,6 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.2.0'
     // Mapbox Navigation SDK
     implementation project(':libnavui-maps')
     implementation project(':libnavui-tripprogress')
@@ -104,8 +103,8 @@ dependencies {
     implementation dependenciesList.androidXCore
     implementation dependenciesList.materialDesign
     implementation dependenciesList.androidXAppCompat
+    implementation dependenciesList.androidXCardView
     implementation dependenciesList.androidXConstraintLayout
-    implementation dependenciesList.androidXPreference
 
     implementation dependenciesList.gmsLocation
 

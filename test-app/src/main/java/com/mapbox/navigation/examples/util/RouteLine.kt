@@ -5,7 +5,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
@@ -23,7 +22,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 
-class Slackline(private val activity: AppCompatActivity) : LifecycleObserver {
+class RouteLine(private val activity: AppCompatActivity) : LifecycleObserver {
     private lateinit var mapView: MapView
     private lateinit var mapboxNavigation: MapboxNavigation
     lateinit var style: Style
@@ -63,20 +62,12 @@ class Slackline(private val activity: AppCompatActivity) : LifecycleObserver {
         this.mapView = mapView
         this.mapboxNavigation = mapboxNavigation
 
-        mapView.getMapboxMap().getStyle(
-            object : Style.OnStyleLoaded {
-                override fun onStyleLoaded(style: Style) {
-                    this@Slackline.style = style
-                }
-            }
-        )
+        mapView.getMapboxMap().getStyle { style -> this@RouteLine.style = style }
     }
 
-    private val onIndicatorPositionChangedListener = object : OnIndicatorPositionChangedListener {
-        override fun onIndicatorPositionChanged(point: Point) {
-            routeLineApi.updateTraveledRouteLine(point)?.apply {
-                routeLineView.render(style, this)
-            }
+    private val onIndicatorPositionChangedListener = OnIndicatorPositionChangedListener { point ->
+        routeLineApi.updateTraveledRouteLine(point)?.apply {
+            routeLineView.render(style, this)
         }
     }
 

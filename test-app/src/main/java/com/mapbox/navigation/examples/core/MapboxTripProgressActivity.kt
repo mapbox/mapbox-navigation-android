@@ -38,8 +38,8 @@ import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.examples.core.databinding.TripProgressActivityLayoutBinding
-import com.mapbox.navigation.examples.util.Slackline
+import com.mapbox.navigation.examples.core.databinding.LayoutActivityTripprogressBinding
+import com.mapbox.navigation.examples.util.RouteLine
 import com.mapbox.navigation.ui.base.model.tripprogress.DistanceRemainingFormatter
 import com.mapbox.navigation.ui.base.model.tripprogress.EstimatedTimeToArrivalFormatter
 import com.mapbox.navigation.ui.base.model.tripprogress.PercentDistanceTraveledFormatter
@@ -48,21 +48,21 @@ import com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormat
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
 
-class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
+class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 
-    private val slackline = Slackline(this)
+    private val routeLine = RouteLine(this)
     private lateinit var mapboxMap: MapboxMap
     private val navigationLocationProvider = NavigationLocationProvider()
     private lateinit var locationComponent: LocationComponentPlugin
     private lateinit var mapCamera: CameraAnimationsPlugin
     private lateinit var mapboxNavigation: MapboxNavigation
     private val mapboxReplayer = MapboxReplayer()
-    private lateinit var binding: TripProgressActivityLayoutBinding
+    private lateinit var binding: LayoutActivityTripprogressBinding
     private lateinit var tripProgressApiApi: MapboxTripProgressApi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = TripProgressActivityLayoutBinding.inflate(layoutInflater)
+        binding = LayoutActivityTripprogressBinding.inflate(layoutInflater)
         setContentView(binding.root)
         mapboxMap = binding.mapView.getMapboxMap()
         locationComponent = binding.mapView.getLocationComponentPlugin().apply {
@@ -95,13 +95,13 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
     private fun init() {
         initNavigation()
         initStyle()
-        slackline.initialize(binding.mapView, mapboxNavigation)
+        routeLine.initialize(binding.mapView, mapboxNavigation)
     }
 
     @SuppressLint("MissingPermission")
     private fun initNavigation() {
         mapboxNavigation = MapboxNavigation(
-            NavigationOptions.Builder(this@TripProgressActivity)
+            NavigationOptions.Builder(this@MapboxTripProgressActivity)
                 .accessToken(getMapboxAccessTokenFromResources())
                 .locationEngine(ReplayLocationEngine(mapboxReplayer))
                 .build()
@@ -124,7 +124,7 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
             object : OnMapLoadErrorListener {
                 override fun onMapLoadError(mapLoadError: MapLoadError, msg: String) {
                     Log.e(
-                        TripProgressActivity::class.java.simpleName,
+                        MapboxTripProgressActivity::class.java.simpleName,
                         "Error loading map: " + mapLoadError.name
                     )
                 }

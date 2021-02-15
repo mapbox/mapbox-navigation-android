@@ -20,7 +20,6 @@ mapbox[_view-type]_<function/feature name>_layout.xml
 
 * mapbox_maneuver_layout              -- _for custom view layout_
 * mapbox_trip_progess_layout          -- _for custom view layout_
-* mapbox_activity_maneuver_layout     -- _for example activity layout_
 * mapbox_item_lane_guidance_layout    -- _for recycler view item layout_
 
 ### Animation files

@@ -1,9 +1,0 @@
-<resources>
-    <string name="app_name">Mapbox 1.0 Lilọ kiri SDK fun Android</string>
-
-    <string name="settings">Ètò</string>
-    <string name="simulate_route">Itọsọna Simulate</string>
-    <string name="language">Ede</string>
-    <string name="unit_type">Iru Iwọn</string>
-    <string name="route_profile">Profaili Itọsọna</string>
-</resources>

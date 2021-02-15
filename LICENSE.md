@@ -728,6 +728,12 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Kotlin Android Extensions Runtime.
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Kotlin Stdlib (Kotlin Standard Library for JVM).
 URL: [https://kotlinlang.org/](https://kotlinlang.org/)
 License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -755,6 +761,12 @@ License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENS
 Mapbox Navigation uses portions of the Mapbox Java SDK.
 URL: [https://github.com/mapbox/mapbox-java](https://github.com/mapbox/mapbox-java)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Parcelize Runtime (Runtime library for the Parcelize compiler plugin).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
@@ -976,6 +988,12 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Kotlin Android Extensions Runtime.
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Kotlin Stdlib (Kotlin Standard Library for JVM).
 URL: [https://kotlinlang.org/](https://kotlinlang.org/)
 License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1100,6 +1118,12 @@ License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Parcelize Runtime (Runtime library for the Parcelize compiler plugin).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Telemetry for the Mapbox Maps SDK Carbon.
 URL: [https://github.com/mapbox/mapbox-maps-android](https://github.com/mapbox/mapbox-maps-android)
 License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
@@ -1193,6 +1217,12 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Kotlin Android Extensions Runtime.
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Kotlin Stdlib (Kotlin Standard Library for JVM).
 URL: [https://kotlinlang.org/](https://kotlinlang.org/)
 License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1212,6 +1242,12 @@ License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENS
 ===========================================================================
 
 Mapbox Navigation uses portions of the Kotlin Stdlib Jdk8 (Kotlin Standard Library JDK 8 extension).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Parcelize Runtime (Runtime library for the Parcelize compiler plugin).
 URL: [https://kotlinlang.org/](https://kotlinlang.org/)
 License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1241,6 +1277,12 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 Mapbox Navigation uses portions of the IntelliJ IDEA Annotations (A set of annotations used for code inspection support and code documentation.).
 URL: [http://www.jetbrains.org](http://www.jetbrains.org)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Android Extensions Runtime.
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
@@ -1277,6 +1319,12 @@ License: [The Apache Software License, Version 2.0](https://www.apache.org/licen
 Mapbox Navigation uses portions of the kotlinx-coroutines-core (Coroutines support libraries for Kotlin).
 URL: [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
 License: [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Parcelize Runtime (Runtime library for the Parcelize compiler plugin).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
@@ -1456,6 +1504,12 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Kotlin Android Extensions Runtime.
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Kotlin Stdlib (Kotlin Standard Library for JVM).
 URL: [https://kotlinlang.org/](https://kotlinlang.org/)
 License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1492,6 +1546,12 @@ License: [The Apache Software License, Version 2.0](https://www.apache.org/licen
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Parcelize Runtime (Runtime library for the Parcelize compiler plugin).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Timber (No-nonsense injectable logging.).
 URL: [https://github.com/JakeWharton/timber](https://github.com/JakeWharton/timber)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1515,12 +1575,6 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 Mapbox Navigation uses portions of the IntelliJ IDEA Annotations (A set of annotations used for code inspection support and code documentation.).
 URL: [http://www.jetbrains.org](http://www.jetbrains.org)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the Kotlin Android Extensions Runtime.
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
@@ -1633,6 +1687,12 @@ License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 Mapbox Navigation uses portions of the Okio.
 License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Parcelize Runtime (Runtime library for the Parcelize compiler plugin).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 

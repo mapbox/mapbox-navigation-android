@@ -8,32 +8,30 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.navigation.examples.core.MapboxManeuverActivity
-import com.mapbox.navigation.examples.core.MapboxRouteLineApiExampleActivity
+import com.mapbox.navigation.examples.core.MapboxNavigationActivity
+import com.mapbox.navigation.examples.core.MapboxRouteLineActivity
 import com.mapbox.navigation.examples.core.MapboxSignboardActivity
 import com.mapbox.navigation.examples.core.MapboxSnapshotActivity
+import com.mapbox.navigation.examples.core.MapboxTripProgressActivity
+import com.mapbox.navigation.examples.core.MapboxVoiceActivity
 import com.mapbox.navigation.examples.core.R
-import com.mapbox.navigation.examples.core.SlackLineActivity
-import com.mapbox.navigation.examples.core.TripProgressActivity
-import com.mapbox.navigation.examples.core.VoiceActivity
-import com.mapbox.navigation.examples.core.camera.CameraAnimationsActivity
-import com.mapbox.navigation.examples.core.databinding.MainActivityLayoutBinding
+import com.mapbox.navigation.examples.core.camera.MapboxCameraAnimationsActivity
+import com.mapbox.navigation.examples.core.databinding.LayoutActivityMainBinding
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper.Companion.areLocationPermissionsGranted
 
 class MainActivity : AppCompatActivity(), PermissionsListener {
 
     private val permissionsHelper = LocationPermissionsHelper(this)
-    private lateinit var binding: MainActivityLayoutBinding
+    private lateinit var binding: LayoutActivityMainBinding
     private lateinit var adapter: ExamplesAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = MainActivityLayoutBinding.inflate(layoutInflater)
+        binding = LayoutActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         val sampleItemList = buildSampleList()
@@ -46,7 +44,6 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 LinearLayoutManager.VERTICAL,
                 false
             )
-            addItemDecoration(DividerItemDecoration(this@MainActivity, VERTICAL))
             adapter = this@MainActivity.adapter
         }
         adapter.addSampleItems(sampleItemList)
@@ -61,19 +58,19 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
     private fun buildSampleList(): List<SampleItem> {
         return listOf(
             SampleItem(
-                getString(R.string.title_route_api),
-                getString(R.string.description_routeline_api),
-                MapboxRouteLineApiExampleActivity::class.java
+                getString(R.string.title_navigation),
+                getString(R.string.description_navigation),
+                MapboxNavigationActivity::class.java
             ),
             SampleItem(
-                getString(R.string.title_slackline),
-                getString(R.string.slackline_description),
-                SlackLineActivity::class.java
+                getString(R.string.title_route_line),
+                getString(R.string.description_route_line),
+                MapboxRouteLineActivity::class.java
             ),
             SampleItem(
-                getString(R.string.title_navigation_camera),
-                getString(R.string.description_navigation_camera),
-                CameraAnimationsActivity::class.java
+                getString(R.string.title_camera),
+                getString(R.string.description_camera),
+                MapboxCameraAnimationsActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_snapshotter),
@@ -88,7 +85,7 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
             SampleItem(
                 getString(R.string.title_trip_progress),
                 getString(R.string.description_trip_progress),
-                TripProgressActivity::class.java
+                MapboxTripProgressActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_maneuver),
@@ -98,7 +95,7 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
             SampleItem(
                 getString(R.string.title_voice),
                 getString(R.string.description_voice),
-                VoiceActivity::class.java
+                MapboxVoiceActivity::class.java
             )
         )
     }

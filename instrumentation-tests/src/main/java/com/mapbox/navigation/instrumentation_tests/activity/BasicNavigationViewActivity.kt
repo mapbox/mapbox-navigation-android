@@ -6,17 +6,18 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.maps.MapLoadError
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
-import com.mapbox.navigation.instrumentation_tests.R
-import kotlinx.android.synthetic.main.activity_basic_navigation_view.*
+import com.mapbox.navigation.instrumentation_tests.databinding.ActivityBasicNavigationViewBinding
 
 class BasicNavigationViewActivity : AppCompatActivity() {
 
+    lateinit var binding: ActivityBasicNavigationViewBinding
     lateinit var mapboxMap: MapboxMap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_basic_navigation_view)
-        mapboxMap = mapView.getMapboxMap()
+        binding = ActivityBasicNavigationViewBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        mapboxMap = binding.mapView.getMapboxMap()
         mapboxMap.loadStyleUri(
             "asset://map_style_blank.json",
             onMapLoadErrorListener = object : OnMapLoadErrorListener {
@@ -29,21 +30,21 @@ class BasicNavigationViewActivity : AppCompatActivity() {
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView?.onLowMemory()
+        binding.mapView?.onLowMemory()
     }
 
     override fun onStart() {
         super.onStart()
-        mapView.onStart()
+        binding.mapView.onStart()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView.onStop()
+        binding.mapView.onStop()
     }
 
     override fun onDestroy() {
-        mapView.onDestroy()
+        binding.mapView.onDestroy()
         super.onDestroy()
     }
 }
