@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-parcelize'
 apply plugin: 'com.mapbox.maps.token'
 apply from: "${rootDir}/gradle/ktlint.gradle"
 
@@ -25,6 +25,10 @@ android {
 
     testOptions {
         execution 'ANDROIDX_TEST_ORCHESTRATOR'
+    }
+
+    buildFeatures {
+        viewBinding true
     }
 }
 

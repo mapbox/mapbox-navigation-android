@@ -32,7 +32,6 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
-import kotlinx.android.synthetic.main.activity_basic_navigation_view.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -63,7 +62,7 @@ abstract class SimpleMapViewNavigationTest :
 
     @Before
     fun setup() {
-        initIdlingResource = MapStyleInitIdlingResource(activity.mapView)
+        initIdlingResource = MapStyleInitIdlingResource(activity.binding.mapView)
         initIdlingResource.register()
         Espresso.onIdle()
 
@@ -114,7 +113,7 @@ abstract class SimpleMapViewNavigationTest :
             )
             navigationCamera = NavigationCamera(
                 activity.mapboxMap,
-                activity.mapView.getCameraAnimationsPlugin(),
+                activity.binding.mapView.getCameraAnimationsPlugin(),
                 mapboxNavigationViewportDataSource
             )
             navigationCamera.requestNavigationCameraToFollowing()
@@ -147,7 +146,7 @@ abstract class SimpleMapViewNavigationTest :
     protected fun addLocationPuck() {
         runOnMainSync {
             navigationLocationProvider = NavigationLocationProvider()
-            locationPlugin = activity.mapView.getLocationComponentPlugin()
+            locationPlugin = activity.binding.mapView.getLocationComponentPlugin()
             locationPlugin.setLocationProvider(navigationLocationProvider)
             locationPlugin.locationPuck = LocationPuck2D(
                 bearingImage = ContextCompat.getDrawable(

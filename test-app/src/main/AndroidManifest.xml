@@ -13,20 +13,20 @@
       android:theme="@style/AppTheme">
 
     <activity
-        android:name=".MapboxRouteLineApiExampleActivity"
-        android:label="@string/title_navigation_route_ui"
+        android:name=".MapboxNavigationActivity"
+        android:label="@string/title_navigation"
         android:screenOrientation="portrait">
     </activity>
 
     <activity
-        android:name=".SlackLineActivity"
-        android:label="@string/title_navigation_route_ui"
+        android:name=".MapboxRouteLineActivity"
+        android:label="@string/title_route_line"
         android:screenOrientation="portrait">
     </activity>
 
     <activity
-        android:name=".camera.CameraAnimationsActivity"
-        android:label="@string/title_navigation_route_ui"
+        android:name=".camera.MapboxCameraAnimationsActivity"
+        android:label="@string/title_camera"
         android:screenOrientation="portrait">
     </activity>
 
@@ -43,7 +43,7 @@
     </activity>
 
     <activity
-        android:name=".TripProgressActivity"
+        android:name=".MapboxTripProgressActivity"
         android:label="@string/title_trip_progress">
     </activity>
 
@@ -53,13 +53,12 @@
     </activity>
 
     <activity
-        android:name=".VoiceActivity"
+        android:name=".MapboxVoiceActivity"
         android:label="@string/title_voice">
     </activity>
 
     <activity
         android:name="com.mapbox.navigation.examples.MainActivity"
-        android:label="@string/title_navigation_route_ui"
         android:screenOrientation="portrait">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />

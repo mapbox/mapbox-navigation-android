@@ -52,7 +52,7 @@ import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.camera.AnimationAdapter.OnAnimationButtonClicked
-import com.mapbox.navigation.examples.core.databinding.LayoutCameraAnimationsBinding
+import com.mapbox.navigation.examples.core.databinding.LayoutActivityCameraBinding
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
@@ -69,7 +69,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.turf.TurfMeasurement
 
-class CameraAnimationsActivity :
+class MapboxCameraAnimationsActivity :
     AppCompatActivity(),
     PermissionsListener,
     OnAnimationButtonClicked,
@@ -88,7 +88,7 @@ class CameraAnimationsActivity :
     private var routeLineView: MapboxRouteLineView? = null
     private var routeArrowView: MapboxRouteArrowView? = null
 
-    private lateinit var binding: LayoutCameraAnimationsBinding
+    private lateinit var binding: LayoutActivityCameraBinding
     private lateinit var navigationCamera: NavigationCamera
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
 
@@ -201,13 +201,13 @@ class CameraAnimationsActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = LayoutCameraAnimationsBinding.inflate(layoutInflater)
+        binding = LayoutActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
         mapboxMap = binding.mapView.getMapboxMap()
         locationComponent = binding.mapView.getLocationComponentPlugin().apply {
             this.locationPuck = LocationPuck2D(
                 bearingImage = ContextCompat.getDrawable(
-                    this@CameraAnimationsActivity,
+                    this@MapboxCameraAnimationsActivity,
                     R.drawable.mapbox_navigation_puck_icon
                 )
             )
@@ -388,7 +388,7 @@ class CameraAnimationsActivity :
             object : Style.OnStyleLoaded {
                 override fun onStyleLoaded(style: Style) {
                     getGesturesPlugin().addOnMapLongClickListener(
-                        this@CameraAnimationsActivity
+                        this@MapboxCameraAnimationsActivity
                     )
                     style.addSource(poiSource)
                     style.addLayer(poiLayer)

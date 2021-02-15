@@ -1,9 +1,0 @@
-<resources>
-    <string name="app_name">SDK 1.0 de mapas e navegación para o Android</string>
-
-    <string name="settings">Axustes</string>
-    <string name="simulate_route">Simular rota</string>
-    <string name="language">Lingua</string>
-    <string name="unit_type">Unidade de medida</string>
-    <string name="route_profile">Perfil de rota</string>
-</resources>

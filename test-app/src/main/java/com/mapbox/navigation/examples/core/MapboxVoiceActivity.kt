@@ -20,7 +20,6 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapLoadError
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.Style
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
@@ -44,7 +43,7 @@ import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
-import com.mapbox.navigation.examples.core.databinding.LayoutVoiceBinding
+import com.mapbox.navigation.examples.core.databinding.LayoutActivityVoiceBinding
 import com.mapbox.navigation.ui.base.api.voice.SpeechApi
 import com.mapbox.navigation.ui.base.api.voice.SpeechCallback
 import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayer
@@ -69,7 +68,7 @@ import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
 import com.mapbox.navigation.utils.internal.ifNonNull
 import java.util.Locale
 
-class VoiceActivity :
+class MapboxVoiceActivity :
     AppCompatActivity(),
     PermissionsListener,
     OnMapLongClickListener {
@@ -92,7 +91,7 @@ class VoiceActivity :
     private var firstPlay: SpeechState.ReadyToPlay? = null
     private var isFirst: Boolean = true
 
-    private lateinit var binding: LayoutVoiceBinding
+    private lateinit var binding: LayoutActivityVoiceBinding
     private lateinit var navigationCamera: NavigationCamera
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
 
@@ -214,13 +213,13 @@ class VoiceActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = LayoutVoiceBinding.inflate(layoutInflater)
+        binding = LayoutActivityVoiceBinding.inflate(layoutInflater)
         setContentView(binding.root)
         mapboxMap = binding.mapView.getMapboxMap()
         locationComponent = binding.mapView.getLocationComponentPlugin().apply {
             this.locationPuck = LocationPuck2D(
                 bearingImage = ContextCompat.getDrawable(
-                    this@VoiceActivity,
+                    this@MapboxVoiceActivity,
                     R.drawable.mapbox_navigation_puck_icon
                 )
             )
@@ -369,12 +368,10 @@ class VoiceActivity :
     private fun initStyle() {
         mapboxMap.loadStyleUri(
             MAPBOX_STREETS,
-            object : Style.OnStyleLoaded {
-                override fun onStyleLoaded(style: Style) {
-                    getGesturesPlugin().addOnMapLongClickListener(
-                        this@VoiceActivity
-                    )
-                }
+            {
+                getGesturesPlugin().addOnMapLongClickListener(
+                    this@MapboxVoiceActivity
+                )
             },
             object : OnMapLoadErrorListener {
                 override fun onMapLoadError(mapViewLoadError: MapLoadError, msg: String) {

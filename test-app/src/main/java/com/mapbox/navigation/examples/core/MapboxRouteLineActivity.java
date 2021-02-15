@@ -74,7 +74,7 @@ import timber.log.Timber;
 import static com.mapbox.android.gestures.Utils.dpToPx;
 import static com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID;
 
-public class MapboxRouteLineApiExampleActivity extends AppCompatActivity implements OnMapLongClickListener {
+public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapLongClickListener {
 
   private final float routeClickPadding = dpToPx(30f);
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
@@ -102,7 +102,7 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_mapbox_route_line_api_example);
+    setContentView(R.layout.layout_activity_routeline);
     MapboxMapOptions mapboxMapOptions = new MapboxMapOptions(this, getResources().getDisplayMetrics().density, null);
     ResourceOptions resourceOptions = new ResourceOptions.Builder()
         .accessToken(getMapboxAccessTokenFromResources())

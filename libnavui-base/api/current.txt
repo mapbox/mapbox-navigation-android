@@ -104,7 +104,7 @@ package com.mapbox.navigation.ui.base.api.voice {
 package com.mapbox.navigation.ui.base.formatter {
 
   public interface ValueFormatter<T, R> {
-    method public R! format(T? t);
+    method public R! format(T? update);
   }
 
 }
@@ -746,10 +746,10 @@ package com.mapbox.navigation.ui.base.model.tripprogress {
   public static final class TripProgressUpdateFormatter.Builder {
     ctor public TripProgressUpdateFormatter.Builder(android.content.Context context);
     method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter build();
-    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder distanceRemainingFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,android.text.SpannableString> formatter);
-    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder estimatedTimeToArrivalFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,android.text.SpannableString> formatter);
-    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder percentRouteTraveledFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,android.text.SpannableString> formatter);
-    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder timeRemainingFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,android.text.SpannableString> formatter);
+    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder distanceRemainingFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,? extends android.text.SpannableString> formatter);
+    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder estimatedTimeToArrivalFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,? extends android.text.SpannableString> formatter);
+    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder percentRouteTraveledFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,? extends android.text.SpannableString> formatter);
+    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder timeRemainingFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,? extends android.text.SpannableString> formatter);
   }
 
 }

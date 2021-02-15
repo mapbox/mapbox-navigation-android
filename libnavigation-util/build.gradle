@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-parcelize'
 apply plugin: 'org.jetbrains.dokka'
 apply from: "${rootDir}/gradle/ktlint.gradle"
 apply from: "${rootDir}/gradle/kdoc-settings.gradle"
@@ -18,6 +18,10 @@ android {
         targetSdkVersion androidVersions.targetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro"
+    }
+
+    buildFeatures {
+        viewBinding true
     }
 
 }
