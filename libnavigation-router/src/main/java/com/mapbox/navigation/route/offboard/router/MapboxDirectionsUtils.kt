@@ -2,7 +2,7 @@ package com.mapbox.navigation.route.offboard.router
 
 import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.internal.extensions.supportsRefresh
+import com.mapbox.navigation.base.extensions.supportsRouteRefresh
 import java.util.Locale
 
 private val EVENT_LISTENER = NavigationRouteEventListener()
@@ -98,7 +98,7 @@ internal fun MapboxDirections.Builder.routeOptions(
         walkingOptions(it)
     }
 
-    enableRefresh(options.supportsRefresh())
+    enableRefresh(options.supportsRouteRefresh())
 
     eventListener(EVENT_LISTENER)
 

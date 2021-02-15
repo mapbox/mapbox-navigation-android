@@ -3,7 +3,8 @@ package com.mapbox.navigation.core.routerefresh
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
-import com.mapbox.navigation.base.internal.extensions.supportsRefresh
+import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.navigation.base.extensions.supportsRouteRefresh
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.core.directions.session.DirectionsSession
@@ -11,6 +12,8 @@ import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.MapboxTimer
 import kotlinx.coroutines.Job
 import java.util.concurrent.TimeUnit
+
+private val TAG = Tag("RouteRefreshController")
 
 /**
  * This class is responsible for refreshing the current direction route's traffic.
@@ -36,13 +39,23 @@ internal class RouteRefreshController(
     fun start(): Job {
         stop()
         return routerRefreshTimer.startTimer {
-            val route = tripSession.route?.takeIf { it.routeOptions().supportsRefresh() }
-            route?.let {
+            val route = tripSession.route?.takeIf { it.routeOptions().supportsRouteRefresh() }
+            if (route != null) {
                 val legIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0
                 directionsSession.requestRouteRefresh(
                     route,
                     legIndex,
                     routeRefreshCallback
+                )
+            } else {
+                logger.w(
+                    TAG,
+                    Message(
+                        """
+                           The route is not qualified for route refresh feature.
+                           See RouteOptions?.supportsRouteRefresh() extension for details.
+                        """.trimIndent()
+                    )
                 )
             }
         }
@@ -55,7 +68,7 @@ internal class RouteRefreshController(
     private val routeRefreshCallback = object : RouteRefreshCallback {
 
         override fun onRefresh(directionsRoute: DirectionsRoute) {
-            logger.i(msg = Message("Successful route refresh"))
+            logger.i(TAG, msg = Message("Successful route refresh"))
             val directionsSessionRoutes = directionsSession.routes.toMutableList()
             if (directionsSessionRoutes.isNotEmpty()) {
                 directionsSessionRoutes[0] = directionsRoute
@@ -64,7 +77,8 @@ internal class RouteRefreshController(
         }
 
         override fun onError(error: RouteRefreshError) {
-            logger.i(
+            logger.e(
+                TAG,
                 msg = Message("Route refresh error"),
                 tr = error.throwable
             )

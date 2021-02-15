@@ -3,6 +3,7 @@ package com.mapbox.navigation.base.internal.extensions
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.extensions.supportsRouteRefresh
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -27,7 +28,7 @@ class RouteRefreshExTest {
             .overview(DirectionsCriteria.OVERVIEW_FULL)
             .build()
 
-        assertTrue(routeOptions.supportsRefresh())
+        assertTrue(routeOptions.supportsRouteRefresh())
     }
 
     @Test
@@ -38,7 +39,7 @@ class RouteRefreshExTest {
             .overview(DirectionsCriteria.OVERVIEW_FULL)
             .build()
 
-        assertTrue(routeOptions.supportsRefresh())
+        assertTrue(routeOptions.supportsRouteRefresh())
     }
 
     @Test
@@ -49,7 +50,7 @@ class RouteRefreshExTest {
             .overview(DirectionsCriteria.OVERVIEW_SIMPLIFIED)
             .build()
 
-        assertFalse(routeOptions.supportsRefresh())
+        assertFalse(routeOptions.supportsRouteRefresh())
     }
 
     @Test
@@ -62,6 +63,6 @@ class RouteRefreshExTest {
             .overview(DirectionsCriteria.OVERVIEW_FULL)
             .build()
 
-        assertFalse(routeOptions.supportsRefresh())
+        assertFalse(routeOptions.supportsRouteRefresh())
     }
 }

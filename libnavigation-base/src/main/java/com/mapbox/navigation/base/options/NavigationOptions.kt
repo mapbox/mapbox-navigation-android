@@ -244,7 +244,11 @@ class NavigationOptions private constructor(
             apply { this.eHorizonOptions = eHorizonOptions }
 
         /**
-         * Defines if route refresh is enabled
+         * Defines if route refresh is enabled.
+         *
+         * See [com.mapbox.navigation.base.extensions.supportsRouteRefresh]
+         * for a list of requirements that your route request needs to meet to be eligible for
+         * refresh calls.
          */
         fun isRouteRefreshEnabled(flag: Boolean): Builder =
             apply { this.isRouteRefreshEnabled = flag }
