@@ -33,8 +33,7 @@ license:
 
 .PHONY: javadoc-dokka
 javadoc-dokka:
-	$(call run-gradle-tasks,$(CORE_MODULES),dokka)
-	$(call run-gradle-tasks,$(UI_MODULES),dokka)
+	./gradlew dokkaHtmlMultiModule
 
 .PHONY: dependency-graphs
 dependency-graphs:

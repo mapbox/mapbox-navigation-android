@@ -157,7 +157,7 @@ ext {
       jacoco             : '0.2',
       googleServices     : '4.3.3',
       mapboxSdkVersions  : '1.1.0',
-      dokka              : '0.10.1',
+      dokka              : '1.4.20',
       mapbox             : '0.2.1'
   ]
 

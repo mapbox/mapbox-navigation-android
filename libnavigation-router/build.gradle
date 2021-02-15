@@ -1,22 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'com.jaredsburrows.license'
 apply from: "${rootDir}/gradle/ktlint.gradle"
-
-dokka {
-    outputDirectory = "$buildDir/kdoc"
-    configuration {
-        moduleName = 'libnavigation-router'
-        reportUndocumented = true
-
-        perPackageOption {
-            prefix = "com.mapbox.navigation.route.internal"
-            suppress = true
-        }
-    }
-}
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion

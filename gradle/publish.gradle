@@ -1,6 +1,7 @@
 apply plugin: 'maven-publish'
 apply plugin: 'com.mapbox.sdkRegistry'
 apply from: file("${rootDir}/gradle/artifact-settings.gradle")
+apply from: "${rootDir}/gradle/kdoc-settings.gradle"
 
 afterEvaluate {
     publishing {
@@ -12,7 +13,7 @@ afterEvaluate {
                 version project.ext.versionName
 
                 artifact(androidSourcesJar)
-                artifact(androidJavadocsJar)
+                artifact(androidKdocJar)
 
                 pom.withXml {
                     final mainNode = asNode()
@@ -42,7 +43,7 @@ afterEvaluate {
                 version project.ext.versionName
 
                 artifact(androidSourcesJar)
-                artifact(androidJavadocsJar)
+                artifact(androidKdocJar)
             }
         }
     }
@@ -72,7 +73,7 @@ task androidSourcesJar(type: Jar) {
     from android.sourceSets.main.kotlin
 }
 
-task androidJavadocsJar(type: Jar, dependsOn: dokka) {
+task androidKdocJar(type: Jar) {
     classifier = 'javadoc'
-    from dokka.outputDirectory
+    from kdocPath
 }
