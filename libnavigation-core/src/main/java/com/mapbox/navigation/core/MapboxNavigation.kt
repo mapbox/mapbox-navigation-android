@@ -816,7 +816,8 @@ class MapboxNavigation(
                 ModuleProviderArgument(
                     NetworkStatusService::class.java,
                     NetworkStatusService(navigationOptions.applicationContext)
-                )
+                ),
+                ModuleProviderArgument(Boolean::class.java, navigationOptions.isRouteRefreshEnabled)
             )
             MapboxModuleType.NavigationTripNotification -> arrayOf(
                 ModuleProviderArgument(NavigationOptions::class.java, navigationOptions),

@@ -52,7 +52,7 @@ class MapboxOffboardRouterTest : BaseTest() {
         }
         every { routeOptions.coordinates().size } returns 2
         every { call.isCanceled } returns false
-        offboardRouter = MapboxOffboardRouter(accessToken, context, mockSkuTokenProvider)
+        offboardRouter = MapboxOffboardRouter(accessToken, context, mockSkuTokenProvider, true)
     }
 
     @Test

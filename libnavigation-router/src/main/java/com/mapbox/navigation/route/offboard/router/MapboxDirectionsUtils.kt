@@ -2,7 +2,6 @@ package com.mapbox.navigation.route.offboard.router
 
 import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.extensions.supportsRouteRefresh
 import java.util.Locale
 
 private val EVENT_LISTENER = NavigationRouteEventListener()
@@ -15,7 +14,8 @@ private val EVENT_LISTENER = NavigationRouteEventListener()
  * @return MapboxDirections.Builder
  */
 internal fun MapboxDirections.Builder.routeOptions(
-    options: RouteOptions
+    options: RouteOptions,
+    refreshEnabled: Boolean
 ): MapboxDirections.Builder {
     check(options.coordinates().size >= 2) { "At least 2 coordinates should be provided." }
 
@@ -98,7 +98,7 @@ internal fun MapboxDirections.Builder.routeOptions(
         walkingOptions(it)
     }
 
-    enableRefresh(options.supportsRouteRefresh())
+    enableRefresh(refreshEnabled)
 
     eventListener(EVENT_LISTENER)
 
