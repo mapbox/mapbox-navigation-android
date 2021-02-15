@@ -1,0 +1,4 @@
+ext {
+    kdocDirName = 'kdoc'
+    kdocPath = new File(buildDir.path, kdocDirName)
+}

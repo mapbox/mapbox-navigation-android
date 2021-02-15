@@ -3,19 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'com.jaredsburrows.license'
 apply from: "${rootDir}/gradle/ktlint.gradle"
-
-dokka {
-    outputDirectory = "$buildDir/kdoc"
-    configuration {
-        moduleName = 'libnavigation-metrics'
-        reportUndocumented = true
-
-        perPackageOption {
-            prefix = "com.mapbox.navigation.metrics.internal"
-            suppress = true
-        }
-    }
-}
+apply from: "${rootDir}/gradle/kdoc-settings.gradle"
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -48,6 +36,21 @@ dependencies {
 
     testImplementation project(':libtesting-utils')
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
+}
+
+dokkaHtml {
+    outputDirectory.set(kdocPath)
+    moduleName.set("Metrics")
+    dokkaSourceSets {
+        configureEach {
+            reportUndocumented.set(true)
+
+            perPackageOption {
+                matchingRegex.set("com.mapbox.navigation.metrics.internal.*")
+                suppress.set(true)
+            }
+        }
+    }
 }
 
 apply from: "${rootDir}/gradle/track-public-apis.gradle"
