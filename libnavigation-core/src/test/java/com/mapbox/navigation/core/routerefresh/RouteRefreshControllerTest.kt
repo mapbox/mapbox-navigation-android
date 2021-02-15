@@ -5,7 +5,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.extensions.supportsRouteRefresh
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.trip.session.TripSession
@@ -46,7 +45,7 @@ class RouteRefreshControllerTest {
 
     @Before
     fun setup() {
-        mockkStatic("com.mapbox.navigation.base.extensions.DirectionsRefreshEx")
+        mockkStatic("com.mapbox.navigation.base.extensions.RouteOptionsEx")
         every { tripSession.getRouteProgress() } returns mockk {
             every { currentLegProgress } returns mockk {
                 every { legIndex } returns 0
@@ -101,11 +100,12 @@ class RouteRefreshControllerTest {
         verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
         verify(exactly = 1) {
             logger.w(
-                Tag("RouteRefreshController"),
+                RouteRefreshController.TAG,
                 Message(
                     """
-                       The route is not qualified for route refresh feature.
-                       See RouteOptions?.supportsRouteRefresh() extension for details.
+                           The route is not qualified for route refresh feature.
+                           See com.mapbox.navigation.base.extensions.supportsRouteRefresh
+                           extension for details.
                     """.trimIndent()
                 )
             )
@@ -114,6 +114,6 @@ class RouteRefreshControllerTest {
 
     @After
     fun tearDown() {
-        unmockkStatic("com.mapbox.navigation.base.extensions.DirectionsRefreshEx")
+        unmockkStatic("com.mapbox.navigation.base.extensions.RouteOptionsEx")
     }
 }

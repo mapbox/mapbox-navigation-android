@@ -59,7 +59,8 @@ class NavigationRouteTest {
                 provideDefaultRouteOptionsBuilder()
                     .accessToken(ACESS_TOKEN)
                     .coordinates(listOf(origin, destination))
-                    .build()
+                    .build(),
+                refreshEnabled = true
             )
             .build()
         assertNotNull(navigationRoute)
@@ -74,7 +75,8 @@ class NavigationRouteTest {
                     .accessToken(ACESS_TOKEN)
                     .coordinates(listOf(origin, destination))
                     .profile(DirectionsCriteria.PROFILE_CYCLING)
-                    .build()
+                    .build(),
+                refreshEnabled = true
             )
             .build()
 
@@ -96,7 +98,8 @@ class NavigationRouteTest {
                         "${DirectionsCriteria.APPROACH_CURB}" +
                             ";${DirectionsCriteria.APPROACH_UNRESTRICTED}"
                     )
-                    .build()
+                    .build(),
+                refreshEnabled = true
             )
             .build()
 
@@ -118,7 +121,8 @@ class NavigationRouteTest {
                     )
                     .accessToken(ACESS_TOKEN)
                     .waypointIndices(arrayOf(0, 2, 3).joinToString(separator = ";"))
-                    .build()
+                    .build(),
+                refreshEnabled = true
             )
 
             .build()
@@ -137,7 +141,8 @@ class NavigationRouteTest {
                     .accessToken(ACESS_TOKEN)
                     .coordinates(listOf(origin, destination))
                     .profile(DirectionsCriteria.PROFILE_CYCLING)
-                    .waypointNames("Origin; Destination").build()
+                    .waypointNames("Origin; Destination").build(),
+                refreshEnabled = true
             )
             .build()
         assertThat(
@@ -158,7 +163,8 @@ class NavigationRouteTest {
                             Point.fromLngLat(0.99, 4.99),
                             Point.fromLngLat(1.99, 5.99)
                         ).joinToString(separator = ";") { "${it?.latitude()},${it?.longitude()}" }
-                    ).build()
+                    ).build(),
+                refreshEnabled = true
             )
             .build()
 
@@ -179,7 +185,8 @@ class NavigationRouteTest {
                         destination = Point.fromLngLat(1.0, 5.0)
                     )
                     .bearingsList(listOf(listOf(90.0, 90.0), listOf(null, null)))
-                    .build()
+                    .build(),
+                refreshEnabled = true
             )
             .build()
 
@@ -207,7 +214,8 @@ class NavigationRouteTest {
                             listOf(40.0, 40.0)
                         )
                     )
-                    .build()
+                    .build(),
+                refreshEnabled = true
             )
             .build()
 
@@ -245,7 +253,10 @@ class NavigationRouteTest {
             .build()
 
         val navigationRoute = provideNavigationOffboardRouteBuilder()
-            .routeOptions(routeOptions)
+            .routeOptions(
+                routeOptions,
+                refreshEnabled = true
+            )
             .build()
 
         val request = navigationRoute.cloneCall().request().url().toString()

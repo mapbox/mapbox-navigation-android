@@ -1,4 +1,4 @@
-@file:JvmName("DirectionsRefreshEx")
+@file:JvmName("RouteOptionsEx")
 
 package com.mapbox.navigation.base.extensions
 

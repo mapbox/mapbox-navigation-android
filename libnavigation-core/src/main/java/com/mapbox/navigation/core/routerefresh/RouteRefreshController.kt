@@ -13,8 +13,6 @@ import com.mapbox.navigation.utils.internal.MapboxTimer
 import kotlinx.coroutines.Job
 import java.util.concurrent.TimeUnit
 
-private val TAG = Tag("RouteRefreshController")
-
 /**
  * This class is responsible for refreshing the current direction route's traffic.
  * This does not support alternative routes.
@@ -29,6 +27,10 @@ internal class RouteRefreshController(
     private val tripSession: TripSession,
     private val logger: Logger
 ) {
+
+    companion object {
+        internal val TAG = Tag("RouteRefreshController")
+    }
 
     private val routerRefreshTimer = MapboxTimer()
 
@@ -53,7 +55,8 @@ internal class RouteRefreshController(
                     Message(
                         """
                            The route is not qualified for route refresh feature.
-                           See RouteOptions?.supportsRouteRefresh() extension for details.
+                           See com.mapbox.navigation.base.extensions.supportsRouteRefresh
+                           extension for details.
                         """.trimIndent()
                     )
                 )

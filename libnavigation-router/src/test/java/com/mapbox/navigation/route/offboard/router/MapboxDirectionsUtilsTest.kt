@@ -25,7 +25,7 @@ class MapboxDirectionsUtilsTest {
             .applyDefaultParams()
             .build()
 
-        mapboxDirectionsBuilder.routeOptions(routeOptions)
+        mapboxDirectionsBuilder.routeOptions(routeOptions, refreshEnabled = true)
 
         verify { mapboxDirectionsBuilder.baseUrl(routeOptions.baseUrl()) }
         verify { mapboxDirectionsBuilder.user(routeOptions.user()) }
