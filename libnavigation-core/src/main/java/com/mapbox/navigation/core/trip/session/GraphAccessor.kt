@@ -1,15 +1,17 @@
 package com.mapbox.navigation.core.trip.session
 
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.model.eh.EHorizonEdge
 import com.mapbox.navigation.core.trip.model.eh.EHorizonEdgeMetadata
 import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonEdgeMetadata
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 
 /**
- * [EHorizonGraphAccessor] provides methods to get [EHorizonEdge] shape and metadata.
+ * [MapboxNavigation.graphAccessor] provides methods to get edge (e.g. [EHorizonEdge]) shape and
+ * metadata.
  */
-class EHorizonGraphAccessor internal constructor(
+class GraphAccessor internal constructor(
     private val navigator: MapboxNativeNavigator,
 ) {
 

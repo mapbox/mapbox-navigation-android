@@ -50,13 +50,13 @@ import com.mapbox.navigation.core.trip.model.eh.EHorizonEdge
 import com.mapbox.navigation.core.trip.model.eh.EHorizonEdgeMetadata
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
-import com.mapbox.navigation.core.trip.session.EHorizonGraphAccessor
-import com.mapbox.navigation.core.trip.session.EHorizonObjectsStore
 import com.mapbox.navigation.core.trip.session.EHorizonObserver
+import com.mapbox.navigation.core.trip.session.GraphAccessor
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
+import com.mapbox.navigation.core.trip.session.RoadObjectsStore
 import com.mapbox.navigation.core.trip.session.RouteAlertsObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSession
@@ -166,8 +166,17 @@ class MapboxNavigation(
      */
     private var rerouteController: RerouteController?
     private val defaultRerouteController: RerouteController
-    private val eHorizonObjectsStore: EHorizonObjectsStore
-    private val eHorizonGraphAccessor: EHorizonGraphAccessor
+    /**
+     * [MapboxNavigation.roadObjectsStore] provides methods to get road objects metadata,
+     * add and remove custom road
+     * objects.
+     */
+    val roadObjectsStore: RoadObjectsStore
+    /**
+     * [MapboxNavigation.graphAccessor] provides methods to get edge (e.g. [EHorizonEdge]) shape and
+     * metadata.
+     */
+    val graphAccessor: GraphAccessor
 
     init {
         ThreadController.init()
@@ -259,8 +268,8 @@ class MapboxNavigation(
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
         directionsSession.registerRoutesObserver(internalRoutesObserver)
 
-        eHorizonObjectsStore = EHorizonObjectsStore(navigator)
-        eHorizonGraphAccessor = EHorizonGraphAccessor(navigator)
+        roadObjectsStore = RoadObjectsStore(navigator)
+        graphAccessor = GraphAccessor(navigator)
     }
 
     /**
@@ -632,8 +641,8 @@ class MapboxNavigation(
      * To start listening EHorizon updates [EHorizonObserver] should be registered.
      * Observer will be called when the EHorizon changes.
      * To save resources and be more efficient callbacks return minimum data.
-     * To get [EHorizonEdge] shape or [EHorizonEdgeMetadata] use [EHorizonGraphAccessor]
-     * To get more data about EHorizon road object use [EHorizonObjectsStore]
+     * To get [EHorizonEdge] shape or [EHorizonEdgeMetadata] use [MapboxNavigation.graphAccessor]
+     * To get more data about EHorizon road object use [MapboxNavigation.roadObjectsStore]
      *
      * Registering an EHorizonObserver activates the Electronic Horizon module.
      *
@@ -653,16 +662,6 @@ class MapboxNavigation(
     fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver) {
         tripSession.unregisterEHorizonObserver(eHorizonObserver)
     }
-
-    /**
-     * Provides [EHorizonGraphAccessor] interface
-     */
-    fun getEHorizonGraphAccessor(): EHorizonGraphAccessor = eHorizonGraphAccessor
-
-    /**
-     * Provides [EHorizonObjectsStore] interface
-     */
-    fun getEHorizonObjectsStore(): EHorizonObjectsStore = eHorizonObjectsStore
 
     /**
      * Registers an observer that gets notified whenever a new enhanced location update is available

@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.trip.session
 
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectEdgeLocation
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectLocation
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectMetadata
@@ -12,9 +13,10 @@ import com.mapbox.navigation.core.trip.model.eh.mapToOpenLRStandard
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 
 /**
- * [EHorizonObjectsStore] provides methods to get road objects metadata, add and remove it.
+ * [MapboxNavigation.roadObjectsStore] provides methods to get road objects metadata, add and remove
+ * custom road objects.
  */
-class EHorizonObjectsStore internal constructor(
+class RoadObjectsStore internal constructor(
     private val navigator: MapboxNativeNavigator,
 ) {
 

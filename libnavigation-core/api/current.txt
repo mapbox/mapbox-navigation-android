@@ -6,10 +6,10 @@ package com.mapbox.navigation.core {
     method public void addHistoryEvent(String eventType, String eventJsonProperties);
     method public void attachFasterRouteObserver(com.mapbox.navigation.core.fasterroute.FasterRouteObserver fasterRouteObserver);
     method public void detachFasterRouteObserver();
-    method public com.mapbox.navigation.core.trip.session.EHorizonGraphAccessor getEHorizonGraphAccessor();
-    method public com.mapbox.navigation.core.trip.session.EHorizonObjectsStore getEHorizonObjectsStore();
+    method public com.mapbox.navigation.core.trip.session.GraphAccessor getGraphAccessor();
     method public com.mapbox.navigation.base.options.NavigationOptions getNavigationOptions();
     method public com.mapbox.navigation.core.reroute.RerouteController? getRerouteController();
+    method public com.mapbox.navigation.core.trip.session.RoadObjectsStore getRoadObjectsStore();
     method public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
     method public com.mapbox.navigation.core.trip.session.TripSessionState getTripSessionState();
     method public boolean navigateNextRouteLeg();
@@ -51,6 +51,8 @@ package com.mapbox.navigation.core {
     method public void unregisterTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
     method public void unregisterVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
     method public void updateSensorEvent(android.hardware.SensorEvent sensorEvent);
+    property public final com.mapbox.navigation.core.trip.session.GraphAccessor graphAccessor;
+    property public final com.mapbox.navigation.core.trip.session.RoadObjectsStore roadObjectsStore;
     field public static final com.mapbox.navigation.core.MapboxNavigation.Companion! Companion;
   }
 
@@ -655,20 +657,6 @@ package com.mapbox.navigation.core.trip.session {
     method public void onNewBannerInstructions(com.mapbox.api.directions.v5.models.BannerInstructions bannerInstructions);
   }
 
-  public final class EHorizonGraphAccessor {
-    method public com.mapbox.navigation.core.trip.model.eh.EHorizonEdgeMetadata? getEdgeMetadata(long edgeId);
-    method public java.util.List<com.mapbox.geojson.Point>? getEdgeShape(long edgeId);
-  }
-
-  public final class EHorizonObjectsStore {
-    method public void addCustomRoadObject(String roadObjectId, String openLRLocation, @com.mapbox.navigation.core.trip.model.eh.OpenLRStandard.Type String openLRStandard);
-    method public java.util.List<java.lang.String> getRoadObjectIdsByEdgeIds(java.util.List<java.lang.Long> edgeIds);
-    method public com.mapbox.navigation.core.trip.model.eh.EHorizonObjectLocation? getRoadObjectLocation(String roadObjectId);
-    method public com.mapbox.navigation.core.trip.model.eh.EHorizonObjectMetadata? getRoadObjectMetadata(String roadObjectId);
-    method public java.util.Map<java.lang.String,com.mapbox.navigation.core.trip.model.eh.EHorizonObjectEdgeLocation> getRoadObjectsOnTheEdge(long edgeId);
-    method public void removeCustomRoadObject(String roadObjectId);
-  }
-
   public interface EHorizonObserver {
     method public void onPositionUpdated(com.mapbox.navigation.core.trip.model.eh.EHorizonPosition position, java.util.Map<java.lang.String,com.mapbox.navigation.core.trip.model.eh.EHorizonObjectDistanceInfo> distances);
     method public void onRoadObjectAdded(String roadObjectId);
@@ -676,6 +664,11 @@ package com.mapbox.navigation.core.trip.session {
     method public void onRoadObjectExit(com.mapbox.navigation.core.trip.model.eh.EHorizonObjectEnterExitInfo objectEnterExitInfo);
     method public void onRoadObjectRemoved(String roadObjectId);
     method public void onRoadObjectUpdated(String roadObjectId);
+  }
+
+  public final class GraphAccessor {
+    method public com.mapbox.navigation.core.trip.model.eh.EHorizonEdgeMetadata? getEdgeMetadata(long edgeId);
+    method public java.util.List<com.mapbox.geojson.Point>? getEdgeShape(long edgeId);
   }
 
   public interface LocationObserver {
@@ -699,6 +692,15 @@ package com.mapbox.navigation.core.trip.session {
 
   public interface OffRouteObserver {
     method public void onOffRouteStateChanged(boolean offRoute);
+  }
+
+  public final class RoadObjectsStore {
+    method public void addCustomRoadObject(String roadObjectId, String openLRLocation, @com.mapbox.navigation.core.trip.model.eh.OpenLRStandard.Type String openLRStandard);
+    method public java.util.List<java.lang.String> getRoadObjectIdsByEdgeIds(java.util.List<java.lang.Long> edgeIds);
+    method public com.mapbox.navigation.core.trip.model.eh.EHorizonObjectLocation? getRoadObjectLocation(String roadObjectId);
+    method public com.mapbox.navigation.core.trip.model.eh.EHorizonObjectMetadata? getRoadObjectMetadata(String roadObjectId);
+    method public java.util.Map<java.lang.String,com.mapbox.navigation.core.trip.model.eh.EHorizonObjectEdgeLocation> getRoadObjectsOnTheEdge(long edgeId);
+    method public void removeCustomRoadObject(String roadObjectId);
   }
 
   public interface RouteAlertsObserver {

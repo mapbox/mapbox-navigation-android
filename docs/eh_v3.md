@@ -59,14 +59,14 @@ interface EHorizonObserver {
 }
 ```
 
-Anytime you need edge's shape or metadata you can get it with `EHorizonGraphAccessor`.
+Anytime you need edge's shape or metadata you can get it with `GraphAccessor`.
 It's available with
 ```kotlin
-mapboxNavigation.getEHorizonGraphAccessor()
+mapboxNavigation.graphAccessor
 ```
 
 ```kotlin
-interface EHorizonGraphAccessor {
+class GraphAccessor {
     /**
      * Returns Graph Edge geometry for the given GraphId of the edge.
      * If edge with given edgeId is not accessible, returns null
@@ -87,14 +87,14 @@ interface EHorizonGraphAccessor {
 }
 ```
 
-Anytime you need road object's metadata or location you can get it with `EHorizonObjectsStore`
+Anytime you need road object's metadata or location you can get it with `RoadObjectsStore`
 It's available with
 ```kotlin
-mapboxNavigation.getEHorizonObjectsStore()
+mapboxNavigation.roadObjectsStore
 ```
 
 ```kotlin
-interface EHorizonObjectsStore {
+class RoadObjectsStore {
     /**
      * Returns mapping `road object id -> EHorizonObjectEdgeLocation` for all road objects
      * which are lying on the edge with given id.
