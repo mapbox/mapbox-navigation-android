@@ -20,6 +20,7 @@ import org.apache.commons.io.IOUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Test
 
 class SchemaTest {
@@ -27,6 +28,7 @@ class SchemaTest {
     private val eventSchemas: List<EventSchema> = unpackSchemas()
 
     @Test
+    @Ignore("Not relevant test anymore")
     @Throws(Exception::class)
     fun checkNavigationArriveEventSize() {
         val schema = grabEventSchema(NavigationMetrics.ARRIVE)
@@ -43,6 +45,7 @@ class SchemaTest {
     }
 
     @Test
+    @Ignore("Not relevant test anymore")
     @Throws(Exception::class)
     fun checkNavigationCancelEventSize() {
         val schema = grabEventSchema(NavigationMetrics.CANCEL_SESSION)
@@ -59,6 +62,7 @@ class SchemaTest {
     }
 
     @Test
+    @Ignore("Not relevant test anymore")
     @Throws(Exception::class)
     fun checkNavigationDepartEventSize() {
         val schema = grabEventSchema(NavigationMetrics.DEPART)
@@ -75,6 +79,7 @@ class SchemaTest {
     }
 
     @Test
+    @Ignore("Not relevant test anymore")
     @Throws(Exception::class)
     fun checkNavigationFeedbackEventSize() {
         val schema = grabEventSchema(NavigationMetrics.FEEDBACK, version = "2.1")
@@ -91,6 +96,7 @@ class SchemaTest {
     }
 
     @Test
+    @Ignore("Not relevant test anymore")
     @Throws(Exception::class)
     fun checkNavigationRerouteEventSize() {
         val schema = grabEventSchema(NavigationMetrics.REROUTE)
