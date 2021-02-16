@@ -13,9 +13,6 @@ import java.io.File
 
 
 class SanityUiRouteTest : SimpleMapViewNavigationTest() {
-//    @Rule
-//    var mRuntimePermissionRule = GrantPermissionRule.grant(Manifest.permission.ACCESS_)
-
     lateinit var context: Context
 
 
