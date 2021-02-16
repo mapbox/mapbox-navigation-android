@@ -84,6 +84,7 @@ abstract class SimpleMapViewNavigationTest :
                     .accessToken(getMapboxAccessTokenFromResources(activity))
                     .build()
             )
+            mapboxNavigation.toggleHistory(true);
             mapboxNavigation.setRoutes(listOf(route))
             mapboxNavigation.startTripSession()
         }
