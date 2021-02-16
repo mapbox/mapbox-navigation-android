@@ -1,5 +1,7 @@
 package com.mapbox.navigation.ui.maps.internal.route.line
 
+import android.annotation.SuppressLint
+import android.util.Log
 import android.util.SparseArray
 import androidx.annotation.ColorInt
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -11,15 +13,14 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
-import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.expressions.dsl.generated.color
 import com.mapbox.maps.extension.style.expressions.dsl.generated.eq
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
-import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
+import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
@@ -33,7 +34,6 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMisc
-import timber.log.Timber
 import java.util.UUID
 import kotlin.math.ln
 import kotlin.math.max
@@ -508,43 +508,23 @@ object MapboxRouteLineUtils {
      *
      * @return either the layer ID if found else a default layer ID
      */
+    @SuppressLint("LogNotTimber")
     @JvmStatic
-    fun getDefaultBelowLayer(layerId: String?, style: Style): String {
-        val layers = style.styleLayers
-        return when (layerId.isNullOrEmpty()) {
-            false -> checkLayerIdPresent(layerId, layers)
-            true -> findLayerBelow(layers)
+    fun getBelowLayerIdToUse(belowLayerId: String?, style: Style): String? {
+        return when (belowLayerId) {
+            null -> belowLayerId
+            else -> when (style.styleLayerExists(belowLayerId)) {
+                true -> belowLayerId
+                false -> {
+                    Log.e(
+                        MapboxRouteLineUtils::class.java.simpleName,
+                        "Layer $belowLayerId not found. Route line related layers will be " +
+                            "placed at top of the map stack."
+                    )
+                    null
+                }
+            }
         }
-    }
-
-    private fun checkLayerIdPresent(layerId: String, layers: List<StyleObjectInfo>): String {
-        val foundId = layers.firstOrNull { it.id == layerId }?.id
-        if (foundId == null) {
-            Timber.e(
-                """Tried placing route line below "$layerId" which doesn't exist"""
-            )
-        }
-        return foundId ?: LocationComponentConstants.MODEL_LAYER
-    }
-
-    /**
-     * Tries to find a reference layer ID that's above a first non-symbol layer from the top
-     * of the stack of layers. Additionally, the algorithm always ensures that the reference
-     * layer is below the puck layers.
-     */
-    private fun findLayerBelow(layers: List<StyleObjectInfo>): String {
-        val puckLayerIndex = layers.indexOfFirst {
-            it.id.contains(RouteConstants.MAPBOX_LOCATION_ID)
-        }
-        val lastSymbolLayerFromTopIndex = layers.indexOfLast {
-            it.type != "symbol" && !it.id.contains(RouteConstants.MAPBOX_LOCATION_ID)
-        } + 1
-        val index = if (puckLayerIndex in 0 until lastSymbolLayerFromTopIndex) {
-            puckLayerIndex
-        } else {
-            lastSymbolLayerFromTopIndex
-        }
-        return layers.getOrNull(index)?.id ?: LocationComponentConstants.MODEL_LAYER
     }
 
     /**
@@ -632,18 +612,11 @@ object MapboxRouteLineUtils {
             return
         }
 
-        val belowLayerIdToUse: String =
-            getDefaultBelowLayer(
+        val belowLayerIdToUse: String? =
+            getBelowLayerIdToUse(
                 options.routeLineBelowLayerId,
                 style
             )
-
-        if (!style.styleLayerExists(belowLayerIdToUse)) {
-            Timber.w(
-                """Tried placing route line below "$belowLayerIdToUse" which doesn't exist"""
-            )
-            return
-        }
 
         if (!style.styleSourceExists(RouteConstants.WAYPOINT_SOURCE_ID)) {
             geoJsonSource(RouteConstants.WAYPOINT_SOURCE_ID) {
@@ -732,15 +705,15 @@ object MapboxRouteLineUtils {
             style.styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) &&
             style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) &&
             style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) &&
-            style.styleLayerExists(RouteConstants.PRIMARY_ROUTE_LAYER_ID) &&
-            style.styleLayerExists(RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID) &&
-            style.styleLayerExists(RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID) &&
-            style.styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID) &&
-            style.styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID) &&
-            style.styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID) &&
-            style.styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID) &&
-            style.styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID) &&
-            style.styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+            style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID) &&
+            style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID) &&
+            style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID) &&
+            style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID) &&
+            style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID) &&
+            style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID) &&
+            style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID) &&
+            style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID) &&
+            style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
     }
 
     private fun projectX(x: Double): Double {

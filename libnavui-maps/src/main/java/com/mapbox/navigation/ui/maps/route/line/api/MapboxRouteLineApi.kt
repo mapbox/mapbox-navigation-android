@@ -12,7 +12,8 @@ import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
+import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -315,9 +316,9 @@ class MapboxRouteLineApi(
     fun showPrimaryRoute(): RouteLineState.UpdateLayerVisibilityState {
         return RouteLineState.UpdateLayerVisibilityState(
             listOf(
-                Pair(RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID, Visibility.VISIBLE),
-                Pair(RouteConstants.PRIMARY_ROUTE_LAYER_ID, Visibility.VISIBLE),
-                Pair(RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID, Visibility.VISIBLE)
+                Pair(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID, Visibility.VISIBLE),
+                Pair(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID, Visibility.VISIBLE),
+                Pair(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID, Visibility.VISIBLE)
             )
         )
     }
@@ -329,9 +330,9 @@ class MapboxRouteLineApi(
     fun hidePrimaryRoute(): RouteLineState.UpdateLayerVisibilityState {
         return RouteLineState.UpdateLayerVisibilityState(
             listOf(
-                Pair(RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID, Visibility.NONE),
-                Pair(RouteConstants.PRIMARY_ROUTE_LAYER_ID, Visibility.NONE),
-                Pair(RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID, Visibility.NONE)
+                Pair(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID, Visibility.NONE),
+                Pair(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID, Visibility.NONE),
+                Pair(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID, Visibility.NONE)
             )
         )
     }
@@ -343,12 +344,12 @@ class MapboxRouteLineApi(
     fun showAlternativeRoutes(): RouteLineState.UpdateLayerVisibilityState {
         return RouteLineState.UpdateLayerVisibilityState(
             listOf(
-                Pair(RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID, Visibility.VISIBLE),
-                Pair(RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID, Visibility.VISIBLE),
-                Pair(RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID, Visibility.VISIBLE),
-                Pair(RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID, Visibility.VISIBLE),
-                Pair(RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID, Visibility.VISIBLE),
-                Pair(RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID, Visibility.VISIBLE)
+                Pair(RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID, Visibility.VISIBLE),
+                Pair(RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID, Visibility.VISIBLE),
+                Pair(RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID, Visibility.VISIBLE),
+                Pair(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID, Visibility.VISIBLE),
+                Pair(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID, Visibility.VISIBLE),
+                Pair(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID, Visibility.VISIBLE)
             )
         )
     }
@@ -360,12 +361,12 @@ class MapboxRouteLineApi(
     fun hideAlternativeRoutes(): RouteLineState.UpdateLayerVisibilityState {
         return RouteLineState.UpdateLayerVisibilityState(
             listOf(
-                Pair(RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID, Visibility.NONE),
-                Pair(RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID, Visibility.NONE),
-                Pair(RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID, Visibility.NONE),
-                Pair(RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID, Visibility.NONE),
-                Pair(RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID, Visibility.NONE),
-                Pair(RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID, Visibility.NONE)
+                Pair(RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID, Visibility.NONE),
+                Pair(RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID, Visibility.NONE),
+                Pair(RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID, Visibility.NONE),
+                Pair(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID, Visibility.NONE),
+                Pair(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID, Visibility.NONE),
+                Pair(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID, Visibility.NONE)
             )
         )
     }
@@ -429,10 +430,10 @@ class MapboxRouteLineApi(
             mapboxMap,
             mapClickPoint,
             listOf(
-                RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
-                RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
-                RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
-                RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID
+                RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
+                RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
+                RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
+                RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID
             ),
             features
         )
@@ -444,10 +445,10 @@ class MapboxRouteLineApi(
                 mapboxMap,
                 clickRect,
                 listOf(
-                    RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
-                    RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
-                    RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
-                    RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID
+                    RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
+                    RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
+                    RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
+                    RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID
                 ),
                 features
             )
@@ -458,8 +459,8 @@ class MapboxRouteLineApi(
                     mapboxMap,
                     mapClickPoint,
                     listOf(
-                        RouteConstants.PRIMARY_ROUTE_LAYER_ID,
-                        RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+                        RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
+                        RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
                     ),
                     features
                 )

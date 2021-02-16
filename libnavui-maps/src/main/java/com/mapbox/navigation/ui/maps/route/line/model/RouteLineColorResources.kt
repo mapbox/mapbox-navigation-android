@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
 import androidx.annotation.ColorInt
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 
 /**
  * Contains colors an other values used to determine the appearance of the route line.

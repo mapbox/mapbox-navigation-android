@@ -8,7 +8,8 @@ import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
+import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getLayerVisibility
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.initializeLayers
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -36,17 +37,17 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
 
         updateLineGradient(
             style,
-            RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+            RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
             routeDrawData.getTrafficLineExpression()
         )
         updateLineGradient(
             style,
-            RouteConstants.PRIMARY_ROUTE_LAYER_ID,
+            RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
             routeDrawData.getRouteLineExpression()
         )
         updateLineGradient(
             style,
-            RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+            RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
             routeDrawData.getCasingLineExpression()
         )
         updateSource(
@@ -66,12 +67,12 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         )
         updateLineGradient(
             style,
-            RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
+            RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
             routeDrawData.getAlternativeRoute1TrafficExpression()
         )
         updateLineGradient(
             style,
-            RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
+            RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
             routeDrawData.getAlternativeRoute2TrafficExpression()
         )
         updateSource(
@@ -95,17 +96,17 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
 
         updateLineGradient(
             style,
-            RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+            RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
             vanishingRouteLineState.getTrafficLineExpression()
         )
         updateLineGradient(
             style,
-            RouteConstants.PRIMARY_ROUTE_LAYER_ID,
+            RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
             vanishingRouteLineState.getRouteLineExpression()
         )
         updateLineGradient(
             style,
-            RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+            RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
             vanishingRouteLineState.getCasingLineExpression()
         )
     }
@@ -163,7 +164,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @return the visibility value returned by the map.
      */
     fun getPrimaryRouteVisibility(style: Style): Visibility? {
-        return getLayerVisibility(style, RouteConstants.PRIMARY_ROUTE_LAYER_ID)
+        return getLayerVisibility(style, RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID)
     }
 
     /**
@@ -174,7 +175,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @return the visibility value returned by the map.
      */
     fun getAlternativeRoutesVisibility(style: Style): Visibility? {
-        return getLayerVisibility(style, RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID)
+        return getLayerVisibility(style, RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID)
     }
 
     /**
@@ -184,7 +185,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      */
     @Deprecated("This needs to be moved to its own API")
     fun showOriginAndDestinationPoints(style: Style) {
-        updateLayerVisibility(style, RouteConstants.WAYPOINT_LAYER_ID, Visibility.VISIBLE)
+        updateLayerVisibility(style, RouteLayerConstants.WAYPOINT_LAYER_ID, Visibility.VISIBLE)
     }
 
     /**
@@ -194,7 +195,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      */
     @Deprecated("This needs to be moved to its own API")
     fun hideOriginAndDestinationPoints(style: Style) {
-        updateLayerVisibility(style, RouteConstants.WAYPOINT_LAYER_ID, Visibility.NONE)
+        updateLayerVisibility(style, RouteLayerConstants.WAYPOINT_LAYER_ID, Visibility.NONE)
     }
 
     private fun updateLayerVisibility(style: Style, layerId: String, visibility: Visibility) {

@@ -7,7 +7,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -73,7 +72,7 @@ import java.util.List;
 import timber.log.Timber;
 
 import static com.mapbox.android.gestures.Utils.dpToPx;
-import static com.mapbox.navigation.ui.base.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID;
+import static com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID;
 
 public class MapboxRouteLineApiExampleActivity extends AppCompatActivity implements OnMapLongClickListener {
 
@@ -140,6 +139,7 @@ public class MapboxRouteLineApiExampleActivity extends AppCompatActivity impleme
     MapboxRouteLineOptions mapboxRouteLineOptions = new MapboxRouteLineOptions.Builder(this)
         .withRouteLineResources(routeLineResources)
         .withVanishingRouteLineEnabled(true)
+        .withRouteLineBelowLayerId("road-label")
         .build();
 
     mapboxRouteLineApi = new MapboxRouteLineApi(mapboxRouteLineOptions);

@@ -35,6 +35,7 @@ class Slackline(private val activity: AppCompatActivity) : LifecycleObserver {
     private val options: MapboxRouteLineOptions by lazy {
         MapboxRouteLineOptions.Builder(activity)
             .withRouteLineResources(routeLineResources)
+            .withRouteLineBelowLayerId("road-label")
             .build()
     }
 

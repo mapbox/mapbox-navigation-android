@@ -9,7 +9,8 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
+import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.common.ShadowValueConverter
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -72,22 +73,26 @@ class MapboxRouteLineViewTest {
             every { styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns true
             every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns true
             every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
-            every { styleLayerExists(RouteConstants.PRIMARY_ROUTE_LAYER_ID) } returns true
-            every { styleLayerExists(RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID) } returns true
-            every { styleLayerExists(RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID) } returns true
-            every { styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_LAYER_ID) } returns true
-            every { styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_LAYER_ID) } returns true
+            every { styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID) } returns true
             every {
-                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
+                styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
             } returns true
             every {
-                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
+                styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID)
+            } returns true
+            every { styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID) } returns true
+            every { styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID) } returns true
+            every {
+                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
             } returns true
             every {
-                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
+                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
             } returns true
             every {
-                styleLayerExists(RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
+            } returns true
+            every {
+                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
             } returns true
         }
     }
@@ -206,31 +211,31 @@ class MapboxRouteLineViewTest {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
             every {
-                getStyleLayerProperties(RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+                getStyleLayerProperties(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
             } returns layerPropertyExpected
             every {
-                getStyleLayerProperties(RouteConstants.PRIMARY_ROUTE_LAYER_ID)
+                getStyleLayerProperties(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID)
             } returns layerPropertyExpected
             every {
-                getStyleLayerProperties(RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID)
+                getStyleLayerProperties(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleLayerProperty(
-                    RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                    RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
                     "line-gradient",
                     trafficLineExp
                 )
             } returns ExpectedFactory.createValue()
             every {
                 setStyleLayerProperty(
-                    RouteConstants.PRIMARY_ROUTE_LAYER_ID,
+                    RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
                     "line-gradient",
                     routeLineExp
                 )
             } returns ExpectedFactory.createValue()
             every {
                 setStyleLayerProperty(
-                    RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+                    RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
                     "line-gradient",
                     casingLineEx
                 )
@@ -243,21 +248,21 @@ class MapboxRouteLineViewTest {
 
         verify {
             style.setStyleLayerProperty(
-                RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
                 "line-gradient",
                 trafficLineExp
             )
         }
         verify {
             style.setStyleLayerProperty(
-                RouteConstants.PRIMARY_ROUTE_LAYER_ID,
+                RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
                 "line-gradient",
                 routeLineExp
             )
         }
         verify {
             style.setStyleLayerProperty(
-                RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+                RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
                 "line-gradient",
                 casingLineEx
             )
@@ -300,51 +305,51 @@ class MapboxRouteLineViewTest {
             every { fullyLoaded } returns true
 
             every {
-                getStyleLayerProperties(RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+                getStyleLayerProperties(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
             } returns layerPropertyExpected
             every {
-                getStyleLayerProperties(RouteConstants.PRIMARY_ROUTE_LAYER_ID)
+                getStyleLayerProperties(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID)
             } returns layerPropertyExpected
             every {
-                getStyleLayerProperties(RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID)
+                getStyleLayerProperties(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleLayerProperty(
-                    RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                    RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
                     "line-gradient",
                     trafficLineExp
                 )
             } returns ExpectedFactory.createValue()
             every {
                 setStyleLayerProperty(
-                    RouteConstants.PRIMARY_ROUTE_LAYER_ID,
+                    RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
                     "line-gradient",
                     routeLineExp
                 )
             } returns ExpectedFactory.createValue()
             every {
                 setStyleLayerProperty(
-                    RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+                    RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
                     "line-gradient",
                     casingLineEx
                 )
             } returns ExpectedFactory.createValue()
             every {
-                getStyleLayerProperties(RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
+                getStyleLayerProperties(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
             } returns layerPropertyExpected
             every {
-                getStyleLayerProperties(RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+                getStyleLayerProperties(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleLayerProperty(
-                    RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
+                    RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
                     "line-gradient",
                     alternativeRoute1Expression
                 )
             } returns ExpectedFactory.createValue()
             every {
                 setStyleLayerProperty(
-                    RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
+                    RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
                     "line-gradient",
                     alternativeRoute2Expression
                 )
@@ -381,35 +386,35 @@ class MapboxRouteLineViewTest {
 
         verify {
             style.setStyleLayerProperty(
-                RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
                 "line-gradient",
                 trafficLineExp
             )
         }
         verify {
             style.setStyleLayerProperty(
-                RouteConstants.PRIMARY_ROUTE_LAYER_ID,
+                RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
                 "line-gradient",
                 routeLineExp
             )
         }
         verify {
             style.setStyleLayerProperty(
-                RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+                RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
                 "line-gradient",
                 casingLineEx
             )
         }
         verify {
             style.setStyleLayerProperty(
-                RouteConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
+                RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
                 "line-gradient",
                 alternativeRoute1Expression
             )
         }
         verify {
             style.setStyleLayerProperty(
-                RouteConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
+                RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
                 "line-gradient",
                 alternativeRoute2Expression
             )
@@ -467,21 +472,21 @@ class MapboxRouteLineViewTest {
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val state = RouteLineState.UpdateLayerVisibilityState(
-            listOf(Pair(RouteConstants.PRIMARY_ROUTE_LAYER_ID, Visibility.NONE))
+            listOf(Pair(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID, Visibility.NONE))
         )
         val visibilityValueSlot = slot<Value>()
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
             every {
-                getStyleLayerProperties(RouteConstants.PRIMARY_ROUTE_LAYER_ID)
+                getStyleLayerProperties(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any(), any())
             } returns ExpectedFactory.createValue()
             every {
                 setStyleLayerProperty(
-                    RouteConstants.PRIMARY_ROUTE_LAYER_ID,
+                    RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
                     "visibility",
                     any()
                 )
@@ -494,7 +499,7 @@ class MapboxRouteLineViewTest {
 
         verify {
             style.setStyleLayerProperty(
-                RouteConstants.PRIMARY_ROUTE_LAYER_ID,
+                RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
                 "visibility",
                 capture(visibilityValueSlot)
             )

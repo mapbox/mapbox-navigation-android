@@ -15,7 +15,8 @@ import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
+import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.utils.internal.extensions.getBitmap
 import com.mapbox.turf.TurfConstants
@@ -55,12 +56,14 @@ internal object RouteArrowUtils {
     }
 
     fun initializeLayers(style: Style, options: RouteArrowOptions) {
-        if (
-            !style.fullyLoaded ||
-            layersAreInitialized(style) ||
-            !style.styleLayerExists(options.aboveLayerId)
-        ) {
+        if (!style.fullyLoaded || layersAreInitialized(style)) {
             return
+        }
+
+        val aboveLayerIdToUse = if (style.styleLayerExists(options.aboveLayerId)) {
+            options.aboveLayerId
+        } else {
+            null
         }
 
         if (!style.styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID)) {
@@ -115,11 +118,11 @@ internal object RouteArrowUtils {
         }
 
         // arrow shaft casing
-        if (style.styleLayerExists(RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)) {
-            style.removeStyleLayer(RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+        if (style.styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)) {
+            style.removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
         }
         val arrowShaftCasingLayer = LineLayer(
-            RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID,
+            RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID,
             RouteConstants.ARROW_SHAFT_SOURCE_ID
         )
             .lineColor(
@@ -156,11 +159,11 @@ internal object RouteArrowUtils {
             )
 
         // arrow head casing
-        if (style.styleLayerExists(RouteConstants.ARROW_HEAD_CASING_LAYER_ID)) {
-            style.removeStyleLayer(RouteConstants.ARROW_HEAD_CASING_LAYER_ID)
+        if (style.styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID)) {
+            style.removeStyleLayer(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID)
         }
         val arrowHeadCasingLayer = SymbolLayer(
-            RouteConstants.ARROW_HEAD_CASING_LAYER_ID,
+            RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID,
             RouteConstants.ARROW_HEAD_SOURCE_ID
         )
             .iconImage(RouteConstants.ARROW_HEAD_ICON_CASING)
@@ -202,11 +205,11 @@ internal object RouteArrowUtils {
             )
 
         // arrow shaft
-        if (style.styleLayerExists(RouteConstants.ARROW_SHAFT_LINE_LAYER_ID)) {
-            style.removeStyleLayer(RouteConstants.ARROW_SHAFT_LINE_LAYER_ID)
+        if (style.styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID)) {
+            style.removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID)
         }
         val arrowShaftLayer = LineLayer(
-            RouteConstants.ARROW_SHAFT_LINE_LAYER_ID,
+            RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
             RouteConstants.ARROW_SHAFT_SOURCE_ID
         )
             .lineColor(
@@ -241,11 +244,11 @@ internal object RouteArrowUtils {
             )
 
         // arrow head
-        if (style.styleLayerExists(RouteConstants.ARROW_HEAD_LAYER_ID)) {
-            style.removeStyleLayer(RouteConstants.ARROW_HEAD_LAYER_ID)
+        if (style.styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID)) {
+            style.removeStyleLayer(RouteLayerConstants.ARROW_HEAD_LAYER_ID)
         }
         val arrowHeadLayer = SymbolLayer(
-            RouteConstants.ARROW_HEAD_LAYER_ID,
+            RouteLayerConstants.ARROW_HEAD_LAYER_ID,
             RouteConstants.ARROW_HEAD_SOURCE_ID
         )
             .iconImage(RouteConstants.ARROW_HEAD_ICON)
@@ -286,7 +289,7 @@ internal object RouteArrowUtils {
                 }
             )
 
-        style.addLayerAbove(arrowShaftCasingLayer, options.aboveLayerId)
+        style.addLayerAbove(arrowShaftCasingLayer, aboveLayerIdToUse)
         style.addLayerAbove(arrowHeadCasingLayer, arrowShaftCasingLayer.layerId)
         style.addLayerAbove(arrowShaftLayer, arrowHeadCasingLayer.layerId)
         style.addLayerAbove(arrowHeadLayer, arrowShaftLayer.layerId)
@@ -296,9 +299,9 @@ internal object RouteArrowUtils {
         return style.fullyLoaded &&
             style.styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) &&
             style.styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) &&
-            style.styleLayerExists(RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID) &&
-            style.styleLayerExists(RouteConstants.ARROW_HEAD_CASING_LAYER_ID) &&
-            style.styleLayerExists(RouteConstants.ARROW_SHAFT_LINE_LAYER_ID) &&
-            style.styleLayerExists(RouteConstants.ARROW_HEAD_LAYER_ID)
+            style.styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID) &&
+            style.styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) &&
+            style.styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) &&
+            style.styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID)
     }
 }

@@ -3,7 +3,8 @@ package com.mapbox.navigation.ui.maps.route.line.model
 import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.appcompat.content.res.AppCompatResources
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
+import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLayerProvider
 import com.mapbox.navigation.ui.maps.route.line.api.VanishingRouteLine
 
@@ -133,7 +134,9 @@ class MapboxRouteLineOptions private constructor(
             apply { this.routeLineResources = resourceProvider }
 
         /**
-         * Determines the elevation of the route layers
+         * Indicates the elevation of the route line related layers. A good starting point is
+         * [LocationComponentConstants.MODEL_LAYER]. If no value is provided the route line
+         * related layers will be placed at the top of the [Map] layer stack.
          *
          * @return the builder
          */

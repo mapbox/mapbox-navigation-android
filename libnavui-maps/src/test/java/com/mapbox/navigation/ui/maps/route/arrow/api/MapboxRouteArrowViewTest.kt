@@ -9,7 +9,8 @@ import com.mapbox.geojson.Feature
 import com.mapbox.maps.Image
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
+import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.common.ShadowValueConverter
 import com.mapbox.navigation.ui.maps.route.arrow.RouteArrowUtils
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
@@ -70,21 +71,21 @@ class MapboxRouteArrowViewTest {
         mockkObject(RouteArrowUtils)
         val options = RouteArrowOptions.Builder(ctx).build()
         val state = RouteArrowState.UpdateRouteArrowVisibilityState(
-            listOf(Pair(RouteConstants.ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE))
+            listOf(Pair(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE))
         )
         val visibilityValueSlot = slot<Value>()
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
             every {
-                getStyleLayerProperties(RouteConstants.ARROW_SHAFT_LINE_LAYER_ID)
+                getStyleLayerProperties(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID)
             } returns layerPropertyExpected
             every {
-                setStyleSourceProperty(RouteConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
+                setStyleSourceProperty(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
             } returns ExpectedFactory.createValue()
             every {
                 setStyleLayerProperty(
-                    RouteConstants.ARROW_SHAFT_LINE_LAYER_ID,
+                    RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
                     "visibility",
                     any()
                 )
@@ -97,7 +98,7 @@ class MapboxRouteArrowViewTest {
 
         verify {
             style.setStyleLayerProperty(
-                RouteConstants.ARROW_SHAFT_LINE_LAYER_ID,
+                RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
                 "visibility",
                 capture(visibilityValueSlot)
             )
@@ -121,7 +122,7 @@ class MapboxRouteArrowViewTest {
             every { toJson() } returns "{}"
         }
         val state = RouteArrowState.UpdateManeuverArrowState(
-            listOf(Pair(RouteConstants.ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE)),
+            listOf(Pair(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE)),
             arrowShaftFeature,
             arrowHeadFeature
         )
@@ -132,14 +133,14 @@ class MapboxRouteArrowViewTest {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
             every {
-                getStyleLayerProperties(RouteConstants.ARROW_SHAFT_LINE_LAYER_ID)
+                getStyleLayerProperties(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID)
             } returns layerPropertyExpected
             every {
-                setStyleSourceProperty(RouteConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
+                setStyleSourceProperty(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
             } returns ExpectedFactory.createValue()
             every {
                 setStyleLayerProperty(
-                    RouteConstants.ARROW_SHAFT_LINE_LAYER_ID,
+                    RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
                     "visibility",
                     any()
                 )
@@ -165,7 +166,7 @@ class MapboxRouteArrowViewTest {
 
         verify {
             style.setStyleLayerProperty(
-                RouteConstants.ARROW_SHAFT_LINE_LAYER_ID,
+                RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
                 "visibility",
                 capture(visibilityValueSlot)
             )
@@ -207,10 +208,12 @@ class MapboxRouteArrowViewTest {
             every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns true
             every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns true
             every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
-            every { styleLayerExists(RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(RouteConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
-            every { styleLayerExists(RouteConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(RouteConstants.ARROW_HEAD_LAYER_ID) } returns true
+            every {
+                styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+            } returns true
+            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
+            every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
             every { getStyleImage(RouteConstants.ARROW_HEAD_ICON) } returns mockImage
             every { getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) } returns mockImage
         }
