@@ -92,8 +92,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import timber.log.Timber;
-
 import static com.mapbox.android.gestures.Utils.dpToPx;
 import static com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID;
 

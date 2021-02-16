@@ -8,6 +8,9 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -66,6 +69,7 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
     private lateinit var mapboxMap: MapboxMap
     private lateinit var mapCamera: CameraAnimationsPlugin
     private lateinit var mapboxNavigation: MapboxNavigation
+    private lateinit var mapboxLogger: Logger
     private lateinit var binding: LayoutActivityTripprogressBinding
     private lateinit var locationComponent: LocationComponentPlugin
 
@@ -195,6 +199,9 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
                 .build()
         )
         mapboxNavigation.startTripSession()
+
+        mapboxLogger = mapboxNavigation.getLogger()
+
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.play()
     }
