@@ -4,8 +4,7 @@ import com.mapbox.navigation.ui.internal.instruction.turnlane.TurnLaneViewData;
 
 import org.junit.Test;
 
-import static com.mapbox.navigation.ui.internal.instruction.turnlane.TurnLaneViewData.DRAW_LANE_RIGHT;
-import static com.mapbox.navigation.ui.internal.instruction.turnlane.TurnLaneViewData.DRAW_LANE_RIGHT_ONLY;
+import static com.mapbox.navigation.ui.internal.instruction.turnlane.TurnLaneViewData.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -42,5 +41,62 @@ public class TurnLaneViewDataTest {
     String drawMethod = data.getDrawMethod();
 
     assertEquals(DRAW_LANE_RIGHT_ONLY, drawMethod);
+  }
+
+  @Test
+  public void getDrawMethod_correctForStraightRightLane_modifierStraight() {
+    String laneIndications = "straightright";
+    String maneuverModifier = "straight";
+    TurnLaneViewData data = new TurnLaneViewData(laneIndications, maneuverModifier);
+
+    String drawMethod = data.getDrawMethod();
+
+    assertEquals(DRAW_LANE_STRAIGHT_ONLY, drawMethod);
+  }
+
+  @Test
+  public void getDrawMethod_correctForStraightRightLane_modifierLeft() {
+    String laneIndications = "straightright";
+    String maneuverModifier = "left";
+    TurnLaneViewData data = new TurnLaneViewData(laneIndications, maneuverModifier);
+
+    String drawMethod = data.getDrawMethod();
+
+    assertEquals(DRAW_LANE_STRAIGHT_RIGHT_NONE, drawMethod);
+  }
+
+  @Test
+  public void getDrawMethod_correctForStraightLeftLane_modifierLeft() {
+    String laneIndications = "straightleft";
+    String maneuverModifier = "left";
+    TurnLaneViewData data = new TurnLaneViewData(laneIndications, maneuverModifier);
+
+    String drawMethod = data.getDrawMethod();
+    boolean shouldFlip = data.shouldBeFlipped();
+
+    assertEquals(DRAW_LANE_RIGHT_ONLY, drawMethod);
+    assertTrue(shouldFlip);
+  }
+
+  @Test
+  public void getDrawMethod_correctForStraightLeftLane_modifierStraight() {
+    String laneIndications = "straightleft";
+    String maneuverModifier = "straight";
+    TurnLaneViewData data = new TurnLaneViewData(laneIndications, maneuverModifier);
+
+    String drawMethod = data.getDrawMethod();
+
+    assertEquals(DRAW_LANE_STRAIGHT_ONLY, drawMethod);
+  }
+
+  @Test
+  public void getDrawMethod_correctForStraightLeftLane_modifierRight() {
+    String laneIndications = "straightleft";
+    String maneuverModifier = "right";
+    TurnLaneViewData data = new TurnLaneViewData(laneIndications, maneuverModifier);
+
+    String drawMethod = data.getDrawMethod();
+
+    assertEquals(DRAW_LANE_STRAIGHT_RIGHT_NONE, drawMethod);
   }
 }
