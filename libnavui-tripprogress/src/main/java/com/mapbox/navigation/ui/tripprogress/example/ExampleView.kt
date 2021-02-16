@@ -42,7 +42,11 @@ class ExampleView @JvmOverloads constructor(
             is Failure -> {
                 viewOneMain.visibility = GONE
                 viewOneAdditional.visibility = GONE
-                Toast.makeText(context, expected.error.errorMessage, Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context,
+                    expected.error.errorMessage,
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
@@ -57,7 +61,11 @@ class ExampleView @JvmOverloads constructor(
             }
             is Failure -> {
                 viewTwoMain.visibility = GONE
-                Toast.makeText(context, expected.error.errorMessage, Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context,
+                    expected.error.errorMessage,
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
