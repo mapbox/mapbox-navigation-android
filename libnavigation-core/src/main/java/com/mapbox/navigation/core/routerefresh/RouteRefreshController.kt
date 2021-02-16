@@ -64,8 +64,8 @@ internal class RouteRefreshController(
         }
 
         override fun onError(error: RouteRefreshError) {
-            logger.i(
-                msg = Message("Route refresh error"),
+            logger.e(
+                msg = Message(error.message ?: "Route refresh error"),
                 tr = error.throwable
             )
         }
