@@ -1,12 +1,11 @@
 package com.mapbox.navigation.core
 
-import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
+import com.mapbox.common.SKUIdentifier
+import com.mapbox.common.TokenGenerator
 import com.mapbox.navigator.SkuTokenSource
 
-internal class NativeSkuTokenProvider(
-    private val skuTokenProvider: SkuTokenProvider
-) : SkuTokenSource() {
+internal class NativeSkuTokenProvider : SkuTokenSource() {
     override fun getToken(): String {
-        return skuTokenProvider.obtainSkuToken()
+        return TokenGenerator.getSKUToken(SKUIdentifier.NAVIGATION_MAUS)
     }
 }

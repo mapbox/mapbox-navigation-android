@@ -48,11 +48,11 @@ dependencies {
     runtimeOnly project(':libtrip-notification')
     runtimeOnly dependenciesList.mapboxLogger
     implementation project(':libnavigation-metrics')
-    implementation dependenciesList.mapboxAndroidAccounts
     implementation dependenciesList.mapboxSdkTurf
 
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
+    implementation dependenciesList.androidStartup
 
     testImplementation project(':libtesting-utils')
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"

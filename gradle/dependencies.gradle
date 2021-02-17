@@ -12,10 +12,9 @@ ext {
       mapboxEvents              : '6.2.2',
       mapboxCore                : '3.1.1',
       mapboxNavigator           : '43.0.1',
-      mapboxCommonNative        : '10.0.0-beta.9.1',
+      mapboxCommonNative        : '10.0.0-beta.9.2',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
-      mapboxAccounts            : '0.4.1',
       mapboxBaseAndroid         : '0.4.0',
       androidXCoreVersion       : '1.2.0',
       androidXAppCompatVersion  : '1.1.0',
@@ -51,7 +50,8 @@ ext {
       androidxTestJunit         : '1.1.1',
       androidxTest              : '1.3.0',
       barista                   : '3.2.0',
-      svgParser                 : '1.4'
+      svgParser                 : '1.4',
+      androidStartup            : '1.0.0',
   ]
   dependenciesList = [
       // mapbox
@@ -67,7 +67,6 @@ ext {
       mapboxCommonNative        : "com.mapbox.common:common:${version.mapboxCommonNative}",
       mapboxAnnotationPlugin    : "com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:${version.mapboxAnnotationPlugin}",
       mapboxCrashMonitor        : "com.mapbox.crashmonitor:mapbox-crash-monitor-native:${version.mapboxCrashMonitor}",
-      mapboxAndroidAccounts     : "com.mapbox.mapboxsdk:mapbox-navigation-accounts-android:${version.mapboxAccounts}",
       mapboxAnnotations         : "com.mapbox.base:annotations:${version.mapboxBaseAndroid}",
       mapboxAnnotationsProcessor: "com.mapbox.base:annotations-processor:${version.mapboxBaseAndroid}",
       mapboxAndroidCommon       : "com.mapbox.base:common:${version.mapboxBaseAndroid}",
@@ -110,6 +109,7 @@ ext {
       androidXCardView          : "androidx.cardview:cardview:${version.cardViewVersion}",
       androidXConstraintLayout  : "androidx.constraintlayout:constraintlayout:${version.constraintLayout}",
       androidXPreference        : "androidx.preference:preference-ktx:${version.androidXAppCompatVersion}",
+      androidStartup            : "androidx.startup:startup-runtime:${version.androidStartup}",
 
       // architecture
       lifecycleViewModelKtx     : "androidx.lifecycle:lifecycle-viewmodel-ktx:${version.lifecycleViewModelKtx}",

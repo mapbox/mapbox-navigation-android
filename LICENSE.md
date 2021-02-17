@@ -261,12 +261,6 @@ License: [The Apache Software License, Version 2.0](https://www.apache.org/licen
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the Mapbox Accounts SDK for Android.
-URL: [https://github.com/mapbox/mapbox-accounts-android](https://github.com/mapbox/mapbox-accounts-android)
-License: [Mapbox Terms of Service](https://www.mapbox.com/tos/)
-
-===========================================================================
-
 Mapbox Navigation uses portions of the Mapbox Android Commmon SDK.
 URL: [https://github.com/mapbox/mapbox-sdk](https://github.com/mapbox/mapbox-sdk)
 License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
@@ -300,12 +294,6 @@ License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 Mapbox Navigation uses portions of the Mapbox Logger (Artifact that provides Mapbox Logger module implementation).
 URL: [https://github.com/mapbox/mapbox-base-android](https://github.com/mapbox/mapbox-base-android)
 License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the Mapbox Navigation Accounts SDK for Android.
-URL: [https://github.com/mapbox/mapbox-accounts-android](https://github.com/mapbox/mapbox-accounts-android)
-License: [Mapbox Terms of Service](https://www.mapbox.com/tos/)
 
 ===========================================================================
 

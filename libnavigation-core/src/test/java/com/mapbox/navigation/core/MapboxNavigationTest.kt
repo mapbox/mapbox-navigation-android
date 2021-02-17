@@ -300,7 +300,7 @@ class MapboxNavigationTest {
 
     @Test
     fun init_registerNavigationSessionStateObserver() {
-        verify(exactly = 2) { navigationSession.registerNavigationSessionStateObserver(any()) }
+        verify(exactly = 1) { navigationSession.registerNavigationSessionStateObserver(any()) }
 
         mapboxNavigation.onDestroy()
     }

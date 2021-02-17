@@ -23,7 +23,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert
 import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
-import com.mapbox.navigation.core.accounts.NavigationAccountsSession
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
@@ -142,8 +141,6 @@ class MapboxNavigation(
     private val tripService: TripService
     private val tripSession: TripSession
     private val navigationSession: NavigationSession
-    private val navigationAccountsSession =
-        NavigationAccountsSession(navigationOptions.applicationContext)
     private val logger: Logger
     private val internalRoutesObserver: RoutesObserver
     private val internalOffRouteObserver: OffRouteObserver
@@ -227,7 +224,6 @@ class MapboxNavigation(
             accessToken = accessToken
         )
         tripSession.registerStateObserver(navigationSession)
-        navigationSession.registerNavigationSessionStateObserver(navigationAccountsSession)
 
         arrivalProgressObserver = ArrivalProgressObserver(tripSession)
         setArrivalController()
@@ -820,7 +816,7 @@ class MapboxNavigation(
                 ModuleProviderArgument(Context::class.java, navigationOptions.applicationContext),
                 ModuleProviderArgument(
                     UrlSkuTokenProvider::class.java,
-                    MapboxNavigationAccounts.getInstance(navigationOptions.applicationContext)
+                    MapboxNavigationAccounts
                 ),
                 ModuleProviderArgument(
                     MapboxNativeNavigator::class.java,
@@ -881,9 +877,7 @@ class MapboxNavigation(
                 navigationOptions.accessToken ?: "",
                 USER_AGENT,
                 BuildConfig.NAV_NATIVE_SDK_VERSION,
-                NativeSkuTokenProvider(
-                    MapboxNavigationAccounts.getInstance(navigationOptions.applicationContext)
-                ),
+                NativeSkuTokenProvider(),
                 navigationOptions.routingTilesOptions.minDaysBetweenServerAndLocalTilesVersion
             )
         )

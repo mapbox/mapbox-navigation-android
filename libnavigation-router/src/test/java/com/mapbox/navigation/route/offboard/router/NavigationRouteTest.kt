@@ -47,8 +47,8 @@ class NavigationRouteTest {
         MockKAnnotations.init(this)
         every { context.inferDeviceLocale() } returns Locale.US
         every {
-            mockSkuTokenProvider.obtainUrlWithSkuToken("/mock", 1)
-        } returns ("/mock&sku=102jaksdhfj")
+            mockSkuTokenProvider.obtainUrlWithSkuToken(any())
+        } returns (mockk())
     }
 
     @Test

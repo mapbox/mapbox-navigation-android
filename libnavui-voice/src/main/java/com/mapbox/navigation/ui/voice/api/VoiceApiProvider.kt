@@ -17,7 +17,7 @@ internal object VoiceApiProvider {
         MapboxSpeechProvider(
             accessToken,
             language,
-            MapboxNavigationAccounts.getInstance(context.applicationContext),
+            MapboxNavigationAccounts,
             baseUri
         ),
         MapboxSpeechFileProvider(
