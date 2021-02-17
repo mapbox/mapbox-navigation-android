@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.navigation.examples.core.MapboxManeuverActivity
@@ -20,26 +21,34 @@ import com.mapbox.navigation.examples.core.SlackLineActivity
 import com.mapbox.navigation.examples.core.TripProgressActivity
 import com.mapbox.navigation.examples.core.VoiceActivity
 import com.mapbox.navigation.examples.core.camera.CameraAnimationsActivity
+import com.mapbox.navigation.examples.core.databinding.MainActivityLayoutBinding
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper.Companion.areLocationPermissionsGranted
-import kotlinx.android.synthetic.main.main_activity_layout.*
 
 class MainActivity : AppCompatActivity(), PermissionsListener {
 
     private val permissionsHelper = LocationPermissionsHelper(this)
+    private lateinit var binding: MainActivityLayoutBinding
     private lateinit var adapter: ExamplesAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.main_activity_layout)
+        binding = MainActivityLayoutBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         val sampleItemList = buildSampleList()
         adapter = ExamplesAdapter(this) {
             startActivity(Intent(this@MainActivity, sampleItemList[it].activity))
         }
-        coreRecycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        coreRecycler.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
-        coreRecycler.adapter = adapter
+        binding.coreRecycler.apply {
+            layoutManager = LinearLayoutManager(
+                this@MainActivity,
+                LinearLayoutManager.VERTICAL,
+                false
+            )
+            addItemDecoration(DividerItemDecoration(this@MainActivity, VERTICAL))
+            adapter = this@MainActivity.adapter
+        }
         adapter.addSampleItems(sampleItemList)
 
         if (areLocationPermissionsGranted(this)) {

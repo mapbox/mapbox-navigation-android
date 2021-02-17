@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maneuver.view
 import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import androidx.annotation.StyleRes
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -14,10 +15,10 @@ import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import com.mapbox.navigation.ui.base.MapboxView
 import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState
 import com.mapbox.navigation.ui.maneuver.R
+import com.mapbox.navigation.ui.maneuver.databinding.MapboxMainManeuverLayoutBinding
+import com.mapbox.navigation.ui.maneuver.databinding.MapboxManeuverLayoutBinding
+import com.mapbox.navigation.ui.maneuver.databinding.MapboxSubManeuverLayoutBinding
 import com.mapbox.navigation.ui.maneuver.model.TurnIconResources
-import kotlinx.android.synthetic.main.mapbox_main_maneuver_layout.view.*
-import kotlinx.android.synthetic.main.mapbox_maneuver_layout.view.*
-import kotlinx.android.synthetic.main.mapbox_sub_maneuver_layout.view.*
 
 /**
  * Default view to render a maneuver.
@@ -33,26 +34,30 @@ class MapboxManeuverView @JvmOverloads constructor(
 
     private val laneGuidanceAdapter = MapboxLaneGuidanceAdapter(context)
     private val upcomingManeuverAdapter = MapboxUpcomingManeuverAdapter(context)
-
+    private val binding = MapboxManeuverLayoutBinding.inflate(
+        LayoutInflater.from(context),
+        this,
+        true
+    )
+    private val mainLayoutBinding = MapboxMainManeuverLayoutBinding.bind(binding.root)
+    private val subLayoutBinding = MapboxSubManeuverLayoutBinding.bind(binding.root)
     /**
      * Initialize.
      */
     init {
-        inflate(context, R.layout.mapbox_maneuver_layout, this)
-
-        laneGuidanceRecycler.apply {
+        binding.laneGuidanceRecycler.apply {
             layoutManager = LinearLayoutManager(context, HORIZONTAL, false)
             adapter = laneGuidanceAdapter
         }
 
-        upcomingManeuverRecycler.apply {
+        binding.upcomingManeuverRecycler.apply {
             layoutManager = LinearLayoutManager(context, VERTICAL, false)
             adapter = upcomingManeuverAdapter
         }
 
         initAttributes(attrs)
         this.setOnClickListener {
-            if (upcomingManeuverRecycler.visibility == GONE) {
+            if (binding.upcomingManeuverRecycler.visibility == GONE) {
                 render(ManeuverState.UpcomingManeuvers.Show)
             } else {
                 render(ManeuverState.UpcomingManeuvers.Hide)
@@ -125,8 +130,8 @@ class MapboxManeuverView @JvmOverloads constructor(
      * @param turnIconResources TurnIconResources
      */
     fun updateTurnIconResources(turnIconResources: TurnIconResources) {
-        maneuverIcon.updateTurnIconResources(turnIconResources)
-        subManeuverIcon.updateTurnIconResources(turnIconResources)
+        mainLayoutBinding.maneuverIcon.updateTurnIconResources(turnIconResources)
+        subLayoutBinding.subManeuverIcon.updateTurnIconResources(turnIconResources)
     }
 
     /**
@@ -134,8 +139,12 @@ class MapboxManeuverView @JvmOverloads constructor(
      * @param style Int
      */
     fun updateTurnIconStyle(@StyleRes style: Int) {
-        maneuverIcon.updateTurnIconStyle(ContextThemeWrapper(context, style))
-        subManeuverIcon.updateTurnIconStyle(ContextThemeWrapper(context, style))
+        mainLayoutBinding.maneuverIcon.updateTurnIconStyle(
+            ContextThemeWrapper(context, style)
+        )
+        subLayoutBinding.subManeuverIcon.updateTurnIconStyle(
+            ContextThemeWrapper(context, style)
+        )
     }
 
     /**
@@ -143,7 +152,7 @@ class MapboxManeuverView @JvmOverloads constructor(
      * @param style Int
      */
     fun updatePrimaryManeuverTextAppearance(@StyleRes style: Int) {
-        TextViewCompat.setTextAppearance(primaryManeuverText, style)
+        TextViewCompat.setTextAppearance(mainLayoutBinding.primaryManeuverText, style)
     }
 
     /**
@@ -151,7 +160,7 @@ class MapboxManeuverView @JvmOverloads constructor(
      * @param style Int
      */
     fun updateSecondaryManeuverTextAppearance(@StyleRes style: Int) {
-        TextViewCompat.setTextAppearance(secondaryManeuverText, style)
+        TextViewCompat.setTextAppearance(mainLayoutBinding.secondaryManeuverText, style)
     }
 
     /**
@@ -159,7 +168,7 @@ class MapboxManeuverView @JvmOverloads constructor(
      * @param style Int
      */
     fun updateSubManeuverTextAppearance(@StyleRes style: Int) {
-        TextViewCompat.setTextAppearance(subManeuverText, style)
+        TextViewCompat.setTextAppearance(subLayoutBinding.subManeuverText, style)
     }
 
     /**
@@ -167,7 +176,7 @@ class MapboxManeuverView @JvmOverloads constructor(
      * @param style Int
      */
     fun updateStepDistanceTextAppearance(@StyleRes style: Int) {
-        TextViewCompat.setTextAppearance(stepDistance, style)
+        TextViewCompat.setTextAppearance(mainLayoutBinding.stepDistance, style)
     }
 
     /**
@@ -187,7 +196,7 @@ class MapboxManeuverView @JvmOverloads constructor(
     }
 
     private fun applyAttributes(typedArray: TypedArray) {
-        mainManeuverView.setCardBackgroundColor(
+        binding.mainManeuverView.setCardBackgroundColor(
             ContextCompat.getColor(
                 context,
                 typedArray.getResourceId(
@@ -196,7 +205,7 @@ class MapboxManeuverView @JvmOverloads constructor(
                 )
             )
         )
-        subManeuverView.setCardBackgroundColor(
+        binding.subManeuverView.setCardBackgroundColor(
             ContextCompat.getColor(
                 context,
                 typedArray.getResourceId(
@@ -205,7 +214,7 @@ class MapboxManeuverView @JvmOverloads constructor(
                 )
             )
         )
-        laneGuidanceCard.setCardBackgroundColor(
+        binding.laneGuidanceCard.setCardBackgroundColor(
             ContextCompat.getColor(
                 context,
                 typedArray.getResourceId(
@@ -214,7 +223,7 @@ class MapboxManeuverView @JvmOverloads constructor(
                 )
             )
         )
-        upcomingManeuverRecycler.setBackgroundColor(
+        binding.upcomingManeuverRecycler.setBackgroundColor(
             ContextCompat.getColor(
                 context,
                 typedArray.getResourceId(
@@ -232,39 +241,39 @@ class MapboxManeuverView @JvmOverloads constructor(
     }
 
     private fun renderPrimaryManeuver(state: ManeuverState.ManeuverPrimary.Instruction) {
-        primaryManeuverText.render(state)
+        mainLayoutBinding.primaryManeuverText.render(state)
     }
 
     private fun renderSecondaryManeuver(state: ManeuverState.ManeuverSecondary.Instruction) {
-        secondaryManeuverText.render(state)
+        mainLayoutBinding.secondaryManeuverText.render(state)
     }
 
     private fun hideSecondaryManeuver() {
-        secondaryManeuverText.visibility = GONE
+        mainLayoutBinding.secondaryManeuverText.visibility = GONE
         updateConstraintsToOnlyPrimary()
-        primaryManeuverText.maxLines = 2
+        mainLayoutBinding.primaryManeuverText.maxLines = 2
     }
 
     private fun showSecondaryManeuver() {
-        secondaryManeuverText.visibility = VISIBLE
+        mainLayoutBinding.secondaryManeuverText.visibility = VISIBLE
         updateConstraintsToHaveSecondary()
-        primaryManeuverText.maxLines = 1
+        mainLayoutBinding.primaryManeuverText.maxLines = 1
     }
 
     private fun renderSubManeuver(state: ManeuverState.ManeuverSub.Instruction) {
-        subManeuverText.render(state)
+        subLayoutBinding.subManeuverText.render(state)
     }
 
     private fun renderSubManeuverVisibility(visibility: Int) {
-        subManeuverView.visibility = visibility
+        binding.subManeuverView.visibility = visibility
     }
 
     private fun renderPrimaryTurnIcon(state: ManeuverState.ManeuverPrimary.Instruction) {
-        maneuverIcon.render(state)
+        mainLayoutBinding.maneuverIcon.render(state)
     }
 
     private fun renderSubTurnIcon(state: ManeuverState.ManeuverSub.Instruction) {
-        subManeuverIcon.render(state)
+        subLayoutBinding.subManeuverIcon.render(state)
     }
 
     private fun removeUpcomingManeuver(state: ManeuverState.UpcomingManeuvers.RemoveUpcoming) {
@@ -272,7 +281,7 @@ class MapboxManeuverView @JvmOverloads constructor(
     }
 
     private fun renderDistanceRemaining(state: ManeuverState) {
-        stepDistance.render(state)
+        mainLayoutBinding.stepDistance.render(state)
     }
 
     private fun renderAddLanes(state: ManeuverState.LaneGuidanceManeuver.AddLanes) {
@@ -284,7 +293,7 @@ class MapboxManeuverView @JvmOverloads constructor(
     }
 
     private fun renderLaneGuidanceVisibility(visibility: Int) {
-        laneGuidanceCard.visibility = visibility
+        binding.laneGuidanceCard.visibility = visibility
     }
 
     private fun renderUpcomingManeuvers(state: ManeuverState.UpcomingManeuvers.Upcoming) {
@@ -297,21 +306,21 @@ class MapboxManeuverView @JvmOverloads constructor(
     }
 
     private fun renderUpcomingManeuverVisibility(visibility: Int) {
-        upcomingManeuverRecycler.visibility = visibility
+        binding.upcomingManeuverRecycler.visibility = visibility
     }
 
     private fun updateConstraintsToOnlyPrimary() {
-        val params = primaryManeuverText.layoutParams as LayoutParams
+        val params = mainLayoutBinding.primaryManeuverText.layoutParams as LayoutParams
         params.topToTop = LayoutParams.PARENT_ID
         params.bottomToBottom = LayoutParams.PARENT_ID
         requestLayout()
     }
 
     private fun updateConstraintsToHaveSecondary() {
-        val params = primaryManeuverText.layoutParams as LayoutParams
+        val params = mainLayoutBinding.primaryManeuverText.layoutParams as LayoutParams
         params.topToTop = LayoutParams.UNSET
         params.bottomToBottom = LayoutParams.UNSET
-        params.bottomToTop = secondaryManeuverText.id
+        params.bottomToTop = mainLayoutBinding.secondaryManeuverText.id
         requestLayout()
     }
 }

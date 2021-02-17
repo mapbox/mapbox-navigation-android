@@ -17,7 +17,6 @@ import com.mapbox.navigation.ui.base.model.maneuver.TextComponentNode
 import com.mapbox.navigation.ui.base.model.maneuver.TotalManeuverDistance
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.android.synthetic.main.mapbox_main_maneuver_layout.view.*
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -67,7 +66,7 @@ class MapboxUpcomingManeuverAdapterTest {
 
         adapter.addUpcomingManeuvers(upcomingManeuverList)
         adapter.onBindViewHolder(viewHolder, 0)
-        val actual = viewHolder.view.primaryManeuverText.text
+        val actual = viewHolder.viewBinding.primaryManeuverText.text
 
         assertEquals(expected, actual.toString())
     }
@@ -84,7 +83,7 @@ class MapboxUpcomingManeuverAdapterTest {
 
         adapter.addUpcomingManeuvers(upcomingManeuverList)
         adapter.onBindViewHolder(viewHolder, 0)
-        val actual = viewHolder.view.secondaryManeuverText.text
+        val actual = viewHolder.viewBinding.secondaryManeuverText.text
 
         assertEquals(expected, actual.toString())
     }
@@ -106,7 +105,7 @@ class MapboxUpcomingManeuverAdapterTest {
 
         adapter.addUpcomingManeuvers(upcomingManeuverList)
         adapter.onBindViewHolder(viewHolder, 0)
-        val actual = viewHolder.view.stepDistance.text
+        val actual = viewHolder.viewBinding.stepDistance.text
 
         assertEquals(expected.toString(), actual.toString())
     }

@@ -31,7 +31,6 @@ import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
-import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
 import com.mapbox.maps.plugin.gestures.GesturesPlugin
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
@@ -53,6 +52,7 @@ import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.camera.AnimationAdapter.OnAnimationButtonClicked
+import com.mapbox.navigation.examples.core.databinding.LayoutCameraAnimationsBinding
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
@@ -68,7 +68,6 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.turf.TurfMeasurement
-import kotlinx.android.synthetic.main.layout_camera_animations.*
 
 class CameraAnimationsActivity :
     AppCompatActivity(),
@@ -89,6 +88,7 @@ class CameraAnimationsActivity :
     private var routeLineView: MapboxRouteLineView? = null
     private var routeArrowView: MapboxRouteArrowView? = null
 
+    private lateinit var binding: LayoutCameraAnimationsBinding
     private lateinit var navigationCamera: NavigationCamera
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
 
@@ -201,9 +201,10 @@ class CameraAnimationsActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.layout_camera_animations)
-        mapboxMap = mapView.getMapboxMap()
-        locationComponent = mapView.getLocationComponentPlugin().apply {
+        binding = LayoutCameraAnimationsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        mapboxMap = binding.mapView.getMapboxMap()
+        locationComponent = binding.mapView.getLocationComponentPlugin().apply {
             this.locationPuck = LocationPuck2D(
                 bearingImage = ContextCompat.getDrawable(
                     this@CameraAnimationsActivity,
@@ -219,18 +220,18 @@ class CameraAnimationsActivity :
 
         viewportDataSource = MapboxNavigationViewportDataSource(
             MapboxNavigationViewportDataSourceOptions.Builder().build(),
-            mapView.getMapboxMap()
+            binding.mapView.getMapboxMap()
         )
         navigationCamera = NavigationCamera(
-            mapView.getMapboxMap(),
-            mapView.getCameraAnimationsPlugin(),
+            binding.mapView.getMapboxMap(),
+            binding.mapView.getCameraAnimationsPlugin(),
             viewportDataSource
         )
         /* Alternative to the NavigationScaleGestureHandler
         mapView.getCameraAnimationsPlugin().addCameraAnimationsLifecycleListener(
             NavigationBasicGesturesHandler(navigationCamera)
         )*/
-        mapView.getCameraAnimationsPlugin().addCameraAnimationsLifecycleListener(
+        binding.mapView.getCameraAnimationsPlugin().addCameraAnimationsLifecycleListener(
             NavigationScaleGestureHandler(
                 this,
                 navigationCamera,
@@ -274,7 +275,7 @@ class CameraAnimationsActivity :
     }
 
     private fun initButtons() {
-        gravitate_left.setOnClickListener {
+        binding.gravitateLeft.setOnClickListener {
             mapboxMap.getCameraOptions(null).padding?.let {
                 val padding = EdgeInsets(
                     it.top,
@@ -287,7 +288,7 @@ class CameraAnimationsActivity :
             }
         }
 
-        gravitate_right.setOnClickListener {
+        binding.gravitateRight.setOnClickListener {
             mapboxMap.getCameraOptions(null).padding?.let {
                 val padding = EdgeInsets(
                     it.top,
@@ -300,7 +301,7 @@ class CameraAnimationsActivity :
             }
         }
 
-        gravitate_top.setOnClickListener {
+        binding.gravitateTop.setOnClickListener {
             mapboxMap.getCameraOptions(null).padding?.let {
                 val padding = EdgeInsets(
                     0.0,
@@ -313,7 +314,7 @@ class CameraAnimationsActivity :
             }
         }
 
-        gravitate_bottom.setOnClickListener {
+        binding.gravitateBottom.setOnClickListener {
             mapboxMap.getCameraOptions(null).padding?.let {
                 val padding = EdgeInsets(
                     120.0 * pixelDensity,
@@ -328,13 +329,7 @@ class CameraAnimationsActivity :
     }
 
     private fun initCameraListeners() {
-        mapboxMap.addOnCameraChangeListener(
-            object : OnCameraChangeListener {
-                override fun onCameraChanged() {
-                    updateCameraChangeView()
-                }
-            }
-        )
+        mapboxMap.addOnCameraChangeListener { updateCameraChangeView() }
     }
 
     private fun initNavigation() {
@@ -413,21 +408,23 @@ class CameraAnimationsActivity :
     private fun initAnimations() {
         val adapter = AnimationAdapter(this, this)
         val manager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        animationsList.layoutManager = manager
-        animationsList.adapter = adapter
+        binding.animationsList.layoutManager = manager
+        binding.animationsList.adapter = adapter
     }
 
     @SuppressLint("SetTextI18n")
     private fun updateCameraChangeView() {
         mapboxMap.getCameraOptions(null).let { currentMapCamera ->
-            cameraChangeView_state.text = "state: ${navigationCamera.state}"
-            cameraChangeView_lng.text = "lng: " +
+            binding.cameraChangeViewState.text = "state: ${navigationCamera.state}"
+            binding.cameraChangeViewLng.text = "lng: " +
                 currentMapCamera.center?.longitude().formatNumber()
-            cameraChangeView_lat.text = "lat: ${currentMapCamera.center?.latitude().formatNumber()}"
-            cameraChangeView_zoom.text = "zoom: ${currentMapCamera.zoom.formatNumber()}"
-            cameraChangeView_bearing.text = "bearing: ${currentMapCamera.bearing.formatNumber()}"
-            cameraChangeView_pitch.text = "pitch: ${currentMapCamera.pitch.formatNumber()}"
-            cameraChangeView_padding.text =
+            binding.cameraChangeViewLat.text =
+                "lat: ${currentMapCamera.center?.latitude().formatNumber()}"
+            binding.cameraChangeViewZoom.text = "zoom: ${currentMapCamera.zoom.formatNumber()}"
+            binding.cameraChangeViewBearing.text =
+                "bearing: ${currentMapCamera.bearing.formatNumber()}"
+            binding.cameraChangeViewPitch.text = "pitch: ${currentMapCamera.pitch.formatNumber()}"
+            binding.cameraChangeViewPadding.text =
                 """
                     |padding:
                     |  top: ${currentMapCamera.padding?.top.formatNumber()}
@@ -458,7 +455,7 @@ class CameraAnimationsActivity :
                         it.longitude + 0.0123,
                         it.latitude + 0.0123
                     )
-                    mapView.getCameraAnimationsPlugin().flyTo(
+                    binding.mapView.getCameraAnimationsPlugin().flyTo(
                         CameraOptions.Builder()
                             .center(center)
                             .bearing(0.0)
@@ -529,18 +526,18 @@ class CameraAnimationsActivity :
 
     override fun onStart() {
         super.onStart()
-        mapView.onStart()
+        binding.mapView.onStart()
         navigationCamera.resetFrame()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView.onStop()
+        binding.mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView.onDestroy()
+        binding.mapView.onDestroy()
         mapboxNavigation.onDestroy()
     }
 
@@ -549,7 +546,7 @@ class CameraAnimationsActivity :
     }
 
     private fun getGesturesPlugin(): GesturesPlugin {
-        return mapView.getGesturesPlugin()
+        return binding.mapView.getGesturesPlugin()
     }
 
     override fun onRequestPermissionsResult(

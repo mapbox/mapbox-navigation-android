@@ -338,10 +338,9 @@ package com.mapbox.navigation.ui.maneuver.view {
   }
 
   public final class MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
-    ctor public MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder(android.view.View view);
+    ctor public MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder(error.NonExistentClass viewBinding);
     method public void bindLaneIndicator(com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator laneIndicator);
-    method public android.view.View getView();
-    property public final android.view.View view;
+    method public error.NonExistentClass getViewBinding();
   }
 
   public final class MapboxManeuverView extends androidx.constraintlayout.widget.ConstraintLayout implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState> {
@@ -406,10 +405,8 @@ package com.mapbox.navigation.ui.maneuver.view {
   }
 
   public final class MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
-    ctor public MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder(android.view.View view);
+    ctor public MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder(error.NonExistentClass viewBinding);
     method public void bindUpcomingManeuver(com.mapbox.navigation.ui.base.model.maneuver.Maneuver maneuver);
-    method public android.view.View getView();
-    property public final android.view.View view;
   }
 
 }

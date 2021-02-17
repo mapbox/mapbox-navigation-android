@@ -2,16 +2,15 @@ package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StyleRes
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.recyclerview.widget.RecyclerView
 import com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator
 import com.mapbox.navigation.ui.maneuver.R
+import com.mapbox.navigation.ui.maneuver.databinding.MapboxItemLaneGuidanceLayoutBinding
 import com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder
 import com.mapbox.navigation.ui.utils.internal.ThemeUtil
-import kotlinx.android.synthetic.main.mapbox_item_lane_guidance_layout.view.*
 
 /**
  * Default recycler adapter to render lanes for the upcoming turn.
@@ -42,8 +41,8 @@ class MapboxLaneGuidanceAdapter(
         parent: ViewGroup,
         viewType: Int
     ): MapboxLaneGuidanceViewHolder {
-        val view = inflater.inflate(R.layout.mapbox_item_lane_guidance_layout, parent, false)
-        return MapboxLaneGuidanceViewHolder(view)
+        val binding = MapboxItemLaneGuidanceLayoutBinding.inflate(inflater, parent, false)
+        return MapboxLaneGuidanceViewHolder(binding)
     }
 
     /**
@@ -104,18 +103,18 @@ class MapboxLaneGuidanceAdapter(
      * @constructor
      */
     inner class MapboxLaneGuidanceViewHolder(
-        val view: View
-    ) : RecyclerView.ViewHolder(view) {
+        val viewBinding: MapboxItemLaneGuidanceLayoutBinding
+    ) : RecyclerView.ViewHolder(viewBinding.root) {
 
         /**
          * Invoke the method to bind the lane to the view.
          * @param laneIndicator LaneIndicator
          */
         fun bindLaneIndicator(laneIndicator: LaneIndicator) {
-            view.itemLaneGuidance.renderLane(
+            viewBinding.itemLaneGuidance.renderLane(
                 laneIndicator,
                 activeDirection,
-                ContextThemeWrapper(view.context, laneGuidanceStyle)
+                ContextThemeWrapper(viewBinding.root.context, laneGuidanceStyle)
             )
         }
     }

@@ -38,6 +38,7 @@ import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.examples.core.databinding.LayoutActivitySnapshotBinding
 import com.mapbox.navigation.examples.util.Slackline
 import com.mapbox.navigation.examples.util.Utils.getMapboxAccessToken
 import com.mapbox.navigation.ui.base.api.snapshotter.SnapshotReadyCallback
@@ -47,8 +48,6 @@ import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.snapshotter.api.MapboxSnapshotterApi
 import com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
-import kotlinx.android.synthetic.main.layout_activity_signboard.mapView
-import kotlinx.android.synthetic.main.layout_activity_snapshot.*
 import java.util.Objects
 
 class MapboxSnapshotActivity : AppCompatActivity(), OnMapLongClickListener {
@@ -57,21 +56,22 @@ class MapboxSnapshotActivity : AppCompatActivity(), OnMapLongClickListener {
     private lateinit var mapCamera: CameraAnimationsPlugin
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var snapshotApi: SnapshotterApi
-    private val navigationLocationProvider = NavigationLocationProvider()
+    private lateinit var binding: LayoutActivitySnapshotBinding
     private lateinit var locationComponent: LocationComponentPlugin
 
     private val mapboxReplayer = MapboxReplayer()
     private val replayRouteMapper = ReplayRouteMapper()
     private val slackLine = Slackline(this)
+    private val navigationLocationProvider = NavigationLocationProvider()
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
     private val snapshotCallback: SnapshotReadyCallback = object : SnapshotReadyCallback {
         override fun onSnapshotReady(bitmap: SnapshotState.SnapshotReady) {
-            snapshotView.render(bitmap)
+            binding.snapshotView.render(bitmap)
         }
 
         override fun onFailure(error: SnapshotState.SnapshotFailure) {
-            snapshotView.render(error)
+            binding.snapshotView.render(error)
         }
     }
 
@@ -115,9 +115,10 @@ class MapboxSnapshotActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.layout_activity_snapshot)
-        mapboxMap = mapView.getMapboxMap()
-        locationComponent = mapView.getLocationComponentPlugin().apply {
+        binding = LayoutActivitySnapshotBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        mapboxMap = binding.mapView.getMapboxMap()
+        locationComponent = binding.mapView.getLocationComponentPlugin().apply {
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }
@@ -127,7 +128,7 @@ class MapboxSnapshotActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onStart() {
         super.onStart()
-        mapView.onStart()
+        binding.mapView.onStart()
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.registerRoutesObserver(routesObserver)
             mapboxNavigation.registerLocationObserver(locationObserver)
@@ -144,18 +145,18 @@ class MapboxSnapshotActivity : AppCompatActivity(), OnMapLongClickListener {
             mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
             mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         }
-        mapView.onStop()
+        binding.mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView.onDestroy()
+        binding.mapView.onDestroy()
         mapboxNavigation.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView.onLowMemory()
+        binding.mapView.onLowMemory()
     }
 
     override fun onMapLongClick(point: Point): Boolean {
@@ -171,7 +172,7 @@ class MapboxSnapshotActivity : AppCompatActivity(), OnMapLongClickListener {
     private fun init() {
         initNavigation()
         initStyle()
-        slackLine.initialize(mapView, mapboxNavigation)
+        slackLine.initialize(binding.mapView, mapboxNavigation)
     }
 
     @SuppressLint("MissingPermission")
@@ -188,7 +189,7 @@ class MapboxSnapshotActivity : AppCompatActivity(), OnMapLongClickListener {
             .edgeInsets(EdgeInsets(250.0 * density, 0.0 * density, 0.0 * density, 0.0 * density))
             .styleUri("mapbox://styles/mapbox-map-design/ckkfnaak605mv17pgmmxgmlvd")
             .build()
-        snapshotApi = MapboxSnapshotterApi(this, mapboxMap, options, mapView)
+        snapshotApi = MapboxSnapshotterApi(this, mapboxMap, options, binding.mapView)
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.play()
     }
@@ -229,11 +230,11 @@ class MapboxSnapshotActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private fun getMapCamera(): CameraAnimationsPlugin {
-        return mapView.getCameraAnimationsPlugin()
+        return binding.mapView.getCameraAnimationsPlugin()
     }
 
     private fun getGesturePlugin(): GesturesPlugin {
-        return mapView.getGesturesPlugin()
+        return binding.mapView.getGesturesPlugin()
     }
 
     private fun getMapboxAccessTokenFromResources(): String? {
