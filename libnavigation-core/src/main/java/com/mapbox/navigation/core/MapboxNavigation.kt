@@ -77,6 +77,7 @@ import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.channels.ReceiveChannel
 import java.lang.reflect.Field
+import java.net.URI
 
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
@@ -846,32 +847,35 @@ class MapboxNavigation(
 
     private fun createTilesConfig(): TilesConfig {
         // TODO StrictMode may report a violation as we're creating a File from the Main
-        val offlineFilesPath = OnboardRouterFiles(navigationOptions.applicationContext, logger)
-            .absolutePath(navigationOptions.onboardRouterOptions)
-        val dataset = StringBuilder().apply {
-            append(navigationOptions.onboardRouterOptions.tilesDataset)
-            append("/")
-            append(navigationOptions.onboardRouterOptions.tilesProfile)
-        }.toString()
+        navigationOptions.run {
+            val offlineFilesPath = OnboardRouterFiles(applicationContext, logger)
+                .absolutePath(onboardRouterOptions)
+            val dataset = StringBuilder().apply {
+                append(onboardRouterOptions.tilesDataset)
+                append("/")
+                append(onboardRouterOptions.tilesProfile)
+            }.toString()
+            val host = onboardRouterOptions.tilesUri.let { uri ->
+                URI(uri.scheme, uri.host, null, null)
+            }.toString()
 
-        return TilesConfig(
-            offlineFilesPath,
-            null,
-            null,
-            null,
-            THREADS_COUNT,
-            TileEndpointConfiguration(
-                navigationOptions.onboardRouterOptions.tilesUri.toString(),
-                dataset,
-                navigationOptions.onboardRouterOptions.tilesVersion,
-                navigationOptions.accessToken ?: "",
-                USER_AGENT,
-                BuildConfig.NAV_NATIVE_SDK_VERSION,
-                NativeSkuTokenProvider(
-                    MapboxNavigationAccounts.getInstance(navigationOptions.applicationContext)
+            return TilesConfig(
+                offlineFilesPath,
+                null,
+                null,
+                null,
+                THREADS_COUNT,
+                TileEndpointConfiguration(
+                    host,
+                    dataset,
+                    onboardRouterOptions.tilesVersion,
+                    accessToken ?: "",
+                    USER_AGENT,
+                    BuildConfig.NAV_NATIVE_SDK_VERSION,
+                    NativeSkuTokenProvider(MapboxNavigationAccounts.getInstance(applicationContext))
                 )
             )
-        )
+        }
     }
 
     companion object {

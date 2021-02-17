@@ -59,6 +59,7 @@ import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import java.io.File
+import java.net.URI
 import java.util.Locale
 
 @InternalCoroutinesApi
@@ -77,6 +78,7 @@ class MapboxNavigationTest {
     private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
     private val distanceFormatterOptions: DistanceFormatterOptions = mockk(relaxed = true)
     private val onBoardRouterOptions: OnboardRouterOptions = mockk(relaxed = true)
+    private val tilesUri: URI = mockk(relaxed = true)
     private val fasterRouteRequestCallback: RoutesRequestCallback = mockk(relaxed = true)
     private val routeRefreshController: RouteRefreshController = mockk(relaxUnitFun = true)
     private val routeOptions: RouteOptions = provideDefaultRouteOptionsBuilder().build()
@@ -110,6 +112,8 @@ class MapboxNavigationTest {
 
     companion object {
         private const val DEFAULT_REROUTE_BEARING_ANGLE = 11f
+        private const val SCHEMA = "https"
+        private const val HOST = "api.example.com"
 
         @BeforeClass
         @JvmStatic
@@ -144,6 +148,10 @@ class MapboxNavigationTest {
         mockkObject(NavigationComponentProvider)
 
         every { applicationContext.applicationContext } returns applicationContext
+
+        every { tilesUri.scheme } returns SCHEMA
+        every { tilesUri.host } returns HOST
+        every { onBoardRouterOptions.tilesUri } returns tilesUri
 
         navigationOptions = provideNavigationOptions().build()
 
@@ -621,6 +629,28 @@ class MapboxNavigationTest {
         mapboxNavigation = MapboxNavigation(options)
 
         assertEquals(slot.captured.endpointConfig!!.dataset, "someUser.osm/truck")
+
+        mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun `verify tile config host`() {
+        ThreadController.cancelAllUICoroutines()
+        val slot = slot<TilesConfig>()
+        every {
+            NavigationComponentProvider.createNativeNavigator(any(), any(), capture(slot))
+        } returns navigator
+        val options = navigationOptions.toBuilder()
+            .onboardRouterOptions(
+                OnboardRouterOptions.Builder()
+                    .tilesUri(URI.create("https://api.mapbox.com/route-tiles/v2/dataset/profile"))
+                    .build()
+            )
+            .build()
+
+        mapboxNavigation = MapboxNavigation(options)
+
+        assertEquals("https://api.mapbox.com", slot.captured.endpointConfig!!.host)
 
         mapboxNavigation.onDestroy()
     }
