@@ -15,6 +15,7 @@ import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.internal.route.RouteUrl
+import com.mapbox.navigation.base.options.IncidentsOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.route.Router
@@ -38,6 +39,7 @@ import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.TilesConfig
 import io.mockk.Ordering
 import io.mockk.every
@@ -53,6 +55,7 @@ import kotlinx.coroutines.InternalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.BeforeClass
@@ -621,6 +624,67 @@ class MapboxNavigationTest {
         mapboxNavigation = MapboxNavigation(options)
 
         assertEquals(slot.captured.endpointConfig!!.dataset, "someUser.osm/truck")
+
+        mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun `verify incidents options null when no params set`() {
+        ThreadController.cancelAllUICoroutines()
+        val slot = slot<NavigatorConfig>()
+        every {
+            NavigationComponentProvider.createNativeNavigator(any(), capture(slot), any())
+        } returns navigator
+
+        mapboxNavigation = MapboxNavigation(navigationOptions)
+
+        assertNull(slot.captured.incidentsOptions)
+
+        mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun `verify incidents options non-null when graph set`() {
+        ThreadController.cancelAllUICoroutines()
+        val slot = slot<NavigatorConfig>()
+        every {
+            NavigationComponentProvider.createNativeNavigator(any(), capture(slot), any())
+        } returns navigator
+        val options = navigationOptions.toBuilder()
+            .incidentsOptions(
+                IncidentsOptions.Builder()
+                    .graph("graph")
+                    .build()
+            )
+            .build()
+
+        mapboxNavigation = MapboxNavigation(options)
+
+        assertEquals(slot.captured.incidentsOptions!!.graph, "graph")
+        assertEquals(slot.captured.incidentsOptions!!.apiUrl, "")
+
+        mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun `verify incidents options non-null when apiUrl set`() {
+        ThreadController.cancelAllUICoroutines()
+        val slot = slot<NavigatorConfig>()
+        every {
+            NavigationComponentProvider.createNativeNavigator(any(), capture(slot), any())
+        } returns navigator
+        val options = navigationOptions.toBuilder()
+            .incidentsOptions(
+                IncidentsOptions.Builder()
+                    .apiUrl("apiUrl")
+                    .build()
+            )
+            .build()
+
+        mapboxNavigation = MapboxNavigation(options)
+
+        assertEquals(slot.captured.incidentsOptions!!.apiUrl, "apiUrl")
+        assertEquals(slot.captured.incidentsOptions!!.graph, "")
 
         mapboxNavigation.onDestroy()
     }

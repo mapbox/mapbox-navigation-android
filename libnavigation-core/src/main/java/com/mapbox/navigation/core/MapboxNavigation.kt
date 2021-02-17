@@ -72,6 +72,7 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import com.mapbox.navigator.ElectronicHorizonOptions
+import com.mapbox.navigator.IncidentsOptions
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
@@ -157,7 +158,21 @@ class MapboxNavigation(
         true, // doNotRecalculateInUncertainState is not exposed and can't be changed at the moment
         navigationOptions.eHorizonOptions.minTimeDeltaBetweenUpdates
     )
-    private val navigatorConfig = NavigatorConfig(null, electronicHorizonOptions, null, null)
+
+    private val incidentsOptions: IncidentsOptions? = navigationOptions.incidentsOptions.run {
+        if (graph.isNotEmpty() || apiUrl.isNotEmpty()) {
+            IncidentsOptions(graph, apiUrl)
+        } else {
+            null
+        }
+    }
+
+    private val navigatorConfig = NavigatorConfig(
+        null,
+        electronicHorizonOptions,
+        null,
+        incidentsOptions
+    )
 
     private var notificationChannelField: Field? = null
 

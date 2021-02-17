@@ -35,6 +35,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * @param deviceProfile [DeviceProfile] defines how navigation data should be interpretation
  * @param eHorizonOptions [EHorizonOptions] defines configuration for the Electronic Horizon
  * @param isRouteRefreshEnabled Boolean *true* if need to enable route refresh mechanism, otherwise *false*
+ * @param incidentsOptions defines configuration for live incidents
  */
 class NavigationOptions private constructor(
     val applicationContext: Context,
@@ -50,7 +51,8 @@ class NavigationOptions private constructor(
     val isDebugLoggingEnabled: Boolean,
     val deviceProfile: DeviceProfile,
     val eHorizonOptions: EHorizonOptions,
-    val isRouteRefreshEnabled: Boolean
+    val isRouteRefreshEnabled: Boolean,
+    val incidentsOptions: IncidentsOptions,
 ) {
 
     /**
@@ -70,6 +72,7 @@ class NavigationOptions private constructor(
         deviceProfile(deviceProfile)
         eHorizonOptions(eHorizonOptions)
         isRouteRefreshEnabled(isRouteRefreshEnabled)
+        incidentsOptions(incidentsOptions)
     }
 
     /**
@@ -95,6 +98,7 @@ class NavigationOptions private constructor(
         if (deviceProfile != other.deviceProfile) return false
         if (eHorizonOptions != other.eHorizonOptions) return false
         if (isRouteRefreshEnabled != other.isRouteRefreshEnabled) return false
+        if (incidentsOptions != other.incidentsOptions) return false
 
         return true
     }
@@ -117,6 +121,7 @@ class NavigationOptions private constructor(
         result = 31 * result + deviceProfile.hashCode()
         result = 31 * result + eHorizonOptions.hashCode()
         result = 31 * result + isRouteRefreshEnabled.hashCode()
+        result = 31 * result + incidentsOptions.hashCode()
         return result
     }
 
@@ -137,8 +142,9 @@ class NavigationOptions private constructor(
             "isFromNavigationUi=$isFromNavigationUi, " +
             "isDebugLoggingEnabled=$isDebugLoggingEnabled, " +
             "deviceProfile=$deviceProfile, " +
-            "eHorizonOptions=$eHorizonOptions" +
-            "isRouteRefreshEnabled=$isRouteRefreshEnabled" +
+            "eHorizonOptions=$eHorizonOptions " +
+            "isRouteRefreshEnabled=$isRouteRefreshEnabled " +
+            "incidentsOptions=$incidentsOptions" +
             ")"
     }
 
@@ -168,6 +174,7 @@ class NavigationOptions private constructor(
         private var deviceProfile: DeviceProfile = DeviceProfile.Builder().build()
         private var eHorizonOptions: EHorizonOptions = EHorizonOptions.Builder().build()
         private var isRouteRefreshEnabled: Boolean = true
+        private var incidentsOptions: IncidentsOptions = IncidentsOptions.Builder().build()
 
         /**
          * Defines [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
@@ -254,6 +261,12 @@ class NavigationOptions private constructor(
             apply { this.isRouteRefreshEnabled = flag }
 
         /**
+         * Defines configuration for live incidents
+         */
+        fun incidentsOptions(incidentsOptions: IncidentsOptions): Builder =
+            apply { this.incidentsOptions = incidentsOptions }
+
+        /**
          * Build a new instance of [NavigationOptions]
          * @return NavigationOptions
          */
@@ -273,7 +286,8 @@ class NavigationOptions private constructor(
                 isDebugLoggingEnabled = isDebugLoggingEnabled,
                 deviceProfile = deviceProfile,
                 eHorizonOptions = eHorizonOptions,
-                isRouteRefreshEnabled = isRouteRefreshEnabled
+                isRouteRefreshEnabled = isRouteRefreshEnabled,
+                incidentsOptions = incidentsOptions,
             )
         }
     }
