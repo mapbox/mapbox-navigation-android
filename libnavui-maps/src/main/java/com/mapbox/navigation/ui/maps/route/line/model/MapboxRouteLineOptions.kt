@@ -6,7 +6,6 @@ import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
 import com.mapbox.base.common.logger.Logger
-import com.mapbox.navigation.ui.base.internal.route.RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLayerProvider
 import com.mapbox.navigation.ui.maps.route.line.api.VanishingRouteLine
 
