@@ -136,12 +136,27 @@ package com.mapbox.navigation.base.options {
     field @Deprecated public static final com.mapbox.navigation.base.options.EHorizonOptions.Builder.Companion! Companion;
   }
 
+  public final class IncidentsOptions {
+    method public String getApiUrl();
+    method public String getGraph();
+    method public com.mapbox.navigation.base.options.IncidentsOptions.Builder toBuilder();
+    field @Deprecated public static final com.mapbox.navigation.base.options.IncidentsOptions.Companion! Companion;
+  }
+
+  public static final class IncidentsOptions.Builder {
+    ctor public IncidentsOptions.Builder();
+    method public com.mapbox.navigation.base.options.IncidentsOptions.Builder apiUrl(String apiUrl);
+    method public com.mapbox.navigation.base.options.IncidentsOptions build();
+    method public com.mapbox.navigation.base.options.IncidentsOptions.Builder graph(String graph);
+  }
+
   public final class NavigationOptions {
     method public String? getAccessToken();
     method public android.content.Context getApplicationContext();
     method public com.mapbox.navigation.base.options.DeviceProfile getDeviceProfile();
     method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions getDistanceFormatterOptions();
     method public com.mapbox.navigation.base.options.EHorizonOptions getEHorizonOptions();
+    method public com.mapbox.navigation.base.options.IncidentsOptions getIncidentsOptions();
     method public com.mapbox.android.core.location.LocationEngine getLocationEngine();
     method public com.mapbox.android.core.location.LocationEngineRequest getLocationEngineRequest();
     method public long getNavigatorPredictionMillis();
@@ -161,6 +176,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder deviceProfile(com.mapbox.navigation.base.options.DeviceProfile deviceProfile);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder distanceFormatterOptions(com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder eHorizonOptions(com.mapbox.navigation.base.options.EHorizonOptions eHorizonOptions);
+    method public com.mapbox.navigation.base.options.NavigationOptions.Builder incidentsOptions(com.mapbox.navigation.base.options.IncidentsOptions incidentsOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder isDebugLoggingEnabled(boolean flag);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder isFromNavigationUi(boolean flag);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder isRouteRefreshEnabled(boolean flag);
