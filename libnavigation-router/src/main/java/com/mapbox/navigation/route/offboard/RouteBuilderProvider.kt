@@ -35,11 +35,7 @@ internal object RouteBuilderProvider {
             .voiceUnits(context.inferDeviceLocale().getUnitTypeForLocale())
             .interceptor {
                 val httpUrl = it.request().url()
-                val skuUrl =
-                    urlSkuTokenProvider.obtainUrlWithSkuToken(
-                        httpUrl.toString(),
-                        httpUrl.querySize()
-                    )
+                val skuUrl = urlSkuTokenProvider.obtainUrlWithSkuToken(httpUrl.url())
                 it.proceed(it.request().newBuilder().url(skuUrl).build())
             }
 

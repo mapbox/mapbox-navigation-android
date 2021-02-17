@@ -516,7 +516,7 @@ internal object MapboxNavigationTelemetry :
     private fun postTurnstileEvent() {
         val turnstileEvent =
             AppUserTurnstile(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME).also {
-                it.setSkuId(MapboxNavigationAccounts.getInstance(context).obtainSkuId())
+                it.setSkuId(MapboxNavigationAccounts.obtainSkuId())
             }
         val event = NavigationAppUserTurnstileEvent(turnstileEvent)
         sendEvent(event)

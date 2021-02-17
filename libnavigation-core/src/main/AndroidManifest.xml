@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.mapbox.navigation.core">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -6,11 +7,16 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application>
+
         <provider
-            android:name="com.mapbox.navigation.core.accounts.MapboxNavigationAccountsProvider"
-            android:authorities="${applicationId}.MapboxNavigationAccountsProvider"
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
-            android:initOrder="200" />
+            tools:node="merge">
+            <meta-data
+                android:name="com.mapbox.navigation.core.internal.MapboxNavigationSDKInitializer"
+                android:value="androidx.startup" />
+        </provider>
         <service
             android:name=".trip.service.NavigationNotificationService"
             android:foregroundServiceType="location" />

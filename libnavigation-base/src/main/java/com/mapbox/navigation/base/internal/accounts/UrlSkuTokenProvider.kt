@@ -1,12 +1,14 @@
 package com.mapbox.navigation.base.internal.accounts
 
+import java.net.URL
+
 /**
  * Internal usage.
  */
 interface UrlSkuTokenProvider {
 
     /**
-     * Returns a token attached to the URL query or the given [resourceUrl].
+     * Returns a token attached to the URI query.
      */
-    fun obtainUrlWithSkuToken(resourceUrl: String, querySize: Int): String
+    fun obtainUrlWithSkuToken(resourceUrl: URL): URL
 }
