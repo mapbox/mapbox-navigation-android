@@ -14,8 +14,6 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.Style
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
@@ -36,6 +34,7 @@ import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.examples.core.databinding.LayoutActivitySignboardBinding
 import com.mapbox.navigation.examples.util.Slackline
 import com.mapbox.navigation.examples.util.Utils.getMapboxAccessToken
 import com.mapbox.navigation.ui.base.api.signboard.SignboardApi
@@ -44,7 +43,6 @@ import com.mapbox.navigation.ui.base.model.signboard.SignboardState
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.signboard.api.MapboxSignboardApi
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
-import kotlinx.android.synthetic.main.layout_activity_signboard.*
 import java.util.Objects
 
 class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
@@ -53,28 +51,29 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
     private lateinit var mapCamera: CameraAnimationsPlugin
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var signboardApi: SignboardApi
-    private val navigationLocationProvider = NavigationLocationProvider()
+    private lateinit var binding: LayoutActivitySignboardBinding
     private lateinit var locationComponent: LocationComponentPlugin
 
     private val mapboxReplayer = MapboxReplayer()
     private val replayRouteMapper = ReplayRouteMapper()
     private val slackLine = Slackline(this)
+    private val navigationLocationProvider = NavigationLocationProvider()
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
     private val signboardCallback: SignboardReadyCallback = object : SignboardReadyCallback {
         override fun onAvailable(state: SignboardState.Signboard.Available) {
-            signboardView.render(SignboardState.Show)
-            signboardView.render(state)
+            binding.signboardView.render(SignboardState.Show)
+            binding.signboardView.render(state)
         }
 
         override fun onUnavailable(state: SignboardState.Signboard.Empty) {
-            signboardView.render(SignboardState.Hide)
-            signboardView.render(state)
+            binding.signboardView.render(SignboardState.Hide)
+            binding.signboardView.render(state)
         }
 
         override fun onError(state: SignboardState.Signboard.Error) {
-            signboardView.render(SignboardState.Hide)
-            signboardView.render(state)
+            binding.signboardView.render(SignboardState.Hide)
+            binding.signboardView.render(state)
         }
     }
 
@@ -120,9 +119,10 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.layout_activity_signboard)
-        mapboxMap = mapView.getMapboxMap()
-        locationComponent = mapView.getLocationComponentPlugin().apply {
+        binding = LayoutActivitySignboardBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        mapboxMap = binding.mapView.getMapboxMap()
+        locationComponent = binding.mapView.getLocationComponentPlugin().apply {
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }
@@ -132,7 +132,7 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onStart() {
         super.onStart()
-        mapView.onStart()
+        binding.mapView.onStart()
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.registerRoutesObserver(routesObserver)
             mapboxNavigation.registerLocationObserver(locationObserver)
@@ -149,18 +149,18 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
             mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
             mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         }
-        mapView.onStop()
+        binding.mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView.onDestroy()
+        binding.mapView.onDestroy()
         mapboxNavigation.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView.onLowMemory()
+        binding.mapView.onLowMemory()
     }
 
     override fun onMapLongClick(point: Point): Boolean {
@@ -176,7 +176,7 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
     private fun init() {
         initNavigation()
         initStyle()
-        slackLine.initialize(mapView, mapboxNavigation)
+        slackLine.initialize(binding.mapView, mapboxNavigation)
     }
 
     @SuppressLint("MissingPermission")
@@ -196,11 +196,10 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
     @SuppressLint("MissingPermission")
     private fun initStyle() {
         mapboxMap.loadStyleUri(
-            MAPBOX_STREETS,
-            { style: Style ->
-                getGesturePlugin().addOnMapLongClickListener(this)
-            }
-        )
+            MAPBOX_STREETS
+        ) {
+            getGesturePlugin().addOnMapLongClickListener(this)
+        }
     }
 
     private fun findRoute(origin: Point, destination: Point) {
@@ -225,11 +224,11 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private fun getMapCamera(): CameraAnimationsPlugin {
-        return mapView.getCameraAnimationsPlugin()
+        return binding.mapView.getCameraAnimationsPlugin()
     }
 
     private fun getGesturePlugin(): GesturesPlugin {
-        return mapView.getGesturesPlugin()
+        return binding.mapView.getGesturesPlugin()
     }
 
     private fun getMapboxAccessTokenFromResources(): String? {

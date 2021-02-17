@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.tripprogress.view
 import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.StyleRes
@@ -10,7 +11,7 @@ import androidx.core.content.ContextCompat
 import com.mapbox.navigation.ui.base.MapboxView
 import com.mapbox.navigation.ui.base.model.tripprogress.TripProgressState
 import com.mapbox.navigation.ui.tripprogress.R
-import kotlinx.android.synthetic.main.mapbox_trip_progress_layout.view.*
+import com.mapbox.navigation.ui.tripprogress.databinding.MapboxTripProgressLayoutBinding
 
 /**
  * A view that can be added to activity layouts which displays trip progress.
@@ -21,9 +22,14 @@ class MapboxTripProgressView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr), MapboxView<TripProgressState> {
 
-    init {
-        inflate(context, R.layout.mapbox_trip_progress_layout, this)
+    private val binding =
+        MapboxTripProgressLayoutBinding.inflate(
+            LayoutInflater.from(context),
+            this,
+            true
+        )
 
+    init {
         initAttributes(attrs)
     }
 
@@ -62,9 +68,9 @@ class MapboxTripProgressView @JvmOverloads constructor(
                 R.color.mapbox_trip_progress_text_color
             )
         )
-        timeRemainingText.setTextColor(textColor)
-        distanceRemainingText.setTextColor(textColor)
-        estimatedTimeToArriveText.setTextColor(textColor)
+        binding.timeRemainingText.setTextColor(textColor)
+        binding.distanceRemainingText.setTextColor(textColor)
+        binding.estimatedTimeToArriveText.setTextColor(textColor)
 
         val dividerColor = ContextCompat.getColor(
             context,
@@ -73,9 +79,9 @@ class MapboxTripProgressView @JvmOverloads constructor(
                 R.color.mapbox_trip_progress_divider_color
             )
         )
-        tripProgressDivider?.setBackgroundColor(dividerColor)
-        tripProgressDividerLeft?.setBackgroundColor(dividerColor)
-        tripProgressDividerRight?.setBackgroundColor(dividerColor)
+        binding.tripProgressDivider?.setBackgroundColor(dividerColor)
+        binding.tripProgressDividerLeft?.setBackgroundColor(dividerColor)
+        binding.tripProgressDividerRight?.setBackgroundColor(dividerColor)
 
         setBackgroundColor(
             ContextCompat.getColor(
@@ -89,17 +95,17 @@ class MapboxTripProgressView @JvmOverloads constructor(
     }
 
     private fun renderUpdate(state: TripProgressState.Update) {
-        distanceRemainingText.setText(
+        binding.distanceRemainingText.setText(
             state.formatter.getDistanceRemaining(state.tripProgressUpdate),
             TextView.BufferType.SPANNABLE
         )
 
-        estimatedTimeToArriveText.setText(
+        binding.estimatedTimeToArriveText.setText(
             state.formatter.getEstimatedTimeToArrival(state.tripProgressUpdate),
             TextView.BufferType.SPANNABLE
         )
 
-        timeRemainingText.setText(
+        binding.timeRemainingText.setText(
             state.formatter.getTimeRemaining(state.tripProgressUpdate),
             TextView.BufferType.SPANNABLE
         )

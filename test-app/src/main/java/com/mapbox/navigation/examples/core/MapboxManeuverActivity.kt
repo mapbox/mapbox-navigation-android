@@ -45,6 +45,7 @@ import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.examples.core.databinding.LayoutActivityManeuverBinding
 import com.mapbox.navigation.examples.util.Slackline
 import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.base.api.maneuver.ManeuverApi
@@ -55,7 +56,6 @@ import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
-import kotlinx.android.synthetic.main.layout_activity_maneuver.*
 import java.util.Objects
 
 class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
@@ -64,12 +64,13 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
     private lateinit var mapCamera: CameraAnimationsPlugin
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var maneuverApi: ManeuverApi
-    private val navigationLocationProvider = NavigationLocationProvider()
+    private lateinit var binding: LayoutActivityManeuverBinding
     private lateinit var locationComponent: LocationComponentPlugin
 
     private val mapboxReplayer = MapboxReplayer()
     private val replayRouteMapper = ReplayRouteMapper()
     private val slackLine = Slackline(this)
+    private val navigationLocationProvider = NavigationLocationProvider()
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
     private val currentManeuverCallback = object : ManeuverCallback {
@@ -80,25 +81,25 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
             val sub = maneuver.sub
             val lane = maneuver.laneGuidance
             if (secondary?.componentList != null) {
-                maneuverView.render(ManeuverState.ManeuverSecondary.Show)
-                maneuverView.render(ManeuverState.ManeuverSecondary.Instruction(secondary))
+                binding.maneuverView.render(ManeuverState.ManeuverSecondary.Show)
+                binding.maneuverView.render(ManeuverState.ManeuverSecondary.Instruction(secondary))
             } else {
-                maneuverView.render(ManeuverState.ManeuverSecondary.Hide)
+                binding.maneuverView.render(ManeuverState.ManeuverSecondary.Hide)
             }
             if (sub?.componentList != null) {
-                maneuverView.render(ManeuverState.ManeuverSub.Show)
-                maneuverView.render(ManeuverState.ManeuverSub.Instruction(sub))
+                binding.maneuverView.render(ManeuverState.ManeuverSub.Show)
+                binding.maneuverView.render(ManeuverState.ManeuverSub.Instruction(sub))
             } else {
-                maneuverView.render(ManeuverState.ManeuverSub.Hide)
+                binding.maneuverView.render(ManeuverState.ManeuverSub.Hide)
             }
-            maneuverView.render(ManeuverState.ManeuverPrimary.Instruction(primary))
-            maneuverView.render(ManeuverState.UpcomingManeuvers.RemoveUpcoming(maneuver))
+            binding.maneuverView.render(ManeuverState.ManeuverPrimary.Instruction(primary))
+            binding.maneuverView.render(ManeuverState.UpcomingManeuvers.RemoveUpcoming(maneuver))
             if (lane != null) {
-                maneuverView.render(ManeuverState.LaneGuidanceManeuver.Show)
-                maneuverView.render(ManeuverState.LaneGuidanceManeuver.AddLanes(lane))
+                binding.maneuverView.render(ManeuverState.LaneGuidanceManeuver.Show)
+                binding.maneuverView.render(ManeuverState.LaneGuidanceManeuver.AddLanes(lane))
             } else {
-                maneuverView.render(ManeuverState.LaneGuidanceManeuver.Hide)
-                maneuverView.render(ManeuverState.LaneGuidanceManeuver.RemoveLanes)
+                binding.maneuverView.render(ManeuverState.LaneGuidanceManeuver.Hide)
+                binding.maneuverView.render(ManeuverState.LaneGuidanceManeuver.RemoveLanes)
             }
         }
     }
@@ -107,13 +108,13 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         override fun onStepDistanceRemaining(
             distanceRemaining: ManeuverState.DistanceRemainingToFinishStep
         ) {
-            maneuverView.render(distanceRemaining)
+            binding.maneuverView.render(distanceRemaining)
         }
     }
 
     private val upcomingManeuversCallback = object : UpcomingManeuversCallback {
         override fun onUpcomingManeuvers(state: ManeuverState.UpcomingManeuvers.Upcoming) {
-            maneuverView.render(state)
+            binding.maneuverView.render(state)
         }
     }
 
@@ -148,9 +149,9 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
                 startSimulation(routes[0])
-                maneuverView.visibility = VISIBLE
+                binding.maneuverView.visibility = VISIBLE
             } else {
-                maneuverView.visibility = GONE
+                binding.maneuverView.visibility = GONE
             }
         }
     }
@@ -183,9 +184,10 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.layout_activity_maneuver)
-        mapboxMap = mapView.getMapboxMap()
-        locationComponent = mapView.getLocationComponentPlugin().apply {
+        binding = LayoutActivityManeuverBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        mapboxMap = binding.mapView.getMapboxMap()
+        locationComponent = binding.mapView.getLocationComponentPlugin().apply {
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }
@@ -195,7 +197,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onStart() {
         super.onStart()
-        mapView.onStart()
+        binding.mapView.onStart()
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.registerRoutesObserver(routesObserver)
             mapboxNavigation.registerLocationObserver(locationObserver)
@@ -214,18 +216,18 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
             mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
             mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionObserver)
         }
-        mapView.onStop()
+        binding.mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView.onDestroy()
+        binding.mapView.onDestroy()
         mapboxNavigation.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView.onLowMemory()
+        binding.mapView.onLowMemory()
     }
 
     override fun onMapLongClick(point: Point): Boolean {
@@ -244,7 +246,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
     private fun init() {
         initNavigation()
         initStyle()
-        slackLine.initialize(mapView, mapboxNavigation)
+        slackLine.initialize(binding.mapView, mapboxNavigation)
     }
 
     @SuppressLint("MissingPermission")
@@ -298,11 +300,11 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private fun getMapCamera(): CameraAnimationsPlugin {
-        return mapView.getCameraAnimationsPlugin()
+        return binding.mapView.getCameraAnimationsPlugin()
     }
 
     private fun getGesturePlugin(): GesturesPlugin {
-        return mapView.getGesturesPlugin()
+        return binding.mapView.getGesturesPlugin()
     }
 
     private fun getMapboxAccessTokenFromResources(): String? {

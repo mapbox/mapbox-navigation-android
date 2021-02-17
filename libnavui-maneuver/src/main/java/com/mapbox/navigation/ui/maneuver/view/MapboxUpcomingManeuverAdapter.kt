@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
@@ -10,9 +9,9 @@ import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.ui.base.model.maneuver.Maneuver
 import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState
-import com.mapbox.navigation.ui.maneuver.R
+import com.mapbox.navigation.ui.maneuver.databinding.MapboxItemUpcomingManeuversLayoutBinding
+import com.mapbox.navigation.ui.maneuver.databinding.MapboxMainManeuverLayoutBinding
 import com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder
-import kotlinx.android.synthetic.main.mapbox_main_maneuver_layout.view.*
 
 /**
  * Default recycler adapter to render upcoming maneuvers for the [RouteLeg].
@@ -38,8 +37,9 @@ class MapboxUpcomingManeuverAdapter(
         parent: ViewGroup,
         viewType: Int
     ): MapboxUpcomingManeuverViewHolder {
-        val view = inflater.inflate(R.layout.mapbox_item_upcoming_maneuvers_layout, parent, false)
-        return MapboxUpcomingManeuverViewHolder(view)
+        val binding = MapboxItemUpcomingManeuversLayoutBinding.inflate(inflater, parent, false)
+        val mainLayoutBinding = MapboxMainManeuverLayoutBinding.bind(binding.root)
+        return MapboxUpcomingManeuverViewHolder(mainLayoutBinding)
     }
 
     /**
@@ -99,7 +99,9 @@ class MapboxUpcomingManeuverAdapter(
      * @property view View
      * @constructor
      */
-    inner class MapboxUpcomingManeuverViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+    inner class MapboxUpcomingManeuverViewHolder(
+        val viewBinding: MapboxMainManeuverLayoutBinding
+    ) : RecyclerView.ViewHolder(viewBinding.root) {
 
         /**
          * Invoke the method to bind the maneuver to the view.
@@ -110,20 +112,28 @@ class MapboxUpcomingManeuverAdapter(
             val secondary = maneuver.secondary
             val totalStepDistance = maneuver.totalManeuverDistance
             if (secondary != null) {
-                view.secondaryManeuverText.render(ManeuverState.ManeuverSecondary.Show)
-                view.secondaryManeuverText.render(
+                viewBinding.secondaryManeuverText.render(
+                    ManeuverState.ManeuverSecondary.Show
+                )
+                viewBinding.secondaryManeuverText.render(
                     ManeuverState.ManeuverSecondary.Instruction(secondary)
                 )
                 updateConstraintsToHaveSecondary()
-                view.primaryManeuverText.maxLines = 1
+                viewBinding.primaryManeuverText.maxLines = 1
             } else {
                 updateConstraintsToOnlyPrimary()
-                view.secondaryManeuverText.render(ManeuverState.ManeuverSecondary.Hide)
-                view.primaryManeuverText.maxLines = 2
+                viewBinding.secondaryManeuverText.render(
+                    ManeuverState.ManeuverSecondary.Hide
+                )
+                viewBinding.primaryManeuverText.maxLines = 2
             }
-            view.primaryManeuverText.render(ManeuverState.ManeuverPrimary.Instruction(primary))
-            view.maneuverIcon.render(ManeuverState.ManeuverPrimary.Instruction(primary))
-            view.stepDistance.render(
+            viewBinding.primaryManeuverText.render(
+                ManeuverState.ManeuverPrimary.Instruction(primary)
+            )
+            viewBinding.maneuverIcon.render(
+                ManeuverState.ManeuverPrimary.Instruction(primary)
+            )
+            viewBinding.stepDistance.render(
                 ManeuverState.TotalStepDistance(
                     MapboxDistanceFormatter(DistanceFormatterOptions.Builder(context).build()),
                     totalStepDistance.totalDistance
@@ -132,18 +142,20 @@ class MapboxUpcomingManeuverAdapter(
         }
 
         private fun updateConstraintsToOnlyPrimary() {
-            val params = view.primaryManeuverText.layoutParams as ConstraintLayout.LayoutParams
+            val params = viewBinding.primaryManeuverText.layoutParams
+                as ConstraintLayout.LayoutParams
             params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
             params.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
-            view.requestLayout()
+            viewBinding.root.requestLayout()
         }
 
         private fun updateConstraintsToHaveSecondary() {
-            val params = view.primaryManeuverText.layoutParams as ConstraintLayout.LayoutParams
+            val params = viewBinding.primaryManeuverText.layoutParams
+                as ConstraintLayout.LayoutParams
             params.topToTop = ConstraintLayout.LayoutParams.UNSET
             params.bottomToBottom = ConstraintLayout.LayoutParams.UNSET
-            params.bottomToTop = view.secondaryManeuverText.id
-            view.requestLayout()
+            params.bottomToTop = viewBinding.secondaryManeuverText.id
+            viewBinding.root.requestLayout()
         }
     }
 }

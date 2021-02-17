@@ -38,6 +38,7 @@ import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.examples.core.databinding.TripProgressActivityLayoutBinding
 import com.mapbox.navigation.examples.util.Slackline
 import com.mapbox.navigation.ui.base.model.tripprogress.DistanceRemainingFormatter
 import com.mapbox.navigation.ui.base.model.tripprogress.EstimatedTimeToArrivalFormatter
@@ -46,7 +47,6 @@ import com.mapbox.navigation.ui.base.model.tripprogress.TimeRemainingFormatter
 import com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
-import kotlinx.android.synthetic.main.trip_progress_activity_layout.*
 
 class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 
@@ -57,13 +57,15 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
     private lateinit var mapCamera: CameraAnimationsPlugin
     private lateinit var mapboxNavigation: MapboxNavigation
     private val mapboxReplayer = MapboxReplayer()
+    private lateinit var binding: TripProgressActivityLayoutBinding
     private lateinit var tripProgressApiApi: MapboxTripProgressApi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.trip_progress_activity_layout)
-        mapboxMap = mapView.getMapboxMap()
-        locationComponent = mapView.getLocationComponentPlugin().apply {
+        binding = TripProgressActivityLayoutBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        mapboxMap = binding.mapView.getMapboxMap()
+        locationComponent = binding.mapView.getLocationComponentPlugin().apply {
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }
@@ -93,7 +95,7 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
     private fun init() {
         initNavigation()
         initStyle()
-        slackline.initialize(mapView, mapboxNavigation)
+        slackline.initialize(binding.mapView, mapboxNavigation)
     }
 
     @SuppressLint("MissingPermission")
@@ -116,8 +118,8 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
     private fun initStyle() {
         mapboxMap.loadStyleUri(
             MAPBOX_STREETS,
-            Style.OnStyleLoaded { style: Style ->
-                mapView.getGesturesPlugin().addOnMapLongClickListener(this)
+            { style: Style ->
+                binding.mapView.getGesturesPlugin().addOnMapLongClickListener(this)
             },
             object : OnMapLoadErrorListener {
                 override fun onMapLoadError(mapLoadError: MapLoadError, msg: String) {
@@ -146,7 +148,7 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private fun getMapCamera(): CameraAnimationsPlugin {
-        return mapView.getCameraAnimationsPlugin()
+        return binding.mapView.getCameraAnimationsPlugin()
     }
 
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
@@ -169,9 +171,9 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
                 startSimulation(routes[0])
-                tripProgressView.visibility = View.VISIBLE
+                binding.tripProgressView.visibility = View.VISIBLE
             } else {
-                tripProgressView.visibility = View.GONE
+                binding.tripProgressView.visibility = View.GONE
             }
         }
     }
@@ -232,7 +234,7 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
             tripProgressApiApi.getTripProgress(routeProgress).let { update ->
-                tripProgressView.render(update)
+                binding.tripProgressView.render(update)
             }
         }
     }
@@ -242,7 +244,7 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
-        mapView.onStart()
+        binding.mapView.onStart()
     }
 
     override fun onStop() {
@@ -250,17 +252,17 @@ class TripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
-        mapView.onStop()
+        binding.mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView.onDestroy()
+        binding.mapView.onDestroy()
         mapboxNavigation.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView.onLowMemory()
+        binding.mapView.onLowMemory()
     }
 }
