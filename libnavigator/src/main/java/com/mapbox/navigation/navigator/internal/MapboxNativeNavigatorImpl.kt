@@ -12,8 +12,8 @@ import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.gson.GeometryGeoJson
 import com.mapbox.navigation.base.options.DeviceProfile
-import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
+import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.navigator.ActiveGuidanceOptionsMapper
 import com.mapbox.navigation.navigator.toFixLocation
 import com.mapbox.navigation.navigator.toLocation
@@ -410,17 +410,17 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     /**
      * Creates a Navigation [PredictiveCacheController].
      *
-     * @param onboardRouterOptions Navigation [OnboardRouterOptions]
+     * @param routingTilesOptions Navigation [RoutingTilesOptions]
      * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
      *
      * @return [PredictiveCacheController]
      */
     override fun createNavigationPredictiveCacheController(
-        onboardRouterOptions: OnboardRouterOptions,
+        routingTilesOptions: RoutingTilesOptions,
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions
     ): PredictiveCacheController =
         navigator!!.createPredictiveCacheController(
-            createDefaultNavigationPredictiveCacheControllerOptions(onboardRouterOptions),
+            createDefaultNavigationPredictiveCacheControllerOptions(routingTilesOptions),
             createDefaultPredictiveLocationTrackerOptions(predictiveCacheLocationOptions)
         )
 
@@ -443,11 +443,11 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         )
 
     private fun createDefaultNavigationPredictiveCacheControllerOptions(
-        onboardRouterOptions: OnboardRouterOptions
+        routingTilesOptions: RoutingTilesOptions
     ): PredictiveCacheControllerOptions =
         PredictiveCacheControllerOptions(
-            onboardRouterOptions.tilesVersion,
-            "${onboardRouterOptions.tilesDataset}/${onboardRouterOptions.tilesProfile}",
+            routingTilesOptions.tilesVersion,
+            "${routingTilesOptions.tilesDataset}/${routingTilesOptions.tilesProfile}",
             MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS
         )
 }

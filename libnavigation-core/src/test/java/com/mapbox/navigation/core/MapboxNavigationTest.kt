@@ -17,7 +17,7 @@ import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.base.options.IncidentsOptions
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.options.OnboardRouterOptions
+import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.TripNotification
@@ -79,7 +79,7 @@ class MapboxNavigationTest {
     private val location: Location = mockk(relaxUnitFun = true)
     private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
     private val distanceFormatterOptions: DistanceFormatterOptions = mockk(relaxed = true)
-    private val onBoardRouterOptions: OnboardRouterOptions = mockk(relaxed = true)
+    private val routingTilesOptions: RoutingTilesOptions = mockk(relaxed = true)
     private val fasterRouteRequestCallback: RoutesRequestCallback = mockk(relaxed = true)
     private val routeRefreshController: RouteRefreshController = mockk(relaxUnitFun = true)
     private val routeOptions: RouteOptions = provideDefaultRouteOptionsBuilder().build()
@@ -595,12 +595,12 @@ class MapboxNavigationTest {
             NavigationComponentProvider.createNativeNavigator(any(), any(), capture(slot), any())
         } returns navigator
         val options = navigationOptions.toBuilder()
-            .onboardRouterOptions(OnboardRouterOptions.Builder().build())
+            .routingTilesOptions(RoutingTilesOptions.Builder().build())
             .build()
 
         mapboxNavigation = MapboxNavigation(options)
 
-        assertTrue(slot.captured.tilesPath.endsWith("/mbx_nav/tiles/api.mapbox.com"))
+        assertTrue(slot.captured.tilesPath.endsWith(RoutingTilesFiles.TILES_PATH_SUB_DIR))
 
         mapboxNavigation.onDestroy()
     }
@@ -613,8 +613,8 @@ class MapboxNavigationTest {
             NavigationComponentProvider.createNativeNavigator(any(), any(), capture(slot), any())
         } returns navigator
         val options = navigationOptions.toBuilder()
-            .onboardRouterOptions(
-                OnboardRouterOptions.Builder()
+            .routingTilesOptions(
+                RoutingTilesOptions.Builder()
                     .tilesDataset("someUser.osm")
                     .tilesProfile("truck")
                     .build()
@@ -760,7 +760,7 @@ class MapboxNavigationTest {
             .accessToken(accessToken)
             .distanceFormatterOptions(distanceFormatterOptions)
             .navigatorPredictionMillis(1500L)
-            .onboardRouterOptions(onBoardRouterOptions)
+            .routingTilesOptions(routingTilesOptions)
             .timeFormatType(NONE_SPECIFIED)
             .locationEngine(locationEngine)
 }

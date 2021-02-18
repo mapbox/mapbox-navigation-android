@@ -7,8 +7,8 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.common.TileStore
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.options.DeviceProfile
-import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
+import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.GraphAccessor
@@ -271,13 +271,13 @@ interface MapboxNativeNavigator {
     /**
      * Creates a Navigation [PredictiveCacheController].
      *
-     * @param onboardRouterOptions Navigation [OnboardRouterOptions]
+     * @param routingTilesOptions Navigation [RoutingTilesOptions]
      * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
      *
      * @return [PredictiveCacheController]
      */
     fun createNavigationPredictiveCacheController(
-        onboardRouterOptions: OnboardRouterOptions,
+        routingTilesOptions: RoutingTilesOptions,
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions
     ): PredictiveCacheController
 

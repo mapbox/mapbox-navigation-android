@@ -4,16 +4,16 @@ import android.content.Context
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
-import com.mapbox.navigation.base.options.OnboardRouterOptions
+import com.mapbox.navigation.base.options.RoutingTilesOptions
 import java.io.File
 
-internal class OnboardRouterFiles(
+internal class RoutingTilesFiles(
     val applicationContext: Context,
     val logger: Logger
 ) {
 
-    fun absolutePath(options: OnboardRouterOptions): String {
-        val fileDirectory = options.filePath ?: defaultFilePath(options)
+    fun absolutePath(options: RoutingTilesOptions): String {
+        val fileDirectory = options.filePath ?: defaultFilePath()
         val tileDir = File(fileDirectory)
         if (!tileDir.exists()) {
             tileDir.mkdirs()
@@ -25,7 +25,7 @@ internal class OnboardRouterFiles(
             logger.e(
                 loggerTag,
                 Message(
-                    "Unable to create a file, check the OnboardRouterOptions " +
+                    "Unable to create a file, check the RoutingTilesOptions " +
                         tileDir.absolutePath
                 )
             )
@@ -33,12 +33,12 @@ internal class OnboardRouterFiles(
         }
     }
 
-    private fun defaultFilePath(options: OnboardRouterOptions): String {
-        val directoryVersion = "mbx_nav/tiles/${options.tilesUri.host}"
-        return File(applicationContext.filesDir, directoryVersion).absolutePath
+    private fun defaultFilePath(): String {
+        return File(applicationContext.filesDir, TILES_PATH_SUB_DIR).absolutePath
     }
 
-    private companion object {
-        private val loggerTag = Tag("OnboardRouterFiles")
+    companion object {
+        private val loggerTag = Tag("RoutingTilesOptions")
+        internal const val TILES_PATH_SUB_DIR = "mbx_nav/tiles"
     }
 }

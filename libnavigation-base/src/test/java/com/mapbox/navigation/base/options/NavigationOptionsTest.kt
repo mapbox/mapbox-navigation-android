@@ -63,7 +63,7 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
                     .build()
             )
             .navigatorPredictionMillis(1)
-            .onboardRouterOptions(mockk())
+            .routingTilesOptions(mockk())
             .predictiveCacheLocationOptions(mockk())
             .timeFormatType(1)
             .eHorizonOptions(mockk())
@@ -82,7 +82,7 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
 
         assertEquals(options.timeFormatType, NONE_SPECIFIED)
         assertEquals(options.navigatorPredictionMillis, DEFAULT_NAVIGATOR_PREDICTION_MILLIS)
-        assertNotNull(options.onboardRouterOptions)
+        assertNotNull(options.routingTilesOptions)
     }
 
     @Test

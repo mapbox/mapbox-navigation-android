@@ -17,7 +17,7 @@ import com.mapbox.common.module.provider.ModuleProviderArgument
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.options.OnboardRouterOptions
+import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert
@@ -83,7 +83,7 @@ private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android
 private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER =
     "You need to provide an access token in NavigationOptions in order to use the default " +
-        "Router. Also see MapboxNavigation#defaultNavigationOptionsBuilder"
+        "Router."
 private const val MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME =
     "com.mapbox.navigation.trip.notification.internal.MapboxTripNotification"
 private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButtonChannel"
@@ -111,7 +111,7 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  * or the enhanced one map-matched internally using SDK's native capabilities.
  *
  * In `Free Drive` mode, the enhanced location is computed using nearby to user location's routing tiles that are continuously updating in the background.
- * This can be configured using the [OnboardRouterOptions] in the [NavigationOptions].
+ * This can be configured using the [RoutingTilesOptions] in the [NavigationOptions].
  *
  * If the session is stopped, the SDK will stop listening for raw location updates and enter the `Idle` state.
  *
@@ -129,7 +129,6 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  * You can use [setRoutes] to provide new routes, clear current ones, or change the route at primary index 0.
  *
  * @param navigationOptions a set of [NavigationOptions] used to customize various features of the SDK.
- * Use [defaultNavigationOptionsBuilder] to set default options
  */
 @UiThread
 class MapboxNavigation(
@@ -861,12 +860,12 @@ class MapboxNavigation(
 
     private fun createTilesConfig(): TilesConfig {
         // TODO StrictMode may report a violation as we're creating a File from the Main
-        val offlineFilesPath = OnboardRouterFiles(navigationOptions.applicationContext, logger)
-            .absolutePath(navigationOptions.onboardRouterOptions)
+        val offlineFilesPath = RoutingTilesFiles(navigationOptions.applicationContext, logger)
+            .absolutePath(navigationOptions.routingTilesOptions)
         val dataset = StringBuilder().apply {
-            append(navigationOptions.onboardRouterOptions.tilesDataset)
+            append(navigationOptions.routingTilesOptions.tilesDataset)
             append("/")
-            append(navigationOptions.onboardRouterOptions.tilesProfile)
+            append(navigationOptions.routingTilesOptions.tilesProfile)
         }.toString()
 
         return TilesConfig(
@@ -876,15 +875,16 @@ class MapboxNavigation(
             null,
             THREADS_COUNT,
             TileEndpointConfiguration(
-                navigationOptions.onboardRouterOptions.tilesUri.toString(),
+                navigationOptions.routingTilesOptions.tilesBaseUri.toString(),
                 dataset,
-                navigationOptions.onboardRouterOptions.tilesVersion,
+                navigationOptions.routingTilesOptions.tilesVersion,
                 navigationOptions.accessToken ?: "",
                 USER_AGENT,
                 BuildConfig.NAV_NATIVE_SDK_VERSION,
                 NativeSkuTokenProvider(
                     MapboxNavigationAccounts.getInstance(navigationOptions.applicationContext)
-                )
+                ),
+                navigationOptions.routingTilesOptions.minDaysBetweenServerAndLocalTilesVersion
             )
         )
     }
