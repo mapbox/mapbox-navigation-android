@@ -96,7 +96,7 @@ class MapboxUpcomingManeuverAdapter(
 
     /**
      * View Holder defined for the [RecyclerView.Adapter]
-     * @property view View
+     * @property viewBinding
      * @constructor
      */
     inner class MapboxUpcomingManeuverViewHolder(

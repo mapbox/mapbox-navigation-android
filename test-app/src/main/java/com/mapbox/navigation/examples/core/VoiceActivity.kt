@@ -44,6 +44,7 @@ import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
+import com.mapbox.navigation.examples.core.databinding.LayoutVoiceBinding
 import com.mapbox.navigation.ui.base.api.voice.SpeechApi
 import com.mapbox.navigation.ui.base.api.voice.SpeechCallback
 import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayer
@@ -66,8 +67,6 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
 import com.mapbox.navigation.utils.internal.ifNonNull
-import kotlinx.android.synthetic.main.layout_camera_animations.mapView
-import kotlinx.android.synthetic.main.layout_voice.*
 import java.util.Locale
 
 class VoiceActivity :
@@ -93,6 +92,7 @@ class VoiceActivity :
     private var firstPlay: SpeechState.ReadyToPlay? = null
     private var isFirst: Boolean = true
 
+    private lateinit var binding: LayoutVoiceBinding
     private lateinit var navigationCamera: NavigationCamera
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
 
@@ -214,9 +214,10 @@ class VoiceActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.layout_voice)
-        mapboxMap = mapView.getMapboxMap()
-        locationComponent = mapView.getLocationComponentPlugin().apply {
+        binding = LayoutVoiceBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        mapboxMap = binding.mapView.getMapboxMap()
+        locationComponent = binding.mapView.getLocationComponentPlugin().apply {
             this.locationPuck = LocationPuck2D(
                 bearingImage = ContextCompat.getDrawable(
                     this@VoiceActivity,
@@ -232,18 +233,18 @@ class VoiceActivity :
 
         viewportDataSource = MapboxNavigationViewportDataSource(
             MapboxNavigationViewportDataSourceOptions.Builder().build(),
-            mapView.getMapboxMap()
+            binding.mapView.getMapboxMap()
         )
         navigationCamera = NavigationCamera(
-            mapView.getMapboxMap(),
-            mapView.getCameraAnimationsPlugin(),
+            binding.mapView.getMapboxMap(),
+            binding.mapView.getCameraAnimationsPlugin(),
             viewportDataSource
         )
         /* Alternative to the NavigationScaleGestureHandler
         mapView.getCameraAnimationsPlugin().addCameraAnimationsLifecycleListener(
             NavigationBasicGesturesHandler(navigationCamera)
         )*/
-        mapView.getCameraAnimationsPlugin().addCameraAnimationsLifecycleListener(
+        binding.mapView.getCameraAnimationsPlugin().addCameraAnimationsLifecycleListener(
             NavigationScaleGestureHandler(
                 this,
                 navigationCamera,
@@ -333,7 +334,7 @@ class VoiceActivity :
     }
 
     private fun getGesturesPlugin(): GesturesPlugin {
-        return mapView.getGesturesPlugin()
+        return binding.mapView.getGesturesPlugin()
     }
 
     @SuppressLint("MissingPermission")
@@ -387,7 +388,7 @@ class VoiceActivity :
     }
 
     private fun initButtons() {
-        mute_unmute.setOnClickListener {
+        binding.muteUnmute.setOnClickListener {
             isMuted = if (isMuted) {
                 voiceInstructionsPlayer?.volume(SpeechState.Volume(1.0f))
                 false
@@ -397,7 +398,7 @@ class VoiceActivity :
             }
         }
 
-        add_play.setOnClickListener {
+        binding.addPlay.setOnClickListener {
             firstPlay?.let {
                 voiceInstructionsPlayer?.play(
                     SpeechState.ReadyToPlay(Announcement("Test hybrid speech player.", null, null)),
@@ -406,7 +407,7 @@ class VoiceActivity :
             }
         }
 
-        following.setOnClickListener {
+        binding.following.setOnClickListener {
             viewportDataSource.followingZoomUpdatesAllowed = true
             viewportDataSource.followingPaddingPropertyOverride(followingEdgeInsets)
             viewportDataSource.evaluate()
@@ -436,18 +437,18 @@ class VoiceActivity :
 
     override fun onStart() {
         super.onStart()
-        mapView.onStart()
+        binding.mapView.onStart()
         navigationCamera.resetFrame()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView.onStop()
+        binding.mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView.onDestroy()
+        binding.mapView.onDestroy()
         mapboxNavigation.onDestroy()
         speechAPI.cancel()
         voiceInstructionsPlayer?.shutdown()

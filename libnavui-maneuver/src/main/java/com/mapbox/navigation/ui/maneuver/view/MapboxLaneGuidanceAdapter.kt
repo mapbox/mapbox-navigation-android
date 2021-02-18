@@ -99,11 +99,11 @@ class MapboxLaneGuidanceAdapter(
 
     /**
      * View Holder defined for the [RecyclerView.Adapter]
-     * @property view View
+     * @property viewBinding
      * @constructor
      */
     inner class MapboxLaneGuidanceViewHolder(
-        val viewBinding: MapboxItemLaneGuidanceLayoutBinding
+        private val viewBinding: MapboxItemLaneGuidanceLayoutBinding
     ) : RecyclerView.ViewHolder(viewBinding.root) {
 
         /**
