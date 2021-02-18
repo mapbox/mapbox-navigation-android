@@ -81,7 +81,7 @@ class PredictiveCacheController @JvmOverloads constructor(
     init {
         // Navigation PredictiveCacheController
         PredictiveCache.createNavigationController(
-            onboardRouterOptions = navigation.navigationOptions.onboardRouterOptions,
+            routingTilesOptions = navigation.navigationOptions.routingTilesOptions,
             predictiveCacheLocationOptions =
             navigation.navigationOptions.predictiveCacheLocationOptions
         )

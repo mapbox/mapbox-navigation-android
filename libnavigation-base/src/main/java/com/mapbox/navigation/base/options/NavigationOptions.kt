@@ -28,7 +28,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * @param timeFormatType defines time format for calculation remaining trip time
  * @param navigatorPredictionMillis defines approximate navigator prediction in milliseconds
  * @param distanceFormatterOptions [DistanceFormatterOptions] options to format distances showing in notification during navigation
- * @param onboardRouterOptions [OnboardRouterOptions] defines configuration for the default on-board router
+ * @param routingTilesOptions [RoutingTilesOptions] defines routing tiles endpoint and storage configuration.
  * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions] defines location configuration for predictive caching
  * @param isFromNavigationUi Boolean *true* if is called from UI, otherwise *false*
  * @param isDebugLoggingEnabled Boolean
@@ -44,7 +44,7 @@ class NavigationOptions private constructor(
     @TimeFormat.Type val timeFormatType: Int,
     val navigatorPredictionMillis: Long,
     val distanceFormatterOptions: DistanceFormatterOptions,
-    val onboardRouterOptions: OnboardRouterOptions,
+    val routingTilesOptions: RoutingTilesOptions,
     val predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
     val isFromNavigationUi: Boolean,
     val isDebugLoggingEnabled: Boolean,
@@ -63,7 +63,7 @@ class NavigationOptions private constructor(
         timeFormatType(timeFormatType)
         navigatorPredictionMillis(navigatorPredictionMillis)
         distanceFormatterOptions(distanceFormatterOptions)
-        onboardRouterOptions(onboardRouterOptions)
+        routingTilesOptions(routingTilesOptions)
         predictiveCacheLocationOptions(predictiveCacheLocationOptions)
         isFromNavigationUi(isFromNavigationUi)
         isDebugLoggingEnabled(isDebugLoggingEnabled)
@@ -88,7 +88,7 @@ class NavigationOptions private constructor(
         if (timeFormatType != other.timeFormatType) return false
         if (navigatorPredictionMillis != other.navigatorPredictionMillis) return false
         if (distanceFormatterOptions != other.distanceFormatterOptions) return false
-        if (onboardRouterOptions != other.onboardRouterOptions) return false
+        if (routingTilesOptions != other.routingTilesOptions) return false
         if (predictiveCacheLocationOptions != other.predictiveCacheLocationOptions) return false
         if (isFromNavigationUi != other.isFromNavigationUi) return false
         if (isDebugLoggingEnabled != other.isDebugLoggingEnabled) return false
@@ -110,7 +110,7 @@ class NavigationOptions private constructor(
         result = 31 * result + timeFormatType
         result = 31 * result + navigatorPredictionMillis.hashCode()
         result = 31 * result + distanceFormatterOptions.hashCode()
-        result = 31 * result + onboardRouterOptions.hashCode()
+        result = 31 * result + routingTilesOptions.hashCode()
         result = 31 * result + predictiveCacheLocationOptions.hashCode()
         result = 31 * result + isFromNavigationUi.hashCode()
         result = 31 * result + isDebugLoggingEnabled.hashCode()
@@ -132,7 +132,7 @@ class NavigationOptions private constructor(
             "timeFormatType=$timeFormatType, " +
             "navigatorPredictionMillis=$navigatorPredictionMillis, " +
             "distanceFormatterOptions=$distanceFormatterOptions, " +
-            "onboardRouterOptions=$onboardRouterOptions, " +
+            "routingTilesOptions=$routingTilesOptions, " +
             "predictiveCacheLocationOptions=$predictiveCacheLocationOptions, " +
             "isFromNavigationUi=$isFromNavigationUi, " +
             "isDebugLoggingEnabled=$isDebugLoggingEnabled, " +
@@ -159,8 +159,8 @@ class NavigationOptions private constructor(
         private var navigatorPredictionMillis: Long = DEFAULT_NAVIGATOR_PREDICTION_MILLIS
         private var distanceFormatterOptions: DistanceFormatterOptions =
             DistanceFormatterOptions.Builder(applicationContext).build()
-        private var onboardRouterOptions: OnboardRouterOptions =
-            OnboardRouterOptions.Builder().build()
+        private var routingTilesOptions: RoutingTilesOptions =
+            RoutingTilesOptions.Builder().build()
         private var predictiveCacheLocationOptions: PredictiveCacheLocationOptions =
             PredictiveCacheLocationOptions.Builder().build()
         private var isFromNavigationUi: Boolean = false
@@ -214,8 +214,8 @@ class NavigationOptions private constructor(
         /**
          * Defines configuration for the default on-board router
          */
-        fun onboardRouterOptions(onboardRouterOptions: OnboardRouterOptions): Builder =
-            apply { this.onboardRouterOptions = onboardRouterOptions }
+        fun routingTilesOptions(routingTilesOptions: RoutingTilesOptions): Builder =
+            apply { this.routingTilesOptions = routingTilesOptions }
 
         /**
          * Defines location configuration for predictive caching
@@ -267,7 +267,7 @@ class NavigationOptions private constructor(
                 timeFormatType = timeFormatType,
                 navigatorPredictionMillis = navigatorPredictionMillis,
                 distanceFormatterOptions = distanceFormatterOptions,
-                onboardRouterOptions = onboardRouterOptions,
+                routingTilesOptions = routingTilesOptions,
                 predictiveCacheLocationOptions = predictiveCacheLocationOptions,
                 isFromNavigationUi = isFromNavigationUi,
                 isDebugLoggingEnabled = isDebugLoggingEnabled,

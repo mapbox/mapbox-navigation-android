@@ -145,8 +145,8 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.android.core.location.LocationEngine getLocationEngine();
     method public com.mapbox.android.core.location.LocationEngineRequest getLocationEngineRequest();
     method public long getNavigatorPredictionMillis();
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions getOnboardRouterOptions();
     method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions getPredictiveCacheLocationOptions();
+    method public com.mapbox.navigation.base.options.RoutingTilesOptions getRoutingTilesOptions();
     method public int getTimeFormatType();
     method public boolean isDebugLoggingEnabled();
     method public boolean isFromNavigationUi();
@@ -167,32 +167,13 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngine(com.mapbox.android.core.location.LocationEngine locationEngine);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngineRequest(com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder navigatorPredictionMillis(long predictionMillis);
-    method public com.mapbox.navigation.base.options.NavigationOptions.Builder onboardRouterOptions(com.mapbox.navigation.base.options.OnboardRouterOptions onboardRouterOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder predictiveCacheLocationOptions(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions);
+    method public com.mapbox.navigation.base.options.NavigationOptions.Builder routingTilesOptions(com.mapbox.navigation.base.options.RoutingTilesOptions routingTilesOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder timeFormatType(int type);
   }
 
   public final class NavigationOptionsKt {
     field public static final long DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L; // 0x44cL
-  }
-
-  public final class OnboardRouterOptions {
-    method public String? getFilePath();
-    method public String getTilesDataset();
-    method public String getTilesProfile();
-    method public java.net.URI getTilesUri();
-    method public String getTilesVersion();
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder toBuilder();
-  }
-
-  public static final class OnboardRouterOptions.Builder {
-    ctor public OnboardRouterOptions.Builder();
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions build();
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder filePath(String? filePath);
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesDataset(String tilesDataset);
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesProfile(String tilesProfile);
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesUri(java.net.URI tilesUri);
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesVersion(String version);
   }
 
   public final class PredictiveCacheLocationOptions {
@@ -208,6 +189,27 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder currentLocationRadiusInMeters(int radiusInMeters);
     method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder destinationLocationRadiusInMeters(int radiusInMeters);
     method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder routeBufferRadiusInMeters(int radiusInMeters);
+  }
+
+  public final class RoutingTilesOptions {
+    method public String? getFilePath();
+    method public int getMinDaysBetweenServerAndLocalTilesVersion();
+    method public java.net.URI getTilesBaseUri();
+    method public String getTilesDataset();
+    method public String getTilesProfile();
+    method public String getTilesVersion();
+    method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder toBuilder();
+  }
+
+  public static final class RoutingTilesOptions.Builder {
+    ctor public RoutingTilesOptions.Builder();
+    method public com.mapbox.navigation.base.options.RoutingTilesOptions build();
+    method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder filePath(String? filePath);
+    method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder minDaysBetweenServerAndLocalTilesVersion(int minDaysBetweenServerAndLocalTilesVersion);
+    method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder tilesBaseUri(java.net.URI tilesBaseUri);
+    method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder tilesDataset(String tilesDataset);
+    method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder tilesProfile(String tilesProfile);
+    method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder tilesVersion(String version);
   }
 
 }

@@ -7,7 +7,7 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.internal.route.RouteUrl
-import com.mapbox.navigation.base.options.OnboardRouterOptions
+import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -24,7 +24,7 @@ import kotlinx.coroutines.withContext
  * MapboxOnboardRouter provides offline route fetching
  *
  * It uses offline storage path to store and retrieve data, setup endpoint,
- * tiles' version, token. Config is provided via [OnboardRouterOptions].
+ * tiles' version, token. Config is provided via [RoutingTilesOptions].
  *
  * @param navigatorNative Native Navigator
  * @param logger interface for logging any events

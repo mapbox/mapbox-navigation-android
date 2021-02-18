@@ -44,7 +44,7 @@ class PredictiveCacheControllerTest {
 
         verify {
             PredictiveCache.createNavigationController(
-                mockedMapboxNavigation.navigationOptions.onboardRouterOptions,
+                mockedMapboxNavigation.navigationOptions.routingTilesOptions,
                 mockedMapboxNavigation.navigationOptions.predictiveCacheLocationOptions
             )
         }
