@@ -2,13 +2,13 @@
 package com.mapbox.navigation.base {
 
   public final class TimeFormat {
-    field public static final com.mapbox.navigation.base.TimeFormat! INSTANCE;
+    field public static final com.mapbox.navigation.base.TimeFormat INSTANCE;
     field public static final int NONE_SPECIFIED = -1; // 0xffffffff
     field public static final int TWELVE_HOURS = 0; // 0x0
     field public static final int TWENTY_FOUR_HOURS = 1; // 0x1
   }
 
-  @IntDef({com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED, com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS, com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS}) @kotlin.annotation.Retention(AnnotationRetention.SOURCE) public static @interface TimeFormat.Type {
+  @IntDef({com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED, com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS, com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface TimeFormat.Type {
   }
 
 }
@@ -33,6 +33,10 @@ package com.mapbox.navigation.base.formatter {
     method public int getRoundingIncrement();
     method public String getUnitType();
     method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions.Builder toBuilder();
+    property public final android.content.Context applicationContext;
+    property public final java.util.Locale locale;
+    property public final int roundingIncrement;
+    property public final String unitType;
   }
 
   public static final class DistanceFormatterOptions.Builder {
@@ -49,10 +53,10 @@ package com.mapbox.navigation.base.formatter {
     field public static final int INCREMENT_ONE_HUNDRED = 100; // 0x64
     field public static final int INCREMENT_TEN = 10; // 0xa
     field public static final int INCREMENT_TWENTY_FIVE = 25; // 0x19
-    field public static final com.mapbox.navigation.base.formatter.Rounding! INSTANCE;
+    field public static final com.mapbox.navigation.base.formatter.Rounding INSTANCE;
   }
 
-  @IntDef({com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TEN, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TWENTY_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIFTY, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_ONE_HUNDRED}) @kotlin.annotation.Retention(AnnotationRetention.SOURCE) public static @interface Rounding.Increment {
+  @IntDef({com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TEN, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TWENTY_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIFTY, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_ONE_HUNDRED}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface Rounding.Increment {
   }
 
 }
@@ -60,7 +64,7 @@ package com.mapbox.navigation.base.formatter {
 package com.mapbox.navigation.base.metrics {
 
   public final class DirectionsMetrics {
-    field public static final com.mapbox.navigation.base.metrics.DirectionsMetrics! INSTANCE;
+    field public static final com.mapbox.navigation.base.metrics.DirectionsMetrics INSTANCE;
     field public static final String ROUTE_RETRIEVAL = "route_retrieval_event";
   }
 
@@ -92,7 +96,7 @@ package com.mapbox.navigation.base.metrics {
     field public static final String FEEDBACK = "navigation.feedback";
     field public static final String FREE_DRIVE = "navigation.freeDrive";
     field public static final String INITIAL_GPS = "initial_gps_event";
-    field public static final com.mapbox.navigation.base.metrics.NavigationMetrics! INSTANCE;
+    field public static final com.mapbox.navigation.base.metrics.NavigationMetrics INSTANCE;
     field public static final String REROUTE = "navigation.reroute";
   }
 
@@ -104,6 +108,8 @@ package com.mapbox.navigation.base.options {
     method public String getCustomConfig();
     method public com.mapbox.navigation.base.options.DeviceType getDeviceType();
     method public com.mapbox.navigation.base.options.DeviceProfile.Builder toBuilder();
+    property public final String customConfig;
+    property public final com.mapbox.navigation.base.options.DeviceType deviceType;
   }
 
   public static final class DeviceProfile.Builder {
@@ -124,6 +130,10 @@ package com.mapbox.navigation.base.options {
     method public double getLength();
     method public Double? getMinTimeDeltaBetweenUpdates();
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder toBuilder();
+    property public final double branchLength;
+    property public final int expansion;
+    property public final double length;
+    property public final Double? minTimeDeltaBetweenUpdates;
   }
 
   public static final class EHorizonOptions.Builder {
@@ -133,14 +143,14 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder expansion(int expansion);
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder length(double length);
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder minTimeDeltaBetweenUpdates(Double? minTimeDeltaBetweenUpdates);
-    field @Deprecated public static final com.mapbox.navigation.base.options.EHorizonOptions.Builder.Companion! Companion;
   }
 
   public final class IncidentsOptions {
     method public String getApiUrl();
     method public String getGraph();
     method public com.mapbox.navigation.base.options.IncidentsOptions.Builder toBuilder();
-    field @Deprecated public static final com.mapbox.navigation.base.options.IncidentsOptions.Companion! Companion;
+    property public final String apiUrl;
+    property public final String graph;
   }
 
   public static final class IncidentsOptions.Builder {
@@ -167,6 +177,21 @@ package com.mapbox.navigation.base.options {
     method public boolean isFromNavigationUi();
     method public boolean isRouteRefreshEnabled();
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder toBuilder();
+    property public final String? accessToken;
+    property public final android.content.Context applicationContext;
+    property public final com.mapbox.navigation.base.options.DeviceProfile deviceProfile;
+    property public final com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions;
+    property public final com.mapbox.navigation.base.options.EHorizonOptions eHorizonOptions;
+    property public final com.mapbox.navigation.base.options.IncidentsOptions incidentsOptions;
+    property public final boolean isDebugLoggingEnabled;
+    property public final boolean isFromNavigationUi;
+    property public final boolean isRouteRefreshEnabled;
+    property public final com.mapbox.android.core.location.LocationEngine locationEngine;
+    property public final com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest;
+    property public final long navigatorPredictionMillis;
+    property public final com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions;
+    property public final com.mapbox.navigation.base.options.RoutingTilesOptions routingTilesOptions;
+    property public final int timeFormatType;
   }
 
   public static final class NavigationOptions.Builder {
@@ -197,6 +222,9 @@ package com.mapbox.navigation.base.options {
     method public int getDestinationLocationRadiusInMeters();
     method public int getRouteBufferRadiusInMeters();
     method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder toBuilder();
+    property public final int currentLocationRadiusInMeters;
+    property public final int destinationLocationRadiusInMeters;
+    property public final int routeBufferRadiusInMeters;
   }
 
   public static final class PredictiveCacheLocationOptions.Builder {
@@ -215,6 +243,12 @@ package com.mapbox.navigation.base.options {
     method public String getTilesProfile();
     method public String getTilesVersion();
     method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder toBuilder();
+    property public final String? filePath;
+    property public final int minDaysBetweenServerAndLocalTilesVersion;
+    property public final java.net.URI tilesBaseUri;
+    property public final String tilesDataset;
+    property public final String tilesProfile;
+    property public final String tilesVersion;
   }
 
   public static final class RoutingTilesOptions.Builder {
@@ -238,13 +272,14 @@ package com.mapbox.navigation.base.route {
   }
 
   public final class RouteRefreshError {
-    ctor public RouteRefreshError(String? message, Throwable? throwable);
-    ctor public RouteRefreshError();
+    ctor public RouteRefreshError(String? message = null, Throwable? throwable = null);
     method public String? component1();
     method public Throwable? component2();
     method public com.mapbox.navigation.base.route.RouteRefreshError copy(String? message, Throwable? throwable);
     method public String? getMessage();
     method public Throwable? getThrowable();
+    property public final String? message;
+    property public final Throwable? throwable;
   }
 
   public interface Router {
@@ -273,6 +308,9 @@ package com.mapbox.navigation.base.speed.model {
     method public Integer? getSpeedKmph();
     method public com.mapbox.navigation.base.speed.model.SpeedLimitSign getSpeedLimitSign();
     method public com.mapbox.navigation.base.speed.model.SpeedLimitUnit getSpeedLimitUnit();
+    property public final Integer? speedKmph;
+    property public final com.mapbox.navigation.base.speed.model.SpeedLimitSign speedLimitSign;
+    property public final com.mapbox.navigation.base.speed.model.SpeedLimitUnit speedLimitUnit;
   }
 
   public enum SpeedLimitSign {
@@ -306,6 +344,14 @@ package com.mapbox.navigation.base.trip.model {
     method public com.mapbox.api.directions.v5.models.RouteLeg? getRouteLeg();
     method public com.mapbox.api.directions.v5.models.LegStep? getUpcomingStep();
     method public com.mapbox.navigation.base.trip.model.RouteLegProgress.Builder toBuilder();
+    property public final com.mapbox.navigation.base.trip.model.RouteStepProgress? currentStepProgress;
+    property public final float distanceRemaining;
+    property public final float distanceTraveled;
+    property public final double durationRemaining;
+    property public final float fractionTraveled;
+    property public final int legIndex;
+    property public final com.mapbox.api.directions.v5.models.RouteLeg? routeLeg;
+    property public final com.mapbox.api.directions.v5.models.LegStep? upcomingStep;
   }
 
   public static final class RouteLegProgress.Builder {
@@ -337,6 +383,20 @@ package com.mapbox.navigation.base.trip.model {
     method public java.util.List<com.mapbox.geojson.Point>? getUpcomingStepPoints();
     method public com.mapbox.api.directions.v5.models.VoiceInstructions? getVoiceInstructions();
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder toBuilder();
+    property public final com.mapbox.api.directions.v5.models.BannerInstructions? bannerInstructions;
+    property public final com.mapbox.navigation.base.trip.model.RouteLegProgress? currentLegProgress;
+    property public final com.mapbox.navigation.base.trip.model.RouteProgressState currentState;
+    property public final float distanceRemaining;
+    property public final float distanceTraveled;
+    property public final double durationRemaining;
+    property public final float fractionTraveled;
+    property public final boolean inTunnel;
+    property public final int remainingWaypoints;
+    property public final com.mapbox.api.directions.v5.models.DirectionsRoute route;
+    property public final com.mapbox.geojson.Geometry? routeGeometryWithBuffer;
+    property public final java.util.List<com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert> upcomingRouteAlerts;
+    property public final java.util.List<com.mapbox.geojson.Point>? upcomingStepPoints;
+    property public final com.mapbox.api.directions.v5.models.VoiceInstructions? voiceInstructions;
   }
 
   public static final class RouteProgress.Builder {
@@ -377,6 +437,14 @@ package com.mapbox.navigation.base.trip.model {
     method public int getStepIndex();
     method public java.util.List<com.mapbox.geojson.Point>? getStepPoints();
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder toBuilder();
+    property public final float distanceRemaining;
+    property public final float distanceTraveled;
+    property public final double durationRemaining;
+    property public final float fractionTraveled;
+    property public final int intersectionIndex;
+    property public final com.mapbox.api.directions.v5.models.LegStep? step;
+    property public final int stepIndex;
+    property public final java.util.List<com.mapbox.geojson.Point>? stepPoints;
   }
 
   public static final class RouteStepProgress.Builder {
@@ -400,6 +468,8 @@ package com.mapbox.navigation.base.trip.model.alert {
     method public String getCode();
     method public String getCodeAlpha3();
     method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo.Builder toBuilder();
+    property public final String code;
+    property public final String codeAlpha3;
   }
 
   public static final class CountryBorderCrossingAdminInfo.Builder {
@@ -411,6 +481,8 @@ package com.mapbox.navigation.base.trip.model.alert {
     method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? getFrom();
     method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? getTo();
     method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert.Builder toBuilder();
+    property public final com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? from;
+    property public final com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? to;
   }
 
   public static final class CountryBorderCrossingAlert.Builder {
@@ -424,6 +496,7 @@ package com.mapbox.navigation.base.trip.model.alert {
   public final class IncidentAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
     method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo? getInfo();
     method public com.mapbox.navigation.base.trip.model.alert.IncidentAlert.Builder toBuilder();
+    property public final com.mapbox.navigation.base.trip.model.alert.IncidentInfo? info;
   }
 
   public static final class IncidentAlert.Builder {
@@ -436,6 +509,7 @@ package com.mapbox.navigation.base.trip.model.alert {
   public final class IncidentCongestion {
     method public Integer? getValue();
     method public com.mapbox.navigation.base.trip.model.alert.IncidentCongestion.Builder toBuilder();
+    property public final Integer? value;
   }
 
   public static final class IncidentCongestion.Builder {
@@ -446,14 +520,14 @@ package com.mapbox.navigation.base.trip.model.alert {
 
   public final class IncidentImpact {
     field public static final String CRITICAL = "critical";
-    field public static final com.mapbox.navigation.base.trip.model.alert.IncidentImpact! INSTANCE;
+    field public static final com.mapbox.navigation.base.trip.model.alert.IncidentImpact INSTANCE;
     field public static final String LOW = "low";
     field public static final String MAJOR = "major";
     field public static final String MINOR = "minor";
     field public static final String UNKNOWN = "unknown";
   }
 
-  @StringDef({com.mapbox.navigation.base.trip.model.alert.IncidentImpact.UNKNOWN, com.mapbox.navigation.base.trip.model.alert.IncidentImpact.CRITICAL, com.mapbox.navigation.base.trip.model.alert.IncidentImpact.MAJOR, com.mapbox.navigation.base.trip.model.alert.IncidentImpact.MINOR, com.mapbox.navigation.base.trip.model.alert.IncidentImpact.LOW}) @kotlin.annotation.Retention(AnnotationRetention.SOURCE) public static @interface IncidentImpact.Impact {
+  @StringDef({com.mapbox.navigation.base.trip.model.alert.IncidentImpact.UNKNOWN, com.mapbox.navigation.base.trip.model.alert.IncidentImpact.CRITICAL, com.mapbox.navigation.base.trip.model.alert.IncidentImpact.MAJOR, com.mapbox.navigation.base.trip.model.alert.IncidentImpact.MINOR, com.mapbox.navigation.base.trip.model.alert.IncidentImpact.LOW}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface IncidentImpact.Impact {
   }
 
   public final class IncidentInfo {
@@ -470,6 +544,18 @@ package com.mapbox.navigation.base.trip.model.alert {
     method public int getType();
     method public boolean isClosed();
     method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder toBuilder();
+    property public final java.util.List<java.lang.Integer>? alertcCodes;
+    property public final com.mapbox.navigation.base.trip.model.alert.IncidentCongestion? congestion;
+    property public final java.util.Date? creationTime;
+    property public final String? description;
+    property public final java.util.Date? endTime;
+    property public final String id;
+    property public final String impact;
+    property public final boolean isClosed;
+    property public final java.util.Date? startTime;
+    property public final String? subType;
+    property public final String? subTypeDescription;
+    property public final int type;
   }
 
   public static final class IncidentInfo.Builder {
@@ -493,7 +579,7 @@ package com.mapbox.navigation.base.trip.model.alert {
     field public static final int CONGESTION = 42; // 0x2a
     field public static final int CONSTRUCTION = 43; // 0x2b
     field public static final int DISABLED_VEHICLE = 44; // 0x2c
-    field public static final com.mapbox.navigation.base.trip.model.alert.IncidentType! INSTANCE;
+    field public static final com.mapbox.navigation.base.trip.model.alert.IncidentType INSTANCE;
     field public static final int LANE_RESTRICTION = 45; // 0x2d
     field public static final int MASS_TRANSIT = 46; // 0x2e
     field public static final int MISCELLANEOUS = 47; // 0x2f
@@ -508,6 +594,7 @@ package com.mapbox.navigation.base.trip.model.alert {
   public final class RestStopAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
     method public int getRestStopType();
     method public com.mapbox.navigation.base.trip.model.alert.RestStopAlert.Builder toBuilder();
+    property public final int restStopType;
   }
 
   public static final class RestStopAlert.Builder {
@@ -518,7 +605,7 @@ package com.mapbox.navigation.base.trip.model.alert {
   }
 
   public final class RestStopType {
-    field public static final com.mapbox.navigation.base.trip.model.alert.RestStopType! INSTANCE;
+    field public static final com.mapbox.navigation.base.trip.model.alert.RestStopType INSTANCE;
     field public static final int RestArea = 1; // 0x1
     field public static final int ServiceArea = 2; // 0x2
     field public static final int Unknown = -1; // 0xffffffff
@@ -540,6 +627,10 @@ package com.mapbox.navigation.base.trip.model.alert {
     method public final int getAlertType();
     method public final com.mapbox.geojson.Point getCoordinate();
     method public final double getDistance();
+    property public final com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry;
+    property public final int alertType;
+    property public final com.mapbox.geojson.Point coordinate;
+    property public final double distance;
   }
 
   public final class RouteAlertGeometry {
@@ -549,6 +640,11 @@ package com.mapbox.navigation.base.trip.model.alert {
     method public com.mapbox.geojson.Point getStartCoordinate();
     method public int getStartGeometryIndex();
     method public com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry.Builder toBuilder();
+    property public final com.mapbox.geojson.Point endCoordinate;
+    property public final int endGeometryIndex;
+    property public final double length;
+    property public final com.mapbox.geojson.Point startCoordinate;
+    property public final int startGeometryIndex;
   }
 
   public static final class RouteAlertGeometry.Builder {
@@ -558,7 +654,7 @@ package com.mapbox.navigation.base.trip.model.alert {
 
   public final class RouteAlertType {
     field public static final int CountryBorderCrossing = 1; // 0x1
-    field public static final com.mapbox.navigation.base.trip.model.alert.RouteAlertType! INSTANCE;
+    field public static final com.mapbox.navigation.base.trip.model.alert.RouteAlertType INSTANCE;
     field public static final int Incident = 5; // 0x5
     field public static final int RestStop = 3; // 0x3
     field public static final int RestrictedArea = 4; // 0x4
@@ -574,6 +670,7 @@ package com.mapbox.navigation.base.trip.model.alert {
   public final class TollCollectionAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
     method public int getTollCollectionType();
     method public com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert.Builder toBuilder();
+    property public final int tollCollectionType;
   }
 
   public static final class TollCollectionAlert.Builder {
@@ -584,7 +681,7 @@ package com.mapbox.navigation.base.trip.model.alert {
   }
 
   public final class TollCollectionType {
-    field public static final com.mapbox.navigation.base.trip.model.alert.TollCollectionType! INSTANCE;
+    field public static final com.mapbox.navigation.base.trip.model.alert.TollCollectionType INSTANCE;
     field public static final int TollBooth = 1; // 0x1
     field public static final int TollGantry = 2; // 0x2
     field public static final int Unknown = -1; // 0xffffffff
@@ -593,6 +690,7 @@ package com.mapbox.navigation.base.trip.model.alert {
   public final class TunnelEntranceAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
     method public com.mapbox.navigation.base.trip.model.alert.TunnelInfo? getInfo();
     method public com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert.Builder toBuilder();
+    property public final com.mapbox.navigation.base.trip.model.alert.TunnelInfo? info;
   }
 
   public static final class TunnelEntranceAlert.Builder {
@@ -605,6 +703,7 @@ package com.mapbox.navigation.base.trip.model.alert {
   public final class TunnelInfo {
     method public String getName();
     method public com.mapbox.navigation.base.trip.model.alert.TunnelInfo.Builder toBuilder();
+    property public final String name;
   }
 
   public static final class TunnelInfo.Builder {
@@ -616,6 +715,8 @@ package com.mapbox.navigation.base.trip.model.alert {
     method public double getDistanceToStart();
     method public com.mapbox.navigation.base.trip.model.alert.RouteAlert getRouteAlert();
     method public com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert.Builder toBuilder();
+    property public final double distanceToStart;
+    property public final com.mapbox.navigation.base.trip.model.alert.RouteAlert routeAlert;
   }
 
   public static final class UpcomingRouteAlert.Builder {

@@ -111,6 +111,100 @@ package com.mapbox.navigation.ui.maneuver.model {
     method public int getTurnIconUpdown();
     method public int getTurnIconUturn();
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder toBuilder();
+    property public final int turnIconArrive;
+    property public final int turnIconArriveLeft;
+    property public final int turnIconArriveRight;
+    property public final int turnIconArriveStraight;
+    property public final int turnIconContinue;
+    property public final int turnIconContinueLeft;
+    property public final int turnIconContinueRight;
+    property public final int turnIconContinueSlightLeft;
+    property public final int turnIconContinueSlightRight;
+    property public final int turnIconContinueStraight;
+    property public final int turnIconContinueUturn;
+    property public final int turnIconDepart;
+    property public final int turnIconDepartLeft;
+    property public final int turnIconDepartRight;
+    property public final int turnIconDepartStraight;
+    property public final int turnIconEndRoadLeft;
+    property public final int turnIconEndRoadRight;
+    property public final int turnIconFlag;
+    property public final int turnIconFork;
+    property public final int turnIconForkLeft;
+    property public final int turnIconForkRight;
+    property public final int turnIconForkSlightLeft;
+    property public final int turnIconForkSlightRight;
+    property public final int turnIconForkStraight;
+    property public final int turnIconInvalid;
+    property public final int turnIconInvalidLeft;
+    property public final int turnIconInvalidRight;
+    property public final int turnIconInvalidSlightLeft;
+    property public final int turnIconInvalidSlightRight;
+    property public final int turnIconInvalidStraight;
+    property public final int turnIconInvalidUturn;
+    property public final int turnIconMergeLeft;
+    property public final int turnIconMergeRight;
+    property public final int turnIconMergeSlightLeft;
+    property public final int turnIconMergeSlightRight;
+    property public final int turnIconMergeStraight;
+    property public final int turnIconNewNameLeft;
+    property public final int turnIconNewNameRight;
+    property public final int turnIconNewNameSharpLeft;
+    property public final int turnIconNewNameSharpRight;
+    property public final int turnIconNewNameSlightLeft;
+    property public final int turnIconNewNameSlightRight;
+    property public final int turnIconNewNameStraight;
+    property public final int turnIconNotificationLeft;
+    property public final int turnIconNotificationRight;
+    property public final int turnIconNotificationSharpLeft;
+    property public final int turnIconNotificationSharpRight;
+    property public final int turnIconNotificationSlightLeft;
+    property public final int turnIconNotificationSlightRight;
+    property public final int turnIconNotificationStraight;
+    property public final int turnIconOffRamp;
+    property public final int turnIconOffRampLeft;
+    property public final int turnIconOffRampRight;
+    property public final int turnIconOffRampSlightLeft;
+    property public final int turnIconOffRampSlightRight;
+    property public final int turnIconOnRamp;
+    property public final int turnIconOnRampLeft;
+    property public final int turnIconOnRampRight;
+    property public final int turnIconOnRampSharpLeft;
+    property public final int turnIconOnRampSharpRight;
+    property public final int turnIconOnRampSlightLeft;
+    property public final int turnIconOnRampSlightRight;
+    property public final int turnIconOnRampStraight;
+    property public final int turnIconRamp;
+    property public final int turnIconRotary;
+    property public final int turnIconRotaryLeft;
+    property public final int turnIconRotaryRight;
+    property public final int turnIconRotarySharpLeft;
+    property public final int turnIconRotarySharpRight;
+    property public final int turnIconRotarySlightLeft;
+    property public final int turnIconRotarySlightRight;
+    property public final int turnIconRotaryStraight;
+    property public final int turnIconRoundabout;
+    property public final int turnIconRoundaboutLeft;
+    property public final int turnIconRoundaboutRight;
+    property public final int turnIconRoundaboutSharpLeft;
+    property public final int turnIconRoundaboutSharpRight;
+    property public final int turnIconRoundaboutSlightLeft;
+    property public final int turnIconRoundaboutSlightRight;
+    property public final int turnIconRoundaboutStraight;
+    property public final int turnIconTrafficCircle;
+    property public final int turnIconTrafficCircleLeft;
+    property public final int turnIconTrafficCircleRight;
+    property public final int turnIconTrafficCircleSlightLeft;
+    property public final int turnIconTrafficCircleSlightRight;
+    property public final int turnIconTurnLeft;
+    property public final int turnIconTurnRight;
+    property public final int turnIconTurnSharpLeft;
+    property public final int turnIconTurnSharpRight;
+    property public final int turnIconTurnSlightLeft;
+    property public final int turnIconTurnSlightRight;
+    property public final int turnIconTurnStraight;
+    property public final int turnIconUpdown;
+    property public final int turnIconUturn;
   }
 
   public static final class TurnIconResources.Builder {
@@ -217,8 +311,8 @@ package com.mapbox.navigation.ui.maneuver.model {
 package com.mapbox.navigation.ui.maneuver.view {
 
   public final class MapboxExitText extends androidx.appcompat.widget.AppCompatTextView {
-    ctor public MapboxExitText(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    ctor public MapboxExitText(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxExitText(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
+    ctor public MapboxExitText(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxExitText(android.content.Context context);
     method public android.graphics.Bitmap getViewAsBitmap();
     method public void setExit(String? modifier, com.mapbox.navigation.ui.base.model.maneuver.ExitNumberComponentNode exit);
@@ -227,8 +321,8 @@ package com.mapbox.navigation.ui.maneuver.view {
   }
 
   public final class MapboxLaneGuidance extends androidx.appcompat.widget.AppCompatImageView {
-    ctor public MapboxLaneGuidance(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    ctor public MapboxLaneGuidance(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxLaneGuidance(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
+    ctor public MapboxLaneGuidance(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxLaneGuidance(android.content.Context context);
     method public void renderLane(com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator laneIndicator, String? activeDirection, androidx.appcompat.view.ContextThemeWrapper wrapper);
   }
@@ -247,11 +341,12 @@ package com.mapbox.navigation.ui.maneuver.view {
     ctor public MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder(android.view.View view);
     method public void bindLaneIndicator(com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator laneIndicator);
     method public android.view.View getView();
+    property public final android.view.View view;
   }
 
   public final class MapboxManeuverView extends androidx.constraintlayout.widget.ConstraintLayout implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState> {
-    ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
+    ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxManeuverView(android.content.Context context);
     method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState state);
     method public void updatePrimaryManeuverTextAppearance(@StyleRes int style);
@@ -264,36 +359,36 @@ package com.mapbox.navigation.ui.maneuver.view {
   }
 
   public final class MapboxPrimaryManeuver extends androidx.appcompat.widget.AppCompatTextView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary> {
-    ctor public MapboxPrimaryManeuver(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    ctor public MapboxPrimaryManeuver(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxPrimaryManeuver(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
+    ctor public MapboxPrimaryManeuver(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxPrimaryManeuver(android.content.Context context);
     method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary state);
   }
 
   public final class MapboxSecondaryManeuver extends androidx.appcompat.widget.AppCompatTextView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary> {
-    ctor public MapboxSecondaryManeuver(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    ctor public MapboxSecondaryManeuver(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxSecondaryManeuver(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
+    ctor public MapboxSecondaryManeuver(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxSecondaryManeuver(android.content.Context context);
     method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary state);
   }
 
   public final class MapboxStepDistance extends androidx.appcompat.widget.AppCompatTextView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState> {
-    ctor public MapboxStepDistance(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    ctor public MapboxStepDistance(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxStepDistance(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
+    ctor public MapboxStepDistance(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxStepDistance(android.content.Context context);
     method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState state);
   }
 
   public final class MapboxSubManeuver extends androidx.appcompat.widget.AppCompatTextView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub> {
-    ctor public MapboxSubManeuver(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    ctor public MapboxSubManeuver(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxSubManeuver(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
+    ctor public MapboxSubManeuver(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxSubManeuver(android.content.Context context);
     method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub state);
   }
 
   public final class MapboxTurnIconManeuver extends androidx.appcompat.widget.AppCompatImageView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState> {
-    ctor public MapboxTurnIconManeuver(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    ctor public MapboxTurnIconManeuver(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxTurnIconManeuver(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
+    ctor public MapboxTurnIconManeuver(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxTurnIconManeuver(android.content.Context context);
     method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState state);
     method public void updateTurnIconResources(com.mapbox.navigation.ui.maneuver.model.TurnIconResources turnIcon);
@@ -314,6 +409,7 @@ package com.mapbox.navigation.ui.maneuver.view {
     ctor public MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder(android.view.View view);
     method public void bindUpcomingManeuver(com.mapbox.navigation.ui.base.model.maneuver.Maneuver maneuver);
     method public android.view.View getView();
+    property public final android.view.View view;
   }
 
 }
