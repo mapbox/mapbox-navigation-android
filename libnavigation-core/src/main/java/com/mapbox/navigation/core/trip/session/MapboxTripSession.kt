@@ -11,12 +11,12 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.alert.RouteAlert
 import com.mapbox.navigation.core.internal.utils.isSameRoute
+import com.mapbox.navigation.core.internal.utils.isSameUuid
 import com.mapbox.navigation.core.navigator.getMapMatcherResult
 import com.mapbox.navigation.core.sensors.SensorMapper
 import com.mapbox.navigation.core.trip.service.TripService
@@ -71,7 +71,8 @@ internal class MapboxTripSession(
 
     override var route: DirectionsRoute? = null
         set(value) {
-            val isSameRoute = field.isSameRoute(value)
+            val isSameUuid = value?.isSameUuid(field) ?: false
+            val isSameRoute = value?.isSameRoute(field) ?: false
             field = value
             if (value == null) {
                 routeAlerts = emptyList()
@@ -79,23 +80,14 @@ internal class MapboxTripSession(
             }
             cancelOngoingUpdateNavigatorStatusDataJobs()
             val updateRouteJob = threadController.getMainScopeAndRootJob().scope.launch {
-                if (isSameRoute && value != null) {
-                    value.legs()?.forEachIndexed { index, routeLeg ->
-                        routeLeg.annotation()?.toJson()?.let { annotations ->
-                            navigator.updateAnnotations(annotations, index).let { success ->
-                                logger.d(
-                                    tag = Tag(TAG),
-                                    msg = Message(
-                                        "Annotation updated successfully=$success, for leg " +
-                                            "index $index, annotations: [$annotations]"
-                                    )
-                                )
-                            }
-                        }
+                when {
+                    isSameUuid && isSameRoute && value != null -> {
+                        navigator.updateAnnotations(value)
                     }
-                } else {
-                    navigator.setRoute(value)?.let {
-                        routeAlerts = it.routeAlerts
+                    else -> {
+                        navigator.setRoute(value)?.let {
+                            routeAlerts = it.routeAlerts
+                        }
                     }
                 }
             }

@@ -2,6 +2,7 @@ package com.mapbox.navigation.navigator.internal
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.base.common.logger.Logger
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.TileStore
 import com.mapbox.geojson.Point
@@ -41,7 +42,8 @@ interface MapboxNativeNavigator {
     fun create(
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
-        tilesConfig: TilesConfig
+        tilesConfig: TilesConfig,
+        logger: Logger
     ): MapboxNativeNavigator
 
     /**
@@ -115,7 +117,7 @@ interface MapboxNativeNavigator {
      *
      * @return True if the annotations could be updated false if not (wrong number of annotations)
      */
-    suspend fun updateAnnotations(legAnnotationJson: String, legIndex: Int): Boolean
+    suspend fun updateAnnotations(route: DirectionsRoute)
 
     /**
      * Gets the banner at a specific step index in the route. If there is no
