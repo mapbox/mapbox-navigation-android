@@ -6,6 +6,7 @@ package com.mapbox.navigation.ui.tripprogress.api {
     method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter getFormatter();
     method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressState.Update getTripProgress(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
     method public void setFormatter(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter p);
+    property public final com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter formatter;
   }
 
 }
@@ -13,8 +14,8 @@ package com.mapbox.navigation.ui.tripprogress.api {
 package com.mapbox.navigation.ui.tripprogress.view {
 
   public final class MapboxTripProgressView extends android.widget.FrameLayout implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressState> {
-    ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
+    ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxTripProgressView(android.content.Context context);
     method public void render(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressState state);
     method public void updateStyle(@StyleRes int style);

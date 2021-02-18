@@ -174,7 +174,7 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     field public static final double DEFAULT_ROUTE_SOURCES_TOLERANCE = 0.375;
     field public static final String DESTINATION_MARKER_NAME = "destinationMarker";
     field public static final String HEAVY_CONGESTION_VALUE = "heavy";
-    field public static final com.mapbox.navigation.ui.base.internal.model.route.RouteConstants! INSTANCE;
+    field public static final com.mapbox.navigation.ui.base.internal.model.route.RouteConstants INSTANCE;
     field public static final String LOW_CONGESTION_VALUE = "low";
     field public static final double MAX_ARROW_ZOOM = 22.0;
     field public static final double MAX_DEGREES = 360.0;
@@ -216,6 +216,8 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public com.mapbox.navigation.ui.base.model.maneuver.Component copy(String type, com.mapbox.navigation.ui.base.model.maneuver.ComponentNode node);
     method public com.mapbox.navigation.ui.base.model.maneuver.ComponentNode getNode();
     method public String getType();
+    property public final com.mapbox.navigation.ui.base.model.maneuver.ComponentNode node;
+    property public final String type;
   }
 
   public interface ComponentNode {
@@ -224,6 +226,7 @@ package com.mapbox.navigation.ui.base.model.maneuver {
   public final class DelimiterComponentNode implements com.mapbox.navigation.ui.base.model.maneuver.ComponentNode {
     method public String getText();
     method public com.mapbox.navigation.ui.base.model.maneuver.DelimiterComponentNode.Builder toBuilder();
+    property public final String text;
   }
 
   public static final class DelimiterComponentNode.Builder {
@@ -235,6 +238,7 @@ package com.mapbox.navigation.ui.base.model.maneuver {
   public final class ExitComponentNode implements com.mapbox.navigation.ui.base.model.maneuver.ComponentNode {
     method public String getText();
     method public com.mapbox.navigation.ui.base.model.maneuver.ExitComponentNode.Builder toBuilder();
+    property public final String text;
   }
 
   public static final class ExitComponentNode.Builder {
@@ -246,6 +250,7 @@ package com.mapbox.navigation.ui.base.model.maneuver {
   public final class ExitNumberComponentNode implements com.mapbox.navigation.ui.base.model.maneuver.ComponentNode {
     method public String getText();
     method public com.mapbox.navigation.ui.base.model.maneuver.ExitNumberComponentNode.Builder toBuilder();
+    property public final String text;
   }
 
   public static final class ExitNumberComponentNode.Builder {
@@ -258,6 +263,8 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public String? getActiveDirection();
     method public java.util.List<com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator> getAllLanes();
     method public com.mapbox.navigation.ui.base.model.maneuver.Lane.Builder toBuilder();
+    property public final String? activeDirection;
+    property public final java.util.List<com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator> allLanes;
   }
 
   public static final class Lane.Builder {
@@ -271,6 +278,8 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public java.util.List<java.lang.String> getDirections();
     method public boolean isActive();
     method public com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator.Builder toBuilder();
+    property public final java.util.List<java.lang.String> directions;
+    property public final boolean isActive;
   }
 
   public static final class LaneIndicator.Builder {
@@ -287,6 +296,11 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public com.mapbox.navigation.ui.base.model.maneuver.SubManeuver? getSub();
     method public com.mapbox.navigation.ui.base.model.maneuver.TotalManeuverDistance getTotalManeuverDistance();
     method public com.mapbox.navigation.ui.base.model.maneuver.Maneuver.Builder toBuilder();
+    property public final com.mapbox.navigation.ui.base.model.maneuver.Lane? laneGuidance;
+    property public final com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver primary;
+    property public final com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver? secondary;
+    property public final com.mapbox.navigation.ui.base.model.maneuver.SubManeuver? sub;
+    property public final com.mapbox.navigation.ui.base.model.maneuver.TotalManeuverDistance totalManeuverDistance;
   }
 
   public static final class Maneuver.Builder {
@@ -308,6 +322,7 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.CurrentManeuver copy(com.mapbox.navigation.ui.base.model.maneuver.Maneuver maneuver);
     method public com.mapbox.navigation.ui.base.model.maneuver.Maneuver getManeuver();
     method public void setManeuver(com.mapbox.navigation.ui.base.model.maneuver.Maneuver p);
+    property public final com.mapbox.navigation.ui.base.model.maneuver.Maneuver maneuver;
   }
 
   public static final class ManeuverState.DistanceRemainingToFinishStep extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState {
@@ -317,6 +332,8 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.DistanceRemainingToFinishStep copy(com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter, double distanceRemaining);
     method public com.mapbox.navigation.base.formatter.DistanceFormatter getDistanceFormatter();
     method public double getDistanceRemaining();
+    property public final com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter;
+    property public final double distanceRemaining;
   }
 
   public abstract static sealed class ManeuverState.LaneGuidanceManeuver extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState {
@@ -327,25 +344,26 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public com.mapbox.navigation.ui.base.model.maneuver.Lane component1();
     method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver.AddLanes copy(com.mapbox.navigation.ui.base.model.maneuver.Lane lane);
     method public com.mapbox.navigation.ui.base.model.maneuver.Lane getLane();
+    property public final com.mapbox.navigation.ui.base.model.maneuver.Lane lane;
   }
 
   public static final class ManeuverState.LaneGuidanceManeuver.Hide extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver {
-    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver.Hide! INSTANCE;
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver.Hide INSTANCE;
   }
 
   public static final class ManeuverState.LaneGuidanceManeuver.RemoveLanes extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver {
-    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver.RemoveLanes! INSTANCE;
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver.RemoveLanes INSTANCE;
   }
 
   public static final class ManeuverState.LaneGuidanceManeuver.Show extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver {
-    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver.Show! INSTANCE;
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.LaneGuidanceManeuver.Show INSTANCE;
   }
 
   public abstract static sealed class ManeuverState.ManeuverPrimary extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState {
   }
 
   public static final class ManeuverState.ManeuverPrimary.Hide extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary {
-    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary.Hide! INSTANCE;
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary.Hide INSTANCE;
   }
 
   public static final class ManeuverState.ManeuverPrimary.Instruction extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary {
@@ -354,17 +372,18 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary.Instruction copy(com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver maneuver);
     method public com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver getManeuver();
     method public void setManeuver(com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver p);
+    property public final com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver maneuver;
   }
 
   public static final class ManeuverState.ManeuverPrimary.Show extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary {
-    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary.Show! INSTANCE;
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary.Show INSTANCE;
   }
 
   public abstract static sealed class ManeuverState.ManeuverSecondary extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState {
   }
 
   public static final class ManeuverState.ManeuverSecondary.Hide extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary {
-    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary.Hide! INSTANCE;
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary.Hide INSTANCE;
   }
 
   public static final class ManeuverState.ManeuverSecondary.Instruction extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary {
@@ -373,17 +392,18 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary.Instruction copy(com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver? maneuver);
     method public com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver? getManeuver();
     method public void setManeuver(com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver? p);
+    property public final com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver? maneuver;
   }
 
   public static final class ManeuverState.ManeuverSecondary.Show extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary {
-    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary.Show! INSTANCE;
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary.Show INSTANCE;
   }
 
   public abstract static sealed class ManeuverState.ManeuverSub extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState {
   }
 
   public static final class ManeuverState.ManeuverSub.Hide extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub {
-    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub.Hide! INSTANCE;
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub.Hide INSTANCE;
   }
 
   public static final class ManeuverState.ManeuverSub.Instruction extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub {
@@ -392,10 +412,11 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub.Instruction copy(com.mapbox.navigation.ui.base.model.maneuver.SubManeuver? maneuver);
     method public com.mapbox.navigation.ui.base.model.maneuver.SubManeuver? getManeuver();
     method public void setManeuver(com.mapbox.navigation.ui.base.model.maneuver.SubManeuver? p);
+    property public final com.mapbox.navigation.ui.base.model.maneuver.SubManeuver? maneuver;
   }
 
   public static final class ManeuverState.ManeuverSub.Show extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub {
-    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub.Show! INSTANCE;
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub.Show INSTANCE;
   }
 
   public static final class ManeuverState.TotalStepDistance extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState {
@@ -405,13 +426,15 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.TotalStepDistance copy(com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter, double totalStepDistance);
     method public com.mapbox.navigation.base.formatter.DistanceFormatter getDistanceFormatter();
     method public double getTotalStepDistance();
+    property public final com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter;
+    property public final double totalStepDistance;
   }
 
   public abstract static sealed class ManeuverState.UpcomingManeuvers extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState {
   }
 
   public static final class ManeuverState.UpcomingManeuvers.Hide extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers {
-    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers.Hide! INSTANCE;
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers.Hide INSTANCE;
   }
 
   public static final class ManeuverState.UpcomingManeuvers.RemoveUpcoming extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers {
@@ -419,10 +442,11 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public com.mapbox.navigation.ui.base.model.maneuver.Maneuver component1();
     method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers.RemoveUpcoming copy(com.mapbox.navigation.ui.base.model.maneuver.Maneuver maneuver);
     method public com.mapbox.navigation.ui.base.model.maneuver.Maneuver getManeuver();
+    property public final com.mapbox.navigation.ui.base.model.maneuver.Maneuver maneuver;
   }
 
   public static final class ManeuverState.UpcomingManeuvers.Show extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers {
-    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers.Show! INSTANCE;
+    field public static final com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers.Show INSTANCE;
   }
 
   public static final class ManeuverState.UpcomingManeuvers.Upcoming extends com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers {
@@ -430,6 +454,7 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Maneuver> component1();
     method public com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.UpcomingManeuvers.Upcoming copy(java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Maneuver> upcomingManeuverList);
     method public java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Maneuver> getUpcomingManeuverList();
+    property public final java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Maneuver> upcomingManeuverList;
   }
 
   public final class PrimaryManeuver {
@@ -440,6 +465,12 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public String getText();
     method public String? getType();
     method public com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver.Builder toBuilder();
+    property public final java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Component> componentList;
+    property public final Double? degrees;
+    property public final String? drivingSide;
+    property public final String? modifier;
+    property public final String text;
+    property public final String? type;
   }
 
   public static final class PrimaryManeuver.Builder {
@@ -457,6 +488,8 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public byte[]? getShieldIcon();
     method public String getText();
     method public com.mapbox.navigation.ui.base.model.maneuver.RoadShieldComponentNode.Builder toBuilder();
+    property public final byte[]? shieldIcon;
+    property public final String text;
   }
 
   public static final class RoadShieldComponentNode.Builder {
@@ -474,6 +507,12 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public String getText();
     method public String? getType();
     method public com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver.Builder toBuilder();
+    property public final java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Component> componentList;
+    property public final Double? degrees;
+    property public final String? drivingSide;
+    property public final String? modifier;
+    property public final String text;
+    property public final String? type;
   }
 
   public static final class SecondaryManeuver.Builder {
@@ -495,6 +534,12 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public String getText();
     method public String? getType();
     method public com.mapbox.navigation.ui.base.model.maneuver.SubManeuver.Builder toBuilder();
+    property public final java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Component> componentList;
+    property public final Double? degrees;
+    property public final String? drivingSide;
+    property public final String? modifier;
+    property public final String text;
+    property public final String? type;
   }
 
   public static final class SubManeuver.Builder {
@@ -513,6 +558,9 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public Integer? getAbbrPriority();
     method public String getText();
     method public com.mapbox.navigation.ui.base.model.maneuver.TextComponentNode.Builder toBuilder();
+    property public final String? abbr;
+    property public final Integer? abbrPriority;
+    property public final String text;
   }
 
   public static final class TextComponentNode.Builder {
@@ -528,6 +576,7 @@ package com.mapbox.navigation.ui.base.model.maneuver {
     method public double component1();
     method public com.mapbox.navigation.ui.base.model.maneuver.TotalManeuverDistance copy(double totalDistance);
     method public double getTotalDistance();
+    property public final double totalDistance;
   }
 
 }
@@ -545,7 +594,7 @@ package com.mapbox.navigation.ui.base.model.route {
     field public static final String ARROW_HEAD_LAYER_ID = "mapbox-navigation-arrow-head-layer";
     field public static final String ARROW_SHAFT_CASING_LINE_LAYER_ID = "mapbox-navigation-arrow-shaft-casing-layer";
     field public static final String ARROW_SHAFT_LINE_LAYER_ID = "mapbox-navigation-arrow-shaft-layer";
-    field public static final com.mapbox.navigation.ui.base.model.route.RouteLayerConstants! INSTANCE;
+    field public static final com.mapbox.navigation.ui.base.model.route.RouteLayerConstants INSTANCE;
     field public static final String PRIMARY_ROUTE_CASING_LAYER_ID = "mapbox-navigation-route-casing-layer";
     field public static final String PRIMARY_ROUTE_LAYER_ID = "mapbox-navigation-route-layer";
     field public static final String PRIMARY_ROUTE_TRAFFIC_LAYER_ID = "mapbox-navigation-route-traffic-layer";
@@ -560,11 +609,11 @@ package com.mapbox.navigation.ui.base.model.signboard {
   }
 
   public static final class SignboardState.Hide extends com.mapbox.navigation.ui.base.model.signboard.SignboardState {
-    field public static final com.mapbox.navigation.ui.base.model.signboard.SignboardState.Hide! INSTANCE;
+    field public static final com.mapbox.navigation.ui.base.model.signboard.SignboardState.Hide INSTANCE;
   }
 
   public static final class SignboardState.Show extends com.mapbox.navigation.ui.base.model.signboard.SignboardState {
-    field public static final com.mapbox.navigation.ui.base.model.signboard.SignboardState.Show! INSTANCE;
+    field public static final com.mapbox.navigation.ui.base.model.signboard.SignboardState.Show INSTANCE;
   }
 
   public abstract static sealed class SignboardState.Signboard extends com.mapbox.navigation.ui.base.model.signboard.SignboardState {
@@ -578,10 +627,12 @@ package com.mapbox.navigation.ui.base.model.signboard {
     method public com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Available copy(int desiredSignboardWidth, byte[] bytes);
     method public byte[] getBytes();
     method public int getDesiredSignboardWidth();
+    property public final byte[] bytes;
+    property public final int desiredSignboardWidth;
   }
 
   public static final class SignboardState.Signboard.Empty extends com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard {
-    field public static final com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Empty! INSTANCE;
+    field public static final com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Empty INSTANCE;
   }
 
   public static final class SignboardState.Signboard.Error extends com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard {
@@ -589,6 +640,7 @@ package com.mapbox.navigation.ui.base.model.signboard {
     method public String? component1();
     method public com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Error copy(String? exception);
     method public String? getException();
+    property public final String? exception;
   }
 
 }
@@ -606,6 +658,7 @@ package com.mapbox.navigation.ui.base.model.snapshotter {
     method public String? component1();
     method public com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure.SnapshotEmpty copy(String? exception);
     method public String? getException();
+    property public final String? exception;
   }
 
   public static final class SnapshotState.SnapshotFailure.SnapshotError extends com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure {
@@ -613,10 +666,11 @@ package com.mapbox.navigation.ui.base.model.snapshotter {
     method public String? component1();
     method public com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure.SnapshotError copy(String? exception);
     method public String? getException();
+    property public final String? exception;
   }
 
   public static final class SnapshotState.SnapshotFailure.SnapshotUnavailable extends com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure {
-    field public static final com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure.SnapshotUnavailable! INSTANCE;
+    field public static final com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure.SnapshotUnavailable INSTANCE;
   }
 
   public static final class SnapshotState.SnapshotReady extends com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState {
@@ -624,6 +678,7 @@ package com.mapbox.navigation.ui.base.model.snapshotter {
     method public android.graphics.Bitmap component1();
     method public com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotReady copy(android.graphics.Bitmap bitmap);
     method public android.graphics.Bitmap getBitmap();
+    property public final android.graphics.Bitmap bitmap;
   }
 
 }
@@ -636,7 +691,7 @@ package com.mapbox.navigation.ui.base.model.tripprogress {
   }
 
   public final class EstimatedTimeToArrivalFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,android.text.SpannableString> {
-    ctor public EstimatedTimeToArrivalFormatter(android.content.Context context, @com.mapbox.navigation.base.TimeFormat.Type int timeFormatType);
+    ctor public EstimatedTimeToArrivalFormatter(android.content.Context context, @com.mapbox.navigation.base.TimeFormat.Type int timeFormatType = -1);
     method public android.text.SpannableString format(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate update);
   }
 
@@ -646,10 +701,11 @@ package com.mapbox.navigation.ui.base.model.tripprogress {
   }
 
   public class TimeRemainingFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate,android.text.SpannableString> {
-    ctor public TimeRemainingFormatter(android.content.Context context, java.util.Locale? locale);
+    ctor public TimeRemainingFormatter(android.content.Context context, java.util.Locale? locale = null);
     method public android.text.SpannableString format(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate update);
     method public final java.util.Locale? getLocale();
     method public final void setLocale(java.util.Locale? p);
+    property public final java.util.Locale? locale;
   }
 
   public abstract sealed class TripProgressState implements com.mapbox.navigation.ui.base.MapboxState {
@@ -659,6 +715,8 @@ package com.mapbox.navigation.ui.base.model.tripprogress {
     ctor public TripProgressState.Update(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate tripProgressUpdate, com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter formatter);
     method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter getFormatter();
     method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate getTripProgressUpdate();
+    property public final com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter formatter;
+    property public final com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate tripProgressUpdate;
   }
 
   public final class TripProgressUpdate {
@@ -669,6 +727,12 @@ package com.mapbox.navigation.ui.base.model.tripprogress {
     method public double getPercentRouteTraveled();
     method public double getTotalTimeRemaining();
     method public int getTrafficCongestionColor();
+    property public final double currentLegTimeRemaining;
+    property public final double distanceRemaining;
+    property public final long estimatedTimeToArrival;
+    property public final double percentRouteTraveled;
+    property public final double totalTimeRemaining;
+    property public final int trafficCongestionColor;
   }
 
   public final class TripProgressUpdateFormatter {
@@ -701,6 +765,9 @@ package com.mapbox.navigation.ui.base.model.voice {
     method public String getAnnouncement();
     method public java.io.File? getFile();
     method public String? getSsmlAnnouncement();
+    property public final String announcement;
+    property public final java.io.File? file;
+    property public final String? ssmlAnnouncement;
   }
 
   public abstract sealed class SpeechState implements com.mapbox.navigation.ui.base.MapboxState {
@@ -711,6 +778,7 @@ package com.mapbox.navigation.ui.base.model.voice {
     method public com.mapbox.navigation.ui.base.model.voice.Announcement component1();
     method public com.mapbox.navigation.ui.base.model.voice.SpeechState.DonePlaying copy(com.mapbox.navigation.ui.base.model.voice.Announcement announcement);
     method public com.mapbox.navigation.ui.base.model.voice.Announcement getAnnouncement();
+    property public final com.mapbox.navigation.ui.base.model.voice.Announcement announcement;
   }
 
   public static final class SpeechState.ReadyToPlay extends com.mapbox.navigation.ui.base.model.voice.SpeechState {
@@ -718,6 +786,7 @@ package com.mapbox.navigation.ui.base.model.voice {
     method public com.mapbox.navigation.ui.base.model.voice.Announcement component1();
     method public com.mapbox.navigation.ui.base.model.voice.SpeechState.ReadyToPlay copy(com.mapbox.navigation.ui.base.model.voice.Announcement announcement);
     method public com.mapbox.navigation.ui.base.model.voice.Announcement getAnnouncement();
+    property public final com.mapbox.navigation.ui.base.model.voice.Announcement announcement;
   }
 
   public abstract static sealed class SpeechState.Speech extends com.mapbox.navigation.ui.base.model.voice.SpeechState {
@@ -728,6 +797,7 @@ package com.mapbox.navigation.ui.base.model.voice {
     method public com.mapbox.navigation.ui.base.model.voice.Announcement component1();
     method public com.mapbox.navigation.ui.base.model.voice.SpeechState.Speech.Available copy(com.mapbox.navigation.ui.base.model.voice.Announcement announcement);
     method public com.mapbox.navigation.ui.base.model.voice.Announcement getAnnouncement();
+    property public final com.mapbox.navigation.ui.base.model.voice.Announcement announcement;
   }
 
   public static final class SpeechState.Speech.Error extends com.mapbox.navigation.ui.base.model.voice.SpeechState.Speech {
@@ -735,13 +805,15 @@ package com.mapbox.navigation.ui.base.model.voice {
     method public String component1();
     method public com.mapbox.navigation.ui.base.model.voice.SpeechState.Speech.Error copy(String exception);
     method public String getException();
+    property public final String exception;
   }
 
   public static final class SpeechState.Volume extends com.mapbox.navigation.ui.base.model.voice.SpeechState {
-    ctor public SpeechState.Volume(@FloatRange(from=null, to=null) float level);
+    ctor public SpeechState.Volume(@FloatRange(from=0.0, to=1.0) float level);
     method public float component1();
     method public com.mapbox.navigation.ui.base.model.voice.SpeechState.Volume copy(float level);
     method public float getLevel();
+    property public final float level;
   }
 
 }

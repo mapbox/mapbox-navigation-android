@@ -2,7 +2,7 @@
 package com.mapbox.navigation.ui.maps {
 
   public final class PredictiveCacheController {
-    ctor public PredictiveCacheController(com.mapbox.navigation.core.MapboxNavigation navigation, com.mapbox.navigation.ui.maps.PredictiveCacheControllerErrorHandler? predictiveCacheControllerErrorHandler);
+    ctor public PredictiveCacheController(com.mapbox.navigation.core.MapboxNavigation navigation, com.mapbox.navigation.ui.maps.PredictiveCacheControllerErrorHandler? predictiveCacheControllerErrorHandler = null);
     ctor public PredictiveCacheController(com.mapbox.navigation.core.MapboxNavigation navigation);
     method public void onDestroy();
     method public void removeMapInstance();
@@ -21,7 +21,7 @@ package com.mapbox.navigation.ui.maps {
 package com.mapbox.navigation.ui.maps.camera {
 
   @UiThread public final class NavigationCamera {
-    ctor public NavigationCamera(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin, com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource viewportDataSource, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition stateTransition);
+    ctor public NavigationCamera(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin, com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource viewportDataSource, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition stateTransition = MapboxNavigationCameraStateTransition(mapboxMap, cameraPlugin));
     method public com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState getState();
     method public void registerNavigationCameraStateChangeObserver(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver navigationCameraStateChangedObserver);
     method public void requestNavigationCameraToFollowing(android.animation.Animator.AnimatorListener? animatorListener = null);
@@ -30,7 +30,7 @@ package com.mapbox.navigation.ui.maps.camera {
     method public void resetFrame();
     method public void unregisterNavigationCameraStateChangeObserver(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver navigationCameraStateChangedObserver);
     property public final com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state;
-    field public static final com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion! Companion;
+    field public static final com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion Companion;
     field public static final String NAVIGATION_CAMERA_OWNER = "NAVIGATION_CAMERA_OWNER";
   }
 
@@ -113,6 +113,9 @@ package com.mapbox.navigation.ui.maps.camera.data {
     method public double getMaxZoom();
     method public double getMinFollowingZoom();
     method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions.Builder toBuilder();
+    property public final double maxFollowingPitch;
+    property public final double maxZoom;
+    property public final double minFollowingZoom;
   }
 
   public static final class MapboxNavigationViewportDataSourceOptions.Builder {
@@ -130,6 +133,8 @@ package com.mapbox.navigation.ui.maps.camera.data {
     method public com.mapbox.navigation.ui.maps.camera.data.ViewportData copy(com.mapbox.maps.CameraOptions cameraForFollowing, com.mapbox.maps.CameraOptions cameraForOverview);
     method public com.mapbox.maps.CameraOptions getCameraForFollowing();
     method public com.mapbox.maps.CameraOptions getCameraForOverview();
+    property public final com.mapbox.maps.CameraOptions cameraForFollowing;
+    property public final com.mapbox.maps.CameraOptions cameraForOverview;
   }
 
   public interface ViewportDataSource {
@@ -159,7 +164,7 @@ package com.mapbox.navigation.ui.maps.camera.lifecycle {
   }
 
   public final class NavigationScaleGestureHandler implements com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener {
-    ctor public NavigationScaleGestureHandler(android.content.Context context, com.mapbox.navigation.ui.maps.camera.NavigationCamera navigationCamera, com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.gestures.GesturesPlugin gesturesPlugin, com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin locationPlugin, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener? scaleActionListener, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions options);
+    ctor public NavigationScaleGestureHandler(android.content.Context context, com.mapbox.navigation.ui.maps.camera.NavigationCamera navigationCamera, com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.gestures.GesturesPlugin gesturesPlugin, com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin locationPlugin, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener? scaleActionListener = null, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions options = NavigationScaleGestureHandlerOptions.<init>(context).build());
     method public void cleanup();
     method public com.mapbox.android.gestures.AndroidGesturesManager getCustomGesturesManager();
     method public com.mapbox.android.gestures.AndroidGesturesManager getInitialGesturesManager();
@@ -179,6 +184,9 @@ package com.mapbox.navigation.ui.maps.camera.lifecycle {
     method public float getFollowingMultiFingerMoveThreshold();
     method public android.graphics.RectF? getFollowingMultiFingerProtectedMoveArea();
     method public com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions.Builder toBuilder();
+    property public final float followingInitialMoveThreshold;
+    property public final float followingMultiFingerMoveThreshold;
+    property public final android.graphics.RectF? followingMultiFingerProtectedMoveArea;
   }
 
   public static final class NavigationScaleGestureHandlerOptions.Builder {
@@ -210,7 +218,7 @@ package com.mapbox.navigation.ui.maps.camera.state {
 package com.mapbox.navigation.ui.maps.camera.transition {
 
   public final class MapboxNavigationCameraStateTransition implements com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition {
-    ctor public MapboxNavigationCameraStateTransition(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransition navigationCameraTransition);
+    ctor public MapboxNavigationCameraStateTransition(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransition navigationCameraTransition = MapboxNavigationCameraTransition(mapboxMap, cameraPlugin));
     method public android.animation.AnimatorSet transitionToFollowing(com.mapbox.maps.CameraOptions cameraOptions);
     method public android.animation.AnimatorSet transitionToOverview(com.mapbox.maps.CameraOptions cameraOptions);
     method public android.animation.AnimatorSet updateFrameForFollowing(com.mapbox.maps.CameraOptions cameraOptions);
@@ -257,7 +265,7 @@ package com.mapbox.navigation.ui.maps.internal.route.line {
     method @ColorInt public int getRouteColorForCongestion(String congestionValue, boolean isPrimaryRoute, com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources routeLineColorResources);
     method public kotlin.jvm.functions.Function0<java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData>> getRouteFeatureDataProvider(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> directionsRoutes);
     method public kotlin.jvm.functions.Function0<java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData>> getRouteLineFeatureDataProvider(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLine> directionsRoutes);
-    field public static final com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils! INSTANCE;
+    field public static final com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils INSTANCE;
   }
 
 }
@@ -306,6 +314,12 @@ package com.mapbox.navigation.ui.maps.route.arrow.model {
     method public android.graphics.drawable.Drawable getArrowHeadIconBorder();
     method public double getTolerance();
     method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder toBuilder(android.content.Context context);
+    property public final String aboveLayerId;
+    property public final int arrowBorderColor;
+    property public final int arrowColor;
+    property public final android.graphics.drawable.Drawable arrowHeadIcon;
+    property public final android.graphics.drawable.Drawable arrowHeadIconBorder;
+    property public final double tolerance;
   }
 
   public static final class RouteArrowOptions.Builder {
@@ -370,6 +384,7 @@ package com.mapbox.navigation.ui.maps.route.line.api {
     method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.line.model.RouteLineState.UpdateLayerVisibilityState state);
     method public void setOptions(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions p);
     method @Deprecated public void showOriginAndDestinationPoints(com.mapbox.maps.Style style);
+    property public final com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions options;
   }
 
 }
@@ -383,6 +398,11 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public String? getRouteLineBelowLayerId();
     method public double getTolerance();
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder toBuilder(android.content.Context context);
+    property public final android.graphics.drawable.Drawable destinationIcon;
+    property public final android.graphics.drawable.Drawable originIcon;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources resourceProvider;
+    property public final String? routeLineBelowLayerId;
+    property public final double tolerance;
   }
 
   public static final class MapboxRouteLineOptions.Builder {
@@ -403,6 +423,9 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.geojson.FeatureCollection getFeatureCollection();
     method public com.mapbox.geojson.LineString getLineString();
     method public com.mapbox.api.directions.v5.models.DirectionsRoute getRoute();
+    property public final com.mapbox.geojson.FeatureCollection featureCollection;
+    property public final com.mapbox.geojson.LineString lineString;
+    property public final com.mapbox.api.directions.v5.models.DirectionsRoute route;
   }
 
   public final class RouteLine {
@@ -412,6 +435,8 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLine copy(com.mapbox.api.directions.v5.models.DirectionsRoute route, String? identifier);
     method public String? getIdentifier();
     method public com.mapbox.api.directions.v5.models.DirectionsRoute getRoute();
+    property public final String? identifier;
+    property public final com.mapbox.api.directions.v5.models.DirectionsRoute route;
   }
 
   public final class RouteLineColorResources {
@@ -432,6 +457,22 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public int getRouteSevereColor();
     method public int getRouteUnknownTrafficColor();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder toBuilder();
+    property public final int alternativeRouteCasingColor;
+    property public final int alternativeRouteDefaultColor;
+    property public final int alternativeRouteHeavyColor;
+    property public final int alternativeRouteLowColor;
+    property public final int alternativeRouteModerateColor;
+    property public final int alternativeRouteSevereColor;
+    property public final int alternativeRouteUnknownTrafficColor;
+    property public final int routeCasingColor;
+    property public final int routeDefaultColor;
+    property public final int routeHeavyColor;
+    property public final int routeLineTraveledCasingColor;
+    property public final int routeLineTraveledColor;
+    property public final int routeLowCongestionColor;
+    property public final int routeModerateColor;
+    property public final int routeSevereColor;
+    property public final int routeUnknownTrafficColor;
   }
 
   public static final class RouteLineColorResources.Builder {
@@ -462,6 +503,8 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex copy(com.mapbox.geojson.Point point, double distanceRemaining);
     method public double getDistanceRemaining();
     method public com.mapbox.geojson.Point getPoint();
+    property public final double distanceRemaining;
+    property public final com.mapbox.geojson.Point point;
   }
 
   public final class RouteLineExpressionData {
@@ -471,6 +514,8 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData copy(double offset, int segmentColor);
     method public double getOffset();
     method public int getSegmentColor();
+    property public final double offset;
+    property public final int segmentColor;
   }
 
   public final class RouteLineGranularDistances {
@@ -480,6 +525,8 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances copy(double distance, android.util.SparseArray<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex> distancesArray);
     method public double getDistance();
     method public android.util.SparseArray<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex> getDistancesArray();
+    property public final double distance;
+    property public final android.util.SparseArray<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex> distancesArray;
   }
 
   public final class RouteLineResources {
@@ -492,6 +539,14 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteTrafficLineScaleExpression();
     method public java.util.List<java.lang.String> getTrafficBackfillRoadClasses();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder toBuilder();
+    property public final int destinationWaypointIcon;
+    property public final int originWaypointIcon;
+    property public final boolean roundedLineCap;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeCasingLineScaleExpression;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources routeLineColorResources;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeLineScaleExpression;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeTrafficLineScaleExpression;
+    property public final java.util.List<java.lang.String> trafficBackfillRoadClasses;
   }
 
   public static final class RouteLineResources.Builder {
@@ -516,6 +571,9 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public float getScale();
     method public float getScaleMultiplier();
     method public float getScaleStop();
+    property public final float scale;
+    property public final float scaleMultiplier;
+    property public final float scaleStop;
   }
 
   public abstract sealed class RouteLineState implements com.mapbox.navigation.ui.base.MapboxState {
@@ -566,6 +624,8 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RoutePoints copy(java.util.List<? extends java.util.List<? extends java.util.List<com.mapbox.geojson.Point>>> nestedList, java.util.List<com.mapbox.geojson.Point> flatList);
     method public java.util.List<com.mapbox.geojson.Point> getFlatList();
     method public java.util.List<java.util.List<java.util.List<com.mapbox.geojson.Point>>> getNestedList();
+    property public final java.util.List<com.mapbox.geojson.Point> flatList;
+    property public final java.util.List<java.util.List<java.util.List<com.mapbox.geojson.Point>>> nestedList;
   }
 
   public final class RouteStyleDescriptor {
@@ -577,6 +637,9 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public int getLineCasingColorResourceId();
     method public int getLineColorResourceId();
     method public String getRouteIdentifier();
+    property public final int lineCasingColorResourceId;
+    property public final int lineColorResourceId;
+    property public final String routeIdentifier;
   }
 
   public enum VanishingPointState {
@@ -593,7 +656,7 @@ package com.mapbox.navigation.ui.maps.signboard.api {
     ctor public MapboxSignboardApi(String accessToken);
     method public void cancelAll();
     method public void generateSignboard(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.api.signboard.SignboardReadyCallback callback);
-    field public static final com.mapbox.navigation.ui.maps.signboard.api.MapboxSignboardApi.Companion! Companion;
+    field public static final com.mapbox.navigation.ui.maps.signboard.api.MapboxSignboardApi.Companion Companion;
   }
 
   public static final class MapboxSignboardApi.Companion {
@@ -604,11 +667,10 @@ package com.mapbox.navigation.ui.maps.signboard.api {
 package com.mapbox.navigation.ui.maps.signboard.view {
 
   public final class MapboxSignboardView extends androidx.appcompat.widget.AppCompatImageView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.signboard.SignboardState> {
-    ctor public MapboxSignboardView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    ctor public MapboxSignboardView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxSignboardView(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
+    ctor public MapboxSignboardView(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxSignboardView(android.content.Context context);
     method public void render(com.mapbox.navigation.ui.base.model.signboard.SignboardState state);
-    field @Deprecated public static final com.mapbox.navigation.ui.maps.signboard.view.MapboxSignboardView.Companion! Companion;
   }
 
 }
@@ -620,6 +682,7 @@ package com.mapbox.navigation.ui.maps.snapshotter.api {
     method public void cancel();
     method public void generateSnapshot(com.mapbox.navigation.base.trip.model.RouteProgress progress, com.mapbox.navigation.ui.base.api.snapshotter.SnapshotReadyCallback callback);
     method public android.content.Context getContext();
+    property public final android.content.Context context;
   }
 
 }
@@ -633,6 +696,11 @@ package com.mapbox.navigation.ui.maps.snapshotter.model {
     method public com.mapbox.maps.Size getSize();
     method public String getStyleUri();
     method public com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions.Builder toBuilder();
+    property public final android.graphics.Bitmap.Config bitmapConfig;
+    property public final float density;
+    property public final com.mapbox.maps.EdgeInsets edgeInsets;
+    property public final com.mapbox.maps.Size size;
+    property public final String styleUri;
   }
 
   public static final class MapboxSnapshotterOptions.Builder {
@@ -650,8 +718,8 @@ package com.mapbox.navigation.ui.maps.snapshotter.model {
 package com.mapbox.navigation.ui.maps.snapshotter.view {
 
   public final class MapboxSnapshotView extends androidx.appcompat.widget.AppCompatImageView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState> {
-    ctor public MapboxSnapshotView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    ctor public MapboxSnapshotView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxSnapshotView(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
+    ctor public MapboxSnapshotView(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxSnapshotView(android.content.Context context);
     method public void render(com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState state);
   }

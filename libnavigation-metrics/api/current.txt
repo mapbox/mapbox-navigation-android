@@ -8,7 +8,7 @@ package com.mapbox.navigation.metrics {
     method public void removeObserver();
     method public void setMetricsObserver(com.mapbox.navigation.base.metrics.MetricsObserver metricsObserver);
     method public static void toggleLogging(boolean isDebugLoggingEnabled);
-    field public static final com.mapbox.navigation.metrics.MapboxMetricsReporter! INSTANCE;
+    field public static final com.mapbox.navigation.metrics.MapboxMetricsReporter INSTANCE;
   }
 
 }
