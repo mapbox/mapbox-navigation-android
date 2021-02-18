@@ -3,6 +3,9 @@ package com.mapbox.navigation.navigator.internal
 import android.location.Location
 import android.os.SystemClock
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.gson.GeometryGeoJson
@@ -36,6 +39,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private const val BUFFER_DILATION: Short = 1
     private const val PRIMARY_ROUTE_INDEX = 0
     private const val SINGLE_THREAD = 1
+    private const val TAG = "MapboxNativeNavigatorImpl"
 
     private val NavigatorDispatcher: CoroutineDispatcher =
         Executors.newFixedThreadPool(SINGLE_THREAD).asCoroutineDispatcher()
@@ -43,6 +47,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private var route: DirectionsRoute? = null
     private var routeBufferGeoJson: Geometry? = null
     private val navigatorMapper = NavigatorMapper()
+    private var logger: Logger? = null
 
     // Route following
 
@@ -53,7 +58,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override fun create(
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
-        tilesConfig: TilesConfig
+        tilesConfig: TilesConfig,
+        logger: Logger
     ): MapboxNativeNavigator {
         navigator = NavigatorLoader.createNavigator(
             deviceProfile,
@@ -62,6 +68,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         )
         route = null
         routeBufferGeoJson = null
+        this.logger = logger
         return this
     }
 
@@ -170,14 +177,24 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      *
      * @return True if the annotations could be updated false if not (wrong number of annotations)
      */
-    override suspend fun updateAnnotations(
-        legAnnotationJson: String,
-        legIndex: Int
-    ): Boolean = withContext(NavigatorDispatcher) {
-        navigator!!.updateAnnotations(
-            legAnnotationJson, PRIMARY_ROUTE_INDEX, legIndex
-        )
-    }
+    override suspend fun updateAnnotations(route: DirectionsRoute): Unit =
+        withContext(NavigatorDispatcher) {
+            MapboxNativeNavigatorImpl.route = route
+            route.legs()?.forEachIndexed { index, routeLeg ->
+                routeLeg.annotation()?.toJson()?.let { annotations ->
+                    navigator!!.updateAnnotations(annotations, PRIMARY_ROUTE_INDEX, index)
+                        .let { success ->
+                            logger?.d(
+                                tag = Tag(TAG),
+                                msg = Message(
+                                    "Annotation updated successfully=$success, for leg " +
+                                        "index $index, annotations: [$annotations]"
+                                )
+                            )
+                        }
+                }
+            }
+        }
 
     /**
      * Gets the banner at a specific step index in the route. If there is no

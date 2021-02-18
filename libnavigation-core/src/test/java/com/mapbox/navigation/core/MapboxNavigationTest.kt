@@ -142,7 +142,7 @@ class MapboxNavigationTest {
         mockDirectionSession()
         mockNavigationSession()
 
-        every { navigator.create(any(), any(), any()) } returns navigator
+        every { navigator.create(any(), any(), any(), any()) } returns navigator
 
         mapboxNavigation = MapboxNavigation(navigationOptions)
 
@@ -580,7 +580,7 @@ class MapboxNavigationTest {
 
     private fun mockNativeNavigator() {
         every {
-            NavigationComponentProvider.createNativeNavigator(any(), any(), any())
+            NavigationComponentProvider.createNativeNavigator(any(), any(), any(), any())
         } returns navigator
     }
 
