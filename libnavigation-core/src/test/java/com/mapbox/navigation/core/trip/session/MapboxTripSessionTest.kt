@@ -18,6 +18,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.alert.RouteAlert
 import com.mapbox.navigation.core.internal.utils.isSameRoute
+import com.mapbox.navigation.core.internal.utils.isSameUuid
 import com.mapbox.navigation.core.navigator.getMapMatcherResult
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -109,12 +110,14 @@ class MapboxTripSessionTest {
         coEvery { navigator.getStatus(any()) } returns tripStatus
         coEvery { navigator.updateLocation(any()) } returns false
         coEvery { navigator.setRoute(any()) } returns null
+        coEvery { navigator.updateAnnotations(any()) } returns Unit
         every { tripStatus.enhancedLocation } returns enhancedLocation
         every { tripStatus.keyPoints } returns keyPoints
         every { tripStatus.offRoute } returns false
         every { tripStatus.getMapMatcherResult() } returns mapMatcherResult
         every { routeProgress.bannerInstructions } returns null
         every { routeProgress.voiceInstructions } returns null
+        every { route.isSameUuid(any()) } returns false
         every { route.isSameRoute(any()) } returns false
         every { route.routeOptions()?.requestUuid() } returns "uuid"
 
@@ -562,6 +565,40 @@ class MapboxTripSessionTest {
         tripSession.route = route
 
         coVerify(exactly = 1) { navigator.setRoute(route) }
+        coVerify(exactly = 1) { navigator.getStatus(any()) }
+        coVerifyOrder {
+            navigator.setRoute(route)
+            navigator.getStatus(any())
+        }
+    }
+
+    @Test
+    fun checkNavigatorUpdateAnnotationsWhenRouteIsTheSame() {
+        tripSession.start()
+        every { route.isSameRoute(any()) } returns true
+        every { route.isSameUuid(any()) } returns true
+
+        tripSession.route = route
+
+        coVerify(exactly = 1) { navigator.updateAnnotations(route) }
+        coVerify(exactly = 0) { navigator.setRoute(any()) }
+        coVerify(exactly = 1) { navigator.getStatus(any()) }
+        coVerifyOrder {
+            navigator.updateAnnotations(route)
+            navigator.getStatus(any())
+        }
+    }
+
+    @Test
+    fun checkNavigatorUpdateAnnotationsWhenRouteUuidSameButRouteIsAlternative() {
+        tripSession.start()
+        every { route.isSameRoute(any()) } returns false
+        every { route.isSameUuid(any()) } returns true
+
+        tripSession.route = route
+
+        coVerify(exactly = 1) { navigator.setRoute(route) }
+        coVerify(exactly = 0) { navigator.updateAnnotations(any()) }
         coVerify(exactly = 1) { navigator.getStatus(any()) }
         coVerifyOrder {
             navigator.setRoute(route)
