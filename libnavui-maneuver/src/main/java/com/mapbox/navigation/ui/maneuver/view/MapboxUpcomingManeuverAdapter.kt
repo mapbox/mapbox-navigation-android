@@ -66,9 +66,11 @@ class MapboxUpcomingManeuverAdapter(
      */
     fun addUpcomingManeuvers(upcomingManeuvers: List<Maneuver>) {
         if (upcomingManeuvers.isNotEmpty()) {
+            val currentSize = this.upcomingManeuverList.size
             this.upcomingManeuverList.clear()
             this.upcomingManeuverList.addAll(upcomingManeuvers)
-            notifyItemRangeInserted(0, upcomingManeuverList.size)
+            notifyItemRangeRemoved(0, currentSize)
+            notifyItemRangeInserted(0, upcomingManeuvers.size)
         }
     }
 
@@ -77,8 +79,10 @@ class MapboxUpcomingManeuverAdapter(
      * @param maneuverToRemove Maneuver
      */
     fun removeManeuver(maneuverToRemove: Maneuver) {
-        if (this.upcomingManeuverList.contains(maneuverToRemove)) {
-            val index = this.upcomingManeuverList.indexOf(maneuverToRemove)
+        val index = this.upcomingManeuverList.indexOfFirst {
+            it.primary.text == maneuverToRemove.primary.text
+        }
+        if (index != -1) {
             this.upcomingManeuverList.removeAt(index)
             notifyItemRemoved(index)
         }

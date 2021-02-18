@@ -44,7 +44,7 @@ class MapboxUpcomingManeuverAdapterTest {
 
     @Test
     fun `add upcoming maneuvers query item count`() {
-        val upcomingManeuverList = getUpcomingManeuver()
+        val upcomingManeuverList = getUpcomingManeuver("Besco Drive")
         val adapter = MapboxUpcomingManeuverAdapter(ctx)
         val expected = upcomingManeuverList.size
 
@@ -55,8 +55,35 @@ class MapboxUpcomingManeuverAdapterTest {
     }
 
     @Test
+    fun `remove upcoming maneuver success query item count`() {
+        val upcomingManeuverList = getUpcomingManeuver("Besco Drive")
+        val adapter = MapboxUpcomingManeuverAdapter(ctx)
+        val expected = upcomingManeuverList.size - 1
+
+        adapter.addUpcomingManeuvers(upcomingManeuverList)
+        adapter.removeManeuver(getUpcomingManeuver("Besco Drive")[0])
+        val actual = adapter.itemCount
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `remove upcoming maneuver failure query item count`() {
+        val upcomingManeuverList = getUpcomingManeuver("Besco Drive")
+        val maneuverToRemove = getUpcomingManeuver("Test Street")[0]
+        val adapter = MapboxUpcomingManeuverAdapter(ctx)
+        val expected = upcomingManeuverList.size
+
+        adapter.addUpcomingManeuvers(upcomingManeuverList)
+        adapter.removeManeuver(maneuverToRemove)
+        val actual = adapter.itemCount
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun `add lanes query primary maneuver text`() {
-        val upcomingManeuverList = getUpcomingManeuver()
+        val upcomingManeuverList = getUpcomingManeuver("Besco Drive")
         val adapter = MapboxUpcomingManeuverAdapter(ctx)
         val rvParent = RecyclerView(ctx)
         rvParent.layoutManager = LinearLayoutManager(ctx)
@@ -73,7 +100,7 @@ class MapboxUpcomingManeuverAdapterTest {
 
     @Test
     fun `add lanes query secondary maneuver text`() {
-        val upcomingManeuverList = getUpcomingManeuver()
+        val upcomingManeuverList = getUpcomingManeuver("Besco Drive")
         val adapter = MapboxUpcomingManeuverAdapter(ctx)
         val rvParent = RecyclerView(ctx)
         rvParent.layoutManager = LinearLayoutManager(ctx)
@@ -93,7 +120,7 @@ class MapboxUpcomingManeuverAdapterTest {
         val distanceFormatter = MapboxDistanceFormatter(
             DistanceFormatterOptions.Builder(ctx).build()
         )
-        val upcomingManeuverList = getUpcomingManeuver()
+        val upcomingManeuverList = getUpcomingManeuver("Besco Drive")
         val adapter = MapboxUpcomingManeuverAdapter(ctx)
         val rvParent = RecyclerView(ctx)
         rvParent.layoutManager = LinearLayoutManager(ctx)
@@ -110,12 +137,12 @@ class MapboxUpcomingManeuverAdapterTest {
         assertEquals(expected.toString(), actual.toString())
     }
 
-    private fun getUpcomingManeuver(): List<Maneuver> {
+    private fun getUpcomingManeuver(primaryText: String): List<Maneuver> {
         val totalStepDistance = mockk<TotalManeuverDistance>() {
             every { totalDistance } returns 32.0
         }
         val primaryManeuver = mockk<PrimaryManeuver> {
-            every { text } returns "Besco Drive"
+            every { text } returns primaryText
             every { type } returns StepManeuver.TURN
             every { degrees } returns null
             every { modifier } returns ManeuverModifier.LEFT
@@ -125,7 +152,7 @@ class MapboxUpcomingManeuverAdapterTest {
                     BannerComponents.TEXT,
                     TextComponentNode
                         .Builder()
-                        .text("Besco Drive")
+                        .text(primaryText)
                         .abbr(null)
                         .abbrPriority(null)
                         .build()
