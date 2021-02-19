@@ -24,12 +24,14 @@ class MapboxVoiceInstructionsPlayer(
 ) : VoiceInstructionsPlayer {
 
     private val playCallbackQueue: Queue<PlayCallback> = ConcurrentLinkedQueue()
-    // for testing
-    internal var filePlayer: VoiceInstructionsFilePlayer =
-        VoiceInstructionsFilePlayer(context, accessToken, language)
-    // for testing
-    internal var textPlayer: VoiceInstructionsTextPlayer =
-        VoiceInstructionsTextPlayer(context, language)
+    private val filePlayer: VoiceInstructionsFilePlayer =
+        VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
+            context,
+            accessToken,
+            language
+        )
+    private val textPlayer: VoiceInstructionsTextPlayer =
+        VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(context, language)
     private var localCallback: VoiceInstructionsPlayerCallback =
         object : VoiceInstructionsPlayerCallback {
             override fun onDone(state: SpeechState.DonePlaying) {

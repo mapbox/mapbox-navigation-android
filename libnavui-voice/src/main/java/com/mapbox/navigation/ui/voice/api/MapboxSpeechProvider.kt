@@ -14,7 +14,7 @@ import kotlin.coroutines.suspendCoroutine
 internal class MapboxSpeechProvider(
     private val accessToken: String,
     private val language: String,
-    private val urlSkuTokenProvider: UrlSkuTokenProvider,
+    private val urlSkuTokenProvider: UrlSkuTokenProvider
 ) {
 
     suspend fun enqueueCall(request: VoiceResult.VoiceRequest.Success): VoiceState {
