@@ -2,6 +2,14 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 1.5.0-alpha.2 - February 19, 2021
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Bug fixes and improvements
+- Fixed `RouteProgress#route` which didn't have its congestion annotations updated after a route refresh. [#4031](https://github.com/mapbox/mapbox-navigation-android/pull/4031)
+- Fixed `RouteProgerss#route` which always returned a primary route even if an alternative was selected. [#4031](https://github.com/mapbox/mapbox-navigation-android/pull/4031)
+
 ## Mapbox Navigation SDK 1.5.0-alpha.1 - February 12, 2021
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
