@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.route.RouteRefreshError
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.lang.Exception
 
 internal class RouteRefreshCallbackMapper(
     private val originalRoute: DirectionsRoute,
@@ -34,7 +35,10 @@ internal class RouteRefreshCallbackMapper(
             callback.onError(
                 RouteRefreshError(
                     message = "Failed to read refresh response",
-                    throwable = errorThrowable
+                    throwable = errorThrowable ?: Exception(
+                        "Message=[${response.message()}]; errorBody = [${response.errorBody()}];" +
+                            "refresh route = [$routeAnnotations]"
+                    )
                 )
             )
         }
