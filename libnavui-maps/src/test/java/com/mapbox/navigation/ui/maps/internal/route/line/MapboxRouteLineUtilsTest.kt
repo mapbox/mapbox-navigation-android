@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.bindgen.Value
 import com.mapbox.core.constants.Constants
@@ -12,6 +13,9 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
+import com.mapbox.maps.StylePropertyValue
+import com.mapbox.maps.StylePropertyValueKind
+import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
@@ -510,9 +514,26 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
-    fun getDefaultBelowLayer_whenLayerIdNotFoundReturnsNull() {
+    fun calculateRouteGranularDistances_whenInputNull() {
+        val result = MapboxRouteLineUtils.calculateRouteGranularDistances(listOf())
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getBelowLayerIdToUse() {
         val style = mockk<Style> {
-            every { styleLayers } returns listOf()
+            every { styleLayerExists("foobar") } returns true
+        }
+
+        val result = MapboxRouteLineUtils.getBelowLayerIdToUse("foobar", style)
+
+        assertEquals("foobar", result)
+    }
+
+    @Test
+    fun getBelowLayerIdToUse_whenLayerIdNotFoundReturnsNull() {
+        val style = mockk<Style> {
             every { styleLayerExists("foobar") } returns false
         }
 
@@ -522,30 +543,8 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
-    fun getDefaultBelowLayer_whenLayerIdNotSpecifiedAndSymbolLayerNotFound() {
-        val layer0 = mockk<StyleObjectInfo> {
-            every { id } returns "layer0"
-            every { type } returns "line"
-        }
-        val layer1 = mockk<StyleObjectInfo> {
-            every { id } returns "layer1"
-            every { type } returns "line"
-        }
-        val layer2 = mockk<StyleObjectInfo> {
-            every { id } returns "layer2"
-            every { type } returns "line"
-        }
-        val layer3 = mockk<StyleObjectInfo> {
-            every { id } returns "layer3"
-            every { type } returns "line"
-        }
-        val layer4 = mockk<StyleObjectInfo> {
-            every { id } returns "layer4"
-            every { type } returns "line"
-        }
-        val style = mockk<Style> {
-            every { styleLayers } returns listOf(layer0, layer1, layer2, layer3, layer4)
-        }
+    fun getBelowLayerIdToUse_whenLayerIdNotSpecified() {
+        val style = mockk<Style>()
 
         val result = MapboxRouteLineUtils.getBelowLayerIdToUse(null, style)
 
@@ -963,6 +962,38 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
+    fun calculateRouteLineSegments_whenNoTrafficExpressionData() {
+        val colorResources = RouteLineColorResources.Builder().build()
+        val route = mockk<DirectionsRoute> {
+            every { legs() } returns listOf()
+        }
+
+        val result = MapboxRouteLineUtils.calculateRouteLineSegments(
+            route,
+            listOf(),
+            true,
+            colorResources
+        )
+
+        assertEquals(1, result.size)
+        assertEquals(0.0, result[0].offset, 0.0)
+        assertEquals(colorResources.routeDefaultColor, result[0].segmentColor)
+    }
+
+    @Test
+    fun getRouteColorForCongestionPrimaryRouteCongestionLow() {
+        val resources = RouteLineColorResources.Builder().build()
+
+        val result = MapboxRouteLineUtils.getRouteColorForCongestion(
+            RouteConstants.LOW_CONGESTION_VALUE,
+            true,
+            resources
+        )
+
+        assertEquals(resources.routeLowCongestionColor, result)
+    }
+
+    @Test
     fun getRouteColorForCongestionPrimaryRouteCongestionModerate() {
         val resources = RouteLineColorResources.Builder().build()
 
@@ -1028,6 +1059,20 @@ class MapboxRouteLineUtilsTest {
         )
 
         assertEquals(resources.routeDefaultColor, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionNonPrimaryRouteCongestionLow() {
+        val resources = RouteLineColorResources.Builder().build()
+
+        val result =
+            MapboxRouteLineUtils.getRouteColorForCongestion(
+                RouteConstants.LOW_CONGESTION_VALUE,
+                false,
+                resources
+            )
+
+        assertEquals(resources.alternativeRouteLowColor, result)
     }
 
     @Test
@@ -1097,6 +1142,110 @@ class MapboxRouteLineUtilsTest {
         )
 
         assertEquals(resources.alternativeRouteDefaultColor, result)
+    }
+
+    @Test
+    fun buildWayPointFeatureCollection() {
+        val route = getMultilegRoute()
+
+        val result = MapboxRouteLineUtils.buildWayPointFeatureCollection(route)
+
+        assertEquals(4, result.features()!!.size)
+        assertEquals(
+            Point.fromLngLat(-77.157347, 38.783004),
+            result.features()!![0].geometry() as Point
+        )
+        assertEquals(
+            Point.fromLngLat(-77.167276, 38.775717),
+            result.features()!![1].geometry() as Point
+        )
+        assertEquals(
+            Point.fromLngLat(-77.167276, 38.775717),
+            result.features()!![2].geometry() as Point
+        )
+        assertEquals(
+            Point.fromLngLat(-77.153468, 38.77091),
+            result.features()!![3].geometry() as Point
+        )
+    }
+
+    @Test
+    fun getLayerVisibility() {
+        val layerTypeValue = mockk<Value> {
+            every { contents } returns "line"
+        }
+        val sourceValue = mockk<Value> {
+            every { contents } returns "mapbox-navigation-route-source"
+        }
+        val layerValue = mockk<Value> {
+            every { contents } returns HashMap<String, Value>().also {
+                it["type"] = layerTypeValue
+                it["source"] = sourceValue
+            }
+        }
+        val layerPropertyExpected = mockk<Expected<Value, String>> {
+            every { value.hint(Value::class) } returns layerValue
+        }
+        val stylePropertyValue = mockk<StylePropertyValue> {
+            every { kind } returns StylePropertyValueKind.CONSTANT
+            every { value } returns Value.valueOf("visible")
+        }
+
+        val style = mockk<Style> {
+            every { isFullyLoaded() } returns true
+            every {
+                getStyleLayerProperties("foobar")
+            } returns layerPropertyExpected
+            every {
+                getStyleLayerProperty("foobar", "visibility")
+            } returns stylePropertyValue
+        }
+
+        val result = MapboxRouteLineUtils.getLayerVisibility(style, "foobar")
+
+        assertEquals(Visibility.VISIBLE, result)
+    }
+
+    @Test
+    fun getLayerVisibility_whenStyleNotLoaded() {
+        val style = mockk<Style> {
+            every { isFullyLoaded() } returns false
+        }
+
+        val result = MapboxRouteLineUtils.getLayerVisibility(style, "foobar")
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getLayerVisibility_whenLayerNotFound() {
+        val style = mockk<Style> {
+            every { isFullyLoaded() } returns true
+            every {
+                getStyleLayerProperties("foobar")
+            } returns mockk {
+                every { value } returns null
+                every { error } returns null
+            }
+        }
+
+        val result = MapboxRouteLineUtils.getLayerVisibility(style, "foobar")
+
+        assertNull(result)
+    }
+
+    @Test
+    fun parseRoutePoints() {
+        val route = getMultilegRoute()
+
+        val result = MapboxRouteLineUtils.parseRoutePoints(route)!!
+
+        assertEquals(128, result.flatList.size)
+        assertEquals(15, result.nestedList.flatten().size)
+        assertEquals(result.flatList[1].latitude(), result.flatList[2].latitude(), 0.0)
+        assertEquals(result.flatList[1].longitude(), result.flatList[2].longitude(), 0.0)
+        assertEquals(result.flatList[126].latitude(), result.flatList[127].latitude(), 0.0)
+        assertEquals(result.flatList[126].longitude(), result.flatList[127].longitude(), 0.0)
     }
 
     private fun getMultilegRoute(): DirectionsRoute {

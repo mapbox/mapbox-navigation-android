@@ -377,13 +377,11 @@ package com.mapbox.navigation.ui.maps.route.line.api {
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getAlternativeRoutesVisibility(com.mapbox.maps.Style style);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions getOptions();
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getPrimaryRouteVisibility(com.mapbox.maps.Style style);
-    method @Deprecated public void hideOriginAndDestinationPoints(com.mapbox.maps.Style style);
     method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.line.model.RouteLineState.RouteSetState routeDrawData);
     method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.line.model.RouteLineState.VanishingRouteLineUpdateState vanishingRouteLineState);
     method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.line.model.RouteLineState.ClearRouteLineState clearRouteLineData);
     method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.line.model.RouteLineState.UpdateLayerVisibilityState state);
     method public void setOptions(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions p);
-    method @Deprecated public void showOriginAndDestinationPoints(com.mapbox.maps.Style style);
     property public final com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions options;
   }
 

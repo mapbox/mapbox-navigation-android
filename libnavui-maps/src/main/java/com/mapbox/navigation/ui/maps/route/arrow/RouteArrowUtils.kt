@@ -23,6 +23,7 @@ import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMisc
 
 internal object RouteArrowUtils {
+
     fun obtainArrowPointsFrom(routeProgress: RouteProgress): List<Point> {
         val reversedCurrent: List<Point> =
             routeProgress.currentLegProgress?.currentStepProgress?.stepPoints?.reversed()

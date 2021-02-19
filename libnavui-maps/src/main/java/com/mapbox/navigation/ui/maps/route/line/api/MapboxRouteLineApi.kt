@@ -162,7 +162,7 @@ class MapboxRouteLineApi(
     /**
      * Updates which route is identified as the primary route.
      *
-     * @param route the DirectionsRoute which should be designated as the primary
+     * @param route the [DirectionsRoute] which should be designated as the primary
      *
      * @return a state which contains the side effects to be applied to the map displaying the
      * newly designated route line.
@@ -259,7 +259,7 @@ class MapboxRouteLineApi(
     /**
      * Sets the value of the vanishing point of the route line to the value specified. This is used
      * for the vanishing route line feature and is only applicable if an instance of
-     * VanishingRouteLine was supplied at the time of instantiation.
+     * [VanishingRouteLine] was supplied at the time of instantiation.
      *
      * @param offset a value representing the percentage of the distance traveled along the route
      *
@@ -300,7 +300,7 @@ class MapboxRouteLineApi(
     /**
      * Used for the vanishing route line feature, this method updates the vanishing point
      * calculation point based on the route progress. If null was passed as a parameter for
-     * VanishingRouteLine during instantiation, this method does not need to be called.
+     * [VanishingRouteLine] during instantiation, this method does not need to be called.
      *
      * @param routeProgress a route progress object
      */
@@ -318,7 +318,8 @@ class MapboxRouteLineApi(
             listOf(
                 Pair(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID, Visibility.VISIBLE),
                 Pair(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID, Visibility.VISIBLE),
-                Pair(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID, Visibility.VISIBLE)
+                Pair(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID, Visibility.VISIBLE),
+                Pair(RouteLayerConstants.WAYPOINT_LAYER_ID, Visibility.VISIBLE),
             )
         )
     }
@@ -332,7 +333,8 @@ class MapboxRouteLineApi(
             listOf(
                 Pair(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID, Visibility.NONE),
                 Pair(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID, Visibility.NONE),
-                Pair(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID, Visibility.NONE)
+                Pair(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID, Visibility.NONE),
+                Pair(RouteLayerConstants.WAYPOINT_LAYER_ID, Visibility.NONE)
             )
         )
     }

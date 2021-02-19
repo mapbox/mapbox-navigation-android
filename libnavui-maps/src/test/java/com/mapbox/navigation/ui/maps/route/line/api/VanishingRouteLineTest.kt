@@ -23,6 +23,25 @@ import org.robolectric.RobolectricTestRunner
 class VanishingRouteLineTest {
 
     @Test
+    fun initWithRoute() {
+        val route = getRoute()
+
+        val vanishingRouteLine = VanishingRouteLine().also {
+            it.initWithRoute(route)
+        }
+
+        assertEquals(
+            0.0000025451727518618744,
+            vanishingRouteLine.primaryRouteLineGranularDistances!!.distance,
+            0.0
+        )
+        assertEquals(
+            8,
+            vanishingRouteLine.primaryRouteLineGranularDistances!!.distancesArray.size()
+        )
+    }
+
+    @Test
     fun updateVanishingPointState_when_LOCATION_TRACKING() {
         val vanishingRouteLine = VanishingRouteLine().also {
             it.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)

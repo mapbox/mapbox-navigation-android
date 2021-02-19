@@ -511,4 +511,40 @@ class MapboxRouteLineViewTest {
         verify { MapboxRouteLineUtils.initializeLayers(style, options) }
         unmockkObject(MapboxRouteLineUtils)
     }
+
+    @Test
+    fun getPrimaryRouteVisibility() {
+        mockkObject(MapboxRouteLineUtils)
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val style = mockk<Style>()
+        every {
+            MapboxRouteLineUtils.getLayerVisibility(
+                style,
+                RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID
+            )
+        } returns Visibility.VISIBLE
+
+        val result = MapboxRouteLineView(options).getPrimaryRouteVisibility(style)
+
+        assertEquals(Visibility.VISIBLE, result)
+        unmockkObject(MapboxRouteLineUtils)
+    }
+
+    @Test
+    fun getAlternativeRoutesVisibility() {
+        mockkObject(MapboxRouteLineUtils)
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val style = mockk<Style>()
+        every {
+            MapboxRouteLineUtils.getLayerVisibility(
+                style,
+                RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID
+            )
+        } returns Visibility.VISIBLE
+
+        val result = MapboxRouteLineView(options).getAlternativeRoutesVisibility(style)
+
+        assertEquals(Visibility.VISIBLE, result)
+        unmockkObject(MapboxRouteLineUtils)
+    }
 }

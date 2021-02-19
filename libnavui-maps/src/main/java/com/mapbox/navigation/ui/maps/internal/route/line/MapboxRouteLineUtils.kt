@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import android.util.SparseArray
 import androidx.annotation.ColorInt
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.core.constants.Constants
@@ -11,6 +12,7 @@ import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.dsl.generated.color
@@ -30,6 +32,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrafficExpressionData
+import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.turf.TurfConstants
@@ -200,8 +203,7 @@ object MapboxRouteLineUtils {
      * @param trafficBackfillRoadClasses a collection of road classes for overriding the traffic
      * congestion color for unknown traffic conditions
      * @param isPrimaryRoute indicates if the route used is the primary route
-     * @param congestionColorProvider a function that provides the colors used for various
-     * traffic congestion values
+     * @param routeLineColorResources provides color values for the route line
      *
      * @return a list of items representing the distance offset of each route leg and the color
      * used to represent the traffic congestion.
@@ -334,8 +336,7 @@ object MapboxRouteLineUtils {
      *
      * @param trafficExpressionData the traffic data to perform the substitution on
      * @param routeDistance the total distance of the route
-     * @param congestionColorProvider a function that provides the colors used for various
-     * traffic congestion values
+     * @param routeLineColorResources provides color values for the route line
      * @param isPrimaryRoute indicates if the route used is the primary route
      * @param trafficOverrideRoadClasses a collection of road classes for which a color
      * substitution should occur.
@@ -402,8 +403,8 @@ object MapboxRouteLineUtils {
      * @return a RouteFeatureData containing the original route and a FeatureCollection and
      * LineString
      */
-    private fun generateFeatureCollection(routeData: RouteLine): RouteFeatureData =
-        generateFeatureCollection(routeData.route, routeData.identifier)
+    private fun generateFeatureCollection(route: RouteLine): RouteFeatureData =
+        generateFeatureCollection(route.route, route.identifier)
 
     internal fun calculateRouteGranularDistances(coordinates: List<Point>):
         RouteLineGranularDistances? {
@@ -452,10 +453,11 @@ object MapboxRouteLineUtils {
         }
 
     /**
-     * Builds a FeatureCollection representing waypoints from a DirectionsRoute
+     * Builds a [FeatureCollection] representing waypoints from a [DirectionsRoute]
      *
-     * @param route the route to use for generating the waypoints FeatureCollection
-     * @return a FeatureCollection representing the waypoints derived from the DirectionRoute
+     * @param route the route to use for generating the waypoints [FeatureCollection]
+     *
+     * @return a [FeatureCollection] representing the waypoints derived from the [DirectionsRoute]
      */
     internal fun buildWayPointFeatureCollection(route: DirectionsRoute): FeatureCollection {
         val wayPointFeatures = mutableListOf<Feature>()
@@ -474,13 +476,13 @@ object MapboxRouteLineUtils {
     }
 
     /**
-     * Builds a Feature representing a waypoint for use on a Mapbox Map.
+     * Builds a [Feature] representing a waypoint for use on a Mapbox [Map].
      *
-     * @param leg the RouteLeg containing the waypoint info.
+     * @param leg the [RouteLeg] containing the waypoint info.
      * @param index a value of 0 indicates a property value of origin
-     * will be added to the Feature else a value of destination will be used.
+     * will be added to the [Feature] else a value of destination will be used.
      *
-     * @return a Feature representing the waypoint from the RouteLog
+     * @return a [Feature] representing the waypoint from the [RouteLeg]
      */
     private fun buildWayPointFeatureFromLeg(leg: RouteLeg, index: Int): Feature? {
         return leg.steps()?.get(index)?.maneuver()?.location()?.run {
@@ -503,8 +505,8 @@ object MapboxRouteLineUtils {
 
     /**
      * Checks if a layer with the given ID exists else returns a default layer ID
-     * @param layerId the layer ID to look for
-     * @param style the style containing the layers
+     * @param belowLayerId the layer ID to look for
+     * @param style the [Style] containing the layers
      *
      * @return either the layer ID if found else a default layer ID
      */
@@ -714,6 +716,34 @@ object MapboxRouteLineUtils {
             style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID) &&
             style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID) &&
             style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+    }
+
+    /**
+     * Decodes the route geometry into nested arrays of legs -> steps -> points.
+     *
+     * The first and last point of adjacent steps overlap and are duplicated.
+     */
+    internal fun parseRoutePoints(
+        route: DirectionsRoute,
+    ): RoutePoints? {
+        val precision =
+            if (route.routeOptions()?.geometries() == DirectionsCriteria.GEOMETRY_POLYLINE) {
+                Constants.PRECISION_5
+            } else {
+                Constants.PRECISION_6
+            }
+
+        val nestedList = route.legs()?.map { routeLeg ->
+            routeLeg.steps()?.map { legStep ->
+                legStep.geometry()?.let { geometry ->
+                    PolylineUtils.decode(geometry, precision).toList()
+                } ?: return null
+            } ?: return null
+        } ?: return null
+
+        val flatList = nestedList.flatten().flatten()
+
+        return RoutePoints(nestedList, flatList)
     }
 
     private fun projectX(x: Double): Double {
