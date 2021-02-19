@@ -17,7 +17,7 @@ import java.io.File
  */
 internal class MapboxVoiceApi(
     private val speechProvider: MapboxSpeechProvider,
-    private val speechFileProvider: MapboxSpeechFileProvider,
+    private val speechFileProvider: MapboxSpeechFileProvider
 ) : VoiceApi {
 
     /**

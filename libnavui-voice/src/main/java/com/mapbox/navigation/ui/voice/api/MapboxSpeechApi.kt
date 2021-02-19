@@ -26,7 +26,6 @@ class MapboxSpeechApi(
 
     private val mainJobController: JobControl by lazy { ThreadController.getMainScopeAndRootJob() }
     private var currentVoiceJob: Job? = null
-
     private val voiceAPI = VoiceApiProvider.retrieveMapboxVoiceApi(context, accessToken, language)
 
     /**

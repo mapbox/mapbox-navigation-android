@@ -8,9 +8,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import java.io.File
 
-internal class MapboxSpeechFileProvider(
-    context: Context,
-) {
+internal class MapboxSpeechFileProvider(context: Context) {
 
     private val ioJobController: JobControl by lazy { ThreadController.getIOScopeAndRootJob() }
     private val instructionsCacheDirectory: File =

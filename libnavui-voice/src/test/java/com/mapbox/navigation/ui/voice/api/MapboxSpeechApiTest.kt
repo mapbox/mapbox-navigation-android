@@ -17,10 +17,13 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -33,7 +36,14 @@ class MapboxSpeechApiTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
     private val parentJob = SupervisorJob()
-    private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
+    private var exceptions: MutableList<Throwable> = mutableListOf()
+    private val coroutineExceptionHandler: CoroutineExceptionHandler =
+        CoroutineExceptionHandler { _, exception ->
+            exceptions.add(exception)
+        }
+    private val testScope = CoroutineScope(
+        parentJob + coroutineRule.testDispatcher + coroutineExceptionHandler
+    )
 
     @Before
     fun setUp() {
@@ -46,6 +56,7 @@ class MapboxSpeechApiTest {
     fun tearDown() {
         unmockkObject(ThreadController)
         unmockkObject(VoiceApiProvider)
+        exceptions.clear()
     }
 
     @Test
@@ -119,7 +130,34 @@ class MapboxSpeechApiTest {
     }
 
     @Test
-    fun clean() = coroutineRule.runBlockingTest {
+    fun `generate voice file can't produce VoiceResponse VoiceState`() =
+        coroutineRule.runBlockingTest {
+            val aMockedContext: Context = mockk(relaxed = true)
+            val anyAccessToken = "pk.123"
+            val anyLanguage = Locale.US.language
+            val mockedVoiceInstructions: VoiceInstructions = mockk()
+            val speechCallback: SpeechCallback = mockk()
+            val mockedVoiceResponse: VoiceState.VoiceResponse = VoiceState.VoiceResponse(mockk())
+            val mockedVoiceApi: MapboxVoiceApi = mockk()
+            coEvery {
+                mockedVoiceApi.retrieveVoiceFile(any())
+            } returns mockedVoiceResponse
+            every {
+                VoiceApiProvider.retrieveMapboxVoiceApi(aMockedContext, anyAccessToken, anyLanguage)
+            } returns mockedVoiceApi
+            val mapboxSpeechApi = MapboxSpeechApi(aMockedContext, anyAccessToken, anyLanguage)
+
+            mapboxSpeechApi.generate(mockedVoiceInstructions, speechCallback)
+
+            assertTrue(exceptions[0] is java.lang.IllegalStateException)
+            assertEquals(
+                "Invalid state: retrieveVoiceFile can't produce VoiceResponse VoiceState",
+                exceptions[0].localizedMessage
+            )
+        }
+
+    @Test
+    fun clean() {
         val aMockedContext: Context = mockk(relaxed = true)
         val anyAccessToken = "pk.123"
         val anyLanguage = Locale.US.language
