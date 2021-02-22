@@ -5,15 +5,16 @@ import android.media.AudioManager;
 class SpeechAudioFocusDelegate implements AudioFocusDelegate {
 
   private final AudioManager audioManager;
+  private final int focusGain;
 
-  SpeechAudioFocusDelegate(AudioManager audioManager) {
+  SpeechAudioFocusDelegate(AudioManager audioManager, int focusGain) {
     this.audioManager = audioManager;
+    this.focusGain = focusGain;
   }
 
   @Override
   public void requestFocus() {
-    audioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC,
-      AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+    audioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC, focusGain);
   }
 
   @Override

@@ -734,8 +734,14 @@ package com.mapbox.navigation.ui.voice {
   }
 
   public class SpeechPlayerProvider {
-    ctor public SpeechPlayerProvider(android.content.Context, String!, boolean, com.mapbox.navigation.ui.voice.VoiceInstructionLoader);
+    ctor @Deprecated public SpeechPlayerProvider(android.content.Context, String!, boolean, com.mapbox.navigation.ui.voice.VoiceInstructionLoader);
     method public void setIsFallbackAlwaysEnabled(boolean);
+  }
+
+  public static class SpeechPlayerProvider.Builder {
+    ctor public SpeechPlayerProvider.Builder(android.content.Context, String!, boolean, com.mapbox.navigation.ui.voice.VoiceInstructionLoader);
+    method public com.mapbox.navigation.ui.voice.SpeechPlayerProvider.Builder! audioFocusGain(int);
+    method public com.mapbox.navigation.ui.voice.SpeechPlayerProvider! build();
   }
 
   public class VoiceInstructionLoader {

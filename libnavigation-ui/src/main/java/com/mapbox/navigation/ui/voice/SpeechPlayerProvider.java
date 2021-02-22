@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.voice;
 
 import android.content.Context;
+import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 
 import androidx.annotation.NonNull;
@@ -10,7 +11,9 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigation.ui.internal.ConnectivityStatusProvider;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import org.jetbrains.annotations.TestOnly;
 
 /**
  * Given to the constructor of {@link NavigationSpeechPlayer}, this class decides which
@@ -45,10 +48,72 @@ public class SpeechPlayerProvider {
    * @param language               to be used
    * @param voiceLanguageSupported true if <tt>voiceLanguage</tt> is not null, false otherwise
    * @param voiceInstructionLoader voice instruction loader
+   * @deprecated use {@link Builder} instead
    */
-  public SpeechPlayerProvider(@NonNull Context context, String language,
-                              boolean voiceLanguageSupported, @NonNull VoiceInstructionLoader voiceInstructionLoader) {
-    initialize(context, language, voiceLanguageSupported, voiceInstructionLoader);
+  @Deprecated
+  public SpeechPlayerProvider(
+    @NonNull Context context,
+    String language,
+    boolean voiceLanguageSupported,
+    @NonNull VoiceInstructionLoader voiceInstructionLoader
+  ) {
+    this(
+      context,
+      language,
+      voiceLanguageSupported,
+      voiceInstructionLoader,
+      Builder.DEFAULT_FOCUS_GAIN
+    );
+  }
+
+  private SpeechPlayerProvider(
+    @NonNull Context context,
+    String language,
+    boolean voiceLanguageSupported,
+    @NonNull VoiceInstructionLoader voiceInstructionLoader,
+    int focusGain
+  ) {
+    initialize(
+      context,
+      language,
+      voiceLanguageSupported,
+      voiceInstructionLoader,
+      focusGain
+    );
+  }
+
+  @TestOnly
+  SpeechPlayerProvider(
+    @NonNull Context context,
+    String language,
+    boolean voiceLanguageSupported,
+    @NonNull VoiceInstructionLoader voiceInstructionLoader,
+    ConnectivityStatusProvider connectivityStatus
+  ) {
+    this(
+      context,
+      language,
+      voiceLanguageSupported,
+      voiceInstructionLoader,
+      Builder.DEFAULT_FOCUS_GAIN
+    );
+    this.connectivityStatus = connectivityStatus;
+  }
+
+  private void initialize(
+    @NonNull Context context,
+    String language,
+    boolean voiceLanguageSupported,
+    @NonNull VoiceInstructionLoader voiceInstructionLoader,
+    int focusGain
+  ) {
+    AudioFocusDelegateProvider provider = buildAudioFocusDelegateProvider(context, focusGain);
+    SpeechAudioFocusManager audioFocusManager = new SpeechAudioFocusManager(provider);
+    VoiceListener voiceListener = new NavigationVoiceListener(this, audioFocusManager);
+    initializeMapboxSpeechPlayer(context, language, voiceLanguageSupported, voiceListener, voiceInstructionLoader);
+    initializeAndroidSpeechPlayer(context, language, voiceListener);
+    this.voiceInstructionLoader = voiceInstructionLoader;
+    connectivityStatus = new ConnectivityStatusProvider(context);
   }
 
   /**
@@ -63,14 +128,6 @@ public class SpeechPlayerProvider {
    */
   public void setIsFallbackAlwaysEnabled(boolean isFallbackAlwaysEnabled) {
     this.isFallbackAlwaysEnabled = isFallbackAlwaysEnabled;
-  }
-
-  // Package private (no modifier) for testing purposes
-  SpeechPlayerProvider(@NonNull Context context, String language,
-                       boolean voiceLanguageSupported, @NonNull VoiceInstructionLoader voiceInstructionLoader,
-                       ConnectivityStatusProvider connectivityStatus) {
-    this(context, language, voiceLanguageSupported, voiceInstructionLoader);
-    this.connectivityStatus = connectivityStatus;
   }
 
   @Nullable
@@ -114,6 +171,15 @@ public class SpeechPlayerProvider {
     }
   }
 
+  @NonNull
+  private AudioFocusDelegateProvider buildAudioFocusDelegateProvider(
+    @NonNull Context context,
+    int focusGain
+  ) {
+    AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+    return new AudioFocusDelegateProvider(audioManager, focusGain);
+  }
+
   void onSpeechPlayerStateChanged(@NonNull SpeechPlayerState speechPlayerState) {
     if (speechPlayerState == SpeechPlayerState.OFFLINE_PLAYER_INITIALIZED) {
       if (this.speechPlayerState == SpeechPlayerState.OFFLINE_PLAYER_INITIALIZING) {
@@ -130,23 +196,6 @@ public class SpeechPlayerProvider {
 
   void setSpeechPlayerStateChangeObserver(SpeechPlayerStateChangeObserver observer) {
     this.observer = observer;
-  }
-
-  private void initialize(@NonNull Context context, String language,
-                          boolean voiceLanguageSupported, @NonNull VoiceInstructionLoader voiceInstructionLoader) {
-    AudioFocusDelegateProvider provider = buildAudioFocusDelegateProvider(context);
-    SpeechAudioFocusManager audioFocusManager = new SpeechAudioFocusManager(provider);
-    VoiceListener voiceListener = new NavigationVoiceListener(this, audioFocusManager);
-    initializeMapboxSpeechPlayer(context, language, voiceLanguageSupported, voiceListener, voiceInstructionLoader);
-    initializeAndroidSpeechPlayer(context, language, voiceListener);
-    this.voiceInstructionLoader = voiceInstructionLoader;
-    connectivityStatus = new ConnectivityStatusProvider(context);
-  }
-
-  @NonNull
-  private AudioFocusDelegateProvider buildAudioFocusDelegateProvider(@NonNull Context context) {
-    AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-    return new AudioFocusDelegateProvider(audioManager);
   }
 
   private void initializeMapboxSpeechPlayer(
@@ -167,5 +216,80 @@ public class SpeechPlayerProvider {
                                              VoiceListener listener) {
     androidSpeechPlayer = new AndroidSpeechPlayer(context, language, listener);
     speechPlayers.add(androidSpeechPlayer);
+  }
+
+  /**
+   * The Builder of {@link SpeechPlayerProvider}.
+   */
+  public static class Builder {
+    // static field to support SpeechPlayerProvider deprecated constructor
+    private static final int DEFAULT_FOCUS_GAIN = AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK;
+    private static final List<Integer> validFocusGains = Arrays.asList(
+      AudioManager.AUDIOFOCUS_GAIN,
+      AudioManager.AUDIOFOCUS_GAIN_TRANSIENT,
+      AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK,
+      AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE
+    );
+
+    @NonNull
+    private final  Context context;
+    private final  String language;
+    private final boolean voiceLanguageSupported;
+    @NonNull
+    private final VoiceInstructionLoader voiceInstructionLoader;
+    private int focusGain = DEFAULT_FOCUS_GAIN;
+
+    /**
+     * A new instance of {@link Builder}.
+     *
+     * @param context                for the initialization of the speech players
+     * @param language               to be used
+     * @param voiceLanguageSupported true if <tt>voiceLanguage</tt> is not null, false otherwise
+     * @param voiceInstructionLoader voice instruction loader
+     */
+    public Builder(
+      @NonNull Context context,
+      String language,
+      boolean voiceLanguageSupported,
+      @NonNull VoiceInstructionLoader voiceInstructionLoader
+    ) {
+      this.context = context;
+      this.language = language;
+      this.voiceLanguageSupported = voiceLanguageSupported;
+      this.voiceInstructionLoader = voiceInstructionLoader;
+    }
+
+    /**
+     * Audio focus gain. One of {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT},
+     * {@link AudioManager#AUDIOFOCUS_GAIN}, and etc.
+     * <p>
+     * Default is {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK}
+     * @see AudioManager#requestAudioFocus(AudioManager.OnAudioFocusChangeListener, int, int)
+     * @see AudioManager#requestAudioFocus(AudioFocusRequest)
+     */
+    public Builder audioFocusGain(int focusGain) {
+      if (!validFocusGains.contains(focusGain)) {
+        throw new IllegalStateException(
+          "Valid values for focus requests are AudioManager.AUDIOFOCUS_GAIN, "
+            + "AudioManager.AUDIOFOCUS_GAIN_TRANSIENT, "
+            + "AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK and "
+            + "AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE.");
+      }
+      this.focusGain = focusGain;
+      return this;
+    }
+
+    /**
+     * Build a new instance of {@link SpeechPlayerProvider}.
+     */
+    public SpeechPlayerProvider build() {
+      return new SpeechPlayerProvider(
+        context,
+        language,
+        voiceLanguageSupported,
+        voiceInstructionLoader,
+        focusGain
+      );
+    }
   }
 }
