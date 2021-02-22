@@ -15,6 +15,7 @@ libnavui-tripprogress \
 libnavui-maneuver \
 libnavui-resources \
 libnavui-voice \
+libnavigation-android \
 
 APPLICATION_MODULES = \
 test-app \

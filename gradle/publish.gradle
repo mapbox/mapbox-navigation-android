@@ -50,6 +50,7 @@ afterEvaluate {
 }
 
 def sdkNameMap = [:]
+sdkNameMap["libnavigation-android"] = "mobile-navigation-android"
 sdkNameMap["libnavigation-base"] = "mobile-navigation-base"
 sdkNameMap["libnavigation-core"] = "mobile-navigation-core"
 sdkNameMap["libnavigation-metrics"] = "mobile-navigation-metrics"
