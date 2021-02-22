@@ -1,6 +1,7 @@
 include ':test-app',
         ':app-tests-wrapper',
         ':instrumentation-tests',
+        ':libnavigation-android',
         ':libnavigator',
         ':libnavigation-base',
         ':libnavigation-router',
