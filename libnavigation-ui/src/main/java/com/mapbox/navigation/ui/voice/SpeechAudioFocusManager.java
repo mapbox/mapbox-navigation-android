@@ -6,8 +6,8 @@ class SpeechAudioFocusManager {
 
   private final AudioFocusDelegate audioFocusDelegate;
 
-  SpeechAudioFocusManager(@NonNull AudioFocusDelegateProvider provider) {
-    audioFocusDelegate = provider.retrieveAudioFocusDelegate();
+  SpeechAudioFocusManager(@NonNull AudioFocusDelegate audioFocusDelegate) {
+    this.audioFocusDelegate = audioFocusDelegate;
   }
 
   void requestAudioFocus() {

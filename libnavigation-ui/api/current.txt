@@ -716,6 +716,11 @@ package com.mapbox.navigation.ui.summary {
 
 package com.mapbox.navigation.ui.voice {
 
+  public interface AudioFocusDelegate {
+    method public void abandonFocus();
+    method public void requestFocus();
+  }
+
   public class NavigationSpeechPlayer implements com.mapbox.navigation.ui.voice.SpeechPlayer {
     ctor public NavigationSpeechPlayer(com.mapbox.navigation.ui.voice.SpeechPlayerProvider!);
     method public boolean isMuted();
@@ -734,8 +739,14 @@ package com.mapbox.navigation.ui.voice {
   }
 
   public class SpeechPlayerProvider {
-    ctor public SpeechPlayerProvider(android.content.Context, String!, boolean, com.mapbox.navigation.ui.voice.VoiceInstructionLoader);
+    ctor @Deprecated public SpeechPlayerProvider(android.content.Context, String!, boolean, com.mapbox.navigation.ui.voice.VoiceInstructionLoader);
     method public void setIsFallbackAlwaysEnabled(boolean);
+  }
+
+  public static class SpeechPlayerProvider.Builder {
+    ctor public SpeechPlayerProvider.Builder(android.content.Context, String!, boolean, com.mapbox.navigation.ui.voice.VoiceInstructionLoader);
+    method public com.mapbox.navigation.ui.voice.SpeechPlayerProvider.Builder! audioFocusDelegate(com.mapbox.navigation.ui.voice.AudioFocusDelegate);
+    method public com.mapbox.navigation.ui.voice.SpeechPlayerProvider! build();
   }
 
   public class VoiceInstructionLoader {

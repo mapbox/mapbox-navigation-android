@@ -238,7 +238,9 @@ class DebugMapboxNavigationKt :
         val voiceInstructionLoader =
             VoiceInstructionLoader(application, Mapbox.getAccessToken(), cache)
         val speechPlayerProvider =
-            SpeechPlayerProvider(application, Locale.US.language, true, voiceInstructionLoader)
+            SpeechPlayerProvider.Builder(
+                application, Locale.US.language, true, voiceInstructionLoader
+            ).build()
         speechPlayer = NavigationSpeechPlayer(speechPlayerProvider)
     }
 

@@ -11,6 +11,7 @@ import com.mapbox.navigation.ui.internal.ConnectivityStatusProvider;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jetbrains.annotations.TestOnly;
 
 /**
  * Given to the constructor of {@link NavigationSpeechPlayer}, this class decides which
@@ -45,10 +46,71 @@ public class SpeechPlayerProvider {
    * @param language               to be used
    * @param voiceLanguageSupported true if <tt>voiceLanguage</tt> is not null, false otherwise
    * @param voiceInstructionLoader voice instruction loader
+   * @deprecated use {@link Builder} instead
    */
-  public SpeechPlayerProvider(@NonNull Context context, String language,
-                              boolean voiceLanguageSupported, @NonNull VoiceInstructionLoader voiceInstructionLoader) {
-    initialize(context, language, voiceLanguageSupported, voiceInstructionLoader);
+  @Deprecated
+  public SpeechPlayerProvider(
+    @NonNull Context context,
+    String language,
+    boolean voiceLanguageSupported,
+    @NonNull VoiceInstructionLoader voiceInstructionLoader
+  ) {
+    this(
+      context,
+      language,
+      voiceLanguageSupported,
+      voiceInstructionLoader,
+      Builder.buildAudioFocusDelegateProvider(context).retrieveAudioFocusDelegate()
+    );
+  }
+
+  private SpeechPlayerProvider(
+    @NonNull Context context,
+    String language,
+    boolean voiceLanguageSupported,
+    @NonNull VoiceInstructionLoader voiceInstructionLoader,
+    @NonNull AudioFocusDelegate audioFocusDelegate
+  ) {
+    initialize(
+      context,
+      language,
+      voiceLanguageSupported,
+      voiceInstructionLoader,
+      audioFocusDelegate
+    );
+  }
+
+  @TestOnly
+  SpeechPlayerProvider(
+    @NonNull Context context,
+    String language,
+    boolean voiceLanguageSupported,
+    @NonNull VoiceInstructionLoader voiceInstructionLoader,
+    ConnectivityStatusProvider connectivityStatus
+  ) {
+    this(
+      context,
+      language,
+      voiceLanguageSupported,
+      voiceInstructionLoader,
+      Builder.buildAudioFocusDelegateProvider(context).retrieveAudioFocusDelegate()
+    );
+    this.connectivityStatus = connectivityStatus;
+  }
+
+  private void initialize(
+    @NonNull Context context,
+    String language,
+    boolean voiceLanguageSupported,
+    @NonNull VoiceInstructionLoader voiceInstructionLoader,
+    @NonNull AudioFocusDelegate audioFocusDelegate
+  ) {
+    SpeechAudioFocusManager audioFocusManager = new SpeechAudioFocusManager(audioFocusDelegate);
+    VoiceListener voiceListener = new NavigationVoiceListener(this, audioFocusManager);
+    initializeMapboxSpeechPlayer(context, language, voiceLanguageSupported, voiceListener, voiceInstructionLoader);
+    initializeAndroidSpeechPlayer(context, language, voiceListener);
+    this.voiceInstructionLoader = voiceInstructionLoader;
+    connectivityStatus = new ConnectivityStatusProvider(context);
   }
 
   /**
@@ -63,14 +125,6 @@ public class SpeechPlayerProvider {
    */
   public void setIsFallbackAlwaysEnabled(boolean isFallbackAlwaysEnabled) {
     this.isFallbackAlwaysEnabled = isFallbackAlwaysEnabled;
-  }
-
-  // Package private (no modifier) for testing purposes
-  SpeechPlayerProvider(@NonNull Context context, String language,
-                       boolean voiceLanguageSupported, @NonNull VoiceInstructionLoader voiceInstructionLoader,
-                       ConnectivityStatusProvider connectivityStatus) {
-    this(context, language, voiceLanguageSupported, voiceInstructionLoader);
-    this.connectivityStatus = connectivityStatus;
   }
 
   @Nullable
@@ -132,23 +186,6 @@ public class SpeechPlayerProvider {
     this.observer = observer;
   }
 
-  private void initialize(@NonNull Context context, String language,
-                          boolean voiceLanguageSupported, @NonNull VoiceInstructionLoader voiceInstructionLoader) {
-    AudioFocusDelegateProvider provider = buildAudioFocusDelegateProvider(context);
-    SpeechAudioFocusManager audioFocusManager = new SpeechAudioFocusManager(provider);
-    VoiceListener voiceListener = new NavigationVoiceListener(this, audioFocusManager);
-    initializeMapboxSpeechPlayer(context, language, voiceLanguageSupported, voiceListener, voiceInstructionLoader);
-    initializeAndroidSpeechPlayer(context, language, voiceListener);
-    this.voiceInstructionLoader = voiceInstructionLoader;
-    connectivityStatus = new ConnectivityStatusProvider(context);
-  }
-
-  @NonNull
-  private AudioFocusDelegateProvider buildAudioFocusDelegateProvider(@NonNull Context context) {
-    AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-    return new AudioFocusDelegateProvider(audioManager);
-  }
-
   private void initializeMapboxSpeechPlayer(
           @NonNull Context context,
           String language,
@@ -167,5 +204,71 @@ public class SpeechPlayerProvider {
                                              VoiceListener listener) {
     androidSpeechPlayer = new AndroidSpeechPlayer(context, language, listener);
     speechPlayers.add(androidSpeechPlayer);
+  }
+
+  /**
+   * The Builder of {@link SpeechPlayerProvider}.
+   */
+  public static class Builder {
+
+    @NonNull
+    private final  Context context;
+    private final  String language;
+    private final boolean voiceLanguageSupported;
+    @NonNull
+    private final VoiceInstructionLoader voiceInstructionLoader;
+    @NonNull
+    private AudioFocusDelegate audioFocusDelegate;
+
+    /**
+     * A new instance of {@link Builder}.
+     *
+     * @param context                for the initialization of the speech players
+     * @param language               to be used
+     * @param voiceLanguageSupported true if <tt>voiceLanguage</tt> is not null, false otherwise
+     * @param voiceInstructionLoader voice instruction loader
+     */
+    public Builder(
+      @NonNull Context context,
+      String language,
+      boolean voiceLanguageSupported,
+      @NonNull VoiceInstructionLoader voiceInstructionLoader
+    ) {
+      this.context = context;
+      this.language = language;
+      this.voiceLanguageSupported = voiceLanguageSupported;
+      this.voiceInstructionLoader = voiceInstructionLoader;
+      audioFocusDelegate = buildAudioFocusDelegateProvider(context).retrieveAudioFocusDelegate();
+    }
+
+    /**
+     * Audio focus delegate, needed to grab and release audio focus.
+     */
+    public Builder audioFocusDelegate(@NonNull AudioFocusDelegate audioFocusDelegate) {
+      this.audioFocusDelegate = audioFocusDelegate;
+      return this;
+    }
+
+    /**
+     * Build a new instance of {@link SpeechPlayerProvider}.
+     */
+    public SpeechPlayerProvider build() {
+      return new SpeechPlayerProvider(
+        context,
+        language,
+        voiceLanguageSupported,
+        voiceInstructionLoader,
+        audioFocusDelegate
+      );
+    }
+
+    // static method to support SpeechPlayerProvider deprecated constructor
+    @NonNull
+    private static AudioFocusDelegateProvider buildAudioFocusDelegateProvider(
+      @NonNull Context context
+    ) {
+      AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+      return new AudioFocusDelegateProvider(audioManager);
+    }
   }
 }
