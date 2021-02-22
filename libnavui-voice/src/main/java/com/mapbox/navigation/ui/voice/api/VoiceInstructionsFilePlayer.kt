@@ -67,6 +67,7 @@ internal class VoiceInstructionsFilePlayer(
      */
     override fun clear() {
         resetMediaPlayer(mediaPlayer)
+        currentPlay = null
     }
 
     /**
