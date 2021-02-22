@@ -430,12 +430,12 @@ class BasicNavigationFragment :
         val voiceInstructionLoader =
             VoiceInstructionLoader(requireContext(), Mapbox.getAccessToken(), cache)
         val speechPlayerProvider =
-            SpeechPlayerProvider(
+            SpeechPlayerProvider.Builder(
                 requireContext(),
                 Locale.US.language,
                 true,
                 voiceInstructionLoader
-            )
+            ).build()
         speechPlayer = NavigationSpeechPlayer(speechPlayerProvider)
     }
 

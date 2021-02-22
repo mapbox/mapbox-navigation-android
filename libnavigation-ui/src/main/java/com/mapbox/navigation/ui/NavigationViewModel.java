@@ -412,7 +412,9 @@ public class NavigationViewModel extends AndroidViewModel {
 
   @NonNull
   private SpeechPlayerProvider initializeSpeechPlayerProvider(boolean voiceLanguageSupported) {
-    return new SpeechPlayerProvider(getApplication(), language, voiceLanguageSupported, voiceInstructionLoader);
+    return new SpeechPlayerProvider.Builder(
+      getApplication(), language, voiceLanguageSupported, voiceInstructionLoader
+    ).build();
   }
 
   @Nullable

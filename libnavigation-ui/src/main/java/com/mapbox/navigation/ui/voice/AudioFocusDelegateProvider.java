@@ -10,8 +10,8 @@ class AudioFocusDelegateProvider {
   @NonNull
   private final AudioFocusDelegate audioFocusDelegate;
 
-  AudioFocusDelegateProvider(AudioManager audioManager) {
-    audioFocusDelegate = buildAudioFocusDelegate(audioManager);
+  AudioFocusDelegateProvider(AudioManager audioManager, int focusGain) {
+    audioFocusDelegate = buildAudioFocusDelegate(audioManager, focusGain);
   }
 
   @NonNull
@@ -20,10 +20,13 @@ class AudioFocusDelegateProvider {
   }
 
   @NonNull
-  private AudioFocusDelegate buildAudioFocusDelegate(AudioManager audioManager) {
+  private AudioFocusDelegate buildAudioFocusDelegate(
+    AudioManager audioManager,
+    int focusGain
+  ) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      return new Api26AudioFocusDelegate(audioManager);
+      return new Api26AudioFocusDelegate(audioManager, focusGain);
     }
-    return new SpeechAudioFocusDelegate(audioManager);
+    return new SpeechAudioFocusDelegate(audioManager, focusGain);
   }
 }
