@@ -2,7 +2,6 @@ package com.mapbox.navigation.core.internal
 
 import com.mapbox.common.TileStore
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
-import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigator.PredictiveCacheController
 
@@ -14,12 +13,10 @@ object PredictiveCache {
         mutableMapOf<String, PredictiveCacheController>()
 
     fun createNavigationController(
-        routingTilesOptions: RoutingTilesOptions,
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions
     ) {
         val predictiveCacheController =
             MapboxNativeNavigatorImpl.createNavigationPredictiveCacheController(
-                routingTilesOptions,
                 predictiveCacheLocationOptions
             )
         cachedNavigationPredictiveCacheControllers.add(predictiveCacheController)

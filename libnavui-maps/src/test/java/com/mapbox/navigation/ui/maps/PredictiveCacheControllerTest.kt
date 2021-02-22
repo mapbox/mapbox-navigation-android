@@ -35,7 +35,7 @@ class PredictiveCacheControllerTest {
         val mockedMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
         mockkObject(PredictiveCache)
         every {
-            PredictiveCache.createNavigationController(any(), any())
+            PredictiveCache.createNavigationController(any())
         } just Runs
 
         PredictiveCacheController(
@@ -44,7 +44,6 @@ class PredictiveCacheControllerTest {
 
         verify {
             PredictiveCache.createNavigationController(
-                mockedMapboxNavigation.navigationOptions.routingTilesOptions,
                 mockedMapboxNavigation.navigationOptions.predictiveCacheLocationOptions
             )
         }
@@ -57,7 +56,7 @@ class PredictiveCacheControllerTest {
         val mockedMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
         mockkObject(PredictiveCache)
         every {
-            PredictiveCache.createNavigationController(any(), any())
+            PredictiveCache.createNavigationController(any())
         } just Runs
         val mockedMapboxMap = mockk<MapboxMap>(relaxed = true)
         val style = mockk<Style>()
@@ -131,7 +130,7 @@ class PredictiveCacheControllerTest {
         val mockedMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
         mockkObject(PredictiveCache)
         every {
-            PredictiveCache.createNavigationController(any(), any())
+            PredictiveCache.createNavigationController(any())
         } just Runs
         val mockedMapboxMap = mockk<MapboxMap>(relaxed = true)
         val style = mockk<Style>()
