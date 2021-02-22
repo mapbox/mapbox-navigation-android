@@ -16,6 +16,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo
 import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert
+import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo
 import com.mapbox.navigation.base.trip.model.alert.IncidentAlert
 import com.mapbox.navigation.base.trip.model.alert.IncidentCongestion
 import com.mapbox.navigation.base.trip.model.alert.IncidentImpact
@@ -36,6 +37,7 @@ import com.mapbox.navigator.AdminInfo
 import com.mapbox.navigator.BannerComponent
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
+import com.mapbox.navigator.BorderCrossingInfo
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouteAlertType
@@ -72,6 +74,21 @@ class NavigatorMapper internal constructor() {
     }
 
     fun getIncidentInfo(info: com.mapbox.navigator.IncidentInfo?) = info?.toIncidentInfo()
+
+    fun getBorderCrossingInfo(info: BorderCrossingInfo?): CountryBorderCrossingInfo? {
+        return info?.let {
+            CountryBorderCrossingInfo.Builder(
+                it.from.toBorderCrossingAdminInfo(),
+                it.to.toBorderCrossingAdminInfo()
+            ).build()
+        }
+    }
+
+    fun getTunnelInfo(info: com.mapbox.navigator.TunnelInfo?): TunnelInfo? = info.toTunnelInfo()
+
+    fun getTollCollectionType(info: TollCollectionInfo?): Int? = info.toTollCollectionType()
+
+    fun getRestStopType(info: ServiceAreaInfo?): Int? = info.toRestStopType()
 
     private fun NavigationStatus.getRouteProgress(
         route: DirectionsRoute?,

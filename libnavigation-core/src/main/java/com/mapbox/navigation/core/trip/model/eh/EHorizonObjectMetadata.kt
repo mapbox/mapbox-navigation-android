@@ -1,6 +1,8 @@
 package com.mapbox.navigation.core.trip.model.eh
 
+import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo
 import com.mapbox.navigation.base.trip.model.alert.IncidentInfo
+import com.mapbox.navigation.base.trip.model.alert.TunnelInfo
 
 /**
  * RoadObject metadata
@@ -9,11 +11,24 @@ import com.mapbox.navigation.base.trip.model.alert.IncidentInfo
  * @param objectProvider provider of road object
  * @param incidentInfo will be filled only if [type] is [EHorizonObjectType.INCIDENT] and
  * [objectProvider] is [EHorizonObjectProvider.MAPBOX]
+ * @param tunnelInfo will be filled only if [type] is [EHorizonObjectType.TUNNEL_ENTRANCE] and
+ * [objectProvider] is [EHorizonObjectProvider.MAPBOX]
+ * @param borderCrossingInfo will be filled only if [type] is [EHorizonObjectType.BORDER_CROSSING]
+ * and [objectProvider] is [EHorizonObjectProvider.MAPBOX]
+ * @param tollCollectionType will be filled only if [type] is
+ * [EHorizonObjectType.TOLL_COLLECTION_POINT] and [objectProvider] is
+ * [EHorizonObjectProvider.MAPBOX]
+ * @param restStopType will be filled only if [type] is [EHorizonObjectType.SERVICE_AREA] and
+ * [objectProvider] is [EHorizonObjectProvider.MAPBOX]
  */
 class EHorizonObjectMetadata internal constructor(
     @EHorizonObjectType.Type val type: String,
     @EHorizonObjectProvider.Type val objectProvider: String,
     val incidentInfo: IncidentInfo?,
+    val tunnelInfo: TunnelInfo?,
+    val borderCrossingInfo: CountryBorderCrossingInfo?,
+    val tollCollectionType: Int?,
+    val restStopType: Int?,
 ) {
 
     /**
@@ -28,6 +43,10 @@ class EHorizonObjectMetadata internal constructor(
         if (type != other.type) return false
         if (objectProvider != other.objectProvider) return false
         if (incidentInfo != other.incidentInfo) return false
+        if (tunnelInfo != other.tunnelInfo) return false
+        if (borderCrossingInfo != other.borderCrossingInfo) return false
+        if (tollCollectionType != other.tollCollectionType) return false
+        if (restStopType != other.restStopType) return false
 
         return true
     }
@@ -39,6 +58,10 @@ class EHorizonObjectMetadata internal constructor(
         var result = type.hashCode()
         result = 31 * result + objectProvider.hashCode()
         result = 31 * result + (incidentInfo?.hashCode() ?: 0)
+        result = 31 * result + (tunnelInfo?.hashCode() ?: 0)
+        result = 31 * result + (borderCrossingInfo?.hashCode() ?: 0)
+        result = 31 * result + (tollCollectionType ?: 0)
+        result = 31 * result + (restStopType ?: 0)
         return result
     }
 
@@ -47,8 +70,12 @@ class EHorizonObjectMetadata internal constructor(
      */
     override fun toString(): String {
         return "EHorizonObjectMetadata(" +
-            "type=$type, " +
+            "type='$type', " +
             "objectProvider='$objectProvider', " +
-            "incidentInfo=$incidentInfo)"
+            "incidentInfo=$incidentInfo, " +
+            "tunnelInfo=$tunnelInfo, " +
+            "borderCrossingInfo=$borderCrossingInfo, " +
+            "tollCollectionType=$tollCollectionType, " +
+            "restStopType=$restStopType)"
     }
 }
