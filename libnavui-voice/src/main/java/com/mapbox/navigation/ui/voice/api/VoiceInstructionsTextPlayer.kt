@@ -72,6 +72,7 @@ internal class VoiceInstructionsTextPlayer(
      */
     override fun clear() {
         textToSpeech.stop()
+        currentPlay = null
     }
 
     /**

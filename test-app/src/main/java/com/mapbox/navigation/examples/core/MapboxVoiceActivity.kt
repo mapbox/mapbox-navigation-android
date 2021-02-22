@@ -188,6 +188,8 @@ class MapboxVoiceActivity :
 
     private val routesObserver = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
+            speechAPI.cancel()
+            voiceInstructionsPlayer?.clear()
             if (routes.isNotEmpty()) {
                 routeLineAPI?.setRoutes(listOf(RouteLine(routes[0], null)))?.apply {
                     ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
