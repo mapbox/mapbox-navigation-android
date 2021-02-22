@@ -646,11 +646,19 @@ package com.mapbox.navigation.core.trip.model.eh {
   }
 
   public final class EHorizonObjectMetadata {
+    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo? getBorderCrossingInfo();
     method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo? getIncidentInfo();
     method public String getObjectProvider();
+    method public Integer? getRestStopType();
+    method public Integer? getTollCollectionType();
+    method public com.mapbox.navigation.base.trip.model.alert.TunnelInfo? getTunnelInfo();
     method public String getType();
+    property public final com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo? borderCrossingInfo;
     property public final com.mapbox.navigation.base.trip.model.alert.IncidentInfo? incidentInfo;
     property public final String objectProvider;
+    property public final Integer? restStopType;
+    property public final Integer? tollCollectionType;
+    property public final com.mapbox.navigation.base.trip.model.alert.TunnelInfo? tunnelInfo;
     property public final String type;
   }
 

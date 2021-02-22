@@ -493,6 +493,19 @@ package com.mapbox.navigation.base.trip.model.alert {
     method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert.Builder to(com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? to);
   }
 
+  public final class CountryBorderCrossingInfo {
+    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? getFrom();
+    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? getTo();
+    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo.Builder toBuilder();
+    property public final com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? from;
+    property public final com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? to;
+  }
+
+  public static final class CountryBorderCrossingInfo.Builder {
+    ctor public CountryBorderCrossingInfo.Builder(com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? from, com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? to);
+    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo build();
+  }
+
   public final class IncidentAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
     method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo? getInfo();
     method public com.mapbox.navigation.base.trip.model.alert.IncidentAlert.Builder toBuilder();

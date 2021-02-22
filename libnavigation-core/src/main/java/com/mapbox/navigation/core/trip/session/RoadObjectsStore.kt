@@ -40,11 +40,17 @@ class RoadObjectsStore internal constructor(
      */
     fun getRoadObjectMetadata(roadObjectId: String): EHorizonObjectMetadata? {
         return navigator.roadObjectsStore?.getRoadObjectMetadata(roadObjectId)?.let {
-            EHorizonObjectMetadata(
-                it.type.mapToEHorizonObjectType(),
-                it.provider.mapToEHorizonObjectProvider(),
-                navigator.navigatorMapper.getIncidentInfo(it.incident)
-            )
+            navigator.navigatorMapper.run {
+                EHorizonObjectMetadata(
+                    it.type.mapToEHorizonObjectType(),
+                    it.provider.mapToEHorizonObjectProvider(),
+                    getIncidentInfo(it.incident),
+                    getTunnelInfo(it.tunnelInfo),
+                    getBorderCrossingInfo(it.borderCrossingInfo),
+                    getTollCollectionType(it.tollCollectionInfo),
+                    getRestStopType(it.serviceAreaInfo),
+                )
+            }
         }
     }
 
