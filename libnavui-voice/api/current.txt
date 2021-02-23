@@ -2,6 +2,7 @@
 package com.mapbox.navigation.ui.voice.api {
 
   public final class MapboxSpeechApi implements com.mapbox.navigation.ui.base.api.voice.SpeechApi {
+    ctor public MapboxSpeechApi(android.content.Context context, String accessToken, String language, String? baseUri = null);
     ctor public MapboxSpeechApi(android.content.Context context, String accessToken, String language);
     method public void cancel();
     method public void clean(com.mapbox.navigation.ui.base.model.voice.Announcement announcement);
@@ -9,11 +10,28 @@ package com.mapbox.navigation.ui.voice.api {
   }
 
   @UiThread public final class MapboxVoiceInstructionsPlayer implements com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayer {
+    ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options = VoiceInstructionsPlayerOptions.<init>().build());
     ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language);
     method public void clear();
     method public void play(com.mapbox.navigation.ui.base.model.voice.SpeechState.ReadyToPlay state, com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayerCallback callback);
     method public void shutdown();
     method public void volume(com.mapbox.navigation.ui.base.model.voice.SpeechState.Volume state);
+  }
+
+}
+
+package com.mapbox.navigation.ui.voice.options {
+
+  public final class VoiceInstructionsPlayerOptions {
+    method public int getFocusGain();
+    method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder toBuilder();
+    property public final int focusGain;
+  }
+
+  public static final class VoiceInstructionsPlayerOptions.Builder {
+    ctor public VoiceInstructionsPlayerOptions.Builder();
+    method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions build();
+    method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder focusGain(int focusGain);
   }
 
 }

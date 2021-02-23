@@ -83,7 +83,12 @@ class MapboxSpeechApiTest {
             mockedVoiceApi.retrieveVoiceFile(any())
         } returns VoiceState.VoiceFile(mockedInstructionFile)
         every {
-            VoiceApiProvider.retrieveMapboxVoiceApi(aMockedContext, anyAccessToken, anyLanguage)
+            VoiceApiProvider.retrieveMapboxVoiceApi(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage,
+                null
+            )
         } returns mockedVoiceApi
         val mapboxSpeechApi = MapboxSpeechApi(aMockedContext, anyAccessToken, anyLanguage)
 
@@ -114,7 +119,12 @@ class MapboxSpeechApiTest {
             mockedVoiceApi.retrieveVoiceFile(any())
         } returns mockedVoiceError
         every {
-            VoiceApiProvider.retrieveMapboxVoiceApi(aMockedContext, anyAccessToken, anyLanguage)
+            VoiceApiProvider.retrieveMapboxVoiceApi(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage,
+                null
+            )
         } returns mockedVoiceApi
         val mapboxSpeechApi = MapboxSpeechApi(aMockedContext, anyAccessToken, anyLanguage)
 
@@ -143,7 +153,12 @@ class MapboxSpeechApiTest {
                 mockedVoiceApi.retrieveVoiceFile(any())
             } returns mockedVoiceResponse
             every {
-                VoiceApiProvider.retrieveMapboxVoiceApi(aMockedContext, anyAccessToken, anyLanguage)
+                VoiceApiProvider.retrieveMapboxVoiceApi(
+                    aMockedContext,
+                    anyAccessToken,
+                    anyLanguage,
+                    null
+                )
             } returns mockedVoiceApi
             val mapboxSpeechApi = MapboxSpeechApi(aMockedContext, anyAccessToken, anyLanguage)
 
@@ -164,7 +179,12 @@ class MapboxSpeechApiTest {
         val mockedVoiceApi: MapboxVoiceApi = mockk()
         every { mockedVoiceApi.clean(any()) } just Runs
         every {
-            VoiceApiProvider.retrieveMapboxVoiceApi(aMockedContext, anyAccessToken, anyLanguage)
+            VoiceApiProvider.retrieveMapboxVoiceApi(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage,
+                null
+            )
         } returns mockedVoiceApi
         val mapboxSpeechApi = MapboxSpeechApi(aMockedContext, anyAccessToken, anyLanguage)
         val anyAnnouncement: Announcement = mockk()

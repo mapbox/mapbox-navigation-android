@@ -17,16 +17,23 @@ import kotlinx.coroutines.launch
  * @property context Context
  * @property accessToken String
  * @property language [Locale] language (ISO 639)
+ * @property baseUri base URL (optional)
  */
-class MapboxSpeechApi(
+class MapboxSpeechApi @JvmOverloads constructor(
     private val context: Context,
     private val accessToken: String,
-    private val language: String
+    private val language: String,
+    private val baseUri: String? = null
 ) : SpeechApi {
 
     private val mainJobController: JobControl by lazy { ThreadController.getMainScopeAndRootJob() }
     private var currentVoiceJob: Job? = null
-    private val voiceAPI = VoiceApiProvider.retrieveMapboxVoiceApi(context, accessToken, language)
+    private val voiceAPI = VoiceApiProvider.retrieveMapboxVoiceApi(
+        context,
+        accessToken,
+        language,
+        baseUri
+    )
 
     /**
      * Given [VoiceInstructions] the method will generate the voice instruction [Announcement].
