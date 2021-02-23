@@ -13,12 +13,12 @@ def getCommonLibDependency(String moduleName) {
         project.delete(moduleName + '_dependencies.txt')
     }
 
-    "./gradlew :" + moduleName + ":dependencies --configuration releaseRuntimeClasspath >> " + moduleName + "_dependencies.txt"
+    "./gradlew :" + moduleName + ":dependencyInsight --dependency com.mapbox.common:common: --configuration releaseRuntimeClasspath >> " + moduleName + "_dependencies.txt"
             .execute().text.trim()
 
     dependenciesFile = new File(moduleName + '_dependencies.txt')
     int firstIndexCommonLib = dependenciesFile.text.indexOf("com.mapbox.common:common:")
-    int lastIndexCommonLib = dependenciesFile.text.indexOf("|", firstIndexCommonLib)
+    int lastIndexCommonLib = dependenciesFile.text.indexOf("variant", firstIndexCommonLib)
     String commonLibDependency = dependenciesFile.text.substring(firstIndexCommonLib, lastIndexCommonLib)
     return commonLibDependency
 }
