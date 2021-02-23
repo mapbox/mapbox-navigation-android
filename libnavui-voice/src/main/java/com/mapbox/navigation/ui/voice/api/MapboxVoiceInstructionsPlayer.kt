@@ -7,6 +7,7 @@ import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayer
 import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayerCallback
 import com.mapbox.navigation.ui.base.model.voice.Announcement
 import com.mapbox.navigation.ui.base.model.voice.SpeechState
+import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import java.util.Queue
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -16,12 +17,15 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * @property context Context
  * @property accessToken String
  * @property language [Locale] language (ISO 639)
+ * @property options [VoiceInstructionsPlayerOptions] (optional)
  */
 @UiThread
-class MapboxVoiceInstructionsPlayer(
+class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
     private val context: Context,
     private val accessToken: String,
-    private val language: String
+    private val language: String,
+    private val options: VoiceInstructionsPlayerOptions = VoiceInstructionsPlayerOptions.Builder()
+        .build()
 ) : VoiceInstructionsPlayer {
 
     private val playCallbackQueue: Queue<PlayCallback> = ConcurrentLinkedQueue()
@@ -46,7 +50,8 @@ class MapboxVoiceInstructionsPlayer(
         }
     private val audioFocusDelegate: AudioFocusDelegate =
         AudioFocusDelegateProvider.retrieveAudioFocusDelegate(
-            context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
+            options
         )
 
     /**

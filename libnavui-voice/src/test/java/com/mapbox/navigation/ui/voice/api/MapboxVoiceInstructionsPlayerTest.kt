@@ -5,6 +5,7 @@ import android.media.AudioManager
 import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayerCallback
 import com.mapbox.navigation.ui.base.model.voice.Announcement
 import com.mapbox.navigation.ui.base.model.voice.SpeechState
+import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -24,6 +25,8 @@ class MapboxVoiceInstructionsPlayerTest {
 
     private val aMockedContext: Context = mockk(relaxed = true)
     private val audioManager = mockk<AudioManager>(relaxed = true)
+    private val mockedAudioFocusDelegate: AudioFocusDelegate = mockk(relaxed = true)
+    private val mockedVoiceInstructionsPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
 
     @Before
     fun setUp() {
@@ -34,8 +37,11 @@ class MapboxVoiceInstructionsPlayerTest {
             aMockedContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         } returns audioManager
         every {
-            AudioFocusDelegateProvider.retrieveAudioFocusDelegate(audioManager)
-        } returns mockk(relaxed = true)
+            AudioFocusDelegateProvider.retrieveAudioFocusDelegate(
+                audioManager,
+                mockedVoiceInstructionsPlayerOptions
+            )
+        } returns mockedAudioFocusDelegate
     }
 
     @After
@@ -75,7 +81,12 @@ class MapboxVoiceInstructionsPlayerTest {
             )
         } returns mockedTextPlayer
         val mapboxVoiceInstructionsPlayer =
-            MapboxVoiceInstructionsPlayer(aMockedContext, anyAccessToken, anyLanguage)
+            MapboxVoiceInstructionsPlayer(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions
+            )
         val mockedPlay: SpeechState.ReadyToPlay = SpeechState.ReadyToPlay(mockedAnnouncement)
         val voiceInstructionsPlayerCallback: VoiceInstructionsPlayerCallback = mockk()
         every { voiceInstructionsPlayerCallback.onDone(any()) } just Runs
@@ -123,7 +134,12 @@ class MapboxVoiceInstructionsPlayerTest {
             )
         } returns mockedTextPlayer
         val mapboxVoiceInstructionsPlayer =
-            MapboxVoiceInstructionsPlayer(aMockedContext, anyAccessToken, anyLanguage)
+            MapboxVoiceInstructionsPlayer(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions
+            )
         val mockedPlay: SpeechState.ReadyToPlay = SpeechState.ReadyToPlay(mockedAnnouncement)
         val voiceInstructionsPlayerCallback: VoiceInstructionsPlayerCallback = mockk()
         every { voiceInstructionsPlayerCallback.onDone(any()) } just Runs
@@ -177,7 +193,12 @@ class MapboxVoiceInstructionsPlayerTest {
             )
         } returns mockedTextPlayer
         val mapboxVoiceInstructionsPlayer =
-            MapboxVoiceInstructionsPlayer(aMockedContext, anyAccessToken, anyLanguage)
+            MapboxVoiceInstructionsPlayer(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions
+            )
         val mockedPlay: SpeechState.ReadyToPlay = SpeechState.ReadyToPlay(mockedAnnouncement)
         val voiceInstructionsPlayerCallback: VoiceInstructionsPlayerCallback = mockk()
         every { voiceInstructionsPlayerCallback.onDone(any()) } just Runs
@@ -215,7 +236,12 @@ class MapboxVoiceInstructionsPlayerTest {
             )
         } returns mockedTextPlayer
         val mapboxVoiceInstructionsPlayer =
-            MapboxVoiceInstructionsPlayer(aMockedContext, anyAccessToken, anyLanguage)
+            MapboxVoiceInstructionsPlayer(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions
+            )
         val mockedVolume: SpeechState.Volume = mockk()
 
         mapboxVoiceInstructionsPlayer.volume(mockedVolume)
@@ -250,7 +276,12 @@ class MapboxVoiceInstructionsPlayerTest {
             )
         } returns mockedTextPlayer
         val mapboxVoiceInstructionsPlayer =
-            MapboxVoiceInstructionsPlayer(aMockedContext, anyAccessToken, anyLanguage)
+            MapboxVoiceInstructionsPlayer(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions
+            )
 
         mapboxVoiceInstructionsPlayer.clear()
 
@@ -284,7 +315,12 @@ class MapboxVoiceInstructionsPlayerTest {
             )
         } returns mockedTextPlayer
         val mapboxVoiceInstructionsPlayer =
-            MapboxVoiceInstructionsPlayer(aMockedContext, anyAccessToken, anyLanguage)
+            MapboxVoiceInstructionsPlayer(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions
+            )
 
         mapboxVoiceInstructionsPlayer.shutdown()
 
@@ -293,6 +329,36 @@ class MapboxVoiceInstructionsPlayerTest {
         }
         verify(exactly = 1) {
             mockedTextPlayer.shutdown()
+        }
+    }
+
+    @Test
+    fun `request audio focus when play and abandon focus when done`() {
+        val anyAccessToken = "pk.123"
+        val anyLanguage = Locale.US.language
+        val mockedAnnouncement: Announcement = mockk(relaxed = true)
+        val mapboxVoiceInstructionsPlayer =
+            MapboxVoiceInstructionsPlayer(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions
+            )
+        val mockedPlay: SpeechState.ReadyToPlay = SpeechState.ReadyToPlay(mockedAnnouncement)
+        val voiceInstructionsPlayerCallback: VoiceInstructionsPlayerCallback = mockk()
+        every { voiceInstructionsPlayerCallback.onDone(any()) } just Runs
+
+        mapboxVoiceInstructionsPlayer.play(mockedPlay, voiceInstructionsPlayerCallback)
+
+        verify(exactly = 1) {
+            mockedAudioFocusDelegate.requestFocus()
+        }
+        verify(exactly = 1) {
+            mockedAudioFocusDelegate.abandonFocus()
+        }
+        verifyOrder {
+            mockedAudioFocusDelegate.requestFocus()
+            mockedAudioFocusDelegate.abandonFocus()
         }
     }
 }

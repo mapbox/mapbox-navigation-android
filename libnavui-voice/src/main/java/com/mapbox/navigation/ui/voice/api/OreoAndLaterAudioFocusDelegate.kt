@@ -4,13 +4,16 @@ import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 internal class OreoAndLaterAudioFocusDelegate(
-    private val audioManager: AudioManager
+    private val audioManager: AudioManager,
+    options: VoiceInstructionsPlayerOptions
 ) : AudioFocusDelegate {
 
-    private val audioFocusRequest: AudioFocusRequest = AudioFocusRequest.Builder(FOCUS_GAIN).build()
+    private val audioFocusRequest: AudioFocusRequest =
+        AudioFocusRequest.Builder(options.focusGain).build()
 
     override fun requestFocus() {
         audioManager.requestAudioFocus(audioFocusRequest)
@@ -18,9 +21,5 @@ internal class OreoAndLaterAudioFocusDelegate(
 
     override fun abandonFocus() {
         audioManager.abandonAudioFocusRequest(audioFocusRequest)
-    }
-
-    private companion object {
-        private const val FOCUS_GAIN = AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
     }
 }
