@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
+import android.media.AudioManager
 import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayerCallback
 import com.mapbox.navigation.ui.base.model.voice.Announcement
 import com.mapbox.navigation.ui.base.model.voice.SpeechState
@@ -21,21 +22,31 @@ import java.util.Locale
 
 class MapboxVoiceInstructionsPlayerTest {
 
+    private val aMockedContext: Context = mockk(relaxed = true)
+    private val audioManager = mockk<AudioManager>(relaxed = true)
+
     @Before
     fun setUp() {
         mockkObject(VoiceInstructionsFilePlayerProvider)
         mockkObject(VoiceInstructionsTextPlayerProvider)
+        mockkObject(AudioFocusDelegateProvider)
+        every {
+            aMockedContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        } returns audioManager
+        every {
+            AudioFocusDelegateProvider.retrieveAudioFocusDelegate(audioManager)
+        } returns mockk(relaxed = true)
     }
 
     @After
     fun tearDown() {
         unmockkObject(VoiceInstructionsFilePlayerProvider)
         unmockkObject(VoiceInstructionsTextPlayerProvider)
+        unmockkObject(AudioFocusDelegateProvider)
     }
 
     @Test
     fun `play VoiceInstructionsFilePlayer if file available`() {
-        val aMockedContext: Context = mockk(relaxed = true)
         val anyAccessToken = "pk.123"
         val anyLanguage = Locale.US.language
         val mockedFilePlayer: VoiceInstructionsFilePlayer = mockk()
@@ -84,7 +95,6 @@ class MapboxVoiceInstructionsPlayerTest {
 
     @Test
     fun `play VoiceInstructionsTextPlayer if file not available`() {
-        val aMockedContext: Context = mockk(relaxed = true)
         val anyAccessToken = "pk.123"
         val anyLanguage = Locale.US.language
         val mockedFilePlayer: VoiceInstructionsFilePlayer = mockk()
@@ -133,7 +143,6 @@ class MapboxVoiceInstructionsPlayerTest {
 
     @Test
     fun `announcements are played in order`() {
-        val aMockedContext: Context = mockk(relaxed = true)
         val anyAccessToken = "pk.123"
         val anyLanguage = Locale.US.language
         val mockedFilePlayer: VoiceInstructionsFilePlayer = mockk()
@@ -186,7 +195,6 @@ class MapboxVoiceInstructionsPlayerTest {
 
     @Test
     fun volume() {
-        val aMockedContext: Context = mockk(relaxed = true)
         val anyAccessToken = "pk.123"
         val anyLanguage = Locale.US.language
         val mockedFilePlayer: VoiceInstructionsFilePlayer = mockk()
@@ -222,7 +230,6 @@ class MapboxVoiceInstructionsPlayerTest {
 
     @Test
     fun clear() {
-        val aMockedContext: Context = mockk(relaxed = true)
         val anyAccessToken = "pk.123"
         val anyLanguage = Locale.US.language
         val mockedFilePlayer: VoiceInstructionsFilePlayer = mockk()
@@ -257,7 +264,6 @@ class MapboxVoiceInstructionsPlayerTest {
 
     @Test
     fun shutdown() {
-        val aMockedContext: Context = mockk(relaxed = true)
         val anyAccessToken = "pk.123"
         val anyLanguage = Locale.US.language
         val mockedFilePlayer: VoiceInstructionsFilePlayer = mockk()

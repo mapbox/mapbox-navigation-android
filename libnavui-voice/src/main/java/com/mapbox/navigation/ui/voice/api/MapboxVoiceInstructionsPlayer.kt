@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
+import android.media.AudioManager
 import androidx.annotation.UiThread
 import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayer
 import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayerCallback
@@ -35,6 +36,7 @@ class MapboxVoiceInstructionsPlayer(
     private var localCallback: VoiceInstructionsPlayerCallback =
         object : VoiceInstructionsPlayerCallback {
             override fun onDone(state: SpeechState.DonePlaying) {
+                audioFocusDelegate.abandonFocus()
                 val currentPlayCallback = playCallbackQueue.poll()
                 val announcement = currentPlayCallback.announcement
                 val clientCallback = currentPlayCallback.callback
@@ -42,6 +44,10 @@ class MapboxVoiceInstructionsPlayer(
                 play()
             }
         }
+    private val audioFocusDelegate: AudioFocusDelegate =
+        AudioFocusDelegateProvider.retrieveAudioFocusDelegate(
+            context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        )
 
     /**
      * Given [SpeechState.ReadyToPlay] [Announcement] the method will play the voice instruction.
@@ -89,6 +95,7 @@ class MapboxVoiceInstructionsPlayer(
 
     private fun play() {
         if (playCallbackQueue.isNotEmpty()) {
+            audioFocusDelegate.requestFocus()
             val currentPlayCallback = playCallbackQueue.peek()
             val currentPlay = currentPlayCallback.announcement
             currentPlay.announcement.file?.let {
