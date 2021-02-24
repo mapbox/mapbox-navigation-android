@@ -114,6 +114,7 @@ class MapboxOffboardRouter(
             val refreshBuilder = MapboxDirectionsRefresh.builder()
                 .accessToken(accessToken)
                 .requestId(route.routeOptions()?.requestUuid())
+                .routeIndex(route.routeIndex()?.toIntOrNull() ?: 0)
                 .legIndex(legIndex)
                 .interceptor {
                     val httpUrl = it.request().url()
