@@ -8,6 +8,7 @@ import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayerCallback
 import com.mapbox.navigation.ui.base.model.voice.Announcement
 import com.mapbox.navigation.ui.base.model.voice.SpeechState
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
+import java.lang.IllegalArgumentException
 import java.util.Queue
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -71,9 +72,16 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
 
     /**
      * The method will set the volume to the specified level from [SpeechState.Volume].
+     * Volume is specified as a float ranging from 0 to 1
+     * where 0 is silence, and 1 is the maximum volume (the default behavior).
      * @param state SpeechState Volume level.
      */
     override fun volume(state: SpeechState.Volume) {
+        if (state.level < MIN_VOLUME_LEVEL || state.level > MAX_VOLUME_LEVEL) {
+            throw IllegalArgumentException(
+                "Volume level needs to be a float ranging from 0 to 1."
+            )
+        }
         filePlayer.volume(state)
         textPlayer.volume(state)
     }
@@ -111,5 +119,10 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
 
     private fun clean() {
         playCallbackQueue.clear()
+    }
+
+    private companion object {
+        private const val MAX_VOLUME_LEVEL = 1.0f
+        private const val MIN_VOLUME_LEVEL = 0.0f
     }
 }
