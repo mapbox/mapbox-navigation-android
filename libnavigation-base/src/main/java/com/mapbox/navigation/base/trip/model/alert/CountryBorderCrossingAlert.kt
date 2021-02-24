@@ -5,8 +5,7 @@ import com.mapbox.geojson.Point
 /**
  * Route alert type that provides information about country border crossings on the route.
  *
- * @param from origin administrative info when crossing the country border
- * @param to destination administrative info when crossing the country border
+ * @param countryBorderCrossingInfo administrative info when crossing the country border
  * @see RouteAlert
  * @see RouteAlertType.CountryBorderCrossing
  */
@@ -14,8 +13,7 @@ class CountryBorderCrossingAlert private constructor(
     coordinate: Point,
     distance: Double,
     alertGeometry: RouteAlertGeometry?,
-    val from: CountryBorderCrossingAdminInfo?,
-    val to: CountryBorderCrossingAdminInfo?
+    val countryBorderCrossingInfo: CountryBorderCrossingInfo?,
 ) : RouteAlert(
     RouteAlertType.CountryBorderCrossing,
     coordinate,
@@ -28,8 +26,7 @@ class CountryBorderCrossingAlert private constructor(
      */
     fun toBuilder(): Builder = Builder(coordinate, distance)
         .alertGeometry(alertGeometry)
-        .from(from)
-        .to(to)
+        .countryBorderCrossingInfo(countryBorderCrossingInfo)
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -41,8 +38,7 @@ class CountryBorderCrossingAlert private constructor(
 
         other as CountryBorderCrossingAlert
 
-        if (from != other.from) return false
-        if (to != other.to) return false
+        if (countryBorderCrossingInfo != other.countryBorderCrossingInfo) return false
 
         return true
     }
@@ -52,8 +48,7 @@ class CountryBorderCrossingAlert private constructor(
      */
     override fun hashCode(): Int {
         var result = super.hashCode()
-        result = 31 * result + (from?.hashCode() ?: 0)
-        result = 31 * result + (to?.hashCode() ?: 0)
+        result = 31 * result + (countryBorderCrossingInfo?.hashCode() ?: 0)
         return result
     }
 
@@ -61,7 +56,8 @@ class CountryBorderCrossingAlert private constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "CountryBorderCrossingAlert(from=$from, to=$to), ${super.toString()}"
+        return "CountryBorderCrossingAlert(" +
+            "countryBorderCrossingInfo=$countryBorderCrossingInfo), ${super.toString()}"
     }
 
     /**
@@ -75,8 +71,7 @@ class CountryBorderCrossingAlert private constructor(
     ) {
 
         private var alertGeometry: RouteAlertGeometry? = null
-        private var from: CountryBorderCrossingAdminInfo? = null
-        private var to: CountryBorderCrossingAdminInfo? = null
+        private var countryBorderCrossingInfo: CountryBorderCrossingInfo? = null
 
         /**
          * Add optional geometry if the alert has a length.
@@ -86,18 +81,12 @@ class CountryBorderCrossingAlert private constructor(
         }
 
         /**
-         * Add the origin administrative info when crossing the country border.
+         * Add the administrative info when crossing the country border.
          */
-        fun from(from: CountryBorderCrossingAdminInfo?): Builder = apply {
-            this.from = from
-        }
-
-        /**
-         * Add the destination administrative info when crossing the country border.
-         */
-        fun to(to: CountryBorderCrossingAdminInfo?): Builder = apply {
-            this.to = to
-        }
+        fun countryBorderCrossingInfo(borderCrossingInfo: CountryBorderCrossingInfo?): Builder =
+            apply {
+                this.countryBorderCrossingInfo = borderCrossingInfo
+            }
 
         /**
          * Build the object instance.
@@ -107,8 +96,7 @@ class CountryBorderCrossingAlert private constructor(
                 coordinate = coordinate,
                 distance = distance,
                 alertGeometry = alertGeometry,
-                from = from,
-                to = to
+                countryBorderCrossingInfo = countryBorderCrossingInfo
             )
     }
 }
