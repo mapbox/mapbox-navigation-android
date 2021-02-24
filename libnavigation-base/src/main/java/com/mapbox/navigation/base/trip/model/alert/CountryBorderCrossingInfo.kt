@@ -14,8 +14,7 @@ class CountryBorderCrossingInfo private constructor(
     /**
      * Transform this object into a builder to mutate the values.
      */
-    fun toBuilder(): CountryBorderCrossingInfo.Builder =
-        CountryBorderCrossingInfo.Builder(from, to)
+    fun toBuilder(): Builder = Builder(from, to)
 
     /**
      * Indicates whether some other object is "equal to" this one.

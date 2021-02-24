@@ -13,7 +13,9 @@ class CountryBorderCrossingAlertTest :
     override fun getFilledUpBuilder() = CountryBorderCrossingAlert.Builder(
         Point.fromLngLat(0.0, 0.0),
         1.0
-    ).alertGeometry(mockk(relaxed = true)).from(mockk(relaxed = true)).to(mockk(relaxed = true))
+    )
+        .alertGeometry(mockk(relaxed = true))
+        .countryBorderCrossingInfo(mockk(relaxed = true))
 
     @Test
     override fun trigger() {

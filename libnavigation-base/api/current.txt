@@ -478,19 +478,16 @@ package com.mapbox.navigation.base.trip.model.alert {
   }
 
   public final class CountryBorderCrossingAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
-    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? getFrom();
-    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? getTo();
+    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo? getCountryBorderCrossingInfo();
     method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert.Builder toBuilder();
-    property public final com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? from;
-    property public final com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? to;
+    property public final com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo? countryBorderCrossingInfo;
   }
 
   public static final class CountryBorderCrossingAlert.Builder {
     ctor public CountryBorderCrossingAlert.Builder(com.mapbox.geojson.Point coordinate, double distance);
     method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert.Builder alertGeometry(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
     method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert build();
-    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert.Builder from(com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? from);
-    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert.Builder to(com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? to);
+    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert.Builder countryBorderCrossingInfo(com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo? borderCrossingInfo);
   }
 
   public final class CountryBorderCrossingInfo {

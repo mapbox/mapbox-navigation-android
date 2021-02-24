@@ -6,6 +6,7 @@ import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo
 import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert
+import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo
 import com.mapbox.navigation.base.trip.model.alert.IncidentAlert
 import com.mapbox.navigation.base.trip.model.alert.IncidentCongestion
 import com.mapbox.navigation.base.trip.model.alert.IncidentImpact
@@ -187,8 +188,12 @@ class NavigatorMapperTest {
             Point.fromLngLat(10.0, 20.0),
             123.0
         )
-            .from(CountryBorderCrossingAdminInfo.Builder("US", "USA").build())
-            .to(CountryBorderCrossingAdminInfo.Builder("CA", "CAN").build())
+            .countryBorderCrossingInfo(
+                CountryBorderCrossingInfo.Builder(
+                    CountryBorderCrossingAdminInfo.Builder("US", "USA").build(),
+                    CountryBorderCrossingAdminInfo.Builder("CA", "CAN").build()
+                ).build()
+            )
             .build()
         assertEquals(expected, upcomingRouteAlert.routeAlert)
         assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())

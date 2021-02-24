@@ -315,8 +315,12 @@ class NavigatorMapper internal constructor() {
                     alert.distance
                 )
                     .alertGeometry(alert.getAlertGeometry())
-                    .from(alert.borderCrossingInfo?.from.toBorderCrossingAdminInfo())
-                    .to(alert.borderCrossingInfo?.to.toBorderCrossingAdminInfo())
+                    .countryBorderCrossingInfo(
+                        CountryBorderCrossingInfo.Builder(
+                            alert.borderCrossingInfo?.from.toBorderCrossingAdminInfo(),
+                            alert.borderCrossingInfo?.to.toBorderCrossingAdminInfo()
+                        ).build()
+                    )
                     .build()
             }
             RouteAlertType.TOLL_COLLECTION_POINT -> {
