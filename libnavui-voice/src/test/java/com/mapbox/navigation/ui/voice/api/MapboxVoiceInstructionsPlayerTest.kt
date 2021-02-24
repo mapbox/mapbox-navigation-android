@@ -243,6 +243,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 mockedVoiceInstructionsPlayerOptions
             )
         val mockedVolume: SpeechState.Volume = mockk()
+        every { mockedVolume.level } returns 0.5f
 
         mapboxVoiceInstructionsPlayer.volume(mockedVolume)
 
@@ -252,6 +253,74 @@ class MapboxVoiceInstructionsPlayerTest {
         verify(exactly = 1) {
             mockedTextPlayer.volume(mockedVolume)
         }
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `invalid volume less than min (0)`() {
+        val anyAccessToken = "pk.123"
+        val anyLanguage = Locale.US.language
+        val mockedFilePlayer: VoiceInstructionsFilePlayer = mockk()
+        every { mockedFilePlayer.volume(any()) } just Runs
+        val mockedTextPlayer: VoiceInstructionsTextPlayer = mockk()
+        every { mockedTextPlayer.volume(any()) } just Runs
+        every {
+            VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage
+            )
+        } returns mockedFilePlayer
+        every {
+            VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
+                aMockedContext,
+                anyLanguage
+            )
+        } returns mockedTextPlayer
+        val mapboxVoiceInstructionsPlayer =
+            MapboxVoiceInstructionsPlayer(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions
+            )
+        val mockedVolume: SpeechState.Volume = mockk()
+        every { mockedVolume.level } returns -0.5f
+
+        mapboxVoiceInstructionsPlayer.volume(mockedVolume)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `invalid volume greater than max (1)`() {
+        val anyAccessToken = "pk.123"
+        val anyLanguage = Locale.US.language
+        val mockedFilePlayer: VoiceInstructionsFilePlayer = mockk()
+        every { mockedFilePlayer.volume(any()) } just Runs
+        val mockedTextPlayer: VoiceInstructionsTextPlayer = mockk()
+        every { mockedTextPlayer.volume(any()) } just Runs
+        every {
+            VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage
+            )
+        } returns mockedFilePlayer
+        every {
+            VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
+                aMockedContext,
+                anyLanguage
+            )
+        } returns mockedTextPlayer
+        val mapboxVoiceInstructionsPlayer =
+            MapboxVoiceInstructionsPlayer(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions
+            )
+        val mockedVolume: SpeechState.Volume = mockk()
+        every { mockedVolume.level } returns 1.5f
+
+        mapboxVoiceInstructionsPlayer.volume(mockedVolume)
     }
 
     @Test

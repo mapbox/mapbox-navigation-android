@@ -131,6 +131,6 @@ internal class VoiceInstructionsFilePlayer(
 
     private companion object {
         private const val TAG = "MbxVoiceInstructionsFilePlayer"
-        private const val DEFAULT_VOLUME_LEVEL = 0.5f
+        private const val DEFAULT_VOLUME_LEVEL = 1.0f
     }
 }

@@ -136,7 +136,7 @@ internal class VoiceInstructionsTextPlayer(
         private const val TAG = "MbxVoiceInstructionsTextPlayer"
         private const val LANGUAGE_NOT_SUPPORTED = "Language is not supported"
         private const val DEFAULT_UTTERANCE_ID = "default_id"
-        private const val DEFAULT_VOLUME_LEVEL = 0.5f
+        private const val DEFAULT_VOLUME_LEVEL = 1.0f
         private const val MUTE_VOLUME_LEVEL = 0.0f
     }
 }
