@@ -15,6 +15,7 @@ import com.mapbox.maps.extension.style.expressions.generated.Expression
  * @param alternativeRoute1Source the feature collection for an alternative route line
  * @param alternativeRoute2Source the feature collection for an alternative route line
  * @param waypointsSource the feature collection for the origin and destination icons
+ * @param restrictedRoadSource the feature collection for the restricted road indicator(s)
  */
 class RouteSetValue internal constructor(
     val primaryRouteSource: FeatureCollection,
@@ -25,5 +26,6 @@ class RouteSetValue internal constructor(
     val altRoute2TrafficExpression: Expression,
     val alternativeRoute1Source: FeatureCollection,
     val alternativeRoute2Source: FeatureCollection,
-    val waypointsSource: FeatureCollection
+    val waypointsSource: FeatureCollection,
+    val restrictedRoadSource: FeatureCollection
 )

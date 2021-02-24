@@ -29,6 +29,7 @@ class RouteLineColorResourcesTest :
             .alternativeRouteHeavyColor(14)
             .alternativeRouteSevereColor(15)
             .alternativeRouteCasingColor(16)
+            .restrictedRoadColor(17)
     }
 
     override fun trigger() {
@@ -156,6 +157,14 @@ class RouteLineColorResourcesTest :
     }
 
     @Test
+    fun withRestrictedRoadColor() {
+        val resources =
+            RouteLineColorResources.Builder().restrictedRoadColor(5).build()
+
+        assertEquals(5, resources.restrictedRoadColor)
+    }
+
+    @Test
     fun toBuilder() {
         val routeLineColorResources = RouteLineColorResources.Builder()
             .routeLineTraveledColor(1)
@@ -174,6 +183,7 @@ class RouteLineColorResourcesTest :
             .alternativeRouteHeavyColor(14)
             .alternativeRouteSevereColor(15)
             .alternativeRouteCasingColor(16)
+            .restrictedRoadColor(17)
             .build()
 
         val result = routeLineColorResources.toBuilder().build()
@@ -194,5 +204,6 @@ class RouteLineColorResourcesTest :
         assertEquals(14, result.alternativeRouteHeavyColor)
         assertEquals(15, result.alternativeRouteSevereColor)
         assertEquals(16, result.alternativeRouteCasingColor)
+        assertEquals(17, result.restrictedRoadColor)
     }
 }

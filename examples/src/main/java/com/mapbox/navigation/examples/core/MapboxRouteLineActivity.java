@@ -354,7 +354,6 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
         .accessToken(getMapboxAccessTokenFromResources())
         .coordinates(Arrays.asList(origin, destination))
         .alternatives(true)
-        .annotationsList(Collections.singletonList(DirectionsCriteria.ANNOTATION_MAXSPEED))
         .build();
 
     mapboxNavigation.requestRoutes(
@@ -392,6 +391,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
       for (DirectionsRoute route : routes) {
         routeLines.add(new RouteLine(route, null));
       }
+
       mapboxRouteLineApi.setRoutes(routeLines, new MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>() {
         @Override
         public void accept(Expected<RouteSetValue, RouteLineError> routeDrawData) {

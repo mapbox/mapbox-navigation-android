@@ -326,6 +326,7 @@ package com.mapbox.navigation.ui.maps.internal.route.line {
   public final class MapboxRouteLineUtils {
     method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData> calculateRouteLineSegments(com.mapbox.api.directions.v5.models.DirectionsRoute route, java.util.List<java.lang.String> trafficBackfillRoadClasses, boolean isPrimaryRoute, com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources routeLineColorResources);
     method public static String? getBelowLayerIdToUse(String? belowLayerId, com.mapbox.maps.Style style);
+    method public java.util.List<java.util.List<com.mapbox.geojson.Point>> getRestrictedRouteSections(com.mapbox.api.directions.v5.models.DirectionsRoute route);
     method @ColorInt public int getRouteColorForCongestion(String congestionValue, boolean isPrimaryRoute, com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources routeLineColorResources);
     method public kotlin.jvm.functions.Function0<java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData>> getRouteFeatureDataProvider(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> directionsRoutes);
     method public kotlin.jvm.functions.Function0<java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData>> getRouteLineFeatureDataProvider(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLine> directionsRoutes);
@@ -461,12 +462,14 @@ package com.mapbox.navigation.ui.maps.route.line.model {
 
   public final class MapboxRouteLineOptions {
     method public android.graphics.drawable.Drawable getDestinationIcon();
+    method public boolean getEnableRestrictedRoadLayer();
     method public android.graphics.drawable.Drawable getOriginIcon();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources getResourceProvider();
     method public String? getRouteLineBelowLayerId();
     method public double getTolerance();
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder toBuilder(android.content.Context context);
     property public final android.graphics.drawable.Drawable destinationIcon;
+    property public final boolean enableRestrictedRoadLayer;
     property public final android.graphics.drawable.Drawable originIcon;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources resourceProvider;
     property public final String? routeLineBelowLayerId;
@@ -476,6 +479,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
   public static final class MapboxRouteLineOptions.Builder {
     ctor public MapboxRouteLineOptions.Builder(android.content.Context context);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions build();
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRestrictedRoadLayerEnabled(boolean enabled);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteLineBelowLayerId(String layerId);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteLineResources(com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources resourceProvider);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteStyleDescriptors(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor> routeStyleDescriptors);
@@ -527,6 +531,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public int getAlternativeRouteModerateColor();
     method public int getAlternativeRouteSevereColor();
     method public int getAlternativeRouteUnknownTrafficColor();
+    method public int getRestrictedRoadColor();
     method public int getRouteCasingColor();
     method public int getRouteDefaultColor();
     method public int getRouteHeavyColor();
@@ -544,6 +549,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final int alternativeRouteModerateColor;
     property public final int alternativeRouteSevereColor;
     property public final int alternativeRouteUnknownTrafficColor;
+    property public final int restrictedRoadColor;
     property public final int routeCasingColor;
     property public final int routeDefaultColor;
     property public final int routeHeavyColor;
@@ -565,6 +571,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteSevereColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteUnknownTrafficColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources build();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder restrictedRoadColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeCasingColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeDefaultColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeHeavyColor(@ColorInt int color);
@@ -622,6 +629,9 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.maps.extension.style.expressions.generated.Expression getAlternativeRouteTrafficLineScaleExpression();
     method public int getDestinationWaypointIcon();
     method public int getOriginWaypointIcon();
+    method public java.util.List<java.lang.Double> getRestrictedRoadDashArray();
+    method public double getRestrictedRoadLineWidth();
+    method public double getRestrictedRoadOpacity();
     method public boolean getRoundedLineCap();
     method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteCasingLineScaleExpression();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources getRouteLineColorResources();
@@ -634,6 +644,9 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final com.mapbox.maps.extension.style.expressions.generated.Expression alternativeRouteTrafficLineScaleExpression;
     property public final int destinationWaypointIcon;
     property public final int originWaypointIcon;
+    property public final java.util.List<java.lang.Double> restrictedRoadDashArray;
+    property public final double restrictedRoadLineWidth;
+    property public final double restrictedRoadOpacity;
     property public final boolean roundedLineCap;
     property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeCasingLineScaleExpression;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources routeLineColorResources;
@@ -650,6 +663,9 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources build();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder destinationWaypointIcon(@DrawableRes int resource);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder originWaypointIcon(@DrawableRes int resource);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder restrictedRoadDashArray(java.util.List<java.lang.Double> dashArray);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder restrictedRoadLineWidth(double width);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder restrictedRoadOpacity(double opacity);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder roundedLineCap(boolean roundLineCap);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder routeCasingLineScaleExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder routeLineColorResources(com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources routeLineColorResources);
@@ -697,6 +713,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.geojson.FeatureCollection getAlternativeRoute2Source();
     method public com.mapbox.maps.extension.style.expressions.generated.Expression getCasingLineExpression();
     method public com.mapbox.geojson.FeatureCollection getPrimaryRouteSource();
+    method public com.mapbox.geojson.FeatureCollection getRestrictedRoadSource();
     method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteLineExpression();
     method public com.mapbox.maps.extension.style.expressions.generated.Expression getTrafficLineExpression();
     method public com.mapbox.geojson.FeatureCollection getWaypointsSource();
@@ -706,6 +723,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final com.mapbox.geojson.FeatureCollection alternativeRoute2Source;
     property public final com.mapbox.maps.extension.style.expressions.generated.Expression casingLineExpression;
     property public final com.mapbox.geojson.FeatureCollection primaryRouteSource;
+    property public final com.mapbox.geojson.FeatureCollection restrictedRoadSource;
     property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeLineExpression;
     property public final com.mapbox.maps.extension.style.expressions.generated.Expression trafficLineExpression;
     property public final com.mapbox.geojson.FeatureCollection waypointsSource;

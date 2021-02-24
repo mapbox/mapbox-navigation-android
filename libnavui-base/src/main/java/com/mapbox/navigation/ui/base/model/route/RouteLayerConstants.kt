@@ -73,4 +73,9 @@ object RouteLayerConstants {
      * Layer ID for the waypoint icons layer
      */
     const val WAYPOINT_LAYER_ID = "mapbox-navigation-waypoint-layer"
+
+    /**
+     * Layer ID for the restricted area layer
+     */
+    const val RESTRICTED_ROAD_LAYER_ID = "mapbox-restricted-road-layer"
 }
