@@ -106,6 +106,12 @@ commands:
           name: Check codebase
           command: make check
 
+  verify-common-sdk-version:
+    steps:
+      - run:
+          name: Verify Common SDK version
+          command: make verify-common-sdk-version
+
   verify-changelog:
     steps:
       - run:

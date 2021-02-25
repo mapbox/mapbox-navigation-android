@@ -119,6 +119,7 @@ subprojects {
 }
 
 apply from: "${rootDir}/gradle/kdoc-settings.gradle"
+apply from: "${rootDir}/gradle/verify-common-sdk-version.gradle"
 
 dokkaHtmlMultiModule {
   outputDirectory.set(kdocPath)

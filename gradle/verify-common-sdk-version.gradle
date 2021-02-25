@@ -1,24 +1,46 @@
+def navigatorModuleName = "libnavigator"
+def moduleNames = ["libnavigation-core", navigatorModuleName]
+
 task verifyCommonSdkVersion {
-    String commonLibDependencyCore = getCommonLibDependency("libnavigation-core")
-    String commonLibDependencyNavigator = getCommonLibDependency("libnavigator")
-    if (commonLibDependencyCore != commonLibDependencyNavigator) {
-        throw new GradleException("Navigation SDK and Navigation Native have different versions of" +
-                "Common SDK library. Please align Common SDK version in both SDKs before push changes.")
+    moduleNames.each { moduleName ->
+        dependsOn ":" + moduleName + ":generateDependencyReportFile"
+    }
+    doLast {
+        def moduleDependencyMap = [:]
+        moduleNames.each { moduleName ->
+            String commonDependency = parseCommonLibDependency(moduleName)
+            moduleDependencyMap[moduleName] = commonDependency
+        }
+        moduleNames.each { moduleName ->
+            if (moduleName != navigatorModuleName
+                    && moduleDependencyMap[moduleName] != moduleDependencyMap[navigatorModuleName]) {
+                throw new GradleException(moduleName + " (" + moduleDependencyMap[moduleName] + ") " +
+                        "and " + navigatorModuleName + " (" + moduleDependencyMap[navigatorModuleName] + ") " +
+                        "have different versions of Common SDK library. " +
+                        "Please align Common SDK version in both SDKs before push changes.")
+            }
+        }
+        println("Common SDK versions are equal for Navigation SDK and for Navigation Native")
+        println(moduleDependencyMap)
     }
 }
 
-def getCommonLibDependency(String moduleName) {
-    File dependenciesFile = new File(moduleName + '_dependencies.txt')
-    if (dependenciesFile.exists() ) {
-        project.delete(moduleName + '_dependencies.txt')
+allprojects.findAll {it.name in moduleNames}.each { p ->
+    configure(p) {
+        task generateDependencyReportFile(type: DependencyReportTask) {
+            outputFile = file("build/reports/dependencies_report.txt")
+        }
     }
+}
 
-    "./gradlew :" + moduleName + ":dependencyInsight --dependency com.mapbox.common:common: --configuration releaseRuntimeClasspath >> " + moduleName + "_dependencies.txt"
-            .execute().text.trim()
-
-    dependenciesFile = new File(moduleName + '_dependencies.txt')
-    int firstIndexCommonLib = dependenciesFile.text.indexOf("com.mapbox.common:common:")
-    int lastIndexCommonLib = dependenciesFile.text.indexOf("variant", firstIndexCommonLib)
+static def parseCommonLibDependency(String moduleName) {
+    File dependenciesFile = new File(moduleName + "/build/reports/dependencies_report.txt")
+    int startSearchIndex = dependenciesFile.text.indexOf("releaseCompileClasspath")
+    int firstIndexCommonLib = dependenciesFile.text.indexOf("com.mapbox.common:common:", startSearchIndex)
+    int lastIndexCommonLib = Math.min(
+            dependenciesFile.text.indexOf("\n", firstIndexCommonLib),
+            dependenciesFile.text.indexOf(" ", firstIndexCommonLib)
+    )
     String commonLibDependency = dependenciesFile.text.substring(firstIndexCommonLib, lastIndexCommonLib)
     return commonLibDependency
 }
