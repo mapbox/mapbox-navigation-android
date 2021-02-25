@@ -38,7 +38,6 @@ import com.mapbox.navigation.examples.core.replay.HistoryFilesActivity
 import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
-import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import kotlinx.coroutines.CoroutineScope
@@ -107,7 +106,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun initMapStyle() {
         viewportDataSource = MapboxNavigationViewportDataSource(
-            MapboxNavigationViewportDataSourceOptions.Builder().build(),
             binding.mapView.getMapboxMap()
         )
         binding.mapView.getMapboxMap().loadStyleUri(

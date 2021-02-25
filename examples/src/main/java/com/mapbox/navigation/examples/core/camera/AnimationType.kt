@@ -4,5 +4,6 @@ enum class AnimationType {
     Following,
     Overview,
     ToPOI,
-    LookAtPOIWhenFollowing
+    LookAtPOIWhenFollowing,
+    RemoveRoute
 }

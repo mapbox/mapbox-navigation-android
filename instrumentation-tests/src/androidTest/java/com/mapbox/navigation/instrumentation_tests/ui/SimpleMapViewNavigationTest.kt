@@ -29,7 +29,6 @@ import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
-import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
@@ -119,7 +118,6 @@ abstract class SimpleMapViewNavigationTest :
     protected fun addNavigationCamera() {
         runOnMainSync {
             mapboxNavigationViewportDataSource = MapboxNavigationViewportDataSource(
-                MapboxNavigationViewportDataSourceOptions.Builder().build(),
                 activity.mapboxMap
             )
             navigationCamera = NavigationCamera(

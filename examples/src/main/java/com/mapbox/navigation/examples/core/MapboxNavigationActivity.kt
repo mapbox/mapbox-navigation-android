@@ -63,7 +63,6 @@ import com.mapbox.navigation.ui.maneuver.model.StepDistance
 import com.mapbox.navigation.ui.maneuver.model.StepDistanceError
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
-import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
@@ -332,7 +331,6 @@ class MapboxNavigationActivity :
         }
         initNavigation()
         viewportDataSource = MapboxNavigationViewportDataSource(
-            MapboxNavigationViewportDataSourceOptions.Builder().build(),
             binding.mapView.getMapboxMap()
         )
         navigationCamera = NavigationCamera(
@@ -539,9 +537,9 @@ class MapboxNavigationActivity :
 
     private fun updateCameraToOverview() {
         if (this.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            viewportDataSource.overviewPaddingPropertyOverride(landscapeOverviewEdgeInsets)
+            viewportDataSource.overviewPadding = landscapeOverviewEdgeInsets
         } else {
-            viewportDataSource.overviewPaddingPropertyOverride(overviewEdgeInsets)
+            viewportDataSource.overviewPadding = overviewEdgeInsets
         }
         viewportDataSource.evaluate()
         navigationCamera.requestNavigationCameraToOverview()
@@ -549,9 +547,9 @@ class MapboxNavigationActivity :
 
     private fun updateCameraToFollowing() {
         if (this.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            viewportDataSource.followingPaddingPropertyOverride(landscapeFollowingEdgeInsets)
+            viewportDataSource.followingPadding = landscapeFollowingEdgeInsets
         } else {
-            viewportDataSource.followingPaddingPropertyOverride(followingEdgeInsets)
+            viewportDataSource.followingPadding = followingEdgeInsets
         }
         viewportDataSource.evaluate()
         navigationCamera.requestNavigationCameraToFollowing()

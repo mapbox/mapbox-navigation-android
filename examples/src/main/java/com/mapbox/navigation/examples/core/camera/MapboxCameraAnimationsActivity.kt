@@ -38,6 +38,7 @@ import com.mapbox.maps.plugin.gestures.getGesturesPlugin
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -56,9 +57,11 @@ import com.mapbox.navigation.examples.core.camera.AnimationAdapter.OnAnimationBu
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityCameraBinding
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
-import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
+import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandler
+import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.clearRouteLine
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
@@ -100,20 +103,35 @@ class MapboxCameraAnimationsActivity :
     private val pixelDensity = Resources.getSystem().displayMetrics.density
     private val overviewEdgeInsets: EdgeInsets by lazy {
         EdgeInsets(
-            10.0 * pixelDensity,
-            10.0 * pixelDensity,
-            10.0 * pixelDensity,
-            10.0 * pixelDensity
+            40.0 * pixelDensity,
+            40.0 * pixelDensity,
+            40.0 * pixelDensity,
+            40.0 * pixelDensity
         )
     }
-    private val followingEdgeInsets: EdgeInsets by lazy {
+
+    private val paddedFollowingEdgeInsets = EdgeInsets(
+        0.0 * pixelDensity,
+        40.0 * pixelDensity,
+        120.0 * pixelDensity,
+        40.0 * pixelDensity
+    )
+
+    private val notPaddedEdgeInsets: EdgeInsets by lazy {
         EdgeInsets(
-            mapboxMap.getSize().height.toDouble() * 2.0 / 3.0,
-            0.0 * pixelDensity,
-            0.0 * pixelDensity,
-            0.0 * pixelDensity
+            0.0,
+            0.0,
+            0.0,
+            0.0
         )
     }
+
+    private var followingEdgeInsets = notPaddedEdgeInsets
+        set(value) {
+            field = value
+            viewportDataSource.followingPadding = value
+            viewportDataSource.evaluate()
+        }
 
     private var lookAtPoint: Point? = null
         set(value) {
@@ -191,10 +209,23 @@ class MapboxCameraAnimationsActivity :
                 }
                 startSimulation(routes[0])
                 viewportDataSource.onRouteChanged(routes.first())
-                viewportDataSource.overviewPaddingPropertyOverride(overviewEdgeInsets)
+                viewportDataSource.overviewPadding = overviewEdgeInsets
                 viewportDataSource.evaluate()
                 navigationCamera.requestNavigationCameraToOverview()
             } else {
+                CoroutineScope(Dispatchers.Main).launch {
+                    routeArrowAPI.clearArrows().apply {
+                        ifNonNull(routeArrowView, mapboxMap.getStyle()) { view, style ->
+                            view.render(style, this)
+                        }
+                    }
+                    routeLineAPI?.clearRouteLine()?.apply {
+                        ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
+                            view.renderClearRouteLineValue(style, this)
+                        }
+                    }
+                }
+                viewportDataSource.clearRouteData()
                 navigationCamera.requestNavigationCameraToIdle()
             }
         }
@@ -206,6 +237,7 @@ class MapboxCameraAnimationsActivity :
         }
     }
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = LayoutActivityCameraBinding.inflate(layoutInflater)
@@ -225,15 +257,22 @@ class MapboxCameraAnimationsActivity :
 
         initNavigation()
 
+        val debugger = MapboxNavigationViewportDataSourceDebugger(
+            this,
+            binding.mapView
+        ).apply {
+            enabled = true
+        }
         viewportDataSource = MapboxNavigationViewportDataSource(
-            MapboxNavigationViewportDataSourceOptions.Builder().build(),
             binding.mapView.getMapboxMap()
         )
+        viewportDataSource.debugger = debugger
         navigationCamera = NavigationCamera(
             binding.mapView.getMapboxMap(),
             binding.mapView.getCameraAnimationsPlugin(),
             viewportDataSource
         )
+        navigationCamera.debugger = debugger
         /* Alternative to the NavigationScaleGestureHandler
         mapView.getCameraAnimationsPlugin().addCameraAnimationsLifecycleListener(
             NavigationBasicGesturesHandler(navigationCamera)
@@ -247,7 +286,10 @@ class MapboxCameraAnimationsActivity :
                 locationComponent,
                 object : NavigationScaleGestureActionListener {
                     override fun onNavigationScaleGestureAction() {
-                        viewportDataSource.followingZoomUpdatesAllowed = false
+                        viewportDataSource
+                            .options
+                            .followingFrameOptions
+                            .zoomUpdatesAllowed = false
                     }
                 }
             ).apply { initialize() }
@@ -283,61 +325,55 @@ class MapboxCameraAnimationsActivity :
 
     private fun initButtons() {
         binding.gravitateLeft.setOnClickListener {
-            mapboxMap.getCameraOptions(null).padding?.let {
-                val padding = EdgeInsets(
-                    it.top,
-                    0.0,
-                    it.bottom,
-                    120.0 * pixelDensity
-                )
-                viewportDataSource.followingPaddingPropertyOverride(padding)
-                viewportDataSource.evaluate()
-            }
+            followingEdgeInsets = EdgeInsets(
+                followingEdgeInsets.top,
+                20.0,
+                followingEdgeInsets.bottom,
+                200.0 * pixelDensity
+            )
+            viewportDataSource.evaluate()
         }
 
         binding.gravitateRight.setOnClickListener {
-            mapboxMap.getCameraOptions(null).padding?.let {
-                val padding = EdgeInsets(
-                    it.top,
-                    120.0 * pixelDensity,
-                    it.bottom,
-                    0.0
-                )
-                viewportDataSource.followingPaddingPropertyOverride(padding)
-                viewportDataSource.evaluate()
-            }
+            followingEdgeInsets = EdgeInsets(
+                followingEdgeInsets.top,
+                200.0 * pixelDensity,
+                followingEdgeInsets.bottom,
+                20.0
+            )
+            viewportDataSource.evaluate()
         }
 
         binding.gravitateTop.setOnClickListener {
-            mapboxMap.getCameraOptions(null).padding?.let {
-                val padding = EdgeInsets(
-                    0.0,
-                    it.left,
-                    120.0 * pixelDensity,
-                    it.right
-                )
-                viewportDataSource.followingPaddingPropertyOverride(padding)
-                viewportDataSource.evaluate()
-            }
+            followingEdgeInsets = EdgeInsets(
+                20.0,
+                followingEdgeInsets.left,
+                240.0 * pixelDensity,
+                followingEdgeInsets.right
+            )
+            viewportDataSource.evaluate()
         }
 
         binding.gravitateBottom.setOnClickListener {
-            mapboxMap.getCameraOptions(null).padding?.let {
-                val padding = EdgeInsets(
-                    120.0 * pixelDensity,
-                    it.left,
-                    0.0,
-                    it.right
-                )
-                viewportDataSource.followingPaddingPropertyOverride(padding)
-                viewportDataSource.evaluate()
-            }
+            followingEdgeInsets = EdgeInsets(
+                240.0 * pixelDensity,
+                followingEdgeInsets.left,
+                20.0,
+                followingEdgeInsets.right
+            )
+            viewportDataSource.evaluate()
         }
     }
 
     private fun initCameraListeners() {
         mapboxMap.addOnCameraChangeListener {
             this.runOnUiThread {
+                if (navigationCamera.state == NavigationCameraState.FOLLOWING &&
+                    mapboxMap.getCameraOptions().pitch!! < 0.1
+                ) {
+                    // this is added to avoid locking zoom level after scaling in top-down following
+                    viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed = true
+                }
                 updateCameraChangeView()
             }
         }
@@ -450,13 +486,18 @@ class MapboxCameraAnimationsActivity :
     override fun onButtonClicked(animationType: AnimationType) {
         when (animationType) {
             AnimationType.Following -> {
-                viewportDataSource.followingZoomUpdatesAllowed = true
-                viewportDataSource.followingPaddingPropertyOverride(followingEdgeInsets)
+                followingEdgeInsets = if (followingEdgeInsets == paddedFollowingEdgeInsets) {
+                    notPaddedEdgeInsets
+                } else {
+                    paddedFollowingEdgeInsets
+                }
+                viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed = true
+                viewportDataSource.followingPadding = followingEdgeInsets
                 viewportDataSource.evaluate()
                 navigationCamera.requestNavigationCameraToFollowing()
             }
             AnimationType.Overview -> {
-                viewportDataSource.overviewPaddingPropertyOverride(overviewEdgeInsets)
+                viewportDataSource.overviewPadding = overviewEdgeInsets
                 viewportDataSource.evaluate()
                 navigationCamera.requestNavigationCameraToOverview()
             }
@@ -466,14 +507,18 @@ class MapboxCameraAnimationsActivity :
                         it.longitude + 0.0123,
                         it.latitude + 0.0123
                     )
-                    binding.mapView.getCameraAnimationsPlugin().flyTo(
+                    // workaround for https://github.com/mapbox/mapbox-maps-android/issues/177
+                    // binding.mapView.getCameraAnimationsPlugin().flyTo(
+                    binding.mapView.getCameraAnimationsPlugin().easeTo(
                         CameraOptions.Builder()
+                            .padding(notPaddedEdgeInsets)
                             .center(center)
                             .bearing(0.0)
                             .zoom(14.0)
                             .pitch(0.0)
                             .build(),
                         MapAnimationOptions.mapAnimationOptions {
+                            duration(1000L)
                         }
                     )
                 }
@@ -498,6 +543,9 @@ class MapboxCameraAnimationsActivity :
                     viewportDataSource.followingBearingPropertyOverride(null)
                     viewportDataSource.evaluate()
                 }
+            }
+            AnimationType.RemoveRoute -> {
+                mapboxNavigation.setRoutes(emptyList())
             }
         }
     }
