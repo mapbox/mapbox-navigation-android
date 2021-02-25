@@ -6,10 +6,7 @@ import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
-import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.ScreenCoordinate
+import com.mapbox.maps.*
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
@@ -687,6 +684,9 @@ class MapboxNavigationViewportDataSource(
         updateFollowingData(pointsForFollowing)
         updateOverviewData(pointsForOverview)
 
+        val anchorPointFromPitch = getAnchorPointFromPitch(followingPitchProperty.get(), options.maxFollowingPitch, mapboxMap.getSize(), followingPaddingProperty.get())
+        val paddingFromAnchorPoint = getEdgeInsetsFromPoint(mapboxMap.getSize(), anchorPointFromPitch)
+
         followingCameraOptions =
             CameraOptions.Builder().apply {
                 if (followingCenterUpdatesAllowed) {
@@ -702,7 +702,7 @@ class MapboxNavigationViewportDataSource(
                     pitch(followingPitchProperty.get())
                 }
                 if (followingPaddingUpdatesAllowed) {
-                    padding(followingPaddingProperty.get())
+                    padding(paddingFromAnchorPoint)
                 }
                 if (followingAnchorUpdatesAllowed) {
                     anchor(followingAnchorProperty.get())
@@ -730,6 +730,20 @@ class MapboxNavigationViewportDataSource(
                     anchor(overviewAnchorProperty.get())
                 }
             }.build()
+    }
+
+    private fun getAnchorPointFromPitch(currentPitch: Double = 0.0, maxPitch: Double = 60.0, mapSize: Size, padding: EdgeInsets): ScreenCoordinate {
+        val centerInsidePaddingX = ((mapSize.width - padding.left - padding.right) / 2.0) + padding.left
+        val centerInsidePaddingY = ((mapSize.height - padding.top - padding.bottom) / 2.0) + padding.top
+        val pitchPercentage = min(max(currentPitch / maxPitch, 0.0), 1.0)
+        val anchorPointX = centerInsidePaddingX
+        val anchorPointY = ((mapSize.height - padding.bottom - centerInsidePaddingY) * pitchPercentage) + centerInsidePaddingY
+        return ScreenCoordinate(anchorPointX,anchorPointY)
+    }
+
+    private fun getEdgeInsetsFromPoint(mapSize: Size, screenPoint: ScreenCoordinate? = null): EdgeInsets {
+        var point = screenPoint ?: ScreenCoordinate(mapSize.width.toDouble() / 2.0, mapSize.height.toDouble() / 2.0)
+        return EdgeInsets(point.y.toDouble(), point.x.toDouble(), (mapSize.height - point.y).toDouble(), (mapSize.width - point.x).toDouble())
     }
 
     private fun updateFollowingData(pointsForFollowing: List<Point>) {

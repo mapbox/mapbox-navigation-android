@@ -99,18 +99,18 @@ class MapboxCameraAnimationsActivity :
     private val pixelDensity = Resources.getSystem().displayMetrics.density
     private val overviewEdgeInsets: EdgeInsets by lazy {
         EdgeInsets(
-            10.0 * pixelDensity,
-            10.0 * pixelDensity,
-            10.0 * pixelDensity,
-            10.0 * pixelDensity
+            40.0 * pixelDensity,
+            40.0 * pixelDensity,
+            40.0 * pixelDensity,
+            40.0 * pixelDensity
         )
     }
     private val followingEdgeInsets: EdgeInsets by lazy {
         EdgeInsets(
-            mapboxMap.getSize().height.toDouble() * 2.0 / 3.0,
-            0.0 * pixelDensity,
-            0.0 * pixelDensity,
-            0.0 * pixelDensity
+            80.0 * pixelDensity,
+            40.0 * pixelDensity,
+            120.0 * pixelDensity,
+            40.0 * pixelDensity
         )
     }
 
