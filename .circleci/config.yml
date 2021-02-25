@@ -260,6 +260,19 @@ commands:
               echo "export POM_VERSION_NAME=$POM_VERSION_NAME" >> $BASH_ENV
             fi
 
+  generate-google-services-json:
+    steps:
+      - run:
+          name: Generate google services json for the test app
+          command:  |
+            echo "${TEST_APP_GOOGLE_SERVICES_JSON}" > /root/code/test-app/google-services.json
+
+  download-native-libs:
+    steps:
+      - run:
+          name: Download native libraries for crashlytics
+          command: ./gradlew downloadUnstrippedNativeLibsDir
+
   run-internal-firebase-instrumentation:
     parameters:
       module_wrapper:
@@ -415,6 +428,8 @@ jobs:
       GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
     steps:
       - read-workspace
+      - download-native-libs
+      - generate-google-services-json
       - assemble-module:
           module_target: "test-app"
           variant: "Release"
