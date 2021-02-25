@@ -58,6 +58,10 @@ dependency-updates:
 	$(call run-gradle-tasks,$(CORE_MODULES),dependencyUpdates) \
 	&& $(call run-gradle-tasks,$(UI_MODULES),dependencyUpdates)
 
+.PHONY: verify-common-sdk-version
+verify-common-sdk-version:
+    ./gradlew verifyCommonSdkVersion
+
 .PHONY: dex-count
 dex-count:
 	./gradlew countDebugDexMethods
