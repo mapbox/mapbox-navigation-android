@@ -18,6 +18,7 @@ import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.NAVIGATION_CAMERA_OWNER
+import com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
@@ -58,9 +59,9 @@ import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedOb
  * for a certain period of time.
  *
  * For example, when using the [MapboxNavigationViewportDataSource], you can call
- * [MapboxNavigationViewportDataSource.followingZoomUpdatesAllowed] with `false` to stop producing
+ * [FollowingFrameOptions.zoomUpdatesAllowed] with `false` to stop producing
  * zoom level updates. You can later reset the value to `true` (after a button click, or after
- * a certain period of time).
+ * a certain period of time). Use [MapboxNavigationViewportDataSource.options] to mutate this state.
  *
  * ### Integration
  * To enable the handler, register it via

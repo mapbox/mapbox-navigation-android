@@ -1,107 +1,308 @@
 package com.mapbox.navigation.ui.maps.camera.data
 
+import android.location.Location
+
 /**
- * Set of options used to customize [MapboxNavigationViewportDataSource].
- *
- * @param maxFollowingPitch the max pitch that will be generated for camera frames when following
- * @param minFollowingZoom the min zoom that will be generated for all following camera frames
- * @param maxZoom the max zoom that will be generated for all camera frames
+ * Options that impact generation of frames.
  */
-class MapboxNavigationViewportDataSourceOptions private constructor(
-    val maxFollowingPitch: Double,
-    val minFollowingZoom: Double,
-    val maxZoom: Double
-) {
+class MapboxNavigationViewportDataSourceOptions internal constructor() {
+    /**
+     * Options that impact generation of following frames.
+     */
+    val followingFrameOptions = FollowingFrameOptions()
 
     /**
-     * Get a builder to customize a subset of current options.
+     * Options that impact generation of overview frames.
      */
-    fun toBuilder(): Builder = Builder().apply {
-        maxFollowingPitch(maxFollowingPitch)
-        minFollowingZoom(minFollowingZoom)
-        maxZoom(maxZoom)
-    }
+    val overviewFrameOptions = OverviewFrameOptions()
+}
+
+/**
+ * Options that impact the generation of the following frame.
+ */
+class FollowingFrameOptions internal constructor() {
 
     /**
-     * Indicates whether some other object is "equal to" this one.
+     * The default pitch that will be generated for following camera frames.
+     *
+     * Defaults to `45.0` degrees.
      */
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as MapboxNavigationViewportDataSourceOptions
-
-        if (maxFollowingPitch != other.maxFollowingPitch) return false
-        if (minFollowingZoom != other.minFollowingZoom) return false
-        if (maxZoom != other.maxZoom) return false
-
-        return true
-    }
+    var defaultPitch = 45.0
 
     /**
-     * Returns a hash code value for the object.
+     * The min zoom that will be generated for camera following frames.
+     *
+     * Defaults to `10.5`.
      */
-    override fun hashCode(): Int {
-        var result = maxFollowingPitch.hashCode()
-        result = 31 * result + minFollowingZoom.hashCode()
-        result = 31 * result + maxZoom.hashCode()
-        return result
-    }
+    var minZoom = 10.5
 
     /**
-     * Returns a string representation of the object.
+     * The max zoom that will be generated for camera following frames.
+     *
+     * Defaults to `16.35`.
      */
-    override fun toString(): String {
-        return "MapboxNavigationViewportDataSourceOptions(" +
-            "maxFollowingPitch=$maxFollowingPitch, " +
-            "minFollowingZoom=$minFollowingZoom" +
-            "maxZoom=$maxZoom" +
-            ")"
-    }
+    var maxZoom = 16.35
 
     /**
-     * Build a new [MapboxNavigationViewportDataSourceOptions]
+     * When a produced **following frame** has pitch `0`,
+     * the puck will not be tied to the bottom edge of the [MapboxNavigationViewportDataSource.followingPadding] and instead move
+     * around the centroid of the maneuver's geometry to maximize the view of the maneuver's geometry within the [MapboxNavigationViewportDataSource.followingPadding].
+     *
+     * Defaults to `true`.
      */
-    class Builder {
-        private var maxFollowingPitch = 40.0
-        private var minFollowingZoom = 12.0
-        private var maxZoom = 19.0
+    var maximizeViewableRouteGeometryWhenPitchZero = true
 
+    /**
+     * Options that modify the framed route geometries based on the intersection density.
+     *
+     * By default we frame the whole remainder of the step while the options here shrink that geometry to increase the zoom level.
+     */
+    val intersectionDensityCalculation = IntersectionDensityCalculation()
+
+    /**
+     * Options that modify the framed route geometries when approaching a maneuver.
+     */
+    val pitchNearManeuvers = PitchNearManeuvers()
+
+    /**
+     * Options that modify the framed route geometries by appending additional points after maneuver to extend the view.
+     */
+    val frameGeometryAfterManeuver = FrameGeometryAfterManeuver()
+
+    /**
+     * Options that impact bearing generation to not be fixed to location's bearing but also taking into the direction to the upcoming maneuver.
+     */
+    val bearingSmoothing = BearingSmoothing()
+
+    /**
+     * If `true`, the source will manipulate Camera Center Property when producing following frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Center Property.
+     *
+     * Defaults to `true`.
+     */
+    var centerUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Zoom Property when producing following frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Zoom Center Property.
+     *
+     * Defaults to `true`.
+     */
+    var zoomUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Bearing Property when producing following frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Bearing Property.
+     *
+     * Defaults to `true`.
+     */
+    var bearingUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Pitch Property when producing following frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Pitch Property.
+     *
+     * Defaults to `true`.
+     */
+    var pitchUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Padding Property when producing following frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Padding Property.
+     *
+     * Defaults to `true`.
+     */
+    var paddingUpdatesAllowed = true
+
+    /**
+     * Options that modify the framed route geometries based on the intersection density.
+     *
+     * By default we frame the whole remainder of the step while the options here shrink that geometry to increase the zoom level.
+     */
+    class IntersectionDensityCalculation internal constructor() {
         /**
-         * Override [MapboxNavigationViewportDataSourceOptions.maxFollowingPitch].
+         * **Preconditions**:
+         * - a route is provided via [MapboxNavigationViewportDataSource.onRouteChanged]
+         * - updates are provided via [MapboxNavigationViewportDataSource.onRouteProgressChanged]
          *
-         * Defaults to 40.0.
-         */
-        fun maxFollowingPitch(maxFollowingPitch: Double): Builder = apply {
-            this.maxFollowingPitch = maxFollowingPitch
-        }
-
-        /**
-         * Override [MapboxNavigationViewportDataSourceOptions.minFollowingZoom].
+         * When this option is enabled and the preconditions are met,
+         * the geometry that's going to be **framed for following** will not match the whole remainder of the current step
+         * but a smaller subset of that geometry to make the zoom level higher.
          *
-         * Defaults to 12.0.
-         */
-        fun minFollowingZoom(minFollowingZoom: Double): Builder = apply {
-            this.minFollowingZoom = minFollowingZoom
-        }
-
-        /**
-         * Override [MapboxNavigationViewportDataSourceOptions.maxZoom].
+         * This has an effect of zooming closer in urban locations when intersections are dense and zooming out on highways where opportunities to turn are farther apart.
          *
-         * Defaults to 19.0.
+         * Defaults to `true`.
          */
-        fun maxZoom(maxZoom: Double): Builder = apply {
-            this.maxZoom = maxZoom
-        }
+        var enabled = true
 
         /**
-         * Build a new instance of [MapboxNavigationViewportDataSourceOptions].
+         * When enabled this multiplier can be used to adjust the size of the portion of the remaining step that's going to be selected for framing.
+         *
+         * Defaults to `7.0`.
          */
-        fun build(): MapboxNavigationViewportDataSourceOptions =
-            MapboxNavigationViewportDataSourceOptions(
-                maxFollowingPitch = maxFollowingPitch,
-                minFollowingZoom = minFollowingZoom,
-                maxZoom = maxZoom
-            )
+        var averageDistanceMultiplier = 7.0
+
+        /**
+         * When enabled, this describes the minimum distance between intersections to count them as 2 instances.
+         *
+         * This has an effect of filtering out intersections based on parking lot entrances, driveways and alleys from the average intersection distance.
+         *
+         * Defaults to `20.0` meters.
+         */
+        var minimumDistanceBetweenIntersections = 20.0
     }
+
+    /**
+     * Options that modify the framed route geometries when approaching a maneuver.
+     */
+    class PitchNearManeuvers internal constructor() {
+        /**
+         * **Preconditions**:
+         * - a route is provided via [MapboxNavigationViewportDataSource.onRouteChanged]
+         * - updates are provided via [MapboxNavigationViewportDataSource.onRouteProgressChanged]
+         *
+         * When enabled the generated **following camera frame** will have pitch `0` when [triggerDistanceFromManeuver] is met.
+         *
+         * Defaults to `true`.
+         */
+        var enabled = true
+
+        /**
+         * When this option is enabled and the preconditions are met,
+         * this variable describes the threshold distance to the next maneuver makes the frame with pitch `0`, based on the [MapboxNavigationViewportDataSource.onRouteProgressChanged].
+         *
+         * Defaults to `180.0` meters.
+         */
+        var triggerDistanceFromManeuver = 180.0
+    }
+
+    /**
+     * Options that modify the framed route geometries by appending additional points after maneuver to extend the view.
+     */
+    class FrameGeometryAfterManeuver internal constructor() {
+        /**
+         * **Preconditions**:
+         * - a route is provided via [MapboxNavigationViewportDataSource.onRouteChanged]
+         * - updates are provided via [MapboxNavigationViewportDataSource.onRouteProgressChanged]
+         * - produced **following frame** has pitch `0`
+         *
+         * When this option is enabled and the preconditions are met,
+         * this controls whether additional points _after_ the upcoming maneuver should be framed to provide more context.
+         *
+         * Defaults to `true`.
+         */
+        var enabled = true
+
+        /**
+         * When enabled, this controls the distance between maneuvers closely following the current one to treat them for inclusion in the frame.
+         *
+         * Defaults to `150.0` meters.
+         */
+        var distanceToCoalesceCompoundManeuvers = 150.0
+
+        /**
+         * When enabled, this controls the distance on route after the current maneuver to include in the frame.
+         *
+         * This is added on top of potentially included compound maneuvers that closely follow the upcoming one,
+         * controlled by [distanceToCoalesceCompoundManeuvers].
+         *
+         * Defaults to `100.0` meters.
+         */
+        var distanceToFrameAfterManeuver = 100.0
+    }
+
+    /**
+     * Options that impact bearing generation to not be fixed to location's bearing but also taking into the direction to the upcoming maneuver.
+     */
+    class BearingSmoothing internal constructor() {
+        /**
+         * If enabled, the **following frame**'s bearing won't exactly reflect the bearing returned by the [Location] from [MapboxNavigationViewportDataSource.onLocationChanged]
+         * but will also be affected by the direction to the upcoming framed geometry, to maximize the viewable area.
+         *
+         * Defaults to `true`.
+         *
+         * @see [maxBearingAngleDiff]
+         */
+        var enabled = true
+
+        /**
+         * When enabled, this controls how much the **following frame**'s bearing can deviate from the [Location] bearing, in degrees.
+         *
+         * Defaults to `45.0` degrees.
+         */
+        var maxBearingAngleDiff = 45.0
+    }
+}
+
+/**
+ * Options that impact the generation of the overview frame.
+ */
+class OverviewFrameOptions internal constructor() {
+
+    /**
+     * The max zoom that will be generated for camera overview frames.
+     *
+     * Defaults to `16.35`.
+     */
+    var maxZoom = 16.35
+
+    /**
+     * If `true`, the source will manipulate Camera Center Property when producing overview frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Center Property.
+     *
+     * Defaults to `true`.
+     */
+    var centerUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Zoom Property when producing overview frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Zoom Center Property.
+     *
+     * Defaults to `true`.
+     */
+    var zoomUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Bearing Property when producing overview frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Bearing Property.
+     *
+     * Defaults to `true`.
+     */
+    var bearingUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Pitch Property when producing overview frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Pitch Property.
+     *
+     * Defaults to `true`.
+     */
+    var pitchUpdatesAllowed = true
+
+    /**
+     * If `true`, the source will manipulate Camera Padding Property when producing overview frame
+     * updates as necessary.
+     *
+     * If `false`, the source will not change the current Camera Padding Property.
+     *
+     * Defaults to `true`.
+     */
+    var paddingUpdatesAllowed = true
 }

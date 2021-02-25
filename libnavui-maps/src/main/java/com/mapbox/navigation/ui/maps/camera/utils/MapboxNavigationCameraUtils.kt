@@ -10,5 +10,3 @@ internal fun shortestRotation(from: Double, to: Double): Double {
 internal fun Location.toPoint(): Point {
     return Point.fromLngLat(this.longitude, this.latitude)
 }
-
-internal fun Float.metersToKilometers() = this / 1000.0

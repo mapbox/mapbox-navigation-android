@@ -9,10 +9,12 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.animator.CameraAnimator
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.ViewportData
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceUpdateObserver
+import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandler
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
@@ -87,6 +89,14 @@ import java.util.concurrent.CopyOnWriteArraySet
  * - [NavigationScaleGestureHandler] behaves as above, but allows for executing various scale
  * gestures to manipulate the camera's zoom level when in [NavigationCameraState.FOLLOWING] without
  * immediately falling back to [NavigationCameraState.IDLE].
+ *
+ * ## Debugging
+ * If you are using the [MapboxNavigationViewportDataSource] instance,
+ * you can use [debugger] to provide a [MapboxNavigationViewportDataSourceDebugger] instance
+ * which will draw various info on the screen when the [NavigationCamera] operates to together with
+ * the [MapboxNavigationViewportDataSource].
+ *
+ * Make sure to also provide the same instance to [MapboxNavigationViewportDataSource.debugger].
  */
 @UiThread
 class NavigationCamera(
@@ -119,11 +129,18 @@ class NavigationCamera(
         private set(value) {
             if (value != field) {
                 field = value
+                updateDebugger()
                 navigationCameraStateChangedObservers.forEach {
                     it.onNavigationCameraStateChanged(value)
                 }
             }
         }
+
+    /**
+     * Set a [MapboxNavigationViewportDataSourceDebugger].
+     */
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    var debugger: MapboxNavigationViewportDataSourceDebugger? = null
 
     private val sourceUpdateObserver = object : ViewportDataSourceUpdateObserver {
         override fun viewportDataSourceUpdated(viewportData: ViewportData) {
@@ -348,5 +365,10 @@ class NavigationCamera(
         override fun onAnimationRepeat(animation: Animator?) {
             // no impl
         }
+    }
+
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    private fun updateDebugger() {
+        debugger?.cameraState = state
     }
 }
