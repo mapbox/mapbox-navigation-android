@@ -38,16 +38,8 @@ class EstimatedTimeToArrivalFormatterTest {
         every { DateFormat.is24HourFormat(ctx) } returns false
         val now = Date()
         val expected = SimpleDateFormat("h:mm a").format(now).toLowerCase()
-        val update = TripProgressUpdate(
-            now.time,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0
-        )
 
-        val result = EstimatedTimeToArrivalFormatter(ctx, NONE_SPECIFIED).format(update)
+        val result = EstimatedTimeToArrivalFormatter(ctx, NONE_SPECIFIED).format(now.time)
 
         assertEquals(expected, result.toString())
         unmockkStatic(DateFormat::class)
@@ -59,16 +51,8 @@ class EstimatedTimeToArrivalFormatterTest {
         every { DateFormat.is24HourFormat(ctx) } returns false
         val now = Date()
         val expected = SimpleDateFormat("h:mm a").format(now).toLowerCase()
-        val update = TripProgressUpdate(
-            now.time,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0
-        )
 
-        val result = EstimatedTimeToArrivalFormatter(ctx, TWELVE_HOURS).format(update)
+        val result = EstimatedTimeToArrivalFormatter(ctx, TWELVE_HOURS).format(now.time)
 
         assertEquals(expected, result.toString())
         unmockkStatic(DateFormat::class)
@@ -80,16 +64,8 @@ class EstimatedTimeToArrivalFormatterTest {
         every { DateFormat.is24HourFormat(ctx) } returns false
         val now = Date()
         val expected = SimpleDateFormat("H:mm").format(now)
-        val update = TripProgressUpdate(
-            now.time,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0
-        )
 
-        val result = EstimatedTimeToArrivalFormatter(ctx, TWENTY_FOUR_HOURS).format(update)
+        val result = EstimatedTimeToArrivalFormatter(ctx, TWENTY_FOUR_HOURS).format(now.time)
 
         assertEquals(expected, result.toString())
         unmockkStatic(DateFormat::class)
@@ -101,16 +77,8 @@ class EstimatedTimeToArrivalFormatterTest {
         every { DateFormat.is24HourFormat(ctx) } returns true
         val now = Date()
         val expected = SimpleDateFormat("H:mm").format(now)
-        val update = TripProgressUpdate(
-            now.time,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0
-        )
 
-        val result = EstimatedTimeToArrivalFormatter(ctx, NONE_SPECIFIED).format(update)
+        val result = EstimatedTimeToArrivalFormatter(ctx, NONE_SPECIFIED).format(now.time)
 
         assertEquals(expected, result.toString())
         unmockkStatic(DateFormat::class)
@@ -122,16 +90,8 @@ class EstimatedTimeToArrivalFormatterTest {
         every { DateFormat.is24HourFormat(ctx) } returns true
         val now = Date()
         val expected = SimpleDateFormat("h:mm a").format(now).toLowerCase()
-        val update = TripProgressUpdate(
-            now.time,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0
-        )
 
-        val result = EstimatedTimeToArrivalFormatter(ctx, TWELVE_HOURS).format(update)
+        val result = EstimatedTimeToArrivalFormatter(ctx, TWELVE_HOURS).format(now.time)
 
         assertEquals(expected, result.toString())
         unmockkStatic(DateFormat::class)
@@ -143,15 +103,8 @@ class EstimatedTimeToArrivalFormatterTest {
         every { DateFormat.is24HourFormat(ctx) } returns false
         val now = Date()
         val expected = SimpleDateFormat("h:mm a").format(now).toLowerCase()
-        val update = TripProgressUpdate(
-            now.time,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0
-        )
-        val result = EstimatedTimeToArrivalFormatter(ctx, NONE_SPECIFIED).format(update)
+
+        val result = EstimatedTimeToArrivalFormatter(ctx, NONE_SPECIFIED).format(now.time)
 
         assertEquals(expected, result.toString())
         unmockkStatic(DateFormat::class)
@@ -163,15 +116,8 @@ class EstimatedTimeToArrivalFormatterTest {
         every { DateFormat.is24HourFormat(ctx) } returns false
         val now = Date()
         val expected = SimpleDateFormat("H:mm").format(now)
-        val update = TripProgressUpdate(
-            now.time,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0
-        )
-        val result = EstimatedTimeToArrivalFormatter(ctx, TWENTY_FOUR_HOURS).format(update)
+
+        val result = EstimatedTimeToArrivalFormatter(ctx, TWENTY_FOUR_HOURS).format(now.time)
 
         assertEquals(expected, result.toString())
         unmockkStatic(DateFormat::class)

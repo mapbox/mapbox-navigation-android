@@ -16,10 +16,10 @@ import com.mapbox.navigation.ui.base.formatter.ValueFormatter
  */
 class TripProgressUpdateFormatter private constructor(
     private val estimatedTimeToArrivalFormatter:
-        ValueFormatter<TripProgressUpdate, SpannableString>,
-    private val distanceRemainingFormatter: ValueFormatter<TripProgressUpdate, SpannableString>,
-    private val timeRemainingFormatter: ValueFormatter<TripProgressUpdate, SpannableString>,
-    private val percentRouteTraveledFormatter: ValueFormatter<TripProgressUpdate, SpannableString>
+        ValueFormatter<Long, SpannableString>,
+    private val distanceRemainingFormatter: ValueFormatter<Double, SpannableString>,
+    private val timeRemainingFormatter: ValueFormatter<Double, SpannableString>,
+    private val percentRouteTraveledFormatter: ValueFormatter<Double, SpannableString>
 ) {
 
     /**
@@ -81,42 +81,42 @@ class TripProgressUpdateFormatter private constructor(
     /**
      * Formats the estimated time until arrival
      *
-     * @param update a [TripProgressUpdate]
+     * @param value the estimated time to arrival in milliseconds
      *
      * @return the formatted result
      */
-    fun getEstimatedTimeToArrival(update: TripProgressUpdate) =
-        estimatedTimeToArrivalFormatter.format(update)
+    fun getEstimatedTimeToArrival(value: Long) =
+        estimatedTimeToArrivalFormatter.format(value)
 
     /**
      * Formats the distance remaining
      *
-     * @param update a [TripProgressUpdate]
+     * @param value the distance remaining
      *
      * @return the formatted result
      */
-    fun getDistanceRemaining(update: TripProgressUpdate) =
-        distanceRemainingFormatter.format(update)
+    fun getDistanceRemaining(value: Double) =
+        distanceRemainingFormatter.format(value)
 
     /**
      * Formats the time remaining
      *
-     * @param update a [TripProgressUpdate]
+     * @param value the time remaining
      *
      * @return the formatted result
      */
-    fun getTimeRemaining(update: TripProgressUpdate) =
-        timeRemainingFormatter.format(update)
+    fun getTimeRemaining(value: Double) =
+        timeRemainingFormatter.format(value)
 
     /**
      * Formats the percent distance traveled
      *
-     * @param update a [TripProgressUpdate]
+     * @param value the percent distance traveled
      *
      * @return the formatted result
      */
-    fun getPercentRouteTraveled(update: TripProgressUpdate) =
-        percentRouteTraveledFormatter.format(update)
+    fun getPercentRouteTraveled(value: Double) =
+        percentRouteTraveledFormatter.format(value)
 
     /**
      * Builds an instance of [TripProgressUpdateFormatter]
@@ -125,13 +125,13 @@ class TripProgressUpdateFormatter private constructor(
      */
     class Builder(private val context: Context) {
         private var estimatedTimeToArrivalFormatter:
-            ValueFormatter<TripProgressUpdate, SpannableString>? = null
+            ValueFormatter<Long, SpannableString>? = null
         private var distanceRemainingFormatter:
-            ValueFormatter<TripProgressUpdate, SpannableString>? = null
+            ValueFormatter<Double, SpannableString>? = null
         private var timeRemainingFormatter:
-            ValueFormatter<TripProgressUpdate, SpannableString>? = null
+            ValueFormatter<Double, SpannableString>? = null
         private var percentRouteTraveledFormatter:
-            ValueFormatter<TripProgressUpdate, SpannableString>? = null
+            ValueFormatter<Double, SpannableString>? = null
 
         /**
          * A class that formats a [TripProgressUpdate] to a [SpannableString] representing
@@ -142,7 +142,7 @@ class TripProgressUpdateFormatter private constructor(
          * @return the builder
          */
         fun estimatedTimeToArrivalFormatter(
-            formatter: ValueFormatter<TripProgressUpdate, SpannableString>
+            formatter: ValueFormatter<Long, SpannableString>
         ): Builder =
             apply { this.estimatedTimeToArrivalFormatter = formatter }
 
@@ -155,7 +155,7 @@ class TripProgressUpdateFormatter private constructor(
          * @return the builder
          */
         fun distanceRemainingFormatter(
-            formatter: ValueFormatter<TripProgressUpdate, SpannableString>
+            formatter: ValueFormatter<Double, SpannableString>
         ): Builder =
             apply { this.distanceRemainingFormatter = formatter }
 
@@ -168,7 +168,7 @@ class TripProgressUpdateFormatter private constructor(
          * @return the builder
          */
         fun timeRemainingFormatter(
-            formatter: ValueFormatter<TripProgressUpdate, SpannableString>
+            formatter: ValueFormatter<Double, SpannableString>
         ): Builder =
             apply { this.timeRemainingFormatter = formatter }
 
@@ -181,7 +181,7 @@ class TripProgressUpdateFormatter private constructor(
          * @return the builder
          */
         fun percentRouteTraveledFormatter(
-            formatter: ValueFormatter<TripProgressUpdate, SpannableString>
+            formatter: ValueFormatter<Double, SpannableString>
         ): Builder =
             apply { this.percentRouteTraveledFormatter = formatter }
 
@@ -192,22 +192,22 @@ class TripProgressUpdateFormatter private constructor(
          */
         fun build(): TripProgressUpdateFormatter {
             val theEstimatedTimeToArrivalFormatter:
-                ValueFormatter<TripProgressUpdate, SpannableString> =
+                ValueFormatter<Long, SpannableString> =
                     estimatedTimeToArrivalFormatter ?: EstimatedTimeToArrivalFormatter(
                         context.applicationContext,
                         TimeFormat.NONE_SPECIFIED
                     )
 
-            val theDistanceRemainingFormatter: ValueFormatter<TripProgressUpdate, SpannableString> =
+            val theDistanceRemainingFormatter: ValueFormatter<Double, SpannableString> =
                 distanceRemainingFormatter ?: DistanceRemainingFormatter(
                     DistanceFormatterOptions.Builder(context).build()
                 )
 
-            val theTimeRemainingFormatter: ValueFormatter<TripProgressUpdate, SpannableString> =
+            val theTimeRemainingFormatter: ValueFormatter<Double, SpannableString> =
                 timeRemainingFormatter ?: TimeRemainingFormatter(context.applicationContext)
 
             val thePercentRouteTraveledFormatter:
-                ValueFormatter<TripProgressUpdate, SpannableString> =
+                ValueFormatter<Double, SpannableString> =
                     percentRouteTraveledFormatter ?: PercentDistanceTraveledFormatter()
 
             return TripProgressUpdateFormatter(

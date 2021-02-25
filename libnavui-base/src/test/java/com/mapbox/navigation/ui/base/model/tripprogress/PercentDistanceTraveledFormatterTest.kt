@@ -10,16 +10,7 @@ class PercentDistanceTraveledFormatterTest {
 
     @Test
     fun format() {
-        val update = TripProgressUpdate(
-            System.currentTimeMillis(),
-            19312.1,
-            50.0,
-            100.0,
-            21.0,
-            111
-        )
-
-        val result = PercentDistanceTraveledFormatter().format(update)
+        val result = PercentDistanceTraveledFormatter().format(21.0)
 
         assertEquals("21", result.toString())
     }

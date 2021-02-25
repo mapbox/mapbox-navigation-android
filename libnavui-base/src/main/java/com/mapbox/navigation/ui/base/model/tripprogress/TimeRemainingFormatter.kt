@@ -11,26 +11,26 @@ import java.util.Locale
 /**
  * Formats trip related data for displaying in the UI
  *
- * @param applicationContext an application context instance
+ * @param context an application context instance
  * @param locale an optional [Locale], if not provided the locale will be derived from the context
  */
 open class TimeRemainingFormatter(
     context: Context,
     var locale: Locale? = null
-) : ValueFormatter<TripProgressUpdate, SpannableString> {
+) : ValueFormatter<Double, SpannableString> {
 
     private val appContext: Context = context.applicationContext
 
     /**
      * * Formats an update to a [SpannableString] representing the remaining travel time
      *
-     * @param update a [TripProgressUpdate]
+     * @param value the time remaining value
      * @return a formatted string
      */
-    override fun format(update: TripProgressUpdate): SpannableString {
+    override fun format(value: Double): SpannableString {
         val timeRemainingSpan = formatTimeRemaining(
             appContext,
-            update.currentLegTimeRemaining,
+            value,
             locale
         )
         val spaceIndex = if (timeRemainingSpan.startsWith("<")) {

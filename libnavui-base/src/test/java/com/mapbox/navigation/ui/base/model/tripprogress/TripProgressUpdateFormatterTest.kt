@@ -4,7 +4,6 @@ import android.content.Context
 import android.text.SpannableString
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.ui.base.formatter.ValueFormatter
-import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -25,9 +24,8 @@ class TripProgressUpdateFormatterTest {
 
     @Test
     fun estimatedTimeToArrivalFormatter() {
-        val state = mockk<TripProgressUpdate>()
-        val formatter = object : ValueFormatter<TripProgressUpdate, SpannableString> {
-            override fun format(t: TripProgressUpdate): SpannableString {
+        val formatter = object : ValueFormatter<Long, SpannableString> {
+            override fun format(t: Long): SpannableString {
                 return SpannableString("mapbox")
             }
         }
@@ -38,15 +36,14 @@ class TripProgressUpdateFormatterTest {
 
         assertEquals(
             "mapbox",
-            progressFormatter.getEstimatedTimeToArrival(state).toString()
+            progressFormatter.getEstimatedTimeToArrival(5).toString()
         )
     }
 
     @Test
     fun distanceRemainingFormatter() {
-        val state = mockk<TripProgressUpdate>()
-        val formatter = object : ValueFormatter<TripProgressUpdate, SpannableString> {
-            override fun format(t: TripProgressUpdate): SpannableString {
+        val formatter = object : ValueFormatter<Double, SpannableString> {
+            override fun format(t: Double): SpannableString {
                 return SpannableString("mapbox")
             }
         }
@@ -57,15 +54,14 @@ class TripProgressUpdateFormatterTest {
 
         assertEquals(
             "mapbox",
-            progressFormatter.getDistanceRemaining(state).toString()
+            progressFormatter.getDistanceRemaining(5.0).toString()
         )
     }
 
     @Test
     fun timeRemainingFormatter() {
-        val state = mockk<TripProgressUpdate>()
-        val formatter = object : ValueFormatter<TripProgressUpdate, SpannableString> {
-            override fun format(t: TripProgressUpdate): SpannableString {
+        val formatter = object : ValueFormatter<Double, SpannableString> {
+            override fun format(t: Double): SpannableString {
                 return SpannableString("mapbox")
             }
         }
@@ -76,15 +72,14 @@ class TripProgressUpdateFormatterTest {
 
         assertEquals(
             "mapbox",
-            progressFormatter.getTimeRemaining(state).toString()
+            progressFormatter.getTimeRemaining(5.0).toString()
         )
     }
 
     @Test
     fun percentRouteTraveledFormatter() {
-        val state = mockk<TripProgressUpdate>()
-        val formatter = object : ValueFormatter<TripProgressUpdate, SpannableString> {
-            override fun format(t: TripProgressUpdate): SpannableString {
+        val formatter = object : ValueFormatter<Double, SpannableString> {
+            override fun format(t: Double): SpannableString {
                 return SpannableString("mapbox")
             }
         }
@@ -95,33 +90,32 @@ class TripProgressUpdateFormatterTest {
 
         assertEquals(
             "mapbox",
-            progressFormatter.getPercentRouteTraveled(state).toString()
+            progressFormatter.getPercentRouteTraveled(0.3).toString()
         )
     }
 
     @Test
     fun toBuilder() {
-        val state = mockk<TripProgressUpdate>()
         val distanceRemainingFormatter =
-            object : ValueFormatter<TripProgressUpdate, SpannableString> {
-                override fun format(t: TripProgressUpdate): SpannableString {
+            object : ValueFormatter<Double, SpannableString> {
+                override fun format(t: Double): SpannableString {
                     return SpannableString("distanceRemainingFormatter")
                 }
             }
-        val timeRemainingFormatter = object : ValueFormatter<TripProgressUpdate, SpannableString> {
-            override fun format(t: TripProgressUpdate): SpannableString {
+        val timeRemainingFormatter = object : ValueFormatter<Double, SpannableString> {
+            override fun format(t: Double): SpannableString {
                 return SpannableString("timeRemainingFormatter")
             }
         }
         val percentDistanceTraveledFormatter =
-            object : ValueFormatter<TripProgressUpdate, SpannableString> {
-                override fun format(t: TripProgressUpdate): SpannableString {
+            object : ValueFormatter<Double, SpannableString> {
+                override fun format(t: Double): SpannableString {
                     return SpannableString("percentDistanceTraveledFormatter")
                 }
             }
         val estimatedTimeToArrivalFormatter = object :
-            ValueFormatter<TripProgressUpdate, SpannableString> {
-            override fun format(t: TripProgressUpdate): SpannableString {
+            ValueFormatter<Long, SpannableString> {
+            override fun format(t: Long): SpannableString {
                 return SpannableString("estimatedTimeToArrivalFormatter")
             }
         }
@@ -135,19 +129,19 @@ class TripProgressUpdateFormatterTest {
         val rebuiltFormatter = progressFormatter.toBuilder(ctx).build()
 
         assertEquals(
-            rebuiltFormatter.getDistanceRemaining(state).toString(),
+            rebuiltFormatter.getDistanceRemaining(0.5).toString(),
             "distanceRemainingFormatter"
         )
         assertEquals(
-            rebuiltFormatter.getTimeRemaining(state).toString(),
+            rebuiltFormatter.getTimeRemaining(0.5).toString(),
             "timeRemainingFormatter"
         )
         assertEquals(
-            rebuiltFormatter.getPercentRouteTraveled(state).toString(),
+            rebuiltFormatter.getPercentRouteTraveled(0.5).toString(),
             "percentDistanceTraveledFormatter"
         )
         assertEquals(
-            rebuiltFormatter.getEstimatedTimeToArrival(state).toString(),
+            rebuiltFormatter.getEstimatedTimeToArrival(1L).toString(),
             "estimatedTimeToArrivalFormatter"
         )
     }

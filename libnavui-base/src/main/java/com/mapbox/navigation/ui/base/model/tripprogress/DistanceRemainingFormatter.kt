@@ -12,7 +12,7 @@ import com.mapbox.navigation.ui.base.formatter.ValueFormatter
  */
 class DistanceRemainingFormatter(
     private val distanceFormatterOptions: DistanceFormatterOptions
-) : ValueFormatter<TripProgressUpdate, SpannableString> {
+) : ValueFormatter<Double, SpannableString> {
 
     private val formatter = MapboxDistanceFormatter(distanceFormatterOptions)
 
@@ -20,10 +20,10 @@ class DistanceRemainingFormatter(
      * Formats the data in the [TripProgressUpdate] for displaying the route distance remaining
      * in the UI
      *
-     * @param t a [TripProgressUpdate]
+     * @param value the distance remaining value to be formatted
      * @return a [SpannableString] representing the route distance remaining
      */
-    override fun format(t: TripProgressUpdate): SpannableString {
-        return formatter.formatDistance(t.distanceRemaining)
+    override fun format(value: Double): SpannableString {
+        return formatter.formatDistance(value)
     }
 }
