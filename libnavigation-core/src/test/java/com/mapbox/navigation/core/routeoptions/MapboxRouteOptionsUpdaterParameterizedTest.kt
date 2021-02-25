@@ -1,6 +1,8 @@
 package com.mapbox.navigation.core.routeoptions
 
 import android.location.Location
+import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.geojson.Point
@@ -102,6 +104,7 @@ class MapboxRouteOptionsUpdaterParameterizedTest(
 
         assertEquals(expectedWaypointNames, updatedWaypointNames)
         assertEquals(expectedWaypointIndices, updatedWaypointIndices)
+        MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(routeOptions, updatedRouteOptions)
     }
 
     private fun mockLocation() {
@@ -116,9 +119,8 @@ class MapboxRouteOptionsUpdaterParameterizedTest(
             .accessToken(accessToken)
             .baseUrl(RouteUrl.BASE_URL)
             .user(RouteUrl.PROFILE_DEFAULT_USER)
-            .profile(RouteUrl.PROFILE_DRIVING)
-            .coordinates(emptyList())
-            .geometries("")
+            .profile(RouteUrl.PROFILE_DRIVING_TRAFFIC)
+            .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
             .requestUuid("")
             .coordinates(
                 listOf(
@@ -131,5 +133,23 @@ class MapboxRouteOptionsUpdaterParameterizedTest(
                     Point.fromLngLat(1.0, 1.0)
                 )
             )
+            .overview(DirectionsCriteria.OVERVIEW_FULL)
+            .annotationsList(
+                listOf(
+                    DirectionsCriteria.ANNOTATION_SPEED,
+                    DirectionsCriteria.ANNOTATION_CONGESTION
+                )
+            )
+            .alternatives(true)
+            .steps(true)
+            .bannerInstructions(true)
+            .continueStraight(true)
+            .exclude(DirectionsCriteria.EXCLUDE_TOLL)
+            .language("en")
+            .roundaboutExits(true)
+            .walkingOptions(
+                WalkingOptions.builder().walkingSpeed(5.0).build()
+            )
+            .voiceInstructions(true)
             .build()
 }
