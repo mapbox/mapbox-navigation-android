@@ -3,6 +3,8 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.mapbox.maps.token'
 apply from: "${rootDir}/gradle/script-git-version.gradle"
 apply from: "${rootDir}/gradle/ktlint.gradle"
+apply plugin: 'com.google.firebase.crashlytics'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -60,6 +62,12 @@ android {
             minifyEnabled true
             signingConfig signingConfigs.release
             manifestPlaceholders = [enableCrashReporting: "true"]
+            firebaseCrashlytics {
+                mappingFileUploadEnabled = true
+                nativeSymbolUploadEnabled = true
+                strippedNativeLibsDir = 'build/intermediates/stripped_native_libs/debug/release/lib/'
+                unstrippedNativeLibsDir = com.mapbox.gradle.NativeDownloadTask.UNSTRIPPED_NATIVE_LIBS_PATH
+            }
         }
     }
 
@@ -76,6 +84,14 @@ android {
     buildFeatures {
         viewBinding true
     }
+}
+
+task downloadUnstrippedNativeLibsDir(type: com.mapbox.gradle.NativeDownloadTask) {
+    mapboxDependencies = [
+            dependenciesList.mapboxMapSdk,
+            dependenciesList.mapboxNavigator,
+            dependenciesList.mapboxCommonNative
+    ]
 }
 
 dependencies {
@@ -112,4 +128,7 @@ dependencies {
 
     // Leak Canary
     debugImplementation dependenciesList.leakCanaryDebug
+
+    // Crashlytics
+    implementation dependenciesList.firebaseCrashlyticsNdk
 }

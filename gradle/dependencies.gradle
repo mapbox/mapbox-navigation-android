@@ -41,7 +41,7 @@ ext {
       gmsLocation               : '17.0.0',
       ktlint                    : '0.40.0',
       kotlinStdLib              : '1.4.30',
-      firebaseCrashlytics       : '17.1.0',
+      firebaseCrashlytics       : '17.3.1',
       multidex                  : '2.0.0',
       json                      : '20180813',
       coroutinesAndroid         : '1.4.2',
@@ -146,37 +146,44 @@ ext {
 
       multidex                  : "androidx.multidex:multidex:${version.multidex}",
 
-      svgParser                 : "com.caverock:androidsvg-aar:${version.svgParser}"
+      svgParser                 : "com.caverock:androidsvg-aar:${version.svgParser}",
+
+      // Test app crashlytics
+      firebaseCrashlyticsNdk    : "com.google.firebase:firebase-crashlytics-ndk:${version.firebaseCrashlytics}"
   ]
 
   pluginVersion = [
-      checkstyle         : '8.2',
-      pmd                : '5.8.1',
-      gradle             : '4.0.1',
-      dependencyGraph    : '0.5.0',
-      dependencyUpdates  : '0.29.0',
-      kotlin             : '1.4.30',
-      license            : '0.8.5',
-      jacoco             : '0.2',
-      googleServices     : '4.3.3',
-      mapboxSdkVersions  : '1.1.0',
-      dokka              : '1.4.20',
-      mapboxSdkRegistry  : '0.4.0',
-      mapboxAccessToken  : '0.2.1'
+      checkstyle           : '8.2',
+      pmd                  : '5.8.1',
+      gradle               : '4.0.1',
+      dependencyGraph      : '0.5.0',
+      dependencyUpdates    : '0.29.0',
+      kotlin               : '1.4.30',
+      license              : '0.8.5',
+      jacoco               : '0.2',
+      googleServices       : '4.3.3',
+      mapboxSdkVersions    : '1.1.0',
+      dokka                : '1.4.20',
+      mapboxSdkRegistry    : '0.4.0',
+      mapboxAccessToken    : '0.2.1',
+      mapboxNativeDownload : '0.1.1',
+      firebaseCrashlytics  : '2.5.0'
   ]
 
   pluginDependencies = [
-      gradle             : "com.android.tools.build:gradle:${pluginVersion.gradle}",
-      kotlin             : "org.jetbrains.kotlin:kotlin-gradle-plugin:${pluginVersion.kotlin}",
-      checkstyle         : "com.puppycrawl.tools:checkstyle:${pluginVersion.checkstyle}",
-      license            : "com.jaredsburrows:gradle-license-plugin:${pluginVersion.license}",
-      dependencyGraph    : "com.vanniktech:gradle-dependency-graph-generator-plugin:${pluginVersion.dependencyGraph}",
-      dependencyUpdates  : "com.github.ben-manes:gradle-versions-plugin:${pluginVersion.dependencyUpdates}",
-      jacoco             : "com.hiya:jacoco-android:${pluginVersion.jacoco}",
-      googleServices     : "com.google.gms:google-services:${pluginVersion.googleServices}",
-      mapboxSdkVersions  : "com.mapbox.mapboxsdk:mapbox-android-sdk-versions:${pluginVersion.mapboxSdkVersions}",
-      dokka              : "org.jetbrains.dokka:dokka-gradle-plugin:${pluginVersion.dokka}",
-      mapboxSdkRegistry  : "com.mapbox.gradle.plugins:sdk-registry:${pluginVersion.mapboxSdkRegistry}",
-      mapboxAccessToken  : "com.mapbox.gradle.plugins:access-token:${pluginVersion.mapboxAccessToken}"
+      gradle               : "com.android.tools.build:gradle:${pluginVersion.gradle}",
+      kotlin               : "org.jetbrains.kotlin:kotlin-gradle-plugin:${pluginVersion.kotlin}",
+      checkstyle           : "com.puppycrawl.tools:checkstyle:${pluginVersion.checkstyle}",
+      license              : "com.jaredsburrows:gradle-license-plugin:${pluginVersion.license}",
+      dependencyGraph      : "com.vanniktech:gradle-dependency-graph-generator-plugin:${pluginVersion.dependencyGraph}",
+      dependencyUpdates    : "com.github.ben-manes:gradle-versions-plugin:${pluginVersion.dependencyUpdates}",
+      jacoco               : "com.hiya:jacoco-android:${pluginVersion.jacoco}",
+      googleServices       : "com.google.gms:google-services:${pluginVersion.googleServices}",
+      mapboxSdkVersions    : "com.mapbox.mapboxsdk:mapbox-android-sdk-versions:${pluginVersion.mapboxSdkVersions}",
+      dokka                : "org.jetbrains.dokka:dokka-gradle-plugin:${pluginVersion.dokka}",
+      mapboxSdkRegistry    : "com.mapbox.gradle.plugins:sdk-registry:${pluginVersion.mapboxSdkRegistry}",
+      mapboxAccessToken    : "com.mapbox.gradle.plugins:access-token:${pluginVersion.mapboxAccessToken}",
+      mapboxNativeDownload : "com.mapbox.gradle.plugins:native-download:${pluginVersion.mapboxNativeDownload}",
+      firebaseCrashlytics  : "com.google.firebase:firebase-crashlytics-gradle:${pluginVersion.firebaseCrashlytics}"
   ]
 }

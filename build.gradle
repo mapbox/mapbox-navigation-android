@@ -26,7 +26,10 @@ buildscript {
     classpath pluginDependencies.mapboxSdkVersions
     classpath pluginDependencies.mapboxSdkRegistry
     classpath pluginDependencies.mapboxAccessToken
+    classpath pluginDependencies.mapboxNativeDownload
     classpath pluginDependencies.dokka
+    classpath pluginDependencies.firebaseCrashlytics
+    classpath pluginDependencies.googleServices
   }
 }
 
