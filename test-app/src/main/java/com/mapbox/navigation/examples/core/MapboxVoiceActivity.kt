@@ -169,11 +169,18 @@ class MapboxVoiceActivity :
             voiceInstructionsPlayer?.play(currentPlay, voiceInstructionsPlayerCallback)
         }
 
-        override fun onError(error: SpeechState.Speech.Error) {
+        override fun onError(
+            error: SpeechState.Speech.Error,
+            fallback: SpeechState.Speech.Available
+        ) {
             Log.e(
                 "VoiceActivity",
                 "Error playing the voice instruction: ${error.exception}"
             )
+            fallback.let {
+                val currentPlay = SpeechState.ReadyToPlay(it.announcement)
+                voiceInstructionsPlayer?.play(currentPlay, voiceInstructionsPlayerCallback)
+            }
         }
     }
 

@@ -67,10 +67,8 @@ class MapboxVoiceApiTest {
 
         assertTrue(voiceState is VoiceState.VoiceError)
         assertEquals(
-            "VoiceInstructions announcement / ssmlAnnouncement can't be null or blank",
-            (
-                voiceState as VoiceState.VoiceError
-                ).exception
+            "VoiceInstructions ssmlAnnouncement / announcement can't be null or blank",
+            (voiceState as VoiceState.VoiceError).exception
         )
     }
 
@@ -91,7 +89,7 @@ class MapboxVoiceApiTest {
 
         assertTrue(voiceState is VoiceState.VoiceError)
         assertEquals(
-            "VoiceInstructions announcement / ssmlAnnouncement can't be null or blank",
+            "VoiceInstructions ssmlAnnouncement / announcement can't be null or blank",
             (voiceState as VoiceState.VoiceError).exception
         )
     }

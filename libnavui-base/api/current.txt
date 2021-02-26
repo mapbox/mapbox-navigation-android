@@ -77,7 +77,7 @@ package com.mapbox.navigation.ui.base.api.voice {
 
   public interface SpeechCallback {
     method public void onAvailable(com.mapbox.navigation.ui.base.model.voice.SpeechState.Speech.Available state);
-    method public void onError(com.mapbox.navigation.ui.base.model.voice.SpeechState.Speech.Error error);
+    method public void onError(com.mapbox.navigation.ui.base.model.voice.SpeechState.Speech.Error error, com.mapbox.navigation.ui.base.model.voice.SpeechState.Speech.Available fallback);
   }
 
   public interface VoiceInstructionsPlayer {
@@ -758,7 +758,7 @@ package com.mapbox.navigation.ui.base.model.voice {
     property public final String? ssmlAnnouncement;
   }
 
-  public abstract sealed class SpeechState implements com.mapbox.navigation.ui.base.MapboxState {
+  public abstract sealed class SpeechState {
   }
 
   public static final class SpeechState.DonePlaying extends com.mapbox.navigation.ui.base.model.voice.SpeechState {

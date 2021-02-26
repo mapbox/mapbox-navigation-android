@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
+import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
 import java.io.File
 
 internal object VoiceApiProvider {
@@ -12,13 +13,13 @@ internal object VoiceApiProvider {
         context: Context,
         accessToken: String,
         language: String,
-        baseUri: String?
+        options: MapboxSpeechApiOptions
     ): MapboxVoiceApi = MapboxVoiceApi(
         MapboxSpeechProvider(
             accessToken,
             language,
             MapboxNavigationAccounts,
-            baseUri
+            options
         ),
         MapboxSpeechFileProvider(
             File(

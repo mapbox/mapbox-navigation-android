@@ -3,11 +3,13 @@ package com.mapbox.navigation.ui.voice.api
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.ui.base.model.voice.Announcement
 import com.mapbox.navigation.ui.voice.VoiceAction
+import com.mapbox.navigation.ui.voice.VoiceAction.PrepareTypeAndAnnouncement
 import com.mapbox.navigation.ui.voice.VoiceAction.PrepareVoiceRequest
 import com.mapbox.navigation.ui.voice.VoiceAction.ProcessVoiceResponse
 import com.mapbox.navigation.ui.voice.VoiceProcessor
 import com.mapbox.navigation.ui.voice.VoiceResult.VoiceRequest
 import com.mapbox.navigation.ui.voice.VoiceResult.VoiceResponse
+import com.mapbox.navigation.ui.voice.VoiceResult.VoiceTypeAndAnnouncement
 import com.mapbox.navigation.ui.voice.model.VoiceState
 import com.mapbox.navigation.ui.voice.model.VoiceState.VoiceError
 import java.io.File
@@ -25,7 +27,7 @@ internal class MapboxVoiceApi(
      * @param voiceInstruction VoiceInstructions object representing [VoiceInstructions]
      */
     override suspend fun retrieveVoiceFile(voiceInstruction: VoiceInstructions): VoiceState {
-        return processAction(PrepareVoiceRequest(voiceInstruction))
+        return processAction(PrepareTypeAndAnnouncement(voiceInstruction))
     }
 
     /**
@@ -40,10 +42,17 @@ internal class MapboxVoiceApi(
 
     private suspend fun processAction(action: VoiceAction): VoiceState {
         return when (val result = VoiceProcessor.process(action)) {
+            is VoiceTypeAndAnnouncement -> {
+                when (result) {
+                    is VoiceTypeAndAnnouncement.Success -> processAction(
+                        PrepareVoiceRequest(result.typeAndAnnouncement)
+                    )
+                    is VoiceTypeAndAnnouncement.Failure -> VoiceError(result.error)
+                }
+            }
             is VoiceRequest -> {
                 when (result) {
                     is VoiceRequest.Success -> processVoiceRequest(result)
-                    is VoiceRequest.Failure -> VoiceError(result.error)
                 }
             }
             is VoiceResponse -> {
