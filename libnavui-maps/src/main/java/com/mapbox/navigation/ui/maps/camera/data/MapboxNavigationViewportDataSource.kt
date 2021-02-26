@@ -18,6 +18,7 @@ import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMeasurement
 import com.mapbox.turf.TurfMisc
 import java.util.concurrent.CopyOnWriteArraySet
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -720,6 +721,8 @@ class MapboxNavigationViewportDataSource(
             pointsForOverview.add(0, localTargetLocation.toPoint())
         }
 
+        val bearingToEndOfPointsForFollowing = getBearingForMap(mapboxMap.getCameraOptions().bearing ?: 0.0, followingBearingProperty.get(), pointsForFollowing)
+
         pointsForFollowing.addAll(additionalPointsToFrameForFollowing)
         pointsForOverview.addAll(additionalPointsToFrameForOverview)
 
@@ -738,7 +741,7 @@ class MapboxNavigationViewportDataSource(
                     zoom(followingZoomProperty.get())
                 }
                 if (followingBearingUpdatesAllowed) {
-                    bearing(followingBearingProperty.get())
+                    bearing(bearingToEndOfPointsForFollowing)
                 }
                 if (followingPitchUpdatesAllowed) {
                     pitch(followingPitchProperty.get())
@@ -786,6 +789,35 @@ class MapboxNavigationViewportDataSource(
     private fun getEdgeInsetsFromPoint(mapSize: Size, screenPoint: ScreenCoordinate? = null): EdgeInsets {
         var point = screenPoint ?: ScreenCoordinate(mapSize.width.toDouble() / 2.0, mapSize.height.toDouble() / 2.0)
         return EdgeInsets(point.y.toDouble(), point.x.toDouble(), (mapSize.height - point.y).toDouble(), (mapSize.width - point.x).toDouble())
+    }
+
+//    TODO: Make these ViewportDataSourceOptions
+    private val bearingDiffMax = 20.0
+
+    private fun getBearingForMap(currentMapCameraBearing: Double, vehicleBearing: Double, pointsForBearing: List<Point>): Double {
+        var output = vehicleBearing
+        if (pointsForBearing.size > 1) {
+            val bearingFromPointsFirstToLast = TurfMeasurement.bearing(pointsForBearing.first(), pointsForBearing.last())
+            val bearingDiff = shortestRotationDiff(bearingFromPointsFirstToLast, vehicleBearing)
+            if (abs(bearingDiff) > bearingDiffMax) {
+                val diffDirection = if (bearingDiff < 0.0) -1.0 else 1.0
+                output += bearingDiffMax * diffDirection
+            } else {
+                output = bearingFromPointsFirstToLast
+            }
+        }
+        return currentMapCameraBearing + shortestRotationDiff(output, currentMapCameraBearing)
+    }
+
+    private fun shortestRotationDiff(angle: Double, anchorAngle: Double): Double {
+        if (angle.isNaN() || anchorAngle.isNaN()) { return 0.0 }
+        val rawAngleDiff = angle - anchorAngle
+        return wrap(rawAngleDiff, -180.0, 180.0)
+    }
+
+    private fun wrap(angle: Double, min: Double, max: Double): Double {
+        val d = max - min
+        return ((((angle - min) % d) + d) % d) + min
     }
 
     private fun updateFollowingData(pointsForFollowing: List<Point>) {
