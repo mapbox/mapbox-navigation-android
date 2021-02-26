@@ -9,9 +9,15 @@ import com.mapbox.navigation.ui.base.model.voice.Announcement
 interface SpeechApi {
 
     /**
-     * Given [VoiceInstructions] the method will generate the voice instruction [Announcement].
+     * Given [VoiceInstructions] the method will try to generate the
+     * voice instruction [Announcement] including the synthesized speech mp3 file
+     * from Mapbox's API Voice.
+     *
+     * In case of an error, a fallback is provided that can be played with a text-to-speech engine.
+     *
      * @param voiceInstruction VoiceInstructions object representing [VoiceInstructions]
      * @param callback SpeechCallback
+     * @see [cancel]
      */
     fun generate(
         voiceInstruction: VoiceInstructions,
@@ -21,6 +27,7 @@ interface SpeechApi {
     /**
      * The method stops the process of retrieving the voice instruction [Announcement]
      * and destroys any related callbacks.
+     * @see [generate]
      */
     fun cancel()
 

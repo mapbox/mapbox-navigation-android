@@ -14,8 +14,10 @@ interface SpeechCallback {
     fun onAvailable(state: SpeechState.Speech.Available)
 
     /**
-     * Invoked when there is an error playing the voice instruction.
+     * Invoked when there is an error retrieving the voice instruction.
      * @param error error message.
+     * @param fallback represents the raw announcement (without file)
+     * that can be played with a text-to-speech engine.
      */
-    fun onError(error: SpeechState.Speech.Error)
+    fun onError(error: SpeechState.Speech.Error, fallback: SpeechState.Speech.Available)
 }

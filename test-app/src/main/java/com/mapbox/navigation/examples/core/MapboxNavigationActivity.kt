@@ -174,7 +174,14 @@ class MapboxNavigationActivity :
             voiceInstructionsPlayer?.play(currentPlay, voiceInstructionsPlayerCallback)
         }
 
-        override fun onError(error: SpeechState.Speech.Error) {
+        override fun onError(
+            error: SpeechState.Speech.Error,
+            fallback: SpeechState.Speech.Available
+        ) {
+            fallback.let {
+                val currentPlay = SpeechState.ReadyToPlay(it.announcement)
+                voiceInstructionsPlayer?.play(currentPlay, voiceInstructionsPlayerCallback)
+            }
         }
     }
 

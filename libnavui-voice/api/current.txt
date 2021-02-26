@@ -2,7 +2,7 @@
 package com.mapbox.navigation.ui.voice.api {
 
   public final class MapboxSpeechApi implements com.mapbox.navigation.ui.base.api.voice.SpeechApi {
-    ctor public MapboxSpeechApi(android.content.Context context, String accessToken, String language, String? baseUri = null);
+    ctor public MapboxSpeechApi(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions options = MapboxSpeechApiOptions.<init>().build());
     ctor public MapboxSpeechApi(android.content.Context context, String accessToken, String language);
     method public void cancel();
     method public void clean(com.mapbox.navigation.ui.base.model.voice.Announcement announcement);
@@ -21,6 +21,18 @@ package com.mapbox.navigation.ui.voice.api {
 }
 
 package com.mapbox.navigation.ui.voice.options {
+
+  public final class MapboxSpeechApiOptions {
+    method public String getBaseUri();
+    method public com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions.Builder toBuilder();
+    property public final String baseUri;
+  }
+
+  public static final class MapboxSpeechApiOptions.Builder {
+    ctor public MapboxSpeechApiOptions.Builder();
+    method public com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions.Builder baseUri(String baseUri);
+    method public com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions build();
+  }
 
   public final class VoiceInstructionsPlayerOptions {
     method public int getFocusGain();

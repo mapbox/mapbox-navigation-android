@@ -1,12 +1,11 @@
 package com.mapbox.navigation.ui.base.model.voice
 
 import androidx.annotation.FloatRange
-import com.mapbox.navigation.ui.base.MapboxState
 
 /**
  * Immutable object representing the speech player data.
  */
-sealed class SpeechState : MapboxState {
+sealed class SpeechState {
 
     /**
      * The structure represents different state for a Speech.
@@ -15,12 +14,14 @@ sealed class SpeechState : MapboxState {
 
         /**
          * The state is returned when the speech is ready to be played on the UI.
+         * It's also returned as a fallback when [SpeechApi.generate] fails.
+         * In this case, the [File] from the [Announcement] will be null.
          * @property announcement
          */
         data class Available(val announcement: Announcement) : Speech()
 
         /**
-         * The state is returned if there is an error playing the voice instruction
+         * The state is returned if there is an error retrieving the voice instruction
          * @property exception String error message
          */
         data class Error(val exception: String) : Speech()

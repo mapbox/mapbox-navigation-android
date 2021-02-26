@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.voice
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.api.speech.v1.MapboxSpeech
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.voice.model.TypeAndAnnouncement
 import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
@@ -36,9 +37,9 @@ class VoiceProcessorTest {
     @Test
     fun `process PrepareVoiceRequest returns VoiceRequest result`() =
         coroutineRule.runBlockingTest {
-            val mockedVoiceInstructions: VoiceInstructions = mockk(relaxed = true)
+            val mockedTypeAndAnnouncement: TypeAndAnnouncement = mockk(relaxed = true)
             val prepareVoiceRequest: VoiceAction =
-                VoiceAction.PrepareVoiceRequest(mockedVoiceInstructions)
+                VoiceAction.PrepareVoiceRequest(mockedTypeAndAnnouncement)
 
             val actual = VoiceProcessor.process(prepareVoiceRequest)
 
@@ -46,9 +47,12 @@ class VoiceProcessorTest {
         }
 
     @Test
-    fun `process PrepareVoiceRequest SSML announcement returns Success VoiceRequest result`() =
+    fun `process PrepareVoiceRequest returns Success result`() =
         coroutineRule.runBlockingTest {
-            val mockedVoiceInstructions: VoiceInstructions = mockk()
+            val mockedTypeAndAnnouncement: TypeAndAnnouncement = mockk()
+            every {
+                mockedTypeAndAnnouncement.type
+            } returns "ssml"
             val aSsmlAnnouncement = """
             <speak>
                 <amazon:effect name="drc">
@@ -57,10 +61,10 @@ class VoiceProcessorTest {
             </speak>
             """.trimIndent()
             every {
-                mockedVoiceInstructions.ssmlAnnouncement()
+                mockedTypeAndAnnouncement.announcement
             } returns aSsmlAnnouncement
             val prepareVoiceRequest: VoiceAction =
-                VoiceAction.PrepareVoiceRequest(mockedVoiceInstructions)
+                VoiceAction.PrepareVoiceRequest(mockedTypeAndAnnouncement)
 
             val actual = VoiceProcessor.process(prepareVoiceRequest)
 
@@ -78,96 +82,104 @@ class VoiceProcessorTest {
         }
 
     @Test
-    fun `process PrepareVoiceRequest text announcement returns Success VoiceRequest result`() =
+    fun `process PrepareTypeAndAnnouncement ssmlAnnouncement returns Success result`() =
         coroutineRule.runBlockingTest {
             val mockedVoiceInstructions: VoiceInstructions = mockk()
+            val aSsmlAnnouncement = """
+            <speak>
+                <amazon:effect name="drc">
+                    <prosody rate="1.08">Turn right onto Frederick Road, Maryland 3 55.</prosody>
+                </amazon:effect>
+            </speak>
+            """.trimIndent()
             every {
                 mockedVoiceInstructions.ssmlAnnouncement()
-            } returns null
-            val anAnnouncement = "Turn right onto Frederick Road, Maryland 3 55."
+            } returns aSsmlAnnouncement
             every {
                 mockedVoiceInstructions.announcement()
-            } returns anAnnouncement
-            val prepareVoiceRequest: VoiceAction =
-                VoiceAction.PrepareVoiceRequest(mockedVoiceInstructions)
+            } returns "any announcement"
+            val prepareTypeAndAnnouncement: VoiceAction =
+                VoiceAction.PrepareTypeAndAnnouncement(mockedVoiceInstructions)
 
-            val actual = VoiceProcessor.process(prepareVoiceRequest)
+            val actual = VoiceProcessor.process(prepareTypeAndAnnouncement)
 
-            assertTrue(actual is VoiceResult.VoiceRequest.Success)
-            val actualSpeech: MapboxSpeech =
-                (actual as VoiceResult.VoiceRequest.Success).requestBuilder
-                    .accessToken("pk.123")
-                    .build()
-            val expectedSpeech: MapboxSpeech = MapboxSpeech.builder()
-                .accessToken("pk.123")
-                .instruction(anAnnouncement)
-                .textType("text")
-                .build()
-            assertEquals(expectedSpeech, actualSpeech)
+            assertTrue(actual is VoiceResult.VoiceTypeAndAnnouncement.Success)
+            val actualTypeAndAnnouncement: TypeAndAnnouncement =
+                (actual as VoiceResult.VoiceTypeAndAnnouncement.Success).typeAndAnnouncement
+            assertEquals("ssml", actualTypeAndAnnouncement.type)
+            assertEquals(aSsmlAnnouncement, actualTypeAndAnnouncement.announcement)
         }
 
     @Test
-    fun `process PrepareVoiceRequest null announcements returns Failure VoiceRequest result`() =
+    fun `process PrepareTypeAndAnnouncement announcement returns Success result`() =
         coroutineRule.runBlockingTest {
             val mockedVoiceInstructions: VoiceInstructions = mockk()
+            val invalidSsmlAnnouncement = ""
+            val announcement = "Turn right onto Frederick Road, Maryland 3 55."
             every {
                 mockedVoiceInstructions.ssmlAnnouncement()
-            } returns null
+            } returns invalidSsmlAnnouncement
             every {
                 mockedVoiceInstructions.announcement()
-            } returns null
-            val prepareVoiceRequest: VoiceAction =
-                VoiceAction.PrepareVoiceRequest(mockedVoiceInstructions)
+            } returns announcement
+            val prepareTypeAndAnnouncement: VoiceAction =
+                VoiceAction.PrepareTypeAndAnnouncement(mockedVoiceInstructions)
 
-            val actual = VoiceProcessor.process(prepareVoiceRequest)
+            val actual = VoiceProcessor.process(prepareTypeAndAnnouncement)
 
-            assertTrue(actual is VoiceResult.VoiceRequest.Failure)
-            assertEquals(
-                "VoiceInstructions announcement / ssmlAnnouncement can't be null or blank",
-                (actual as VoiceResult.VoiceRequest.Failure).error
-            )
+            assertTrue(actual is VoiceResult.VoiceTypeAndAnnouncement.Success)
+            val actualTypeAndAnnouncement: TypeAndAnnouncement =
+                (actual as VoiceResult.VoiceTypeAndAnnouncement.Success).typeAndAnnouncement
+            assertEquals("text", actualTypeAndAnnouncement.type)
+            assertEquals(announcement, actualTypeAndAnnouncement.announcement)
         }
 
     @Test
-    fun `process PrepareVoiceRequest empty ssmlAnnouncement returns Failure VoiceRequest result`() =
+    fun `process PrepareTypeAndAnnouncement empty empty returns Failure result`() =
         coroutineRule.runBlockingTest {
             val mockedVoiceInstructions: VoiceInstructions = mockk()
             every {
                 mockedVoiceInstructions.ssmlAnnouncement()
             } returns ""
-            val prepareVoiceRequest: VoiceAction =
-                VoiceAction.PrepareVoiceRequest(mockedVoiceInstructions)
+            every {
+                mockedVoiceInstructions.announcement()
+            } returns ""
+            val prepareTypeAndAnnouncement: VoiceAction =
+                VoiceAction.PrepareTypeAndAnnouncement(mockedVoiceInstructions)
 
-            val actual = VoiceProcessor.process(prepareVoiceRequest)
+            val actual = VoiceProcessor.process(prepareTypeAndAnnouncement)
 
-            assertTrue(actual is VoiceResult.VoiceRequest.Failure)
+            assertTrue(actual is VoiceResult.VoiceTypeAndAnnouncement.Failure)
             assertEquals(
-                "VoiceInstructions announcement / ssmlAnnouncement can't be null or blank",
-                (actual as VoiceResult.VoiceRequest.Failure).error
+                "VoiceInstructions ssmlAnnouncement / announcement can't be null or blank",
+                (actual as VoiceResult.VoiceTypeAndAnnouncement.Failure).error
             )
         }
 
     @Test
-    fun `process PrepareVoiceRequest blank ssmlAnnouncement returns Failure VoiceRequest result`() =
+    fun `process PrepareTypeAndAnnouncement blank empty returns Failure result`() =
         coroutineRule.runBlockingTest {
             val mockedVoiceInstructions: VoiceInstructions = mockk()
             every {
                 mockedVoiceInstructions.ssmlAnnouncement()
             } returns "    "
-            val prepareVoiceRequest: VoiceAction =
-                VoiceAction.PrepareVoiceRequest(mockedVoiceInstructions)
+            every {
+                mockedVoiceInstructions.announcement()
+            } returns ""
+            val prepareTypeAndAnnouncement: VoiceAction =
+                VoiceAction.PrepareTypeAndAnnouncement(mockedVoiceInstructions)
 
-            val actual = VoiceProcessor.process(prepareVoiceRequest)
+            val actual = VoiceProcessor.process(prepareTypeAndAnnouncement)
 
-            assertTrue(actual is VoiceResult.VoiceRequest.Failure)
+            assertTrue(actual is VoiceResult.VoiceTypeAndAnnouncement.Failure)
             assertEquals(
-                "VoiceInstructions announcement / ssmlAnnouncement can't be null or blank",
-                (actual as VoiceResult.VoiceRequest.Failure).error
+                "VoiceInstructions ssmlAnnouncement / announcement can't be null or blank",
+                (actual as VoiceResult.VoiceTypeAndAnnouncement.Failure).error
             )
         }
 
     @Test
-    fun `process PrepareVoiceRequest empty announcement returns Failure VoiceRequest result`() =
+    fun `process PrepareTypeAndAnnouncement null empty returns Failure result`() =
         coroutineRule.runBlockingTest {
             val mockedVoiceInstructions: VoiceInstructions = mockk()
             every {
@@ -176,20 +188,20 @@ class VoiceProcessorTest {
             every {
                 mockedVoiceInstructions.announcement()
             } returns ""
-            val prepareVoiceRequest: VoiceAction =
-                VoiceAction.PrepareVoiceRequest(mockedVoiceInstructions)
+            val prepareTypeAndAnnouncement: VoiceAction =
+                VoiceAction.PrepareTypeAndAnnouncement(mockedVoiceInstructions)
 
-            val actual = VoiceProcessor.process(prepareVoiceRequest)
+            val actual = VoiceProcessor.process(prepareTypeAndAnnouncement)
 
-            assertTrue(actual is VoiceResult.VoiceRequest.Failure)
+            assertTrue(actual is VoiceResult.VoiceTypeAndAnnouncement.Failure)
             assertEquals(
-                "VoiceInstructions announcement / ssmlAnnouncement can't be null or blank",
-                (actual as VoiceResult.VoiceRequest.Failure).error
+                "VoiceInstructions ssmlAnnouncement / announcement can't be null or blank",
+                (actual as VoiceResult.VoiceTypeAndAnnouncement.Failure).error
             )
         }
 
     @Test
-    fun `process PrepareVoiceRequest blank announcement returns Failure VoiceRequest result`() =
+    fun `process PrepareTypeAndAnnouncement null null returns Failure result`() =
         coroutineRule.runBlockingTest {
             val mockedVoiceInstructions: VoiceInstructions = mockk()
             every {
@@ -197,16 +209,126 @@ class VoiceProcessorTest {
             } returns null
             every {
                 mockedVoiceInstructions.announcement()
-            } returns "      "
-            val prepareVoiceRequest: VoiceAction =
-                VoiceAction.PrepareVoiceRequest(mockedVoiceInstructions)
+            } returns null
+            val prepareTypeAndAnnouncement: VoiceAction =
+                VoiceAction.PrepareTypeAndAnnouncement(mockedVoiceInstructions)
 
-            val actual = VoiceProcessor.process(prepareVoiceRequest)
+            val actual = VoiceProcessor.process(prepareTypeAndAnnouncement)
 
-            assertTrue(actual is VoiceResult.VoiceRequest.Failure)
+            assertTrue(actual is VoiceResult.VoiceTypeAndAnnouncement.Failure)
             assertEquals(
-                "VoiceInstructions announcement / ssmlAnnouncement can't be null or blank",
-                (actual as VoiceResult.VoiceRequest.Failure).error
+                "VoiceInstructions ssmlAnnouncement / announcement can't be null or blank",
+                (actual as VoiceResult.VoiceTypeAndAnnouncement.Failure).error
+            )
+        }
+
+    @Test
+    fun `process PrepareTypeAndAnnouncement empty null returns Failure result`() =
+        coroutineRule.runBlockingTest {
+            val mockedVoiceInstructions: VoiceInstructions = mockk()
+            every {
+                mockedVoiceInstructions.ssmlAnnouncement()
+            } returns ""
+            every {
+                mockedVoiceInstructions.announcement()
+            } returns null
+            val prepareTypeAndAnnouncement: VoiceAction =
+                VoiceAction.PrepareTypeAndAnnouncement(mockedVoiceInstructions)
+
+            val actual = VoiceProcessor.process(prepareTypeAndAnnouncement)
+
+            assertTrue(actual is VoiceResult.VoiceTypeAndAnnouncement.Failure)
+            assertEquals(
+                "VoiceInstructions ssmlAnnouncement / announcement can't be null or blank",
+                (actual as VoiceResult.VoiceTypeAndAnnouncement.Failure).error
+            )
+        }
+
+    @Test
+    fun `process PrepareTypeAndAnnouncement blank null returns Failure result`() =
+        coroutineRule.runBlockingTest {
+            val mockedVoiceInstructions: VoiceInstructions = mockk()
+            every {
+                mockedVoiceInstructions.ssmlAnnouncement()
+            } returns "    "
+            every {
+                mockedVoiceInstructions.announcement()
+            } returns null
+            val prepareTypeAndAnnouncement: VoiceAction =
+                VoiceAction.PrepareTypeAndAnnouncement(mockedVoiceInstructions)
+
+            val actual = VoiceProcessor.process(prepareTypeAndAnnouncement)
+
+            assertTrue(actual is VoiceResult.VoiceTypeAndAnnouncement.Failure)
+            assertEquals(
+                "VoiceInstructions ssmlAnnouncement / announcement can't be null or blank",
+                (actual as VoiceResult.VoiceTypeAndAnnouncement.Failure).error
+            )
+        }
+
+    @Test
+    fun `process PrepareTypeAndAnnouncement blank blank returns Failure result`() =
+        coroutineRule.runBlockingTest {
+            val mockedVoiceInstructions: VoiceInstructions = mockk()
+            every {
+                mockedVoiceInstructions.ssmlAnnouncement()
+            } returns "    "
+            every {
+                mockedVoiceInstructions.announcement()
+            } returns "    "
+            val prepareTypeAndAnnouncement: VoiceAction =
+                VoiceAction.PrepareTypeAndAnnouncement(mockedVoiceInstructions)
+
+            val actual = VoiceProcessor.process(prepareTypeAndAnnouncement)
+
+            assertTrue(actual is VoiceResult.VoiceTypeAndAnnouncement.Failure)
+            assertEquals(
+                "VoiceInstructions ssmlAnnouncement / announcement can't be null or blank",
+                (actual as VoiceResult.VoiceTypeAndAnnouncement.Failure).error
+            )
+        }
+
+    @Test
+    fun `process PrepareTypeAndAnnouncement null blank returns Failure result`() =
+        coroutineRule.runBlockingTest {
+            val mockedVoiceInstructions: VoiceInstructions = mockk()
+            every {
+                mockedVoiceInstructions.ssmlAnnouncement()
+            } returns null
+            every {
+                mockedVoiceInstructions.announcement()
+            } returns "    "
+            val prepareTypeAndAnnouncement: VoiceAction =
+                VoiceAction.PrepareTypeAndAnnouncement(mockedVoiceInstructions)
+
+            val actual = VoiceProcessor.process(prepareTypeAndAnnouncement)
+
+            assertTrue(actual is VoiceResult.VoiceTypeAndAnnouncement.Failure)
+            assertEquals(
+                "VoiceInstructions ssmlAnnouncement / announcement can't be null or blank",
+                (actual as VoiceResult.VoiceTypeAndAnnouncement.Failure).error
+            )
+        }
+
+    @Test
+    fun `process PrepareTypeAndAnnouncement empty blank returns Failure result`() =
+        coroutineRule.runBlockingTest {
+            val mockedVoiceInstructions: VoiceInstructions = mockk()
+            every {
+                mockedVoiceInstructions.ssmlAnnouncement()
+            } returns ""
+            every {
+                mockedVoiceInstructions.announcement()
+            } returns "    "
+            val prepareTypeAndAnnouncement: VoiceAction =
+                VoiceAction.PrepareTypeAndAnnouncement(mockedVoiceInstructions)
+
+            val actual = VoiceProcessor.process(prepareTypeAndAnnouncement)
+
+            assertTrue(actual is VoiceResult.VoiceTypeAndAnnouncement.Failure)
+            assertEquals(
+                "VoiceInstructions ssmlAnnouncement / announcement can't be null or blank",
+                (actual as VoiceResult.VoiceTypeAndAnnouncement.Failure).error
             )
         }
 

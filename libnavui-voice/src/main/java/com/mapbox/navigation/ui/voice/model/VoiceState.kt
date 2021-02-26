@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.voice.model
 
-import com.mapbox.navigation.ui.base.MapboxState
 import okhttp3.ResponseBody
 import retrofit2.Response
 import java.io.File
@@ -8,7 +7,7 @@ import java.io.File
 /**
  * Immutable object representing the voice data to be played.
  */
-internal sealed class VoiceState : MapboxState {
+internal sealed class VoiceState {
 
     /**
      * State representing data about the response from Mapbox's API Voice.

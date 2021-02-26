@@ -4,6 +4,8 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.api.speech.v1.MapboxSpeech
 import com.mapbox.navigation.ui.voice.VoiceResult.VoiceRequest
 import com.mapbox.navigation.ui.voice.VoiceResult.VoiceResponse
+import com.mapbox.navigation.ui.voice.VoiceResult.VoiceTypeAndAnnouncement
+import com.mapbox.navigation.ui.voice.model.TypeAndAnnouncement
 import com.mapbox.navigation.utils.internal.ThreadController
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
@@ -26,25 +28,35 @@ internal object VoiceProcessor {
 
     private fun processVoiceAction(action: VoiceAction): VoiceResult {
         return when (action) {
-            is VoiceAction.PrepareVoiceRequest -> prepareRequest(action.instruction)
+            is VoiceAction.PrepareTypeAndAnnouncement ->
+                prepareTypeAndAnnouncement(action.instruction)
+            is VoiceAction.PrepareVoiceRequest -> prepareRequest(action.typeAndAnnouncement)
             is VoiceAction.ProcessVoiceResponse -> processResponse(action.response)
         }
     }
 
-    private fun prepareRequest(instruction: VoiceInstructions): VoiceRequest {
-        val (type, announcement) = if (instruction.ssmlAnnouncement() != null) {
-            Pair(SSML_TYPE, instruction.ssmlAnnouncement())
-        } else {
-            Pair(TEXT_TYPE, instruction.announcement())
-        }
-        if (announcement.isNullOrBlank()) {
-            return VoiceRequest.Failure(
-                "VoiceInstructions announcement / ssmlAnnouncement can't be null or blank"
-            )
-        }
+    private fun prepareTypeAndAnnouncement(
+        instruction: VoiceInstructions
+    ): VoiceTypeAndAnnouncement {
+        val announcement = instruction.announcement()
+        val ssmlAnnouncement = instruction.ssmlAnnouncement()
+        val (type, instruction) =
+            if (ssmlAnnouncement != null && !ssmlAnnouncement.isNullOrBlank()) {
+                Pair(SSML_TYPE, ssmlAnnouncement)
+            } else if (announcement != null && !announcement.isNullOrBlank()) {
+                Pair(TEXT_TYPE, announcement)
+            } else {
+                return VoiceTypeAndAnnouncement.Failure(
+                    "VoiceInstructions ssmlAnnouncement / announcement can't be null or blank"
+                )
+            }
+        return VoiceTypeAndAnnouncement.Success(TypeAndAnnouncement(type, instruction))
+    }
+
+    private fun prepareRequest(typeAndAnnouncement: TypeAndAnnouncement): VoiceRequest {
         val requestBuilder = MapboxSpeech.builder()
-            .instruction(announcement)
-            .textType(type)
+            .textType(typeAndAnnouncement.type)
+            .instruction(typeAndAnnouncement.announcement)
         return VoiceRequest.Success(requestBuilder)
     }
 
