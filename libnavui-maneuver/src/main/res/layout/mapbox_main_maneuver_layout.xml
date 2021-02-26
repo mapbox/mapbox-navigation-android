@@ -4,71 +4,79 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:parentTag="android.widget.LinearLayout">
+    tools:background="@color/colorSecondary"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
 
-  <LinearLayout
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_weight="18"
-      android:orientation="vertical">
-    <com.mapbox.navigation.ui.maneuver.view.MapboxTurnIconManeuver
-        android:id="@+id/maneuverIcon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="@dimen/mapbox_dimen_16dp"
-        android:layout_gravity="center"
-        />
-    <com.mapbox.navigation.ui.maneuver.view.MapboxStepDistance
-        android:id="@+id/stepDistance"
-        android:layout_width="match_parent"
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/mainManeuverGuideline"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="6dp"
-        android:gravity="center"
-        android:maxLines="1"
-        android:textStyle="bold"
-        android:textAppearance="@style/MapboxStyleStepDistance"
-        tools:text="3020 mi"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.21"
         />
-  </LinearLayout>
-  <androidx.constraintlayout.widget.ConstraintLayout
-      android:layout_width="0dp"
-      android:layout_height="match_parent"
-      android:layout_weight="82">
 
     <com.mapbox.navigation.ui.maneuver.view.MapboxPrimaryManeuver
         android:id="@+id/primaryManeuverText"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:paddingEnd="@dimen/mapbox_dimen_2dp"
+        android:paddingStart="@dimen/mapbox_dimen_2dp"
+        android:paddingBottom="@dimen/mapbox_dimen_2dp"
+        android:textAppearance="@style/MapboxStylePrimaryManeuver"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/mainManeuverGuideline"
         app:layout_constraintTop_toTopOf="parent"
-        android:paddingEnd="@dimen/mapbox_dimen_4dp"
-        android:paddingStart="@dimen/mapbox_dimen_4dp"
-        android:gravity="center_vertical"
-        android:maxLines="1"
-        android:textStyle="bold"
-        android:textAppearance="@style/MapboxStylePrimaryManeuver"
         tools:text="I-580 South"
         />
 
     <com.mapbox.navigation.ui.maneuver.view.MapboxSecondaryManeuver
         android:id="@+id/secondaryManeuverText"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
+        android:layout_marginTop="@dimen/mapbox_dimen_4dp"
+        android:gravity="top"
+        android:singleLine="true"
+        android:paddingEnd="@dimen/mapbox_dimen_2dp"
+        android:paddingTop="@dimen/mapbox_dimen_2dp"
+        android:paddingStart="@dimen/mapbox_dimen_2dp"
+        android:textAppearance="@style/MapboxStyleSecondaryManeuver"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:paddingEnd="@dimen/mapbox_dimen_4dp"
-        android:paddingStart="@dimen/mapbox_dimen_4dp"
-        android:gravity="top"
-        android:visibility="gone"
-        android:maxLines="1"
-        android:textStyle="bold"
-        android:textAppearance="@style/MapboxStyleSecondaryManeuver"
+        app:layout_constraintStart_toEndOf="@id/mainManeuverGuideline"
         tools:text="I-580 South"
         />
-  </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.mapbox.navigation.ui.maneuver.view.MapboxStepDistance
+        android:id="@+id/stepDistance"
+        android:layout_width="@dimen/mapbox_dimen_96dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/mapbox_dimen_4dp"
+        android:gravity="center"
+        android:paddingTop="@dimen/mapbox_dimen_4dp"
+        android:paddingBottom="@dimen/mapbox_dimen_4dp"
+        android:textAppearance="@style/MapboxStyleStepDistance"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/mainManeuverGuideline"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="3020 mi"
+        />
+
+    <com.mapbox.navigation.ui.maneuver.view.MapboxTurnIconManeuver
+        android:id="@+id/maneuverIcon"
+        android:layout_width="@dimen/mapbox_dimen_48dp"
+        android:layout_height="@dimen/mapbox_dimen_48dp"
+        android:layout_marginTop="@dimen/mapbox_dimen_12dp"
+        android:padding="@dimen/mapbox_dimen_2dp"
+        app:layout_constraintBottom_toTopOf="@id/stepDistance"
+        app:layout_constraintEnd_toStartOf="@id/mainManeuverGuideline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/mapbox_ic_turn_sharp_left"
+        />
 </merge>

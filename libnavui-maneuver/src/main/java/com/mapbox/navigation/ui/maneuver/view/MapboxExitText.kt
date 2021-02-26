@@ -12,9 +12,9 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.ManeuverModifier
-import com.mapbox.navigation.ui.base.model.maneuver.ComponentNode
-import com.mapbox.navigation.ui.base.model.maneuver.ExitNumberComponentNode
 import com.mapbox.navigation.ui.maneuver.R
+import com.mapbox.navigation.ui.maneuver.model.ComponentNode
+import com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode
 
 /**
  * Default Exit View that renders exit number in a specific style.

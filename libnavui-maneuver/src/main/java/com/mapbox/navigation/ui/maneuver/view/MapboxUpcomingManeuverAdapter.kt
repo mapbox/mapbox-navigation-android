@@ -2,15 +2,21 @@ package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
-import com.mapbox.navigation.ui.base.model.maneuver.Maneuver
-import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState
 import com.mapbox.navigation.ui.maneuver.databinding.MapboxItemUpcomingManeuversLayoutBinding
 import com.mapbox.navigation.ui.maneuver.databinding.MapboxMainManeuverLayoutBinding
+import com.mapbox.navigation.ui.maneuver.model.Maneuver
+import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
+import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
+import com.mapbox.navigation.ui.maneuver.model.StepDistance
+import com.mapbox.navigation.ui.maneuver.model.TotalManeuverDistance
 import com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder
 
 /**
@@ -65,37 +71,11 @@ class MapboxUpcomingManeuverAdapter(
      * @param upcomingManeuvers List<Maneuver>
      */
     fun addUpcomingManeuvers(upcomingManeuvers: List<Maneuver>) {
-        if (upcomingManeuvers.isNotEmpty()) {
-            val currentSize = this.upcomingManeuverList.size
-            this.upcomingManeuverList.clear()
-            this.upcomingManeuverList.addAll(upcomingManeuvers)
-            notifyItemRangeRemoved(0, currentSize)
-            notifyItemRangeInserted(0, upcomingManeuvers.size)
-        }
-    }
-
-    /**
-     * Invoke to remove a particular [Maneuver] from the recycler view.
-     * @param maneuverToRemove Maneuver
-     */
-    fun removeManeuver(maneuverToRemove: Maneuver) {
-        val index = this.upcomingManeuverList.indexOfFirst {
-            it.primary.text == maneuverToRemove.primary.text
-        }
-        if (index != -1) {
-            this.upcomingManeuverList.removeAt(index)
-            notifyItemRemoved(index)
-        }
-    }
-
-    /**
-     * Invoke to remove all the maneuvers from the recycler view.
-     */
-    fun removeManeuvers() {
-        if (this.upcomingManeuverList.isNotEmpty()) {
-            this.upcomingManeuverList.clear()
-            notifyDataSetChanged()
-        }
+        val diffCallback = MapboxManeuverDiffCallback(upcomingManeuverList, upcomingManeuvers)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+        upcomingManeuverList.clear()
+        upcomingManeuverList.addAll(upcomingManeuvers)
+        diffResult.dispatchUpdatesTo(this)
     }
 
     /**
@@ -115,34 +95,36 @@ class MapboxUpcomingManeuverAdapter(
             val primary = maneuver.primary
             val secondary = maneuver.secondary
             val totalStepDistance = maneuver.totalManeuverDistance
-            if (secondary != null) {
-                viewBinding.secondaryManeuverText.render(
-                    ManeuverState.ManeuverSecondary.Show
-                )
-                viewBinding.secondaryManeuverText.render(
-                    ManeuverState.ManeuverSecondary.Instruction(secondary)
-                )
-                updateConstraintsToHaveSecondary()
-                viewBinding.primaryManeuverText.maxLines = 1
-            } else {
-                updateConstraintsToOnlyPrimary()
-                viewBinding.secondaryManeuverText.render(
-                    ManeuverState.ManeuverSecondary.Hide
-                )
-                viewBinding.primaryManeuverText.maxLines = 2
-            }
-            viewBinding.primaryManeuverText.render(
-                ManeuverState.ManeuverPrimary.Instruction(primary)
-            )
-            viewBinding.maneuverIcon.render(
-                ManeuverState.ManeuverPrimary.Instruction(primary)
-            )
+            drawSecondaryManeuver(secondary)
+            drawPrimaryManeuver(primary)
+            drawTotalStepDistance(totalStepDistance)
+        }
+
+        private fun drawPrimaryManeuver(primary: PrimaryManeuver) {
+            viewBinding.primaryManeuverText.render(primary)
+            viewBinding.maneuverIcon.renderPrimaryTurnIcon(primary)
+        }
+
+        private fun drawTotalStepDistance(totalStepDistance: TotalManeuverDistance) {
             viewBinding.stepDistance.render(
-                ManeuverState.TotalStepDistance(
+                StepDistance(
                     MapboxDistanceFormatter(DistanceFormatterOptions.Builder(context).build()),
                     totalStepDistance.totalDistance
                 )
             )
+        }
+
+        private fun drawSecondaryManeuver(secondary: SecondaryManeuver?) {
+            if (secondary != null) {
+                viewBinding.secondaryManeuverText.visibility = VISIBLE
+                viewBinding.secondaryManeuverText.render(secondary)
+                updateConstraintsToHaveSecondary()
+                viewBinding.primaryManeuverText.isSingleLine = true
+            } else {
+                updateConstraintsToOnlyPrimary()
+                viewBinding.secondaryManeuverText.visibility = GONE
+                viewBinding.primaryManeuverText.isSingleLine = false
+            }
         }
 
         private fun updateConstraintsToOnlyPrimary() {

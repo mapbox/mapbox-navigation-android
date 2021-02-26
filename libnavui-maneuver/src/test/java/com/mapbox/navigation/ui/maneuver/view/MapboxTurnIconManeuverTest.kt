@@ -1,15 +1,13 @@
 package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
-import android.view.View.GONE
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
-import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState
-import com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver
-import com.mapbox.navigation.ui.base.model.maneuver.SubManeuver
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.TurnIconHelper
+import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
+import com.mapbox.navigation.ui.maneuver.model.SubManeuver
 import com.mapbox.navigation.ui.maneuver.model.TurnIcon
 import io.mockk.every
 import io.mockk.mockk
@@ -33,7 +31,6 @@ class MapboxTurnIconManeuverTest {
     @Test
     fun `render primary maneuver icon flip icon`() {
         val maneuver = getRoundaboutPrimaryManeuver()
-        val mockState = ManeuverState.ManeuverPrimary.Instruction(maneuver)
         val turnIcon = getTurnIconForPrimary(maneuver)
         val view = MapboxTurnIconManeuver(ctx)
         val expectedFlip = 180f
@@ -43,7 +40,7 @@ class MapboxTurnIconManeuverTest {
             )
         } returns turnIcon
 
-        view.render(mockState)
+        view.renderPrimaryTurnIcon(maneuver)
         val actualFlip = view.rotationY
 
         assertEquals(expectedFlip, actualFlip)
@@ -52,7 +49,6 @@ class MapboxTurnIconManeuverTest {
     @Test
     fun `render sub maneuver icon flip icon`() {
         val maneuver = getRoundaboutSubManeuver()
-        val mockState = ManeuverState.ManeuverSub.Instruction(maneuver)
         val turnIcon = getTurnIconForSub(maneuver)
         val view = MapboxTurnIconManeuver(ctx)
         val expectedFlip = 180f
@@ -62,32 +58,11 @@ class MapboxTurnIconManeuverTest {
             )
         } returns turnIcon
 
-        view.render(mockState)
+        view.renderSubTurnIcon(maneuver)
         val actualFlip = view.rotationY
 
         assertEquals(expectedFlip, actualFlip)
     }
-
-    @Test
-    fun `render view visibility`() {
-        val expectedVisibility = GONE
-        val mockState = ManeuverState.ManeuverSub.Hide
-        val view = MapboxTurnIconManeuver(ctx)
-
-        view.render(mockState)
-
-        assertEquals(expectedVisibility, view.visibility)
-    }
-
-    private fun getPrimaryManeuver() = PrimaryManeuver
-        .Builder()
-        .text("I-880")
-        .type(StepManeuver.TURN)
-        .degrees(null)
-        .modifier(ManeuverModifier.LEFT)
-        .drivingSide("left")
-        .componentList(listOf())
-        .build()
 
     private fun getRoundaboutPrimaryManeuver() = PrimaryManeuver
         .Builder()
@@ -105,16 +80,6 @@ class MapboxTurnIconManeuverTest {
         false,
         R.drawable.mapbox_ic_turn_left
     )
-
-    private fun getSubManeuver() = SubManeuver
-        .Builder()
-        .text("I-880")
-        .type(StepManeuver.TURN)
-        .degrees(null)
-        .modifier(ManeuverModifier.LEFT)
-        .drivingSide("left")
-        .componentList(listOf())
-        .build()
 
     private fun getRoundaboutSubManeuver() = SubManeuver
         .Builder()

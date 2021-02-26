@@ -8,7 +8,7 @@ import com.mapbox.api.directions.v5.models.ManeuverModifier.SLIGHT_LEFT
 import com.mapbox.api.directions.v5.models.ManeuverModifier.SLIGHT_RIGHT
 import com.mapbox.api.directions.v5.models.ManeuverModifier.STRAIGHT
 import com.mapbox.api.directions.v5.models.ManeuverModifier.UTURN
-import com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator
+import com.mapbox.navigation.ui.maneuver.model.LaneIndicator
 import com.mapbox.navigation.ui.maneuver.model.LaneTurns
 
 internal class LaneIconHelper {

@@ -14,8 +14,7 @@
 
     <activity
         android:name=".MapboxNavigationActivity"
-        android:label="@string/title_navigation"
-        android:screenOrientation="portrait">
+        android:label="@string/title_navigation">
     </activity>
 
     <activity

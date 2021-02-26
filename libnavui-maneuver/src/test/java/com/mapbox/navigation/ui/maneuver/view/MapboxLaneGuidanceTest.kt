@@ -6,9 +6,9 @@ import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator
 import com.mapbox.navigation.ui.maneuver.LaneIconHelper
 import com.mapbox.navigation.ui.maneuver.R
+import com.mapbox.navigation.ui.maneuver.model.LaneIndicator
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals

@@ -1,18 +1,27 @@
 package com.mapbox.navigation.ui.maneuver
 
-import com.mapbox.navigation.ui.base.model.maneuver.Maneuver
+import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.navigation.ui.maneuver.model.Maneuver
 
 internal sealed class ManeuverResult {
 
-    data class CurrentManeuver(
-        val currentManeuver: Maneuver
+    data class GetManeuver(
+        val maneuver: Maneuver
     ) : ManeuverResult()
 
-    data class StepDistanceRemaining(
+    data class GetStepDistanceRemaining(
         val distanceRemaining: Double
     ) : ManeuverResult()
 
-    data class UpcomingManeuvers(
-        val upcomingManeuverList: List<Maneuver>
+    data class GetAllBannerInstructions(
+        val bannerInstructions: List<BannerInstructions>
+    ) : ManeuverResult()
+
+    data class GetAllBannerInstructionsAfterStep(
+        val bannerInstructions: List<BannerInstructions>
+    ) : ManeuverResult()
+
+    data class GetAllManeuvers(
+        val maneuverList: List<Maneuver>
     ) : ManeuverResult()
 }

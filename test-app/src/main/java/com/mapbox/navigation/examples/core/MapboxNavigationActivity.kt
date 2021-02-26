@@ -2,6 +2,7 @@ package com.mapbox.navigation.examples.core
 
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import android.content.res.Resources
 import android.location.Location
 import android.os.Bundle
@@ -46,21 +47,25 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityNavigationBinding
 import com.mapbox.navigation.examples.util.Utils
-import com.mapbox.navigation.ui.base.api.maneuver.ManeuverCallback
-import com.mapbox.navigation.ui.base.api.maneuver.StepDistanceRemainingCallback
-import com.mapbox.navigation.ui.base.api.maneuver.UpcomingManeuversCallback
 import com.mapbox.navigation.ui.base.api.voice.SpeechApi
 import com.mapbox.navigation.ui.base.api.voice.SpeechCallback
 import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayer
 import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayerCallback
-import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState
+import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.model.tripprogress.DistanceRemainingFormatter
 import com.mapbox.navigation.ui.base.model.tripprogress.EstimatedTimeToArrivalFormatter
 import com.mapbox.navigation.ui.base.model.tripprogress.PercentDistanceTraveledFormatter
 import com.mapbox.navigation.ui.base.model.tripprogress.TimeRemainingFormatter
 import com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter
 import com.mapbox.navigation.ui.base.model.voice.SpeechState
+import com.mapbox.navigation.ui.maneuver.api.ManeuverCallback
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
+import com.mapbox.navigation.ui.maneuver.api.StepDistanceRemainingCallback
+import com.mapbox.navigation.ui.maneuver.api.UpcomingManeuverListCallback
+import com.mapbox.navigation.ui.maneuver.model.Maneuver
+import com.mapbox.navigation.ui.maneuver.model.ManeuverError
+import com.mapbox.navigation.ui.maneuver.model.StepDistance
+import com.mapbox.navigation.ui.maneuver.model.StepDistanceError
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
@@ -102,8 +107,16 @@ class MapboxNavigationActivity :
     private val pixelDensity = Resources.getSystem().displayMetrics.density
     private val overviewEdgeInsets: EdgeInsets by lazy {
         EdgeInsets(
+            40.0 * pixelDensity,
+            40.0 * pixelDensity,
+            40.0 * pixelDensity,
+            40.0 * pixelDensity
+        )
+    }
+    private val landscapeOverviewEdgeInsets: EdgeInsets by lazy {
+        EdgeInsets(
             20.0 * pixelDensity,
-            20.0 * pixelDensity,
+            mapboxMap.getSize().width.toDouble() / 1.75,
             20.0 * pixelDensity,
             20.0 * pixelDensity
         )
@@ -116,48 +129,46 @@ class MapboxNavigationActivity :
             0.0 * pixelDensity
         )
     }
+    private val landscapeFollowingEdgeInsets: EdgeInsets by lazy {
+        EdgeInsets(
+            mapboxMap.getSize().height.toDouble() * 2.0 / 5.0,
+            mapboxMap.getSize().width.toDouble() / 2.0,
+            0.0 * pixelDensity,
+            40.0 * pixelDensity
+        )
+    }
     private val currentManeuverCallback = object : ManeuverCallback {
-        override fun onManeuver(currentManeuver: ManeuverState.CurrentManeuver) {
-            val maneuver = currentManeuver.maneuver
-            val primary = maneuver.primary
-            val secondary = maneuver.secondary
-            val sub = maneuver.sub
-            val lane = maneuver.laneGuidance
-            if (secondary?.componentList != null) {
-                binding.maneuverView.render(ManeuverState.ManeuverSecondary.Show)
-                binding.maneuverView.render(ManeuverState.ManeuverSecondary.Instruction(secondary))
-            } else {
-                binding.maneuverView.render(ManeuverState.ManeuverSecondary.Hide)
-            }
-            if (sub?.componentList != null) {
-                binding.maneuverView.render(ManeuverState.ManeuverSub.Show)
-                binding.maneuverView.render(ManeuverState.ManeuverSub.Instruction(sub))
-            } else {
-                binding.maneuverView.render(ManeuverState.ManeuverSub.Hide)
-            }
-            binding.maneuverView.render(ManeuverState.ManeuverPrimary.Instruction(primary))
-            binding.maneuverView.render(ManeuverState.UpcomingManeuvers.RemoveUpcoming(maneuver))
-            if (lane != null) {
-                binding.maneuverView.render(ManeuverState.LaneGuidanceManeuver.Show)
-                binding.maneuverView.render(ManeuverState.LaneGuidanceManeuver.AddLanes(lane))
-            } else {
-                binding.maneuverView.render(ManeuverState.LaneGuidanceManeuver.Hide)
-                binding.maneuverView.render(ManeuverState.LaneGuidanceManeuver.RemoveLanes)
-            }
+        override fun onManeuver(maneuver: Expected<Maneuver, ManeuverError>) {
+            binding.maneuverView.renderManeuver(maneuver)
         }
     }
 
     private val stepDistanceRemainingCallback = object : StepDistanceRemainingCallback {
         override fun onStepDistanceRemaining(
-            distanceRemaining: ManeuverState.DistanceRemainingToFinishStep
+            distanceRemaining: Expected<StepDistance, StepDistanceError>
         ) {
-            binding.maneuverView.render(distanceRemaining)
+
+            when (distanceRemaining) {
+                is Expected.Success -> {
+                    binding.maneuverView.renderDistanceRemaining(distanceRemaining.value)
+                }
+                is Expected.Failure -> {
+                    // Not handled
+                }
+            }
         }
     }
 
-    private val upcomingManeuversCallback = object : UpcomingManeuversCallback {
-        override fun onUpcomingManeuvers(state: ManeuverState.UpcomingManeuvers.Upcoming) {
-            binding.maneuverView.render(state)
+    private val upcomingManeuversCallback = object : UpcomingManeuverListCallback {
+        override fun onUpcomingManeuvers(maneuvers: Expected<List<Maneuver>, ManeuverError>) {
+            when (maneuvers) {
+                is Expected.Success -> {
+                    binding.maneuverView.renderUpcomingManeuvers(maneuvers.value)
+                }
+                is Expected.Failure -> {
+                    // Not handled
+                }
+            }
         }
     }
 
@@ -222,10 +233,6 @@ class MapboxNavigationActivity :
                     binding.start.visibility = VISIBLE
                     updateCameraToOverview()
                 }
-                val routeLeg = routes.first().legs()
-                ifNonNull(routeLeg) {
-                    maneuverApi.retrieveUpcomingManeuvers(it.first(), upcomingManeuversCallback)
-                }
             } else {
                 viewportDataSource.clearRouteData()
                 updateCameraToIdle()
@@ -248,9 +255,10 @@ class MapboxNavigationActivity :
                 }
             }
             binding.tripProgressView.render(tripProgressApi.getTripProgress(routeProgress))
+            maneuverApi.getUpcomingManeuverList(routeProgress, upcomingManeuversCallback)
             ifNonNull(routeProgress.currentLegProgress) { legProgress ->
                 ifNonNull(legProgress.currentStepProgress) {
-                    maneuverApi.retrieveStepDistanceRemaining(it, stepDistanceRemainingCallback)
+                    maneuverApi.getStepDistanceRemaining(it, stepDistanceRemainingCallback)
                 }
             }
         }
@@ -258,7 +266,10 @@ class MapboxNavigationActivity :
 
     private val bannerInstructionsObserver = object : BannerInstructionsObserver {
         override fun onNewBannerInstructions(bannerInstructions: BannerInstructions) {
-            maneuverApi.retrieveManeuver(bannerInstructions, currentManeuverCallback)
+            if (binding.maneuverView.visibility != VISIBLE) {
+                binding.maneuverView.visibility = VISIBLE
+            }
+            maneuverApi.getManeuver(bannerInstructions, currentManeuverCallback)
         }
     }
 
@@ -331,7 +342,10 @@ class MapboxNavigationActivity :
         binding.mapView.onDestroy()
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.unregisterRoutesObserver(routesObserver)
+            mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
             mapboxNavigation.unregisterMapMatcherResultObserver(mapMatcherResultObserver)
+            mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
+            mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver)
         }
         mapboxNavigation.onDestroy()
         speechAPI.cancel()
@@ -378,7 +392,6 @@ class MapboxNavigationActivity :
         binding.start.setOnClickListener {
             startNavigation()
             binding.start.visibility = GONE
-            binding.maneuverView.visibility = VISIBLE
             binding.tripProgressCard.visibility = VISIBLE
         }
         binding.stop.setOnClickListener {
@@ -417,7 +430,10 @@ class MapboxNavigationActivity :
                 }
             })
             registerRoutesObserver(routesObserver)
+            registerRouteProgressObserver(routeProgressObserver)
             registerMapMatcherResultObserver(mapMatcherResultObserver)
+            registerVoiceInstructionsObserver(voiceInstructionsObserver)
+            registerBannerInstructionsObserver(bannerInstructionsObserver)
         }
     }
 
@@ -447,13 +463,21 @@ class MapboxNavigationActivity :
     }
 
     private fun updateCameraToOverview() {
-        viewportDataSource.overviewPaddingPropertyOverride(overviewEdgeInsets)
+        if (this.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            viewportDataSource.overviewPaddingPropertyOverride(landscapeOverviewEdgeInsets)
+        } else {
+            viewportDataSource.overviewPaddingPropertyOverride(overviewEdgeInsets)
+        }
         viewportDataSource.evaluate()
         navigationCamera.requestNavigationCameraToOverview()
     }
 
     private fun updateCameraToFollowing() {
-        viewportDataSource.followingPaddingPropertyOverride(followingEdgeInsets)
+        if (this.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            viewportDataSource.followingPaddingPropertyOverride(landscapeFollowingEdgeInsets)
+        } else {
+            viewportDataSource.followingPaddingPropertyOverride(followingEdgeInsets)
+        }
         viewportDataSource.evaluate()
         navigationCamera.requestNavigationCameraToFollowing()
     }
@@ -465,18 +489,12 @@ class MapboxNavigationActivity :
     private fun startNavigation() {
         isNavigating = true
         updateCameraToFollowing()
-        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
-        mapboxNavigation.registerBannerInstructionsObserver(bannerInstructionsObserver)
     }
 
     private fun stopNavigation() {
         isNavigating = false
         updateCameraToIdle()
         clearRouteLine()
-        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
-        mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver)
     }
 
     private fun clearRouteLine() {

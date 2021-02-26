@@ -1,89 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
-    >
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/mainManeuverView"
-        android:layout_width="match_parent"
+        android:id="@+id/maneuver"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="10dp"
+        app:cardCornerRadius="@dimen/mapbox_dimen_16dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/mainManeuverLayout"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:weightSum="100"
-                android:orientation="horizontal">
+                android:elevation="@dimen/mapbox_dimen_4dp"
+                android:padding="@dimen/mapbox_dimen_4dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <include layout="@layout/mapbox_main_maneuver_layout" />
-            </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/subManeuverLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/mapbox_dimen_4dp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/mainManeuverLayout">
+
+                <include layout="@layout/mapbox_sub_maneuver_layout" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/laneGuidanceRecycler"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/mapbox_dimen_4dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/mainManeuverLayout"
+                    tools:listitem="@layout/mapbox_item_lane_guidance_layout" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <com.mapbox.navigation.ui.maneuver.view.MapboxManeuversList
                 android:id="@+id/upcomingManeuverRecycler"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="200dp"
                 android:visibility="gone"
-                android:background="@color/mapbox_upcoming_maneuver_background_color"
-                />
-        </LinearLayout>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/mainManeuverLayout"
+                tools:listitem="@layout/mapbox_item_upcoming_maneuvers_layout" />
 
-    </androidx.cardview.widget.CardView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/subManeuverView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:cardCornerRadius="@dimen/mapbox_dimen_10dp"
-        app:cardElevation="0dp"
-        android:translationY="-12dp"
-        android:visibility="gone"
-        app:contentPaddingTop="@dimen/mapbox_dimen_24dp"
-        app:contentPaddingBottom="@dimen/mapbox_dimen_8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/mainManeuverView"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:weightSum="100"
-            android:orientation="horizontal">
-
-            <include layout="@layout/mapbox_sub_maneuver_layout" />
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/laneGuidanceCard"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:cardCornerRadius="@dimen/mapbox_dimen_10dp"
-        app:cardElevation="0dp"
-        android:visibility="gone"
-        android:translationY="-12dp"
-        app:contentPaddingTop="@dimen/mapbox_dimen_16dp"
-        app:contentPaddingBottom="@dimen/mapbox_dimen_8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/mainManeuverView"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/laneGuidanceRecycler"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"/>
     </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

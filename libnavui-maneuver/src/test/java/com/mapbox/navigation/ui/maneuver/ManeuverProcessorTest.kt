@@ -10,26 +10,30 @@ import com.mapbox.api.directions.v5.models.BannerComponents.builder
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.api.directions.v5.models.LegStep
+import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.navigation.base.trip.model.RouteLegProgress
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.base.model.maneuver.Component
-import com.mapbox.navigation.ui.base.model.maneuver.DelimiterComponentNode
-import com.mapbox.navigation.ui.base.model.maneuver.ExitComponentNode
-import com.mapbox.navigation.ui.base.model.maneuver.ExitNumberComponentNode
-import com.mapbox.navigation.ui.base.model.maneuver.Lane
-import com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator
-import com.mapbox.navigation.ui.base.model.maneuver.Maneuver
-import com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver
-import com.mapbox.navigation.ui.base.model.maneuver.RoadShieldComponentNode
-import com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver
-import com.mapbox.navigation.ui.base.model.maneuver.SubManeuver
-import com.mapbox.navigation.ui.base.model.maneuver.TextComponentNode
-import com.mapbox.navigation.ui.base.model.maneuver.TotalManeuverDistance
+import com.mapbox.navigation.ui.maneuver.model.Component
+import com.mapbox.navigation.ui.maneuver.model.DelimiterComponentNode
+import com.mapbox.navigation.ui.maneuver.model.ExitComponentNode
+import com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode
+import com.mapbox.navigation.ui.maneuver.model.Lane
+import com.mapbox.navigation.ui.maneuver.model.LaneIndicator
+import com.mapbox.navigation.ui.maneuver.model.Maneuver
+import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
+import com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode
+import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
+import com.mapbox.navigation.ui.maneuver.model.SubManeuver
+import com.mapbox.navigation.ui.maneuver.model.TextComponentNode
+import com.mapbox.navigation.ui.maneuver.model.TotalManeuverDistance
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 
@@ -42,89 +46,238 @@ class ManeuverProcessorTest {
     @Test
     fun `process action step distance remaining result distance`() =
         coroutineRule.runBlockingTest {
+            val maneuverProcessor = ManeuverProcessor()
             val mockRouteStepProgress = mockk<RouteStepProgress>()
             val mockStepDistanceRemaining = 324f
             every { mockRouteStepProgress.distanceRemaining } returns mockStepDistanceRemaining
-            val mockAction = ManeuverAction.FindStepDistanceRemaining(mockRouteStepProgress)
-            val expected = ManeuverResult.StepDistanceRemaining(
+            val mockAction = ManeuverAction.GetStepDistanceRemaining(mockRouteStepProgress)
+            val expected = ManeuverResult.GetStepDistanceRemaining(
                 mockStepDistanceRemaining.toDouble()
             )
 
-            val actual = ManeuverProcessor.process(mockAction)
+            val actual = maneuverProcessor.process(mockAction)
 
             assertEquals(expected, actual)
         }
 
     @Test
-    fun `process action find upcoming maneuvers result no steps empty upcoming maneuvers`() =
+    fun `process action get maneuver list result no currentLegProgress empty maneuver list`() =
         coroutineRule.runBlockingTest {
+            val maneuverProcessor = ManeuverProcessor()
+            val mockRouteProgress = mockk<RouteProgress>()
+            every { mockRouteProgress.currentLegProgress } returns null
+            val mockAction = ManeuverAction.GetAllBannerInstructions(mockRouteProgress)
+            val expected = ManeuverResult.GetAllBannerInstructions(listOf())
+
+            val actual = maneuverProcessor.process(mockAction)
+
+            assertEquals(expected, actual)
+        }
+
+    @Test
+    fun `process action get maneuver list result no routeLeg empty maneuver list`() =
+        coroutineRule.runBlockingTest {
+            val maneuverProcessor = ManeuverProcessor()
+            val mockLegProgress = mockk<RouteLegProgress>()
+            every { mockLegProgress.routeLeg } returns null
+            val mockRouteProgress = mockk<RouteProgress>()
+            every { mockRouteProgress.currentLegProgress } returns mockLegProgress
+            val mockAction = ManeuverAction.GetAllBannerInstructions(mockRouteProgress)
+            val expected = ManeuverResult.GetAllBannerInstructions(listOf())
+
+            val actual = maneuverProcessor.process(mockAction)
+
+            assertEquals(expected, actual)
+        }
+
+    @Test
+    fun `process action get maneuver list result no steps empty maneuver list`() =
+        coroutineRule.runBlockingTest {
+            val maneuverProcessor = ManeuverProcessor()
             val mockRouteLeg = mockk<RouteLeg>()
             every { mockRouteLeg.steps() } returns null
-            val mockAction = ManeuverAction.FindAllUpcomingManeuvers(mockRouteLeg)
-            val expected = ManeuverResult.UpcomingManeuvers(listOf())
+            val mockLegProgress = mockk<RouteLegProgress>()
+            every { mockLegProgress.routeLeg } returns null
+            val mockRouteProgress = mockk<RouteProgress>()
+            every { mockRouteProgress.currentLegProgress } returns mockLegProgress
+            val mockAction = ManeuverAction.GetAllBannerInstructions(mockRouteProgress)
+            val expected = ManeuverResult.GetAllBannerInstructions(listOf())
 
-            val actual = ManeuverProcessor.process(mockAction)
+            val actual = maneuverProcessor.process(mockAction)
 
             assertEquals(expected, actual)
         }
 
     @Test
-    fun `process action find upcoming maneuvers result no instructions empty upcoming maneuvers`() =
+    fun `process action find maneuver list result no instructions empty maneuver list`() =
         coroutineRule.runBlockingTest {
-            val mockRouteLeg = mockk<RouteLeg>()
+            val maneuverProcessor = ManeuverProcessor()
             val mockStep = mockk<LegStep>()
             every { mockStep.bannerInstructions() } returns null
-            val mockStepList = listOf(mockStep)
-            every { mockRouteLeg.steps() } returns mockStepList
+            val mockRouteLeg = mockk<RouteLeg>()
+            every { mockRouteLeg.steps() } returns listOf(mockStep)
+            val mockLegProgress = mockk<RouteLegProgress>()
+            every { mockLegProgress.routeLeg } returns null
+            val mockRouteProgress = mockk<RouteProgress>()
+            every { mockRouteProgress.currentLegProgress } returns mockLegProgress
+            val mockAction = ManeuverAction.GetAllBannerInstructions(mockRouteProgress)
+            val expected = ManeuverResult.GetAllBannerInstructions(listOf())
 
-            val mockAction = ManeuverAction.FindAllUpcomingManeuvers(mockRouteLeg)
-            val expected = ManeuverResult.UpcomingManeuvers(listOf())
-
-            val actual = ManeuverProcessor.process(mockAction)
+            val actual = maneuverProcessor.process(mockAction)
 
             assertEquals(expected, actual)
         }
 
     @Test
-    fun `process action find upcoming maneuvers result upcoming maneuvers`() =
+    fun `process action filter maneuver after step null step distance geometry`() =
         coroutineRule.runBlockingTest {
-            val mockRouteLeg = mockk<RouteLeg>()
-            val mockPrimaryBannerText = getPrimaryBannerText()
-            val mockBannerInstructions = mockk<BannerInstructions>()
-            every { mockBannerInstructions.primary() } returns mockPrimaryBannerText
-            every { mockBannerInstructions.secondary() } returns null
-            every { mockBannerInstructions.sub() } returns null
-            every { mockBannerInstructions.distanceAlongGeometry() } returns 23.0
-            val mockStep = mockk<LegStep>()
-            every { mockStep.bannerInstructions() } returns listOf(mockBannerInstructions)
-            val mockStepList = listOf(mockStep)
-            every { mockRouteLeg.steps() } returns mockStepList
-
-            val mockAction = ManeuverAction.FindAllUpcomingManeuvers(mockRouteLeg)
-            val totalManeuverDistance =
-                TotalManeuverDistance(mockBannerInstructions.distanceAlongGeometry())
-            val primaryManeuver = createPrimaryManeuver(mockPrimaryBannerText)
-            val expected = ManeuverResult.UpcomingManeuvers(
-                listOf(
-                    Maneuver
-                        .Builder()
-                        .primary(primaryManeuver)
-                        .totalManeuverDistance(totalManeuverDistance)
-                        .secondary(null)
-                        .sub(null)
-                        .laneGuidance(null)
-                        .build()
-                )
+            val maneuverProcessor = ManeuverProcessor()
+            val mockBannerInstruction = mockk<BannerInstructions>()
+            val mockLegProgress = mockk<RouteLegProgress>()
+            every { mockLegProgress.currentStepProgress } returns null
+            val mockRouteProgress = mockk<RouteProgress>()
+            every { mockRouteProgress.currentLegProgress } returns mockLegProgress
+            val mockAction = ManeuverAction.GetAllBannerInstructionsAfterStep(
+                mockRouteProgress,
+                listOf(mockBannerInstruction)
+            )
+            val expected = ManeuverResult.GetAllBannerInstructionsAfterStep(
+                listOf(mockBannerInstruction)
             )
 
-            val actual = ManeuverProcessor.process(mockAction)
+            val actual = maneuverProcessor.process(mockAction)
 
             assertEquals(expected, actual)
+        }
+
+    @Test
+    fun `process action filter maneuver after step original list does not contain step banner`() =
+        coroutineRule.runBlockingTest {
+            val maneuverProcessor = ManeuverProcessor()
+            val mockLegStep = mockk<LegStep>()
+            every { mockLegStep.bannerInstructions() } returns listOf(
+                getMockBannerInstruction({ "primary3" }, { 123.0 })
+            )
+            val mockStepProgress = mockk<RouteStepProgress>()
+            every { mockStepProgress.step } returns mockLegStep
+            every { mockStepProgress.distanceRemaining } returns 12f
+            val mockLegProgress = mockk<RouteLegProgress>()
+            every { mockLegProgress.currentStepProgress } returns mockStepProgress
+            val mockRouteProgress = mockk<RouteProgress>()
+            every { mockRouteProgress.currentLegProgress } returns mockLegProgress
+            val mockBannerInstruction1 = getMockBannerInstruction({ "primary1" }, { 1.0 })
+            val mockBannerInstruction2 = getMockBannerInstruction({ "primary2" }, { 2.0 })
+            val mockAction = ManeuverAction.GetAllBannerInstructionsAfterStep(
+                mockRouteProgress,
+                listOf(mockBannerInstruction1, mockBannerInstruction2)
+            )
+            val expected = ManeuverResult.GetAllBannerInstructionsAfterStep(
+                listOf(mockBannerInstruction1, mockBannerInstruction2)
+            )
+
+            val actual = maneuverProcessor.process(mockAction)
+
+            assertEquals(expected, actual)
+        }
+
+    @Test
+    fun `process action filter maneuver after step original list contains step banner`() =
+        coroutineRule.runBlockingTest {
+            val maneuverProcessor = ManeuverProcessor()
+            val mockLegStep = mockk<LegStep>()
+            val mockBannerInstruction1 = getMockBannerInstruction({ "primary1" }, { 1.0 })
+            val mockBannerInstruction2 = getMockBannerInstruction({ "primary2" }, { 2.0 })
+            every { mockLegStep.bannerInstructions() } returns listOf(mockBannerInstruction1)
+            val mockStepProgress = mockk<RouteStepProgress>()
+            every { mockStepProgress.step } returns mockLegStep
+            every { mockStepProgress.distanceRemaining } returns 12f
+            val mockLegProgress = mockk<RouteLegProgress>()
+            every { mockLegProgress.currentStepProgress } returns mockStepProgress
+            val mockRouteProgress = mockk<RouteProgress>()
+            every { mockRouteProgress.currentLegProgress } returns mockLegProgress
+            val mockAction = ManeuverAction.GetAllBannerInstructionsAfterStep(
+                mockRouteProgress,
+                listOf(mockBannerInstruction1, mockBannerInstruction2)
+            )
+            val expected = ManeuverResult.GetAllBannerInstructionsAfterStep(
+                listOf(mockBannerInstruction2)
+            )
+
+            val actual = maneuverProcessor.process(mockAction)
+
+            assertEquals(expected, actual)
+        }
+
+    @Test
+    fun `process action maneuver list from filtered banner instruction list`() =
+        coroutineRule.runBlockingTest {
+            val maneuverProcessor = ManeuverProcessor()
+            val mockBannerInstruction = getMockBannerInstruction({ "primary1" }, { 12.0 })
+            val mockAction = ManeuverAction.GetAllManeuvers(listOf(mockBannerInstruction))
+
+            val actual = maneuverProcessor.process(mockAction) as ManeuverResult.GetAllManeuvers
+
+            assertEquals(
+                mockBannerInstruction.primary().text(), actual.maneuverList[0].primary.text
+            )
+            assertEquals(
+                mockBannerInstruction.distanceAlongGeometry(),
+                actual.maneuverList[0].totalManeuverDistance.totalDistance,
+                0.0
+            )
+            assertNull(actual.maneuverList[0].secondary)
+            assertNull(actual.maneuverList[0].sub)
+            assertNull(actual.maneuverList[0].laneGuidance)
+        }
+
+    @Test
+    fun `process action maneuver list from new filtered banner instruction list`() =
+        coroutineRule.runBlockingTest {
+            val maneuverProcessor = ManeuverProcessor()
+            val mockBannerInstruction1 = getMockBannerInstruction({ "primary1" }, { 12.0 })
+            val mockAction1 = ManeuverAction.GetAllManeuvers(listOf(mockBannerInstruction1))
+            maneuverProcessor.process(mockAction1) as ManeuverResult.GetAllManeuvers
+            val mockBannerInstruction2 = getMockBannerInstruction({ "primary2" }, { 22.0 })
+            val mockAction2 = ManeuverAction.GetAllManeuvers(listOf(mockBannerInstruction2))
+            val maneuverList2 =
+                maneuverProcessor.process(mockAction2) as ManeuverResult.GetAllManeuvers
+
+            assertEquals(
+                mockBannerInstruction2.primary().text(), maneuverList2.maneuverList[0].primary.text
+            )
+            assertEquals(
+                mockBannerInstruction2.distanceAlongGeometry(),
+                maneuverList2.maneuverList[0].totalManeuverDistance.totalDistance,
+                0.0
+            )
+            assertNull(maneuverList2.maneuverList[0].secondary)
+            assertNull(maneuverList2.maneuverList[0].sub)
+            assertNull(maneuverList2.maneuverList[0].laneGuidance)
+        }
+
+    @Test
+    fun `process action maneuver list return from cache`() =
+        coroutineRule.runBlockingTest {
+            val maneuverProcessor = ManeuverProcessor()
+            val mockBannerInstruction = getMockBannerInstruction({ "primary1" }, { 12.0 })
+            val mockAction1 = ManeuverAction.GetAllManeuvers(
+                listOf(mockBannerInstruction)
+            )
+            val maneuverList1 =
+                maneuverProcessor.process(mockAction1) as ManeuverResult.GetAllManeuvers
+            val mockAction2 = ManeuverAction.GetAllManeuvers(
+                listOf(mockBannerInstruction)
+            )
+            val maneuverList2 =
+                maneuverProcessor.process(mockAction2) as ManeuverResult.GetAllManeuvers
+
+            assertEquals(maneuverList1, maneuverList2)
         }
 
     @Test
     fun `process action get current maneuver result without secondary, sub and lane`() =
         coroutineRule.runBlockingTest {
+            val maneuverProcessor = ManeuverProcessor()
             val mockPrimaryBannerText = getPrimaryBannerText()
             val mockBannerInstructions = mockk<BannerInstructions>()
             val mockTotalStepDistance = 23.0
@@ -133,27 +286,34 @@ class ManeuverProcessorTest {
             every { mockBannerInstructions.sub() } returns null
             every { mockBannerInstructions.distanceAlongGeometry() } returns mockTotalStepDistance
 
-            val mockAction = ManeuverAction.ParseCurrentManeuver(mockBannerInstructions)
+            val mockAction = ManeuverAction.GetManeuver(mockBannerInstructions)
             val primaryManeuver = createPrimaryManeuver(mockPrimaryBannerText)
-            val expected = ManeuverResult.CurrentManeuver(
-                Maneuver
-                    .Builder()
-                    .primary(primaryManeuver)
-                    .totalManeuverDistance(TotalManeuverDistance(mockTotalStepDistance))
-                    .secondary(null)
-                    .sub(null)
-                    .laneGuidance(null)
-                    .build()
+            val expected = ManeuverResult.GetManeuver(
+                Maneuver(
+                    primaryManeuver,
+                    TotalManeuverDistance(mockTotalStepDistance),
+                    null,
+                    null,
+                    null
+                )
             )
 
-            val actual = ManeuverProcessor.process(mockAction)
+            val actual = maneuverProcessor.process(mockAction) as ManeuverResult.GetManeuver
 
-            assertEquals(expected, actual)
+            assertEquals(expected.maneuver.primary, actual.maneuver.primary)
+            assertEquals(
+                expected.maneuver.totalManeuverDistance,
+                actual.maneuver.totalManeuverDistance
+            )
+            assertNull(actual.maneuver.sub)
+            assertNull(actual.maneuver.secondary)
+            assertNull(actual.maneuver.laneGuidance)
         }
 
     @Test
     fun `process action get current maneuver result without sub and lane`() =
         coroutineRule.runBlockingTest {
+            val maneuverProcessor = ManeuverProcessor()
             val mockPrimaryBannerText = getPrimaryBannerText()
             val mockSecondaryBannerText = getSecondaryBannerText()
             val mockBannerInstructions = mockk<BannerInstructions>()
@@ -163,28 +323,35 @@ class ManeuverProcessorTest {
             every { mockBannerInstructions.sub() } returns null
             every { mockBannerInstructions.distanceAlongGeometry() } returns mockTotalStepDistance
 
-            val mockAction = ManeuverAction.ParseCurrentManeuver(mockBannerInstructions)
+            val mockAction = ManeuverAction.GetManeuver(mockBannerInstructions)
             val primaryManeuver = createPrimaryManeuver(mockPrimaryBannerText)
             val secondaryManeuver = createSecondaryManeuver(mockSecondaryBannerText)
-            val expected = ManeuverResult.CurrentManeuver(
-                Maneuver
-                    .Builder()
-                    .primary(primaryManeuver)
-                    .totalManeuverDistance(TotalManeuverDistance(mockTotalStepDistance))
-                    .secondary(secondaryManeuver)
-                    .sub(null)
-                    .laneGuidance(null)
-                    .build()
+            val expected = ManeuverResult.GetManeuver(
+                Maneuver(
+                    primaryManeuver,
+                    TotalManeuverDistance(mockTotalStepDistance),
+                    secondaryManeuver,
+                    null,
+                    null
+                )
             )
 
-            val actual = ManeuverProcessor.process(mockAction)
+            val actual = maneuverProcessor.process(mockAction) as ManeuverResult.GetManeuver
 
-            assertEquals(expected, actual)
+            assertEquals(expected.maneuver.primary, actual.maneuver.primary)
+            assertEquals(expected.maneuver.secondary, actual.maneuver.secondary)
+            assertEquals(
+                expected.maneuver.totalManeuverDistance,
+                actual.maneuver.totalManeuverDistance
+            )
+            assertNull(actual.maneuver.sub)
+            assertNull(actual.maneuver.laneGuidance)
         }
 
     @Test
     fun `process action get current maneuver result with sub and without lane`() =
         coroutineRule.runBlockingTest {
+            val maneuverProcessor = ManeuverProcessor()
             val mockPrimaryBannerText = getPrimaryBannerText()
             val mockSecondaryBannerText = getSecondaryBannerText()
             val mockSubBannerText = getSubBannerText()
@@ -195,29 +362,36 @@ class ManeuverProcessorTest {
             every { mockBannerInstructions.sub() } returns mockSubBannerText
             every { mockBannerInstructions.distanceAlongGeometry() } returns mockTotalStepDistance
 
-            val mockAction = ManeuverAction.ParseCurrentManeuver(mockBannerInstructions)
+            val mockAction = ManeuverAction.GetManeuver(mockBannerInstructions)
             val primaryManeuver = createPrimaryManeuver(mockPrimaryBannerText)
             val secondaryManeuver = createSecondaryManeuver(mockSecondaryBannerText)
             val subManeuver = createSubManeuver(mockSubBannerText)
-            val expected = ManeuverResult.CurrentManeuver(
-                Maneuver
-                    .Builder()
-                    .primary(primaryManeuver)
-                    .totalManeuverDistance(TotalManeuverDistance(mockTotalStepDistance))
-                    .secondary(secondaryManeuver)
-                    .sub(subManeuver)
-                    .laneGuidance(null)
-                    .build()
+            val expected = ManeuverResult.GetManeuver(
+                Maneuver(
+                    primaryManeuver,
+                    TotalManeuverDistance(mockTotalStepDistance),
+                    secondaryManeuver,
+                    subManeuver,
+                    null
+                )
             )
 
-            val actual = ManeuverProcessor.process(mockAction)
+            val actual = maneuverProcessor.process(mockAction) as ManeuverResult.GetManeuver
 
-            assertEquals(expected, actual)
+            assertEquals(expected.maneuver.primary, actual.maneuver.primary)
+            assertEquals(expected.maneuver.secondary, actual.maneuver.secondary)
+            assertEquals(
+                expected.maneuver.totalManeuverDistance,
+                actual.maneuver.totalManeuverDistance
+            )
+            assertEquals(expected.maneuver.sub, actual.maneuver.sub)
+            assertNull(actual.maneuver.laneGuidance)
         }
 
     @Test
     fun `process action get current maneuver result without sub and with lane`() =
         coroutineRule.runBlockingTest {
+            val maneuverProcessor = ManeuverProcessor()
             val mockPrimaryBannerText = getPrimaryBannerText()
             val mockSecondaryBannerText = getSecondaryBannerText()
             val mockLaneBannerText = getLaneBannerText()
@@ -228,7 +402,7 @@ class ManeuverProcessorTest {
             every { mockBannerInstructions.sub() } returns mockLaneBannerText
             every { mockBannerInstructions.distanceAlongGeometry() } returns mockTotalStepDistance
 
-            val mockAction = ManeuverAction.ParseCurrentManeuver(mockBannerInstructions)
+            val mockAction = ManeuverAction.GetManeuver(mockBannerInstructions)
             val primaryManeuver = createPrimaryManeuver(mockPrimaryBannerText)
             val secondaryManeuver = createSecondaryManeuver(mockSecondaryBannerText)
             val laneManeuver = Lane
@@ -236,21 +410,84 @@ class ManeuverProcessorTest {
                 .allLanes(createLaneManeuver())
                 .activeDirection(mockPrimaryBannerText.modifier())
                 .build()
-            val expected = ManeuverResult.CurrentManeuver(
-                Maneuver
-                    .Builder()
-                    .primary(primaryManeuver)
-                    .totalManeuverDistance(TotalManeuverDistance(mockTotalStepDistance))
-                    .secondary(secondaryManeuver)
-                    .sub(null)
-                    .laneGuidance(laneManeuver)
-                    .build()
+            val expected = ManeuverResult.GetManeuver(
+                Maneuver(
+                    primaryManeuver,
+                    TotalManeuverDistance(mockTotalStepDistance),
+                    secondaryManeuver,
+                    null,
+                    laneManeuver
+                )
             )
 
-            val actual = ManeuverProcessor.process(mockAction)
+            val actual = maneuverProcessor.process(mockAction) as ManeuverResult.GetManeuver
 
-            assertEquals(expected, actual)
+            assertEquals(expected.maneuver.primary, actual.maneuver.primary)
+            assertEquals(expected.maneuver.secondary, actual.maneuver.secondary)
+            assertEquals(
+                expected.maneuver.totalManeuverDistance,
+                actual.maneuver.totalManeuverDistance
+            )
+            assertEquals(expected.maneuver.laneGuidance, actual.maneuver.laneGuidance)
+            assertNull(actual.maneuver.sub)
         }
+
+    private fun getMockBannerInstruction(
+        textPrimary: () -> String,
+        distanceAlongGeometry: () -> Double
+    ): BannerInstructions {
+        val bannerInstructions = mockk<BannerInstructions>()
+        every { bannerInstructions.primary() } returns mockBannerText(
+            { textPrimary() },
+            { listOf(mockBannerComponent({ textPrimary() }, { TEXT })) }
+        )
+        every { bannerInstructions.secondary() } returns null
+        every { bannerInstructions.sub() } returns null
+        every { bannerInstructions.distanceAlongGeometry() } returns distanceAlongGeometry()
+        return bannerInstructions
+    }
+
+    private fun mockBannerText(
+        text: () -> String,
+        componentList: () -> List<BannerComponents>,
+        type: () -> String = { TEXT },
+        modifier: () -> String = { ManeuverModifier.RIGHT },
+        degrees: () -> Double? = { null },
+        drivingSide: () -> String? = { null },
+    ): BannerText {
+        val bannerText = mockk<BannerText>()
+        every { bannerText.text() } returns text()
+        every { bannerText.type() } returns type()
+        every { bannerText.degrees() } returns degrees()
+        every { bannerText.modifier() } returns modifier()
+        every { bannerText.drivingSide() } returns drivingSide()
+        every { bannerText.components() } returns componentList()
+        return bannerText
+    }
+
+    private fun mockBannerComponent(
+        text: () -> String,
+        type: () -> String,
+        active: () -> Boolean? = { null },
+        subType: () -> String? = { null },
+        imageUrl: () -> String? = { null },
+        directions: () -> List<String>? = { null },
+        imageBaseUrl: () -> String? = { null },
+        abbreviation: () -> String? = { null },
+        abbreviationPriority: () -> Int? = { null },
+    ): BannerComponents {
+        val bannerComponents = mockk<BannerComponents>()
+        every { bannerComponents.text() } returns text()
+        every { bannerComponents.type() } returns type()
+        every { bannerComponents.active() } returns active()
+        every { bannerComponents.subType() } returns subType()
+        every { bannerComponents.imageUrl() } returns imageUrl()
+        every { bannerComponents.directions() } returns directions()
+        every { bannerComponents.imageBaseUrl() } returns imageBaseUrl()
+        every { bannerComponents.abbreviation() } returns abbreviation()
+        every { bannerComponents.abbreviationPriority() } returns abbreviationPriority()
+        return bannerComponents
+    }
 
     private fun getPrimaryBannerText(): BannerText {
         val primaryBannerComponentList = getPrimaryBannerComponentList()

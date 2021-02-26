@@ -5,32 +5,30 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
-import com.mapbox.navigation.ui.base.api.maneuver.ManeuverApi
-import com.mapbox.navigation.ui.base.api.maneuver.ManeuverCallback
-import com.mapbox.navigation.ui.base.api.maneuver.StepDistanceRemainingCallback
-import com.mapbox.navigation.ui.base.api.maneuver.UpcomingManeuversCallback
-import com.mapbox.navigation.ui.base.model.maneuver.Maneuver
-import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState
-import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.CurrentManeuver
-import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.DistanceRemainingToFinishStep
+import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.maneuver.ManeuverAction
 import com.mapbox.navigation.ui.maneuver.ManeuverProcessor
-import com.mapbox.navigation.ui.maneuver.ManeuverResult
+import com.mapbox.navigation.ui.maneuver.ManeuverResult.GetAllBannerInstructions
+import com.mapbox.navigation.ui.maneuver.ManeuverResult.GetAllBannerInstructionsAfterStep
+import com.mapbox.navigation.ui.maneuver.ManeuverResult.GetAllManeuvers
+import com.mapbox.navigation.ui.maneuver.ManeuverResult.GetManeuver
+import com.mapbox.navigation.ui.maneuver.ManeuverResult.GetStepDistanceRemaining
+import com.mapbox.navigation.ui.maneuver.model.StepDistance
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
- * Implementation of [ManeuverApi] allowing access to generate representation of
- * maneuvers based on [BannerInstructions]
+ * Used to generate representation of maneuvers based on [BannerInstructions]
  * @property distanceFormatter DistanceFormatter
  */
 class MapboxManeuverApi internal constructor(
     private val distanceFormatter: DistanceFormatter,
     private val processor: ManeuverProcessor
-) : ManeuverApi {
+) {
 
     /**
      * @param formatter contains various instances for use in formatting distance related data
@@ -38,94 +36,99 @@ class MapboxManeuverApi internal constructor(
      *
      * @return a [MapboxManeuverApi]
      */
-    constructor(formatter: DistanceFormatter) : this(formatter, ManeuverProcessor)
+    constructor(formatter: DistanceFormatter) : this(formatter, ManeuverProcessor())
 
     private val mainJobController: JobControl by lazy { ThreadController.getMainScopeAndRootJob() }
-    private var currentManeuverJob: Job? = null
-    private var upcomingManeuverJob: Job? = null
+    private var maneuverJob: Job? = null
+    private var upcomingManeuverListJob: Job? = null
     private var stepDistanceRemainingJob: Job? = null
 
     /**
      * Given [BannerInstructions] the method goes through the list of [BannerComponents] and returns
-     * a [Maneuver] wrapped inside [ManeuverCallback]
+     * a [Expected] wrapped inside [ManeuverCallback]
      * @param bannerInstruction BannerInstructions object representing [BannerInstructions]
-     * @param callback ManeuverCallback contains [ManeuverState.CurrentManeuver]
+     * @param callback ManeuverCallback contains [Expected]
      */
-    override fun retrieveManeuver(
+    fun getManeuver(
         bannerInstruction: BannerInstructions,
         callback: ManeuverCallback
     ) {
-        currentManeuverJob?.cancel()
-        currentManeuverJob = mainJobController.scope.launch {
-            val action = ManeuverAction.ParseCurrentManeuver(bannerInstruction)
-            val result = processor.process(action) as ManeuverResult.CurrentManeuver
-            callback.onManeuver(CurrentManeuver(result.currentManeuver))
+        maneuverJob?.cancel()
+        maneuverJob = mainJobController.scope.launch {
+            val action = ManeuverAction.GetManeuver(bannerInstruction)
+            val result = processor.process(action) as GetManeuver
+            callback.onManeuver(Expected.Success(result.maneuver))
         }
     }
 
     /**
      * Given [RouteStepProgress] the method returns the distance remaining to finish the [LegStep]
      * @param routeStepProgress RouteStepProgress progress object specific to the current step the user is on
-     * @param callback StepDistanceRemainingCallback contains [ManeuverState.DistanceRemainingToFinishStep]
+     * @param callback StepDistanceRemainingCallback contains [Expected]
      */
-    override fun retrieveStepDistanceRemaining(
+    fun getStepDistanceRemaining(
         routeStepProgress: RouteStepProgress,
         callback: StepDistanceRemainingCallback
     ) {
         stepDistanceRemainingJob?.cancel()
         stepDistanceRemainingJob = mainJobController.scope.launch {
-            val action = ManeuverAction.FindStepDistanceRemaining(routeStepProgress)
-            val result = processor.process(action) as ManeuverResult.StepDistanceRemaining
+            val action = ManeuverAction.GetStepDistanceRemaining(routeStepProgress)
+            val result = processor.process(action) as GetStepDistanceRemaining
             callback.onStepDistanceRemaining(
-                DistanceRemainingToFinishStep(
-                    distanceFormatter,
-                    result.distanceRemaining
-                )
+                Expected.Success(StepDistance(distanceFormatter, result.distanceRemaining))
             )
         }
     }
 
     /**
      * For a given [RouteLeg] the method returns all the maneuvers in the [LegStep] wrapped inside
-     * [UpcomingManeuversCallback].
-     * @param routeLeg RouteLeg route between two points.
-     * @param callback UpcomingManeuversCallback contains [ManeuverState.UpcomingManeuvers]
+     * [UpcomingManeuverListCallback].
+     * @param routeProgress RouteProgress
+     * @param callback UpcomingManeuverListCallback contains [Expected]
      */
-    override fun retrieveUpcomingManeuvers(
-        routeLeg: RouteLeg,
-        callback: UpcomingManeuversCallback
+    fun getUpcomingManeuverList(
+        routeProgress: RouteProgress,
+        callback: UpcomingManeuverListCallback
     ) {
-        upcomingManeuverJob?.cancel()
-        upcomingManeuverJob = mainJobController.scope.launch {
-            val action = ManeuverAction.FindAllUpcomingManeuvers(routeLeg)
-            val result = processor.process(action) as ManeuverResult.UpcomingManeuvers
-            callback.onUpcomingManeuvers(
-                ManeuverState.UpcomingManeuvers.Upcoming(result.upcomingManeuverList)
-            )
+        upcomingManeuverListJob?.cancel()
+        upcomingManeuverListJob = mainJobController.scope.launch {
+            val allBannersAction = ManeuverAction.GetAllBannerInstructions(routeProgress)
+            val allBanners = processor.process(allBannersAction) as GetAllBannerInstructions
+            val allBannersAfterStepAction =
+                ManeuverAction.GetAllBannerInstructionsAfterStep(
+                    routeProgress,
+                    allBanners.bannerInstructions
+                )
+            val allBannersAfterStep = processor
+                .process(allBannersAfterStepAction) as GetAllBannerInstructionsAfterStep
+            val allManeuversAction =
+                ManeuverAction.GetAllManeuvers(allBannersAfterStep.bannerInstructions)
+            val allManeuvers = processor.process(allManeuversAction) as GetAllManeuvers
+            callback.onUpcomingManeuvers(Expected.Success(allManeuvers.maneuverList))
         }
     }
 
     /**
-     * The function cancels the current job [retrieveManeuver] and doesn't return the callback
+     * The function cancels the current job [getManeuver] and doesn't return the callback
      * associated with it.
      */
-    override fun cancelManeuver() {
-        currentManeuverJob?.cancel()
+    fun cancelManeuver() {
+        maneuverJob?.cancel()
     }
 
     /**
-     * The function cancels the current job [retrieveUpcomingManeuvers] and doesn't return the
+     * The function cancels the current job [getUpcomingManeuverList] and doesn't return the
      * callback associated with it.
      */
-    override fun cancelUpcomingManeuver() {
-        upcomingManeuverJob?.cancel()
+    fun cancelUpcomingManeuverList() {
+        upcomingManeuverListJob?.cancel()
     }
 
     /**
-     * The function cancels the current job [retrieveStepDistanceRemaining] and doesn't return
+     * The function cancels the current job [getStepDistanceRemaining] and doesn't return
      * the callback associated with it.
      */
-    override fun cancelStepDistanceRemaining() {
+    fun cancelStepDistanceRemaining() {
         stepDistanceRemainingJob?.cancel()
     }
 }

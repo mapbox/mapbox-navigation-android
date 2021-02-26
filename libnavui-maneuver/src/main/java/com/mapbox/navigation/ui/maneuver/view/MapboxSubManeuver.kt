@@ -9,14 +9,12 @@ import android.text.style.ImageSpan
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
-import com.mapbox.navigation.ui.base.MapboxView
-import com.mapbox.navigation.ui.base.model.maneuver.DelimiterComponentNode
-import com.mapbox.navigation.ui.base.model.maneuver.ExitNumberComponentNode
-import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState
-import com.mapbox.navigation.ui.base.model.maneuver.RoadShieldComponentNode
-import com.mapbox.navigation.ui.base.model.maneuver.SubManeuver
-import com.mapbox.navigation.ui.base.model.maneuver.TextComponentNode
 import com.mapbox.navigation.ui.maneuver.R
+import com.mapbox.navigation.ui.maneuver.model.DelimiterComponentNode
+import com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode
+import com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode
+import com.mapbox.navigation.ui.maneuver.model.SubManeuver
+import com.mapbox.navigation.ui.maneuver.model.TextComponentNode
 
 /**
  * Default view to render sub banner instructions onto [MapboxManeuverView].
@@ -28,7 +26,7 @@ class MapboxSubManeuver @JvmOverloads constructor(
     context: Context,
     private val attrs: AttributeSet? = null,
     private val defStyleAttr: Int = 0
-) : MapboxView<ManeuverState.ManeuverSub>, AppCompatTextView(context, attrs, defStyleAttr) {
+) : AppCompatTextView(context, attrs, defStyleAttr) {
 
     private var leftDrawable = ContextCompat.getDrawable(
         context, R.drawable.mapbox_ic_exit_arrow_left
@@ -41,31 +39,12 @@ class MapboxSubManeuver @JvmOverloads constructor(
     )
 
     /**
-     * Entry point for [MapboxSubManeuver] to render itself based on a [ManeuverState].
+     * Invoke the method to render sub instructions
+     * @param maneuver SubManeuver
      */
-    override fun render(state: ManeuverState.ManeuverSub) {
-        when (state) {
-            is ManeuverState.ManeuverSub.Instruction -> {
-                renderSubManeuver(state.maneuver)
-            }
-            is ManeuverState.ManeuverSub.Show -> {
-                updateVisibility(VISIBLE)
-            }
-            is ManeuverState.ManeuverSub.Hide -> {
-                updateVisibility(GONE)
-            }
-        }
-    }
-
-    private fun updateVisibility(visibility: Int) {
-        this.visibility = visibility
-    }
-
-    private fun renderSubManeuver(maneuver: SubManeuver?) {
+    fun render(maneuver: SubManeuver?) {
         val instruction = generateInstruction(maneuver, lineHeight)
-        if (instruction.isNotEmpty()) {
-            text = instruction
-        }
+        text = instruction
     }
 
     private fun generateInstruction(
@@ -76,14 +55,14 @@ class MapboxSubManeuver @JvmOverloads constructor(
         maneuver?.componentList?.forEach { component ->
             when (component.node) {
                 is TextComponentNode -> {
-                    instructionBuilder.append((component.node as TextComponentNode).text)
+                    instructionBuilder.append((component.node).text)
                     instructionBuilder.append(" ")
                 }
                 is ExitNumberComponentNode -> {
                     instructionBuilder.append(
                         styleAndGetExitView(
                             maneuver.modifier,
-                            component.node as ExitNumberComponentNode,
+                            component.node,
                             desiredHeight
                         )
                     )
@@ -92,14 +71,14 @@ class MapboxSubManeuver @JvmOverloads constructor(
                 is RoadShieldComponentNode -> {
                     instructionBuilder.append(
                         styleAndGetRoadShield(
-                            component.node as RoadShieldComponentNode,
+                            component.node,
                             desiredHeight
                         )
                     )
                     instructionBuilder.append(" ")
                 }
                 is DelimiterComponentNode -> {
-                    instructionBuilder.append((component.node as DelimiterComponentNode).text)
+                    instructionBuilder.append((component.node).text)
                     instructionBuilder.append(" ")
                 }
             }

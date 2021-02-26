@@ -9,12 +9,12 @@ import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
-import com.mapbox.navigation.ui.base.model.maneuver.Component
-import com.mapbox.navigation.ui.base.model.maneuver.Maneuver
-import com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver
-import com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver
-import com.mapbox.navigation.ui.base.model.maneuver.TextComponentNode
-import com.mapbox.navigation.ui.base.model.maneuver.TotalManeuverDistance
+import com.mapbox.navigation.ui.maneuver.model.Component
+import com.mapbox.navigation.ui.maneuver.model.Maneuver
+import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
+import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
+import com.mapbox.navigation.ui.maneuver.model.TextComponentNode
+import com.mapbox.navigation.ui.maneuver.model.TotalManeuverDistance
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -49,33 +49,6 @@ class MapboxUpcomingManeuverAdapterTest {
         val expected = upcomingManeuverList.size
 
         adapter.addUpcomingManeuvers(upcomingManeuverList)
-        val actual = adapter.itemCount
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `remove upcoming maneuver success query item count`() {
-        val upcomingManeuverList = getUpcomingManeuver("Besco Drive")
-        val adapter = MapboxUpcomingManeuverAdapter(ctx)
-        val expected = upcomingManeuverList.size - 1
-
-        adapter.addUpcomingManeuvers(upcomingManeuverList)
-        adapter.removeManeuver(getUpcomingManeuver("Besco Drive")[0])
-        val actual = adapter.itemCount
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `remove upcoming maneuver failure query item count`() {
-        val upcomingManeuverList = getUpcomingManeuver("Besco Drive")
-        val maneuverToRemove = getUpcomingManeuver("Test Street")[0]
-        val adapter = MapboxUpcomingManeuverAdapter(ctx)
-        val expected = upcomingManeuverList.size
-
-        adapter.addUpcomingManeuvers(upcomingManeuverList)
-        adapter.removeManeuver(maneuverToRemove)
         val actual = adapter.itemCount
 
         assertEquals(expected, actual)
@@ -138,7 +111,7 @@ class MapboxUpcomingManeuverAdapterTest {
     }
 
     private fun getUpcomingManeuver(primaryText: String): List<Maneuver> {
-        val totalStepDistance = mockk<TotalManeuverDistance>() {
+        val totalStepDistance = mockk<TotalManeuverDistance> {
             every { totalDistance } returns 32.0
         }
         val primaryManeuver = mockk<PrimaryManeuver> {
@@ -177,14 +150,13 @@ class MapboxUpcomingManeuverAdapterTest {
                 )
             )
         }
-        val maneuver = Maneuver
-            .Builder()
-            .primary(primaryManeuver)
-            .totalManeuverDistance(totalStepDistance)
-            .secondary(secondaryManeuver)
-            .sub(null)
-            .laneGuidance(null)
-            .build()
+        val maneuver = Maneuver(
+            primaryManeuver,
+            totalStepDistance,
+            secondaryManeuver,
+            null,
+            null
+        )
         return listOf(maneuver)
     }
 }
