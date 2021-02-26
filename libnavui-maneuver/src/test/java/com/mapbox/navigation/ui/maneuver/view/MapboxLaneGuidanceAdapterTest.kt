@@ -2,7 +2,7 @@ package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator
+import com.mapbox.navigation.ui.maneuver.model.LaneIndicator
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

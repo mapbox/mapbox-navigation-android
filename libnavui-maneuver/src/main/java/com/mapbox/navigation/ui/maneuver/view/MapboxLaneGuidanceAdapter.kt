@@ -6,9 +6,9 @@ import android.view.ViewGroup
 import androidx.annotation.StyleRes
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.recyclerview.widget.RecyclerView
-import com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.databinding.MapboxItemLaneGuidanceLayoutBinding
+import com.mapbox.navigation.ui.maneuver.model.LaneIndicator
 import com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder
 import com.mapbox.navigation.ui.utils.internal.ThemeUtil
 

@@ -3,8 +3,7 @@ package com.mapbox.navigation.ui.maneuver.view
 import android.content.Context
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
-import com.mapbox.navigation.ui.base.MapboxView
-import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState
+import com.mapbox.navigation.ui.maneuver.model.StepDistance
 
 /**
  * Default view to render distance onto [MapboxManeuverView] and single
@@ -16,27 +15,12 @@ class MapboxStepDistance @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : MapboxView<ManeuverState>, AppCompatTextView(context, attrs, defStyleAttr) {
+) : AppCompatTextView(context, attrs, defStyleAttr) {
 
     /**
-     * Entry point for [MapboxStepDistance] to render itself based on a [ManeuverState].
+     * Render distance remaining to finish step or total step distance based on [StepDistance].
      */
-    override fun render(state: ManeuverState) {
-        when (state) {
-            is ManeuverState.DistanceRemainingToFinishStep -> {
-                renderDistanceRemaining(state)
-            }
-            is ManeuverState.TotalStepDistance -> {
-                renderTotalStepDistance(state)
-            }
-        }
-    }
-
-    private fun renderDistanceRemaining(state: ManeuverState.DistanceRemainingToFinishStep) {
-        text = state.distanceFormatter.formatDistance(state.distanceRemaining)
-    }
-
-    private fun renderTotalStepDistance(state: ManeuverState.TotalStepDistance) {
-        text = state.distanceFormatter.formatDistance(state.totalStepDistance)
+    fun render(stepDistance: StepDistance) {
+        text = stepDistance.distanceFormatter.formatDistance(stepDistance.distance)
     }
 }

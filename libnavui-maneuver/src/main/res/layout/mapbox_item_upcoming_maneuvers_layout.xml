@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:weightSum="100">
+    android:layout_height="100dp"
+    android:padding="@dimen/mapbox_dimen_4dp"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:background="@color/colorSecondary">
 
   <include layout="@layout/mapbox_main_maneuver_layout" />
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

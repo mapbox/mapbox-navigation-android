@@ -9,14 +9,12 @@ import android.text.style.ImageSpan
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
-import com.mapbox.navigation.ui.base.MapboxView
-import com.mapbox.navigation.ui.base.model.maneuver.DelimiterComponentNode
-import com.mapbox.navigation.ui.base.model.maneuver.ExitNumberComponentNode
-import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState
-import com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver
-import com.mapbox.navigation.ui.base.model.maneuver.RoadShieldComponentNode
-import com.mapbox.navigation.ui.base.model.maneuver.TextComponentNode
 import com.mapbox.navigation.ui.maneuver.R
+import com.mapbox.navigation.ui.maneuver.model.DelimiterComponentNode
+import com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode
+import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
+import com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode
+import com.mapbox.navigation.ui.maneuver.model.TextComponentNode
 
 /**
  * Default view to render primary banner instructions onto [MapboxManeuverView].
@@ -28,7 +26,7 @@ class MapboxPrimaryManeuver @JvmOverloads constructor(
     context: Context,
     private val attrs: AttributeSet? = null,
     private val defStyleAttr: Int = 0
-) : MapboxView<ManeuverState.ManeuverPrimary>, AppCompatTextView(context, attrs, defStyleAttr) {
+) : AppCompatTextView(context, attrs, defStyleAttr) {
 
     private var leftDrawable = ContextCompat.getDrawable(
         context, R.drawable.mapbox_ic_exit_arrow_left
@@ -41,35 +39,14 @@ class MapboxPrimaryManeuver @JvmOverloads constructor(
     )
 
     /**
-     * Entry point for [MapboxPrimaryManeuver] to render itself based on a [ManeuverState].
+     * Invoke the method to render sub instructions
+     * @param maneuver PrimaryManeuver
      */
-    override fun render(state: ManeuverState.ManeuverPrimary) {
-        when (state) {
-            is ManeuverState.ManeuverPrimary.Instruction -> {
-                renderPrimaryManeuver(state.maneuver)
-            }
-            is ManeuverState.ManeuverPrimary.Show -> {
-                updateVisibility(VISIBLE)
-            }
-            is ManeuverState.ManeuverPrimary.Hide -> {
-                updateVisibility(GONE)
-            }
-        }
-    }
-
-    private fun renderPrimaryManeuver(maneuver: PrimaryManeuver) {
+    fun render(maneuver: PrimaryManeuver) {
         val instruction = generateInstruction(maneuver, lineHeight)
         if (instruction.isNotEmpty()) {
             text = instruction
         }
-    }
-
-    private fun updateVisibility(visibility: Int) {
-        this.visibility = visibility
-    }
-
-    private fun updateMaxLines(maxLines: Int) {
-        this.maxLines = maxLines
     }
 
     private fun generateInstruction(

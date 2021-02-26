@@ -1,19 +1,267 @@
 // Signature format: 3.0
 package com.mapbox.navigation.ui.maneuver.api {
 
-  public final class MapboxManeuverApi implements com.mapbox.navigation.ui.base.api.maneuver.ManeuverApi {
+  public interface ManeuverCallback {
+    method public void onManeuver(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maneuver.model.Maneuver,com.mapbox.navigation.ui.maneuver.model.ManeuverError> maneuver);
+  }
+
+  public final class MapboxManeuverApi {
     ctor public MapboxManeuverApi(com.mapbox.navigation.base.formatter.DistanceFormatter formatter);
     method public void cancelManeuver();
     method public void cancelStepDistanceRemaining();
-    method public void cancelUpcomingManeuver();
-    method public void retrieveManeuver(com.mapbox.api.directions.v5.models.BannerInstructions bannerInstruction, com.mapbox.navigation.ui.base.api.maneuver.ManeuverCallback callback);
-    method public void retrieveStepDistanceRemaining(com.mapbox.navigation.base.trip.model.RouteStepProgress routeStepProgress, com.mapbox.navigation.ui.base.api.maneuver.StepDistanceRemainingCallback callback);
-    method public void retrieveUpcomingManeuvers(com.mapbox.api.directions.v5.models.RouteLeg routeLeg, com.mapbox.navigation.ui.base.api.maneuver.UpcomingManeuversCallback callback);
+    method public void cancelUpcomingManeuverList();
+    method public void getManeuver(com.mapbox.api.directions.v5.models.BannerInstructions bannerInstruction, com.mapbox.navigation.ui.maneuver.api.ManeuverCallback callback);
+    method public void getStepDistanceRemaining(com.mapbox.navigation.base.trip.model.RouteStepProgress routeStepProgress, com.mapbox.navigation.ui.maneuver.api.StepDistanceRemainingCallback callback);
+    method public void getUpcomingManeuverList(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, com.mapbox.navigation.ui.maneuver.api.UpcomingManeuverListCallback callback);
+  }
+
+  public interface StepDistanceRemainingCallback {
+    method public void onStepDistanceRemaining(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maneuver.model.StepDistance,com.mapbox.navigation.ui.maneuver.model.StepDistanceError> distanceRemaining);
+  }
+
+  public interface UpcomingManeuverListCallback {
+    method public void onUpcomingManeuvers(com.mapbox.navigation.ui.base.model.Expected<? extends java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>,com.mapbox.navigation.ui.maneuver.model.ManeuverError> maneuvers);
   }
 
 }
 
 package com.mapbox.navigation.ui.maneuver.model {
+
+  public final class Component {
+    ctor public Component(String type, com.mapbox.navigation.ui.maneuver.model.ComponentNode node);
+    method public String component1();
+    method public com.mapbox.navigation.ui.maneuver.model.ComponentNode component2();
+    method public com.mapbox.navigation.ui.maneuver.model.Component copy(String type, com.mapbox.navigation.ui.maneuver.model.ComponentNode node);
+    method public com.mapbox.navigation.ui.maneuver.model.ComponentNode getNode();
+    method public String getType();
+    property public final com.mapbox.navigation.ui.maneuver.model.ComponentNode node;
+    property public final String type;
+  }
+
+  public interface ComponentNode {
+  }
+
+  public final class DelimiterComponentNode implements com.mapbox.navigation.ui.maneuver.model.ComponentNode {
+    method public String getText();
+    method public com.mapbox.navigation.ui.maneuver.model.DelimiterComponentNode.Builder toBuilder();
+    property public final String text;
+  }
+
+  public static final class DelimiterComponentNode.Builder {
+    ctor public DelimiterComponentNode.Builder();
+    method public com.mapbox.navigation.ui.maneuver.model.DelimiterComponentNode build();
+    method public com.mapbox.navigation.ui.maneuver.model.DelimiterComponentNode.Builder text(String text);
+  }
+
+  public final class ExitComponentNode implements com.mapbox.navigation.ui.maneuver.model.ComponentNode {
+    method public String getText();
+    method public com.mapbox.navigation.ui.maneuver.model.ExitComponentNode.Builder toBuilder();
+    property public final String text;
+  }
+
+  public static final class ExitComponentNode.Builder {
+    ctor public ExitComponentNode.Builder();
+    method public com.mapbox.navigation.ui.maneuver.model.ExitComponentNode build();
+    method public com.mapbox.navigation.ui.maneuver.model.ExitComponentNode.Builder text(String text);
+  }
+
+  public final class ExitNumberComponentNode implements com.mapbox.navigation.ui.maneuver.model.ComponentNode {
+    method public String getText();
+    method public com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode.Builder toBuilder();
+    property public final String text;
+  }
+
+  public static final class ExitNumberComponentNode.Builder {
+    ctor public ExitNumberComponentNode.Builder();
+    method public com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode build();
+    method public com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode.Builder text(String text);
+  }
+
+  public final class Lane {
+    method public String? getActiveDirection();
+    method public java.util.List<com.mapbox.navigation.ui.maneuver.model.LaneIndicator> getAllLanes();
+    method public com.mapbox.navigation.ui.maneuver.model.Lane.Builder toBuilder();
+    property public final String? activeDirection;
+    property public final java.util.List<com.mapbox.navigation.ui.maneuver.model.LaneIndicator> allLanes;
+  }
+
+  public static final class Lane.Builder {
+    ctor public Lane.Builder();
+    method public com.mapbox.navigation.ui.maneuver.model.Lane.Builder activeDirection(String? activeDirection);
+    method public com.mapbox.navigation.ui.maneuver.model.Lane.Builder allLanes(java.util.List<com.mapbox.navigation.ui.maneuver.model.LaneIndicator> allLanes);
+    method public com.mapbox.navigation.ui.maneuver.model.Lane build();
+  }
+
+  public final class LaneIndicator {
+    method public java.util.List<java.lang.String> getDirections();
+    method public boolean isActive();
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIndicator.Builder toBuilder();
+    property public final java.util.List<java.lang.String> directions;
+    property public final boolean isActive;
+  }
+
+  public static final class LaneIndicator.Builder {
+    ctor public LaneIndicator.Builder();
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIndicator build();
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIndicator.Builder directions(java.util.List<java.lang.String> directions);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIndicator.Builder isActive(boolean isActive);
+  }
+
+  public final class Maneuver {
+    method public com.mapbox.navigation.ui.maneuver.model.Lane? getLaneGuidance();
+    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver getPrimary();
+    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? getSecondary();
+    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver? getSub();
+    method public com.mapbox.navigation.ui.maneuver.model.TotalManeuverDistance getTotalManeuverDistance();
+    property public final com.mapbox.navigation.ui.maneuver.model.Lane? laneGuidance;
+    property public final com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver primary;
+    property public final com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? secondary;
+    property public final com.mapbox.navigation.ui.maneuver.model.SubManeuver? sub;
+    property public final com.mapbox.navigation.ui.maneuver.model.TotalManeuverDistance totalManeuverDistance;
+  }
+
+  public final class ManeuverError {
+    method public String getErrorMessage();
+    method public Throwable? getThrowable();
+    property public final String errorMessage;
+    property public final Throwable? throwable;
+  }
+
+  public final class PrimaryManeuver {
+    method public java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> getComponentList();
+    method public Double? getDegrees();
+    method public String? getDrivingSide();
+    method public String? getModifier();
+    method public String getText();
+    method public String? getType();
+    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver.Builder toBuilder();
+    property public final java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList;
+    property public final Double? degrees;
+    property public final String? drivingSide;
+    property public final String? modifier;
+    property public final String text;
+    property public final String? type;
+  }
+
+  public static final class PrimaryManeuver.Builder {
+    ctor public PrimaryManeuver.Builder();
+    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver build();
+    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver.Builder componentList(java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList);
+    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver.Builder degrees(Double? degrees);
+    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver.Builder drivingSide(String? drivingSide);
+    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver.Builder modifier(String? modifier);
+    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver.Builder text(String text);
+    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver.Builder type(String? type);
+  }
+
+  public final class RoadShieldComponentNode implements com.mapbox.navigation.ui.maneuver.model.ComponentNode {
+    method public byte[]? getShieldIcon();
+    method public String getText();
+    method public com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode.Builder toBuilder();
+    property public final byte[]? shieldIcon;
+    property public final String text;
+  }
+
+  public static final class RoadShieldComponentNode.Builder {
+    ctor public RoadShieldComponentNode.Builder();
+    method public com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode build();
+    method public com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode.Builder shieldIcon(byte[]? shieldIcon);
+    method public com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode.Builder text(String text);
+  }
+
+  public final class SecondaryManeuver {
+    method public java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> getComponentList();
+    method public Double? getDegrees();
+    method public String? getDrivingSide();
+    method public String? getModifier();
+    method public String getText();
+    method public String? getType();
+    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver.Builder toBuilder();
+    property public final java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList;
+    property public final Double? degrees;
+    property public final String? drivingSide;
+    property public final String? modifier;
+    property public final String text;
+    property public final String? type;
+  }
+
+  public static final class SecondaryManeuver.Builder {
+    ctor public SecondaryManeuver.Builder();
+    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver build();
+    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver.Builder componentList(java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList);
+    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver.Builder degrees(Double? degrees);
+    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver.Builder drivingSide(String? drivingSide);
+    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver.Builder modifier(String? modifier);
+    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver.Builder text(String text);
+    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver.Builder type(String? type);
+  }
+
+  public final class StepDistance {
+    method public double getDistance();
+    method public com.mapbox.navigation.base.formatter.DistanceFormatter getDistanceFormatter();
+    property public final double distance;
+    property public final com.mapbox.navigation.base.formatter.DistanceFormatter distanceFormatter;
+  }
+
+  public final class StepDistanceError {
+    method public String getErrorMessage();
+    method public Throwable? getThrowable();
+    property public final String errorMessage;
+    property public final Throwable? throwable;
+  }
+
+  public final class SubManeuver {
+    method public java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> getComponentList();
+    method public Double? getDegrees();
+    method public String? getDrivingSide();
+    method public String? getModifier();
+    method public String getText();
+    method public String? getType();
+    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver.Builder toBuilder();
+    property public final java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList;
+    property public final Double? degrees;
+    property public final String? drivingSide;
+    property public final String? modifier;
+    property public final String text;
+    property public final String? type;
+  }
+
+  public static final class SubManeuver.Builder {
+    ctor public SubManeuver.Builder();
+    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver build();
+    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver.Builder componentList(java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList);
+    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver.Builder degrees(Double? degrees);
+    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver.Builder drivingSide(String? drivingSide);
+    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver.Builder modifier(String? modifier);
+    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver.Builder text(String text);
+    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver.Builder type(String? type);
+  }
+
+  public final class TextComponentNode implements com.mapbox.navigation.ui.maneuver.model.ComponentNode {
+    method public String? getAbbr();
+    method public Integer? getAbbrPriority();
+    method public String getText();
+    method public com.mapbox.navigation.ui.maneuver.model.TextComponentNode.Builder toBuilder();
+    property public final String? abbr;
+    property public final Integer? abbrPriority;
+    property public final String text;
+  }
+
+  public static final class TextComponentNode.Builder {
+    ctor public TextComponentNode.Builder();
+    method public com.mapbox.navigation.ui.maneuver.model.TextComponentNode.Builder abbr(String? abbr);
+    method public com.mapbox.navigation.ui.maneuver.model.TextComponentNode.Builder abbrPriority(Integer? abbrPriority);
+    method public com.mapbox.navigation.ui.maneuver.model.TextComponentNode build();
+    method public com.mapbox.navigation.ui.maneuver.model.TextComponentNode.Builder text(String text);
+  }
+
+  public final class TotalManeuverDistance {
+    ctor public TotalManeuverDistance(double totalDistance);
+    method public double component1();
+    method public com.mapbox.navigation.ui.maneuver.model.TotalManeuverDistance copy(double totalDistance);
+    method public double getTotalDistance();
+    property public final double totalDistance;
+  }
 
   public final class TurnIconResources {
     method public int getTurnIconArrive();
@@ -315,7 +563,7 @@ package com.mapbox.navigation.ui.maneuver.view {
     ctor public MapboxExitText(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxExitText(android.content.Context context);
     method public android.graphics.Bitmap getViewAsBitmap();
-    method public void setExit(String? modifier, com.mapbox.navigation.ui.base.model.maneuver.ExitNumberComponentNode exit);
+    method public void setExit(String? modifier, com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode exit);
     method public void setExitStyle(android.graphics.drawable.Drawable? background, android.graphics.drawable.Drawable? leftDrawable, android.graphics.drawable.Drawable? rightDrawable);
     method public android.graphics.drawable.Drawable styleExitWith(android.graphics.Bitmap bitmap, int drawableHeight);
   }
@@ -324,12 +572,12 @@ package com.mapbox.navigation.ui.maneuver.view {
     ctor public MapboxLaneGuidance(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
     ctor public MapboxLaneGuidance(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxLaneGuidance(android.content.Context context);
-    method public void renderLane(com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator laneIndicator, String? activeDirection, androidx.appcompat.view.ContextThemeWrapper wrapper);
+    method public void renderLane(com.mapbox.navigation.ui.maneuver.model.LaneIndicator laneIndicator, String? activeDirection, androidx.appcompat.view.ContextThemeWrapper wrapper);
   }
 
   public final class MapboxLaneGuidanceAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder> {
     ctor public MapboxLaneGuidanceAdapter(android.content.Context context);
-    method public void addLanes(java.util.List<com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator> laneIndicatorList, String? activeDirection);
+    method public void addLanes(java.util.List<com.mapbox.navigation.ui.maneuver.model.LaneIndicator> laneIndicatorList, String? activeDirection);
     method public int getItemCount();
     method public void onBindViewHolder(com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder holder, int position);
     method public com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType);
@@ -339,73 +587,83 @@ package com.mapbox.navigation.ui.maneuver.view {
 
   public final class MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
     ctor public MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder(error.NonExistentClass viewBinding);
-    method public void bindLaneIndicator(com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator laneIndicator);
+    method public void bindLaneIndicator(com.mapbox.navigation.ui.maneuver.model.LaneIndicator laneIndicator);
   }
 
-  public final class MapboxManeuverView extends androidx.constraintlayout.widget.ConstraintLayout implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState> {
+  public final class MapboxManeuverView extends androidx.constraintlayout.widget.ConstraintLayout {
     ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
     ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxManeuverView(android.content.Context context);
-    method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState state);
+    method public void renderAddLanes(com.mapbox.navigation.ui.maneuver.model.Lane lane);
+    method public void renderDistanceRemaining(com.mapbox.navigation.ui.maneuver.model.StepDistance stepDistance);
+    method public void renderManeuver(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maneuver.model.Maneuver,com.mapbox.navigation.ui.maneuver.model.ManeuverError> maneuver);
+    method public void renderPrimaryManeuver(com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver primary);
+    method public void renderRemoveLanes();
+    method public void renderSecondaryManeuver(com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? secondary);
+    method public void renderSubManeuver(com.mapbox.navigation.ui.maneuver.model.SubManeuver? sub);
+    method public void renderUpcomingManeuvers(java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver> maneuvers);
     method public void updatePrimaryManeuverTextAppearance(@StyleRes int style);
+    method public void updatePrimaryManeuverTextVisibility(int visibility);
     method public void updateSecondaryManeuverTextAppearance(@StyleRes int style);
+    method public void updateSecondaryManeuverVisibility(int visibility);
     method public void updateStepDistanceTextAppearance(@StyleRes int style);
     method public void updateStyle(@StyleRes int style);
     method public void updateSubManeuverTextAppearance(@StyleRes int style);
+    method public void updateSubManeuverViewVisibility(int visibility);
     method public void updateTurnIconResources(com.mapbox.navigation.ui.maneuver.model.TurnIconResources turnIconResources);
     method public void updateTurnIconStyle(@StyleRes int style);
+    method public void updateUpcomingManeuversVisibility(int visibility);
   }
 
-  public final class MapboxPrimaryManeuver extends androidx.appcompat.widget.AppCompatTextView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary> {
+  public final class MapboxPrimaryManeuver extends androidx.appcompat.widget.AppCompatTextView {
     ctor public MapboxPrimaryManeuver(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
     ctor public MapboxPrimaryManeuver(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxPrimaryManeuver(android.content.Context context);
-    method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverPrimary state);
+    method public void render(com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver maneuver);
   }
 
-  public final class MapboxSecondaryManeuver extends androidx.appcompat.widget.AppCompatTextView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary> {
+  public final class MapboxSecondaryManeuver extends androidx.appcompat.widget.AppCompatTextView {
     ctor public MapboxSecondaryManeuver(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
     ctor public MapboxSecondaryManeuver(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxSecondaryManeuver(android.content.Context context);
-    method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSecondary state);
+    method public void render(com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? maneuver);
   }
 
-  public final class MapboxStepDistance extends androidx.appcompat.widget.AppCompatTextView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState> {
+  public final class MapboxStepDistance extends androidx.appcompat.widget.AppCompatTextView {
     ctor public MapboxStepDistance(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
     ctor public MapboxStepDistance(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxStepDistance(android.content.Context context);
-    method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState state);
+    method public void render(com.mapbox.navigation.ui.maneuver.model.StepDistance stepDistance);
   }
 
-  public final class MapboxSubManeuver extends androidx.appcompat.widget.AppCompatTextView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub> {
+  public final class MapboxSubManeuver extends androidx.appcompat.widget.AppCompatTextView {
     ctor public MapboxSubManeuver(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
     ctor public MapboxSubManeuver(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxSubManeuver(android.content.Context context);
-    method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState.ManeuverSub state);
+    method public void render(com.mapbox.navigation.ui.maneuver.model.SubManeuver? maneuver);
   }
 
-  public final class MapboxTurnIconManeuver extends androidx.appcompat.widget.AppCompatImageView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.maneuver.ManeuverState> {
+  public final class MapboxTurnIconManeuver extends androidx.appcompat.widget.AppCompatImageView {
     ctor public MapboxTurnIconManeuver(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
     ctor public MapboxTurnIconManeuver(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxTurnIconManeuver(android.content.Context context);
-    method public void render(com.mapbox.navigation.ui.base.model.maneuver.ManeuverState state);
+    method public void renderPrimaryTurnIcon(com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver maneuver);
+    method public void renderSubTurnIcon(com.mapbox.navigation.ui.maneuver.model.SubManeuver? maneuver);
     method public void updateTurnIconResources(com.mapbox.navigation.ui.maneuver.model.TurnIconResources turnIcon);
     method public void updateTurnIconStyle(androidx.appcompat.view.ContextThemeWrapper wrapper);
   }
 
   public final class MapboxUpcomingManeuverAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder> {
     ctor public MapboxUpcomingManeuverAdapter(android.content.Context context);
-    method public void addUpcomingManeuvers(java.util.List<com.mapbox.navigation.ui.base.model.maneuver.Maneuver> upcomingManeuvers);
+    method public void addUpcomingManeuvers(java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver> upcomingManeuvers);
     method public int getItemCount();
     method public void onBindViewHolder(com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder holder, int position);
     method public com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType);
-    method public void removeManeuver(com.mapbox.navigation.ui.base.model.maneuver.Maneuver maneuverToRemove);
-    method public void removeManeuvers();
   }
 
   public final class MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
     ctor public MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder(error.NonExistentClass viewBinding);
-    method public void bindUpcomingManeuver(com.mapbox.navigation.ui.base.model.maneuver.Maneuver maneuver);
+    method public void bindUpcomingManeuver(com.mapbox.navigation.ui.maneuver.model.Maneuver maneuver);
     method public error.NonExistentClass getViewBinding();
     property public final error.NonExistentClass viewBinding;
   }

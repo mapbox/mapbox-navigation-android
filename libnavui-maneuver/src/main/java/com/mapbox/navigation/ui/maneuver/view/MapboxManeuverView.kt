@@ -12,12 +12,18 @@ import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.HORIZONTAL
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
-import com.mapbox.navigation.ui.base.MapboxView
-import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState
+import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.databinding.MapboxMainManeuverLayoutBinding
 import com.mapbox.navigation.ui.maneuver.databinding.MapboxManeuverLayoutBinding
 import com.mapbox.navigation.ui.maneuver.databinding.MapboxSubManeuverLayoutBinding
+import com.mapbox.navigation.ui.maneuver.model.Lane
+import com.mapbox.navigation.ui.maneuver.model.Maneuver
+import com.mapbox.navigation.ui.maneuver.model.ManeuverError
+import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
+import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
+import com.mapbox.navigation.ui.maneuver.model.StepDistance
+import com.mapbox.navigation.ui.maneuver.model.SubManeuver
 import com.mapbox.navigation.ui.maneuver.model.TurnIconResources
 
 /**
@@ -30,7 +36,7 @@ class MapboxManeuverView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : MapboxView<ManeuverState>, ConstraintLayout(context, attrs, defStyleAttr) {
+) : ConstraintLayout(context, attrs, defStyleAttr) {
 
     private val laneGuidanceAdapter = MapboxLaneGuidanceAdapter(context)
     private val upcomingManeuverAdapter = MapboxUpcomingManeuverAdapter(context)
@@ -41,6 +47,7 @@ class MapboxManeuverView @JvmOverloads constructor(
     )
     private val mainLayoutBinding = MapboxMainManeuverLayoutBinding.bind(binding.root)
     private val subLayoutBinding = MapboxSubManeuverLayoutBinding.bind(binding.root)
+
     /**
      * Initialize.
      */
@@ -58,68 +65,26 @@ class MapboxManeuverView @JvmOverloads constructor(
         initAttributes(attrs)
         this.setOnClickListener {
             if (binding.upcomingManeuverRecycler.visibility == GONE) {
-                render(ManeuverState.UpcomingManeuvers.Show)
+                updateUpcomingManeuversVisibility(VISIBLE)
             } else {
-                render(ManeuverState.UpcomingManeuvers.Hide)
+                updateUpcomingManeuversVisibility(GONE)
+                binding.upcomingManeuverRecycler.smoothScrollToPosition(0)
+                updateSubManeuverViewVisibility(binding.subManeuverLayout.visibility)
             }
         }
     }
 
     /**
-     * Entry point for [MapboxManeuverView] to render itself based on a [ManeuverState].
-     * @param state ManeuverState
+     * Invoke the method to render primary, secondary, sub instructions and lane information.
+     * @param maneuver Expected
      */
-    override fun render(state: ManeuverState) {
-        when (state) {
-            is ManeuverState.ManeuverPrimary.Instruction -> {
-                renderPrimaryManeuver(state)
-                renderPrimaryTurnIcon(state)
+    fun renderManeuver(maneuver: Expected<Maneuver, ManeuverError>) {
+        when (maneuver) {
+            is Expected.Success -> {
+                drawManeuver(maneuver.value)
             }
-            is ManeuverState.ManeuverSecondary.Instruction -> {
-                renderSecondaryManeuver(state)
-            }
-            is ManeuverState.ManeuverSecondary.Show -> {
-                showSecondaryManeuver()
-            }
-            is ManeuverState.ManeuverSecondary.Hide -> {
-                hideSecondaryManeuver()
-            }
-            is ManeuverState.ManeuverSub.Instruction -> {
-                renderSubManeuver(state)
-                renderSubTurnIcon(state)
-            }
-            is ManeuverState.ManeuverSub.Show -> {
-                renderSubManeuverVisibility(VISIBLE)
-            }
-            is ManeuverState.ManeuverSub.Hide -> {
-                renderSubManeuverVisibility(GONE)
-            }
-            is ManeuverState.LaneGuidanceManeuver.AddLanes -> {
-                renderAddLanes(state)
-            }
-            is ManeuverState.LaneGuidanceManeuver.RemoveLanes -> {
-                renderRemoveLanes(state)
-            }
-            is ManeuverState.LaneGuidanceManeuver.Show -> {
-                renderLaneGuidanceVisibility(VISIBLE)
-            }
-            is ManeuverState.LaneGuidanceManeuver.Hide -> {
-                renderLaneGuidanceVisibility(GONE)
-            }
-            is ManeuverState.DistanceRemainingToFinishStep -> {
-                renderDistanceRemaining(state)
-            }
-            is ManeuverState.UpcomingManeuvers.Upcoming -> {
-                renderUpcomingManeuvers(state)
-            }
-            is ManeuverState.UpcomingManeuvers.Show -> {
-                renderUpcomingManeuverVisibility(VISIBLE)
-            }
-            is ManeuverState.UpcomingManeuvers.Hide -> {
-                renderUpcomingManeuverVisibility(GONE)
-            }
-            is ManeuverState.UpcomingManeuvers.RemoveUpcoming -> {
-                removeUpcomingManeuver(state)
+            is Expected.Failure -> {
+                // Not handled
             }
         }
     }
@@ -189,6 +154,105 @@ class MapboxManeuverView @JvmOverloads constructor(
         typedArray.recycle()
     }
 
+    /**
+     * Invoke the method to control the visibility of [MapboxPrimaryManeuver]
+     * @param visibility Int
+     */
+    fun updatePrimaryManeuverTextVisibility(visibility: Int) {
+        mainLayoutBinding.primaryManeuverText.visibility = visibility
+    }
+
+    /**
+     * Invoke the method to control the visibility of [MapboxSecondaryManeuver]
+     * @param visibility Int
+     */
+    fun updateSecondaryManeuverVisibility(visibility: Int) {
+        when (visibility) {
+            VISIBLE -> {
+                showSecondaryManeuver()
+            }
+            INVISIBLE -> {
+                hideSecondaryManeuver(INVISIBLE)
+            }
+            GONE -> {
+                hideSecondaryManeuver(GONE)
+            }
+        }
+    }
+
+    /**
+     * Invoke the method to control the visibility of [MapboxSubManeuver]
+     * @param visibility Int
+     */
+    fun updateSubManeuverViewVisibility(visibility: Int) {
+        binding.subManeuverLayout.visibility = visibility
+    }
+
+    /**
+     * Invoke the method to control the visibility of upcoming instructions list
+     * @param visibility Int
+     */
+    fun updateUpcomingManeuversVisibility(visibility: Int) {
+        binding.upcomingManeuverRecycler.visibility = visibility
+    }
+
+    /**
+     * Invoke the method to render primary instructions on top of [MapboxManeuverView]
+     * @param primary PrimaryManeuver
+     */
+    fun renderPrimaryManeuver(primary: PrimaryManeuver) {
+        mainLayoutBinding.primaryManeuverText.render(primary)
+        mainLayoutBinding.maneuverIcon.renderPrimaryTurnIcon(primary)
+    }
+
+    /**
+     * Invoke the method to render secondary instructions on top of [MapboxManeuverView]
+     * @param secondary SecondaryManeuver?
+     */
+    fun renderSecondaryManeuver(secondary: SecondaryManeuver?) {
+        mainLayoutBinding.secondaryManeuverText.render(secondary)
+    }
+
+    /**
+     * Invoke the method to render sub instructions on top of [MapboxManeuverView]
+     * @param sub SubManeuver?
+     */
+    fun renderSubManeuver(sub: SubManeuver?) {
+        subLayoutBinding.subManeuverText.render(sub)
+        subLayoutBinding.subManeuverIcon.renderSubTurnIcon(sub)
+    }
+
+    /**
+     * Invoke the method to add lane information on top of [MapboxManeuverView]
+     * @param lane Lane
+     */
+    fun renderAddLanes(lane: Lane) {
+        laneGuidanceAdapter.addLanes(lane.allLanes, lane.activeDirection)
+    }
+
+    /**
+     * Invoke the method to remove lane information on top of [MapboxManeuverView]
+     */
+    fun renderRemoveLanes() {
+        laneGuidanceAdapter.removeLanes()
+    }
+
+    /**
+     * Invoke the method to render list of upcoming instructions on top of [MapboxManeuverView]
+     * @param maneuvers List<Maneuver>
+     */
+    fun renderUpcomingManeuvers(maneuvers: List<Maneuver>) {
+        upcomingManeuverAdapter.addUpcomingManeuvers(maneuvers)
+    }
+
+    /**
+     * Invoke the method to render step distance remaining on top of [MapboxManeuverView]
+     * @param stepDistance StepDistance
+     */
+    fun renderDistanceRemaining(stepDistance: StepDistance) {
+        mainLayoutBinding.stepDistance.render(stepDistance)
+    }
+
     private fun initAttributes(attrs: AttributeSet?) {
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.MapboxManeuverView)
         applyAttributes(typedArray)
@@ -196,7 +260,7 @@ class MapboxManeuverView @JvmOverloads constructor(
     }
 
     private fun applyAttributes(typedArray: TypedArray) {
-        binding.mainManeuverView.setCardBackgroundColor(
+        binding.mainManeuverLayout.setBackgroundColor(
             ContextCompat.getColor(
                 context,
                 typedArray.getResourceId(
@@ -205,21 +269,12 @@ class MapboxManeuverView @JvmOverloads constructor(
                 )
             )
         )
-        binding.subManeuverView.setCardBackgroundColor(
+        binding.subManeuverLayout.setBackgroundColor(
             ContextCompat.getColor(
                 context,
                 typedArray.getResourceId(
                     R.styleable.MapboxManeuverView_subManeuverViewBackgroundColor,
                     R.color.mapbox_sub_maneuver_background_color
-                )
-            )
-        )
-        binding.laneGuidanceCard.setCardBackgroundColor(
-            ContextCompat.getColor(
-                context,
-                typedArray.getResourceId(
-                    R.styleable.MapboxManeuverView_laneGuidanceViewBackgroundColor,
-                    R.color.mapbox_lane_guidance_background_color
                 )
             )
         )
@@ -240,73 +295,48 @@ class MapboxManeuverView @JvmOverloads constructor(
         )
     }
 
-    private fun renderPrimaryManeuver(state: ManeuverState.ManeuverPrimary.Instruction) {
-        mainLayoutBinding.primaryManeuverText.render(state)
+    private fun drawManeuver(maneuver: Maneuver) {
+        val primary = maneuver.primary
+        val secondary = maneuver.secondary
+        val sub = maneuver.sub
+        val lane = maneuver.laneGuidance
+        if (secondary?.componentList != null) {
+            updateSecondaryManeuverVisibility(VISIBLE)
+            renderSecondaryManeuver(secondary)
+        } else {
+            updateSecondaryManeuverVisibility(GONE)
+        }
+        renderPrimaryManeuver(primary)
+        if (sub?.componentList != null || lane != null) {
+            updateSubManeuverViewVisibility(VISIBLE)
+        } else {
+            updateSubManeuverViewVisibility(GONE)
+        }
+        if (sub?.componentList != null) {
+            renderSubManeuver(sub)
+        } else {
+            renderSubManeuver(null)
+        }
+        when (lane != null) {
+            true -> {
+                renderAddLanes(lane)
+            }
+            else -> {
+                renderRemoveLanes()
+            }
+        }
     }
 
-    private fun renderSecondaryManeuver(state: ManeuverState.ManeuverSecondary.Instruction) {
-        mainLayoutBinding.secondaryManeuverText.render(state)
-    }
-
-    private fun hideSecondaryManeuver() {
-        mainLayoutBinding.secondaryManeuverText.visibility = GONE
+    private fun hideSecondaryManeuver(visibility: Int) {
+        mainLayoutBinding.secondaryManeuverText.visibility = visibility
         updateConstraintsToOnlyPrimary()
-        mainLayoutBinding.primaryManeuverText.maxLines = 2
+        mainLayoutBinding.primaryManeuverText.isSingleLine = false
     }
 
     private fun showSecondaryManeuver() {
         mainLayoutBinding.secondaryManeuverText.visibility = VISIBLE
         updateConstraintsToHaveSecondary()
-        mainLayoutBinding.primaryManeuverText.maxLines = 1
-    }
-
-    private fun renderSubManeuver(state: ManeuverState.ManeuverSub.Instruction) {
-        subLayoutBinding.subManeuverText.render(state)
-    }
-
-    private fun renderSubManeuverVisibility(visibility: Int) {
-        binding.subManeuverView.visibility = visibility
-    }
-
-    private fun renderPrimaryTurnIcon(state: ManeuverState.ManeuverPrimary.Instruction) {
-        mainLayoutBinding.maneuverIcon.render(state)
-    }
-
-    private fun renderSubTurnIcon(state: ManeuverState.ManeuverSub.Instruction) {
-        subLayoutBinding.subManeuverIcon.render(state)
-    }
-
-    private fun removeUpcomingManeuver(state: ManeuverState.UpcomingManeuvers.RemoveUpcoming) {
-        upcomingManeuverAdapter.removeManeuver(state.maneuver)
-    }
-
-    private fun renderDistanceRemaining(state: ManeuverState) {
-        mainLayoutBinding.stepDistance.render(state)
-    }
-
-    private fun renderAddLanes(state: ManeuverState.LaneGuidanceManeuver.AddLanes) {
-        laneGuidanceAdapter.addLanes(state.lane.allLanes, state.lane.activeDirection)
-    }
-
-    private fun renderRemoveLanes(state: ManeuverState.LaneGuidanceManeuver.RemoveLanes) {
-        laneGuidanceAdapter.removeLanes()
-    }
-
-    private fun renderLaneGuidanceVisibility(visibility: Int) {
-        binding.laneGuidanceCard.visibility = visibility
-    }
-
-    private fun renderUpcomingManeuvers(state: ManeuverState.UpcomingManeuvers.Upcoming) {
-        val maneuvers = state.upcomingManeuverList
-        if (maneuvers.isNotEmpty()) {
-            upcomingManeuverAdapter.addUpcomingManeuvers(maneuvers)
-        } else {
-            upcomingManeuverAdapter.removeManeuvers()
-        }
-    }
-
-    private fun renderUpcomingManeuverVisibility(visibility: Int) {
-        binding.upcomingManeuverRecycler.visibility = visibility
+        mainLayoutBinding.primaryManeuverText.isSingleLine = true
     }
 
     private fun updateConstraintsToOnlyPrimary() {

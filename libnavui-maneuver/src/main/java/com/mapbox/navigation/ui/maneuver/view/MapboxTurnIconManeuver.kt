@@ -5,12 +5,11 @@ import android.util.AttributeSet
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
-import com.mapbox.navigation.ui.base.MapboxView
-import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState
-import com.mapbox.navigation.ui.base.model.maneuver.PrimaryManeuver
-import com.mapbox.navigation.ui.base.model.maneuver.SubManeuver
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.TurnIconHelper
+import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
+import com.mapbox.navigation.ui.maneuver.model.SubManeuver
+import com.mapbox.navigation.ui.maneuver.model.TurnIcon
 import com.mapbox.navigation.ui.maneuver.model.TurnIconResources
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 
@@ -25,42 +24,12 @@ class MapboxTurnIconManeuver @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : MapboxView<ManeuverState>, AppCompatImageView(context, attrs, defStyleAttr) {
+) : AppCompatImageView(context, attrs, defStyleAttr) {
 
     private var contextThemeWrapper: ContextThemeWrapper =
         ContextThemeWrapper(context, R.style.MapboxStyleTurnIconManeuver)
     private var turnIconResources = TurnIconResources.Builder().build()
     private var turnIconHelper = TurnIconHelper(turnIconResources)
-
-    /**
-     * Entry point for [MapboxTurnIconManeuver] to render itself based on a [ManeuverState].
-     */
-    override fun render(state: ManeuverState) {
-        when (state) {
-            is ManeuverState.ManeuverPrimary.Instruction -> {
-                renderPrimaryTurnIcon(state.maneuver)
-            }
-            is ManeuverState.ManeuverSub.Instruction -> {
-                renderSubTurnIcon(state.maneuver)
-            }
-            is ManeuverState.ManeuverSub.Hide -> {
-                updateVisibility(GONE)
-            }
-            is ManeuverState.ManeuverSub.Show -> {
-                updateVisibility(VISIBLE)
-            }
-        }
-    }
-
-    /**
-     * Invoke the method if there is a need to use other turn icon drawables than the default icons
-     * supplied.
-     * @param turnIcon TurnIconResources
-     */
-    fun updateTurnIconResources(turnIcon: TurnIconResources) {
-        this.turnIconResources = turnIcon
-        this.turnIconHelper = TurnIconHelper(turnIconResources)
-    }
 
     /**
      * Invoke to change the styling of [MapboxTurnIconManeuver]
@@ -70,10 +39,40 @@ class MapboxTurnIconManeuver @JvmOverloads constructor(
         this.contextThemeWrapper = wrapper
     }
 
-    private fun renderPrimaryTurnIcon(maneuver: PrimaryManeuver) {
+    /**
+     * Invoke the method if there is a need to use other turn icon drawables than the default icons
+     * supplied.
+     * @param turnIcon TurnIconResources
+     * Invoke to render a turn icon based on a [SubManeuver].
+     */
+    fun updateTurnIconResources(turnIcon: TurnIconResources) {
+        this.turnIconResources = turnIcon
+        this.turnIconHelper = TurnIconHelper(turnIconResources)
+    }
+
+    /**
+     * Invoke to render a turn icon based on a [PrimaryManeuver].
+     */
+    fun renderPrimaryTurnIcon(maneuver: PrimaryManeuver) {
         val turnIcon = turnIconHelper.retrieveTurnIcon(
             maneuver.type, maneuver.degrees?.toFloat(), maneuver.modifier, maneuver.drivingSide
         )
+        renderIcon(turnIcon)
+    }
+
+    /**
+     * Invoke to render a turn icon based on a [SubManeuver].
+     */
+    fun renderSubTurnIcon(maneuver: SubManeuver?) {
+        ifNonNull(maneuver) { m ->
+            val turnIcon = turnIconHelper.retrieveTurnIcon(
+                m.type, m.degrees?.toFloat(), m.modifier, m.drivingSide
+            )
+            renderIcon(turnIcon)
+        } ?: setImageDrawable(null)
+    }
+
+    private fun renderIcon(turnIcon: TurnIcon?) {
         turnIcon?.let {
             ifNonNull(it.icon) { icon ->
                 if (it.shouldFlipIcon) {
@@ -87,30 +86,5 @@ class MapboxTurnIconManeuver @JvmOverloads constructor(
                 setImageDrawable(drawable)
             }
         }
-    }
-
-    private fun renderSubTurnIcon(maneuver: SubManeuver?) {
-        ifNonNull(maneuver) { m ->
-            val turnIcon = turnIconHelper.retrieveTurnIcon(
-                m.type, m.degrees?.toFloat(), m.modifier, m.drivingSide
-            )
-            turnIcon?.let {
-                ifNonNull(it.icon) { icon ->
-                    if (it.shouldFlipIcon) {
-                        rotationY = 180f
-                    }
-                    val drawable = VectorDrawableCompat.create(
-                        context.resources,
-                        icon,
-                        contextThemeWrapper.theme
-                    )
-                    setImageDrawable(drawable)
-                }
-            }
-        }
-    }
-
-    private fun updateVisibility(visibility: Int) {
-        this.visibility = visibility
     }
 }

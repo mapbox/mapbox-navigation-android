@@ -5,8 +5,8 @@ import android.util.AttributeSet
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
-import com.mapbox.navigation.ui.base.model.maneuver.LaneIndicator
 import com.mapbox.navigation.ui.maneuver.LaneIconHelper
+import com.mapbox.navigation.ui.maneuver.model.LaneIndicator
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 
 /**

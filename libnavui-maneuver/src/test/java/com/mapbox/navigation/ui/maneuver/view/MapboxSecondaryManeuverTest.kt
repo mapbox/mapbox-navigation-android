@@ -2,20 +2,17 @@ package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
 import android.text.SpannableString
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
-import com.mapbox.navigation.ui.base.model.maneuver.Component
-import com.mapbox.navigation.ui.base.model.maneuver.DelimiterComponentNode
-import com.mapbox.navigation.ui.base.model.maneuver.ExitComponentNode
-import com.mapbox.navigation.ui.base.model.maneuver.ExitNumberComponentNode
-import com.mapbox.navigation.ui.base.model.maneuver.ManeuverState
-import com.mapbox.navigation.ui.base.model.maneuver.RoadShieldComponentNode
-import com.mapbox.navigation.ui.base.model.maneuver.SecondaryManeuver
-import com.mapbox.navigation.ui.base.model.maneuver.TextComponentNode
+import com.mapbox.navigation.ui.maneuver.model.Component
+import com.mapbox.navigation.ui.maneuver.model.DelimiterComponentNode
+import com.mapbox.navigation.ui.maneuver.model.ExitComponentNode
+import com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode
+import com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode
+import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
+import com.mapbox.navigation.ui.maneuver.model.TextComponentNode
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -35,45 +32,21 @@ class MapboxSecondaryManeuverTest {
     @Test
     fun `render secondary maneuver text`() {
         val componentList = createComponentList()
-        val state = ManeuverState.ManeuverSecondary.Instruction(
-            SecondaryManeuver
-                .Builder()
-                .text("Exit 23 I-880/Central")
-                .type(StepManeuver.TURN)
-                .degrees(null)
-                .modifier(ManeuverModifier.SLIGHT_LEFT)
-                .drivingSide(null)
-                .componentList(componentList)
-                .build()
-        )
+        val state = SecondaryManeuver
+            .Builder()
+            .text("Exit 23 I-880/Central")
+            .type(StepManeuver.TURN)
+            .degrees(null)
+            .modifier(ManeuverModifier.SLIGHT_LEFT)
+            .drivingSide(null)
+            .componentList(componentList)
+            .build()
         val expected = SpannableString("23 I-880 / Central ")
         val view = MapboxSecondaryManeuver(ctx)
 
         view.render(state)
 
         assertEquals(expected.toString(), view.text.toString())
-    }
-
-    @Test
-    fun `render secondary view hide`() {
-        val view = MapboxSecondaryManeuver(ctx)
-        val state = ManeuverState.ManeuverSecondary.Hide
-        val expected = GONE
-
-        view.render(state)
-
-        assertEquals(expected, view.visibility)
-    }
-
-    @Test
-    fun `render secondary view show`() {
-        val view = MapboxSecondaryManeuver(ctx)
-        val state = ManeuverState.ManeuverSecondary.Show
-        val expected = VISIBLE
-
-        view.render(state)
-
-        assertEquals(expected, view.visibility)
     }
 
     private fun createComponentList(): List<Component> {
