@@ -25,16 +25,7 @@ class DistanceRemainingFormatterTest {
                 .build()
         )
 
-        val result = formatter.format(
-            TripProgressUpdate(
-                System.currentTimeMillis(),
-                19312.1,
-                50.0,
-                100.0,
-                21.0,
-                111
-            )
-        )
+        val result = formatter.format(19312.1)
 
         assertEquals("12 mi", result.toString())
     }
@@ -47,16 +38,7 @@ class DistanceRemainingFormatterTest {
                 .build()
         )
 
-        val result = formatter.format(
-            TripProgressUpdate(
-                System.currentTimeMillis(),
-                19312.1,
-                50.0,
-                100.0,
-                21.0,
-                111
-            )
-        )
+        val result = formatter.format(19312.1)
 
         assertEquals("19 km", result.toString())
     }
@@ -70,16 +52,7 @@ class DistanceRemainingFormatterTest {
                 .build()
         )
 
-        val result = formatter.format(
-            TripProgressUpdate(
-                System.currentTimeMillis(),
-                55.3,
-                50.0,
-                100.0,
-                21.0,
-                111
-            )
-        )
+        val result = formatter.format(55.3)
 
         assertEquals("150 フィート", result.toString())
     }

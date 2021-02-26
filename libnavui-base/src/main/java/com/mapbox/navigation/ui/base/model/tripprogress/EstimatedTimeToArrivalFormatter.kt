@@ -14,27 +14,27 @@ import java.util.Calendar
 /**
  * Formats trip related data for displaying in the UI
  *
- * @param applicationContext an application context instance
+ * @param context an application context instance
  * @param timeFormatType a value indicating whether the time should be formatted in 12 or 24 hour
  * format
  */
 class EstimatedTimeToArrivalFormatter(
     context: Context,
     @TimeFormat.Type private val timeFormatType: Int = TimeFormat.NONE_SPECIFIED
-) : ValueFormatter<TripProgressUpdate, SpannableString> {
+) : ValueFormatter<Long, SpannableString> {
 
     private val appContext: Context = context.applicationContext
 
     /**
      * Formats an update to a [SpannableString] representing the estimated time to arrival
      *
-     * @param update a [TripProgressUpdate]
+     * @param eta represents the estimated time to arrival value
      * @return a formatted string
      */
-    override fun format(update: TripProgressUpdate): SpannableString {
+    override fun format(eta: Long): SpannableString {
         val is24HourFormat = DateFormat.is24HourFormat(appContext)
         val etaAsCalendar = Calendar.getInstance().also {
-            it.timeInMillis = update.estimatedTimeToArrival
+            it.timeInMillis = eta
         }
 
         return SpannableString(formatTime(etaAsCalendar, timeFormatType, is24HourFormat))

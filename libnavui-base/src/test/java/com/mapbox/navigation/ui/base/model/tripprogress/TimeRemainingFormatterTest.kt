@@ -43,16 +43,7 @@ class TimeRemainingFormatterTest {
     @Config(qualifiers = "en")
     @Test
     fun format() {
-        val update = TripProgressUpdate(
-            0L,
-            0.0,
-            1800.0,
-            0.0,
-            0.0,
-            0
-        )
-
-        val result = TimeRemainingFormatter(ctx).format(update)
+        val result = TimeRemainingFormatter(ctx).format(1800.0)
 
         assertEquals("30 min", result.toString())
         assertEquals(6, result.count())
@@ -115,16 +106,7 @@ class TimeRemainingFormatterTest {
     @Config(qualifiers = "en")
     @Test
     fun format_lessThanOneMinute() {
-        val update = TripProgressUpdate(
-            0L,
-            0.0,
-            15.0,
-            0.0,
-            0.0,
-            0
-        )
-
-        val result = TimeRemainingFormatter(ctx).format(update)
+        val result = TimeRemainingFormatter(ctx).format(15.0)
 
         assertEquals("< 1 min", result.toString())
         assertEquals(7, result.count())
@@ -233,16 +215,7 @@ class TimeRemainingFormatterTest {
     @Config(qualifiers = "en")
     @Test
     fun format_moreThanOneHour() {
-        val update = TripProgressUpdate(
-            0L,
-            0.0,
-            5460.0,
-            0.0,
-            0.0,
-            0
-        )
-
-        val result = TimeRemainingFormatter(ctx).format(update)
+        val result = TimeRemainingFormatter(ctx).format(5460.0)
 
         assertEquals("1 hr 31 min", result.toString())
         assertEquals(11, result.count())
@@ -295,16 +268,7 @@ class TimeRemainingFormatterTest {
     @Config(qualifiers = "en")
     @Test
     fun format_withLocale() {
-        val update = TripProgressUpdate(
-            0L,
-            0.0,
-            1800.0,
-            0.0,
-            0.0,
-            0
-        )
-
-        val result = TimeRemainingFormatter(ctx, Locale("hu")).format(update)
+        val result = TimeRemainingFormatter(ctx, Locale("hu")).format(1800.0)
 
         assertEquals("30 perc", result.toString())
     }

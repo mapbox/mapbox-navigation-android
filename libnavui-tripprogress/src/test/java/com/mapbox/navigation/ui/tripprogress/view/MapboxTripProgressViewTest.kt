@@ -6,10 +6,10 @@ import android.text.SpannableString
 import android.view.View
 import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.ui.base.model.tripprogress.TripProgressState
-import com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdate
+import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter
 import com.mapbox.navigation.ui.tripprogress.R
+import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -92,36 +92,38 @@ class MapboxTripProgressViewTest {
 
     @Test
     fun render_Update() {
-        val update = TripProgressUpdate(
-            1L,
-            2.0,
-            3.0,
-            4.0,
-            5.0,
-            6
-        )
         val formatter = TripProgressUpdateFormatter.Builder(ctx)
             .estimatedTimeToArrivalFormatter(
                 mockk {
-                    every { format(update) } returns SpannableString("11:59")
+                    every { format(1L) } returns SpannableString("11:59")
                 }
             )
             .distanceRemainingFormatter(
                 mockk {
-                    every { format(update) } returns SpannableString("44 mi")
+                    every { format(2.0) } returns SpannableString("44 mi")
                 }
             )
             .timeRemainingFormatter(
                 mockk {
-                    every { format(update) } returns SpannableString("5 min")
+                    every { format(3.0) } returns SpannableString("5 min")
                 }
             )
             .percentRouteTraveledFormatter(
                 mockk {
-                    every { format(update) } returns SpannableString("10%")
+                    every { format(4.0) } returns SpannableString("10%")
                 }
             ).build()
-        val state = TripProgressState.Update(update, formatter)
+        val state = Expected.Success(
+            TripProgressUpdateValue(
+                1L,
+                2.0,
+                3.0,
+                4.0,
+                5.0,
+                6,
+                formatter
+            )
+        )
 
         val view = MapboxTripProgressView(ctx).also {
             it.render(state)

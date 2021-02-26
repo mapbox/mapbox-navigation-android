@@ -6,15 +6,15 @@ import com.mapbox.navigation.ui.base.formatter.ValueFormatter
 /**
  * Formats trip related data for displaying in the UI
  */
-class PercentDistanceTraveledFormatter : ValueFormatter<TripProgressUpdate, SpannableString> {
+class PercentDistanceTraveledFormatter : ValueFormatter<Double, SpannableString> {
 
     /**
      * Formats an update to a [SpannableString] representing the percent distance traveled
      *
-     * @param update a [TripProgressUpdate]
+     * @param value a [TripProgressUpdate]
      * @return a formatted string
      */
-    override fun format(update: TripProgressUpdate): SpannableString {
-        return SpannableString("${update.percentRouteTraveled.toInt()}")
+    override fun format(value: Double): SpannableString {
+        return SpannableString("${value.toInt()}")
     }
 }
