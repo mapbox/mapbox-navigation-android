@@ -433,6 +433,7 @@ jobs:
     steps:
       - read-workspace
       - verify-codebase
+      - verify-common-sdk-version
       - check-api-core
       - check-api-ui
       - check-public-documentation
