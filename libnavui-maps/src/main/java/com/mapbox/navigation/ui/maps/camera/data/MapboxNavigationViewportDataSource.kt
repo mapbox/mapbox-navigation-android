@@ -15,6 +15,7 @@ import com.mapbox.navigation.ui.maps.camera.utils.shortestRotation
 import com.mapbox.navigation.ui.maps.camera.utils.toPoint
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
+import com.mapbox.turf.TurfMeasurement
 import com.mapbox.turf.TurfMisc
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.math.max
@@ -141,6 +142,7 @@ class MapboxNavigationViewportDataSource(
     private var remainingPointsOnCurrentStep: List<Point> = emptyList()
     private var remainingPointsOnRoute: List<Point> = emptyList()
     private var targetLocation: Location? = null
+    private var averageIntersectionDistancesOnRoute: List<List<Double>> = emptyList()
 
     /* -------- GENERATED OPTIONS -------- */
     private var followingCameraOptions = CameraOptions.Builder().build()
@@ -363,6 +365,7 @@ class MapboxNavigationViewportDataSource(
         completeRoutePoints = processRouteInfo(route)
         remainingPointsOnRoute = completeRoutePoints.flatten().flatten()
         remainingPointsOnCurrentStep = emptyList()
+        averageIntersectionDistancesOnRoute = processRouteIntersections(route)
         updateData()
     }
 
@@ -392,11 +395,17 @@ class MapboxNavigationViewportDataSource(
                     distanceTraveledOnStepKM = 0.0
                 }
 
+                var lookaheadDistanceForZoom = fullDistanceOfCurrentStepKM
+                if (usingIntersectionDensityToCalculateZoom) {
+                    val lookaheadInKM = averageIntersectionDistancesOnRoute[currentLegProgress.legIndex][currentStepProgress.stepIndex] / 1000.0
+                    lookaheadDistanceForZoom = distanceTraveledOnStepKM + (lookaheadInKM * averageIntersectionDistanceMultiplier)
+                }
+
                 try {
                     remainingPointsOnCurrentStep = TurfMisc.lineSliceAlong(
                         LineString.fromLngLats(currentStepFullPoints),
                         distanceTraveledOnStepKM,
-                        fullDistanceOfCurrentStepKM,
+                        lookaheadDistanceForZoom,
                         TurfConstants.UNIT_KILOMETERS
                     ).coordinates()
                 } catch (e: TurfException) {
@@ -666,6 +675,39 @@ class MapboxNavigationViewportDataSource(
                 } ?: emptyList()
             } ?: emptyList()
         } ?: emptyList()
+    }
+
+//    TODO: Make these ViewportDataSourceOptions
+    private var usingIntersectionDensityToCalculateZoom = true
+    private var averageIntersectionDistanceMultiplier = 5
+    private var minimumMetersForIntersectionDensity = 20.0
+
+    private fun processRouteIntersections(route: DirectionsRoute): List<List<Double>> {
+        val output = route.legs()?.map {routeLeg ->
+            routeLeg.steps()?.map { legStep ->
+                legStep.geometry()?.let { geometry ->
+                    val stepPoints = PolylineUtils.decode(geometry, Constants.PRECISION_6).toList()
+                    val intersectionLocations: List<Point> = legStep.intersections()?.map { it.location() }
+                        ?: emptyList()
+                    val list: MutableList<Point> = ArrayList()
+                    list.addAll(listOf(stepPoints.first()))
+                    list.addAll(intersectionLocations)
+                    list.addAll(listOf(stepPoints.last()))
+                    val comparisonList = list.toMutableList()
+                    list.removeFirst()
+                    val intersectionDistances = list.mapIndexed { index, point ->
+                        TurfMeasurement.distance(point, comparisonList[index]) * 1000.0
+                    }
+                    val filteredIntersectionDistances = intersectionDistances.filter { it > minimumMetersForIntersectionDensity }
+                    if (filteredIntersectionDistances.size > 0) {
+                        filteredIntersectionDistances.reduce {acc, next -> acc + next} / filteredIntersectionDistances.size
+                    } else {
+                        minimumMetersForIntersectionDensity
+                    }
+                } ?: 0.0
+            } ?: emptyList()
+        } ?: emptyList()
+        return output
     }
 
     private fun updateData() {
