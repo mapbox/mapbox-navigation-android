@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -281,6 +282,11 @@ class MapboxCameraAnimationsActivity :
     }
 
     private fun initButtons() {
+        binding.gravitateLeft.setVisibility(View.GONE)
+        binding.gravitateRight.setVisibility(View.GONE)
+        binding.gravitateTop.setVisibility(View.GONE)
+        binding.gravitateBottom.setVisibility(View.GONE)
+
         binding.gravitateLeft.setOnClickListener {
             mapboxMap.getCameraOptions(null).padding?.let {
                 val padding = EdgeInsets(
