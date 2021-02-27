@@ -66,15 +66,15 @@ class RouteLine(private val activity: AppCompatActivity) : LifecycleObserver {
     }
 
     private val onIndicatorPositionChangedListener = OnIndicatorPositionChangedListener { point ->
-        routeLineApi.updateTraveledRouteLine(point)?.apply {
-            routeLineView.render(style, this)
+        routeLineApi.updateTraveledRouteLine(point).apply {
+            routeLineView.renderVanishingRouteLineUpdateValue(style, this)
         }
     }
 
     private val routesObserver: RoutesObserver = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
             routeLineApi.setRoutes(listOf(RouteLine(routes[0], null))).apply {
-                routeLineView.render(style, this)
+                routeLineView.renderRouteDrawData(style, this)
             }
         }
     }
@@ -99,7 +99,7 @@ class RouteLine(private val activity: AppCompatActivity) : LifecycleObserver {
 
             if (isNewRoute) {
                 routeLineApi.setRoutes(listOf(RouteLine(routeProgress.route, null))).apply {
-                    routeLineView.render(style, this)
+                    routeLineView.renderRouteDrawData(style, this)
                 }
             }
         }

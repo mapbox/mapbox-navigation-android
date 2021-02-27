@@ -9,16 +9,20 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
+import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getLayerVisibility
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.initializeLayers
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineState
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
+import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
+import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue
 
 /**
- * Responsible for rendering side effects produced by the MapboxRouteLineApi. The MapboxRouteLineApi
+ * Responsible for rendering side effects produced by the [MapboxRouteLineApi]. The [MapboxRouteLineApi]
  * class consumes route data from the Navigation SDK and produces the data necessary to
- * visualize one or more routes on the map. This class renders the data from the MapboxRouteLineApi
+ * visualize one or more routes on the map. This class renders the data from the [MapboxRouteLineApi]
  * by calling the appropriate map related commands so that the map can have an appearance that is
  * consistent with the state of the navigation SDK and the application.
  *
@@ -27,133 +31,252 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineState
 class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
 
     /**
+     * Will initialize the route line related layers. Other calls in this class will initialize
+     * the layers if they have not yet been initialized. If you have a use case for initializing
+     * the layers in advance of any API calls this method may be used.
+     *
+     * @param style a valid [Style] instance
+     */
+    fun initializeLayers(style: Style) {
+        initializeLayers(style, options)
+    }
+
+    /**
      * Applies drawing related side effects.
      *
-     * @param style a valid Style instance
-     * @param routeDrawData a RouteSetState object
+     * @param style a valid [Style] instance
+     * @param routeDrawData a [Expected<RouteSetValue, RouteLineError>]
      */
-    fun render(style: Style, routeDrawData: RouteLineState.RouteSetState) {
+    fun renderRouteDrawData(style: Style, routeDrawData: Expected<RouteSetValue, RouteLineError>) {
         initializeLayers(style, options)
 
-        updateLineGradient(
-            style,
-            RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
-            routeDrawData.getTrafficLineExpression()
-        )
-        updateLineGradient(
-            style,
-            RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
-            routeDrawData.getRouteLineExpression()
-        )
-        updateLineGradient(
-            style,
-            RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
-            routeDrawData.getCasingLineExpression()
-        )
-        updateSource(
-            style,
-            RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
-            routeDrawData.getPrimaryRouteSource()
-        )
-        updateSource(
-            style,
-            RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
-            routeDrawData.getAlternativeRoute1Source()
-        )
-        updateSource(
-            style,
-            RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
-            routeDrawData.getAlternativeRoute2Source()
-        )
-        updateLineGradient(
-            style,
-            RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
-            routeDrawData.getAlternativeRoute1TrafficExpression()
-        )
-        updateLineGradient(
-            style,
-            RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
-            routeDrawData.getAlternativeRoute2TrafficExpression()
-        )
-        updateSource(
-            style,
-            RouteConstants.WAYPOINT_SOURCE_ID,
-            routeDrawData.getOriginAndDestinationPointsSource()
-        )
+        when (routeDrawData) {
+            is Expected.Success -> {
+                updateLineGradient(
+                    style,
+                    RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                    routeDrawData.value.trafficLineExpression
+                )
+                updateLineGradient(
+                    style,
+                    RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
+                    routeDrawData.value.routeLineExpression
+                )
+                updateLineGradient(
+                    style,
+                    RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+                    routeDrawData.value.casingLineExpression
+                )
+                updateSource(
+                    style,
+                    RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
+                    routeDrawData.value.primaryRouteSource
+                )
+                updateSource(
+                    style,
+                    RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
+                    routeDrawData.value.alternativeRoute1Source
+                )
+                updateSource(
+                    style,
+                    RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                    routeDrawData.value.alternativeRoute2Source
+                )
+                updateLineGradient(
+                    style,
+                    RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
+                    routeDrawData.value.altRoute1TrafficExpression
+                )
+                updateLineGradient(
+                    style,
+                    RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
+                    routeDrawData.value.altRoute2TrafficExpression
+                )
+                updateSource(
+                    style,
+                    RouteConstants.WAYPOINT_SOURCE_ID,
+                    routeDrawData.value.waypointsSource
+                )
+            }
+            is Expected.Failure -> { }
+        }
     }
 
     /**
      * Applies side effects related to the vanishing route line feature.
      *
      * @param style an instance of the Style
-     * @param vanishingRouteLineState an instance of VanishingRouteLineUpdateState
+     * @param update an instance of VanishingRouteLineUpdateState
      */
-    fun render(
+    fun renderVanishingRouteLineUpdateValue(
         style: Style,
-        vanishingRouteLineState: RouteLineState.VanishingRouteLineUpdateState
+        update: Expected<VanishingRouteLineUpdateValue, RouteLineError>
     ) {
-        initializeLayers(style, options)
+        when (update) {
+            is Expected.Failure -> { }
+            is Expected.Success -> {
+                initializeLayers(style, options)
 
-        updateLineGradient(
-            style,
-            RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
-            vanishingRouteLineState.getTrafficLineExpression()
-        )
-        updateLineGradient(
-            style,
-            RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
-            vanishingRouteLineState.getRouteLineExpression()
-        )
-        updateLineGradient(
-            style,
-            RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
-            vanishingRouteLineState.getCasingLineExpression()
-        )
+                updateLineGradient(
+                    style,
+                    RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                    update.value.trafficLineExpression
+                )
+                updateLineGradient(
+                    style,
+                    RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
+                    update.value.routeLineExpression
+                )
+                updateLineGradient(
+                    style,
+                    RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+                    update.value.casingLineExpression
+                )
+            }
+        }
     }
 
     /**
      * Applies side effects related to clearing the route(s) from the map.
      *
      * @param style an instance of the Style
-     * @param clearRouteLineData an instance of ClearRouteLineState
+     * @param clearRouteLineValue an instance of ClearRouteLineState
      */
-    fun render(style: Style, clearRouteLineData: RouteLineState.ClearRouteLineState) {
-        initializeLayers(style, options)
+    fun renderClearRouteLineValue(
+        style: Style,
+        clearRouteLineValue: Expected<RouteLineClearValue, RouteLineError>
+    ) {
+        when (clearRouteLineValue) {
+            is Expected.Failure -> { }
+            is Expected.Success -> {
+                initializeLayers(style, options)
 
-        updateSource(
+                updateSource(
+                    style,
+                    RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
+                    clearRouteLineValue.value.primaryRouteSource
+                )
+                updateSource(
+                    style,
+                    RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
+                    clearRouteLineValue.value.altRoute1Source
+                )
+                updateSource(
+                    style,
+                    RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                    clearRouteLineValue.value.altRoute2Source
+                )
+                updateSource(
+                    style,
+                    RouteConstants.WAYPOINT_SOURCE_ID,
+                    clearRouteLineValue.value.waypointsSource
+                )
+            }
+        }
+    }
+
+    /**
+     * Shows the layers used for the primary route line.
+     *
+     * @param style an instance of the [Style]
+     */
+    fun showPrimaryRoute(style: Style) {
+        updateLayerVisibility(
             style,
-            RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
-            clearRouteLineData.getPrimaryRouteSource()
+            RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID, Visibility.VISIBLE
         )
-        updateSource(
+        updateLayerVisibility(
             style,
-            RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
-            clearRouteLineData.getAlternativeRoute1Source()
+            RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID, Visibility.VISIBLE
         )
-        updateSource(
+        updateLayerVisibility(
             style,
-            RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
-            clearRouteLineData.getAlternativeRoute2Source()
-        )
-        updateSource(
-            style,
-            RouteConstants.WAYPOINT_SOURCE_ID,
-            clearRouteLineData.getOriginAndDestinationPointsSource()
+            RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID, Visibility.VISIBLE
         )
     }
 
     /**
-     * Applies side effects related to updating the visibility of the route line(s)
+     * Hides the layers used for the primary route line.
      *
-     * @param style an instance of the Style
-     * @param state an instance of UpdateLayerVisibilityState
+     * @param style an instance of the [Style]
      */
-    fun render(style: Style, state: RouteLineState.UpdateLayerVisibilityState) {
-        initializeLayers(style, options)
+    fun hidePrimaryRoute(style: Style) {
+        updateLayerVisibility(
+            style,
+            RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID, Visibility.NONE
+        )
+        updateLayerVisibility(
+            style,
+            RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID, Visibility.NONE
+        )
+        updateLayerVisibility(
+            style,
+            RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID, Visibility.NONE
+        )
+    }
 
-        state.getLayerVisibilityChanges().forEach {
-            updateLayerVisibility(style, it.first, it.second)
-        }
+    /**
+     * Shows the layers used for the alternative route line(s).
+     *
+     * @param style an instance of the [Style]
+     */
+    fun showAlternativeRoutes(style: Style) {
+        updateLayerVisibility(
+            style,
+            RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID, Visibility.VISIBLE
+        )
+        updateLayerVisibility(
+            style,
+            RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID, Visibility.VISIBLE
+        )
+        updateLayerVisibility(
+            style,
+            RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID, Visibility.VISIBLE
+        )
+        updateLayerVisibility(
+            style,
+            RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID, Visibility.VISIBLE
+        )
+        updateLayerVisibility(
+            style,
+            RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID, Visibility.VISIBLE
+        )
+        updateLayerVisibility(
+            style,
+            RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID, Visibility.VISIBLE
+        )
+    }
+
+    /**
+     * Hides the layers used for the alternative route line(s).
+     *
+     * @param style an instance of the [Style]
+     */
+    fun hideAlternativeRoutes(style: Style) {
+        updateLayerVisibility(
+            style,
+            RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID, Visibility.NONE
+        )
+        updateLayerVisibility(
+            style,
+            RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID, Visibility.NONE
+        )
+        updateLayerVisibility(
+            style,
+            RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID, Visibility.NONE
+        )
+        updateLayerVisibility(
+            style,
+            RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID, Visibility.NONE
+        )
+        updateLayerVisibility(
+            style,
+            RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID, Visibility.NONE
+        )
+        updateLayerVisibility(
+            style,
+            RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID, Visibility.NONE
+        )
     }
 
     /**
@@ -176,6 +299,24 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      */
     fun getAlternativeRoutesVisibility(style: Style): Visibility? {
         return getLayerVisibility(style, RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID)
+    }
+
+    /**
+     * Sets the layer containing the origin and destination icons to visible.
+     *
+     * @param style an instance of the Style
+     */
+    fun showOriginAndDestinationPoints(style: Style) {
+        updateLayerVisibility(style, RouteLayerConstants.WAYPOINT_LAYER_ID, Visibility.VISIBLE)
+    }
+
+    /**
+     * Sets the layer containing the origin and destination icons to not visible.
+     *
+     * @param style an instance of the Style
+     */
+    fun hideOriginAndDestinationPoints(style: Style) {
+        updateLayerVisibility(style, RouteLayerConstants.WAYPOINT_LAYER_ID, Visibility.NONE)
     }
 
     private fun updateLayerVisibility(style: Style, layerId: String, visibility: Visibility) {
