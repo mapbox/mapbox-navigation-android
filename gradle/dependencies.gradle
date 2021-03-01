@@ -6,6 +6,9 @@ ext {
       compileSdkVersion       : 29
   ]
 
+  // Navigation Native CI can run SDK CI downstream with forced Navigation Native version
+  // in this case `FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION` environment variable will contain
+  // version which we should use in this build
   def mapboxNavigatorVersion = System.getenv("FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION")
   if (mapboxNavigatorVersion == null || mapboxNavigatorVersion == '') {
       mapboxNavigatorVersion = '43.0.1'
