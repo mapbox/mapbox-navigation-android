@@ -19,7 +19,7 @@ executors:
     environment:
       when: << pipeline.parameters.mapbox_navigation_native_upstream >>
       FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION: << pipeline.parameters.mapbox_navigation_native_snapshot >>
-    
+      
 #-------------------------------
 #---------- WORKFLOWS ----------
 #-------------------------------
@@ -63,7 +63,7 @@ workflows:
             - static-analysis
           filters:
             branches:
-              ignore: /^(sf-trigger-pipeline|main|release-.*)/
+              ignore: /^(main|release-.*)/
 #      - mobile-metrics-dry-run:
 #          type: approval
 #      - mobile-metrics-benchmarks:
