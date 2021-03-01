@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.reroute
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.core.directions.session.DirectionsSession
@@ -78,8 +79,6 @@ class MapboxRerouteControllerTest {
     @After
     fun cleanUp() {
         assertEquals(RerouteState.Idle, rerouteController.state)
-        // routeCallback mustn't called in current implementation. DirectionSession update routes internally
-        verify(exactly = 0) { routeCallback.onNewRoutes(any()) }
     }
 
     @Test
@@ -106,7 +105,7 @@ class MapboxRerouteControllerTest {
                 routeOptionsFromSuccessResult,
                 capture(routeRequestCallback)
             )
-        } returns mockk()
+        } returns 1L
 
         rerouteController.reroute(routeCallback)
         routeRequestCallback.captured.onRoutesReady(mockk())
@@ -118,7 +117,7 @@ class MapboxRerouteControllerTest {
             tripSession.getRouteProgress()
         }
         verify(exactly = 1) {
-            directionsSession.getRouteOptions()
+            directionsSession.getPrimaryRouteOptions()
         }
     }
 
@@ -126,18 +125,19 @@ class MapboxRerouteControllerTest {
     fun reroute_success() {
         mockRouteOptionsResult(successFromResult)
         addRerouteStateObserver()
+        val routes = listOf(mockk<DirectionsRoute>())
         val routeRequestCallback = slot<RoutesRequestCallback>()
         every {
             directionsSession.requestRoutes(
                 routeOptionsFromSuccessResult,
                 capture(routeRequestCallback)
             )
-        } returns mockk()
+        } returns 1L
 
         rerouteController.reroute(routeCallback)
-        routeRequestCallback.captured.onRoutesReady(mockk())
+        routeRequestCallback.captured.onRoutesReady(routes)
 
-        assertTrue(routeRequestCallback.isCaptured)
+        verify(exactly = 1) { routeCallback.onNewRoutes(routes) }
         verify(exactly = 1) {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
         }
@@ -165,12 +165,11 @@ class MapboxRerouteControllerTest {
                 routeOptionsFromSuccessResult,
                 capture(routeRequestCallback)
             )
-        } returns mockk()
+        } returns 1L
 
         rerouteController.reroute(routeCallback)
         routeRequestCallback.captured.onRoutesRequestFailure(mockk(), mockk())
 
-        assertTrue(routeRequestCallback.isCaptured)
         verify(exactly = 1) {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
         }
@@ -198,12 +197,11 @@ class MapboxRerouteControllerTest {
                 routeOptionsFromSuccessResult,
                 capture(routeRequestCallback)
             )
-        } returns mockk()
+        } returns 1L
 
         rerouteController.reroute(routeCallback)
         routeRequestCallback.captured.onRoutesRequestCanceled(mockk())
 
-        assertTrue(routeRequestCallback.isCaptured)
         verify(exactly = 1) {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
         }
@@ -230,13 +228,13 @@ class MapboxRerouteControllerTest {
                 routeOptionsFromSuccessResult,
                 capture(routeRequestCallback)
             )
-        } returns mockk()
+        } returns 1L
         rerouteController.reroute(routeCallback)
 
         rerouteController.reroute(routeCallback)
         routeRequestCallback.captured.onRoutesReady(mockk())
 
-        verify(exactly = 1) { directionsSession.cancel() }
+        verify(exactly = 1) { directionsSession.cancelRouteRequest(1L) }
     }
 
     @Test
@@ -248,12 +246,13 @@ class MapboxRerouteControllerTest {
                 routeOptionsFromSuccessResult,
                 capture(routeRequestCallback)
             )
-        } returns mockk()
+        } returns 1L
 
         rerouteController.reroute(routeCallback)
         routeRequestCallback.captured.onRoutesReady(mockk())
 
-        verify(exactly = 0) { directionsSession.cancel() }
+        verify(exactly = 0) { directionsSession.cancelAll() }
+        verify(exactly = 0) { directionsSession.cancelRouteRequest(any()) }
     }
 
     @Test
@@ -266,9 +265,9 @@ class MapboxRerouteControllerTest {
                 routeOptionsFromSuccessResult,
                 capture(routeRequestCallback)
             )
-        } returns mockk()
+        } returns 1L
         every {
-            directionsSession.cancel()
+            directionsSession.cancelRouteRequest(1L)
         } answers {
             routeRequestCallback.captured.onRoutesRequestCanceled(mockk())
         }
@@ -276,7 +275,6 @@ class MapboxRerouteControllerTest {
         rerouteController.reroute(routeCallback)
         rerouteController.interrupt()
 
-        assertTrue(routeRequestCallback.isCaptured)
         verify(exactly = 1) {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
         }

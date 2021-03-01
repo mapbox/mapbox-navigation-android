@@ -10,37 +10,46 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
+import com.mapbox.navigation.base.route.RouteRefreshCallback
+import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.route.internal.util.httpUrl
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.NavigationException
+import com.mapbox.navigation.utils.internal.RequestMap
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouterError
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.slot
+import io.mockk.unmockkConstructor
 import io.mockk.unmockkObject
 import io.mockk.verify
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.junit.After
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -58,8 +67,6 @@ class MapboxOnboardRouterTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
-
-    private lateinit var onboardRouter: MapboxOnboardRouter
 
     private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     private val routerCallback: Router.Callback = mockk(relaxUnitFun = true)
@@ -81,10 +88,10 @@ class MapboxOnboardRouterTest {
     private val mapboxDirections = mockk<MapboxDirections>(relaxed = true)
     private val mapboxDirectionsBuilder = mockk<MapboxDirections.Builder>(relaxed = true)
 
+    private var onboardRouter: MapboxOnboardRouter = MapboxOnboardRouter(navigator, context, logger)
+
     @Before
     fun setUp() {
-        onboardRouter = MapboxOnboardRouter(navigator, context, logger)
-
         mockkObject(ThreadController)
         every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
 
@@ -134,18 +141,17 @@ class MapboxOnboardRouterTest {
     @Test
     fun checkCallbackCalledOnCancel() {
         coEvery { navigator.getRoute(any()) } coAnswers {
-            onboardRouter.cancel()
-            routerResultSuccess
+            awaitCancellation()
         }
 
         val latch = CountDownLatch(1)
         val callback: Router.Callback = object : Router.Callback {
             override fun onResponse(routes: List<DirectionsRoute>) {
-                Assert.fail()
+                fail()
             }
 
             override fun onFailure(throwable: Throwable) {
-                Assert.fail()
+                fail()
             }
 
             override fun onCanceled() {
@@ -153,9 +159,10 @@ class MapboxOnboardRouterTest {
             }
         }
         onboardRouter.getRoute(routerOptions, callback)
+        onboardRouter.cancelAll()
 
         if (!latch.await(5, TimeUnit.SECONDS)) {
-            Assert.fail("onCanceled not called")
+            fail("onCanceled not called")
         }
     }
 
@@ -170,20 +177,6 @@ class MapboxOnboardRouterTest {
 
     @Test
     fun checkCallbackCalledOnCancel3() = runBlocking {
-        coEvery {
-            navigator.getRoute(any())
-        } coAnswers {
-            onboardRouter.cancel()
-            routerResultFailure
-        }
-
-        onboardRouter.getRoute(routerOptions, routerCallback)
-
-        verify { routerCallback.onCanceled() }
-    }
-
-    @Test
-    fun checkCallbackCalledOnCancel4() = runBlocking {
         // cancellable code should run on a separate dispatcher to allow call `cancel` after launch.
         // if we use the same dispatcher, it will be blocked until coroutine finish. `cancel` will have no affect
         // job's state will be `isActive == false`, `isCancelled == false`.
@@ -204,6 +197,101 @@ class MapboxOnboardRouterTest {
 
         assertFalse(job.isActive)
         assertTrue(job.isCancelled)
+    }
+
+    @Test
+    fun `cancel a request when multiple are running`() {
+        coEvery { navigator.getRoute(any()) } coAnswers {
+            awaitCancellation()
+        }
+
+        val firstLatch = CountDownLatch(1)
+        val firstCallback: Router.Callback = object : Router.Callback {
+            override fun onResponse(routes: List<DirectionsRoute>) {
+                fail()
+            }
+
+            override fun onFailure(throwable: Throwable) {
+                fail()
+            }
+
+            override fun onCanceled() {
+                firstLatch.countDown()
+            }
+        }
+
+        val secondLatch = CountDownLatch(1)
+        val secondCallback: Router.Callback = object : Router.Callback {
+            override fun onResponse(routes: List<DirectionsRoute>) {
+                fail()
+            }
+
+            override fun onFailure(throwable: Throwable) {
+                fail()
+            }
+
+            override fun onCanceled() {
+                secondLatch.countDown()
+            }
+        }
+
+        val firstId = onboardRouter.getRoute(routerOptions, firstCallback)
+        onboardRouter.cancelRouteRequest(firstId)
+
+        if (!firstLatch.await(5, TimeUnit.SECONDS)) {
+            fail("onCanceled not called on first request")
+        }
+
+        assertTrue(secondLatch.count > 0)
+
+        val secondId = onboardRouter.getRoute(routerOptions, secondCallback)
+        onboardRouter.cancelRouteRequest(secondId)
+
+        if (!secondLatch.await(5, TimeUnit.SECONDS)) {
+            fail("onCanceled not called on second request")
+        }
+    }
+
+    @Test
+    fun `request list cleared on success`() = coroutineRule.runBlockingTest {
+        mockkConstructor(RequestMap::class)
+        val idSlot = slot<Long>()
+        every { anyConstructed<RequestMap<Job>>().put(capture(idSlot), any()) } just Runs
+        onboardRouter = MapboxOnboardRouter(navigator, context, logger)
+        coEvery { navigator.getRoute(any()) } returns routerResultSuccess
+
+        onboardRouter.getRoute(routerOptions, routerCallback)
+
+        verify(exactly = 1) { anyConstructed<RequestMap<Job>>().remove(idSlot.captured) }
+        unmockkConstructor(RequestMap::class)
+    }
+
+    @Test
+    fun `request list cleared on failure`() = coroutineRule.runBlockingTest {
+        mockkConstructor(RequestMap::class)
+        val idSlot = slot<Long>()
+        every { anyConstructed<RequestMap<Job>>().put(capture(idSlot), any()) } just Runs
+        onboardRouter = MapboxOnboardRouter(navigator, context, logger)
+        coEvery { navigator.getRoute(any()) } returns routerResultFailure
+
+        onboardRouter.getRoute(routerOptions, routerCallback)
+
+        verify(exactly = 1) { anyConstructed<RequestMap<Job>>().remove(idSlot.captured) }
+        unmockkConstructor(RequestMap::class)
+    }
+
+    @Test
+    fun `request list cleared on cancel`() = coroutineRule.runBlockingTest {
+        mockkConstructor(RequestMap::class)
+        val idSlot = slot<Long>()
+        every { anyConstructed<RequestMap<Job>>().put(capture(idSlot), any()) } just Runs
+        onboardRouter = MapboxOnboardRouter(navigator, context, logger)
+        coEvery { navigator.getRoute(any()) } coAnswers { throw CancellationException() }
+
+        onboardRouter.getRoute(routerOptions, routerCallback)
+
+        verify(exactly = 1) { anyConstructed<RequestMap<Job>>().remove(idSlot.captured) }
+        unmockkConstructor(RequestMap::class)
     }
 
     @Test
@@ -285,6 +373,18 @@ class MapboxOnboardRouterTest {
         assertEquals(COMPONENT_ABBREVIATION_PRIORITY, component.abbreviationPriority())
         assertEquals(COMPONENT_TEXT, component.text())
         assertEquals(COMPONENT_TYPE, component.type())
+    }
+
+    @Test
+    fun `route refresh is disabled`() {
+        val callback = mockk<RouteRefreshCallback>(relaxUnitFun = true)
+        onboardRouter.getRouteRefresh(mockk(), 0, callback)
+
+        verify {
+            callback.onError(
+                RouteRefreshError(message = "Route refresh is not available when offline.")
+            )
+        }
     }
 
     private fun provideDefaultRouteOptions(): RouteOptions {

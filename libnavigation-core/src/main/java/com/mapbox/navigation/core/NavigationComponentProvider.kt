@@ -20,9 +20,9 @@ import com.mapbox.navigator.TilesConfig
 
 internal object NavigationComponentProvider {
     fun createDirectionsSession(
-        router: Router
-    ): DirectionsSession =
-        MapboxDirectionsSession(router)
+        router: Router,
+        logger: Logger
+    ): DirectionsSession = MapboxDirectionsSession(router, logger)
 
     fun createNativeNavigator(
         deviceProfile: DeviceProfile,

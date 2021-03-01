@@ -2,9 +2,11 @@ package com.mapbox.navigation.core.directions.session
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.navigation.base.route.RouteRefreshCallback
+import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.core.NavigationComponentProvider
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -13,7 +15,6 @@ import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
 class MapboxDirectionsSessionTest {
@@ -21,12 +22,18 @@ class MapboxDirectionsSessionTest {
     private lateinit var session: MapboxDirectionsSession
 
     private val router: Router = mockk(relaxUnitFun = true)
+    private val logger: Logger = mockk(relaxUnitFun = true)
     private val routeOptions: RouteOptions = mockk(relaxUnitFun = true)
     private val routesRequestCallback: RoutesRequestCallback = mockk(relaxUnitFun = true)
+    private val routesRefreshRequestCallback: RouteRefreshCallback = mockk(relaxUnitFun = true)
     private val observer: RoutesObserver = mockk(relaxUnitFun = true)
     private val route: DirectionsRoute = mockk(relaxUnitFun = true)
     private val routes: List<DirectionsRoute> = listOf(route)
-    private lateinit var callback: Router.Callback
+    private lateinit var routeCallback: Router.Callback
+    private lateinit var refreshCallback: RouteRefreshCallback
+
+    private val routeRequestId = 1L
+    private val routeRefreshRequestId = 2L
 
     @Before
     fun setUp() {
@@ -44,80 +51,116 @@ class MapboxDirectionsSessionTest {
         every { routeBuilder.routeOptions(any()) } returns routeBuilder
         every { routeBuilder.build() } returns route
 
-        val listener = slot<Router.Callback>()
-        every { router.getRoute(routeOptions, capture(listener)) } answers {
-            callback = listener.captured
+        val routeListener = slot<Router.Callback>()
+        val refreshListener = slot<RouteRefreshCallback>()
+        every { router.getRoute(routeOptions, capture(routeListener)) } answers {
+            routeCallback = routeListener.captured
+            routeRequestId
+        }
+        every { router.getRouteRefresh(route, 0, capture(refreshListener)) } answers {
+            refreshCallback = refreshListener.captured
+            routeRefreshRequestId
         }
         every { routes[0].routeOptions() } returns routeOptions
         mockkObject(NavigationComponentProvider)
         every { routesRequestCallback.onRoutesReady(any()) } answers {
             this.value
         }
-        session = MapboxDirectionsSession(router)
+        session = MapboxDirectionsSession(router, logger)
     }
 
     @Test
     fun initialState() {
-        assertNull(session.getRouteOptions())
+        assertNull(session.getPrimaryRouteOptions())
         assertEquals(session.routes, emptyList<DirectionsRoute>())
     }
 
     @Test
-    fun routeResponse_before() {
-        session.registerRoutesObserver(observer)
+    fun `route response - success`() {
         session.requestRoutes(routeOptions, routesRequestCallback)
-        callback.onResponse(routes)
+        routeCallback.onResponse(routes)
 
-        assertEquals(routes, session.routes)
-        session.routes.forEach { route ->
-            assertEquals(route.routeOptions(), routeOptions)
-        }
         verify(exactly = 1) { routesRequestCallback.onRoutesReady(routes) }
-        verify(exactly = 1) { observer.onRoutesChanged(routes) }
     }
 
     @Test
-    fun routeResponse_inProgress() {
-        session.requestRoutes(routeOptions, routesRequestCallback)
-
-        session.registerRoutesObserver(observer)
-        verify(exactly = 0) { observer.onRoutesChanged(routes) }
-
-        callback.onResponse(routes)
-        verify(exactly = 1) { observer.onRoutesChanged(routes) }
+    fun `route request returns id`() {
+        assertEquals(
+            1L,
+            session.requestRoutes(routeOptions, routesRequestCallback)
+        )
     }
 
     @Test
-    fun routeResponse_after() {
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        callback.onResponse(routes)
-        session.registerRoutesObserver(observer)
-        verify(exactly = 1) { observer.onRoutesChanged(routes) }
-    }
-
-    @Test
-    fun failRouteResponse() {
+    fun `route response - failure`() {
         val throwable: Throwable = mockk()
-        session.registerRoutesObserver(observer)
         session.requestRoutes(routeOptions, routesRequestCallback)
-        callback.onFailure(throwable)
+        routeCallback.onFailure(throwable)
+
         verify(exactly = 1) {
             routesRequestCallback.onRoutesRequestFailure(throwable, routeOptions)
         }
-        verify(exactly = 0) { observer.onRoutesChanged(any()) }
+    }
+
+    @Test
+    fun `route response - canceled`() {
+        session.requestRoutes(routeOptions, routesRequestCallback)
+        routeCallback.onCanceled()
+
+        verify(exactly = 1) {
+            routesRequestCallback.onRoutesRequestCanceled(routeOptions)
+        }
+    }
+
+    @Test
+    fun `route refresh response - success`() {
+        session.requestRouteRefresh(route, 0, routesRefreshRequestCallback)
+        refreshCallback.onRefresh(route)
+
+        verify(exactly = 1) { routesRefreshRequestCallback.onRefresh(route) }
+    }
+
+    @Test
+    fun `route refresh request returns id`() {
+        assertEquals(
+            2L,
+            session.requestRouteRefresh(route, 0, routesRefreshRequestCallback)
+        )
+    }
+
+    @Test
+    fun `route refresh response - failure`() {
+        val error: RouteRefreshError = mockk()
+        session.requestRouteRefresh(route, 0, routesRefreshRequestCallback)
+        refreshCallback.onError(error)
+
+        verify(exactly = 1) {
+            routesRefreshRequestCallback.onError(error)
+        }
     }
 
     @Test
     fun getRouteOptions() {
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        callback.onResponse(routes)
-        assertEquals(routeOptions, session.getRouteOptions())
+        session.routes = routes
+        assertEquals(routeOptions, session.getPrimaryRouteOptions())
     }
 
     @Test
-    fun cancel() {
-        session.cancel()
-        verify { router.cancel() }
+    fun cancelAll() {
+        session.cancelAll()
+        verify { router.cancelAll() }
+    }
+
+    @Test
+    fun cancelRouteRequest() {
+        session.cancelRouteRequest(1L)
+        verify { router.cancelRouteRequest(1L) }
+    }
+
+    @Test
+    fun cancelRouteRefresh() {
+        session.cancelRouteRefreshRequest(1L)
+        verify { router.cancelRouteRefreshRequest(1L) }
     }
 
     @Test
@@ -127,14 +170,14 @@ class MapboxDirectionsSessionTest {
     }
 
     @Test
-    fun routeSetter_set() {
+    fun `when route set, observer notified`() {
         session.registerRoutesObserver(observer)
         session.routes = routes
         verify(exactly = 1) { observer.onRoutesChanged(routes) }
     }
 
     @Test
-    fun routeSetter_setEmpty() {
+    fun `when route cleared, observer notified`() {
         session.registerRoutesObserver(observer)
         session.routes = routes
         session.routes = emptyList()
@@ -142,10 +185,9 @@ class MapboxDirectionsSessionTest {
     }
 
     @Test
-    fun routeSetter_set_alreadyAvailable() {
+    fun `when new route available, observer notified`() {
         session.registerRoutesObserver(observer)
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        callback.onResponse(routes)
+        session.routes = routes
         val newRoutes: List<DirectionsRoute> = listOf(mockk())
         every { newRoutes[0].routeOptions() } returns routeOptions
         session.routes = newRoutes
@@ -153,76 +195,18 @@ class MapboxDirectionsSessionTest {
     }
 
     @Test
-    fun routeSetter_cancelRouter() {
-        session.registerRoutesObserver(observer)
+    fun `setting a route does not impact ongoing route request`() {
         session.requestRoutes(routeOptions, routesRequestCallback)
-        clearMocks(router)
         session.routes = routes
-        verify(exactly = 1) { router.cancel() }
-        verify(exactly = 1) { observer.onRoutesChanged(routes) }
-    }
-
-    // TODO Should we support the use case being tested here? If so, rewrite this test.
-    @Ignore
-    @Test
-    fun routeRequestClearsSession() {
-        session.registerRoutesObserver(observer)
-        session.routes = routes
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        verify(exactly = 1) { observer.onRoutesChanged(emptyList()) }
-    }
-
-    @Test
-    fun fasterRoute_availableRoutes() {
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        callback.onResponse(routes)
-        session.requestFasterRoute(routeOptions, routesRequestCallback)
-        callback.onResponse(routes)
-        verify { routesRequestCallback.onRoutesReady(routes) }
-    }
-
-    @Test
-    fun fasterRoute_failedRoutes() {
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        callback.onResponse(routes)
-        val throwable: Throwable = mockk()
-        session.requestFasterRoute(routeOptions, routesRequestCallback)
-        callback.onFailure(throwable)
-        verify { routesRequestCallback.onRoutesRequestFailure(any(), any()) }
-    }
-
-    @Test
-    fun fasterRoute_canceledRoutes() {
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        callback.onResponse(routes)
-        session.requestFasterRoute(routeOptions, routesRequestCallback)
-        callback.onCanceled()
-        verify { routesRequestCallback.onRoutesRequestCanceled(any()) }
-    }
-
-    // TODO Should we support the use case being tested here? If so, rewrite this test.
-    @Ignore
-    @Test
-    fun fasterRoute_canceledByNewRequest() {
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        callback.onResponse(routes)
-        session.requestFasterRoute(routeOptions, routesRequestCallback)
-        clearMocks(router)
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        session.requestFasterRoute(routeOptions, routesRequestCallback)
-        verify(exactly = 1) { router.cancel() }
+        verify(exactly = 0) { router.cancelAll() }
     }
 
     @Test
     fun unregisterAllRouteObservers() {
         session.registerRoutesObserver(observer)
-        session.requestRoutes(routeOptions, routesRequestCallback)
-
         session.unregisterAllRoutesObservers()
+        session.routes = routes
 
-        callback.onResponse(routes)
-
-        verify { router.getRoute(routeOptions, callback) }
         verify(exactly = 0) { observer.onRoutesChanged(any()) }
     }
 }

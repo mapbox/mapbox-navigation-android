@@ -78,6 +78,7 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
                     .coordinates(mockRoute.routeWaypoints).build(),
                 object : RoutesRequestCallback {
                     override fun onRoutesReady(routes: List<DirectionsRoute>) {
+                        mapboxNavigation.setRoutes(routes)
                         mockLocationReplayerRule.playRoute(routes[0])
                     }
 

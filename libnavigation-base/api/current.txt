@@ -324,9 +324,11 @@ package com.mapbox.navigation.base.route {
   }
 
   public interface Router {
-    method public void cancel();
-    method public void getRoute(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.Router.Callback callback);
-    method public void getRouteRefresh(com.mapbox.api.directions.v5.models.DirectionsRoute route, int legIndex, com.mapbox.navigation.base.route.RouteRefreshCallback callback);
+    method public void cancelAll();
+    method public void cancelRouteRefreshRequest(long requestId);
+    method public void cancelRouteRequest(long requestId);
+    method public long getRoute(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.Router.Callback callback);
+    method public long getRouteRefresh(com.mapbox.api.directions.v5.models.DirectionsRoute route, int legIndex, com.mapbox.navigation.base.route.RouteRefreshCallback callback);
     method public void shutdown();
   }
 

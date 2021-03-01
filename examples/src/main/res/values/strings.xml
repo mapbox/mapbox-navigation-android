@@ -21,6 +21,8 @@
     <string name="description_maneuver" translatable="false">Demonstrates the use of maneuver API.</string>
     <string name="title_voice" translatable="false">Voice Example</string>
     <string name="description_voice" translatable="false">Demonstrates the use of voice API.</string>
+    <string name="title_independent_route" translatable="false">Independent route generation</string>
+    <string name="description_independent_route" translatable="false">Use MapboxNavigation to request online and offline routes on demand thanks to the hybrid router implementation, without interrupting the current navigation session.</string>
     <string name="title_replay" translatable="false">Replay Example</string>
     <string name="description_replay" translatable="false">Demonstrates the use of replay API.</string>
     <string name="title_custom_style" translatable="false">Custom Style Example</string>

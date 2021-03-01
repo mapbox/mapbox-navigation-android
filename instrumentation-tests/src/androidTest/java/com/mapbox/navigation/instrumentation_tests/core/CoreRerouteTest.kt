@@ -1,6 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import androidx.test.espresso.Espresso
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
@@ -8,6 +9,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
@@ -103,7 +105,23 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
                 RouteOptions.builder().applyDefaultParams()
                     .baseUrl(mockWebServerRule.baseUrl)
                     .accessToken(getMapboxAccessTokenFromResources(activity))
-                    .coordinates(mockRoute.routeWaypoints).build()
+                    .coordinates(mockRoute.routeWaypoints).build(),
+                object : RoutesRequestCallback {
+                    override fun onRoutesReady(routes: List<DirectionsRoute>) {
+                        mapboxNavigation.setRoutes(routes)
+                    }
+
+                    override fun onRoutesRequestFailure(
+                        throwable: Throwable,
+                        routeOptions: RouteOptions
+                    ) {
+                        // no impl
+                    }
+
+                    override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
+                        // no impl
+                    }
+                }
             )
         }
 

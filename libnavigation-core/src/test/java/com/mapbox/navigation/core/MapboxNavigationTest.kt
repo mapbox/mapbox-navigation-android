@@ -424,8 +424,8 @@ class MapboxNavigationTest {
 
     @Test
     fun fasterRoute_noRouteOptions_noRequest() {
-        every { directionsSession.getRouteOptions() } returns null
-        verify(exactly = 0) { directionsSession.requestFasterRoute(any(), any()) }
+        every { directionsSession.getPrimaryRouteOptions() } returns null
+        verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
 
         mapboxNavigation.onDestroy()
     }
@@ -433,7 +433,7 @@ class MapboxNavigationTest {
     @Test
     fun fasterRoute_noEnhancedLocation_noRequest() {
         every { tripSession.getEnhancedLocation() } returns null
-        verify(exactly = 0) { directionsSession.requestFasterRoute(any(), any()) }
+        verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
 
         mapboxNavigation.onDestroy()
     }
@@ -522,10 +522,11 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun interrupt_reroute_on_route_request() {
-        mapboxNavigation.requestRoutes(mockk())
+    fun `don't interrupt faster route request on a standalone route request`() {
+        every { directionsSession.requestRoutes(any(), any()) } returns 1L
+        mapboxNavigation.requestRoutes(mockk(), mockk())
 
-        verify(exactly = 1) { rerouteController.interrupt() }
+        verify(exactly = 0) { rerouteController.interrupt() }
 
         mapboxNavigation.onDestroy()
     }
@@ -690,6 +691,65 @@ class MapboxNavigationTest {
         mapboxNavigation.onDestroy()
     }
 
+    @Test
+    fun `setRoute pushes the route to the directions session`() {
+        val routes = listOf(mockk<DirectionsRoute>())
+
+        mapboxNavigation.setRoutes(routes)
+
+        verify(exactly = 1) { directionsSession.routes = routes }
+    }
+
+    @Test
+    fun `requestRoutes pushes the request to the directions session`() {
+        val options = mockk<RouteOptions>()
+        val callback = mockk<RoutesRequestCallback>()
+        every { directionsSession.requestRoutes(options, callback) } returns 1L
+
+        mapboxNavigation.requestRoutes(options, callback)
+        verify(exactly = 1) { directionsSession.requestRoutes(options, callback) }
+    }
+
+    @Test
+    fun `requestRoutes passes back the request id`() {
+        val expected = 1L
+        val options = mockk<RouteOptions>()
+        val callback = mockk<RoutesRequestCallback>()
+        every { directionsSession.requestRoutes(options, callback) } returns expected
+
+        val actual = mapboxNavigation.requestRoutes(options, callback)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `requestRoutes doesn't pushes the route to the directions session automatically`() {
+        val routes = listOf(mockk<DirectionsRoute>())
+        val options = mockk<RouteOptions>()
+        val possibleInternalCallbackSlot = slot<RoutesRequestCallback>()
+        every { directionsSession.requestRoutes(options, any()) } returns 1L
+
+        mapboxNavigation.requestRoutes(options, mockk(relaxUnitFun = true))
+        verify { directionsSession.requestRoutes(options, capture(possibleInternalCallbackSlot)) }
+        possibleInternalCallbackSlot.captured.onRoutesReady(routes)
+
+        verify(exactly = 0) { directionsSession.routes = routes }
+    }
+
+    @Test
+    fun `cancelRouteRequest pushes the data to directions session`() {
+        mapboxNavigation.cancelRouteRequest(1L)
+
+        verify(exactly = 1) { directionsSession.cancelRouteRequest(1L) }
+    }
+
+    @Test
+    fun `directions session is shutdown onDestroy`() {
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { directionsSession.shutdown() }
+    }
+
     private fun mockLocation() {
         every { location.longitude } returns -122.789876
         every { location.latitude } returns 37.657483
@@ -728,12 +788,8 @@ class MapboxNavigationTest {
     }
 
     private fun mockDirectionSession() {
-        every { NavigationComponentProvider.createDirectionsSession(any()) } answers {
+        every { NavigationComponentProvider.createDirectionsSession(any(), any()) } answers {
             directionsSession
-        }
-        every { directionsSession.getRouteOptions() } returns routeOptions
-        every { directionsSession.requestFasterRoute(any(), any()) } answers {
-            fasterRouteRequestCallback.onRoutesReady(routes)
         }
         // TODO Needed for telemetry - Free Drive (empty list) for now
         every { directionsSession.routes } returns emptyList()

@@ -25,6 +25,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
@@ -220,7 +221,23 @@ class MapboxSnapshotActivity : AppCompatActivity(), OnMapLongClickListener {
                 .applyDefaultParams()
                 .accessToken(getMapboxRouteAccessToken(this))
                 .coordinates(listOf(origin, destination))
-                .build()
+                .build(),
+            object : RoutesRequestCallback {
+                override fun onRoutesReady(routes: List<DirectionsRoute>) {
+                    mapboxNavigation.setRoutes(routes)
+                }
+
+                override fun onRoutesRequestFailure(
+                    throwable: Throwable,
+                    routeOptions: RouteOptions
+                ) {
+                    // no impl
+                }
+
+                override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
+                    // no impl
+                }
+            }
         )
     }
 

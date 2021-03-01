@@ -8,6 +8,8 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
+import com.mapbox.navigation.base.route.RouteRefreshCallback
+import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.utils.internal.NetworkStatus
 import com.mapbox.navigation.utils.internal.NetworkStatusService
@@ -15,6 +17,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import io.mockk.verifySequence
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -33,20 +36,47 @@ class MapboxHybridRouterTest {
     private val connectivityManager: ConnectivityManager = mockk(relaxUnitFun = true)
     private val routerCallback: Router.Callback = mockk(relaxUnitFun = true)
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
-    private val internalCallback = slot<Router.Callback>()
+    private val internalOffboardCallback = slot<Router.Callback>()
+    private val internalOnboardCallback = slot<Router.Callback>()
     private val networkStatusService: NetworkStatusService = mockk(relaxUnitFun = true)
     private val channel = Channel<NetworkStatus>(Channel.CONFLATED)
+    private val internalOffboardRefreshCallback = slot<RouteRefreshCallback>()
+    private val internalOnboardRefreshCallback = slot<RouteRefreshCallback>()
 
     @Before
     fun setUp() {
         every { context.getSystemService(Context.CONNECTIVITY_SERVICE) } returns connectivityManager
         every { context.registerReceiver(any(), any()) } returns Intent()
-        every { onboardRouter.getRoute(routerOptions, capture(internalCallback)) } answers {}
-        every { offboardRouter.getRoute(routerOptions, capture(internalCallback)) } answers {}
+        every { onboardRouter.getRoute(routerOptions, capture(internalOnboardCallback)) } returns 1L
+        every {
+            offboardRouter.getRoute(
+                routerOptions,
+                capture(internalOffboardCallback)
+            )
+        } returns 2L
         every { context.getSystemService(Context.CONNECTIVITY_SERVICE) } returns connectivityManager
         every { networkStatusService.getNetworkStatusChannel() } returns channel
+        every {
+            offboardRouter.getRouteRefresh(
+                any(),
+                any(),
+                capture(internalOffboardRefreshCallback)
+            )
+        } returns 3L
+        every {
+            onboardRouter.getRouteRefresh(
+                any(),
+                any(),
+                capture(internalOnboardRefreshCallback)
+            )
+        } returns 4L
 
-        hybridRouter = MapboxHybridRouter(onboardRouter, offboardRouter, networkStatusService)
+        hybridRouter = MapboxHybridRouter(
+            onboardRouter,
+            offboardRouter,
+            networkStatusService,
+            mockk(relaxed = true)
+        )
     }
 
     @Test
@@ -59,13 +89,16 @@ class MapboxHybridRouterTest {
     }
 
     @Test
-    fun offboardRouterCanceled() = runBlocking {
+    fun `offboardRouterCanceled and request list is clear`() = runBlocking {
         enableNetworkConnection()
 
-        hybridRouter.getRoute(routerOptions, routerCallback)
-        internalCallback.captured.onCanceled()
+        val id = hybridRouter.getRoute(routerOptions, routerCallback)
+        internalOffboardCallback.captured.onCanceled()
 
         verify(exactly = 1) { routerCallback.onCanceled() }
+
+        hybridRouter.cancelRouteRequest(id)
+        verify(exactly = 0) { offboardRouter.cancelRouteRequest(any()) }
     }
 
     @Test
@@ -78,41 +111,62 @@ class MapboxHybridRouterTest {
     }
 
     @Test
-    fun onboardRouterCanceled() = runBlocking {
+    fun `onboardRouterCanceled and request list is clear`() = runBlocking {
         disableNetworkConnection()
 
-        hybridRouter.getRoute(routerOptions, routerCallback)
-        internalCallback.captured.onCanceled()
+        val id = hybridRouter.getRoute(routerOptions, routerCallback)
+        internalOnboardCallback.captured.onCanceled()
 
         verify(exactly = 1) { routerCallback.onCanceled() }
+
+        hybridRouter.cancelRouteRequest(id)
+        verify(exactly = 0) { onboardRouter.cancelRouteRequest(any()) }
     }
 
     @Test
-    fun whenOffboardRouterFailsOnboardRouterIsCalled() = runBlocking {
+    fun `whenOffboardRouterFailsOnboardRouterIsCalled and request list is clear`() = runBlocking {
         enableNetworkConnection()
 
-        hybridRouter.getRoute(routerOptions, routerCallback)
+        val id = hybridRouter.getRoute(routerOptions, routerCallback)
 
-        internalCallback.captured.onFailure(Throwable())
-        internalCallback.captured.onResponse(emptyList())
+        internalOffboardCallback.captured.onFailure(Throwable())
+        internalOnboardCallback.captured.onResponse(emptyList())
 
         verify(exactly = 1) { offboardRouter.getRoute(routerOptions, any()) }
         verify(exactly = 1) { onboardRouter.getRoute(routerOptions, any()) }
         verify(exactly = 1) { routerCallback.onResponse(any()) }
+
+        hybridRouter.cancelRouteRequest(id)
+        verify(exactly = 0) { offboardRouter.cancelRouteRequest(any()) }
+        verify(exactly = 0) { onboardRouter.cancelRouteRequest(any()) }
     }
 
     @Test
-    fun whenOnboardRouterFailsOffboardRouterIsCalled() = runBlocking {
+    fun `whenOnboardRouterFailsOffboardRouterIsCalled and request list is clear`() = runBlocking {
         disableNetworkConnection()
 
-        hybridRouter.getRoute(routerOptions, routerCallback)
+        val id = hybridRouter.getRoute(routerOptions, routerCallback)
 
-        internalCallback.captured.onFailure(Throwable())
-        internalCallback.captured.onResponse(emptyList())
+        internalOnboardCallback.captured.onFailure(Throwable())
+        internalOffboardCallback.captured.onResponse(emptyList())
 
-        verify(exactly = 1) { onboardRouter.getRoute(routerOptions, internalCallback.captured) }
-        verify(exactly = 1) { offboardRouter.getRoute(routerOptions, internalCallback.captured) }
+        verify(exactly = 1) {
+            onboardRouter.getRoute(
+                routerOptions,
+                internalOnboardCallback.captured
+            )
+        }
+        verify(exactly = 1) {
+            offboardRouter.getRoute(
+                routerOptions,
+                internalOffboardCallback.captured
+            )
+        }
         verify(exactly = 1) { routerCallback.onResponse(any()) }
+
+        hybridRouter.cancelRouteRequest(id)
+        verify(exactly = 0) { offboardRouter.cancelRouteRequest(any()) }
+        verify(exactly = 0) { onboardRouter.cancelRouteRequest(any()) }
     }
 
     @Test
@@ -121,15 +175,15 @@ class MapboxHybridRouterTest {
 
         hybridRouter.getRoute(routerOptions, routerCallback)
 
-        internalCallback.captured.onFailure(Throwable())
-        internalCallback.captured.onResponse(emptyList())
+        internalOffboardCallback.captured.onFailure(Throwable())
+        internalOnboardCallback.captured.onResponse(emptyList())
 
         hybridRouter.getRoute(routerOptions, routerCallback)
 
-        internalCallback.captured.onResponse(emptyList())
+        internalOffboardCallback.captured.onResponse(emptyList())
 
-        verify(exactly = 2) { offboardRouter.getRoute(routerOptions, internalCallback.captured) }
-        verify(exactly = 1) { onboardRouter.getRoute(routerOptions, internalCallback.captured) }
+        verify(exactly = 2) { offboardRouter.getRoute(routerOptions, any()) }
+        verify(exactly = 1) { onboardRouter.getRoute(routerOptions, any()) }
         verify(exactly = 2) { routerCallback.onResponse(any()) }
     }
 
@@ -139,12 +193,12 @@ class MapboxHybridRouterTest {
 
         hybridRouter.getRoute(routerOptions, routerCallback)
 
-        internalCallback.captured.onFailure(Throwable())
-        internalCallback.captured.onResponse(emptyList())
+        internalOnboardCallback.captured.onFailure(Throwable())
+        internalOffboardCallback.captured.onResponse(emptyList())
 
         hybridRouter.getRoute(routerOptions, routerCallback)
 
-        internalCallback.captured.onResponse(emptyList())
+        internalOnboardCallback.captured.onResponse(emptyList())
 
         verify(exactly = 2) { onboardRouter.getRoute(routerOptions, any()) }
         verify(exactly = 1) { offboardRouter.getRoute(routerOptions, any()) }
@@ -189,36 +243,168 @@ class MapboxHybridRouterTest {
     }
 
     @Test
-    fun whenMultipleRoutesFetchedCallbacksHandledCorrectly() = runBlocking {
+    fun `route request failure and request list is clear`() = runBlocking {
         enableNetworkConnection()
 
-        val originalCallback: Router.Callback = mockk(relaxUnitFun = true)
-        val additionalCallbackFirst: Router.Callback = mockk(relaxUnitFun = true)
-        val additionalCallbackSecond: Router.Callback = mockk(relaxUnitFun = true)
-        val additionalCallbackThird: Router.Callback = mockk(relaxUnitFun = true)
+        val id = hybridRouter.getRoute(routerOptions, routerCallback)
 
-        val originalResult = listOf<DirectionsRoute>(
-            DirectionsRoute.builder().distance(.0).duration(.0).build()
-        )
+        internalOffboardCallback.captured.onFailure(Throwable())
+        internalOnboardCallback.captured.onFailure(Throwable())
 
-        val additionalResultFirst = emptyList<DirectionsRoute>()
-        val additionalResultSecond = emptyList<DirectionsRoute>()
-        val additionalResultThird = emptyList<DirectionsRoute>()
+        verify(exactly = 1) { routerCallback.onFailure(any()) }
 
-        hybridRouter.getRoute(routerOptions, originalCallback)
-        hybridRouter.getRoute(routerOptions, additionalCallbackFirst)
-        hybridRouter.getRoute(routerOptions, additionalCallbackSecond)
-        hybridRouter.getRoute(routerOptions, additionalCallbackThird)
+        hybridRouter.cancelRouteRequest(id)
+        verify(exactly = 0) { offboardRouter.cancelRouteRequest(any()) }
+        verify(exactly = 0) { onboardRouter.cancelRouteRequest(any()) }
+    }
 
-        internalCallback.captured.onResponse(originalResult)
-        internalCallback.captured.onResponse(additionalResultFirst)
-        internalCallback.captured.onResponse(additionalResultSecond)
-        internalCallback.captured.onResponse(additionalResultThird)
+    @Test
+    fun `cancel a specific refresh request when multiple are running`() = runBlocking {
+        enableNetworkConnection()
 
-        verify(exactly = 1) { originalCallback.onResponse(originalResult) }
-        verify(exactly = 1) { additionalCallbackFirst.onResponse(additionalResultFirst) }
-        verify(exactly = 1) { additionalCallbackSecond.onResponse(additionalResultSecond) }
-        verify(exactly = 1) { additionalCallbackThird.onResponse(additionalResultThird) }
+        var offboardRequestIds = 0
+        every { offboardRouter.getRoute(any(), any()) } answers {
+            (++offboardRequestIds).toLong()
+        }
+        val firstId = hybridRouter.getRoute(routerOptions, routerCallback)
+        val secondId = hybridRouter.getRoute(routerOptions, routerCallback)
+
+        verify(exactly = 0) { offboardRouter.cancelRouteRequest(any()) }
+        verify(exactly = 0) { onboardRouter.cancelRouteRequest(any()) }
+
+        disableNetworkConnection()
+
+        var onboardRequestIds = 11
+        every { onboardRouter.getRoute(any(), any()) } answers {
+            (++onboardRequestIds).toLong()
+        }
+        val thirdId = hybridRouter.getRoute(routerOptions, routerCallback)
+        val forthId = hybridRouter.getRoute(routerOptions, routerCallback)
+
+        hybridRouter.cancelRouteRequest(firstId)
+        hybridRouter.cancelRouteRequest(thirdId)
+        hybridRouter.cancelRouteRequest(secondId)
+        hybridRouter.cancelRouteRequest(forthId)
+
+        verifySequence {
+            offboardRouter.getRoute(routerOptions, any())
+            offboardRouter.getRoute(routerOptions, any())
+            onboardRouter.getRoute(routerOptions, any())
+            onboardRouter.getRoute(routerOptions, any())
+
+            offboardRouter.cancelRouteRequest(1L)
+            onboardRouter.cancelRouteRequest(12L)
+            offboardRouter.cancelRouteRequest(2L)
+            onboardRouter.cancelRouteRequest(13L)
+        }
+    }
+
+    @Test
+    fun `offboard route refresh is successful and request list is clear`() = runBlocking {
+        enableNetworkConnection()
+        val original = mockk<DirectionsRoute>()
+        val resulting = mockk<DirectionsRoute>()
+        val callback = mockk<RouteRefreshCallback>(relaxUnitFun = true)
+
+        val id = hybridRouter.getRouteRefresh(original, 0, callback)
+        internalOffboardRefreshCallback.captured.onRefresh(resulting)
+
+        verify(exactly = 1) { offboardRouter.getRouteRefresh(original, 0, any()) }
+        verify(exactly = 1) { callback.onRefresh(resulting) }
+
+        hybridRouter.cancelRouteRefreshRequest(id)
+        verify(exactly = 0) { offboardRouter.cancelRouteRefreshRequest(any()) }
+    }
+
+    @Test
+    fun `route refresh fails and request list is clear`() = runBlocking {
+        enableNetworkConnection()
+        val original = mockk<DirectionsRoute> {
+            every { routeOptions() } returns mockk {
+                every { requestUuid() } returns "uuid"
+            }
+        }
+        val error = mockk<RouteRefreshError> {
+            every { message } returns "mock"
+            every { throwable } returns mockk(relaxed = true)
+        }
+        val callback = mockk<RouteRefreshCallback>(relaxUnitFun = true)
+
+        val id = hybridRouter.getRouteRefresh(original, 0, callback)
+        internalOffboardRefreshCallback.captured.onError(error)
+        internalOnboardRefreshCallback.captured.onError(error)
+
+        verify(exactly = 1) { offboardRouter.getRouteRefresh(original, 0, any()) }
+        verify(exactly = 1) { callback.onError(any()) }
+
+        hybridRouter.cancelRouteRefreshRequest(id)
+        verify(exactly = 0) { offboardRouter.cancelRouteRefreshRequest(any()) }
+        verify(exactly = 0) { onboardRouter.cancelRouteRefreshRequest(any()) }
+    }
+
+    @Test
+    fun `onboard route refresh is successful and request list is clear`() = runBlocking {
+        disableNetworkConnection()
+        val original = mockk<DirectionsRoute>()
+        val resulting = mockk<DirectionsRoute>()
+        val callback = mockk<RouteRefreshCallback>(relaxUnitFun = true)
+
+        val id = hybridRouter.getRouteRefresh(original, 0, callback)
+        internalOnboardRefreshCallback.captured.onRefresh(resulting)
+
+        verify(exactly = 1) { onboardRouter.getRouteRefresh(original, 0, any()) }
+        verify(exactly = 1) { callback.onRefresh(resulting) }
+
+        hybridRouter.cancelRouteRefreshRequest(id)
+        verify(exactly = 0) { onboardRouter.cancelRouteRefreshRequest(any()) }
+    }
+
+    @Test
+    fun `when network connection is re-established, offboard is used for refresh again`() =
+        runBlocking {
+            disableNetworkConnection()
+            enableNetworkConnection()
+            val original = mockk<DirectionsRoute>()
+            val resulting = mockk<DirectionsRoute>()
+            val callback = mockk<RouteRefreshCallback>(relaxUnitFun = true)
+
+            hybridRouter.getRouteRefresh(original, 0, callback)
+            internalOffboardRefreshCallback.captured.onRefresh(resulting)
+
+            verify(exactly = 1) { offboardRouter.getRouteRefresh(original, 0, any()) }
+            verify(exactly = 1) { callback.onRefresh(resulting) }
+        }
+
+    @Test
+    fun `cancel all`() = runBlocking {
+        var requestIds = 100
+        every { offboardRouter.getRoute(any(), any()) } answers {
+            (++requestIds).toLong()
+        }
+        every { onboardRouter.getRoute(any(), any()) } answers {
+            (++requestIds).toLong()
+        }
+        every { offboardRouter.getRouteRefresh(any(), any(), any()) } answers {
+            (++requestIds).toLong()
+        }
+        every { onboardRouter.getRouteRefresh(any(), any(), any()) } answers {
+            (++requestIds).toLong()
+        }
+
+        enableNetworkConnection()
+        hybridRouter.getRoute(mockk(relaxed = true), mockk(relaxed = true))
+        hybridRouter.getRoute(mockk(relaxed = true), mockk(relaxed = true))
+        hybridRouter.getRouteRefresh(mockk(relaxed = true), 0, mockk(relaxed = true))
+
+        disableNetworkConnection()
+        hybridRouter.getRoute(mockk(relaxed = true), mockk(relaxed = true))
+        hybridRouter.getRoute(mockk(relaxed = true), mockk(relaxed = true))
+        hybridRouter.getRouteRefresh(mockk(relaxed = true), 0, mockk(relaxed = true))
+
+        hybridRouter.cancelAll()
+
+        verify { offboardRouter.cancelAll() }
+        verify { onboardRouter.cancelAll() }
     }
 
     private suspend fun enableNetworkConnection() = networkConnected(true)

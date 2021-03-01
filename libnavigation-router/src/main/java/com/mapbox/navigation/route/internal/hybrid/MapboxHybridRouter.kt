@@ -8,17 +8,17 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.route.RouteRefreshCallback
+import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.route.internal.offboard.MapboxOffboardRouter
 import com.mapbox.navigation.route.internal.onboard.MapboxOnboardRouter
 import com.mapbox.navigation.utils.internal.NetworkStatus
 import com.mapbox.navigation.utils.internal.NetworkStatusService
+import com.mapbox.navigation.utils.internal.RequestMap
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import kotlinx.coroutines.Job
-import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * MapboxHybridRouter combines onboard and offboard Routers.
@@ -31,8 +31,12 @@ import java.util.concurrent.atomic.AtomicReference
 class MapboxHybridRouter(
     private val onboardRouter: Router,
     private val offboardRouter: Router,
-    networkStatusService: NetworkStatusService
+    networkStatusService: NetworkStatusService,
+    private val logger: Logger
 ) : Router {
+
+    private val directionRequests = RequestMap<HybridRouterHandler.Directions>()
+    private val refreshRequests = RequestMap<HybridRouterHandler.Refresh>()
 
     constructor(
         accessToken: String,
@@ -52,32 +56,16 @@ class MapboxHybridRouter(
             accessToken,
             context,
             urlSkuTokenProvider,
-            refreshEnabled
+            refreshEnabled,
+            logger
         ),
-        networkStatusService = networkStatusService
+        networkStatusService = networkStatusService,
+        logger = logger
     )
 
     private val jobControl = ThreadController.getIOScopeAndRootJob()
-    private val offboardRouterHandler: RouterHandler by lazy {
-        RouterHandler(
-            mainRouter = offboardRouter,
-            reserveRouter = onboardRouter
-        )
-    }
-    private val onboardRouterHandler: RouterHandler by lazy {
-        RouterHandler(
-            mainRouter = onboardRouter,
-            reserveRouter = offboardRouter
-        )
-    }
     internal val networkStatusJob: Job
-
-    /**
-     * routeDispatchHandler always references a router, (on-board or off-board).
-     * Internet availability determines which one.
-     */
-    private val routeDispatchHandler: AtomicReference<RouterDispatchInterface> =
-        AtomicReference(offboardRouterHandler)
+    private var isNetworkAvailable = true
 
     /**
      * At init time, the network monitor is setup. isNetworkAvailable represents the current network state. Based
@@ -92,107 +80,7 @@ class MapboxHybridRouter(
     }
 
     internal suspend fun onNetworkStatusChanged(networkStatus: NetworkStatus) {
-        when (networkStatus.isNetworkAvailable) {
-            true -> routeDispatchHandler.set(offboardRouterHandler)
-            false -> routeDispatchHandler.set(onboardRouterHandler)
-        }
-    }
-
-    /**
-     * Private interface used with handler classes here to call the correct router
-     */
-    private interface RouterDispatchInterface {
-        fun getRoute(routeOptions: RouteOptions, clientCallback: Router.Callback)
-        fun getRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback)
-    }
-
-    private class RouterHandler(
-        private val mainRouter: Router,
-        private val reserveRouter: Router
-    ) : RouterDispatchInterface, Router.Callback {
-
-        companion object {
-            private const val FIRST_POSITION = 0
-        }
-
-        private var reserveRouterCalled = false
-        private lateinit var options: RouteOptions
-        private lateinit var callback: Router.Callback
-        private var fetchingInProgress = false
-        private var pendingRequests: MutableList<Pair<RouteOptions, Router.Callback>> =
-            CopyOnWriteArrayList()
-
-        override fun onResponse(routes: List<DirectionsRoute>) {
-            fetchingInProgress = false
-            callback.onResponse(routes)
-            checkPendingRequests()
-        }
-
-        /**
-         * onFailure is used as a fail-safe. If the initial call to onBoardRouter.getRoute()
-         * fails, it is assumed that the offBoardRouter may be available. The call is made to the offBoardRouter.
-         * The error returns remains the same as in the first call, but the flag value has changed. This time a failure
-         * is propagated to the client. In short, call the onBoardRouter. If it fails call the offBoardRouter,
-         * if that fails propagate the exception
-         */
-        override fun onFailure(throwable: Throwable) {
-            when (reserveRouterCalled) {
-                true -> {
-                    reserveRouterCalled = false
-                    fetchingInProgress = false
-                    callback.onFailure(throwable)
-                    checkPendingRequests()
-                }
-                false -> {
-                    reserveRouterCalled = true
-                    reserveRouter.getRoute(options, this)
-                }
-            }
-        }
-
-        override fun onCanceled() {
-            fetchingInProgress = false
-            callback.onCanceled()
-            checkPendingRequests()
-        }
-
-        /**
-         * This method is equivalent to calling .getRoute() with the additional parameter capture
-         */
-        override fun getRoute(routeOptions: RouteOptions, clientCallback: Router.Callback) {
-            handleRouteRequest(routeOptions, clientCallback)
-        }
-
-        override fun getRouteRefresh(
-            route: DirectionsRoute,
-            legIndex: Int,
-            callback: RouteRefreshCallback
-        ) {
-            mainRouter.getRouteRefresh(route, legIndex, callback)
-        }
-
-        private fun handleRouteRequest(
-            routeOptions: RouteOptions,
-            clientCallback: Router.Callback
-        ) {
-            if (fetchingInProgress) {
-                pendingRequests.add(Pair(routeOptions, clientCallback))
-            } else {
-                fetchingInProgress = true
-                reserveRouterCalled = false
-                options = routeOptions
-                callback = clientCallback
-                mainRouter.getRoute(routeOptions, this)
-            }
-        }
-
-        private fun checkPendingRequests() {
-            if (pendingRequests.isNotEmpty()) {
-                val request = pendingRequests[FIRST_POSITION]
-                pendingRequests.removeAt(FIRST_POSITION)
-                getRoute(routeOptions = request.first, clientCallback = request.second)
-            }
-        }
+        isNetworkAvailable = networkStatus.isNetworkAvailable
     }
 
     /**
@@ -204,8 +92,36 @@ class MapboxHybridRouter(
     override fun getRoute(
         routeOptions: RouteOptions,
         callback: Router.Callback
-    ) {
-        routeDispatchHandler.get().getRoute(routeOptions, callback)
+    ): Long {
+        val routerHandler = createDirectionsHandler()
+        val id = directionRequests.put(routerHandler)
+        routerHandler.getRoute(
+            routeOptions,
+            object : Router.Callback {
+                override fun onResponse(routes: List<DirectionsRoute>) {
+                    directionRequests.remove(id)
+                    callback.onResponse(routes)
+                }
+
+                override fun onFailure(throwable: Throwable) {
+                    directionRequests.remove(id)
+                    callback.onFailure(throwable)
+                }
+
+                override fun onCanceled() {
+                    directionRequests.remove(id)
+                    callback.onCanceled()
+                }
+            }
+        )
+        return id
+    }
+
+    /**
+     * Cancel a request with ID from [getRoute].
+     */
+    override fun cancelRouteRequest(requestId: Long) {
+        directionRequests.remove(requestId)?.cancelRouteRequest()
     }
 
     /**
@@ -219,23 +135,64 @@ class MapboxHybridRouter(
         route: DirectionsRoute,
         legIndex: Int,
         callback: RouteRefreshCallback
-    ) {
-        routeDispatchHandler.get().getRouteRefresh(route, legIndex, callback)
+    ): Long {
+        val routerHandler = createRefreshHandler()
+        val id = refreshRequests.put(routerHandler)
+        routerHandler.getRouteRefresh(
+            route,
+            legIndex,
+            object : RouteRefreshCallback {
+                override fun onRefresh(directionsRoute: DirectionsRoute) {
+                    refreshRequests.remove(id)
+                    callback.onRefresh(directionsRoute)
+                }
+
+                override fun onError(error: RouteRefreshError) {
+                    refreshRequests.remove(id)
+                    callback.onError(error)
+                }
+            }
+        )
+        return id
     }
 
     /**
-     * Interrupts a route-fetching request if one is in progress.
+     * Cancel a request with ID from [getRouteRefresh].
      */
-    override fun cancel() {
-        onboardRouter.cancel()
-        offboardRouter.cancel()
+    override fun cancelRouteRefreshRequest(requestId: Long) {
+        refreshRequests.remove(requestId)?.cancelRouteRefreshRequest()
+    }
+
+    /**
+     * Cancel all running requests.
+     */
+    override fun cancelAll() {
+        offboardRouter.cancelAll()
+        onboardRouter.cancelAll()
     }
 
     /**
      * Release used resources.
      */
     override fun shutdown() {
-        cancel()
+        offboardRouter.shutdown()
+        onboardRouter.shutdown()
         networkStatusJob.cancel()
+    }
+
+    private fun createDirectionsHandler(): HybridRouterHandler.Directions {
+        return if (isNetworkAvailable) {
+            HybridRouterHandler.Directions(offboardRouter, onboardRouter, logger)
+        } else {
+            HybridRouterHandler.Directions(onboardRouter, offboardRouter, logger)
+        }
+    }
+
+    private fun createRefreshHandler(): HybridRouterHandler.Refresh {
+        return if (isNetworkAvailable) {
+            HybridRouterHandler.Refresh(offboardRouter, onboardRouter, logger)
+        } else {
+            HybridRouterHandler.Refresh(onboardRouter, offboardRouter, logger)
+        }
     }
 }

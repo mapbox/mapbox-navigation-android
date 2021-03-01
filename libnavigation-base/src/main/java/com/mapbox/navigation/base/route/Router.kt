@@ -9,20 +9,29 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 interface Router {
 
     /**
-     * Fetch route based on [RouteOptions]
+     * Fetch routes based on [RouteOptions].
      *
      * @param routeOptions RouteOptions
      * @param callback Callback that gets notified with the results of the request
+     *
+     * @return request ID, can be used to cancel the request with [cancelRouteRequest]
      */
     fun getRoute(
         routeOptions: RouteOptions,
         callback: Callback
-    )
+    ): Long
 
     /**
-     * Interrupts a route-fetching request if one is in progress.
+     * Cancels a specific route request.
+     *
+     * @see [getRoute]
      */
-    fun cancel()
+    fun cancelRouteRequest(requestId: Long)
+
+    /**
+     * Interrupts all in-progress requests.
+     */
+    fun cancelAll()
 
     /**
      * Refresh the traffic annotations for a given [DirectionsRoute]
@@ -30,12 +39,21 @@ interface Router {
      * @param route DirectionsRoute the direction route to refresh
      * @param legIndex Int the index of the current leg in the route
      * @param callback Callback that gets notified with the results of the request
+     *
+     * @return request ID, can be used to cancel the request with [cancelRouteRefreshRequest]
      */
     fun getRouteRefresh(
         route: DirectionsRoute,
         legIndex: Int,
         callback: RouteRefreshCallback
-    )
+    ): Long
+
+    /**
+     * Cancels a specific route refresh request.
+     *
+     * @see [getRouteRefresh]
+     */
+    fun cancelRouteRefreshRequest(requestId: Long)
 
     /**
      * Release used resources.
