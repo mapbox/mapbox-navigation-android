@@ -43,6 +43,7 @@ internal class FasterRouteController(
     }
 
     fun stop() {
+        // TODO add cancellation of the request
         this.fasterRouteObserver = null
         fasterRouteTimer.stopJobs()
         jobControl.job.cancelChildren()
@@ -58,14 +59,14 @@ internal class FasterRouteController(
         fasterRouteTimer.restartAfterMillis = restartAfterMillis
 
         routeOptionsUpdater.update(
-            directionsSession.getRouteOptions(),
+            directionsSession.getPrimaryRouteOptions(),
             tripSession.getRouteProgress(),
             tripSession.getEnhancedLocation()
         )
             .let { routeOptionsResult ->
                 when (routeOptionsResult) {
                     is RouteOptionsUpdater.RouteOptionsResult.Success ->
-                        directionsSession.requestFasterRoute(
+                        directionsSession.requestRoutes(
                             routeOptionsResult.routeOptions,
                             fasterRouteRequestCallback
                         )

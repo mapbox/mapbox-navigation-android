@@ -89,6 +89,11 @@
     </activity>
 
     <activity
+        android:name=".IndependentRouteGenerationActivity"
+        android:label="@string/title_independent_route">
+    </activity>
+
+    <activity
         android:name="com.mapbox.navigation.examples.MainActivity"
         android:screenOrientation="portrait">
       <intent-filter>

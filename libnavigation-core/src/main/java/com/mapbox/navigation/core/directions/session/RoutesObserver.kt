@@ -13,8 +13,7 @@ interface RoutesObserver {
      *
      * The route at index 0, if exist, will be treated as the primary route for 'Active Guidance'.
      *
-     * A list of routes can be modified internally and externally at any time with methods like
-     * [MapboxNavigation.requestRoutes], [MapboxNavigation.setRoutes], or during automatic reroutes, faster route and route refresh operations.
+     * A list of routes can be modified internally and externally at any time with [MapboxNavigation.setRoutes], or during automatic reroutes, faster route and route refresh operations.
      *
      * @param routes list of currently maintained routes
      */

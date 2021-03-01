@@ -29,10 +29,12 @@ internal class RouteRefreshController(
 ) {
 
     companion object {
-        internal val TAG = Tag("RouteRefreshController")
+        internal val TAG = Tag("MbxRouteRefreshController")
     }
 
     private val routerRefreshTimer = MapboxTimer()
+
+    private var requestId: Long? = null
 
     init {
         routerRefreshTimer.restartAfterMillis = TimeUnit.MINUTES.toMillis(5)
@@ -44,7 +46,7 @@ internal class RouteRefreshController(
             val route = tripSession.route?.takeIf { it.routeOptions().supportsRouteRefresh() }
             if (route != null) {
                 val legIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0
-                directionsSession.requestRouteRefresh(
+                requestId = directionsSession.requestRouteRefresh(
                     route,
                     legIndex,
                     routeRefreshCallback
@@ -65,6 +67,10 @@ internal class RouteRefreshController(
     }
 
     fun stop() {
+        requestId?.let {
+            directionsSession.cancelRouteRefreshRequest(it)
+            requestId = null
+        }
         routerRefreshTimer.stopJobs()
     }
 
@@ -82,7 +88,7 @@ internal class RouteRefreshController(
         override fun onError(error: RouteRefreshError) {
             logger.e(
                 TAG,
-                msg = Message("Route refresh error"),
+                msg = Message("Route refresh error: ${error.message}"),
                 tr = error.throwable
             )
         }

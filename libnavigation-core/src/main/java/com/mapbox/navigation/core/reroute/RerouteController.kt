@@ -95,7 +95,7 @@ sealed class RerouteState {
     /**
      * Re-route request has failed.
      *
-     * You can [MapboxNavigation.requestRoutes] with [MapboxRouteOptionsUpdater] to retry the request.
+     * You can [MapboxNavigation.requestRoutes] or [MapboxNavigation.setRoutes] with [MapboxRouteOptionsUpdater] to retry the request.
      *
      * @param message describes error
      * @param throwable is optional

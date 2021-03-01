@@ -365,6 +365,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   private RoutesRequestCallback routesReqCallback = new RoutesRequestCallback() {
     @Override
     public void onRoutesReady(@NotNull List<? extends DirectionsRoute> routes) {
+      mapboxNavigation.setRoutes(routes);
       if (!routes.isEmpty()) {
         routeLoading.setVisibility(View.INVISIBLE);
         startNavigation.setVisibility(View.VISIBLE);

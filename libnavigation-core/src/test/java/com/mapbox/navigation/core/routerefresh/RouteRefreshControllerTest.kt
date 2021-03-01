@@ -14,18 +14,20 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.TimeUnit
 
+@ExperimentalCoroutinesApi
 class RouteRefreshControllerTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
-    private val directionsSession: DirectionsSession = mockk()
+    private val directionsSession: DirectionsSession = mockk(relaxUnitFun = true)
     private val tripSession: TripSession = mockk()
     private val logger: Logger = mockk()
     private val routeOptions: RouteOptions = mockk {
@@ -43,6 +45,8 @@ class RouteRefreshControllerTest {
         logger
     )
 
+    private val requestId = 1L
+
     @Before
     fun setup() {
         mockkStatic("com.mapbox.navigation.base.extensions.RouteOptionsEx")
@@ -52,7 +56,7 @@ class RouteRefreshControllerTest {
             }
         }
         every { tripSession.route } returns validRoute
-        every { directionsSession.requestRouteRefresh(any(), any(), any()) } returns Unit
+        every { directionsSession.requestRouteRefresh(any(), any(), any()) } returns requestId
     }
 
     @Test
@@ -110,6 +114,24 @@ class RouteRefreshControllerTest {
                 )
             )
         }
+    }
+
+    @Test
+    fun `cancel request when stopped (nothing started)`() {
+        routeRefreshController.stop()
+
+        verify(exactly = 0) { directionsSession.cancelRouteRefreshRequest(any()) }
+    }
+
+    @Test
+    fun `cancel request when stopped`() = coroutineRule.runBlockingTest {
+        every { routeOptions.supportsRouteRefresh() } returns true
+
+        routeRefreshController.start()
+        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
+        routeRefreshController.stop()
+
+        verify(exactly = 1) { directionsSession.cancelRouteRefreshRequest(requestId) }
     }
 
     @After

@@ -8,10 +8,8 @@ class SanityUiRouteTest : SimpleMapViewNavigationTest() {
 
     @Test
     fun route_completes() {
-        // puck needs to be added first,
-        // see https://github.com/mapbox/mapbox-navigation-android-internal/issues/102
-        addLocationPuck()
         addRouteLine()
+        addLocationPuck()
         addNavigationCamera()
         val arrivalIdlingResource = ArrivalIdlingResource(mapboxNavigation)
         arrivalIdlingResource.register()

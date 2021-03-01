@@ -30,16 +30,28 @@ internal class MapboxRerouteController(
 
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
 
+    private var requestId: Long? = null
+
     override var state: RerouteState = RerouteState.Idle
         private set(value) {
             if (field == value) {
                 return
             }
             field = value
+            when (value) {
+                RerouteState.Idle,
+                RerouteState.Interrupted,
+                is RerouteState.Failed,
+                RerouteState.RouteFetched -> {
+                    requestId = null
+                }
+                RerouteState.FetchingRoute -> {
+                    // no impl
+                }
+            }
             observers.forEach { it.onRerouteStateChanged(field) }
         }
 
-    // current implementation ignores `routesCallback` callback because `DirectionsSession` update routes internally
     override fun reroute(routesCallback: RerouteController.RoutesCallback) {
         interrupt()
         state = RerouteState.FetchingRoute
@@ -48,14 +60,14 @@ internal class MapboxRerouteController(
             Message("Fetching route")
         )
         routeOptionsUpdater.update(
-            directionsSession.getRouteOptions(),
+            directionsSession.getPrimaryRouteOptions(),
             tripSession.getRouteProgress(),
             tripSession.getEnhancedLocation()
         )
             .let { routeOptionsResult ->
                 when (routeOptionsResult) {
                     is RouteOptionsUpdater.RouteOptionsResult.Success -> {
-                        request(routeOptionsResult.routeOptions)
+                        request(routesCallback, routeOptionsResult.routeOptions)
                     }
                     is RouteOptionsUpdater.RouteOptionsResult.Error -> {
                         mainJobController.scope.launch {
@@ -73,8 +85,9 @@ internal class MapboxRerouteController(
     @MainThread
     override fun interrupt() {
         if (state == RerouteState.FetchingRoute) {
-            // do not change state here because it's changed into onRoutesRequestCanceled callback
-            directionsSession.cancel()
+            val id = requestId
+            checkNotNull(id)
+            directionsSession.cancelRouteRequest(id)
             logger.d(
                 Tag(TAG),
                 Message("Route request interrupted")
@@ -97,11 +110,13 @@ internal class MapboxRerouteController(
         return observers.remove(rerouteStateObserver)
     }
 
-    private fun request(routeOptions: RouteOptions) {
-        directionsSession.requestRoutes(
+    private fun request(
+        routesCallback: RerouteController.RoutesCallback,
+        routeOptions: RouteOptions
+    ) {
+        requestId = directionsSession.requestRoutes(
             routeOptions,
             object : RoutesRequestCallback {
-                // ignore result, DirectionsSession sets routes internally
                 override fun onRoutesReady(routes: List<DirectionsRoute>) {
                     logger.d(
                         Tag(TAG),
@@ -110,6 +125,7 @@ internal class MapboxRerouteController(
                     mainJobController.scope.launch {
                         state = RerouteState.RouteFetched
                         state = RerouteState.Idle
+                        routesCallback.onNewRoutes(routes)
                     }
                 }
 

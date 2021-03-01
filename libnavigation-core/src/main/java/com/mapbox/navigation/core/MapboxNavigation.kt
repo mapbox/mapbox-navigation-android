@@ -115,15 +115,31 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  * If the session is stopped, the SDK will stop listening for raw location updates and enter the `Idle` state.
  *
  * ### Routing
- * A route can be requested with [requestRoutes]. If the request is successful and returns a non-empty list of routes in the [RoutesObserver],
- * the first route at index 0 is going to be chosen as a primary one.
+ * A route can be requested with:
+ * - [requestRoutes], if successful, returns a route reference without acting on it. You can then pass the generated routes to [setRoutes].
+ * - [setRoutes] sets new routes, clear current ones, or changes the route at primary index 0.
+ * The routes are immediately available via the [RoutesObserver] and the first route (at index 0) is going to be chosen as the primary one.
+ *
+ * Example:
+ * ```
+ * mapboxNavigation.requestRoutes(
+ *     options,
+ *     object : RoutesRequestCallback {
+ *         override fun onRoutesReady(routes: List<DirectionsRoute>) {
+ *             mapboxNavigation.setRoutes(routes)
+ *         }
+ *         override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) { }
+ *         override fun onRoutesRequestCanceled(routeOptions: RouteOptions) { }
+ *     }
+ * )
+ * ```
  *
  * If the SDK is in an `Idle` state, it stays in this same state even when a primary route is available.
  *
  * If the SDK is already in the `Free Drive` mode or entering it whenever a primary route is available,
  * the SDK will enter the `Active Guidance` mode instead and propagate meaningful [RouteProgress].
  *
- * If a new routes request is made, or the routes are manually cleared, the SDK automatically fall back to either `Idle` or `Free Drive` state.
+ * When the routes are manually cleared, the SDK automatically fall back to either `Idle` or `Free Drive` state.
  *
  * You can use [setRoutes] to provide new routes, clear current ones, or change the route at primary index 0.
  *
@@ -178,12 +194,14 @@ class MapboxNavigation(
      */
     private var rerouteController: RerouteController?
     private val defaultRerouteController: RerouteController
+
     /**
      * [MapboxNavigation.roadObjectsStore] provides methods to get road objects metadata,
      * add and remove custom road
      * objects.
      */
     val roadObjectsStore: RoadObjectsStore
+
     /**
      * [MapboxNavigation.graphAccessor] provides methods to get edge (e.g. [EHorizonEdge]) shape and
      * metadata.
@@ -201,7 +219,8 @@ class MapboxNavigation(
         )
         navigationSession = NavigationComponentProvider.createNavigationSession()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
-            MapboxModuleProvider.createModule(MapboxModuleType.NavigationRouter, ::paramsProvider)
+            MapboxModuleProvider.createModule(MapboxModuleType.NavigationRouter, ::paramsProvider),
+            logger
         )
         directionsSession.registerRoutesObserver(navigationSession)
         val notification: TripNotification = MapboxModuleProvider
@@ -329,38 +348,53 @@ class MapboxNavigation(
     fun getTripSessionState(): TripSessionState = tripSession.getState()
 
     /**
-     * Requests a route using the provided [Router] implementation.
-     * If the request succeeds and the SDK enters an `Active Guidance` state, meaningful [RouteProgress] updates will be available.
+     * Requests a route using the available [Router] implementation.
      *
-     * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the routes list reference managed by the SDK changes, regardless of a source.
+     * Use [MapboxNavigation.setRoutes] to supply the returned list of routes, transformed list, or a list from an external source, to be managed by the SDK.
      *
-     * Use [MapboxNavigation.setRoutes] to supply a transformed list of routes, or a list from an external source, to be managed by the SDK.
+     * Example:
+     * ```
+     * mapboxNavigation.requestRoutes(routeOptions, object : RoutesRequestCallback {
+     *     override fun onRoutesReady(routes: List<DirectionsRoute>) {
+     *         ...
+     *         mapboxNavigation.setRoutes(routes)
+     *     }
+     *     ...
+     * })
+     * ```
      *
      * @param routeOptions params for the route request
      * @param routesRequestCallback listener that gets notified when request state changes
+     * @return requestId, see [cancelRouteRequest]
      * @see [registerRoutesObserver]
      * @see [registerRouteProgressObserver]
      */
-    @JvmOverloads
     fun requestRoutes(
         routeOptions: RouteOptions,
-        routesRequestCallback: RoutesRequestCallback? = null
-    ) {
-        rerouteController?.interrupt()
-        directionsSession.requestRoutes(routeOptions, routesRequestCallback)
+        routesRequestCallback: RoutesRequestCallback
+    ): Long {
+        return directionsSession.requestRoutes(routeOptions, routesRequestCallback)
+    }
+
+    /**
+     * Cancels a specific route request using the ID returned by [requestRoutes].
+     */
+    fun cancelRouteRequest(requestId: Long) {
+        directionsSession.cancelRouteRequest(requestId)
     }
 
     /**
      * Set a list of routes.
      *
-     * If the list is empty, the SDK will exit the `Active Guidance` state.
+     * If the list is not empty, the route at index 0 is valid, and the trip session is started,
+     * then the SDK enters an `Active Guidance` state and [RouteProgress] updates will be available.
      *
-     * If the list is not empty, the route at index 0 is going to be treated as the primary route
-     * and used for route progress calculations and off route events.
+     * If the list is empty, the SDK will exit the `Active Guidance` state.
      *
      * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the routes list reference managed by the SDK changes, regardless of a source.
      *
      * @param routes a list of [DirectionsRoute]s
+     * @see [requestRoutes]
      */
     fun setRoutes(routes: List<DirectionsRoute>) {
         rerouteController?.interrupt()

@@ -55,13 +55,13 @@ class FasterRouteControllerTest {
             routeOptionsResultSuccess.routeOptions
         } returns routeOptionsResultSuccessRouteOptions
 
-        every { directionsSession.getRouteOptions() } returns mockk()
+        every { directionsSession.getPrimaryRouteOptions() } returns mockk()
         every {
-            directionsSession.requestFasterRoute(
+            directionsSession.requestRoutes(
                 any(),
                 capture(routesRequestCallbacks)
             )
-        } returns mockk()
+        } returns 1L
         every { tripSession.getRouteProgress() } returns mockk()
     }
 
@@ -104,7 +104,7 @@ class FasterRouteControllerTest {
         fasterRouteController.stop()
 
         coroutineRule.testDispatcher.cleanupTestCoroutines()
-        verify(exactly = 5) { directionsSession.requestFasterRoute(any(), any()) }
+        verify(exactly = 5) { directionsSession.requestRoutes(any(), any()) }
     }
 
     @Test
@@ -120,7 +120,7 @@ class FasterRouteControllerTest {
         fasterRouteController.stop()
 
         coroutineRule.testDispatcher.cleanupTestCoroutines()
-        verify(exactly = 0) { directionsSession.requestFasterRoute(any(), any()) }
+        verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
     }
 
     @Test
@@ -136,11 +136,11 @@ class FasterRouteControllerTest {
             every { longitude } returns 151.206087
         }
         every {
-            directionsSession.requestFasterRoute(
+            directionsSession.requestRoutes(
                 any(),
                 capture(routesRequestCallbacks)
             )
-        } returns mockk()
+        } returns 1L
 
         fasterRouteController.attach(fasterRouteObserver)
         coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
@@ -170,11 +170,11 @@ class FasterRouteControllerTest {
             every { longitude } returns 151.206087
         }
         every {
-            directionsSession.requestFasterRoute(
+            directionsSession.requestRoutes(
                 any(),
                 capture(routesRequestCallbacks)
             )
-        } returns mockk()
+        } returns 1L
 
         fasterRouteController.attach(fasterRouteObserver)
         coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))

@@ -10,6 +10,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.permissions.PermissionsListener
+import com.mapbox.navigation.examples.core.IndependentRouteGenerationActivity
 import com.mapbox.navigation.examples.core.MapboxCustomStyleActivity
 import com.mapbox.navigation.examples.core.MapboxJunctionActivity
 import com.mapbox.navigation.examples.core.MapboxManeuverActivity
@@ -126,6 +127,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_draw_utility),
                 getString(R.string.description_draw_utility),
                 RouteDrawingActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_independent_route),
+                getString(R.string.description_independent_route),
+                IndependentRouteGenerationActivity::class.java
             )
         )
     }

@@ -5,6 +5,7 @@ package com.mapbox.navigation.core {
     ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public void addHistoryEvent(String eventType, String eventJsonProperties);
     method public void attachFasterRouteObserver(com.mapbox.navigation.core.fasterroute.FasterRouteObserver fasterRouteObserver);
+    method public void cancelRouteRequest(long requestId);
     method public void detachFasterRouteObserver();
     method public com.mapbox.navigation.core.trip.session.GraphAccessor getGraphAccessor();
     method public com.mapbox.navigation.base.options.NavigationOptions getNavigationOptions();
@@ -26,8 +27,7 @@ package com.mapbox.navigation.core {
     method public void registerRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
     method public void registerTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
     method public void registerVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
-    method public void requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.core.directions.session.RoutesRequestCallback? routesRequestCallback = null);
-    method public void requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public long requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.core.directions.session.RoutesRequestCallback routesRequestCallback);
     method public void resetTripSession();
     method public String retrieveHistory();
     method public String? retrieveSsmlAnnouncementInstruction(int index);
