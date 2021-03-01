@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MapboxRecenterButton">
+        <attr format="reference|color" name="recenterButtonPrimaryColor"/>
+        <attr format="reference|color" name="recenterButtonSecondaryColor"/>
+    </declare-styleable>
+    <declare-styleable name="MapboxNavigationView">
+        <!-- Colors -->
+        <attr format="color" name="navigationViewPrimary"/>
+        <attr format="color" name="navigationViewSecondary"/>
+        <attr format="color" name="navigationViewAccent"/>
+        <attr format="color" name="navigationViewPrimaryText"/>
+        <attr format="color" name="navigationViewSecondaryText"/>
+        <attr format="color" name="navigationViewDivider"/>
+
+        <!-- Instruction List -->
+        <attr format="color" name="navigationViewListBackground"/>
+
+        <!-- Banner -->
+        <attr format="color" name="navigationViewBannerBackground"/>
+        <attr format="color" name="navigationViewBannerPrimaryText"/>
+        <attr format="color" name="navigationViewBannerSecondaryText"/>
+        <attr format="color" name="navigationViewBannerManeuverPrimary"/>
+        <attr format="color" name="navigationViewBannerManeuverSecondary"/>
+
+        <!-- Progress Bars -->
+        <attr format="color" name="navigationViewProgress"/>
+        <attr format="color" name="navigationViewProgressBackground"/>
+
+        <!-- Map style -->
+        <attr format="string" name="navigationViewMapStyle"/>
+
+        <!-- Route style -->
+        <attr format="reference" name="navigationViewRouteStyle"/>
+
+        <!-- Location layer style -->
+        <attr format="reference" name="navigationViewLocationLayerStyle"/>
+
+        <!-- Destination marker drawable -->
+        <attr format="reference" name="navigationViewDestinationMarker"/>
+
+        <!-- Route overview drawable -->
+        <attr format="reference" name="navigationViewRouteOverviewDrawable"/>
+
+        <!-- For setting the styles in XML -->
+        <attr format="reference" name="navigationLightTheme"/>
+        <attr format="reference" name="navigationDarkTheme"/>
+    </declare-styleable>
+</resources>

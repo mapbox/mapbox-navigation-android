@@ -9,8 +9,6 @@ import android.view.animation.TranslateAnimation
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.mapbox.navigation.ui.base.MapboxView
-import com.mapbox.navigation.ui.base.model.recenterbutton.RecenterButtonState
 import com.mapbox.navigation.ui.maps.R
 
 /**
@@ -24,7 +22,7 @@ import com.mapbox.navigation.ui.maps.R
  * to be shown.
  */
 
-class MapboxRecenterButton : ConstraintLayout, MapboxView<RecenterButtonState> {
+class MapboxRecenterButton : ConstraintLayout {
 
     private var multiOnClickListener: MultiOnClickListener? = MultiOnClickListener()
     private var slideUpBottom: Animation? = null
@@ -96,19 +94,19 @@ class MapboxRecenterButton : ConstraintLayout, MapboxView<RecenterButtonState> {
     fun updateStyle(styleRes: Int) {
         val typedArray = context.obtainStyledAttributes(
             styleRes,
-            R.styleable.MapboxStyleRecenterButton
+            R.styleable.MapboxRecenterButton
         )
         primaryColor = ContextCompat.getColor(
             context,
             typedArray.getResourceId(
-                R.styleable.MapboxStyleRecenterButton_recenterButtonPrimaryColor,
+                R.styleable.MapboxRecenterButton_recenterButtonPrimaryColor,
                 R.color.mapbox_recenter_button_primary
             )
         )
         secondaryColor = ContextCompat.getColor(
             context,
             typedArray.getResourceId(
-                R.styleable.MapboxStyleRecenterButton_recenterButtonSecondaryColor,
+                R.styleable.MapboxRecenterButton_recenterButtonSecondaryColor,
                 R.color.mapbox_recenter_button_secondary
             )
         )
@@ -166,19 +164,19 @@ class MapboxRecenterButton : ConstraintLayout, MapboxView<RecenterButtonState> {
     private fun initAttributes(attributeSet: AttributeSet?) {
         val typedArray = context.obtainStyledAttributes(
             attributeSet,
-            R.styleable.MapboxStyleRecenterButton
+            R.styleable.MapboxRecenterButton
         )
         primaryColor = ContextCompat.getColor(
             context,
             typedArray.getResourceId(
-                R.styleable.MapboxStyleRecenterButton_recenterButtonPrimaryColor,
+                R.styleable.MapboxRecenterButton_recenterButtonPrimaryColor,
                 R.color.mapbox_recenter_button_primary
             )
         )
         secondaryColor = ContextCompat.getColor(
             context,
             typedArray.getResourceId(
-                R.styleable.MapboxStyleRecenterButton_recenterButtonSecondaryColor,
+                R.styleable.MapboxRecenterButton_recenterButtonSecondaryColor,
                 R.color.mapbox_recenter_button_secondary
             )
         )
@@ -197,21 +195,6 @@ class MapboxRecenterButton : ConstraintLayout, MapboxView<RecenterButtonState> {
         ).also {
             slideUpBottom?.duration = 300
             slideUpBottom?.interpolator = OvershootInterpolator(2.0f)
-        }
-    }
-
-    override fun render(state: RecenterButtonState) {
-        when (state) {
-            is RecenterButtonState.RecenterButtonVisible -> {
-                if (state.isVisible) {
-                    show()
-                } else {
-                    hide()
-                }
-            }
-            is RecenterButtonState.RecenterButtonClicked -> {
-//                TODO: ???
-            }
         }
     }
 }

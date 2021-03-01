@@ -2,4 +2,9 @@
 <resources>
     <dimen name="mapbox_navigationCamera_trackingInitialMoveThreshold">25dp</dimen>
     <dimen name="mapbox_navigationCamera_trackingMultiFingerMoveThreshold">400dp</dimen>
+    <dimen name="mapbox_dimen_16dp">16dp</dimen>
+    <dimen name="mapbox_dimen_2dp">2dp</dimen>
+    <dimen name="mapbox_dimen_4dp">4dp</dimen>
+    <dimen name="mapbox_dimen_8dp">8dp</dimen>
+    <dimen name="mapbox_fab_margin_bottom">@dimen/mapbox_dimen_2dp</dimen>
 </resources>
