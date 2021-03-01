@@ -17,6 +17,7 @@ executors:
       - image: mbgl/android-ndk-r21:latest
     working_directory: ~/code
     environment:
+      when: << pipeline.parameters.mapbox_navigation_native_upstream >>
       FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION: << pipeline.parameters.mapbox_navigation_native_snapshot >>
     
 #-------------------------------
@@ -24,25 +25,22 @@ executors:
 #-------------------------------
 workflows:
   version: 2
-  mapbox-navigation-native-validation:
-    when: << pipeline.parameters.mapbox_navigation_native_upstream >>
-    jobs: 
-      - prepare-and-assemble
-      - unit-tests:
-          requires:
-            - prepare-and-assemble
-      - ui-robo-tests:
-          requires:
-            - prepare-and-assemble
-      - internal-instrumentation-tests:
-          requires:
-            - prepare-and-assemble
-      - instrumentation-tests:
-          requires:
-            - prepare-and-assemble
-  default:
-    when:
+  release-workflow:
+    when: 
       not: << pipeline.parameters.mapbox_navigation_native_upstream >>
+    jobs: 
+      - release-snapshot:
+          filters:
+            branches:
+              only:
+                - main
+      - release:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+  default:
     jobs:
       - prepare-and-assemble
       - static-analysis:
@@ -65,18 +63,7 @@ workflows:
             - static-analysis
           filters:
             branches:
-              ignore: /^(main|release-.*)/
-      - release-snapshot:
-          filters:
-            branches:
-              only:
-                - main
-      - release:
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
+              ignore: /^(sf-trigger-pipeline|main|release-.*)/
 #      - mobile-metrics-dry-run:
 #          type: approval
 #      - mobile-metrics-benchmarks:

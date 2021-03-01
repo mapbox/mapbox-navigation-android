@@ -57,17 +57,23 @@ allprojects {
         password = project.hasProperty('SDK_REGISTRY_TOKEN') ? project.property('SDK_REGISTRY_TOKEN') : System.getenv('SDK_REGISTRY_TOKEN')
       }
     }
-    // uncomment if snapshots access is needed
-    maven {
-      url 'https://api.mapbox.com/downloads/v2/snapshots/maven'
-      authentication {
-        basic(BasicAuthentication)
+    // we allow access to snapshots repo if FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION is set, what means we are running on CI 
+    // with Navigation Native forced to be some snapshot version
+    // if you need to use snapshots while development, just set `addSnapshotRepo` to true manually
+    def addSnapshotRepo = System.getenv("FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION") != null
+    if (addSnapshotRepo) {
+      maven {
+        url 'https://api.mapbox.com/downloads/v2/snapshots/maven'
+        authentication {
+          basic(BasicAuthentication)
+        }
+        credentials {
+          username = "mapbox"
+          password = project.hasProperty('SDK_REGISTRY_TOKEN') ? project.property('SDK_REGISTRY_TOKEN') : System.getenv('SDK_REGISTRY_TOKEN')
+        }
       }
-      credentials {
-        username = "mapbox"
-        password = project.hasProperty('SDK_REGISTRY_TOKEN') ? project.property('SDK_REGISTRY_TOKEN') : System.getenv('SDK_REGISTRY_TOKEN')
-      }
-    }
+    } 
+
     /*maven {
       url 'https://mapbox.bintray.com/mapbox_internal'
       credentials {
