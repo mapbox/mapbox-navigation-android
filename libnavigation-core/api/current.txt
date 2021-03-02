@@ -597,6 +597,17 @@ package com.mapbox.navigation.core.trip.model.eh {
     property public final boolean tunnel;
   }
 
+  public final class EHorizonGraphPath {
+    method public java.util.List<java.lang.Long> getEdges();
+    method public double getLength();
+    method public double getPercentAlongBegin();
+    method public double getPercentAlongEnd();
+    property public final java.util.List<java.lang.Long> edges;
+    property public final double length;
+    property public final double percentAlongBegin;
+    property public final double percentAlongEnd;
+  }
+
   public final class EHorizonGraphPosition {
     method public long getEdgeId();
     method public double getPercentAlong();
@@ -637,12 +648,10 @@ package com.mapbox.navigation.core.trip.model.eh {
   }
 
   public final class EHorizonObjectLocation {
-    method public java.util.List<java.lang.Long> getEdges();
-    method public double getPercentAlongBegin();
-    method public double getPercentAlongEnd();
-    property public final java.util.List<java.lang.Long> edges;
-    property public final double percentAlongBegin;
-    property public final double percentAlongEnd;
+    method public com.mapbox.navigation.core.trip.model.eh.EHorizonGraphPath? getPath();
+    method public com.mapbox.navigation.core.trip.model.eh.EHorizonGraphPosition? getPosition();
+    property public final com.mapbox.navigation.core.trip.model.eh.EHorizonGraphPath? path;
+    property public final com.mapbox.navigation.core.trip.model.eh.EHorizonGraphPosition? position;
   }
 
   public final class EHorizonObjectMetadata {
@@ -754,6 +763,8 @@ package com.mapbox.navigation.core.trip.session {
   public final class GraphAccessor {
     method public com.mapbox.navigation.core.trip.model.eh.EHorizonEdgeMetadata? getEdgeMetadata(long edgeId);
     method public java.util.List<com.mapbox.geojson.Point>? getEdgeShape(long edgeId);
+    method public com.mapbox.geojson.Point? getGraphPositionCoordinate(com.mapbox.navigation.core.trip.model.eh.EHorizonGraphPosition graphPosition);
+    method public java.util.List<com.mapbox.geojson.Point>? getPathShape(com.mapbox.navigation.core.trip.model.eh.EHorizonGraphPath graphPath);
   }
 
   public interface LocationObserver {

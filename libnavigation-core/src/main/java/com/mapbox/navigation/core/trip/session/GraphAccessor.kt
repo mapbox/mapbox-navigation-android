@@ -4,7 +4,11 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.model.eh.EHorizonEdge
 import com.mapbox.navigation.core.trip.model.eh.EHorizonEdgeMetadata
+import com.mapbox.navigation.core.trip.model.eh.EHorizonGraphPath
+import com.mapbox.navigation.core.trip.model.eh.EHorizonGraphPosition
 import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonEdgeMetadata
+import com.mapbox.navigation.core.trip.model.eh.mapToGraphPath
+import com.mapbox.navigation.core.trip.model.eh.mapToGraphPosition
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 
 /**
@@ -35,5 +39,21 @@ class GraphAccessor internal constructor(
      */
     fun getEdgeMetadata(edgeId: Long): EHorizonEdgeMetadata? {
         return navigator.graphAccessor?.getEdgeMetadata(edgeId)?.mapToEHorizonEdgeMetadata()
+    }
+
+    /**
+     * Returns geometry of given path on graph.
+     * If any of path edges is not accessible, returns null.
+     */
+    fun getPathShape(graphPath: EHorizonGraphPath): List<Point>? {
+        return navigator.graphAccessor?.getPathShape(graphPath.mapToGraphPath())
+    }
+
+    /**
+     * Returns geographical coordinate of given position on graph
+     * If position's edge is not accessible, returns null.
+     */
+    fun getGraphPositionCoordinate(graphPosition: EHorizonGraphPosition): Point? {
+        return navigator.graphAccessor?.getPositionCoordinate(graphPosition.mapToGraphPosition())
     }
 }
