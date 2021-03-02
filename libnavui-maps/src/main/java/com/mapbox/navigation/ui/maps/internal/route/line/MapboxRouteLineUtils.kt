@@ -70,7 +70,8 @@ object MapboxRouteLineUtils {
                 literal(0.0)
             }
         }
-        val filteredItems = routeLineExpressionData.filter { it.offset > distanceOffset }
+        val filteredItems = routeLineExpressionData
+            .filter { it.offset > distanceOffset }.distinctBy { it.offset }
         when (filteredItems.isEmpty()) {
             true -> when (routeLineExpressionData.isEmpty()) {
                 true -> listOf(RouteLineExpressionData(distanceOffset, fallbackRouteColor))
