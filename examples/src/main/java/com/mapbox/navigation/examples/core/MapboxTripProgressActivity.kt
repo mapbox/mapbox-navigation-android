@@ -25,6 +25,7 @@ import com.mapbox.maps.plugin.gestures.getGesturesPlugin
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.logger.LoggerProvider
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -200,7 +201,7 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
         )
         mapboxNavigation.startTripSession()
 
-        mapboxLogger = mapboxNavigation.getLogger()
+        mapboxLogger = LoggerProvider.logger
 
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.play()

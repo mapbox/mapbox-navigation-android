@@ -3,8 +3,6 @@ package com.mapbox.navigation.ui.maps.route.line.model
 import android.content.Context
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.base.common.logger.Logger
-import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
@@ -17,8 +15,6 @@ class MapboxRouteLineOptionsTest {
 
     lateinit var ctx: Context
 
-    private val logger: Logger = mockk()
-
     @Before
     fun setUp() {
         ctx = ApplicationProvider.getApplicationContext()
@@ -28,7 +24,7 @@ class MapboxRouteLineOptionsTest {
     fun withRouteLineResourceProvider() {
         val routeLineResources = RouteLineResources.Builder().build()
 
-        val options = MapboxRouteLineOptions.Builder(ctx, logger)
+        val options = MapboxRouteLineOptions.Builder(ctx)
             .withRouteLineResources(routeLineResources)
             .build()
 
@@ -37,7 +33,7 @@ class MapboxRouteLineOptionsTest {
 
     @Test
     fun withRouteLineBelowLayerId() {
-        val options = MapboxRouteLineOptions.Builder(ctx, logger)
+        val options = MapboxRouteLineOptions.Builder(ctx)
             .withRouteLineBelowLayerId("someLayerId")
             .build()
 
@@ -46,7 +42,7 @@ class MapboxRouteLineOptionsTest {
 
     @Test
     fun withTolerance() {
-        val options = MapboxRouteLineOptions.Builder(ctx, logger)
+        val options = MapboxRouteLineOptions.Builder(ctx)
             .withTolerance(.111)
             .build()
 
@@ -70,14 +66,14 @@ class MapboxRouteLineOptionsTest {
         val routeStyleDescriptors =
             listOf(RouteStyleDescriptor("foobar", Color.CYAN, Color.YELLOW))
 
-        val options = MapboxRouteLineOptions.Builder(ctx, logger)
+        val options = MapboxRouteLineOptions.Builder(ctx)
             .withRouteLineResources(routeLineResources)
             .withVanishingRouteLineEnabled(true)
             .withRouteLineBelowLayerId("someLayerId")
             .withTolerance(.111)
             .withRouteStyleDescriptors(routeStyleDescriptors)
             .build()
-            .toBuilder(ctx, logger)
+            .toBuilder(ctx)
             .build()
 
         assertEquals(routeLineResources, options.resourceProvider)

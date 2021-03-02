@@ -24,6 +24,7 @@ import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
+import com.mapbox.navigation.base.logger.LoggerProvider
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -521,15 +522,14 @@ object MapboxRouteLineUtils {
     @JvmStatic
     fun getBelowLayerIdToUse(
         belowLayerId: String?,
-        style: Style,
-        logger: Logger
+        style: Style
     ): String? {
         return when (belowLayerId) {
             null -> belowLayerId
             else -> when (style.styleLayerExists(belowLayerId)) {
                 true -> belowLayerId
                 false -> {
-                    logger.e(
+                    LoggerProvider.logger.e(
                         Tag(MapboxRouteLineUtils::class.java.simpleName),
                         Message("Layer $belowLayerId not found. Route line related layers will be " +
                             "placed at top of the map stack.")
@@ -631,8 +631,7 @@ object MapboxRouteLineUtils {
         val belowLayerIdToUse: String? =
             getBelowLayerIdToUse(
                 options.routeLineBelowLayerId,
-                style,
-                options.logger
+                style
             )
 
         if (!style.styleSourceExists(RouteConstants.WAYPOINT_SOURCE_ID)) {

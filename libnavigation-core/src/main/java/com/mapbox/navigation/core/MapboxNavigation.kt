@@ -16,6 +16,7 @@ import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.common.module.provider.ModuleProviderArgument
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
+import com.mapbox.navigation.base.logger.LoggerProvider
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.Router
@@ -192,7 +193,7 @@ class MapboxNavigation(
 
     init {
         ThreadController.init()
-        logger = MapboxModuleProvider.createModule(MapboxModuleType.CommonLogger, ::paramsProvider)
+        logger = LoggerProvider.logger
         navigator = NavigationComponentProvider.createNativeNavigator(
             navigationOptions.deviceProfile,
             navigatorConfig,
@@ -738,11 +739,6 @@ class MapboxNavigation(
     fun detachFasterRouteObserver() {
         fasterRouteController.stop()
     }
-
-    /**
-     * Get currently set [Logger].
-     */
-    fun getLogger(): Logger = logger
 
     /**
      * Register a [NavigationSessionStateObserver] to be notified of the various Session states. Not publicly available

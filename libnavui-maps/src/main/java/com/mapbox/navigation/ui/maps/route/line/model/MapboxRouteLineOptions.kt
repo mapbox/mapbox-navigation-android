@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLayerProvider
 import com.mapbox.navigation.ui.maps.route.line.api.VanishingRouteLine
 
@@ -21,7 +20,6 @@ import com.mapbox.navigation.ui.maps.route.line.api.VanishingRouteLine
  * @param tolerance the tolerance value used when configuring the underlying map source
  */
 class MapboxRouteLineOptions private constructor(
-    val logger: Logger,
     val resourceProvider: RouteLineResources,
     internal val routeLayerProvider: MapboxRouteLayerProvider,
     val originIcon: Drawable,
@@ -33,15 +31,13 @@ class MapboxRouteLineOptions private constructor(
 
     /**
      * @param context a valid context
-     * @param logger interface for logging any events
      *
      * @return builder matching the one used to create this instance
      */
-    fun toBuilder(context: Context, logger: Logger): Builder {
+    fun toBuilder(context: Context): Builder {
         val vanishingRouteLineEnabled = vanishingRouteLine != null
         return Builder(
             context,
-            logger,
             resourceProvider,
             routeLineBelowLayerId,
             routeLayerProvider.routeStyleDescriptors,
@@ -101,7 +97,6 @@ class MapboxRouteLineOptions private constructor(
      * Responsible for instantiating an instance of MapboxRouteLineOptions
      *
      * @param context an instance of Context
-     * @param logger interface for logging any events
      * @param routeLineResources an instance of RouteLineResources
      * @param routeLineBelowLayerId determines the elevation of the route layers
      * @param routeStyleDescriptors a collection of RouteStyleDescriptor objects
@@ -109,7 +104,6 @@ class MapboxRouteLineOptions private constructor(
      */
     class Builder internal constructor(
         private val context: Context,
-        private val logger: Logger,
         private var routeLineResources: RouteLineResources?,
         private var routeLineBelowLayerId: String?,
         private var routeStyleDescriptors: List<RouteStyleDescriptor>,
@@ -121,11 +115,9 @@ class MapboxRouteLineOptions private constructor(
          * Responsible for instantiating an instance of MapboxRouteLineOptions
          *
          * @param context an instance of Context
-         * @param logger interface for logging any events
          */
-        constructor(context: Context, logger: Logger) : this(
+        constructor(context: Context) : this(
             context,
-            logger,
             null,
             null,
             listOf(),
@@ -212,13 +204,12 @@ class MapboxRouteLineOptions private constructor(
             )
 
             val vanishingRouteLine = if (vanishingRouteLineEnabled) {
-                VanishingRouteLine(logger)
+                VanishingRouteLine()
             } else {
                 null
             }
 
             return MapboxRouteLineOptions(
-                logger,
                 resourceProvider,
                 routeLineLayerProvider,
                 originIcon!!,

@@ -40,6 +40,7 @@ import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
+import com.mapbox.navigation.base.logger.LoggerProvider
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -272,7 +273,7 @@ class MapboxCameraAnimationsActivity :
     }
 
     private fun initRouteLine() {
-        val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(this, mapboxLogger)
+        val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(this)
             .withRouteLineBelowLayerId("road-label")
             .build()
         routeLineAPI = MapboxRouteLineApi(mapboxRouteLineOptions)
@@ -379,7 +380,7 @@ class MapboxCameraAnimationsActivity :
             registerMapMatcherResultObserver(mapMatcherResultObserver)
         }
 
-        mapboxLogger = mapboxNavigation.getLogger()
+        mapboxLogger = LoggerProvider.logger
 
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.playbackSpeed(1.0)

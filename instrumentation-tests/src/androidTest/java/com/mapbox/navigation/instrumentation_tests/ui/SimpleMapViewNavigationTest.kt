@@ -5,7 +5,6 @@ import androidx.core.content.ContextCompat
 import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.maps.plugin.LocationPuck2D
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
@@ -57,8 +56,6 @@ abstract class SimpleMapViewNavigationTest :
 
     protected lateinit var mapboxNavigation: MapboxNavigation
 
-    private lateinit var logger: Logger
-
     protected lateinit var routeLineApi: MapboxRouteLineApi
     protected lateinit var routeLineView: MapboxRouteLineView
 
@@ -92,8 +89,6 @@ abstract class SimpleMapViewNavigationTest :
                     .build()
             )
 
-            logger = mapboxNavigation.getLogger()
-
             mapboxNavigation.setRoutes(listOf(route))
             mapboxNavigation.startTripSession()
         }
@@ -103,14 +98,12 @@ abstract class SimpleMapViewNavigationTest :
         runOnMainSync {
             routeLineView = MapboxRouteLineView(
                 MapboxRouteLineOptions.Builder(
-                    activity,
-                    logger
+                    activity
                 ).build()
             )
             routeLineApi = MapboxRouteLineApi(
                 MapboxRouteLineOptions.Builder(
-                    activity,
-                    logger
+                    activity
                 ).build()
             )
 
