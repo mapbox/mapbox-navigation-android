@@ -4,16 +4,12 @@ package com.mapbox.navigation.core.trip.model.eh
  * EHorizonObjectLocation represents location of road object on road graph.
  * For point-like objects will contain single edge with `percentAlongBegin == percentAlongEnd`
  *
- * @param edges list of edge ids belong to object
- * @param percentAlongBegin offset from the start of edge (0 - 1) pointing to the start of road
- * object on the very first edge
- * @param percentAlongEnd offset from the start of edge (0 - 1) pointing to the end of road object
- * on the very last edge
+ * @param path represents location of line-like object, will be null point-like objects
+ * @param position represents location of point-like object, will be null line-like objects
  */
 class EHorizonObjectLocation internal constructor(
-    val edges: List<Long>,
-    val percentAlongBegin: Double,
-    val percentAlongEnd: Double,
+    val path: EHorizonGraphPath?,
+    val position: EHorizonGraphPosition?
 ) {
 
     /**
@@ -25,9 +21,8 @@ class EHorizonObjectLocation internal constructor(
 
         other as EHorizonObjectLocation
 
-        if (edges != other.edges) return false
-        if (percentAlongBegin != other.percentAlongBegin) return false
-        if (percentAlongEnd != other.percentAlongEnd) return false
+        if (path != other.path) return false
+        if (position != other.position) return false
 
         return true
     }
@@ -36,9 +31,8 @@ class EHorizonObjectLocation internal constructor(
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        var result = edges.hashCode()
-        result = 31 * result + percentAlongBegin.hashCode()
-        result = 31 * result + percentAlongEnd.hashCode()
+        var result = path.hashCode()
+        result = 31 * result + position.hashCode()
         return result
     }
 
@@ -47,9 +41,8 @@ class EHorizonObjectLocation internal constructor(
      */
     override fun toString(): String {
         return "EHorizonObjectLocation(" +
-            "edges=$edges, " +
-            "percentAlongBegin=$percentAlongBegin, " +
-            "percentAlongEnd=$percentAlongEnd" +
+            "path=$path, " +
+            "position=$position" +
             ")"
     }
 }

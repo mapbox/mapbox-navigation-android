@@ -12,6 +12,7 @@ import com.mapbox.navigator.GraphPosition
 import com.mapbox.navigator.RoadObjectDistanceInfo
 import com.mapbox.navigator.RoadObjectEdgeLocation
 import com.mapbox.navigator.RoadObjectEnterExitInfo
+import com.mapbox.navigator.RoadObjectLocation
 import com.mapbox.navigator.RoadObjectProvider
 import com.mapbox.navigator.RoadObjectType
 import com.mapbox.navigator.Standard
@@ -63,11 +64,10 @@ internal suspend fun RoadObjectDistanceInfo.mapToEHorizonObjectDistanceInfo():
 /**
  * Map the ElectronicHorizonPosition.
  */
-internal fun GraphPath.mapToEHorizonObjectLocation(): EHorizonObjectLocation {
+internal fun RoadObjectLocation.mapToEHorizonObjectLocation(): EHorizonObjectLocation {
     return EHorizonObjectLocation(
-        this.edges,
-        this.percentAlongBegin,
-        this.percentAlongEnd
+        path?.mapToEHorizonGraphPath(),
+        position?.mapToEHorizonGraphPosition()
     )
 }
 
@@ -141,6 +141,28 @@ internal fun String.mapToOpenLRStandard(): Standard {
     }
 }
 
+/**
+ * Map the EHorizonGraphPath.
+ */
+internal fun EHorizonGraphPath.mapToGraphPath(): GraphPath {
+    return GraphPath(
+        edges,
+        percentAlongBegin,
+        percentAlongEnd,
+        length
+    )
+}
+
+/**
+ * Map the EHorizonGraphPosition.
+ */
+internal fun EHorizonGraphPosition.mapToGraphPosition(): GraphPosition {
+    return GraphPosition(
+        edgeId,
+        percentAlong
+    )
+}
+
 private fun FunctionalRoadClass.mapToRoadClass(): String {
     return when (this) {
         FunctionalRoadClass.MOTORWAY -> RoadClass.MOTORWAY
@@ -209,5 +231,17 @@ private fun GraphPosition.mapToEHorizonGraphPosition(): EHorizonGraphPosition {
     return EHorizonGraphPosition(
         edgeId,
         percentAlong
+    )
+}
+
+/**
+ * Map the GraphPath.
+ */
+private fun GraphPath.mapToEHorizonGraphPath(): EHorizonGraphPath {
+    return EHorizonGraphPath(
+        edges,
+        percentAlongBegin,
+        percentAlongEnd,
+        length
     )
 }
