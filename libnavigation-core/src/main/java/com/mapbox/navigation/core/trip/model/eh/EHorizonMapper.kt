@@ -7,6 +7,7 @@ import com.mapbox.navigator.ElectronicHorizonEdge
 import com.mapbox.navigator.ElectronicHorizonPosition
 import com.mapbox.navigator.ElectronicHorizonResultType
 import com.mapbox.navigator.FunctionalRoadClass
+import com.mapbox.navigator.GraphPath
 import com.mapbox.navigator.GraphPosition
 import com.mapbox.navigator.RoadObjectDistanceInfo
 import com.mapbox.navigator.RoadObjectEdgeLocation
@@ -65,9 +66,8 @@ internal suspend fun RoadObjectDistanceInfo.mapToEHorizonObjectDistanceInfo():
  */
 internal fun RoadObjectLocation.mapToEHorizonObjectLocation(): EHorizonObjectLocation {
     return EHorizonObjectLocation(
-        edges,
-        percentAlongBegin,
-        percentAlongEnd
+        path?.mapToEHorizonGraphPath(),
+        position?.mapToEHorizonGraphPosition()
     )
 }
 
@@ -141,6 +141,28 @@ internal fun String.mapToOpenLRStandard(): Standard {
     }
 }
 
+/**
+ * Map the EHorizonGraphPath.
+ */
+internal fun EHorizonGraphPath.mapToGraphPath(): GraphPath {
+    return GraphPath(
+        edges,
+        percentAlongBegin,
+        percentAlongEnd,
+        length
+    )
+}
+
+/**
+ * Map the EHorizonGraphPosition.
+ */
+internal fun EHorizonGraphPosition.mapToGraphPosition(): GraphPosition {
+    return GraphPosition(
+        edgeId,
+        percentAlong
+    )
+}
+
 private fun FunctionalRoadClass.mapToRoadClass(): String {
     return when (this) {
         FunctionalRoadClass.MOTORWAY -> RoadClass.MOTORWAY
@@ -209,5 +231,17 @@ private fun GraphPosition.mapToEHorizonGraphPosition(): EHorizonGraphPosition {
     return EHorizonGraphPosition(
         edgeId,
         percentAlong
+    )
+}
+
+/**
+ * Map the GraphPath.
+ */
+private fun GraphPath.mapToEHorizonGraphPath(): EHorizonGraphPath {
+    return EHorizonGraphPath(
+        edges,
+        percentAlongBegin,
+        percentAlongEnd,
+        length
     )
 }
