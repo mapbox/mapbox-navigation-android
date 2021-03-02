@@ -61,6 +61,16 @@ package com.mapbox.navigation.base.formatter {
 
 }
 
+package com.mapbox.navigation.base.logger {
+
+  public final class LoggerProvider {
+    method public com.mapbox.base.common.logger.Logger getLogger();
+    property public final com.mapbox.base.common.logger.Logger logger;
+    field public static final com.mapbox.navigation.base.logger.LoggerProvider INSTANCE;
+  }
+
+}
+
 package com.mapbox.navigation.base.metrics {
 
   public final class DirectionsMetrics {
