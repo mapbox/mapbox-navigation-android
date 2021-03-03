@@ -9,11 +9,19 @@ internal class BannerInstructionEvent {
     var bannerInstructions: BannerInstructions? = null
         private set
 
-    fun isOccurring(routeProgress: RouteProgress): Boolean = updateCurrentBanner(routeProgress)
+    var latestBannerInstructions: BannerInstructions? = null
+        private set
 
-    private fun updateCurrentBanner(routeProgress: RouteProgress): Boolean =
-        ifNonNull(routeProgress.bannerInstructions) {
-            bannerInstructions = it
-            true
-        } ?: false
+    fun isOccurring(routeProgress: RouteProgress) = updateCurrentBanner(routeProgress)
+
+    fun invalidateLatestBannerInstructions() {
+        latestBannerInstructions = null
+    }
+
+    private fun updateCurrentBanner(routeProgress: RouteProgress) {
+        bannerInstructions = routeProgress.bannerInstructions
+        ifNonNull(bannerInstructions) {
+            latestBannerInstructions = it
+        }
+    }
 }
