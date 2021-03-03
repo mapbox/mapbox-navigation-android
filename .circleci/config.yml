@@ -17,7 +17,6 @@ executors:
       - image: mbgl/android-ndk-r21:latest
     working_directory: ~/code
     environment:
-      when: << pipeline.parameters.mapbox_navigation_native_upstream >>
       FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION: << pipeline.parameters.mapbox_navigation_native_snapshot >>
       ALLOW_SNAPSHOT_REPOSITORY: true
       
