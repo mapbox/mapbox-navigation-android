@@ -12,6 +12,7 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.common.ShadowValueConverter
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.arrow.RouteArrowUtils
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowState
@@ -199,6 +200,24 @@ class MapboxRouteArrowViewTest {
         )
         verify { RouteArrowUtils.initializeLayers(style, options) }
         unmockkObject(RouteArrowUtils)
+    }
+
+    @Test
+    fun getVisibility() {
+        mockkObject(MapboxRouteLineUtils)
+        val options = RouteArrowOptions.Builder(ctx).build()
+        val style = mockk<Style>()
+        every {
+            MapboxRouteLineUtils.getLayerVisibility(
+                style,
+                RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID
+            )
+        } returns Visibility.VISIBLE
+
+        val result = MapboxRouteArrowView(options).getVisibility(style)
+
+        assertEquals(Visibility.VISIBLE, result)
+        unmockkObject(MapboxRouteLineUtils)
     }
 
     private fun mockCheckForLayerInitialization(style: Style) {

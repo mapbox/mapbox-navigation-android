@@ -178,26 +178,6 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         return getLayerVisibility(style, RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID)
     }
 
-    /**
-     * Sets the layer containing the origin and destination icons to visible.
-     *
-     * @param style an instance of the Style
-     */
-    @Deprecated("This needs to be moved to its own API")
-    fun showOriginAndDestinationPoints(style: Style) {
-        updateLayerVisibility(style, RouteLayerConstants.WAYPOINT_LAYER_ID, Visibility.VISIBLE)
-    }
-
-    /**
-     * Sets the layer containing the origin and destination icons to not visible.
-     *
-     * @param style an instance of the Style
-     */
-    @Deprecated("This needs to be moved to its own API")
-    fun hideOriginAndDestinationPoints(style: Style) {
-        updateLayerVisibility(style, RouteLayerConstants.WAYPOINT_LAYER_ID, Visibility.NONE)
-    }
-
     private fun updateLayerVisibility(style: Style, layerId: String, visibility: Visibility) {
         if (style.isFullyLoaded()) {
             style.getLayer(layerId)?.visibility(visibility)

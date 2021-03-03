@@ -1,13 +1,11 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
-import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.parseRoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
@@ -62,34 +60,6 @@ internal class VanishingRouteLine {
             primaryRoutePoints?.flatList
                 ?: emptyList()
         )
-    }
-
-    /**
-     * Decodes the route geometry into nested arrays of legs -> steps -> points.
-     *
-     * The first and last point of adjacent steps overlap and are duplicated.
-     */
-    private fun parseRoutePoints(
-        route: DirectionsRoute,
-    ): RoutePoints? {
-        val precision =
-            if (route.routeOptions()?.geometries() == DirectionsCriteria.GEOMETRY_POLYLINE) {
-                Constants.PRECISION_5
-            } else {
-                Constants.PRECISION_6
-            }
-
-        val nestedList = route.legs()?.map { routeLeg ->
-            routeLeg.steps()?.map { legStep ->
-                legStep.geometry()?.let { geometry ->
-                    PolylineUtils.decode(geometry, precision).toList()
-                } ?: return null
-            } ?: return null
-        } ?: return null
-
-        val flatList = nestedList.flatten().flatten()
-
-        return RoutePoints(nestedList, flatList)
     }
 
     /**
