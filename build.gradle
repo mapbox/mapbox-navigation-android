@@ -57,7 +57,7 @@ allprojects {
         password = project.hasProperty('SDK_REGISTRY_TOKEN') ? project.property('SDK_REGISTRY_TOKEN') : System.getenv('SDK_REGISTRY_TOKEN')
       }
     }
-    // we allow access to snapshots repo if FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION is set, what means we are running on CI 
+    // we allow access to snapshots repo if ALLOW_SNAPSHOT_REPOSITORY is set, what means we are running on CI 
     // with Navigation Native forced to be some snapshot version
     // if you need to use snapshots while development, just set `addSnapshotsRepo` to true manually
     def addSnapshotsRepo = System.getenv("ALLOW_SNAPSHOT_REPOSITORY") ?: false
