@@ -2,8 +2,12 @@
 package com.mapbox.navigation.instrumentation_tests.utils.routes
 
 import android.content.Context
+import androidx.annotation.IntegerRes
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.core.constants.Constants
+import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.utils.bufferFromRawFile
@@ -44,5 +48,10 @@ object MockRoutesProvider {
                 BannerInstructions.fromJson(readRawFileText(context, R.raw.route_response_dc_very_short_banner_instructions_3))
             )
         )
+    }
+
+    fun loadDirectionsResponse(context: Context, @IntegerRes routeFileResource: Int): DirectionsResponse {
+        val jsonResponse = readRawFileText(context, routeFileResource)
+        return DirectionsResponse.fromJson(jsonResponse)
     }
 }
