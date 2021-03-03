@@ -178,10 +178,8 @@ class MapboxNavigationActivity :
             error: SpeechState.Speech.Error,
             fallback: SpeechState.Speech.Available
         ) {
-            fallback.let {
-                val currentPlay = SpeechState.ReadyToPlay(it.announcement)
-                voiceInstructionsPlayer?.play(currentPlay, voiceInstructionsPlayerCallback)
-            }
+            val currentPlay = SpeechState.ReadyToPlay(fallback.announcement)
+            voiceInstructionsPlayer?.play(currentPlay, voiceInstructionsPlayerCallback)
         }
     }
 
@@ -236,8 +234,7 @@ class MapboxNavigationActivity :
         }
     }
 
-    private val onIndicatorPositionChangedListener = OnIndicatorPositionChangedListener {
-        point ->
+    private val onIndicatorPositionChangedListener = OnIndicatorPositionChangedListener { point ->
         routeLineAPI?.updateTraveledRouteLine(point)
     }
 

@@ -63,8 +63,6 @@ internal class MapboxTripSession(
 
         @Volatile
         internal var UNCONDITIONAL_STATUS_POLLING_INTERVAL = 1000L
-
-        private const val TAG = "MapboxTripSession"
     }
 
     private var updateNavigatorStatusDataJobs: MutableList<Job> = CopyOnWriteArrayList()
@@ -96,6 +94,7 @@ internal class MapboxTripSession(
                 updateDataFromNavigatorStatus()
             }
             isOffRoute = false
+            invalidateLatestBannerInstructionEvent()
         }
 
     private fun cancelOngoingUpdateNavigatorStatusDataJobs() {
@@ -118,7 +117,6 @@ internal class MapboxTripSession(
     private val mapMatcherResultObservers = CopyOnWriteArraySet<MapMatcherResultObserver>()
 
     private val bannerInstructionEvent = BannerInstructionEvent()
-    private val voiceInstructionEvent = VoiceInstructionEvent()
 
     private var state: TripSessionState = TripSessionState.STOPPED
         set(value) {
@@ -330,20 +328,9 @@ internal class MapboxTripSession(
         bannerInstructionsObserver: BannerInstructionsObserver
     ) {
         bannerInstructionsObservers.add(bannerInstructionsObserver)
-        routeProgress?.let {
-            checkBannerInstructionEvent(it) { bannerInstruction ->
-                bannerInstructionsObserver.onNewBannerInstructions(bannerInstruction)
-            }
+        checkLatestValidBannerInstructionEvent { bannerInstruction ->
+            bannerInstructionsObserver.onNewBannerInstructions(bannerInstruction)
         }
-    }
-
-    /**
-     * Unregister all [BannerInstructionsObserver]
-     *
-     * @see [registerBannerInstructionsObserver]
-     */
-    override fun unregisterAllBannerInstructionsObservers() {
-        bannerInstructionsObservers.clear()
     }
 
     /**
@@ -356,6 +343,15 @@ internal class MapboxTripSession(
     }
 
     /**
+     * Unregister all [BannerInstructionsObserver]
+     *
+     * @see [registerBannerInstructionsObserver]
+     */
+    override fun unregisterAllBannerInstructionsObservers() {
+        bannerInstructionsObservers.clear()
+    }
+
+    /**
      * Register [VoiceInstructionsObserver]
      */
     override fun registerVoiceInstructionsObserver(
@@ -363,7 +359,7 @@ internal class MapboxTripSession(
     ) {
         voiceInstructionsObservers.add(voiceInstructionsObserver)
         routeProgress?.let {
-            checkVoiceInstructionEvent(it) { voiceInstruction ->
+            checkVoiceInstructionEvent(it.voiceInstructions) { voiceInstruction ->
                 voiceInstructionsObserver.onNewVoiceInstructions(voiceInstruction)
             }
         }
@@ -537,14 +533,15 @@ internal class MapboxTripSession(
     private fun updateRouteProgress(progress: RouteProgress?) {
         routeProgress = progress
         tripService.updateNotification(progress)
-        progress?.let {
+        progress?.let { progress ->
             routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
-            checkBannerInstructionEvent(progress) { bannerInstruction ->
+            bannerInstructionEvent.isOccurring(progress)
+            checkBannerInstructionEvent { bannerInstruction ->
                 bannerInstructionsObservers.forEach {
                     it.onNewBannerInstructions(bannerInstruction)
                 }
             }
-            checkVoiceInstructionEvent(progress) { voiceInstruction ->
+            checkVoiceInstructionEvent(progress.voiceInstructions) { voiceInstruction ->
                 voiceInstructionsObservers.forEach {
                     it.onNewVoiceInstructions(voiceInstruction)
                 }
@@ -552,35 +549,44 @@ internal class MapboxTripSession(
         }
     }
 
-    private fun checkBannerInstructionEvent(
-        progress: RouteProgress,
+    private fun checkLatestValidBannerInstructionEvent(
         action: (BannerInstructions) -> Unit
     ) {
-        if (bannerInstructionEvent.isOccurring(progress)) {
-            ifNonNull(bannerInstructionEvent.bannerInstructions) { bannerInstructions ->
-                val bannerView = bannerInstructions.view()
-                val bannerComponents = bannerView?.components()
-                ifNonNull(bannerComponents) { components ->
-                    components.forEachIndexed { index, component ->
-                        component.takeIf { it.type() == BannerComponents.GUIDANCE_VIEW }?.let { c ->
-                            components[index] =
-                                c.toBuilder()
-                                    .imageUrl(c.imageUrl()?.plus("&access_token=$accessToken"))
-                                    .build()
-                        }
+        ifNonNull(bannerInstructionEvent.latestBannerInstructions) {
+            action(it)
+        }
+    }
+
+    private fun invalidateLatestBannerInstructionEvent() {
+        bannerInstructionEvent.invalidateLatestBannerInstructions()
+    }
+
+    private fun checkBannerInstructionEvent(
+        action: (BannerInstructions) -> Unit
+    ) {
+        ifNonNull(bannerInstructionEvent.bannerInstructions) { bannerInstructions ->
+            val bannerView = bannerInstructions.view()
+            val bannerComponents = bannerView?.components()
+            ifNonNull(bannerComponents) { components ->
+                components.forEachIndexed { index, component ->
+                    component.takeIf { it.type() == BannerComponents.GUIDANCE_VIEW }?.let { c ->
+                        components[index] =
+                            c.toBuilder()
+                                .imageUrl(c.imageUrl()?.plus("&access_token=$accessToken"))
+                                .build()
                     }
                 }
-                action(bannerInstructions)
             }
+            action(bannerInstructions)
         }
     }
 
     private fun checkVoiceInstructionEvent(
-        progress: RouteProgress,
+        currentVoiceInstructions: VoiceInstructions?,
         action: (VoiceInstructions) -> Unit
     ) {
-        if (voiceInstructionEvent.isOccurring(progress)) {
-            action(voiceInstructionEvent.voiceInstructions)
+        ifNonNull(currentVoiceInstructions) { voiceInstructions ->
+            action(voiceInstructions)
         }
     }
 }
