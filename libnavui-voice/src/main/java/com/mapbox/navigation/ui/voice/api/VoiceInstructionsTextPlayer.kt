@@ -5,10 +5,8 @@ import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
-import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayer
-import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayerCallback
-import com.mapbox.navigation.ui.base.model.voice.Announcement
-import com.mapbox.navigation.ui.base.model.voice.SpeechState
+import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
+import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import java.util.Locale
 
 /**
@@ -29,23 +27,26 @@ internal class VoiceInstructionsTextPlayer(
     }
     private var volumeLevel: Float = DEFAULT_VOLUME_LEVEL
     private var clientCallback: VoiceInstructionsPlayerCallback? = null
-    private var currentPlay: SpeechState.ReadyToPlay? = null
+    private var currentPlay: SpeechAnnouncement? = null
 
     /**
-     * Given [SpeechState.ReadyToPlay] [Announcement] the method will play the voice instruction.
+     * Given [SpeechAnnouncement] the method will play the voice instruction.
      * If a voice instruction is already playing or other announcement are already queued,
      * the given voice instruction will be queued to play after.
-     * @param state SpeechState Play Announcement object including the announcement text
+     * @param announcement object including the announcement text
      * and optionally a synthesized speech mp3.
      * @param callback
      */
-    override fun play(state: SpeechState.ReadyToPlay, callback: VoiceInstructionsPlayerCallback) {
+    override fun play(
+        announcement: SpeechAnnouncement,
+        callback: VoiceInstructionsPlayerCallback
+    ) {
         clientCallback = callback
         check(currentPlay == null) {
             "Only one announcement can be played at a time."
         }
-        currentPlay = state
-        val announcement = state.announcement.announcement
+        currentPlay = announcement
+        val announcement = announcement.announcement
         if (isLanguageSupported && announcement.isNotBlank()) {
             play(announcement)
         } else {
@@ -55,12 +56,12 @@ internal class VoiceInstructionsTextPlayer(
     }
 
     /**
-     * The method will set the volume to the specified level from [SpeechState.Volume].
+     * The method will set the volume to the specified level from [SpeechVolume].
      * Note that this API is not dynamic and only takes effect on the next play announcement.
      * If the volume is set to 0.0f, current play announcement (if any) is stopped though.
-     * @param state SpeechState Volume level.
+     * @param state volume level.
      */
-    override fun volume(state: SpeechState.Volume) {
+    override fun volume(state: SpeechVolume) {
         volumeLevel = state.level
         if (textToSpeech.isSpeaking && state.level == MUTE_VOLUME_LEVEL) {
             textToSpeech.stop()
@@ -119,9 +120,9 @@ internal class VoiceInstructionsTextPlayer(
     }
 
     private fun donePlaying() {
-        currentPlay?.announcement?.let {
+        currentPlay?.let {
             currentPlay = null
-            clientCallback?.onDone(SpeechState.DonePlaying(it))
+            clientCallback?.onDone(it)
         }
     }
 

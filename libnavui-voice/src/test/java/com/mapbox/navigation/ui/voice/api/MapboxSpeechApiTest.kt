@@ -3,12 +3,13 @@ package com.mapbox.navigation.ui.voice.api
 import android.content.Context
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.base.api.voice.SpeechCallback
-import com.mapbox.navigation.ui.base.model.voice.Announcement
-import com.mapbox.navigation.ui.base.model.voice.SpeechState
+import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.voice.VoiceAction
 import com.mapbox.navigation.ui.voice.VoiceProcessor
 import com.mapbox.navigation.ui.voice.VoiceResult
+import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
+import com.mapbox.navigation.ui.voice.model.SpeechError
+import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.TypeAndAnnouncement
 import com.mapbox.navigation.ui.voice.model.VoiceState
 import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
@@ -85,7 +86,8 @@ class MapboxSpeechApiTest {
         every { mockedVoiceInstructions.announcement() } returns anAnnouncement
         every { mockedVoiceInstructions.ssmlAnnouncement() } returns aSsmlAnnouncement
         val speechCallback: SpeechCallback = mockk()
-        every { speechCallback.onAvailable(any()) } just Runs
+        val speechValueSlot = slot<Expected.Success<SpeechValue>>()
+        every { speechCallback.onSpeech(capture(speechValueSlot)) } just Runs
         val mockedInstructionFile: File = mockk()
         val mockedVoiceApi: MapboxVoiceApi = mockk()
         coEvery {
@@ -105,10 +107,8 @@ class MapboxSpeechApiTest {
         mapboxSpeechApi.generate(mockedVoiceInstructions, speechCallback)
 
         verify(exactly = 1) {
-            speechCallback.onAvailable(
-                SpeechState.Speech.Available(
-                    Announcement(anAnnouncement, aSsmlAnnouncement, mockedInstructionFile)
-                )
+            speechCallback.onSpeech(
+                speechValueSlot.captured
             )
         }
     }
@@ -130,7 +130,7 @@ class MapboxSpeechApiTest {
         every { mockedVoiceInstructions.announcement() } returns anAnnouncement
         every { mockedVoiceInstructions.ssmlAnnouncement() } returns aSsmlAnnouncement
         val speechCallback: SpeechCallback = mockk()
-        every { speechCallback.onError(any(), any()) } just Runs
+        every { speechCallback.onSpeech(any()) } just Runs
         val mockedVoiceError: VoiceState.VoiceError = VoiceState.VoiceError(
             "code: 204, error: No data available"
         )
@@ -148,7 +148,7 @@ class MapboxSpeechApiTest {
             )
         } returns mockedVoiceApi
         val mapboxSpeechApi = MapboxSpeechApi(aMockedContext, anyAccessToken, anyLanguage)
-        val speechStateSpeechTextSlot = slot<SpeechState.Speech.Available>()
+        val speechErrorSlot = slot<Expected.Failure<SpeechError>>()
         val mockedTypeAndAnnouncement: TypeAndAnnouncement = mockk()
         every { mockedTypeAndAnnouncement.type } returns "ssml"
         every { mockedTypeAndAnnouncement.announcement } returns aSsmlAnnouncement
@@ -159,19 +159,20 @@ class MapboxSpeechApiTest {
         mapboxSpeechApi.generate(mockedVoiceInstructions, speechCallback)
 
         verify(exactly = 1) {
-            speechCallback.onError(
-                SpeechState.Speech.Error(
-                    "code: 204, error: No data available"
-                ),
-                capture(speechStateSpeechTextSlot)
+            speechCallback.onSpeech(
+                capture(speechErrorSlot)
             )
         }
-        assertEquals(anAnnouncement, speechStateSpeechTextSlot.captured.announcement.announcement)
+        assertEquals(
+            "code: 204, error: No data available",
+            speechErrorSlot.captured.error.errorMessage
+        )
+        assertEquals(anAnnouncement, speechErrorSlot.captured.error.fallback.announcement)
         assertEquals(
             aSsmlAnnouncement,
-            speechStateSpeechTextSlot.captured.announcement.ssmlAnnouncement
+            speechErrorSlot.captured.error.fallback.ssmlAnnouncement
         )
-        assertNull(speechStateSpeechTextSlot.captured.announcement.file)
+        assertNull(speechErrorSlot.captured.error.fallback.file)
     }
 
     @Test
@@ -191,7 +192,7 @@ class MapboxSpeechApiTest {
         every { mockedVoiceInstructions.announcement() } returns anAnnouncement
         every { mockedVoiceInstructions.ssmlAnnouncement() } returns aSsmlAnnouncement
         val speechCallback: SpeechCallback = mockk()
-        every { speechCallback.onError(any(), any()) } just Runs
+        every { speechCallback.onSpeech(any()) } just Runs
         val mockedVoiceError: VoiceState.VoiceError = VoiceState.VoiceError(
             "code: 204, error: No data available"
         )
@@ -275,7 +276,7 @@ class MapboxSpeechApiTest {
             )
         } returns mockedVoiceApi
         val mapboxSpeechApi = MapboxSpeechApi(aMockedContext, anyAccessToken, anyLanguage)
-        val anyAnnouncement: Announcement = mockk()
+        val anyAnnouncement: SpeechAnnouncement = mockk()
 
         mapboxSpeechApi.clean(anyAnnouncement)
 

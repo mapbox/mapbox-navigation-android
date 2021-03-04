@@ -2,9 +2,8 @@ package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
 import android.media.AudioManager
-import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayerCallback
-import com.mapbox.navigation.ui.base.model.voice.Announcement
-import com.mapbox.navigation.ui.base.model.voice.SpeechState
+import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
+import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import io.mockk.Runs
 import io.mockk.every
@@ -58,10 +57,10 @@ class MapboxVoiceInstructionsPlayerTest {
         val mockedFilePlayer: VoiceInstructionsFilePlayer = mockk()
         val mockedTextPlayer: VoiceInstructionsTextPlayer = mockk()
         val voiceInstructionsPlayerCallbackSlot = slot<VoiceInstructionsPlayerCallback>()
-        val mockedAnnouncement: Announcement = mockk()
+        val mockedAnnouncement: SpeechAnnouncement = mockk()
         val mockedFile: File = mockk()
         every { mockedAnnouncement.file } returns mockedFile
-        val mockedDonePlaying: SpeechState.DonePlaying = SpeechState.DonePlaying(mockedAnnouncement)
+        val mockedDonePlaying: SpeechAnnouncement = mockedAnnouncement
         every {
             mockedFilePlayer.play(any(), capture(voiceInstructionsPlayerCallbackSlot))
         } answers {
@@ -87,7 +86,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 anyLanguage,
                 mockedVoiceInstructionsPlayerOptions
             )
-        val mockedPlay: SpeechState.ReadyToPlay = SpeechState.ReadyToPlay(mockedAnnouncement)
+        val mockedPlay: SpeechAnnouncement = mockedAnnouncement
         val voiceInstructionsPlayerCallback: VoiceInstructionsPlayerCallback = mockk()
         every { voiceInstructionsPlayerCallback.onDone(any()) } just Runs
 
@@ -100,7 +99,7 @@ class MapboxVoiceInstructionsPlayerTest {
             mockedTextPlayer.play(mockedPlay, any())
         }
         verify(exactly = 1) {
-            voiceInstructionsPlayerCallback.onDone(SpeechState.DonePlaying(mockedPlay.announcement))
+            voiceInstructionsPlayerCallback.onDone(mockedPlay)
         }
     }
 
@@ -111,10 +110,10 @@ class MapboxVoiceInstructionsPlayerTest {
         val mockedFilePlayer: VoiceInstructionsFilePlayer = mockk()
         val mockedTextPlayer: VoiceInstructionsTextPlayer = mockk()
         val voiceInstructionsPlayerCallbackSlot = slot<VoiceInstructionsPlayerCallback>()
-        val mockedAnnouncement: Announcement = mockk()
+        val mockedAnnouncement: SpeechAnnouncement = mockk()
         val nullFile = null
         every { mockedAnnouncement.file } returns nullFile
-        val mockedDonePlaying: SpeechState.DonePlaying = SpeechState.DonePlaying(mockedAnnouncement)
+        val mockedDonePlaying: SpeechAnnouncement = mockedAnnouncement
         every {
             mockedTextPlayer.play(any(), capture(voiceInstructionsPlayerCallbackSlot))
         } answers {
@@ -140,7 +139,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 anyLanguage,
                 mockedVoiceInstructionsPlayerOptions
             )
-        val mockedPlay: SpeechState.ReadyToPlay = SpeechState.ReadyToPlay(mockedAnnouncement)
+        val mockedPlay: SpeechAnnouncement = mockedAnnouncement
         val voiceInstructionsPlayerCallback: VoiceInstructionsPlayerCallback = mockk()
         every { voiceInstructionsPlayerCallback.onDone(any()) } just Runs
 
@@ -153,7 +152,7 @@ class MapboxVoiceInstructionsPlayerTest {
             mockedFilePlayer.play(mockedPlay, any())
         }
         verify(exactly = 1) {
-            voiceInstructionsPlayerCallback.onDone(SpeechState.DonePlaying(mockedPlay.announcement))
+            voiceInstructionsPlayerCallback.onDone(mockedPlay)
         }
     }
 
@@ -164,11 +163,11 @@ class MapboxVoiceInstructionsPlayerTest {
         val mockedFilePlayer: VoiceInstructionsFilePlayer = mockk()
         val mockedTextPlayer: VoiceInstructionsTextPlayer = mockk()
         val voiceInstructionsPlayerCallbackSlot = slot<VoiceInstructionsPlayerCallback>()
-        val mockedAnnouncement: Announcement = mockk()
+        val mockedAnnouncement: SpeechAnnouncement = mockk()
         val mockedFile: File = mockk()
         val nullFile = null
         every { mockedAnnouncement.file } returns mockedFile andThen nullFile
-        val mockedDonePlaying: SpeechState.DonePlaying = SpeechState.DonePlaying(mockedAnnouncement)
+        val mockedDonePlaying: SpeechAnnouncement = mockedAnnouncement
         every {
             mockedFilePlayer.play(any(), capture(voiceInstructionsPlayerCallbackSlot))
         } answers {
@@ -199,7 +198,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 anyLanguage,
                 mockedVoiceInstructionsPlayerOptions
             )
-        val mockedPlay: SpeechState.ReadyToPlay = SpeechState.ReadyToPlay(mockedAnnouncement)
+        val mockedPlay: SpeechAnnouncement = mockedAnnouncement
         val voiceInstructionsPlayerCallback: VoiceInstructionsPlayerCallback = mockk()
         every { voiceInstructionsPlayerCallback.onDone(any()) } just Runs
 
@@ -208,9 +207,9 @@ class MapboxVoiceInstructionsPlayerTest {
 
         verifyOrder {
             mockedFilePlayer.play(mockedPlay, any())
-            voiceInstructionsPlayerCallback.onDone(SpeechState.DonePlaying(mockedPlay.announcement))
+            voiceInstructionsPlayerCallback.onDone(mockedPlay)
             mockedTextPlayer.play(mockedPlay, any())
-            voiceInstructionsPlayerCallback.onDone(SpeechState.DonePlaying(mockedPlay.announcement))
+            voiceInstructionsPlayerCallback.onDone(mockedPlay)
         }
     }
 
@@ -242,7 +241,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 anyLanguage,
                 mockedVoiceInstructionsPlayerOptions
             )
-        val mockedVolume: SpeechState.Volume = mockk()
+        val mockedVolume: SpeechVolume = mockk()
         every { mockedVolume.level } returns 0.5f
 
         mapboxVoiceInstructionsPlayer.volume(mockedVolume)
@@ -283,7 +282,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 anyLanguage,
                 mockedVoiceInstructionsPlayerOptions
             )
-        val mockedVolume: SpeechState.Volume = mockk()
+        val mockedVolume: SpeechVolume = mockk()
         every { mockedVolume.level } returns -0.5f
 
         mapboxVoiceInstructionsPlayer.volume(mockedVolume)
@@ -317,7 +316,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 anyLanguage,
                 mockedVoiceInstructionsPlayerOptions
             )
-        val mockedVolume: SpeechState.Volume = mockk()
+        val mockedVolume: SpeechVolume = mockk()
         every { mockedVolume.level } returns 1.5f
 
         mapboxVoiceInstructionsPlayer.volume(mockedVolume)
@@ -405,7 +404,7 @@ class MapboxVoiceInstructionsPlayerTest {
     fun `request audio focus when play and abandon focus when done`() {
         val anyAccessToken = "pk.123"
         val anyLanguage = Locale.US.language
-        val mockedAnnouncement: Announcement = mockk(relaxed = true)
+        val mockedAnnouncement: SpeechAnnouncement = mockk(relaxed = true)
         val mapboxVoiceInstructionsPlayer =
             MapboxVoiceInstructionsPlayer(
                 aMockedContext,
@@ -413,7 +412,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 anyLanguage,
                 mockedVoiceInstructionsPlayerOptions
             )
-        val mockedPlay: SpeechState.ReadyToPlay = SpeechState.ReadyToPlay(mockedAnnouncement)
+        val mockedPlay: SpeechAnnouncement = mockedAnnouncement
         val voiceInstructionsPlayerCallback: VoiceInstructionsPlayerCallback = mockk()
         every { voiceInstructionsPlayerCallback.onDone(any()) } just Runs
 

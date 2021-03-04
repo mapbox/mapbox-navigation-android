@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.voice.api
 
 import com.mapbox.api.directions.v5.models.VoiceInstructions
-import com.mapbox.navigation.ui.base.model.voice.Announcement
+import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.VoiceState
 
 /**
@@ -16,8 +16,9 @@ internal interface VoiceApi {
     suspend fun retrieveVoiceFile(voiceInstruction: VoiceInstructions): VoiceState
 
     /**
-     * Given the [Announcement] the method may cleanup any associated files previously generated.
+     * Given the [SpeechAnnouncement] the method may cleanup any associated files
+     * previously generated.
      * @param announcement
      */
-    fun clean(announcement: Announcement)
+    fun clean(announcement: SpeechAnnouncement)
 }

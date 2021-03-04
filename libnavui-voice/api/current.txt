@@ -1,21 +1,72 @@
 // Signature format: 3.0
 package com.mapbox.navigation.ui.voice.api {
 
-  public final class MapboxSpeechApi implements com.mapbox.navigation.ui.base.api.voice.SpeechApi {
+  public final class MapboxSpeechApi {
     ctor public MapboxSpeechApi(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions options = MapboxSpeechApiOptions.<init>().build());
     ctor public MapboxSpeechApi(android.content.Context context, String accessToken, String language);
     method public void cancel();
-    method public void clean(com.mapbox.navigation.ui.base.model.voice.Announcement announcement);
-    method public void generate(com.mapbox.api.directions.v5.models.VoiceInstructions voiceInstruction, com.mapbox.navigation.ui.base.api.voice.SpeechCallback callback);
+    method public void clean(com.mapbox.navigation.ui.voice.model.SpeechAnnouncement announcement);
+    method public void generate(com.mapbox.api.directions.v5.models.VoiceInstructions voiceInstruction, com.mapbox.navigation.ui.voice.api.SpeechCallback callback);
   }
 
-  @UiThread public final class MapboxVoiceInstructionsPlayer implements com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayer {
+  @UiThread public final class MapboxVoiceInstructionsPlayer {
     ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options = VoiceInstructionsPlayerOptions.<init>().build());
     ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language);
     method public void clear();
-    method public void play(com.mapbox.navigation.ui.base.model.voice.SpeechState.ReadyToPlay state, com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayerCallback callback);
+    method public void play(com.mapbox.navigation.ui.voice.model.SpeechAnnouncement announcement, com.mapbox.navigation.ui.voice.api.VoiceInstructionsPlayerCallback callback);
     method public void shutdown();
-    method public void volume(com.mapbox.navigation.ui.base.model.voice.SpeechState.Volume state);
+    method public void volume(com.mapbox.navigation.ui.voice.model.SpeechVolume state);
+  }
+
+  public interface SpeechCallback {
+    method public void onSpeech(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.voice.model.SpeechValue,com.mapbox.navigation.ui.voice.model.SpeechError> state);
+  }
+
+  public interface VoiceInstructionsPlayerCallback {
+    method public void onDone(com.mapbox.navigation.ui.voice.model.SpeechAnnouncement announcement);
+  }
+
+}
+
+package com.mapbox.navigation.ui.voice.model {
+
+  public final class SpeechAnnouncement {
+    method public String getAnnouncement();
+    method public java.io.File? getFile();
+    method public String? getSsmlAnnouncement();
+    method public com.mapbox.navigation.ui.voice.model.SpeechAnnouncement.Builder toBuilder();
+    property public final String announcement;
+    property public final java.io.File? file;
+    property public final String? ssmlAnnouncement;
+  }
+
+  public static final class SpeechAnnouncement.Builder {
+    ctor public SpeechAnnouncement.Builder(String announcement);
+    method public com.mapbox.navigation.ui.voice.model.SpeechAnnouncement build();
+    method public com.mapbox.navigation.ui.voice.model.SpeechAnnouncement.Builder file(java.io.File? file);
+    method public com.mapbox.navigation.ui.voice.model.SpeechAnnouncement.Builder ssmlAnnouncement(String? ssmlAnnouncement);
+  }
+
+  public final class SpeechError {
+    method public String getErrorMessage();
+    method public com.mapbox.navigation.ui.voice.model.SpeechAnnouncement getFallback();
+    method public Throwable? getThrowable();
+    property public final String errorMessage;
+    property public final com.mapbox.navigation.ui.voice.model.SpeechAnnouncement fallback;
+    property public final Throwable? throwable;
+  }
+
+  public final class SpeechValue {
+    method public com.mapbox.navigation.ui.voice.model.SpeechAnnouncement getAnnouncement();
+    property public final com.mapbox.navigation.ui.voice.model.SpeechAnnouncement announcement;
+  }
+
+  public final class SpeechVolume {
+    ctor public SpeechVolume(@FloatRange(from=0.0, to=1.0) float level);
+    method public float component1();
+    method public com.mapbox.navigation.ui.voice.model.SpeechVolume copy(float level);
+    method public float getLevel();
+    property public final float level;
   }
 
 }

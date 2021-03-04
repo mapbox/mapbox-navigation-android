@@ -47,12 +47,7 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityNavigationBinding
 import com.mapbox.navigation.examples.util.Utils
-import com.mapbox.navigation.ui.base.api.voice.SpeechApi
-import com.mapbox.navigation.ui.base.api.voice.SpeechCallback
-import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayer
-import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayerCallback
 import com.mapbox.navigation.ui.base.model.Expected
-import com.mapbox.navigation.ui.base.model.voice.SpeechState
 import com.mapbox.navigation.ui.maneuver.api.ManeuverCallback
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.api.StepDistanceRemainingCallback
@@ -81,6 +76,11 @@ import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
+import com.mapbox.navigation.ui.voice.api.SpeechCallback
+import com.mapbox.navigation.ui.voice.api.VoiceInstructionsPlayerCallback
+import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
+import com.mapbox.navigation.ui.voice.model.SpeechError
+import com.mapbox.navigation.ui.voice.model.SpeechValue
 import java.util.Locale
 
 class MapboxNavigationActivity :
@@ -95,13 +95,13 @@ class MapboxNavigationActivity :
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
     private lateinit var tripProgressApi: MapboxTripProgressApi
     private lateinit var maneuverApi: MapboxManeuverApi
-    private lateinit var speechAPI: SpeechApi
+    private lateinit var speechAPI: MapboxSpeechApi
 
     private var isNavigating = false
     private var routeLineAPI: MapboxRouteLineApi? = null
     private var routeLineView: MapboxRouteLineView? = null
     private var routeArrowView: MapboxRouteArrowView? = null
-    private var voiceInstructionsPlayer: VoiceInstructionsPlayer? = null
+    private var voiceInstructionsPlayer: MapboxVoiceInstructionsPlayer? = null
     private val routeArrowAPI: MapboxRouteArrowApi = MapboxRouteArrowApi()
     private val navigationLocationProvider = NavigationLocationProvider()
     private val pixelDensity = Resources.getSystem().displayMetrics.density
@@ -174,23 +174,29 @@ class MapboxNavigationActivity :
 
     private val voiceInstructionsPlayerCallback: VoiceInstructionsPlayerCallback =
         object : VoiceInstructionsPlayerCallback {
-            override fun onDone(state: SpeechState.DonePlaying) {
-                speechAPI.clean(state.announcement)
+            override fun onDone(announcement: SpeechAnnouncement) {
+                speechAPI.clean(announcement)
             }
         }
 
     private val speechCallback = object : SpeechCallback {
-        override fun onAvailable(state: SpeechState.Speech.Available) {
-            val currentPlay = SpeechState.ReadyToPlay(state.announcement)
-            voiceInstructionsPlayer?.play(currentPlay, voiceInstructionsPlayerCallback)
-        }
-
-        override fun onError(
-            error: SpeechState.Speech.Error,
-            fallback: SpeechState.Speech.Available
-        ) {
-            val currentPlay = SpeechState.ReadyToPlay(fallback.announcement)
-            voiceInstructionsPlayer?.play(currentPlay, voiceInstructionsPlayerCallback)
+        override fun onSpeech(state: Expected<SpeechValue, SpeechError>) {
+            when (state) {
+                is Expected.Success -> {
+                    val currentSpeechValue = state.value
+                    voiceInstructionsPlayer?.play(
+                        currentSpeechValue.announcement,
+                        voiceInstructionsPlayerCallback
+                    )
+                }
+                is Expected.Failure -> {
+                    val currentSpeechError = state.error
+                    voiceInstructionsPlayer?.play(
+                        currentSpeechError.fallback,
+                        voiceInstructionsPlayerCallback
+                    )
+                }
+            }
         }
     }
 

@@ -1,9 +1,8 @@
 package com.mapbox.navigation.ui.voice.api
 
-import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayerCallback
-import com.mapbox.navigation.ui.base.model.voice.SpeechState
+import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 
 internal data class PlayCallback(
-    val announcement: SpeechState.ReadyToPlay,
+    val announcement: SpeechAnnouncement,
     val callback: VoiceInstructionsPlayerCallback
 )

@@ -39,32 +39,6 @@ package com.mapbox.navigation.ui.base.api.snapshotter {
 
 }
 
-package com.mapbox.navigation.ui.base.api.voice {
-
-  public interface SpeechApi {
-    method public void cancel();
-    method public void clean(com.mapbox.navigation.ui.base.model.voice.Announcement announcement);
-    method public void generate(com.mapbox.api.directions.v5.models.VoiceInstructions voiceInstruction, com.mapbox.navigation.ui.base.api.voice.SpeechCallback callback);
-  }
-
-  public interface SpeechCallback {
-    method public void onAvailable(com.mapbox.navigation.ui.base.model.voice.SpeechState.Speech.Available state);
-    method public void onError(com.mapbox.navigation.ui.base.model.voice.SpeechState.Speech.Error error, com.mapbox.navigation.ui.base.model.voice.SpeechState.Speech.Available fallback);
-  }
-
-  public interface VoiceInstructionsPlayer {
-    method public void clear();
-    method public void play(com.mapbox.navigation.ui.base.model.voice.SpeechState.ReadyToPlay state, com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayerCallback callback);
-    method public void shutdown();
-    method public void volume(com.mapbox.navigation.ui.base.model.voice.SpeechState.Volume state);
-  }
-
-  public interface VoiceInstructionsPlayerCallback {
-    method public void onDone(com.mapbox.navigation.ui.base.model.voice.SpeechState.DonePlaying state);
-  }
-
-}
-
 package com.mapbox.navigation.ui.base.formatter {
 
   public interface ValueFormatter<T, R> {
@@ -292,70 +266,6 @@ package com.mapbox.navigation.ui.base.model.snapshotter {
     method public com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotReady copy(android.graphics.Bitmap bitmap);
     method public android.graphics.Bitmap getBitmap();
     property public final android.graphics.Bitmap bitmap;
-  }
-
-}
-
-package com.mapbox.navigation.ui.base.model.voice {
-
-  public final class Announcement {
-    ctor public Announcement(String announcement, String? ssmlAnnouncement, java.io.File? file);
-    method public String component1();
-    method public String? component2();
-    method public java.io.File? component3();
-    method public com.mapbox.navigation.ui.base.model.voice.Announcement copy(String announcement, String? ssmlAnnouncement, java.io.File? file);
-    method public String getAnnouncement();
-    method public java.io.File? getFile();
-    method public String? getSsmlAnnouncement();
-    property public final String announcement;
-    property public final java.io.File? file;
-    property public final String? ssmlAnnouncement;
-  }
-
-  public abstract sealed class SpeechState {
-  }
-
-  public static final class SpeechState.DonePlaying extends com.mapbox.navigation.ui.base.model.voice.SpeechState {
-    ctor public SpeechState.DonePlaying(com.mapbox.navigation.ui.base.model.voice.Announcement announcement);
-    method public com.mapbox.navigation.ui.base.model.voice.Announcement component1();
-    method public com.mapbox.navigation.ui.base.model.voice.SpeechState.DonePlaying copy(com.mapbox.navigation.ui.base.model.voice.Announcement announcement);
-    method public com.mapbox.navigation.ui.base.model.voice.Announcement getAnnouncement();
-    property public final com.mapbox.navigation.ui.base.model.voice.Announcement announcement;
-  }
-
-  public static final class SpeechState.ReadyToPlay extends com.mapbox.navigation.ui.base.model.voice.SpeechState {
-    ctor public SpeechState.ReadyToPlay(com.mapbox.navigation.ui.base.model.voice.Announcement announcement);
-    method public com.mapbox.navigation.ui.base.model.voice.Announcement component1();
-    method public com.mapbox.navigation.ui.base.model.voice.SpeechState.ReadyToPlay copy(com.mapbox.navigation.ui.base.model.voice.Announcement announcement);
-    method public com.mapbox.navigation.ui.base.model.voice.Announcement getAnnouncement();
-    property public final com.mapbox.navigation.ui.base.model.voice.Announcement announcement;
-  }
-
-  public abstract static sealed class SpeechState.Speech extends com.mapbox.navigation.ui.base.model.voice.SpeechState {
-  }
-
-  public static final class SpeechState.Speech.Available extends com.mapbox.navigation.ui.base.model.voice.SpeechState.Speech {
-    ctor public SpeechState.Speech.Available(com.mapbox.navigation.ui.base.model.voice.Announcement announcement);
-    method public com.mapbox.navigation.ui.base.model.voice.Announcement component1();
-    method public com.mapbox.navigation.ui.base.model.voice.SpeechState.Speech.Available copy(com.mapbox.navigation.ui.base.model.voice.Announcement announcement);
-    method public com.mapbox.navigation.ui.base.model.voice.Announcement getAnnouncement();
-    property public final com.mapbox.navigation.ui.base.model.voice.Announcement announcement;
-  }
-
-  public static final class SpeechState.Speech.Error extends com.mapbox.navigation.ui.base.model.voice.SpeechState.Speech {
-    ctor public SpeechState.Speech.Error(String exception);
-    method public String component1();
-    method public com.mapbox.navigation.ui.base.model.voice.SpeechState.Speech.Error copy(String exception);
-    method public String getException();
-    property public final String exception;
-  }
-
-  public static final class SpeechState.Volume extends com.mapbox.navigation.ui.base.model.voice.SpeechState {
-    ctor public SpeechState.Volume(@FloatRange(from=0.0, to=1.0) float level);
-    method public float component1();
-    method public com.mapbox.navigation.ui.base.model.voice.SpeechState.Volume copy(float level);
-    method public float getLevel();
-    property public final float level;
   }
 
 }
