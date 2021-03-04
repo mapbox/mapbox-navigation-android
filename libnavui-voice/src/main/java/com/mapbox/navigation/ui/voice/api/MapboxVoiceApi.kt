@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.voice.api
 
 import com.mapbox.api.directions.v5.models.VoiceInstructions
-import com.mapbox.navigation.ui.base.model.voice.Announcement
 import com.mapbox.navigation.ui.voice.VoiceAction
 import com.mapbox.navigation.ui.voice.VoiceAction.PrepareTypeAndAnnouncement
 import com.mapbox.navigation.ui.voice.VoiceAction.PrepareVoiceRequest
@@ -10,6 +9,7 @@ import com.mapbox.navigation.ui.voice.VoiceProcessor
 import com.mapbox.navigation.ui.voice.VoiceResult.VoiceRequest
 import com.mapbox.navigation.ui.voice.VoiceResult.VoiceResponse
 import com.mapbox.navigation.ui.voice.VoiceResult.VoiceTypeAndAnnouncement
+import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.VoiceState
 import com.mapbox.navigation.ui.voice.model.VoiceState.VoiceError
 import java.io.File
@@ -31,10 +31,10 @@ internal class MapboxVoiceApi(
     }
 
     /**
-     * Given the [Announcement] the method may cleanup any associated files previously generated.
+     * Given the [SpeechAnnouncement] the method may cleanup any associated files previously generated.
      * @param announcement
      */
-    override fun clean(announcement: Announcement) {
+    override fun clean(announcement: SpeechAnnouncement) {
         announcement.file?.let {
             speechFileProvider.delete(it)
         }

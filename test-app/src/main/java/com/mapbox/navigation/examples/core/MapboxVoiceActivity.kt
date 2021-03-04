@@ -44,12 +44,7 @@ import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityVoiceBinding
-import com.mapbox.navigation.ui.base.api.voice.SpeechApi
-import com.mapbox.navigation.ui.base.api.voice.SpeechCallback
-import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayer
-import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayerCallback
-import com.mapbox.navigation.ui.base.model.voice.Announcement
-import com.mapbox.navigation.ui.base.model.voice.SpeechState
+import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
@@ -65,6 +60,12 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
+import com.mapbox.navigation.ui.voice.api.SpeechCallback
+import com.mapbox.navigation.ui.voice.api.VoiceInstructionsPlayerCallback
+import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
+import com.mapbox.navigation.ui.voice.model.SpeechError
+import com.mapbox.navigation.ui.voice.model.SpeechValue
+import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.utils.internal.ifNonNull
 import java.util.Locale
 
@@ -85,10 +86,10 @@ class MapboxVoiceActivity :
     private val routeArrowAPI: MapboxRouteArrowApi = MapboxRouteArrowApi()
     private var routeLineView: MapboxRouteLineView? = null
     private var routeArrowView: MapboxRouteArrowView? = null
-    private lateinit var speechAPI: SpeechApi
-    private var voiceInstructionsPlayer: VoiceInstructionsPlayer? = null
+    private lateinit var speechAPI: MapboxSpeechApi
+    private var voiceInstructionsPlayer: MapboxVoiceInstructionsPlayer? = null
     private var isMuted: Boolean = false
-    private var firstPlay: SpeechState.ReadyToPlay? = null
+    private var firstPlay: SpeechAnnouncement? = null
     private var isFirst: Boolean = true
 
     private lateinit var binding: LayoutActivityVoiceBinding
@@ -154,31 +155,37 @@ class MapboxVoiceActivity :
 
     private val voiceInstructionsPlayerCallback: VoiceInstructionsPlayerCallback =
         object : VoiceInstructionsPlayerCallback {
-            override fun onDone(state: SpeechState.DonePlaying) {
-                speechAPI.clean(state.announcement)
+            override fun onDone(announcement: SpeechAnnouncement) {
+                speechAPI.clean(announcement)
             }
         }
 
     private val speechCallback = object : SpeechCallback {
-        override fun onAvailable(state: SpeechState.Speech.Available) {
-            val currentPlay = SpeechState.ReadyToPlay(state.announcement)
-            if (isFirst) {
-                firstPlay = currentPlay
-                isFirst = false
+        override fun onSpeech(state: Expected<SpeechValue, SpeechError>) {
+            when (state) {
+                is Expected.Success -> {
+                    val currentSpeechValue = state.value
+                    if (isFirst) {
+                        firstPlay = currentSpeechValue.announcement
+                        isFirst = false
+                    }
+                    voiceInstructionsPlayer?.play(
+                        currentSpeechValue.announcement,
+                        voiceInstructionsPlayerCallback
+                    )
+                }
+                is Expected.Failure -> {
+                    val currentSpeechError = state.error
+                    Log.e(
+                        "VoiceActivity",
+                        "Error playing the voice instruction: ${currentSpeechError.errorMessage}"
+                    )
+                    voiceInstructionsPlayer?.play(
+                        currentSpeechError.fallback,
+                        voiceInstructionsPlayerCallback
+                    )
+                }
             }
-            voiceInstructionsPlayer?.play(currentPlay, voiceInstructionsPlayerCallback)
-        }
-
-        override fun onError(
-            error: SpeechState.Speech.Error,
-            fallback: SpeechState.Speech.Available
-        ) {
-            Log.e(
-                "VoiceActivity",
-                "Error playing the voice instruction: ${error.exception}"
-            )
-            val currentPlay = SpeechState.ReadyToPlay(fallback.announcement)
-            voiceInstructionsPlayer?.play(currentPlay, voiceInstructionsPlayerCallback)
         }
     }
 
@@ -394,10 +401,10 @@ class MapboxVoiceActivity :
     private fun initButtons() {
         binding.muteUnmute.setOnClickListener {
             isMuted = if (isMuted) {
-                voiceInstructionsPlayer?.volume(SpeechState.Volume(1.0f))
+                voiceInstructionsPlayer?.volume(SpeechVolume(1.0f))
                 false
             } else {
-                voiceInstructionsPlayer?.volume(SpeechState.Volume(0.0f))
+                voiceInstructionsPlayer?.volume(SpeechVolume(0.0f))
                 true
             }
         }
@@ -405,7 +412,7 @@ class MapboxVoiceActivity :
         binding.addPlay.setOnClickListener {
             firstPlay?.let {
                 voiceInstructionsPlayer?.play(
-                    SpeechState.ReadyToPlay(Announcement("Test hybrid speech player.", null, null)),
+                    SpeechAnnouncement.Builder("Test hybrid speech player.").build(),
                     voiceInstructionsPlayerCallback
                 )
             }

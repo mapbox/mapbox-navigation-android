@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.voice.api
 
 import com.mapbox.api.directions.v5.models.VoiceInstructions
-import com.mapbox.navigation.ui.base.model.voice.Announcement
+import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.VoiceState
 import io.mockk.coEvery
 import io.mockk.every
@@ -209,7 +209,7 @@ class MapboxVoiceApiTest {
 
     @Test
     fun `clean file`() = runBlocking {
-        val mockedAnnouncement: Announcement = mockk()
+        val mockedAnnouncement: SpeechAnnouncement = mockk()
         val mockedFile: File = mockk()
         every { mockedAnnouncement.file } returns mockedFile
         val fileProvider: MapboxSpeechFileProvider = mockk(relaxed = true)
@@ -223,7 +223,7 @@ class MapboxVoiceApiTest {
 
     @Test
     fun `clean no file`() = runBlocking {
-        val mockedAnnouncement: Announcement = mockk()
+        val mockedAnnouncement: SpeechAnnouncement = mockk()
         val nullFile: File? = null
         every { mockedAnnouncement.file } returns nullFile
         val fileProvider: MapboxSpeechFileProvider = mockk(relaxed = true)

@@ -3,10 +3,8 @@ package com.mapbox.navigation.ui.voice.api
 import android.content.Context
 import android.media.MediaPlayer
 import android.util.Log
-import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayer
-import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayerCallback
-import com.mapbox.navigation.ui.base.model.voice.Announcement
-import com.mapbox.navigation.ui.base.model.voice.SpeechState
+import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
+import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
@@ -28,23 +26,26 @@ internal class VoiceInstructionsFilePlayer(
     private var mediaPlayer: MediaPlayer? = null
     private var volumeLevel: Float = DEFAULT_VOLUME_LEVEL
     private var clientCallback: VoiceInstructionsPlayerCallback? = null
-    private var currentPlay: SpeechState.ReadyToPlay? = null
+    private var currentPlay: SpeechAnnouncement? = null
 
     /**
-     * Given [SpeechState.ReadyToPlay] [Announcement] the method will play the voice instruction.
+     * Given [SpeechAnnouncement] the method will play the voice instruction.
      * If a voice instruction is already playing or other announcement are already queued,
      * the given voice instruction will be queued to play after.
-     * @param state SpeechState Play Announcement object including the announcement text
+     * @param announcement object including the announcement text
      * and optionally a synthesized speech mp3.
      * @param callback
      */
-    override fun play(state: SpeechState.ReadyToPlay, callback: VoiceInstructionsPlayerCallback) {
+    override fun play(
+        announcement: SpeechAnnouncement,
+        callback: VoiceInstructionsPlayerCallback
+    ) {
         clientCallback = callback
         check(currentPlay == null) {
             "Only one announcement can be played at a time."
         }
-        currentPlay = state
-        val file = state.announcement.file
+        currentPlay = announcement
+        val file = announcement.file
         if (file != null && file.canRead()) {
             play(file)
         } else {
@@ -54,10 +55,10 @@ internal class VoiceInstructionsFilePlayer(
     }
 
     /**
-     * The method will set the volume to the specified level from [SpeechState.Volume].
+     * The method will set the volume to the specified level from [SpeechVolume].
      * @param state SpeechState Volume level.
      */
-    override fun volume(state: SpeechState.Volume) {
+    override fun volume(state: SpeechVolume) {
         volumeLevel = state.level
         setVolume(volumeLevel)
     }
@@ -114,9 +115,9 @@ internal class VoiceInstructionsFilePlayer(
 
     private fun donePlaying(mp: MediaPlayer?) {
         resetMediaPlayer(mp)
-        currentPlay?.announcement?.let {
+        currentPlay?.let {
             currentPlay = null
-            clientCallback?.onDone(SpeechState.DonePlaying(it))
+            clientCallback?.onDone(it)
         }
     }
 

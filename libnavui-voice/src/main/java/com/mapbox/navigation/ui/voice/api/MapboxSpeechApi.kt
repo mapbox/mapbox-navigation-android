@@ -2,13 +2,13 @@ package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
 import com.mapbox.api.directions.v5.models.VoiceInstructions
-import com.mapbox.navigation.ui.base.api.voice.SpeechApi
-import com.mapbox.navigation.ui.base.api.voice.SpeechCallback
-import com.mapbox.navigation.ui.base.model.voice.Announcement
-import com.mapbox.navigation.ui.base.model.voice.SpeechState
+import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.voice.VoiceAction
 import com.mapbox.navigation.ui.voice.VoiceProcessor
 import com.mapbox.navigation.ui.voice.VoiceResult
+import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
+import com.mapbox.navigation.ui.voice.model.SpeechError
+import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.VoiceState
 import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
 import com.mapbox.navigation.utils.internal.JobControl
@@ -28,7 +28,7 @@ class MapboxSpeechApi @JvmOverloads constructor(
     private val accessToken: String,
     private val language: String,
     private val options: MapboxSpeechApiOptions = MapboxSpeechApiOptions.Builder().build()
-) : SpeechApi {
+) {
 
     private val mainJobController: JobControl by lazy { ThreadController.getMainScopeAndRootJob() }
     private var currentVoiceFileJob: Job? = null
@@ -41,13 +41,13 @@ class MapboxSpeechApi @JvmOverloads constructor(
 
     /**
      * Given [VoiceInstructions] the method will try to generate the
-     * voice instruction [Announcement] including the synthesized speech mp3 file
+     * voice instruction [SpeechAnnouncement] including the synthesized speech mp3 file
      * from Mapbox's API Voice.
      * @param voiceInstruction VoiceInstructions object representing [VoiceInstructions]
      * @param callback SpeechCallback
      * @see [cancel]
      */
-    override fun generate(voiceInstruction: VoiceInstructions, callback: SpeechCallback) {
+    fun generate(voiceInstruction: VoiceInstructions, callback: SpeechCallback) {
         currentVoiceFileJob?.cancel()
         currentVoiceFileJob = mainJobController.scope.launch {
             retrieveVoiceFile(voiceInstruction, callback)
@@ -55,19 +55,19 @@ class MapboxSpeechApi @JvmOverloads constructor(
     }
 
     /**
-     * The method stops the process of retrieving the file voice instruction [Announcement]
+     * The method stops the process of retrieving the file voice instruction [SpeechAnnouncement]
      * and destroys any related callbacks.
      * @see [generate]
      */
-    override fun cancel() {
+    fun cancel() {
         currentVoiceFileJob?.cancel()
     }
 
     /**
-     * Given the [Announcement] the method may cleanup any associated files previously generated.
+     * Given the [SpeechAnnouncement] the method may cleanup any associated files previously generated.
      * @param announcement
      */
-    override fun clean(announcement: Announcement) {
+    fun clean(announcement: SpeechAnnouncement) {
         voiceAPI.clean(announcement)
     }
 
@@ -84,13 +84,14 @@ class MapboxSpeechApi @JvmOverloads constructor(
             is VoiceState.VoiceFile -> {
                 val announcement = voiceInstruction.announcement()
                 val ssmlAnnouncement = voiceInstruction.ssmlAnnouncement()
-                callback.onAvailable(
-                    SpeechState.Speech.Available(
-                        Announcement(
+                callback.onSpeech(
+                    Expected.Success(
+                        SpeechValue(
                             // Can't be null as it's checked in retrieveVoiceFile
-                            announcement!!,
-                            ssmlAnnouncement,
-                            result.instructionFile
+                            SpeechAnnouncement.Builder(announcement!!).apply {
+                                ssmlAnnouncement(ssmlAnnouncement)
+                                file(result.instructionFile)
+                            }.build()
                         )
                     )
                 )
@@ -99,9 +100,14 @@ class MapboxSpeechApi @JvmOverloads constructor(
                 processVoiceAnnouncement(
                     voiceInstruction
                 ) { available ->
-                    callback.onError(
-                        SpeechState.Speech.Error(result.exception),
-                        available
+                    callback.onSpeech(
+                        Expected.Failure(
+                            SpeechError(
+                                result.exception,
+                                null,
+                                available
+                            )
+                        )
                     )
                 }
             }
@@ -110,7 +116,7 @@ class MapboxSpeechApi @JvmOverloads constructor(
 
     private suspend fun processVoiceAnnouncement(
         voiceInstruction: VoiceInstructions,
-        onAvailable: (SpeechState.Speech.Available) -> Unit
+        onAvailable: (SpeechAnnouncement) -> Unit
     ) {
         val checkVoiceInstructionsResult =
             VoiceProcessor.process(VoiceAction.PrepareTypeAndAnnouncement(voiceInstruction))
@@ -120,14 +126,10 @@ class MapboxSpeechApi @JvmOverloads constructor(
             is VoiceResult.VoiceTypeAndAnnouncement.Success -> {
                 val announcement = voiceInstruction.announcement()
                 val ssmlAnnouncement = voiceInstruction.ssmlAnnouncement()
-                val available = SpeechState.Speech.Available(
-                    Announcement(
-                        // Can't be null as it's checked in processVoiceAnnouncement
-                        announcement!!,
-                        ssmlAnnouncement,
-                        null
-                    )
-                )
+                // Can't be null as it's checked in processVoiceAnnouncement
+                val available = SpeechAnnouncement.Builder(announcement!!)
+                    .ssmlAnnouncement(ssmlAnnouncement)
+                    .build()
                 onAvailable(available)
             }
             is VoiceResult.VoiceTypeAndAnnouncement.Failure -> {
