@@ -4,34 +4,42 @@ import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Geometry
+import com.mapbox.geojson.LineString
+import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
-import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo
-import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert
-import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo
-import com.mapbox.navigation.base.trip.model.alert.IncidentAlert
-import com.mapbox.navigation.base.trip.model.alert.IncidentCongestion
-import com.mapbox.navigation.base.trip.model.alert.IncidentImpact
-import com.mapbox.navigation.base.trip.model.alert.IncidentInfo
-import com.mapbox.navigation.base.trip.model.alert.IncidentType
-import com.mapbox.navigation.base.trip.model.alert.RestStopAlert
-import com.mapbox.navigation.base.trip.model.alert.RestStopType
-import com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert
-import com.mapbox.navigation.base.trip.model.alert.RouteAlert
-import com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry
-import com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert
-import com.mapbox.navigation.base.trip.model.alert.TollCollectionType
-import com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert
-import com.mapbox.navigation.base.trip.model.alert.TunnelInfo
-import com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert
+import com.mapbox.navigation.base.trip.model.roadobject.RoadObject
+import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry
+import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
+import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossing
+import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo
+import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingInfo
+import com.mapbox.navigation.base.trip.model.roadobject.bridge.BridgeEntrance
+import com.mapbox.navigation.base.trip.model.roadobject.bridge.BridgeExit
+import com.mapbox.navigation.base.trip.model.roadobject.custom.Custom
+import com.mapbox.navigation.base.trip.model.roadobject.incident.Incident
+import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongestion
+import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact
+import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo
+import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType
+import com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea
+import com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedAreaEntrance
+import com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedAreaExit
+import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop
+import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStopType
+import com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollection
+import com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollectionType
+import com.mapbox.navigation.base.trip.model.roadobject.tunnel.Tunnel
+import com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelEntrance
+import com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelExit
+import com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.AdminInfo
 import com.mapbox.navigator.BannerComponent
@@ -40,6 +48,8 @@ import com.mapbox.navigator.BannerSection
 import com.mapbox.navigator.BorderCrossingInfo
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
+import com.mapbox.navigator.RoadObjectMetadata
+import com.mapbox.navigator.RoadObjectType
 import com.mapbox.navigator.RouteAlertType
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteState
@@ -48,7 +58,7 @@ import com.mapbox.navigator.ServiceAreaType
 import com.mapbox.navigator.TollCollectionInfo
 import com.mapbox.navigator.VoiceInstruction
 
-private val SUPPORTED_ROUTE_ALERTS = arrayOf(
+private val SUPPORTED_ROAD_OBJECTS = arrayOf(
     RouteAlertType.TUNNEL_ENTRANCE,
     RouteAlertType.BORDER_CROSSING,
     RouteAlertType.TOLL_COLLECTION_POINT,
@@ -89,6 +99,43 @@ class NavigatorMapper internal constructor() {
     fun getTollCollectionType(info: TollCollectionInfo?): Int? = info.toTollCollectionType()
 
     fun getRestStopType(info: ServiceAreaInfo?): Int? = info.toRestStopType()
+
+    fun getRoadObject(
+        metadata: RoadObjectMetadata,
+        geometry: RoadObjectGeometry
+    ): RoadObject {
+        return when (metadata.type) {
+            RoadObjectType.INCIDENT -> {
+                buildIncident(geometry, metadata.incident?.toIncidentInfo())
+            }
+            RoadObjectType.TOLL_COLLECTION_POINT ->
+                buildTollCollection(
+                    geometry,
+                    metadata.tollCollectionInfo.toTollCollectionType()
+                )
+            RoadObjectType.BORDER_CROSSING ->
+                buildBorderCrossing(
+                    geometry,
+                    metadata.borderCrossingInfo?.from.toBorderCrossingAdminInfo(),
+                    metadata.borderCrossingInfo?.to.toBorderCrossingAdminInfo()
+                )
+            RoadObjectType.TUNNEL_ENTRANCE ->
+                buildTunnelEntrance(geometry, metadata.tunnelInfo.toTunnelInfo())
+            RoadObjectType.TUNNEL_EXIT ->
+                buildTunnelExit(geometry, metadata.tunnelInfo.toTunnelInfo())
+            RoadObjectType.RESTRICTED_AREA_ENTRANCE ->
+                buildRestrictedAreaEntrance(geometry)
+            RoadObjectType.RESTRICTED_AREA_EXIT ->
+                buildRestrictedAreaExit(geometry)
+            RoadObjectType.SERVICE_AREA ->
+                buildRestStop(geometry, metadata.serviceAreaInfo.toRestStopType())
+
+            RoadObjectType.BRIDGE_ENTRANCE -> buildBridgeEntrance(geometry)
+            RoadObjectType.BRIDGE_EXIT -> buildBridgeExit(geometry)
+            RoadObjectType.CUSTOM -> buildCustom(geometry)
+            else -> throw IllegalArgumentException("unsupported type: ${metadata.type}")
+        }
+    }
 
     private fun NavigationStatus.getRouteProgress(
         route: DirectionsRoute?,
@@ -212,7 +259,7 @@ class NavigatorMapper internal constructor() {
 
             routeProgressBuilder.voiceInstructions(voiceInstruction?.mapToDirectionsApi())
 
-            routeProgressBuilder.upcomingRouteAlerts(upcomingRouteAlerts.toUpcomingRouteAlerts())
+            routeProgressBuilder.upcomingRoadObjects(upcomingRouteAlerts.toUpcomingRoadObjects())
 
             return routeProgressBuilder.build()
         }
@@ -282,112 +329,74 @@ class NavigatorMapper internal constructor() {
         return if (this != null) {
             RouteInitInfo(
                 alerts
-                    .filter { SUPPORTED_ROUTE_ALERTS.contains(it.type) }
-                    .map { it.toRouteAlert() }
+                    .filter { SUPPORTED_ROAD_OBJECTS.contains(it.type) }
+                    .map { it.toRoadObject() }
             )
         } else null
     }
 
-    private fun List<com.mapbox.navigator.UpcomingRouteAlert>.toUpcomingRouteAlerts():
-        List<UpcomingRouteAlert> {
+    private fun List<com.mapbox.navigator.UpcomingRouteAlert>.toUpcomingRoadObjects():
+        List<UpcomingRoadObject> {
             return this
-                .filter { SUPPORTED_ROUTE_ALERTS.contains(it.alert.type) }
+                .filter { SUPPORTED_ROAD_OBJECTS.contains(it.alert.type) }
                 .map {
-                    UpcomingRouteAlert.Builder(it.alert.toRouteAlert(), it.distanceToStart).build()
+                    UpcomingRoadObject.Builder(it.alert.toRoadObject(), it.distanceToStart).build()
                 }
         }
 
-    private fun com.mapbox.navigator.RouteAlert.toRouteAlert(): RouteAlert {
+    private fun com.mapbox.navigator.RouteAlert.toRoadObject(): RoadObject {
         val alert = this
         return when (alert.type) {
-            RouteAlertType.TUNNEL_ENTRANCE -> {
-                TunnelEntranceAlert.Builder(
-                    alert.beginCoordinate,
-                    alert.distance
+            // RouteAlert with type TUNNEL_ENTRANCE contains coordinates of tunnel's start and end,
+            // so map to Tunnel, not TunnelEntrance
+            RouteAlertType.TUNNEL_ENTRANCE -> alert.run {
+                buildTunnelWithEntranceAndExit(
+                    getAlertGeometry(),
+                    tunnelInfo?.toTunnelInfo(),
+                    distance
                 )
-                    .alertGeometry(alert.getAlertGeometry())
-                    .info(alert.tunnelInfo?.toTunnelInfo())
-                    .build()
             }
-            RouteAlertType.BORDER_CROSSING -> {
-                CountryBorderCrossingAlert.Builder(
-                    alert.beginCoordinate,
-                    alert.distance
+            RouteAlertType.BORDER_CROSSING -> alert.run {
+                buildBorderCrossing(
+                    getAlertGeometry(),
+                    borderCrossingInfo?.from.toBorderCrossingAdminInfo(),
+                    borderCrossingInfo?.to.toBorderCrossingAdminInfo(),
+                    distance
                 )
-                    .alertGeometry(alert.getAlertGeometry())
-                    .countryBorderCrossingInfo(
-                        CountryBorderCrossingInfo.Builder(
-                            alert.borderCrossingInfo?.from.toBorderCrossingAdminInfo(),
-                            alert.borderCrossingInfo?.to.toBorderCrossingAdminInfo()
-                        ).build()
-                    )
-                    .build()
             }
-            RouteAlertType.TOLL_COLLECTION_POINT -> {
-                TollCollectionAlert.Builder(
-                    alert.beginCoordinate,
-                    alert.distance
+            RouteAlertType.TOLL_COLLECTION_POINT -> alert.run {
+                buildTollCollection(
+                    getAlertGeometry(),
+                    tollCollectionInfo.toTollCollectionType(),
+                    distance,
                 )
-                    .alertGeometry(alert.getAlertGeometry())
-                    .apply {
-                        val type = alert.tollCollectionInfo.toTollCollectionType()
-                        if (type != null) {
-                            tollCollectionType(type)
-                        }
-                    }
-                    .build()
             }
-            RouteAlertType.SERVICE_AREA -> {
-                RestStopAlert.Builder(
-                    alert.beginCoordinate,
-                    alert.distance
-                )
-                    .alertGeometry(alert.getAlertGeometry())
-                    .apply {
-                        val type = alert.serviceAreaInfo.toRestStopType()
-                        if (type != null) {
-                            restStopType(type)
-                        }
-                    }
-                    .build()
+            RouteAlertType.SERVICE_AREA -> alert.run {
+                buildRestStop(getAlertGeometry(), serviceAreaInfo.toRestStopType(), distance)
             }
-            RouteAlertType.RESTRICTED_AREA -> {
-                RestrictedAreaAlert.Builder(
-                    alert.beginCoordinate,
-                    alert.distance
-                )
-                    .alertGeometry(alert.getAlertGeometry())
-                    .build()
+            // RouteAlert with type RESTRICTED_AREA contains coordinates of area's start and end,
+            // so map to RestrictedArea, not RestrictedAreaEntrance
+            RouteAlertType.RESTRICTED_AREA -> alert.run {
+                buildRestrictedAreaWithEntranceAndExit(getAlertGeometry(), distance)
             }
-            RouteAlertType.INCIDENT -> {
-                IncidentAlert.Builder(
-                    alert.beginCoordinate,
-                    alert.distance
-                )
-                    .info(alert.incidentInfo?.toIncidentInfo())
-                    .alertGeometry(alert.getAlertGeometry())
-                    .build()
+            RouteAlertType.INCIDENT -> alert.run {
+                buildIncident(getAlertGeometry(), incidentInfo?.toIncidentInfo(), distance)
             }
             else -> throw IllegalArgumentException("not supported type: ${alert.type}")
         }
     }
 
-    private fun com.mapbox.navigator.RouteAlert.getAlertGeometry(): RouteAlertGeometry? = ifNonNull(
-        this.length,
-        this.beginCoordinate,
-        this.beginGeometryIndex,
-        this.endCoordinate,
-        this.endGeometryIndex
-    ) { length,
-        beginCoordinate,
-        beginGeometryIndex,
-        endCoordinate,
-        endGeometryIndex ->
-        RouteAlertGeometry.Builder(
+    private fun com.mapbox.navigator.RouteAlert.getAlertGeometry(): RoadObjectGeometry {
+        val shape = if (length != null) {
+            LineString.fromLngLats(listOf(beginCoordinate, endCoordinate))
+        } else {
+            Point.fromLngLat(beginCoordinate.longitude(), beginCoordinate.latitude())
+        }
+
+        return RoadObjectGeometry.Builder(
             length = length,
-            startCoordinate = beginCoordinate,
+            shape = shape,
             startGeometryIndex = beginGeometryIndex,
-            endCoordinate = endCoordinate,
             endGeometryIndex = endGeometryIndex,
         ).build()
     }
@@ -473,7 +482,7 @@ class NavigatorMapper internal constructor() {
             IncidentCongestion.Builder().value(congestion.value).build()
         }
 
-    @Incident.IncidentType
+    @IncidentImpact.Impact
     private fun com.mapbox.navigator.IncidentImpact.toIncidentImpact(): String =
         when (this) {
             com.mapbox.navigator.IncidentImpact.UNKNOWN -> IncidentImpact.UNKNOWN
@@ -482,4 +491,123 @@ class NavigatorMapper internal constructor() {
             com.mapbox.navigator.IncidentImpact.MINOR -> IncidentImpact.MINOR
             com.mapbox.navigator.IncidentImpact.LOW -> IncidentImpact.LOW
         }
+
+    private fun buildTunnelEntrance(
+        geometry: RoadObjectGeometry,
+        tunnelInfo: TunnelInfo?,
+        distance: Double? = null,
+    ) =
+        TunnelEntrance.Builder(geometry)
+            .distanceFromStartOfRoute(distance)
+            .info(tunnelInfo)
+            .build()
+
+    private fun buildTunnelExit(
+        geometry: RoadObjectGeometry,
+        tunnelInfo: TunnelInfo?,
+        distance: Double? = null,
+    ) =
+        TunnelExit.Builder(geometry)
+            .distanceFromStartOfRoute(distance)
+            .info(tunnelInfo)
+            .build()
+
+    private fun buildTunnelWithEntranceAndExit(
+        geometry: RoadObjectGeometry,
+        tunnelInfo: TunnelInfo?,
+        distance: Double? = null,
+    ) =
+        Tunnel.Builder(geometry)
+            .distanceFromStartOfRoute(distance)
+            .info(tunnelInfo)
+            .build()
+
+    private fun buildBorderCrossing(
+        geometry: RoadObjectGeometry,
+        from: CountryBorderCrossingAdminInfo?,
+        to: CountryBorderCrossingAdminInfo?,
+        distance: Double? = null,
+    ) = CountryBorderCrossing.Builder(geometry)
+        .distanceFromStartOfRoute(distance)
+        .countryBorderCrossingInfo(CountryBorderCrossingInfo.Builder(from, to).build())
+        .build()
+
+    private fun buildTollCollection(
+        geometry: RoadObjectGeometry,
+        type: Int?,
+        distance: Double? = null,
+    ) =
+        TollCollection.Builder(geometry)
+            .distanceFromStartOfRoute(distance)
+            .apply {
+                if (type != null) {
+                    tollCollectionType(type)
+                }
+            }
+            .build()
+
+    private fun buildRestStop(
+        geometry: RoadObjectGeometry,
+        type: Int?,
+        distance: Double? = null,
+    ) =
+        RestStop.Builder(geometry)
+            .distanceFromStartOfRoute(distance)
+            .apply {
+                if (type != null) {
+                    restStopType(type)
+                }
+            }
+            .build()
+
+    private fun buildRestrictedAreaEntrance(
+        geometry: RoadObjectGeometry,
+        distance: Double? = null
+    ) =
+        RestrictedAreaEntrance.Builder(geometry)
+            .distanceFromStartOfRoute(distance)
+            .build()
+
+    private fun buildRestrictedAreaExit(geometry: RoadObjectGeometry, distance: Double? = null) =
+        RestrictedAreaExit.Builder(geometry)
+            .distanceFromStartOfRoute(distance)
+            .build()
+
+    private fun buildRestrictedAreaWithEntranceAndExit(
+        geometry: RoadObjectGeometry,
+        distance: Double? = null
+    ) =
+        RestrictedArea.Builder(geometry)
+            .distanceFromStartOfRoute(distance)
+            .build()
+
+    private fun buildIncident(
+        geometry: RoadObjectGeometry,
+        info: IncidentInfo?,
+        distance: Double? = null,
+    ) = Incident.Builder(geometry)
+        .distanceFromStartOfRoute(distance)
+        .info(info)
+        .build()
+
+    private fun buildBridgeEntrance(
+        geometry: RoadObjectGeometry,
+        distance: Double? = null
+    ) = BridgeEntrance.Builder(geometry)
+        .distanceFromStartOfRoute(distance)
+        .build()
+
+    private fun buildBridgeExit(
+        geometry: RoadObjectGeometry,
+        distance: Double? = null
+    ) = BridgeExit.Builder(geometry)
+        .distanceFromStartOfRoute(distance)
+        .build()
+
+    private fun buildCustom(
+        geometry: RoadObjectGeometry,
+        distance: Double? = null
+    ) = Custom.Builder(geometry)
+        .distanceFromStartOfRoute(distance)
+        .build()
 }

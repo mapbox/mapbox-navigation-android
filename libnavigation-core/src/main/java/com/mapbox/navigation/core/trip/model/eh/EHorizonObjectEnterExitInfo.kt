@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.trip.model.eh
 
+import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
 import com.mapbox.navigation.core.trip.session.EHorizonObserver
 
 /**
@@ -14,7 +15,7 @@ import com.mapbox.navigation.core.trip.session.EHorizonObserver
 class EHorizonObjectEnterExitInfo internal constructor(
     val roadObjectId: String,
     val enterFromStartOrExitFromEnd: Boolean,
-    @EHorizonObjectType.Type val type: String,
+    @RoadObjectType.Type val type: Int,
 ) {
 
     /**

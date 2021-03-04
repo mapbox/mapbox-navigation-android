@@ -379,7 +379,7 @@ package com.mapbox.navigation.base.trip.model {
     method public int getRemainingWaypoints();
     method public com.mapbox.api.directions.v5.models.DirectionsRoute getRoute();
     method public com.mapbox.geojson.Geometry? getRouteGeometryWithBuffer();
-    method public java.util.List<com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert> getUpcomingRouteAlerts();
+    method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> getUpcomingRoadObjects();
     method public java.util.List<com.mapbox.geojson.Point>? getUpcomingStepPoints();
     method public com.mapbox.api.directions.v5.models.VoiceInstructions? getVoiceInstructions();
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder toBuilder();
@@ -394,7 +394,7 @@ package com.mapbox.navigation.base.trip.model {
     property public final int remainingWaypoints;
     property public final com.mapbox.api.directions.v5.models.DirectionsRoute route;
     property public final com.mapbox.geojson.Geometry? routeGeometryWithBuffer;
-    property public final java.util.List<com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert> upcomingRouteAlerts;
+    property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> upcomingRoadObjects;
     property public final java.util.List<com.mapbox.geojson.Point>? upcomingStepPoints;
     property public final com.mapbox.api.directions.v5.models.VoiceInstructions? voiceInstructions;
   }
@@ -412,7 +412,7 @@ package com.mapbox.navigation.base.trip.model {
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder inTunnel(boolean inTunnel);
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder remainingWaypoints(int remainingWaypoints);
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder routeGeometryWithBuffer(com.mapbox.geojson.Geometry? routeGeometryWithBuffer);
-    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder upcomingRouteAlerts(java.util.List<com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert> upcomingRouteAlerts);
+    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder upcomingRoadObjects(java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> upcomingRoadObjects);
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder upcomingStepPoints(java.util.List<com.mapbox.geojson.Point>? upcomingStepPoints);
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder voiceInstructions(com.mapbox.api.directions.v5.models.VoiceInstructions? voiceInstructions);
   }
@@ -462,87 +462,209 @@ package com.mapbox.navigation.base.trip.model {
 
 }
 
-package com.mapbox.navigation.base.trip.model.alert {
+package com.mapbox.navigation.base.trip.model.roadobject {
+
+  public abstract class RoadObject {
+    ctor public RoadObject(int objectType, Double? distanceFromStartOfRoute, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry);
+    method public final Double? getDistanceFromStartOfRoute();
+    method public final com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry getObjectGeometry();
+    method public final int getObjectType();
+    property public final Double? distanceFromStartOfRoute;
+    property public final com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry;
+    property public final int objectType;
+  }
+
+  public final class RoadObjectGeometry {
+    method public Integer? getEndGeometryIndex();
+    method public Double? getLength();
+    method public com.mapbox.geojson.Geometry getShape();
+    method public Integer? getStartGeometryIndex();
+    method public com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry.Builder toBuilder();
+    property public final Integer? endGeometryIndex;
+    property public final Double? length;
+    property public final com.mapbox.geojson.Geometry shape;
+    property public final Integer? startGeometryIndex;
+  }
+
+  public static final class RoadObjectGeometry.Builder {
+    ctor public RoadObjectGeometry.Builder(Double? length, com.mapbox.geojson.Geometry shape, Integer? startGeometryIndex, Integer? endGeometryIndex);
+    method public com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry build();
+  }
+
+  public final class RoadObjectType {
+    field public static final int BRIDGE = 11; // 0xb
+    field public static final int BRIDGE_ENTRANCE = 9; // 0x9
+    field public static final int BRIDGE_EXIT = 10; // 0xa
+    field public static final int COUNTRY_BORDER_CROSSING = 3; // 0x3
+    field public static final int CUSTOM = 13; // 0xd
+    field public static final int INCIDENT = 12; // 0xc
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType INSTANCE;
+    field public static final int RESTRICTED_AREA = 8; // 0x8
+    field public static final int RESTRICTED_AREA_ENTRANCE = 6; // 0x6
+    field public static final int RESTRICTED_AREA_EXIT = 7; // 0x7
+    field public static final int REST_STOP = 5; // 0x5
+    field public static final int TOLL_COLLECTION = 4; // 0x4
+    field public static final int TUNNEL = 2; // 0x2
+    field public static final int TUNNEL_ENTRANCE = 0; // 0x0
+    field public static final int TUNNEL_EXIT = 1; // 0x1
+  }
+
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TUNNEL_ENTRANCE, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TUNNEL_EXIT, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TUNNEL, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.COUNTRY_BORDER_CROSSING, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TOLL_COLLECTION, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.REST_STOP, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RESTRICTED_AREA_ENTRANCE, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RESTRICTED_AREA_EXIT, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RESTRICTED_AREA, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.BRIDGE_ENTRANCE, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.BRIDGE_EXIT, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.BRIDGE, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.INCIDENT, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.CUSTOM}) @kotlin.annotation.Retention public static @interface RoadObjectType.Type {
+  }
+
+  public final class RoadObjectUtils {
+    method public static com.mapbox.geojson.LineString? toLineString(com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry, com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute, @IntRange(from=com.mapbox.navigation.base.trip.model.roadobject.RoadObjectUtils.PRECISION_RANGE_START, to=com.mapbox.navigation.base.trip.model.roadobject.RoadObjectUtils.PRECISION_RANGE_END) int precision);
+    method public static com.mapbox.geojson.LineString? toLineString(com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry, com.mapbox.geojson.LineString routeLineString);
+  }
+
+  public final class UpcomingRoadObject {
+    method public double getDistanceToStart();
+    method public com.mapbox.navigation.base.trip.model.roadobject.RoadObject getRoadObject();
+    method public com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject.Builder toBuilder();
+    property public final double distanceToStart;
+    property public final com.mapbox.navigation.base.trip.model.roadobject.RoadObject roadObject;
+  }
+
+  public static final class UpcomingRoadObject.Builder {
+    ctor public UpcomingRoadObject.Builder(com.mapbox.navigation.base.trip.model.roadobject.RoadObject roadObject, double distanceRemaining);
+    method public com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject build();
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.border {
+
+  public final class CountryBorderCrossing extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingInfo? getCountryBorderCrossingInfo();
+    method public com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossing.Builder toBuilder();
+    property public final com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingInfo? countryBorderCrossingInfo;
+  }
+
+  public static final class CountryBorderCrossing.Builder {
+    ctor public CountryBorderCrossing.Builder(com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry);
+    method public com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossing build();
+    method public com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossing.Builder countryBorderCrossingInfo(com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingInfo? borderCrossingInfo);
+    method public com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossing.Builder distanceFromStartOfRoute(Double? distanceFromStartOfRoute);
+  }
 
   public final class CountryBorderCrossingAdminInfo {
     method public String getCode();
     method public String getCodeAlpha3();
-    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo.Builder toBuilder();
+    method public com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo.Builder toBuilder();
     property public final String code;
     property public final String codeAlpha3;
   }
 
   public static final class CountryBorderCrossingAdminInfo.Builder {
     ctor public CountryBorderCrossingAdminInfo.Builder(String code, String codeAlpha3);
-    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo build();
-  }
-
-  public final class CountryBorderCrossingAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
-    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo? getCountryBorderCrossingInfo();
-    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert.Builder toBuilder();
-    property public final com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo? countryBorderCrossingInfo;
-  }
-
-  public static final class CountryBorderCrossingAlert.Builder {
-    ctor public CountryBorderCrossingAlert.Builder(com.mapbox.geojson.Point coordinate, double distance);
-    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert.Builder alertGeometry(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
-    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert build();
-    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert.Builder countryBorderCrossingInfo(com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo? borderCrossingInfo);
+    method public com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo build();
   }
 
   public final class CountryBorderCrossingInfo {
-    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? getFrom();
-    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? getTo();
-    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo.Builder toBuilder();
-    property public final com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? from;
-    property public final com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? to;
+    method public com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo? getFrom();
+    method public com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo? getTo();
+    method public com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingInfo.Builder toBuilder();
+    property public final com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo? from;
+    property public final com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo? to;
   }
 
   public static final class CountryBorderCrossingInfo.Builder {
-    ctor public CountryBorderCrossingInfo.Builder(com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? from, com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? to);
-    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo build();
+    ctor public CountryBorderCrossingInfo.Builder(com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo? from, com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo? to);
+    method public com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingInfo build();
   }
 
-  public final class IncidentAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo? getInfo();
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentAlert.Builder toBuilder();
-    property public final com.mapbox.navigation.base.trip.model.alert.IncidentInfo? info;
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.bridge {
+
+  public final class Bridge extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.bridge.Bridge.Builder toBuilder();
   }
 
-  public static final class IncidentAlert.Builder {
-    ctor public IncidentAlert.Builder(com.mapbox.geojson.Point coordinate, double distance);
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentAlert.Builder alertGeometry(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentAlert build();
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentAlert.Builder info(com.mapbox.navigation.base.trip.model.alert.IncidentInfo? incidentInfo);
+  public static final class Bridge.Builder {
+    ctor public Bridge.Builder(com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry);
+    method public com.mapbox.navigation.base.trip.model.roadobject.bridge.Bridge build();
+    method public com.mapbox.navigation.base.trip.model.roadobject.bridge.Bridge.Builder distanceFromStartOfRoute(Double? distanceFromStartOfRoute);
+  }
+
+  public final class BridgeEntrance extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.bridge.BridgeEntrance.Builder toBuilder();
+  }
+
+  public static final class BridgeEntrance.Builder {
+    ctor public BridgeEntrance.Builder(com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry);
+    method public com.mapbox.navigation.base.trip.model.roadobject.bridge.BridgeEntrance build();
+    method public com.mapbox.navigation.base.trip.model.roadobject.bridge.BridgeEntrance.Builder distanceFromStartOfRoute(Double? distanceFromStartOfRoute);
+  }
+
+  public final class BridgeExit extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.bridge.BridgeExit.Builder toBuilder();
+  }
+
+  public static final class BridgeExit.Builder {
+    ctor public BridgeExit.Builder(com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry);
+    method public com.mapbox.navigation.base.trip.model.roadobject.bridge.BridgeExit build();
+    method public com.mapbox.navigation.base.trip.model.roadobject.bridge.BridgeExit.Builder distanceFromStartOfRoute(Double? distanceFromStartOfRoute);
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.custom {
+
+  public final class Custom extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.custom.Custom.Builder toBuilder();
+  }
+
+  public static final class Custom.Builder {
+    ctor public Custom.Builder(com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry);
+    method public com.mapbox.navigation.base.trip.model.roadobject.custom.Custom build();
+    method public com.mapbox.navigation.base.trip.model.roadobject.custom.Custom.Builder distanceFromStartOfRoute(Double? distanceFromStartOfRoute);
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.incident {
+
+  public final class Incident extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo? getInfo();
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.Incident.Builder toBuilder();
+    property public final com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo? info;
+  }
+
+  public static final class Incident.Builder {
+    ctor public Incident.Builder(com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry);
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.Incident build();
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.Incident.Builder distanceFromStartOfRoute(Double? distanceFromStartOfRoute);
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.Incident.Builder info(com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo? incidentInfo);
   }
 
   public final class IncidentCongestion {
     method public Integer? getValue();
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentCongestion.Builder toBuilder();
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongestion.Builder toBuilder();
     property public final Integer? value;
   }
 
   public static final class IncidentCongestion.Builder {
     ctor public IncidentCongestion.Builder();
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentCongestion build();
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentCongestion.Builder value(Integer? value);
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongestion build();
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongestion.Builder value(Integer? value);
   }
 
   public final class IncidentImpact {
     field public static final String CRITICAL = "critical";
-    field public static final com.mapbox.navigation.base.trip.model.alert.IncidentImpact INSTANCE;
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact INSTANCE;
     field public static final String LOW = "low";
     field public static final String MAJOR = "major";
     field public static final String MINOR = "minor";
     field public static final String UNKNOWN = "unknown";
   }
 
-  @StringDef({com.mapbox.navigation.base.trip.model.alert.IncidentImpact.UNKNOWN, com.mapbox.navigation.base.trip.model.alert.IncidentImpact.CRITICAL, com.mapbox.navigation.base.trip.model.alert.IncidentImpact.MAJOR, com.mapbox.navigation.base.trip.model.alert.IncidentImpact.MINOR, com.mapbox.navigation.base.trip.model.alert.IncidentImpact.LOW}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface IncidentImpact.Impact {
+  @StringDef({com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact.UNKNOWN, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact.CRITICAL, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact.MAJOR, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact.MINOR, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact.LOW}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface IncidentImpact.Impact {
   }
 
   public final class IncidentInfo {
     method public java.util.List<java.lang.Integer>? getAlertcCodes();
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentCongestion? getCongestion();
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongestion? getCongestion();
     method public java.util.Date? getCreationTime();
     method public String? getDescription();
     method public java.util.Date? getEndTime();
@@ -553,9 +675,9 @@ package com.mapbox.navigation.base.trip.model.alert {
     method public String? getSubTypeDescription();
     method public int getType();
     method public boolean isClosed();
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder toBuilder();
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo.Builder toBuilder();
     property public final java.util.List<java.lang.Integer>? alertcCodes;
-    property public final com.mapbox.navigation.base.trip.model.alert.IncidentCongestion? congestion;
+    property public final com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongestion? congestion;
     property public final java.util.Date? creationTime;
     property public final String? description;
     property public final java.util.Date? endTime;
@@ -570,18 +692,18 @@ package com.mapbox.navigation.base.trip.model.alert {
 
   public static final class IncidentInfo.Builder {
     ctor public IncidentInfo.Builder(String id);
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder alertcCodes(java.util.List<java.lang.Integer>? alertcCodes);
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo build();
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder congestion(com.mapbox.navigation.base.trip.model.alert.IncidentCongestion? congestion);
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder creationTime(java.util.Date? creationTime);
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder description(String? description);
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder endTime(java.util.Date? endTime);
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder impact(@com.mapbox.navigation.base.trip.model.alert.IncidentImpact.Impact String impact);
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder isClosed(boolean isClosed);
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder startTime(java.util.Date? startTime);
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder subType(String? subType);
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder subTypeDescription(String? subTypeDescription);
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder type(int incidentType);
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo.Builder alertcCodes(java.util.List<java.lang.Integer>? alertcCodes);
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo build();
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo.Builder congestion(com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongestion? congestion);
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo.Builder creationTime(java.util.Date? creationTime);
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo.Builder description(String? description);
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo.Builder endTime(java.util.Date? endTime);
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo.Builder impact(@com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact.Impact String impact);
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo.Builder isClosed(boolean isClosed);
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo.Builder startTime(java.util.Date? startTime);
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo.Builder subType(String? subType);
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo.Builder subTypeDescription(String? subTypeDescription);
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo.Builder type(int incidentType);
   }
 
   public final class IncidentType {
@@ -589,7 +711,7 @@ package com.mapbox.navigation.base.trip.model.alert {
     field public static final int CONGESTION = 42; // 0x2a
     field public static final int CONSTRUCTION = 43; // 0x2b
     field public static final int DISABLED_VEHICLE = 44; // 0x2c
-    field public static final com.mapbox.navigation.base.trip.model.alert.IncidentType INSTANCE;
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType INSTANCE;
     field public static final int LANE_RESTRICTION = 45; // 0x2d
     field public static final int MASS_TRANSIT = 46; // 0x2e
     field public static final int MISCELLANEOUS = 47; // 0x2f
@@ -601,137 +723,140 @@ package com.mapbox.navigation.base.trip.model.alert {
     field public static final int WEATHER = 52; // 0x34
   }
 
-  public final class RestStopAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.restrictedarea {
+
+  public final class RestrictedArea extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea.Builder toBuilder();
+  }
+
+  public static final class RestrictedArea.Builder {
+    ctor public RestrictedArea.Builder(com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry);
+    method public com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea build();
+    method public com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea.Builder distanceFromStartOfRoute(Double? distanceFromStartOfRoute);
+  }
+
+  public final class RestrictedAreaEntrance extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedAreaEntrance.Builder toBuilder();
+  }
+
+  public static final class RestrictedAreaEntrance.Builder {
+    ctor public RestrictedAreaEntrance.Builder(com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry);
+    method public com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedAreaEntrance build();
+    method public com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedAreaEntrance.Builder distanceFromStartOfRoute(Double? distanceFromStartOfRoute);
+  }
+
+  public final class RestrictedAreaExit extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedAreaExit.Builder toBuilder();
+  }
+
+  public static final class RestrictedAreaExit.Builder {
+    ctor public RestrictedAreaExit.Builder(com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry);
+    method public com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedAreaExit build();
+    method public com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedAreaExit.Builder distanceFromStartOfRoute(Double? distanceFromStartOfRoute);
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.reststop {
+
+  public final class RestStop extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
     method public int getRestStopType();
-    method public com.mapbox.navigation.base.trip.model.alert.RestStopAlert.Builder toBuilder();
+    method public com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop.Builder toBuilder();
     property public final int restStopType;
   }
 
-  public static final class RestStopAlert.Builder {
-    ctor public RestStopAlert.Builder(com.mapbox.geojson.Point coordinate, double distance);
-    method public com.mapbox.navigation.base.trip.model.alert.RestStopAlert.Builder alertGeometry(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
-    method public com.mapbox.navigation.base.trip.model.alert.RestStopAlert build();
-    method public com.mapbox.navigation.base.trip.model.alert.RestStopAlert.Builder restStopType(int restStopType);
+  public static final class RestStop.Builder {
+    ctor public RestStop.Builder(com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry);
+    method public com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop build();
+    method public com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop.Builder distanceFromStartOfRoute(Double? distanceFromStartOfRoute);
+    method public com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop.Builder restStopType(int restStopType);
   }
 
   public final class RestStopType {
-    field public static final com.mapbox.navigation.base.trip.model.alert.RestStopType INSTANCE;
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStopType INSTANCE;
     field public static final int RestArea = 1; // 0x1
     field public static final int ServiceArea = 2; // 0x2
     field public static final int Unknown = -1; // 0xffffffff
   }
 
-  public final class RestrictedAreaAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
-    method public com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert.Builder toBuilder();
-  }
+}
 
-  public static final class RestrictedAreaAlert.Builder {
-    ctor public RestrictedAreaAlert.Builder(com.mapbox.geojson.Point coordinate, double distance);
-    method public com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert.Builder alertGeometry(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
-    method public com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert build();
-  }
+package com.mapbox.navigation.base.trip.model.roadobject.tollcollection {
 
-  public abstract class RouteAlert {
-    ctor public RouteAlert(int alertType, com.mapbox.geojson.Point coordinate, double distance, com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
-    method public final com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? getAlertGeometry();
-    method public final int getAlertType();
-    method public final com.mapbox.geojson.Point getCoordinate();
-    method public final double getDistance();
-    property public final com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry;
-    property public final int alertType;
-    property public final com.mapbox.geojson.Point coordinate;
-    property public final double distance;
-  }
-
-  public final class RouteAlertGeometry {
-    method public com.mapbox.geojson.Point getEndCoordinate();
-    method public int getEndGeometryIndex();
-    method public double getLength();
-    method public com.mapbox.geojson.Point getStartCoordinate();
-    method public int getStartGeometryIndex();
-    method public com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry.Builder toBuilder();
-    property public final com.mapbox.geojson.Point endCoordinate;
-    property public final int endGeometryIndex;
-    property public final double length;
-    property public final com.mapbox.geojson.Point startCoordinate;
-    property public final int startGeometryIndex;
-  }
-
-  public static final class RouteAlertGeometry.Builder {
-    ctor public RouteAlertGeometry.Builder(double length, com.mapbox.geojson.Point startCoordinate, int startGeometryIndex, com.mapbox.geojson.Point endCoordinate, int endGeometryIndex);
-    method public com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry build();
-  }
-
-  public final class RouteAlertType {
-    field public static final int CountryBorderCrossing = 1; // 0x1
-    field public static final com.mapbox.navigation.base.trip.model.alert.RouteAlertType INSTANCE;
-    field public static final int Incident = 5; // 0x5
-    field public static final int RestStop = 3; // 0x3
-    field public static final int RestrictedArea = 4; // 0x4
-    field public static final int TollCollection = 2; // 0x2
-    field public static final int TunnelEntrance = 0; // 0x0
-  }
-
-  public final class RouteAlertUtils {
-    method public static com.mapbox.geojson.LineString toLineString(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry, com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute, @IntRange(from=5, to=6) int precision);
-    method public static com.mapbox.geojson.LineString toLineString(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry, com.mapbox.geojson.LineString routeLineString);
-  }
-
-  public final class TollCollectionAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
+  public final class TollCollection extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
     method public int getTollCollectionType();
-    method public com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert.Builder toBuilder();
+    method public com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollection.Builder toBuilder();
     property public final int tollCollectionType;
   }
 
-  public static final class TollCollectionAlert.Builder {
-    ctor public TollCollectionAlert.Builder(com.mapbox.geojson.Point coordinate, double distance);
-    method public com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert.Builder alertGeometry(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
-    method public com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert build();
-    method public com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert.Builder tollCollectionType(int tollCollectionType);
+  public static final class TollCollection.Builder {
+    ctor public TollCollection.Builder(com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry);
+    method public com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollection build();
+    method public com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollection.Builder distanceFromStartOfRoute(Double? distanceFromStartOfRoute);
+    method public com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollection.Builder tollCollectionType(int tollCollectionType);
   }
 
   public final class TollCollectionType {
-    field public static final com.mapbox.navigation.base.trip.model.alert.TollCollectionType INSTANCE;
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollectionType INSTANCE;
     field public static final int TollBooth = 1; // 0x1
     field public static final int TollGantry = 2; // 0x2
     field public static final int Unknown = -1; // 0xffffffff
   }
 
-  public final class TunnelEntranceAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
-    method public com.mapbox.navigation.base.trip.model.alert.TunnelInfo? getInfo();
-    method public com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert.Builder toBuilder();
-    property public final com.mapbox.navigation.base.trip.model.alert.TunnelInfo? info;
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.tunnel {
+
+  public final class Tunnel extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo? getInfo();
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.Tunnel.Builder toBuilder();
+    property public final com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo? info;
   }
 
-  public static final class TunnelEntranceAlert.Builder {
-    ctor public TunnelEntranceAlert.Builder(com.mapbox.geojson.Point coordinate, double distance);
-    method public com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert.Builder alertGeometry(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
-    method public com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert build();
-    method public com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert.Builder info(com.mapbox.navigation.base.trip.model.alert.TunnelInfo? info);
+  public static final class Tunnel.Builder {
+    ctor public Tunnel.Builder(com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry);
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.Tunnel build();
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.Tunnel.Builder distanceFromStartOfRoute(Double? distanceFromStartOfRoute);
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.Tunnel.Builder info(com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo? info);
+  }
+
+  public final class TunnelEntrance extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo? getInfo();
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelEntrance.Builder toBuilder();
+    property public final com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo? info;
+  }
+
+  public static final class TunnelEntrance.Builder {
+    ctor public TunnelEntrance.Builder(com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry);
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelEntrance build();
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelEntrance.Builder distanceFromStartOfRoute(Double? distanceFromStartOfRoute);
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelEntrance.Builder info(com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo? info);
+  }
+
+  public final class TunnelExit extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo? getInfo();
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelExit.Builder toBuilder();
+    property public final com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo? info;
+  }
+
+  public static final class TunnelExit.Builder {
+    ctor public TunnelExit.Builder(com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry);
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelExit build();
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelExit.Builder distanceFromStartOfRoute(Double? distanceFromStartOfRoute);
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelExit.Builder info(com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo? info);
   }
 
   public final class TunnelInfo {
     method public String getName();
-    method public com.mapbox.navigation.base.trip.model.alert.TunnelInfo.Builder toBuilder();
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo.Builder toBuilder();
     property public final String name;
   }
 
   public static final class TunnelInfo.Builder {
     ctor public TunnelInfo.Builder(String name);
-    method public com.mapbox.navigation.base.trip.model.alert.TunnelInfo build();
-  }
-
-  public final class UpcomingRouteAlert {
-    method public double getDistanceToStart();
-    method public com.mapbox.navigation.base.trip.model.alert.RouteAlert getRouteAlert();
-    method public com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert.Builder toBuilder();
-    property public final double distanceToStart;
-    property public final com.mapbox.navigation.base.trip.model.alert.RouteAlert routeAlert;
-  }
-
-  public static final class UpcomingRouteAlert.Builder {
-    ctor public UpcomingRouteAlert.Builder(com.mapbox.navigation.base.trip.model.alert.RouteAlert routeAlert, double distanceRemaining);
-    method public com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert build();
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo build();
   }
 
 }

@@ -1,8 +1,9 @@
 package com.mapbox.navigation.core.trip.model.eh
 
-import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo
-import com.mapbox.navigation.base.trip.model.alert.IncidentInfo
-import com.mapbox.navigation.base.trip.model.alert.TunnelInfo
+import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
+import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingInfo
+import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo
+import com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo
 
 /**
  * RoadObject metadata
@@ -22,7 +23,7 @@ import com.mapbox.navigation.base.trip.model.alert.TunnelInfo
  * [objectProvider] is [EHorizonObjectProvider.MAPBOX]
  */
 class EHorizonObjectMetadata internal constructor(
-    @EHorizonObjectType.Type val type: String,
+    @RoadObjectType.Type val type: Int,
     @EHorizonObjectProvider.Type val objectProvider: String,
     val incidentInfo: IncidentInfo?,
     val tunnelInfo: TunnelInfo?,

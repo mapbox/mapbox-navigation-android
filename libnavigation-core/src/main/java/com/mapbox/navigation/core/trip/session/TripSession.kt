@@ -46,9 +46,9 @@ internal interface TripSession {
     fun updateSensorEvent(sensorEvent: SensorEvent)
     fun updateLegIndex(legIndex: Int): Boolean
 
-    fun registerRouteAlertsObserver(routeAlertsObserver: RouteAlertsObserver)
-    fun unregisterRouteAlertsObserver(routeAlertsObserver: RouteAlertsObserver)
-    fun unregisterAllRouteAlertsObservers()
+    fun registerRoadObjectsObserver(roadObjectsObserver: RoadObjectsObserver)
+    fun unregisterRoadObjectsObserver(roadObjectsObserver: RoadObjectsObserver)
+    fun unregisterAllRoadObjectsObservers()
 
     fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver)
     fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver)

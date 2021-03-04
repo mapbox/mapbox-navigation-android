@@ -21,7 +21,7 @@ package com.mapbox.navigation.core {
     method public void registerLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
     method public void registerMapMatcherResultObserver(com.mapbox.navigation.core.trip.session.MapMatcherResultObserver mapMatcherResultObserver);
     method public void registerOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
-    method public void registerRouteAlertsObserver(com.mapbox.navigation.core.trip.session.RouteAlertsObserver routeAlertsObserver);
+    method public void registerRoadObjectsObserver(com.mapbox.navigation.core.trip.session.RoadObjectsObserver roadObjectsObserver);
     method public void registerRouteProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver routeProgressObserver);
     method public void registerRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
     method public void registerTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
@@ -45,7 +45,7 @@ package com.mapbox.navigation.core {
     method public void unregisterLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
     method public void unregisterMapMatcherResultObserver(com.mapbox.navigation.core.trip.session.MapMatcherResultObserver mapMatcherResultObserver);
     method public void unregisterOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
-    method public void unregisterRouteAlertsObserver(com.mapbox.navigation.core.trip.session.RouteAlertsObserver routeAlertsObserver);
+    method public void unregisterRoadObjectsObserver(com.mapbox.navigation.core.trip.session.RoadObjectsObserver roadObjectsObserver);
     method public void unregisterRouteProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver routeProgressObserver);
     method public void unregisterRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
     method public void unregisterTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
@@ -625,12 +625,12 @@ package com.mapbox.navigation.core.trip.model.eh {
     method public double getDistanceToEntry();
     method public boolean getEntryFromStart();
     method public Double? getLength();
-    method public String getType();
+    method public int getType();
     property public final double distanceToEnd;
     property public final double distanceToEntry;
     property public final boolean entryFromStart;
     property public final Double? length;
-    property public final String type;
+    property public final int type;
   }
 
   public final class EHorizonObjectEdgeLocation {
@@ -643,10 +643,10 @@ package com.mapbox.navigation.core.trip.model.eh {
   public final class EHorizonObjectEnterExitInfo {
     method public boolean getEnterFromStartOrExitFromEnd();
     method public String getRoadObjectId();
-    method public String getType();
+    method public int getType();
     property public final boolean enterFromStartOrExitFromEnd;
     property public final String roadObjectId;
-    property public final String type;
+    property public final int type;
   }
 
   public final class EHorizonObjectLocation {
@@ -657,20 +657,20 @@ package com.mapbox.navigation.core.trip.model.eh {
   }
 
   public final class EHorizonObjectMetadata {
-    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo? getBorderCrossingInfo();
-    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo? getIncidentInfo();
+    method public com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingInfo? getBorderCrossingInfo();
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo? getIncidentInfo();
     method public String getObjectProvider();
     method public Integer? getRestStopType();
     method public Integer? getTollCollectionType();
-    method public com.mapbox.navigation.base.trip.model.alert.TunnelInfo? getTunnelInfo();
-    method public String getType();
-    property public final com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo? borderCrossingInfo;
-    property public final com.mapbox.navigation.base.trip.model.alert.IncidentInfo? incidentInfo;
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo? getTunnelInfo();
+    method public int getType();
+    property public final com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingInfo? borderCrossingInfo;
+    property public final com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo? incidentInfo;
     property public final String objectProvider;
     property public final Integer? restStopType;
     property public final Integer? tollCollectionType;
-    property public final com.mapbox.navigation.base.trip.model.alert.TunnelInfo? tunnelInfo;
-    property public final String type;
+    property public final com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo? tunnelInfo;
+    property public final int type;
   }
 
   public final class EHorizonObjectProvider {
@@ -680,24 +680,6 @@ package com.mapbox.navigation.core.trip.model.eh {
   }
 
   @StringDef({com.mapbox.navigation.core.trip.model.eh.EHorizonObjectProvider.MAPBOX, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectProvider.CUSTOM}) @kotlin.annotation.Retention public static @interface EHorizonObjectProvider.Type {
-  }
-
-  public final class EHorizonObjectType {
-    field public static final String BORDER_CROSSING = "BORDER_CROSSING";
-    field public static final String BRIDGE_ENTRANCE = "BRIDGE_ENTRANCE";
-    field public static final String BRIDGE_EXIT = "BRIDGE_EXIT";
-    field public static final String CUSTOM = "CUSTOM";
-    field public static final String INCIDENT = "INCIDENT";
-    field public static final com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType INSTANCE;
-    field public static final String RESTRICTED_AREA_ENTRANCE = "RESTRICTED_AREA_ENTRANCE";
-    field public static final String RESTRICTED_AREA_EXIT = "RESTRICTED_AREA_EXIT";
-    field public static final String SERVICE_AREA = "SERVICE_AREA";
-    field public static final String TOLL_COLLECTION_POINT = "TOLL_COLLECTION_POINT";
-    field public static final String TUNNEL_ENTRANCE = "TUNNEL_ENTRANCE";
-    field public static final String TUNNEL_EXIT = "TUNNEL_EXIT";
-  }
-
-  @StringDef({com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.INCIDENT, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.TOLL_COLLECTION_POINT, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.BORDER_CROSSING, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.TUNNEL_ENTRANCE, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.TUNNEL_EXIT, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.RESTRICTED_AREA_ENTRANCE, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.RESTRICTED_AREA_EXIT, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.SERVICE_AREA, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.BRIDGE_ENTRANCE, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.BRIDGE_EXIT, com.mapbox.navigation.core.trip.model.eh.EHorizonObjectType.CUSTOM}) @kotlin.annotation.Retention public static @interface EHorizonObjectType.Type {
   }
 
   public final class EHorizonPosition {
@@ -799,17 +781,18 @@ package com.mapbox.navigation.core.trip.session {
     method public void onOffRouteStateChanged(boolean offRoute);
   }
 
+  public interface RoadObjectsObserver {
+    method public void onNewRoadObjects(java.util.List<? extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject> roadObjects);
+  }
+
   public final class RoadObjectsStore {
     method public void addCustomRoadObject(String roadObjectId, String openLRLocation, @com.mapbox.navigation.core.trip.model.eh.OpenLRStandard.Type String openLRStandard);
     method public java.util.List<java.lang.String> getRoadObjectIdsByEdgeIds(java.util.List<java.lang.Long> edgeIds);
     method public com.mapbox.navigation.core.trip.model.eh.EHorizonObjectLocation? getRoadObjectLocation(String roadObjectId);
     method public com.mapbox.navigation.core.trip.model.eh.EHorizonObjectMetadata? getRoadObjectMetadata(String roadObjectId);
     method public java.util.Map<java.lang.String,com.mapbox.navigation.core.trip.model.eh.EHorizonObjectEdgeLocation> getRoadObjectsOnTheEdge(long edgeId);
+    method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> getUpcomingRoadObjects(java.util.Map<java.lang.String,com.mapbox.navigation.core.trip.model.eh.EHorizonObjectDistanceInfo> distances);
     method public void removeCustomRoadObject(String roadObjectId);
-  }
-
-  public interface RouteAlertsObserver {
-    method public void onNewRouteAlerts(java.util.List<? extends com.mapbox.navigation.base.trip.model.alert.RouteAlert> routeAlerts);
   }
 
   public interface RouteProgressObserver {

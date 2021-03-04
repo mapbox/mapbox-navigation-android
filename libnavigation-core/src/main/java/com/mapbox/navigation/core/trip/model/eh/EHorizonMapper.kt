@@ -18,6 +18,9 @@ import com.mapbox.navigator.RoadObjectType
 import com.mapbox.navigator.Standard
 import kotlinx.coroutines.withContext
 
+private typealias SDKRoadObjectType =
+    com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
+
 /**
  * Map the ElectronicHorizonPosition.
  */
@@ -40,7 +43,7 @@ internal suspend fun RoadObjectEnterExitInfo.mapToEHorizonObjectEnterExitInfo():
             EHorizonObjectEnterExitInfo(
                 roadObjectId,
                 enterFromStartOrExitFromEnd,
-                type.mapToEHorizonObjectType()
+                type.mapToRoadObjectType()
             )
         }
     }
@@ -56,7 +59,7 @@ internal suspend fun RoadObjectDistanceInfo.mapToEHorizonObjectDistanceInfo():
                 distanceToEnd,
                 entryFromStart,
                 length,
-                type.mapToEHorizonObjectType()
+                type.mapToRoadObjectType()
             )
         }
     }
@@ -74,19 +77,19 @@ internal fun RoadObjectLocation.mapToEHorizonObjectLocation(): EHorizonObjectLoc
 /**
  * Map the RoadObjectType.
  */
-internal fun RoadObjectType.mapToEHorizonObjectType(): String {
+internal fun RoadObjectType.mapToRoadObjectType(): Int {
     return when (this) {
-        RoadObjectType.INCIDENT -> EHorizonObjectType.INCIDENT
-        RoadObjectType.TOLL_COLLECTION_POINT -> EHorizonObjectType.TOLL_COLLECTION_POINT
-        RoadObjectType.BORDER_CROSSING -> EHorizonObjectType.BORDER_CROSSING
-        RoadObjectType.TUNNEL_ENTRANCE -> EHorizonObjectType.TUNNEL_ENTRANCE
-        RoadObjectType.TUNNEL_EXIT -> EHorizonObjectType.TUNNEL_EXIT
-        RoadObjectType.RESTRICTED_AREA_ENTRANCE -> EHorizonObjectType.RESTRICTED_AREA_ENTRANCE
-        RoadObjectType.RESTRICTED_AREA_EXIT -> EHorizonObjectType.RESTRICTED_AREA_EXIT
-        RoadObjectType.SERVICE_AREA -> EHorizonObjectType.SERVICE_AREA
-        RoadObjectType.BRIDGE_ENTRANCE -> EHorizonObjectType.BRIDGE_ENTRANCE
-        RoadObjectType.BRIDGE_EXIT -> EHorizonObjectType.BRIDGE_EXIT
-        RoadObjectType.CUSTOM -> EHorizonObjectType.CUSTOM
+        RoadObjectType.INCIDENT -> SDKRoadObjectType.INCIDENT
+        RoadObjectType.TOLL_COLLECTION_POINT -> SDKRoadObjectType.TOLL_COLLECTION
+        RoadObjectType.BORDER_CROSSING -> SDKRoadObjectType.COUNTRY_BORDER_CROSSING
+        RoadObjectType.TUNNEL_ENTRANCE -> SDKRoadObjectType.TUNNEL_ENTRANCE
+        RoadObjectType.TUNNEL_EXIT -> SDKRoadObjectType.TUNNEL_EXIT
+        RoadObjectType.RESTRICTED_AREA_ENTRANCE -> SDKRoadObjectType.RESTRICTED_AREA_ENTRANCE
+        RoadObjectType.RESTRICTED_AREA_EXIT -> SDKRoadObjectType.RESTRICTED_AREA_EXIT
+        RoadObjectType.SERVICE_AREA -> SDKRoadObjectType.REST_STOP
+        RoadObjectType.BRIDGE_ENTRANCE -> SDKRoadObjectType.BRIDGE_ENTRANCE
+        RoadObjectType.BRIDGE_EXIT -> SDKRoadObjectType.BRIDGE_EXIT
+        RoadObjectType.CUSTOM -> SDKRoadObjectType.CUSTOM
     }
 }
 

@@ -34,7 +34,7 @@ import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
-import com.mapbox.navigation.core.trip.session.RouteAlertsObserver
+import com.mapbox.navigation.core.trip.session.RoadObjectsObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -344,7 +344,7 @@ class MapboxNavigationTest {
     fun onDestroy_unregisters_TripSession_routeAlerts_observers() {
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { tripSession.unregisterAllRouteAlertsObservers() }
+        verify(exactly = 1) { tripSession.unregisterAllRoadObjectsObservers() }
     }
 
     @Test
@@ -563,21 +563,21 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun `route alerts observer is registered in the trip session`() {
-        val observer: RouteAlertsObserver = mockk()
+    fun `road objects observer is registered in the trip session`() {
+        val observer: RoadObjectsObserver = mockk()
 
-        mapboxNavigation.registerRouteAlertsObserver(observer)
+        mapboxNavigation.registerRoadObjectsObserver(observer)
 
-        verify(exactly = 1) { tripSession.registerRouteAlertsObserver(observer) }
+        verify(exactly = 1) { tripSession.registerRoadObjectsObserver(observer) }
     }
 
     @Test
-    fun `route alerts observer is unregistered in the trip session`() {
-        val observer: RouteAlertsObserver = mockk()
+    fun `road objects observer is unregistered in the trip session`() {
+        val observer: RoadObjectsObserver = mockk()
 
-        mapboxNavigation.unregisterRouteAlertsObserver(observer)
+        mapboxNavigation.unregisterRoadObjectsObserver(observer)
 
-        verify(exactly = 1) { tripSession.unregisterRouteAlertsObserver(observer) }
+        verify(exactly = 1) { tripSession.unregisterRoadObjectsObserver(observer) }
     }
 
     @Test
