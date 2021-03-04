@@ -16,7 +16,7 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_PREDICTION_MILLIS
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.alert.RouteAlert
+import com.mapbox.navigation.base.trip.model.roadobject.RoadObject
 import com.mapbox.navigation.core.internal.utils.isSameRoute
 import com.mapbox.navigation.core.internal.utils.isSameUuid
 import com.mapbox.navigation.core.navigator.getMapMatcherResult
@@ -800,103 +800,103 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun `route alerts observer gets successfully called`() = coroutineRule.runBlockingTest {
-        val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
-        val routeAlerts: List<RouteAlert> = listOf(mockk())
-        coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(routeAlerts)
+    fun `road objects observer gets successfully called`() = coroutineRule.runBlockingTest {
+        val roadObjectsObserver: RoadObjectsObserver = mockk(relaxUnitFun = true)
+        val roadObjects: List<RoadObject> = listOf(mockk())
+        coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(roadObjects)
         tripSession = buildTripSession()
 
-        tripSession.registerRouteAlertsObserver(routeAlertsObserver)
+        tripSession.registerRoadObjectsObserver(roadObjectsObserver)
         tripSession.route = mockk(relaxed = true)
 
-        verify(exactly = 1) { routeAlertsObserver.onNewRouteAlerts(routeAlerts) }
+        verify(exactly = 1) { roadObjectsObserver.onNewRoadObjects(roadObjects) }
     }
 
     @Test
-    fun `route alerts observer gets called only one on duplicate updates`() =
+    fun `road objects observer gets called only one on duplicate updates`() =
         coroutineRule.runBlockingTest {
-            val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
-            val routeAlerts: List<RouteAlert> = listOf(mockk())
-            coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(routeAlerts)
+            val roadObjectsObserver: RoadObjectsObserver = mockk(relaxUnitFun = true)
+            val roadObjects: List<RoadObject> = listOf(mockk())
+            coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(roadObjects)
             tripSession = buildTripSession()
 
-            tripSession.registerRouteAlertsObserver(routeAlertsObserver)
+            tripSession.registerRoadObjectsObserver(roadObjectsObserver)
             tripSession.route = mockk(relaxed = true)
             tripSession.route = mockk(relaxed = true)
 
-            verify(exactly = 1) { routeAlertsObserver.onNewRouteAlerts(routeAlerts) }
+            verify(exactly = 1) { roadObjectsObserver.onNewRoadObjects(roadObjects) }
         }
 
     @Test
-    fun `route alerts observer doesn't get called when unregistered`() =
+    fun `road objects observer doesn't get called when unregistered`() =
         coroutineRule.runBlockingTest {
-            val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
-            val routeAlerts: List<RouteAlert> = listOf(mockk())
-            coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(routeAlerts)
+            val roadObjectsObserver: RoadObjectsObserver = mockk(relaxUnitFun = true)
+            val roadObjects: List<RoadObject> = listOf(mockk())
+            coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(roadObjects)
             tripSession = buildTripSession()
 
-            tripSession.registerRouteAlertsObserver(routeAlertsObserver)
+            tripSession.registerRoadObjectsObserver(roadObjectsObserver)
             tripSession.route = mockk(relaxed = true)
-            tripSession.unregisterRouteAlertsObserver(routeAlertsObserver)
+            tripSession.unregisterRoadObjectsObserver(roadObjectsObserver)
             tripSession.route = mockk(relaxed = true)
 
-            verify(exactly = 1) { routeAlertsObserver.onNewRouteAlerts(routeAlerts) }
+            verify(exactly = 1) { roadObjectsObserver.onNewRoadObjects(roadObjects) }
         }
 
     @Test
-    fun `route alerts observer gets immediately notified`() = coroutineRule.runBlockingTest {
-        val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
-        val routeAlerts: List<RouteAlert> = listOf(mockk())
-        coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(routeAlerts)
+    fun `road objects observer gets immediately notified`() = coroutineRule.runBlockingTest {
+        val roadObjectsObserver: RoadObjectsObserver = mockk(relaxUnitFun = true)
+        val roadObjects: List<RoadObject> = listOf(mockk())
+        coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(roadObjects)
         tripSession = buildTripSession()
 
         tripSession.route = mockk(relaxed = true)
-        tripSession.registerRouteAlertsObserver(routeAlertsObserver)
+        tripSession.registerRoadObjectsObserver(roadObjectsObserver)
 
-        verify(exactly = 1) { routeAlertsObserver.onNewRouteAlerts(routeAlerts) }
+        verify(exactly = 1) { roadObjectsObserver.onNewRoadObjects(roadObjects) }
     }
 
     @Test
-    fun `route alerts get cleared when route is cleared`() = coroutineRule.runBlockingTest {
-        val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
-        val routeAlerts: List<RouteAlert> = listOf(mockk())
+    fun `road objects get cleared when route is cleared`() = coroutineRule.runBlockingTest {
+        val roadObjectsObserver: RoadObjectsObserver = mockk(relaxUnitFun = true)
+        val roadObjects: List<RoadObject> = listOf(mockk())
         tripSession = buildTripSession()
-        coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(routeAlerts)
+        coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(roadObjects)
         tripSession.route = mockk(relaxed = true)
-        tripSession.registerRouteAlertsObserver(routeAlertsObserver)
+        tripSession.registerRoadObjectsObserver(roadObjectsObserver)
         coEvery { navigator.setRoute(any(), any()) } returns null
         tripSession.route = null
 
         verifySequence {
-            routeAlertsObserver.onNewRouteAlerts(routeAlerts)
-            routeAlertsObserver.onNewRouteAlerts(emptyList())
+            roadObjectsObserver.onNewRoadObjects(roadObjects)
+            roadObjectsObserver.onNewRoadObjects(emptyList())
         }
     }
 
     @Test
-    fun `route alerts observer is notified with null if there's no route`() =
+    fun `road objects observer is notified with null if there's no route`() =
         coroutineRule.runBlockingTest {
-            val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
+            val roadObjectsObserver: RoadObjectsObserver = mockk(relaxUnitFun = true)
             tripSession = buildTripSession()
 
-            tripSession.registerRouteAlertsObserver(routeAlertsObserver)
+            tripSession.registerRoadObjectsObserver(roadObjectsObserver)
 
-            verify(exactly = 1) { routeAlertsObserver.onNewRouteAlerts(emptyList()) }
+            verify(exactly = 1) { roadObjectsObserver.onNewRoadObjects(emptyList()) }
         }
 
     @Test
-    fun unregisterAllRouteAlertsObservers() = coroutineRule.runBlockingTest {
-        val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
-        val routeAlerts: List<RouteAlert> = listOf(mockk())
-        coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(routeAlerts)
+    fun unregisterAllRoadObjectsObservers() = coroutineRule.runBlockingTest {
+        val roadObjectsObserver: RoadObjectsObserver = mockk(relaxUnitFun = true)
+        val roadObjects: List<RoadObject> = listOf(mockk())
+        coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(roadObjects)
         tripSession = buildTripSession()
 
-        tripSession.registerRouteAlertsObserver(routeAlertsObserver)
+        tripSession.registerRoadObjectsObserver(roadObjectsObserver)
         tripSession.route = mockk(relaxed = true)
-        tripSession.unregisterAllRouteAlertsObservers()
+        tripSession.unregisterAllRoadObjectsObservers()
         tripSession.route = mockk(relaxed = true)
 
-        verify(exactly = 1) { routeAlertsObserver.onNewRouteAlerts(routeAlerts) }
+        verify(exactly = 1) { roadObjectsObserver.onNewRoadObjects(roadObjects) }
     }
 
     @Test

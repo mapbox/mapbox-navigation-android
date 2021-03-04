@@ -57,6 +57,7 @@ import com.mapbox.navigation.core.replay.route.ReplayRouteMapper;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.MapMatcherResult;
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver;
+import com.mapbox.navigation.core.trip.session.RoadObjectsStore;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.base.model.Expected;
 import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter;

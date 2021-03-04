@@ -1,26 +1,27 @@
 package com.mapbox.navigation.navigator
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
-import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo
-import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert
-import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo
-import com.mapbox.navigation.base.trip.model.alert.IncidentAlert
-import com.mapbox.navigation.base.trip.model.alert.IncidentCongestion
-import com.mapbox.navigation.base.trip.model.alert.IncidentImpact
-import com.mapbox.navigation.base.trip.model.alert.IncidentInfo
-import com.mapbox.navigation.base.trip.model.alert.IncidentType.CONSTRUCTION
-import com.mapbox.navigation.base.trip.model.alert.RestStopAlert
-import com.mapbox.navigation.base.trip.model.alert.RestStopType
-import com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert
-import com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry
-import com.mapbox.navigation.base.trip.model.alert.RouteAlertType
-import com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert
-import com.mapbox.navigation.base.trip.model.alert.TollCollectionType
-import com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert
-import com.mapbox.navigation.base.trip.model.alert.TunnelInfo
+import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry
+import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
+import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossing
+import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo
+import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingInfo
+import com.mapbox.navigation.base.trip.model.roadobject.incident.Incident
+import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongestion
+import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact
+import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo
+import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.CONSTRUCTION
+import com.mapbox.navigation.base.trip.model.roadobject.restrictedarea.RestrictedArea
+import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop
+import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStopType
+import com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollection
+import com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollectionType
+import com.mapbox.navigation.base.trip.model.roadobject.tunnel.Tunnel
+import com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo
 import com.mapbox.navigation.navigator.internal.NavigatorMapper
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigator.IncidentCongestionDescription
@@ -101,8 +102,8 @@ class NavigatorMapperTest {
 
         val result = navigatorMapper.getRouteInitInfo(routeInfo)!!
 
-        assertEquals(1, result.routeAlerts.size)
-        assertEquals(RouteAlertType.TunnelEntrance, result.routeAlerts[0].alertType)
+        assertEquals(1, result.roadObjects.size)
+        assertEquals(RoadObjectType.TUNNEL, result.roadObjects[0].objectType)
     }
 
     @Test
@@ -117,31 +118,29 @@ class NavigatorMapperTest {
             navigationStatus,
             mockk(relaxed = true)
         )
-        val upcomingRouteAlert = routeProgress!!.upcomingRouteAlerts[0]
+        val upcomingRoadObject = routeProgress!!.upcomingRoadObjects[0]
 
         assertEquals(
             defaultDistanceToStart,
-            upcomingRouteAlert.distanceToStart,
+            upcomingRoadObject.distanceToStart,
             .00001
         )
-        val expected = TunnelEntranceAlert.Builder(
-            Point.fromLngLat(10.0, 20.0),
-            123.0
-        ).alertGeometry(
-            RouteAlertGeometry.Builder(
+        val expected = Tunnel.Builder(
+            RoadObjectGeometry.Builder(
                 456.0,
-                Point.fromLngLat(10.0, 20.0),
+                LineString.fromLngLats(
+                    listOf(Point.fromLngLat(10.0, 20.0), Point.fromLngLat(33.0, 44.0))
+                ),
                 1,
-                Point.fromLngLat(33.0, 44.0),
                 2
             ).build()
-        )
+        ).distanceFromStartOfRoute(123.0)
             .info(TunnelInfo.Builder("Ted Williams Tunnel").build())
             .build()
-        assertEquals(expected, upcomingRouteAlert.routeAlert)
-        assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
-        assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.alertType, RouteAlertType.TunnelEntrance)
+        assertEquals(expected, upcomingRoadObject.roadObject)
+        assertEquals(expected.hashCode(), upcomingRoadObject.roadObject.hashCode())
+        assertEquals(expected.toString(), upcomingRoadObject.roadObject.toString())
+        assertEquals(expected.objectType, RoadObjectType.TUNNEL)
     }
 
     @Test
@@ -159,7 +158,7 @@ class NavigatorMapperTest {
             navigationStatus,
             mockk(relaxed = true)
         )
-        val upcomingRouteAlerts = routeProgress!!.upcomingRouteAlerts
+        val upcomingRouteAlerts = routeProgress!!.upcomingRoadObjects
 
         assertEquals(firstEntrance.distanceToStart, upcomingRouteAlerts[0].distanceToStart, .0001)
         assertEquals(secondEntrance.distanceToStart, upcomingRouteAlerts[1].distanceToStart, .0001)
@@ -177,17 +176,22 @@ class NavigatorMapperTest {
             navigationStatus,
             mockk(relaxed = true)
         )
-        val upcomingRouteAlert = routeProgress!!.upcomingRouteAlerts[0]
+        val upcomingRouteAlert = routeProgress!!.upcomingRoadObjects[0]
 
         assertEquals(
             defaultDistanceToStart,
             upcomingRouteAlert.distanceToStart,
             .00001
         )
-        val expected = CountryBorderCrossingAlert.Builder(
-            Point.fromLngLat(10.0, 20.0),
-            123.0
+        val expected = CountryBorderCrossing.Builder(
+            RoadObjectGeometry.Builder(
+                null,
+                shape = Point.fromLngLat(10.0, 20.0),
+                1,
+                1
+            ).build()
         )
+            .distanceFromStartOfRoute(123.0)
             .countryBorderCrossingInfo(
                 CountryBorderCrossingInfo.Builder(
                     CountryBorderCrossingAdminInfo.Builder("US", "USA").build(),
@@ -195,10 +199,10 @@ class NavigatorMapperTest {
                 ).build()
             )
             .build()
-        assertEquals(expected, upcomingRouteAlert.routeAlert)
-        assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
-        assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.alertType, RouteAlertType.CountryBorderCrossing)
+        assertEquals(expected, upcomingRouteAlert.roadObject)
+        assertEquals(expected.hashCode(), upcomingRouteAlert.roadObject.hashCode())
+        assertEquals(expected.toString(), upcomingRouteAlert.roadObject.toString())
+        assertEquals(expected.objectType, RoadObjectType.COUNTRY_BORDER_CROSSING)
     }
 
     @Test
@@ -213,23 +217,27 @@ class NavigatorMapperTest {
             navigationStatus,
             mockk(relaxed = true)
         )
-        val upcomingRouteAlert = routeProgress!!.upcomingRouteAlerts[0]
+        val upcomingRouteAlert = routeProgress!!.upcomingRoadObjects[0]
 
         assertEquals(
             defaultDistanceToStart,
             upcomingRouteAlert.distanceToStart,
             .00001
         )
-        val expected = TollCollectionAlert.Builder(
-            Point.fromLngLat(10.0, 20.0),
-            123.0
-        )
+        val expected = TollCollection.Builder(
+            RoadObjectGeometry.Builder(
+                null,
+                shape = Point.fromLngLat(10.0, 20.0),
+                1,
+                1
+            ).build()
+        ).distanceFromStartOfRoute(123.0)
             .tollCollectionType(TollCollectionType.TollGantry)
             .build()
-        assertEquals(expected, upcomingRouteAlert.routeAlert)
-        assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
-        assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.alertType, RouteAlertType.TollCollection)
+        assertEquals(expected, upcomingRouteAlert.roadObject)
+        assertEquals(expected.hashCode(), upcomingRouteAlert.roadObject.hashCode())
+        assertEquals(expected.toString(), upcomingRouteAlert.roadObject.toString())
+        assertEquals(expected.objectType, RoadObjectType.TOLL_COLLECTION)
     }
 
     @Test
@@ -244,23 +252,27 @@ class NavigatorMapperTest {
             navigationStatus,
             mockk(relaxed = true)
         )
-        val upcomingRouteAlert = routeProgress!!.upcomingRouteAlerts[0]
+        val upcomingRouteAlert = routeProgress!!.upcomingRoadObjects[0]
 
         assertEquals(
             defaultDistanceToStart,
             upcomingRouteAlert.distanceToStart,
             .00001
         )
-        val expected = TollCollectionAlert.Builder(
-            Point.fromLngLat(10.0, 20.0),
-            123.0
-        )
+        val expected = TollCollection.Builder(
+            RoadObjectGeometry.Builder(
+                null,
+                shape = Point.fromLngLat(10.0, 20.0),
+                1,
+                1
+            ).build()
+        ).distanceFromStartOfRoute(123.0)
             .tollCollectionType(TollCollectionType.TollBooth)
             .build()
-        assertEquals(expected, upcomingRouteAlert.routeAlert)
-        assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
-        assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.alertType, RouteAlertType.TollCollection)
+        assertEquals(expected, upcomingRouteAlert.roadObject)
+        assertEquals(expected.hashCode(), upcomingRouteAlert.roadObject.hashCode())
+        assertEquals(expected.toString(), upcomingRouteAlert.roadObject.toString())
+        assertEquals(expected.objectType, RoadObjectType.TOLL_COLLECTION)
     }
 
     @Test
@@ -275,21 +287,26 @@ class NavigatorMapperTest {
             navigationStatus,
             mockk(relaxed = true)
         )
-        val upcomingRouteAlert = routeProgress!!.upcomingRouteAlerts[0]
+        val upcomingRouteAlert = routeProgress!!.upcomingRoadObjects[0]
 
         assertEquals(
             defaultDistanceToStart,
             upcomingRouteAlert.distanceToStart,
             .00001
         )
-        val expected = TollCollectionAlert.Builder(
-            Point.fromLngLat(10.0, 20.0),
-            123.0
-        ).build()
-        assertEquals(expected, upcomingRouteAlert.routeAlert)
-        assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
-        assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.alertType, RouteAlertType.TollCollection)
+        val expected = TollCollection.Builder(
+            RoadObjectGeometry.Builder(
+                null,
+                shape = Point.fromLngLat(10.0, 20.0),
+                1,
+                1
+            ).build()
+        ).distanceFromStartOfRoute(123.0)
+            .build()
+        assertEquals(expected, upcomingRouteAlert.roadObject)
+        assertEquals(expected.hashCode(), upcomingRouteAlert.roadObject.hashCode())
+        assertEquals(expected.toString(), upcomingRouteAlert.roadObject.toString())
+        assertEquals(expected.objectType, RoadObjectType.TOLL_COLLECTION)
     }
 
     @Test
@@ -304,23 +321,27 @@ class NavigatorMapperTest {
             navigationStatus,
             mockk(relaxed = true)
         )
-        val upcomingRouteAlert = routeProgress!!.upcomingRouteAlerts[0]
+        val upcomingRoadObject = routeProgress!!.upcomingRoadObjects[0]
 
         assertEquals(
             defaultDistanceToStart,
-            upcomingRouteAlert.distanceToStart,
+            upcomingRoadObject.distanceToStart,
             .00001
         )
-        val expected = RestStopAlert.Builder(
-            Point.fromLngLat(10.0, 20.0),
-            123.0
-        )
+        val expected = RestStop.Builder(
+            RoadObjectGeometry.Builder(
+                null,
+                shape = Point.fromLngLat(10.0, 20.0),
+                1,
+                1
+            ).build()
+        ).distanceFromStartOfRoute(123.0)
             .restStopType(RestStopType.RestArea)
             .build()
-        assertEquals(expected, upcomingRouteAlert.routeAlert)
-        assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
-        assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.alertType, RouteAlertType.RestStop)
+        assertEquals(expected, upcomingRoadObject.roadObject)
+        assertEquals(expected.hashCode(), upcomingRoadObject.roadObject.hashCode())
+        assertEquals(expected.toString(), upcomingRoadObject.roadObject.toString())
+        assertEquals(expected.objectType, RoadObjectType.REST_STOP)
     }
 
     @Test
@@ -335,23 +356,23 @@ class NavigatorMapperTest {
             navigationStatus,
             mockk(relaxed = true)
         )
-        val upcomingRouteAlert = routeProgress!!.upcomingRouteAlerts[0]
+        val upcomingRoadObject = routeProgress!!.upcomingRoadObjects[0]
 
-        assertEquals(
-            defaultDistanceToStart,
-            upcomingRouteAlert.distanceToStart,
-            .00001
-        )
-        val expected = RestStopAlert.Builder(
-            Point.fromLngLat(10.0, 20.0),
-            123.0
-        )
+        assertEquals(defaultDistanceToStart, upcomingRoadObject.distanceToStart, .00001)
+        val expected = RestStop.Builder(
+            RoadObjectGeometry.Builder(
+                null,
+                shape = Point.fromLngLat(10.0, 20.0),
+                1,
+                1
+            ).build()
+        ).distanceFromStartOfRoute(123.0)
             .restStopType(RestStopType.ServiceArea)
             .build()
-        assertEquals(expected, upcomingRouteAlert.routeAlert)
-        assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
-        assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.alertType, RouteAlertType.RestStop)
+        assertEquals(expected, upcomingRoadObject.roadObject)
+        assertEquals(expected.hashCode(), upcomingRoadObject.roadObject.hashCode())
+        assertEquals(expected.toString(), upcomingRoadObject.roadObject.toString())
+        assertEquals(expected.objectType, RoadObjectType.REST_STOP)
     }
 
     @Test
@@ -366,21 +387,26 @@ class NavigatorMapperTest {
             navigationStatus,
             mockk(relaxed = true)
         )
-        val upcomingRouteAlert = routeProgress!!.upcomingRouteAlerts[0]
+        val upcomingRoadObject = routeProgress!!.upcomingRoadObjects[0]
 
         assertEquals(
             defaultDistanceToStart,
-            upcomingRouteAlert.distanceToStart,
+            upcomingRoadObject.distanceToStart,
             .00001
         )
-        val expected = RestStopAlert.Builder(
-            Point.fromLngLat(10.0, 20.0),
-            123.0
-        ).build()
-        assertEquals(expected, upcomingRouteAlert.routeAlert)
-        assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
-        assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.alertType, RouteAlertType.RestStop)
+        val expected = RestStop.Builder(
+            RoadObjectGeometry.Builder(
+                null,
+                shape = Point.fromLngLat(10.0, 20.0),
+                1,
+                1
+            ).build()
+        ).distanceFromStartOfRoute(123.0)
+            .build()
+        assertEquals(expected, upcomingRoadObject.roadObject)
+        assertEquals(expected.hashCode(), upcomingRoadObject.roadObject.hashCode())
+        assertEquals(expected.toString(), upcomingRoadObject.roadObject.toString())
+        assertEquals(expected.objectType, RoadObjectType.REST_STOP)
     }
 
     @Test
@@ -395,29 +421,28 @@ class NavigatorMapperTest {
             navigationStatus,
             mockk(relaxed = true)
         )
-        val upcomingRouteAlert = routeProgress!!.upcomingRouteAlerts[0]
+        val upcomingRoadObject = routeProgress!!.upcomingRoadObjects[0]
 
         assertEquals(
             defaultDistanceToStart,
-            upcomingRouteAlert.distanceToStart,
+            upcomingRoadObject.distanceToStart,
             .00001
         )
-        val expected = RestrictedAreaAlert.Builder(
-            Point.fromLngLat(10.0, 20.0),
-            123.0
-        ).alertGeometry(
-            RouteAlertGeometry.Builder(
+        val expected = RestrictedArea.Builder(
+            RoadObjectGeometry.Builder(
                 456.0,
-                Point.fromLngLat(10.0, 20.0),
+                LineString.fromLngLats(
+                    listOf(Point.fromLngLat(10.0, 20.0), Point.fromLngLat(33.0, 44.0))
+                ),
                 1,
-                Point.fromLngLat(33.0, 44.0),
                 2
             ).build()
-        ).build()
-        assertEquals(expected, upcomingRouteAlert.routeAlert)
-        assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
-        assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.alertType, RouteAlertType.RestrictedArea)
+        ).distanceFromStartOfRoute(123.0)
+            .build()
+        assertEquals(expected, upcomingRoadObject.roadObject)
+        assertEquals(expected.hashCode(), upcomingRoadObject.roadObject.hashCode())
+        assertEquals(expected.toString(), upcomingRoadObject.roadObject.toString())
+        assertEquals(expected.objectType, RoadObjectType.RESTRICTED_AREA)
     }
 
     @Test
@@ -432,26 +457,24 @@ class NavigatorMapperTest {
             navigationStatus,
             mockk(relaxed = true)
         )
-        val upcomingRouteAlert = routeProgress!!.upcomingRouteAlerts[0]
+        val upcomingRoadObject = routeProgress!!.upcomingRoadObjects[0]
 
         assertEquals(
             defaultDistanceToStart,
-            upcomingRouteAlert.distanceToStart,
+            upcomingRoadObject.distanceToStart,
             .00001
         )
-        val expected = IncidentAlert.Builder(
-            Point.fromLngLat(10.0, 20.0),
-            123.0
+        val expected = Incident.Builder(
+            RoadObjectGeometry.Builder(
+                456.0,
+                LineString.fromLngLats(
+                    listOf(Point.fromLngLat(10.0, 20.0), Point.fromLngLat(33.0, 44.0))
+                ),
+                1,
+                2
+            ).build()
         )
-            .alertGeometry(
-                RouteAlertGeometry.Builder(
-                    456.0,
-                    Point.fromLngLat(10.0, 20.0),
-                    1,
-                    Point.fromLngLat(33.0, 44.0),
-                    2
-                ).build()
-            )
+            .distanceFromStartOfRoute(123.0)
             .info(
                 IncidentInfo.Builder("some_id")
                     .type(CONSTRUCTION)
@@ -469,10 +492,10 @@ class NavigatorMapperTest {
             )
             .build()
 
-        assertEquals(expected, upcomingRouteAlert.routeAlert)
-        assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
-        assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.alertType, RouteAlertType.Incident)
+        assertEquals(expected, upcomingRoadObject.roadObject)
+        assertEquals(expected.hashCode(), upcomingRoadObject.roadObject.hashCode())
+        assertEquals(expected.toString(), upcomingRoadObject.roadObject.toString())
+        assertEquals(expected.objectType, RoadObjectType.INCIDENT)
     }
 
     private val directionsRoute = DirectionsRoute.fromJson(

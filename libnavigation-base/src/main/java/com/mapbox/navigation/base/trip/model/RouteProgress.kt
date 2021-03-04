@@ -5,7 +5,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert
+import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 
 /**
  * This class contains all progress information at any given time during a navigation session. This
@@ -37,7 +37,7 @@ import com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert
  * @param fractionTraveled [Float] fraction traveled along the current route. This value is
  * between 0 and 1 and isn't guaranteed to reach 1 before the user reaches the end of the route.
  * @param remainingWaypoints [Int] number of waypoints remaining on the current route.
- * @param upcomingRouteAlerts list of upcoming route alerts.
+ * @param upcomingRoadObjects list of upcoming road objects.
  */
 class RouteProgress private constructor(
     val route: DirectionsRoute,
@@ -53,7 +53,7 @@ class RouteProgress private constructor(
     val durationRemaining: Double,
     val fractionTraveled: Float,
     val remainingWaypoints: Int,
-    val upcomingRouteAlerts: List<UpcomingRouteAlert>
+    val upcomingRoadObjects: List<UpcomingRoadObject>
 ) {
 
     /**
@@ -72,7 +72,7 @@ class RouteProgress private constructor(
         .durationRemaining(durationRemaining)
         .fractionTraveled(fractionTraveled)
         .remainingWaypoints(remainingWaypoints)
-        .upcomingRouteAlerts(upcomingRouteAlerts)
+        .upcomingRoadObjects(upcomingRoadObjects)
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -96,7 +96,7 @@ class RouteProgress private constructor(
         if (durationRemaining != other.durationRemaining) return false
         if (fractionTraveled != other.fractionTraveled) return false
         if (remainingWaypoints != other.remainingWaypoints) return false
-        if (upcomingRouteAlerts != other.upcomingRouteAlerts) return false
+        if (upcomingRoadObjects != other.upcomingRoadObjects) return false
 
         return true
     }
@@ -118,7 +118,7 @@ class RouteProgress private constructor(
         result = 31 * result + durationRemaining.hashCode()
         result = 31 * result + fractionTraveled.hashCode()
         result = 31 * result + remainingWaypoints
-        result = 31 * result + upcomingRouteAlerts.hashCode()
+        result = 31 * result + upcomingRoadObjects.hashCode()
         return result
     }
 
@@ -140,7 +140,7 @@ class RouteProgress private constructor(
             "durationRemaining=$durationRemaining, " +
             "fractionTraveled=$fractionTraveled, " +
             "remainingWaypoints=$remainingWaypoints, " +
-            "upcomingRouteAlerts=$upcomingRouteAlerts" +
+            "upcomingRoadObjects=$upcomingRoadObjects" +
             ")"
     }
 
@@ -162,7 +162,7 @@ class RouteProgress private constructor(
         private var durationRemaining: Double = 0.0
         private var fractionTraveled: Float = 0f
         private var remainingWaypoints: Int = 0
-        private var upcomingRouteAlerts: List<UpcomingRouteAlert> = emptyList()
+        private var upcomingRoadObjects: List<UpcomingRoadObject> = emptyList()
 
         /**
          * Current [DirectionsRoute] geometry with a buffer
@@ -267,12 +267,12 @@ class RouteProgress private constructor(
             apply { this.remainingWaypoints = remainingWaypoints }
 
         /**
-         * List of upcoming route alerts with distances from current location to each of them.
+         * List of upcoming road objects with distances from current location to each of them.
          *
          * @return Builder
          */
-        fun upcomingRouteAlerts(upcomingRouteAlerts: List<UpcomingRouteAlert>): Builder =
-            apply { this.upcomingRouteAlerts = upcomingRouteAlerts }
+        fun upcomingRoadObjects(upcomingRoadObjects: List<UpcomingRoadObject>): Builder =
+            apply { this.upcomingRoadObjects = upcomingRoadObjects }
 
         /**
          * Build new instance of [RouteProgress]
@@ -295,7 +295,7 @@ class RouteProgress private constructor(
                 durationRemaining,
                 fractionTraveled,
                 remainingWaypoints,
-                upcomingRouteAlerts
+                upcomingRoadObjects
             )
         }
     }

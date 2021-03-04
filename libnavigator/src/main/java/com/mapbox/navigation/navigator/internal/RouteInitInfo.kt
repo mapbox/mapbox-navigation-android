@@ -1,7 +1,7 @@
 package com.mapbox.navigation.navigator.internal
 
-import com.mapbox.navigation.base.trip.model.alert.RouteAlert
+import com.mapbox.navigation.base.trip.model.roadobject.RoadObject
 
 data class RouteInitInfo(
-    val routeAlerts: List<RouteAlert>
+    val roadObjects: List<RoadObject>
 )

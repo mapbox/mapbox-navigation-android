@@ -4,8 +4,8 @@ package com.mapbox.navigation.core.trip.model.eh
  * EHorizonObjectLocation represents location of road object on road graph.
  * For point-like objects will contain single edge with `percentAlongBegin == percentAlongEnd`
  *
- * @param path represents location of line-like object, will be null point-like objects
- * @param position represents location of point-like object, will be null line-like objects
+ * @param path represents location of line-like object, will be null for point-like objects
+ * @param position represents location of point-like object, will be null for line-like objects
  */
 class EHorizonObjectLocation internal constructor(
     val path: EHorizonGraphPath?,
