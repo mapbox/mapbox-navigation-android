@@ -1,5 +1,13 @@
 version: 2.1
 
+parameters:
+  mapbox_navigation_native_upstream:
+    type: boolean
+    default: false
+  mapbox_navigation_native_snapshot:
+    type: string
+    default: ''
+
 #-------------------------------
 #---------- EXECUTORS ----------
 #-------------------------------
@@ -8,12 +16,30 @@ executors:
     docker:
       - image: mbgl/android-ndk-r21:latest
     working_directory: ~/code
-
+    environment:
+      FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION: << pipeline.parameters.mapbox_navigation_native_snapshot >>
+      ALLOW_SNAPSHOT_REPOSITORY: << pipeline.parameters.mapbox_navigation_native_upstream >>
+      
 #-------------------------------
 #---------- WORKFLOWS ----------
 #-------------------------------
 workflows:
   version: 2
+  release-workflow:
+    when: 
+      not: << pipeline.parameters.mapbox_navigation_native_upstream >>
+    jobs: 
+      - release-snapshot:
+          filters:
+            branches:
+              only:
+                - main
+      - release:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
   default:
     jobs:
       - prepare-and-assemble
@@ -38,17 +64,6 @@ workflows:
           filters:
             branches:
               ignore: /^(main|release-.*)/
-      - release-snapshot:
-          filters:
-            branches:
-              only:
-                - main
-      - release:
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
 #      - mobile-metrics-dry-run:
 #          type: approval
 #      - mobile-metrics-benchmarks:
