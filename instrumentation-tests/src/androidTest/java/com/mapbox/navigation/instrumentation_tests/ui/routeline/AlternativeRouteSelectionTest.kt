@@ -24,7 +24,6 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
-import kotlinx.android.synthetic.main.activity_basic_navigation_view.*
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -52,7 +51,7 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
 
     @Before
     fun setUp() {
-        initIdlingResource = MapStyleInitIdlingResource(activity.mapView)
+        initIdlingResource = MapStyleInitIdlingResource(activity.binding.mapView)
         initIdlingResource.register()
         Espresso.onIdle()
 
