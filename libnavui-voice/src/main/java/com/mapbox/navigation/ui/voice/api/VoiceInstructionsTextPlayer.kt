@@ -100,6 +100,11 @@ internal class VoiceInstructionsTextPlayer(
             }
 
             override fun onError(utteranceId: String?) {
+                // Intentionally empty as deprecated
+            }
+
+            override fun onError(utteranceId: String?, errorCode: Int) {
+                Log.e(TAG, "TextToSpeech error: $errorCode")
                 donePlaying()
             }
 
