@@ -375,7 +375,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
   private void updateCamera(Location location) {
     MapAnimationOptions.Builder mapAnimationOptionsBuilder = new MapAnimationOptions.Builder();
-    mapAnimationOptionsBuilder.setDuration(1500L);
+    mapAnimationOptionsBuilder.duration(1500L);
     mapCamera.easeTo(
         new CameraOptions.Builder()
             .center(Point.fromLngLat(location.getLongitude(), location.getLatitude()))

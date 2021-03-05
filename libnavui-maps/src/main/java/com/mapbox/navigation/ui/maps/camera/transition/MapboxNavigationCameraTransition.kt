@@ -46,7 +46,7 @@ class MapboxNavigationCameraTransition(
                 .coerceAtMost(MAXIMUM_LOW_TO_HIGH_DURATION)
             val centerAnimator = cameraPlugin.createCenterAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(center) {
-                    owner = NAVIGATION_CAMERA_OWNER
+                    owner(NAVIGATION_CAMERA_OWNER)
                 }
             ) {
                 duration = centerDuration
@@ -70,7 +70,7 @@ class MapboxNavigationCameraTransition(
 
             val zoomAnimator = cameraPlugin.createZoomAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(zoom) {
-                    owner = NAVIGATION_CAMERA_OWNER
+                    owner(NAVIGATION_CAMERA_OWNER)
                 }
             ) {
                 startDelay = zoomDelay.toLong()
@@ -89,7 +89,7 @@ class MapboxNavigationCameraTransition(
             val bearingDelay = (zoomDelay + zoomDuration - bearingDuration).coerceAtLeast(0.0)
             val bearingAnimator = cameraPlugin.createBearingAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(bearingShortestRotation) {
-                    owner = NAVIGATION_CAMERA_OWNER
+                    owner(NAVIGATION_CAMERA_OWNER)
                 }
             ) {
                 startDelay = bearingDelay.toLong()
@@ -107,7 +107,7 @@ class MapboxNavigationCameraTransition(
         cameraOptions.pitch?.let { pitch ->
             val pitchAnimator = cameraPlugin.createPitchAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(pitch) {
-                    owner = NAVIGATION_CAMERA_OWNER
+                    owner(NAVIGATION_CAMERA_OWNER)
                 }
             ) {
                 startDelay = pitchAndPaddingDelay.toLong()
@@ -120,7 +120,7 @@ class MapboxNavigationCameraTransition(
         cameraOptions.padding?.let { padding ->
             val paddingAnimator = cameraPlugin.createPaddingAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(padding) {
-                    owner = NAVIGATION_CAMERA_OWNER
+                    owner(NAVIGATION_CAMERA_OWNER)
                 }
             ) {
                 startDelay = pitchAndPaddingDelay.toLong()
@@ -144,7 +144,7 @@ class MapboxNavigationCameraTransition(
         cameraOptions.center?.let { center ->
             val centerAnimator = cameraPlugin.createCenterAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(center) {
-                    owner = NAVIGATION_CAMERA_OWNER
+                    owner(NAVIGATION_CAMERA_OWNER)
                 }
             ) {
                 startDelay = 800
@@ -157,7 +157,7 @@ class MapboxNavigationCameraTransition(
         cameraOptions.zoom?.let { zoom ->
             val zoomAnimator = cameraPlugin.createZoomAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(zoom) {
-                    owner = NAVIGATION_CAMERA_OWNER
+                    owner(NAVIGATION_CAMERA_OWNER)
                 }
             ) {
                 startDelay = 0
@@ -174,7 +174,7 @@ class MapboxNavigationCameraTransition(
             }
             val bearingAnimator = cameraPlugin.createBearingAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(bearingShortestRotation) {
-                    owner = NAVIGATION_CAMERA_OWNER
+                    owner(NAVIGATION_CAMERA_OWNER)
                 }
             ) {
                 startDelay = 600
@@ -187,7 +187,7 @@ class MapboxNavigationCameraTransition(
         cameraOptions.pitch?.let { pitch ->
             val pitchAnimator = cameraPlugin.createPitchAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(pitch) {
-                    owner = NAVIGATION_CAMERA_OWNER
+                    owner(NAVIGATION_CAMERA_OWNER)
                 }
             ) {
                 startDelay = 0
@@ -200,7 +200,7 @@ class MapboxNavigationCameraTransition(
         cameraOptions.padding?.let { padding ->
             val paddingAnimator = cameraPlugin.createPaddingAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(padding) {
-                    owner = NAVIGATION_CAMERA_OWNER
+                    owner(NAVIGATION_CAMERA_OWNER)
                 }
             ) {
                 startDelay = 0
@@ -224,7 +224,7 @@ class MapboxNavigationCameraTransition(
         cameraOptions.center?.let { center ->
             val centerAnimator = cameraPlugin.createCenterAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(center) {
-                    owner = NAVIGATION_CAMERA_OWNER
+                    owner(NAVIGATION_CAMERA_OWNER)
                 }
             ) {
                 duration = LINEAR_ANIMATION_DURATION
@@ -236,7 +236,7 @@ class MapboxNavigationCameraTransition(
         cameraOptions.zoom?.let { zoom ->
             val zoomAnimator = cameraPlugin.createZoomAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(zoom) {
-                    owner = NAVIGATION_CAMERA_OWNER
+                    owner(NAVIGATION_CAMERA_OWNER)
                 }
             ) {
                 duration = LINEAR_ANIMATION_DURATION
@@ -252,7 +252,7 @@ class MapboxNavigationCameraTransition(
             }
             val bearingAnimator = cameraPlugin.createBearingAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(bearingShortestRotation) {
-                    owner = NAVIGATION_CAMERA_OWNER
+                    owner(NAVIGATION_CAMERA_OWNER)
                 }
             ) {
                 duration = LINEAR_ANIMATION_DURATION
@@ -264,7 +264,7 @@ class MapboxNavigationCameraTransition(
         cameraOptions.pitch?.let { pitch ->
             val pitchAnimator = cameraPlugin.createPitchAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(pitch) {
-                    owner = NAVIGATION_CAMERA_OWNER
+                    owner(NAVIGATION_CAMERA_OWNER)
                 }
             ) {
                 duration = LINEAR_ANIMATION_DURATION
@@ -276,7 +276,7 @@ class MapboxNavigationCameraTransition(
         cameraOptions.padding?.let { padding ->
             val paddingAnimator = cameraPlugin.createPaddingAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(padding) {
-                    owner = NAVIGATION_CAMERA_OWNER
+                    owner(NAVIGATION_CAMERA_OWNER)
                 }
             ) {
                 duration = LINEAR_ANIMATION_DURATION

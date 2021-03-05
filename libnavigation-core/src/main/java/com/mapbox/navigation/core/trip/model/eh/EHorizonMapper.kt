@@ -7,11 +7,11 @@ import com.mapbox.navigator.ElectronicHorizonEdge
 import com.mapbox.navigator.ElectronicHorizonPosition
 import com.mapbox.navigator.ElectronicHorizonResultType
 import com.mapbox.navigator.FunctionalRoadClass
+import com.mapbox.navigator.GraphPath
 import com.mapbox.navigator.GraphPosition
 import com.mapbox.navigator.RoadObjectDistanceInfo
 import com.mapbox.navigator.RoadObjectEdgeLocation
 import com.mapbox.navigator.RoadObjectEnterExitInfo
-import com.mapbox.navigator.RoadObjectLocation
 import com.mapbox.navigator.RoadObjectProvider
 import com.mapbox.navigator.RoadObjectType
 import com.mapbox.navigator.Standard
@@ -63,11 +63,11 @@ internal suspend fun RoadObjectDistanceInfo.mapToEHorizonObjectDistanceInfo():
 /**
  * Map the ElectronicHorizonPosition.
  */
-internal fun RoadObjectLocation.mapToEHorizonObjectLocation(): EHorizonObjectLocation {
+internal fun GraphPath.mapToEHorizonObjectLocation(): EHorizonObjectLocation {
     return EHorizonObjectLocation(
-        edges,
-        percentAlongBegin,
-        percentAlongEnd
+        this.edges,
+        this.percentAlongBegin,
+        this.percentAlongEnd
     )
 }
 

@@ -329,7 +329,11 @@ class MapboxCameraAnimationsActivity :
     }
 
     private fun initCameraListeners() {
-        mapboxMap.addOnCameraChangeListener { updateCameraChangeView() }
+        mapboxMap.addOnCameraChangeListener {
+            this.runOnUiThread {
+                updateCameraChangeView()
+            }
+        }
     }
 
     private fun initNavigation() {
@@ -463,7 +467,7 @@ class MapboxCameraAnimationsActivity :
                             .pitch(0.0)
                             .build(),
                         MapAnimationOptions.mapAnimationOptions {
-                            duration = 1500
+                            duration(1500)
                         }
                     )
                 }

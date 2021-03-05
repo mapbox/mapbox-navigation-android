@@ -6,7 +6,7 @@ import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.common.HttpMethod
 import com.mapbox.common.HttpRequest
-import com.mapbox.common.UserAgentComponents
+import com.mapbox.common.UAComponents
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.ui.base.model.maneuver.Component
 import com.mapbox.navigation.ui.base.model.maneuver.DelimiterComponentNode
@@ -227,10 +227,9 @@ internal object ManeuverProcessor {
             .body(byteArrayOf())
             .headers(hashMapOf(Pair(USER_AGENT_KEY, USER_AGENT_VALUE)))
             .method(HttpMethod.GET)
-            .userAgentComponents(
-                UserAgentComponents
-                    .Builder()
-                    .sdkIdentifier(SDK_IDENTIFIER)
+            .uaComponents(
+                UAComponents.Builder()
+                    .sdkIdentifierComponent(SDK_IDENTIFIER)
                     .build()
             )
             .build()

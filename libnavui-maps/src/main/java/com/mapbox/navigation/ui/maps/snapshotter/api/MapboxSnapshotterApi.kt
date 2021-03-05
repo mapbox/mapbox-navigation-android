@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.maps.snapshotter.api
 
 import android.content.Context
 import com.mapbox.api.directions.v5.models.BannerComponents
-import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
@@ -14,6 +13,8 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.MapboxOptions
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
+import com.mapbox.maps.SnapshotCreatedListener
+import com.mapbox.maps.SnapshotStyleListener
 import com.mapbox.maps.Snapshotter
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.addLayer
@@ -120,10 +121,24 @@ class MapboxSnapshotterApi(
                         snapshotter.setCameraOptions(cameraOptions)
                         snapshotter.setUri(options.styleUri)
                         mapInterface.size = oldSize
-                        snapshotter.start(object : Snapshotter.SnapshotReadyCallback {
-                            override fun onSnapshotCreated(
-                                snapshot: Expected<MapSnapshotInterface?, String?>
-                            ) {
+                        snapshotter.setStyleListener(object : SnapshotStyleListener {
+                            override fun onDidFinishLoadingStyle(style: Style) {
+                                style.addSource(
+                                    geoJsonSource(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) {
+                                        geometry(LineString.fromLngLats(routeLinePoints))
+                                    }
+                                )
+                                style.addLayer(
+                                    (
+                                        SnapshotterProcessor
+                                            .process(SnapshotterAction.GenerateLineLayer)
+                                            as SnapshotterResult.SnapshotLineLayer
+                                        ).layer
+                                )
+                            }
+                        })
+                        snapshotter.start(object : SnapshotCreatedListener {
+                            override fun onSnapshotResult(snapshot: MapSnapshotInterface?) {
                                 val bitmapAction = SnapshotterAction.GenerateBitmap(
                                     options,
                                     snapshot
@@ -139,14 +154,7 @@ class MapboxSnapshotterApi(
                                     is SnapshotterResult.Snapshot.Failure -> {
                                         callback.onFailure(
                                             SnapshotState.SnapshotFailure.SnapshotError(
-                                                snapshot.error
-                                            )
-                                        )
-                                    }
-                                    is SnapshotterResult.Snapshot.Empty -> {
-                                        callback.onFailure(
-                                            SnapshotState.SnapshotFailure.SnapshotEmpty(
-                                                snapshot.error
+                                                bitmapResult.error
                                             )
                                         )
                                     }
@@ -157,21 +165,6 @@ class MapboxSnapshotterApi(
                                         )
                                     }
                                 }
-                            }
-
-                            override fun onStyleLoaded(style: Style) {
-                                style.addSource(
-                                    geoJsonSource(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) {
-                                        geometry(LineString.fromLngLats(routeLinePoints))
-                                    }
-                                )
-                                style.addLayer(
-                                    (
-                                        SnapshotterProcessor
-                                            .process(SnapshotterAction.GenerateLineLayer)
-                                            as SnapshotterResult.SnapshotLineLayer
-                                        ).layer
-                                )
                             }
                         })
                     } ?: callback.onFailure(

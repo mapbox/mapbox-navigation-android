@@ -7,9 +7,6 @@ import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerView
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.bindgen.Expected
-import com.mapbox.bindgen.ExpectedFactory.createError
-import com.mapbox.bindgen.ExpectedFactory.createValue
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.Image
@@ -266,23 +263,15 @@ class SnapshotterProcessorTest {
     @Test
     fun `process action generate bitmap result failure`() {
         val options = MapboxSnapshotterOptions.Builder(ctx).build()
-        val snapshot: Expected<MapSnapshotInterface?, String?> = createError("snapshot is empty")
+        val snapshot: MapSnapshotInterface? = null
         val action = SnapshotterAction.GenerateBitmap(options, snapshot)
 
         val actualResult = SnapshotterProcessor.process(action)
 
-        assertEquals(snapshot.error, (actualResult as SnapshotterResult.Snapshot.Failure).error)
-    }
-
-    @Test
-    fun `process action generate bitmap result empty`() {
-        val options = MapboxSnapshotterOptions.Builder(ctx).build()
-        val snapshot: Expected<MapSnapshotInterface?, String?> = createValue()
-        val action = SnapshotterAction.GenerateBitmap(options, snapshot)
-
-        val actualResult = SnapshotterProcessor.process(action)
-
-        assertEquals(snapshot.error, (actualResult as SnapshotterResult.Snapshot.Empty).error)
+        assertEquals(
+            "Failed to generate map snapshot.",
+            (actualResult as SnapshotterResult.Snapshot.Failure).error
+        )
     }
 
     @Test
@@ -296,8 +285,7 @@ class SnapshotterProcessorTest {
         every { mockImage.data } returns byteArrayOf(-56, -50, -62, -1, -56, -50)
         every { mockSnapshot.image() } returns mockImage
 
-        val snapshot: Expected<MapSnapshotInterface?, String?> = createValue(mockSnapshot)
-        val action = SnapshotterAction.GenerateBitmap(options, snapshot)
+        val action = SnapshotterAction.GenerateBitmap(options, mockSnapshot)
 
         val result = SnapshotterProcessor.process(action)
 
@@ -316,8 +304,7 @@ class SnapshotterProcessorTest {
         every { mockImage.data } returns data
         every { mockSnapshot.image() } returns mockImage
 
-        val snapshot: Expected<MapSnapshotInterface?, String?> = createValue(mockSnapshot)
-        val action = SnapshotterAction.GenerateBitmap(options, snapshot)
+        val action = SnapshotterAction.GenerateBitmap(options, mockSnapshot)
 
         val expectedBitmap: Bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
         expectedBitmap.copyPixelsFromBuffer(ByteBuffer.wrap(data))

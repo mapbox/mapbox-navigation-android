@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.maps.snapshotter
 import android.graphics.Bitmap
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
-import com.mapbox.bindgen.Expected
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
@@ -185,27 +184,22 @@ internal object SnapshotterProcessor {
 
     private fun generateBitmap(
         options: MapboxSnapshotterOptions,
-        snapshot: Expected<MapSnapshotInterface?, String?>
+        snapshot: MapSnapshotInterface?
     ): SnapshotterResult {
-        when {
-            snapshot.isValue -> {
-                return snapshot.value?.let { snapshotInterface ->
-                    val image = snapshotInterface.image()
-                    val bitmap: Bitmap = Bitmap.createBitmap(
-                        image.width,
-                        image.height,
-                        options.bitmapConfig
-                    )
-                    val buffer = ByteBuffer.wrap(image.data)
-                    bitmap.copyPixelsFromBuffer(buffer)
-                    SnapshotterResult.Snapshot.Success(bitmap)
-                } ?: SnapshotterResult.Snapshot.Empty(snapshot.error)
-            }
-            snapshot.isError -> {
-                return SnapshotterResult.Snapshot.Failure(snapshot.error)
+        return when {
+            snapshot != null -> {
+                val image = snapshot.image()
+                val bitmap: Bitmap = Bitmap.createBitmap(
+                    image.width,
+                    image.height,
+                    options.bitmapConfig
+                )
+                val buffer = ByteBuffer.wrap(image.data)
+                bitmap.copyPixelsFromBuffer(buffer)
+                SnapshotterResult.Snapshot.Success(bitmap)
             }
             else -> {
-                return SnapshotterResult.Snapshot.Failure(snapshot.error)
+                SnapshotterResult.Snapshot.Failure("Failed to generate map snapshot.")
             }
         }
     }
