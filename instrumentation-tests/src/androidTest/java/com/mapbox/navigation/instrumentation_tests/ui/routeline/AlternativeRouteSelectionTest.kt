@@ -122,7 +122,7 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
                         RouteLine(it, null)
                     }
                     routeLineApi.setRoutes(routeLines).apply {
-                        routeLineView.render(activity.mapboxMap.getStyle()!!, this)
+                        routeLineView.renderRouteDrawData(activity.mapboxMap.getStyle()!!, this)
                     }
                     mapboxNavigation.unregisterRoutesObserver(this)
                 }

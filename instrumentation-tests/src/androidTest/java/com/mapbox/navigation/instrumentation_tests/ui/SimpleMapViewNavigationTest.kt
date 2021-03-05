@@ -99,7 +99,7 @@ abstract class SimpleMapViewNavigationTest :
                     routeLineApi.setRoutes(
                         listOf(RouteLine(mockRoute.routeResponse.routes()[0], null))
                     ).apply {
-                        routeLineView.render(activity.mapboxMap.getStyle()!!, this)
+                        routeLineView.renderRouteDrawData(activity.mapboxMap.getStyle()!!, this)
                     }
                 }
             })

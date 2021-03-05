@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.maps.route.line.api
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.bindgen.Expected
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.LineString
@@ -14,24 +13,14 @@ import com.mapbox.maps.QueryFeaturesCallback
 import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
-import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID
+import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.parseRoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineState
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import io.mockk.every
 import io.mockk.mockk
@@ -42,7 +31,6 @@ import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -73,112 +61,8 @@ class MapboxRouteLineApiTest {
         assertEquals(route, result)
     }
 
-    @Test
-    fun hidePrimaryRoute() {
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val api = MapboxRouteLineApi(options)
-
-        val result = api.hidePrimaryRoute()
-
-        assertEquals(4, result.getLayerVisibilityChanges().size)
-        assertEquals(result.getLayerVisibilityChanges()[0].first, PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
-        assertEquals(result.getLayerVisibilityChanges()[0].second, Visibility.NONE)
-        assertEquals(result.getLayerVisibilityChanges()[1].first, PRIMARY_ROUTE_LAYER_ID)
-        assertEquals(result.getLayerVisibilityChanges()[1].second, Visibility.NONE)
-        assertEquals(result.getLayerVisibilityChanges()[2].first, PRIMARY_ROUTE_CASING_LAYER_ID)
-        assertEquals(result.getLayerVisibilityChanges()[2].second, Visibility.NONE)
-        assertEquals(result.getLayerVisibilityChanges()[3].first, WAYPOINT_LAYER_ID)
-        assertEquals(result.getLayerVisibilityChanges()[3].second, Visibility.NONE)
-    }
-
-    @Test
-    fun showPrimaryRoute() {
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val api = MapboxRouteLineApi(options)
-
-        val result = api.showPrimaryRoute()
-
-        assertEquals(4, result.getLayerVisibilityChanges().size)
-        assertEquals(result.getLayerVisibilityChanges()[0].first, PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
-        assertEquals(result.getLayerVisibilityChanges()[0].second, Visibility.VISIBLE)
-        assertEquals(result.getLayerVisibilityChanges()[1].first, PRIMARY_ROUTE_LAYER_ID)
-        assertEquals(result.getLayerVisibilityChanges()[1].second, Visibility.VISIBLE)
-        assertEquals(result.getLayerVisibilityChanges()[2].first, PRIMARY_ROUTE_CASING_LAYER_ID)
-        assertEquals(result.getLayerVisibilityChanges()[2].second, Visibility.VISIBLE)
-        assertEquals(result.getLayerVisibilityChanges()[3].first, WAYPOINT_LAYER_ID)
-        assertEquals(result.getLayerVisibilityChanges()[3].second, Visibility.VISIBLE)
-    }
-
-    @Test
-    fun hideAlternativeRoutes() {
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val api = MapboxRouteLineApi(options)
-
-        val result = api.hideAlternativeRoutes()
-
-        assertEquals(6, result.getLayerVisibilityChanges().size)
-        assertEquals(result.getLayerVisibilityChanges()[0].first, ALTERNATIVE_ROUTE1_LAYER_ID)
-        assertEquals(result.getLayerVisibilityChanges()[0].second, Visibility.NONE)
-        assertEquals(
-            result.getLayerVisibilityChanges()[1].first,
-            ALTERNATIVE_ROUTE1_CASING_LAYER_ID
-        )
-        assertEquals(result.getLayerVisibilityChanges()[1].second, Visibility.NONE)
-        assertEquals(result.getLayerVisibilityChanges()[2].first, ALTERNATIVE_ROUTE2_LAYER_ID)
-        assertEquals(result.getLayerVisibilityChanges()[2].second, Visibility.NONE)
-        assertEquals(
-            result.getLayerVisibilityChanges()[3].first,
-            ALTERNATIVE_ROUTE2_CASING_LAYER_ID
-        )
-        assertEquals(result.getLayerVisibilityChanges()[3].second, Visibility.NONE)
-        assertEquals(
-            result.getLayerVisibilityChanges()[4].first,
-            ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID
-        )
-        assertEquals(result.getLayerVisibilityChanges()[4].second, Visibility.NONE)
-        assertEquals(
-            result.getLayerVisibilityChanges()[5].first,
-            ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID
-        )
-        assertEquals(result.getLayerVisibilityChanges()[5].second, Visibility.NONE)
-    }
-
-    @Test
-    fun showAlternativeRoutes() {
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val api = MapboxRouteLineApi(options)
-
-        val result = api.showAlternativeRoutes()
-
-        assertEquals(6, result.getLayerVisibilityChanges().size)
-        assertEquals(result.getLayerVisibilityChanges()[0].first, ALTERNATIVE_ROUTE1_LAYER_ID)
-        assertEquals(result.getLayerVisibilityChanges()[0].second, Visibility.VISIBLE)
-        assertEquals(
-            result.getLayerVisibilityChanges()[1].first,
-            ALTERNATIVE_ROUTE1_CASING_LAYER_ID
-        )
-        assertEquals(result.getLayerVisibilityChanges()[1].second, Visibility.VISIBLE)
-        assertEquals(result.getLayerVisibilityChanges()[2].first, ALTERNATIVE_ROUTE2_LAYER_ID)
-        assertEquals(result.getLayerVisibilityChanges()[2].second, Visibility.VISIBLE)
-        assertEquals(
-            result.getLayerVisibilityChanges()[3].first,
-            ALTERNATIVE_ROUTE2_CASING_LAYER_ID
-        )
-        assertEquals(result.getLayerVisibilityChanges()[3].second, Visibility.VISIBLE)
-        assertEquals(
-            result.getLayerVisibilityChanges()[4].first,
-            ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID
-        )
-        assertEquals(result.getLayerVisibilityChanges()[4].second, Visibility.VISIBLE)
-        assertEquals(
-            result.getLayerVisibilityChanges()[5].first,
-            ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID
-        )
-        assertEquals(result.getLayerVisibilityChanges()[5].second, Visibility.VISIBLE)
-    }
-
-    @Test
-    fun updateToPrimaryRoute() {
+    @Test // todo needs more testing
+    fun getUpdatePrimaryRouteIndexStateSetsPrimaryRoute() {
         val route1 = getRoute()
         val route2 = getRoute()
         val options = MapboxRouteLineOptions.Builder(ctx).build()
@@ -276,24 +160,27 @@ class MapboxRouteLineApiTest {
         val route = getRoute()
         val routes = listOf(RouteLine(route, null))
 
-        val result = api.setRoutes(routes)
+        val result = api.setRoutes(routes) as Expected.Success
 
-        assertEquals(expectedCasingExpression, result.getCasingLineExpression().toString())
-        assertEquals(expectedRouteLineExpression, result.getRouteLineExpression().toString())
-        assertEquals(expectedTrafficLineExpression, result.getTrafficLineExpression().toString())
+        assertEquals(expectedCasingExpression, result.value.casingLineExpression.toString())
+        assertEquals(expectedRouteLineExpression, result.value.routeLineExpression.toString())
+        assertEquals(
+            expectedTrafficLineExpression,
+            result.value.trafficLineExpression.toString()
+        )
         assertEquals(
             expectedPrimaryRouteSourceGeometry,
-            result.getPrimaryRouteSource().features()!![0].geometry().toString()
+            result.value.primaryRouteSource.features()!![0].geometry().toString()
         )
-        assertTrue(result.getAlternativeRoute1Source().features()!!.isEmpty())
-        assertTrue(result.getAlternativeRoute2Source().features()!!.isEmpty())
+        assertTrue(result.value.alternativeRoute1Source.features()!!.isEmpty())
+        assertTrue(result.value.alternativeRoute2Source.features()!!.isEmpty())
         assertEquals(
             expectedWaypointFeature0,
-            result.getOriginAndDestinationPointsSource().features()!![0].geometry().toString()
+            result.value.waypointsSource.features()!![0].geometry().toString()
         )
         assertEquals(
             expectedWaypointFeature1,
-            result.getOriginAndDestinationPointsSource().features()!![1].geometry().toString()
+            result.value.waypointsSource.features()!![1].geometry().toString()
         )
     }
 
@@ -322,24 +209,24 @@ class MapboxRouteLineApiTest {
         val routes = listOf(RouteLine(route, null))
         api.setRoutes(routes)
 
-        val result = api.getRouteDrawData()
+        val result = api.getRouteDrawData() as Expected.Success
 
-        assertEquals(expectedCasingExpression, result.getCasingLineExpression().toString())
-        assertEquals(expectedRouteLineExpression, result.getRouteLineExpression().toString())
-        assertEquals(expectedTrafficLineExpression, result.getTrafficLineExpression().toString())
+        assertEquals(expectedCasingExpression, result.value.casingLineExpression.toString())
+        assertEquals(expectedRouteLineExpression, result.value.routeLineExpression.toString())
+        assertEquals(expectedTrafficLineExpression, result.value.trafficLineExpression.toString())
         assertEquals(
             expectedPrimaryRouteSourceGeometry,
-            result.getPrimaryRouteSource().features()!![0].geometry().toString()
+            result.value.primaryRouteSource.features()!![0].geometry().toString()
         )
-        assertTrue(result.getAlternativeRoute1Source().features()!!.isEmpty())
-        assertTrue(result.getAlternativeRoute2Source().features()!!.isEmpty())
+        assertTrue(result.value.alternativeRoute1Source.features()!!.isEmpty())
+        assertTrue(result.value.alternativeRoute2Source.features()!!.isEmpty())
         assertEquals(
             expectedWaypointFeature0,
-            result.getOriginAndDestinationPointsSource().features()!![0].geometry().toString()
+            result.value.waypointsSource.features()!![0].geometry().toString()
         )
         assertEquals(
             expectedWaypointFeature1,
-            result.getOriginAndDestinationPointsSource().features()!![1].geometry().toString()
+            result.value.waypointsSource.features()!![1].geometry().toString()
         )
     }
 
@@ -383,11 +270,11 @@ class MapboxRouteLineApiTest {
         api.updateUpcomingRoutePointIndex(routeProgress)
 
         val result = api.updateTraveledRouteLine(lineString.coordinates()[1])
-            as RouteLineState.VanishingRouteLineUpdateState
+            as Expected.Success
 
-        assertEquals(expectedCasingExpression, result.getCasingLineExpression().toString())
-        assertEquals(expectedRouteExpression, result.getRouteLineExpression().toString())
-        assertEquals(expectedTrafficExpression, result.getTrafficLineExpression().toString())
+        assertEquals(expectedCasingExpression, result.value.casingLineExpression.toString())
+        assertEquals(expectedRouteExpression, result.value.routeLineExpression.toString())
+        assertEquals(expectedTrafficExpression, result.value.trafficLineExpression.toString())
     }
 
     @Test
@@ -565,7 +452,7 @@ class MapboxRouteLineApiTest {
 
         val result = api.updateTraveledRouteLine(Point.fromLngLat(-122.4727051, 37.7577627))
 
-        assertNull(result)
+        assertTrue(result is Expected.Failure)
     }
 
     @Test
@@ -581,7 +468,7 @@ class MapboxRouteLineApiTest {
 
         val result = api.updateTraveledRouteLine(Point.fromLngLat(-122.4727051, 37.7577627))
 
-        assertNull(result)
+        assertTrue(result is Expected.Failure)
     }
 
     @Test
@@ -605,12 +492,12 @@ class MapboxRouteLineApiTest {
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val api = MapboxRouteLineApi(options)
 
-        val result = api.clearRouteLine()
+        val result = api.clearRouteLine() as Expected.Success
 
-        assertTrue(result.getAlternativeRoute1Source().features()!!.isEmpty())
-        assertTrue(result.getAlternativeRoute2Source().features()!!.isEmpty())
-        assertTrue(result.getPrimaryRouteSource().features()!!.isEmpty())
-        assertTrue(result.getOriginAndDestinationPointsSource().features()!!.isEmpty())
+        assertTrue(result.value.altRoute1Source.features()!!.isEmpty())
+        assertTrue(result.value.altRoute2Source.features()!!.isEmpty())
+        assertTrue(result.value.primaryRouteSource.features()!!.isEmpty())
+        assertTrue(result.value.waypointsSource.features()!!.isEmpty())
     }
 
     @Test
@@ -629,11 +516,11 @@ class MapboxRouteLineApiTest {
             options
         )
 
-        val result = api.setVanishingOffset(.5)
+        val result = api.setVanishingOffset(.5) as Expected.Success
 
-        assertEquals(trafficExpression, result!!.getCasingLineExpression().toString())
-        assertEquals(routeLineExpression, result.getRouteLineExpression().toString())
-        assertEquals(casingExpression, result.getCasingLineExpression().toString())
+        assertEquals(trafficExpression, result.value.casingLineExpression.toString())
+        assertEquals(routeLineExpression, result.value.routeLineExpression.toString())
+        assertEquals(casingExpression, result.value.casingLineExpression.toString())
     }
 
     @ExperimentalCoroutinesApi
@@ -655,7 +542,7 @@ class MapboxRouteLineApiTest {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
         val point = Point.fromLngLat(139.7745686, 35.677573)
-        val mockExpected = mockk<Expected<List<Feature>, String>> {
+        val mockExpected = mockk<com.mapbox.bindgen.Expected<List<Feature>, String>> {
             every { value } returns listOf(feature2, feature1)
         }
         val querySlot = slot<QueryFeaturesCallback>()
@@ -670,9 +557,9 @@ class MapboxRouteLineApiTest {
             } answers { querySlot.captured.run(mockExpected) }
         }
 
-        val result = api.findClosestRoute(point, mockkMap, 50f)
+        val result = api.findClosestRoute(point, mockkMap, 50f) as Expected.Success
 
-        assertEquals(1, result.getRouteIndex())
+        assertEquals(1, result.value.routeIndex)
         unmockkStatic(UUID::class)
     }
 
@@ -695,10 +582,10 @@ class MapboxRouteLineApiTest {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
         val point = Point.fromLngLat(139.7745686, 35.677573)
-        val emptyExpected = mockk<Expected<List<Feature>, String>> {
+        val emptyExpected = mockk<com.mapbox.bindgen.Expected<List<Feature>, String>> {
             every { value } returns listOf()
         }
-        val mockExpected = mockk<Expected<List<Feature>, String>> {
+        val mockExpected = mockk<com.mapbox.bindgen.Expected<List<Feature>, String>> {
             every { value } returns listOf(feature2, feature1)
         }
         val querySlot = slot<QueryFeaturesCallback>()
@@ -716,9 +603,9 @@ class MapboxRouteLineApiTest {
             }
         }
 
-        val result = api.findClosestRoute(point, mockkMap, 50f)
+        val result = api.findClosestRoute(point, mockkMap, 50f) as Expected.Success
 
-        assertEquals(1, result.getRouteIndex())
+        assertEquals(1, result.value.routeIndex)
         unmockkStatic(UUID::class)
     }
 
@@ -741,10 +628,10 @@ class MapboxRouteLineApiTest {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
         val point = Point.fromLngLat(139.7745686, 35.677573)
-        val emptyExpected = mockk<Expected<List<Feature>, String>> {
+        val emptyExpected = mockk<com.mapbox.bindgen.Expected<List<Feature>, String>> {
             every { value } returns listOf()
         }
-        val mockExpected = mockk<Expected<List<Feature>, String>> {
+        val mockExpected = mockk<com.mapbox.bindgen.Expected<List<Feature>, String>> {
             every { value } returns listOf(feature1, feature2)
         }
         val querySlot = slot<QueryFeaturesCallback>()
@@ -776,9 +663,9 @@ class MapboxRouteLineApiTest {
             }
         }
 
-        val result = api.findClosestRoute(point, mockkMap, 50f)
+        val result = api.findClosestRoute(point, mockkMap, 50f) as Expected.Success
 
-        assertEquals(0, result.getRouteIndex())
+        assertEquals(0, result.value.routeIndex)
         unmockkStatic(UUID::class)
     }
 

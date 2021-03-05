@@ -179,7 +179,7 @@ class MapboxCameraAnimationsActivity :
             if (routes.isNotEmpty()) {
                 routeLineAPI?.setRoutes(listOf(RouteLine(routes[0], null)))?.apply {
                     ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
-                        view.render(style, this)
+                        view.renderRouteDrawData(style, this)
                     }
                 }
                 startSimulation(routes[0])
