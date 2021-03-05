@@ -57,14 +57,14 @@ internal object SnapshotterProcessor {
         }
     }
 
-    private fun isSnapshotAvailable(instruction: BannerInstructions): SnapshotterResult {
+    private fun isSnapshotAvailable(instruction: BannerInstructions?): SnapshotterResult {
         return ifNonNull(getComponentContainingSnapshot(instruction)) {
             SnapshotterResult.SnapshotAvailable
         } ?: SnapshotterResult.SnapshotUnavailable
     }
 
     private fun getComponentContainingSnapshot(
-        bannerInstructions: BannerInstructions
+        bannerInstructions: BannerInstructions?
     ): BannerComponents? {
         val bannerComponents = bannerInstructions.getBannerComponents()
         return when {
