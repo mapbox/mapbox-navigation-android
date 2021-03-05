@@ -1,5 +1,7 @@
 package com.mapbox.navigation.core.trip.session
 
+import com.mapbox.bindgen.Expected
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectEdgeLocation
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectLocation
@@ -11,6 +13,7 @@ import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonObjectProvider
 import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonObjectType
 import com.mapbox.navigation.core.trip.model.eh.mapToOpenLRStandard
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigator.OpenLRLocation
 
 /**
  * [MapboxNavigation.roadObjectsStore] provides methods to get road objects metadata, add and remove
@@ -86,13 +89,51 @@ class RoadObjectsStore internal constructor(
         @OpenLRStandard.Type openLRStandard: String
     ) {
         navigator.openLRDecoder?.decode(
-            listOf(openLRLocation),
-            openLRStandard.mapToOpenLRStandard()
-        ) { locations ->
-            locations.first().value?.let { openLRLocation ->
-                navigator.roadObjectsStore?.addCustomRoadObject(roadObjectId, openLRLocation)
-            }
-        }
+            listOf(openLRLocation), openLRStandard.mapToOpenLRStandard()
+        ) { addObjectToStore(roadObjectId, it) }
+    }
+
+    /**
+     * Matches given polylines to graph and add it for object tracking.
+     * Polyline should define valid path on graph,
+     * i.e. it should be possible to drive this path according to traffic rules.
+     * In case of error(if there are no tiles in cache, decoding failed etc) object wont be added.
+     */
+    @ExperimentalEHorizonAPI
+    fun addCustomPolylinesObject(roadObjectId: String, polylines: List<List<Point>>) {
+        navigator.openLRDecoder?.decodePolylines(polylines) { addObjectToStore(roadObjectId, it) }
+    }
+
+    /**
+     * Matches given polygons to graph and add it for object tracking.
+     * "Matching" here means we try to find all intersections of polygon with the road graph
+     * and track distances to those intersections as distance to polygon.
+     * In case of error(if there are no tiles in cache, decoding failed etc) object wont be added.
+     */
+    @ExperimentalEHorizonAPI
+    fun addCustomPolygonsObject(roadObjectId: String, polygons: List<List<Point>>) {
+        navigator.openLRDecoder?.decodePolygons(polygons) { addObjectToStore(roadObjectId, it) }
+    }
+
+    /**
+     * Matches given gantries(i.e. polylines orthogonal to the road) to the graph and add it
+     * for object tracking.
+     * "Matching" here means we try to find all intersections of gantry with road graph
+     * and track distances to those intersections as distance to gantry.
+     * In case of error(if there are no tiles in cache, decoding failed etc) object wont be added.
+     */
+    @ExperimentalEHorizonAPI
+    fun addCustomGantriesObject(roadObjectId: String, gantries: List<List<Point>>) {
+        navigator.openLRDecoder?.decodeGantries(gantries) { addObjectToStore(roadObjectId, it) }
+    }
+
+    /**
+     * Matches given points to road graph and add it for object tracking.
+     * In case of error(if there are no tiles in cache, decoding failed etc) object wont be added.
+     */
+    @ExperimentalEHorizonAPI
+    fun addCustomPointsObject(roadObjectId: String, points: List<Point>) {
+        navigator.openLRDecoder?.decodePoints(points) { addObjectToStore(roadObjectId, it) }
     }
 
     /**
@@ -101,5 +142,14 @@ class RoadObjectsStore internal constructor(
      */
     fun removeCustomRoadObject(roadObjectId: String) {
         navigator.roadObjectsStore?.removeCustomRoadObject(roadObjectId)
+    }
+
+    private fun addObjectToStore(
+        roadObjectId: String,
+        locations: List<Expected<OpenLRLocation, String>>
+    ) {
+        locations.first().value?.let { openLRLocation ->
+            navigator.roadObjectsStore?.addCustomRoadObject(roadObjectId, openLRLocation)
+        }
     }
 }
