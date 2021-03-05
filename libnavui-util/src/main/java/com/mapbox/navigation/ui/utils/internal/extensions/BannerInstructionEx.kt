@@ -18,8 +18,8 @@ fun BannerInstructions.getBannerView(): BannerView? =
  * Given [BannerInstructions] returns list of [BannerComponents] if present; null otherwise
  * @return MutableList<BannerComponents>? if present or null
  */
-fun BannerInstructions.getBannerComponents(): MutableList<BannerComponents>? =
-    ifNonNull(getBannerView()) { bannerView ->
+fun BannerInstructions?.getBannerComponents(): MutableList<BannerComponents>? =
+    ifNonNull(this?.getBannerView()) { bannerView ->
         ifNonNull(bannerView.components()) {
             it
         }

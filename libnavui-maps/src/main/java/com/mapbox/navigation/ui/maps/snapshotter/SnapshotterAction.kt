@@ -6,7 +6,7 @@ import com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions
 
 internal sealed class SnapshotterAction {
     data class GenerateSnapshot(
-        val bannerInstruction: BannerInstructions
+        val bannerInstruction: BannerInstructions?
     ) : SnapshotterAction()
 
     data class GenerateCameraPosition(
