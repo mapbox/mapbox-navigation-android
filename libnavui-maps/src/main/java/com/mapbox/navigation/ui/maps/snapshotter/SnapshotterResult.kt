@@ -15,7 +15,6 @@ internal sealed class SnapshotterResult {
     sealed class Snapshot : SnapshotterResult() {
         data class Success(val bitmap: Bitmap) : Snapshot()
         data class Failure(val error: String?) : Snapshot()
-        data class Empty(val error: String?) : Snapshot()
     }
 
     data class SnapshotLineLayer(

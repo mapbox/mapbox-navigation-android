@@ -11,7 +11,7 @@ import com.mapbox.common.HttpRequest
 import com.mapbox.common.HttpRequestError
 import com.mapbox.common.HttpRequestErrorType
 import com.mapbox.common.HttpResponseData
-import com.mapbox.common.UserAgentComponents
+import com.mapbox.common.UAComponents
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -115,7 +115,11 @@ class SignboardProcessorTest {
             .body(byteArrayOf())
             .method(HttpMethod.GET)
             .url("https://abc.mapbox.com")
-            .userAgentComponents(UserAgentComponents.Builder().build())
+            .uaComponents(
+                UAComponents.Builder()
+                    .sdkIdentifierComponent("mapbox-navigation-ui-android")
+                    .build()
+            )
             .build()
         val action = SignboardAction.PrepareSignboardRequest("https://abc.mapbox.com")
 
@@ -125,7 +129,7 @@ class SignboardProcessorTest {
         assertEquals(mockHttpRequest.body.isEmpty(), result.request.body.isEmpty())
         assertEquals(mockHttpRequest.method, result.request.method)
         assertEquals(mockHttpRequest.headers, result.request.headers)
-        assertEquals(mockHttpRequest.userAgentComponents, result.request.userAgentComponents)
+        assertEquals(mockHttpRequest.uaComponents, result.request.uaComponents)
     }
 
     @Test

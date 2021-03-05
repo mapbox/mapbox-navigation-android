@@ -7,7 +7,7 @@ import com.mapbox.common.HttpMethod
 import com.mapbox.common.HttpRequest
 import com.mapbox.common.HttpRequestError
 import com.mapbox.common.HttpResponseData
-import com.mapbox.common.UserAgentComponents
+import com.mapbox.common.UAComponents
 import com.mapbox.navigation.ui.utils.internal.extensions.getBannerComponents
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 
@@ -15,6 +15,7 @@ internal object SignboardProcessor {
 
     private const val USER_AGENT_KEY = "User-Agent"
     private const val USER_AGENT_VALUE = "MapboxJava/"
+    private const val SDK_IDENTIFIER = "mapbox-navigation-ui-android"
     private const val CODE_200 = 200L
     private const val CODE_401 = 401L
     private const val CODE_404 = 404L
@@ -74,7 +75,11 @@ internal object SignboardProcessor {
             .body(byteArrayOf())
             .method(HttpMethod.GET)
             .headers(hashMapOf(Pair(USER_AGENT_KEY, USER_AGENT_VALUE)))
-            .userAgentComponents(UserAgentComponents.Builder().build())
+            .uaComponents(
+                UAComponents.Builder()
+                    .sdkIdentifierComponent(SDK_IDENTIFIER)
+                    .build()
+            )
             .build()
         return SignboardResult.SignboardRequest(request)
     }

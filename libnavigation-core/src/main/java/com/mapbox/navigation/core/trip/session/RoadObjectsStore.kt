@@ -59,7 +59,7 @@ class RoadObjectsStore internal constructor(
      * @param roadObjectId
      */
     fun getRoadObjectLocation(roadObjectId: String): EHorizonObjectLocation? {
-        return navigator.roadObjectsStore?.getRoadObjectLocation(roadObjectId)
+        return navigator.roadObjectsStore?.getRoadObjectLocation(roadObjectId)?.path
             ?.mapToEHorizonObjectLocation()
     }
 

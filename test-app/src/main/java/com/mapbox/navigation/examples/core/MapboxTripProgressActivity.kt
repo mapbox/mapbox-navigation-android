@@ -190,7 +190,7 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private fun updateCamera(location: Location) {
         val mapAnimationOptionsBuilder = MapAnimationOptions.Builder()
-        mapAnimationOptionsBuilder.duration = 1500L
+        mapAnimationOptionsBuilder.duration(1500L)
         mapCamera.easeTo(
             CameraOptions.Builder()
                 .center(Point.fromLngLat(location.longitude, location.latitude))

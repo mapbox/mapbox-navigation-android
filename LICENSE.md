@@ -202,8 +202,38 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Android Arch-Common.
+URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Lifecycle Runtime.
+URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Lifecycle-Common.
+URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Android Support Library Annotations (The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs.).
 URL: [http://developer.android.com/tools/extras/support-library.html](http://developer.android.com/tools/extras/support-library.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Support Library collections (Standalone efficient collections.).
+URL: [http://developer.android.com/tools/extras/support-library.html](http://developer.android.com/tools/extras/support-library.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Support Library compat (The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs. Compatible on devices running API 14 or later.).
+URL: [https://developer.android.com/jetpack/androidx](https://developer.android.com/jetpack/androidx)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
@@ -294,6 +324,12 @@ License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 Mapbox Navigation uses portions of the Mapbox Logger (Artifact that provides Mapbox Logger module implementation).
 URL: [https://github.com/mapbox/mapbox-base-android](https://github.com/mapbox/mapbox-base-android)
 License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the VersionedParcelable (Provides a stable but relatively compact binary serialization format that can be passed across processes or persisted safely.).
+URL: [http://developer.android.com/tools/extras/support-library.html](http://developer.android.com/tools/extras/support-library.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
@@ -468,8 +504,38 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Android Arch-Common.
+URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Lifecycle Runtime.
+URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Lifecycle-Common.
+URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Android Support Library Annotations (The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs.).
 URL: [http://developer.android.com/tools/extras/support-library.html](http://developer.android.com/tools/extras/support-library.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Support Library collections (Standalone efficient collections.).
+URL: [http://developer.android.com/tools/extras/support-library.html](http://developer.android.com/tools/extras/support-library.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Support Library compat (The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs. Compatible on devices running API 14 or later.).
+URL: [https://developer.android.com/jetpack/androidx](https://developer.android.com/jetpack/androidx)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
@@ -576,6 +642,12 @@ License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 Mapbox Navigation uses portions of the Okio.
 License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the VersionedParcelable (Provides a stable but relatively compact binary serialization format that can be passed across processes or persisted safely.).
+URL: [http://developer.android.com/tools/extras/support-library.html](http://developer.android.com/tools/extras/support-library.html)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
