@@ -84,4 +84,4 @@ dependencies {
 
 ## Contributing
 
-We welcome feedback, translations, and code contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+We welcome feedback, translations and code contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
