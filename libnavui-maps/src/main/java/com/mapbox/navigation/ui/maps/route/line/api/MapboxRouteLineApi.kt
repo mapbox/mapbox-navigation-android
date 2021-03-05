@@ -23,6 +23,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
+import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue
@@ -354,13 +355,14 @@ class MapboxRouteLineApi(
      * box to search in.
      * @param resultConsumer a callback to receive the result
      *
-     * @return the index of the route in this class's route collection or -1 if no routes found.
+     * @return a value containing the [DirectionsRoute] found or an error indicating no route was
+     * found.
      */
     fun findClosestRoute(
         target: Point,
         mapboxMap: MapboxMap,
         padding: Float,
-        resultConsumer: MapboxNavigationConsumer<Expected<ClosestRouteValue, RouteLineError>>
+        resultConsumer: MapboxNavigationConsumer<Expected<ClosestRouteValue, RouteNotFound>>
     ) {
         ThreadController.getMainScopeAndRootJob().scope.launch {
             val state = findClosestRoute(target, mapboxMap, padding)
@@ -379,14 +381,14 @@ class MapboxRouteLineApi(
      * @param padding a sizing value added to all sides of the target point for creating a bounding
      * box to search in.
      *
-     * @return a [ClosestRouteValue] with the index of the route found or an error indicating no
-     * route was found in the search area.
+     * @return a value containing the [DirectionsRoute] found or an error indicating no route was
+     * found.
      */
     suspend fun findClosestRoute(
         target: Point,
         mapboxMap: MapboxMap,
         padding: Float,
-    ): Expected<ClosestRouteValue, RouteLineError> {
+    ): Expected<ClosestRouteValue, RouteNotFound> {
         val mapClickPoint = mapboxMap.pixelForCoordinate(target)
         val leftFloat = (mapClickPoint.x - padding)
         val rightFloat = (mapClickPoint.x + padding)
@@ -396,7 +398,8 @@ class MapboxRouteLineApi(
             ScreenCoordinate(leftFloat, topFloat),
             ScreenCoordinate(rightFloat, bottomFloat)
         )
-        val features = routeFeatureData.map { it.featureCollection }
+        val routesAndFeatures = routeFeatureData.toList()
+        val features = routesAndFeatures.map { it.featureCollection }
 
         val clickPointFeatureIndex = queryMapForFeatureIndex(
             mapboxMap,
@@ -411,7 +414,7 @@ class MapboxRouteLineApi(
         )
 
         return if (clickPointFeatureIndex >= 0) {
-            Expected.Success(ClosestRouteValue(clickPointFeatureIndex))
+            Expected.Success(ClosestRouteValue(routesAndFeatures[clickPointFeatureIndex].route))
         } else {
             val clickRectFeatureIndex = queryMapForFeatureIndex(
                 mapboxMap,
@@ -425,7 +428,7 @@ class MapboxRouteLineApi(
                 features
             )
             if (clickRectFeatureIndex >= 0) {
-                Expected.Success(ClosestRouteValue(clickRectFeatureIndex))
+                Expected.Success(ClosestRouteValue(routesAndFeatures[clickRectFeatureIndex].route))
             } else {
                 val index = queryMapForFeatureIndex(
                     mapboxMap,
@@ -437,9 +440,9 @@ class MapboxRouteLineApi(
                     features
                 )
                 if (index >= 0) {
-                    Expected.Success(ClosestRouteValue(index))
+                    Expected.Success(ClosestRouteValue(routesAndFeatures[index].route))
                 } else {
-                    Expected.Failure(RouteLineError("No route found in query area.", null))
+                    Expected.Failure(RouteNotFound("No route found in query area.", null))
                 }
             }
         }
