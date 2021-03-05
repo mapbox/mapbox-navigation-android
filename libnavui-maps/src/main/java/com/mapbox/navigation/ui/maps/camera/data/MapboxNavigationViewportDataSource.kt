@@ -144,6 +144,7 @@ class MapboxNavigationViewportDataSource(
     private var remainingPointsOnRoute: List<Point> = emptyList()
     private var targetLocation: Location? = null
     private var averageIntersectionDistancesOnRoute: List<List<Double>> = emptyList()
+    private var distanceRemainingOnCurrentStep: Float = 0.0F
 
     /* -------- GENERATED OPTIONS -------- */
     private var followingCameraOptions = CameraOptions.Builder().build()
@@ -395,6 +396,8 @@ class MapboxNavigationViewportDataSource(
                 if (distanceTraveledOnStepKM > fullDistanceOfCurrentStepKM) {
                     distanceTraveledOnStepKM = 0.0
                 }
+
+                distanceRemainingOnCurrentStep = currentStepProgress.distanceRemaining
 
                 var lookaheadDistanceForZoom = fullDistanceOfCurrentStepKM
                 if (usingIntersectionDensityToCalculateZoom) {
@@ -712,25 +715,8 @@ class MapboxNavigationViewportDataSource(
     }
 
     private fun updateData() {
-        val pointsForFollowing: MutableList<Point> = remainingPointsOnCurrentStep.toMutableList()
-        val pointsForOverview: MutableList<Point> = remainingPointsOnRoute.toMutableList()
-
-        val localTargetLocation = targetLocation
-        if (localTargetLocation != null) {
-            pointsForFollowing.add(0, localTargetLocation.toPoint())
-            pointsForOverview.add(0, localTargetLocation.toPoint())
-        }
-
-        val bearingToEndOfPointsForFollowing = getBearingForMap(mapboxMap.getCameraOptions().bearing ?: 0.0, followingBearingProperty.get(), pointsForFollowing)
-
-        pointsForFollowing.addAll(additionalPointsToFrameForFollowing)
-        pointsForOverview.addAll(additionalPointsToFrameForOverview)
-
-        updateFollowingData(pointsForFollowing)
-        updateOverviewData(pointsForOverview)
-
-        val anchorPointFromPitch = getAnchorPointFromPitch(followingPitchProperty.get(), options.maxFollowingPitch, mapboxMap.getSize(), followingPaddingProperty.get())
-        val paddingFromAnchorPoint = getEdgeInsetsFromPoint(mapboxMap.getSize(), anchorPointFromPitch)
+        updateFollowingData()
+        updateOverviewData()
 
         followingCameraOptions =
             CameraOptions.Builder().apply {
@@ -741,16 +727,14 @@ class MapboxNavigationViewportDataSource(
                     zoom(followingZoomProperty.get())
                 }
                 if (followingBearingUpdatesAllowed) {
-                    bearing(bearingToEndOfPointsForFollowing)
+                    bearing(followingBearingProperty.get())
                 }
                 if (followingPitchUpdatesAllowed) {
                     pitch(followingPitchProperty.get())
                 }
                 if (followingPaddingUpdatesAllowed) {
+                    val paddingFromAnchorPoint = getEdgeInsetsFromPoint(mapboxMap.getSize(), followingAnchorProperty.get())
                     padding(paddingFromAnchorPoint)
-                }
-                if (followingAnchorUpdatesAllowed) {
-                    anchor(followingAnchorProperty.get())
                 }
             }.build()
 
@@ -771,18 +755,33 @@ class MapboxNavigationViewportDataSource(
                 if (overviewPaddingUpdatesAllowed) {
                     padding(overviewPaddingProperty.get())
                 }
-                if (overviewAnchorUpdatesAllowed) {
-                    anchor(overviewAnchorProperty.get())
-                }
             }.build()
     }
 
-    private fun getAnchorPointFromPitch(currentPitch: Double = 0.0, maxPitch: Double = 60.0, mapSize: Size, padding: EdgeInsets): ScreenCoordinate {
+//    TODO: Make these ViewportDataSourceOptions
+    private var distanceFromManeuverToBeginPitchChange = 180.0
+    private var distanceFromManeuverToEndPitchChange = 150.0
+
+    private fun getPitchForDistanceRemainingOnStep(distanceRemaining: Float, minPitch: Double = 0.0, maxPitch: Double = 60.0): Double {
+        val denominator = distanceFromManeuverToBeginPitchChange - distanceFromManeuverToEndPitchChange
+        if (denominator > 0) {
+            val percentage = 1.0 - min(max((distanceFromManeuverToBeginPitchChange - distanceRemaining) / denominator, 0.0), 1.0)
+            return minPitch + (maxPitch - minPitch) * percentage
+        }
+        return 0.0
+    }
+
+    private fun getPitchPercentage(currentPitch: Double = 0.0, maxPitch: Double = 60.0): Double {
+        if (maxPitch == 0.0) return 0.0
+        return (currentPitch / maxPitch).coerceIn(0.0, 1.0)
+    }
+
+    private fun getAnchorPointFromPitchPercentage(pitchPercentage: Double, mapSize: Size, padding: EdgeInsets): ScreenCoordinate {
+        val percentage = pitchPercentage.coerceIn(0.0, 1.0)
         val centerInsidePaddingX = ((mapSize.width - padding.left - padding.right) / 2.0) + padding.left
         val centerInsidePaddingY = ((mapSize.height - padding.top - padding.bottom) / 2.0) + padding.top
-        val pitchPercentage = min(max(currentPitch / maxPitch, 0.0), 1.0)
         val anchorPointX = centerInsidePaddingX
-        val anchorPointY = ((mapSize.height - padding.bottom - centerInsidePaddingY) * pitchPercentage) + centerInsidePaddingY
+        val anchorPointY = ((mapSize.height - padding.bottom - centerInsidePaddingY) * percentage) + centerInsidePaddingY
         return ScreenCoordinate(anchorPointX,anchorPointY)
     }
 
@@ -820,11 +819,27 @@ class MapboxNavigationViewportDataSource(
         return ((((angle - min) % d) + d) % d) + min
     }
 
-    private fun updateFollowingData(pointsForFollowing: List<Point>) {
-        followingBearingProperty.fallback = normalizeBearing(
-            mapboxMap.getCameraOptions(null).bearing ?: 0.0,
-            targetLocation?.bearing?.toDouble() ?: 0.0
-        )
+    private fun getMapCenterCoordinateFromPitchPercentage(pitchPercentage: Double, vehicleLocation: Point, framingGeometryCentroid: Point): Point {
+        val percentage = pitchPercentage.coerceIn(0.0, 1.0)
+        val distance = TurfMeasurement.distance(framingGeometryCentroid, vehicleLocation)
+        return TurfMeasurement.along(listOf(framingGeometryCentroid, vehicleLocation), distance * percentage, TurfConstants.UNIT_KILOMETERS)
+    }
+
+    private fun updateFollowingData() {
+        val pointsForFollowing: MutableList<Point> = remainingPointsOnCurrentStep.toMutableList()
+        val localTargetLocation = targetLocation
+
+        if (localTargetLocation != null) {
+            pointsForFollowing.add(0, localTargetLocation.toPoint())
+        }
+
+        followingBearingProperty.fallback = getBearingForMap(mapboxMap.getCameraOptions().bearing ?: 0.0, localTargetLocation?.bearing?.toDouble() ?: 0.0, pointsForFollowing)
+
+        followingPitchProperty.fallback = getPitchForDistanceRemainingOnStep(distanceRemainingOnCurrentStep, 0.0, options.maxFollowingPitch)
+
+        val pitchPercentage = getPitchPercentage(followingPitchProperty.get(), options.maxFollowingPitch)
+
+        followingAnchorProperty.fallback = getAnchorPointFromPitchPercentage(pitchPercentage, mapboxMap.getSize(), followingPaddingProperty.get())
 
         val zoomAndCenter = getZoomLevelAndCenterCoordinate(
             pointsForFollowing,
@@ -833,14 +848,23 @@ class MapboxNavigationViewportDataSource(
             followingPaddingProperty.get()
         )
 
-        followingCenterProperty.fallback = pointsForFollowing.firstOrNull()
-            ?: Point.fromLngLat(0.0, 0.0) // todo how about "zoomAndCenter.second"?
+        val geometryCentroid = zoomAndCenter.second
+        val vehicleLocation = localTargetLocation?.toPoint() ?: geometryCentroid
+
+        followingCenterProperty.fallback = getMapCenterCoordinateFromPitchPercentage(pitchPercentage, vehicleLocation, geometryCentroid)
 
         followingZoomProperty.fallback =
             max(min(zoomAndCenter.first, options.maxZoom), options.minFollowingZoom)
     }
 
-    private fun updateOverviewData(pointsForOverview: List<Point>) {
+    private fun updateOverviewData() {
+        val pointsForOverview: MutableList<Point> = remainingPointsOnRoute.toMutableList()
+
+        val localTargetLocation = targetLocation
+        if (localTargetLocation != null) {
+            pointsForOverview.add(0, localTargetLocation.toPoint())
+        }
+
         overviewBearingProperty.fallback = normalizeBearing(
             mapboxMap.getCameraOptions(null).bearing ?: 0.0,
             0.0

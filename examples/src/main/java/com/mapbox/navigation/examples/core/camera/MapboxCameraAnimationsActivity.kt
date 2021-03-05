@@ -108,7 +108,7 @@ class MapboxCameraAnimationsActivity :
     }
     private val followingEdgeInsets: EdgeInsets by lazy {
         EdgeInsets(
-            80.0 * pixelDensity,
+            120.0 * pixelDensity,
             40.0 * pixelDensity,
             120.0 * pixelDensity,
             40.0 * pixelDensity
@@ -144,7 +144,9 @@ class MapboxCameraAnimationsActivity :
             }
             navigationLocationProvider.changePosition(
                 mapMatcherResult.enhancedLocation,
-                mapMatcherResult.keyPoints,
+                listOf(),
+//                Passing an empty list to smooth out puck animation jitter. Replace with next line down to restore the use of keyPoints.
+//                mapMatcherResult.keyPoints.dropLast(1),
                 latLngTransitionOptions = transitionOptions,
                 bearingTransitionOptions = transitionOptions
             )
