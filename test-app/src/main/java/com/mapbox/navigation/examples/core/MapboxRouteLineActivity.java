@@ -78,6 +78,7 @@ import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi;
 import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError;
 import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue;
 import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView;
+import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue;
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue;
 
@@ -498,23 +499,19 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     }
   };
 
-    private final MapboxNavigationConsumer<Expected<ClosestRouteValue, RouteLineError>> closestRouteResultConsumer =
-            new MapboxNavigationConsumer<Expected<ClosestRouteValue, RouteLineError>>() {
+  private final MapboxNavigationConsumer<Expected<ClosestRouteValue, RouteNotFound>> closestRouteResultConsumer =
+      new MapboxNavigationConsumer<Expected<ClosestRouteValue, RouteNotFound>>() {
         @Override
-        public void accept(Expected<ClosestRouteValue, RouteLineError> closestRouteResult) {
+        public void accept(Expected<ClosestRouteValue, RouteNotFound> closestRouteResult) {
           if (closestRouteResult instanceof Expected.Success) {
-            final int index = ((ClosestRouteValue)((Expected.Success) closestRouteResult)
-                    .getValue())
-                    .getRouteIndex();
-            if (index > 0) {
-              final DirectionsRoute selectedRoute = mapboxRouteLineApi.getRoutes().get(index);
-              if (selectedRoute != mapboxRouteLineApi.getPrimaryRoute()) {
-                mapboxRouteLineApi.updateToPrimaryRoute(selectedRoute);
-                // NOTE: We don't have to render the state because there is a RoutesObserver on the
-                // MapboxNavigation object which will draw the routes. Rendering the state would draw the routes
-                // twice unnecessarily in this implementation.
-                mapboxNavigation.setRoutes(mapboxRouteLineApi.getRoutes());
-              }
+            final ClosestRouteValue closestRouteValue = (ClosestRouteValue) ((Expected.Success) closestRouteResult).getValue();
+            final DirectionsRoute routeFound = closestRouteValue.getRoute();
+            if (routeFound != mapboxRouteLineApi.getPrimaryRoute()) {
+              mapboxRouteLineApi.updateToPrimaryRoute(routeFound);
+              // NOTE: We don't have to render the state because there is a RoutesObserver on the
+              // MapboxNavigation object which will draw the routes. Rendering the state would draw the routes
+              // twice unnecessarily in this implementation.
+              mapboxNavigation.setRoutes(mapboxRouteLineApi.getRoutes());
             }
           }
         }

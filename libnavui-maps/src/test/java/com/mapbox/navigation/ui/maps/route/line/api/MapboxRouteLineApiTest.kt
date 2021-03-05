@@ -605,7 +605,7 @@ class MapboxRouteLineApiTest {
 
         val result = api.findClosestRoute(point, mockkMap, 50f) as Expected.Success
 
-        assertEquals(1, result.value.routeIndex)
+        assertEquals(route2, result.value.route)
         unmockkStatic(UUID::class)
     }
 
@@ -651,7 +651,7 @@ class MapboxRouteLineApiTest {
 
         val result = api.findClosestRoute(point, mockkMap, 50f) as Expected.Success
 
-        assertEquals(1, result.value.routeIndex)
+        assertEquals(route2, result.value.route)
         unmockkStatic(UUID::class)
     }
 
@@ -711,7 +711,7 @@ class MapboxRouteLineApiTest {
 
         val result = api.findClosestRoute(point, mockkMap, 50f) as Expected.Success
 
-        assertEquals(0, result.value.routeIndex)
+        assertEquals(route1, result.value.route)
         unmockkStatic(UUID::class)
     }
 

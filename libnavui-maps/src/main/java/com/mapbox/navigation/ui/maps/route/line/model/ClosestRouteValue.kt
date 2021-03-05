@@ -1,9 +1,10 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+
 /**
- * Represents the index of a route found by searching for the nearest route to to a map
- * click point. The index corresponds to the MapboxRouteArrowApi's collection of routes.
+ * The nearest route to a touch point on the [Map].
  *
- * @param routeIndex the index of the route in the collection
+ * @param route the route found
  */
-class ClosestRouteValue internal constructor(val routeIndex: Int)
+class ClosestRouteValue internal constructor(val route: DirectionsRoute)
