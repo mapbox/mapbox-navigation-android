@@ -61,8 +61,6 @@ class RouteLine(private val activity: AppCompatActivity) : LifecycleObserver {
     fun initialize(mapView: MapView, mapboxNavigation: MapboxNavigation) {
         this.mapView = mapView
         this.mapboxNavigation = mapboxNavigation
-
-        mapView.getMapboxMap().getStyle { style -> this@RouteLine.style = style }
     }
 
     private val onIndicatorPositionChangedListener = OnIndicatorPositionChangedListener { point ->
@@ -107,11 +105,14 @@ class RouteLine(private val activity: AppCompatActivity) : LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     private fun onStart() {
-        mapView.getLocationComponentPlugin().addOnIndicatorPositionChangedListener(
-            onIndicatorPositionChangedListener
-        )
-        mapboxNavigation.registerRoutesObserver(routesObserver)
-        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+        mapView.getMapboxMap().getStyle { style ->
+            this@RouteLine.style = style
+            mapView.getLocationComponentPlugin().addOnIndicatorPositionChangedListener(
+                onIndicatorPositionChangedListener
+            )
+            mapboxNavigation.registerRoutesObserver(routesObserver)
+            mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+        }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
