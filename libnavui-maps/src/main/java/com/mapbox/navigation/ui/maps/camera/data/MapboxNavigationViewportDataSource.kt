@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.camera.data
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
@@ -140,7 +141,9 @@ class MapboxNavigationViewportDataSource(
 ) : ViewportDataSource {
 
     private var completeRoutePoints: List<List<List<Point>>> = emptyList()
+    private var postManeuverFramingPoints: List<List<List<Point>>> = emptyList()
     private var remainingPointsOnCurrentStep: List<Point> = emptyList()
+    private var pointsToFrameAfterCurrentStep: List<Point> = emptyList()
     private var remainingPointsOnRoute: List<Point> = emptyList()
     private var targetLocation: Location? = null
     private var averageIntersectionDistancesOnRoute: List<List<Double>> = emptyList()
@@ -368,6 +371,7 @@ class MapboxNavigationViewportDataSource(
         remainingPointsOnRoute = completeRoutePoints.flatten().flatten()
         remainingPointsOnCurrentStep = emptyList()
         averageIntersectionDistancesOnRoute = processRouteIntersections(route)
+        postManeuverFramingPoints = processRouteForPostManeuverFramingGeometry(route)
         updateData()
     }
 
@@ -415,6 +419,8 @@ class MapboxNavigationViewportDataSource(
                 } catch (e: TurfException) {
                     return
                 }
+
+                pointsToFrameAfterCurrentStep = postManeuverFramingPoints[currentLegProgress.legIndex][currentStepProgress.stepIndex]
 
                 val currentLegPoints = completeRoutePoints[currentLegProgress.legIndex]
                 val remainingStepsAfterCurrentStep =
@@ -682,9 +688,9 @@ class MapboxNavigationViewportDataSource(
     }
 
 //    TODO: Make these ViewportDataSourceOptions
-    private var usingIntersectionDensityToCalculateZoom = true
-    private var averageIntersectionDistanceMultiplier = 5
-    private var minimumMetersForIntersectionDensity = 20.0
+    private val usingIntersectionDensityToCalculateZoom = true
+    private val averageIntersectionDistanceMultiplier = 5
+    private val minimumMetersForIntersectionDensity = 20.0
 
     private fun processRouteIntersections(route: DirectionsRoute): List<List<Double>> {
         val output = route.legs()?.map {routeLeg ->
@@ -709,6 +715,27 @@ class MapboxNavigationViewportDataSource(
                         minimumMetersForIntersectionDensity
                     }
                 } ?: 0.0
+            } ?: emptyList()
+        } ?: emptyList()
+        return output
+    }
+
+//    TODO: Make these ViewportDataSourceOptions
+    private val distanceToCoelesceCompoundManeuvers = 150.0
+    private val defaultDistanceToFrameAfterManeuver = 100.0
+
+    private fun processRouteForPostManeuverFramingGeometry(route: DirectionsRoute): List<List<List<Point>>> {
+        val output = route.legs()?.map { routeLeg ->
+            routeLeg.steps()?.mapIndexed { index, legStep ->
+                val stepsAfter: List<LegStep> = routeLeg.steps()?.drop(index+1) ?: emptyList()
+                val compoundManeuverGeometryList = stepsAfter.takeWhile { it.distance() <= distanceToCoelesceCompoundManeuvers }.map { it.geometry() }
+                val compoundManeuverGeometryPoints = compoundManeuverGeometryList.filterNotNull().map { PolylineUtils.decode(it, Constants.PRECISION_6).toList() }.flatten()
+
+                var defaultGeometryPointsAfterManeuver = emptyList<Point>()
+                if (compoundManeuverGeometryList.size < stepsAfter.size) {
+                    defaultGeometryPointsAfterManeuver = TurfMisc.lineSliceAlong(LineString.fromPolyline(stepsAfter[compoundManeuverGeometryList.size].geometry() ?: "", Constants.PRECISION_6), 0.0, defaultDistanceToFrameAfterManeuver, TurfConstants.UNIT_METERS).coordinates()
+                }
+                compoundManeuverGeometryPoints + defaultGeometryPointsAfterManeuver
             } ?: emptyList()
         } ?: emptyList()
         return output
@@ -759,8 +786,8 @@ class MapboxNavigationViewportDataSource(
     }
 
 //    TODO: Make these ViewportDataSourceOptions
-    private var distanceFromManeuverToBeginPitchChange = 180.0
-    private var distanceFromManeuverToEndPitchChange = 150.0
+    private val distanceFromManeuverToBeginPitchChange = 180.0
+    private val distanceFromManeuverToEndPitchChange = 150.0
 
     private fun getPitchForDistanceRemainingOnStep(distanceRemaining: Float, minPitch: Double = 0.0, maxPitch: Double = 60.0): Double {
         val denominator = distanceFromManeuverToBeginPitchChange - distanceFromManeuverToEndPitchChange
@@ -840,6 +867,8 @@ class MapboxNavigationViewportDataSource(
         val pitchPercentage = getPitchPercentage(followingPitchProperty.get(), options.maxFollowingPitch)
 
         followingAnchorProperty.fallback = getAnchorPointFromPitchPercentage(pitchPercentage, mapboxMap.getSize(), followingPaddingProperty.get())
+
+        pointsForFollowing.addAll(pointsToFrameAfterCurrentStep)
 
         val zoomAndCenter = getZoomLevelAndCenterCoordinate(
             pointsForFollowing,
