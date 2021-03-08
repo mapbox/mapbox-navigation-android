@@ -24,6 +24,7 @@ import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState.TRANSITI
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver
 import com.mapbox.navigation.ui.maps.camera.transition.MapboxNavigationCameraStateTransition
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition
+import com.mapbox.navigation.ui.maps.internal.camera.data.MapboxNavigationViewportDataSourceDebugger
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -119,11 +120,14 @@ class NavigationCamera(
         private set(value) {
             if (value != field) {
                 field = value
+                debugger?.cameraState = value
                 navigationCameraStateChangedObservers.forEach {
                     it.onNavigationCameraStateChanged(value)
                 }
             }
         }
+
+    var debugger: MapboxNavigationViewportDataSourceDebugger? = null
 
     private val sourceUpdateObserver = object : ViewportDataSourceUpdateObserver {
         override fun viewportDataSourceUpdated(viewportData: ViewportData) {

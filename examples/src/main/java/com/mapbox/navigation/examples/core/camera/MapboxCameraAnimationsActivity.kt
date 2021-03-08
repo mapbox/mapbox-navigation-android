@@ -7,7 +7,6 @@ import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -106,14 +105,29 @@ class MapboxCameraAnimationsActivity :
             40.0 * pixelDensity
         )
     }
-    private val followingEdgeInsets: EdgeInsets by lazy {
+
+    private val paddedFollowingEdgeInsets = EdgeInsets(
+        0.0 * pixelDensity,
+        40.0 * pixelDensity,
+        120.0 * pixelDensity,
+        40.0 * pixelDensity
+    )
+
+    private val notPaddedEdgeInsets: EdgeInsets by lazy {
         EdgeInsets(
-            120.0 * pixelDensity,
-            40.0 * pixelDensity,
-            120.0 * pixelDensity,
-            40.0 * pixelDensity
+            0.0,
+            0.0,
+            0.0,
+            0.0
         )
     }
+
+    private var followingEdgeInsets = notPaddedEdgeInsets
+        set(value) {
+            field = value
+            viewportDataSource.followingPaddingPropertyOverride(value)
+            viewportDataSource.evaluate()
+        }
 
     private var lookAtPoint: Point? = null
         set(value) {
@@ -144,9 +158,7 @@ class MapboxCameraAnimationsActivity :
             }
             navigationLocationProvider.changePosition(
                 mapMatcherResult.enhancedLocation,
-                listOf(),
-//                Passing an empty list to smooth out puck animation jitter. Replace with next line down to restore the use of keyPoints.
-//                mapMatcherResult.keyPoints.dropLast(1),
+                mapMatcherResult.keyPoints,
                 latLngTransitionOptions = transitionOptions,
                 bearingTransitionOptions = transitionOptions
             )
@@ -227,15 +239,23 @@ class MapboxCameraAnimationsActivity :
 
         initNavigation()
 
+        val debugger = MapboxNavigationViewportDataSourceDebugger(
+            this,
+            binding.mapView
+        ).apply {
+            enabled = true
+        }
         viewportDataSource = MapboxNavigationViewportDataSource(
             MapboxNavigationViewportDataSourceOptions.Builder().build(),
             binding.mapView.getMapboxMap()
         )
+        viewportDataSource.debugger = debugger
         navigationCamera = NavigationCamera(
             binding.mapView.getMapboxMap(),
             binding.mapView.getCameraAnimationsPlugin(),
             viewportDataSource
         )
+        navigationCamera.debugger = debugger
         /* Alternative to the NavigationScaleGestureHandler
         mapView.getCameraAnimationsPlugin().addCameraAnimationsLifecycleListener(
             NavigationBasicGesturesHandler(navigationCamera)
@@ -284,61 +304,40 @@ class MapboxCameraAnimationsActivity :
     }
 
     private fun initButtons() {
-        binding.gravitateLeft.setVisibility(View.GONE)
-        binding.gravitateRight.setVisibility(View.GONE)
-        binding.gravitateTop.setVisibility(View.GONE)
-        binding.gravitateBottom.setVisibility(View.GONE)
-
         binding.gravitateLeft.setOnClickListener {
-            mapboxMap.getCameraOptions(null).padding?.let {
-                val padding = EdgeInsets(
-                    it.top,
-                    0.0,
-                    it.bottom,
-                    120.0 * pixelDensity
-                )
-                viewportDataSource.followingPaddingPropertyOverride(padding)
-                viewportDataSource.evaluate()
-            }
+            followingEdgeInsets = EdgeInsets(
+                followingEdgeInsets.top,
+                20.0,
+                followingEdgeInsets.bottom,
+                200.0 * pixelDensity
+            )
         }
 
         binding.gravitateRight.setOnClickListener {
-            mapboxMap.getCameraOptions(null).padding?.let {
-                val padding = EdgeInsets(
-                    it.top,
-                    120.0 * pixelDensity,
-                    it.bottom,
-                    0.0
-                )
-                viewportDataSource.followingPaddingPropertyOverride(padding)
-                viewportDataSource.evaluate()
-            }
+            followingEdgeInsets = EdgeInsets(
+                followingEdgeInsets.top,
+                200.0 * pixelDensity,
+                followingEdgeInsets.bottom,
+                20.0
+            )
         }
 
         binding.gravitateTop.setOnClickListener {
-            mapboxMap.getCameraOptions(null).padding?.let {
-                val padding = EdgeInsets(
-                    0.0,
-                    it.left,
-                    120.0 * pixelDensity,
-                    it.right
-                )
-                viewportDataSource.followingPaddingPropertyOverride(padding)
-                viewportDataSource.evaluate()
-            }
+            followingEdgeInsets = EdgeInsets(
+                20.0,
+                followingEdgeInsets.left,
+                240.0 * pixelDensity,
+                followingEdgeInsets.right
+            )
         }
 
         binding.gravitateBottom.setOnClickListener {
-            mapboxMap.getCameraOptions(null).padding?.let {
-                val padding = EdgeInsets(
-                    120.0 * pixelDensity,
-                    it.left,
-                    0.0,
-                    it.right
-                )
-                viewportDataSource.followingPaddingPropertyOverride(padding)
-                viewportDataSource.evaluate()
-            }
+            followingEdgeInsets = EdgeInsets(
+                240.0 * pixelDensity,
+                followingEdgeInsets.left,
+                20.0,
+                followingEdgeInsets.right
+            )
         }
     }
 
@@ -457,6 +456,11 @@ class MapboxCameraAnimationsActivity :
     override fun onButtonClicked(animationType: AnimationType) {
         when (animationType) {
             AnimationType.Following -> {
+                followingEdgeInsets = if (followingEdgeInsets == paddedFollowingEdgeInsets) {
+                    notPaddedEdgeInsets
+                } else {
+                    paddedFollowingEdgeInsets
+                }
                 viewportDataSource.followingZoomUpdatesAllowed = true
                 viewportDataSource.followingPaddingPropertyOverride(followingEdgeInsets)
                 viewportDataSource.evaluate()
@@ -473,7 +477,9 @@ class MapboxCameraAnimationsActivity :
                         it.longitude + 0.0123,
                         it.latitude + 0.0123
                     )
-                    binding.mapView.getCameraAnimationsPlugin().flyTo(
+                    // workaround for https://github.com/mapbox/mapbox-maps-android/issues/177
+                    // binding.mapView.getCameraAnimationsPlugin().flyTo(
+                    binding.mapView.getCameraAnimationsPlugin().easeTo(
                         CameraOptions.Builder()
                             .center(center)
                             .bearing(0.0)
