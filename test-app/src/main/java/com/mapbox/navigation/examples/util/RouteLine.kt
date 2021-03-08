@@ -13,6 +13,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
@@ -21,6 +22,10 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.utils.internal.ThreadController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class RouteLine(private val activity: AppCompatActivity) : LifecycleObserver {
     private lateinit var mapView: MapView
@@ -71,8 +76,10 @@ class RouteLine(private val activity: AppCompatActivity) : LifecycleObserver {
 
     private val routesObserver: RoutesObserver = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            routeLineApi.setRoutes(listOf(RouteLine(routes[0], null))).apply {
-                routeLineView.renderRouteDrawData(style, this)
+            CoroutineScope(Dispatchers.Main).launch {
+                routeLineApi.setRoutes(listOf(RouteLine(routes[0], null))).apply {
+                    routeLineView.renderRouteDrawData(style, this)
+                }
             }
         }
     }
@@ -96,8 +103,17 @@ class RouteLine(private val activity: AppCompatActivity) : LifecycleObserver {
             }
 
             if (isNewRoute) {
-                routeLineApi.setRoutes(listOf(RouteLine(routeProgress.route, null))).apply {
-                    routeLineView.renderRouteDrawData(style, this)
+                ThreadController.getMainScopeAndRootJob().scope.launch {
+                    routeLineApi.setRoutes(
+                        listOf(
+                            RouteLine(
+                                routeProgress.route,
+                                null
+                            )
+                        )
+                    ).apply {
+                        routeLineView.renderRouteDrawData(style, this)
+                    }
                 }
             }
         }

@@ -32,7 +32,10 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMisc
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -144,6 +147,8 @@ class MapboxRouteLineApi(
     private val routeLineExpressionData: MutableList<RouteLineExpressionData> = mutableListOf()
     private var lastIndexUpdateTimeNano: Long = 0
     private val routeFeatureData: MutableList<RouteFeatureData> = mutableListOf()
+    private val jobControl = ThreadController.getMainScopeAndRootJob()
+    private val mutex = Mutex()
 
     /**
      * @return the vanishing point of the route line if an instance of VanishingRouteLine
@@ -168,17 +173,24 @@ class MapboxRouteLineApi(
      * Updates which route is identified as the primary route.
      *
      * @param route the [DirectionsRoute] which should be designated as the primary
-     *
-     * @return a state which contains the side effects to be applied to the map displaying the
-     * newly designated route line.
+     * @param consumer a consumer of the result of calling this method which should be applied to
+     * a render method in [MapboxRouteLineView]
      */
-    fun updateToPrimaryRoute(route: DirectionsRoute): Expected<RouteSetValue, RouteLineError> {
-        val newRoutes = directionsRoutes.filter { it != route }.toMutableList().also {
-            it.add(0, route)
+    fun updateToPrimaryRoute(
+        route: DirectionsRoute,
+        consumer: MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>
+    ) {
+        jobControl.scope.launch {
+            mutex.withLock {
+                val newRoutes = directionsRoutes.filter { it != route }.toMutableList().also {
+                    it.add(0, route)
+                }
+                val featureDataProvider: () -> List<RouteFeatureData> =
+                    MapboxRouteLineUtils.getRouteFeatureDataProvider(newRoutes)
+                val routeData = setNewRouteData(newRoutes, featureDataProvider)
+                consumer.accept(routeData)
+            }
         }
-        val featureDataProvider: () -> List<RouteFeatureData> =
-            MapboxRouteLineUtils.getRouteFeatureDataProvider(newRoutes)
-        return setNewRouteData(newRoutes, featureDataProvider)
     }
 
     /**
@@ -186,24 +198,41 @@ class MapboxRouteLineApi(
      *
      * @param newRoutes one or more routes. The first route in the collection will be considered
      * the primary route and any additional routes will be alternate routes.
+     * @param consumer a method that consumes the result of the operation.
      *
-     * @return a state which contains the side effects to be applied to the map
      */
-    fun setRoutes(newRoutes: List<RouteLine>): Expected<RouteSetValue, RouteLineError> {
-        val routes = newRoutes.map(RouteLine::route)
-        val featureDataProvider: () -> List<RouteFeatureData> =
-            MapboxRouteLineUtils.getRouteLineFeatureDataProvider(newRoutes)
-        return setNewRouteData(routes, featureDataProvider)
+    fun setRoutes(
+        newRoutes: List<RouteLine>,
+        consumer: MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>
+    ) {
+        jobControl.scope.launch {
+            mutex.withLock {
+                val routes = newRoutes.map(RouteLine::route)
+                val featureDataProvider: () -> List<RouteFeatureData> =
+                    MapboxRouteLineUtils.getRouteLineFeatureDataProvider(newRoutes)
+                val routeData = setNewRouteData(routes, featureDataProvider)
+                consumer.accept(routeData)
+            }
+        }
     }
 
     /**
-     * @return a state which contains the side effects to be applied to the map. The data
-     * can be used to draw the current route line(s) on the map.
+     * Gathers the data necessary to draw the route line(s) on the map based on the current state.
+     *
+     * @param consumer a method that consumes the result of the operation. The data received by
+     * the consumer should be passed to the render method of the [MapboxRouteLineView]
      */
-    fun getRouteDrawData(): Expected<RouteSetValue, RouteLineError> {
-        val featureDataProvider: () -> List<RouteFeatureData> =
-            MapboxRouteLineUtils.getRouteFeatureDataProvider(directionsRoutes)
-        return buildDrawRoutesState(featureDataProvider)
+    fun getRouteDrawData(
+        consumer: MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>
+    ) {
+        jobControl.scope.launch {
+            mutex.withLock {
+                val featureDataProvider: () -> List<RouteFeatureData> =
+                    MapboxRouteLineUtils.getRouteFeatureDataProvider(directionsRoutes)
+                val result = buildDrawRoutesState(featureDataProvider)
+                consumer.accept(result)
+            }
+        }
     }
 
     /**
@@ -259,24 +288,33 @@ class MapboxRouteLineApi(
     /**
      * Clears the route line data.
      *
+     * @param consumer a callback to consume the result
      * @return a state representing the side effects to be rendered on the map. In this case
      * the map should appear without any route lines.
      */
-    fun clearRouteLine(): Expected<RouteLineClearValue, RouteLineError> {
-        routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
-        directionsRoutes.clear()
-        routeFeatureData.clear()
-        routeLineExpressionData.clear()
-        routeLineOptions.vanishingRouteLine?.clear()
+    fun clearRouteLine(
+        consumer: MapboxNavigationConsumer<Expected<RouteLineClearValue, RouteLineError>>
+    ) {
+        jobControl.scope.launch {
+            mutex.withLock {
+                routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
+                directionsRoutes.clear()
+                routeFeatureData.clear()
+                routeLineExpressionData.clear()
+                routeLineOptions.vanishingRouteLine?.clear()
 
-        return Expected.Success(
-            RouteLineClearValue(
-                FeatureCollection.fromFeatures(listOf()),
-                FeatureCollection.fromFeatures(listOf()),
-                FeatureCollection.fromFeatures(listOf()),
-                FeatureCollection.fromFeatures(listOf())
-            )
-        )
+                consumer.accept(
+                    Expected.Success(
+                        RouteLineClearValue(
+                            FeatureCollection.fromFeatures(listOf()),
+                            FeatureCollection.fromFeatures(listOf()),
+                            FeatureCollection.fromFeatures(listOf()),
+                            FeatureCollection.fromFeatures(listOf())
+                        )
+                    )
+                )
+            }
+        }
     }
 
     /**
@@ -350,13 +388,10 @@ class MapboxRouteLineApi(
      * primary route is given precedence if more than one route is found.
      *
      * @param target a target latitude/longitude serving as the search point
-     * @param mapboxMap a reference to the []MapboxMap] that will be queried
+     * @param mapboxMap a reference to the [MapboxMap] that will be queried
      * @param padding a sizing value added to all sides of the target point for creating a bounding
      * box to search in.
      * @param resultConsumer a callback to receive the result
-     *
-     * @return a value containing the [DirectionsRoute] found or an error indicating no route was
-     * found.
      */
     fun findClosestRoute(
         target: Point,
@@ -364,27 +399,15 @@ class MapboxRouteLineApi(
         padding: Float,
         resultConsumer: MapboxNavigationConsumer<Expected<ClosestRouteValue, RouteNotFound>>
     ) {
-        ThreadController.getMainScopeAndRootJob().scope.launch {
-            val state = findClosestRoute(target, mapboxMap, padding)
-            resultConsumer.accept(state)
+        jobControl.scope.launch {
+            mutex.withLock {
+                val state = findClosestRoute(target, mapboxMap, padding)
+                resultConsumer.accept(state)
+            }
         }
     }
 
-    /**
-     * The map will be queried for a route line feature at the target point or a bounding box
-     * centered at the target point with a padding value determining the box's size. If a route
-     * feature is found the index of that route in this class's route collection is returned. The
-     * primary route is given precedence if more than one route is found.
-     *
-     * @param target a target latitude/longitude serving as the search point
-     * @param mapboxMap a reference to the [MapboxMap] that will be queried
-     * @param padding a sizing value added to all sides of the target point for creating a bounding
-     * box to search in.
-     *
-     * @return a value containing the [DirectionsRoute] found or an error indicating no route was
-     * found.
-     */
-    suspend fun findClosestRoute(
+    private suspend fun findClosestRoute(
         target: Point,
         mapboxMap: MapboxMap,
         padding: Float,
@@ -549,10 +572,7 @@ class MapboxRouteLineApi(
             /**
              * Add to the count of remaining points all of the remaining legs.
              */
-            for (
-                i in currentLegProgress.legIndex + 1 until
-                    completeRoutePoints.nestedList.size
-            ) {
+            for (i in currentLegProgress.legIndex + 1 until completeRoutePoints.nestedList.size) {
                 allRemainingPoints += completeRoutePoints.nestedList[i].flatten().size
             }
 
@@ -576,7 +596,7 @@ class MapboxRouteLineApi(
         routeLineOptions.vanishingRouteLine?.updateVanishingPointState(routeProgressState)
     }
 
-    private fun setNewRouteData(
+    private suspend fun setNewRouteData(
         newRoutes: List<DirectionsRoute>,
         featureDataProvider: () -> List<RouteFeatureData>
     ): Expected<RouteSetValue, RouteLineError> {
@@ -587,101 +607,153 @@ class MapboxRouteLineApi(
         return buildDrawRoutesState(featureDataProvider)
     }
 
-    private fun buildDrawRoutesState(
+    private suspend fun buildDrawRoutesState(
         featureDataProvider: () -> List<RouteFeatureData>
     ): Expected<RouteSetValue, RouteLineError> {
+        val routeFeatureDataDef = jobControl.scope.async(ThreadController.IODispatcher) {
+            featureDataProvider()
+        }
         routeFeatureData.clear()
-        routeFeatureData.addAll(featureDataProvider())
+        routeFeatureData.addAll(routeFeatureDataDef.await())
         val partitionedRoutes = routeFeatureData.partition { it.route == directionsRoutes.first() }
-        val segments: List<RouteLineExpressionData> =
-            partitionedRoutes.first.firstOrNull()?.route?.run {
-                MapboxRouteLineUtils.calculateRouteLineSegments(
-                    this,
-                    routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
-                    true,
-                    routeLineOptions.resourceProvider.routeLineColorResources
-                )
-            } ?: listOf()
-        routeLineExpressionData.clear()
-        routeLineExpressionData.addAll(segments)
-        val trafficLineExpression = MapboxRouteLineUtils.getTrafficLineExpression(
-            routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
-            segments,
-            routeLineOptions.resourceProvider.routeLineColorResources.routeUnknownTrafficColor
-        )
-        val routeLineExpression = MapboxRouteLineUtils.getVanishingRouteLineExpression(
-            routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
-            routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor,
-            routeLineOptions.resourceProvider.routeLineColorResources.routeDefaultColor
-        )
-        val routeLineCasingExpression = MapboxRouteLineUtils.getVanishingRouteLineExpression(
-            routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
-            routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledCasingColor,
-            routeLineOptions.resourceProvider.routeLineColorResources.routeCasingColor
-        )
-        val alternativeRoute1TrafficSegments: List<RouteLineExpressionData> =
-            partitionedRoutes.second.firstOrNull()?.route?.run {
-                MapboxRouteLineUtils.calculateRouteLineSegments(
-                    this,
-                    routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
-                    false,
-                    routeLineOptions.resourceProvider.routeLineColorResources
-                )
-            } ?: listOf()
-        val alternativeRoute1TrafficExpression = MapboxRouteLineUtils.getTrafficLineExpression(
-            routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
-            alternativeRoute1TrafficSegments,
-            routeLineOptions
-                .resourceProvider.routeLineColorResources.alternativeRouteUnknownTrafficColor
-        )
-        val alternativeRoute2TrafficSegments: List<RouteLineExpressionData> =
-            if (partitionedRoutes.second.size > 1) {
-                partitionedRoutes.second[1].route.run {
+
+        val vanishingRouteLineInitDef = jobControl.scope.async(ThreadController.IODispatcher) {
+            partitionedRoutes.first.firstOrNull()?.let {
+                routeLineOptions.vanishingRouteLine?.initWithRoute(it.route)
+            }
+        }
+
+        val trafficLineExpressionDef = jobControl.scope.async(ThreadController.IODispatcher) {
+            val segments: List<RouteLineExpressionData> =
+                partitionedRoutes.first.firstOrNull()?.route?.run {
                     MapboxRouteLineUtils.calculateRouteLineSegments(
                         this,
                         routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
-                        false,
+                        true,
                         routeLineOptions.resourceProvider.routeLineColorResources
                     )
+                } ?: listOf()
+            routeLineExpressionData.clear()
+            routeLineExpressionData.addAll(segments)
+            MapboxRouteLineUtils.getTrafficLineExpression(
+                routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
+                segments,
+                routeLineOptions.resourceProvider.routeLineColorResources.routeUnknownTrafficColor
+            )
+        }
+
+        val routeLineExpressionDef = jobControl.scope.async(ThreadController.IODispatcher) {
+            MapboxRouteLineUtils.getVanishingRouteLineExpression(
+                routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
+                routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor,
+                routeLineOptions.resourceProvider.routeLineColorResources.routeDefaultColor
+            )
+        }
+
+        val routeLineCasingExpressionDef = jobControl.scope.async(ThreadController.IODispatcher) {
+            MapboxRouteLineUtils.getVanishingRouteLineExpression(
+                routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
+                routeLineOptions
+                    .resourceProvider
+                    .routeLineColorResources
+                    .routeLineTraveledCasingColor,
+                routeLineOptions.resourceProvider.routeLineColorResources.routeCasingColor
+            )
+        }
+
+        val alternativeRoute1TrafficExpressionDef =
+            jobControl.scope.async(ThreadController.IODispatcher) {
+                val alternativeRoute1TrafficSegments: List<RouteLineExpressionData> =
+                    partitionedRoutes.second.firstOrNull()?.route?.run {
+                        MapboxRouteLineUtils.calculateRouteLineSegments(
+                            this,
+                            routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
+                            false,
+                            routeLineOptions.resourceProvider.routeLineColorResources
+                        )
+                    } ?: listOf()
+                MapboxRouteLineUtils.getTrafficLineExpression(
+                    0.0,
+                    alternativeRoute1TrafficSegments,
+                    routeLineOptions
+                        .resourceProvider
+                        .routeLineColorResources
+                        .alternativeRouteUnknownTrafficColor
+                )
+            }
+
+        val alternativeRoute2TrafficExpressionDef =
+            jobControl.scope.async(ThreadController.IODispatcher) {
+                val alternativeRoute2TrafficSegments: List<RouteLineExpressionData> =
+                    if (partitionedRoutes.second.size > 1) {
+                        partitionedRoutes.second[1].route.run {
+                            MapboxRouteLineUtils.calculateRouteLineSegments(
+                                this,
+                                routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
+                                false,
+                                routeLineOptions.resourceProvider.routeLineColorResources
+                            )
+                        }
+                    } else {
+                        listOf()
+                    }
+                MapboxRouteLineUtils.getTrafficLineExpression(
+                    0.0,
+                    alternativeRoute2TrafficSegments,
+                    routeLineOptions
+                        .resourceProvider
+                        .routeLineColorResources
+                        .alternativeRouteUnknownTrafficColor
+                )
+            }
+
+        val alternativeRoute1FeatureCollectionDef =
+            jobControl.scope.async(ThreadController.IODispatcher) {
+                partitionedRoutes.second.firstOrNull()?.featureCollection
+                    ?: FeatureCollection.fromFeatures(listOf())
+            }
+
+        val alternativeRoute2FeatureCollectionDef =
+            jobControl.scope.async(ThreadController.IODispatcher) {
+                if (partitionedRoutes.second.size > 1) {
+                    partitionedRoutes.second[1].featureCollection
+                } else {
+                    FeatureCollection.fromFeatures(listOf())
                 }
-            } else {
-                listOf()
             }
-        val alternativeRoute2TrafficExpression = MapboxRouteLineUtils.getTrafficLineExpression(
-            routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
-            alternativeRoute2TrafficSegments,
-            routeLineOptions
-                .resourceProvider.routeLineColorResources.alternativeRouteUnknownTrafficColor
-        )
-        val alternativeRoute1FeatureCollection: FeatureCollection =
-            partitionedRoutes.second.firstOrNull()?.featureCollection
-                ?: FeatureCollection.fromFeatures(listOf())
-        val alternativeRoute2FeatureCollection: FeatureCollection =
-            if (partitionedRoutes.second.size > 1) {
-                partitionedRoutes.second[1].featureCollection
-            } else {
-                FeatureCollection.fromFeatures(listOf())
-            }
-        val wayPointsFeatureCollection: FeatureCollection =
+
+        val wayPointsFeatureCollectionDef = jobControl.scope.async(ThreadController.IODispatcher) {
             partitionedRoutes.first.firstOrNull()?.route?.run {
                 MapboxRouteLineUtils.buildWayPointFeatureCollection(this)
             } ?: FeatureCollection.fromFeatures(listOf())
-        partitionedRoutes.first.firstOrNull()?.let {
-            routeLineOptions.vanishingRouteLine?.initWithRoute(it.route)
         }
-        val primaryRouteSource = partitionedRoutes.first.firstOrNull()?.featureCollection
-            ?: FeatureCollection.fromFeatures(
-                listOf()
-            )
+
+        val primaryRouteSourceDef = jobControl.scope.async(ThreadController.IODispatcher) {
+            partitionedRoutes.first.firstOrNull()?.featureCollection
+                ?: FeatureCollection.fromFeatures(
+                    listOf()
+                )
+        }
+
+        val trafficLineExp = trafficLineExpressionDef.await()
+        val routeLineExp = routeLineExpressionDef.await()
+        val routeCasingLineExp = routeLineCasingExpressionDef.await()
+        val altRoute1Exp = alternativeRoute1TrafficExpressionDef.await()
+        val altRoute2Exp = alternativeRoute2TrafficExpressionDef.await()
+        val alternativeRoute1FeatureCollection = alternativeRoute1FeatureCollectionDef.await()
+        val alternativeRoute2FeatureCollection = alternativeRoute2FeatureCollectionDef.await()
+        val wayPointsFeatureCollection = wayPointsFeatureCollectionDef.await()
+        val primaryRouteSource = primaryRouteSourceDef.await()
+        vanishingRouteLineInitDef.await()
 
         return Expected.Success(
             RouteSetValue(
                 primaryRouteSource,
-                trafficLineExpression,
-                routeLineExpression,
-                routeLineCasingExpression,
-                alternativeRoute1TrafficExpression,
-                alternativeRoute2TrafficExpression,
+                trafficLineExp,
+                routeLineExp,
+                routeCasingLineExp,
+                altRoute1Exp,
+                altRoute2Exp,
                 alternativeRoute1FeatureCollection,
                 alternativeRoute2FeatureCollection,
                 wayPointsFeatureCollection

@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -60,7 +61,6 @@ import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver;
 import com.mapbox.navigation.core.trip.session.RoadObjectsStore;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.base.model.Expected;
-import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter;
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer;
 import com.mapbox.navigation.ui.maps.PredictiveCacheController;
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider;
@@ -75,13 +75,14 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources;
-import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi;
-import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError;
-import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue;
-import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue;
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue;
+import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi;
+import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter;
+import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError;
+import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue;
+import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -202,6 +203,10 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     ((FloatingActionButton) findViewById(R.id.fabToggleStyle)).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
+        if (mapboxMap.getStyle() == null || !mapboxMap.getStyle().isFullyLoaded()) {
+          return;
+        }
+
         Visibility primaryRouteLineVisibility = mapboxRouteLineView.getPrimaryRouteVisibility(mapboxMap.getStyle());
         Visibility alternativeRouteLineVisibility = mapboxRouteLineView.getAlternativeRoutesVisibility(mapboxMap.getStyle());
         Visibility arrowVisibility = routeArrowView.getVisibility(mapboxMap.getStyle());
@@ -224,8 +229,13 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
               mapboxRouteLineView.showAlternativeRoutes(style);
             }
 
-            Expected<RouteSetValue, RouteLineError> redrawData = mapboxRouteLineApi.getRouteDrawData();
-            mapboxRouteLineView.renderRouteDrawData(style, redrawData);
+            mapboxRouteLineApi.getRouteDrawData(
+                    new MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>() {
+              @Override
+              public void accept(Expected<RouteSetValue, RouteLineError> redrawData) {
+                mapboxRouteLineView.renderRouteDrawData(style, redrawData);
+              }
+            });
 
             RouteArrowState.UpdateRouteArrowVisibilityState arrowVisibilityState;
             if (arrowVisibility == Visibility.NONE) {
@@ -387,8 +397,12 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
       for (DirectionsRoute route : routes) {
         routeLines.add(new RouteLine(route, null));
       }
-      Expected<RouteSetValue, RouteLineError> routeDrawData = mapboxRouteLineApi.setRoutes(routeLines);
-      mapboxRouteLineView.renderRouteDrawData(mapboxMap.getStyle(), routeDrawData);
+      mapboxRouteLineApi.setRoutes(routeLines, new MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>() {
+        @Override
+        public void accept(Expected<RouteSetValue, RouteLineError> routeDrawData) {
+          mapboxRouteLineView.renderRouteDrawData(mapboxMap.getStyle(), routeDrawData);
+        }
+      });
     }
   };
 
@@ -483,11 +497,14 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
       }
 
       if (isNewRoute) {
-        Expected<RouteSetValue, RouteLineError> routeDrawData =
-            mapboxRouteLineApi.setRoutes(
-                Collections.singletonList(new RouteLine(routeProgress.getRoute(), null))
-            );
-        mapboxRouteLineView.renderRouteDrawData(mapboxMap.getStyle(), routeDrawData);
+        mapboxRouteLineApi.setRoutes(
+          Collections.singletonList(new RouteLine(routeProgress.getRoute(), null)),
+          new MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>() {
+            @Override
+            public void accept(Expected<RouteSetValue, RouteLineError> routeDrawData) {
+              mapboxRouteLineView.renderRouteDrawData(mapboxMap.getStyle(), routeDrawData);
+            }
+          });
       }
     }
   };
@@ -505,15 +522,20 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
         @Override
         public void accept(Expected<ClosestRouteValue, RouteNotFound> closestRouteResult) {
           if (closestRouteResult instanceof Expected.Success) {
-            final ClosestRouteValue closestRouteValue = (ClosestRouteValue) ((Expected.Success) closestRouteResult).getValue();
-            final DirectionsRoute routeFound = closestRouteValue.getRoute();
-            if (routeFound != mapboxRouteLineApi.getPrimaryRoute()) {
-              mapboxRouteLineApi.updateToPrimaryRoute(routeFound);
-              // NOTE: We don't have to render the state because there is a RoutesObserver on the
-              // MapboxNavigation object which will draw the routes. Rendering the state would draw the routes
-              // twice unnecessarily in this implementation.
-              mapboxNavigation.setRoutes(mapboxRouteLineApi.getRoutes());
-            }
+            final DirectionsRoute selectedRoute = ((ClosestRouteValue)((Expected.Success) closestRouteResult).getValue()).getRoute();
+              if (selectedRoute != mapboxRouteLineApi.getPrimaryRoute()) {
+                mapboxRouteLineApi.updateToPrimaryRoute(
+                  selectedRoute,
+                  new MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>() {
+                    @Override
+                    public void accept(Expected<RouteSetValue, RouteLineError> routeSetValueRouteLineErrorExpected) {
+                      // NOTE: We don't have to render the state because there is a RoutesObserver on the
+                      // MapboxNavigation object which will draw the routes. Rendering the state would draw the routes
+                      // twice unnecessarily in this implementation.
+                      mapboxNavigation.setRoutes(mapboxRouteLineApi.getRoutes());
+                    }
+                });
+              }
           }
         }
       };
@@ -521,10 +543,12 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   private final OnMapClickListener mapClickListener = new OnMapClickListener() {
     @Override
     public boolean onMapClick(@NotNull Point point) {
-      Visibility primaryLineVisibility = mapboxRouteLineView.getPrimaryRouteVisibility(mapboxMap.getStyle());
-      Visibility alternativeRouteLinesVisibility = mapboxRouteLineView.getAlternativeRoutesVisibility(mapboxMap.getStyle());
-      if (primaryLineVisibility == Visibility.VISIBLE && alternativeRouteLinesVisibility == Visibility.VISIBLE) {
-        mapboxRouteLineApi.findClosestRoute(point, mapboxMap, routeClickPadding, closestRouteResultConsumer);
+      if (mapboxMap.getStyle() != null && mapboxMap.getStyle().isFullyLoaded()) {
+        Visibility primaryLineVisibility = mapboxRouteLineView.getPrimaryRouteVisibility(mapboxMap.getStyle());
+        Visibility alternativeRouteLinesVisibility = mapboxRouteLineView.getAlternativeRoutesVisibility(mapboxMap.getStyle());
+        if (primaryLineVisibility == Visibility.VISIBLE && alternativeRouteLinesVisibility == Visibility.VISIBLE) {
+          mapboxRouteLineApi.findClosestRoute(point, mapboxMap, routeClickPadding, closestRouteResultConsumer);
+        }
       }
       return false;
     }

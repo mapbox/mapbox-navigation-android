@@ -51,6 +51,7 @@ import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSou
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandler
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
@@ -66,6 +67,9 @@ import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.utils.internal.ifNonNull
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 class MapboxVoiceActivity :
@@ -204,9 +208,11 @@ class MapboxVoiceActivity :
             speechAPI.cancel()
             voiceInstructionsPlayer?.clear()
             if (routes.isNotEmpty()) {
-                routeLineAPI?.setRoutes(listOf(RouteLine(routes[0], null)))?.apply {
-                    ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
-                        view.renderRouteDrawData(style, this)
+                CoroutineScope(Dispatchers.Main).launch {
+                    routeLineAPI?.setRoutes(listOf(RouteLine(routes[0], null)))?.apply {
+                        ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
+                            view.renderRouteDrawData(style, this)
+                        }
                     }
                 }
                 startSimulation(routes[0])

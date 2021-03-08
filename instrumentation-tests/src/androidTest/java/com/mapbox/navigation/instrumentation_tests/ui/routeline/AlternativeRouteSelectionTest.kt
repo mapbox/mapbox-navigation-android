@@ -2,6 +2,8 @@ package com.mapbox.navigation.instrumentation_tests.ui.routeline
 
 import android.content.Context
 import androidx.test.espresso.Espresso
+import androidx.test.espresso.IdlingRegistry
+import androidx.test.espresso.idling.CountingIdlingResource
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -20,10 +22,15 @@ import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvid
 import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
+import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
+import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -49,10 +56,14 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
     protected lateinit var routeLineApi: MapboxRouteLineApi
     protected lateinit var routeLineView: MapboxRouteLineView
 
+    private val myResourceIdler =
+        CountingIdlingResource("AlternativeRouteSelectionTestResource")
+
     @Before
     fun setUp() {
         initIdlingResource = MapStyleInitIdlingResource(activity.binding.mapView)
         initIdlingResource.register()
+        IdlingRegistry.getInstance().register(myResourceIdler)
         Espresso.onIdle()
 
         directionsResponse = getRoute(activity)
@@ -81,30 +92,44 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
         }
     }
 
+    @After
+    fun tearDown() {
+        initIdlingResource.unregister()
+    }
+
     @Test
     fun selectAlternateRoute() {
         addRouteLine()
         routeProgressIdlingResource.register()
 
         runOnMainSync {
+            myResourceIdler.increment()
             assertEquals(3, routeLineApi.getRoutes().size)
 
             val soonToBePrimaryRoute = routeLineApi.getRoutes()[1]
-            routeLineApi.updateToPrimaryRoute(soonToBePrimaryRoute)
+            routeLineApi.updateToPrimaryRoute(
+                soonToBePrimaryRoute,
+                object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
+                    override fun accept(t: Expected<RouteSetValue, RouteLineError>) {
+                        assertEquals(soonToBePrimaryRoute, routeLineApi.getRoutes()[0])
 
-            assertEquals(soonToBePrimaryRoute, routeLineApi.getRoutes()[0])
+                        mapboxNavigation.setRoutes(routeLineApi.getRoutes())
+                        mapboxNavigation.registerRouteProgressObserver(
+                            object : RouteProgressObserver {
+                                override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+                                    // only need one route progress for this test
+                                    mapboxNavigation.unregisterRouteProgressObserver(this)
 
-            mapboxNavigation.setRoutes(routeLineApi.getRoutes())
-            mapboxNavigation.registerRouteProgressObserver(object : RouteProgressObserver {
-                override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-                    // only need one route progress for this test
-                    mapboxNavigation.unregisterRouteProgressObserver(this)
-
-                    assertEquals(routeLineApi.getRoutes()[0], routeProgress.route)
-                    routeProgressIdlingResource.unregister()
+                                    assertEquals(routeLineApi.getRoutes()[0], routeProgress.route)
+                                    routeProgressIdlingResource.unregister()
+                                    myResourceIdler.decrement()
+                                }
+                            }
+                        )
+                        mapboxNavigation.startTripSession()
+                    }
                 }
-            })
-            mapboxNavigation.startTripSession()
+            )
         }
 
         Espresso.onIdle()
@@ -121,16 +146,24 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
                     val routeLines = directionsResponse.routes().map {
                         RouteLine(it, null)
                     }
-                    routeLineApi.setRoutes(routeLines).apply {
-                        routeLineView.renderRouteDrawData(activity.mapboxMap.getStyle()!!, this)
-                    }
+                    routeLineApi.setRoutes(
+                        routeLines,
+                        object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
+                            override fun accept(result: Expected<RouteSetValue, RouteLineError>) {
+                                routeLineView.renderRouteDrawData(
+                                    activity.mapboxMap.getStyle()!!,
+                                    result
+                                )
+                            }
+                        }
+                    )
                     mapboxNavigation.unregisterRoutesObserver(this)
                 }
             })
         }
     }
 
-    fun getRoute(context: Context): DirectionsResponse {
+    private fun getRoute(context: Context): DirectionsResponse {
         return MockRoutesProvider.loadDirectionsResponse(context, R.raw.multiple_routes)
     }
 }
