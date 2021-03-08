@@ -42,6 +42,14 @@ private const val RASTER_SOURCE_TYPE = "raster"
  * Call [onDestroy] to cleanup all map and navigation state related references.
  * This can be called when navigation session finishes and predictive caching is not needed anymore.
  *
+ * - When migrating please ensure you have cleaned up old navigation tiles cache folder to reclaim disk space.
+ * Navigation SDK 2.0 caches navigation tiles in a default folder under `APP_FOLDER/mbx_nav/tiles/api.mapbox.com`.
+ * Previous versions of Nav SDK used to cache tiles under a default folder `APP_FOLDER/Offline/api.mapbox.com/$tilesVersion/tiles`.
+ * Old cache is not compatible with a new version of SDK 2.0.
+ * It makes sense to delete any folders used previously for caching including a default one.
+ * - `OnboardRouterOptions` enabled you to specify a path where nav-tiles will be saved and if a
+ * custom directory was used, it should be cleared as well.
+ *
  * @param navigation [MapboxNavigation] instance
  * @param predictiveCacheControllerErrorHandler [PredictiveCacheControllerErrorHandler] listener (optional)
  */
