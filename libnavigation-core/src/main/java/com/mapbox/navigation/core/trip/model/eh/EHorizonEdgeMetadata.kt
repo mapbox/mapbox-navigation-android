@@ -21,6 +21,8 @@ package com.mapbox.navigation.core.trip.model.eh
  * @param meanElevation mean elevation along the edge in meters
  * @param countryCode ISO 3166-1 alpha-3 country code
  * @param stateCode a state inside a country (ISO 3166-2)
+ * @param isRightHandTraffic true if in the current place/state right-hand traffic is used,
+ * false if left-hand.
  */
 class EHorizonEdgeMetadata internal constructor(
     val heading: Double,
@@ -38,7 +40,8 @@ class EHorizonEdgeMetadata internal constructor(
     val meanElevation: Double?,
     val curvature: Byte,
     val countryCode: String?,
-    val stateCode: String?
+    val stateCode: String?,
+    val isRightHandTraffic: Boolean,
 ) {
 
     /**
@@ -66,6 +69,7 @@ class EHorizonEdgeMetadata internal constructor(
         if (curvature != other.curvature) return false
         if (countryCode != other.countryCode) return false
         if (stateCode != other.stateCode) return false
+        if (isRightHandTraffic != other.isRightHandTraffic) return false
 
         return true
     }
@@ -90,6 +94,7 @@ class EHorizonEdgeMetadata internal constructor(
         result = 31 * result + curvature
         result = 31 * result + (countryCode?.hashCode() ?: 0)
         result = 31 * result + (stateCode?.hashCode() ?: 0)
+        result = 31 * result + isRightHandTraffic.hashCode()
         return result
     }
 
@@ -113,7 +118,8 @@ class EHorizonEdgeMetadata internal constructor(
             "meanElevation=$meanElevation, " +
             "curvature=$curvature, " +
             "countryCode=$countryCode, " +
-            "stateCode=$stateCode" +
+            "stateCode=$stateCode, " +
+            "isRightHandTraffic=$isRightHandTraffic" +
             ")"
     }
 }

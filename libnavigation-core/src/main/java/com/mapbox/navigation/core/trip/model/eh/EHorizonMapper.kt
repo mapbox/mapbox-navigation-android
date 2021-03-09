@@ -130,7 +130,8 @@ internal fun EdgeMetadata.mapToEHorizonEdgeMetadata(): EHorizonEdgeMetadata {
         meanElevation,
         curvature,
         countryCode,
-        stateCode
+        stateCode,
+        isRightHandTraffic
     )
 }
 
