@@ -1,6 +1,11 @@
 package com.mapbox.navigation.core.trip.session
 
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.navigator.getBorderCrossingInfo
+import com.mapbox.navigation.core.navigator.getIncidentInfo
+import com.mapbox.navigation.core.navigator.getRestStopType
+import com.mapbox.navigation.core.navigator.getTollCollectionType
+import com.mapbox.navigation.core.navigator.getTunnelInfo
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectEdgeLocation
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectLocation
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectMetadata
@@ -40,7 +45,7 @@ class RoadObjectsStore internal constructor(
      */
     fun getRoadObjectMetadata(roadObjectId: String): EHorizonObjectMetadata? {
         return navigator.roadObjectsStore?.getRoadObjectMetadata(roadObjectId)?.let {
-            navigator.navigatorMapper.run {
+            run {
                 EHorizonObjectMetadata(
                     it.type.mapToEHorizonObjectType(),
                     it.provider.mapToEHorizonObjectProvider(),

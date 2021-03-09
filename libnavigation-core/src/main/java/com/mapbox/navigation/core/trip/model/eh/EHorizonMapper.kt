@@ -1,3 +1,5 @@
+@file:JvmName("EHorizonMapper")
+
 package com.mapbox.navigation.core.trip.model.eh
 
 import com.mapbox.navigation.utils.internal.ThreadController

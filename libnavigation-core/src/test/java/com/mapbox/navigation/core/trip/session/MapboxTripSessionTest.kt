@@ -13,20 +13,30 @@ import com.mapbox.api.directions.v5.models.BannerView
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
+import com.mapbox.geojson.Geometry
 import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_PREDICTION_MILLIS
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.alert.RouteAlert
 import com.mapbox.navigation.core.internal.utils.isSameRoute
 import com.mapbox.navigation.core.internal.utils.isSameUuid
+import com.mapbox.navigation.core.navigator.RouteInitInfo
 import com.mapbox.navigation.core.navigator.getMapMatcherResult
+import com.mapbox.navigation.core.navigator.getRouteInitInfo
+import com.mapbox.navigation.core.navigator.getRouteProgressFrom
+import com.mapbox.navigation.core.navigator.toFixLocation
+import com.mapbox.navigation.core.navigator.toLocation
+import com.mapbox.navigation.core.navigator.toLocations
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
-import com.mapbox.navigation.navigator.internal.RouteInitInfo
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigator.FixLocation
+import com.mapbox.navigator.NavigationStatus
+import com.mapbox.navigator.RouteInfo
+import com.mapbox.navigator.RouteState
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -70,19 +80,22 @@ class MapboxTripSessionTest {
     private lateinit var tripSession: TripSession
 
     private val tripService: TripService = mockk(relaxUnitFun = true)
-    private val route: DirectionsRoute = mockk()
+    private val route: DirectionsRoute = mockk(relaxed = true)
+    private val routeBufferGeoJson: Geometry = mockk(relaxed = true)
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
     private lateinit var navigationOptions: NavigationOptions
     private val locationCallbackSlot = slot<LocationEngineCallback<LocationEngineResult>>()
     private val locationEngineResult: LocationEngineResult = mockk(relaxUnitFun = true)
-    private val location: Location = mockk(relaxUnitFun = true)
-    private val enhancedLocation: Location = mockk(relaxUnitFun = true)
+    private val location: Location = mockk(relaxed = true)
+    private val fixLocation: FixLocation = mockk(relaxed = true)
     private val keyPoints: List<Location> = listOf(mockk(relaxUnitFun = true))
+    private val keyFixPoints: List<FixLocation> = listOf(mockk(relaxed = true))
 
     private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     private val tripStatus: TripStatus = mockk(relaxUnitFun = true)
+    private val navigationStatus: NavigationStatus = mockk(relaxed = true)
     private val logger: Logger = mockk(relaxUnitFun = true)
 
     private val routeProgress: RouteProgress = mockk()
@@ -98,8 +111,12 @@ class MapboxTripSessionTest {
     @Before
     fun setUp() {
         mockkObject(ThreadController)
-        mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapperKt")
+        mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         mockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
+        mockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
+        every { location.toFixLocation() } returns fixLocation
+        every { fixLocation.toLocation() } returns location
+        every { keyFixPoints.toLocations() } returns keyPoints
         every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
         every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
         navigationOptions = NavigationOptions.Builder(context)
@@ -111,12 +128,19 @@ class MapboxTripSessionTest {
         coEvery { navigator.updateLocation(any()) } returns false
         coEvery { navigator.setRoute(any()) } returns null
         coEvery { navigator.updateAnnotations(any()) } returns Unit
-        every { tripStatus.enhancedLocation } returns enhancedLocation
-        every { tripStatus.keyPoints } returns keyPoints
-        every { tripStatus.offRoute } returns false
-        every { tripStatus.getMapMatcherResult() } returns mapMatcherResult
+
+        every { navigationStatus.location } returns fixLocation
+        every { navigationStatus.key_points } returns keyFixPoints
+        every { navigationStatus.routeState } returns RouteState.TRACKING
+
+        every { tripStatus.navigationStatus } returns navigationStatus
+        every { tripStatus.route } returns route
+        every { tripStatus.routeBufferGeoJson } returns routeBufferGeoJson
+
+        every { tripStatus.getMapMatcherResult(any(), any()) } returns mapMatcherResult
         every { routeProgress.bannerInstructions } returns null
         every { routeProgress.voiceInstructions } returns null
+        every { getRouteProgressFrom(any(), any(), any(), any()) } returns routeProgress
         every { route.isSameUuid(any()) } returns false
         every { route.isSameRoute(any()) } returns false
         every { route.routeOptions()?.requestUuid() } returns "uuid"
@@ -129,8 +153,6 @@ class MapboxTripSessionTest {
             )
         } answers {}
         every { locationEngineResult.locations } returns listOf(location)
-
-        every { tripStatus.routeProgress } returns routeProgress
     }
 
     private fun buildTripSession(accessToken: String? = "pk.1234"): TripSession {
@@ -269,7 +291,7 @@ class MapboxTripSessionTest {
     fun locationPush() = coroutineRule.runBlockingTest {
         tripSession.start()
         updateLocationAndJoin()
-        coVerify { navigator.updateLocation(location) }
+        coVerify { navigator.updateLocation(fixLocation) }
         tripSession.stop()
     }
 
@@ -278,7 +300,7 @@ class MapboxTripSessionTest {
         every { locationEngineResult.locations } returns listOf(mockk(), location)
         tripSession.start()
         updateLocationAndJoin()
-        coVerify { navigator.updateLocation(location) }
+        coVerify { navigator.updateLocation(fixLocation) }
         tripSession.stop()
     }
 
@@ -348,7 +370,7 @@ class MapboxTripSessionTest {
 
     @Test
     fun routeProgressObserverNotCalledWhenInFreeDrive() = coroutineRule.runBlockingTest {
-        every { tripStatus.routeProgress } returns null
+        every { getRouteProgressFrom(any(), any(), any(), any()) } returns null
         tripSession = buildTripSession()
         tripSession.start()
         val observer: RouteProgressObserver = mockk(relaxUnitFun = true)
@@ -422,7 +444,7 @@ class MapboxTripSessionTest {
         val offRouteObserver: OffRouteObserver = mockk(relaxUnitFun = true)
         tripSession.registerOffRouteObserver(offRouteObserver)
 
-        every { tripStatus.offRoute } returns true
+        every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
         updateLocationAndJoin()
 
         verify(exactly = 1) { offRouteObserver.onOffRouteStateChanged(false) }
@@ -455,7 +477,7 @@ class MapboxTripSessionTest {
         tripSession.start()
         val offRouteObserver: OffRouteObserver = mockk(relaxUnitFun = true)
         tripSession.registerOffRouteObserver(offRouteObserver)
-        every { tripStatus.offRoute } returns true
+        every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
         locationCallbackSlot.captured.onSuccess(locationEngineResult)
 
         tripSession.route = route
@@ -478,7 +500,7 @@ class MapboxTripSessionTest {
         tripSession.start()
         val offRouteObserver: OffRouteObserver = mockk(relaxUnitFun = true)
         tripSession.registerOffRouteObserver(offRouteObserver)
-        every { tripStatus.offRoute } returns true
+        every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
         locationCallbackSlot.captured.onSuccess(locationEngineResult)
 
         tripSession.route = null
@@ -502,8 +524,8 @@ class MapboxTripSessionTest {
         tripSession.registerLocationObserver(observer)
         updateLocationAndJoin()
 
-        verify { observer.onEnhancedLocationChanged(enhancedLocation, keyPoints) }
-        assertEquals(enhancedLocation, tripSession.getEnhancedLocation())
+        verify { observer.onEnhancedLocationChanged(location, keyPoints) }
+        assertEquals(location, tripSession.getEnhancedLocation())
         tripSession.stop()
     }
 
@@ -515,8 +537,8 @@ class MapboxTripSessionTest {
         val observer: LocationObserver = mockk(relaxUnitFun = true)
         tripSession.registerLocationObserver(observer)
 
-        verify(exactly = 1) { observer.onEnhancedLocationChanged(enhancedLocation, emptyList()) }
-        assertEquals(enhancedLocation, tripSession.getEnhancedLocation())
+        verify(exactly = 1) { observer.onEnhancedLocationChanged(location, emptyList()) }
+        assertEquals(location, tripSession.getEnhancedLocation())
         tripSession.stop()
     }
 
@@ -528,7 +550,7 @@ class MapboxTripSessionTest {
         tripSession.registerLocationObserver(observer)
         tripSession.unregisterLocationObserver(observer)
         updateLocationAndJoin()
-        verify(exactly = 0) { observer.onEnhancedLocationChanged(enhancedLocation, keyPoints) }
+        verify(exactly = 0) { observer.onEnhancedLocationChanged(location, keyPoints) }
 
         tripSession.stop()
     }
@@ -721,7 +743,7 @@ class MapboxTripSessionTest {
         tripSession.registerOffRouteObserver(offRouteObserver)
         tripSession.unregisterAllOffRouteObservers()
 
-        every { tripStatus.offRoute } returns true
+        every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
         updateLocationAndJoin()
 
         // registerOffRouteObserver will call onOffRouteStateChanged() on
@@ -753,7 +775,7 @@ class MapboxTripSessionTest {
         every { routeProgress.bannerInstructions } returns bannerInstructions
         every { routeProgress.bannerInstructions?.view() } returns null
         every { routeProgress.voiceInstructions } returns null
-        every { tripStatus.offRoute } returns true
+        every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
 
         tripSession = buildTripSession()
         tripSession.start()
@@ -779,7 +801,7 @@ class MapboxTripSessionTest {
         val voiceInstructions: VoiceInstructions = mockk()
         every { routeProgress.bannerInstructions } returns null
         every { routeProgress.voiceInstructions } returns voiceInstructions
-        every { tripStatus.offRoute } returns true
+        every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
 
         tripSession = buildTripSession()
         tripSession.start()
@@ -803,7 +825,11 @@ class MapboxTripSessionTest {
     fun `route alerts observer gets successfully called`() = coroutineRule.runBlockingTest {
         val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
         val routeAlerts: List<RouteAlert> = listOf(mockk())
-        coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(routeAlerts)
+        val mockedRouteInitInfo: RouteInitInfo = mockk()
+        every { mockedRouteInitInfo.routeAlerts } returns routeAlerts
+        val mockedRouteInfo: RouteInfo = mockk()
+        every { getRouteInitInfo(mockedRouteInfo) } returns mockedRouteInitInfo
+        coEvery { navigator.setRoute(any(), any()) } returns mockedRouteInfo
         tripSession = buildTripSession()
 
         tripSession.registerRouteAlertsObserver(routeAlertsObserver)
@@ -817,7 +843,11 @@ class MapboxTripSessionTest {
         coroutineRule.runBlockingTest {
             val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
             val routeAlerts: List<RouteAlert> = listOf(mockk())
-            coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(routeAlerts)
+            val mockedRouteInitInfo: RouteInitInfo = mockk()
+            every { mockedRouteInitInfo.routeAlerts } returns routeAlerts
+            val mockedRouteInfo: RouteInfo = mockk()
+            every { getRouteInitInfo(mockedRouteInfo) } returns mockedRouteInitInfo
+            coEvery { navigator.setRoute(any(), any()) } returns mockedRouteInfo
             tripSession = buildTripSession()
 
             tripSession.registerRouteAlertsObserver(routeAlertsObserver)
@@ -832,7 +862,11 @@ class MapboxTripSessionTest {
         coroutineRule.runBlockingTest {
             val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
             val routeAlerts: List<RouteAlert> = listOf(mockk())
-            coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(routeAlerts)
+            val mockedRouteInitInfo: RouteInitInfo = mockk()
+            every { mockedRouteInitInfo.routeAlerts } returns routeAlerts
+            val mockedRouteInfo: RouteInfo = mockk()
+            every { getRouteInitInfo(mockedRouteInfo) } returns mockedRouteInitInfo
+            coEvery { navigator.setRoute(any(), any()) } returns mockedRouteInfo
             tripSession = buildTripSession()
 
             tripSession.registerRouteAlertsObserver(routeAlertsObserver)
@@ -847,7 +881,11 @@ class MapboxTripSessionTest {
     fun `route alerts observer gets immediately notified`() = coroutineRule.runBlockingTest {
         val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
         val routeAlerts: List<RouteAlert> = listOf(mockk())
-        coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(routeAlerts)
+        val mockedRouteInitInfo: RouteInitInfo = mockk()
+        every { mockedRouteInitInfo.routeAlerts } returns routeAlerts
+        val mockedRouteInfo: RouteInfo = mockk()
+        every { getRouteInitInfo(mockedRouteInfo) } returns mockedRouteInitInfo
+        coEvery { navigator.setRoute(any(), any()) } returns mockedRouteInfo
         tripSession = buildTripSession()
 
         tripSession.route = mockk(relaxed = true)
@@ -861,7 +899,11 @@ class MapboxTripSessionTest {
         val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
         val routeAlerts: List<RouteAlert> = listOf(mockk())
         tripSession = buildTripSession()
-        coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(routeAlerts)
+        val mockedRouteInitInfo: RouteInitInfo = mockk()
+        every { mockedRouteInitInfo.routeAlerts } returns routeAlerts
+        val mockedRouteInfo: RouteInfo = mockk()
+        every { getRouteInitInfo(mockedRouteInfo) } returns mockedRouteInitInfo
+        coEvery { navigator.setRoute(any(), any()) } returns mockedRouteInfo
         tripSession.route = mockk(relaxed = true)
         tripSession.registerRouteAlertsObserver(routeAlertsObserver)
         coEvery { navigator.setRoute(any(), any()) } returns null
@@ -888,7 +930,11 @@ class MapboxTripSessionTest {
     fun unregisterAllRouteAlertsObservers() = coroutineRule.runBlockingTest {
         val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
         val routeAlerts: List<RouteAlert> = listOf(mockk())
-        coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(routeAlerts)
+        val mockedRouteInitInfo: RouteInitInfo = mockk()
+        every { mockedRouteInitInfo.routeAlerts } returns routeAlerts
+        val mockedRouteInfo: RouteInfo = mockk()
+        every { getRouteInitInfo(mockedRouteInfo) } returns mockedRouteInitInfo
+        coEvery { navigator.setRoute(any(), any()) } returns mockedRouteInfo
         tripSession = buildTripSession()
 
         tripSession.registerRouteAlertsObserver(routeAlertsObserver)
@@ -913,7 +959,7 @@ class MapboxTripSessionTest {
             routeProgress.bannerInstructions?.view()?.components()
         } returns bannerComponentsList
         every { routeProgress.voiceInstructions } returns null
-        every { tripStatus.offRoute } returns true
+        every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
 
         tripSession = buildTripSession(accessToken = null)
         tripSession.start()
@@ -945,7 +991,7 @@ class MapboxTripSessionTest {
             routeProgress.bannerInstructions?.view()?.components()
         } returns bannerComponentsList
         every { routeProgress.voiceInstructions } returns null
-        every { tripStatus.offRoute } returns true
+        every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
 
         tripSession = buildTripSession()
         tripSession.start()
@@ -1037,8 +1083,9 @@ class MapboxTripSessionTest {
     @After
     fun cleanUp() {
         unmockkObject(ThreadController)
-        unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapperKt")
+        unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         unmockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
+        unmockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
     }
 
     private suspend fun updateLocationAndJoin() {

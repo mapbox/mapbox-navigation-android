@@ -18,6 +18,11 @@ import com.mapbox.navigation.base.trip.model.alert.RouteAlert
 import com.mapbox.navigation.core.internal.utils.isSameRoute
 import com.mapbox.navigation.core.internal.utils.isSameUuid
 import com.mapbox.navigation.core.navigator.getMapMatcherResult
+import com.mapbox.navigation.core.navigator.getRouteInitInfo
+import com.mapbox.navigation.core.navigator.getRouteProgressFrom
+import com.mapbox.navigation.core.navigator.toFixLocation
+import com.mapbox.navigation.core.navigator.toLocation
+import com.mapbox.navigation.core.navigator.toLocations
 import com.mapbox.navigation.core.sensors.SensorMapper
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -27,6 +32,7 @@ import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.NavigationStatus
+import com.mapbox.navigator.RouteState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
@@ -84,7 +90,7 @@ internal class MapboxTripSession(
                     }
                     else -> {
                         navigator.setRoute(value)?.let {
-                            routeAlerts = it.routeAlerts
+                            routeAlerts = getRouteInitInfo(it)?.routeAlerts ?: emptyList()
                         }
                     }
                 }
@@ -471,7 +477,7 @@ internal class MapboxTripSession(
         this.rawLocation = rawLocation
         locationObservers.forEach { it.onRawLocationChanged(rawLocation) }
         mainJobController.scope.launch {
-            navigator.updateLocation(rawLocation)
+            navigator.updateLocation(rawLocation.toFixLocation())
             updateDataFromNavigatorStatus()
         }
 
@@ -496,19 +502,31 @@ internal class MapboxTripSession(
             if (!isActive) {
                 return@launch
             }
-            updateEnhancedLocation(status.enhancedLocation, status.keyPoints)
+            val enhancedLocation = status.navigationStatus.location.toLocation()
+            val keyPoints = status.navigationStatus.key_points.toLocations()
+            updateEnhancedLocation(enhancedLocation, keyPoints)
             if (!isActive) {
                 return@launch
             }
-            updateMapMatcherResult(status.getMapMatcherResult())
+            updateMapMatcherResult(status.getMapMatcherResult(enhancedLocation, keyPoints))
             if (!isActive) {
                 return@launch
             }
-            updateRouteProgress(status.routeProgress)
+            val remainingWaypoints = ifNonNull(status.route?.routeOptions()?.coordinates()?.size) {
+                it - status.navigationStatus.nextWaypointIndex
+            } ?: 0
+            val routeProgress = getRouteProgressFrom(
+                status.route,
+                status.routeBufferGeoJson,
+                status.navigationStatus,
+                remainingWaypoints
+            )
+
+            updateRouteProgress(routeProgress)
             if (!isActive) {
                 return@launch
             }
-            isOffRoute = status.offRoute
+            isOffRoute = status.navigationStatus.routeState == RouteState.OFF_ROUTE
         }
         updateNavigatorStatusDataJob.invokeOnCompletion {
             updateNavigatorStatusDataJobs.remove(updateNavigatorStatusDataJob)

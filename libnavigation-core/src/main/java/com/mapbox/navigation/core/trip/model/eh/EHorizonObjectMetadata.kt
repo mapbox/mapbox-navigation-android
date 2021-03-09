@@ -1,8 +1,8 @@
 package com.mapbox.navigation.core.trip.model.eh
 
-import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingInfo
-import com.mapbox.navigation.base.trip.model.alert.IncidentInfo
-import com.mapbox.navigation.base.trip.model.alert.TunnelInfo
+import com.mapbox.navigation.core.trip.model.alert.CountryBorderCrossingInfo
+import com.mapbox.navigation.core.trip.model.alert.IncidentInfo
+import com.mapbox.navigation.core.trip.model.alert.TunnelInfo
 
 /**
  * RoadObject metadata
