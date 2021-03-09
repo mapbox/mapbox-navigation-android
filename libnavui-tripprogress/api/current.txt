@@ -2,36 +2,69 @@
 package com.mapbox.navigation.ui.tripprogress.api {
 
   public final class MapboxTripProgressApi {
-    ctor public MapboxTripProgressApi(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter formatter);
-    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter getFormatter();
-    method public com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue,com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateError> getTripProgress(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
-    method public void setFormatter(com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter p);
-    property public final com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter formatter;
+    ctor public MapboxTripProgressApi(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter formatter);
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter getFormatter();
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue getTripProgress(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+    method public void setFormatter(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter p);
+    property public final com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter formatter;
   }
 
 }
 
 package com.mapbox.navigation.ui.tripprogress.model {
 
-  public final class TripProgressUpdateError {
-    method public String getErrorMessage();
-    method public Throwable? getThrowable();
-    property public final String errorMessage;
-    property public final Throwable? throwable;
+  public final class DistanceRemainingFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<java.lang.Double,android.text.SpannableString> {
+    ctor public DistanceRemainingFormatter(com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions);
+    method public android.text.SpannableString format(double update);
+  }
+
+  public final class EstimatedTimeToArrivalFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<java.lang.Long,android.text.SpannableString> {
+    ctor public EstimatedTimeToArrivalFormatter(android.content.Context context, @com.mapbox.navigation.base.TimeFormat.Type int timeFormatType = -1);
+    method public android.text.SpannableString format(long update);
+  }
+
+  public final class PercentDistanceTraveledFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<java.lang.Double,android.text.SpannableString> {
+    ctor public PercentDistanceTraveledFormatter();
+    method public android.text.SpannableString format(double update);
+  }
+
+  public class TimeRemainingFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<java.lang.Double,android.text.SpannableString> {
+    ctor public TimeRemainingFormatter(android.content.Context context, java.util.Locale? locale = null);
+    method public android.text.SpannableString format(double update);
+    method public final java.util.Locale? getLocale();
+    method public final void setLocale(java.util.Locale? p);
+    property public final java.util.Locale? locale;
+  }
+
+  public final class TripProgressUpdateFormatter {
+    method public android.text.SpannableString getDistanceRemaining(double value);
+    method public android.text.SpannableString getEstimatedTimeToArrival(long value);
+    method public android.text.SpannableString getPercentRouteTraveled(double value);
+    method public android.text.SpannableString getTimeRemaining(double value);
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter.Builder toBuilder(android.content.Context context);
+  }
+
+  public static final class TripProgressUpdateFormatter.Builder {
+    ctor public TripProgressUpdateFormatter.Builder(android.content.Context context);
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter build();
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter.Builder distanceRemainingFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super java.lang.Double,? extends android.text.SpannableString> formatter);
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter.Builder estimatedTimeToArrivalFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super java.lang.Long,? extends android.text.SpannableString> formatter);
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter.Builder percentRouteTraveledFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super java.lang.Double,? extends android.text.SpannableString> formatter);
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter.Builder timeRemainingFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super java.lang.Double,? extends android.text.SpannableString> formatter);
   }
 
   public final class TripProgressUpdateValue {
     method public double getCurrentLegTimeRemaining();
     method public double getDistanceRemaining();
     method public long getEstimatedTimeToArrival();
-    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter getFormatter();
+    method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter getFormatter();
     method public double getPercentRouteTraveled();
     method public double getTotalTimeRemaining();
     method public int getTrafficCongestionColor();
     property public final double currentLegTimeRemaining;
     property public final double distanceRemaining;
     property public final long estimatedTimeToArrival;
-    property public final com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter formatter;
+    property public final com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter formatter;
     property public final double percentRouteTraveled;
     property public final double totalTimeRemaining;
     property public final int trafficCongestionColor;
@@ -45,7 +78,7 @@ package com.mapbox.navigation.ui.tripprogress.view {
     ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
     ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxTripProgressView(android.content.Context context);
-    method public void render(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue,com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateError> result);
+    method public void render(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue result);
     method public void updateStyle(@StyleRes int style);
   }
 

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.base.model.tripprogress
+package com.mapbox.navigation.ui.tripprogress.model
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

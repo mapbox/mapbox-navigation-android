@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.base.model.tripprogress
+package com.mapbox.navigation.ui.tripprogress.model
 
 import android.content.Context
 import android.graphics.Typeface
@@ -28,13 +28,13 @@ class EstimatedTimeToArrivalFormatter(
     /**
      * Formats an update to a [SpannableString] representing the estimated time to arrival
      *
-     * @param eta represents the estimated time to arrival value
+     * @param update represents the estimated time to arrival value
      * @return a formatted string
      */
-    override fun format(eta: Long): SpannableString {
+    override fun format(update: Long): SpannableString {
         val is24HourFormat = DateFormat.is24HourFormat(appContext)
         val etaAsCalendar = Calendar.getInstance().also {
-            it.timeInMillis = eta
+            it.timeInMillis = update
         }
 
         return SpannableString(formatTime(etaAsCalendar, timeFormatType, is24HourFormat))

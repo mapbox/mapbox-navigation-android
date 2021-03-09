@@ -40,13 +40,13 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityTripprogressBinding
 import com.mapbox.navigation.examples.util.RouteLine
-import com.mapbox.navigation.ui.base.model.tripprogress.DistanceRemainingFormatter
-import com.mapbox.navigation.ui.base.model.tripprogress.EstimatedTimeToArrivalFormatter
-import com.mapbox.navigation.ui.base.model.tripprogress.PercentDistanceTraveledFormatter
-import com.mapbox.navigation.ui.base.model.tripprogress.TimeRemainingFormatter
-import com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
+import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
+import com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter
+import com.mapbox.navigation.ui.tripprogress.model.PercentDistanceTraveledFormatter
+import com.mapbox.navigation.ui.tripprogress.model.TimeRemainingFormatter
+import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter
 
 class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 

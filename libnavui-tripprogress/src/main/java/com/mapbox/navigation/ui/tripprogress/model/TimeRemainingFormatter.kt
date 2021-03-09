@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.base.model.tripprogress
+package com.mapbox.navigation.ui.tripprogress.model
 
 import android.content.Context
 import android.text.Spannable
@@ -24,13 +24,13 @@ open class TimeRemainingFormatter(
     /**
      * * Formats an update to a [SpannableString] representing the remaining travel time
      *
-     * @param value the time remaining value
+     * @param update the time remaining value
      * @return a formatted string
      */
-    override fun format(value: Double): SpannableString {
+    override fun format(update: Double): SpannableString {
         val timeRemainingSpan = formatTimeRemaining(
             appContext,
-            value,
+            update,
             locale
         )
         val spaceIndex = if (timeRemainingSpan.startsWith("<")) {

@@ -52,11 +52,6 @@ import com.mapbox.navigation.ui.base.api.voice.SpeechCallback
 import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayer
 import com.mapbox.navigation.ui.base.api.voice.VoiceInstructionsPlayerCallback
 import com.mapbox.navigation.ui.base.model.Expected
-import com.mapbox.navigation.ui.base.model.tripprogress.DistanceRemainingFormatter
-import com.mapbox.navigation.ui.base.model.tripprogress.EstimatedTimeToArrivalFormatter
-import com.mapbox.navigation.ui.base.model.tripprogress.PercentDistanceTraveledFormatter
-import com.mapbox.navigation.ui.base.model.tripprogress.TimeRemainingFormatter
-import com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter
 import com.mapbox.navigation.ui.base.model.voice.SpeechState
 import com.mapbox.navigation.ui.maneuver.api.ManeuverCallback
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
@@ -78,6 +73,11 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
+import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
+import com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter
+import com.mapbox.navigation.ui.tripprogress.model.PercentDistanceTraveledFormatter
+import com.mapbox.navigation.ui.tripprogress.model.TimeRemainingFormatter
+import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.base.model.tripprogress
+package com.mapbox.navigation.ui.tripprogress.model
 
 import android.text.SpannableString
 import com.mapbox.navigation.ui.base.formatter.ValueFormatter
@@ -11,10 +11,10 @@ class PercentDistanceTraveledFormatter : ValueFormatter<Double, SpannableString>
     /**
      * Formats an update to a [SpannableString] representing the percent distance traveled
      *
-     * @param value a [TripProgressUpdate]
+     * @param update a [TripProgressUpdateValue]
      * @return a formatted string
      */
-    override fun format(value: Double): SpannableString {
-        return SpannableString("${value.toInt()}")
+    override fun format(update: Double): SpannableString {
+        return SpannableString("${update.toInt()}")
     }
 }
