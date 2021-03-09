@@ -613,7 +613,7 @@ class MapboxRouteLineApi(
         )
         val routeLineCasingExpression = MapboxRouteLineUtils.getVanishingRouteLineExpression(
             routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
-            routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledColor,
+            routeLineOptions.resourceProvider.routeLineColorResources.routeLineTraveledCasingColor,
             routeLineOptions.resourceProvider.routeLineColorResources.routeCasingColor
         )
         val alternativeRoute1TrafficSegments: List<RouteLineExpressionData> =
