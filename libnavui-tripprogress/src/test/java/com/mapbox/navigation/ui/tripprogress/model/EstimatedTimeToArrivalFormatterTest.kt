@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.base.model.tripprogress
+package com.mapbox.navigation.ui.tripprogress.model
 
 import android.content.Context
 import android.os.Build
@@ -39,7 +39,10 @@ class EstimatedTimeToArrivalFormatterTest {
         val now = Date()
         val expected = SimpleDateFormat("h:mm a").format(now).toLowerCase()
 
-        val result = EstimatedTimeToArrivalFormatter(ctx, NONE_SPECIFIED).format(now.time)
+        val result = com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter(
+            ctx,
+            NONE_SPECIFIED
+        ).format(now.time)
 
         assertEquals(expected, result.toString())
         unmockkStatic(DateFormat::class)
@@ -52,7 +55,10 @@ class EstimatedTimeToArrivalFormatterTest {
         val now = Date()
         val expected = SimpleDateFormat("h:mm a").format(now).toLowerCase()
 
-        val result = EstimatedTimeToArrivalFormatter(ctx, TWELVE_HOURS).format(now.time)
+        val result = com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter(
+            ctx,
+            TWELVE_HOURS
+        ).format(now.time)
 
         assertEquals(expected, result.toString())
         unmockkStatic(DateFormat::class)
@@ -65,7 +71,10 @@ class EstimatedTimeToArrivalFormatterTest {
         val now = Date()
         val expected = SimpleDateFormat("H:mm").format(now)
 
-        val result = EstimatedTimeToArrivalFormatter(ctx, TWENTY_FOUR_HOURS).format(now.time)
+        val result = com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter(
+            ctx,
+            TWENTY_FOUR_HOURS
+        ).format(now.time)
 
         assertEquals(expected, result.toString())
         unmockkStatic(DateFormat::class)
@@ -78,7 +87,10 @@ class EstimatedTimeToArrivalFormatterTest {
         val now = Date()
         val expected = SimpleDateFormat("H:mm").format(now)
 
-        val result = EstimatedTimeToArrivalFormatter(ctx, NONE_SPECIFIED).format(now.time)
+        val result = com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter(
+            ctx,
+            NONE_SPECIFIED
+        ).format(now.time)
 
         assertEquals(expected, result.toString())
         unmockkStatic(DateFormat::class)
@@ -91,7 +103,10 @@ class EstimatedTimeToArrivalFormatterTest {
         val now = Date()
         val expected = SimpleDateFormat("h:mm a").format(now).toLowerCase()
 
-        val result = EstimatedTimeToArrivalFormatter(ctx, TWELVE_HOURS).format(now.time)
+        val result = com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter(
+            ctx,
+            TWELVE_HOURS
+        ).format(now.time)
 
         assertEquals(expected, result.toString())
         unmockkStatic(DateFormat::class)
@@ -104,7 +119,10 @@ class EstimatedTimeToArrivalFormatterTest {
         val now = Date()
         val expected = SimpleDateFormat("h:mm a").format(now).toLowerCase()
 
-        val result = EstimatedTimeToArrivalFormatter(ctx, NONE_SPECIFIED).format(now.time)
+        val result = com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter(
+            ctx,
+            NONE_SPECIFIED
+        ).format(now.time)
 
         assertEquals(expected, result.toString())
         unmockkStatic(DateFormat::class)
@@ -117,7 +135,10 @@ class EstimatedTimeToArrivalFormatterTest {
         val now = Date()
         val expected = SimpleDateFormat("H:mm").format(now)
 
-        val result = EstimatedTimeToArrivalFormatter(ctx, TWENTY_FOUR_HOURS).format(now.time)
+        val result = com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter(
+            ctx,
+            TWENTY_FOUR_HOURS
+        ).format(now.time)
 
         assertEquals(expected, result.toString())
         unmockkStatic(DateFormat::class)
@@ -129,7 +150,10 @@ class EstimatedTimeToArrivalFormatterTest {
             every { applicationContext } returns ctx
         }
 
-        EstimatedTimeToArrivalFormatter(inputContext, NONE_SPECIFIED)
+        com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter(
+            inputContext,
+            NONE_SPECIFIED
+        )
 
         verify { inputContext.applicationContext }
     }

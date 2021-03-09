@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.base.model.tripprogress
+package com.mapbox.navigation.ui.tripprogress.model
 
 import android.text.SpannableString
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
@@ -17,13 +17,13 @@ class DistanceRemainingFormatter(
     private val formatter = MapboxDistanceFormatter(distanceFormatterOptions)
 
     /**
-     * Formats the data in the [TripProgressUpdate] for displaying the route distance remaining
+     * Formats the data in the [TripProgressUpdateValue] for displaying the route distance remaining
      * in the UI
      *
-     * @param value the distance remaining value to be formatted
+     * @param update the distance remaining value to be formatted
      * @return a [SpannableString] representing the route distance remaining
      */
-    override fun format(value: Double): SpannableString {
-        return formatter.formatDistance(value)
+    override fun format(update: Double): SpannableString {
+        return formatter.formatDistance(update)
     }
 }

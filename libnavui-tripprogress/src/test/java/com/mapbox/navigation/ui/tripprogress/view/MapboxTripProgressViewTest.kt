@@ -6,9 +6,8 @@ import android.text.SpannableString
 import android.view.View
 import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.ui.base.model.Expected
-import com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter
 import com.mapbox.navigation.ui.tripprogress.R
+import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue
 import io.mockk.every
 import io.mockk.mockk
@@ -76,17 +75,11 @@ class MapboxTripProgressViewTest {
 
         assertEquals(
             expectedDividerColor,
-            (
-                view.findViewById<TextView>(R.id.tripProgressDividerLeft)
-                    .background as ColorDrawable
-                ).color
+            view.findViewById<TextView>(R.id.tripProgressDividerLeft).currentTextColor
         )
         assertEquals(
             expectedDividerColor,
-            (
-                view.findViewById<TextView>(R.id.tripProgressDividerRight)
-                    .background as ColorDrawable
-                ).color
+            view.findViewById<TextView>(R.id.tripProgressDividerRight).currentTextColor
         )
     }
 
@@ -113,16 +106,14 @@ class MapboxTripProgressViewTest {
                     every { format(4.0) } returns SpannableString("10%")
                 }
             ).build()
-        val state = Expected.Success(
-            TripProgressUpdateValue(
-                1L,
-                2.0,
-                3.0,
-                4.0,
-                5.0,
-                6,
-                formatter
-            )
+        val state = TripProgressUpdateValue(
+            1L,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6,
+            formatter
         )
 
         val view = MapboxTripProgressView(ctx).also {

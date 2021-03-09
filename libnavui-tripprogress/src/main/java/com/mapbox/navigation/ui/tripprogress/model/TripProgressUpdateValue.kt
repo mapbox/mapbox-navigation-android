@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.tripprogress.model
 
 import androidx.annotation.ColorInt
-import com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter
 
 /**
  * Represents a trip progress update to be rendered

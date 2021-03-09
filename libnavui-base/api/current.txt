@@ -296,50 +296,6 @@ package com.mapbox.navigation.ui.base.model.snapshotter {
 
 }
 
-package com.mapbox.navigation.ui.base.model.tripprogress {
-
-  public final class DistanceRemainingFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<java.lang.Double,android.text.SpannableString> {
-    ctor public DistanceRemainingFormatter(com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions);
-    method public android.text.SpannableString format(double value);
-  }
-
-  public final class EstimatedTimeToArrivalFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<java.lang.Long,android.text.SpannableString> {
-    ctor public EstimatedTimeToArrivalFormatter(android.content.Context context, @com.mapbox.navigation.base.TimeFormat.Type int timeFormatType = -1);
-    method public android.text.SpannableString format(long eta);
-  }
-
-  public final class PercentDistanceTraveledFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<java.lang.Double,android.text.SpannableString> {
-    ctor public PercentDistanceTraveledFormatter();
-    method public android.text.SpannableString format(double value);
-  }
-
-  public class TimeRemainingFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<java.lang.Double,android.text.SpannableString> {
-    ctor public TimeRemainingFormatter(android.content.Context context, java.util.Locale? locale = null);
-    method public android.text.SpannableString format(double value);
-    method public final java.util.Locale? getLocale();
-    method public final void setLocale(java.util.Locale? p);
-    property public final java.util.Locale? locale;
-  }
-
-  public final class TripProgressUpdateFormatter {
-    method public android.text.SpannableString getDistanceRemaining(double value);
-    method public android.text.SpannableString getEstimatedTimeToArrival(long value);
-    method public android.text.SpannableString getPercentRouteTraveled(double value);
-    method public android.text.SpannableString getTimeRemaining(double value);
-    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder toBuilder(android.content.Context context);
-  }
-
-  public static final class TripProgressUpdateFormatter.Builder {
-    ctor public TripProgressUpdateFormatter.Builder(android.content.Context context);
-    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter build();
-    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder distanceRemainingFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super java.lang.Double,? extends android.text.SpannableString> formatter);
-    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder estimatedTimeToArrivalFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super java.lang.Long,? extends android.text.SpannableString> formatter);
-    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder percentRouteTraveledFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super java.lang.Double,? extends android.text.SpannableString> formatter);
-    method public com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter.Builder timeRemainingFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super java.lang.Double,? extends android.text.SpannableString> formatter);
-  }
-
-}
-
 package com.mapbox.navigation.ui.base.model.voice {
 
   public final class Announcement {

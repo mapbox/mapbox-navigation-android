@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.base.model.tripprogress
+package com.mapbox.navigation.ui.tripprogress.model
 
 import android.content.Context
 import android.graphics.Typeface
@@ -268,7 +268,10 @@ class TimeRemainingFormatterTest {
     @Config(qualifiers = "en")
     @Test
     fun format_withLocale() {
-        val result = TimeRemainingFormatter(ctx, Locale("hu")).format(1800.0)
+        val result = TimeRemainingFormatter(
+            ctx,
+            Locale("hu")
+        ).format(1800.0)
 
         assertEquals("30 perc", result.toString())
     }

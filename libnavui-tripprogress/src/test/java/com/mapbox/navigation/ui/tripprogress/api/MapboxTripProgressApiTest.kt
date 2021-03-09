@@ -4,10 +4,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
-import com.mapbox.navigation.ui.base.model.Expected
-import com.mapbox.navigation.ui.base.model.tripprogress.TripProgressUpdateFormatter
 import com.mapbox.navigation.ui.tripprogress.TripProgressProcessor
-import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue
+import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -37,16 +35,16 @@ class MapboxTripProgressApiTest {
         val result = MapboxTripProgressApi(
             progressFormatter,
             TripProgressProcessor()
-        ).getTripProgress(routeProgress) as Expected.Success<TripProgressUpdateValue>
+        ).getTripProgress(routeProgress)
 
-        assertEquals(progressFormatter, result.value.formatter)
-        assertEquals(100.0, result.value.distanceRemaining, 0.0)
-        assertEquals(2.0, result.value.currentLegTimeRemaining, 0.0)
-        assertEquals(600.0, result.value.totalTimeRemaining, 0.0)
-        assertEquals(0.3333333432674408, result.value.percentRouteTraveled, 0.0)
+        assertEquals(progressFormatter, result.formatter)
+        assertEquals(100.0, result.distanceRemaining, 0.0)
+        assertEquals(2.0, result.currentLegTimeRemaining, 0.0)
+        assertEquals(600.0, result.totalTimeRemaining, 0.0)
+        assertEquals(0.3333333432674408, result.percentRouteTraveled, 0.0)
         assertEquals(
             expectedEta.timeInMillis.toDouble(),
-            result.value.estimatedTimeToArrival.toDouble(),
+            result.estimatedTimeToArrival.toDouble(),
             30000.0
         )
     }

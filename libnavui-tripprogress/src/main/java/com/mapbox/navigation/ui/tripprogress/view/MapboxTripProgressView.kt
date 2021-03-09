@@ -8,10 +8,8 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.StyleRes
 import androidx.core.content.ContextCompat
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.tripprogress.R
 import com.mapbox.navigation.ui.tripprogress.databinding.MapboxTripProgressLayoutBinding
-import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateError
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue
 
 /**
@@ -70,8 +68,8 @@ class MapboxTripProgressView @JvmOverloads constructor(
             )
         )
         binding.tripProgressDivider?.setBackgroundColor(dividerColor)
-        binding.tripProgressDividerLeft?.setBackgroundColor(dividerColor)
-        binding.tripProgressDividerRight?.setBackgroundColor(dividerColor)
+        binding.tripProgressDividerLeft?.setTextColor(dividerColor)
+        binding.tripProgressDividerRight?.setTextColor(dividerColor)
 
         setBackgroundColor(
             ContextCompat.getColor(
@@ -90,27 +88,22 @@ class MapboxTripProgressView @JvmOverloads constructor(
      * @param result a [Expected<TripProgressUpdateValue, TripProgressUpdateError>]
      * containing the data that should be rendered.
      */
-    fun render(result: Expected<TripProgressUpdateValue, TripProgressUpdateError>) {
-        when (result) {
-            is Expected.Success<TripProgressUpdateValue> -> {
-                binding.distanceRemainingText.setText(
-                    result.value.formatter.getDistanceRemaining(result.value.distanceRemaining),
-                    TextView.BufferType.SPANNABLE
-                )
+    fun render(result: TripProgressUpdateValue) {
+        binding.distanceRemainingText.setText(
+            result.formatter.getDistanceRemaining(result.distanceRemaining),
+            TextView.BufferType.SPANNABLE
+        )
 
-                binding.estimatedTimeToArriveText.setText(
-                    result.value.formatter.getEstimatedTimeToArrival(
-                        result.value.estimatedTimeToArrival
-                    ),
-                    TextView.BufferType.SPANNABLE
-                )
+        binding.estimatedTimeToArriveText.setText(
+            result.formatter.getEstimatedTimeToArrival(
+                result.estimatedTimeToArrival
+            ),
+            TextView.BufferType.SPANNABLE
+        )
 
-                binding.timeRemainingText.setText(
-                    result.value.formatter.getTimeRemaining(result.value.currentLegTimeRemaining),
-                    TextView.BufferType.SPANNABLE
-                )
-            }
-            is Expected.Failure<TripProgressUpdateError> -> { }
-        }
+        binding.timeRemainingText.setText(
+            result.formatter.getTimeRemaining(result.currentLegTimeRemaining),
+            TextView.BufferType.SPANNABLE
+        )
     }
 }
