@@ -185,6 +185,52 @@ class MapboxRouteLineApiTest {
     }
 
     @Test
+    fun setRoutesTrafficExpressionsWithAlternativeRoutes() {
+        val expectedPrimaryTrafficLineExpression = "[step, [line-progress], " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            "0.9429639111009005, [rgba, 255.0, 149.0, 0.0, 1.0]]"
+        val expectedAlternative1TrafficLineExpression = "[step, [line-progress], " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, [rgba, 134.0, 148.0, 165.0, 1.0], " +
+            "0.4277038222190263, [rgba, 190.0, 160.0, 135.0, 1.0], 0.49556716073574053, " +
+            "[rgba, 134.0, 148.0, 165.0, 1.0]]"
+        val expectedAlternative2TrafficLineExpression = "[step, [line-progress], " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, [rgba, 134.0, 148.0, 165.0, 1.0], " +
+            "0.09121273901463474, [rgba, 190.0, 160.0, 135.0, 1.0], 0.09968837805505427, [rgba, " +
+            "134.0, 148.0, 165.0, 1.0], 0.7428990170270018, [rgba, 190.0, 160.0, 135.0, 1.0], " +
+            "0.7533307965366008, [rgba, 134.0, 148.0, 165.0, 1.0], 0.791100847370589, [rgba, " +
+            "190.0, 160.0, 135.0, 1.0], 0.8172213571475897, [rgba, 134.0, 148.0, 165.0, 1.0], " +
+            "0.8647489907014745, [rgba, 190.0, 160.0, 135.0, 1.0], 0.8661754437401568, [rgba, " +
+            "134.0, 148.0, 165.0, 1.0], 0.8880749995256708, [rgba, 181.0, 130.0, 129.0, 1.0], " +
+            "0.92754943810966, [rgba, 134.0, 148.0, 165.0, 1.0]]"
+
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val api = MapboxRouteLineApi(options)
+        val route = getRoute()
+        val altRoute1 = getRouteWithRoadClasses()
+        val altRoute2 = getMultilegRoute()
+        val routes = listOf(
+            RouteLine(route, null),
+            RouteLine(altRoute1, null),
+            RouteLine(altRoute2, null)
+        )
+
+        val result = api.setRoutes(routes) as Expected.Success
+
+        assertEquals(
+            expectedPrimaryTrafficLineExpression,
+            result.value.trafficLineExpression.toString()
+        )
+        assertEquals(
+            expectedAlternative1TrafficLineExpression,
+            result.value.altRoute1TrafficExpression.toString()
+        )
+        assertEquals(
+            expectedAlternative2TrafficLineExpression,
+            result.value.altRoute2TrafficExpression.toString()
+        )
+    }
+
+    @Test
     fun getRouteDrawData() {
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val api = MapboxRouteLineApi(options)
@@ -676,6 +722,16 @@ class MapboxRouteLineApiTest {
 
     private fun getMultilegRoute(): DirectionsRoute {
         val routeAsJson = loadJsonFixture("multileg_route.json")
+        return DirectionsRoute.fromJson(routeAsJson)
+    }
+
+    private fun getRouteWithRoadClasses(): DirectionsRoute {
+        val routeAsJson = loadJsonFixture("route-with-road-classes.txt")
+        return DirectionsRoute.fromJson(routeAsJson)
+    }
+
+    private fun getRouteWithNoRoadClasses(): DirectionsRoute {
+        val routeAsJson = loadJsonFixture("route-with-traffic-no-street-classes.txt")
         return DirectionsRoute.fromJson(routeAsJson)
     }
 }
