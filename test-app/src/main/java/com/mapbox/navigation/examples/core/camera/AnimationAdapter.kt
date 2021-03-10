@@ -19,7 +19,7 @@ class AnimationAdapter(
     init {
         animationList.add(AnimationType.Following)
         animationList.add(AnimationType.Overview)
-        animationList.add(AnimationType.ToPOI)
+        // animationList.add(AnimationType.ToPOI)
         animationList.add(AnimationType.LookAtPOIWhenFollowing)
     }
 
@@ -40,7 +40,7 @@ class AnimationAdapter(
     inner class AnimationsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var animationButton: Button = itemView.findViewById(R.id.animationButton)
         fun bindAnimations(item: AnimationType) {
-            animationButton.text = animationList[adapterPosition].name
+            animationButton.text = item.text ?: item.name
             animationButton.setOnClickListener { callback.onButtonClicked(item) }
         }
     }

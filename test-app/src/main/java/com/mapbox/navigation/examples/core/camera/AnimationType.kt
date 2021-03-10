@@ -1,8 +1,8 @@
 package com.mapbox.navigation.examples.core.camera
 
-enum class AnimationType {
+enum class AnimationType(val text: String? = null) {
     Following,
     Overview,
     ToPOI,
-    LookAtPOIWhenFollowing
+    LookAtPOIWhenFollowing("Look at POI")
 }

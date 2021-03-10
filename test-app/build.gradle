@@ -3,8 +3,8 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.mapbox.maps.token'
 apply from: "${rootDir}/gradle/script-git-version.gradle"
 apply from: "${rootDir}/gradle/ktlint.gradle"
-apply plugin: 'com.google.firebase.crashlytics'
-apply plugin: 'com.google.gms.google-services'
+//apply plugin: 'com.google.firebase.crashlytics'
+//apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -46,12 +46,12 @@ android {
 
     signingConfigs {
         release {
-            keyAlias System.getenv("CIRCLECI_ANDROID_KEYSTORE_ALIAS")
-            keyPassword System.getenv("CIRCLECI_ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD")
+            keyAlias "mapbox_demo"
+            keyPassword "RsaLF4LbFzmDVPpqVriYXFphVatxKTfDihqNK2JxmtErMVcssX"
             storeFile file("$project.rootDir/navigation_testapp.keystore")
-            storePassword System.getenv("CIRCLECI_ANDROID_KEYSTORE_PASSWORD")
+            storePassword "RsaLF4LbFzmDVPpqVriYXFphVatxKTfDihqNK2JxmtErMVcssX"
+            }
         }
-    }
 
     buildTypes {
         debug {
@@ -61,13 +61,13 @@ android {
         release {
             minifyEnabled true
             signingConfig signingConfigs.release
-            manifestPlaceholders = [enableCrashReporting: "true"]
+            /*manifestPlaceholders = [enableCrashReporting: "true"]
             firebaseCrashlytics {
                 mappingFileUploadEnabled = true
                 nativeSymbolUploadEnabled = true
                 strippedNativeLibsDir = 'build/intermediates/stripped_native_libs/debug/release/lib/'
                 unstrippedNativeLibsDir = com.mapbox.gradle.NativeDownloadTask.UNSTRIPPED_NATIVE_LIBS_PATH
-            }
+            }*/
         }
     }
 

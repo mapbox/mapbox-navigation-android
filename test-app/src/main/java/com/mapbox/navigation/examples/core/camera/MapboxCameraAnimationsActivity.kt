@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -26,9 +27,15 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.CircleLayer
+import com.mapbox.maps.extension.style.layers.generated.skyLayer
+import com.mapbox.maps.extension.style.layers.properties.generated.SkyType
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.extension.style.sources.generated.rasterDemSource
+import com.mapbox.maps.extension.style.style
+import com.mapbox.maps.extension.style.terrain.generated.terrain
 import com.mapbox.maps.plugin.LocationPuck2D
+import com.mapbox.maps.plugin.LocationPuck3D
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
@@ -95,10 +102,10 @@ class MapboxCameraAnimationsActivity :
     private val pixelDensity = Resources.getSystem().displayMetrics.density
     private val overviewEdgeInsets: EdgeInsets by lazy {
         EdgeInsets(
-            10.0 * pixelDensity,
-            10.0 * pixelDensity,
-            10.0 * pixelDensity,
-            10.0 * pixelDensity
+            20.0 * pixelDensity,
+            20.0 * pixelDensity,
+            20.0 * pixelDensity,
+            20.0 * pixelDensity
         )
     }
     private val followingEdgeInsets: EdgeInsets by lazy {
@@ -114,7 +121,7 @@ class MapboxCameraAnimationsActivity :
         set(value) {
             field = value
             if (value != null) {
-                poiSource.geometry(value)
+                // poiSource.geometry(value)
             } else {
                 poiSource.featureCollection(FeatureCollection.fromFeatures(emptyList()))
             }
@@ -166,6 +173,7 @@ class MapboxCameraAnimationsActivity :
             viewportDataSource.onRouteProgressChanged(routeProgress)
             viewportDataSource.evaluate()
 
+            routeLineAPI?.updateWithRouteProgress(routeProgress)
             routeArrowAPI.updateUpcomingManeuverArrow(routeProgress).apply {
                 ifNonNull(routeArrowView, mapboxMap.getStyle()) { view, style ->
                     view.render(style, this)
@@ -195,7 +203,9 @@ class MapboxCameraAnimationsActivity :
 
     private val onIndicatorPositionChangedListener = object : OnIndicatorPositionChangedListener {
         override fun onIndicatorPositionChanged(point: Point) {
-            routeLineAPI?.updateTraveledRouteLine(point)
+            routeLineAPI?.updateTraveledRouteLine(point)?.let {
+                routeLineView?.renderVanishingRouteLineUpdateValue(mapboxMap.getStyle()!!, it)
+            }
         }
     }
 
@@ -205,12 +215,7 @@ class MapboxCameraAnimationsActivity :
         setContentView(binding.root)
         mapboxMap = binding.mapView.getMapboxMap()
         locationComponent = binding.mapView.getLocationComponentPlugin().apply {
-            this.locationPuck = LocationPuck2D(
-                bearingImage = ContextCompat.getDrawable(
-                    this@MapboxCameraAnimationsActivity,
-                    R.drawable.mapbox_navigation_puck_icon
-                )
-            )
+            pulsingEnabled = true
             setLocationProvider(navigationLocationProvider)
             addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
             enabled = true
@@ -266,6 +271,7 @@ class MapboxCameraAnimationsActivity :
     private fun initRouteLine() {
         val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(this)
             .withRouteLineBelowLayerId("road-label")
+            .withVanishingRouteLineEnabled(true)
             .build()
         routeLineAPI = MapboxRouteLineApi(mapboxRouteLineOptions)
         routeLineView = MapboxRouteLineView(mapboxRouteLineOptions)
@@ -275,6 +281,8 @@ class MapboxCameraAnimationsActivity :
     }
 
     private fun initButtons() {
+        binding.gravitateTop.visibility = View.GONE
+        binding.gravitateBottom.visibility = View.GONE
         binding.gravitateLeft.setOnClickListener {
             mapboxMap.getCameraOptions(null).padding?.let {
                 val padding = EdgeInsets(
@@ -381,13 +389,43 @@ class MapboxCameraAnimationsActivity :
         mapboxReplayer.clearEvents()
         mapboxReplayer.pushRealLocation(this, 0.0)
         val replayEvents = replayRouteMapper.mapDirectionsRouteGeometry(route)
+        // val replayEvents = replayRouteMapper.mapDirectionsRouteLegAnnotation(route)
         mapboxReplayer.pushEvents(replayEvents)
         mapboxReplayer.seekTo(replayEvents.first())
         mapboxReplayer.play()
     }
 
+
+    companion object {
+        private const val SOURCE = "TERRAIN_SOURCE"
+        private const val SKY_LAYER = "sky"
+        private const val TERRAIN_URL_TILE_RESOURCE = "mapbox://mapbox.terrain-rgb"
+    }
+
     private fun initStyle() {
-        mapboxMap.loadStyleUri(
+        mapboxMap.loadStyle(
+            styleExtension = style(Style.MAPBOX_STREETS) {
+                /*+rasterDemSource(SOURCE) {
+                    url(TERRAIN_URL_TILE_RESOURCE)
+                    tileSize(512)
+                }
+                +terrain(SOURCE)*/
+                +skyLayer(SKY_LAYER) {
+                    skyType(SkyType.ATMOSPHERE)
+                    skyAtmosphereSun(listOf(-50.0, 90.2))
+                }
+            },
+            onStyleLoaded = object : Style.OnStyleLoaded {
+                override fun onStyleLoaded(style: Style) {
+                    getGesturesPlugin().addOnMapLongClickListener(
+                        this@MapboxCameraAnimationsActivity
+                    )
+                    style.addSource(poiSource)
+                    style.addLayer(poiLayer)
+                }
+            }
+        )
+        /*mapboxMap.loadStyleUri(
             MAPBOX_STREETS,
             object : Style.OnStyleLoaded {
                 override fun onStyleLoaded(style: Style) {
@@ -406,7 +444,7 @@ class MapboxCameraAnimationsActivity :
                     )
                 }
             }
-        )
+        )*/
     }
 
     private fun initAnimations() {
@@ -443,6 +481,15 @@ class MapboxCameraAnimationsActivity :
     override fun onButtonClicked(animationType: AnimationType) {
         when (animationType) {
             AnimationType.Following -> {
+                binding.mapView.getLocationComponentPlugin().apply {
+                    locationPuck = LocationPuck2D(
+                        bearingImage = ContextCompat.getDrawable(
+                            this@MapboxCameraAnimationsActivity,
+                            R.drawable.mapbox_navigation_puck_icon
+                        )
+                    )
+                    pulsingEnabled = false
+                }
                 viewportDataSource.followingZoomUpdatesAllowed = true
                 viewportDataSource.followingPaddingPropertyOverride(followingEdgeInsets)
                 viewportDataSource.evaluate()
@@ -452,6 +499,14 @@ class MapboxCameraAnimationsActivity :
                 viewportDataSource.overviewPaddingPropertyOverride(overviewEdgeInsets)
                 viewportDataSource.evaluate()
                 navigationCamera.requestNavigationCameraToOverview()
+                binding.mapView.getLocationComponentPlugin().apply {
+                    locationPuck = LocationPuck2D(
+                        bearingImage = ContextCompat.getDrawable(
+                            this@MapboxCameraAnimationsActivity,
+                            R.drawable.mapbox_navigation_puck_icon
+                        )
+                    )
+                }
             }
             AnimationType.ToPOI -> {
                 navigationLocationProvider.lastLocation?.let {
@@ -480,17 +535,34 @@ class MapboxCameraAnimationsActivity :
                         (center.longitude()) + 0.003,
                         (center.latitude()) + 0.003
                     ).also {
-                        viewportDataSource.additionalPointsToFrameForFollowing(listOf(it))
+                        // viewportDataSource.additionalPointsToFrameForFollowing(listOf(it))
+                        viewportDataSource.followingPitchPropertyOverride(80.0)
                         viewportDataSource.followingBearingPropertyOverride(
                             TurfMeasurement.bearing(center, it)
                         )
                         viewportDataSource.evaluate()
                     }
+                    binding.mapView.getLocationComponentPlugin().apply {
+                        locationPuck = LocationPuck3D(
+                            modelUri = "asset://race_car_model.gltf",
+                            modelScale = listOf(0.3f, 0.3f, 0.3f)
+                        )
+                    }
                 } else {
                     lookAtPoint = null
                     viewportDataSource.additionalPointsToFrameForFollowing(emptyList())
                     viewportDataSource.followingBearingPropertyOverride(null)
+                    viewportDataSource.followingPitchPropertyOverride(null)
                     viewportDataSource.evaluate()
+
+                    /*binding.mapView.getLocationComponentPlugin().apply {
+                        locationPuck = LocationPuck2D(
+                            bearingImage = ContextCompat.getDrawable(
+                                this@MapboxCameraAnimationsActivity,
+                                R.drawable.mapbox_navigation_puck_icon
+                            )
+                        )
+                    }*/
                 }
             }
         }

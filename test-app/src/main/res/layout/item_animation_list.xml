@@ -17,7 +17,7 @@
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
-      android:textColor="#019898"
+      android:textColor="#5A5A5A"
       android:gravity="center"
       android:textSize="14sp"
       android:textStyle="bold"

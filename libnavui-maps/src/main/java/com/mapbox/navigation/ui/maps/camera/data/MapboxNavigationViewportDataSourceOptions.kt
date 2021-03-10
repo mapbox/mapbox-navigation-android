@@ -65,7 +65,7 @@ class MapboxNavigationViewportDataSourceOptions private constructor(
     class Builder {
         private var maxFollowingPitch = 40.0
         private var minFollowingZoom = 12.0
-        private var maxZoom = 19.0
+        private var maxZoom = 18.0
 
         /**
          * Override [MapboxNavigationViewportDataSourceOptions.maxFollowingPitch].
