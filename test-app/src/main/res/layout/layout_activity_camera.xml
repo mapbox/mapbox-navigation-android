@@ -16,8 +16,99 @@
         <com.mapbox.maps.MapView
             android:id="@+id/mapView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:mapbox_cameraZoom="14" />
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@id/tripProgressCard"
+            app:mapbox_cameraZoom="14">
+
+        </com.mapbox.maps.MapView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/tripProgressCard"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:cardUseCompatPadding="false"
+            app:cardElevation="@dimen/mapbox_dimen_8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:visibility="gone"
+            >
+            <com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
+                android:id="@+id/tripProgressView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:layout_width="wrap_content">
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:background="@android:color/transparent"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:id="@+id/btnRouteOverview"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:padding="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/divider"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/mapbox_ic_route_preview" />
+
+                <View
+                    android:background="#D8D8D8"
+                    android:id="@+id/divider"
+                    android:layout_height="0dp"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_width="1dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/btnCancel"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:background="@android:color/transparent"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:id="@+id/btnCancel"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:padding="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/mapbox_ic_cancel" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
+            android:id="@+id/maneuverView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/mapbox_dimen_16dp"
+            android:background="@color/colorSecondary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:fabSize="auto"
+            android:src="@drawable/mapbox_ic_start_navigation"
+            />
 
         <Button
             android:id="@+id/gravitate_left"
@@ -69,6 +160,7 @@
         android:fadeScrollbars="false"
         android:scrollbarThumbVertical="@drawable/recycler_view_scrollbar"
         android:scrollbars="vertical"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_default="percent"

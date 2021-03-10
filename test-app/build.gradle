@@ -46,12 +46,12 @@ android {
 
     signingConfigs {
         release {
-            keyAlias "mapbox_demo"
-            keyPassword "RsaLF4LbFzmDVPpqVriYXFphVatxKTfDihqNK2JxmtErMVcssX"
+            keyAlias System.getenv("CIRCLECI_ANDROID_KEYSTORE_ALIAS")
+            keyPassword System.getenv("CIRCLECI_ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD")
             storeFile file("$project.rootDir/navigation_testapp.keystore")
-            storePassword "RsaLF4LbFzmDVPpqVriYXFphVatxKTfDihqNK2JxmtErMVcssX"
-            }
+            storePassword System.getenv("CIRCLECI_ANDROID_KEYSTORE_PASSWORD")
         }
+    }
 
     buildTypes {
         debug {

@@ -6,6 +6,7 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.FeatureCollection
@@ -45,14 +47,18 @@ import com.mapbox.maps.plugin.gestures.getGesturesPlugin
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
+import com.mapbox.navigation.base.TimeFormat
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
@@ -60,11 +66,21 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.camera.AnimationAdapter.OnAnimationButtonClicked
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityCameraBinding
+import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.navigation.ui.maneuver.api.ManeuverCallback
+import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
+import com.mapbox.navigation.ui.maneuver.api.StepDistanceRemainingCallback
+import com.mapbox.navigation.ui.maneuver.api.UpcomingManeuverListCallback
+import com.mapbox.navigation.ui.maneuver.model.Maneuver
+import com.mapbox.navigation.ui.maneuver.model.ManeuverError
+import com.mapbox.navigation.ui.maneuver.model.StepDistance
+import com.mapbox.navigation.ui.maneuver.model.StepDistanceError
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandler
+import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
@@ -73,6 +89,12 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
+import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
+import com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter
+import com.mapbox.navigation.ui.tripprogress.model.PercentDistanceTraveledFormatter
+import com.mapbox.navigation.ui.tripprogress.model.TimeRemainingFormatter
+import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.turf.TurfMeasurement
 
@@ -99,13 +121,51 @@ class MapboxCameraAnimationsActivity :
     private lateinit var navigationCamera: NavigationCamera
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
 
+    private lateinit var tripProgressApi: MapboxTripProgressApi
+    private lateinit var maneuverApi: MapboxManeuverApi
+
+    private val currentManeuverCallback = object : ManeuverCallback {
+        override fun onManeuver(maneuver: Expected<Maneuver, ManeuverError>) {
+            binding.maneuverView.renderManeuver(maneuver)
+        }
+    }
+
+    private val stepDistanceRemainingCallback = object : StepDistanceRemainingCallback {
+        override fun onStepDistanceRemaining(
+            distanceRemaining: Expected<StepDistance, StepDistanceError>
+        ) {
+
+            when (distanceRemaining) {
+                is Expected.Success -> {
+                    binding.maneuverView.renderDistanceRemaining(distanceRemaining.value)
+                }
+                is Expected.Failure -> {
+                    // Not handled
+                }
+            }
+        }
+    }
+
+    private val upcomingManeuversCallback = object : UpcomingManeuverListCallback {
+        override fun onUpcomingManeuvers(maneuvers: Expected<List<Maneuver>, ManeuverError>) {
+            when (maneuvers) {
+                is Expected.Success -> {
+                    binding.maneuverView.renderUpcomingManeuvers(maneuvers.value)
+                }
+                is Expected.Failure -> {
+                    // Not handled
+                }
+            }
+        }
+    }
+
     private val pixelDensity = Resources.getSystem().displayMetrics.density
     private val overviewEdgeInsets: EdgeInsets by lazy {
         EdgeInsets(
-            20.0 * pixelDensity,
-            20.0 * pixelDensity,
-            20.0 * pixelDensity,
-            20.0 * pixelDensity
+            60.0 * pixelDensity,
+            60.0 * pixelDensity,
+            60.0 * pixelDensity,
+            60.0 * pixelDensity
         )
     }
     private val followingEdgeInsets: EdgeInsets by lazy {
@@ -173,6 +233,14 @@ class MapboxCameraAnimationsActivity :
             viewportDataSource.onRouteProgressChanged(routeProgress)
             viewportDataSource.evaluate()
 
+            binding.tripProgressView.render(tripProgressApi.getTripProgress(routeProgress))
+            maneuverApi.getUpcomingManeuverList(routeProgress, upcomingManeuversCallback)
+            com.mapbox.navigation.ui.utils.internal.ifNonNull(routeProgress.currentLegProgress) { legProgress ->
+                com.mapbox.navigation.ui.utils.internal.ifNonNull(legProgress.currentStepProgress) {
+                    maneuverApi.getStepDistanceRemaining(it, stepDistanceRemainingCallback)
+                }
+            }
+
             routeLineAPI?.updateWithRouteProgress(routeProgress)
             routeArrowAPI.updateUpcomingManeuverArrow(routeProgress).apply {
                 ifNonNull(routeArrowView, mapboxMap.getStyle()) { view, style ->
@@ -195,6 +263,10 @@ class MapboxCameraAnimationsActivity :
                 viewportDataSource.overviewPaddingPropertyOverride(overviewEdgeInsets)
                 viewportDataSource.evaluate()
                 navigationCamera.requestNavigationCameraToOverview()
+
+                Handler().postDelayed({
+                    runScenario()
+                }, 2500)
             } else {
                 navigationCamera.requestNavigationCameraToIdle()
             }
@@ -206,6 +278,12 @@ class MapboxCameraAnimationsActivity :
             routeLineAPI?.updateTraveledRouteLine(point)?.let {
                 routeLineView?.renderVanishingRouteLineUpdateValue(mapboxMap.getStyle()!!, it)
             }
+        }
+    }
+
+    private val bannerInstructionsObserver = object : BannerInstructionsObserver {
+        override fun onNewBannerInstructions(bannerInstructions: BannerInstructions) {
+            maneuverApi.getManeuver(bannerInstructions, currentManeuverCallback)
         }
     }
 
@@ -222,6 +300,25 @@ class MapboxCameraAnimationsActivity :
         }
 
         initNavigation()
+        tripProgressApi = MapboxTripProgressApi(
+            TripProgressUpdateFormatter.Builder(this)
+                .distanceRemainingFormatter(
+                    DistanceRemainingFormatter(
+                        mapboxNavigation.navigationOptions.distanceFormatterOptions
+                    )
+                )
+                .timeRemainingFormatter(TimeRemainingFormatter(this))
+                .percentRouteTraveledFormatter(PercentDistanceTraveledFormatter())
+                .estimatedTimeToArrivalFormatter(
+                    EstimatedTimeToArrivalFormatter(
+                        this,
+                        TimeFormat.NONE_SPECIFIED
+                    )
+                ).build()
+        )
+        maneuverApi = MapboxManeuverApi(
+            MapboxDistanceFormatter(DistanceFormatterOptions.Builder(this).build())
+        )
 
         viewportDataSource = MapboxNavigationViewportDataSource(
             MapboxNavigationViewportDataSourceOptions.Builder().build(),
@@ -283,6 +380,8 @@ class MapboxCameraAnimationsActivity :
     private fun initButtons() {
         binding.gravitateTop.visibility = View.GONE
         binding.gravitateBottom.visibility = View.GONE
+        binding.gravitateLeft.visibility = View.GONE
+        binding.gravitateRight.visibility = View.GONE
         binding.gravitateLeft.setOnClickListener {
             mapboxMap.getCameraOptions(null).padding?.let {
                 val padding = EdgeInsets(
@@ -344,7 +443,139 @@ class MapboxCameraAnimationsActivity :
         }
     }
 
+    private fun runScenario() {
+
+        binding.mapView.getLocationComponentPlugin().apply {
+            locationPuck = LocationPuck2D(
+                bearingImage = ContextCompat.getDrawable(
+                    this@MapboxCameraAnimationsActivity,
+                    R.drawable.mapbox_navigation_puck_icon
+                )
+            )
+            pulsingEnabled = false
+        }
+        viewportDataSource.followingZoomUpdatesAllowed = true
+        viewportDataSource.followingPaddingPropertyOverride(followingEdgeInsets)
+        viewportDataSource.evaluate()
+        navigationCamera.requestNavigationCameraToFollowing()
+        binding.start.visibility = View.GONE
+        binding.tripProgressCard.visibility = View.VISIBLE
+        binding.maneuverView.visibility = View.VISIBLE
+
+        Handler().postDelayed({
+            mapboxMap.getCameraOptions(null).padding?.let {
+                val padding = EdgeInsets(
+                    it.top,
+                    0.0,
+                    it.bottom,
+                    120.0 * pixelDensity
+                )
+                viewportDataSource.followingPaddingPropertyOverride(padding)
+                viewportDataSource.evaluate()
+            }
+        }, 3000)
+
+        Handler().postDelayed({
+            viewportDataSource.followingPaddingPropertyOverride(followingEdgeInsets)
+            viewportDataSource.evaluate()
+        }, 11000)
+
+        Handler().postDelayed({
+            val center = mapboxMap.getCameraOptions(null).center
+                ?: Point.fromLngLat(0.0, 0.0)
+            lookAtPoint = Point.fromLngLat(
+                (center.longitude()) + 0.003,
+                (center.latitude()) + 0.003
+            ).also {
+                // viewportDataSource.additionalPointsToFrameForFollowing(listOf(it))
+                viewportDataSource.followingPitchPropertyOverride(80.0)
+                viewportDataSource.followingBearingPropertyOverride(
+                    TurfMeasurement.bearing(center, it)
+                )
+                viewportDataSource.evaluate()
+            }
+            binding.mapView.getLocationComponentPlugin().apply {
+                locationPuck = LocationPuck3D(
+                    modelUri = "asset://race_car_model.gltf",
+                    modelScale = listOf(0.3f, 0.3f, 0.3f)
+                )
+            }
+        }, 20000)
+
+        Handler().postDelayed({
+            mapboxMap.getCameraOptions(null).padding?.let {
+                val padding = EdgeInsets(
+                    it.top,
+                    120.0 * pixelDensity,
+                    it.bottom,
+                    0.0
+                )
+                viewportDataSource.followingPaddingPropertyOverride(padding)
+                viewportDataSource.evaluate()
+            }
+        }, 25000)
+
+        Handler().postDelayed({
+            lookAtPoint = null
+            viewportDataSource.additionalPointsToFrameForFollowing(emptyList())
+            viewportDataSource.followingBearingPropertyOverride(null)
+            viewportDataSource.followingPitchPropertyOverride(null)
+            viewportDataSource.evaluate()
+        }, 25000)
+
+        Handler().postDelayed({
+            mapboxMap.getCameraOptions(null).padding?.let {
+                val padding = EdgeInsets(
+                    it.top,
+                    0.0,
+                    it.bottom,
+                    120.0 * pixelDensity
+                )
+                viewportDataSource.followingPaddingPropertyOverride(padding)
+                viewportDataSource.evaluate()
+            }
+        }, 33000)
+
+        Handler().postDelayed({
+            /*viewportDataSource.overviewPaddingPropertyOverride(EdgeInsets(
+                80.0 * pixelDensity,
+                80.0 * pixelDensity,
+                80.0 * pixelDensity,
+                80.0 * pixelDensity
+            ))
+            viewportDataSource.evaluate()
+            navigationCamera.requestNavigationCameraToOverview()*/
+
+            binding.mapView.getCameraAnimationsPlugin().flyTo(
+                CameraOptions.Builder().padding(EdgeInsets(0.0, 0.0, 0.0, 0.0))
+                    .center(Point.fromLngLat( -77.05261278623257, 38.943639298127344))
+                    .zoom(15.0)
+                    .bearing(0.0)
+                    .pitch(0.0)
+                    .build(),
+                MapAnimationOptions.mapAnimationOptions {
+                    duration(1500)
+                }
+            )
+            binding.mapView.getLocationComponentPlugin().apply {
+                locationPuck = LocationPuck2D(
+                    bearingImage = ContextCompat.getDrawable(
+                        this@MapboxCameraAnimationsActivity,
+                        R.drawable.mapbox_navigation_puck_icon
+                    )
+                )
+            }
+        }, 37000)
+    }
+
     private fun initNavigation() {
+        binding.start.setOnClickListener {
+
+
+
+
+
+        }
         mapboxNavigation = MapboxNavigation(
             NavigationOptions.Builder(this)
                 .accessToken(getMapboxAccessTokenFromResources())
@@ -377,6 +608,7 @@ class MapboxCameraAnimationsActivity :
             registerRouteProgressObserver(routeProgressObserver)
             registerRoutesObserver(routesObserver)
             registerMapMatcherResultObserver(mapMatcherResultObserver)
+            registerBannerInstructionsObserver(bannerInstructionsObserver)
         }
 
         mapboxReplayer.pushRealLocation(this, 0.0)
@@ -394,7 +626,6 @@ class MapboxCameraAnimationsActivity :
         mapboxReplayer.seekTo(replayEvents.first())
         mapboxReplayer.play()
     }
-
 
     companion object {
         private const val SOURCE = "TERRAIN_SOURCE"

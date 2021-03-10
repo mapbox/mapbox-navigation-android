@@ -724,7 +724,7 @@ class MapboxNavigationViewportDataSource(
                     pitch(overviewPitchProperty.get())
                 }
                 if (overviewPaddingUpdatesAllowed) {
-                    padding(overviewPaddingProperty.get())
+                    padding(EdgeInsets(0.0, 0.0, 0.0, 0.0))
                 }
                 if (overviewAnchorUpdatesAllowed) {
                     anchor(overviewAnchorProperty.get())
@@ -767,7 +767,7 @@ class MapboxNavigationViewportDataSource(
 
         overviewCenterProperty.fallback = zoomAndCenter.second
 
-        overviewZoomProperty.fallback = min(zoomAndCenter.first, options.maxZoom)
+        overviewZoomProperty.fallback = zoomAndCenter.first
     }
 
     private fun normalizeBearing(currentBearing: Double, targetBearing: Double) =
