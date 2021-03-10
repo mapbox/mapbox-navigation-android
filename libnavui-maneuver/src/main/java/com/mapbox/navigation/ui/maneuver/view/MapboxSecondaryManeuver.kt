@@ -15,6 +15,8 @@ import com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode
 import com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode
 import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.TextComponentNode
+import com.mapbox.navigation.ui.utils.internal.SvgUtil
+import java.io.ByteArrayInputStream
 
 /**
  * Default view to render secondary banner instructions onto [MapboxManeuverView].
@@ -116,7 +118,8 @@ class MapboxSecondaryManeuver @JvmOverloads constructor(
         val icon = roadShield.shieldIcon
         val roadShieldBuilder = SpannableStringBuilder(roadShield.text)
         if (icon != null && icon.isNotEmpty()) {
-            val svgBitmap = RoadShieldRenderer.renderRoadShieldAsBitmap(icon, desiredHeight)
+            val stream = ByteArrayInputStream(icon)
+            val svgBitmap = SvgUtil.renderAsBitmapWithHeight(stream, desiredHeight)
             svgBitmap?.let { b ->
                 val drawable: Drawable = BitmapDrawable(context.resources, b)
                 val right = (desiredHeight * b.width.toDouble() / b.height.toDouble()).toInt()
