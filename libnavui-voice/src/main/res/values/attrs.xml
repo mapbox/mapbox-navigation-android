@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MapboxSoundButton">
+        <!-- Defines the drawable representing sound button mute state. -->
+        <attr name="soundButtonMuteDrawable" format="reference" />
+        <!-- Defines the drawable representing sound button unmute state. -->
+        <attr name="soundButtonUnmuteDrawable" format="reference" />
+    </declare-styleable>
+</resources>

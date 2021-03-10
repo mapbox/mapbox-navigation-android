@@ -74,4 +74,14 @@
       app:layout_constraintTop_toBottomOf="@id/maneuverView"
       />
 
+  <com.mapbox.navigation.ui.voice.view.MapboxSoundButton
+      android:id="@+id/soundButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:visibility="gone"
+      android:layout_marginTop="@dimen/mapbox_dimen_8dp"
+      app:layout_constraintEnd_toEndOf="@id/routeOverview"
+      app:layout_constraintTop_toBottomOf="@id/routeOverview"
+      />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

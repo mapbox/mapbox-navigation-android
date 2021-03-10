@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="MapboxStyleSound">
+        <item name="soundButtonMuteDrawable">@drawable/mapbox_ic_sound_off</item>
+        <item name="soundButtonUnmuteDrawable">@drawable/mapbox_ic_sound_on</item>
+    </style>
+</resources>
