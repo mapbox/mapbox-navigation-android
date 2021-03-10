@@ -210,7 +210,7 @@ internal class MapboxRouteLayerProvider(
                     toString {
                         get { literal(RouteConstants.WAYPOINT_PROPERTY_KEY) }
                     }
-                    literal(RouteConstants.ORIGIN_MARKER_NAME)
+                    literal(RouteConstants.WAYPOINT_ORIGIN_VALUE)
                     stop {
                         RouteConstants.WAYPOINT_ORIGIN_VALUE
                         literal(RouteConstants.ORIGIN_MARKER_NAME)
