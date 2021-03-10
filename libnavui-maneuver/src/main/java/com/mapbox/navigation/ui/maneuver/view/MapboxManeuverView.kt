@@ -330,13 +330,13 @@ class MapboxManeuverView @JvmOverloads constructor(
     private fun hideSecondaryManeuver(visibility: Int) {
         mainLayoutBinding.secondaryManeuverText.visibility = visibility
         updateConstraintsToOnlyPrimary()
-        mainLayoutBinding.primaryManeuverText.isSingleLine = false
+        mainLayoutBinding.primaryManeuverText.maxLines = 2
     }
 
     private fun showSecondaryManeuver() {
         mainLayoutBinding.secondaryManeuverText.visibility = VISIBLE
         updateConstraintsToHaveSecondary()
-        mainLayoutBinding.primaryManeuverText.isSingleLine = true
+        mainLayoutBinding.primaryManeuverText.maxLines = 1
     }
 
     private fun updateConstraintsToOnlyPrimary() {

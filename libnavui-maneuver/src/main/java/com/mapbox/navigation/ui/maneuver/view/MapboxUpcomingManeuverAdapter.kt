@@ -119,11 +119,11 @@ class MapboxUpcomingManeuverAdapter(
                 viewBinding.secondaryManeuverText.visibility = VISIBLE
                 viewBinding.secondaryManeuverText.render(secondary)
                 updateConstraintsToHaveSecondary()
-                viewBinding.primaryManeuverText.isSingleLine = true
+                viewBinding.primaryManeuverText.maxLines = 1
             } else {
                 updateConstraintsToOnlyPrimary()
                 viewBinding.secondaryManeuverText.visibility = GONE
-                viewBinding.primaryManeuverText.isSingleLine = false
+                viewBinding.primaryManeuverText.maxLines = 2
             }
         }
 

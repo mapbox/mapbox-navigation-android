@@ -57,7 +57,7 @@
             <com.mapbox.navigation.ui.maneuver.view.MapboxManeuversList
                 android:id="@+id/upcomingManeuverRecycler"
                 android:layout_width="0dp"
-                android:layout_height="200dp"
+                android:layout_height="150dp"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
