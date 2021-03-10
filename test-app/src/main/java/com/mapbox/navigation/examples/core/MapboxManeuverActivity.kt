@@ -193,10 +193,12 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onMapLongClick(point: Point): Boolean {
         vibrate()
-        ifNonNull(navigationLocationProvider.lastLocation) {
-            val or = Point.fromLngLat(-121.971323, 37.502502)
-            val de = Point.fromLngLat(-121.935586, 37.491613)
-            findRoute(or, de)
+        ifNonNull(navigationLocationProvider.lastLocation) { currentLocation ->
+            val originPoint = Point.fromLngLat(
+                currentLocation.longitude,
+                currentLocation.latitude
+            )
+            findRoute(originPoint, point)
         }
         return false
     }
