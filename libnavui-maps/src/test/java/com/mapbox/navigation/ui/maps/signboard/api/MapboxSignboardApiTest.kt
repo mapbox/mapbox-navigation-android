@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.maps.signboard.api
 
 import com.mapbox.api.directions.v5.models.BannerInstructions
-import com.mapbox.bindgen.Expected
 import com.mapbox.common.HttpRequest
 import com.mapbox.common.HttpRequestError
 import com.mapbox.common.HttpResponse
@@ -10,11 +9,13 @@ import com.mapbox.common.HttpResponseData
 import com.mapbox.common.HttpServiceInterface
 import com.mapbox.common.core.module.CommonSingletonModuleProvider
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.base.api.signboard.SignboardReadyCallback
-import com.mapbox.navigation.ui.base.model.signboard.SignboardState
+import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.signboard.SignboardAction
 import com.mapbox.navigation.ui.maps.signboard.SignboardProcessor
 import com.mapbox.navigation.ui.maps.signboard.SignboardResult
+import com.mapbox.navigation.ui.maps.signboard.model.SignboardError
+import com.mapbox.navigation.ui.maps.signboard.model.SignboardValue
 import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
@@ -39,7 +40,8 @@ class MapboxSignboardApiTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
-    private val callback: SignboardReadyCallback = mockk(relaxed = true)
+    private val consumer:
+        MapboxNavigationConsumer<Expected<SignboardValue, SignboardError>> = mockk(relaxed = true)
     private val bannerInstructions: BannerInstructions = mockk()
     private val signboardApi = MapboxSignboardApi("pk.1234")
 
@@ -65,11 +67,15 @@ class MapboxSignboardApiTest {
                 SignboardAction.CheckSignboardAvailability(bannerInstructions)
             )
         } returns SignboardResult.SignboardUnavailable
-        val messageSlot = slot<SignboardState.Signboard.Empty>()
+        val messageSlot = slot<Expected.Failure<SignboardError>>()
 
-        signboardApi.generateSignboard(bannerInstructions, callback)
+        signboardApi.generateSignboard(bannerInstructions, consumer)
 
-        verify(exactly = 1) { callback.onUnavailable(capture(messageSlot)) }
+        verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
+        assertEquals(
+            "No signboard available for current maneuver.",
+            messageSlot.captured.error.errorMessage
+        )
     }
 
     @Test
@@ -77,15 +83,15 @@ class MapboxSignboardApiTest {
         val mockResult = SignboardResult.SignboardRequest(mockk())
         val mockAction = SignboardAction.CheckSignboardAvailability(bannerInstructions)
         every { SignboardProcessor.process(mockAction) } returns mockResult
-        val messageSlot = slot<SignboardState.Signboard.Error>()
-        val expectedState = SignboardState.Signboard.Error(
-            "Inappropriate result $mockResult emitted for $mockAction processed."
+        val messageSlot = slot<Expected.Failure<SignboardError>>()
+
+        signboardApi.generateSignboard(bannerInstructions, consumer)
+
+        verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
+        assertEquals(
+            "Inappropriate $mockResult emitted for $mockAction.",
+            messageSlot.captured.error.errorMessage
         )
-
-        signboardApi.generateSignboard(bannerInstructions, callback)
-
-        verify(exactly = 1) { callback.onError(capture(messageSlot)) }
-        assertEquals(expectedState.exception, messageSlot.captured.exception)
     }
 
     @Test
@@ -94,7 +100,7 @@ class MapboxSignboardApiTest {
         val mockUrlWithAccessToken = "https//abc.mapbox.com?access_token=pk.1234"
         val httpResponseCallbackSlot = slot<HttpResponseCallback>()
         val mockRequest = mockk<HttpRequest>()
-        val mockError = "No data available"
+        val expectedError = "No signboard available for current maneuver."
         val mockHttpService = mockk<HttpServiceInterface>() {
             every { request(mockRequest, capture(httpResponseCallbackSlot)) } returns 0
         }
@@ -109,7 +115,8 @@ class MapboxSignboardApiTest {
                 SignboardAction.PrepareSignboardRequest(mockUrlWithAccessToken)
             )
         } returns SignboardResult.SignboardRequest(mockRequest)
-        val mockResponseData = mockk<Expected<HttpResponseData?, HttpRequestError?>>()
+        val mockResponseData =
+            mockk<com.mapbox.bindgen.Expected<HttpResponseData?, HttpRequestError?>>()
         val mockResponse = mockk<HttpResponse> {
             every { result } returns mockResponseData
             every { request } returns mockRequest
@@ -120,12 +127,13 @@ class MapboxSignboardApiTest {
                 SignboardAction.ProcessSignboardResponse(mockResponseData)
             )
         } returns mockResult
-        val messageSlot = slot<SignboardState.Signboard.Empty>()
+        val messageSlot = slot<Expected.Failure<SignboardError>>()
 
-        signboardApi.generateSignboard(bannerInstructions, callback)
+        signboardApi.generateSignboard(bannerInstructions, consumer)
         httpResponseCallbackSlot.captured.run(mockResponse)
 
-        verify(exactly = 1) { callback.onUnavailable(capture(messageSlot)) }
+        verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
+        assertEquals(expectedError, messageSlot.captured.error.errorMessage)
     }
 
     @Test
@@ -149,7 +157,8 @@ class MapboxSignboardApiTest {
                 SignboardAction.PrepareSignboardRequest(mockUrlWithAccessToken)
             )
         } returns SignboardResult.SignboardRequest(mockRequest)
-        val mockResponseData = mockk<Expected<HttpResponseData?, HttpRequestError?>>()
+        val mockResponseData =
+            mockk<com.mapbox.bindgen.Expected<HttpResponseData?, HttpRequestError?>>()
         val mockResponse = mockk<HttpResponse> {
             every { result } returns mockResponseData
             every { request } returns mockRequest
@@ -157,21 +166,21 @@ class MapboxSignboardApiTest {
         val mockResult = mockk<SignboardResult.Signboard.Failure> {
             every { error } returns mockError
         }
-        val expectedState = mockk<SignboardState.Signboard.Error> {
-            every { exception } returns mockError
+        val expected = mockk<Expected.Failure<SignboardError>> {
+            every { error.errorMessage } returns mockError
         }
         every {
             SignboardProcessor.process(
                 SignboardAction.ProcessSignboardResponse(mockResponseData)
             )
         } returns mockResult
-        val messageSlot = slot<SignboardState.Signboard.Error>()
+        val messageSlot = slot<Expected.Failure<SignboardError>>()
 
-        signboardApi.generateSignboard(bannerInstructions, callback)
+        signboardApi.generateSignboard(bannerInstructions, consumer)
         httpResponseCallbackSlot.captured.run(mockResponse)
 
-        verify(exactly = 1) { callback.onError(capture(messageSlot)) }
-        assertEquals(expectedState.exception, messageSlot.captured.exception)
+        verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
+        assertEquals(expected.error.errorMessage, messageSlot.captured.error.errorMessage)
     }
 
     @Test
@@ -195,7 +204,8 @@ class MapboxSignboardApiTest {
             )
         } returns SignboardResult.SignboardRequest(mockRequest)
         val mockData = byteArrayOf(-12, 12, 34, 55, -45)
-        val mockResponseData = mockk<Expected<HttpResponseData?, HttpRequestError?>>()
+        val mockResponseData =
+            mockk<com.mapbox.bindgen.Expected<HttpResponseData?, HttpRequestError?>>()
         val mockResponse = mockk<HttpResponse> {
             every { result } returns mockResponseData
             every { request } returns mockRequest
@@ -203,21 +213,21 @@ class MapboxSignboardApiTest {
         val mockResult = mockk<SignboardResult.Signboard.Success> {
             every { data } returns mockData
         }
-        val expectedState = mockk<SignboardState.Signboard.Available> {
-            every { bytes } returns mockData
+        val expected = mockk<Expected.Success<SignboardValue>> {
+            every { value.bytes } returns mockData
         }
         every {
             SignboardProcessor.process(
                 SignboardAction.ProcessSignboardResponse(mockResponseData)
             )
         } returns mockResult
-        val messageSlot = slot<SignboardState.Signboard.Available>()
+        val messageSlot = slot<Expected.Success<SignboardValue>>()
 
-        signboardApi.generateSignboard(bannerInstructions, callback)
+        signboardApi.generateSignboard(bannerInstructions, consumer)
         httpResponseCallbackSlot.captured.run(mockResponse)
 
-        verify(exactly = 1) { callback.onAvailable(capture(messageSlot)) }
-        assertEquals(expectedState.bytes, messageSlot.captured.bytes)
+        verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
+        assertEquals(expected.value.bytes, messageSlot.captured.value.bytes)
     }
 
     @Test
@@ -232,17 +242,17 @@ class MapboxSignboardApiTest {
                 SignboardAction.CheckSignboardAvailability(bannerInstructions)
             )
         } returns SignboardResult.SignboardAvailable(mockWebServer.url(mockUrl).toString())
-        val mockFailure = SignboardState.Signboard.Error("Canceled")
-        val messageSlot = slot<SignboardState.Signboard.Error>()
+        val mockFailure = Expected.Failure(SignboardError("Canceled", null))
+        val messageSlot = slot<Expected.Failure<SignboardError>>()
         val latch = CountDownLatch(1)
-        every { callback.onError(capture(messageSlot)) } answers { latch.countDown() }
+        every { consumer.accept(capture(messageSlot)) } answers { latch.countDown() }
 
-        signboardApi.generateSignboard(bannerInstructions, callback)
+        signboardApi.generateSignboard(bannerInstructions, consumer)
         signboardApi.cancelAll()
         latch.await(300, TimeUnit.MILLISECONDS)
 
-        verify(exactly = 1) { callback.onError(any()) }
-        assertEquals(mockFailure.exception, messageSlot.captured.exception)
+        verify(exactly = 1) { consumer.accept(any()) }
+        assertEquals(mockFailure.error.errorMessage, messageSlot.captured.error.errorMessage)
         mockWebServer.shutdown()
     }
 }

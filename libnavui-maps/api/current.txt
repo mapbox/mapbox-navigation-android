@@ -680,10 +680,10 @@ package com.mapbox.navigation.ui.maps.route.line.model {
 
 package com.mapbox.navigation.ui.maps.signboard.api {
 
-  public final class MapboxSignboardApi implements com.mapbox.navigation.ui.base.api.signboard.SignboardApi {
+  public final class MapboxSignboardApi {
     ctor public MapboxSignboardApi(String accessToken);
     method public void cancelAll();
-    method public void generateSignboard(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.api.signboard.SignboardReadyCallback callback);
+    method public void generateSignboard(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.signboard.model.SignboardValue,com.mapbox.navigation.ui.maps.signboard.model.SignboardError>> consumer);
     field public static final com.mapbox.navigation.ui.maps.signboard.api.MapboxSignboardApi.Companion Companion;
   }
 
@@ -692,13 +692,31 @@ package com.mapbox.navigation.ui.maps.signboard.api {
 
 }
 
+package com.mapbox.navigation.ui.maps.signboard.model {
+
+  public final class SignboardError {
+    method public String? getErrorMessage();
+    method public Throwable? getThrowable();
+    property public final String? errorMessage;
+    property public final Throwable? throwable;
+  }
+
+  public final class SignboardValue {
+    method public byte[] getBytes();
+    method public int getDesiredSignboardWidth();
+    property public final byte[] bytes;
+    property public final int desiredSignboardWidth;
+  }
+
+}
+
 package com.mapbox.navigation.ui.maps.signboard.view {
 
-  public final class MapboxSignboardView extends androidx.appcompat.widget.AppCompatImageView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.signboard.SignboardState> {
+  public final class MapboxSignboardView extends androidx.appcompat.widget.AppCompatImageView {
     ctor public MapboxSignboardView(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
     ctor public MapboxSignboardView(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxSignboardView(android.content.Context context);
-    method public void render(com.mapbox.navigation.ui.base.model.signboard.SignboardState state);
+    method public void render(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.signboard.model.SignboardValue,com.mapbox.navigation.ui.maps.signboard.model.SignboardError> result);
   }
 
 }

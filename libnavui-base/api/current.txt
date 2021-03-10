@@ -10,21 +10,6 @@ package com.mapbox.navigation.ui.base {
 
 }
 
-package com.mapbox.navigation.ui.base.api.signboard {
-
-  public interface SignboardApi {
-    method public void cancelAll();
-    method public void generateSignboard(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.api.signboard.SignboardReadyCallback callback);
-  }
-
-  public interface SignboardReadyCallback {
-    method public void onAvailable(com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Available state);
-    method public void onError(com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Error state);
-    method public void onUnavailable(com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Empty state);
-  }
-
-}
-
 package com.mapbox.navigation.ui.base.api.snapshotter {
 
   public interface SnapshotReadyCallback {
@@ -190,48 +175,6 @@ package com.mapbox.navigation.ui.base.model.route {
 
 }
 
-package com.mapbox.navigation.ui.base.model.signboard {
-
-  public abstract sealed class SignboardState implements com.mapbox.navigation.ui.base.MapboxState {
-  }
-
-  public static final class SignboardState.Hide extends com.mapbox.navigation.ui.base.model.signboard.SignboardState {
-    field public static final com.mapbox.navigation.ui.base.model.signboard.SignboardState.Hide INSTANCE;
-  }
-
-  public static final class SignboardState.Show extends com.mapbox.navigation.ui.base.model.signboard.SignboardState {
-    field public static final com.mapbox.navigation.ui.base.model.signboard.SignboardState.Show INSTANCE;
-  }
-
-  public abstract static sealed class SignboardState.Signboard extends com.mapbox.navigation.ui.base.model.signboard.SignboardState {
-  }
-
-  public static final class SignboardState.Signboard.Available extends com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard {
-    ctor public SignboardState.Signboard.Available(int desiredSignboardWidth, byte[] bytes);
-    ctor public SignboardState.Signboard.Available(byte[] bytes);
-    method public int component1();
-    method public byte[] component2();
-    method public com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Available copy(int desiredSignboardWidth, byte[] bytes);
-    method public byte[] getBytes();
-    method public int getDesiredSignboardWidth();
-    property public final byte[] bytes;
-    property public final int desiredSignboardWidth;
-  }
-
-  public static final class SignboardState.Signboard.Empty extends com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard {
-    field public static final com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Empty INSTANCE;
-  }
-
-  public static final class SignboardState.Signboard.Error extends com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard {
-    ctor public SignboardState.Signboard.Error(String? exception);
-    method public String? component1();
-    method public com.mapbox.navigation.ui.base.model.signboard.SignboardState.Signboard.Error copy(String? exception);
-    method public String? getException();
-    property public final String? exception;
-  }
-
-}
-
 package com.mapbox.navigation.ui.base.model.snapshotter {
 
   public abstract sealed class SnapshotState implements com.mapbox.navigation.ui.base.MapboxState {
@@ -273,7 +216,7 @@ package com.mapbox.navigation.ui.base.model.snapshotter {
 package com.mapbox.navigation.ui.base.util {
 
   @java.lang.FunctionalInterface public interface MapboxNavigationConsumer<T> {
-    method public default void accept(T? t);
+    method public default void accept(T? value);
   }
 
 }

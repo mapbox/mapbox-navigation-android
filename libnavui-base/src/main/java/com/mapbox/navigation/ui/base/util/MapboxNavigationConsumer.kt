@@ -9,8 +9,8 @@ interface MapboxNavigationConsumer<T> {
     /**
      * Performs this operation on the given argument.
      *
-     * @param t the input argument
+     * @param value the input argument
      */
-    fun accept(t: T) {
+    fun accept(value: T) {
     }
 }

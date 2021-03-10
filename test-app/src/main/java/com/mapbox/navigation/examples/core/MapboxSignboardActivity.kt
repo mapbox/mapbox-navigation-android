@@ -38,11 +38,12 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivitySignboardBinding
 import com.mapbox.navigation.examples.util.RouteLine
 import com.mapbox.navigation.examples.util.Utils.getMapboxAccessToken
-import com.mapbox.navigation.ui.base.api.signboard.SignboardApi
-import com.mapbox.navigation.ui.base.api.signboard.SignboardReadyCallback
-import com.mapbox.navigation.ui.base.model.signboard.SignboardState
+import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.signboard.api.MapboxSignboardApi
+import com.mapbox.navigation.ui.maps.signboard.model.SignboardError
+import com.mapbox.navigation.ui.maps.signboard.model.SignboardValue
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import java.util.Objects
 
@@ -51,7 +52,7 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
     private lateinit var mapboxMap: MapboxMap
     private lateinit var mapCamera: CameraAnimationsPlugin
     private lateinit var mapboxNavigation: MapboxNavigation
-    private lateinit var signboardApi: SignboardApi
+    private lateinit var signboardApi: MapboxSignboardApi
     private lateinit var binding: LayoutActivitySignboardBinding
     private lateinit var locationComponent: LocationComponentPlugin
 
@@ -61,20 +62,10 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
     private val navigationLocationProvider = NavigationLocationProvider()
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
-    private val signboardCallback: SignboardReadyCallback = object : SignboardReadyCallback {
-        override fun onAvailable(state: SignboardState.Signboard.Available) {
-            binding.signboardView.render(SignboardState.Show)
-            binding.signboardView.render(state)
-        }
-
-        override fun onUnavailable(state: SignboardState.Signboard.Empty) {
-            binding.signboardView.render(SignboardState.Hide)
-            binding.signboardView.render(state)
-        }
-
-        override fun onError(state: SignboardState.Signboard.Error) {
-            binding.signboardView.render(SignboardState.Hide)
-            binding.signboardView.render(state)
+    private val signboardCallback = object :
+        MapboxNavigationConsumer<Expected<SignboardValue, SignboardError>> {
+        override fun accept(value: Expected<SignboardValue, SignboardError>) {
+            binding.signboardView.render(value)
         }
     }
 

@@ -37,6 +37,7 @@ dependencies {
     api project(":libnavigation-util")
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.androidXAnnotation
+    implementation dependenciesList.svgParser
 
     ktlint dependenciesList.ktlint
 
