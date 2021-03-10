@@ -31,16 +31,25 @@ android {
         unitTests.returnDefaultValues = true
         unitTests.includeAndroidResources = true
     }
+
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
     api project(":libnavui-base")
+    api project(":libnavui-resources")
 
     api dependenciesList.mapboxSdkServices
 
     implementation dependenciesList.kotlinStdLib
 
     implementation dependenciesList.coroutinesAndroid
+
+    // androidX
+    implementation dependenciesList.androidXConstraintLayout
+    implementation dependenciesList.androidXAppCompat
 
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
     testImplementation(project(':libtesting-utils'))

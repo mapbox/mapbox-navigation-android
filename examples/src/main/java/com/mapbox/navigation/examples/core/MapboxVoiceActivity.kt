@@ -169,6 +169,20 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
+    private val soundButtonCallback = object : MapboxNavigationConsumer<Boolean> {
+        override fun accept(value: Boolean) {
+            isMuted = value.also {
+                if (it) {
+                    // This is used to set the speech volume to max
+                    voiceInstructionsPlayer.volume(SpeechVolume(1.0f))
+                } else {
+                    // This is used to set the speech volume to mute.
+                    voiceInstructionsPlayer.volume(SpeechVolume(0.0f))
+                }
+            }
+        }
+    }
+
     private val locationObserver = object : LocationObserver {
         override fun onRawLocationChanged(rawLocation: Location) {}
         override fun onEnhancedLocationChanged(
@@ -222,6 +236,10 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
+    companion object {
+        private const val SOUND_BUTTON_TEXT_APPEAR_DURATION = 1000L
+    }
+
     private fun getGesturesPlugin(): GesturesPlugin {
         return binding.mapView.getGesturesPlugin()
     }
@@ -257,16 +275,10 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private fun initButtons() {
-        binding.muteUnmute.setOnClickListener {
-            isMuted = if (isMuted) {
-                // This is used to set the speech volume to max
-                voiceInstructionsPlayer.volume(SpeechVolume(1.0f))
-                false
-            } else {
-                // This is used to set the speech volume to mute.
-                voiceInstructionsPlayer.volume(SpeechVolume(0.0f))
-                true
-            }
+        soundButtonMake(isMuted) // init state
+
+        binding.soundButton.setOnClickListener {
+            soundButtonMake(!isMuted)
         }
 
         binding.addPlay.setOnClickListener {
@@ -274,6 +286,16 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
                 SpeechAnnouncement.Builder("Test hybrid speech player.").build(),
                 voiceInstructionsPlayerCallback
             )
+        }
+    }
+
+    private fun soundButtonMake(mute: Boolean) {
+        if (mute) {
+            binding.soundButton
+                .muteAndExtend(SOUND_BUTTON_TEXT_APPEAR_DURATION, soundButtonCallback)
+        } else {
+            binding.soundButton
+                .unmuteAndExtend(SOUND_BUTTON_TEXT_APPEAR_DURATION, soundButtonCallback)
         }
     }
 

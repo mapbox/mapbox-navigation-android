@@ -103,6 +103,7 @@ class MapboxNavigationActivity :
     private lateinit var maneuverApi: MapboxManeuverApi
     private lateinit var speechAPI: MapboxSpeechApi
 
+    private var isMuted = false
     private var isNavigating = false
     private var routeLineAPI: MapboxRouteLineApi? = null
     private var routeLineView: MapboxRouteLineView? = null
@@ -143,6 +144,13 @@ class MapboxNavigationActivity :
             40.0 * pixelDensity
         )
     }
+
+    private val muteUnmuteCallback = object : MapboxNavigationConsumer<Boolean> {
+        override fun accept(value: Boolean) {
+            isMuted = value
+        }
+    }
+
     private val currentManeuverCallback = object : ManeuverCallback {
         override fun onManeuver(maneuver: Expected<Maneuver, ManeuverError>) {
             binding.maneuverView.renderManeuver(maneuver)
@@ -411,19 +419,29 @@ class MapboxNavigationActivity :
     private fun initViews() {
         binding.start.setOnClickListener {
             startNavigation()
+            binding.soundButton.unmute(muteUnmuteCallback)
             binding.start.visibility = GONE
+            binding.soundButton.visibility = VISIBLE
             binding.routeOverview.visibility = VISIBLE
             binding.tripProgressCard.visibility = VISIBLE
         }
         binding.stop.setOnClickListener {
             stopNavigation()
             binding.maneuverView.visibility = GONE
+            binding.soundButton.visibility = GONE
             binding.routeOverview.visibility = GONE
             binding.tripProgressCard.visibility = GONE
         }
         binding.routeOverview.setOnClickListener {
             binding.routeOverview.showTextAndExtend(2000L)
             updateCameraToOverview()
+        }
+        binding.soundButton.setOnClickListener {
+            if (isMuted) {
+                binding.soundButton.unmuteAndExtend(2000L, muteUnmuteCallback)
+            } else {
+                binding.soundButton.muteAndExtend(2000L, muteUnmuteCallback)
+            }
         }
     }
 

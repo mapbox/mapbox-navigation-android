@@ -29,7 +29,7 @@ define run-gradle-tasks
 endef
 
 .PHONY: check
-check: license-verification
+check:
 	$(call run-gradle-tasks,$(CORE_MODULES),ktlint) \
 	&& $(call run-gradle-tasks,$(UI_MODULES),ktlint) \
 	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),ktlint)

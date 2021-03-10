@@ -2,7 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:background="@android:color/holo_blue_bright">
 
     <com.mapbox.maps.MapView
         android:id="@+id/mapView"
@@ -18,22 +20,17 @@
         android:layout_marginStart="@dimen/mapbox_dimen_8dp"
         android:layout_marginEnd="@dimen/mapbox_dimen_16dp"
         android:layout_marginBottom="@dimen/mapbox_dimen_16dp"
-        android:text="add instruction"
+        android:text="Add Instruction"
         android:background="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/mute_unmute"
+        app:layout_constraintStart_toEndOf="@id/sound_button"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
-    <Button
-        android:id="@+id/mute_unmute"
+    <com.mapbox.navigation.ui.voice.view.MapboxSoundButton
+        android:id="@+id/sound_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:padding="@dimen/mapbox_dimen_16dp"
-        android:layout_marginEnd="@dimen/mapbox_dimen_8dp"
-        android:layout_marginStart="@dimen/mapbox_dimen_16dp"
         android:layout_marginBottom="@dimen/mapbox_dimen_16dp"
-        android:text="mute/unmute"
-        android:background="@android:color/white"
         app:layout_constraintEnd_toStartOf="@id/add_play"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

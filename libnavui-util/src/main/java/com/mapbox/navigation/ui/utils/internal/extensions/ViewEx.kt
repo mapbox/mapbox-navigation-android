@@ -46,18 +46,19 @@ fun View.slideHeight(fromHeight: Int, toHeight: Int, duration: Long): ValueAnima
 
 fun View.extend(
     animator: ValueAnimator,
-    doOnEnd: () -> Unit
+    doOnStart: (() -> Unit)? = null,
+    doOnEnd: (() -> Unit)? = null
 ) {
     val set = AnimatorSet()
     set.play(animator)
     set.interpolator = AccelerateDecelerateInterpolator()
     set.addListener(object : Animator.AnimatorListener {
         override fun onAnimationStart(animation: Animator?) {
-            // No implementation
+            doOnStart?.invoke()
         }
 
         override fun onAnimationEnd(animation: Animator?) {
-            doOnEnd()
+            doOnEnd?.invoke()
         }
 
         override fun onAnimationCancel(animation: Animator?) {
@@ -73,18 +74,19 @@ fun View.extend(
 
 fun View.shrink(
     animator: ValueAnimator,
-    doOnStart: () -> Unit
+    doOnStart: (() -> Unit)? = null,
+    doOnEnd: (() -> Unit)? = null
 ) {
     val set = AnimatorSet()
     set.play(animator)
     set.interpolator = AccelerateDecelerateInterpolator()
     set.addListener(object : Animator.AnimatorListener {
         override fun onAnimationStart(animation: Animator?) {
-            doOnStart()
+            doOnStart?.invoke()
         }
 
         override fun onAnimationEnd(animation: Animator?) {
-            // No implementation
+            doOnEnd?.invoke()
         }
 
         override fun onAnimationCancel(animation: Animator?) {
