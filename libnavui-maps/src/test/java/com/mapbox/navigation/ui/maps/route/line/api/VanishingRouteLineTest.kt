@@ -91,7 +91,7 @@ class VanishingRouteLineTest {
             " [rgba, 255.0, 255.0, 255.0, 1.0]]"
         val expectedRouteLineExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 2.0, 0.0]," +
             " 0.0, [rgba, 0.0, 0.0, 3.0, 0.0]]"
-        val expectedCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 2.0, 0.0]," +
+        val expectedCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 10.0, 0.0]," +
             " 0.0, [rgba, 0.0, 0.0, 4.0, 0.0]]"
 
         val colorResources = RouteLineColorResources.Builder()
