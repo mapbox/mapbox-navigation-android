@@ -45,6 +45,9 @@ class RouteLineResourcesTest : BuilderTest<RouteLineResources, RouteLineResource
             .routeLineScaleExpression(routeLineExpression)
             .routeCasingLineScaleExpression(routeCasingExpression)
             .routeTrafficLineScaleExpression(trafficExpression)
+            .alternativeRouteLineScaleExpression(routeCasingExpression)
+            .alternativeRouteCasingLineScaleExpression(routeCasingExpression)
+            .alternativeRouteTrafficLineScaleExpression(routeCasingExpression)
     }
 
     override fun trigger() {
@@ -137,6 +140,9 @@ class RouteLineResourcesTest : BuilderTest<RouteLineResources, RouteLineResource
             .routeLineScaleExpression(routeLineExpression)
             .routeCasingLineScaleExpression(routeCasingExpression)
             .routeTrafficLineScaleExpression(trafficExpression)
+            .alternativeRouteLineScaleExpression(trafficExpression)
+            .alternativeRouteCasingLineScaleExpression(trafficExpression)
+            .alternativeRouteTrafficLineScaleExpression(trafficExpression)
             .build()
             .toBuilder()
             .build()

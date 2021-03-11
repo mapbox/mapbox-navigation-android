@@ -21,7 +21,10 @@ internal class MapboxRouteLayerProvider(
     val routeStyleDescriptors: List<RouteStyleDescriptor>,
     private val routeLineScaleExpression: Expression,
     private val routeCasingLineScaleExpression: Expression,
-    private val routeTrafficLineScaleExpression: Expression
+    private val routeTrafficLineScaleExpression: Expression,
+    private val alternativeRouteLineScaleExpression: Expression,
+    private val alternativeRouteCasingLineScaleExpression: Expression,
+    private val alternativeRouteTrafficLineScaleExpression: Expression
 ) {
 
     fun buildPrimaryRouteLayer(
@@ -104,7 +107,7 @@ internal class MapboxRouteLayerProvider(
                 roundedLineCap,
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
                 RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
-                routeTrafficLineScaleExpression,
+                alternativeRouteLineScaleExpression,
                 routeLineColorExpressions
             ),
             initializeRouteLayer(
@@ -112,7 +115,7 @@ internal class MapboxRouteLayerProvider(
                 roundedLineCap,
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
                 RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
-                routeTrafficLineScaleExpression,
+                alternativeRouteLineScaleExpression,
                 routeLineColorExpressions
             )
         )
@@ -135,7 +138,7 @@ internal class MapboxRouteLayerProvider(
                 true,
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
                 RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
-                routeCasingLineScaleExpression,
+                alternativeRouteCasingLineScaleExpression,
                 routeLineColorExpressions
             ),
             initializeRouteLayer(
@@ -143,7 +146,7 @@ internal class MapboxRouteLayerProvider(
                 true,
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID,
                 RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
-                routeCasingLineScaleExpression,
+                alternativeRouteCasingLineScaleExpression,
                 routeLineColorExpressions
             )
         )
@@ -167,7 +170,7 @@ internal class MapboxRouteLayerProvider(
                 roundedLineCap,
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
                 RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
-                routeTrafficLineScaleExpression,
+                alternativeRouteTrafficLineScaleExpression,
                 routeLineColorExpressions
             ),
             initializeRouteLayer(
@@ -175,7 +178,7 @@ internal class MapboxRouteLayerProvider(
                 roundedLineCap,
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
                 RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
-                routeTrafficLineScaleExpression,
+                alternativeRouteTrafficLineScaleExpression,
                 routeLineColorExpressions
             )
         )

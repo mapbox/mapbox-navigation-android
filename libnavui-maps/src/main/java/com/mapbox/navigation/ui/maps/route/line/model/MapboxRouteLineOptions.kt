@@ -166,7 +166,7 @@ class MapboxRouteLineOptions private constructor(
         }
 
         /**
-         * @return an instance of MapboxRouteLineOptions
+         * @return an instance of [MapboxRouteLineOptions]
          */
         fun build(): MapboxRouteLineOptions {
             val resourceProvider: RouteLineResources = routeLineResources
@@ -176,7 +176,10 @@ class MapboxRouteLineOptions private constructor(
                 routeStyleDescriptors,
                 resourceProvider.routeLineScaleExpression,
                 resourceProvider.routeCasingLineScaleExpression,
-                resourceProvider.routeTrafficLineScaleExpression
+                resourceProvider.routeTrafficLineScaleExpression,
+                resourceProvider.alternativeRouteLineScaleExpression,
+                resourceProvider.alternativeRouteCasingLineScaleExpression,
+                resourceProvider.alternativeRouteTrafficLineScaleExpression
             )
 
             val originIcon = AppCompatResources.getDrawable(

@@ -23,6 +23,12 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.bu
  * scaling
  * @param routeTrafficLineScaleExpression an expression governing the behavior of route traffic line
  * scaling
+ * @param alternativeRouteLineScaleExpression an expression governing the behavior of
+ * alternative route line scaling
+ * @param alternativeRouteCasingLineScaleExpression an expression governing the behavior of
+ * alternative route casing line scaling
+ * @param alternativeRouteTrafficLineScaleExpression an expression governing the behavior of
+ * alternative route traffic line scaling
  */
 class RouteLineResources private constructor(
     val routeLineColorResources: RouteLineColorResources,
@@ -32,7 +38,10 @@ class RouteLineResources private constructor(
     val trafficBackfillRoadClasses: List<String>,
     val routeLineScaleExpression: Expression,
     val routeCasingLineScaleExpression: Expression,
-    val routeTrafficLineScaleExpression: Expression
+    val routeTrafficLineScaleExpression: Expression,
+    val alternativeRouteLineScaleExpression: Expression,
+    val alternativeRouteCasingLineScaleExpression: Expression,
+    val alternativeRouteTrafficLineScaleExpression: Expression
 ) {
 
     /**
@@ -48,6 +57,9 @@ class RouteLineResources private constructor(
             .routeLineScaleExpression(routeLineScaleExpression)
             .routeCasingLineScaleExpression(routeCasingLineScaleExpression)
             .routeTrafficLineScaleExpression(routeTrafficLineScaleExpression)
+            .alternativeRouteLineScaleExpression(alternativeRouteLineScaleExpression)
+            .alternativeRouteCasingLineScaleExpression(alternativeRouteCasingLineScaleExpression)
+            .alternativeRouteTrafficLineScaleExpression(alternativeRouteTrafficLineScaleExpression)
     }
 
     /**
@@ -55,14 +67,18 @@ class RouteLineResources private constructor(
      */
     override fun toString(): String {
         return "RouteLineResources(" +
-            "routeLineColorResources=$routeLineColorResources" +
-            "roundedLineCap=$roundedLineCap" +
-            "originWaypointIcon=$originWaypointIcon" +
-            "destinationWaypointIcon=$destinationWaypointIcon" +
-            "routeLineScaleExpression=$routeLineScaleExpression" +
-            "routeCasingLineScaleExpression=$routeCasingLineScaleExpression" +
-            "routeTrafficLineScaleExpression=$routeTrafficLineScaleExpression" +
-            "trafficBackfillRoadClasses=$trafficBackfillRoadClasses"
+            "routeLineColorResources=$routeLineColorResources," +
+            "roundedLineCap=$roundedLineCap," +
+            "originWaypointIcon=$originWaypointIcon," +
+            "destinationWaypointIcon=$destinationWaypointIcon," +
+            "routeLineScaleExpression=$routeLineScaleExpression," +
+            "routeCasingLineScaleExpression=$routeCasingLineScaleExpression," +
+            "routeTrafficLineScaleExpression=$routeTrafficLineScaleExpression," +
+            "trafficBackfillRoadClasses=$trafficBackfillRoadClasses," +
+            "alternativeRouteLineScaleExpression=$alternativeRouteLineScaleExpression," +
+            "alternativeRouteCasingLineScaleExpression=" +
+            "$alternativeRouteCasingLineScaleExpression," +
+            "alternativeRouteTrafficLineScaleExpression=$alternativeRouteTrafficLineScaleExpression"
     }
 
     /**
@@ -82,6 +98,16 @@ class RouteLineResources private constructor(
         if (routeLineScaleExpression != other.routeLineScaleExpression) return false
         if (routeCasingLineScaleExpression != other.routeCasingLineScaleExpression) return false
         if (routeTrafficLineScaleExpression != other.routeTrafficLineScaleExpression) return false
+        if (alternativeRouteLineScaleExpression != other.alternativeRouteLineScaleExpression)
+            return false
+        if (
+            alternativeRouteCasingLineScaleExpression !=
+            other.alternativeRouteCasingLineScaleExpression
+        ) return false
+        if (
+            alternativeRouteTrafficLineScaleExpression !=
+            other.alternativeRouteTrafficLineScaleExpression
+        ) return false
 
         return true
     }
@@ -98,6 +124,9 @@ class RouteLineResources private constructor(
         result = 31 * result + routeLineScaleExpression.hashCode()
         result = 31 * result + routeCasingLineScaleExpression.hashCode()
         result = 31 * result + routeTrafficLineScaleExpression.hashCode()
+        result = 31 * result + alternativeRouteLineScaleExpression.hashCode()
+        result = 31 * result + alternativeRouteCasingLineScaleExpression.hashCode()
+        result = 31 * result + alternativeRouteTrafficLineScaleExpression.hashCode()
         return result
     }
 
@@ -130,6 +159,35 @@ class RouteLineResources private constructor(
             )
         )
         private var routeTrafficLineScaleExpression: Expression = buildScalingExpression(
+            listOf(
+                RouteLineScaleValue(4f, 3f, 1f),
+                RouteLineScaleValue(10f, 4f, 1f),
+                RouteLineScaleValue(13f, 6f, 1f),
+                RouteLineScaleValue(16f, 10f, 1f),
+                RouteLineScaleValue(19f, 14f, 1f),
+                RouteLineScaleValue(22f, 18f, 1f)
+            )
+        )
+        private var alternativeRouteLineScaleExpression: Expression = buildScalingExpression(
+            listOf(
+                RouteLineScaleValue(4f, 3f, 1f),
+                RouteLineScaleValue(10f, 4f, 1f),
+                RouteLineScaleValue(13f, 6f, 1f),
+                RouteLineScaleValue(16f, 10f, 1f),
+                RouteLineScaleValue(19f, 14f, 1f),
+                RouteLineScaleValue(22f, 18f, 1f)
+            )
+        )
+        private var alternativeRouteCasingLineScaleExpression: Expression = buildScalingExpression(
+            listOf(
+                RouteLineScaleValue(10f, 7f, 1f),
+                RouteLineScaleValue(14f, 10.5f, 1f),
+                RouteLineScaleValue(16.5f, 15.5f, 1f),
+                RouteLineScaleValue(19f, 24f, 1f),
+                RouteLineScaleValue(22f, 29f, 1f)
+            )
+        )
+        private var alternativeRouteTrafficLineScaleExpression: Expression = buildScalingExpression(
             listOf(
                 RouteLineScaleValue(4f, 3f, 1f),
                 RouteLineScaleValue(10f, 4f, 1f),
@@ -223,6 +281,38 @@ class RouteLineResources private constructor(
             apply { this.routeTrafficLineScaleExpression = expression }
 
         /**
+         * An expression that will define the scaling behavior of the alternative route line.
+         *
+         * @param expression the expression governing the scaling of the alternative route line
+         *
+         * @return the builder
+         */
+        fun alternativeRouteLineScaleExpression(expression: Expression): Builder =
+            apply { this.alternativeRouteLineScaleExpression = expression }
+
+        /**
+         * An expression that will define the scaling behavior of the alternative route casing line.
+         *
+         * @param expression the expression governing the behavior of alternative route casing
+         * line scaling
+         *
+         * @return the builder
+         */
+        fun alternativeRouteCasingLineScaleExpression(expression: Expression): Builder =
+            apply { this.alternativeRouteCasingLineScaleExpression = expression }
+
+        /**
+         * An expression that will define the scaling behavior of the alternative route traffic line.
+         *
+         * @param expression the expression governing the behavior of alternative route traffic
+         * line scaling
+         *
+         * @return the builder
+         */
+        fun alternativeRouteTrafficLineScaleExpression(expression: Expression): Builder =
+            apply { this.alternativeRouteTrafficLineScaleExpression = expression }
+
+        /**
          * Creates a instance of RouteLineResources
          *
          * @return the instance
@@ -239,7 +329,10 @@ class RouteLineResources private constructor(
                 trafficBackfillRoadClasses,
                 routeLineScaleExpression,
                 routeCasingLineScaleExpression,
-                routeTrafficLineScaleExpression
+                routeTrafficLineScaleExpression,
+                alternativeRouteLineScaleExpression,
+                alternativeRouteCasingLineScaleExpression,
+                alternativeRouteTrafficLineScaleExpression
             )
         }
     }
