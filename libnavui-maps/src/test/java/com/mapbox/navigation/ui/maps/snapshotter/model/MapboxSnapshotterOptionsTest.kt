@@ -24,6 +24,7 @@ class MapboxSnapshotterOptionsTest : BuilderTest<MapboxSnapshotterOptions,
     override fun getFilledUpBuilder(): MapboxSnapshotterOptions.Builder {
         val mockDensity = 2.5f
         val mockStyleUri = "mapbox://style-uri"
+        val mockRoutePrecision = 5
         val mockBitmapConfig = Bitmap.Config.RGB_565
         val mockSize = Size(500f, 250f)
         val mockEdgeInsets = EdgeInsets(10.0, 20.0, 30.0, 40.0)
@@ -33,6 +34,7 @@ class MapboxSnapshotterOptionsTest : BuilderTest<MapboxSnapshotterOptions,
             .styleUri(mockStyleUri)
             .edgeInsets(mockEdgeInsets)
             .bitmapConfig(mockBitmapConfig)
+            .routePrecision(mockRoutePrecision)
     }
 
     @Test

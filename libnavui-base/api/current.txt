@@ -10,20 +10,6 @@ package com.mapbox.navigation.ui.base {
 
 }
 
-package com.mapbox.navigation.ui.base.api.snapshotter {
-
-  public interface SnapshotReadyCallback {
-    method public void onFailure(com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure error);
-    method public void onSnapshotReady(com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotReady bitmap);
-  }
-
-  public interface SnapshotterApi {
-    method public void cancel();
-    method public void generateSnapshot(com.mapbox.navigation.base.trip.model.RouteProgress progress, com.mapbox.navigation.ui.base.api.snapshotter.SnapshotReadyCallback callback);
-  }
-
-}
-
 package com.mapbox.navigation.ui.base.formatter {
 
   public interface ValueFormatter<T, R> {
@@ -171,44 +157,6 @@ package com.mapbox.navigation.ui.base.model.route {
     field public static final String PRIMARY_ROUTE_LAYER_ID = "mapbox-navigation-route-layer";
     field public static final String PRIMARY_ROUTE_TRAFFIC_LAYER_ID = "mapbox-navigation-route-traffic-layer";
     field public static final String WAYPOINT_LAYER_ID = "mapbox-navigation-waypoint-layer";
-  }
-
-}
-
-package com.mapbox.navigation.ui.base.model.snapshotter {
-
-  public abstract sealed class SnapshotState implements com.mapbox.navigation.ui.base.MapboxState {
-  }
-
-  public abstract static sealed class SnapshotState.SnapshotFailure extends com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState {
-  }
-
-  public static final class SnapshotState.SnapshotFailure.SnapshotEmpty extends com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure {
-    ctor public SnapshotState.SnapshotFailure.SnapshotEmpty(String? exception);
-    method public String? component1();
-    method public com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure.SnapshotEmpty copy(String? exception);
-    method public String? getException();
-    property public final String? exception;
-  }
-
-  public static final class SnapshotState.SnapshotFailure.SnapshotError extends com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure {
-    ctor public SnapshotState.SnapshotFailure.SnapshotError(String? exception);
-    method public String? component1();
-    method public com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure.SnapshotError copy(String? exception);
-    method public String? getException();
-    property public final String? exception;
-  }
-
-  public static final class SnapshotState.SnapshotFailure.SnapshotUnavailable extends com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure {
-    field public static final com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotFailure.SnapshotUnavailable INSTANCE;
-  }
-
-  public static final class SnapshotState.SnapshotReady extends com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState {
-    ctor public SnapshotState.SnapshotReady(android.graphics.Bitmap bitmap);
-    method public android.graphics.Bitmap component1();
-    method public com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState.SnapshotReady copy(android.graphics.Bitmap bitmap);
-    method public android.graphics.Bitmap getBitmap();
-    property public final android.graphics.Bitmap bitmap;
   }
 
 }

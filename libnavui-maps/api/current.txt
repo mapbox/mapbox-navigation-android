@@ -724,10 +724,10 @@ package com.mapbox.navigation.ui.maps.signboard.view {
 
 package com.mapbox.navigation.ui.maps.snapshotter.api {
 
-  public final class MapboxSnapshotterApi implements com.mapbox.navigation.ui.base.api.snapshotter.SnapshotterApi {
+  public final class MapboxSnapshotterApi {
     ctor public MapboxSnapshotterApi(android.content.Context context, com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions options, com.mapbox.maps.MapView mapView);
     method public void cancel();
-    method public void generateSnapshot(com.mapbox.navigation.base.trip.model.RouteProgress progress, com.mapbox.navigation.ui.base.api.snapshotter.SnapshotReadyCallback callback);
+    method public void generateSnapshot(com.mapbox.navigation.base.trip.model.RouteProgress progress, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotValue,com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotError>> consumer);
     method public android.content.Context getContext();
     property public final android.content.Context context;
   }
@@ -740,12 +740,14 @@ package com.mapbox.navigation.ui.maps.snapshotter.model {
     method public android.graphics.Bitmap.Config getBitmapConfig();
     method public float getDensity();
     method public com.mapbox.maps.EdgeInsets getEdgeInsets();
+    method public int getRoutePrecision();
     method public com.mapbox.maps.Size getSize();
     method public String getStyleUri();
     method public com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions.Builder toBuilder();
     property public final android.graphics.Bitmap.Config bitmapConfig;
     property public final float density;
     property public final com.mapbox.maps.EdgeInsets edgeInsets;
+    property public final int routePrecision;
     property public final com.mapbox.maps.Size size;
     property public final String styleUri;
   }
@@ -756,19 +758,32 @@ package com.mapbox.navigation.ui.maps.snapshotter.model {
     method public com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions build();
     method public com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions.Builder density(float density);
     method public com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions.Builder edgeInsets(com.mapbox.maps.EdgeInsets edgeInsets);
+    method public com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions.Builder routePrecision(@IntRange(from=5, to=6) int routePrecision);
     method public com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions.Builder size(com.mapbox.maps.Size size);
     method public com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions.Builder styleUri(String styleUri);
+  }
+
+  public final class SnapshotError {
+    method public String? getErrorMessage();
+    method public Throwable? getThrowable();
+    property public final String? errorMessage;
+    property public final Throwable? throwable;
+  }
+
+  public final class SnapshotValue {
+    method public android.graphics.Bitmap getSnapshot();
+    property public final android.graphics.Bitmap snapshot;
   }
 
 }
 
 package com.mapbox.navigation.ui.maps.snapshotter.view {
 
-  public final class MapboxSnapshotView extends androidx.appcompat.widget.AppCompatImageView implements com.mapbox.navigation.ui.base.MapboxView<com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState> {
+  public final class MapboxSnapshotView extends androidx.appcompat.widget.AppCompatImageView {
     ctor public MapboxSnapshotView(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
     ctor public MapboxSnapshotView(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxSnapshotView(android.content.Context context);
-    method public void render(com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState state);
+    method public void render(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotValue,com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotError> result);
   }
 
 }

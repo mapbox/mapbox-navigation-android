@@ -41,12 +41,13 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivitySnapshotBinding
 import com.mapbox.navigation.examples.util.RouteLine
 import com.mapbox.navigation.examples.util.Utils.getMapboxAccessToken
-import com.mapbox.navigation.ui.base.api.snapshotter.SnapshotReadyCallback
-import com.mapbox.navigation.ui.base.api.snapshotter.SnapshotterApi
-import com.mapbox.navigation.ui.base.model.snapshotter.SnapshotState
+import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.snapshotter.api.MapboxSnapshotterApi
 import com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions
+import com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotError
+import com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotValue
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import java.util.Objects
 
@@ -55,7 +56,7 @@ class MapboxSnapshotActivity : AppCompatActivity(), OnMapLongClickListener {
     private lateinit var mapboxMap: MapboxMap
     private lateinit var mapCamera: CameraAnimationsPlugin
     private lateinit var mapboxNavigation: MapboxNavigation
-    private lateinit var snapshotApi: SnapshotterApi
+    private lateinit var snapshotApi: MapboxSnapshotterApi
     private lateinit var binding: LayoutActivitySnapshotBinding
     private lateinit var locationComponent: LocationComponentPlugin
 
@@ -65,13 +66,10 @@ class MapboxSnapshotActivity : AppCompatActivity(), OnMapLongClickListener {
     private val navigationLocationProvider = NavigationLocationProvider()
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
-    private val snapshotCallback: SnapshotReadyCallback = object : SnapshotReadyCallback {
-        override fun onSnapshotReady(bitmap: SnapshotState.SnapshotReady) {
-            binding.snapshotView.render(bitmap)
-        }
-
-        override fun onFailure(error: SnapshotState.SnapshotFailure) {
-            binding.snapshotView.render(error)
+    private val snapshotConsumer = object :
+        MapboxNavigationConsumer<Expected<SnapshotValue, SnapshotError>> {
+        override fun accept(t: Expected<SnapshotValue, SnapshotError>) {
+            binding.snapshotView.render(t)
         }
     }
 
@@ -99,7 +97,7 @@ class MapboxSnapshotActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            snapshotApi.generateSnapshot(routeProgress, snapshotCallback)
+            snapshotApi.generateSnapshot(routeProgress, snapshotConsumer)
         }
     }
 

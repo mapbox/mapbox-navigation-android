@@ -2,6 +2,8 @@ package com.mapbox.navigation.ui.maps.snapshotter.model
 
 import android.content.Context
 import android.graphics.Bitmap
+import androidx.annotation.IntRange
+import com.mapbox.core.constants.Constants
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.Size
 import com.mapbox.maps.Style
@@ -13,6 +15,7 @@ import com.mapbox.navigation.ui.maps.snapshotter.api.MapboxSnapshotterApi
  * @property size bitmap size
  * @property density bitmap density
  * @property styleUri style uri
+ * @property routePrecision can be PRECISION_5 or PRECISION_6
  * @property edgeInsets padding for the snapshot
  * @property bitmapConfig bitmap config, either RGB565 or ARGB8888
  */
@@ -24,6 +27,7 @@ class MapboxSnapshotterOptions private constructor(
     val size: Size,
     val density: Float,
     val styleUri: String,
+    val routePrecision: Int,
     val edgeInsets: EdgeInsets,
     val bitmapConfig: Bitmap.Config
 ) {
@@ -35,6 +39,7 @@ class MapboxSnapshotterOptions private constructor(
         it.size(size)
         it.density(density)
         it.styleUri(styleUri)
+        it.routePrecision(routePrecision)
         it.edgeInsets(edgeInsets)
         it.bitmapConfig(bitmapConfig)
     }
@@ -52,6 +57,7 @@ class MapboxSnapshotterOptions private constructor(
         if (size != other.size) return false
         if (density != other.density) return false
         if (styleUri != other.styleUri) return false
+        if (routePrecision != other.routePrecision) return false
         if (edgeInsets != other.edgeInsets) return false
         if (bitmapConfig != other.bitmapConfig) return false
 
@@ -66,6 +72,7 @@ class MapboxSnapshotterOptions private constructor(
         result = 31 * result + size.hashCode()
         result = 31 * result + density.hashCode()
         result = 31 * result + styleUri.hashCode()
+        result = 31 * result + routePrecision.hashCode()
         result = 31 * result + edgeInsets.hashCode()
         result = 31 * result + bitmapConfig.hashCode()
         return result
@@ -80,6 +87,7 @@ class MapboxSnapshotterOptions private constructor(
             "size=$size, " +
             "density=$density, " +
             "styleUri=$styleUri, " +
+            "routePrecision=$routePrecision, " +
             "edgeInsets=$edgeInsets, " +
             "bitmapConfig=$bitmapConfig" +
             ")"
@@ -91,6 +99,7 @@ class MapboxSnapshotterOptions private constructor(
      * @property size builder for bitmap size
      * @property density builder for bitmap density
      * @property styleUri builder for style uri
+     * @property routePrecision builder for routePrecision
      * @property bitmapConfig builder for bitmap config
      * @property edgeInsets builder for snapshot padding
      * @constructor
@@ -107,6 +116,7 @@ class MapboxSnapshotterOptions private constructor(
         private var edgeInsets = EdgeInsets(
             80.0 * density, 0.0 * density, 0.0 * density, 0.0 * density
         )
+        private var routePrecision = Constants.PRECISION_6
 
         /**
          * apply bitmap size to the builder
@@ -133,6 +143,19 @@ class MapboxSnapshotterOptions private constructor(
             apply { this.styleUri = styleUri }
 
         /**
+         * apply routePrecision to the builder
+         * @param routePrecision String
+         * @return Builder
+         */
+        fun routePrecision(@IntRange(from = 5, to = 6)routePrecision: Int): Builder =
+            apply {
+                require(routePrecision in 5..6) {
+                    "The precision values for route geometry can either be 5 or 6"
+                }
+                this.routePrecision = routePrecision
+            }
+
+        /**
          * apply snapshot padding to the builder
          * @param edgeInsets EdgeInsets
          * @return Builder
@@ -156,6 +179,7 @@ class MapboxSnapshotterOptions private constructor(
                 context = context,
                 size = size,
                 density = density,
+                routePrecision = routePrecision,
                 styleUri = styleUri,
                 edgeInsets = edgeInsets,
                 bitmapConfig = bitmapConfig
