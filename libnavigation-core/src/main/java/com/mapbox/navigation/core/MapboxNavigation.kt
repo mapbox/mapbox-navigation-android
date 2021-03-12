@@ -834,7 +834,9 @@ class MapboxNavigation(
                 ModuleProviderArgument(NavigationOptions::class.java, navigationOptions),
                 ModuleProviderArgument(
                     DistanceFormatter::class.java,
-                    MapboxDistanceFormatter(navigationOptions.distanceFormatterOptions)
+                    MapboxDistanceFormatter(
+                        navigationOptions.applicationContext,
+                        navigationOptions.distanceFormatterOptions)
                 ),
             )
             MapboxModuleType.CommonLogger -> arrayOf()

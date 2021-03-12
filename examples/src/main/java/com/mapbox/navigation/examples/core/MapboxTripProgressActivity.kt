@@ -84,14 +84,17 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
         // is instantiated and configured first. The formatting options in MapboxNavigation
         // can be found at: MapboxNavigation.navigationOptions.distanceFormatterOptions
         val distanceFormatterOptions =
-            DistanceFormatterOptions.Builder(this).build()
+            DistanceFormatterOptions.Builder().build()
 
         // These are Mapbox formatters being created with default values. You can provide your own
         // custom formatters by implementing the appropriate interface. The expected output of
         // a formatter is a SpannableString that is applied to the the view
         // component in MapboxTripProgressView.
         TripProgressUpdateFormatter.Builder(this)
-            .distanceRemainingFormatter(DistanceRemainingFormatter(distanceFormatterOptions))
+            .distanceRemainingFormatter(DistanceRemainingFormatter(
+                this.applicationContext,
+                distanceFormatterOptions
+            ))
             .timeRemainingFormatter(TimeRemainingFormatter(this))
             .estimatedTimeToArrivalFormatter(EstimatedTimeToArrivalFormatter(this))
             .build()

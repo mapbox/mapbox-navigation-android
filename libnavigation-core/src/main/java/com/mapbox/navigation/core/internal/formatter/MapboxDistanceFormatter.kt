@@ -11,6 +11,8 @@ import android.text.style.StyleSpan
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.internal.VoiceUnit
+import com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale
+import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.core.R
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfConversion
@@ -24,18 +26,20 @@ import kotlin.math.roundToInt
  *
  * This constructor will infer device language and unit type using the device locale.
  *
+ * @param applicationContext from which to get localized strings from
  * @param options to build the [MapboxDistanceFormatter]
  */
 class MapboxDistanceFormatter(
+    val applicationContext: Context,
     val options: DistanceFormatterOptions
 ) : DistanceFormatter {
 
-    private val smallUnit = when (options.unitType) {
+    private val smallUnit = when (getUnitTypeToUse(options.unitType, options.locale)) {
         VoiceUnit.IMPERIAL -> TurfConstants.UNIT_FEET
         else -> TurfConstants.UNIT_METERS
     }
 
-    private val largeUnit = when (options.unitType) {
+    private val largeUnit = when (getUnitTypeToUse(options.unitType, options.locale)) {
         VoiceUnit.IMPERIAL -> TurfConstants.UNIT_MILES
         else -> TurfConstants.UNIT_KILOMETERS
     }
@@ -71,7 +75,8 @@ class MapboxDistanceFormatter(
     }
 
     private fun formatDistanceAndSuffixForSmallUnit(distance: Double): Pair<String, String> {
-        val resources = options.applicationContext.resourcesWithLocale(options.locale)
+        val localeToUse: Locale = options.locale ?: applicationContext.inferDeviceLocale()
+        val resources = applicationContext.resourcesWithLocale(localeToUse)
         val unitStringSuffix = getUnitString(resources, smallUnit)
 
         if (distance < 0) {
@@ -102,11 +107,12 @@ class MapboxDistanceFormatter(
         distance: Double,
         maxFractionDigits: Int
     ): Pair<String, String> {
-        val resources = options.applicationContext.resourcesWithLocale(options.locale)
+        val localeToUse: Locale = options.locale ?: applicationContext.inferDeviceLocale()
+        val resources = applicationContext.resourcesWithLocale(localeToUse)
         val unitStringSuffix = getUnitString(resources, largeUnit)
         val distanceUnit =
             TurfConversion.convertLength(distance, TurfConstants.UNIT_METERS, largeUnit)
-        val roundedValue = NumberFormat.getNumberInstance(options.locale).also {
+        val roundedValue = NumberFormat.getNumberInstance(localeToUse).also {
             it.maximumFractionDigits = maxFractionDigits
         }.format(distanceUnit)
         return Pair(roundedValue, unitStringSuffix)
@@ -149,6 +155,15 @@ class MapboxDistanceFormatter(
             TurfConstants.UNIT_MILES -> resources.getString(R.string.mapbox_unit_miles)
             TurfConstants.UNIT_FEET -> resources.getString(R.string.mapbox_unit_feet)
             else -> ""
+        }
+
+    private fun getUnitTypeToUse(unitType: String, locale: Locale?): String =
+        when (unitType) {
+            VoiceUnit.UNDEFINED -> {
+                val localeToUse: Locale = locale ?: applicationContext.inferDeviceLocale()
+                localeToUse.getUnitTypeForLocale()
+            }
+            else -> unitType
         }
 
     private fun Context.resourcesWithLocale(locale: Locale?): Resources {

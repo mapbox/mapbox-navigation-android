@@ -164,7 +164,7 @@ class NavigationOptions private constructor(
         private var timeFormatType: Int = TimeFormat.NONE_SPECIFIED
         private var navigatorPredictionMillis: Long = DEFAULT_NAVIGATOR_PREDICTION_MILLIS
         private var distanceFormatterOptions: DistanceFormatterOptions =
-            DistanceFormatterOptions.Builder(applicationContext).build()
+            DistanceFormatterOptions.Builder().build()
         private var routingTilesOptions: RoutingTilesOptions =
             RoutingTilesOptions.Builder().build()
         private var predictiveCacheLocationOptions: PredictiveCacheLocationOptions =

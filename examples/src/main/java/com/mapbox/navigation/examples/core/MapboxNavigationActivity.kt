@@ -331,7 +331,10 @@ class MapboxNavigationActivity :
         init()
         tripProgressApi = MapboxTripProgressApi(getTripProgressFormatter())
         maneuverApi = MapboxManeuverApi(
-            MapboxDistanceFormatter(DistanceFormatterOptions.Builder(this).build())
+            MapboxDistanceFormatter(
+                this.applicationContext,
+                DistanceFormatterOptions.Builder().build()
+            )
         )
         speechAPI = MapboxSpeechApi(
             this,
@@ -547,6 +550,7 @@ class MapboxNavigationActivity :
         return TripProgressUpdateFormatter.Builder(this)
             .distanceRemainingFormatter(
                 DistanceRemainingFormatter(
+                    this.applicationContext,
                     mapboxNavigation.navigationOptions.distanceFormatterOptions
                 )
             )

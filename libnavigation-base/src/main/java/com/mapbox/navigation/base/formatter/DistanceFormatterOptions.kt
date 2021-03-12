@@ -1,22 +1,18 @@
 package com.mapbox.navigation.base.formatter
 
-import android.content.Context
 import com.mapbox.navigation.base.internal.VoiceUnit
 import com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale
-import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import java.util.Locale
 
 /**
  * Gives options to format the distance in the trip notification.
  *
- * @param applicationContext from which to get localized strings from
  * @param locale the locale to use for localization of distance resources
  * @param unitType to use, or UNDEFINED to use default for locale country
  * @param roundingIncrement increment by which to round small distances
  */
 class DistanceFormatterOptions private constructor(
-    val applicationContext: Context,
-    val locale: Locale,
+    val locale: Locale?,
     @VoiceUnit.Type val unitType: String,
     @Rounding.Increment val roundingIncrement: Int
 ) {
@@ -24,7 +20,7 @@ class DistanceFormatterOptions private constructor(
     /**
      * @return the [Builder] that created the [DistanceFormatterOptions]
      */
-    fun toBuilder() = Builder(applicationContext)
+    fun toBuilder() = Builder()
         .locale(locale)
         .unitType(unitType)
         .roundingIncrement(roundingIncrement)
@@ -38,7 +34,6 @@ class DistanceFormatterOptions private constructor(
 
         other as DistanceFormatterOptions
 
-        if (applicationContext != other.applicationContext) return false
         if (locale != other.locale) return false
         if (unitType != other.unitType) return false
         if (roundingIncrement != other.roundingIncrement) return false
@@ -50,8 +45,7 @@ class DistanceFormatterOptions private constructor(
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        var result = applicationContext.hashCode()
-        result = 31 * result + locale.hashCode()
+        var result = locale.hashCode()
         result = 31 * result + unitType.hashCode()
         result = 31 * result + roundingIncrement
         return result
@@ -61,18 +55,15 @@ class DistanceFormatterOptions private constructor(
      * Regenerate whenever a change is made
      */
     override fun toString(): String {
-        return "DistanceFormatterOptions(applicationContext=$applicationContext," +
-            " locale=$locale," +
+        return "DistanceFormatterOptions(locale=$locale," +
             " unitType='$unitType'," +
             " roundingIncrement=$roundingIncrement)"
     }
 
     /**
      * Builder of [DistanceFormatterOptions]
-     * @param applicationContext converted to applicationContext to save memory leaks
      */
-    class Builder(applicationContext: Context) {
-        private val applicationContext: Context = applicationContext.applicationContext
+    class Builder {
         private var unitType: String = VoiceUnit.UNDEFINED
         private var locale: Locale? = null
         private var roundingIncrement = Rounding.INCREMENT_FIFTY
@@ -109,19 +100,11 @@ class DistanceFormatterOptions private constructor(
          *
          * @return [DistanceFormatterOptions]
          */
-        fun build(): DistanceFormatterOptions {
-            val localeToUse: Locale = locale ?: applicationContext.inferDeviceLocale()
-            val unitTypeToUse: String = when (unitType) {
-                VoiceUnit.UNDEFINED -> localeToUse.getUnitTypeForLocale()
-                else -> unitType
-            }
-
-            return DistanceFormatterOptions(
-                applicationContext = applicationContext,
-                locale = localeToUse,
-                unitType = unitTypeToUse,
+        fun build(): DistanceFormatterOptions =
+            DistanceFormatterOptions(
+                locale = locale,
+                unitType = unitType,
                 roundingIncrement = roundingIncrement
             )
-        }
     }
 }
