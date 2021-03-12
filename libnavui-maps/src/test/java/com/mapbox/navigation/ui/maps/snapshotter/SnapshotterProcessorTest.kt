@@ -35,15 +35,6 @@ class SnapshotterProcessorTest {
     }
 
     @Test
-    fun `process action generate snapshot result snapshot unavailable no banner instructions`() {
-        val bannerInstructions: BannerInstructions? = null
-
-        val action = SnapshotterAction.GenerateSnapshot(bannerInstructions)
-        val result = SnapshotterProcessor.process(action)
-        assert(result is SnapshotterResult.SnapshotUnavailable)
-    }
-
-    @Test
     fun `process action generate snapshot result snapshot unavailable no banner view`() {
         val bannerInstructions: BannerInstructions = mockk()
 

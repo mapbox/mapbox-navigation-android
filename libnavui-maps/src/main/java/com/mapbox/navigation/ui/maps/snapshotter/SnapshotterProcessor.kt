@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.maps.snapshotter
 import android.graphics.Bitmap
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
-import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
@@ -57,14 +56,14 @@ internal object SnapshotterProcessor {
         }
     }
 
-    private fun isSnapshotAvailable(instruction: BannerInstructions?): SnapshotterResult {
+    private fun isSnapshotAvailable(instruction: BannerInstructions): SnapshotterResult {
         return ifNonNull(getComponentContainingSnapshot(instruction)) {
             SnapshotterResult.SnapshotAvailable
         } ?: SnapshotterResult.SnapshotUnavailable
     }
 
     private fun getComponentContainingSnapshot(
-        bannerInstructions: BannerInstructions?
+        bannerInstructions: BannerInstructions
     ): BannerComponents? {
         val bannerComponents = bannerInstructions.getBannerComponents()
         return when {
@@ -104,11 +103,17 @@ internal object SnapshotterProcessor {
     ): SnapshotterResult {
         return ifNonNull(currentGeometry, upcomingGeometry) { currGeometry, nextGeometry ->
             val pointListFromDistanceToManeuver =
-                getPointList(currGeometry, FRAME_POINT_DISTANCE_BEFORE_MANEUVER, true)
+                getPointList(
+                    options.routePrecision,
+                    currGeometry,
+                    FRAME_POINT_DISTANCE_BEFORE_MANEUVER,
+                    true
+                )
             val pointAtDistanceBeforeManeuver =
                 pointListFromDistanceToManeuver.last()
             val nextManeuverPoint = pointListFromDistanceToManeuver.first()
             val pointListFromManeuverToDistance = getPointList(
+                options.routePrecision,
                 nextGeometry,
                 FRAME_POINT_DISTANCE_AFTER_MANEUVER,
                 false
@@ -138,11 +143,12 @@ internal object SnapshotterProcessor {
         CameraPosition(points, insets, bearing, pitch)
 
     private fun getPointList(
+        precision: Int,
         geometry: String,
         distance: Double,
         shouldReverseLineString: Boolean
     ): MutableList<Point> =
-        getPointsAlongLineStringSlice(geometry, distance, shouldReverseLineString)
+        getPointsAlongLineStringSlice(precision, geometry, distance, shouldReverseLineString)
 
     /**
      * The method returns a list of points starting from distance before maneuver point to end of
@@ -163,11 +169,12 @@ internal object SnapshotterProcessor {
      * @return MutableList<Point>
      */
     private fun getPointsAlongLineStringSlice(
+        precision: Int,
         geometry: String,
         distance: Double,
         shouldReverse: Boolean
     ): MutableList<Point> {
-        val pointSequence: List<Point> = PolylineUtils.decode(geometry, Constants.PRECISION_6)
+        val pointSequence: List<Point> = PolylineUtils.decode(geometry, precision)
         val lineString = if (shouldReverse) {
             LineString.fromLngLats(pointSequence.asReversed())
         } else {
