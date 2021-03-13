@@ -553,6 +553,9 @@ package com.mapbox.navigation.ui.maps.route.line.model {
   }
 
   public final class RouteLineResources {
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getAlternativeRouteCasingLineScaleExpression();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getAlternativeRouteLineScaleExpression();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getAlternativeRouteTrafficLineScaleExpression();
     method public int getDestinationWaypointIcon();
     method public int getOriginWaypointIcon();
     method public boolean getRoundedLineCap();
@@ -562,6 +565,9 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteTrafficLineScaleExpression();
     method public java.util.List<java.lang.String> getTrafficBackfillRoadClasses();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder toBuilder();
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression alternativeRouteCasingLineScaleExpression;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression alternativeRouteLineScaleExpression;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression alternativeRouteTrafficLineScaleExpression;
     property public final int destinationWaypointIcon;
     property public final int originWaypointIcon;
     property public final boolean roundedLineCap;
@@ -574,6 +580,9 @@ package com.mapbox.navigation.ui.maps.route.line.model {
 
   public static final class RouteLineResources.Builder {
     ctor public RouteLineResources.Builder();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder alternativeRouteCasingLineScaleExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder alternativeRouteLineScaleExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder alternativeRouteTrafficLineScaleExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources build();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder destinationWaypointIcon(@DrawableRes int resource);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources.Builder originWaypointIcon(@DrawableRes int resource);
