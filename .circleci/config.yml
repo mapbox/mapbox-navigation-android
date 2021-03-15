@@ -33,7 +33,7 @@ workflows:
           filters:
             branches:
               only:
-                - knn-eh-experimental-snapshot
+                - beta-1-eh-snapshot
       - release:
           filters:
             tags:
