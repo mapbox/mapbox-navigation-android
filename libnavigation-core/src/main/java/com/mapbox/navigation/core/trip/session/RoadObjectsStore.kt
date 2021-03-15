@@ -1,5 +1,11 @@
 package com.mapbox.navigation.core.trip.session
 
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.bindgen.Expected
+import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectEdgeLocation
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectLocation
@@ -11,6 +17,7 @@ import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonObjectProvider
 import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonObjectType
 import com.mapbox.navigation.core.trip.model.eh.mapToOpenLRStandard
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigator.OpenLRLocation
 
 /**
  * [MapboxNavigation.roadObjectsStore] provides methods to get road objects metadata, add and remove
@@ -18,7 +25,9 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
  */
 class RoadObjectsStore internal constructor(
     private val navigator: MapboxNativeNavigator,
+    private val logger: Logger
 ) {
+    private val TAG = Tag("MbxRoadObjectsStore")
 
     /**
      * Returns mapping `road object id -> EHorizonObjectEdgeLocation` for all road objects
@@ -86,13 +95,69 @@ class RoadObjectsStore internal constructor(
         @OpenLRStandard.Type openLRStandard: String
     ) {
         navigator.openLRDecoder?.decode(
-            listOf(openLRLocation),
-            openLRStandard.mapToOpenLRStandard()
-        ) { locations ->
-            locations.first().value?.let { openLRLocation ->
-                navigator.roadObjectsStore?.addCustomRoadObject(roadObjectId, openLRLocation)
-            }
+            listOf(openLRLocation), openLRStandard.mapToOpenLRStandard()
+        ) { addObjectToStore(roadObjectId, it) }
+    }
+
+    /**
+     * Matches given polyline to graph and adds it for object tracking.
+     * Polyline should define valid path on graph,
+     * i.e. it should be possible to drive this path according to traffic rules.
+     * In case of error (if there are no tiles in cache, decoding failed, etc.) object won't be added.
+     *
+     * @param roadObjectId unique id of the object
+     * @param polyline polyline representing the object
+     */
+    @ExperimentalMapboxNavigationAPI
+    fun addCustomPolylineObject(roadObjectId: String, polyline: List<Point>) {
+        navigator.openLRDecoder?.decodePolylines(listOf(polyline)) {
+            addObjectToStore(roadObjectId, it)
         }
+    }
+
+    /**
+     * Matches given polygon to graph and adds it for object tracking.
+     * "Matching" here means we try to find all intersections of polygon with the road graph
+     * and track distances to those intersections as distance to polygon.
+     * In case of error (if there are no tiles in cache, decoding failed, etc.) object won't be added.
+     *
+     * @param roadObjectId unique id of the object
+     * @param polygon polygon representing the object
+     */
+    @ExperimentalMapboxNavigationAPI
+    fun addCustomPolygonObject(roadObjectId: String, polygon: List<Point>) {
+        navigator.openLRDecoder?.decodePolygons(listOf(polygon)) {
+            addObjectToStore(roadObjectId, it)
+        }
+    }
+
+    /**
+     * Matches given gantry (i.e. polyline orthogonal to the road) to the graph and adds it
+     * for object tracking.
+     * "Matching" here means we try to find all intersections of gantry with road graph
+     * and track distances to those intersections as distance to gantry.
+     * In case of error (if there are no tiles in cache, decoding failed, etc.) object won't be added.
+     *
+     * @param roadObjectId unique id of the object
+     * @param gantry gantry representing the object
+     */
+    @ExperimentalMapboxNavigationAPI
+    fun addCustomGantryObject(roadObjectId: String, gantry: List<Point>) {
+        navigator.openLRDecoder?.decodeGantries(listOf(gantry)) {
+            addObjectToStore(roadObjectId, it)
+        }
+    }
+
+    /**
+     * Matches given point to road graph and adds it for object tracking.
+     * In case of error (if there are no tiles in cache, decoding failed, etc.) object won't be added.
+     *
+     * @param roadObjectId unique id of the object
+     * @param point point representing the object
+     */
+    @ExperimentalMapboxNavigationAPI
+    fun addCustomPointObject(roadObjectId: String, point: Point) {
+        navigator.openLRDecoder?.decodePoints(listOf(point)) { addObjectToStore(roadObjectId, it) }
     }
 
     /**
@@ -101,5 +166,25 @@ class RoadObjectsStore internal constructor(
      */
     fun removeCustomRoadObject(roadObjectId: String) {
         navigator.roadObjectsStore?.removeCustomRoadObject(roadObjectId)
+    }
+
+    private fun addObjectToStore(
+        roadObjectId: String,
+        locations: List<Expected<OpenLRLocation, String>>
+    ) {
+        if (locations.isEmpty()) {
+            logger.d(TAG, Message("No locations decoded for roadObjectId = $roadObjectId."))
+            return
+        }
+
+        val either = locations.first()
+        if (either.isValue) {
+            navigator.roadObjectsStore?.addCustomRoadObject(roadObjectId, either.value!!)
+        } else {
+            logger.d(
+                TAG,
+                Message("Decoding failed. Error = ${either.error}, roadObjectId = $roadObjectId.")
+            )
+        }
     }
 }
