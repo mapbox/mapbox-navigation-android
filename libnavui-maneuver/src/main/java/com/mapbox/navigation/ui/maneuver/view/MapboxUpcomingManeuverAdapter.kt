@@ -108,7 +108,10 @@ class MapboxUpcomingManeuverAdapter(
         private fun drawTotalStepDistance(totalStepDistance: TotalManeuverDistance) {
             viewBinding.stepDistance.render(
                 StepDistance(
-                    MapboxDistanceFormatter(DistanceFormatterOptions.Builder(context).build()),
+                    MapboxDistanceFormatter(
+                        context.applicationContext,
+                        DistanceFormatterOptions.Builder().build()
+                    ),
                     totalStepDistance.totalDistance
                 )
             )
