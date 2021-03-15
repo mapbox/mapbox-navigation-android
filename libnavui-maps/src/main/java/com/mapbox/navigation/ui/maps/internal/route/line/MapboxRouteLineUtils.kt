@@ -601,7 +601,7 @@ object MapboxRouteLineUtils {
         routeStyleDescriptors.forEach {
             expressions.add(
                 eq {
-                    get { it.routeIdentifier }
+                    get { literal(it.routeIdentifier) }
                     literal(true)
                 }
             )

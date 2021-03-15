@@ -36,7 +36,7 @@ internal class MapboxRouteLayerProvider(
             getRouteLineColorExpressions(
                 color,
                 routeStyleDescriptors,
-                RouteStyleDescriptor::lineColorResourceId
+                RouteStyleDescriptor::lineColor
             )
         return initializeRouteLayer(
             style,
@@ -57,7 +57,7 @@ internal class MapboxRouteLayerProvider(
             getRouteLineColorExpressions(
                 color,
                 routeStyleDescriptors,
-                RouteStyleDescriptor::lineColorResourceId
+                RouteStyleDescriptor::lineColor
             )
         return initializeRouteLayer(
             style,
@@ -77,7 +77,7 @@ internal class MapboxRouteLayerProvider(
             getRouteLineColorExpressions(
                 color,
                 routeStyleDescriptors,
-                RouteStyleDescriptor::lineCasingColorResourceId
+                RouteStyleDescriptor::lineCasingColor
             )
         return initializeRouteLayer(
             style,
@@ -98,7 +98,7 @@ internal class MapboxRouteLayerProvider(
             getRouteLineColorExpressions(
                 color,
                 routeStyleDescriptors,
-                RouteStyleDescriptor::lineColorResourceId
+                RouteStyleDescriptor::lineColor
             )
 
         return listOf(
@@ -129,7 +129,7 @@ internal class MapboxRouteLayerProvider(
             getRouteLineColorExpressions(
                 color,
                 routeStyleDescriptors,
-                RouteStyleDescriptor::lineCasingColorResourceId
+                RouteStyleDescriptor::lineCasingColor
             )
 
         return listOf(
@@ -161,7 +161,7 @@ internal class MapboxRouteLayerProvider(
             getRouteLineColorExpressions(
                 color,
                 routeStyleDescriptors,
-                RouteStyleDescriptor::lineColorResourceId
+                RouteStyleDescriptor::lineColor
             )
 
         return listOf(
