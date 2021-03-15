@@ -13,6 +13,7 @@ ext {
   if (mapboxNavigatorVersion == null || mapboxNavigatorVersion == '') {
       mapboxNavigatorVersion = '45.0.1'
   }
+  println("Navigation Native version: " + mapboxNavigatorVersion)
 
   version = [
       mapboxMapSdk              : '10.0.0-beta.15',
