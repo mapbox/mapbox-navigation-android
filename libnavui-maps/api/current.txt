@@ -415,6 +415,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions build();
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteLineBelowLayerId(String layerId);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteLineResources(com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources resourceProvider);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteStyleDescriptors(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor> routeStyleDescriptors);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withTolerance(double tolerance);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withVanishingRouteLineEnabled(boolean isEnabled);
   }
@@ -648,16 +649,16 @@ package com.mapbox.navigation.ui.maps.route.line.model {
   }
 
   public final class RouteStyleDescriptor {
-    ctor public RouteStyleDescriptor(String routeIdentifier, int lineColorResourceId, int lineCasingColorResourceId);
+    ctor public RouteStyleDescriptor(String routeIdentifier, @ColorInt int lineColor, @ColorInt int lineCasingColor);
     method public String component1();
     method public int component2();
     method public int component3();
-    method public com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor copy(String routeIdentifier, int lineColorResourceId, int lineCasingColorResourceId);
-    method public int getLineCasingColorResourceId();
-    method public int getLineColorResourceId();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor copy(String routeIdentifier, int lineColor, int lineCasingColor);
+    method public int getLineCasingColor();
+    method public int getLineColor();
     method public String getRouteIdentifier();
-    property public final int lineCasingColorResourceId;
-    property public final int lineColorResourceId;
+    property public final int lineCasingColor;
+    property public final int lineColor;
     property public final String routeIdentifier;
   }
 

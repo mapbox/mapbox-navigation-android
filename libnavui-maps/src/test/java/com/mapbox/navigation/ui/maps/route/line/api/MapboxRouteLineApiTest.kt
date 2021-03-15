@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.content.Context
+import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
@@ -21,6 +22,7 @@ import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.ALTERNATIVE
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.parseRoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import io.mockk.every
 import io.mockk.mockk
@@ -227,6 +229,37 @@ class MapboxRouteLineApiTest {
         assertEquals(
             expectedAlternative2TrafficLineExpression,
             result.value.altRoute2TrafficExpression.toString()
+        )
+    }
+
+    @Test
+    fun setRoutesAlternativeRouteColorOverride() {
+        val routeStyleDescriptors = listOf(
+            RouteStyleDescriptor("alternativeRoute1", Color.YELLOW, Color.CYAN),
+            RouteStyleDescriptor("alternativeRoute2", Color.BLUE, Color.GREEN)
+        )
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withRouteStyleDescriptors(routeStyleDescriptors)
+            .build()
+        val api = MapboxRouteLineApi(options)
+        val route = getRoute()
+        val altRoute1 = getRouteWithRoadClasses()
+        val altRoute2 = getMultilegRoute()
+        val routes = listOf(
+            RouteLine(route, null),
+            RouteLine(altRoute1, "alternativeRoute1"),
+            RouteLine(altRoute2, "alternativeRoute2")
+        )
+
+        val result = api.setRoutes(routes) as Expected.Success
+
+        assertEquals(
+            "{\"alternativeRoute1\":true}",
+            result.value.alternativeRoute1Source.features()!!.first().properties().toString()
+        )
+        assertEquals(
+            "{\"alternativeRoute2\":true}",
+            result.value.alternativeRoute2Source.features()!!.first().properties().toString()
         )
     }
 

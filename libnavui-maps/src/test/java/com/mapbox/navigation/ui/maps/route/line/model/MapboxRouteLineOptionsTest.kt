@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
 import android.content.Context
+import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -49,14 +50,28 @@ class MapboxRouteLineOptionsTest {
     }
 
     @Test
+    fun withRouteStyleDescriptors() {
+        val routeStyleDescriptors =
+            listOf(RouteStyleDescriptor("foobar", Color.CYAN, Color.YELLOW))
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withRouteStyleDescriptors(routeStyleDescriptors)
+            .build()
+
+        assertEquals(routeStyleDescriptors, options.routeLayerProvider.routeStyleDescriptors)
+    }
+
+    @Test
     fun toBuilder() {
         val routeLineResources = RouteLineResources.Builder().build()
+        val routeStyleDescriptors =
+            listOf(RouteStyleDescriptor("foobar", Color.CYAN, Color.YELLOW))
 
         val options = MapboxRouteLineOptions.Builder(ctx)
             .withRouteLineResources(routeLineResources)
             .withVanishingRouteLineEnabled(true)
             .withRouteLineBelowLayerId("someLayerId")
             .withTolerance(.111)
+            .withRouteStyleDescriptors(routeStyleDescriptors)
             .build()
             .toBuilder(ctx)
             .build()
@@ -65,5 +80,6 @@ class MapboxRouteLineOptionsTest {
         assertEquals("someLayerId", options.routeLineBelowLayerId)
         assertNotNull(options.vanishingRouteLine)
         assertEquals(.111, options.tolerance, 0.0)
+        assertEquals(routeStyleDescriptors, options.routeLayerProvider.routeStyleDescriptors)
     }
 }

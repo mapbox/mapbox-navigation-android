@@ -166,6 +166,17 @@ class MapboxRouteLineOptions private constructor(
         }
 
         /**
+         * [RouteStyleDescriptor] is an override of an alternative route line coloring based on
+         * a provided identifier. Setting one or more [RouteStyleDescriptor] objects here
+         * will configure the layer such that any route set with a matching identifier will get
+         * colored according to the values provided in the [RouteStyleDescriptor].
+         *
+         * @param routeStyleDescriptors a collection of [RouteStyleDescriptor] objects
+         */
+        fun withRouteStyleDescriptors(routeStyleDescriptors: List<RouteStyleDescriptor>): Builder =
+            apply { this.routeStyleDescriptors = routeStyleDescriptors }
+
+        /**
          * @return an instance of [MapboxRouteLineOptions]
          */
         fun build(): MapboxRouteLineOptions {

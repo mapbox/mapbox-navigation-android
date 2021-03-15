@@ -126,15 +126,15 @@ class MapboxRouteLineUtilsTest {
         val result = MapboxRouteLineUtils.getRouteLineColorExpressions(
             7,
             listOf(blueLineDescriptor, redLineDescriptor),
-            RouteStyleDescriptor::lineColorResourceId
+            RouteStyleDescriptor::lineColor
         )
 
         assertEquals(7, result.size)
         assertEquals("[==, [get, mapboxDescriptorPlaceHolderUnused], true]", result[0].toString())
         assertEquals("[rgba, 0.0, 0.0, 7.0, 0.0]", result[1].toString())
-        assertEquals("[==, [get], true]", result[2].toString())
+        assertEquals("[==, [get, blueLine], true]", result[2].toString())
         assertEquals("[rgba, 0.0, 0.0, 1.0, 0.0]", result[3].toString())
-        assertEquals("[==, [get], true]", result[4].toString())
+        assertEquals("[==, [get, redLine], true]", result[4].toString())
         assertEquals("[rgba, 0.0, 0.0, 2.0, 0.0]", result[5].toString())
         assertEquals("[rgba, 0.0, 0.0, 7.0, 0.0]", result[6].toString())
     }
