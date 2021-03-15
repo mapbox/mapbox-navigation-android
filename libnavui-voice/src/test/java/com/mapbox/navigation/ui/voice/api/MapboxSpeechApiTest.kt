@@ -4,6 +4,7 @@ import android.content.Context
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.VoiceAction
 import com.mapbox.navigation.ui.voice.VoiceProcessor
 import com.mapbox.navigation.ui.voice.VoiceResult
@@ -85,9 +86,9 @@ class MapboxSpeechApiTest {
         """.trimIndent()
         every { mockedVoiceInstructions.announcement() } returns anAnnouncement
         every { mockedVoiceInstructions.ssmlAnnouncement() } returns aSsmlAnnouncement
-        val speechCallback: SpeechCallback = mockk()
+        val speechConsumer: MapboxNavigationConsumer<Expected<SpeechValue, SpeechError>> = mockk()
         val speechValueSlot = slot<Expected.Success<SpeechValue>>()
-        every { speechCallback.onSpeech(capture(speechValueSlot)) } just Runs
+        every { speechConsumer.accept(capture(speechValueSlot)) } just Runs
         val mockedInstructionFile: File = mockk()
         val mockedVoiceApi: MapboxVoiceApi = mockk()
         coEvery {
@@ -104,10 +105,10 @@ class MapboxSpeechApiTest {
         } returns mockedVoiceApi
         val mapboxSpeechApi = MapboxSpeechApi(aMockedContext, anyAccessToken, anyLanguage)
 
-        mapboxSpeechApi.generate(mockedVoiceInstructions, speechCallback)
+        mapboxSpeechApi.generate(mockedVoiceInstructions, speechConsumer)
 
         verify(exactly = 1) {
-            speechCallback.onSpeech(
+            speechConsumer.accept(
                 speechValueSlot.captured
             )
         }
@@ -129,8 +130,8 @@ class MapboxSpeechApiTest {
         """.trimIndent()
         every { mockedVoiceInstructions.announcement() } returns anAnnouncement
         every { mockedVoiceInstructions.ssmlAnnouncement() } returns aSsmlAnnouncement
-        val speechCallback: SpeechCallback = mockk()
-        every { speechCallback.onSpeech(any()) } just Runs
+        val speechConsumer: MapboxNavigationConsumer<Expected<SpeechValue, SpeechError>> = mockk()
+        every { speechConsumer.accept(any()) } just Runs
         val mockedVoiceError: VoiceState.VoiceError = VoiceState.VoiceError(
             "code: 204, error: No data available"
         )
@@ -156,10 +157,10 @@ class MapboxSpeechApiTest {
             VoiceProcessor.process(any<VoiceAction.PrepareTypeAndAnnouncement>())
         } returns VoiceResult.VoiceTypeAndAnnouncement.Success(mockedTypeAndAnnouncement)
 
-        mapboxSpeechApi.generate(mockedVoiceInstructions, speechCallback)
+        mapboxSpeechApi.generate(mockedVoiceInstructions, speechConsumer)
 
         verify(exactly = 1) {
-            speechCallback.onSpeech(
+            speechConsumer.accept(
                 capture(speechErrorSlot)
             )
         }
@@ -191,8 +192,8 @@ class MapboxSpeechApiTest {
         """.trimIndent()
         every { mockedVoiceInstructions.announcement() } returns anAnnouncement
         every { mockedVoiceInstructions.ssmlAnnouncement() } returns aSsmlAnnouncement
-        val speechCallback: SpeechCallback = mockk()
-        every { speechCallback.onSpeech(any()) } just Runs
+        val speechConsumer: MapboxNavigationConsumer<Expected<SpeechValue, SpeechError>> = mockk()
+        every { speechConsumer.accept(any()) } just Runs
         val mockedVoiceError: VoiceState.VoiceError = VoiceState.VoiceError(
             "code: 204, error: No data available"
         )
@@ -216,7 +217,7 @@ class MapboxSpeechApiTest {
             VoiceProcessor.process(any<VoiceAction.PrepareTypeAndAnnouncement>())
         } returns VoiceResult.VoiceTypeAndAnnouncement.Failure(voiceTypeAndAnnouncementError)
 
-        mapboxSpeechApi.generate(mockedVoiceInstructions, speechCallback)
+        mapboxSpeechApi.generate(mockedVoiceInstructions, speechConsumer)
 
         assertTrue(exceptions[0] is java.lang.IllegalStateException)
         assertEquals(
@@ -233,7 +234,8 @@ class MapboxSpeechApiTest {
             val anyAccessToken = "pk.123"
             val anyLanguage = Locale.US.language
             val mockedVoiceInstructions: VoiceInstructions = mockk()
-            val speechCallback: SpeechCallback = mockk()
+            val speechConsumer: MapboxNavigationConsumer<Expected<SpeechValue, SpeechError>> =
+                mockk()
             val mockedVoiceResponse: VoiceState.VoiceResponse = VoiceState.VoiceResponse(mockk())
             val mockedVoiceApi: MapboxVoiceApi = mockk()
             coEvery {
@@ -250,7 +252,7 @@ class MapboxSpeechApiTest {
             } returns mockedVoiceApi
             val mapboxSpeechApi = MapboxSpeechApi(aMockedContext, anyAccessToken, anyLanguage)
 
-            mapboxSpeechApi.generate(mockedVoiceInstructions, speechCallback)
+            mapboxSpeechApi.generate(mockedVoiceInstructions, speechConsumer)
 
             assertTrue(exceptions[0] is java.lang.IllegalStateException)
             assertEquals(

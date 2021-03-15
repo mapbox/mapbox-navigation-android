@@ -45,6 +45,7 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityVoiceBinding
 import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
@@ -60,8 +61,6 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
 import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
-import com.mapbox.navigation.ui.voice.api.SpeechCallback
-import com.mapbox.navigation.ui.voice.api.VoiceInstructionsPlayerCallback
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
@@ -153,41 +152,43 @@ class MapboxVoiceActivity :
         }
     }
 
-    private val voiceInstructionsPlayerCallback: VoiceInstructionsPlayerCallback =
-        object : VoiceInstructionsPlayerCallback {
-            override fun onDone(announcement: SpeechAnnouncement) {
-                speechAPI.clean(announcement)
+    private val voiceInstructionsPlayerCallback =
+        object : MapboxNavigationConsumer<SpeechAnnouncement> {
+            override fun accept(consumer: SpeechAnnouncement) {
+                speechAPI.clean(consumer)
             }
         }
 
-    private val speechCallback = object : SpeechCallback {
-        override fun onSpeech(state: Expected<SpeechValue, SpeechError>) {
-            when (state) {
-                is Expected.Success -> {
-                    val currentSpeechValue = state.value
-                    if (isFirst) {
-                        firstPlay = currentSpeechValue.announcement
-                        isFirst = false
+    private val speechCallback =
+        object : MapboxNavigationConsumer<Expected<SpeechValue, SpeechError>> {
+            override fun accept(consumer: Expected<SpeechValue, SpeechError>) {
+                when (consumer) {
+                    is Expected.Success -> {
+                        val currentSpeechValue = consumer.value
+                        if (isFirst) {
+                            firstPlay = currentSpeechValue.announcement
+                            isFirst = false
+                        }
+                        voiceInstructionsPlayer?.play(
+                            currentSpeechValue.announcement,
+                            voiceInstructionsPlayerCallback
+                        )
                     }
-                    voiceInstructionsPlayer?.play(
-                        currentSpeechValue.announcement,
-                        voiceInstructionsPlayerCallback
-                    )
-                }
-                is Expected.Failure -> {
-                    val currentSpeechError = state.error
-                    Log.e(
-                        "VoiceActivity",
-                        "Error playing the voice instruction: ${currentSpeechError.errorMessage}"
-                    )
-                    voiceInstructionsPlayer?.play(
-                        currentSpeechError.fallback,
-                        voiceInstructionsPlayerCallback
-                    )
+                    is Expected.Failure -> {
+                        val currentSpeechError = consumer.error
+                        Log.e(
+                            "VoiceActivity",
+                            "Error playing the voice instruction: " +
+                                "${currentSpeechError.errorMessage}"
+                        )
+                        voiceInstructionsPlayer?.play(
+                            currentSpeechError.fallback,
+                            voiceInstructionsPlayerCallback
+                        )
+                    }
                 }
             }
         }
-    }
 
     private val voiceInstructionsObserver = object : VoiceInstructionsObserver {
         override fun onNewVoiceInstructions(voiceInstructions: VoiceInstructions) {
