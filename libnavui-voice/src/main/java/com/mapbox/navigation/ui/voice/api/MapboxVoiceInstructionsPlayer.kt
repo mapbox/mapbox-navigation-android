@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.voice.api
 import android.content.Context
 import android.media.AudioManager
 import androidx.annotation.UiThread
+import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
@@ -41,8 +42,8 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
                 audioFocusDelegate.abandonFocus()
                 val currentPlayCallback = playCallbackQueue.poll()
                 val currentAnnouncement = currentPlayCallback.announcement
-                val currentClientCallback = currentPlayCallback.callback
-                currentClientCallback.onDone(currentAnnouncement)
+                val currentClientCallback = currentPlayCallback.consumer
+                currentClientCallback.accept(currentAnnouncement)
                 play()
             }
         }
@@ -58,13 +59,13 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
      * the given voice instruction will be queued to play after.
      * @param announcement object including the announcement text
      * and optionally a synthesized speech mp3.
-     * @param callback
+     * @param consumer represents that the speech player is done playing
      */
     fun play(
         announcement: SpeechAnnouncement,
-        callback: VoiceInstructionsPlayerCallback
+        consumer: MapboxNavigationConsumer<SpeechAnnouncement>
     ) {
-        playCallbackQueue.add(PlayCallback(announcement, callback))
+        playCallbackQueue.add(PlayCallback(announcement, consumer))
         if (playCallbackQueue.size == 1) {
             play()
         }

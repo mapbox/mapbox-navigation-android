@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.voice.api
 import android.content.Context
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.VoiceAction
 import com.mapbox.navigation.ui.voice.VoiceProcessor
 import com.mapbox.navigation.ui.voice.VoiceResult
@@ -44,13 +45,18 @@ class MapboxSpeechApi @JvmOverloads constructor(
      * voice instruction [SpeechAnnouncement] including the synthesized speech mp3 file
      * from Mapbox's API Voice.
      * @param voiceInstruction VoiceInstructions object representing [VoiceInstructions]
-     * @param callback SpeechCallback
+     * @param consumer is a [SpeechValue] including the announcement to be played when the
+     * announcement is ready or a [SpeechError] including the error information and a fallback
+     * with the raw announcement (without file) that can be played with a text-to-speech engine.
      * @see [cancel]
      */
-    fun generate(voiceInstruction: VoiceInstructions, callback: SpeechCallback) {
+    fun generate(
+        voiceInstruction: VoiceInstructions,
+        consumer: MapboxNavigationConsumer<Expected<SpeechValue, SpeechError>>
+    ) {
         currentVoiceFileJob?.cancel()
         currentVoiceFileJob = mainJobController.scope.launch {
-            retrieveVoiceFile(voiceInstruction, callback)
+            retrieveVoiceFile(voiceInstruction, consumer)
         }
     }
 
@@ -73,7 +79,7 @@ class MapboxSpeechApi @JvmOverloads constructor(
 
     private suspend fun retrieveVoiceFile(
         voiceInstruction: VoiceInstructions,
-        callback: SpeechCallback
+        consumer: MapboxNavigationConsumer<Expected<SpeechValue, SpeechError>>
     ) {
         when (val result = voiceAPI.retrieveVoiceFile(voiceInstruction)) {
             is VoiceState.VoiceResponse -> {
@@ -84,7 +90,7 @@ class MapboxSpeechApi @JvmOverloads constructor(
             is VoiceState.VoiceFile -> {
                 val announcement = voiceInstruction.announcement()
                 val ssmlAnnouncement = voiceInstruction.ssmlAnnouncement()
-                callback.onSpeech(
+                consumer.accept(
                     Expected.Success(
                         SpeechValue(
                             // Can't be null as it's checked in retrieveVoiceFile
@@ -100,7 +106,7 @@ class MapboxSpeechApi @JvmOverloads constructor(
                 processVoiceAnnouncement(
                     voiceInstruction
                 ) { available ->
-                    callback.onSpeech(
+                    consumer.accept(
                         Expected.Failure(
                             SpeechError(
                                 result.exception,
