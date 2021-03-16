@@ -134,7 +134,7 @@ public class SpeedLimitView extends ConstraintLayout implements LifecycleObserve
 
   private LayerDrawable getSpeedDrawable(SpeedLimitSign speedLimitSign) {
     LayerDrawable layerDrawable;
-    if (speedLimitSign == SpeedLimitSign.VIENNA) {
+    if (speedLimitSign == SpeedLimitSign.MUTCD) {
       GradientDrawable[] layers = {
           backgroundDrawable(GradientDrawable.RECTANGLE),
           borderDrawable(GradientDrawable.RECTANGLE),
@@ -196,7 +196,7 @@ public class SpeedLimitView extends ConstraintLayout implements LifecycleObserve
 
   @SuppressLint("DefaultLocale")
   private String getSpeedLimit(SpeedLimitSign sign, SpeedLimitUnit unit, int speedLimitKmph) {
-    if (sign == SpeedLimitSign.VIENNA) {
+    if (sign == SpeedLimitSign.MUTCD) {
       if (unit == SpeedLimitUnit.KILOMETRES_PER_HOUR) {
         return getContext().getString(R.string.max_speed, speedLimitKmph);
       } else {
