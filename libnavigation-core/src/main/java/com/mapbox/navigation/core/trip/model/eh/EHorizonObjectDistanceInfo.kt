@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.trip.model.eh
 
-import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
+import com.mapbox.navigation.core.trip.model.roadobject.RoadObjectType
 
 /**
  * EHorizonObjectDistanceInfo

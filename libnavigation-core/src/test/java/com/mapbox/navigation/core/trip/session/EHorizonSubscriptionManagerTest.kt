@@ -51,8 +51,8 @@ class EHorizonSubscriptionManagerTest {
     fun setUp() {
         mockkObject(ThreadController)
         every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
-        mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapperKt")
-        mockkStatic("com.mapbox.navigation.core.trip.model.eh.EHorizonMapperKt")
+        mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
+        mockkStatic("com.mapbox.navigation.core.trip.model.eh.EHorizonMapper")
         coEvery { roadObjectEnterExitInfo.mapToEHorizonObjectEnterExitInfo() } coAnswers
             { eHorizonObjectEnterExitInfo }
         coEvery { electronicHorizonPosition.mapToEHorizonPosition() } coAnswers
@@ -64,8 +64,8 @@ class EHorizonSubscriptionManagerTest {
     @After
     fun cleanUp() {
         unmockkObject(ThreadController)
-        unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapperKt")
-        unmockkStatic("com.mapbox.navigation.core.trip.model.eh.EHorizonMapperKt")
+        unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
+        unmockkStatic("com.mapbox.navigation.core.trip.model.eh.EHorizonMapper")
         subscriptionManager.unregisterAllObservers()
     }
 

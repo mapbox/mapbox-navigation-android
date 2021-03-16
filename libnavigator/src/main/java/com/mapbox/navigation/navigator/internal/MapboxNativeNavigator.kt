@@ -1,6 +1,5 @@
 package com.mapbox.navigation.navigator.internal
 
-import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.bindgen.Expected
@@ -12,6 +11,7 @@ import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.ElectronicHorizonObserver
+import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigatorConfig
@@ -19,6 +19,7 @@ import com.mapbox.navigator.OpenLRDecoder
 import com.mapbox.navigator.PredictiveCacheController
 import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
+import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
@@ -59,11 +60,11 @@ interface MapboxNativeNavigator {
     /**
      * Passes in the current raw location of the user.
      *
-     * @param rawLocation The current raw [Location] of user.
+     * @param rawLocation The current raw [FixLocation] of user.
      *
      * @return true if the raw location was usable, false if not.
      */
-    suspend fun updateLocation(rawLocation: Location): Boolean
+    suspend fun updateLocation(rawLocation: FixLocation): Boolean
 
     /**
      * Passes in the current sensor data of the user.
@@ -106,7 +107,7 @@ interface MapboxNativeNavigator {
     suspend fun setRoute(
         route: DirectionsRoute?,
         legIndex: Int = INDEX_FIRST_LEG
-    ): RouteInitInfo?
+    ): RouteInfo?
 
     /**
      * Updates annotations so that subsequent calls to getStatus will
@@ -286,6 +287,4 @@ interface MapboxNativeNavigator {
     val roadObjectsStore: RoadObjectsStore?
 
     val openLRDecoder: OpenLRDecoder?
-
-    val navigatorMapper: NavigatorMapper
 }

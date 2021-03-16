@@ -7,6 +7,12 @@ import com.mapbox.navigation.base.trip.model.roadobject.RoadObject
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.navigator.getBorderCrossingInfo
+import com.mapbox.navigation.core.navigator.getIncidentInfo
+import com.mapbox.navigation.core.navigator.getRestStopType
+import com.mapbox.navigation.core.navigator.getRoadObject
+import com.mapbox.navigation.core.navigator.getTollCollectionType
+import com.mapbox.navigation.core.navigator.getTunnelInfo
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectDistanceInfo
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectEdgeLocation
 import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectLocation
@@ -50,17 +56,15 @@ class RoadObjectsStore internal constructor(
      */
     fun getRoadObjectMetadata(roadObjectId: String): EHorizonObjectMetadata? {
         return navigator.roadObjectsStore?.getRoadObjectMetadata(roadObjectId)?.let {
-            navigator.navigatorMapper.run {
-                EHorizonObjectMetadata(
-                    it.type.mapToRoadObjectType(),
-                    it.provider.mapToEHorizonObjectProvider(),
-                    getIncidentInfo(it.incident),
-                    getTunnelInfo(it.tunnelInfo),
-                    getBorderCrossingInfo(it.borderCrossingInfo),
-                    getTollCollectionType(it.tollCollectionInfo),
-                    getRestStopType(it.serviceAreaInfo),
-                )
-            }
+            EHorizonObjectMetadata(
+                it.type.mapToRoadObjectType(),
+                it.provider.mapToEHorizonObjectProvider(),
+                getIncidentInfo(it.incident),
+                getTunnelInfo(it.tunnelInfo),
+                getBorderCrossingInfo(it.borderCrossingInfo),
+                getTollCollectionType(it.tollCollectionInfo),
+                getRestStopType(it.serviceAreaInfo),
+            )
         }
     }
 
@@ -150,7 +154,7 @@ class RoadObjectsStore internal constructor(
                 null
             ).build()
 
-            navigator.navigatorMapper.getRoadObject(nonNullMetadata, geometry)
+            getRoadObject(nonNullMetadata, geometry)
         }
     }
 

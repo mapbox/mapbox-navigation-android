@@ -1,5 +1,7 @@
 package com.mapbox.navigation.core.trip.model.eh
 
+import androidx.annotation.StringDef
+
 /**
  * Holds available [RoadClass] types. See https://wiki.openstreetmap.org/wiki/Key:highway for further details.
  *
@@ -54,4 +56,20 @@ object RoadClass {
      * Describes a service other FRC.
      */
     const val SERVICE_OTHER = "SERVICE_OTHER"
+
+    /**
+     * Road class type.
+     */
+    @Retention
+    @StringDef(
+        MOTORWAY,
+        TRUNK,
+        PRIMARY,
+        SECONDARY,
+        TERTIARY,
+        UNCLASSIFIED,
+        RESIDENTIAL,
+        SERVICE_OTHER
+    )
+    annotation class Type
 }
