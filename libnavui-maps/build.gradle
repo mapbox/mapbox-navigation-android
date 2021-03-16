@@ -27,6 +27,10 @@ android {
         consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro"
     }
 
+    buildFeatures {
+        viewBinding true
+    }
+
     testOptions {
         unitTests.returnDefaultValues = true
         unitTests.includeAndroidResources = true
@@ -35,6 +39,7 @@ android {
 
 dependencies {
     api project(":libnavui-base")
+    api project(":libnavui-resources")
 
     api dependenciesList.mapboxMapSdk
     api dependenciesList.mapboxSdkTurf
@@ -42,6 +47,7 @@ dependencies {
     implementation dependenciesList.androidXAppCompat
     implementation dependenciesList.androidXCardView
     implementation dependenciesList.androidXConstraintLayout
+    implementation dependenciesList.materialDesign
     implementation dependenciesList.kotlinStdLib
 
     implementation dependenciesList.timber

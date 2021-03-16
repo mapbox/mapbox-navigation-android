@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MapboxRouteOverviewButton">
+        <!-- Defines the drawable representing route overview. -->
+        <attr name="overviewButtonDrawable" format="reference" />
+    </declare-styleable>
+</resources>
