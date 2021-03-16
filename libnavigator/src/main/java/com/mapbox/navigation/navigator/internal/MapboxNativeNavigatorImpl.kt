@@ -1,6 +1,5 @@
 package com.mapbox.navigation.navigator.internal
 
-import android.location.Location
 import android.os.SystemClock
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.Logger
@@ -16,11 +15,10 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.navigator.ActiveGuidanceOptionsMapper
-import com.mapbox.navigation.navigator.toFixLocation
-import com.mapbox.navigation.navigator.toLocation
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.ElectronicHorizonObserver
+import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.NavigationStatus
@@ -32,7 +30,7 @@ import com.mapbox.navigator.PredictiveCacheControllerOptions
 import com.mapbox.navigator.PredictiveLocationTrackerOptions
 import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
-import com.mapbox.navigator.RouteState
+import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.Router
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterResult
@@ -68,7 +66,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private var historyRecorderHandle: HistoryRecorderHandle? = null
     private var route: DirectionsRoute? = null
     private var routeBufferGeoJson: Geometry? = null
-    override val navigatorMapper = NavigatorMapper()
     override var graphAccessor: GraphAccessor? = null
     override var openLRDecoder: OpenLRDecoder? = null
     override var roadObjectsStore: RoadObjectsStore? = null
@@ -110,13 +107,13 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     /**
      * Passes in the current raw location of the user.
      *
-     * @param rawLocation The current raw [Location] of user.
+     * @param rawLocation The current raw [FixLocation] of user.
      *
      * @return true if the raw location was usable, false if not.
      */
-    override suspend fun updateLocation(rawLocation: Location): Boolean =
+    override suspend fun updateLocation(rawLocation: FixLocation): Boolean =
         withContext(NavigatorDispatcher) {
-            navigator!!.updateLocation(rawLocation.toFixLocation())
+            navigator!!.updateLocation(rawLocation)
         }
 
     /**
@@ -150,19 +147,9 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 navigatorPredictionMillis
             )
             val status = navigator!!.getStatus(nanos)
-            val remainingWaypoints = ifNonNull(route?.routeOptions()?.coordinates()?.size) {
-                it - status.nextWaypointIndex
-            } ?: 0
             TripStatus(
-                status.location.toLocation(),
-                status.key_points.map { it.toLocation() },
-                navigatorMapper.getRouteProgress(
-                    route,
-                    routeBufferGeoJson,
-                    status,
-                    remainingWaypoints
-                ),
-                status.routeState == RouteState.OFF_ROUTE,
+                route,
+                routeBufferGeoJson,
                 status
             )
         }
@@ -183,7 +170,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override suspend fun setRoute(
         route: DirectionsRoute?,
         legIndex: Int
-    ): RouteInitInfo? =
+    ): RouteInfo? =
         withContext(NavigatorDispatcher) {
             MapboxNativeNavigatorImpl.route = route
             val result = navigator!!.setRoute(
@@ -191,7 +178,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 PRIMARY_ROUTE_INDEX,
                 legIndex,
                 ActiveGuidanceOptionsMapper.mapFrom(route)
-            ).let { navigatorMapper.getRouteInitInfo(it.value) }
+            ).let { it.value }
 
             val geometryWithBuffer = getRouteGeometryWithBuffer(GRID_SIZE, BUFFER_DILATION)
             routeBufferGeoJson = ifNonNull(geometryWithBuffer) {

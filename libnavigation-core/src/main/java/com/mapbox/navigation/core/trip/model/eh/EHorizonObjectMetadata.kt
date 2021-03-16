@@ -1,9 +1,9 @@
 package com.mapbox.navigation.core.trip.model.eh
 
-import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
-import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingInfo
-import com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo
-import com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo
+import com.mapbox.navigation.core.trip.model.roadobject.RoadObjectType
+import com.mapbox.navigation.core.trip.model.roadobject.border.CountryBorderCrossingInfo
+import com.mapbox.navigation.core.trip.model.roadobject.incident.IncidentInfo
+import com.mapbox.navigation.core.trip.model.roadobject.tunnel.TunnelInfo
 
 /**
  * RoadObject metadata

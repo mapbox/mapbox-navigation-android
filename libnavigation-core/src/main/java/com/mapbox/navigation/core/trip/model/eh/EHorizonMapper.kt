@@ -1,3 +1,5 @@
+@file:JvmName("EHorizonMapper")
+
 package com.mapbox.navigation.core.trip.model.eh
 
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -19,7 +21,7 @@ import com.mapbox.navigator.Standard
 import kotlinx.coroutines.withContext
 
 private typealias SDKRoadObjectType =
-    com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
+    com.mapbox.navigation.core.trip.model.roadobject.RoadObjectType
 
 /**
  * Map the ElectronicHorizonPosition.
