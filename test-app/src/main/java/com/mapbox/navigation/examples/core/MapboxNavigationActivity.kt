@@ -60,6 +60,7 @@ import com.mapbox.navigation.ui.maneuver.model.StepDistanceError
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
+import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
@@ -314,6 +315,9 @@ class MapboxNavigationActivity :
             binding.mapView.getCameraAnimationsPlugin(),
             viewportDataSource
         )
+        binding.mapView.getCameraAnimationsPlugin().addCameraAnimationsLifecycleListener(
+            NavigationBasicGesturesHandler(navigationCamera)
+        )
         init()
         tripProgressApi = MapboxTripProgressApi(getTripProgressFormatter())
         maneuverApi = MapboxManeuverApi(
@@ -398,12 +402,18 @@ class MapboxNavigationActivity :
         binding.start.setOnClickListener {
             startNavigation()
             binding.start.visibility = GONE
+            binding.routeOverview.visibility = VISIBLE
             binding.tripProgressCard.visibility = VISIBLE
         }
         binding.stop.setOnClickListener {
             stopNavigation()
             binding.maneuverView.visibility = GONE
+            binding.routeOverview.visibility = GONE
             binding.tripProgressCard.visibility = GONE
+        }
+        binding.routeOverview.setOnClickListener {
+            binding.routeOverview.showTextAndExtend(2000L)
+            updateCameraToOverview()
         }
     }
 

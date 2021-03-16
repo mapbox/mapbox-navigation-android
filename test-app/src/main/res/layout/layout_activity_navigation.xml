@@ -64,4 +64,14 @@
       android:visibility="gone"
       />
 
+  <com.mapbox.navigation.ui.maps.camera.view.MapboxRouteOverviewButton
+      android:id="@+id/routeOverview"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:visibility="gone"
+      android:layout_marginTop="@dimen/mapbox_dimen_8dp"
+      app:layout_constraintEnd_toEndOf="@id/maneuverView"
+      app:layout_constraintTop_toBottomOf="@id/maneuverView"
+      />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/routeOverviewText"
+        android:layout_height="@dimen/mapbox_dimen_56dp"
+        android:layout_width="@dimen/mapbox_dimen_56dp"
+        android:paddingStart="@dimen/mapbox_dimen_20dp"
+        android:paddingEnd="@dimen/mapbox_dimen_4dp"
+        android:elevation="0dp"
+        android:textSize="@dimen/mapbox_dimen_text_14sp"
+        android:textAllCaps="true"
+        android:gravity="start|center_vertical"
+        app:layout_constraintEnd_toEndOf="@id/routeOverviewIcon"
+        app:layout_constraintTop_toTopOf="@id/routeOverviewIcon"
+        app:layout_constraintBottom_toBottomOf="@id/routeOverviewIcon"
+        android:background="@drawable/mapbox_bg_circle"
+        android:textColor="@color/colorOnSurface" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/routeOverviewIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:elevation="0dp"
+        app:fabSize="normal"
+        android:layout_marginTop="@dimen/mapbox_dimen_4dp"
+        android:layout_marginEnd="@dimen/mapbox_dimen_4dp"
+        app:rippleColor="@android:color/transparent"
+        app:backgroundTint="@color/colorSurface"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+</merge>
