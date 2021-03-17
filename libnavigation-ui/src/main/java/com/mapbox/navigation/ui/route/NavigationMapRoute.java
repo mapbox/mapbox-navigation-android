@@ -50,9 +50,9 @@ import static com.mapbox.navigation.ui.route.MapboxRouteLayerProviderFactory.get
  * <p>
  * You are given the option when first constructing an instance of this class to pass in a style
  * resource. This allows for custom colorizing and line scaling of the route. Inside your
- * applications {@code style.xml} file, you extend {@code <style name="NavigationMapRoute">} and
- * change some or all the options currently offered. If no style files provided in the constructor,
- * the default style will be used.
+ * applications {@code style.xml} file, you extend
+ * {@code <style name="MapboxStyleNavigationMapRoute">} and change some or all the options currently
+ * offered. If no style files provided in the constructor, the default style will be used.
  */
 @UiThread
 public class NavigationMapRoute implements LifecycleObserver {
