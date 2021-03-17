@@ -75,30 +75,6 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
-    fun getTrafficLineExpressionDuplicateOffsetsRemoved() {
-        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.7868200761181402, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.7930120224665551, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.7932530928525063, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.7964017663976524, [rgba, 86.0, 168.0, 251.0, 1.0]]"
-        val expressionDatas = listOf(
-            RouteLineExpressionData(0.7868200761181402, -11097861),
-            RouteLineExpressionData(0.7930120224665551, -11097861),
-            RouteLineExpressionData(0.7932530928525063, -11097861),
-            RouteLineExpressionData(0.7932530928525063, -11097861),
-            RouteLineExpressionData(0.7964017663976524, -11097861)
-        )
-
-        val result = MapboxRouteLineUtils.getTrafficLineExpression(
-            0.0,
-            expressionDatas,
-            -11097861
-        )
-
-        assertEquals(result.toString(), expectedExpression)
-    }
-
-    @Test
     fun getVanishingRouteLineExpressionTest() {
         val expectedExpression = "[step, [line-progress], [rgba, 255.0, 77.0, 77.0, 1.0]" +
             ", 3.0, [rgba, 86.0, 168.0, 251.0, 1.0]]"
