@@ -10,7 +10,6 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -39,6 +38,9 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
+import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.replay.ReplayLocationEngine
+import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.MapMatcherResult
@@ -46,6 +48,7 @@ import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityNavigationBinding
+import com.mapbox.navigation.examples.core.waypoints.WaypointsController
 import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
@@ -109,7 +112,10 @@ class MapboxNavigationActivity :
     private var routeLineView: MapboxRouteLineView? = null
     private var routeArrowView: MapboxRouteArrowView? = null
     private var voiceInstructionsPlayer: MapboxVoiceInstructionsPlayer? = null
+    private val mapboxReplayer: MapboxReplayer = MapboxReplayer()
+    private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
     private val routeArrowAPI: MapboxRouteArrowApi = MapboxRouteArrowApi()
+    private val waypointsController = WaypointsController()
     private val navigationLocationProvider = NavigationLocationProvider()
     private val pixelDensity = Resources.getSystem().displayMetrics.density
     private val overviewEdgeInsets: EdgeInsets by lazy {
@@ -369,6 +375,7 @@ class MapboxNavigationActivity :
         super.onDestroy()
         binding.mapView.onDestroy()
         if (::mapboxNavigation.isInitialized) {
+            mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
             mapboxNavigation.unregisterRoutesObserver(routesObserver)
             mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
             mapboxNavigation.unregisterMapMatcherResultObserver(mapMatcherResultObserver)
@@ -388,11 +395,8 @@ class MapboxNavigationActivity :
     override fun onMapLongClick(point: Point): Boolean {
         val currentLocation = navigationLocationProvider.lastLocation
         if (currentLocation != null) {
-            val originPoint = Point.fromLngLat(
-                currentLocation.longitude,
-                currentLocation.latitude
-            )
-            findRoute(originPoint, point)
+            waypointsController.add(point)
+            findRoute(Point.fromLngLat(currentLocation.longitude, currentLocation.latitude))
         }
         return false
     }
@@ -457,7 +461,7 @@ class MapboxNavigationActivity :
         mapboxNavigation = MapboxNavigation(
             NavigationOptions.Builder(this)
                 .accessToken(getMapboxAccessTokenFromResources())
-                .locationEngine(LocationEngineProvider.getBestLocationEngine(this))
+                .locationEngine(ReplayLocationEngine(mapboxReplayer))
                 .build()
         ).apply {
             registerLocationObserver(object : LocationObserver {
@@ -480,6 +484,9 @@ class MapboxNavigationActivity :
                 ) {
                 }
             })
+            mapboxReplayer.pushRealLocation(this@MapboxNavigationActivity, 0.0)
+            mapboxReplayer.play()
+            registerRouteProgressObserver(replayProgressObserver)
             registerRoutesObserver(routesObserver)
             registerRouteProgressObserver(routeProgressObserver)
             registerMapMatcherResultObserver(mapMatcherResultObserver)
@@ -502,12 +509,12 @@ class MapboxNavigationActivity :
         )
     }
 
-    private fun findRoute(origin: Point, destination: Point) {
+    private fun findRoute(origin: Point) {
         mapboxNavigation.requestRoutes(
             RouteOptions.builder()
                 .applyDefaultParams()
                 .accessToken(getMapboxAccessTokenFromResources())
-                .coordinates(listOf(origin, destination))
+                .coordinates(waypointsController.coordinates(origin))
                 .alternatives(true)
                 .build()
         )
