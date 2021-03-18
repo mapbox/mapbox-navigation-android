@@ -74,7 +74,7 @@ class MapboxDistanceFormatter(
         val resources = options.applicationContext.resourcesWithLocale(options.locale)
         val unitStringSuffix = getUnitString(resources, smallUnit)
 
-        if (distance <= 0) {
+        if (distance < 0) {
             return Pair("0", unitStringSuffix)
         }
 
@@ -85,7 +85,12 @@ class MapboxDistanceFormatter(
         )
 
         val roundedValue = if (options.roundingIncrement > 0) {
-            distanceUnit.roundToInt() / options.roundingIncrement * options.roundingIncrement
+            val roundedDistance = distanceUnit.roundToInt()
+            if (roundedDistance < options.roundingIncrement) {
+                options.roundingIncrement
+            } else {
+                roundedDistance / options.roundingIncrement * options.roundingIncrement
+            }
         } else {
             distanceUnit.roundToInt()
         }.toString()

@@ -258,7 +258,7 @@ class MapboxDistanceFormatterTest {
                 .build()
         ).formatDistance(-0.1)
 
-        assertEquals("0 ft", result.toString())
+        assertEquals("$INCREMENT_FIFTY ft", result.toString())
     }
 
     @Config(qualifiers = "en-rUS")
@@ -307,5 +307,31 @@ class MapboxDistanceFormatterTest {
         ).formatDistance(55.3)
 
         assertEquals("181 ft", result.toString())
+    }
+
+    @Config(qualifiers = "en")
+    @Test
+    fun formatDistanceZero() {
+        val result = MapboxDistanceFormatter(
+            DistanceFormatterOptions.Builder(ctx)
+                .unitType(IMPERIAL)
+                .roundingIncrement(5)
+                .build()
+        ).formatDistance(0.0)
+
+        assertEquals("5 ft", result.toString())
+    }
+
+    @Config(qualifiers = "en")
+    @Test
+    fun formatDistanceZeroMetric() {
+        val result = MapboxDistanceFormatter(
+            DistanceFormatterOptions.Builder(ctx)
+                .unitType(METRIC)
+                .roundingIncrement(2)
+                .build()
+        ).formatDistance(0.0)
+
+        assertEquals("2 m", result.toString())
     }
 }
