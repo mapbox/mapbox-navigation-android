@@ -5,7 +5,9 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class BannerInstructionEventTest {
@@ -17,8 +19,9 @@ class BannerInstructionEventTest {
         val anyBannerInstructions: BannerInstructions = mockk()
         every { mockedRouteProgress.bannerInstructions } returns anyBannerInstructions
 
-        bannerInstructionEvent.isOccurring(mockedRouteProgress)
+        val isOccurring = bannerInstructionEvent.isOccurring(mockedRouteProgress)
 
+        assertTrue(isOccurring)
         assertEquals(anyBannerInstructions, bannerInstructionEvent.bannerInstructions)
     }
 
@@ -29,8 +32,9 @@ class BannerInstructionEventTest {
         val nullBannerInstructions: BannerInstructions? = null
         every { mockedRouteProgress.bannerInstructions } returns nullBannerInstructions
 
-        bannerInstructionEvent.isOccurring(mockedRouteProgress)
+        val isOccurring = bannerInstructionEvent.isOccurring(mockedRouteProgress)
 
+        assertFalse(isOccurring)
         assertNull(bannerInstructionEvent.bannerInstructions)
     }
 
@@ -41,8 +45,9 @@ class BannerInstructionEventTest {
         val anyBannerInstructions: BannerInstructions = mockk()
         every { mockedRouteProgress.bannerInstructions } returns anyBannerInstructions
 
-        bannerInstructionEvent.isOccurring(mockedRouteProgress)
+        val isOccurring = bannerInstructionEvent.isOccurring(mockedRouteProgress)
 
+        assertTrue(isOccurring)
         assertEquals(anyBannerInstructions, bannerInstructionEvent.latestBannerInstructions)
     }
 
@@ -53,8 +58,9 @@ class BannerInstructionEventTest {
         val nullBannerInstructions: BannerInstructions? = null
         every { mockedRouteProgress.bannerInstructions } returns nullBannerInstructions
 
-        bannerInstructionEvent.isOccurring(mockedRouteProgress)
+        val isOccurring = bannerInstructionEvent.isOccurring(mockedRouteProgress)
 
+        assertFalse(isOccurring)
         assertNull(bannerInstructionEvent.latestBannerInstructions)
     }
 
@@ -68,9 +74,32 @@ class BannerInstructionEventTest {
             mockedNonNullBannerInstructionsRouteProgress.bannerInstructions
         } returns nonNullBannerInstructions andThen nullBannerInstructions
 
-        bannerInstructionEvent.isOccurring(mockedNonNullBannerInstructionsRouteProgress)
-        bannerInstructionEvent.isOccurring(mockedNonNullBannerInstructionsRouteProgress)
+        val isOccurringNonNullBannerInstructions =
+            bannerInstructionEvent.isOccurring(mockedNonNullBannerInstructionsRouteProgress)
+        val isOccurringNullBannerInstructions =
+            bannerInstructionEvent.isOccurring(mockedNonNullBannerInstructionsRouteProgress)
 
+        assertTrue(isOccurringNonNullBannerInstructions)
+        assertFalse(isOccurringNullBannerInstructions)
+        assertEquals(nonNullBannerInstructions, bannerInstructionEvent.latestBannerInstructions)
+    }
+
+    @Test
+    fun `isOccurring doesn't update current latestBannerInstructions if same instructions`() {
+        val bannerInstructionEvent = BannerInstructionEvent()
+        val mockedNonNullBannerInstructionsRouteProgress: RouteProgress = mockk()
+        val nonNullBannerInstructions: BannerInstructions = mockk()
+        every {
+            mockedNonNullBannerInstructionsRouteProgress.bannerInstructions
+        } returns nonNullBannerInstructions andThen nonNullBannerInstructions
+
+        val isOccurringNonNullBannerInstructions =
+            bannerInstructionEvent.isOccurring(mockedNonNullBannerInstructionsRouteProgress)
+        val isOccurringNullBannerInstructions =
+            bannerInstructionEvent.isOccurring(mockedNonNullBannerInstructionsRouteProgress)
+
+        assertTrue(isOccurringNonNullBannerInstructions)
+        assertFalse(isOccurringNullBannerInstructions)
         assertEquals(nonNullBannerInstructions, bannerInstructionEvent.latestBannerInstructions)
     }
 
