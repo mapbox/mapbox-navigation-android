@@ -2,6 +2,24 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.2 - March 19, 2021
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Bug fixes and improvements
+- Fix the issue that origin icon and destination icons are same. [#4115](https://github.com/mapbox/mapbox-navigation-android/pull/4115)
+- Fixes maneuver list cut in landscape mode. [#4124](https://github.com/mapbox/mapbox-navigation-android/pull/4124)
+- Refactor signboard and alter api. [#4125](https://github.com/mapbox/mapbox-navigation-android/pull/4125)
+- Fixes using the incorrect color the traveled route line casing. [#4128](https://github.com/mapbox/mapbox-navigation-android/pull/4128)
+- Added scaling options for the alternative route lines in the RouteLineResources class. [#4129](https://github.com/mapbox/mapbox-navigation-android/pull/4129)
+- Refactor snapshotter. [#4132](https://github.com/mapbox/mapbox-navigation-android/pull/4132)
+- Exposed option to override alternative route color based on route identifier. [#4137](https://github.com/mapbox/mapbox-navigation-android/pull/4137)
+- Refactored Voice module to use `MapboxNavigationConsumer` generic callback. [#4138](https://github.com/mapbox/mapbox-navigation-android/pull/4138)
+- Refactored moved nav-native -> SDK type mapping and `roadobject` models to core module. [#4141](https://github.com/mapbox/mapbox-navigation-android/pull/4141)
+- Introduce route overview button. [#4142](https://github.com/mapbox/mapbox-navigation-android/pull/4142)
+- Fix logical error in speed limit view. [#4143](https://github.com/mapbox/mapbox-navigation-android/pull/4143)
+- Fixed banner instruction and route progress mismatch when in multi-leg scenarios. [#4154](https://github.com/mapbox/mapbox-navigation-android/pull/4154)
+
 ## Mapbox Navigation SDK 1.5.0-alpha.2 - February 19, 2021
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
