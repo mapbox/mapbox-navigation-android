@@ -2,7 +2,6 @@ package com.mapbox.navigation.core.trip.session
 
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.utils.internal.ifNonNull
 
 internal class BannerInstructionEvent {
 
@@ -12,16 +11,18 @@ internal class BannerInstructionEvent {
     var latestBannerInstructions: BannerInstructions? = null
         private set
 
-    fun isOccurring(routeProgress: RouteProgress) = updateCurrentBanner(routeProgress)
+    fun isOccurring(routeProgress: RouteProgress): Boolean = updateCurrentBanner(routeProgress)
 
     fun invalidateLatestBannerInstructions() {
         latestBannerInstructions = null
     }
 
-    private fun updateCurrentBanner(routeProgress: RouteProgress) {
+    private fun updateCurrentBanner(routeProgress: RouteProgress): Boolean {
         bannerInstructions = routeProgress.bannerInstructions
-        ifNonNull(bannerInstructions) {
-            latestBannerInstructions = it
+        if (bannerInstructions != null && bannerInstructions!! != latestBannerInstructions) {
+            latestBannerInstructions = bannerInstructions
+            return true
         }
+        return false
     }
 }

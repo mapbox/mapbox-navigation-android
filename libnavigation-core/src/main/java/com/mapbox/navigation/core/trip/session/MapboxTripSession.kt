@@ -408,6 +408,7 @@ internal class MapboxTripSession(
      * @return an initialized [NavigationStatus] if no errors, invalid otherwise
      */
     override fun updateLegIndex(legIndex: Int): Boolean {
+        invalidateLatestBannerInstructionEvent()
         return navigator.updateLegIndex(legIndex)
     }
 
@@ -552,10 +553,11 @@ internal class MapboxTripSession(
         tripService.updateNotification(progress)
         progress?.let { progress ->
             routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
-            bannerInstructionEvent.isOccurring(progress)
-            checkBannerInstructionEvent { bannerInstruction ->
-                bannerInstructionsObservers.forEach {
-                    it.onNewBannerInstructions(bannerInstruction)
+            if (bannerInstructionEvent.isOccurring(progress)) {
+                checkBannerInstructionEvent { bannerInstruction ->
+                    bannerInstructionsObservers.forEach {
+                        it.onNewBannerInstructions(bannerInstruction)
+                    }
                 }
             }
             checkVoiceInstructionEvent(progress.voiceInstructions) { voiceInstruction ->
