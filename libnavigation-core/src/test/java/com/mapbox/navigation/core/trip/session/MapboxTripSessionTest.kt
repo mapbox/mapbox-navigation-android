@@ -9,7 +9,6 @@ import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
-import com.mapbox.api.directions.v5.models.BannerView
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
@@ -943,70 +942,6 @@ class MapboxTripSessionTest {
         tripSession.route = mockk(relaxed = true)
 
         verify(exactly = 1) { roadObjectsObserver.onNewRoadObjects(roadObjects) }
-    }
-
-    @Test
-    fun guidanceViewURLWithNoAccessToken() = coroutineRule.runBlockingTest {
-        val bannerInstructionsObserver: BannerInstructionsObserver = mockk(relaxUnitFun = true)
-        val bannerInstructions: BannerInstructions = mockk()
-        val bannerView: BannerView = mockk()
-        val bannerComponent = getBannerComponent()
-        val bannerComponentsList: MutableList<BannerComponents> = mutableListOf(bannerComponent)
-
-        every { routeProgress.bannerInstructions } returns bannerInstructions
-        every { routeProgress.bannerInstructions?.view() } returns bannerView
-        every {
-            routeProgress.bannerInstructions?.view()?.components()
-        } returns bannerComponentsList
-        every { routeProgress.voiceInstructions } returns null
-        every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
-
-        tripSession = buildTripSession(accessToken = null)
-        tripSession.start()
-        tripSession.registerBannerInstructionsObserver(bannerInstructionsObserver)
-
-        updateLocationAndJoin()
-
-        assertEquals(
-            "https://api.mapbox.com/guidance-views/v1/1580515200/jct/CB211101?arrow_ids=" +
-                "CB21110A&access_token=null",
-            bannerComponentsList[0].imageUrl()
-        )
-
-        tripSession.unregisterAllBannerInstructionsObservers()
-        tripSession.stop()
-    }
-
-    @Test
-    fun guidanceViewURLWithAccessToken() = coroutineRule.runBlockingTest {
-        val bannerInstructionsObserver: BannerInstructionsObserver = mockk(relaxUnitFun = true)
-        val bannerInstructions: BannerInstructions = mockk()
-        val bannerView: BannerView = mockk()
-        val bannerComponent = getBannerComponent()
-        val bannerComponentsList: MutableList<BannerComponents> = mutableListOf(bannerComponent)
-
-        every { routeProgress.bannerInstructions } returns bannerInstructions
-        every { routeProgress.bannerInstructions?.view() } returns bannerView
-        every {
-            routeProgress.bannerInstructions?.view()?.components()
-        } returns bannerComponentsList
-        every { routeProgress.voiceInstructions } returns null
-        every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
-
-        tripSession = buildTripSession()
-        tripSession.start()
-        tripSession.registerBannerInstructionsObserver(bannerInstructionsObserver)
-
-        updateLocationAndJoin()
-
-        assertEquals(
-            "https://api.mapbox.com/guidance-views/v1/1580515200/jct/CB211101?arrow_ids=" +
-                "CB21110A&access_token=pk.1234",
-            bannerComponentsList[0].imageUrl()
-        )
-
-        tripSession.unregisterAllBannerInstructionsObservers()
-        tripSession.stop()
     }
 
     @Test

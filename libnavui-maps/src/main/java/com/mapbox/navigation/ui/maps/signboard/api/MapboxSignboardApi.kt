@@ -17,7 +17,7 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import kotlinx.coroutines.launch
 
 /**
- * Implementation of [SignboardApi] allowing you to generate signboard for select maneuvers.
+ * Mapbox Signboard Api allows you to generate signboard for select maneuvers.
  * @property accessToken String
  */
 class MapboxSignboardApi(

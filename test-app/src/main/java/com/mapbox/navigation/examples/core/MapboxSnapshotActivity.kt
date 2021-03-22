@@ -255,18 +255,20 @@ class MapboxSnapshotActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     /**
-     * Returns the Mapbox access token set in the app resources.
+     * Uses a specific access token required for the route request to send snapshots in the response.
+     * If the specific access token is not present, it defaults to access token required to render
+     * Maps.
      *
      * @param context The [Context] of the [android.app.Activity] or [android.app.Fragment].
      * @return The Mapbox access token or null if not found.
      */
     private fun getMapboxRouteAccessToken(context: Context): String {
         val tokenResId = context.resources
-            .getIdentifier("mapbox_route_token", "string", context.packageName)
+            .getIdentifier("mapbox_access_token_snapshot", "string", context.packageName)
         return if (tokenResId != 0) {
             context.getString(tokenResId)
         } else {
-            throw RuntimeException("mapbox_route_token needed (see code comments for details)")
+            getMapboxAccessToken(this)
         }
     }
 }

@@ -35,25 +35,25 @@ import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
-import com.mapbox.navigation.examples.core.databinding.LayoutActivitySignboardBinding
+import com.mapbox.navigation.examples.core.databinding.LayoutActivityJunctionBinding
 import com.mapbox.navigation.examples.util.RouteLine
 import com.mapbox.navigation.examples.util.Utils.getMapboxAccessToken
 import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
+import com.mapbox.navigation.ui.maps.guidance.junction.api.MapboxJunctionApi
+import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError
+import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
-import com.mapbox.navigation.ui.maps.signboard.api.MapboxSignboardApi
-import com.mapbox.navigation.ui.maps.signboard.model.SignboardError
-import com.mapbox.navigation.ui.maps.signboard.model.SignboardValue
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import java.util.Objects
 
-class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
+class MapboxJunctionActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private lateinit var mapboxMap: MapboxMap
     private lateinit var mapCamera: CameraAnimationsPlugin
     private lateinit var mapboxNavigation: MapboxNavigation
-    private lateinit var signboardApi: MapboxSignboardApi
-    private lateinit var binding: LayoutActivitySignboardBinding
+    private lateinit var junctionApi: MapboxJunctionApi
+    private lateinit var binding: LayoutActivityJunctionBinding
     private lateinit var locationComponent: LocationComponentPlugin
 
     private val mapboxReplayer = MapboxReplayer()
@@ -62,10 +62,10 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
     private val navigationLocationProvider = NavigationLocationProvider()
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
-    private val signboardCallback = object :
-        MapboxNavigationConsumer<Expected<SignboardValue, SignboardError>> {
-        override fun accept(value: Expected<SignboardValue, SignboardError>) {
-            binding.signboardView.render(value)
+    private val junctionCallback = object :
+        MapboxNavigationConsumer<Expected<JunctionValue, JunctionError>> {
+        override fun accept(value: Expected<JunctionValue, JunctionError>) {
+            binding.junctionView.render(value)
         }
     }
 
@@ -93,7 +93,7 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val bannerInstructionsObserver = object : BannerInstructionsObserver {
         override fun onNewBannerInstructions(bannerInstructions: BannerInstructions) {
-            signboardApi.generateSignboard(bannerInstructions, signboardCallback)
+            junctionApi.generateJunction(bannerInstructions, junctionCallback)
         }
     }
 
@@ -109,7 +109,7 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = LayoutActivitySignboardBinding.inflate(layoutInflater)
+        binding = LayoutActivityJunctionBinding.inflate(layoutInflater)
         setContentView(binding.root)
         mapboxMap = binding.mapView.getMapboxMap()
         locationComponent = binding.mapView.getLocationComponentPlugin().apply {
@@ -156,8 +156,8 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
     override fun onMapLongClick(point: Point): Boolean {
         vibrate()
         ifNonNull(navigationLocationProvider.lastLocation) {
-            val or = Point.fromLngLat(-3.5870, 40.5719)
-            val de = Point.fromLngLat(-3.607835, 40.551486)
+            val or = Point.fromLngLat(139.7745686, 35.677573)
+            val de = Point.fromLngLat(139.784915, 35.680960)
             findRoute(or, de)
         }
         return false
@@ -177,7 +177,7 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
                 .locationEngine(ReplayLocationEngine(mapboxReplayer))
                 .build()
         )
-        signboardApi = MapboxSignboardApi(getMapboxRouteAccessToken(this))
+        junctionApi = MapboxJunctionApi(getMapboxRouteAccessToken(this))
         mapboxNavigation.startTripSession()
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.play()
@@ -241,7 +241,7 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     /**
-     * Uses a specific access token required for the route request to send signboards in the response.
+     * Uses a specific access token required for the route request to send junctions in the response.
      * If the specific access token is not present, it defaults to access token required to render
      * Maps.
      *
@@ -250,7 +250,7 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
      */
     private fun getMapboxRouteAccessToken(context: Context): String {
         val tokenResId = context.resources
-            .getIdentifier("mapbox_access_token_signboard", "string", context.packageName)
+            .getIdentifier("mapbox_access_token_junction", "string", context.packageName)
         return if (tokenResId != 0) {
             context.getString(tokenResId)
         } else {

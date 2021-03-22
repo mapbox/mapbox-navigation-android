@@ -42,6 +42,12 @@
     </activity>
 
     <activity
+        android:name=".MapboxJunctionActivity"
+        android:label="@string/title_junction"
+        android:screenOrientation="portrait">
+    </activity>
+
+    <activity
         android:name=".MapboxTripProgressActivity"
         android:label="@string/title_trip_progress">
     </activity>

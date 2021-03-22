@@ -1,19 +1,18 @@
-package com.mapbox.navigation.ui.maps.signboard.view
+package com.mapbox.navigation.ui.maps.guidance.junction.view
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
 import com.mapbox.navigation.ui.base.model.Expected
-import com.mapbox.navigation.ui.maps.signboard.model.SignboardError
-import com.mapbox.navigation.ui.maps.signboard.model.SignboardValue
-import com.mapbox.navigation.ui.utils.internal.SvgUtil
-import java.io.ByteArrayInputStream
+import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError
+import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue
 
 /**
- * Default Signboard View that renders snapshot.
+ * Default Junction View that renders junction.
  */
-class MapboxSignboardView : AppCompatImageView {
+class MapboxJunctionView : AppCompatImageView {
 
     /**
      *
@@ -46,10 +45,10 @@ class MapboxSignboardView : AppCompatImageView {
     /**
      * Invoke to render the signboard based on data or error conditions.
      */
-    fun render(result: Expected<SignboardValue, SignboardError>) {
+    fun render(result: Expected<JunctionValue, JunctionError>) {
         when (result) {
             is Expected.Success -> {
-                val signboard = renderSignboard(result.value)
+                val signboard = renderJunction(result.value)
                 visibility = if (signboard != null) {
                     setImageBitmap(signboard)
                     VISIBLE
@@ -65,12 +64,11 @@ class MapboxSignboardView : AppCompatImageView {
         }
     }
 
-    private fun renderSignboard(value: SignboardValue): Bitmap? {
+    private fun renderJunction(value: JunctionValue): Bitmap? {
         return when (value.bytes.isEmpty()) {
             true -> null
             else -> {
-                val stream = ByteArrayInputStream(value.bytes)
-                SvgUtil.renderAsBitmapWithWidth(stream, value.desiredSignboardWidth)
+                BitmapFactory.decodeByteArray(value.bytes, 0, value.bytes.size)
             }
         }
     }
