@@ -1,6 +1,7 @@
 <resources>
     <!-- Notification Strings -->
     <string name="mapbox_end_navigation">End Navigation</string>
+    <string name="mapbox_navigation_is_starting">Navigation is starting…</string>
     <string name="mapbox_stop_session">Stop session</string>
     <string name="mapbox_free_drive_session">Free Drive Session</string>
     <string name="mapbox_eta_format">%s ETA</string>

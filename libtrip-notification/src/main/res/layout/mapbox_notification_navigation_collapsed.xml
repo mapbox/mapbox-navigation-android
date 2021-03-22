@@ -21,6 +21,19 @@
         android:padding="8dp"
         android:tint="@android:color/white" />
 
+    <TextView
+        android:id="@+id/navigationIsStarting"
+        style="@style/MapboxStyleNotificationTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/maneuverImage"
+        android:layout_alignBottom="@+id/maneuverImage"
+        android:layout_toEndOf="@+id/maneuverImage"
+        android:lines="1"
+        android:gravity="center"
+        android:text="@string/mapbox_navigation_is_starting"
+        android:textColor="@android:color/white" />
+
     <LinearLayout
         android:id="@+id/etaContent"
         android:layout_width="wrap_content"
@@ -28,6 +41,8 @@
         android:layout_alignTop="@id/maneuverImage"
         android:layout_toEndOf="@id/maneuverImage"
         android:layout_toRightOf="@id/maneuverImage"
+        android:visibility="gone"
+        tools:visibility="visible"
         android:orientation="horizontal">
 
         <TextView

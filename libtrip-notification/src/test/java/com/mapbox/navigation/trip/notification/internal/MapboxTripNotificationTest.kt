@@ -11,6 +11,7 @@ import android.content.res.Resources
 import android.text.SpannableString
 import android.text.TextUtils
 import android.text.format.DateFormat
+import android.view.View
 import android.widget.RemoteViews
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
@@ -23,6 +24,7 @@ import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
 import com.mapbox.navigation.trip.notification.R
 import com.mapbox.navigation.trip.notification.RemoteViewsProvider
 import com.mapbox.navigation.utils.internal.NOTIFICATION_ID
+import io.mockk.Ordering
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -43,6 +45,7 @@ private const val END_NAVIGATION = "End Navigation"
 private const val FORMAT_STRING = "%s 454545 ETA"
 private const val MANEUVER_TYPE = "MANEUVER TYPE"
 private const val MANEUVER_MODIFIER = "MANEUVER MODIFIER"
+private const val NAVIGATION_IS_STARTING = "Navigation is starting…"
 
 class MapboxTripNotificationTest {
 
@@ -113,6 +116,9 @@ class MapboxTripNotificationTest {
         every { mockedContext.getString(any()) } returns FORMAT_STRING
         every { mockedContext.getString(R.string.mapbox_stop_session) } returns STOP_SESSION
         every { mockedContext.getString(R.string.mapbox_end_navigation) } returns END_NAVIGATION
+        every {
+            mockedContext.getString(R.string.mapbox_navigation_is_starting)
+        } returns NAVIGATION_IS_STARTING
         val notificationManager = mockk<NotificationManager>(relaxed = true)
         every {
             mockedContext.getSystemService(Context.NOTIFICATION_SERVICE)
@@ -309,6 +315,7 @@ class MapboxTripNotificationTest {
         mockUpdateNotificationAndroidInteractions()
 
         notification.onTripSessionStarted()
+
         notification.updateNotification(routeProgress)
 
         verify(exactly = 1) { bannerText.text() }
@@ -331,6 +338,58 @@ class MapboxTripNotificationTest {
         verify(exactly = 1) { expandedViews.setTextViewText(any(), primaryText()) }
         assertNull(notification.currentManeuverType)
         assertNull(notification.currentManeuverModifier)
+
+        // navigationIsStarting
+        verify(ordering = Ordering.ORDERED) {
+            collapsedViews.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
+            collapsedViews.setViewVisibility(R.id.navigationIsStarting, View.GONE)
+            collapsedViews.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
+        }
+        verify(exactly = 3) {
+            collapsedViews.setViewVisibility(R.id.navigationIsStarting, any())
+        }
+        verify(ordering = Ordering.ORDERED) {
+            expandedViews.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
+            expandedViews.setViewVisibility(R.id.navigationIsStarting, View.GONE)
+            expandedViews.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
+        }
+        verify(exactly = 3) {
+            expandedViews.setViewVisibility(R.id.navigationIsStarting, any())
+        }
+        // etaContent
+        verify(ordering = Ordering.ORDERED) {
+            collapsedViews.setViewVisibility(R.id.etaContent, View.VISIBLE)
+            collapsedViews.setViewVisibility(R.id.etaContent, View.GONE)
+            collapsedViews.setViewVisibility(R.id.etaContent, View.GONE)
+        }
+        verify(exactly = 3) {
+            collapsedViews.setViewVisibility(R.id.etaContent, any())
+        }
+        verify(ordering = Ordering.ORDERED) {
+            expandedViews.setViewVisibility(R.id.etaContent, View.VISIBLE)
+            expandedViews.setViewVisibility(R.id.etaContent, View.GONE)
+            expandedViews.setViewVisibility(R.id.etaContent, View.GONE)
+        }
+        verify(exactly = 3) {
+            expandedViews.setViewVisibility(R.id.etaContent, any())
+        }
+        // freeDriveText
+        verify(ordering = Ordering.ORDERED) {
+            collapsedViews.setViewVisibility(R.id.freeDriveText, View.GONE)
+            collapsedViews.setViewVisibility(R.id.freeDriveText, View.GONE)
+            collapsedViews.setViewVisibility(R.id.freeDriveText, View.GONE)
+        }
+        verify(exactly = 3) {
+            collapsedViews.setViewVisibility(R.id.freeDriveText, any())
+        }
+        verify(ordering = Ordering.ORDERED) {
+            expandedViews.setViewVisibility(R.id.freeDriveText, View.GONE)
+            expandedViews.setViewVisibility(R.id.freeDriveText, View.GONE)
+            expandedViews.setViewVisibility(R.id.freeDriveText, View.GONE)
+        }
+        verify(exactly = 3) {
+            expandedViews.setViewVisibility(R.id.freeDriveText, any())
+        }
     }
 
     @Test
@@ -341,6 +400,20 @@ class MapboxTripNotificationTest {
         notification.onTripSessionStarted()
         notification.updateNotification(nullRouteProgress)
 
+        verify(ordering = Ordering.ORDERED) {
+            collapsedViews.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
+            collapsedViews.setViewVisibility(R.id.navigationIsStarting, View.GONE)
+        }
+        verify(exactly = 2) {
+            collapsedViews.setViewVisibility(R.id.navigationIsStarting, any())
+        }
+        verify(ordering = Ordering.ORDERED) {
+            expandedViews.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
+            expandedViews.setViewVisibility(R.id.navigationIsStarting, View.GONE)
+        }
+        verify(exactly = 2) {
+            expandedViews.setViewVisibility(R.id.navigationIsStarting, any())
+        }
         verify(exactly = 0) { expandedViews.setTextViewText(any(), END_NAVIGATION) }
         verify(exactly = 1) { expandedViews.setTextViewText(any(), STOP_SESSION) }
     }
