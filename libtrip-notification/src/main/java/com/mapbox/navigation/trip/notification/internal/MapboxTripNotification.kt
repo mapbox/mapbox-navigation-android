@@ -16,6 +16,7 @@ import android.os.Build
 import android.text.SpannableString
 import android.text.TextUtils
 import android.text.format.DateFormat
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.RemoteViews
@@ -165,6 +166,13 @@ class MapboxTripNotification constructor(
     override fun onTripSessionStarted() {
         registerReceiver()
         notificationActionButtonChannel = Channel(1)
+
+        collapsedNotificationRemoteViews?.apply {
+            setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
+        }
+        expandedNotificationRemoteViews?.apply {
+            setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
+        }
     }
 
     /**
@@ -182,6 +190,9 @@ class MapboxTripNotification constructor(
             setTextViewText(R.id.notificationDistanceText, "")
             setTextViewText(R.id.notificationArrivalText, "")
             setTextViewText(R.id.notificationInstructionText, "")
+            setViewVisibility(R.id.etaContent, View.GONE)
+            setViewVisibility(R.id.notificationInstructionText, View.GONE)
+            setViewVisibility(R.id.freeDriveText, View.GONE)
         }
 
         expandedNotificationRemoteViews?.apply {
@@ -189,6 +200,9 @@ class MapboxTripNotification constructor(
             setTextViewText(R.id.notificationArrivalText, "")
             setTextViewText(R.id.notificationInstructionText, "")
             setTextViewText(R.id.endNavigationBtnText, "")
+            setViewVisibility(R.id.etaContent, View.GONE)
+            setViewVisibility(R.id.notificationInstructionText, View.GONE)
+            setViewVisibility(R.id.freeDriveText, View.GONE)
         }
 
         unregisterReceiver()
@@ -299,6 +313,13 @@ class MapboxTripNotification constructor(
     }
 
     private fun updateNotificationViews(routeProgress: RouteProgress?) {
+        collapsedNotificationRemoteViews?.apply {
+            setViewVisibility(R.id.navigationIsStarting, View.GONE)
+        }
+        expandedNotificationRemoteViews?.apply {
+            setViewVisibility(R.id.navigationIsStarting, View.GONE)
+        }
+
         routeProgress?.let {
             updateInstructionText(routeProgress.bannerInstructions)
             updateDistanceText(routeProgress)
