@@ -271,6 +271,47 @@ package com.mapbox.navigation.ui.maps.camera.view {
 
 }
 
+package com.mapbox.navigation.ui.maps.guidance.junction.api {
+
+  public final class MapboxJunctionApi {
+    ctor public MapboxJunctionApi(String accessToken);
+    method public void cancelAll();
+    method public void generateJunction(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue,com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError>> consumer);
+    field public static final com.mapbox.navigation.ui.maps.guidance.junction.api.MapboxJunctionApi.Companion Companion;
+  }
+
+  public static final class MapboxJunctionApi.Companion {
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.guidance.junction.model {
+
+  public final class JunctionError {
+    method public String? getErrorMessage();
+    method public Throwable? getThrowable();
+    property public final String? errorMessage;
+    property public final Throwable? throwable;
+  }
+
+  public final class JunctionValue {
+    method public byte[] getBytes();
+    property public final byte[] bytes;
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.guidance.junction.view {
+
+  public final class MapboxJunctionView extends androidx.appcompat.widget.AppCompatImageView {
+    ctor public MapboxJunctionView(android.content.Context context);
+    ctor public MapboxJunctionView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxJunctionView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void render(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue,com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError> result);
+  }
+
+}
+
 package com.mapbox.navigation.ui.maps.internal.route.line {
 
   public final class MapboxRouteLineUtils {
@@ -728,9 +769,9 @@ package com.mapbox.navigation.ui.maps.signboard.model {
 package com.mapbox.navigation.ui.maps.signboard.view {
 
   public final class MapboxSignboardView extends androidx.appcompat.widget.AppCompatImageView {
-    ctor public MapboxSignboardView(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
-    ctor public MapboxSignboardView(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxSignboardView(android.content.Context context);
+    ctor public MapboxSignboardView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxSignboardView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
     method public void render(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.signboard.model.SignboardValue,com.mapbox.navigation.ui.maps.signboard.model.SignboardError> result);
   }
 

@@ -5,7 +5,6 @@ import android.location.Location
 import android.os.Looper
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
-import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
@@ -584,18 +583,6 @@ internal class MapboxTripSession(
         action: (BannerInstructions) -> Unit
     ) {
         ifNonNull(bannerInstructionEvent.bannerInstructions) { bannerInstructions ->
-            val bannerView = bannerInstructions.view()
-            val bannerComponents = bannerView?.components()
-            ifNonNull(bannerComponents) { components ->
-                components.forEachIndexed { index, component ->
-                    component.takeIf { it.type() == BannerComponents.GUIDANCE_VIEW }?.let { c ->
-                        components[index] =
-                            c.toBuilder()
-                                .imageUrl(c.imageUrl()?.plus("&access_token=$accessToken"))
-                                .build()
-                    }
-                }
-            }
             action(bannerInstructions)
         }
     }

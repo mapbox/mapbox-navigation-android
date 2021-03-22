@@ -10,6 +10,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.permissions.PermissionsListener
+import com.mapbox.navigation.examples.core.MapboxJunctionActivity
 import com.mapbox.navigation.examples.core.MapboxManeuverActivity
 import com.mapbox.navigation.examples.core.MapboxNavigationActivity
 import com.mapbox.navigation.examples.core.MapboxRouteLineActivity
@@ -82,6 +83,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_signboard),
                 getString(R.string.description_signboard),
                 MapboxSignboardActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_junction),
+                getString(R.string.description_junction),
+                MapboxJunctionActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_trip_progress),
