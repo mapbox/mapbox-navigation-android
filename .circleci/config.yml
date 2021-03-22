@@ -290,6 +290,12 @@ commands:
           name: Download native libraries for crashlytics
           command: ./gradlew downloadUnstrippedNativeLibsDir
 
+  upload-native-libs-to-crashlytics:
+    steps:
+      - run:
+          name: Upload the natice libraries to crashlytics
+          command: ./gradlew uploadCrashlyticsSymbolFileRelease
+
   run-internal-firebase-instrumentation:
     parameters:
       module_wrapper:
@@ -452,6 +458,7 @@ jobs:
           variant: "Release"
           inject_token: true
       - login-google-cloud-platform
+      - upload-native-libs-to-crashlytics
       - run-firebase-robo:
           module_target: "test-app"
           variant: "release"

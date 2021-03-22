@@ -334,7 +334,7 @@ private fun RouteState.convertState(): RouteProgressState {
         RouteState.TRACKING -> RouteProgressState.LOCATION_TRACKING
         RouteState.COMPLETE -> RouteProgressState.ROUTE_COMPLETE
         RouteState.OFF_ROUTE -> RouteProgressState.OFF_ROUTE
-        RouteState.STALE -> RouteProgressState.LOCATION_STALE
+//        RouteState. -> RouteProgressState.LOCATION_STALE
         RouteState.UNCERTAIN -> RouteProgressState.ROUTE_UNCERTAIN
     }
 }

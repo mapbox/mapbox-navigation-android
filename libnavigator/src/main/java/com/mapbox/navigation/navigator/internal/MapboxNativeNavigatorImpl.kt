@@ -425,6 +425,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         PredictiveCacheControllerOptions(
             "",
             tileVariant,
-            MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS
+            MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS,
+            100
         )
 }
