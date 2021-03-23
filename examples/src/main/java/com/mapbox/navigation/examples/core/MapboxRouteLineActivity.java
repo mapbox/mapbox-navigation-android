@@ -557,7 +557,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
     private WeakReference<MapboxRouteLineActivity> activityRef;
 
-    MyLocationEngineCallback(com.mapbox.navigation.examples.core.MapboxRouteLineActivity activity) {
+    MyLocationEngineCallback(MapboxRouteLineActivity activity) {
       this.activityRef = new WeakReference<>(activity);
     }
 
