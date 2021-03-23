@@ -176,7 +176,7 @@ ext {
       mapboxSdkRegistry    : '0.4.0',
       mapboxAccessToken    : '0.2.1',
       mapboxNativeDownload : '0.1.2',
-      firebaseCrashlytics  : '2.5.0'
+      firebaseCrashlytics  : '2.5.1'
   ]
 
   pluginDependencies = [
