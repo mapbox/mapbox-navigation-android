@@ -293,7 +293,13 @@ commands:
   upload-native-libs-to-crashlytics:
     steps:
       - run:
-          name: Upload the natice libraries to crashlytics
+          name: Generate crashlytics symbol file felease
+          command: ./gradlew test-app:generateCrashlyticsSymbolFileRelease -d | grep "com.google.firebase.crashlytics"
+      - run:
+          name: Upload crashlytics mapping file felease
+          command: ./gradlew test-app:uploadCrashlyticsMappingFileRelease -d | grep "com.google.firebase.crashlytics"
+      - run:
+          name: Upload crashlytics symbol file release
           command: ./gradlew test-app:uploadCrashlyticsSymbolFileRelease -d | grep "com.google.firebase.crashlytics"
 
   run-internal-firebase-instrumentation:
