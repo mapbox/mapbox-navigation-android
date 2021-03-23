@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.core.constants.Constants
+import com.mapbox.core.exceptions.ServicesException
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.internal.extensions.coordinates
@@ -16,11 +17,14 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import org.hamcrest.CoreMatchers.containsString
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.BeforeClass
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ExpectedException
 import java.util.Locale
 
 class NavigationRouteTest {
@@ -35,8 +39,11 @@ class NavigationRouteTest {
         const val ACESS_TOKEN = "pk.XXX"
     }
 
-    val origin: Point = Point.fromLngLat(0.0, 0.0)
-    val destination: Point = Point.fromLngLat(1.0, 1.0)
+    @get:Rule
+    val expectedException = ExpectedException.none()
+
+    private val origin: Point = Point.fromLngLat(0.0, 0.0)
+    private val destination: Point = Point.fromLngLat(1.0, 1.0)
     private val mockSkuTokenProvider = mockk<UrlSkuTokenProvider>(relaxed = true)
 
     @MockK
@@ -273,6 +280,83 @@ class NavigationRouteTest {
         assertThat(request, containsString("alley_bias"))
         assertThat(request, containsString("walkway_bias"))
         assertThat(request, containsString("walking_speed"))
+    }
+
+    @Test
+    fun snappingClosuresIncludedInRequest() {
+        val navigationRoute = provideNavigationOffboardRouteBuilder()
+            .routeOptions(
+                provideDefaultRouteOptionsBuilder()
+                    .accessToken(ACESS_TOKEN)
+                    .coordinates(
+                        origin,
+                        listOf(Point.fromLngLat(1.0, 3.0), Point.fromLngLat(1.0, 3.0)),
+                        destination
+                    )
+                    .snappingClosures(listOf(true, null, false, true))
+                    .build(),
+                refreshEnabled = true
+            )
+            .build()
+
+        val requestUrl = navigationRoute.cloneCall().request().url().toString()
+
+        assertThat(requestUrl, containsString("snapping_include_closures=true%3B%3Bfalse%3Btrue"))
+    }
+
+    @Test
+    fun snappingClosuresMustMatchCoordinatesSize() {
+        expectedException.expect(ServicesException::class.java)
+        expectedException.expectMessage(
+            "Number of snapping closures elements must match number of coordinates provided."
+        )
+
+        provideNavigationOffboardRouteBuilder()
+            .routeOptions(
+                provideDefaultRouteOptionsBuilder()
+                    .accessToken(ACESS_TOKEN)
+                    .coordinates(origin = origin, destination = destination)
+                    .snappingClosures(listOf(true, null, true))
+                    .build(),
+                refreshEnabled = true
+            )
+            .build()
+    }
+
+    @Test
+    fun snappingClosuresEmptyListNotIncludedInRequest() {
+        val navigationRoute = provideNavigationOffboardRouteBuilder()
+            .routeOptions(
+                provideDefaultRouteOptionsBuilder()
+                    .accessToken(ACESS_TOKEN)
+                    .coordinates(origin = origin, destination = destination)
+                    .snappingClosures(emptyList())
+                    .build(),
+                refreshEnabled = true
+            )
+            .build()
+
+        val requestUrl = navigationRoute.cloneCall().request().url().toString()
+
+        assertFalse(requestUrl.contains("snapping_include_closures"))
+    }
+
+    @Test
+    fun snappingClosuresEmptyStringNotIncludedInRequest() {
+        val navigationRoute = provideNavigationOffboardRouteBuilder()
+            .routeOptions(
+                provideDefaultRouteOptionsBuilder()
+                    .accessToken(ACESS_TOKEN)
+                    .coordinates(origin = origin, destination = destination)
+                    .snappingClosures("")
+                    .build(),
+                refreshEnabled = true
+            )
+            .build()
+
+        val requestUrl = navigationRoute.cloneCall().request().url().toString()
+
+        assertFalse(requestUrl.contains("snapping_include_closures"))
     }
 
     private fun provideNavigationOffboardRouteBuilder() =

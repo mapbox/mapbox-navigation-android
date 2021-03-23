@@ -98,6 +98,10 @@ internal fun MapboxDirections.Builder.routeOptions(
         walkingOptions(it)
     }
 
+    options.snappingClosuresList()?.let {
+        snappingClosures(it)
+    }
+
     enableRefresh(refreshEnabled)
 
     eventListener(EVENT_LISTENER)
