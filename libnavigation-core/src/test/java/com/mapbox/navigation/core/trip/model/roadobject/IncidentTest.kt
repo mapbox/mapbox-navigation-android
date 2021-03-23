@@ -28,24 +28,22 @@ class IncidentTest : BuilderTest<Incident, Incident.Builder>() {
                 ),
                 1,
                 2
-            ).build()
+            ).build(),
+            IncidentInfo.Builder("some_id")
+                .type(IncidentType.CONSTRUCTION)
+                .creationTime(Date(40))
+                .startTime(Date(60))
+                .endTime(Date(80))
+                .isClosed(true)
+                .congestion(IncidentCongestion.Builder().value(4).build())
+                .impact(IncidentImpact.LOW)
+                .description("incident description")
+                .subType("incident sub-type")
+                .subTypeDescription("incident sub-type description")
+                .alertcCodes(listOf(10, 20, 30))
+                .build()
         )
             .distanceFromStartOfRoute(123.0)
-            .info(
-                IncidentInfo.Builder("some_id")
-                    .type(IncidentType.CONSTRUCTION)
-                    .creationTime(Date(40))
-                    .startTime(Date(60))
-                    .endTime(Date(80))
-                    .isClosed(true)
-                    .congestion(IncidentCongestion.Builder().value(4).build())
-                    .impact(IncidentImpact.LOW)
-                    .description("incident description")
-                    .subType("incident sub-type")
-                    .subTypeDescription("incident sub-type description")
-                    .alertcCodes(listOf(10, 20, 30))
-                    .build()
-            )
 
     @Test
     override fun trigger() {
@@ -54,7 +52,7 @@ class IncidentTest : BuilderTest<Incident, Incident.Builder>() {
 
     @Test
     fun `distanceFromStartOfRoute is null if negative value passed`() {
-        val incident = Incident.Builder(mockk())
+        val incident = Incident.Builder(mockk(), mockk())
             .distanceFromStartOfRoute(-1.0)
             .build()
 
@@ -63,7 +61,7 @@ class IncidentTest : BuilderTest<Incident, Incident.Builder>() {
 
     @Test
     fun `distanceFromStartOfRoute is null if null passed`() {
-        val incident = Incident.Builder(mockk())
+        val incident = Incident.Builder(mockk(), mockk())
             .distanceFromStartOfRoute(null)
             .build()
 
@@ -72,7 +70,7 @@ class IncidentTest : BuilderTest<Incident, Incident.Builder>() {
 
     @Test
     fun `distanceFromStartOfRoute not null if positive value passed`() {
-        val incident = Incident.Builder(mockk())
+        val incident = Incident.Builder(mockk(), mockk())
             .distanceFromStartOfRoute(1.0)
             .build()
 

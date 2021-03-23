@@ -25,10 +25,10 @@ class TollCollection private constructor(
      * Transform this object into a builder to mutate the values.
      */
     fun toBuilder(): Builder = Builder(
-        objectGeometry
+        objectGeometry,
+        tollCollectionType
     )
         .distanceFromStartOfRoute(distanceFromStartOfRoute)
-        .tollCollectionType(tollCollectionType)
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -67,12 +67,11 @@ class TollCollection private constructor(
      * @see TollCollection
      */
     class Builder(
-        private val objectGeometry: RoadObjectGeometry
+        private val objectGeometry: RoadObjectGeometry,
+        @TollCollectionType.Type
+        private val tollCollectionType: Int
     ) {
         private var distanceFromStartOfRoute: Double? = null
-
-        @TollCollectionType.Type
-        private var tollCollectionType: Int = TollCollectionType.UNKNOWN
 
         /**
          * Add optional distance from start of route.
@@ -80,13 +79,6 @@ class TollCollection private constructor(
          */
         fun distanceFromStartOfRoute(distanceFromStartOfRoute: Double?): Builder = apply {
             this.distanceFromStartOfRoute = distanceFromStartOfRoute
-        }
-
-        /**
-         * Sets information about a toll collection point. See [TollCollectionType].
-         */
-        fun tollCollectionType(@TollCollectionType.Type tollCollectionType: Int): Builder = apply {
-            this.tollCollectionType = tollCollectionType
         }
 
         /**

@@ -7,18 +7,14 @@ package com.mapbox.navigation.core.trip.model.roadobject.border
  * @param to destination administrative info when crossing the country border
  */
 class CountryBorderCrossingInfo private constructor(
-    val from: CountryBorderCrossingAdminInfo?,
-    val to: CountryBorderCrossingAdminInfo?
+    val from: CountryBorderCrossingAdminInfo,
+    val to: CountryBorderCrossingAdminInfo
 ) {
 
     /**
      * Transform this object into a builder to mutate the values.
      */
-    fun toBuilder(): Builder =
-        Builder(
-            from,
-            to
-        )
+    fun toBuilder(): Builder = Builder(from, to)
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -39,8 +35,8 @@ class CountryBorderCrossingInfo private constructor(
      * Returns a hash code value for the object.
      */
     override fun hashCode(): Int {
-        var result = from?.hashCode() ?: 0
-        result = 31 * result + (to?.hashCode() ?: 0)
+        var result = from.hashCode()
+        result = 31 * result + (to.hashCode())
         return result
     }
 
@@ -50,7 +46,8 @@ class CountryBorderCrossingInfo private constructor(
     override fun toString(): String {
         return "CountryBorderCrossingInfo(" +
             "from=$from, " +
-            "to=$to)"
+            "to=$to" +
+            ")"
     }
 
     /**
@@ -59,17 +56,13 @@ class CountryBorderCrossingInfo private constructor(
      * @see CountryBorderCrossingInfo
      */
     class Builder(
-        private val from: CountryBorderCrossingAdminInfo?,
-        private val to: CountryBorderCrossingAdminInfo?
+        private val from: CountryBorderCrossingAdminInfo,
+        private val to: CountryBorderCrossingAdminInfo
     ) {
 
         /**
          * Build the object instance.
          */
-        fun build() =
-            CountryBorderCrossingInfo(
-                from,
-                to
-            )
+        fun build() = CountryBorderCrossingInfo(from, to)
     }
 }

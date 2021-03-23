@@ -13,15 +13,14 @@ import com.mapbox.navigation.core.trip.model.roadobject.RoadObjectType
 class Incident private constructor(
     distanceFromStartOfRoute: Double?,
     objectGeometry: RoadObjectGeometry,
-    val info: IncidentInfo?
+    val info: IncidentInfo
 ) : RoadObject(RoadObjectType.INCIDENT, distanceFromStartOfRoute, objectGeometry) {
 
     /**
      * Transform this object into a builder to mutate the values.
      */
-    fun toBuilder() = Builder(objectGeometry)
+    fun toBuilder() = Builder(objectGeometry, info)
         .distanceFromStartOfRoute(distanceFromStartOfRoute)
-        .info(info)
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -62,9 +61,10 @@ class Incident private constructor(
      * @see Incident
      */
     class Builder(
-        private val objectGeometry: RoadObjectGeometry
+        private val objectGeometry: RoadObjectGeometry,
+        private val info: IncidentInfo
     ) {
-        private var info: IncidentInfo? = null
+
         private var distanceFromStartOfRoute: Double? = null
 
         /**
@@ -73,13 +73,6 @@ class Incident private constructor(
          */
         fun distanceFromStartOfRoute(distanceFromStartOfRoute: Double?): Builder = apply {
             this.distanceFromStartOfRoute = distanceFromStartOfRoute
-        }
-
-        /**
-         * Incident alert info.
-         */
-        fun info(incidentInfo: IncidentInfo?): Builder = apply {
-            this.info = incidentInfo
         }
 
         /**

@@ -14,7 +14,7 @@ import com.mapbox.navigation.core.trip.model.roadobject.RoadObjectType
 class CountryBorderCrossing private constructor(
     distanceFromStartOfRoute: Double?,
     objectGeometry: RoadObjectGeometry,
-    val countryBorderCrossingInfo: CountryBorderCrossingInfo?,
+    val countryBorderCrossingInfo: CountryBorderCrossingInfo,
 ) : RoadObject(
     RoadObjectType.COUNTRY_BORDER_CROSSING,
     distanceFromStartOfRoute,
@@ -25,10 +25,10 @@ class CountryBorderCrossing private constructor(
      * Transform this object into a builder to mutate the values.
      */
     fun toBuilder(): Builder = Builder(
-        objectGeometry
+        objectGeometry,
+        countryBorderCrossingInfo
     )
         .distanceFromStartOfRoute(distanceFromStartOfRoute)
-        .countryBorderCrossingInfo(countryBorderCrossingInfo)
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -68,10 +68,10 @@ class CountryBorderCrossing private constructor(
      * @see CountryBorderCrossing
      */
     class Builder(
-        private val objectGeometry: RoadObjectGeometry
+        private val objectGeometry: RoadObjectGeometry,
+        private val countryBorderCrossingInfo: CountryBorderCrossingInfo
     ) {
         private var distanceFromStartOfRoute: Double? = null
-        private var countryBorderCrossingInfo: CountryBorderCrossingInfo? = null
 
         /**
          * Add optional distance from start of route.
@@ -80,14 +80,6 @@ class CountryBorderCrossing private constructor(
         fun distanceFromStartOfRoute(distanceFromStartOfRoute: Double?): Builder = apply {
             this.distanceFromStartOfRoute = distanceFromStartOfRoute
         }
-
-        /**
-         * Add the administrative info when crossing the country border.
-         */
-        fun countryBorderCrossingInfo(borderCrossingInfo: CountryBorderCrossingInfo?): Builder =
-            apply {
-                this.countryBorderCrossingInfo = borderCrossingInfo
-            }
 
         /**
          * Build the object instance.

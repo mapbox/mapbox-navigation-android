@@ -7,16 +7,13 @@ class TunnelInfo private constructor(
     /**
      * Tunnel name.
      */
-    val name: String,
+    val name: String?,
 ) {
 
     /**
      * Transform this object into a builder to mutate the values.
      */
-    fun toBuilder(): Builder =
-        Builder(
-            name
-        )
+    fun toBuilder(): Builder = Builder(name)
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -52,15 +49,12 @@ class TunnelInfo private constructor(
      * @see TunnelInfo
      */
     class Builder(
-        private val name: String
+        private val name: String?
     ) {
 
         /**
          * Build the object instance.
          */
-        fun build() =
-            TunnelInfo(
-                name
-            )
+        fun build() = TunnelInfo(name)
     }
 }
