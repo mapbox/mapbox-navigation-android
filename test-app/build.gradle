@@ -65,7 +65,7 @@ android {
             firebaseCrashlytics {
                 mappingFileUploadEnabled = true
                 nativeSymbolUploadEnabled = true
-                strippedNativeLibsDir = 'build/intermediates/stripped_native_libs/debug/release/lib/'
+                strippedNativeLibsDir = 'build/intermediates/stripped_native_libs/release/out/lib/'
                 unstrippedNativeLibsDir = com.mapbox.gradle.NativeDownloadTask.UNSTRIPPED_NATIVE_LIBS_PATH
             }
         }
