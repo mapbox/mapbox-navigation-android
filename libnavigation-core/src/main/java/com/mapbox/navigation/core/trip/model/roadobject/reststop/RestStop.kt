@@ -25,10 +25,10 @@ class RestStop private constructor(
      * Transform this object into a builder to mutate the values.
      */
     fun toBuilder(): Builder = Builder(
-        objectGeometry
+        objectGeometry,
+        restStopType
     )
         .distanceFromStartOfRoute(distanceFromStartOfRoute)
-        .restStopType(restStopType)
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -67,12 +67,11 @@ class RestStop private constructor(
      * @see RestStop
      */
     class Builder(
-        private val objectGeometry: RoadObjectGeometry
+        private val objectGeometry: RoadObjectGeometry,
+        @RestStopType.Type
+        private val restStopType: Int
     ) {
         private var distanceFromStartOfRoute: Double? = null
-
-        @RestStopType.Type
-        private var restStopType: Int = RestStopType.UNKNOWN
 
         /**
          * Add optional distance from start of route.
@@ -80,13 +79,6 @@ class RestStop private constructor(
          */
         fun distanceFromStartOfRoute(distanceFromStartOfRoute: Double?): Builder = apply {
             this.distanceFromStartOfRoute = distanceFromStartOfRoute
-        }
-
-        /**
-         * Sets information about a rest stop. See [RestStopType].
-         */
-        fun restStopType(@RestStopType.Type restStopType: Int): Builder = apply {
-            this.restStopType = restStopType
         }
 
         /**

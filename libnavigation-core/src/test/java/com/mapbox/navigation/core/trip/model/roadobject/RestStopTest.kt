@@ -10,9 +10,11 @@ import org.junit.Test
 class RestStopTest : BuilderTest<RestStop, RestStop.Builder>() {
     override fun getImplementationClass() = RestStop::class
 
-    override fun getFilledUpBuilder() = RestStop.Builder((mockk(relaxed = true)))
+    override fun getFilledUpBuilder() = RestStop.Builder(
+        (mockk(relaxed = true)),
+        RestStopType.REST_AREA
+    )
         .distanceFromStartOfRoute(123.0)
-        .restStopType(RestStopType.REST_AREA)
 
     @Test
     override fun trigger() {
@@ -21,7 +23,7 @@ class RestStopTest : BuilderTest<RestStop, RestStop.Builder>() {
 
     @Test
     fun `distanceFromStartOfRoute is null if negative value passed`() {
-        val restStop = RestStop.Builder(mockk())
+        val restStop = RestStop.Builder(mockk(), RoadObjectType.REST_STOP)
             .distanceFromStartOfRoute(-1.0)
             .build()
 
@@ -30,7 +32,7 @@ class RestStopTest : BuilderTest<RestStop, RestStop.Builder>() {
 
     @Test
     fun `distanceFromStartOfRoute is null if null passed`() {
-        val restStop = RestStop.Builder(mockk())
+        val restStop = RestStop.Builder(mockk(), RoadObjectType.REST_STOP)
             .distanceFromStartOfRoute(null)
             .build()
 
@@ -39,7 +41,7 @@ class RestStopTest : BuilderTest<RestStop, RestStop.Builder>() {
 
     @Test
     fun `distanceFromStartOfRoute not null if positive value passed`() {
-        val restStop = RestStop.Builder(mockk())
+        val restStop = RestStop.Builder(mockk(), RoadObjectType.REST_STOP)
             .distanceFromStartOfRoute(1.0)
             .build()
 

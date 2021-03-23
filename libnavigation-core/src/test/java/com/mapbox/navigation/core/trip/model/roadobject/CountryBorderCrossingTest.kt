@@ -12,10 +12,10 @@ class CountryBorderCrossingTest :
     override fun getImplementationClass() = CountryBorderCrossing::class
 
     override fun getFilledUpBuilder() = CountryBorderCrossing.Builder(
+        mockk(relaxed = true),
         mockk(relaxed = true)
     )
         .distanceFromStartOfRoute(1.0)
-        .countryBorderCrossingInfo(mockk(relaxed = true))
 
     @Test
     override fun trigger() {
@@ -24,7 +24,7 @@ class CountryBorderCrossingTest :
 
     @Test
     fun `distanceFromStartOfRoute is null if negative value passed`() {
-        val borderCrossing = CountryBorderCrossing.Builder(mockk())
+        val borderCrossing = CountryBorderCrossing.Builder(mockk(), mockk())
             .distanceFromStartOfRoute(-1.0)
             .build()
 
@@ -33,7 +33,7 @@ class CountryBorderCrossingTest :
 
     @Test
     fun `distanceFromStartOfRoute is null if null passed`() {
-        val borderCrossing = CountryBorderCrossing.Builder(mockk())
+        val borderCrossing = CountryBorderCrossing.Builder(mockk(), mockk())
             .distanceFromStartOfRoute(null)
             .build()
 
@@ -42,7 +42,7 @@ class CountryBorderCrossingTest :
 
     @Test
     fun `distanceFromStartOfRoute not null if positive value passed`() {
-        val borderCrossing = CountryBorderCrossing.Builder(mockk())
+        val borderCrossing = CountryBorderCrossing.Builder(mockk(), mockk())
             .distanceFromStartOfRoute(1.0)
             .build()
 

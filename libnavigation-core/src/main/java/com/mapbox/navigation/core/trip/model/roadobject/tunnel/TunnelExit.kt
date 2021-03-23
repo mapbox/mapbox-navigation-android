@@ -14,7 +14,7 @@ import com.mapbox.navigation.core.trip.model.roadobject.RoadObjectType
 class TunnelExit private constructor(
     distanceFromStartOfRoute: Double?,
     objectGeometry: RoadObjectGeometry,
-    val info: TunnelInfo?
+    val info: TunnelInfo
 ) : RoadObject(
     RoadObjectType.TUNNEL_EXIT,
     distanceFromStartOfRoute,
@@ -24,11 +24,8 @@ class TunnelExit private constructor(
     /**
      * Transform this object into a builder to mutate the values.
      */
-    fun toBuilder(): Builder = Builder(
-        objectGeometry
-    )
+    fun toBuilder(): Builder = Builder(objectGeometry, info)
         .distanceFromStartOfRoute(distanceFromStartOfRoute)
-        .info(info)
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -50,7 +47,7 @@ class TunnelExit private constructor(
      */
     override fun hashCode(): Int {
         var result = super.hashCode()
-        result = 31 * result + (info?.hashCode() ?: 0)
+        result = 31 * result + (info.hashCode())
         return result
     }
 
@@ -67,11 +64,11 @@ class TunnelExit private constructor(
      * @see TunnelExit
      */
     class Builder(
-        private val objectGeometry: RoadObjectGeometry
+        private val objectGeometry: RoadObjectGeometry,
+        private val info: TunnelInfo
     ) {
 
         private var distanceFromStartOfRoute: Double? = null
-        private var info: TunnelInfo? = null
 
         /**
          * Add optional distance from start of route.
@@ -79,13 +76,6 @@ class TunnelExit private constructor(
          */
         fun distanceFromStartOfRoute(distanceFromStartOfRoute: Double?): Builder = apply {
             this.distanceFromStartOfRoute = distanceFromStartOfRoute
-        }
-
-        /**
-         * Add the tunnel info.
-         */
-        fun info(info: TunnelInfo?): Builder = apply {
-            this.info = info
         }
 
         /**

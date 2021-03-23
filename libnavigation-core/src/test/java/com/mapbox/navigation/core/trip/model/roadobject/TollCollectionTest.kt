@@ -11,9 +11,9 @@ class TollCollectionTest : BuilderTest<TollCollection, TollCollection.Builder>()
     override fun getImplementationClass() = TollCollection::class
 
     override fun getFilledUpBuilder() = TollCollection.Builder(
-        mockk(relaxed = true)
+        mockk(relaxed = true),
+        TollCollectionType.TOLL_BOOTH
     ).distanceFromStartOfRoute(123.0)
-        .tollCollectionType(TollCollectionType.TOLL_BOOTH)
 
     @Test
     override fun trigger() {
@@ -22,7 +22,7 @@ class TollCollectionTest : BuilderTest<TollCollection, TollCollection.Builder>()
 
     @Test
     fun `distanceFromStartOfRoute is null if negative value passed`() {
-        val tollCollection = TollCollection.Builder(mockk())
+        val tollCollection = TollCollection.Builder(mockk(), RoadObjectType.TOLL_COLLECTION)
             .distanceFromStartOfRoute(-1.0)
             .build()
 
@@ -31,7 +31,7 @@ class TollCollectionTest : BuilderTest<TollCollection, TollCollection.Builder>()
 
     @Test
     fun `distanceFromStartOfRoute is null if null passed`() {
-        val tollCollection = TollCollection.Builder(mockk())
+        val tollCollection = TollCollection.Builder(mockk(), RoadObjectType.TOLL_COLLECTION)
             .distanceFromStartOfRoute(null)
             .build()
 
@@ -40,7 +40,7 @@ class TollCollectionTest : BuilderTest<TollCollection, TollCollection.Builder>()
 
     @Test
     fun `distanceFromStartOfRoute not null if positive value passed`() {
-        val tollCollection = TollCollection.Builder(mockk())
+        val tollCollection = TollCollection.Builder(mockk(), RoadObjectType.TOLL_COLLECTION)
             .distanceFromStartOfRoute(1.0)
             .build()
 

@@ -18,9 +18,9 @@ class TunnelEntranceTest : BuilderTest<TunnelEntrance, TunnelEntrance.Builder>()
             Point.fromLngLat(10.0, 20.0),
             1,
             2
-        ).build()
+        ).build(),
+        mockk(relaxed = true)
     ).distanceFromStartOfRoute(123.0)
-        .info(mockk(relaxed = true))
 
     @Test
     override fun trigger() {
@@ -29,7 +29,7 @@ class TunnelEntranceTest : BuilderTest<TunnelEntrance, TunnelEntrance.Builder>()
 
     @Test
     fun `distanceFromStartOfRoute is null if negative value passed`() {
-        val tunnelEntrance = TunnelEntrance.Builder(mockk())
+        val tunnelEntrance = TunnelEntrance.Builder(mockk(), mockk())
             .distanceFromStartOfRoute(-1.0)
             .build()
 
@@ -38,7 +38,7 @@ class TunnelEntranceTest : BuilderTest<TunnelEntrance, TunnelEntrance.Builder>()
 
     @Test
     fun `distanceFromStartOfRoute is null if null passed`() {
-        val tunnelEntrance = TunnelEntrance.Builder(mockk())
+        val tunnelEntrance = TunnelEntrance.Builder(mockk(), mockk())
             .distanceFromStartOfRoute(null)
             .build()
 
@@ -47,7 +47,7 @@ class TunnelEntranceTest : BuilderTest<TunnelEntrance, TunnelEntrance.Builder>()
 
     @Test
     fun `distanceFromStartOfRoute not null if positive value passed`() {
-        val tunnelEntrance = TunnelEntrance.Builder(mockk())
+        val tunnelEntrance = TunnelEntrance.Builder(mockk(), mockk())
             .distanceFromStartOfRoute(1.0)
             .build()
 

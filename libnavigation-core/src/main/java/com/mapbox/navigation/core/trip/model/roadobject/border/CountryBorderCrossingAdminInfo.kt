@@ -17,11 +17,7 @@ class CountryBorderCrossingAdminInfo private constructor(
     /**
      * Transform this object into a builder to mutate the values.
      */
-    fun toBuilder(): Builder =
-        Builder(
-            code,
-            codeAlpha3
-        )
+    fun toBuilder(): Builder = Builder(code, codeAlpha3)
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -51,8 +47,10 @@ class CountryBorderCrossingAdminInfo private constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "CountryBorderCrossingAdminInfo(code='$code', " +
-            "codeAlpha3='$codeAlpha3')"
+        return "CountryBorderCrossingAdminInfo(" +
+            "code='$code', " +
+            "codeAlpha3='$codeAlpha3'" +
+            ")"
     }
 
     /**
@@ -68,10 +66,6 @@ class CountryBorderCrossingAdminInfo private constructor(
         /**
          * Build the object instance.
          */
-        fun build() =
-            CountryBorderCrossingAdminInfo(
-                code,
-                codeAlpha3
-            )
+        fun build() = CountryBorderCrossingAdminInfo(code, codeAlpha3)
     }
 }
