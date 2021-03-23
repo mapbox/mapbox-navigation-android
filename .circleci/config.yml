@@ -294,7 +294,7 @@ commands:
     steps:
       - run:
           name: Upload the natice libraries to crashlytics
-          command: ./gradlew uploadCrashlyticsSymbolFileRelease
+          command: ./gradlew test-app:uploadCrashlyticsSymbolFileRelease -d | grep "com.google.firebase.crashlytics"
 
   run-internal-firebase-instrumentation:
     parameters:
