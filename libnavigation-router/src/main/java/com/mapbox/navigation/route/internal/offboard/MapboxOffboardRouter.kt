@@ -14,6 +14,7 @@ import com.mapbox.navigation.route.offboard.RouteBuilderProvider
 import com.mapbox.navigation.route.offboard.router.routeOptions
 import com.mapbox.navigation.route.offboard.routerefresh.RouteRefreshCallbackMapper
 import com.mapbox.navigation.utils.NavigationException
+import okhttp3.Request
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -118,8 +119,8 @@ class MapboxOffboardRouter(
                 .routeIndex(route.routeIndex()?.toIntOrNull() ?: 0)
                 .legIndex(legIndex)
                 .interceptor {
-                    val httpUrl = it.request().url()
-                    val skuUrl = urlSkuTokenProvider.obtainUrlWithSkuToken(httpUrl.url())
+                    val httpUrl = (it.request() as Request).url
+                    val skuUrl = urlSkuTokenProvider.obtainUrlWithSkuToken(httpUrl.toUrl())
                     it.proceed(it.request().newBuilder().url(skuUrl).build())
                 }
 

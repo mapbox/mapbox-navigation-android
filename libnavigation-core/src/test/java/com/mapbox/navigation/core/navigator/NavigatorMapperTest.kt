@@ -7,6 +7,7 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.speed.model.SpeedLimit
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry
 import com.mapbox.navigation.core.trip.model.roadobject.RoadObjectType
@@ -255,6 +256,19 @@ class NavigatorMapperTest {
         )
 
         assertNotNull(routeProgress)
+    }
+
+    @Test
+    fun `route progress state location stale`() {
+        every { navigationStatus.stale } returns true
+        val routeProgress = getRouteProgressFrom(
+            directionsRoute,
+            null,
+            navigationStatus,
+            mockk(relaxed = true)
+        )
+
+        assertEquals(RouteProgressState.LOCATION_STALE, routeProgress!!.currentState)
     }
 
     @Test
@@ -716,6 +730,7 @@ class NavigatorMapperTest {
         every { activeGuidanceInfo?.stepProgress?.distanceTraveled } returns 10.0
         every { activeGuidanceInfo?.stepProgress?.fractionTraveled } returns 50.0
         every { routeState } returns RouteState.TRACKING
+        every { stale } returns false
         every { bannerInstruction } returns mockk {
             every { remainingStepDistance } returns 111f
             every { primary } returns mockk {

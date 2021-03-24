@@ -224,7 +224,11 @@ private fun NavigationStatus.getRouteProgress(
                     )
 
                     routeState.convertState().let {
-                        routeProgressBuilder.currentState(it)
+                        if (stale) {
+                            routeProgressBuilder.currentState(RouteProgressState.LOCATION_STALE)
+                        } else {
+                            routeProgressBuilder.currentState(it)
+                        }
 
                         var bannerInstructions =
                             bannerInstruction?.mapToDirectionsApi(currentStep)
@@ -334,7 +338,6 @@ private fun RouteState.convertState(): RouteProgressState {
         RouteState.TRACKING -> RouteProgressState.LOCATION_TRACKING
         RouteState.COMPLETE -> RouteProgressState.ROUTE_COMPLETE
         RouteState.OFF_ROUTE -> RouteProgressState.OFF_ROUTE
-        RouteState.STALE -> RouteProgressState.LOCATION_STALE
         RouteState.UNCERTAIN -> RouteProgressState.ROUTE_UNCERTAIN
     }
 }
