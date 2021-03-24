@@ -50,7 +50,7 @@ class MapboxOffboardRouter(
         callback: Router.Callback
     ) {
         mapboxDirections = RouteBuilderProvider
-            .getBuilder(accessToken, context, urlSkuTokenProvider)
+            .getBuilder(context, urlSkuTokenProvider)
             .routeOptions(routeOptions, refreshEnabled)
             .build()
         mapboxDirections?.enqueueCall(

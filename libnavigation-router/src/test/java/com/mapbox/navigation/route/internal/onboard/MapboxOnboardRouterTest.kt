@@ -1,5 +1,7 @@
 package com.mapbox.navigation.route.internal.onboard
 
+import android.content.Context
+import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -8,9 +10,10 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
-import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.route.internal.util.httpUrl
+import com.mapbox.navigation.route.offboard.RouteBuilderProvider
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.NavigationException
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -31,6 +34,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import okhttp3.HttpUrl
 import org.junit.After
 import org.junit.Assert
 import org.junit.Assert.assertEquals
@@ -73,18 +77,31 @@ class MapboxOnboardRouterTest {
     }
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
     private val logger: Logger = mockk(relaxUnitFun = true)
+    private val context = mockk<Context>()
+    private val mapboxDirections = mockk<MapboxDirections>(relaxed = true)
+    private val mapboxDirectionsBuilder = mockk<MapboxDirections.Builder>(relaxed = true)
 
     @Before
     fun setUp() {
-        onboardRouter = MapboxOnboardRouter(navigator, logger)
+        onboardRouter = MapboxOnboardRouter(navigator, context, logger)
 
         mockkObject(ThreadController)
         every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
+
+        mockkObject(RouteBuilderProvider)
+        every {
+            RouteBuilderProvider.getBuilder(context, null)
+        } returns mapboxDirectionsBuilder
+        every { mapboxDirectionsBuilder.interceptor(any()) } returns mapboxDirectionsBuilder
+        every { mapboxDirectionsBuilder.enableRefresh(any()) } returns mapboxDirectionsBuilder
+        every { mapboxDirectionsBuilder.build() } returns mapboxDirections
+        every { mapboxDirections.httpUrl() } returns HttpUrl.get(URL)!!
     }
 
     @After
     fun cleanUp() {
         unmockkObject(ThreadController)
+        unmockkObject(RouteBuilderProvider)
     }
 
     @Test
@@ -346,12 +363,17 @@ class MapboxOnboardRouterTest {
         private const val COMPONENT_TEXT = "North"
         private const val COMPONENT_TYPE = "text"
 
-        private val URL = RouteUrl(
-            accessToken = ACCESS_TOKEN,
-            origin = origin,
-            waypoints = waypoints,
-            destination = destination
-        ).getRequest()
+        private val URL =
+            MapboxDirections.builder()
+                .accessToken(ACCESS_TOKEN)
+                .origin(origin)
+                .also { builder ->
+                    waypoints.forEach { wp -> builder.addWaypoint(wp) }
+                }
+                .destination(destination)
+                .build()
+                .httpUrl()
+                .url()
 
         private const val ERROR_MESSAGE =
             "Error occurred fetching offline route: No suitable edges near location - Code: 171"

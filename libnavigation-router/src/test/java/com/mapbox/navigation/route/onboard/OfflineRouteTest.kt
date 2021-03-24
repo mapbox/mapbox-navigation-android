@@ -1,7 +1,9 @@
 package com.mapbox.navigation.route.onboard
 
+import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.route.RouteUrl
+import com.mapbox.navigation.route.internal.util.httpUrl
 import com.mapbox.navigation.testing.BuilderTest
 import io.mockk.mockk
 import org.junit.Assert.assertTrue
@@ -10,6 +12,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.UnsupportedEncodingException
+import java.net.URL
 import java.net.URLDecoder
 import kotlin.reflect.KClass
 
@@ -120,13 +123,14 @@ internal class OfflineRouteTest : BuilderTest<OfflineRoute, OfflineRoute.Builder
         assertTrue(offlineUrlDecoded.contains("break;through;;break"))
     }
 
-    private fun provideOnlineRouteBuilder(): RouteUrl {
-        return RouteUrl(
-            accessToken = "pk.XXX",
-            profile = RouteUrl.PROFILE_CYCLING,
-            origin = Point.fromLngLat(1.0, 2.0),
-            waypoints = listOf(Point.fromLngLat(3.0, 2.0)),
-            destination = Point.fromLngLat(1.0, 5.0)
-        )
-    }
+    private fun provideOnlineRouteBuilder(): URL =
+        MapboxDirections.builder()
+            .accessToken("pk.XXX")
+            .profile(DirectionsCriteria.PROFILE_CYCLING)
+            .origin(Point.fromLngLat(1.0, 2.0))
+            .addWaypoint(Point.fromLngLat(3.0, 2.0))
+            .destination(Point.fromLngLat(1.0, 5.0))
+            .build()
+            .httpUrl()
+            .url()
 }

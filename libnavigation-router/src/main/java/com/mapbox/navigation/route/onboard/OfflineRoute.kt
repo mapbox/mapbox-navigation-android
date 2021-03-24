@@ -2,15 +2,15 @@ package com.mapbox.navigation.route.onboard
 
 import android.net.Uri
 import androidx.annotation.FloatRange
-import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.utils.internal.ifNonNull
+import java.net.URL
 
 /**
  * The [OfflineRoute] class wraps the [RouteUrl] class with parameters which
  * could be set in order for an offline navigation session to successfully begin.
  */
 internal class OfflineRoute private constructor(
-    private val routeUrl: RouteUrl,
+    private val routeUrl: URL,
     private val bicycleType: OfflineCriteria.BicycleType?,
     private val cyclingSpeed: Float?,
     private val cyclewayBias: Float?,
@@ -48,7 +48,7 @@ internal class OfflineRoute private constructor(
      * @return the offline url string
      */
     fun buildUrl(): String {
-        return buildOfflineUrl(routeUrl.getRequest())
+        return buildOfflineUrl(routeUrl)
     }
 
     private fun checkWaypointTypes(waypointTypes: List<OfflineCriteria.WaypointType?>?): String? {
@@ -69,8 +69,8 @@ internal class OfflineRoute private constructor(
         return waypointTypes.joinTo(StringBuilder(), ";").toString()
     }
 
-    private fun buildOfflineUrl(url: Uri): String {
-        val offlineUrlBuilder = url.buildUpon()
+    private fun buildOfflineUrl(url: URL): String {
+        val offlineUrlBuilder = Uri.parse(url.toString()).buildUpon()
 
         offlineUrlBuilder
             .appendQueryParamIfNonNull(BICYCLE_TYPE_QUERY_PARAMETER, bicycleType?.type)
@@ -90,13 +90,12 @@ internal class OfflineRoute private constructor(
         return offlineUrlBuilder.build().toString()
     }
 
-    private fun Uri.Builder.appendQueryParamIfNonNull(key: String, value: Float?): Uri.Builder =
-        appendQueryParamIfNonNull(key, value?.toString())
-
-    private fun Uri.Builder.appendQueryParamIfNonNull(key: String, value: String?): Uri.Builder =
-        ifNonNull(value) {
-            appendQueryParameter(key, it)
-        } ?: this
+    private fun Uri.Builder.appendQueryParamIfNonNull(key: String, value: Any?): Uri.Builder =
+        apply {
+            ifNonNull(value) {
+                appendQueryParameter(key, it.toString())
+            }
+        }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -141,7 +140,7 @@ internal class OfflineRoute private constructor(
             ")"
     }
 
-    class Builder internal constructor(private val routeUrl: RouteUrl) {
+    class Builder internal constructor(private val routeUrl: URL) {
         private var bicycleType: OfflineCriteria.BicycleType? = null
         private var cyclingSpeed: Float? = null
         private var cyclewayBias: Float? = null

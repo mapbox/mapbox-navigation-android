@@ -50,7 +50,7 @@ class MapboxOffboardRouterTest : BaseTest() {
             mockSkuTokenProvider.obtainUrlWithSkuToken(any())
         } returns (mockk())
         every {
-            RouteBuilderProvider.getBuilder(accessToken, context, mockSkuTokenProvider)
+            RouteBuilderProvider.getBuilder(context, mockSkuTokenProvider)
         } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.interceptor(any()) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.enableRefresh(any()) } returns mapboxDirectionsBuilder

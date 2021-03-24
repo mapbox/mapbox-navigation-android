@@ -4,11 +4,11 @@ import android.content.Context
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
-import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -276,13 +276,13 @@ class NavigationRouteTest {
     }
 
     private fun provideNavigationOffboardRouteBuilder() =
-        RouteBuilderProvider.getBuilder(ACESS_TOKEN, context, mockSkuTokenProvider)
+        RouteBuilderProvider.getBuilder(context, mockSkuTokenProvider)
 
     private fun provideDefaultRouteOptionsBuilder() =
         RouteOptions.builder()
-            .baseUrl(RouteUrl.BASE_URL)
-            .user(RouteUrl.PROFILE_DEFAULT_USER)
-            .profile(RouteUrl.PROFILE_DRIVING)
+            .baseUrl(Constants.BASE_API_URL)
+            .user(Constants.MAPBOX_USER)
+            .profile(DirectionsCriteria.PROFILE_DRIVING)
             .coordinates(emptyList())
             .geometries("")
             .requestUuid("")
