@@ -39,7 +39,7 @@ class MapboxNavigationCameraTransition(
                 targetCenter = center
             )
 
-            val centerAnimationRate = 300.0
+            val centerAnimationRate = 500.0
             centerDuration = (
                 (screenDistanceFromMapCenterToLocation / centerAnimationRate) * 1000.0
                 ).toLong()
@@ -63,8 +63,8 @@ class MapboxNavigationCameraTransition(
                 abs(zoom - it)
             } ?: zoom
 
-            val zoomAnimationRate = 2.0
-            zoomDelay = centerDuration * 0.3
+            val zoomAnimationRate = 2.2
+            zoomDelay = centerDuration * 0.5
             zoomDuration = ((zoomDelta / zoomAnimationRate) * 1000.0).toLong()
                 .coerceAtMost(MAXIMUM_LOW_TO_HIGH_DURATION)
 
