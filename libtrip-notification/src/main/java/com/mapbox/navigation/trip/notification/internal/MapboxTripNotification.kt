@@ -173,6 +173,10 @@ class MapboxTripNotification constructor(
         expandedNotificationRemoteViews?.apply {
             setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
         }
+        expandedNotificationRemoteViews?.setTextViewText(
+            R.id.endNavigationBtnText,
+            applicationContext.getString(R.string.mapbox_stop_session)
+        )
     }
 
     /**
