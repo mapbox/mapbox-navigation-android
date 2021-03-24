@@ -9,8 +9,10 @@ import android.os.Vibrator
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -27,7 +29,6 @@ import com.mapbox.maps.plugin.gestures.getGesturesPlugin
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
 import com.mapbox.navigation.base.TimeFormat
-import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -213,10 +214,10 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private fun findRoute(origin: Point?, destination: Point?) {
         val routeOptions = RouteOptions.builder()
-            .baseUrl(RouteUrl.BASE_URL)
-            .user(RouteUrl.PROFILE_DEFAULT_USER)
-            .profile(RouteUrl.PROFILE_DRIVING_TRAFFIC)
-            .geometries(RouteUrl.GEOMETRY_POLYLINE6)
+            .baseUrl(Constants.BASE_API_URL)
+            .user(Constants.MAPBOX_USER)
+            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+            .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
             .requestUuid("")
             .accessToken(getMapboxAccessTokenFromResources())
             .coordinates(listOf(origin, destination))

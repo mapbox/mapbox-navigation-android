@@ -5,8 +5,8 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
+import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -63,9 +63,9 @@ class MapboxRouteOptionsUpdaterTest {
         private fun provideDefaultRouteOptionsBuilder() =
             RouteOptions.builder()
                 .accessToken(accessToken)
-                .baseUrl(RouteUrl.BASE_URL)
-                .user(RouteUrl.PROFILE_DEFAULT_USER)
-                .profile(RouteUrl.PROFILE_DRIVING_TRAFFIC)
+                .baseUrl(Constants.BASE_API_URL)
+                .user(Constants.MAPBOX_USER)
+                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
                 .overview(DirectionsCriteria.OVERVIEW_FULL)
                 .annotationsList(
                     listOf(

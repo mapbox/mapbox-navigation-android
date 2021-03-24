@@ -7,14 +7,15 @@ import android.location.Location
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.telemetry.MapboxTelemetryConstants.MAPBOX_SHARED_PREFERENCES
 import com.mapbox.annotation.module.MapboxModuleType
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.common.module.provider.MapboxModuleProvider
+import com.mapbox.core.constants.Constants
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
-import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.base.options.IncidentsOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -747,9 +748,9 @@ class MapboxNavigationTest {
     private fun provideDefaultRouteOptionsBuilder() =
         RouteOptions.builder()
             .accessToken(accessToken)
-            .baseUrl(RouteUrl.BASE_URL)
-            .user(RouteUrl.PROFILE_DEFAULT_USER)
-            .profile(RouteUrl.PROFILE_DRIVING)
+            .baseUrl(Constants.BASE_API_URL)
+            .user(Constants.MAPBOX_USER)
+            .profile(DirectionsCriteria.PROFILE_DRIVING)
             .coordinates(emptyList())
             .geometries("")
             .requestUuid("")

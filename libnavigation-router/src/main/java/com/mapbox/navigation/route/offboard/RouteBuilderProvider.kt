@@ -11,9 +11,8 @@ import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 internal object RouteBuilderProvider {
 
     fun getBuilder(
-        accessToken: String,
         context: Context,
-        urlSkuTokenProvider: UrlSkuTokenProvider
+        urlSkuTokenProvider: UrlSkuTokenProvider?
     ): MapboxDirections.Builder =
         MapboxDirections.builder()
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
@@ -29,14 +28,17 @@ internal object RouteBuilderProvider {
                     DirectionsCriteria.ANNOTATION_DISTANCE
                 )
             )
-            .accessToken(accessToken)
             .voiceInstructions(true)
             .bannerInstructions(true)
             .voiceUnits(context.inferDeviceLocale().getUnitTypeForLocale())
-            .interceptor {
-                val httpUrl = it.request().url()
-                val skuUrl = urlSkuTokenProvider.obtainUrlWithSkuToken(httpUrl.url())
-                it.proceed(it.request().newBuilder().url(skuUrl).build())
+            .also { builder ->
+                if (urlSkuTokenProvider != null) {
+                    builder.interceptor {
+                        val httpUrl = it.request().url()
+                        val skuUrl = urlSkuTokenProvider.obtainUrlWithSkuToken(httpUrl.url())
+                        it.proceed(it.request().newBuilder().url(skuUrl).build())
+                    }
+                }
             }
 
     fun getRefreshBuilder(): MapboxDirectionsRefresh.Builder =

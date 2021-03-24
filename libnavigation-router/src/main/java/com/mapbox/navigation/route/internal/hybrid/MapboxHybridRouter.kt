@@ -45,6 +45,7 @@ class MapboxHybridRouter(
     ) : this(
         onboardRouter = MapboxOnboardRouter(
             navigatorNative,
+            context,
             logger
         ),
         offboardRouter = MapboxOffboardRouter(
