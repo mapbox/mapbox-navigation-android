@@ -19,7 +19,8 @@ package com.mapbox.navigation.core.trip.model.eh
  * @param speedLimit max speed of the edge (speed limit) in m/s
  * @param laneCount the number of lanes on the edge (does not change mid-edge)
  * @param meanElevation mean elevation along the edge in meters
- * @param countryCode ISO 3166-1 alpha-3 country code
+ * @param countryCodeIso3 ISO 3166-1 alpha-3 country code
+ * @param countryCodeIso2 the edge's country code (ISO-2 format)
  * @param stateCode a state inside a country (ISO 3166-2)
  * @param isRightHandTraffic true if in the current place/state right-hand traffic is used,
  * false if left-hand.
@@ -39,7 +40,8 @@ class EHorizonEdgeMetadata internal constructor(
     val laneCount: Byte?,
     val meanElevation: Double?,
     val curvature: Byte,
-    val countryCode: String?,
+    val countryCodeIso3: String?,
+    val countryCodeIso2: String?,
     val stateCode: String?,
     val isRightHandTraffic: Boolean,
 ) {
@@ -67,7 +69,8 @@ class EHorizonEdgeMetadata internal constructor(
         if (laneCount != other.laneCount) return false
         if (meanElevation != other.meanElevation) return false
         if (curvature != other.curvature) return false
-        if (countryCode != other.countryCode) return false
+        if (countryCodeIso3 != other.countryCodeIso3) return false
+        if (countryCodeIso2 != other.countryCodeIso2) return false
         if (stateCode != other.stateCode) return false
         if (isRightHandTraffic != other.isRightHandTraffic) return false
 
@@ -92,7 +95,8 @@ class EHorizonEdgeMetadata internal constructor(
         result = 31 * result + (laneCount ?: 0)
         result = 31 * result + (meanElevation?.hashCode() ?: 0)
         result = 31 * result + curvature
-        result = 31 * result + (countryCode?.hashCode() ?: 0)
+        result = 31 * result + (countryCodeIso3?.hashCode() ?: 0)
+        result = 31 * result + (countryCodeIso2?.hashCode() ?: 0)
         result = 31 * result + (stateCode?.hashCode() ?: 0)
         result = 31 * result + isRightHandTraffic.hashCode()
         return result
@@ -117,7 +121,8 @@ class EHorizonEdgeMetadata internal constructor(
             "laneCount=$laneCount, " +
             "meanElevation=$meanElevation, " +
             "curvature=$curvature, " +
-            "countryCode=$countryCode, " +
+            "countryCodeIso3=$countryCodeIso3, " +
+            "countryCodeIso2=$countryCodeIso2, " +
             "stateCode=$stateCode, " +
             "isRightHandTraffic=$isRightHandTraffic" +
             ")"

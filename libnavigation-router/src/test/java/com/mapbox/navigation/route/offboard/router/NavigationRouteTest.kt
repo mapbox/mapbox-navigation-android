@@ -16,6 +16,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import okhttp3.Request
 import org.hamcrest.CoreMatchers.containsString
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -88,7 +89,7 @@ class NavigationRouteTest {
             .build()
 
         assertThat(
-            navigationRoute.cloneCall().request().url().toString(),
+            (navigationRoute.cloneCall().request() as Request).url.toString(),
             containsString("/cycling/")
         )
     }
@@ -111,7 +112,7 @@ class NavigationRouteTest {
             .build()
 
         assertThat(
-            navigationRoute.cloneCall().request().url().toString(),
+            (navigationRoute.cloneCall().request() as Request).url.toString(),
             containsString("curb")
         )
     }
@@ -135,7 +136,7 @@ class NavigationRouteTest {
             .build()
 
         assertThat(
-            navigationRoute.cloneCall().request().url().toString(),
+            (navigationRoute.cloneCall().request() as Request).url.toString(),
             containsString("waypoints")
         )
     }
@@ -153,7 +154,7 @@ class NavigationRouteTest {
             )
             .build()
         assertThat(
-            navigationRoute.cloneCall().request().url().toString(),
+            (navigationRoute.cloneCall().request() as Request).url.toString(),
             containsString("Destination")
         )
     }
@@ -176,7 +177,7 @@ class NavigationRouteTest {
             .build()
 
         assertThat(
-            navigationRoute.cloneCall().request().url().toString(),
+            (navigationRoute.cloneCall().request() as Request).url.toString(),
             containsString("waypoint_targets")
         )
     }
@@ -197,7 +198,7 @@ class NavigationRouteTest {
             )
             .build()
 
-        val requestUrl = navigationRoute.cloneCall().request().url().toString()
+        val requestUrl = (navigationRoute.cloneCall().request() as Request).url.toString()
 
         assertThat(requestUrl, containsString("bearings=90%2C90"))
     }
@@ -226,7 +227,7 @@ class NavigationRouteTest {
             )
             .build()
 
-        val requestUrl = navigationRoute.cloneCall().request().url().toString()
+        val requestUrl = (navigationRoute.cloneCall().request() as Request).url.toString()
 
         assertThat(requestUrl, containsString("bearings=10%2C10%3B20%2C20%3B30%2C30%3B40%2C40"))
     }
@@ -266,7 +267,7 @@ class NavigationRouteTest {
             )
             .build()
 
-        val request = navigationRoute.cloneCall().request().url().toString()
+        val request = (navigationRoute.cloneCall().request() as Request).url.toString()
         assertThat(request, containsString("https://api-directions-traf.com"))
         assertThat(request, containsString("alternatives=true"))
         assertThat(request, containsString(ACESS_TOKEN))

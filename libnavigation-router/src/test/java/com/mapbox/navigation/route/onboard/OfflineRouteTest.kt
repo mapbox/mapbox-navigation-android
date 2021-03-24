@@ -132,5 +132,5 @@ internal class OfflineRouteTest : BuilderTest<OfflineRoute, OfflineRoute.Builder
             .destination(Point.fromLngLat(1.0, 5.0))
             .build()
             .httpUrl()
-            .url()
+            .toUrl()
 }

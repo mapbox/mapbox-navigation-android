@@ -21,7 +21,7 @@ data class MockDirectionsRequestHandler(
     override fun handle(request: RecordedRequest): MockResponse? {
         val prefix =
             """/directions/v5/mapbox/$profile/${expectedCoordinates.parseCoordinates()}"""
-        return if (request.path.startsWith(prefix)) {
+        return if (request.path!!.startsWith(prefix)) {
             MockResponse().setBody(jsonResponse)
         } else {
             null

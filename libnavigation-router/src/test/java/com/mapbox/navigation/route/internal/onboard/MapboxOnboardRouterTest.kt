@@ -34,7 +34,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.junit.After
 import org.junit.Assert
 import org.junit.Assert.assertEquals
@@ -95,7 +95,7 @@ class MapboxOnboardRouterTest {
         every { mapboxDirectionsBuilder.interceptor(any()) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.enableRefresh(any()) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.build() } returns mapboxDirections
-        every { mapboxDirections.httpUrl() } returns HttpUrl.get(URL)!!
+        every { mapboxDirections.httpUrl() } returns URL.toHttpUrlOrNull()!!
     }
 
     @After
@@ -373,7 +373,7 @@ class MapboxOnboardRouterTest {
                 .destination(destination)
                 .build()
                 .httpUrl()
-                .url()
+                .toUrl()
 
         private const val ERROR_MESSAGE =
             "Error occurred fetching offline route: No suitable edges near location - Code: 171"

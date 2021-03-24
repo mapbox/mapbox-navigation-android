@@ -134,7 +134,8 @@ internal fun EdgeMetadata.mapToEHorizonEdgeMetadata(): EHorizonEdgeMetadata {
         laneCount,
         meanElevation,
         curvature,
-        countryCode,
+        countryCodeIso3,
+        countryCodeIso2,
         stateCode,
         isRightHandTraffic
     )

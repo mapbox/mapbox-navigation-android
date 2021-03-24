@@ -20,8 +20,8 @@ data class MockVoiceRequestHandler(
     override fun handle(request: RecordedRequest): MockResponse? {
         val prefix =
             """/voice/v1/speak/$requestDetails"""
-        return if (request.path.startsWith(prefix)) {
-            MockResponse().apply { body = buffer }
+        return if (request.path!!.startsWith(prefix)) {
+            MockResponse().apply { setBody(buffer) }
         } else {
             null
         }

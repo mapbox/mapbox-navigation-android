@@ -7,6 +7,7 @@ import com.mapbox.api.directionsrefresh.v1.MapboxDirectionsRefresh
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
+import okhttp3.Request
 
 internal object RouteBuilderProvider {
 
@@ -34,8 +35,8 @@ internal object RouteBuilderProvider {
             .also { builder ->
                 if (urlSkuTokenProvider != null) {
                     builder.interceptor {
-                        val httpUrl = it.request().url()
-                        val skuUrl = urlSkuTokenProvider.obtainUrlWithSkuToken(httpUrl.url())
+                        val httpUrl = (it.request() as Request).url
+                        val skuUrl = urlSkuTokenProvider.obtainUrlWithSkuToken(httpUrl.toUrl())
                         it.proceed(it.request().newBuilder().url(skuUrl).build())
                     }
                 }

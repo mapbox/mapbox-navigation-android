@@ -33,7 +33,7 @@ class MockWebServerRule : TestWatcher() {
     val requestHandlers = mutableListOf<MockRequestHandler>()
 
     init {
-        webServer.setDispatcher(object : Dispatcher() {
+        webServer.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 requestHandlers.forEach {
                     it.handle(request)?.run { return this }
@@ -53,7 +53,7 @@ class MockWebServerRule : TestWatcher() {
                     """.trimMargin()
                 )
             }
-        })
+        }
     }
 
     override fun starting(description: Description?) {

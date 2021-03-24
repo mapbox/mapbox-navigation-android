@@ -61,7 +61,7 @@ class MapboxOnboardRouter(
             .build()
             .httpUrl()
 
-        val offlineRoute = OfflineRoute.Builder(httpUrl.url()).build()
+        val offlineRoute = OfflineRoute.Builder(httpUrl.toUrl()).build()
         retrieveRoute(offlineRoute.buildUrl(), callback)
     }
 
