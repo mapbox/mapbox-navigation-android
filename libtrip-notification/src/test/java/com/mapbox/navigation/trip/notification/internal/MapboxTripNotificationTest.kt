@@ -195,8 +195,12 @@ class MapboxTripNotificationTest {
         notification.updateNotification(routeProgress)
 
         verify(exactly = 1) { bannerText.text() }
-        verify(exactly = 1) { collapsedViews.setTextViewText(any(), primaryText()) }
-        verify(exactly = 1) { expandedViews.setTextViewText(any(), primaryText()) }
+        verify(exactly = 1) {
+            collapsedViews.setTextViewText(R.id.notificationInstructionText, primaryText())
+        }
+        verify(exactly = 1) {
+            expandedViews.setTextViewText(R.id.notificationInstructionText, primaryText())
+        }
         verify(exactly = 1) { expandedViews.setTextViewText(any(), END_NAVIGATION) }
         verify(exactly = 0) { expandedViews.setTextViewText(any(), STOP_SESSION) }
         assertEquals(notification.currentManeuverType, MANEUVER_TYPE)
@@ -214,8 +218,18 @@ class MapboxTripNotificationTest {
 
         notification.updateNotification(routeProgress)
 
-        verify(exactly = 1) { collapsedViews.setTextViewText(any(), distanceText) }
-        verify(exactly = 1) { expandedViews.setTextViewText(any(), distanceText) }
+        verify(exactly = 1) {
+            collapsedViews.setTextViewText(
+                R.id.notificationDistanceText,
+                distanceText
+            )
+        }
+        verify(exactly = 1) {
+            expandedViews.setTextViewText(
+                R.id.notificationDistanceText,
+                distanceText
+            )
+        }
     }
 
     @Test
@@ -390,6 +404,9 @@ class MapboxTripNotificationTest {
         verify(exactly = 3) {
             expandedViews.setViewVisibility(R.id.freeDriveText, any())
         }
+        verify(exactly = 2) {
+            expandedViews.setTextViewText(R.id.endNavigationBtnText, STOP_SESSION)
+        }
     }
 
     @Test
@@ -415,7 +432,7 @@ class MapboxTripNotificationTest {
             expandedViews.setViewVisibility(R.id.navigationIsStarting, any())
         }
         verify(exactly = 0) { expandedViews.setTextViewText(any(), END_NAVIGATION) }
-        verify(exactly = 1) { expandedViews.setTextViewText(any(), STOP_SESSION) }
+        verify(exactly = 2) { expandedViews.setTextViewText(any(), STOP_SESSION) }
     }
 
     private fun mockUpdateNotificationAndroidInteractions() {
