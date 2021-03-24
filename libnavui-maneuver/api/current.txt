@@ -591,9 +591,9 @@ package com.mapbox.navigation.ui.maneuver.view {
   }
 
   public final class MapboxManeuverView extends androidx.constraintlayout.widget.ConstraintLayout {
-    ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
-    ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxManeuverView(android.content.Context context);
+    ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
     method public void renderAddLanes(com.mapbox.navigation.ui.maneuver.model.Lane lane);
     method public void renderDistanceRemaining(com.mapbox.navigation.ui.maneuver.model.StepDistance stepDistance);
     method public void renderManeuver(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maneuver.model.Maneuver,com.mapbox.navigation.ui.maneuver.model.ManeuverError> maneuver);

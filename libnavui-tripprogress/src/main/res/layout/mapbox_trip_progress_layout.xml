@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/mapbox_trip_progress_view_background_color">
+    android:layout_height="wrap_content" >
 
   <TextView
       android:id="@+id/distanceRemainingText"
@@ -33,7 +32,6 @@
       android:layout_width="@dimen/mapbox_dimen_24dp"
       android:layout_height="@dimen/mapbox_dimen_1dp"
       android:layout_marginBottom="@dimen/mapbox_dimen_32dp"
-      android:background="@color/mapbox_trip_progress_view_background_color"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"

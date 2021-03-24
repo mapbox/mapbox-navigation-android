@@ -8,10 +8,10 @@
     <attr name="subManeuverViewBackgroundColor" format="reference|color"/>
     <!-- Defines the background color of upcoming maneuvers -->
     <attr name="upcomingManeuverViewBackgroundColor" format="reference|color"/>
-    <!-- Defines the background color of MapboxLaneGuidance view -->
-    <attr name="laneGuidanceViewBackgroundColor" format="reference|color"/>
+    <!-- Defines the style of maneuver arrow in the primary and sub maneuver view -->
+    <attr name="maneuverViewIconStyle" format="reference" />
     <!-- Defines the style of maneuver arrow in the lane guidance view -->
-    <attr name="laneGuidanceManeuverArrowStyle" format="reference" />
+    <attr name="laneGuidanceManeuverIconStyle" format="reference" />
   </declare-styleable>
 
   <declare-styleable name="MapboxTurnIconManeuver">
