@@ -145,4 +145,24 @@ class TripProgressUpdateFormatterTest {
             "estimatedTimeToArrivalFormatter"
         )
     }
+
+    @Config(qualifiers = "en-rUS")
+    @Test
+    fun distanceRemainingFormatterDefaultRoundingIncrementImperial() {
+        val progressFormatter = TripProgressUpdateFormatter.Builder(ctx).build()
+
+        val result = progressFormatter.getDistanceRemaining(.5)
+
+        assertEquals("5 ft", result.toString())
+    }
+
+    @Config(qualifiers = "pt-rPT")
+    @Test
+    fun distanceRemainingFormatterDefaultRoundingIncrementMetric() {
+        val progressFormatter = TripProgressUpdateFormatter.Builder(ctx).build()
+
+        val result = progressFormatter.getDistanceRemaining(1.0)
+
+        assertEquals("2 m", result.toString())
+    }
 }

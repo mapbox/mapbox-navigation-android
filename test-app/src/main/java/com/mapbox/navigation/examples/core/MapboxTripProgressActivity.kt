@@ -42,7 +42,6 @@ import com.mapbox.navigation.examples.core.databinding.LayoutActivityTripprogres
 import com.mapbox.navigation.examples.util.RouteLine
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
-import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
 import com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter
 import com.mapbox.navigation.ui.tripprogress.model.PercentDistanceTraveledFormatter
 import com.mapbox.navigation.ui.tripprogress.model.TimeRemainingFormatter
@@ -77,11 +76,6 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private fun getTripProgressFormatter(): TripProgressUpdateFormatter {
         return TripProgressUpdateFormatter.Builder(this)
-            .distanceRemainingFormatter(
-                DistanceRemainingFormatter(
-                    mapboxNavigation.navigationOptions.distanceFormatterOptions
-                )
-            )
             .timeRemainingFormatter(TimeRemainingFormatter(this))
             .percentRouteTraveledFormatter(PercentDistanceTraveledFormatter())
             .estimatedTimeToArrivalFormatter(

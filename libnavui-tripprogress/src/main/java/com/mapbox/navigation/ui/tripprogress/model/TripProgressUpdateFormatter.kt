@@ -4,6 +4,7 @@ import android.content.Context
 import android.text.SpannableString
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.internal.VoiceUnit
 import com.mapbox.navigation.ui.base.formatter.ValueFormatter
 
 /**
@@ -21,6 +22,11 @@ class TripProgressUpdateFormatter private constructor(
     private val timeRemainingFormatter: ValueFormatter<Double, SpannableString>,
     private val percentRouteTraveledFormatter: ValueFormatter<Double, SpannableString>
 ) {
+
+    companion object {
+        private const val DEFAULT_ROUNDING_IMPERIAL = 5
+        private const val DEFAULT_ROUNDING_METRIC = 2
+    }
 
     /**
      * @param context a valid context
@@ -199,9 +205,7 @@ class TripProgressUpdateFormatter private constructor(
                     )
 
             val theDistanceRemainingFormatter: ValueFormatter<Double, SpannableString> =
-                distanceRemainingFormatter ?: DistanceRemainingFormatter(
-                    DistanceFormatterOptions.Builder(context).build()
-                )
+                distanceRemainingFormatter ?: getDefaultDistanceRemainingFormatter(context)
 
             val theTimeRemainingFormatter: ValueFormatter<Double, SpannableString> =
                 timeRemainingFormatter ?: TimeRemainingFormatter(context.applicationContext)
@@ -217,5 +221,16 @@ class TripProgressUpdateFormatter private constructor(
                 thePercentRouteTraveledFormatter
             )
         }
+
+        private fun getDefaultDistanceRemainingFormatter(context: Context):
+            ValueFormatter<Double, SpannableString> {
+                val options = DistanceFormatterOptions.Builder(context).build()
+                val roundingUnit = when (options.unitType) {
+                    VoiceUnit.IMPERIAL -> DEFAULT_ROUNDING_IMPERIAL
+                    else -> DEFAULT_ROUNDING_METRIC
+                }
+                val finalOptions = options.toBuilder().roundingIncrement(roundingUnit).build()
+                return DistanceRemainingFormatter(finalOptions)
+            }
     }
 }

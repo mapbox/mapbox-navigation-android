@@ -19,7 +19,7 @@ class DistanceRemainingFormatterTest {
     @Config(qualifiers = "en")
     @Test
     fun formatDistanceLargeDistanceImperialWithDefaultLocale() {
-        val formatter = com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter(
+        val formatter = DistanceRemainingFormatter(
             DistanceFormatterOptions.Builder(ctx)
                 .unitType(VoiceUnit.IMPERIAL)
                 .build()
@@ -33,7 +33,7 @@ class DistanceRemainingFormatterTest {
     @Config(qualifiers = "en")
     @Test
     fun formatDistanceLargeDistanceUnitTypeDefault() {
-        val formatter = com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter(
+        val formatter = DistanceRemainingFormatter(
             DistanceFormatterOptions.Builder(ctx)
                 .build()
         )
@@ -45,7 +45,7 @@ class DistanceRemainingFormatterTest {
 
     @Test
     fun formatDistanceJapaneseLocale() {
-        val formatter = com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter(
+        val formatter = DistanceRemainingFormatter(
             DistanceFormatterOptions.Builder(ctx)
                 .locale(Locale.JAPAN)
                 .unitType(VoiceUnit.IMPERIAL)
