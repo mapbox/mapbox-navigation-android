@@ -95,8 +95,8 @@ internal object ViewportDataSourceProcessor {
         distanceFromManeuverToBeginPitchChange: Double,
         distanceFromManeuverToEndPitchChange: Double,
         distanceRemaining: Float,
-        minPitch: Double = 0.0,
-        maxPitch: Double = 60.0
+        minPitch: Double,
+        maxPitch: Double
     ): Double {
         val denominator =
             distanceFromManeuverToBeginPitchChange - distanceFromManeuverToEndPitchChange
@@ -113,8 +113,21 @@ internal object ViewportDataSourceProcessor {
         return 0.0
     }
 
-    fun getPitchPercentage(currentPitch: Double = 0.0, maxPitch: Double = 60.0): Double {
-        if (maxPitch == 0.0) return 0.0
+    fun getPitchForDistanceRemainingOnStep(
+        distanceFromManeuverToPitchChange: Double,
+        distanceRemaining: Float,
+        minPitch: Double,
+        maxPitch: Double
+    ): Double {
+        return if (distanceRemaining <= distanceFromManeuverToPitchChange) {
+            minPitch
+        } else {
+            maxPitch
+        }
+    }
+
+    fun getPitchPercentage(currentPitch: Double, maxPitch: Double): Double {
+        if (maxPitch == 0.0) return 1.0
         return (currentPitch / maxPitch).coerceIn(0.0, 1.0)
     }
 

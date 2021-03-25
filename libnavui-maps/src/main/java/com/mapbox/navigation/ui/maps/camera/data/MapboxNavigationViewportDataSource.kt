@@ -1,12 +1,14 @@
 package com.mapbox.navigation.ui.maps.camera.data
 
 import android.location.Location
+import android.util.Log
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -14,7 +16,6 @@ import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getAnchorPointFromPitchPercentage
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getBearingForMap
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getEdgeInsetsFromPoint
-import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getMapCenterCoordinateFromPitchPercentage
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPitchForDistanceRemainingOnStep
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPitchPercentage
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteForPostManeuverFramingGeometry
@@ -35,16 +36,18 @@ import kotlin.math.min
 private val distanceToCoalesceCompoundManeuvers = 150.0
 private val defaultDistanceToFrameAfterManeuver = 100.0
 
+private val framePointsAfterManeuver = true
+
 private val usingIntersectionDensityToCalculateGeometryForFraming = true
 private val averageIntersectionDistanceMultiplier = 5
 private val minimumMetersForIntersectionDensity = 20.0
 
 private val usingNearManeuverPitchChange = true
+private val maximizingViewableAreaWhenPitchZero = true
 private val distanceFromManeuverToBeginPitchChange = 180.0
 private val distanceFromManeuverToEndPitchChange = 150.0
 
 private val bearingDiffMax = 20.0
-
 
 private val NULL_ISLAND_POINT = Point.fromLngLat(0.0, 0.0)
 private val EMPTY_EDGE_INSETS = EdgeInsets(0.0, 0.0, 0.0, 0.0)
@@ -716,26 +719,7 @@ class MapboxNavigationViewportDataSource(
         updateFollowingData()
         updateOverviewData()
 
-        followingCameraOptions =
-            CameraOptions.Builder().apply {
-                if (followingCenterUpdatesAllowed) {
-                    center(followingCenterProperty.get())
-                }
-                if (followingZoomUpdatesAllowed) {
-                    zoom(followingZoomProperty.get())
-                }
-                if (followingBearingUpdatesAllowed) {
-                    bearing(followingBearingProperty.get())
-                }
-                if (followingPitchUpdatesAllowed) {
-                    pitch(followingPitchProperty.get())
-                }
-                if (followingPaddingUpdatesAllowed) {
-                    val paddingFromAnchorPoint =
-                        getEdgeInsetsFromPoint(mapboxMap.getSize(), followingAnchorProperty.get())
-                    padding(paddingFromAnchorPoint)
-                }
-            }.build()
+        followingCameraOptions = cameraFrame
 
         overviewCameraOptions =
             CameraOptions.Builder().apply {
@@ -757,6 +741,8 @@ class MapboxNavigationViewportDataSource(
             }.build()
     }
 
+    var cameraFrame: CameraOptions? = null
+
     private fun updateFollowingData() {
         val pointsForFollowing: MutableList<Point> = remainingPointsOnCurrentStep.toMutableList()
         val localTargetLocation = targetLocation
@@ -775,7 +761,6 @@ class MapboxNavigationViewportDataSource(
         followingPitchProperty.fallback = if (usingNearManeuverPitchChange) {
             getPitchForDistanceRemainingOnStep(
                 distanceFromManeuverToBeginPitchChange,
-                distanceFromManeuverToEndPitchChange,
                 distanceRemainingOnCurrentStep,
                 0.0,
                 options.maxFollowingPitch
@@ -784,37 +769,67 @@ class MapboxNavigationViewportDataSource(
             options.maxFollowingPitch
         }
 
-        val pitchPercentage = getPitchPercentage(
-            followingPitchProperty.get(),
-            options.maxFollowingPitch
-        )
+        if (framePointsAfterManeuver) {
+            pointsForFollowing.addAll(pointsToFrameAfterCurrentStep)
+        }
 
-        followingAnchorProperty.fallback = getAnchorPointFromPitchPercentage(
-            pitchPercentage,
-            mapboxMap.getSize(),
-            followingPaddingProperty.get()
-        )
+        cameraFrame = if (maximizingViewableAreaWhenPitchZero && followingPitchProperty.get() == 0.0) {
+            followingAnchorProperty.fallback = getAnchorPointFromPitchPercentage(
+                0.0,
+                mapboxMap.getSize(),
+                followingPaddingProperty.get()
+            )
 
-        pointsForFollowing.addAll(pointsToFrameAfterCurrentStep)
+            mapboxMap.cameraForCoordinates(
+                pointsForFollowing,
+                followingPaddingProperty.get(),
+                followingBearingProperty.get(),
+                followingPitchProperty.get()
+            )
+        } else {
+            followingAnchorProperty.fallback = getAnchorPointFromPitchPercentage(
+                1.0,
+                mapboxMap.getSize(),
+                followingPaddingProperty.get()
+            )
 
-        val zoomAndCenter = getZoomLevelAndCenterCoordinate(
-            pointsForFollowing,
-            followingBearingProperty.get(),
-            followingPitchProperty.get(),
-            followingPaddingProperty.get()
-        )
+            val mapSize = mapboxMap.getSize()
+            Log.e("CAMERA_FOR", mapSize.toString())
+            val padding = followingPaddingProperty.get()
 
-        val geometryCentroid = zoomAndCenter.second
-        val vehicleLocation = localTargetLocation?.toPoint() ?: geometryCentroid
+            val topLeft = ScreenCoordinate(
+                padding.left,
+                padding.top
+            )
+            val bottomRight = ScreenCoordinate(
+                mapSize.width - padding.right,
+                mapSize.height - padding.bottom
+            )
+            val screenBox = ScreenBox(
+                topLeft,
+                bottomRight
+            )
 
-        followingCenterProperty.fallback = getMapCenterCoordinateFromPitchPercentage(
-            pitchPercentage,
-            vehicleLocation,
-            geometryCentroid
-        )
-
+            Log.e("CAMERA_FOR", "pointsForFollowing: " + pointsForFollowing)
+            Log.e("CAMERA_FOR", "pointsForFollowingJSON: " + LineString.fromLngLats(pointsForFollowing).toJson())
+            Log.e("CAMERA_FOR", "padding: " + getEdgeInsetsFromPoint(mapSize, followingAnchorProperty.get()))
+            Log.e("CAMERA_FOR", "center: " + pointsForFollowing.first())
+            Log.e("CAMERA_FOR", "screenBox: " + screenBox)
+            Log.e("CAMERA_FOR", "followingBearingProperty: " + followingBearingProperty.get())
+            Log.e("CAMERA_FOR", "followingPitchProperty: " + followingPitchProperty.get())
+            mapboxMap.cameraForCoordinates(
+                pointsForFollowing,
+                getEdgeInsetsFromPoint(mapSize, followingAnchorProperty.get()),
+                pointsForFollowing.first(),
+                screenBox,
+                followingBearingProperty.get(),
+                followingPitchProperty.get()
+            )
+        }
+/*
+        followingCenterProperty.fallback = cameraFrame.center!!
         followingZoomProperty.fallback =
-            max(min(zoomAndCenter.first, options.maxZoom), options.minFollowingZoom)
+            max(min(cameraFrame.zoom!!, options.maxZoom), options.minFollowingZoom)*/
 
         debugger?.followingPoints = pointsForFollowing
         debugger?.followingUserPadding = followingPaddingProperty.get()
