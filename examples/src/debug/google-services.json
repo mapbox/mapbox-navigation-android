@@ -1,0 +1,24 @@
+{
+  "project_info": {
+    "project_number": "empty-for-debugging",
+    "firebase_url": "empty-for-debugging",
+    "project_id": "mapbox-navigation-android",
+    "storage_bucket": "empty-for-debugging"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "empty-for-debugging",
+        "android_client_info": {
+          "package_name": "com.mapbox.navigation.examples"
+        }
+      },
+      "api_key": [
+        {
+          "current_key": "empty-for-debugging"
+        }
+      ]
+    }
+  ],
+  "configuration_version": "1"
+}

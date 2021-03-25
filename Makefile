@@ -19,7 +19,7 @@ libnavigation-android \
 libnavui-speedlimit \
 
 APPLICATION_MODULES = \
-test-app \
+examples \
 instrumentation-tests \
 
 define run-gradle-tasks
