@@ -14,7 +14,7 @@ import com.mapbox.navigation.examples.core.MapboxCustomStyleActivity
 import com.mapbox.navigation.examples.core.MapboxJunctionActivity
 import com.mapbox.navigation.examples.core.MapboxManeuverActivity
 import com.mapbox.navigation.examples.core.MapboxNavigationActivity
-import com.mapbox.navigation.examples.core.MapboxRouteLineActivity
+import com.mapbox.navigation.examples.core.MapboxRouteLineAndArrowActivity
 import com.mapbox.navigation.examples.core.MapboxSignboardActivity
 import com.mapbox.navigation.examples.core.MapboxSnapshotActivity
 import com.mapbox.navigation.examples.core.MapboxTripProgressActivity
@@ -23,6 +23,7 @@ import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.ReplayHistoryActivity
 import com.mapbox.navigation.examples.core.camera.MapboxCameraAnimationsActivity
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityMainBinding
+import com.mapbox.navigation.examples.internal.MapboxRouteLineActivity
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper.Companion.areLocationPermissionsGranted
 import com.mapbox.navigation.examples.util.RouteDrawingActivity
@@ -69,7 +70,7 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
             SampleItem(
                 getString(R.string.title_route_line),
                 getString(R.string.description_route_line),
-                MapboxRouteLineActivity::class.java
+                MapboxRouteLineAndArrowActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_camera),
@@ -115,6 +116,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_replay),
                 getString(R.string.description_replay),
                 ReplayHistoryActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_route_line_internal),
+                getString(R.string.description_route_line_internal),
+                MapboxRouteLineActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_draw_utility),
