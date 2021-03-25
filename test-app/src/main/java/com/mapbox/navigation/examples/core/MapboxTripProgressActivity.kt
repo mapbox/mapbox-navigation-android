@@ -28,7 +28,7 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.getGesturesPlugin
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
-import com.mapbox.navigation.base.TimeFormat
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -40,17 +40,30 @@ import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityTripprogressBinding
-import com.mapbox.navigation.examples.util.RouteLine
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
+import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
+import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
+import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
+import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
 import com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter
-import com.mapbox.navigation.ui.tripprogress.model.PercentDistanceTraveledFormatter
 import com.mapbox.navigation.ui.tripprogress.model.TimeRemainingFormatter
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter
 
+/**
+ * This activity demonstrates the usage of the [MapboxTripProgressApi]. There is boiler plate
+ * code for establishing basic navigation and a route simulator is used.
+ *
+ * The code specifically related to the trip progress
+ * component is commented in order to call attention to its usage.
+ */
 class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 
-    private val routeLine = RouteLine(this)
     private lateinit var mapboxMap: MapboxMap
     private val navigationLocationProvider = NavigationLocationProvider()
     private lateinit var locationComponent: LocationComponentPlugin
@@ -58,11 +71,76 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
     private lateinit var mapboxNavigation: MapboxNavigation
     private val mapboxReplayer = MapboxReplayer()
     private lateinit var binding: LayoutActivityTripprogressBinding
-    private lateinit var tripProgressApiApi: MapboxTripProgressApi
+
+    /**
+     * TripProgress: The [MapboxTripProgressApi] consumes route progress data and produces trip related
+     * data that is consumed by the [MapboxTripProgressView] in the view layout.
+     */
+    private val tripProgressApiApi: MapboxTripProgressApi by lazy {
+        MapboxTripProgressApi(tripProgressFormatter)
+    }
+
+    /**
+     * TripProgress: The data in the view is formatted by different formatting implementations.
+     * Below are default formatters using default options but you can use your own formatting
+     * classes.
+     */
+    private val tripProgressFormatter: TripProgressUpdateFormatter by lazy {
+
+        // Here a distance formatter with default values is being created.
+        // The distance remaining formatter can also come from MapboxNavigation just be sure it
+        // is instantiated and configured first. The formatting options in MapboxNavigation
+        // can be found at: MapboxNavigation.navigationOptions.distanceFormatterOptions
+        val distanceFormatterOptions =
+            DistanceFormatterOptions.Builder(this).build()
+
+        // These are Mapbox formatters being created with default values. You can provide your own
+        // custom formatters by implementing the appropriate interface. The expected output of
+        // a formatter is a SpannableString that is applied to the the view
+        // component in MapboxTripProgressView.
+        TripProgressUpdateFormatter.Builder(this)
+            .distanceRemainingFormatter(DistanceRemainingFormatter(distanceFormatterOptions))
+            .timeRemainingFormatter(TimeRemainingFormatter(this))
+            .estimatedTimeToArrivalFormatter(EstimatedTimeToArrivalFormatter(this))
+            .build()
+    }
+
+    private val routeLineResources: RouteLineResources by lazy {
+        RouteLineResources.Builder().build()
+    }
+
+    private val options: MapboxRouteLineOptions by lazy {
+        MapboxRouteLineOptions.Builder(this)
+            .withRouteLineResources(routeLineResources)
+            .withRouteLineBelowLayerId("road-label")
+            .build()
+    }
+
+    private val routeLineView by lazy {
+        MapboxRouteLineView(options)
+    }
+
+    private val routeLineApi: MapboxRouteLineApi by lazy {
+        MapboxRouteLineApi(options)
+    }
+
+    private val routeArrowApi: MapboxRouteArrowApi by lazy {
+        MapboxRouteArrowApi()
+    }
+
+    private val routeArrowView: MapboxRouteArrowView by lazy {
+        MapboxRouteArrowView(RouteArrowOptions.Builder(this).build())
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // TripProgress: Look at LayoutActivityTripprogressBinding to see the view component in the
+        // activity's layout. You can update the style of the MapboxTripProgressView at runtime
+        // by calling MapboxTripProgressView::updateStyle. This can be useful when going from
+        // a light to a dark theme for example.
         binding = LayoutActivityTripprogressBinding.inflate(layoutInflater)
+
         setContentView(binding.root)
         mapboxMap = binding.mapView.getMapboxMap()
         locationComponent = binding.mapView.getLocationComponentPlugin().apply {
@@ -71,26 +149,11 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
         }
         mapCamera = getMapCamera()
         init()
-
-        tripProgressApiApi = MapboxTripProgressApi(getTripProgressFormatter())
-    }
-
-    private fun getTripProgressFormatter(): TripProgressUpdateFormatter {
-        return TripProgressUpdateFormatter.Builder(this)
-            .timeRemainingFormatter(TimeRemainingFormatter(this))
-            .percentRouteTraveledFormatter(PercentDistanceTraveledFormatter())
-            .estimatedTimeToArrivalFormatter(
-                EstimatedTimeToArrivalFormatter(
-                    this,
-                    TimeFormat.NONE_SPECIFIED
-                )
-            ).build()
     }
 
     private fun init() {
         initNavigation()
         initStyle()
-        routeLine.initialize(binding.mapView, mapboxNavigation)
     }
 
     @SuppressLint("MissingPermission")
@@ -117,6 +180,7 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
                 binding.mapView.getGesturesPlugin().addOnMapLongClickListener(this)
             },
             object : OnMapLoadErrorListener {
+                @SuppressLint("LogNotTimber")
                 override fun onMapLoadError(mapLoadError: MapLoadError, msg: String) {
                     Log.e(
                         MapboxTripProgressActivity::class.java.simpleName,
@@ -130,7 +194,6 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
     @SuppressLint("MissingPermission")
     private fun vibrate() {
         val vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
-            ?: return
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             vibrator.vibrate(VibrationEffect.createOneShot(100L, VibrationEffect.DEFAULT_AMPLITUDE))
         } else {
@@ -165,6 +228,11 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
     private val routesObserver = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
+                routeLineApi.setRoutes(
+                    listOf(RouteLine(routes[0], null))
+                ).apply {
+                    routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
+                }
                 startSimulation(routes[0])
                 binding.tripProgressView.visibility = View.VISIBLE
             } else {
@@ -228,8 +296,15 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+            // TripProgress: The trip progress component is driven by route progress updates.
+            // Passing the route progress to the MapboxTripProgressApi generates the data
+            // for updating the view. The result must be rendered by the MapboxTripProgressView.
             tripProgressApiApi.getTripProgress(routeProgress).let { update ->
                 binding.tripProgressView.render(update)
+            }
+
+            routeArrowApi.updateUpcomingManeuverArrow(routeProgress).apply {
+                routeArrowView.render(mapboxMap.getStyle()!!, this)
             }
         }
     }

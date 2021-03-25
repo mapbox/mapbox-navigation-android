@@ -14,7 +14,7 @@ import java.util.Locale
  * @param context an application context instance
  * @param locale an optional [Locale], if not provided the locale will be derived from the context
  */
-open class TimeRemainingFormatter(
+class TimeRemainingFormatter(
     context: Context,
     var locale: Locale? = null
 ) : ValueFormatter<Double, SpannableString> {

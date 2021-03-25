@@ -28,11 +28,11 @@ package com.mapbox.navigation.ui.tripprogress.model {
     method public android.text.SpannableString format(double update);
   }
 
-  public class TimeRemainingFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<java.lang.Double,android.text.SpannableString> {
+  public final class TimeRemainingFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<java.lang.Double,android.text.SpannableString> {
     ctor public TimeRemainingFormatter(android.content.Context context, java.util.Locale? locale = null);
     method public android.text.SpannableString format(double update);
-    method public final java.util.Locale? getLocale();
-    method public final void setLocale(java.util.Locale? p);
+    method public java.util.Locale? getLocale();
+    method public void setLocale(java.util.Locale? p);
     property public final java.util.Locale? locale;
   }
 
