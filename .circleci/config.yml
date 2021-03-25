@@ -90,7 +90,7 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "test-app/build.gradle" }}-{{ checksum  "libnavigation-router/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}-{{ checksum  "libnavui-maps/build.gradle" }}-{{ checksum  "libnavui-base/build.gradle" }}-{{ checksum  "libnavui-util/build.gradle" }}-{ checksum  "libnavui-resources/build.gradle" }}-{ checksum  "libnavui-maneuver/build.gradle" }}-{{ checksum  "libnavui-tripprogress/build.gradle" }}-{{ checksum  "libnavui-voice/build.gradle" }}-{{ checksum  "libnavigation-android/build.gradle" }}-{{ checksum  "libnavui-speedlimit/build.gradle" }}
+            - deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "examples/build.gradle" }}-{{ checksum  "libnavigation-router/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}-{{ checksum  "libnavui-maps/build.gradle" }}-{{ checksum  "libnavui-base/build.gradle" }}-{{ checksum  "libnavui-util/build.gradle" }}-{ checksum  "libnavui-resources/build.gradle" }}-{ checksum  "libnavui-maneuver/build.gradle" }}-{{ checksum  "libnavui-tripprogress/build.gradle" }}-{{ checksum  "libnavui-voice/build.gradle" }}-{{ checksum  "libnavigation-android/build.gradle" }}-{{ checksum  "libnavui-speedlimit/build.gradle" }}
             - deps-
       - run:
           name: Download Dependencies
@@ -98,7 +98,7 @@ commands:
       - save_cache:
           paths:
             - ~/.gradle
-          key: deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "test-app/build.gradle" }}-{{ checksum  "libnavigation-router/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}-{{ checksum  "libnavui-maps/build.gradle" }}-{{ checksum  "libnavui-base/build.gradle" }}-{{ checksum  "libnavui-util/build.gradle" }}-{ checksum  "libnavui-resources/build.gradle" }}-{ checksum  "libnavui-maneuver/build.gradle" }}-{{ checksum  "libnavui-tripprogress/build.gradle" }}-{{ checksum  "libnavui-voice/build.gradle" }}-{{ checksum  "libnavigation-android/build.gradle" }}-{{ checksum  "libnavui-speedlimit/build.gradle" }}
+          key: deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "examples/build.gradle" }}-{{ checksum  "libnavigation-router/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}-{{ checksum  "libnavui-maps/build.gradle" }}-{{ checksum  "libnavui-base/build.gradle" }}-{{ checksum  "libnavui-util/build.gradle" }}-{ checksum  "libnavui-resources/build.gradle" }}-{ checksum  "libnavui-maneuver/build.gradle" }}-{{ checksum  "libnavui-tripprogress/build.gradle" }}-{{ checksum  "libnavui-voice/build.gradle" }}-{{ checksum  "libnavigation-android/build.gradle" }}-{{ checksum  "libnavui-speedlimit/build.gradle" }}
 
   verify-codebase:
     steps:
@@ -282,7 +282,7 @@ commands:
       - run:
           name: Generate google services json for the test app
           command:  |
-            echo "${TEST_APP_GOOGLE_SERVICES_JSON}" > /root/code/test-app/google-services.json
+            echo "${EXAMPLES_GOOGLE_SERVICES_JSON}" > /root/code/examples/google-services.json
 
   download-native-libs:
     steps:
@@ -448,12 +448,12 @@ jobs:
       - download-native-libs
       - generate-google-services-json
       - assemble-module:
-          module_target: "test-app"
+          module_target: "examples"
           variant: "Release"
           inject_token: true
       - login-google-cloud-platform
       - run-firebase-robo:
-          module_target: "test-app"
+          module_target: "examples"
           variant: "release"
 
   internal-instrumentation-tests:

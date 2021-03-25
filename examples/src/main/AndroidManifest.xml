@@ -1,347 +1,92 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.mapbox.navigation.examples">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.mapbox.navigation.examples.core" >
+  <uses-permission android:name="android.permission.VIBRATE" />
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+  <application
+      android:allowBackup="true"
+      android:icon="@mipmap/ic_launcher"
+      android:label="@string/app_name"
+      android:roundIcon="@mipmap/ic_launcher_round"
+      android:supportsRtl="true"
+      android:theme="@style/AppTheme">
 
-    <meta-data
-        android:name="firebase_crashlytics_collection_enabled"
-        android:value="${enableCrashReporting}" />
+    <activity
+        android:name=".MapboxNavigationActivity"
+        android:label="@string/title_navigation">
+    </activity>
 
-    <application
-        android:name=".NavigationApplication"
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+    <activity
+        android:name=".MapboxRouteLineActivity"
+        android:label="@string/title_route_line"
+        android:screenOrientation="portrait">
+    </activity>
 
-        <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-                <action android:name="android.intent.action.VIEW" />
-            </intent-filter>
-        </activity>
+    <activity
+        android:name=".camera.MapboxCameraAnimationsActivity"
+        android:label="@string/title_camera"
+        android:screenOrientation="portrait">
+    </activity>
 
-        <activity android:name=".CoreActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
+    <activity
+        android:name=".MapboxSnapshotActivity"
+        android:label="@string/title_snapshotter"
+        android:screenOrientation="portrait">
+    </activity>
 
-        <activity android:name=".UIActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
+    <activity
+        android:name=".MapboxSignboardActivity"
+        android:label="@string/title_signboard"
+        android:screenOrientation="portrait">
+    </activity>
 
-        <activity
-            android:name=".settings.NavigationSettingsActivity"
+    <activity
+        android:name=".MapboxJunctionActivity"
+        android:label="@string/title_junction"
+        android:screenOrientation="portrait">
+    </activity>
 
-            android:label="@string/settings">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
+    <activity
+        android:name=".MapboxTripProgressActivity"
+        android:label="@string/title_trip_progress">
+    </activity>
 
-        <activity
-            android:name=".core.SimpleMapboxNavigationKt"
-            android:label="@string/title_simple_navigation_kotlin">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
+    <activity
+        android:name=".MapboxManeuverActivity"
+        android:label="@string/title_maneuver">
+    </activity>
 
-        <activity
-            android:name=".ui.NavigationViewActivity"
-            android:label="@string/title_navigation_view">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".UIActivity" />
-        </activity>
+    <activity
+        android:name=".MapboxVoiceActivity"
+        android:label="@string/title_voice">
+    </activity>
 
-        <activity
-            android:name=".ui.BuildingFootprintHighlightActivity"
-            android:label="@string/title_building_highlight_kotlin"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".UIActivity" />
-        </activity>
+    <activity
+        android:name=".replay.HistoryFilesActivity"
+        android:label="@string/title_replay" >
+    </activity>
 
-        <activity
-            android:name=".ui.BuildingExtrusionHighlightActivity"
-            android:label="@string/title_ui_building_extrusions_kotlin"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".UIActivity" />
-        </activity>
+    <activity
+        android:name=".ReplayHistoryActivity"
+        android:label="@string/title_replay" >
+    </activity>
 
-        <activity
-            android:name=".core.GuidanceViewActivity"
-            android:label="@string/title_guidance_view"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".UIActivity" />
-        </activity>
+    <activity
+        android:name=".MapboxCustomStyleActivity"
+        android:label="@string/title_custom_style" >
+    </activity>
 
-        <activity
-            android:name=".core.JunctionSnapshotActivity"
-            android:label="@string/title_guidance_view"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
+    <activity
+        android:name="com.mapbox.navigation.examples.MainActivity"
+        android:screenOrientation="portrait">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+        <action android:name="android.intent.action.VIEW" />
+      </intent-filter>
+    </activity>
 
-        <activity
-            android:name=".core.ReplayWaypointsActivity"
-            android:label="@string/title_replay_route"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.SilentWaypointsRerouteActivity"
-            android:label="@string/title_silent_waypoints_reroute"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.ReplayActivity"
-            android:label="@string/title_replay_route"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.ReplayHistoryActivity"
-            android:label="@string/title_replay_route"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.BasicNavigationActivity"
-            android:label="@string/title_basic_navigation_kotlin">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.BasicNavigationFragmentActivity"
-            android:label="@string/title_basic_navigation_fragment"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.BasicNavSdkOnlyActivity"
-            android:label="@string/title_basic_navigation_sdk_only_kotlin"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.FreeDriveNavigationActivity"
-            android:label="@string/title_free_drive_kotlin"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.FasterRouteActivity"
-            android:label="@string/title_faster_route">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.InstructionViewActivity"
-            android:label="@string/title_instruction_view">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.ReRouteActivity"
-            android:label="@string/title_reroute_view"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.SummaryBottomSheetActivity"
-            android:label="@string/title_summary_bottom_sheet"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.FeedbackButtonActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:label="@string/title_feedback_button">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".ui.CustomPuckActivity"
-            android:label="@string/title_custom_puck_example"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".UIActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.DebugMapboxNavigationKt"
-            android:label="@string/title_debug_navigation_kotlin"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".ui.CustomCameraActivity"
-            android:label="@string/title_custom_camera_example"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".UIActivity" />
-        </activity>
-
-        <activity
-            android:name=".ui.CustomUIComponentStyleActivity"
-            android:label="@string/title_custom_ui_component_style"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".UIActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.CustomRouteStylingActivity"
-            android:label="@string/title_custom_route_styling_kotlin"
-            android:theme="@style/CustomRouteTheme"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.NavigationMapRouteActivity"
-            android:label="@string/title_navigation_route_ui"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.MapMatchingActivity"
-            android:label="@string/title_map_matching"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".ui.NavigationViewFragmentActivity"
-            android:label="@string/title_navigation_view_fragment">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".UIActivity" />
-        </activity>
-
-        <activity android:name=".history.HistoryFilesActivity"
-            android:label="@string/title_select_replay_history">
-
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".core.ReplayHistoryActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.RuntimeRouteStylingActivity"
-            android:label="@string/title_runtime_styling"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".ui.TrafficToggleActivity"
-            android:label="@string/title_traffic_toggle">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".UIActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.RouteAlertsActivity"
-            android:label="@string/title_route_alerts"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity" />
-        </activity>
-
-        <activity
-            android:name=".core.CustomAlternativeRouteClickPaddingActivity"
-            android:label="@string/title_alternative_route_custom_click_padding"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".UIActivity" />
-        </activity>
-
-        <activity
-            android:name=".ui.FeedbackOptionsActivity"
-            android:label="@string/title_feedback_options"
-            android:windowSoftInputMode="adjustResize">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".UIActivity" />
-        </activity>
-        
-        <meta-data
-            android:name="com.mapbox.TestEventsServer"
-            android:value="api-events-staging.tilestream.net" />
-        <meta-data
-            android:name="com.mapbox.TestEventsAccessToken"
-            android:value="pk.eyJ1IjoiYmxzdGFnaW5nIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ.0IfB7v5Qbm2MGVYt8Kb8fg" />
-    </application>
+  </application>
 
 </manifest>

@@ -2,10 +2,9 @@ package com.mapbox.navigation.examples
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.item_examples_adapter.view.*
+import com.mapbox.navigation.examples.core.databinding.ItemExamplesAdapterBinding
 
 class ExamplesAdapter(
     appContext: Context,
@@ -21,8 +20,8 @@ class ExamplesAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExamplesViewHolder {
-        val view = inflater.inflate(R.layout.item_examples_adapter, parent, false)
-        return ExamplesViewHolder(view)
+        val binding = ItemExamplesAdapterBinding.inflate(inflater, parent, false)
+        return ExamplesViewHolder(binding)
     }
 
     override fun getItemCount() = itemList.size
@@ -31,12 +30,14 @@ class ExamplesAdapter(
         holder.bindItem(itemList[position])
     }
 
-    inner class ExamplesViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
+    inner class ExamplesViewHolder(
+        private val viewBinding: ItemExamplesAdapterBinding
+    ) : RecyclerView.ViewHolder(viewBinding.root) {
         fun bindItem(sampleItem: SampleItem) {
-            view.nameView.text = sampleItem.name
-            view.descriptionView.text = sampleItem.description
+            viewBinding.nameView.text = sampleItem.name
+            viewBinding.descriptionView.text = sampleItem.description
 
-            view.setOnClickListener {
+            viewBinding.root.setOnClickListener {
                 itemClickLambda(layoutPosition)
             }
         }
