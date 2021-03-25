@@ -20,7 +20,6 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.MapLoadError
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
@@ -32,6 +31,7 @@ import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
+import com.mapbox.maps.plugin.delegates.listeners.eventdata.MapLoadErrorType
 import com.mapbox.maps.plugin.gestures.GesturesPlugin
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.getGesturesPlugin
@@ -353,7 +353,7 @@ class MapboxCameraAnimationsActivity :
                             .center(point)
                             .zoom(13.0)
                             .build()
-                        mapboxMap.jumpTo(cameraOptions)
+                        mapboxMap.setCamera(cameraOptions)
                         navigationLocationProvider.changePosition(rawLocation)
                         mapboxNavigation.unregisterLocationObserver(this)
                     }
@@ -399,10 +399,10 @@ class MapboxCameraAnimationsActivity :
                 }
             },
             object : OnMapLoadErrorListener {
-                override fun onMapLoadError(mapViewLoadError: MapLoadError, msg: String) {
+                override fun onMapLoadError(mapLoadErrorType: MapLoadErrorType, msg: String) {
                     Log.e(
                         "CameraAnimationsAct",
-                        "Error loading map: %s".format(mapViewLoadError.name)
+                        "Error loading map - error type: $mapLoadErrorType, message: $msg"
                     )
                 }
             }

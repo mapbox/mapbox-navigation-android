@@ -300,7 +300,7 @@ class NavigationRouteTest {
             )
             .build()
 
-        val requestUrl = navigationRoute.cloneCall().request().url().toString()
+        val requestUrl = (navigationRoute.cloneCall().request() as Request).url.toString()
 
         assertThat(requestUrl, containsString("snapping_include_closures=true%3B%3Bfalse%3Btrue"))
     }
@@ -337,7 +337,7 @@ class NavigationRouteTest {
             )
             .build()
 
-        val requestUrl = navigationRoute.cloneCall().request().url().toString()
+        val requestUrl = (navigationRoute.cloneCall().request() as Request).url.toString()
 
         assertFalse(requestUrl.contains("snapping_include_closures"))
     }
@@ -355,7 +355,7 @@ class NavigationRouteTest {
             )
             .build()
 
-        val requestUrl = navigationRoute.cloneCall().request().url().toString()
+        val requestUrl = (navigationRoute.cloneCall().request() as Request).url.toString()
 
         assertFalse(requestUrl.contains("snapping_include_closures"))
     }

@@ -3,12 +3,11 @@ package com.mapbox.navigation.ui.maps
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.Value
 import com.mapbox.common.TileStore
-import com.mapbox.maps.MapChange
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.TileStoreManager
-import com.mapbox.maps.plugin.delegates.listeners.OnMapChangedListener
+import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.PredictiveCache
 import io.mockk.Runs
@@ -228,9 +227,9 @@ class PredictiveCacheControllerTest {
             PredictiveCache.createMapsController(mockedTileStore, capture(addSlotIds))
         } just Runs
 
-        val mapChangedListenerSlot = slot<OnMapChangedListener>()
-        verify { mockedMapboxMap.addOnMapChangedListener(capture(mapChangedListenerSlot)) }
-        mapChangedListenerSlot.captured.onMapChange(MapChange.DID_FINISH_LOADING_STYLE)
+        val mapChangedListenerSlot = slot<OnStyleLoadedListener>()
+        verify { mockedMapboxMap.addOnStyleLoadedListener(capture(mapChangedListenerSlot)) }
+        mapChangedListenerSlot.captured.onStyleLoaded()
 
         assertEquals(listOf("mapbox.satellite"), removeSlotIds)
         assertEquals(listOf("mapbox.mapbox-streets-v9"), addSlotIds)

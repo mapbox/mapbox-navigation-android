@@ -4,11 +4,10 @@ import android.util.Log
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.Value
 import com.mapbox.common.TileStore
-import com.mapbox.maps.MapChange
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.TileStoreManager
-import com.mapbox.maps.plugin.delegates.listeners.OnMapChangedListener
+import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.PredictiveCache
 import java.util.HashMap
@@ -59,28 +58,21 @@ class PredictiveCacheController @JvmOverloads constructor(
 ) {
     private var map: MapboxMap? = null
 
-    private val onMapChangeListener = object : OnMapChangedListener {
-        override fun onMapChange(mapChange: MapChange) {
-            when (mapChange) {
-                MapChange.DID_FINISH_LOADING_STYLE -> {
-                    map?.let { map ->
-                        val tileStoreResult =
-                            TileStoreManager.getTileStore(map.getResourceOptions())
-                        createMapsControllers(tileStoreResult) { tileStore ->
-                            val currentMapSources = mutableListOf<String>()
-                            traverseMapSources(map) { id ->
-                                currentMapSources.add(id)
-                            }
-                            updateMapsControllers(
-                                currentMapSources,
-                                PredictiveCache.currentMapsPredictiveCacheControllers(),
-                                tileStore
-                            )
-                        }
+    private val onStyleLoadedListener = object : OnStyleLoadedListener {
+        override fun onStyleLoaded() {
+            map?.let { map ->
+                val tileStoreResult =
+                    TileStoreManager.getTileStore(map.getResourceOptions())
+                createMapsControllers(tileStoreResult) { tileStore ->
+                    val currentMapSources = mutableListOf<String>()
+                    traverseMapSources(map) { id ->
+                        currentMapSources.add(id)
                     }
-                }
-                else -> {
-                    // do nothing
+                    updateMapsControllers(
+                        currentMapSources,
+                        PredictiveCache.currentMapsPredictiveCacheControllers(),
+                        tileStore
+                    )
                 }
             }
         }
@@ -109,7 +101,7 @@ class PredictiveCacheController @JvmOverloads constructor(
                 )
             }
         }
-        map.addOnMapChangedListener(onMapChangeListener)
+        map.addOnStyleLoadedListener(onStyleLoadedListener)
         this.map = map
     }
 
@@ -118,7 +110,7 @@ class PredictiveCacheController @JvmOverloads constructor(
      * to avoid leaking references or downloading unnecessary resources.
      */
     fun removeMapInstance() {
-        map?.removeOnMapChangedListener(onMapChangeListener)
+        map?.removeOnStyleLoadedListener(onStyleLoadedListener)
         PredictiveCache.currentMapsPredictiveCacheControllers().forEach {
             PredictiveCache.removeMapsController(it)
         }

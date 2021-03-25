@@ -41,7 +41,6 @@ import com.mapbox.maps.plugin.gestures.GesturesPluginImpl;
 import com.mapbox.maps.plugin.gestures.OnMapClickListener;
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener;
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin;
-
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPluginImpl;
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener;
 import com.mapbox.navigation.base.options.NavigationOptions;
@@ -57,10 +56,8 @@ import com.mapbox.navigation.core.replay.route.ReplayRouteMapper;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.MapMatcherResult;
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver;
-import com.mapbox.navigation.core.trip.session.RoadObjectsStore;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.base.model.Expected;
-import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter;
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer;
 import com.mapbox.navigation.ui.maps.PredictiveCacheController;
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider;
@@ -75,13 +72,14 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources;
-import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi;
-import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError;
-import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue;
-import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue;
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue;
+import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi;
+import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter;
+import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError;
+import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue;
+import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -543,7 +541,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
       if (location != null && activity != null) {
         Point point = Point.fromLngLat(location.getLongitude(), location.getLatitude());
         CameraOptions cameraOptions = new CameraOptions.Builder().center(point).zoom(13.0).build();
-        activity.mapboxMap.jumpTo(cameraOptions);
+        activity.mapboxMap.setCamera(cameraOptions);
         activityRef.get().navigationLocationProvider.changePosition(location, Collections.emptyList(), null, null);
       }
     }
