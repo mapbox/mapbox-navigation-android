@@ -14,13 +14,13 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.MapLoadError
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
+import com.mapbox.maps.plugin.delegates.listeners.eventdata.MapLoadErrorType
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -135,7 +135,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
                 viewportDataSource.evaluate()
             },
             object : OnMapLoadErrorListener {
-                override fun onMapLoadError(mapViewLoadError: MapLoadError, msg: String) {
+                override fun onMapLoadError(mapLoadErrorType: MapLoadErrorType, msg: String) {
                     // intentionally blank
                 }
             }
@@ -276,7 +276,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
                     .center(point)
                     .zoom(13.0)
                     .build()
-                act.binding.mapView.getMapboxMap().jumpTo(cameraOptions)
+                act.binding.mapView.getMapboxMap().setCamera(cameraOptions)
                 act.navigationLocationProvider.changePosition(loc)
                 act.updateCamera(loc)
             }

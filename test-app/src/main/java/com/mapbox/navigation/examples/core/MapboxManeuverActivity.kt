@@ -15,13 +15,13 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.MapLoadError
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
+import com.mapbox.maps.plugin.delegates.listeners.eventdata.MapLoadErrorType
 import com.mapbox.maps.plugin.gestures.GesturesPlugin
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.getGesturesPlugin
@@ -232,7 +232,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
                 getGesturePlugin().addOnMapLongClickListener(this)
             },
             object : OnMapLoadErrorListener {
-                override fun onMapLoadError(mapViewLoadError: MapLoadError, msg: String) {
+                override fun onMapLoadError(mapLoadErrorType: MapLoadErrorType, msg: String) {
                 }
             }
         )

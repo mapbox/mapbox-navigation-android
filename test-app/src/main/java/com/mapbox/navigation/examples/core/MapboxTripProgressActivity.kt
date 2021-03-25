@@ -16,7 +16,6 @@ import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.MapLoadError
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
@@ -24,6 +23,7 @@ import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
+import com.mapbox.maps.plugin.delegates.listeners.eventdata.MapLoadErrorType
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.getGesturesPlugin
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
@@ -181,10 +181,10 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
             },
             object : OnMapLoadErrorListener {
                 @SuppressLint("LogNotTimber")
-                override fun onMapLoadError(mapLoadError: MapLoadError, msg: String) {
+                override fun onMapLoadError(mapLoadErrorType: MapLoadErrorType, msg: String) {
                     Log.e(
                         MapboxTripProgressActivity::class.java.simpleName,
-                        "Error loading map: " + mapLoadError.name
+                        "Error loading map - error type: $mapLoadErrorType, message: $msg"
                     )
                 }
             }
