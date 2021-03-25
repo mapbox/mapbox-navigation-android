@@ -10,7 +10,6 @@ import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.databinding.MapboxItemLaneGuidanceLayoutBinding
 import com.mapbox.navigation.ui.maneuver.model.LaneIndicator
 import com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder
-import com.mapbox.navigation.ui.utils.internal.ThemeUtil
 
 /**
  * Default recycler adapter to render lanes for the upcoming turn.
@@ -93,8 +92,7 @@ class MapboxLaneGuidanceAdapter(
      * @param style Int
      */
     fun updateStyle(@StyleRes style: Int) {
-        this.laneGuidanceStyle =
-            ThemeUtil.retrieveAttrResourceId(context, style, R.style.MapboxStyleTurnIconManeuver)
+        this.laneGuidanceStyle = style
     }
 
     /**

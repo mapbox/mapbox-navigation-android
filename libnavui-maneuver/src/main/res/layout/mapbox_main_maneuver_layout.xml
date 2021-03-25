@@ -40,6 +40,7 @@
         android:layout_marginBottom="10dp"
         android:layout_marginTop="@dimen/mapbox_dimen_4dp"
         android:gravity="top"
+        android:maxLines="1"
         android:ellipsize="end"
         android:paddingEnd="@dimen/mapbox_dimen_2dp"
         android:paddingTop="@dimen/mapbox_dimen_2dp"

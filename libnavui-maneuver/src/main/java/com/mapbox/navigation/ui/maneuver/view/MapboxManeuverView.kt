@@ -32,11 +32,39 @@ import com.mapbox.navigation.ui.maneuver.model.TurnIconResources
  * @property upcomingManeuverAdapter MapboxUpcomingManeuverAdapter
  * @constructor
  */
-class MapboxManeuverView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr) {
+class MapboxManeuverView : ConstraintLayout {
+
+    /**
+     *
+     * @param context Context
+     * @constructor
+     */
+    constructor(context: Context) : super(context)
+
+    /**
+     *
+     * @param context Context
+     * @param attrs AttributeSet?
+     * @constructor
+     */
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
+        initAttributes(attrs)
+    }
+
+    /**
+     *
+     * @param context Context
+     * @param attrs AttributeSet?
+     * @param defStyleAttr Int
+     * @constructor
+     */
+    constructor(
+        context: Context,
+        attrs: AttributeSet?,
+        defStyleAttr: Int
+    ) : super(context, attrs, defStyleAttr) {
+        initAttributes(attrs)
+    }
 
     private val laneGuidanceAdapter = MapboxLaneGuidanceAdapter(context)
     private val upcomingManeuverAdapter = MapboxUpcomingManeuverAdapter(context)
@@ -62,7 +90,6 @@ class MapboxManeuverView @JvmOverloads constructor(
             adapter = upcomingManeuverAdapter
         }
 
-        initAttributes(attrs)
         this.setOnClickListener {
             if (binding.upcomingManeuverRecycler.visibility == GONE) {
                 updateUpcomingManeuversVisibility(VISIBLE)
@@ -254,43 +281,66 @@ class MapboxManeuverView @JvmOverloads constructor(
     }
 
     private fun initAttributes(attrs: AttributeSet?) {
-        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.MapboxManeuverView)
+        val typedArray = context.obtainStyledAttributes(
+            attrs,
+            R.styleable.MapboxManeuverView,
+            0,
+            R.style.MapboxStyleManeuverView
+        )
         applyAttributes(typedArray)
         typedArray.recycle()
     }
 
     private fun applyAttributes(typedArray: TypedArray) {
         binding.mainManeuverLayout.setBackgroundColor(
-            ContextCompat.getColor(
-                context,
-                typedArray.getResourceId(
-                    R.styleable.MapboxManeuverView_maneuverViewBackgroundColor,
+            typedArray.getColor(
+                R.styleable.MapboxManeuverView_maneuverViewBackgroundColor,
+                ContextCompat.getColor(
+                    context,
                     R.color.mapbox_main_maneuver_background_color
                 )
             )
         )
         binding.subManeuverLayout.setBackgroundColor(
-            ContextCompat.getColor(
-                context,
-                typedArray.getResourceId(
-                    R.styleable.MapboxManeuverView_subManeuverViewBackgroundColor,
+            typedArray.getColor(
+                R.styleable.MapboxManeuverView_subManeuverViewBackgroundColor,
+                ContextCompat.getColor(
+                    context,
                     R.color.mapbox_sub_maneuver_background_color
                 )
             )
         )
         binding.upcomingManeuverRecycler.setBackgroundColor(
-            ContextCompat.getColor(
-                context,
-                typedArray.getResourceId(
-                    R.styleable.MapboxManeuverView_upcomingManeuverViewBackgroundColor,
+            typedArray.getColor(
+                R.styleable.MapboxManeuverView_upcomingManeuverViewBackgroundColor,
+                ContextCompat.getColor(
+                    context,
                     R.color.mapbox_upcoming_maneuver_background_color
                 )
             )
         )
         laneGuidanceAdapter.updateStyle(
             typedArray.getResourceId(
-                R.styleable.MapboxManeuverView_laneGuidanceManeuverArrowStyle,
+                R.styleable.MapboxManeuverView_laneGuidanceManeuverIconStyle,
                 R.style.MapboxStyleTurnIconManeuver
+            )
+        )
+        mainLayoutBinding.maneuverIcon.updateTurnIconStyle(
+            ContextThemeWrapper(
+                context,
+                typedArray.getResourceId(
+                    R.styleable.MapboxManeuverView_maneuverViewIconStyle,
+                    R.style.MapboxStyleTurnIconManeuver
+                )
+            )
+        )
+        subLayoutBinding.subManeuverIcon.updateTurnIconStyle(
+            ContextThemeWrapper(
+                context,
+                typedArray.getResourceId(
+                    R.styleable.MapboxManeuverView_maneuverViewIconStyle,
+                    R.style.MapboxStyleTurnIconManeuver
+                )
             )
         )
     }

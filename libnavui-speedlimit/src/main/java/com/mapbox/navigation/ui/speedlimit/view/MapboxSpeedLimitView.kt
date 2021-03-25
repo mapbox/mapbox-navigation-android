@@ -99,7 +99,9 @@ class MapboxSpeedLimitView @JvmOverloads constructor(
     private fun initAttributes(attrs: AttributeSet?) {
         val typedArray: TypedArray = context.obtainStyledAttributes(
             attrs,
-            R.styleable.MapboxSpeedLimitView
+            R.styleable.MapboxSpeedLimitView,
+            0,
+            R.style.MapboxStyleSpeedLimit
         )
         applyAttributes(typedArray)
 
@@ -107,36 +109,36 @@ class MapboxSpeedLimitView @JvmOverloads constructor(
     }
 
     private fun applyAttributes(typedArray: TypedArray) {
-        ContextCompat.getColor(
-            context,
-            typedArray.getResourceId(
-                R.styleable.MapboxSpeedLimitView_speedLimitTextColor,
+        typedArray.getColor(
+            R.styleable.MapboxSpeedLimitView_speedLimitTextColor,
+            ContextCompat.getColor(
+                context,
                 R.color.mapbox_speed_limit_text_color
             )
         ).let {
             setTextColor(it)
         }
 
-        speedLimitBackgroundColor = ContextCompat.getColor(
-            context,
-            typedArray.getResourceId(
-                R.styleable.MapboxSpeedLimitView_speedLimitBackgroundColor,
+        speedLimitBackgroundColor = typedArray.getColor(
+            R.styleable.MapboxSpeedLimitView_speedLimitBackgroundColor,
+            ContextCompat.getColor(
+                context,
                 R.color.mapbox_speed_limit_view_background
             )
         )
 
-        speedLimitViennaBorderColor = ContextCompat.getColor(
-            context,
-            typedArray.getResourceId(
-                R.styleable.MapboxSpeedLimitView_speedLimitViennaBorderColor,
+        speedLimitViennaBorderColor = typedArray.getColor(
+            R.styleable.MapboxSpeedLimitView_speedLimitViennaBorderColor,
+            ContextCompat.getColor(
+                context,
                 R.color.mapbox_speed_limit_view_vienna_border
             )
         )
 
-        speedLimitMutcdBorderColor = ContextCompat.getColor(
-            context,
-            typedArray.getResourceId(
-                R.styleable.MapboxSpeedLimitView_speedLimitMutcdBorderColor,
+        speedLimitMutcdBorderColor = typedArray.getColor(
+            R.styleable.MapboxSpeedLimitView_speedLimitMutcdBorderColor,
+            ContextCompat.getColor(
+                context,
                 R.color.mapbox_speed_limit_view_mutcd_border
             )
         )

@@ -42,46 +42,6 @@ class MapboxTripProgressView @JvmOverloads constructor(
         typedArray.recycle()
     }
 
-    private fun initAttributes(attrs: AttributeSet?) {
-        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.MapboxTripProgressView)
-        applyAttributes(typedArray)
-        typedArray.recycle()
-    }
-
-    private fun applyAttributes(typedArray: TypedArray) {
-        val textColor = ContextCompat.getColor(
-            context,
-            typedArray.getResourceId(
-                R.styleable.MapboxTripProgressView_tripProgressTextColor,
-                R.color.mapbox_trip_progress_text_color
-            )
-        )
-        binding.timeRemainingText.setTextColor(textColor)
-        binding.distanceRemainingText.setTextColor(textColor)
-        binding.estimatedTimeToArriveText.setTextColor(textColor)
-
-        val dividerColor = ContextCompat.getColor(
-            context,
-            typedArray.getResourceId(
-                R.styleable.MapboxTripProgressView_tripProgressDividerColor,
-                R.color.mapbox_trip_progress_divider_color
-            )
-        )
-        binding.tripProgressDivider?.setBackgroundColor(dividerColor)
-        binding.tripProgressDividerLeft?.setTextColor(dividerColor)
-        binding.tripProgressDividerRight?.setTextColor(dividerColor)
-
-        setBackgroundColor(
-            ContextCompat.getColor(
-                context,
-                typedArray.getResourceId(
-                    R.styleable.MapboxTripProgressView_tripProgressViewBackgroundColor,
-                    R.color.mapbox_trip_progress_view_background_color
-                )
-            )
-        )
-    }
-
     /**
      * Applies the necessary view side effects based on the input.
      *
@@ -104,6 +64,51 @@ class MapboxTripProgressView @JvmOverloads constructor(
         binding.timeRemainingText.setText(
             result.formatter.getTimeRemaining(result.currentLegTimeRemaining),
             TextView.BufferType.SPANNABLE
+        )
+    }
+
+    private fun initAttributes(attrs: AttributeSet?) {
+        val typedArray = context.obtainStyledAttributes(
+            attrs,
+            R.styleable.MapboxTripProgressView,
+            0,
+            R.style.MapboxStyleTripProgressView
+        )
+        applyAttributes(typedArray)
+        typedArray.recycle()
+    }
+
+    private fun applyAttributes(typedArray: TypedArray) {
+        val textColor = typedArray.getColor(
+            R.styleable.MapboxTripProgressView_tripProgressTextColor,
+            ContextCompat.getColor(
+                context,
+                R.color.mapbox_trip_progress_text_color
+            )
+        )
+        binding.timeRemainingText.setTextColor(textColor)
+        binding.distanceRemainingText.setTextColor(textColor)
+        binding.estimatedTimeToArriveText.setTextColor(textColor)
+
+        val dividerColor = typedArray.getColor(
+            R.styleable.MapboxTripProgressView_tripProgressDividerColor,
+            ContextCompat.getColor(
+                context,
+                R.color.mapbox_trip_progress_divider_color
+            )
+        )
+        binding.tripProgressDivider?.setBackgroundColor(dividerColor)
+        binding.tripProgressDividerLeft?.setTextColor(dividerColor)
+        binding.tripProgressDividerRight?.setTextColor(dividerColor)
+
+        setBackgroundColor(
+            typedArray.getColor(
+                R.styleable.MapboxTripProgressView_tripProgressViewBackgroundColor,
+                ContextCompat.getColor(
+                    context,
+                    R.color.mapbox_trip_progress_view_background_color
+                )
+            )
         )
     }
 }

@@ -65,14 +65,16 @@
     <activity
         android:name=".replay.HistoryFilesActivity"
         android:label="@string/title_replay" >
-      <meta-data
-          android:name="android.support.PARENT_ACTIVITY"
-          android:value=".ReplayHistoryActivity" />
     </activity>
 
     <activity
         android:name=".ReplayHistoryActivity"
         android:label="@string/title_replay" >
+    </activity>
+
+    <activity
+        android:name=".MapboxCustomStyleActivity"
+        android:label="@string/title_custom_style" >
     </activity>
 
     <activity
