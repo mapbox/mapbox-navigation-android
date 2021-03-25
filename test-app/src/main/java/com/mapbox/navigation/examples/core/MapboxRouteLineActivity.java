@@ -190,7 +190,6 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   @SuppressLint("MissingPermission")
   private void initListeners() {
     startNavigation.setOnClickListener(v -> {
-      mapboxNavigation.registerRouteProgressObserver(routeProgressObserver);
       mapboxNavigation.registerMapMatcherResultObserver(mapMatcherResultObserver);
       mapboxNavigation.startTripSession();
       startNavigation.setVisibility(View.GONE);
@@ -253,9 +252,6 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
             .locationEngine(new ReplayLocationEngine(mapboxReplayer))
             .build()
     );
-    mapboxNavigation.registerLocationObserver(locationObserver);
-    mapboxNavigation.registerRouteProgressObserver(replayProgressObserver);
-    mapboxNavigation.registerRoutesObserver(routesObserver);
 
     mapboxReplayer.pushRealLocation(this, 0.0);
     mapboxReplayer.playbackSpeed(1.5);

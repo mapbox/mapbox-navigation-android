@@ -83,7 +83,7 @@ class MapboxManeuverViewTest {
     @Test
     fun `init attribute main maneuver background color`() {
         val expectedBackgroundColor = ctx.getColor(R.color.mapbox_main_maneuver_background_color)
-        val view = MapboxManeuverView(ctx)
+        val view = MapboxManeuverView(ctx, null)
         val background = view.findViewById<ConstraintLayout>(R.id.mainManeuverLayout).background
 
         assertEquals(expectedBackgroundColor, (background as ColorDrawable).color)
@@ -92,7 +92,7 @@ class MapboxManeuverViewTest {
     @Test
     fun `init attribute sub maneuver background color`() {
         val expectedBackgroundColor = ctx.getColor(R.color.mapbox_sub_maneuver_background_color)
-        val view = MapboxManeuverView(ctx)
+        val view = MapboxManeuverView(ctx, null)
         val background = view.findViewById<ConstraintLayout>(R.id.subManeuverLayout).background
 
         assertEquals(expectedBackgroundColor, (background as ColorDrawable).color)
@@ -102,7 +102,7 @@ class MapboxManeuverViewTest {
     fun `init attribute upcoming maneuver background color`() {
         val expectedBackgroundColor =
             ctx.getColor(R.color.mapbox_upcoming_maneuver_background_color)
-        val view = MapboxManeuverView(ctx)
+        val view = MapboxManeuverView(ctx, null)
         val background = view.findViewById<RecyclerView>(R.id.upcomingManeuverRecycler).background
 
         assertEquals(expectedBackgroundColor, (background as ColorDrawable).color)

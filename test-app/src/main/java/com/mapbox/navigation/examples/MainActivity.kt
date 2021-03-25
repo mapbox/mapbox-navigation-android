@@ -10,6 +10,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.permissions.PermissionsListener
+import com.mapbox.navigation.examples.core.MapboxCustomStyleActivity
 import com.mapbox.navigation.examples.core.MapboxJunctionActivity
 import com.mapbox.navigation.examples.core.MapboxManeuverActivity
 import com.mapbox.navigation.examples.core.MapboxNavigationActivity
@@ -103,6 +104,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_voice),
                 getString(R.string.description_voice),
                 MapboxVoiceActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_custom_style),
+                getString(R.string.description_custom_style),
+                MapboxCustomStyleActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_replay),

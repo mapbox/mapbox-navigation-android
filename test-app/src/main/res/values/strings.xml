@@ -19,10 +19,12 @@
     <string name="description_maneuver" translatable="false">Demonstrates the use of maneuver API.</string>
     <string name="title_voice" translatable="false">Voice Example</string>
     <string name="description_voice" translatable="false">Demonstrates the use of voice API.</string>
-    <string name="label_start_navigation" translatable="false">Start Navigation</string>
     <string name="title_replay" translatable="false">Replay Example</string>
     <string name="description_replay" translatable="false">Demonstrates the use of replay API.</string>
+    <string name="title_custom_style" translatable="false">Custom Style Example</string>
+    <string name="description_custom_style" translatable="false">Demonstrates the use of custom styling.</string>
 
+    <string name="label_start_navigation" translatable="false">Start Navigation</string>
     <string name="play_history" translatable="false">Play history</string>
     <string name="select_history" translatable="false">Select history</string>
     <string name="replay_playback_speed_seekbar" translatable="false">Replay speed %d</string>

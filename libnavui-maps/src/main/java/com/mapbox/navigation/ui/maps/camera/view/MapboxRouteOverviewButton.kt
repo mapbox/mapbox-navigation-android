@@ -6,7 +6,6 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.annotation.StyleRes
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.databinding.MapboxRouteOverviewLayoutBinding
 import com.mapbox.navigation.ui.utils.internal.extensions.afterMeasured
@@ -106,19 +105,17 @@ class MapboxRouteOverviewButton : ConstraintLayout {
     private fun initAttributes(attrs: AttributeSet?) {
         val typedArray = context.obtainStyledAttributes(
             attrs,
-            R.styleable.MapboxRouteOverviewButton
+            R.styleable.MapboxRouteOverviewButton,
+            0,
+            R.style.MapboxStyleRouteOverview
         )
         applyAttributes(typedArray)
         typedArray.recycle()
     }
 
     private fun applyAttributes(typedArray: TypedArray) {
-        ContextCompat.getDrawable(
-            context,
-            typedArray.getResourceId(
-                R.styleable.MapboxRouteOverviewButton_overviewButtonDrawable,
-                R.drawable.mapbox_ic_route_overview
-            )
+        typedArray.getDrawable(
+            R.styleable.MapboxRouteOverviewButton_overviewButtonDrawable
         ).also { binding.routeOverviewIcon.setImageDrawable(it) }
     }
 
