@@ -17,7 +17,6 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.get
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getBearingForMap
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getEdgeInsetsFromPoint
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPitchForDistanceRemainingOnStep
-import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPitchPercentage
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteForPostManeuverFramingGeometry
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteInfo
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteIntersections
@@ -29,7 +28,6 @@ import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMisc
 import java.util.concurrent.CopyOnWriteArraySet
-import kotlin.math.max
 import kotlin.math.min
 
 //    TODO: Make these ViewportDataSourceOptions
@@ -817,13 +815,18 @@ class MapboxNavigationViewportDataSource(
             Log.e("CAMERA_FOR", "screenBox: " + screenBox)
             Log.e("CAMERA_FOR", "followingBearingProperty: " + followingBearingProperty.get())
             Log.e("CAMERA_FOR", "followingPitchProperty: " + followingPitchProperty.get())
+
+            val cameraOptions = mapboxMap.getCameraOptions()
+                .toBuilder()
+                .center(pointsForFollowing.first())
+                .padding(getEdgeInsetsFromPoint(mapSize, followingAnchorProperty.get()))
+                .bearing(followingBearingProperty.get())
+                .pitch(followingPitchProperty.get())
+                .build()
             mapboxMap.cameraForCoordinates(
                 pointsForFollowing,
-                getEdgeInsetsFromPoint(mapSize, followingAnchorProperty.get()),
-                pointsForFollowing.first(),
-                screenBox,
-                followingBearingProperty.get(),
-                followingPitchProperty.get()
+                cameraOptions,
+                screenBox
             )
         }
 /*

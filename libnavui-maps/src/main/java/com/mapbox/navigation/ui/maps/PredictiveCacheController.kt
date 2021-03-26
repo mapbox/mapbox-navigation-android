@@ -6,7 +6,6 @@ import com.mapbox.bindgen.Value
 import com.mapbox.common.TileStore
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.TileStoreManager
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.PredictiveCache
@@ -60,8 +59,8 @@ class PredictiveCacheController @JvmOverloads constructor(
 
     private val onStyleLoadedListener = object : OnStyleLoadedListener {
         override fun onStyleLoaded() {
-            map?.let { map ->
-                val tileStoreResult =
+            /*map?.let { map ->
+                val tileStoreResult = TileStore
                     TileStoreManager.getTileStore(map.getResourceOptions())
                 createMapsControllers(tileStoreResult) { tileStore ->
                     val currentMapSources = mutableListOf<String>()
@@ -74,7 +73,7 @@ class PredictiveCacheController @JvmOverloads constructor(
                         tileStore
                     )
                 }
-            }
+            }*/
         }
     }
 
@@ -92,7 +91,7 @@ class PredictiveCacheController @JvmOverloads constructor(
     fun setMapInstance(map: MapboxMap) {
         removeMapInstance()
         // Maps PredictiveCacheControllers
-        val tileStoreResult = TileStoreManager.getTileStore(map.getResourceOptions())
+        /*val tileStoreResult = TileStoreManager.getTileStore(map.getResourceOptions())
         createMapsControllers(tileStoreResult) { tileStore ->
             traverseMapSources(map) { id ->
                 PredictiveCache.createMapsController(
@@ -102,7 +101,7 @@ class PredictiveCacheController @JvmOverloads constructor(
             }
         }
         map.addOnStyleLoadedListener(onStyleLoadedListener)
-        this.map = map
+        this.map = map*/
     }
 
     /**
