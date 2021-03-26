@@ -18,6 +18,9 @@ Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-an
 #### Other changes
 * Added an example to show custom styling. [#4178](https://github.com/mapbox/mapbox-navigation-android/pull/4178)
 
+#### Known issues
+**When integrating this release, you might run into a crash on startup caused by cached data incompatibility. To resolve the issue, clear the application cache.**
+
 ## Mapbox Navigation SDK 2.0.0-beta.2 - March 19, 2021
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
