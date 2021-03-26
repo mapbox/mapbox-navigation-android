@@ -62,6 +62,30 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Kotlin Stdlib (Kotlin Standard Library for JVM).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Common (Kotlin Common Standard Library).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Jdk7 (Kotlin Standard Library JDK 7 extension).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Jdk8 (Kotlin Standard Library JDK 8 extension).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the kotlinx-coroutines-android (Coroutines support libraries for Kotlin).
 URL: [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
 License: [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -108,30 +132,6 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib (Kotlin Standard Library for JVM).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-common (Kotlin Common Standard Library).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-jdk7 (Kotlin Standard Library JDK 7 extension).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-jdk8 (Kotlin Standard Library JDK 8 extension).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
 Mapbox Navigation uses portions of the Retrofit.
 License: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -148,6 +148,11 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Converter: Gson.
+License: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Gson.
 License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -156,6 +161,30 @@ License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 Mapbox Navigation uses portions of the IntelliJ IDEA Annotations (A set of annotations used for code inspection support and code documentation.).
 URL: [http://www.jetbrains.org](http://www.jetbrains.org)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib (Kotlin Standard Library for JVM).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Common (Kotlin Common Standard Library).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Jdk7 (Kotlin Standard Library JDK 7 extension).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Jdk8 (Kotlin Standard Library JDK 8 extension).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
@@ -171,27 +200,23 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib (Kotlin Standard Library for JVM).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+Mapbox Navigation uses portions of the OkHttp.
+License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-common (Kotlin Common Standard Library).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+Mapbox Navigation uses portions of the OkHttp Logging Interceptor.
+License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-jdk7 (Kotlin Standard Library JDK 7 extension).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+Mapbox Navigation uses portions of the Okio.
+License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-jdk8 (Kotlin Standard Library JDK 8 extension).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+Mapbox Navigation uses portions of the Retrofit.
+License: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
@@ -217,6 +242,30 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Kotlin Stdlib (Kotlin Standard Library for JVM).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Common (Kotlin Common Standard Library).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Jdk7 (Kotlin Standard Library JDK 7 extension).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Jdk8 (Kotlin Standard Library JDK 8 extension).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the kotlinx-coroutines-android (Coroutines support libraries for Kotlin).
 URL: [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
 License: [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -232,6 +281,12 @@ License: [The Apache Software License, Version 2.0](https://www.apache.org/licen
 Mapbox Navigation uses portions of the Mapbox Accounts SDK for Android.
 URL: [https://github.com/mapbox/mapbox-accounts-android](https://github.com/mapbox/mapbox-accounts-android)
 License: [Mapbox Terms of Service](https://www.mapbox.com/tos/)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Mapbox Android Commmon SDK.
+URL: [https://github.com/mapbox/mapbox-sdk](https://github.com/mapbox/mapbox-sdk)
+License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 
 ===========================================================================
 
@@ -253,33 +308,15 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Mapbox Logger (Artifact that provides Mapbox Logger module implementation).
+URL: [https://github.com/mapbox/mapbox-base-android](https://github.com/mapbox/mapbox-base-android)
+License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Mapbox Navigation Accounts SDK for Android.
 URL: [https://github.com/mapbox/mapbox-accounts-android](https://github.com/mapbox/mapbox-accounts-android)
 License: [Mapbox Terms of Service](https://www.mapbox.com/tos/)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib (Kotlin Standard Library for JVM).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-common (Kotlin Common Standard Library).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-jdk7 (Kotlin Standard Library JDK 7 extension).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-jdk8 (Kotlin Standard Library JDK 8 extension).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
@@ -389,6 +426,30 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Kotlin Stdlib (Kotlin Standard Library for JVM).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Common (Kotlin Common Standard Library).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Jdk7 (Kotlin Standard Library JDK 7 extension).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Jdk8 (Kotlin Standard Library JDK 8 extension).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the kotlinx-coroutines-android (Coroutines support libraries for Kotlin).
 URL: [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
 License: [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -417,30 +478,6 @@ License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib (Kotlin Standard Library for JVM).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-common (Kotlin Common Standard Library).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-jdk7 (Kotlin Standard Library JDK 7 extension).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-jdk8 (Kotlin Standard Library JDK 8 extension).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
 Mapbox Navigation uses portions of the VersionedParcelable and friends (Provides a stable but relatively compact binary serialization format that can be passed across processes or persisted safely.).
 URL: [http://developer.android.com/tools/extras/support-library.html](http://developer.android.com/tools/extras/support-library.html)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -463,26 +500,45 @@ License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the Hamcrest Core (This is the core API of hamcrest matcher framework to be used by third-party framework providers. This includes the a foundation set of matcher implementations for common operations.).
-License: [New BSD License](http://www.opensource.org/licenses/bsd-license.php)
-
-===========================================================================
-
 Mapbox Navigation uses portions of the IntelliJ IDEA Annotations (A set of annotations used for code inspection support and code documentation.).
 URL: [http://www.jetbrains.org](http://www.jetbrains.org)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the JUnit (JUnit is a unit testing framework for Java, created by Erich Gamma and Kent Beck.).
-URL: [http://junit.org](http://junit.org)
-License: [Eclipse Public License 1.0](http://www.eclipse.org/legal/epl-v10.html)
+Mapbox Navigation uses portions of the Kotlin Stdlib (Kotlin Standard Library for JVM).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Common (Kotlin Common Standard Library).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Jdk7 (Kotlin Standard Library JDK 7 extension).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Jdk8 (Kotlin Standard Library JDK 8 extension).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
 Mapbox Navigation uses portions of the kotlinx-coroutines-core (Coroutines support libraries for Kotlin).
 URL: [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
 License: [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Mapbox Android Commmon OkHttp SDK.
+URL: [https://github.com/mapbox/mapbox-sdk](https://github.com/mapbox/mapbox-sdk)
+License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 
 ===========================================================================
 
@@ -510,6 +566,12 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Mapbox Logger (Artifact that provides Mapbox Logger module implementation).
+URL: [https://github.com/mapbox/mapbox-base-android](https://github.com/mapbox/mapbox-base-android)
+License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Mapbox Navigation Native (Common multi-platform navigation logic).
 URL: [https://github.com/mapbox/mapbox-navigation-native](https://github.com/mapbox/mapbox-navigation-native)
 License: [Mapbox Terms of Service](https://www.mapbox.com/tos)
@@ -521,42 +583,8 @@ License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the OkHttp Logging Interceptor.
-License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
 Mapbox Navigation uses portions of the Okio.
 License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib (Kotlin Standard Library for JVM).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-common (Kotlin Common Standard Library).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-jdk7 (Kotlin Standard Library JDK 7 extension).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-jdk8 (Kotlin Standard Library JDK 8 extension).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the support.
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
@@ -607,6 +635,30 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Kotlin Stdlib (Kotlin Standard Library for JVM).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Common (Kotlin Common Standard Library).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Jdk7 (Kotlin Standard Library JDK 7 extension).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Jdk8 (Kotlin Standard Library JDK 8 extension).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the kotlinx-coroutines-android (Coroutines support libraries for Kotlin).
 URL: [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
 License: [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -616,30 +668,6 @@ License: [The Apache Software License, Version 2.0](https://www.apache.org/licen
 Mapbox Navigation uses portions of the kotlinx-coroutines-core (Coroutines support libraries for Kotlin).
 URL: [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
 License: [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib (Kotlin Standard Library for JVM).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-common (Kotlin Common Standard Library).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-jdk7 (Kotlin Standard Library JDK 7 extension).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-jdk8 (Kotlin Standard Library JDK 8 extension).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
@@ -898,6 +926,24 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Kotlin Android Extensions Runtime.
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib (Kotlin Standard Library for JVM).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Common (Kotlin Common Standard Library).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the kotlinx-coroutines-android (Coroutines support libraries for Kotlin).
 URL: [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
 License: [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -970,24 +1016,6 @@ License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 Mapbox Navigation uses portions of the Okio.
 License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-android-extensions-runtime (Kotlin Android Extensions Runtime).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib (Kotlin Standard Library for JVM).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-common (Kotlin Common Standard Library).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
