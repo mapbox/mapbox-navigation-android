@@ -71,6 +71,7 @@ internal object EHorizonMapper {
             laneCount,
             meanElevation,
             countryCode,
+            countryCodeIso2,
             stateCode
         )
         // Recursively map the outgoing edges

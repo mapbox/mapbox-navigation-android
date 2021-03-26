@@ -28,7 +28,8 @@ import com.mapbox.geojson.LineString
  * @param speedLimit max speed of the edge (speed limit) in m/s
  * @param laneCount the number of lanes on the edge (does not change mid-edge)
  * @param meanElevation mean elevation along the edge in meters
- * @param countryCode ISO 3166-1 alpha-3 country code
+ * @param countryCodeIso3 ISO 3166-1 alpha-3 country code (3 letters code)
+ * @param countryCodeIso2 ISO 3166-1 alpha-2 country code (2 letters code)
  * @param stateCode a state inside a country (ISO 3166-2)
  */
 class Edge internal constructor(
@@ -52,9 +53,17 @@ class Edge internal constructor(
     val speedLimit: Double?,
     val laneCount: Byte?,
     val meanElevation: Double?,
-    val countryCode: String?,
+    val countryCodeIso3: String?,
+    val countryCodeIso2: String?,
     val stateCode: String?
 ) {
+
+    /**
+     * Country code. ISO 3166-1 alpha-3 country code
+     */
+    @Deprecated("Use Edge#countryCodeIso3 instead", ReplaceWith("countryCodeIso3"))
+    val countryCode: String?
+        get() = countryCodeIso3
 
     /**
      * @return true if the Edge is the most probable path (MPP), false if not
@@ -92,7 +101,8 @@ class Edge internal constructor(
         if (speedLimit != other.speedLimit) return false
         if (laneCount != other.laneCount) return false
         if (meanElevation != other.meanElevation) return false
-        if (countryCode != other.countryCode) return false
+        if (countryCodeIso3 != other.countryCodeIso3) return false
+        if (countryCodeIso2 != other.countryCodeIso2) return false
         if (stateCode != other.stateCode) return false
 
         return true
@@ -122,7 +132,8 @@ class Edge internal constructor(
         result = 31 * result + speedLimit.hashCode()
         result = 31 * result + laneCount.hashCode()
         result = 31 * result + meanElevation.hashCode()
-        result = 31 * result + countryCode.hashCode()
+        result = 31 * result + countryCodeIso3.hashCode()
+        result = 31 * result + countryCodeIso2.hashCode()
         result = 31 * result + stateCode.hashCode()
         return result
     }
@@ -152,7 +163,8 @@ class Edge internal constructor(
             "speedLimit=$speedLimit, " +
             "laneCount=$laneCount, " +
             "meanElevation=$meanElevation, " +
-            "countryCode=$countryCode, " +
+            "countryCodeIso3=$countryCodeIso3, " +
+            "countryCodeIso2=$countryCodeIso2, " +
             "stateCode=$stateCode" +
             ")"
     }

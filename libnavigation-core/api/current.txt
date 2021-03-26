@@ -539,7 +539,9 @@ package com.mapbox.navigation.core.trip.model.eh {
 
   public final class Edge {
     method public boolean getBridge();
-    method public String? getCountryCode();
+    method @Deprecated public String? getCountryCode();
+    method public String? getCountryCodeIso2();
+    method public String? getCountryCodeIso3();
     method public byte getCurvature();
     method public String getFunctionRoadClass();
     method public com.mapbox.geojson.LineString? getGeometry();
@@ -562,6 +564,7 @@ package com.mapbox.navigation.core.trip.model.eh {
     method public boolean getTunnel();
     method public boolean isMpp();
     method public void setParent(com.mapbox.navigation.core.trip.model.eh.Edge? p);
+    property @Deprecated public final String? countryCode;
   }
 
   public final class FunctionalRoadClass {

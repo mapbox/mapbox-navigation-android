@@ -110,7 +110,8 @@ class EHorizonMapperTest {
         assertNull(start.speedLimit)
         assertEquals(1.toByte(), start.laneCount)
         assertEquals(8.0, start.meanElevation)
-        assertEquals("USA", start.countryCode)
+        assertEquals("US", start.countryCodeIso2)
+        assertEquals("USA", start.countryCodeIso3)
         assertEquals("CA", start.stateCode)
     }
 
