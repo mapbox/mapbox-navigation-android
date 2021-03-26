@@ -9,6 +9,7 @@ import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
+import com.mapbox.navigation.ui.maps.camera.utils.shortestRotation
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import com.mapbox.turf.TurfMisc
@@ -174,6 +175,9 @@ internal object ViewportDataSourceProcessor {
         }
         return currentMapCameraBearing + shortestRotationDiff(output, currentMapCameraBearing)
     }
+
+    fun normalizeBearing(currentBearing: Double, targetBearing: Double) =
+        currentBearing + shortestRotation(currentBearing, targetBearing)
 
     private fun shortestRotationDiff(angle: Double, anchorAngle: Double): Double {
         if (angle.isNaN() || anchorAngle.isNaN()) {

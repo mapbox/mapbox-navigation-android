@@ -17,11 +17,11 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.get
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getBearingForMap
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getEdgeInsetsFromPoint
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPitchForDistanceRemainingOnStep
+import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.normalizeBearing
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteForPostManeuverFramingGeometry
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteInfo
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteIntersections
 import com.mapbox.navigation.ui.maps.camera.utils.metersToKilometers
-import com.mapbox.navigation.ui.maps.camera.utils.shortestRotation
 import com.mapbox.navigation.ui.maps.camera.utils.toPoint
 import com.mapbox.navigation.ui.maps.internal.camera.data.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.turf.TurfConstants
@@ -44,14 +44,12 @@ private val minimumMetersForIntersectionDensity = 20.0
 private val usingNearManeuverPitchChange = true
 private val maximizeViewableAreaWhenPitchZero = true
 private val distanceFromManeuverToBeginPitchChange = 180.0
-private val distanceFromManeuverToEndPitchChange = 150.0
 
 private val bearingDiffMax = 20.0
 
 private val NULL_ISLAND_POINT = Point.fromLngLat(0.0, 0.0)
 private val EMPTY_EDGE_INSETS = EdgeInsets(0.0, 0.0, 0.0, 0.0)
 private val CENTER_SCREEN_COORDINATE = ScreenCoordinate(0.0, 0.0)
-private const val MINIMUM_ZOOM_LEVEL_FOR_GEO = 2.0
 
 /**
  * Default implementation of [ViewportDataSource] to use with the [NavigationCamera].
@@ -749,6 +747,9 @@ class MapboxNavigationViewportDataSource(
                 if (overviewPaddingUpdatesAllowed) {
                     padding(overviewPadding)
                 }
+                if (overviewAnchorUpdatesAllowed) {
+                    anchor(overviewAnchorProperty.get())
+                }
             }.build()
     }
 
@@ -869,35 +870,22 @@ class MapboxNavigationViewportDataSource(
             0.0
         )
 
-        val zoomAndCenter = getZoomLevelAndCenterCoordinate(
-            pointsForOverview,
-            overviewBearingProperty.get(),
-            overviewPitchProperty.get(),
-            overviewPadding
-        )
+        val cameraFrame = if (pointsForOverview.isNotEmpty()) {
+            mapboxMap.cameraForCoordinates(
+                pointsForOverview,
+                overviewPadding,
+                overviewBearingProperty.get(),
+                overviewPitchProperty.get()
+            )
+        } else {
+            mapboxMap.getCameraOptions()
+        }
 
-        overviewCenterProperty.fallback = zoomAndCenter.second
-
-        overviewZoomProperty.fallback = min(zoomAndCenter.first, options.maxZoom)
+        overviewCenterProperty.fallback = cameraFrame.center!!
+        overviewZoomProperty.fallback = min(cameraFrame.zoom!!, options.maxZoom)
 
         debugger?.overviewPoints = pointsForOverview
         debugger?.overviewUserPadding = overviewPadding
-    }
-
-    private fun normalizeBearing(currentBearing: Double, targetBearing: Double) =
-        currentBearing + shortestRotation(currentBearing, targetBearing)
-
-    private fun getZoomLevelAndCenterCoordinate(
-        points: List<Point>,
-        bearing: Double,
-        pitch: Double,
-        padding: EdgeInsets
-    ): Pair<Double, Point> {
-        val cam = if (points.isNotEmpty()) {
-            mapboxMap.cameraForCoordinates(points, padding, bearing, pitch)
-        } else null
-
-        return Pair(cam?.zoom ?: MINIMUM_ZOOM_LEVEL_FOR_GEO, cam?.center ?: NULL_ISLAND_POINT)
     }
 }
 
@@ -924,12 +912,6 @@ private sealed class ViewportProperty<T>(var override: T?, var fallback: T) {
         override,
         fallback
     )
-
-    class PaddingProperty(override: EdgeInsets?, fallback: EdgeInsets) :
-        ViewportProperty<EdgeInsets>(
-            override,
-            fallback
-        )
 
     class AnchorProperty(override: ScreenCoordinate?, fallback: ScreenCoordinate) :
         ViewportProperty<ScreenCoordinate>(
