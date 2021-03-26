@@ -20,8 +20,7 @@ class AnimationAdapter(
         animationList.add(AnimationType.Following)
         animationList.add(AnimationType.Overview)
         animationList.add(AnimationType.ToPOI)
-        // TODO bring LookAtPOIWhenFollowing back
-        // animationList.add(AnimationType.LookAtPOIWhenFollowing)
+        animationList.add(AnimationType.LookAtPOIWhenFollowing)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AnimationsViewHolder {

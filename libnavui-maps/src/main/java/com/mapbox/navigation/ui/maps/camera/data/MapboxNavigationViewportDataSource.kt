@@ -31,6 +31,7 @@ import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.math.max
 import kotlin.math.min
 
+// todo add additional points after maneuver only when in pitch 0 not always
 //    TODO: Make these ViewportDataSourceOptions
 private val distanceToCoalesceCompoundManeuvers = 150.0
 private val defaultDistanceToFrameAfterManeuver = 100.0
@@ -761,6 +762,9 @@ class MapboxNavigationViewportDataSource(
             pointsForFollowing.add(0, localTargetLocation.toPoint())
         }
 
+        // needs to be added here to be taken into account for bearing smoothing
+        pointsForFollowing.addAll(additionalPointsToFrameForFollowing)
+
         followingBearingProperty.fallback = getBearingForMap(
             bearingDiffMax,
             mapboxMap.getCameraOptions().bearing ?: 0.0,
@@ -864,6 +868,8 @@ class MapboxNavigationViewportDataSource(
         if (localTargetLocation != null) {
             pointsForOverview.add(0, localTargetLocation.toPoint())
         }
+
+        pointsForOverview.addAll(additionalPointsToFrameForOverview)
 
         overviewBearingProperty.fallback = normalizeBearing(
             mapboxMap.getCameraOptions(null).bearing ?: 0.0,
