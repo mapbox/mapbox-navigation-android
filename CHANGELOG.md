@@ -2,6 +2,22 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.3 - March 26, 2021
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Features
+* Implemented Guidance Views. See `MapboxJunctionApi` and `MapboxJunctionView` for details. [#4157](https://github.com/mapbox/mapbox-navigation-android/pull/4157)
+* Added `SnappingClosures` param to route request builder. [#4161](https://github.com/mapbox/mapbox-navigation-android/pull/4161)
+
+#### Bug fixes and improvements
+* Added text placeholder for TripNotification View. [#4160](https://github.com/mapbox/mapbox-navigation-android/pull/4160)
+* Fixed bug with missing annotations in reroute/faster route. [#4171](https://github.com/mapbox/mapbox-navigation-android/pull/4171)
+* Changed the timing of the Navigation Camera's transition to the `Following` state to improve the zoom-in relation to the centering animation. [#4175](https://github.com/mapbox/mapbox-navigation-android/pull/4175)
+
+#### Other changes
+* Added an example to show custom styling. [#4178](https://github.com/mapbox/mapbox-navigation-android/pull/4178)
+
 ## Mapbox Navigation SDK 2.0.0-beta.2 - March 19, 2021
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
