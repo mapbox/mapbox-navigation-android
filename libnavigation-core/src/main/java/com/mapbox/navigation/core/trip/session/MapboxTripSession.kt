@@ -559,7 +559,7 @@ internal class MapboxTripSession(
         tripService.updateNotification(progress)
         progress?.let {
             routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
-            checkBannerInstructionEvent(progress) { bannerInstruction ->
+            checkBannerInstructionEvent(it) { bannerInstruction ->
                 bannerInstructionsObservers.forEach {
                     it.onNewBannerInstructions(bannerInstruction)
                 }
