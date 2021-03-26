@@ -125,7 +125,7 @@ class MapboxCameraAnimationsActivity :
     private var followingEdgeInsets = notPaddedEdgeInsets
         set(value) {
             field = value
-            viewportDataSource.followingPaddingPropertyOverride(value)
+            viewportDataSource.followingPadding = value
             viewportDataSource.evaluate()
         }
 
@@ -205,7 +205,7 @@ class MapboxCameraAnimationsActivity :
                 }
                 startSimulation(routes[0])
                 viewportDataSource.onRouteChanged(routes.first())
-                viewportDataSource.overviewPaddingPropertyOverride(overviewEdgeInsets)
+                viewportDataSource.overviewPadding = overviewEdgeInsets
                 viewportDataSource.evaluate()
                 navigationCamera.requestNavigationCameraToOverview()
             } else {
@@ -311,6 +311,7 @@ class MapboxCameraAnimationsActivity :
                 followingEdgeInsets.bottom,
                 200.0 * pixelDensity
             )
+            viewportDataSource.evaluate()
         }
 
         binding.gravitateRight.setOnClickListener {
@@ -320,6 +321,7 @@ class MapboxCameraAnimationsActivity :
                 followingEdgeInsets.bottom,
                 20.0
             )
+            viewportDataSource.evaluate()
         }
 
         binding.gravitateTop.setOnClickListener {
@@ -329,6 +331,7 @@ class MapboxCameraAnimationsActivity :
                 240.0 * pixelDensity,
                 followingEdgeInsets.right
             )
+            viewportDataSource.evaluate()
         }
 
         binding.gravitateBottom.setOnClickListener {
@@ -338,6 +341,7 @@ class MapboxCameraAnimationsActivity :
                 20.0,
                 followingEdgeInsets.right
             )
+            viewportDataSource.evaluate()
         }
     }
 
@@ -462,12 +466,12 @@ class MapboxCameraAnimationsActivity :
                     paddedFollowingEdgeInsets
                 }
                 viewportDataSource.followingZoomUpdatesAllowed = true
-                viewportDataSource.followingPaddingPropertyOverride(followingEdgeInsets)
+                viewportDataSource.followingPadding = followingEdgeInsets
                 viewportDataSource.evaluate()
                 navigationCamera.requestNavigationCameraToFollowing()
             }
             AnimationType.Overview -> {
-                viewportDataSource.overviewPaddingPropertyOverride(overviewEdgeInsets)
+                viewportDataSource.overviewPadding = overviewEdgeInsets
                 viewportDataSource.evaluate()
                 navigationCamera.requestNavigationCameraToOverview()
             }

@@ -508,9 +508,9 @@ class MapboxNavigationActivity :
 
     private fun updateCameraToOverview() {
         if (this.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            viewportDataSource.overviewPaddingPropertyOverride(landscapeOverviewEdgeInsets)
+            viewportDataSource.overviewPadding = landscapeOverviewEdgeInsets
         } else {
-            viewportDataSource.overviewPaddingPropertyOverride(overviewEdgeInsets)
+            viewportDataSource.overviewPadding = overviewEdgeInsets
         }
         viewportDataSource.evaluate()
         navigationCamera.requestNavigationCameraToOverview()
@@ -518,9 +518,9 @@ class MapboxNavigationActivity :
 
     private fun updateCameraToFollowing() {
         if (this.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            viewportDataSource.followingPaddingPropertyOverride(landscapeFollowingEdgeInsets)
+            viewportDataSource.followingPadding = landscapeFollowingEdgeInsets
         } else {
-            viewportDataSource.followingPaddingPropertyOverride(followingEdgeInsets)
+            viewportDataSource.followingPadding = followingEdgeInsets
         }
         viewportDataSource.evaluate()
         navigationCamera.requestNavigationCameraToFollowing()
