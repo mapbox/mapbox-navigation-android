@@ -53,8 +53,6 @@ dependencies {
     implementation dependenciesList.timber
     implementation dependenciesList.coroutinesAndroid
 
-    ktlint dependenciesList.ktlint
-
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
     testImplementation(project(':libtesting-utils'))
 }

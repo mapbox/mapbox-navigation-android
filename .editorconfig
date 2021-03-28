@@ -5,9 +5,12 @@ indent_style = space
 indent_size = 4
 continuation_indent_size=4
 
-kotlin_imports_layout=idea
+ij_kotlin_imports_layout=*,java.**,javax.**,kotlin.**,^
 
 insert_final_newline=true
 
 # should be limit 100 or 120 symbols
 max_line_length=100
+
+[**/test/**.kt]
+ktlint_ignore_back_ticked_identifier=true

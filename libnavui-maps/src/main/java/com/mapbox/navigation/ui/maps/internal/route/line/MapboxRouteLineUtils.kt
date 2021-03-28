@@ -407,14 +407,15 @@ object MapboxRouteLineUtils {
     private fun generateFeatureCollection(route: RouteLine): RouteFeatureData =
         generateFeatureCollection(route.route, route.identifier)
 
-    internal fun calculateRouteGranularDistances(coordinates: List<Point>):
-        RouteLineGranularDistances? {
-            return if (coordinates.isNotEmpty()) {
-                calculateGranularDistances(coordinates)
-            } else {
-                null
-            }
+    internal fun calculateRouteGranularDistances(
+        coordinates: List<Point>
+    ): RouteLineGranularDistances? {
+        return if (coordinates.isNotEmpty()) {
+            calculateGranularDistances(coordinates)
+        } else {
+            null
         }
+    }
 
     private fun calculateGranularDistances(points: List<Point>): RouteLineGranularDistances {
         var distance = 0.0
@@ -432,26 +433,28 @@ object MapboxRouteLineUtils {
         return RouteLineGranularDistances(distance, indexArray)
     }
 
-    private fun generateFeatureCollection(route: DirectionsRoute, identifier: String?):
-        RouteFeatureData {
-            val routeGeometry = LineString.fromPolyline(
-                route.geometry() ?: "",
-                Constants.PRECISION_6
-            )
-            val randomId = UUID.randomUUID().toString()
-            val routeFeature = when (identifier) {
-                null -> Feature.fromGeometry(routeGeometry, null, randomId)
-                else -> Feature.fromGeometry(routeGeometry, null, randomId).also {
-                    it.addBooleanProperty(identifier, true)
-                }
+    private fun generateFeatureCollection(
+        route: DirectionsRoute,
+        identifier: String?
+    ): RouteFeatureData {
+        val routeGeometry = LineString.fromPolyline(
+            route.geometry() ?: "",
+            Constants.PRECISION_6
+        )
+        val randomId = UUID.randomUUID().toString()
+        val routeFeature = when (identifier) {
+            null -> Feature.fromGeometry(routeGeometry, null, randomId)
+            else -> Feature.fromGeometry(routeGeometry, null, randomId).also {
+                it.addBooleanProperty(identifier, true)
             }
-
-            return RouteFeatureData(
-                route,
-                FeatureCollection.fromFeatures(listOf(routeFeature)),
-                routeGeometry
-            )
         }
+
+        return RouteFeatureData(
+            route,
+            FeatureCollection.fromFeatures(listOf(routeFeature)),
+            routeGeometry
+        )
+    }
 
     /**
      * Builds a [FeatureCollection] representing waypoints from a [DirectionsRoute]
