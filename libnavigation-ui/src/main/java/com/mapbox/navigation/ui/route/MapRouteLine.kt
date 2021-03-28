@@ -767,26 +767,26 @@ internal class MapRouteLine(
     private fun getIndexOfFirstFeature(features: List<Feature>): Int {
         return features.distinct().run {
             routeFeatureData.indexOfFirst {
-                it.featureCollection.features()?.get(0) ?.id() ?: 0 == this.firstOrNull()?.id()
+                it.featureCollection.features()?.get(0)?.id() ?: 0 == this.firstOrNull()?.id()
             }
         }
     }
 
     private fun getIdentifiableRouteFeatureDataProvider(directionsRoutes: List<IdentifiableRoute>):
         () -> List<RouteFeatureData> = {
-            directionsRoutes.parallelMap(
-                ::generateFeatureCollection,
-                ThreadController.getMainScopeAndRootJob().scope
-            )
-        }
+        directionsRoutes.parallelMap(
+            ::generateFeatureCollection,
+            ThreadController.getMainScopeAndRootJob().scope
+        )
+    }
 
     private fun getRouteFeatureDataProvider(directionsRoutes: List<DirectionsRoute>):
         () -> List<RouteFeatureData> = {
-            directionsRoutes.parallelMap(
-                ::generateFeatureCollection,
-                ThreadController.getMainScopeAndRootJob().scope
-            )
-        }
+        directionsRoutes.parallelMap(
+            ::generateFeatureCollection,
+            ThreadController.getMainScopeAndRootJob().scope
+        )
+    }
 
     /**
      * Initializes the layers used for drawing routes.
@@ -1495,38 +1495,40 @@ internal class MapRouteLine(
         fun generateFeatureCollection(routeData: IdentifiableRoute): RouteFeatureData =
             generateFeatureCollection(routeData.route, routeData.routeIdentifier)
 
-        private fun generateFeatureCollection(route: DirectionsRoute, identifier: String?):
-            RouteFeatureData {
-                val routeGeometry = LineString.fromPolyline(
-                    route.geometry() ?: "",
-                    Constants.PRECISION_6
-                )
-                val randomId = UUID.randomUUID().toString()
-                val routeFeature = when (identifier) {
-                    null -> {
-                        Feature.fromGeometry(
-                            routeGeometry,
-                            null,
-                            randomId
-                        )
-                    }
-                    else -> {
-                        Feature.fromGeometry(
-                            routeGeometry,
-                            null,
-                            randomId
-                        ).also {
-                            it.addBooleanProperty(identifier, true)
-                        }
+        private fun generateFeatureCollection(
+            route: DirectionsRoute,
+            identifier: String?
+        ): RouteFeatureData {
+            val routeGeometry = LineString.fromPolyline(
+                route.geometry() ?: "",
+                Constants.PRECISION_6
+            )
+            val randomId = UUID.randomUUID().toString()
+            val routeFeature = when (identifier) {
+                null -> {
+                    Feature.fromGeometry(
+                        routeGeometry,
+                        null,
+                        randomId
+                    )
+                }
+                else -> {
+                    Feature.fromGeometry(
+                        routeGeometry,
+                        null,
+                        randomId
+                    ).also {
+                        it.addBooleanProperty(identifier, true)
                     }
                 }
-
-                return RouteFeatureData(
-                    route,
-                    FeatureCollection.fromFeatures(listOf(routeFeature)),
-                    routeGeometry
-                )
             }
+
+            return RouteFeatureData(
+                route,
+                FeatureCollection.fromFeatures(listOf(routeFeature)),
+                routeGeometry
+            )
+        }
 
         /**
          * Calculates line segments based on the legs in the route line and color representation
@@ -1668,72 +1670,73 @@ internal class MapRouteLine(
          *
          * @param route the the calculations should be performed on.
          */
-        fun getRouteLineTrafficExpressionData(route: DirectionsRoute):
-            List<RouteLineTrafficExpressionData> {
-                var runningDistance = 0.0
-                val routeLineTrafficData = mutableListOf<RouteLineTrafficExpressionData>()
+        fun getRouteLineTrafficExpressionData(
+            route: DirectionsRoute
+        ): List<RouteLineTrafficExpressionData> {
+            var runningDistance = 0.0
+            val routeLineTrafficData = mutableListOf<RouteLineTrafficExpressionData>()
 
-                route.legs()?.forEach { leg ->
-                    ifNonNull(leg.annotation()?.distance()) { distanceList ->
-                        val intersectionsWithGeometryIndex = leg.steps()
-                            ?.mapNotNull { it.intersections() }
-                            ?.flatten()
-                            ?.filter {
-                                it.geometryIndex() != null
-                            }?.toList() ?: listOf()
+            route.legs()?.forEach { leg ->
+                ifNonNull(leg.annotation()?.distance()) { distanceList ->
+                    val intersectionsWithGeometryIndex = leg.steps()
+                        ?.mapNotNull { it.intersections() }
+                        ?.flatten()
+                        ?.filter {
+                            it.geometryIndex() != null
+                        }?.toList() ?: listOf()
 
-                        val roadClassArray = if (intersectionsWithGeometryIndex.isNotEmpty()) {
-                            arrayOfNulls<String>(
-                                intersectionsWithGeometryIndex.last().geometryIndex()!! + 1
-                            ).apply {
-                                intersectionsWithGeometryIndex.forEach {
-                                    this[it.geometryIndex()!!] = it.mapboxStreetsV8()?.roadClass()
-                                        ?: "intersection_without_class_fallback"
-                                }
+                    val roadClassArray = if (intersectionsWithGeometryIndex.isNotEmpty()) {
+                        arrayOfNulls<String>(
+                            intersectionsWithGeometryIndex.last().geometryIndex()!! + 1
+                        ).apply {
+                            intersectionsWithGeometryIndex.forEach {
+                                this[it.geometryIndex()!!] = it.mapboxStreetsV8()?.roadClass()
+                                    ?: "intersection_without_class_fallback"
                             }
-                        } else {
-                            arrayOfNulls(0)
                         }
+                    } else {
+                        arrayOfNulls(0)
+                    }
 
-                        leg.annotation()?.congestion()?.forEachIndexed { index, congestion ->
-                            val roadClass = getRoadClassForIndex(roadClassArray, index)
-                            if (index == 0) {
+                    leg.annotation()?.congestion()?.forEachIndexed { index, congestion ->
+                        val roadClass = getRoadClassForIndex(roadClassArray, index)
+                        if (index == 0) {
+                            routeLineTrafficData.add(
+                                RouteLineTrafficExpressionData(
+                                    0.0,
+                                    congestion,
+                                    roadClass
+                                )
+                            )
+                        } else {
+                            runningDistance += distanceList[index - 1]
+                            val last = routeLineTrafficData.lastOrNull()
+                            if (last?.trafficCongestionIdentifier == congestion &&
+                                last?.roadClass == roadClass
+                            ) {
+                                // continue
+                            } else if (last?.trafficCongestionIdentifier == congestion &&
+                                roadClass == null
+                            ) {
+                                // continue
+                            } else {
                                 routeLineTrafficData.add(
                                     RouteLineTrafficExpressionData(
-                                        0.0,
+                                        runningDistance,
                                         congestion,
                                         roadClass
                                     )
                                 )
-                            } else {
-                                runningDistance += distanceList[index - 1]
-                                val last = routeLineTrafficData.lastOrNull()
-                                if (last?.trafficCongestionIdentifier == congestion &&
-                                    last?.roadClass == roadClass
-                                ) {
-                                    // continue
-                                } else if (last?.trafficCongestionIdentifier == congestion &&
-                                    roadClass == null
-                                ) {
-                                    // continue
-                                } else {
-                                    routeLineTrafficData.add(
-                                        RouteLineTrafficExpressionData(
-                                            runningDistance,
-                                            congestion,
-                                            roadClass
-                                        )
-                                    )
-                                }
                             }
                         }
-
-                        runningDistance += distanceList.last()
                     }
-                }
 
-                return routeLineTrafficData
+                    runningDistance += distanceList.last()
+                }
             }
+
+            return routeLineTrafficData
+        }
 
         private fun getRoadClassForIndex(roadClassArray: Array<String?>, index: Int): String? {
             return if (roadClassArray.size > index) {

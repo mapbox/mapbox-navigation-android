@@ -282,12 +282,12 @@ internal class NavigatorMapper {
 
     private fun List<com.mapbox.navigator.UpcomingRouteAlert>.toUpcomingRouteAlerts():
         List<UpcomingRouteAlert> {
-            return this
-                .filter { SUPPORTED_ROUTE_ALERTS.contains(it.alert.type) }
-                .map {
-                    UpcomingRouteAlert.Builder(it.alert.toRouteAlert(), it.distanceToStart).build()
-                }
-        }
+        return this
+            .filter { SUPPORTED_ROUTE_ALERTS.contains(it.alert.type) }
+            .map {
+                UpcomingRouteAlert.Builder(it.alert.toRouteAlert(), it.distanceToStart).build()
+            }
+    }
 
     private fun com.mapbox.navigator.RouteAlert.toRouteAlert(): RouteAlert {
         val alert = this
