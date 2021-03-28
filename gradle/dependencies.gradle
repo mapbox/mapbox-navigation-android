@@ -42,7 +42,7 @@ ext {
       lifecycleViewModelKtx     : '2.2.0',
       picasso                   : '2.71828',
       gmsLocation               : '17.0.0',
-      ktlint                    : '0.40.0',
+      ktlint                    : '0.41.0',
       kotlinStdLib              : '1.4.30',
       firebaseCrashlytics       : '17.1.0',
       multidex                  : '2.0.0',
