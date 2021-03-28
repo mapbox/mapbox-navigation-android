@@ -215,46 +215,47 @@ class MapboxRouteLineApi(
      *
      * @return a value representing the updates to the route line's appearance or an error.
      */
-    fun updateTraveledRouteLine(point: Point):
-        Expected<VanishingRouteLineUpdateValue, RouteLineError> {
-            if (routeLineOptions.vanishingRouteLine?.vanishingPointState ==
-                VanishingPointState.DISABLED || System.nanoTime() - lastIndexUpdateTimeNano >
-                RouteConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO
-            ) {
-                return Expected.Failure(
+    fun updateTraveledRouteLine(
+        point: Point
+    ): Expected<VanishingRouteLineUpdateValue, RouteLineError> {
+        if (routeLineOptions.vanishingRouteLine?.vanishingPointState ==
+            VanishingPointState.DISABLED || System.nanoTime() - lastIndexUpdateTimeNano >
+            RouteConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO
+        ) {
+            return Expected.Failure(
+                RouteLineError(
+                    "Vanishing point state is disabled or too much time has " +
+                        "elapsed since last update.",
+                    null
+                )
+            )
+        }
+
+        val routeLineExpressions =
+            routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(
+                point,
+                routeLineExpressionData,
+                routeLineOptions.resourceProvider
+            )
+
+        return when (routeLineExpressions) {
+            null -> {
+                Expected.Failure(
                     RouteLineError(
-                        "Vanishing point state is disabled or too much time has " +
-                            "elapsed since last update.",
+                        "No expression generated for update.",
                         null
                     )
                 )
             }
-
-            val routeLineExpressions =
-                routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(
-                    point,
-                    routeLineExpressionData,
-                    routeLineOptions.resourceProvider
+            else -> Expected.Success(
+                VanishingRouteLineUpdateValue(
+                    routeLineExpressions.trafficLineExpression,
+                    routeLineExpressions.routeLineExpression,
+                    routeLineExpressions.routeLineCasingExpression
                 )
-
-            return when (routeLineExpressions) {
-                null -> {
-                    Expected.Failure(
-                        RouteLineError(
-                            "No expression generated for update.",
-                            null
-                        )
-                    )
-                }
-                else -> Expected.Success(
-                    VanishingRouteLineUpdateValue(
-                        routeLineExpressions.trafficLineExpression,
-                        routeLineExpressions.routeLineExpression,
-                        routeLineExpressions.routeLineCasingExpression
-                    )
-                )
-            }
+            )
         }
+    }
 
     /**
      * Clears the route line data.
@@ -289,47 +290,48 @@ class MapboxRouteLineApi(
      * @return a state representing the side effects to be rendered on the map which will update
      * the appearance of the route line or null if the vanishing route line feature is inactive.
      */
-    fun setVanishingOffset(offset: Double):
-        Expected<VanishingRouteLineUpdateValue, RouteLineError> {
-            routeLineOptions.vanishingRouteLine?.vanishPointOffset = offset
-            return if (offset >= 0) {
-                val trafficLineExpression = MapboxRouteLineUtils.getTrafficLineExpression(
+    fun setVanishingOffset(
+        offset: Double
+    ): Expected<VanishingRouteLineUpdateValue, RouteLineError> {
+        routeLineOptions.vanishingRouteLine?.vanishPointOffset = offset
+        return if (offset >= 0) {
+            val trafficLineExpression = MapboxRouteLineUtils.getTrafficLineExpression(
+                offset,
+                routeLineExpressionData,
+                routeLineOptions
+                    .resourceProvider
+                    .routeLineColorResources
+                    .routeUnknownTrafficColor
+            )
+            val routeLineExpression = MapboxRouteLineUtils.getVanishingRouteLineExpression(
+                offset,
+                routeLineOptions
+                    .resourceProvider
+                    .routeLineColorResources
+                    .routeLineTraveledColor,
+                routeLineOptions.resourceProvider.routeLineColorResources.routeDefaultColor
+            )
+            val routeLineCasingExpression =
+                MapboxRouteLineUtils.getVanishingRouteLineExpression(
                     offset,
-                    routeLineExpressionData,
                     routeLineOptions
-                        .resourceProvider
-                        .routeLineColorResources
-                        .routeUnknownTrafficColor
+                        .resourceProvider.routeLineColorResources.routeLineTraveledCasingColor,
+                    routeLineOptions.resourceProvider.routeLineColorResources.routeCasingColor
                 )
-                val routeLineExpression = MapboxRouteLineUtils.getVanishingRouteLineExpression(
-                    offset,
-                    routeLineOptions
-                        .resourceProvider
-                        .routeLineColorResources
-                        .routeLineTraveledColor,
-                    routeLineOptions.resourceProvider.routeLineColorResources.routeDefaultColor
-                )
-                val routeLineCasingExpression =
-                    MapboxRouteLineUtils.getVanishingRouteLineExpression(
-                        offset,
-                        routeLineOptions
-                            .resourceProvider.routeLineColorResources.routeLineTraveledCasingColor,
-                        routeLineOptions.resourceProvider.routeLineColorResources.routeCasingColor
-                    )
 
-                Expected.Success(
-                    VanishingRouteLineUpdateValue(
-                        trafficLineExpression,
-                        routeLineExpression,
-                        routeLineCasingExpression
-                    )
+            Expected.Success(
+                VanishingRouteLineUpdateValue(
+                    trafficLineExpression,
+                    routeLineExpression,
+                    routeLineCasingExpression
                 )
-            } else {
-                Expected.Failure(
-                    RouteLineError("Offset value should be greater than or equal to 0", null)
-                )
-            }
+            )
+        } else {
+            Expected.Failure(
+                RouteLineError("Offset value should be greater than or equal to 0", null)
+            )
         }
+    }
 
     /**
      * Used for the vanishing route line feature, this method updates the vanishing point

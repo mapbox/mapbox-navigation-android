@@ -197,9 +197,9 @@ class TripProgressUpdateFormatter private constructor(
          * @return a [TripProgressUpdateFormatter] object
          */
         fun build(): TripProgressUpdateFormatter {
-            val theEstimatedTimeToArrivalFormatter:
-                ValueFormatter<Long, SpannableString> =
-                    estimatedTimeToArrivalFormatter ?: EstimatedTimeToArrivalFormatter(
+            val theEstimatedTimeToArrivalFormatter: ValueFormatter<Long, SpannableString> =
+                estimatedTimeToArrivalFormatter
+                    ?: EstimatedTimeToArrivalFormatter(
                         context.applicationContext,
                         TimeFormat.NONE_SPECIFIED
                     )
@@ -210,9 +210,8 @@ class TripProgressUpdateFormatter private constructor(
             val theTimeRemainingFormatter: ValueFormatter<Double, SpannableString> =
                 timeRemainingFormatter ?: TimeRemainingFormatter(context.applicationContext)
 
-            val thePercentRouteTraveledFormatter:
-                ValueFormatter<Double, SpannableString> =
-                    percentRouteTraveledFormatter ?: PercentDistanceTraveledFormatter()
+            val thePercentRouteTraveledFormatter: ValueFormatter<Double, SpannableString> =
+                percentRouteTraveledFormatter ?: PercentDistanceTraveledFormatter()
 
             return TripProgressUpdateFormatter(
                 theEstimatedTimeToArrivalFormatter,
@@ -224,13 +223,13 @@ class TripProgressUpdateFormatter private constructor(
 
         private fun getDefaultDistanceRemainingFormatter(context: Context):
             ValueFormatter<Double, SpannableString> {
-                val options = DistanceFormatterOptions.Builder(context).build()
-                val roundingUnit = when (options.unitType) {
-                    VoiceUnit.IMPERIAL -> DEFAULT_ROUNDING_IMPERIAL
-                    else -> DEFAULT_ROUNDING_METRIC
-                }
-                val finalOptions = options.toBuilder().roundingIncrement(roundingUnit).build()
-                return DistanceRemainingFormatter(finalOptions)
+            val options = DistanceFormatterOptions.Builder(context).build()
+            val roundingUnit = when (options.unitType) {
+                VoiceUnit.IMPERIAL -> DEFAULT_ROUNDING_IMPERIAL
+                else -> DEFAULT_ROUNDING_METRIC
             }
+            val finalOptions = options.toBuilder().roundingIncrement(roundingUnit).build()
+            return DistanceRemainingFormatter(finalOptions)
+        }
     }
 }

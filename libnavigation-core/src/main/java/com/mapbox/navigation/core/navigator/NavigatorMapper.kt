@@ -354,12 +354,12 @@ private fun RouteInfo?.toRouteInitInfo(): RouteInitInfo? {
 
 private fun List<com.mapbox.navigator.UpcomingRouteAlert>.toUpcomingRoadObjects():
     List<UpcomingRoadObject> {
-        return this
-            .filter { SUPPORTED_ROAD_OBJECTS.contains(it.alert.type) }
-            .map {
-                UpcomingRoadObject.Builder(it.alert.toRoadObject(), it.distanceToStart).build()
-            }
-    }
+    return this
+        .filter { SUPPORTED_ROAD_OBJECTS.contains(it.alert.type) }
+        .map {
+            UpcomingRoadObject.Builder(it.alert.toRoadObject(), it.distanceToStart).build()
+        }
+}
 
 private fun com.mapbox.navigator.RouteAlert.toRoadObject(): RoadObject {
     val alert = this

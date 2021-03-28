@@ -41,30 +41,30 @@ internal suspend fun ElectronicHorizonPosition.mapToEHorizonPosition(): EHorizon
  */
 internal suspend fun RoadObjectEnterExitInfo.mapToEHorizonObjectEnterExitInfo():
     EHorizonObjectEnterExitInfo {
-        return withContext(ThreadController.IODispatcher) {
-            EHorizonObjectEnterExitInfo(
-                roadObjectId,
-                enterFromStartOrExitFromEnd,
-                type.mapToRoadObjectType()
-            )
-        }
+    return withContext(ThreadController.IODispatcher) {
+        EHorizonObjectEnterExitInfo(
+            roadObjectId,
+            enterFromStartOrExitFromEnd,
+            type.mapToRoadObjectType()
+        )
     }
+}
 
 /**
  * Map the RoadObjectDistanceInfo.
  */
 internal suspend fun RoadObjectDistanceInfo.mapToEHorizonObjectDistanceInfo():
     EHorizonObjectDistanceInfo {
-        return withContext(ThreadController.IODispatcher) {
-            EHorizonObjectDistanceInfo(
-                distanceToEntry,
-                distanceToEnd,
-                entryFromStart,
-                length,
-                type.mapToRoadObjectType()
-            )
-        }
+    return withContext(ThreadController.IODispatcher) {
+        EHorizonObjectDistanceInfo(
+            distanceToEntry,
+            distanceToEnd,
+            entryFromStart,
+            length,
+            type.mapToRoadObjectType()
+        )
     }
+}
 
 /**
  * Map the ElectronicHorizonPosition.

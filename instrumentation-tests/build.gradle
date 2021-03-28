@@ -42,9 +42,6 @@ dependencies {
     androidTestUtil dependenciesList.testOrchestrator
     implementation dependenciesList.timber
 
-    // ktlint
-    ktlint dependenciesList.ktlint
-
     // Kotlin support
     implementation dependenciesList.kotlinStdLib
 

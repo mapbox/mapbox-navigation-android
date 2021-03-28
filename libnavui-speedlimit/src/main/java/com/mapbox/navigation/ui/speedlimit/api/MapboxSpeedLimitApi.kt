@@ -35,21 +35,22 @@ class MapboxSpeedLimitApi internal constructor(
      * @param speedLimit a [speedLimit] instance
      * @return an updated state for rendering in the view
      */
-    fun updateSpeedLimit(speedLimit: SpeedLimit?):
-        Expected<UpdateSpeedLimitValue, UpdateSpeedLimitError> {
-            return ifNonNull(speedLimit) { speed ->
-                val action = SpeedLimitAction.CalculateSpeedLimitUpdate(speed)
-                val result = processor.process(action) as SpeedLimitResult.SpeedLimitCalculation
-                Expected.Success(
-                    UpdateSpeedLimitValue(
-                        result.speedKPH,
-                        result.speedUnit,
-                        result.signFormat,
-                        formatter
-                    )
+    fun updateSpeedLimit(
+        speedLimit: SpeedLimit?
+    ): Expected<UpdateSpeedLimitValue, UpdateSpeedLimitError> {
+        return ifNonNull(speedLimit) { speed ->
+            val action = SpeedLimitAction.CalculateSpeedLimitUpdate(speed)
+            val result = processor.process(action) as SpeedLimitResult.SpeedLimitCalculation
+            Expected.Success(
+                UpdateSpeedLimitValue(
+                    result.speedKPH,
+                    result.speedUnit,
+                    result.signFormat,
+                    formatter
                 )
-            } ?: Expected.Failure(
-                UpdateSpeedLimitError("Speed Limit data not available", null)
             )
-        }
+        } ?: Expected.Failure(
+            UpdateSpeedLimitError("Speed Limit data not available", null)
+        )
+    }
 }
