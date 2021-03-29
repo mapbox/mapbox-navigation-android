@@ -266,6 +266,40 @@ package com.mapbox.navigation.base.options {
 
 package com.mapbox.navigation.base.route {
 
+  public final class ExclusionViolation {
+    ctor public ExclusionViolation(String type, com.mapbox.api.directions.v5.models.DirectionsRoute route, int legIndex, com.mapbox.api.directions.v5.models.RouteLeg leg, int stepIndex, com.mapbox.api.directions.v5.models.LegStep step, int intersectionIndex, com.mapbox.api.directions.v5.models.StepIntersection intersection);
+    method public String component1();
+    method public com.mapbox.api.directions.v5.models.DirectionsRoute component2();
+    method public int component3();
+    method public com.mapbox.api.directions.v5.models.RouteLeg component4();
+    method public int component5();
+    method public com.mapbox.api.directions.v5.models.LegStep component6();
+    method public int component7();
+    method public com.mapbox.api.directions.v5.models.StepIntersection component8();
+    method public com.mapbox.navigation.base.route.ExclusionViolation copy(String type, com.mapbox.api.directions.v5.models.DirectionsRoute route, int legIndex, com.mapbox.api.directions.v5.models.RouteLeg leg, int stepIndex, com.mapbox.api.directions.v5.models.LegStep step, int intersectionIndex, com.mapbox.api.directions.v5.models.StepIntersection intersection);
+    method public com.mapbox.api.directions.v5.models.StepIntersection getIntersection();
+    method public int getIntersectionIndex();
+    method public com.mapbox.api.directions.v5.models.RouteLeg getLeg();
+    method public int getLegIndex();
+    method public com.mapbox.api.directions.v5.models.DirectionsRoute getRoute();
+    method public com.mapbox.api.directions.v5.models.LegStep getStep();
+    method public int getStepIndex();
+    method public String getType();
+    property public final com.mapbox.api.directions.v5.models.StepIntersection intersection;
+    property public final int intersectionIndex;
+    property public final com.mapbox.api.directions.v5.models.RouteLeg leg;
+    property public final int legIndex;
+    property public final com.mapbox.api.directions.v5.models.DirectionsRoute route;
+    property public final com.mapbox.api.directions.v5.models.LegStep step;
+    property public final int stepIndex;
+    property public final String type;
+  }
+
+  public final class RouteExclusions {
+    method public static com.mapbox.api.directions.v5.models.RouteOptions.Builder exclude(com.mapbox.api.directions.v5.models.RouteOptions.Builder, java.lang.String... exclusionCriteria);
+    method public static java.util.List<com.mapbox.navigation.base.route.ExclusionViolation> exclusionViolations(com.mapbox.api.directions.v5.models.DirectionsRoute);
+  }
+
   public interface RouteRefreshCallback {
     method public void onError(com.mapbox.navigation.base.route.RouteRefreshError error);
     method public void onRefresh(com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute);
