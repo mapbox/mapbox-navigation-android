@@ -314,6 +314,15 @@ package com.mapbox.navigation.ui.maps.guidance.junction.view {
 
 package com.mapbox.navigation.ui.maps.internal.route.line {
 
+  public final class MapboxRouteLineApiExtensions {
+    method public suspend Object? clearRouteLine(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, kotlin.coroutines.Continuation<? super com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError>> p);
+    method public suspend Object? findClosestRoute(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, com.mapbox.geojson.Point target, com.mapbox.maps.MapboxMap mapboxMap, float padding, kotlin.coroutines.Continuation<? super com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue,com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound>> p);
+    method public suspend Object? getRouteDrawData(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, kotlin.coroutines.Continuation<? super com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError>> p);
+    method public suspend Object? setRoutes(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLine> newRoutes, kotlin.coroutines.Continuation<? super com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError>> p);
+    method public suspend Object? updateToPrimaryRoute(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, com.mapbox.api.directions.v5.models.DirectionsRoute route, kotlin.coroutines.Continuation<? super com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError>> p);
+    field public static final com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions INSTANCE;
+  }
+
   public final class MapboxRouteLineUtils {
     method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData> calculateRouteLineSegments(com.mapbox.api.directions.v5.models.DirectionsRoute route, java.util.List<java.lang.String> trafficBackfillRoadClasses, boolean isPrimaryRoute, com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources routeLineColorResources);
     method public static String? getBelowLayerIdToUse(String? belowLayerId, com.mapbox.maps.Style style);
@@ -409,16 +418,15 @@ package com.mapbox.navigation.ui.maps.route.line.api {
 
   public final class MapboxRouteLineApi {
     ctor public MapboxRouteLineApi(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions routeLineOptions);
-    method public com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError> clearRouteLine();
+    method public void clearRouteLine(com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError>> consumer);
     method public void findClosestRoute(com.mapbox.geojson.Point target, com.mapbox.maps.MapboxMap mapboxMap, float padding, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue,com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound>> resultConsumer);
-    method public suspend Object? findClosestRoute(com.mapbox.geojson.Point target, com.mapbox.maps.MapboxMap mapboxMap, float padding, kotlin.coroutines.Continuation<? super com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue,com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound>> p);
     method public com.mapbox.api.directions.v5.models.DirectionsRoute? getPrimaryRoute();
-    method public com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError> getRouteDrawData();
+    method public void getRouteDrawData(com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError>> consumer);
     method public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
     method public double getVanishPointOffset();
-    method public com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError> setRoutes(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLine> newRoutes);
+    method public void setRoutes(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLine> newRoutes, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError>> consumer);
     method public com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError> setVanishingOffset(double offset);
-    method public com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError> updateToPrimaryRoute(com.mapbox.api.directions.v5.models.DirectionsRoute route);
+    method public void updateToPrimaryRoute(com.mapbox.api.directions.v5.models.DirectionsRoute route, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError>> consumer);
     method public com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError> updateTraveledRouteLine(com.mapbox.geojson.Point point);
     method public void updateWithRouteProgress(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
   }

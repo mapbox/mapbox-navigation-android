@@ -61,6 +61,7 @@ import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
@@ -69,6 +70,8 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
 import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
 import com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter
@@ -81,6 +84,9 @@ import com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 class MapboxNavigationActivity :
@@ -230,11 +236,15 @@ class MapboxNavigationActivity :
     private val routesObserver = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
-                routeLineAPI?.setRoutes(listOf(RouteLine(routes[0], null)))?.apply {
-                    ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
-                        view.renderRouteDrawData(style, this)
+                CoroutineScope(Dispatchers.Main).launch {
+                    routeLineAPI?.setRoutes(listOf(RouteLine(routes[0], null)))?.apply {
+                        ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
+
+                            view.renderRouteDrawData(style, this)
+                        }
                     }
                 }
+
                 viewportDataSource.onRouteChanged(routes[0])
                 if (!isNavigating) {
                     binding.start.visibility = VISIBLE
@@ -515,7 +525,13 @@ class MapboxNavigationActivity :
 
     private fun clearRouteLine() {
         ifNonNull(routeLineAPI, routeLineView, mapboxMap.getStyle()) { api, view, style ->
-            view.renderClearRouteLineValue(style, api.clearRouteLine())
+            api.clearRouteLine(
+                object : MapboxNavigationConsumer<Expected<RouteLineClearValue, RouteLineError>> {
+                    override fun accept(value: Expected<RouteLineClearValue, RouteLineError>) {
+                        view.renderClearRouteLineValue(style, value)
+                    }
+                }
+            )
         }
     }
 

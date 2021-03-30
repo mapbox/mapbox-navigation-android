@@ -58,6 +58,7 @@ import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSou
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandler
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
@@ -68,6 +69,9 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.turf.TurfMeasurement
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MapboxCameraAnimationsActivity :
     AppCompatActivity(),
@@ -177,9 +181,11 @@ class MapboxCameraAnimationsActivity :
     private val routesObserver = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
-                routeLineAPI?.setRoutes(listOf(RouteLine(routes[0], null)))?.apply {
-                    ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
-                        view.renderRouteDrawData(style, this)
+                CoroutineScope(Dispatchers.Main).launch {
+                    routeLineAPI?.setRoutes(listOf(RouteLine(routes[0], null)))?.apply {
+                        ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
+                            view.renderRouteDrawData(style, this)
+                        }
                     }
                 }
                 startSimulation(routes[0])
@@ -467,7 +473,6 @@ class MapboxCameraAnimationsActivity :
                             .pitch(0.0)
                             .build(),
                         MapAnimationOptions.mapAnimationOptions {
-                            duration(1500)
                         }
                     )
                 }
