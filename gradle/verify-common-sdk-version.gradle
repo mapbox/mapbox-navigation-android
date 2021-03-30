@@ -1,5 +1,5 @@
 def navigatorModuleName = "libnavigator"
-def moduleNames = ["libnavigation-core", navigatorModuleName]
+def moduleNames = ["libnavigation-core"]
 
 task verifyCommonSdkVersion {
     moduleNames.each { moduleName ->
@@ -11,6 +11,7 @@ task verifyCommonSdkVersion {
             String commonDependency = parseCommonLibDependency(moduleName)
             moduleDependencyMap[moduleName] = commonDependency
         }
+        moduleDependencyMap[navigatorModuleName] = parseNavigatorCommonLibDependency()
         moduleNames.each { moduleName ->
             if (moduleName != navigatorModuleName
                     && moduleDependencyMap[moduleName] != moduleDependencyMap[navigatorModuleName]) {
@@ -36,6 +37,17 @@ allprojects.findAll {it.name in moduleNames}.each { p ->
 static def parseCommonLibDependency(String moduleName) {
     File dependenciesFile = new File(moduleName + "/build/reports/dependencies_report.txt")
     int startSearchIndex = dependenciesFile.text.indexOf("releaseCompileClasspath")
+    return getCommonLibDependency(dependenciesFile, startSearchIndex)
+}
+
+static def parseNavigatorCommonLibDependency() {
+    File dependenciesFile = new File("libnavigator/build/reports/dependencies_report.txt")
+    int configurationStartIndex = dependenciesFile.text.indexOf("releaseCompileClasspath")
+    int startSearchIndex = dependenciesFile.text.indexOf("com.mapbox.navigator:mapbox-navigation-native", configurationStartIndex)
+    return getCommonLibDependency(dependenciesFile, startSearchIndex)
+}
+
+static def getCommonLibDependency(File dependenciesFile, int startSearchIndex) {
     int firstIndexCommonLib = dependenciesFile.text.indexOf("com.mapbox.common:common:", startSearchIndex)
     int lastIndexCommonLib = Math.min(
             dependenciesFile.text.indexOf("\n", firstIndexCommonLib),
