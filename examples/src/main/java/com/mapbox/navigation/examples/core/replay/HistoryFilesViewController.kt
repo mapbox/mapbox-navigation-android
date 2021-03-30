@@ -2,6 +2,8 @@ package com.mapbox.navigation.examples.core.replay
 
 import android.content.Context
 import com.google.gson.Gson
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.navigation.base.logger.LoggerProvider
 import com.mapbox.navigation.core.replay.history.ReplayHistoryDTO
 import com.mapbox.navigation.examples.core.R
 import kotlinx.coroutines.CoroutineScope
@@ -9,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -113,13 +114,18 @@ class HistoryFilesViewController {
                 .use { it.readText() }
             val historyDTO = Gson().fromJson(historyData, ReplayHistoryDTO::class.java)
             if (historyDTO.events.isNullOrEmpty()) {
-                Timber.e("Your history file is empty ${historyFileItem.path}")
+                LoggerProvider.logger.e(
+                    msg = Message("Your history file is empty ${historyFileItem.path}")
+                )
                 null
             } else {
                 historyDTO
             }
         } catch (e: IOException) {
-            Timber.e(e, "Your history file failed to open ${historyFileItem.path}")
+            LoggerProvider.logger.e(
+                msg = Message("Your history file failed to open ${historyFileItem.path}"),
+                tr = e
+            )
             throw e
         }
     }
@@ -160,7 +166,10 @@ class HistoryFilesViewController {
             inputStream.close()
             String(buffer, Charset.forName("UTF-8"))
         } catch (e: IOException) {
-            Timber.e(e, "Your history file failed to open ${historyFileItem.path}")
+            LoggerProvider.logger.e(
+                msg = Message("Your history file failed to open ${historyFileItem.path}"),
+                tr = e
+            )
             throw e
         }
         Gson().fromJson(historyData, ReplayHistoryDTO::class.java)

@@ -7,7 +7,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -293,7 +292,9 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     // a style without composite sources
     String styleId = "mapbox://styles/lukaspaczos/ckirf03jn7hv817nrr69ndwdw";
     mapboxMap.loadStyleUri(styleId, style -> {
-      mapboxNavigation.getNavigationOptions().getLocationEngine().getLastLocation(locationEngineCallback);
+      mapboxNavigation.getNavigationOptions().getLocationEngine().getLastLocation(
+        new MyLocationEngineCallback(this, mapboxLogger)
+      );
       getGesturePlugin().addOnMapLongClickListener(this);
     }, (mapLoadError, s) -> mapboxLogger.e(
       null,
@@ -579,14 +580,19 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     }
   };
 
-  private MyLocationEngineCallback locationEngineCallback = new MyLocationEngineCallback(this);
+//  private MyLocationEngineCallback locationEngineCallback = new MyLocationEngineCallback(this);
 
   private static class MyLocationEngineCallback implements LocationEngineCallback<LocationEngineResult> {
 
     private WeakReference<MapboxRouteLineActivity> activityRef;
+    private Logger mapboxLogger;
 
-    MyLocationEngineCallback(com.mapbox.navigation.examples.core.MapboxRouteLineActivity activity) {
+    MyLocationEngineCallback(
+      com.mapbox.navigation.examples.core.MapboxRouteLineActivity activity,
+      Logger mapboxLogger
+    ) {
       this.activityRef = new WeakReference<>(activity);
+      this.mapboxLogger = mapboxLogger;
     }
 
     @Override
@@ -603,7 +609,11 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
     @Override
     public void onFailure(@NonNull Exception exception) {
-      Timber.i(exception);
+      mapboxLogger.i(
+        null,
+        new Message(exception.getLocalizedMessage() == null ? "" : exception.getLocalizedMessage()),
+        exception
+      );
     }
   }
 }

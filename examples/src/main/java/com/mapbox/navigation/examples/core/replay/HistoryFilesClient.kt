@@ -2,6 +2,8 @@ package com.mapbox.navigation.examples.core.replay
 
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.navigation.base.logger.LoggerProvider
 import com.mapbox.navigation.core.replay.history.ReplayHistoryDTO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,7 +14,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
-import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -61,7 +62,10 @@ class HistoryFilesClient {
         historyDrives.drives().enqueue(
             object : Callback<List<ReplayPath>> {
                 override fun onFailure(call: Call<List<ReplayPath>>, t: Throwable) {
-                    Timber.e(t, "requestHistory onFailure")
+                    LoggerProvider.logger.e(
+                        msg = Message("requestHistory onFailure"),
+                        tr = t
+                    )
                     cont.resume(emptyList())
                 }
 
@@ -69,7 +73,7 @@ class HistoryFilesClient {
                     call: Call<List<ReplayPath>>,
                     response: Response<List<ReplayPath>>
                 ) {
-                    Timber.i("requestHistory onResponse")
+                    LoggerProvider.logger.i(msg = Message("requestHistory onResponse"))
                     val drives = if (response.isSuccessful) {
                         response.body()?.map(::withHttpDataSource) ?: emptyList()
                     } else {
@@ -99,7 +103,10 @@ class HistoryFilesClient {
         historyDrives.jsonFile(filename).enqueue(
             object : Callback<ReplayHistoryDTO> {
                 override fun onFailure(call: Call<ReplayHistoryDTO>, t: Throwable) {
-                    Timber.e(t, "requestData onFailure")
+                    LoggerProvider.logger.e(
+                        msg = Message("requestData onFailure"),
+                        tr = t
+                    )
                     cont.resume(null)
                 }
 
@@ -107,7 +114,7 @@ class HistoryFilesClient {
                     call: Call<ReplayHistoryDTO>,
                     response: Response<ReplayHistoryDTO>
                 ) {
-                    Timber.i("requestData onResponse")
+                    LoggerProvider.logger.i(msg = Message("requestData onResponse"))
                     val data = if (response.isSuccessful) {
                         response.body()
                     } else {
