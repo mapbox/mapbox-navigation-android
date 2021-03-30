@@ -43,6 +43,7 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityStyleBinding
 import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maneuver.api.ManeuverCallback
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.api.StepDistanceRemainingCallback
@@ -59,7 +60,9 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi
 import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
@@ -217,10 +220,13 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
             if (routes.isNotEmpty()) {
                 binding.tripProgressView.visibility = VISIBLE
                 routeLineApi.setRoutes(
-                    listOf(RouteLine(routes[0], null))
-                ).apply {
-                    routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
-                }
+                    listOf(RouteLine(routes[0], null)),
+                    object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
+                        override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
+                            routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, value)
+                        }
+                    }
+                )
                 startSimulation(routes[0])
             } else {
                 binding.tripProgressView.visibility = GONE
