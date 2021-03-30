@@ -40,6 +40,8 @@ import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityTripprogressBinding
+import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
@@ -48,7 +50,9 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
 import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
 import com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter
@@ -229,10 +233,13 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
                 routeLineApi.setRoutes(
-                    listOf(RouteLine(routes[0], null))
-                ).apply {
-                    routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
-                }
+                    listOf(RouteLine(routes[0], null)),
+                    object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
+                        override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
+                            routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, value)
+                        }
+                    }
+                )
                 startSimulation(routes[0])
                 binding.tripProgressView.visibility = View.VISIBLE
             } else {

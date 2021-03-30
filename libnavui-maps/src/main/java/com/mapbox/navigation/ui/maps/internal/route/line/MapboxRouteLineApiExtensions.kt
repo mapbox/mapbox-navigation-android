@@ -30,17 +30,17 @@ object MapboxRouteLineApiExtensions {
      */
     suspend fun MapboxRouteLineApi.updateToPrimaryRoute(route: DirectionsRoute):
         Expected<RouteSetValue, RouteLineError> {
-            return suspendCoroutine { continuation ->
-                this.updateToPrimaryRoute(
-                    route,
-                    object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
-                        override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
-                            continuation.resume(value)
-                        }
+        return suspendCoroutine { continuation ->
+            this.updateToPrimaryRoute(
+                route,
+                object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
+                    override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
+                        continuation.resume(value)
                     }
-                )
-            }
+                }
+            )
         }
+    }
 
     /**
      * Sets the routes that will be operated on.
@@ -52,17 +52,17 @@ object MapboxRouteLineApiExtensions {
      */
     suspend fun MapboxRouteLineApi.setRoutes(newRoutes: List<RouteLine>):
         Expected<RouteSetValue, RouteLineError> {
-            return suspendCoroutine { continuation ->
-                this.setRoutes(
-                    newRoutes,
-                    object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
-                        override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
-                            continuation.resume(value)
-                        }
+        return suspendCoroutine { continuation ->
+            this.setRoutes(
+                newRoutes,
+                object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
+                    override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
+                        continuation.resume(value)
                     }
-                )
-            }
+                }
+            )
         }
+    }
 
     /**
      * @return a state which contains the side effects to be applied to the map. The data
