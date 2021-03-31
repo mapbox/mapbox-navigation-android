@@ -95,9 +95,12 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val tripProgressFormatter: TripProgressUpdateFormatter by lazy {
         val distanceFormatterOptions =
-            DistanceFormatterOptions.Builder(this).build()
+            DistanceFormatterOptions.Builder().build()
         TripProgressUpdateFormatter.Builder(this)
-            .distanceRemainingFormatter(DistanceRemainingFormatter(distanceFormatterOptions))
+            .distanceRemainingFormatter(DistanceRemainingFormatter(
+                this.applicationContext,
+                distanceFormatterOptions
+            ))
             .timeRemainingFormatter(TimeRemainingFormatter(this))
             .estimatedTimeToArrivalFormatter(EstimatedTimeToArrivalFormatter(this))
             .build()
@@ -108,11 +111,14 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private val distanceFormatter: DistanceFormatterOptions by lazy {
-        DistanceFormatterOptions.Builder(this).build()
+        DistanceFormatterOptions.Builder().build()
     }
 
     private val maneuverApi: MapboxManeuverApi by lazy {
-        MapboxManeuverApi(MapboxDistanceFormatter(distanceFormatter))
+        MapboxManeuverApi(MapboxDistanceFormatter(
+            this.applicationContext,
+            distanceFormatter
+        ))
     }
 
     private val routeLineResources: RouteLineResources by lazy {

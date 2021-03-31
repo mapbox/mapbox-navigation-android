@@ -84,7 +84,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
      * The data in the view is formatted by default mapbox distance formatting implementation.
      */
     private val distanceFormatter: DistanceFormatterOptions by lazy {
-        DistanceFormatterOptions.Builder(this).build()
+        DistanceFormatterOptions.Builder().build()
     }
 
     /**
@@ -92,7 +92,10 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
      * and produces trip related data that is consumed by the [MapboxManeuverView] in the layout.
      */
     private val maneuverApi: MapboxManeuverApi by lazy {
-        MapboxManeuverApi(MapboxDistanceFormatter(distanceFormatter))
+        MapboxManeuverApi(MapboxDistanceFormatter(
+            this.applicationContext,
+            distanceFormatter
+        ))
     }
 
     private val routeLineResources: RouteLineResources by lazy {

@@ -223,13 +223,16 @@ class TripProgressUpdateFormatter private constructor(
 
         private fun getDefaultDistanceRemainingFormatter(context: Context):
             ValueFormatter<Double, SpannableString> {
-            val options = DistanceFormatterOptions.Builder(context).build()
+            val options = DistanceFormatterOptions.Builder().build()
             val roundingUnit = when (options.unitType) {
                 VoiceUnit.IMPERIAL -> DEFAULT_ROUNDING_IMPERIAL
                 else -> DEFAULT_ROUNDING_METRIC
             }
             val finalOptions = options.toBuilder().roundingIncrement(roundingUnit).build()
-            return DistanceRemainingFormatter(finalOptions)
+            return DistanceRemainingFormatter(
+                context.applicationContext,
+                finalOptions
+            )
         }
     }
 }
