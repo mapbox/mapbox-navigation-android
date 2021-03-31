@@ -2,6 +2,25 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 1.5.1 - March 31, 2021
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Bug fixes and improvements
+- Fixed speed limit. [#4143](https://github.com/mapbox/mapbox-navigation-android/pull/4143)
+- Added default text placeholder to `TripNotification` view. [#4156](https://github.com/mapbox/mapbox-navigation-android/pull/4156)
+- Fixed `TripNotification` view to always show `Stop Session` label. [#4173](https://github.com/mapbox/mapbox-navigation-android/pull/4173)
+- Fixed bearings calculation on reroute. [#4199](https://github.com/mapbox/mapbox-navigation-android/pull/4199)
+
+## Mapbox Navigation SDK 1.5.0 - March 13, 2021
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Bug fixes and improvements
+- Improved logic to select turn lanes. [#4006](https://github.com/mapbox/mapbox-navigation-android/pull/4006)
+- Changed `SpeechPlayerProvider`: constructor deprecated, builder added, `focusGain` param added. [#4052](https://github.com/mapbox/mapbox-navigation-android/pull/4052)
+- Fixed Route refresh: refresh alternative route when selected. [#4056](https://github.com/mapbox/mapbox-navigation-android/pull/4056)
+
 ## Mapbox Navigation SDK 1.5.0-alpha.2 - February 19, 2021
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
