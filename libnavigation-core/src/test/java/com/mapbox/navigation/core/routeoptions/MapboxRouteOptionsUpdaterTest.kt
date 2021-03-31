@@ -208,7 +208,7 @@ class MapboxRouteOptionsUpdaterTest {
                             DEFAULT_REROUTE_BEARING_ANGLE.toDouble(),
                             2.0
                         ),
-                        listOf(3.0, 4.0),
+                        null,
                         null
                     )
                 ),
