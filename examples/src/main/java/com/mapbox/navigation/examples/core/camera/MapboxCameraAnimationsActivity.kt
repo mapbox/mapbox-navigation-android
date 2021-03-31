@@ -6,7 +6,6 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -17,6 +16,8 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -411,9 +412,9 @@ class MapboxCameraAnimationsActivity :
             },
             object : OnMapLoadErrorListener {
                 override fun onMapLoadError(mapLoadErrorType: MapLoadErrorType, msg: String) {
-                    Log.e(
-                        "CameraAnimationsAct",
-                        "Error loading map - error type: $mapLoadErrorType, message: $msg"
+                    mapboxLogger.e(
+                        Tag("CameraAnimationsAct"),
+                        Message("Error loading map - error type: $mapLoadErrorType, message: $msg")
                     )
                 }
             }

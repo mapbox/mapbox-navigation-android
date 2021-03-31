@@ -4,7 +4,9 @@ import android.content.Context
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
-import android.util.Log
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.navigation.base.logger.LoggerProvider
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import java.util.Locale
@@ -50,7 +52,10 @@ internal class VoiceInstructionsTextPlayer(
         if (isLanguageSupported && announcement.isNotBlank()) {
             play(announcement)
         } else {
-            Log.e(TAG, "$LANGUAGE_NOT_SUPPORTED or announcement from state is blank")
+            LoggerProvider.logger.e(
+                Tag(TAG),
+                Message("$LANGUAGE_NOT_SUPPORTED or announcement from state is blank")
+            )
             donePlaying()
         }
     }
@@ -91,7 +96,7 @@ internal class VoiceInstructionsTextPlayer(
         isLanguageSupported =
             textToSpeech.isLanguageAvailable(language) == TextToSpeech.LANG_AVAILABLE
         if (!isLanguageSupported) {
-            Log.e(TAG, LANGUAGE_NOT_SUPPORTED)
+            LoggerProvider.logger.e(Tag(TAG), Message(LANGUAGE_NOT_SUPPORTED))
             return
         }
         textToSpeech.language = language
@@ -105,7 +110,7 @@ internal class VoiceInstructionsTextPlayer(
             }
 
             override fun onError(utteranceId: String?, errorCode: Int) {
-                Log.e(TAG, "TextToSpeech error: $errorCode")
+                LoggerProvider.logger.e(Tag(TAG), Message("TextToSpeech error: $errorCode"))
                 donePlaying()
             }
 

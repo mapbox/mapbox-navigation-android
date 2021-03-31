@@ -518,7 +518,6 @@ object MapboxRouteLineUtils {
      *
      * @return either the layer ID if found else a default layer ID
      */
-    @SuppressLint("LogNotTimber")
     @JvmStatic
     fun getBelowLayerIdToUse(
         belowLayerId: String?,

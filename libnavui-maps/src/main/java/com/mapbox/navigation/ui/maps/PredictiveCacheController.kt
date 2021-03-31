@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps
 
-import android.util.Log
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.Value
 import com.mapbox.common.TileStore
@@ -8,6 +9,7 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.TileStoreManager
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
+import com.mapbox.navigation.base.logger.LoggerProvider
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.PredictiveCache
 import java.util.HashMap
@@ -132,7 +134,10 @@ class PredictiveCacheController @JvmOverloads constructor(
         fn: (tileStore: TileStore) -> Unit
     ) {
         if (tileStoreResult.isError) {
-            Log.e(TAG, tileStoreResult.error)
+            LoggerProvider.logger.e(
+                Tag(TAG),
+                Message(tileStoreResult.error ?: "")
+            )
             predictiveCacheControllerErrorHandler?.onError(tileStoreResult.error)
         } else {
             fn(tileStoreResult.value!!)
@@ -149,7 +154,7 @@ class PredictiveCacheController @JvmOverloads constructor(
             )
             if (properties != null) {
                 if (properties.isError) {
-                    Log.e(TAG, properties.error)
+                    LoggerProvider.logger.e(Tag(TAG), Message(properties.error ?: ""))
                     predictiveCacheControllerErrorHandler?.onError(properties.error)
                 } else {
                     val contentsDictionary = properties.value!!.contents as HashMap<String, Value>
@@ -161,7 +166,7 @@ class PredictiveCacheController @JvmOverloads constructor(
                                 Only non-composite sources are supported.
                                 See https://docs.mapbox.com/studio-manual/reference/styles/#source-compositing.
                             """.trimIndent()
-                        Log.e(TAG, message)
+                        LoggerProvider.logger.e(Tag(TAG), Message(message))
                         predictiveCacheControllerErrorHandler?.onError(message)
                         continue
                     } else if (!url.startsWith(MAPBOX_URL_PREFIX)) {
@@ -170,7 +175,7 @@ class PredictiveCacheController @JvmOverloads constructor(
                                 Source URL: "$url" does not start with "$MAPBOX_URL_PREFIX".
                                 Only sources hosted on Mapbox Services are supported.
                             """.trimIndent()
-                        Log.e(TAG, message)
+                        LoggerProvider.logger.e(Tag(TAG), Message(message))
                         predictiveCacheControllerErrorHandler?.onError(message)
                         continue
                     } else {
