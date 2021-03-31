@@ -159,6 +159,7 @@ class MapboxRouteOptionsUpdaterTest {
     @RunWith(Parameterized::class)
     class BearingOptionsParameterized(
         val routeOptions: RouteOptions,
+        val remainingWaypointsParameter: Int,
         val expectedBearings: List<List<Double>?>
     ) {
         @MockK
@@ -173,6 +174,7 @@ class MapboxRouteOptionsUpdaterTest {
             fun params() = listOf(
                 arrayOf(
                     provideRouteOptionsWithCoordinatesAndBearings(),
+                    3,
                     listOf(
                         listOf(DEFAULT_REROUTE_BEARING_ANGLE.toDouble(), 10.0),
                         listOf(20.0, 20.0),
@@ -182,13 +184,12 @@ class MapboxRouteOptionsUpdaterTest {
                 ),
                 arrayOf(
                     provideRouteOptionsWithCoordinates(),
+                    1,
                     listOf(
                         listOf(
                             DEFAULT_REROUTE_BEARING_ANGLE.toDouble(),
                             DEFAULT_REROUTE_BEARING_TOLERANCE
                         ),
-                        null,
-                        null,
                         null
                     )
                 ),
@@ -201,13 +202,13 @@ class MapboxRouteOptionsUpdaterTest {
                             )
                         )
                         .build(),
+                    2,
                     listOf(
                         listOf(
                             DEFAULT_REROUTE_BEARING_ANGLE.toDouble(),
                             2.0
                         ),
                         listOf(3.0, 4.0),
-                        null,
                         null
                     )
                 ),
@@ -222,6 +223,7 @@ class MapboxRouteOptionsUpdaterTest {
                             )
                         )
                         .build(),
+                    3,
                     listOf(
                         listOf(
                             DEFAULT_REROUTE_BEARING_ANGLE.toDouble(),
@@ -246,9 +248,8 @@ class MapboxRouteOptionsUpdaterTest {
         @Test
         fun bearingOptions() {
             val routeProgress: RouteProgress = mockk(relaxed = true) {
-                every { remainingWaypoints } returns routeOptions.coordinates().size - 1
+                every { remainingWaypoints } returns remainingWaypointsParameter
             }
-
 
             val newRouteOptions =
                 routeRefreshAdapter.update(routeOptions, routeProgress, location)
