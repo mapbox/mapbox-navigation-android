@@ -135,8 +135,10 @@ class MapboxRouteLineOptions private constructor(
 
         /**
          * Indicates the elevation of the route line related layers. A good starting point is
-         * [LocationComponentConstants.MODEL_LAYER]. If no value is provided the route line
-         * related layers will be placed at the top of the [Map] layer stack.
+         * [LocationComponentConstants.LOCATION_INDICATOR_LAYER] for 2D location puck and
+         * [LocationComponentConstants.MODEL_LAYER] for 3D location puck.
+         *
+         * If no value is provided the route line related layers will be placed at the top of the [Map] layer stack.
          *
          * @return the builder
          */
