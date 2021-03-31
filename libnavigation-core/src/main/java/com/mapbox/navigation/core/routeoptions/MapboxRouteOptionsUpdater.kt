@@ -54,10 +54,10 @@ class MapboxRouteOptionsUpdater(
                     )
                     .bearingsList(
                         getUpdatedBearingList(
-                            index,
                             coordinates.size,
                             location.bearing.toDouble(),
-                            routeOptions.bearingsList()
+                            routeOptions.bearingsList(),
+                            remainingWaypoints
                         )
                     )
                     .radiusesList(
@@ -117,10 +117,10 @@ class MapboxRouteOptionsUpdater(
     }
 
     private fun getUpdatedBearingList(
-        legIndex: Int,
         coordinates: Int,
         currentAngle: Double,
-        legacyBearingList: List<List<Double>?>?
+        legacyBearingList: List<List<Double>?>?,
+        remainingWaypoints: Int
     ): MutableList<List<Double>?> {
         return ArrayList<List<Double>?>().also { newList ->
             val originTolerance = legacyBearingList?.getOrNull(0)
@@ -131,13 +131,13 @@ class MapboxRouteOptionsUpdater(
             if (legacyBearingList != null) {
                 newList.addAll(
                     legacyBearingList.subList(
-                        legIndex + 1,
+                        coordinates - remainingWaypoints,
                         min(legacyBearingList.size, coordinates)
                     )
                 )
             }
 
-            while (newList.size < coordinates) {
+            while (newList.size < remainingWaypoints + 1) {
                 newList.add(null)
             }
         }
