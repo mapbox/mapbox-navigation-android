@@ -3,9 +3,9 @@ package com.mapbox.navigation.examples.core.replay
 import android.content.Context
 import com.google.gson.Gson
 import com.mapbox.base.common.logger.model.Message
-import com.mapbox.navigation.base.logger.LoggerProvider
 import com.mapbox.navigation.core.replay.history.ReplayHistoryDTO
 import com.mapbox.navigation.examples.core.R
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

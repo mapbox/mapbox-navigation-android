@@ -3,8 +3,8 @@ package com.mapbox.navigation.examples.core.replay
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 import com.mapbox.base.common.logger.model.Message
-import com.mapbox.navigation.base.logger.LoggerProvider
 import com.mapbox.navigation.core.replay.history.ReplayHistoryDTO
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Call

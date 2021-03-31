@@ -1,10 +1,10 @@
 package com.mapbox.navigation.examples.core.replay
 
 import com.mapbox.base.common.logger.model.Message
-import com.mapbox.navigation.base.logger.LoggerProvider
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

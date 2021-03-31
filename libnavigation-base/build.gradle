@@ -22,9 +22,6 @@ android {
 }
 
 dependencies {
-    implementation dependenciesList.mapboxAnnotations
-    api dependenciesList.mapboxAndroidCommon
-
     api dependenciesList.mapboxCore
     api dependenciesList.mapboxSdkDirectionsModels
     api dependenciesList.mapboxSdkServicesCore

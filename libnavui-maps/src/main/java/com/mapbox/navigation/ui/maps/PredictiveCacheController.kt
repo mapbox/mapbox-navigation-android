@@ -9,9 +9,9 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.TileStoreManager
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
-import com.mapbox.navigation.base.logger.LoggerProvider
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.PredictiveCache
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import java.util.HashMap
 
 private const val TAG = "MbxPredictiveCache"

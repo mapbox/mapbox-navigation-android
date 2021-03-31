@@ -1,4 +1,4 @@
-package com.mapbox.navigation.base.logger
+package com.mapbox.navigation.utils.internal
 
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.base.common.logger.Logger
@@ -10,7 +10,10 @@ import com.mapbox.common.module.provider.ModuleProviderArgument
  */
 object LoggerProvider {
 
-    val logger = MapboxModuleProvider.createModule<Logger>(MapboxModuleType.CommonLogger, ::paramsProvider)
+    val logger = MapboxModuleProvider.createModule<Logger>(
+        MapboxModuleType.CommonLogger,
+        LoggerProvider::paramsProvider
+    )
 
     private fun paramsProvider(type: MapboxModuleType): Array<ModuleProviderArgument> {
         return arrayOf()

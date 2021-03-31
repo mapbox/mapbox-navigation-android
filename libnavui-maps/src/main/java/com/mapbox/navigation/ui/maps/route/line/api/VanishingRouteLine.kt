@@ -2,9 +2,7 @@ package com.mapbox.navigation.ui.maps.route.line.api
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.model.Message
-import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.logger.LoggerProvider
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
@@ -16,6 +14,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineExpressions
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.LoggerProvider
 
 /**
  * This class implements a feature that can change the appearance of the route line behind the puck.

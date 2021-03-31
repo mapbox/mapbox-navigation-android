@@ -1,13 +1,10 @@
 package com.mapbox.navigation.ui.maps.internal.route.line
 
-import android.annotation.SuppressLint
-import android.util.Log
 import android.util.SparseArray
 import androidx.annotation.ColorInt
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.core.constants.Constants
@@ -24,7 +21,6 @@ import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
-import com.mapbox.navigation.base.logger.LoggerProvider
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -39,6 +35,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrafficExpression
 import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMisc
 import java.util.UUID
@@ -530,8 +527,10 @@ object MapboxRouteLineUtils {
                 false -> {
                     LoggerProvider.logger.e(
                         Tag(MapboxRouteLineUtils::class.java.simpleName),
-                        Message("Layer $belowLayerId not found. Route line related layers will be " +
-                            "placed at top of the map stack.")
+                        Message(
+                            "Layer $belowLayerId not found. Route line related layers will be " +
+                                "placed at top of the map stack."
+                        )
                     )
                     null
                 }

@@ -27,6 +27,9 @@ android {
 }
 
 dependencies {
+    implementation dependenciesList.mapboxAnnotations
+    api dependenciesList.mapboxAndroidCommon
+
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
     implementation dependenciesList.androidXCore

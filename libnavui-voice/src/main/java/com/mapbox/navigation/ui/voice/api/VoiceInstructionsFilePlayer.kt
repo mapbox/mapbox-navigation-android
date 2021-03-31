@@ -4,9 +4,9 @@ import android.content.Context
 import android.media.MediaPlayer
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
-import com.mapbox.navigation.base.logger.LoggerProvider
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
