@@ -5,6 +5,8 @@ import android.graphics.Color
 import android.view.View
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
@@ -186,12 +188,17 @@ class MapboxNavigationViewportDataSourceDebugger(
             }
         }
 
-        val lineString = LineString.fromLngLats(points)
+        val featureCollection = if (points.size > 1) {
+            FeatureCollection.fromFeature(Feature.fromGeometry(LineString.fromLngLats(points)))
+        } else {
+            FeatureCollection.fromFeatures(emptyList())
+        }
+
         val style = mapboxMap.getStyle()
         if (enabled && style != null && style.fullyLoaded) {
             if (!style.styleSourceExists(pointsSourceId)) {
                 val source = GeoJsonSource(
-                    GeoJsonSource.Builder(pointsSourceId).geometry(lineString)
+                    GeoJsonSource.Builder(pointsSourceId).featureCollection(featureCollection)
                 )
                 style.addSource(source)
             }
@@ -205,7 +212,7 @@ class MapboxNavigationViewportDataSourceDebugger(
             }
 
             val source = style.getSource(pointsSourceId) as GeoJsonSource
-            source.geometry(lineString)
+            source.featureCollection(featureCollection)
         }
     }
 }

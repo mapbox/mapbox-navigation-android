@@ -12,6 +12,7 @@ import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.utils.isSameUuid
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getAnchorPointFromPitchPercentage
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getBearingForMap
@@ -30,23 +31,6 @@ import com.mapbox.turf.TurfMisc
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.math.max
 import kotlin.math.min
-
-// todo add additional points after maneuver only when in pitch 0 not always
-//    TODO: Make these ViewportDataSourceOptions
-private val distanceToCoalesceCompoundManeuvers = 150.0
-private val defaultDistanceToFrameAfterManeuver = 100.0
-
-private val framePointsAfterManeuver = true
-
-private val usingIntersectionDensityToCalculateGeometryForFraming = true
-private val averageIntersectionDistanceMultiplier = 5
-private val minimumMetersForIntersectionDensity = 20.0
-
-private val usingNearManeuverPitchChange = true
-private val maximizeViewableAreaWhenPitchZero = true
-private val distanceFromManeuverToBeginPitchChange = 180.0
-
-private val bearingDiffMax = 20.0
 
 private val NULL_ISLAND_POINT = Point.fromLngLat(0.0, 0.0)
 private val EMPTY_EDGE_INSETS = EdgeInsets(0.0, 0.0, 0.0, 0.0)
@@ -166,6 +150,7 @@ class MapboxNavigationViewportDataSource(
 
     var debugger: MapboxNavigationViewportDataSourceDebugger? = null
 
+    private var route: DirectionsRoute? = null
     private var completeRoutePoints: List<List<List<Point>>> = emptyList()
     private var postManeuverFramingPoints: List<List<List<Point>>> = emptyList()
     private var remainingPointsOnCurrentStep: List<Point> = emptyList()
@@ -199,6 +184,110 @@ class MapboxNavigationViewportDataSource(
         null,
         CENTER_SCREEN_COORDINATE
     )
+
+    /**
+     * When enabled and a route is provided via [onRouteChanged] and updates via [onRouteProgressChanged],
+     * the geometry that's going to be framed for following will not match the whole remainder of the current step,
+     * but a smaller subset of that geometry to make the zoom level higher.
+     *
+     * This has an effect of zooming closer in when intersections are dense.
+     *
+     * Defaults to `true`.
+     */
+    var useIntersectionDensityToCalculateGeometryForFraming = true
+
+    /**
+     * When [useIntersectionDensityToCalculateGeometryForFraming] is enabled,
+     * this multiplier can be used to adjust the size of the portion of the remaining step that's going to be selected for framing.
+     *
+     * Defaults to `5.0`.
+     */
+    var averageIntersectionDistanceMultiplier = 5.0
+
+    /**
+     * When [useIntersectionDensityToCalculateGeometryForFraming] is enabled,
+     * describes the minimum distance between intersections to count them as 2 instances.
+     *
+     * This has an effect of limiting zoom level for extremely intersection-dense geometries.
+     *
+     * Defaults to `20.0` meters.
+     */
+    var minimumMetersForIntersectionDensity = 20.0
+
+    /**
+     * When enabled and a route is provided via [onRouteChanged] and updates via [onRouteProgressChanged],
+     * the generated following camera frame will have to pitch `0`.
+     *
+     * Depends on [distanceFromManeuverToUsePitchZero].
+     *
+     * Defaults to `true`.
+     */
+    var usePitchZeroNearManeuvers = true
+
+    /**
+     * When [usePitchZeroNearManeuvers] is enabled,
+     * this variable describes the threshold distance from the next maneuver to move the frame to pitch `0`,
+     * based on the [RouteProgress].
+     *
+     * Defaults to `180.0` meters.
+     */
+    var distanceFromManeuverToUsePitchZero = 180.0
+
+    /**
+     * When a produced following frame has pitch `0`,
+     * the puck will not be tied to the bottom edge of the [followingPadding] and instead move
+     * around the centroid of the maneuver's geometry to maximize the viewable area.
+     *
+     * Defaults to `true`.
+     */
+    var maximizeViewableAreaWhenPitchZero = true
+
+    /**
+     * When a produced following frame has pitch `0`,
+     * this controls whether additional points _after_ the upcoming maneuver should be framed to provide more context.
+     *
+     * Defaults to `true`.
+     */
+    var framePointsAfterManeuverWhenPitchZero = true
+
+    /**
+     * When [framePointsAfterManeuverWhenPitchZero] is enabled,
+     * this controls the distance between maneuvers closely following the current one to treat them for inclusion in the frame.
+     *
+     * Defaults to `150.0` meters.
+     */
+    var distanceToCoalesceCompoundManeuvers = 150.0
+
+    /**
+     * When [framePointsAfterManeuverWhenPitchZero] is enabled,
+     * this controls the distance on route after the current maneuver to include in the frame.
+     *
+     * This is added on top of potentially added compound maneuvers that closely follow the upcoming one,
+     * controlled by [distanceToCoalesceCompoundManeuvers].
+     *
+     * Defaults to `100.0` meters.
+     */
+    var distanceToFrameAfterManeuver = 100.0
+
+    /**
+     * If enabled, the following frame's bearing won't exactly reflect the bearing returned by the [Location],
+     * but will also be affected by the direction to the upcoming framed geometry to maximize the viewable area.
+     *
+     * Defaults to `true`.
+     *
+     * @see [maxBearingAngleDiffWhenSmoothing]
+     */
+    var useBearingSmoothing = true
+
+    /**
+     * When [useBearingSmoothing] is enabled, this controls how much the following frame's bearing
+     * can deviate from the [Location] bearing.
+     *
+     * Defaults to `20.0` degrees.
+     */
+    var maxBearingAngleDiffWhenSmoothing = 20.0
+
+    /* -------- PADDING UPDATES -------- */
 
     /**
      * Holds a padding (in pixels) used for generating a following frame.
@@ -453,6 +542,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun onRouteChanged(route: DirectionsRoute) {
+        this.route = route
         completeRoutePoints = processRouteInfo(route)
         remainingPointsOnRoute = completeRoutePoints.flatten().flatten()
         remainingPointsOnCurrentStep = emptyList()
@@ -462,7 +552,7 @@ class MapboxNavigationViewportDataSource(
         )
         postManeuverFramingPoints = processRouteForPostManeuverFramingGeometry(
             distanceToCoalesceCompoundManeuvers,
-            defaultDistanceToFrameAfterManeuver,
+            distanceToFrameAfterManeuver,
             route
         )
     }
@@ -481,6 +571,18 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun onRouteProgressChanged(routeProgress: RouteProgress) {
+        // todo abort if there's no route cached or differs form the one in rp
+        if (this.route == null) {
+            return
+        }
+
+        if (this.route?.isSameUuid(routeProgress.route) != true) {
+            Log.w(
+                "ViewportDataSource",
+                "Provided route and navigated route do not have the same UUID."
+            )
+        }
+
         routeProgress.currentLegProgress?.let { currentLegProgress ->
             currentLegProgress.currentStepProgress?.let { currentStepProgress ->
                 val currentStepFullPoints = currentStepProgress.stepPoints ?: emptyList()
@@ -496,7 +598,9 @@ class MapboxNavigationViewportDataSource(
                 distanceRemainingOnCurrentStep = currentStepProgress.distanceRemaining
 
                 var lookaheadDistanceForZoom = fullDistanceOfCurrentStepKM
-                if (usingIntersectionDensityToCalculateGeometryForFraming) {
+                if (useIntersectionDensityToCalculateGeometryForFraming
+                    && averageIntersectionDistancesOnRoute.isNotEmpty()
+                ) {
                     val lookaheadInKM =
                         averageIntersectionDistancesOnRoute[currentLegProgress.legIndex][currentStepProgress.stepIndex] / 1000.0
                     lookaheadDistanceForZoom =
@@ -514,10 +618,17 @@ class MapboxNavigationViewportDataSource(
                     return
                 }
 
-                pointsToFrameAfterCurrentStep =
+                pointsToFrameAfterCurrentStep = if (postManeuverFramingPoints.isNotEmpty()) {
                     postManeuverFramingPoints[currentLegProgress.legIndex][currentStepProgress.stepIndex]
+                } else {
+                    emptyList()
+                }
 
-                val currentLegPoints = completeRoutePoints[currentLegProgress.legIndex]
+                val currentLegPoints = if (completeRoutePoints.isNotEmpty()) {
+                    completeRoutePoints[currentLegProgress.legIndex]
+                } else {
+                    emptyList()
+                }
                 val remainingStepsAfterCurrentStep =
                     if (currentStepProgress.stepIndex < currentLegPoints.size) {
                         currentLegPoints.slice(
@@ -561,6 +672,8 @@ class MapboxNavigationViewportDataSource(
         completeRoutePoints = emptyList()
         remainingPointsOnCurrentStep = emptyList()
         remainingPointsOnRoute = emptyList()
+        averageIntersectionDistancesOnRoute = emptyList()
+        postManeuverFramingPoints = emptyList()
     }
 
     /**
@@ -736,15 +849,15 @@ class MapboxNavigationViewportDataSource(
         pointsForFollowing.addAll(additionalPointsToFrameForFollowing)
 
         followingBearingProperty.fallback = getBearingForMap(
-            bearingDiffMax,
+            if (useBearingSmoothing) maxBearingAngleDiffWhenSmoothing else 0.0,
             mapboxMap.getCameraOptions().bearing ?: 0.0,
             localTargetLocation?.bearing?.toDouble() ?: 0.0,
             pointsForFollowing
         )
 
-        followingPitchProperty.fallback = if (usingNearManeuverPitchChange) {
+        followingPitchProperty.fallback = if (usePitchZeroNearManeuvers) {
             getPitchForDistanceRemainingOnStep(
-                distanceFromManeuverToBeginPitchChange,
+                distanceFromManeuverToUsePitchZero,
                 distanceRemainingOnCurrentStep,
                 0.0,
                 options.maxFollowingPitch
@@ -753,7 +866,7 @@ class MapboxNavigationViewportDataSource(
             options.maxFollowingPitch
         }
 
-        if (framePointsAfterManeuver) {
+        if (framePointsAfterManeuverWhenPitchZero && followingPitchProperty.get() == 0.0) {
             pointsForFollowing.addAll(pointsToFrameAfterCurrentStep)
         }
 
