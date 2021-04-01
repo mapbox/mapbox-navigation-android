@@ -13,6 +13,11 @@ import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineExpressions
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.ThreadController
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 /**
@@ -26,6 +31,9 @@ import timber.log.Timber
  * information.
  */
 internal class VanishingRouteLine {
+
+    private val jobControl = ThreadController.getMainScopeAndRootJob()
+
     /**
      * the route points for the indicated primary route
      */
@@ -55,11 +63,22 @@ internal class VanishingRouteLine {
      * Initializes this class with the active primary route.
      */
     fun initWithRoute(route: DirectionsRoute) {
-        primaryRoutePoints = parseRoutePoints(route)
-        primaryRouteLineGranularDistances = MapboxRouteLineUtils.calculateRouteGranularDistances(
-            primaryRoutePoints?.flatList
-                ?: emptyList()
-        )
+        jobControl.job.cancelChildren()
+        jobControl.scope.launch {
+            val initResultDef = async(ThreadController.IODispatcher) {
+                val routePoints = parseRoutePoints(route)
+                val granularDistances = MapboxRouteLineUtils.calculateRouteGranularDistances(
+                    routePoints?.flatList
+                        ?: emptyList()
+                )
+                Pair(routePoints, granularDistances)
+            }
+            val resultPair = initResultDef.await()
+            if (coroutineContext.isActive) {
+                primaryRoutePoints = resultPair.first
+                primaryRouteLineGranularDistances = resultPair.second
+            }
+        }
     }
 
     /**
