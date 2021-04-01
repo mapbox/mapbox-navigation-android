@@ -2,6 +2,24 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.4 - April 1, 2021
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Features
+* Added option to display road closures on the route traffic line. [#4215](https://github.com/mapbox/mapbox-navigation-android/pull/4215)
+* Added option in `RouteLineResources` to enable the display of restricted road sections of the route line. The restriction related color option is in `RouteLineColorResources`. [#4148](https://github.com/mapbox/mapbox-navigation-android/pull/4148)
+* Added multiple exclusion criteria and notification of exclusion violations. [#4195](https://github.com/mapbox/mapbox-navigation-android/pull/4195)
+
+#### Bug fixes and improvements
+* Improved documentation for the suggested `MapboxRouteLineOptions.Builder#withRouteLineBelowLayerId` value. [#4202](https://github.com/mapbox/mapbox-navigation-android/pull/4202)
+* Fixed bearings calculation on reroute. [#4169](https://github.com/mapbox/mapbox-navigation-android/pull/4169)
+* Added `suspend` and callback versions of some methods in the `MapboxRouteLineApi` class. [#4106](https://github.com/mapbox/mapbox-navigation-android/pull/4106)
+* Split `TunnelEntrance` and `RestrictedArea` alerts, made `RoadObjects` info values non-null. [#4162](https://github.com/mapbox/mapbox-navigation-android/pull/4162)
+
+#### Known issues
+**When integrating this release, you might run into a crash on startup caused by cached data incompatibility. To resolve the issue, clear the application cache.**
+
 ## Mapbox Navigation SDK 1.5.1 - March 31, 2021
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
