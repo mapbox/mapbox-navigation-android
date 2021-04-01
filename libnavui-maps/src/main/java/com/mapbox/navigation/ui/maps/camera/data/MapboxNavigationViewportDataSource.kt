@@ -206,10 +206,6 @@ class MapboxNavigationViewportDataSource(
      * All of the geometries and the location puck will always be within the provided padding.
      */
     var followingPadding: EdgeInsets = EMPTY_EDGE_INSETS
-        set(value) {
-            field = value
-            updateData()
-        }
     private var appliedFollowingPadding = followingPadding
 
     /**
@@ -218,10 +214,6 @@ class MapboxNavigationViewportDataSource(
      * All of the geometries and the location puck will always be within the provided padding.
      */
     var overviewPadding: EdgeInsets = EMPTY_EDGE_INSETS
-        set(value) {
-            field = value
-            updateData()
-        }
 
     /* -------- ALLOWED UPDATES -------- */
     /**
@@ -399,6 +391,53 @@ class MapboxNavigationViewportDataSource(
      * @see [getViewportData]
      */
     fun evaluate() {
+        updateFollowingData()
+        updateOverviewData()
+
+        followingCameraOptions =
+            CameraOptions.Builder().apply {
+                if (followingCenterUpdatesAllowed) {
+                    center(followingCenterProperty.get())
+                }
+                if (followingZoomUpdatesAllowed) {
+                    zoom(followingZoomProperty.get())
+                }
+                if (followingBearingUpdatesAllowed) {
+                    bearing(followingBearingProperty.get())
+                }
+                if (followingPitchUpdatesAllowed) {
+                    pitch(followingPitchProperty.get())
+                }
+                if (followingPaddingUpdatesAllowed) {
+                    padding(appliedFollowingPadding)
+                }
+                if (followingAnchorUpdatesAllowed) {
+                    anchor(followingAnchorProperty.get())
+                }
+            }.build()
+
+        overviewCameraOptions =
+            CameraOptions.Builder().apply {
+                if (overviewCenterUpdatesAllowed) {
+                    center(overviewCenterProperty.get())
+                }
+                if (overviewZoomUpdatesAllowed) {
+                    zoom(overviewZoomProperty.get())
+                }
+                if (overviewBearingUpdatesAllowed) {
+                    bearing(overviewBearingProperty.get())
+                }
+                if (overviewPitchUpdatesAllowed) {
+                    pitch(overviewPitchProperty.get())
+                }
+                if (overviewPaddingUpdatesAllowed) {
+                    padding(overviewPadding)
+                }
+                if (overviewAnchorUpdatesAllowed) {
+                    anchor(overviewAnchorProperty.get())
+                }
+            }.build()
+
         viewportData = ViewportData(
             cameraForFollowing = followingCameraOptions,
             cameraForOverview = overviewCameraOptions
@@ -426,7 +465,6 @@ class MapboxNavigationViewportDataSource(
             defaultDistanceToFrameAfterManeuver,
             route
         )
-        updateData()
     }
 
     /**
@@ -493,14 +531,11 @@ class MapboxNavigationViewportDataSource(
                     remainingPointsOnCurrentStep,
                     remainingPointsAfterCurrentStep
                 ).flatten()
-
-                updateData()
                 return
             }
         }
         remainingPointsOnCurrentStep = emptyList()
         remainingPointsOnRoute = emptyList()
-        updateData()
     }
 
     /**
@@ -512,7 +547,6 @@ class MapboxNavigationViewportDataSource(
      */
     fun onLocationChanged(location: Location) {
         targetLocation = location
-        updateData()
     }
 
     /**
@@ -527,7 +561,6 @@ class MapboxNavigationViewportDataSource(
         completeRoutePoints = emptyList()
         remainingPointsOnCurrentStep = emptyList()
         remainingPointsOnRoute = emptyList()
-        updateData()
     }
 
     /**
@@ -535,7 +568,6 @@ class MapboxNavigationViewportDataSource(
      */
     fun additionalPointsToFrameForFollowing(points: List<Point>) {
         additionalPointsToFrameForFollowing = ArrayList(points)
-        updateData()
     }
 
     /**
@@ -543,7 +575,6 @@ class MapboxNavigationViewportDataSource(
      */
     fun additionalPointsToFrameForOverview(points: List<Point>) {
         additionalPointsToFrameForOverview = ArrayList(points)
-        updateData()
     }
 
     /**
@@ -556,7 +587,6 @@ class MapboxNavigationViewportDataSource(
      */
     fun followingCenterPropertyOverride(value: Point?) {
         followingCenterProperty.override = value
-        updateData()
     }
 
     /**
@@ -569,7 +599,6 @@ class MapboxNavigationViewportDataSource(
      */
     fun followingZoomPropertyOverride(value: Double?) {
         followingZoomProperty.override = value
-        updateData()
     }
 
     /**
@@ -582,7 +611,6 @@ class MapboxNavigationViewportDataSource(
      */
     fun followingBearingPropertyOverride(value: Double?) {
         followingBearingProperty.override = value
-        updateData()
     }
 
     /**
@@ -595,7 +623,6 @@ class MapboxNavigationViewportDataSource(
      */
     fun followingPitchPropertyOverride(value: Double?) {
         followingPitchProperty.override = value
-        updateData()
     }
 
     /**
@@ -608,7 +635,6 @@ class MapboxNavigationViewportDataSource(
      */
     fun followingAnchorPropertyOverride(value: ScreenCoordinate?) {
         followingAnchorProperty.override = value
-        updateData()
     }
 
     /**
@@ -622,7 +648,6 @@ class MapboxNavigationViewportDataSource(
      */
     fun overviewCenterPropertyOverride(value: Point?) {
         overviewCenterProperty.override = value
-        updateData()
     }
 
     /**
@@ -636,7 +661,6 @@ class MapboxNavigationViewportDataSource(
      */
     fun overviewZoomPropertyOverride(value: Double?) {
         overviewZoomProperty.override = value
-        updateData()
     }
 
     /**
@@ -650,7 +674,6 @@ class MapboxNavigationViewportDataSource(
      */
     fun overviewBearingPropertyOverride(value: Double?) {
         overviewBearingProperty.override = value
-        updateData()
     }
 
     /**
@@ -664,7 +687,6 @@ class MapboxNavigationViewportDataSource(
      */
     fun overviewPitchPropertyOverride(value: Double?) {
         overviewPitchProperty.override = value
-        updateData()
     }
 
     /**
@@ -678,7 +700,6 @@ class MapboxNavigationViewportDataSource(
      */
     fun overviewAnchorPropertyOverride(value: ScreenCoordinate?) {
         overviewAnchorProperty.override = value
-        updateData()
     }
 
     /**
@@ -690,7 +711,6 @@ class MapboxNavigationViewportDataSource(
         followingBearingProperty.override = null
         followingPitchProperty.override = null
         followingAnchorProperty.override = null
-        updateData()
     }
 
     /**
@@ -702,56 +722,6 @@ class MapboxNavigationViewportDataSource(
         overviewBearingProperty.override = null
         overviewPitchProperty.override = null
         overviewAnchorProperty.override = null
-        updateData()
-    }
-
-    private fun updateData() {
-        updateFollowingData()
-        updateOverviewData()
-
-        followingCameraOptions =
-            CameraOptions.Builder().apply {
-                if (followingCenterUpdatesAllowed) {
-                    center(followingCenterProperty.get())
-                }
-                if (followingZoomUpdatesAllowed) {
-                    zoom(followingZoomProperty.get())
-                }
-                if (followingBearingUpdatesAllowed) {
-                    bearing(followingBearingProperty.get())
-                }
-                if (followingPitchUpdatesAllowed) {
-                    pitch(followingPitchProperty.get())
-                }
-                if (followingPaddingUpdatesAllowed) {
-                    padding(appliedFollowingPadding)
-                }
-                if (followingAnchorUpdatesAllowed) {
-                    anchor(followingAnchorProperty.get())
-                }
-            }.build()
-
-        overviewCameraOptions =
-            CameraOptions.Builder().apply {
-                if (overviewCenterUpdatesAllowed) {
-                    center(overviewCenterProperty.get())
-                }
-                if (overviewZoomUpdatesAllowed) {
-                    zoom(overviewZoomProperty.get())
-                }
-                if (overviewBearingUpdatesAllowed) {
-                    bearing(overviewBearingProperty.get())
-                }
-                if (overviewPitchUpdatesAllowed) {
-                    pitch(overviewPitchProperty.get())
-                }
-                if (overviewPaddingUpdatesAllowed) {
-                    padding(overviewPadding)
-                }
-                if (overviewAnchorUpdatesAllowed) {
-                    anchor(overviewAnchorProperty.get())
-                }
-            }.build()
     }
 
     private fun updateFollowingData() {
