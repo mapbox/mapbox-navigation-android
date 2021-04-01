@@ -525,6 +525,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
 
   public final class RouteLineColorResources {
     method public int getAlternativeRouteCasingColor();
+    method public int getAlternativeRouteClosureColor();
     method public int getAlternativeRouteDefaultColor();
     method public int getAlternativeRouteHeavyColor();
     method public int getAlternativeRouteLowColor();
@@ -533,6 +534,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public int getAlternativeRouteUnknownTrafficColor();
     method public int getRestrictedRoadColor();
     method public int getRouteCasingColor();
+    method public int getRouteClosureColor();
     method public int getRouteDefaultColor();
     method public int getRouteHeavyColor();
     method public int getRouteLineTraveledCasingColor();
@@ -543,6 +545,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public int getRouteUnknownTrafficColor();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder toBuilder();
     property public final int alternativeRouteCasingColor;
+    property public final int alternativeRouteClosureColor;
     property public final int alternativeRouteDefaultColor;
     property public final int alternativeRouteHeavyColor;
     property public final int alternativeRouteLowColor;
@@ -551,6 +554,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final int alternativeRouteUnknownTrafficColor;
     property public final int restrictedRoadColor;
     property public final int routeCasingColor;
+    property public final int routeClosureColor;
     property public final int routeDefaultColor;
     property public final int routeHeavyColor;
     property public final int routeLineTraveledCasingColor;
@@ -564,6 +568,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
   public static final class RouteLineColorResources.Builder {
     ctor public RouteLineColorResources.Builder();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteCasingColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteClosureColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteDefaultColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteHeavyColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder alternativeRouteLowColor(@ColorInt int color);
@@ -573,6 +578,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources build();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder restrictedRoadColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeCasingColor(@ColorInt int color);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeClosureColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeDefaultColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeHeavyColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder routeLineTraveledCasingColor(@ColorInt int color);

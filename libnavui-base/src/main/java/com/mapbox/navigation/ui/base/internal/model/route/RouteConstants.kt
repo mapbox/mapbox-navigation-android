@@ -42,6 +42,7 @@ object RouteConstants {
     const val HEAVY_CONGESTION_VALUE = "heavy"
     const val SEVERE_CONGESTION_VALUE = "severe"
     const val UNKNOWN_CONGESTION_VALUE = "unknown"
+    const val ClOSURE_CONGESTION_VALUE = "closed"
     const val ORIGIN_MARKER_NAME = "originMarker"
     const val DESTINATION_MARKER_NAME = "destinationMarker"
     const val ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS = 1.0
@@ -116,6 +117,12 @@ object RouteConstants {
 
     @ColorInt
     val MANEUVER_ARROW_BORDER_COLOR = Color.parseColor("#2D3F53")
+
+    @ColorInt
+    val ROUTE_CLOSURE_COLOR = Color.parseColor("#000000")
+
+    @ColorInt
+    val ALTERNATIVE_ROUTE_CLOSURE_COLOR = Color.parseColor("#333333")
 
     @DrawableRes
     val MANEUVER_ARROWHEAD_ICON_DRAWABLE: Int = R.drawable.mapbox_ic_arrow_head

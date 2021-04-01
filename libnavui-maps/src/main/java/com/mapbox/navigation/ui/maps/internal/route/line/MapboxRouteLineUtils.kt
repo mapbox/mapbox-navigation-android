@@ -167,6 +167,9 @@ object MapboxRouteLineUtils {
                 RouteConstants.UNKNOWN_CONGESTION_VALUE -> {
                     routeLineColorResources.routeUnknownTrafficColor
                 }
+                RouteConstants.ClOSURE_CONGESTION_VALUE -> {
+                    routeLineColorResources.routeClosureColor
+                }
                 else -> routeLineColorResources.routeDefaultColor
             }
             false -> when (congestionValue) {
@@ -185,6 +188,9 @@ object MapboxRouteLineUtils {
                 RouteConstants.UNKNOWN_CONGESTION_VALUE -> {
                     routeLineColorResources.alternativeRouteUnknownTrafficColor
                 }
+                RouteConstants.ClOSURE_CONGESTION_VALUE -> {
+                    routeLineColorResources.alternativeRouteClosureColor
+                }
                 else -> {
                     routeLineColorResources.alternativeRouteDefaultColor
                 }
@@ -201,7 +207,7 @@ object MapboxRouteLineUtils {
      * traffic congestion annotation and a matching road class will be colored with the low
      * traffic color instead of the color configured for unknown traffic congestion.
      *
-     * @param route the DirectionsRoute used for the [Expression] calculations
+     * @param route the [DirectionsRoute] used for the [Expression] calculations
      * @param trafficBackfillRoadClasses a collection of road classes for overriding the traffic
      * congestion color for unknown traffic conditions
      * @param isPrimaryRoute indicates if the route used is the primary route
@@ -260,6 +266,7 @@ object MapboxRouteLineUtils {
 
         route.legs()?.forEach { leg ->
             ifNonNull(leg.annotation()?.distance()) { distanceList ->
+                val closureRanges = getClosureRanges(leg).asSequence()
                 val intersectionsWithGeometryIndex = leg.steps()
                     ?.mapNotNull { it.intersections() }
                     ?.flatten()
@@ -281,23 +288,26 @@ object MapboxRouteLineUtils {
                 }
 
                 leg.annotation()?.congestion()?.forEachIndexed { index, congestion ->
+                    val isInAClosure = closureRanges.any { it.contains(index) }
+                    val congestionValue: String =
+                        if (isInAClosure) RouteConstants.ClOSURE_CONGESTION_VALUE else congestion
                     val roadClass = getRoadClassForIndex(roadClassArray, index)
                     if (index == 0) {
                         routeLineTrafficData.add(
                             RouteLineTrafficExpressionData(
                                 0.0,
-                                congestion,
+                                congestionValue,
                                 roadClass
                             )
                         )
                     } else {
                         runningDistance += distanceList[index - 1]
                         val last = routeLineTrafficData.lastOrNull()
-                        if (last?.trafficCongestionIdentifier == congestion &&
-                            last?.roadClass == roadClass
+                        if (last?.trafficCongestionIdentifier == congestionValue &&
+                            last.roadClass == roadClass
                         ) {
                             // continue
-                        } else if (last?.trafficCongestionIdentifier == congestion &&
+                        } else if (last?.trafficCongestionIdentifier == congestionValue &&
                             roadClass == null
                         ) {
                             // continue
@@ -305,7 +315,7 @@ object MapboxRouteLineUtils {
                             routeLineTrafficData.add(
                                 RouteLineTrafficExpressionData(
                                     runningDistance,
-                                    congestion,
+                                    congestionValue,
                                     roadClass
                                 )
                             )
@@ -318,6 +328,14 @@ object MapboxRouteLineUtils {
         }
 
         return routeLineTrafficData
+    }
+
+    private fun getClosureRanges(leg: RouteLeg): List<IntRange> {
+        return leg.closures()
+            ?.filter { it.geometryIndexStart() != null && it.geometryIndexEnd() != null }
+            ?.map {
+                IntRange(it.geometryIndexStart()!!, it.geometryIndexEnd()!!)
+            } ?: listOf()
     }
 
     fun getRestrictedRouteSections(route: DirectionsRoute): List<List<Point>> {
@@ -397,9 +415,9 @@ object MapboxRouteLineUtils {
             val percentDistanceTraveled = trafficExpData.distanceFromOrigin / routeDistance
             val trafficIdentifier =
                 if (
-                    trafficOverrideRoadClasses.contains(trafficExpData.roadClass) &&
                     trafficExpData.trafficCongestionIdentifier ==
-                    RouteConstants.UNKNOWN_CONGESTION_VALUE
+                    RouteConstants.UNKNOWN_CONGESTION_VALUE &&
+                    trafficOverrideRoadClasses.contains(trafficExpData.roadClass)
                 ) {
                     RouteConstants.LOW_CONGESTION_VALUE
                 } else {
