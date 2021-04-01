@@ -22,6 +22,7 @@ import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.common.ShadowValueConverter
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRestrictedRouteSections
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
@@ -247,6 +248,7 @@ class MapboxRouteLineUtilsTest {
         val primaryRouteSourceValueSlot = slot<Value>()
         val alternativeRoute1SourceValueSlot = slot<Value>()
         val alternativeRoute2SourceValueSlot = slot<Value>()
+        val restrictedRoadSourceValueSlot = slot<Value>()
         val addStyleLayerSlots = mutableListOf<Value>()
         val addStyleLayerPositionSlots = mutableListOf<LayerPosition>()
         val mockLayer = mockk<StyleObjectInfo> {
@@ -259,6 +261,7 @@ class MapboxRouteLineUtilsTest {
             every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns false
             every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns false
             every { styleSourceExists(RouteConstants.WAYPOINT_SOURCE_ID) } returns false
+            every { styleSourceExists(RouteConstants.RESTRICTED_ROAD_SOURCE_ID) } returns false
             every { styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID) } returns false
             every {
                 styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
@@ -515,6 +518,131 @@ class MapboxRouteLineUtilsTest {
         assertEquals(
             LocationComponentConstants.MODEL_LAYER,
             addStyleLayerPositionSlots[9].below
+        )
+        verify(exactly = 0) {
+            style.addStyleSource(
+                RouteConstants.RESTRICTED_ROAD_SOURCE_ID, capture(restrictedRoadSourceValueSlot)
+            )
+        }
+    }
+
+    @Test
+    fun initializeLayersInitializesRestrictedAccessLayer() {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withRouteLineBelowLayerId(LocationComponentConstants.MODEL_LAYER)
+            .withRestrictedRoadLayerEnabled(true)
+            .build()
+        val addStyleLayerSlots = mutableListOf<Value>()
+        val restrictedRoadSourceValueSlot = slot<Value>()
+        val addStyleLayerPositionSlots = mutableListOf<LayerPosition>()
+        val mockLayer = mockk<StyleObjectInfo> {
+            every { id } returns LocationComponentConstants.MODEL_LAYER
+        }
+        val style = mockk<Style> {
+            every { fullyLoaded } returns true
+            every { styleLayers } returns listOf(mockLayer)
+            every { styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns false
+            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns false
+            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns false
+            every { styleSourceExists(RouteConstants.WAYPOINT_SOURCE_ID) } returns false
+            every { styleSourceExists(RouteConstants.RESTRICTED_ROAD_SOURCE_ID) } returns false
+            every { styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID) } returns false
+            every {
+                styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+            } returns false
+            every {
+                styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID)
+            } returns false
+            every {
+                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID)
+            } returns false
+            every {
+                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID)
+            } returns false
+            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON) } returns null
+            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) } returns null
+            every { getStyleImage(RouteConstants.ORIGIN_MARKER_NAME) } returns null
+            every { getStyleImage(RouteConstants.DESTINATION_MARKER_NAME) } returns null
+            every {
+                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
+            } returns false
+            every {
+                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
+            } returns false
+            every {
+                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
+            } returns false
+            every {
+                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+            } returns false
+            every { styleLayerExists(RouteLayerConstants.WAYPOINT_LAYER_ID) } returns false
+            every { styleLayerExists(LocationComponentConstants.MODEL_LAYER) } returns true
+            every {
+                addStyleSource(RouteConstants.WAYPOINT_SOURCE_ID, any())
+            } returns ExpectedFactory.createValue()
+            every {
+                addStyleSource(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any())
+            } returns ExpectedFactory.createValue()
+            every {
+                addStyleSource(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID, any())
+            } returns ExpectedFactory.createValue()
+            every {
+                addStyleSource(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID, any())
+            } returns ExpectedFactory.createValue()
+            every { addStyleLayer(any(), any()) } returns ExpectedFactory.createValue()
+            every {
+                addStyleSource(RouteConstants.RESTRICTED_ROAD_SOURCE_ID, any())
+            } returns ExpectedFactory.createValue()
+            every {
+                addImage(RouteConstants.ORIGIN_MARKER_NAME, any<Bitmap>())
+            } returns ExpectedFactory.createValue()
+            every {
+                addImage(RouteConstants.DESTINATION_MARKER_NAME, any<Bitmap>())
+            } returns ExpectedFactory.createValue()
+        }
+
+        MapboxRouteLineUtils.initializeLayers(style, options)
+
+        verify {
+            style.addStyleLayer(capture(addStyleLayerSlots), capture(addStyleLayerPositionSlots))
+        }
+        assertEquals(
+            RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
+            (addStyleLayerSlots[10].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        verify {
+            style.addStyleSource(
+                RouteConstants.RESTRICTED_ROAD_SOURCE_ID, capture(restrictedRoadSourceValueSlot)
+            )
+        }
+        assertEquals(
+            "geojson",
+            (
+                restrictedRoadSourceValueSlot
+                    .captured
+                    .contents as HashMap<String, Value>
+                )["type"]!!.contents
+        )
+        assertEquals(
+            16L,
+            (restrictedRoadSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!
+                .contents
+        )
+        assertEquals(
+            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            (
+                restrictedRoadSourceValueSlot
+                    .captured
+                    .contents as HashMap<String, Value>
+                )["data"]!!.contents
+        )
+        assertEquals(
+            RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
+            (
+                restrictedRoadSourceValueSlot
+                    .captured
+                    .contents as HashMap<String, Value>
+                )["tolerance"]!!.contents
         )
     }
 
@@ -1169,6 +1297,25 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
+    fun getRestrictedRouteSectionsTest() {
+        val route = loadRoute("route-with-restrictions.json")
+
+        val result = getRestrictedRouteSections(route)
+
+        assertEquals(2, result.size)
+        assertEquals(2, result[0].size)
+        assertEquals(2, result[1].size)
+        assertEquals(37.971947, result[0].first().latitude(), 0.0)
+        assertEquals(-122.526159, result[0].first().longitude(), 0.0)
+        assertEquals(37.971984, result[0].last().latitude(), 0.0)
+        assertEquals(-122.52645, result[0].last().longitude(), 0.0)
+        assertEquals(37.972037, result[1].first().latitude(), 0.0)
+        assertEquals(-122.526951, result[1].first().longitude(), 0.0)
+        assertEquals(37.972061, result[1].last().latitude(), 0.0)
+        assertEquals(-122.527206, result[1].last().longitude(), 0.0)
+    }
+
+    @Test
     fun buildWayPointFeatureCollection() {
         val route = getMultilegRoute()
 
@@ -1273,7 +1420,11 @@ class MapboxRouteLineUtilsTest {
     }
 
     private fun getMultilegRoute(): DirectionsRoute {
-        val routeAsJson = loadJsonFixture("multileg_route.json")
+        return loadRoute("multileg_route.json")
+    }
+
+    private fun loadRoute(routeFileName: String): DirectionsRoute {
+        val routeAsJson = loadJsonFixture(routeFileName)
         return DirectionsRoute.fromJson(routeAsJson)
     }
 }

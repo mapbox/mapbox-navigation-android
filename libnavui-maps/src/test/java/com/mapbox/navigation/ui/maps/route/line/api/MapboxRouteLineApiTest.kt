@@ -239,6 +239,10 @@ class MapboxRouteLineApiTest {
             expectedWaypointFeature1,
             result.value.waypointsSource.features()!![1].geometry().toString()
         )
+        assertEquals(
+            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            result.value.restrictedRoadSource.toJson()
+        )
     }
 
     @Test
@@ -396,6 +400,28 @@ class MapboxRouteLineApiTest {
     }
 
     @Test
+    fun setRoutes_calculatesRestrictedRoadSections() = coroutineRule.runBlockingTest {
+        val expectedFeatureCollections = "{\"type\":\"FeatureCollection\",\"features\":[{\"type\"" +
+            ":\"Feature\",\"geometry\":{\"type\":\"LineString\",\"coordinates\":" +
+            "[[-122.526159,37.971947],[-122.52645,37.971984]]},\"properties\":{}}," +
+            "{\"type\":\"Feature\",\"geometry\":{\"type\":\"LineString\",\"coordinates\"" +
+            ":[[-122.526951,37.972037],[-122.527206,37.972061]]},\"properties\":{}}]}"
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withRestrictedRoadLayerEnabled(true)
+            .build()
+        val api = MapboxRouteLineApi(options)
+        val route = getRouteWithNoRoadRestrictions()
+        val routes = listOf(RouteLine(route, null))
+
+        val result = api.setRoutes(routes) as Expected.Success
+
+        assertEquals(
+            expectedFeatureCollections,
+            result.value.restrictedRoadSource.toJson()
+        )
+    }
+
+    @Test
     fun getRouteDrawData() = coroutineRule.runBlockingTest {
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val api = MapboxRouteLineApi(options)
@@ -499,6 +525,7 @@ class MapboxRouteLineApiTest {
         val options = mockk<MapboxRouteLineOptions> {
             every { vanishingRouteLine } returns mockVanishingRouteLine
             every { resourceProvider } returns realOptions.resourceProvider
+            every { enableRestrictedRoadLayer } returns false
         }
         val api = MapboxRouteLineApi(options)
         val routeProgress = mockk<RouteProgress> {
@@ -537,6 +564,7 @@ class MapboxRouteLineApiTest {
             val options = mockk<MapboxRouteLineOptions> {
                 every { vanishingRouteLine } returns mockVanishingRouteLine
                 every { resourceProvider } returns realOptions.resourceProvider
+                every { enableRestrictedRoadLayer } returns false
             }
             val api = MapboxRouteLineApi(options)
             val routeProgress = mockk<RouteProgress> {
@@ -575,6 +603,7 @@ class MapboxRouteLineApiTest {
             val options = mockk<MapboxRouteLineOptions> {
                 every { vanishingRouteLine } returns mockVanishingRouteLine
                 every { resourceProvider } returns realOptions.resourceProvider
+                every { enableRestrictedRoadLayer } returns false
             }
             val api = MapboxRouteLineApi(options)
             val routeProgress = mockk<RouteProgress> {
@@ -603,6 +632,7 @@ class MapboxRouteLineApiTest {
             val options = mockk<MapboxRouteLineOptions> {
                 every { vanishingRouteLine } returns mockVanishingRouteLine
                 every { resourceProvider } returns realOptions.resourceProvider
+                every { enableRestrictedRoadLayer } returns false
             }
             val api = MapboxRouteLineApi(options)
             val routeProgress = mockk<RouteProgress> {
@@ -627,6 +657,7 @@ class MapboxRouteLineApiTest {
         val options = mockk<MapboxRouteLineOptions> {
             every { vanishingRouteLine } returns mockVanishingRouteLine
             every { resourceProvider } returns realOptions.resourceProvider
+            every { enableRestrictedRoadLayer } returns false
         }
         val api = MapboxRouteLineApi(options)
         val routeProgress = mockk<RouteProgress> {
@@ -921,6 +952,11 @@ class MapboxRouteLineApiTest {
 
     private fun getVeryLongRoute(): DirectionsRoute {
         val routeAsJson = loadJsonFixture("cross-country-route.json")
+        return DirectionsRoute.fromJson(routeAsJson)
+    }
+
+    private fun getRouteWithNoRoadRestrictions(): DirectionsRoute {
+        val routeAsJson = loadJsonFixture("another-route-with-restrictions.json")
         return DirectionsRoute.fromJson(routeAsJson)
     }
 }

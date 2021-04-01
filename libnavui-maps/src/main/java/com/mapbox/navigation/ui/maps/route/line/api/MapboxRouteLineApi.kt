@@ -737,6 +737,17 @@ class MapboxRouteLineApi(
                 )
         }
 
+        val restrictedSectionFeatureCollectionDef =
+            jobControl.scope.async(ThreadController.IODispatcher) {
+                if (routeLineOptions.enableRestrictedRoadLayer) {
+                    partitionedRoutes.first.firstOrNull()?.route?.run {
+                        getRestrictedRoadFeatureCollection(this)
+                    } ?: FeatureCollection.fromFeatures(listOf())
+                } else {
+                    FeatureCollection.fromFeatures(listOf())
+                }
+            }
+
         val trafficLineExp = trafficLineExpressionDef.await()
         val routeLineExp = routeLineExpressionDef.await()
         val routeCasingLineExp = routeLineCasingExpressionDef.await()
@@ -746,6 +757,7 @@ class MapboxRouteLineApi(
         val alternativeRoute2FeatureCollection = alternativeRoute2FeatureCollectionDef.await()
         val wayPointsFeatureCollection = wayPointsFeatureCollectionDef.await()
         val primaryRouteSource = primaryRouteSourceDef.await()
+        val restrictedSectionFeatureCollection = restrictedSectionFeatureCollectionDef.await()
         vanishingRouteLineInitDef.await()
 
         return Expected.Success(
@@ -758,8 +770,17 @@ class MapboxRouteLineApi(
                 altRoute2Exp,
                 alternativeRoute1FeatureCollection,
                 alternativeRoute2FeatureCollection,
-                wayPointsFeatureCollection
+                wayPointsFeatureCollection,
+                restrictedSectionFeatureCollection
             )
         )
+    }
+
+    private fun getRestrictedRoadFeatureCollection(route: DirectionsRoute): FeatureCollection {
+        return MapboxRouteLineUtils.getRestrictedRouteSections(route).map {
+            Feature.fromGeometry(LineString.fromLngLats(it))
+        }.run {
+            FeatureCollection.fromFeatures(this)
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.maps.internal.route.line
 
-import android.annotation.SuppressLint
 import android.util.Log
 import android.util.SparseArray
 import androidx.annotation.ColorInt
@@ -45,6 +44,8 @@ import kotlin.math.sqrt
 import kotlin.reflect.KProperty1
 
 object MapboxRouteLineUtils {
+
+    private val TAG = "MbxMapboxRouteLineUtils"
 
     /**
      * Creates an [Expression] that can be applied to the layer style changing the appearance of
@@ -319,6 +320,48 @@ object MapboxRouteLineUtils {
         return routeLineTrafficData
     }
 
+    fun getRestrictedRouteSections(route: DirectionsRoute): List<List<Point>> {
+        try {
+            val coordinates = LineString.fromPolyline(
+                route.geometry() ?: "",
+                Constants.PRECISION_6
+            ).coordinates()
+            val restrictedSections = mutableListOf<List<Point>>()
+            var geoIndex: Int? = null
+
+            route.legs()
+                ?.mapNotNull { it.steps() }
+                ?.flatten()
+                ?.mapNotNull { it.intersections() }
+                ?.flatten()
+                ?.forEach { stepIntersection ->
+                    if (stepIntersection.classes()?.contains("restricted") == true) {
+                        if (geoIndex == null) {
+                            geoIndex = stepIntersection.geometryIndex()
+                        }
+                    } else {
+                        if (geoIndex != null && stepIntersection.geometryIndex() != null) {
+                            val section = coordinates.subList(
+                                geoIndex!!,
+                                stepIntersection.geometryIndex()!! + 1
+                            )
+                            restrictedSections.add(section)
+                            geoIndex = null
+                        }
+                    }
+                }
+            return restrictedSections
+        } catch (ex: Exception) {
+            Log.e(
+                TAG,
+                "Failed to extract route restrictions. " +
+                    "This could be caused by missing data in the DirectionsRoute",
+                ex
+            )
+        }
+        return listOf()
+    }
+
     private fun getRoadClassForIndex(roadClassArray: Array<String?>, index: Int): String? {
         return if (roadClassArray.size > index) {
             roadClassArray.slice(0..index).last { it != null }
@@ -514,7 +557,6 @@ object MapboxRouteLineUtils {
      *
      * @return either the layer ID if found else a default layer ID
      */
-    @SuppressLint("LogNotTimber")
     @JvmStatic
     fun getBelowLayerIdToUse(belowLayerId: String?, style: Style): String? {
         return when (belowLayerId) {
@@ -523,7 +565,7 @@ object MapboxRouteLineUtils {
                 true -> belowLayerId
                 false -> {
                     Log.e(
-                        MapboxRouteLineUtils::class.java.simpleName,
+                        TAG,
                         "Layer $belowLayerId not found. Route line related layers will be " +
                             "placed at top of the map stack."
                     )
@@ -659,6 +701,17 @@ object MapboxRouteLineUtils {
             }.bindTo(style)
         }
 
+        if (options.enableRestrictedRoadLayer &&
+            !style.styleSourceExists(RouteConstants.RESTRICTED_ROAD_SOURCE_ID)
+        ) {
+            geoJsonSource(RouteConstants.RESTRICTED_ROAD_SOURCE_ID) {
+                maxzoom(16)
+                lineMetrics(true)
+                featureCollection(FeatureCollection.fromFeatures(listOf<Feature>()))
+                tolerance(options.tolerance)
+            }.bindTo(style)
+        }
+
         options.routeLayerProvider.buildAlternativeRouteCasingLayers(
             style,
             options.resourceProvider.routeLineColorResources.alternativeRouteCasingColor
@@ -704,6 +757,15 @@ object MapboxRouteLineUtils {
             options.originIcon,
             options.destinationIcon
         ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+
+        if (options.enableRestrictedRoadLayer) {
+            options.routeLayerProvider.buildAccessRestrictionsLayer(
+                options.resourceProvider.restrictedRoadDashArray,
+                options.resourceProvider.restrictedRoadOpacity,
+                options.resourceProvider.routeLineColorResources.restrictedRoadColor,
+                options.resourceProvider.restrictedRoadLineWidth
+            ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+        }
     }
 
     internal fun layersAreInitialized(style: Style): Boolean {

@@ -14,6 +14,7 @@ class RouteLineResourcesTest : BuilderTest<RouteLineResources, RouteLineResource
 
     override fun getFilledUpBuilder(): RouteLineResources.Builder {
         val backFill = listOf<String>("foobar")
+        val restrictedRoadDashArray = listOf<Double>()
         val routeLineExpression = mockk<Expression>()
         val routeCasingExpression = mockk<Expression>()
         val trafficExpression = mockk<Expression>()
@@ -34,6 +35,7 @@ class RouteLineResourcesTest : BuilderTest<RouteLineResources, RouteLineResource
             .alternativeRouteHeavyColor(14)
             .alternativeRouteSevereColor(15)
             .alternativeRouteCasingColor(16)
+            .restrictedRoadColor(17)
             .build()
 
         return RouteLineResources.Builder()
@@ -48,10 +50,36 @@ class RouteLineResourcesTest : BuilderTest<RouteLineResources, RouteLineResource
             .alternativeRouteLineScaleExpression(routeCasingExpression)
             .alternativeRouteCasingLineScaleExpression(routeCasingExpression)
             .alternativeRouteTrafficLineScaleExpression(routeCasingExpression)
+            .restrictedRoadDashArray(restrictedRoadDashArray)
+            .restrictedRoadLineWidth(2.0)
+            .restrictedRoadOpacity(.5)
     }
 
     override fun trigger() {
         //
+    }
+
+    @Test
+    fun restrictedRoadDashArray() {
+        val resources =
+            RouteLineResources.Builder().restrictedRoadDashArray(listOf(.5, 2.0)).build()
+
+        assertEquals(resources.restrictedRoadDashArray[0], .5, 0.0)
+        assertEquals(resources.restrictedRoadDashArray[1], 2.0, 0.0)
+    }
+
+    @Test
+    fun restrictedRoadLineWidth() {
+        val resources = RouteLineResources.Builder().restrictedRoadLineWidth(2.0).build()
+
+        assertEquals(resources.restrictedRoadLineWidth, 2.0, 0.0)
+    }
+
+    @Test
+    fun restrictedRoadOpacity() {
+        val resources = RouteLineResources.Builder().restrictedRoadOpacity(.3).build()
+
+        assertEquals(resources.restrictedRoadOpacity, .3, 0.0)
     }
 
     @Test
@@ -143,6 +171,9 @@ class RouteLineResourcesTest : BuilderTest<RouteLineResources, RouteLineResource
             .alternativeRouteLineScaleExpression(trafficExpression)
             .alternativeRouteCasingLineScaleExpression(trafficExpression)
             .alternativeRouteTrafficLineScaleExpression(trafficExpression)
+            .restrictedRoadDashArray(listOf(1.0, 2.0))
+            .restrictedRoadLineWidth(3.0)
+            .restrictedRoadOpacity(.6)
             .build()
             .toBuilder()
             .build()
@@ -154,5 +185,9 @@ class RouteLineResourcesTest : BuilderTest<RouteLineResources, RouteLineResource
         assertEquals(routeLineExpression, result.routeLineScaleExpression)
         assertEquals(routeCasingExpression, result.routeCasingLineScaleExpression)
         assertEquals(trafficExpression, result.routeTrafficLineScaleExpression)
+        assertEquals(3.0, result.restrictedRoadLineWidth, 0.0)
+        assertEquals(.6, result.restrictedRoadOpacity, 0.0)
+        assertEquals(1.0, result.restrictedRoadDashArray[0], 0.0)
+        assertEquals(2.0, result.restrictedRoadDashArray[1], 0.0)
     }
 }

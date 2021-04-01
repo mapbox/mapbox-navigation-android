@@ -27,7 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class RouteLine(private val activity: AppCompatActivity) : LifecycleObserver {
+class RouteLineUtil(private val activity: AppCompatActivity) : LifecycleObserver {
     private lateinit var mapView: MapView
     private lateinit var mapboxNavigation: MapboxNavigation
     lateinit var style: Style
@@ -122,7 +122,7 @@ class RouteLine(private val activity: AppCompatActivity) : LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     private fun onStart() {
         mapView.getMapboxMap().getStyle { style ->
-            this@RouteLine.style = style
+            this@RouteLineUtil.style = style
             mapView.getLocationComponentPlugin().addOnIndicatorPositionChangedListener(
                 onIndicatorPositionChangedListener
             )

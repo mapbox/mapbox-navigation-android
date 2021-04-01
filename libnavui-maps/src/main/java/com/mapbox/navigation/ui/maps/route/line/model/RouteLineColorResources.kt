@@ -32,6 +32,7 @@ import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
  * on alternative routes
  * @param alternativeRouteCasingColor the color used for the alternative route casing line(s) which
  * is positioned below the route line giving the line the appearance of a boarder
+ * @param restrictedRoadColor the color for the restricted road indicator(s)
  */
 class RouteLineColorResources private constructor(
     @ColorInt val routeLineTraveledColor: Int,
@@ -49,7 +50,8 @@ class RouteLineColorResources private constructor(
     @ColorInt val alternativeRouteModerateColor: Int,
     @ColorInt val alternativeRouteHeavyColor: Int,
     @ColorInt val alternativeRouteSevereColor: Int,
-    @ColorInt val alternativeRouteCasingColor: Int
+    @ColorInt val alternativeRouteCasingColor: Int,
+    @ColorInt val restrictedRoadColor: Int
 ) {
 
     /**
@@ -73,29 +75,31 @@ class RouteLineColorResources private constructor(
             .alternativeRouteHeavyColor(alternativeRouteHeavyColor)
             .alternativeRouteSevereColor(alternativeRouteSevereColor)
             .alternativeRouteCasingColor(alternativeRouteCasingColor)
+            .restrictedRoadColor(restrictedRoadColor)
     }
 
     /**
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "RouteLineResources(" +
-            "routeLineTraveledColor=$routeLineTraveledColor)" +
-            "routeLineTraveledCasingColor=$routeLineTraveledCasingColor" +
-            "routeUnknownTrafficColor=$routeUnknownTrafficColor" +
-            "routeDefaultColor=$routeDefaultColor" +
-            "routeLowCongestionColor=$routeLowCongestionColor" +
-            "routeModerateColor=$routeModerateColor" +
-            "routeHeavyColor=$routeHeavyColor" +
-            "routeSevereColor=$routeSevereColor" +
-            "routeCasingColor=$routeCasingColor" +
-            "alternativeRouteUnknownTrafficColor=$alternativeRouteUnknownTrafficColor" +
-            "alternativeRouteDefaultColor=$alternativeRouteDefaultColor" +
-            "alternativeRouteLowColor=$alternativeRouteLowColor" +
-            "alternativeRouteModerateColor=$alternativeRouteModerateColor" +
-            "alternativeRouteHeavyColor=$alternativeRouteHeavyColor" +
-            "alternativeRouteSevereColor=$alternativeRouteSevereColor" +
-            "alternativeRouteCasingColor=$alternativeRouteCasingColor"
+        return "RouteLineColorResources(" +
+            "routeLineTraveledColor=$routeLineTraveledColor, " +
+            "routeLineTraveledCasingColor=$routeLineTraveledCasingColor, " +
+            "routeUnknownTrafficColor=$routeUnknownTrafficColor, " +
+            "routeDefaultColor=$routeDefaultColor, " +
+            "routeLowCongestionColor=$routeLowCongestionColor, " +
+            "routeModerateColor=$routeModerateColor, " +
+            "routeHeavyColor=$routeHeavyColor, " +
+            "routeSevereColor=$routeSevereColor, " +
+            "routeCasingColor=$routeCasingColor, " +
+            "alternativeRouteUnknownTrafficColor=$alternativeRouteUnknownTrafficColor, " +
+            "alternativeRouteDefaultColor=$alternativeRouteDefaultColor, " +
+            "alternativeRouteLowColor=$alternativeRouteLowColor, " +
+            "alternativeRouteModerateColor=$alternativeRouteModerateColor, " +
+            "alternativeRouteHeavyColor=$alternativeRouteHeavyColor, " +
+            "alternativeRouteSevereColor=$alternativeRouteSevereColor, " +
+            "alternativeRouteCasingColor=$alternativeRouteCasingColor, " +
+            "restrictedRoadColor=$restrictedRoadColor)"
     }
 
     /**
@@ -124,6 +128,7 @@ class RouteLineColorResources private constructor(
         if (alternativeRouteCasingColor != other.alternativeRouteCasingColor) return false
         if (alternativeRouteUnknownTrafficColor != other.alternativeRouteUnknownTrafficColor)
             return false
+        if (restrictedRoadColor != other.restrictedRoadColor) return false
 
         return true
     }
@@ -148,6 +153,7 @@ class RouteLineColorResources private constructor(
         result = 31 * result + alternativeRouteHeavyColor
         result = 31 * result + alternativeRouteSevereColor
         result = 31 * result + alternativeRouteCasingColor
+        result = 31 * result + restrictedRoadColor
         return result
     }
 
@@ -176,6 +182,7 @@ class RouteLineColorResources private constructor(
             RouteConstants.ALTERNATE_ROUTE_UNKNOWN_TRAFFIC_COLOR
         private var routeLineTraveledCasingColor: Int =
             RouteConstants.ROUTE_LINE_TRAVELED_CASING_COLOR
+        private var restrictedRoadColor: Int = RouteConstants.RESTRICTED_ROAD_COLOR
 
         /**
          * The color of the section of route line behind the puck representing the section
@@ -343,6 +350,16 @@ class RouteLineColorResources private constructor(
             apply { this.alternativeRouteCasingColor = color }
 
         /**
+         * The color used for the restricted road representation.
+         *
+         * @param color the color to be used
+         *
+         * @return the builder
+         */
+        fun restrictedRoadColor(@ColorInt color: Int): Builder =
+            apply { this.restrictedRoadColor = color }
+
+        /**
          * Creates a instance of RouteLineResources
          *
          * @return the instance
@@ -364,7 +381,8 @@ class RouteLineColorResources private constructor(
                 alternativeRouteModerateColor,
                 alternativeRouteHeavyColor,
                 alternativeRouteSevereColor,
-                alternativeRouteCasingColor
+                alternativeRouteCasingColor,
+                restrictedRoadColor
             )
         }
     }

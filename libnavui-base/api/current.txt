@@ -36,6 +36,8 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     method public int getMANEUVER_ARROW_BORDER_COLOR();
     method public int getMANEUVER_ARROW_COLOR();
     method public int getORIGIN_WAYPOINT_ICON();
+    method public int getRESTRICTED_ROAD_COLOR();
+    method public java.util.List<java.lang.Double> getRESTRICTED_ROAD_DASH_ARRAY();
     method public int getROUTE_CASING_COLOR();
     method public int getROUTE_DEFAULT_COLOR();
     method public int getROUTE_HEAVY_TRAFFIC_COLOR();
@@ -61,6 +63,8 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     property public final int MANEUVER_ARROW_BORDER_COLOR;
     property public final int MANEUVER_ARROW_COLOR;
     property public final int ORIGIN_WAYPOINT_ICON;
+    property public final int RESTRICTED_ROAD_COLOR;
+    property public final java.util.List<java.lang.Double> RESTRICTED_ROAD_DASH_ARRAY;
     property public final int ROUTE_CASING_COLOR;
     property public final int ROUTE_DEFAULT_COLOR;
     property public final int ROUTE_HEAVY_TRAFFIC_COLOR;
@@ -101,6 +105,9 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     field public static final double OPAQUE = 0.0;
     field public static final String ORIGIN_MARKER_NAME = "originMarker";
     field public static final String PRIMARY_ROUTE_SOURCE_ID = "mapbox-navigation-route-source";
+    field public static final double RESTRICTED_ROAD_LINE_OPACITY = 1.0;
+    field public static final double RESTRICTED_ROAD_LINE_WIDTH = 7.0;
+    field public static final String RESTRICTED_ROAD_SOURCE_ID = "mapbox-restricted-road-source";
     field public static final boolean ROUNDED_LINE_CAP = true;
     field public static final double ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS = 1.0;
     field public static final String SEVERE_CONGESTION_VALUE = "severe";
@@ -156,6 +163,7 @@ package com.mapbox.navigation.ui.base.model.route {
     field public static final String PRIMARY_ROUTE_CASING_LAYER_ID = "mapbox-navigation-route-casing-layer";
     field public static final String PRIMARY_ROUTE_LAYER_ID = "mapbox-navigation-route-layer";
     field public static final String PRIMARY_ROUTE_TRAFFIC_LAYER_ID = "mapbox-navigation-route-traffic-layer";
+    field public static final String RESTRICTED_ROAD_LAYER_ID = "mapbox-restricted-road-layer";
     field public static final String WAYPOINT_LAYER_ID = "mapbox-navigation-waypoint-layer";
   }
 

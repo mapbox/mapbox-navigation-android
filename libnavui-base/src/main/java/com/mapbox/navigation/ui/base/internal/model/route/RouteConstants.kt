@@ -9,6 +9,7 @@ object RouteConstants {
     const val PRIMARY_ROUTE_SOURCE_ID = "mapbox-navigation-route-source"
     const val ALTERNATIVE_ROUTE1_SOURCE_ID = "mapbox-navigation-alt-route1-source"
     const val ALTERNATIVE_ROUTE2_SOURCE_ID = "mapbox-navigation-alt-route2-source"
+    const val RESTRICTED_ROAD_SOURCE_ID = "mapbox-restricted-road-source"
     const val WAYPOINT_SOURCE_ID = "mapbox-navigation-waypoint-source"
     const val TWO_POINTS = 2
     const val THIRTY = 30
@@ -48,6 +49,9 @@ object RouteConstants {
     const val MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO = 1500000000.0 // 1.5s
     const val DEFAULT_ROUTE_SOURCES_TOLERANCE = 0.375
     const val ROUNDED_LINE_CAP = true
+    const val RESTRICTED_ROAD_LINE_OPACITY = 1.0
+    const val RESTRICTED_ROAD_LINE_WIDTH = 7.0
+    val RESTRICTED_ROAD_DASH_ARRAY = listOf(.5, 2.0)
     val TRAFFIC_BACKFILL_ROAD_CLASSES = emptyList<String>()
 
     @ColorInt
@@ -97,6 +101,9 @@ object RouteConstants {
 
     @ColorInt
     val ALTERNATE_ROUTE_SEVERE_TRAFFIC_COLOR = Color.parseColor("#B58281")
+
+    @ColorInt
+    val RESTRICTED_ROAD_COLOR = Color.parseColor("#000000")
 
     @DrawableRes
     val ORIGIN_WAYPOINT_ICON: Int = R.drawable.mapbox_ic_route_origin
