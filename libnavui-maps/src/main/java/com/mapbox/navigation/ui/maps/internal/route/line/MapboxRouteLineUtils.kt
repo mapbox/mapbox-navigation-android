@@ -33,6 +33,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrafficExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
+import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMisc
@@ -494,14 +495,11 @@ object MapboxRouteLineUtils {
         return RouteLineGranularDistances(distance, indexArray)
     }
 
-    private fun generateFeatureCollection(
+    private val generateFeatureCollection: (
         route: DirectionsRoute,
         identifier: String?
-    ): RouteFeatureData {
-        val routeGeometry = LineString.fromPolyline(
-            route.geometry() ?: "",
-            Constants.PRECISION_6
-        )
+    ) -> RouteFeatureData = { route: DirectionsRoute, identifier: String? ->
+        val routeGeometry = decodeRoute(route)
         val randomId = UUID.randomUUID().toString()
         val routeFeature = when (identifier) {
             null -> Feature.fromGeometry(routeGeometry, null, randomId)
@@ -510,7 +508,7 @@ object MapboxRouteLineUtils {
             }
         }
 
-        return RouteFeatureData(
+        RouteFeatureData(
             route,
             FeatureCollection.fromFeatures(listOf(routeFeature)),
             routeGeometry
@@ -843,4 +841,18 @@ object MapboxRouteLineUtils {
             else -> y2
         }
     }
+
+    private val decodeRoute: (DirectionsRoute) -> LineString = { route: DirectionsRoute ->
+        val precision =
+            if (route.routeOptions()?.geometries() == DirectionsCriteria.GEOMETRY_POLYLINE) {
+                Constants.PRECISION_5
+            } else {
+                Constants.PRECISION_6
+            }
+
+        LineString.fromPolyline(
+            route.geometry() ?: "",
+            precision
+        )
+    }.cacheResult(3)
 }
