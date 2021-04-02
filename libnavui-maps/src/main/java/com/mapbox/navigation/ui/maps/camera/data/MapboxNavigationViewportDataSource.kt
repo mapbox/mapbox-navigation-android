@@ -208,7 +208,7 @@ class MapboxNavigationViewportDataSource(
     private var remainingPointsOnRoute: List<Point> = emptyList()
     private var targetLocation: Location? = null
     private var averageIntersectionDistancesOnRoute: List<List<Double>> = emptyList()
-    private var distanceRemainingOnCurrentStep: Float = 0.0F
+    private var distanceRemainingOnCurrentStep: Float? = null
 
     /* -------- CONSTRAINTS -------- */
     /**
@@ -765,6 +765,7 @@ class MapboxNavigationViewportDataSource(
         remainingPointsOnRoute = emptyList()
         averageIntersectionDistancesOnRoute = emptyList()
         postManeuverFramingPoints = emptyList()
+        distanceRemainingOnCurrentStep = null
     }
 
     /**
@@ -946,15 +947,17 @@ class MapboxNavigationViewportDataSource(
             pointsForFollowing
         )
 
-        followingPitchProperty.fallback = if (usePitchZeroNearManeuvers) {
-            if (distanceRemainingOnCurrentStep <= distanceFromManeuverToUsePitchZero) {
-                0.0
+        val distanceRemainingOnCurrentStep = this.distanceRemainingOnCurrentStep
+        followingPitchProperty.fallback =
+            if (usePitchZeroNearManeuvers && distanceRemainingOnCurrentStep != null) {
+                if (distanceRemainingOnCurrentStep <= distanceFromManeuverToUsePitchZero) {
+                    0.0
+                } else {
+                    defaultFollowingPitch
+                }
             } else {
                 defaultFollowingPitch
             }
-        } else {
-            defaultFollowingPitch
-        }
 
         if (framePointsAfterManeuverWhenPitchZero && followingPitchProperty.get() == 0.0) {
             pointsForFollowing.addAll(pointsToFrameAfterCurrentStep)
@@ -1006,11 +1009,15 @@ class MapboxNavigationViewportDataSource(
                     .bearing(followingBearingProperty.get())
                     .pitch(followingPitchProperty.get())
                     .build()
-                mapboxMap.cameraForCoordinates(
-                    pointsForFollowing,
-                    cameraOptions,
-                    screenBox
-                )
+                if (pointsForFollowing.size > 1) {
+                    mapboxMap.cameraForCoordinates(
+                        pointsForFollowing,
+                        cameraOptions,
+                        screenBox
+                    )
+                } else {
+                    cameraOptions
+                }
             }
 
         followingCenterProperty.fallback = cameraFrame.center!!
