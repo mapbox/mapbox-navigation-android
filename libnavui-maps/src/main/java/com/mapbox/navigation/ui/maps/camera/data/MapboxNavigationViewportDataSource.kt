@@ -42,9 +42,9 @@ private val CENTER_SCREEN_COORDINATE = ScreenCoordinate(0.0, 0.0)
  *
  * Use:
  * - [onRouteChanged] to produce overview geometries that need to be framed
- * - [onRouteProgressChanged] to produce following geometries of the current step
+ * - [onRouteProgressChanged] (requires also [onRouteChanged]) to produce following geometries of the current step
  * and overview geometries of the remaining points on the route that need to be framed.
- * This will make the following frame change zoom level and pitch depending on the proximity to
+ * This will make the following frame change zoom level depending on the proximity to
  * the upcoming maneuver and resize overview to fit only remaining portion of the route.
  * - [onLocationChanged] to pass a point to be framed and used as a source of bearing for the
  * following camera frame
@@ -55,7 +55,7 @@ private val CENTER_SCREEN_COORDINATE = ScreenCoordinate(0.0, 0.0)
  *
  * Whenever a set of these arguments is provided or refreshed, you need to call [evaluate]
  * to process the data and compute an opinionated [ViewportData] updates that [NavigationCamera]
- * observes and executes.
+ * observes and applies.
  *
  * Based on the provided data, the class will make decisions on how the camera should be framed.
  * However, that might not always match with your expectations or needs.
@@ -65,10 +65,44 @@ private val CENTER_SCREEN_COORDINATE = ScreenCoordinate(0.0, 0.0)
  * The source will keep producing the default, opinionated values, but as long as the override
  * is present, they won’t be used. Passing `null` as an override resets it to the default value.
  *
- * Whenever any changes are made to the data source (new values provided
- * or overrides added/removed), remember to call [evaluate] to notify the observers.
+ * The class also offers various mutable options that can be modified at any point in time
+ * to influence the style of frames that are produced.
+ * Make sure to get familiar with all of the public fields and their documentation.
  *
- * ### Examples
+ * Whenever any changes are made to the data source (new values provided, overrides added/removed,
+ * or settings changed), remember to call [evaluate] recompute frames and notify observers.
+ *
+ * ## Padding and framing behavior
+ * This data source initializes at the `null island` (0.0, 0.0). Make sure to first provide at least
+ * [onLocationChanged] for following frames and [onRouteChanged] for overview frames
+ * (or the [additionalPointsToFrameForOverview] and [additionalPointsToFrameForFollowing]).
+ *
+ * ### Overview
+ * [overviewPadding] is used to generate the correct zoom level while positioning the contents on screen
+ * and is also applied to the resulting default [ViewportData.cameraForOverview].
+ * The default bearing for overview framing is north (`0.0`).
+ *
+ * ### Following
+ * [followingPadding] is used to generate the correct zoom level while positioning the contents on screen
+ * but the padding value is not applied the [ViewportData.cameraForFollowing].
+ * Instead, the frame contains a specific [CameraOptions.padding] value that manipulates the vanishing point of the camera
+ * to provide a better experience for end users when the camera is pitched.
+ *
+ * **This vanishing point change cannot be recovered from automatically without impacting the camera position.
+ * That's why, if you use the [MapboxNavigationViewportDataSource],
+ * you should explicitly define [CameraOptions.padding] in all other transition that your app is running.**
+ *
+ * **When following frame is used, the first point of the framed geometry list will be placed at the bottom edge of this padding, centered horizontally.**
+ * This typically refers to the user's location provided via [onLocationChanged], if available.
+ * This can be influenced with [maximizeViewableAreaWhenPitchZero].
+ *
+ * **The geometries that are below the bottom edge of the following padding on screen (based on camera's bearing) are ignored and not being framed.**
+ * It's impossible to find a zoom level that would fit geometries that are below the vanishing point of the camera,
+ * since the vanishing point is placed at the bottom edge of the provided padding.
+ *
+ * The default pitch for following frames is [defaultFollowingPitch] and zoom is determined based on upcoming geometries or [maxZoom].
+ *
+ * ## Examples
  * #### Show route overview with padding
  * ```kotlin
  * private val routesObserver = object : RoutesObserver {
@@ -79,7 +113,7 @@ private val CENTER_SCREEN_COORDINATE = ScreenCoordinate(0.0, 0.0)
  *             viewportDataSource.evaluate()
  *             navigationCamera.requestNavigationCameraToOverview()
  *         } else {
- *             navigationCamera.requestNavigationCameraToIdle()
+ *             navigationCamera.clearRouteData()
  *         }
  *     }
  * }
@@ -110,6 +144,7 @@ private val CENTER_SCREEN_COORDINATE = ScreenCoordinate(0.0, 0.0)
  *
  * #### Request state to following with padding
  * ```kotlin
+ * viewportDataSource.onLocationChanged(enhancedLocation)
  * viewportDataSource.followingPaddingPropertyOverride(followingEdgeInsets)
  * viewportDataSource.evaluate()
  * navigationCamera.requestNavigationCameraToFollowing()
@@ -131,15 +166,18 @@ private val CENTER_SCREEN_COORDINATE = ScreenCoordinate(0.0, 0.0)
  * #### Run your own animation to a POI
  * ```kotlin
  * private fun animateToPOI() {
- *     navigationCamera.requestNavigationCameraToIdle()
+ *     // request camera to idle first or use `NavigationBasicGesturesHandler` or `NavigationScaleGestureHandler`
  *     mapView.getCameraAnimationsPlugin().flyTo(
  *         CameraOptions.Builder()
+ *             .padding(edgeInsets)
  *             .center(point)
  *             .bearing(0.0)
  *             .zoom(14.0)
  *             .pitch(0.0)
  *             .build(),
- *         1500
+ *         MapAnimationOptions.mapAnimationOptions {
+ *             duration(1000L)
+ *         }
  *     )
  * }
  * ```
@@ -210,7 +248,7 @@ class MapboxNavigationViewportDataSource(
     /* -------- FOLLOWING FRAME SETTINGS -------- */
     /**
      * When enabled and a route is provided via [onRouteChanged] and updates via [onRouteProgressChanged],
-     * the geometry that's going to be framed for following will not match the whole remainder of the current step
+     * the geometry that's going to be **framed for following** will not match the whole remainder of the current step
      * but a smaller subset of that geometry to make the zoom level higher.
      *
      * This has an effect of zooming closer in when intersections are dense.
@@ -239,7 +277,7 @@ class MapboxNavigationViewportDataSource(
 
     /**
      * When enabled and a route is provided via [onRouteChanged] and updates via [onRouteProgressChanged],
-     * the generated following camera frame will have pitch `0`.
+     * the generated **following camera frame** will have pitch `0`.
      *
      * Depends on [distanceFromManeuverToUsePitchZero].
      *
@@ -257,7 +295,7 @@ class MapboxNavigationViewportDataSource(
     var distanceFromManeuverToUsePitchZero = 180.0
 
     /**
-     * When a produced following frame has pitch `0`,
+     * When a produced **following frame** has pitch `0`,
      * the puck will not be tied to the bottom edge of the [followingPadding] and instead move
      * around the centroid of the maneuver's geometry to maximize the screen area within the [followingPadding] that the maneuver's geometry occupies.
      *
@@ -266,7 +304,7 @@ class MapboxNavigationViewportDataSource(
     var maximizeViewableAreaWhenPitchZero = true
 
     /**
-     * When a produced following frame has pitch `0`,
+     * When a produced **following frame** has pitch `0`,
      * this controls whether additional points _after_ the upcoming maneuver should be framed to provide more context.
      *
      * Defaults to `true`.
@@ -293,7 +331,7 @@ class MapboxNavigationViewportDataSource(
     var distanceToFrameAfterManeuver = 100.0
 
     /**
-     * If enabled, the following frame's bearing won't exactly reflect the bearing returned by the [Location],
+     * If enabled, the **following frame**'s bearing won't exactly reflect the bearing returned by the [Location],
      * but will also be affected by the direction to the upcoming framed geometry, to maximize the viewable area.
      *
      * Defaults to `true`.
@@ -303,7 +341,7 @@ class MapboxNavigationViewportDataSource(
     var useBearingSmoothing = true
 
     /**
-     * When [useBearingSmoothing] is enabled, this controls how much the following frame's bearing
+     * When [useBearingSmoothing] is enabled, this controls how much the **following frame**'s bearing
      * can deviate from the [Location] bearing, in degrees.
      *
      * Defaults to `20.0` degrees.
@@ -314,6 +352,10 @@ class MapboxNavigationViewportDataSource(
 
     /**
      * Holds a padding (in pixels, in reference to the [MapView]'s size) used for generating a following frame.
+     *
+     * **When following frame is used, the first point of the framed geometry list will be placed at the bottom edge of this padding, centered horizontally.**
+     * This typically refers to the user's location provided via [onLocationChanged], if available.
+     * This can be influenced with [maximizeViewableAreaWhenPitchZero].
      *
      * The frame will contain the remaining portion of the current [LegStep] of the route provided via [onRouteChanged]
      * based on [onRouteProgressChanged].
@@ -700,6 +742,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun clearRouteData() {
+        route = null
         completeRoutePoints = emptyList()
         remainingPointsOnCurrentStep = emptyList()
         remainingPointsOnRoute = emptyList()

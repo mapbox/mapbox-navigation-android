@@ -484,12 +484,14 @@ class MapboxCameraAnimationsActivity :
                     // binding.mapView.getCameraAnimationsPlugin().flyTo(
                     binding.mapView.getCameraAnimationsPlugin().easeTo(
                         CameraOptions.Builder()
+                            .padding(notPaddedEdgeInsets)
                             .center(center)
                             .bearing(0.0)
                             .zoom(14.0)
                             .pitch(0.0)
                             .build(),
                         MapAnimationOptions.mapAnimationOptions {
+                            duration(1000L)
                         }
                     )
                 }
