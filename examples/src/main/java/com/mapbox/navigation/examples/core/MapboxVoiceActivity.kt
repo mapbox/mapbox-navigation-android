@@ -173,11 +173,11 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         override fun accept(value: Boolean) {
             isMuted = value.also {
                 if (it) {
-                    // This is used to set the speech volume to max
-                    voiceInstructionsPlayer.volume(SpeechVolume(1.0f))
-                } else {
                     // This is used to set the speech volume to mute.
                     voiceInstructionsPlayer.volume(SpeechVolume(0.0f))
+                } else {
+                    // This is used to set the speech volume to max
+                    voiceInstructionsPlayer.volume(SpeechVolume(1.0f))
                 }
             }
         }

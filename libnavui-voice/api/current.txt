@@ -100,13 +100,16 @@ package com.mapbox.navigation.ui.voice.view {
     ctor public MapboxSoundButton(android.content.Context context);
     ctor public MapboxSoundButton(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxSoundButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    method public void mute(com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<java.lang.Boolean>? callback);
-    method public void muteAndExtend(long duration, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<java.lang.Boolean> callback);
-    method public void unmute(com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<java.lang.Boolean>? callback);
-    method public void unmuteAndExtend(long duration, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<java.lang.Boolean> callback);
+    method public void mute(com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<java.lang.Boolean>? callback = null);
+    method public void mute();
+    method public void muteAndExtend(long duration, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<java.lang.Boolean>? callback = null);
+    method public void muteAndExtend(long duration);
+    method public void unmute(com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<java.lang.Boolean>? callback = null);
+    method public void unmute();
+    method public void unmuteAndExtend(long duration, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<java.lang.Boolean>? callback = null);
+    method public void unmuteAndExtend(long duration);
     method public void updateStyle(@StyleRes int style);
-    field public static final int EXTEND_MUTED_TO_WIDTH = 150; // 0x96
-    field public static final int EXTEND_UNMUTED_TO_WIDTH = 165; // 0xa5
+    field public static final int EXTEND_TEXT_TO_WIDTH = 165; // 0xa5
     field public static final long SLIDE_DURATION = 300L; // 0x12cL
   }
 

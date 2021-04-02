@@ -8,6 +8,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.R
+import io.mockk.Ordering
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -131,17 +132,29 @@ class MapboxSoundButtonTest {
     }
 
     @Test
-    fun `mute and extend once with 2 invokes in a row`() {
+    fun `mute and unmute and extend multiple times is allowed`() {
         val view = MapboxSoundButton(ctx)
         val soundButtonText = view.findViewById<AppCompatTextView>(R.id.soundButtonText)
         val messageSlot = slot<Boolean>()
 
-        view.muteAndExtend(0, consumer)
-        view.muteAndExtend(0, consumer)
+        view.muteAndExtend(100, consumer)
+        view.muteAndExtend(100, consumer)
+        view.unmuteAndExtend(100, consumer)
+        view.muteAndExtend(100, consumer)
+        view.unmuteAndExtend(100, consumer)
+        view.unmuteAndExtend(100, consumer)
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-        verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
-        assertTrue(messageSlot.captured)
+        verify(exactly = 6) { consumer.accept(capture(messageSlot)) }
+        verify(ordering = Ordering.SEQUENCE) {
+            consumer.accept(true)
+            consumer.accept(true)
+            consumer.accept(false)
+            consumer.accept(true)
+            consumer.accept(false)
+            consumer.accept(false)
+        }
+        assertTrue(soundButtonText.visibility == View.INVISIBLE)
         assertTrue(soundButtonText.visibility == View.INVISIBLE)
     }
 
@@ -151,21 +164,6 @@ class MapboxSoundButtonTest {
         val soundButtonText = view.findViewById<AppCompatTextView>(R.id.soundButtonText)
         val messageSlot = slot<Boolean>()
 
-        view.unmuteAndExtend(0, consumer)
-        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
-
-        verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
-        assertFalse(messageSlot.captured)
-        assertTrue(soundButtonText.visibility == View.INVISIBLE)
-    }
-
-    @Test
-    fun `unmute and extend once with 2 invokes in a row`() {
-        val view = MapboxSoundButton(ctx)
-        val soundButtonText = view.findViewById<AppCompatTextView>(R.id.soundButtonText)
-        val messageSlot = slot<Boolean>()
-
-        view.unmuteAndExtend(0, consumer)
         view.unmuteAndExtend(0, consumer)
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 

@@ -8,6 +8,7 @@ import android.os.Looper
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
+import androidx.annotation.StringRes
 import androidx.annotation.StyleRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -25,7 +26,6 @@ import com.mapbox.navigation.ui.voice.databinding.MapboxSoundButtonLayoutBinding
 class MapboxSoundButton : ConstraintLayout {
 
     private var textWidth = 0
-    private var isAnimationRunning = false
     private var muteDrawable: Drawable? = null
     private var unmuteDrawable: Drawable? = null
     private val binding = MapboxSoundButtonLayoutBinding.inflate(
@@ -66,124 +66,6 @@ class MapboxSoundButton : ConstraintLayout {
         initAttributes(attrs)
     }
 
-    override fun onFinishInflate() {
-        super.onFinishInflate()
-        binding.soundButtonText.afterMeasured {
-            textWidth = width
-        }
-    }
-
-    /**
-     * Allows you to change the style of [MapboxRouteOverviewButton].
-     * @param style Int
-     */
-    fun updateStyle(@StyleRes style: Int) {
-        val typedArray = context.obtainStyledAttributes(
-            style,
-            R.styleable.MapboxSoundButton
-        )
-        applyAttributes(typedArray)
-        typedArray.recycle()
-    }
-
-    /**
-     * Invoke the function to mute.
-     * @param callback MapboxNavigationConsumer<Boolean> invoked after the drawable has been set and
-     * returns true representing that view is in muted state.
-     */
-    fun mute(callback: MapboxNavigationConsumer<Boolean>?) {
-        binding.soundButtonIcon.setImageDrawable(muteDrawable)
-        callback?.accept(true)
-    }
-
-    /**
-     * Invoke the function to unmute.
-     * @param callback MapboxNavigationConsumer<Boolean> invoked after the drawable has been set and
-     * returns false representing that view is in unmuted state.
-     */
-    fun unmute(callback: MapboxNavigationConsumer<Boolean>?) {
-        binding.soundButtonIcon.setImageDrawable(unmuteDrawable)
-        callback?.accept(false)
-    }
-
-    /**
-     * Invoke the function to mute and show optional text associated with the action.
-     * @param duration for the view to be in the extended mode before it starts to shrink.
-     * @param callback MapboxNavigationConsumer<Boolean> invoked after the animation is finished and
-     * returns true representing that view is in muted state.
-     */
-    fun muteAndExtend(duration: Long, callback: MapboxNavigationConsumer<Boolean>) {
-        if (!isAnimationRunning) {
-            mute(null)
-            isAnimationRunning = true
-            val extendToWidth = EXTEND_MUTED_TO_WIDTH * context.resources.displayMetrics.density
-            val animator = getAnimator(textWidth, extendToWidth.toInt())
-            binding.soundButtonText.extend(
-                animator,
-                doOnStart = {
-                    binding.soundButtonText.text = context.getString(R.string.mapbox_muted)
-                    binding.soundButtonText.visibility = View.VISIBLE
-                    mainHandler.postDelayed(
-                        {
-                            val endAnimator = getAnimator(extendToWidth.toInt(), textWidth)
-                            binding.soundButtonText.shrink(
-                                endAnimator,
-                                doOnStart = {
-                                    binding.soundButtonText.text = null
-                                    isAnimationRunning = false
-                                    callback.accept(true)
-                                },
-                                doOnEnd = {
-                                    binding.soundButtonText.visibility = View.INVISIBLE
-                                }
-                            )
-                        },
-                        duration
-                    )
-                }
-            )
-        }
-    }
-
-    /**
-     * Invoke the function to unmute and show optional text associated with the action.
-     * @param duration for the view to be in the extended mode before it starts to shrink.
-     * @param callback MapboxNavigationConsumer<Boolean> invoked after the animation is finished and
-     * returns false representing that view is in unmuted state.
-     */
-    fun unmuteAndExtend(duration: Long, callback: MapboxNavigationConsumer<Boolean>) {
-        if (!isAnimationRunning) {
-            unmute(null)
-            isAnimationRunning = true
-            val extendToWidth = EXTEND_UNMUTED_TO_WIDTH * context.resources.displayMetrics.density
-            val animator = getAnimator(textWidth, extendToWidth.toInt())
-            binding.soundButtonText.extend(
-                animator,
-                doOnStart = {
-                    binding.soundButtonText.text = context.getString(R.string.mapbox_unmuted)
-                    binding.soundButtonText.visibility = View.VISIBLE
-                    mainHandler.postDelayed(
-                        {
-                            val endAnimator = getAnimator(extendToWidth.toInt(), textWidth)
-                            binding.soundButtonText.shrink(
-                                endAnimator,
-                                doOnStart = {
-                                    binding.soundButtonText.text = null
-                                    isAnimationRunning = false
-                                    callback.accept(false)
-                                },
-                                doOnEnd = {
-                                    binding.soundButtonText.visibility = View.INVISIBLE
-                                }
-                            )
-                        },
-                        duration
-                    )
-                }
-            )
-        }
-    }
-
     private fun initAttributes(attrs: AttributeSet?) {
         val typedArray = context.obtainStyledAttributes(
             attrs,
@@ -210,12 +92,112 @@ class MapboxSoundButton : ConstraintLayout {
         )
     }
 
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        binding.soundButtonText.afterMeasured {
+            textWidth = width
+        }
+    }
+
+    /**
+     * Allows you to change the style of [MapboxRouteOverviewButton].
+     * @param style Int
+     */
+    fun updateStyle(@StyleRes style: Int) {
+        val typedArray = context.obtainStyledAttributes(
+            style,
+            R.styleable.MapboxSoundButton
+        )
+        applyAttributes(typedArray)
+        typedArray.recycle()
+    }
+
+    /**
+     * Invoke the function to mute.
+     * @param callback MapboxNavigationConsumer<Boolean> invoked after the drawable has been set and
+     * returns true representing that view is in muted state.
+     */
+    @JvmOverloads
+    fun mute(callback: MapboxNavigationConsumer<Boolean>? = null) {
+        binding.soundButtonIcon.setImageDrawable(muteDrawable)
+        callback?.accept(true)
+    }
+
+    /**
+     * Invoke the function to unmute.
+     * @param callback MapboxNavigationConsumer<Boolean> invoked after the drawable has been set and
+     * returns false representing that view is in unmuted state.
+     */
+    @JvmOverloads
+    fun unmute(callback: MapboxNavigationConsumer<Boolean>? = null) {
+        binding.soundButtonIcon.setImageDrawable(unmuteDrawable)
+        callback?.accept(false)
+    }
+
+    /**
+     * Invoke the function to mute and show optional text associated with the action.
+     * @param duration for the view to be in the extended mode before it starts to shrink.
+     * @param callback MapboxNavigationConsumer<Boolean> invoked after the animation is finished and
+     * returns true representing that view is in muted state.
+     */
+    @JvmOverloads
+    fun muteAndExtend(duration: Long, callback: MapboxNavigationConsumer<Boolean>? = null) {
+        showTextWithAnimation(R.string.mapbox_muted, duration) {
+            mute(callback)
+        }
+    }
+
+    /**
+     * Invoke the function to unmute and show optional text associated with the action.
+     * @param duration for the view to be in the extended mode before it starts to shrink.
+     * @param callback MapboxNavigationConsumer<Boolean> invoked after the animation is finished and
+     * returns false representing that view is in unmuted state.
+     */
+    @JvmOverloads
+    fun unmuteAndExtend(duration: Long, callback: MapboxNavigationConsumer<Boolean>? = null) {
+        showTextWithAnimation(R.string.mapbox_unmuted, duration) {
+            unmute(callback)
+        }
+    }
+
+    private fun showTextWithAnimation(
+        @StringRes text: Int,
+        duration: Long,
+        beforeAnimation: () -> Unit
+    ) {
+        beforeAnimation()
+        val extendToWidth = EXTEND_TEXT_TO_WIDTH * context.resources.displayMetrics.density
+        val animator = getAnimator(textWidth, extendToWidth.toInt())
+        mainHandler.removeCallbacksAndMessages(null)
+        binding.soundButtonText.extend(
+            animator,
+            doOnStart = {
+                binding.soundButtonText.text = context.getString(text)
+                binding.soundButtonText.visibility = View.VISIBLE
+                mainHandler.postDelayed(
+                    {
+                        val endAnimator = getAnimator(extendToWidth.toInt(), textWidth)
+                        binding.soundButtonText.shrink(
+                            endAnimator,
+                            doOnStart = {
+                                binding.soundButtonText.text = null
+                            },
+                            doOnEnd = {
+                                binding.soundButtonText.visibility = View.INVISIBLE
+                            }
+                        )
+                    },
+                    duration
+                )
+            }
+        )
+    }
+
     private fun getAnimator(from: Int, to: Int) =
         binding.soundButtonText.slideWidth(from, to, SLIDE_DURATION)
 
     private companion object {
         const val SLIDE_DURATION = 300L
-        const val EXTEND_MUTED_TO_WIDTH = 150
-        const val EXTEND_UNMUTED_TO_WIDTH = 165
+        const val EXTEND_TEXT_TO_WIDTH = 165
     }
 }
