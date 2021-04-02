@@ -892,7 +892,6 @@ class MapboxNavigationViewportDataSource(
                 )
 
                 val mapSize = mapboxMap.getSize()
-                Log.e("CAMERA_FOR", mapSize.toString())
 
                 val topLeft = ScreenCoordinate(
                     followingPadding.left,
@@ -906,20 +905,6 @@ class MapboxNavigationViewportDataSource(
                     topLeft,
                     bottomRight
                 )
-
-                Log.e("CAMERA_FOR", "pointsForFollowing: " + pointsForFollowing)
-                Log.e(
-                    "CAMERA_FOR",
-                    "pointsForFollowingJSON: " + LineString.fromLngLats(pointsForFollowing).toJson()
-                )
-                Log.e(
-                    "CAMERA_FOR",
-                    "padding: " + getEdgeInsetsFromPoint(mapSize, followingAnchorProperty.get())
-                )
-                Log.e("CAMERA_FOR", "center: " + pointsForFollowing.first())
-                Log.e("CAMERA_FOR", "screenBox: " + screenBox)
-                Log.e("CAMERA_FOR", "followingBearingProperty: " + followingBearingProperty.get())
-                Log.e("CAMERA_FOR", "followingPitchProperty: " + followingPitchProperty.get())
 
                 val cameraOptions = mapboxMap.getCameraOptions()
                     .toBuilder()
