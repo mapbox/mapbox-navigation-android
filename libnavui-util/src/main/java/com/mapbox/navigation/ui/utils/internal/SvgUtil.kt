@@ -8,62 +8,65 @@ import java.io.ByteArrayInputStream
 
 object SvgUtil {
 
-    private const val CSS_RULES =
-        "text { font-family: Arial, Helvetica, sans-serif; font-size: 0.8em}"
-
     @JvmStatic
-    fun renderAsBitmapWithHeight(stream: ByteArrayInputStream, desiredHeight: Int): Bitmap? {
-        try {
+    fun renderAsBitmapWithHeight(
+        stream: ByteArrayInputStream,
+        desiredHeight: Int,
+        cssStyles: String? = null
+    ): Bitmap? {
+        return try {
             val svg = SVG.getFromInputStream(stream)
 
             svg.setDocumentWidth("100%")
             svg.setDocumentHeight("100%")
-            return if (svg.documentViewBox == null) {
+            if (svg.documentViewBox == null) {
                 null
             } else {
                 val aspectRatio = svg.documentViewBox.bottom / svg.documentViewBox.right
                 val calculatedWidth = (desiredHeight / aspectRatio).toInt()
-
-                val signboard = Bitmap.createBitmap(
-                    calculatedWidth,
-                    desiredHeight,
-                    Bitmap.Config.ARGB_8888
-                )
-                val signboardCanvas = Canvas(signboard)
-                svg.renderToCanvas(signboardCanvas)
-                signboard
+                renderBitmap(svg, calculatedWidth, desiredHeight, cssStyles)
             }
         } catch (exception: Exception) {
-            return null
+            null
         }
     }
 
     @JvmStatic
-    fun renderAsBitmapWithWidth(stream: ByteArrayInputStream, desiredWidth: Int): Bitmap? {
-        try {
+    suspend fun renderAsBitmapWithWidth(
+        stream: ByteArrayInputStream,
+        desiredWidth: Int,
+        cssStyles: String? = null
+    ): Bitmap? {
+        return try {
             val svg = SVG.getFromInputStream(stream)
 
             svg.setDocumentWidth("100%")
             svg.setDocumentHeight("100%")
-            return if (svg.documentViewBox == null) {
+            if (svg.documentViewBox == null) {
                 null
             } else {
                 val aspectRatio = svg.documentViewBox.bottom / svg.documentViewBox.right
                 val calculatedHeight = (desiredWidth * aspectRatio).toInt()
-
-                val signboard = Bitmap.createBitmap(
-                    desiredWidth,
-                    calculatedHeight,
-                    Bitmap.Config.ARGB_8888
-                )
-                val renderOptions = RenderOptions.create()
-                renderOptions.css(CSS_RULES)
-                val signboardCanvas = Canvas(signboard)
-                svg.renderToCanvas(signboardCanvas, renderOptions)
-                signboard
+                renderBitmap(svg, desiredWidth, calculatedHeight, cssStyles)
             }
         } catch (exception: Exception) {
-            return null
+            null
         }
+    }
+
+    private fun renderBitmap(
+        svg: SVG,
+        width: Int,
+        height: Int,
+        cssStyles: String? = null
+    ): Bitmap? {
+        val signboard = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val signboardCanvas = Canvas(signboard)
+        cssStyles?.let {
+            val renderOptions = RenderOptions.create()
+            renderOptions.css(it)
+            svg.renderToCanvas(signboardCanvas, renderOptions)
+        } ?: svg.renderToCanvas(signboardCanvas)
+        return signboard
     }
 }

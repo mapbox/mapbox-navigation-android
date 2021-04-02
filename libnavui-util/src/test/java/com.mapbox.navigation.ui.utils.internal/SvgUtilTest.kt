@@ -1,16 +1,23 @@
 package com.mapbox.navigation.ui.utils.internal
 
 import android.graphics.Bitmap
+import com.mapbox.navigation.testing.MainCoroutineRule
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayInputStream
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class SvgUtilTest {
+
+    @get:Rule
+    private var coroutineRule = MainCoroutineRule()
 
     private val validSvg = "<?xml version='1.0' encoding='utf8'?>\n" +
         "<svg xmlns=\"http://www.w3.org/2000/svg\" baseProfile=\"basic\" " +
@@ -60,7 +67,7 @@ class SvgUtilTest {
         "  </style>\n" +
         "</svg>"
 
-    private val noViewBoxSvg = "<?xml version='1.0' encoding='utf8'?>\n" +
+    private val invalidSvg = "<?xml version='1.0' encoding='utf8'?>\n" +
         "<svg xmlns=\"http://www.w3.org/2000/svg\" baseProfile=\"basic\" " +
         "contentScriptType=\"text/ecmascript\" contentStyleType=\"text/css\" " +
         "id=\"SI_1241914001\" preserveAspectRatio=\"xMidYMid meet\" version=\"1.1\" x=\"0px\" " +
@@ -121,7 +128,7 @@ class SvgUtilTest {
             Bitmap.Config.ARGB_8888
         )
 
-        val actual = SvgUtil.renderAsBitmapWithHeight(mockStream, mockHeight)
+        val actual = SvgUtil.renderAsBitmapWithHeight(mockStream, mockHeight, "")
 
         assertEquals(mockSignboard.height, actual?.height)
         assertEquals(mockSignboard.width, actual?.width)
@@ -133,13 +140,23 @@ class SvgUtilTest {
         val mockHeight = 400
         val mockStream = ByteArrayInputStream(validSvg.toByteArray())
 
-        val actual = SvgUtil.renderAsBitmapWithHeight(mockStream, mockHeight)
+        val actual = SvgUtil.renderAsBitmapWithHeight(mockStream, mockHeight, "")
 
         assertNotNull(actual)
     }
 
     @Test
     fun `render bitmap with height bitmap null`() {
+        val mockHeight = 400
+        val mockStream = ByteArrayInputStream(byteArrayOf(12, 55, 98))
+
+        val actual = SvgUtil.renderAsBitmapWithHeight(mockStream, mockHeight, "")
+
+        assertNull(actual)
+    }
+
+    @Test
+    fun `render bitmap with height css styles null`() {
         val mockHeight = 400
         val mockStream = ByteArrayInputStream(byteArrayOf(12, 55, 98))
 
@@ -151,59 +168,74 @@ class SvgUtilTest {
     @Test
     fun `render bitmap with height bitmap null no viewBox`() {
         val mockHeight = 400
-        val mockStream = ByteArrayInputStream(noViewBoxSvg.toByteArray())
+        val mockStream = ByteArrayInputStream(invalidSvg.toByteArray())
 
-        val actual = SvgUtil.renderAsBitmapWithHeight(mockStream, mockHeight)
-
-        assertNull(actual)
-    }
-
-    @Test
-    fun `render bitmap with width check bitmap properties`() {
-        val mockWidth = 400
-        val mockAspecRatio = 0.7727272727
-        val mockHeight: Int = (mockWidth * mockAspecRatio).toInt()
-        val mockStream = ByteArrayInputStream(validSvg.toByteArray())
-        val mockSignboard = Bitmap.createBitmap(
-            mockWidth,
-            mockHeight,
-            Bitmap.Config.ARGB_8888
-        )
-
-        val actual = SvgUtil.renderAsBitmapWithWidth(mockStream, mockWidth)
-
-        assertEquals(mockSignboard.height, actual?.height)
-        assertEquals(mockSignboard.width, actual?.width)
-        assertEquals(mockSignboard.config, actual?.config)
-    }
-
-    @Test
-    fun `render bitmap with width bitmap non null`() {
-        val mockWidth = 400
-        val mockStream = ByteArrayInputStream(validSvg.toByteArray())
-
-        val actual = SvgUtil.renderAsBitmapWithWidth(mockStream, mockWidth)
-
-        assertNotNull(actual)
-    }
-
-    @Test
-    fun `render bitmap with width bitmap null`() {
-        val mockWidth = 400
-        val mockStream = ByteArrayInputStream(byteArrayOf(12, 55, 98))
-
-        val actual = SvgUtil.renderAsBitmapWithWidth(mockStream, mockWidth)
+        val actual = SvgUtil.renderAsBitmapWithHeight(mockStream, mockHeight, "")
 
         assertNull(actual)
     }
 
     @Test
-    fun `render bitmap with width bitmap null no viewBox`() {
-        val mockWidth = 400
-        val mockStream = ByteArrayInputStream(noViewBoxSvg.toByteArray())
+    fun `render bitmap with width check bitmap properties`() =
+        coroutineRule.runBlockingTest {
+            val mockWidth = 400
+            val mockAspecRatio = 0.7727272727
+            val mockHeight: Int = (mockWidth * mockAspecRatio).toInt()
+            val mockStream = ByteArrayInputStream(validSvg.toByteArray())
+            val mockSignboard = Bitmap.createBitmap(
+                mockWidth,
+                mockHeight,
+                Bitmap.Config.ARGB_8888
+            )
 
-        val actual = SvgUtil.renderAsBitmapWithWidth(mockStream, mockWidth)
+            val actual = SvgUtil.renderAsBitmapWithWidth(mockStream, mockWidth, "")
 
-        assertNull(actual)
-    }
+            assertEquals(mockSignboard.height, actual?.height)
+            assertEquals(mockSignboard.width, actual?.width)
+            assertEquals(mockSignboard.config, actual?.config)
+        }
+
+    @Test
+    fun `render bitmap with width bitmap non null`() =
+        coroutineRule.runBlockingTest {
+            val mockWidth = 400
+            val mockStream = ByteArrayInputStream(validSvg.toByteArray())
+
+            val actual = SvgUtil.renderAsBitmapWithWidth(mockStream, mockWidth, "")
+
+            assertNotNull(actual)
+        }
+
+    @Test
+    fun `render bitmap with width bitmap null`() =
+        coroutineRule.runBlockingTest {
+            val mockWidth = 400
+            val mockStream = ByteArrayInputStream(byteArrayOf(12, 55, 98))
+
+            val actual = SvgUtil.renderAsBitmapWithWidth(mockStream, mockWidth, "")
+
+            assertNull(actual)
+        }
+
+    @Test
+    fun `render bitmap with width css styles null`() =
+        coroutineRule.runBlockingTest {
+            val mockWidth = 400
+            val mockStream = ByteArrayInputStream(byteArrayOf(12, 55, 98))
+
+            val actual = SvgUtil.renderAsBitmapWithWidth(mockStream, mockWidth)
+
+            assertNull(actual)
+        }
+
+    @Test
+    fun `render bitmap with width bitmap null no viewBox`() =
+        coroutineRule.runBlockingTest {
+            val mockWidth = 400
+            val mockStream = ByteArrayInputStream(invalidSvg.toByteArray())
+
+            val actual = SvgUtil.renderAsBitmapWithWidth(mockStream, mockWidth, "")
+
+            assertNull(actual)
+        }
 }

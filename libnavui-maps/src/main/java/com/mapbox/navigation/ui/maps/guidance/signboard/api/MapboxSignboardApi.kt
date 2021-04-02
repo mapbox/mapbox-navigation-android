@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.maps.signboard.api
+package com.mapbox.navigation.ui.maps.guidance.signboard.api
 
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
@@ -6,12 +6,13 @@ import com.mapbox.common.HttpResponse
 import com.mapbox.common.core.module.CommonSingletonModuleProvider
 import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
-import com.mapbox.navigation.ui.maps.signboard.SignboardAction
-import com.mapbox.navigation.ui.maps.signboard.SignboardProcessor
-import com.mapbox.navigation.ui.maps.signboard.SignboardResult
-import com.mapbox.navigation.ui.maps.signboard.model.MapboxSignboardRequest
-import com.mapbox.navigation.ui.maps.signboard.model.SignboardError
-import com.mapbox.navigation.ui.maps.signboard.model.SignboardValue
+import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardAction
+import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardProcessor
+import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardResult
+import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions
+import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardRequest
+import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError
+import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import kotlinx.coroutines.launch
@@ -20,8 +21,9 @@ import kotlinx.coroutines.launch
  * Mapbox Signboard Api allows you to generate signboard for select maneuvers.
  * @property accessToken String
  */
-class MapboxSignboardApi(
-    private val accessToken: String
+class MapboxSignboardApi @JvmOverloads constructor(
+    private val accessToken: String,
+    private val options: MapboxSignboardOptions = MapboxSignboardOptions.Builder().build()
 ) {
 
     companion object {
@@ -101,7 +103,7 @@ class MapboxSignboardApi(
         val result = SignboardProcessor.process(action)
         when (result) {
             is SignboardResult.Signboard.Success -> {
-                consumer.accept(Expected.Success(SignboardValue(result.data)))
+                consumer.accept(Expected.Success(SignboardValue(result.data, options)))
             }
             is SignboardResult.Signboard.Failure -> {
                 consumer.accept(
