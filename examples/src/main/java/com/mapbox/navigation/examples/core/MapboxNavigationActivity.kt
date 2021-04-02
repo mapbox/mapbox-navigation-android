@@ -59,7 +59,6 @@ import com.mapbox.navigation.ui.maneuver.model.StepDistance
 import com.mapbox.navigation.ui.maneuver.model.StepDistanceError
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
-import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
@@ -325,7 +324,6 @@ class MapboxNavigationActivity :
         }
         initNavigation()
         viewportDataSource = MapboxNavigationViewportDataSource(
-            MapboxNavigationViewportDataSourceOptions.Builder().build(),
             binding.mapView.getMapboxMap()
         )
         navigationCamera = NavigationCamera(

@@ -9,7 +9,7 @@ class MapboxNavigationViewportDataSourceOptionsTest :
     override fun getImplementationClass() = MapboxNavigationViewportDataSourceOptions::class
 
     override fun getFilledUpBuilder() = MapboxNavigationViewportDataSourceOptions.Builder()
-        .maxFollowingPitch(12.3)
+        .defaultFollowingPitch(12.3)
         .minFollowingZoom(14.213)
         .maxZoom(45.6)
 

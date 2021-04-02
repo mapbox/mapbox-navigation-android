@@ -3,10 +3,12 @@ package com.mapbox.navigation.ui.maps.camera.data
 import android.location.Location
 import android.util.Log
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
+import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
@@ -17,7 +19,6 @@ import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getAnchorPointFromPitchPercentage
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getBearingForMap
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getEdgeInsetsFromPoint
-import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPitchForDistanceRemainingOnStep
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.normalizeBearing
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteForPostManeuverFramingGeometry
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteInfo
@@ -144,7 +145,6 @@ private val CENTER_SCREEN_COORDINATE = ScreenCoordinate(0.0, 0.0)
  * ```
  */
 class MapboxNavigationViewportDataSource(
-    private val options: MapboxNavigationViewportDataSourceOptions,
     private val mapboxMap: MapboxMap
 ) : ViewportDataSource {
 
@@ -160,6 +160,28 @@ class MapboxNavigationViewportDataSource(
     private var averageIntersectionDistancesOnRoute: List<List<Double>> = emptyList()
     private var distanceRemainingOnCurrentStep: Float = 0.0F
 
+    /* -------- CONSTRAINTS -------- */
+    /**
+     * The default pitch that will be generated for following camera frames.
+     *
+     * Defaults to `45.0` degrees.
+     */
+    var defaultFollowingPitch = 45.0
+
+    /**
+     * The min zoom that will be generated for camera following frames.
+     *
+     * Defaults to `10.5`.
+     */
+    var minFollowingZoom = 10.5
+
+    /**
+     * The max zoom that will be generated for all camera frames.
+     *
+     * Defaults to `17.0`.
+     */
+    var maxZoom = 17.0
+
     /* -------- GENERATED OPTIONS -------- */
     private var followingCameraOptions = CameraOptions.Builder().build()
     private var overviewCameraOptions = CameraOptions.Builder().build()
@@ -170,7 +192,7 @@ class MapboxNavigationViewportDataSource(
     private val followingBearingProperty = ViewportProperty.BearingProperty(null, 0.0)
     private val followingPitchProperty = ViewportProperty.PitchProperty(
         null,
-        options.maxFollowingPitch
+        defaultFollowingPitch
     )
     private val followingAnchorProperty = ViewportProperty.AnchorProperty(
         null,
@@ -185,9 +207,10 @@ class MapboxNavigationViewportDataSource(
         CENTER_SCREEN_COORDINATE
     )
 
+    /* -------- FOLLOWING FRAME SETTINGS -------- */
     /**
      * When enabled and a route is provided via [onRouteChanged] and updates via [onRouteProgressChanged],
-     * the geometry that's going to be framed for following will not match the whole remainder of the current step,
+     * the geometry that's going to be framed for following will not match the whole remainder of the current step
      * but a smaller subset of that geometry to make the zoom level higher.
      *
      * This has an effect of zooming closer in when intersections are dense.
@@ -216,7 +239,7 @@ class MapboxNavigationViewportDataSource(
 
     /**
      * When enabled and a route is provided via [onRouteChanged] and updates via [onRouteProgressChanged],
-     * the generated following camera frame will have to pitch `0`.
+     * the generated following camera frame will have pitch `0`.
      *
      * Depends on [distanceFromManeuverToUsePitchZero].
      *
@@ -226,8 +249,8 @@ class MapboxNavigationViewportDataSource(
 
     /**
      * When [usePitchZeroNearManeuvers] is enabled,
-     * this variable describes the threshold distance from the next maneuver to move the frame to pitch `0`,
-     * based on the [RouteProgress].
+     * this variable describes the threshold distance to the next maneuver makes the frame with pitch `0`,
+     * based on the [onRouteProgressChanged].
      *
      * Defaults to `180.0` meters.
      */
@@ -236,7 +259,7 @@ class MapboxNavigationViewportDataSource(
     /**
      * When a produced following frame has pitch `0`,
      * the puck will not be tied to the bottom edge of the [followingPadding] and instead move
-     * around the centroid of the maneuver's geometry to maximize the viewable area.
+     * around the centroid of the maneuver's geometry to maximize the screen area within the [followingPadding] that the maneuver's geometry occupies.
      *
      * Defaults to `true`.
      */
@@ -262,7 +285,7 @@ class MapboxNavigationViewportDataSource(
      * When [framePointsAfterManeuverWhenPitchZero] is enabled,
      * this controls the distance on route after the current maneuver to include in the frame.
      *
-     * This is added on top of potentially added compound maneuvers that closely follow the upcoming one,
+     * This is added on top of potentially included compound maneuvers that closely follow the upcoming one,
      * controlled by [distanceToCoalesceCompoundManeuvers].
      *
      * Defaults to `100.0` meters.
@@ -271,7 +294,7 @@ class MapboxNavigationViewportDataSource(
 
     /**
      * If enabled, the following frame's bearing won't exactly reflect the bearing returned by the [Location],
-     * but will also be affected by the direction to the upcoming framed geometry to maximize the viewable area.
+     * but will also be affected by the direction to the upcoming framed geometry, to maximize the viewable area.
      *
      * Defaults to `true`.
      *
@@ -281,7 +304,7 @@ class MapboxNavigationViewportDataSource(
 
     /**
      * When [useBearingSmoothing] is enabled, this controls how much the following frame's bearing
-     * can deviate from the [Location] bearing.
+     * can deviate from the [Location] bearing, in degrees.
      *
      * Defaults to `20.0` degrees.
      */
@@ -290,17 +313,25 @@ class MapboxNavigationViewportDataSource(
     /* -------- PADDING UPDATES -------- */
 
     /**
-     * Holds a padding (in pixels) used for generating a following frame.
+     * Holds a padding (in pixels, in reference to the [MapView]'s size) used for generating a following frame.
      *
-     * All of the geometries and the location puck will always be within the provided padding.
+     * The frame will contain the remaining portion of the current [LegStep] of the route provided via [onRouteChanged]
+     * based on [onRouteProgressChanged].
+     *
+     * If the [RouteProgress] is not available,
+     * the frame will focus on the location sample from [onLocationChanged] with [maxZoom] zoom and [defaultFollowingPitch].
+     *
+     * You can use [followingZoomPropertyOverride] and [followingPitchPropertyOverride]
+     * to control the camera in scenarios like free drive where the maneuver points are not available.
      */
     var followingPadding: EdgeInsets = EMPTY_EDGE_INSETS
     private var appliedFollowingPadding = followingPadding
 
     /**
-     * Holds a padding (in pixels) used for generating an overview frame.
+     * Holds a padding (in pixels, in reference to the [MapView]'s size) used for generating an overview frame.
      *
-     * All of the geometries and the location puck will always be within the provided padding.
+     * The frame will contain the entirety of the route provided via [onRouteChanged]
+     * or its remainder if [onRouteProgressChanged] is also available, and the [additionalPointsToFrameForOverview].
      */
     var overviewPadding: EdgeInsets = EMPTY_EDGE_INSETS
 
@@ -856,14 +887,13 @@ class MapboxNavigationViewportDataSource(
         )
 
         followingPitchProperty.fallback = if (usePitchZeroNearManeuvers) {
-            getPitchForDistanceRemainingOnStep(
-                distanceFromManeuverToUsePitchZero,
-                distanceRemainingOnCurrentStep,
-                0.0,
-                options.maxFollowingPitch
-            )
+            if (distanceRemainingOnCurrentStep <= distanceFromManeuverToUsePitchZero) {
+                0.0
+            } else {
+                defaultFollowingPitch
+            }
         } else {
-            options.maxFollowingPitch
+            defaultFollowingPitch
         }
 
         if (framePointsAfterManeuverWhenPitchZero && followingPitchProperty.get() == 0.0) {
@@ -922,7 +952,7 @@ class MapboxNavigationViewportDataSource(
 
         followingCenterProperty.fallback = cameraFrame.center!!
         followingZoomProperty.fallback =
-            max(min(cameraFrame.zoom!!, options.maxZoom), options.minFollowingZoom)
+            max(min(cameraFrame.zoom!!, maxZoom), minFollowingZoom)
         appliedFollowingPadding = cameraFrame.padding!!
 
         debugger?.followingPoints = pointsForFollowing
@@ -956,7 +986,7 @@ class MapboxNavigationViewportDataSource(
         }
 
         overviewCenterProperty.fallback = cameraFrame.center!!
-        overviewZoomProperty.fallback = min(cameraFrame.zoom!!, options.maxZoom)
+        overviewZoomProperty.fallback = min(cameraFrame.zoom!!, maxZoom)
 
         debugger?.overviewPoints = pointsForOverview
         debugger?.overviewUserPadding = overviewPadding

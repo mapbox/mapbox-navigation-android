@@ -55,7 +55,6 @@ import com.mapbox.navigation.examples.core.camera.AnimationAdapter.OnAnimationBu
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityCameraBinding
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
-import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandler
 import com.mapbox.navigation.ui.maps.internal.camera.data.MapboxNavigationViewportDataSourceDebugger
@@ -247,7 +246,6 @@ class MapboxCameraAnimationsActivity :
             enabled = true
         }
         viewportDataSource = MapboxNavigationViewportDataSource(
-            MapboxNavigationViewportDataSourceOptions.Builder().build(),
             binding.mapView.getMapboxMap()
         )
         viewportDataSource.debugger = debugger
