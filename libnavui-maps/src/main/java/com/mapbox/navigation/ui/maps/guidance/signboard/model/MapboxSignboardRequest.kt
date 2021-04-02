@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.maps.signboard.model
+package com.mapbox.navigation.ui.maps.guidance.signboard.model
 
 import com.mapbox.common.HttpRequest
 

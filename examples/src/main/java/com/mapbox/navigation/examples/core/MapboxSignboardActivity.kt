@@ -36,6 +36,10 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivitySignboardBinding
 import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
+import com.mapbox.navigation.ui.maps.guidance.signboard.api.MapboxSignboardApi
+import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError
+import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue
+import com.mapbox.navigation.ui.maps.guidance.signboard.view.MapboxSignboardView
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
@@ -46,10 +50,6 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
-import com.mapbox.navigation.ui.maps.signboard.api.MapboxSignboardApi
-import com.mapbox.navigation.ui.maps.signboard.model.SignboardError
-import com.mapbox.navigation.ui.maps.signboard.model.SignboardValue
-import com.mapbox.navigation.ui.maps.signboard.view.MapboxSignboardView
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

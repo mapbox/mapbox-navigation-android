@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.maps.signboard.api
+package com.mapbox.navigation.ui.maps.guidance.signboard.api
 
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.common.HttpRequest
@@ -11,11 +11,12 @@ import com.mapbox.common.core.module.CommonSingletonModuleProvider
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
-import com.mapbox.navigation.ui.maps.signboard.SignboardAction
-import com.mapbox.navigation.ui.maps.signboard.SignboardProcessor
-import com.mapbox.navigation.ui.maps.signboard.SignboardResult
-import com.mapbox.navigation.ui.maps.signboard.model.SignboardError
-import com.mapbox.navigation.ui.maps.signboard.model.SignboardValue
+import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardAction
+import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardProcessor
+import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardResult
+import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions
+import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError
+import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue
 import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
@@ -43,7 +44,10 @@ class MapboxSignboardApiTest {
     private val consumer:
         MapboxNavigationConsumer<Expected<SignboardValue, SignboardError>> = mockk(relaxed = true)
     private val bannerInstructions: BannerInstructions = mockk()
-    private val signboardApi = MapboxSignboardApi("pk.1234")
+    private val signboardApi = MapboxSignboardApi(
+        "pk.1234",
+        MapboxSignboardOptions.Builder().build()
+    )
 
     @Before
     fun setUp() {
