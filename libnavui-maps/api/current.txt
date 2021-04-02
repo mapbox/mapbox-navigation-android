@@ -22,13 +22,16 @@ package com.mapbox.navigation.ui.maps.camera {
 
   @UiThread public final class NavigationCamera {
     ctor public NavigationCamera(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin, com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource viewportDataSource, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition stateTransition = MapboxNavigationCameraStateTransition(mapboxMap, cameraPlugin));
+    method public com.mapbox.navigation.ui.maps.internal.camera.data.MapboxNavigationViewportDataSourceDebugger? getDebugger();
     method public com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState getState();
     method public void registerNavigationCameraStateChangeObserver(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver navigationCameraStateChangedObserver);
     method public void requestNavigationCameraToFollowing(android.animation.Animator.AnimatorListener? animatorListener = null);
     method public void requestNavigationCameraToIdle();
     method public void requestNavigationCameraToOverview(android.animation.Animator.AnimatorListener? animatorListener = null);
     method public void resetFrame();
+    method public void setDebugger(com.mapbox.navigation.ui.maps.internal.camera.data.MapboxNavigationViewportDataSourceDebugger? p);
     method public void unregisterNavigationCameraStateChangeObserver(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver navigationCameraStateChangedObserver);
+    property public final com.mapbox.navigation.ui.maps.internal.camera.data.MapboxNavigationViewportDataSourceDebugger? debugger;
     property public final com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState state;
     field public static final com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion Companion;
     field public static final String NAVIGATION_CAMERA_OWNER = "NAVIGATION_CAMERA_OWNER";
@@ -42,7 +45,7 @@ package com.mapbox.navigation.ui.maps.camera {
 package com.mapbox.navigation.ui.maps.camera.data {
 
   public final class MapboxNavigationViewportDataSource implements com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource {
-    ctor public MapboxNavigationViewportDataSource(com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions options, com.mapbox.maps.MapboxMap mapboxMap);
+    ctor public MapboxNavigationViewportDataSource(com.mapbox.maps.MapboxMap mapboxMap);
     method public void additionalPointsToFrameForFollowing(java.util.List<com.mapbox.geojson.Point> points);
     method public void additionalPointsToFrameForOverview(java.util.List<com.mapbox.geojson.Point> points);
     method public void clearFollowingOverrides();
@@ -52,21 +55,37 @@ package com.mapbox.navigation.ui.maps.camera.data {
     method public void followingAnchorPropertyOverride(com.mapbox.maps.ScreenCoordinate? value);
     method public void followingBearingPropertyOverride(Double? value);
     method public void followingCenterPropertyOverride(com.mapbox.geojson.Point? value);
-    method public void followingPaddingPropertyOverride(com.mapbox.maps.EdgeInsets? value);
     method public void followingPitchPropertyOverride(Double? value);
     method public void followingZoomPropertyOverride(Double? value);
+    method public double getAverageIntersectionDistanceMultiplier();
+    method public com.mapbox.navigation.ui.maps.internal.camera.data.MapboxNavigationViewportDataSourceDebugger? getDebugger();
+    method public double getDefaultFollowingPitch();
+    method public double getDistanceFromManeuverToUsePitchZero();
+    method public double getDistanceToCoalesceCompoundManeuvers();
+    method public double getDistanceToFrameAfterManeuver();
     method public boolean getFollowingAnchorUpdatesAllowed();
     method public boolean getFollowingBearingUpdatesAllowed();
     method public boolean getFollowingCenterUpdatesAllowed();
+    method public com.mapbox.maps.EdgeInsets getFollowingPadding();
     method public boolean getFollowingPaddingUpdatesAllowed();
     method public boolean getFollowingPitchUpdatesAllowed();
     method public boolean getFollowingZoomUpdatesAllowed();
+    method public boolean getFramePointsAfterManeuverWhenPitchZero();
+    method public double getMaxBearingAngleDiffWhenSmoothing();
+    method public double getMaxZoom();
+    method public boolean getMaximizeViewableAreaWhenPitchZero();
+    method public double getMinFollowingZoom();
+    method public double getMinimumMetersForIntersectionDensity();
     method public boolean getOverviewAnchorUpdatesAllowed();
     method public boolean getOverviewBearingUpdatesAllowed();
     method public boolean getOverviewCenterUpdatesAllowed();
+    method public com.mapbox.maps.EdgeInsets getOverviewPadding();
     method public boolean getOverviewPaddingUpdatesAllowed();
     method public boolean getOverviewPitchUpdatesAllowed();
     method public boolean getOverviewZoomUpdatesAllowed();
+    method public boolean getUseBearingSmoothing();
+    method public boolean getUseIntersectionDensityToCalculateGeometryForFraming();
+    method public boolean getUsePitchZeroNearManeuvers();
     method public com.mapbox.navigation.ui.maps.camera.data.ViewportData getViewportData();
     method public void onLocationChanged(android.location.Location location);
     method public void onRouteChanged(com.mapbox.api.directions.v5.models.DirectionsRoute route);
@@ -74,56 +93,71 @@ package com.mapbox.navigation.ui.maps.camera.data {
     method public void overviewAnchorPropertyOverride(com.mapbox.maps.ScreenCoordinate? value);
     method public void overviewBearingPropertyOverride(Double? value);
     method public void overviewCenterPropertyOverride(com.mapbox.geojson.Point? value);
-    method public void overviewPaddingPropertyOverride(com.mapbox.maps.EdgeInsets? value);
     method public void overviewPitchPropertyOverride(Double? value);
     method public void overviewZoomPropertyOverride(Double? value);
     method public void registerUpdateObserver(com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceUpdateObserver viewportDataSourceUpdateObserver);
+    method public void setAverageIntersectionDistanceMultiplier(double p);
+    method public void setDebugger(com.mapbox.navigation.ui.maps.internal.camera.data.MapboxNavigationViewportDataSourceDebugger? p);
+    method public void setDefaultFollowingPitch(double p);
+    method public void setDistanceFromManeuverToUsePitchZero(double p);
+    method public void setDistanceToCoalesceCompoundManeuvers(double p);
+    method public void setDistanceToFrameAfterManeuver(double p);
     method public void setFollowingAnchorUpdatesAllowed(boolean p);
     method public void setFollowingBearingUpdatesAllowed(boolean p);
     method public void setFollowingCenterUpdatesAllowed(boolean p);
+    method public void setFollowingPadding(com.mapbox.maps.EdgeInsets p);
     method public void setFollowingPaddingUpdatesAllowed(boolean p);
     method public void setFollowingPitchUpdatesAllowed(boolean p);
     method public void setFollowingZoomUpdatesAllowed(boolean p);
+    method public void setFramePointsAfterManeuverWhenPitchZero(boolean p);
+    method public void setMaxBearingAngleDiffWhenSmoothing(double p);
+    method public void setMaxZoom(double p);
+    method public void setMaximizeViewableAreaWhenPitchZero(boolean p);
+    method public void setMinFollowingZoom(double p);
+    method public void setMinimumMetersForIntersectionDensity(double p);
     method public void setOverviewAnchorUpdatesAllowed(boolean p);
     method public void setOverviewBearingUpdatesAllowed(boolean p);
     method public void setOverviewCenterUpdatesAllowed(boolean p);
+    method public void setOverviewPadding(com.mapbox.maps.EdgeInsets p);
     method public void setOverviewPaddingUpdatesAllowed(boolean p);
     method public void setOverviewPitchUpdatesAllowed(boolean p);
     method public void setOverviewZoomUpdatesAllowed(boolean p);
+    method public void setUseBearingSmoothing(boolean p);
+    method public void setUseIntersectionDensityToCalculateGeometryForFraming(boolean p);
+    method public void setUsePitchZeroNearManeuvers(boolean p);
     method public void unregisterUpdateObserver(com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceUpdateObserver viewportDataSourceUpdateObserver);
+    property public final double averageIntersectionDistanceMultiplier;
+    property public final com.mapbox.navigation.ui.maps.internal.camera.data.MapboxNavigationViewportDataSourceDebugger? debugger;
+    property public final double defaultFollowingPitch;
+    property public final double distanceFromManeuverToUsePitchZero;
+    property public final double distanceToCoalesceCompoundManeuvers;
+    property public final double distanceToFrameAfterManeuver;
     property public final boolean followingAnchorUpdatesAllowed;
     property public final boolean followingBearingUpdatesAllowed;
     property public final boolean followingCenterUpdatesAllowed;
+    property public final com.mapbox.maps.EdgeInsets followingPadding;
     property public final boolean followingPaddingUpdatesAllowed;
     property public final boolean followingPitchUpdatesAllowed;
     property public final boolean followingZoomUpdatesAllowed;
+    property public final boolean framePointsAfterManeuverWhenPitchZero;
+    property public final double maxBearingAngleDiffWhenSmoothing;
+    property public final double maxZoom;
+    property public final boolean maximizeViewableAreaWhenPitchZero;
+    property public final double minFollowingZoom;
+    property public final double minimumMetersForIntersectionDensity;
     property public final boolean overviewAnchorUpdatesAllowed;
     property public final boolean overviewBearingUpdatesAllowed;
     property public final boolean overviewCenterUpdatesAllowed;
+    property public final com.mapbox.maps.EdgeInsets overviewPadding;
     property public final boolean overviewPaddingUpdatesAllowed;
     property public final boolean overviewPitchUpdatesAllowed;
     property public final boolean overviewZoomUpdatesAllowed;
+    property public final boolean useBearingSmoothing;
+    property public final boolean useIntersectionDensityToCalculateGeometryForFraming;
+    property public final boolean usePitchZeroNearManeuvers;
   }
 
   public final class MapboxNavigationViewportDataSourceKt {
-  }
-
-  public final class MapboxNavigationViewportDataSourceOptions {
-    method public double getMaxFollowingPitch();
-    method public double getMaxZoom();
-    method public double getMinFollowingZoom();
-    method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions.Builder toBuilder();
-    property public final double maxFollowingPitch;
-    property public final double maxZoom;
-    property public final double minFollowingZoom;
-  }
-
-  public static final class MapboxNavigationViewportDataSourceOptions.Builder {
-    ctor public MapboxNavigationViewportDataSourceOptions.Builder();
-    method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions build();
-    method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions.Builder maxFollowingPitch(double maxFollowingPitch);
-    method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions.Builder maxZoom(double maxZoom);
-    method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions.Builder minFollowingZoom(double minFollowingZoom);
   }
 
   public final class ViewportData {
@@ -308,6 +342,17 @@ package com.mapbox.navigation.ui.maps.guidance.junction.view {
     ctor public MapboxJunctionView(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxJunctionView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
     method public void render(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue,com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError> result);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.internal.camera.data {
+
+  public final class MapboxNavigationViewportDataSourceDebugger {
+    ctor public MapboxNavigationViewportDataSourceDebugger(android.content.Context context, com.mapbox.maps.MapView mapView);
+    method public boolean getEnabled();
+    method public void setEnabled(boolean value);
+    property public final boolean enabled;
   }
 
 }

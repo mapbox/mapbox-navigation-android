@@ -53,7 +53,10 @@ internal object ViewportDataSourceProcessor {
                         LineString.fromPolyline(
                             stepsAfter[compoundManeuverGeometryList.size].geometry() ?: "",
                             Constants.PRECISION_6
-                        ), 0.0, defaultDistanceToFrameAfterManeuver, TurfConstants.UNIT_METERS
+                        ),
+                        0.0,
+                        defaultDistanceToFrameAfterManeuver,
+                        TurfConstants.UNIT_METERS
                     ).coordinates()
                 }
                 compoundManeuverGeometryPoints + defaultGeometryPointsAfterManeuver
@@ -83,7 +86,9 @@ internal object ViewportDataSourceProcessor {
                     val filteredIntersectionDistances =
                         intersectionDistances.filter { it > minimumMetersForIntersectionDensity }
                     if (filteredIntersectionDistances.isNotEmpty()) {
-                        filteredIntersectionDistances.reduce { acc, next -> acc + next } / filteredIntersectionDistances.size
+                        filteredIntersectionDistances
+                            .reduce { acc, next -> acc + next }
+                            .div(filteredIntersectionDistances.size)
                     } else {
                         minimumMetersForIntersectionDensity
                     }
@@ -125,7 +130,8 @@ internal object ViewportDataSourceProcessor {
             ((mapSize.height - padding.top - padding.bottom) / 2.0) + padding.top
         val anchorPointX = centerInsidePaddingX
         val anchorPointY =
-            ((mapSize.height - padding.bottom - centerInsidePaddingY) * pitchPercentage) + centerInsidePaddingY
+            ((mapSize.height - padding.bottom - centerInsidePaddingY) * pitchPercentage)
+                .plus(centerInsidePaddingY)
         return ScreenCoordinate(anchorPointX, anchorPointY)
     }
 

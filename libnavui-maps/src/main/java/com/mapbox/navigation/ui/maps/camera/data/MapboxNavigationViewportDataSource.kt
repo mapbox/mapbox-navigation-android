@@ -683,13 +683,16 @@ class MapboxNavigationViewportDataSource(
                 distanceRemainingOnCurrentStep = currentStepProgress.distanceRemaining
 
                 var lookaheadDistanceForZoom = fullDistanceOfCurrentStepKM
-                if (useIntersectionDensityToCalculateGeometryForFraming
-                    && averageIntersectionDistancesOnRoute.isNotEmpty()
+                if (useIntersectionDensityToCalculateGeometryForFraming &&
+                    averageIntersectionDistancesOnRoute.isNotEmpty()
                 ) {
                     val lookaheadInKM =
-                        averageIntersectionDistancesOnRoute[currentLegProgress.legIndex][currentStepProgress.stepIndex] / 1000.0
-                    lookaheadDistanceForZoom =
-                        distanceTraveledOnStepKM + (lookaheadInKM * averageIntersectionDistanceMultiplier)
+                        averageIntersectionDistancesOnRoute
+                            .get(currentLegProgress.legIndex)
+                            .get(currentStepProgress.stepIndex)
+                            .div(1000.0)
+                    lookaheadDistanceForZoom = distanceTraveledOnStepKM +
+                        (lookaheadInKM * averageIntersectionDistanceMultiplier)
                 }
 
                 try {
@@ -704,7 +707,9 @@ class MapboxNavigationViewportDataSource(
                 }
 
                 pointsToFrameAfterCurrentStep = if (postManeuverFramingPoints.isNotEmpty()) {
-                    postManeuverFramingPoints[currentLegProgress.legIndex][currentStepProgress.stepIndex]
+                    postManeuverFramingPoints
+                        .get(currentLegProgress.legIndex)
+                        .get(currentStepProgress.stepIndex)
                 } else {
                     emptyList()
                 }
@@ -993,7 +998,10 @@ class MapboxNavigationViewportDataSource(
 
                 val cameraOptions = mapboxMap.getCameraOptions()
                     .toBuilder()
-                    .center(pointsForFollowing.first())
+                    .center(
+                        pointsForFollowing.firstOrNull()
+                            ?: mapboxMap.getCameraOptions().center!!
+                    )
                     .padding(getEdgeInsetsFromPoint(mapSize, followingAnchorProperty.get()))
                     .bearing(followingBearingProperty.get())
                     .pitch(followingPitchProperty.get())

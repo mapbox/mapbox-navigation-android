@@ -1,5 +1,5 @@
 package com.mapbox.navigation.ui.maps
-
+/*
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.Value
 import com.mapbox.common.TileStore
@@ -238,3 +238,4 @@ class PredictiveCacheControllerTest {
         unmockkStatic(TileStoreManager::class)
     }
 }
+*/
