@@ -44,8 +44,8 @@ private val CENTER_SCREEN_COORDINATE = ScreenCoordinate(0.0, 0.0)
  * - [onRouteChanged] to produce overview geometries that need to be framed
  * - [onRouteProgressChanged] (requires also [onRouteChanged]) to produce following geometries of the current step
  * and overview geometries of the remaining points on the route that need to be framed.
- * This will make the following frame change zoom level depending on the proximity to
- * the upcoming maneuver and resize overview to fit only remaining portion of the route.
+ * This will make the frame in following mode change zoom level depending on the proximity to
+ * the upcoming maneuver and resize the frame in overview mode to fit only the remaining portion of the route.
  * - [onLocationChanged] to pass a point to be framed and used as a source of bearing for the
  * following camera frame
  * - [additionalPointsToFrameForFollowing] - points that also need to be visible in
@@ -54,7 +54,7 @@ private val CENTER_SCREEN_COORDINATE = ScreenCoordinate(0.0, 0.0)
  * the overview camera frame
  *
  * Whenever a set of these arguments is provided or refreshed, you need to call [evaluate]
- * to process the data and compute an opinionated [ViewportData] updates that [NavigationCamera]
+ * to process the data and compute an opinionated [ViewportData] update that [NavigationCamera]
  * observes and applies.
  *
  * Based on the provided data, the class will make decisions on how the camera should be framed.
@@ -74,7 +74,7 @@ private val CENTER_SCREEN_COORDINATE = ScreenCoordinate(0.0, 0.0)
  *
  * ## Padding and framing behavior
  * This data source initializes at the `null island` (0.0, 0.0). Make sure to first provide at least
- * [onLocationChanged] for following frames and [onRouteChanged] for overview frames
+ * [onLocationChanged] for following mode framing and [onRouteChanged] for overview mode framing
  * (or the [additionalPointsToFrameForOverview] and [additionalPointsToFrameForFollowing]).
  *
  * ### Overview
@@ -263,7 +263,7 @@ class MapboxNavigationViewportDataSource(
      * the geometry that's going to be **framed for following** will not match the whole remainder of the current step
      * but a smaller subset of that geometry to make the zoom level higher.
      *
-     * This has an effect of zooming closer in when intersections are dense.
+     * This has an effect of zooming closer in urban locations when intersections are dense and zooming out on highways where opportunities to turn are farther apart.
      *
      * Defaults to `true`.
      */
@@ -281,7 +281,7 @@ class MapboxNavigationViewportDataSource(
      * When [useIntersectionDensityToCalculateGeometryForFraming] is enabled,
      * describes the minimum distance between intersections to count them as 2 instances.
      *
-     * This has an effect of limiting zoom level for extremely intersection-dense geometries.
+     * This has an effect of filtering out intersections based on parking lot entrances, driveways and alleys from the average intersection distance.
      *
      * Defaults to `20.0` meters.
      */
@@ -309,7 +309,7 @@ class MapboxNavigationViewportDataSource(
     /**
      * When a produced **following frame** has pitch `0`,
      * the puck will not be tied to the bottom edge of the [followingPadding] and instead move
-     * around the centroid of the maneuver's geometry to maximize the screen area within the [followingPadding] that the maneuver's geometry occupies.
+     * around the centroid of the maneuver's geometry to maximize the view of the maneuver's geometry within the [followingPadding].
      *
      * Defaults to `true`.
      */
