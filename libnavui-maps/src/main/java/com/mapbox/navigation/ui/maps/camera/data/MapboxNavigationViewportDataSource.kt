@@ -761,10 +761,11 @@ class MapboxNavigationViewportDataSource(
     fun clearRouteData() {
         route = null
         completeRoutePoints = emptyList()
+        postManeuverFramingPoints = emptyList()
         remainingPointsOnCurrentStep = emptyList()
+        pointsToFrameAfterCurrentStep = emptyList()
         remainingPointsOnRoute = emptyList()
         averageIntersectionDistancesOnRoute = emptyList()
-        postManeuverFramingPoints = emptyList()
         distanceRemainingOnCurrentStep = null
     }
 
