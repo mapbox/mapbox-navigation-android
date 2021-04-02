@@ -102,6 +102,15 @@ private val CENTER_SCREEN_COORDINATE = ScreenCoordinate(0.0, 0.0)
  *
  * The default pitch for following frames is [defaultFollowingPitch] and zoom is determined based on upcoming geometries or [maxZoom].
  *
+ * ## Debugging
+ * **This feature is currently experimental an subject to change.**
+ *
+ * You can use [debugger] to provide a [MapboxNavigationViewportDataSourceDebugger] instance
+ * which will draw various info on the screen when the [NavigationCamera] operates to together with
+ * the [MapboxNavigationViewportDataSource].
+ *
+ * Make sure to also provide the same instance to [NavigationCamera.debugger].
+ *
  * ## Examples
  * #### Show route overview with padding
  * ```kotlin
@@ -186,6 +195,9 @@ class MapboxNavigationViewportDataSource(
     private val mapboxMap: MapboxMap
 ) : ViewportDataSource {
 
+    /**
+     * Set a [MapboxNavigationViewportDataSourceDebugger].
+     */
     var debugger: MapboxNavigationViewportDataSourceDebugger? = null
 
     private var route: DirectionsRoute? = null

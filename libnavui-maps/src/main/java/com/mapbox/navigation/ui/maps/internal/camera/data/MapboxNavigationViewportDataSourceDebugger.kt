@@ -18,8 +18,43 @@ import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
 import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
 import com.mapbox.navigation.ui.maps.R
+import com.mapbox.navigation.ui.maps.camera.NavigationCamera
+import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 
+/**
+ * **This feature is currently experimental an subject to change.**
+ *
+ * Draw various info on the screen when the [NavigationCamera] operates to together with
+ * the [MapboxNavigationViewportDataSource]. This info includes:
+ * - Green Box, which is the padding applied by the developer for framing purposes.
+ * - Black Box, which is the padding applied to the Map instance.
+ * - Red Box, which is the Map's camera center.
+ * - Light Blue Line, which shows the framed geometries.
+ *
+ * ### Example
+ * Make sure to also provide the same debugger instance to [NavigationCamera.debugger] and
+ * [MapboxNavigationViewportDataSource.debugger].
+ *
+ * ```kotlin
+ * val debugger = MapboxNavigationViewportDataSourceDebugger(
+ *     context,
+ *     mapView
+ * ).apply {
+ *     enabled = true
+ * }
+ * viewportDataSource = MapboxNavigationViewportDataSource(
+ *     mapView.getMapboxMap()
+ * )
+ * viewportDataSource.debugger = debugger
+ * navigationCamera = NavigationCamera(
+ *     mapView.getMapboxMap(),
+ *     mapView.getCameraAnimationsPlugin(),
+ *     viewportDataSource
+ * )
+ * navigationCamera.debugger = debugger
+ * ```
+ */
 class MapboxNavigationViewportDataSourceDebugger(
     private val context: Context,
     private val mapView: MapView
@@ -29,6 +64,9 @@ class MapboxNavigationViewportDataSourceDebugger(
 
     private val mapboxMap = mapView.getMapboxMap()
 
+    /**
+     * Use to show/hide the debug info.
+     */
     var enabled = false
         set(value) {
             field = value

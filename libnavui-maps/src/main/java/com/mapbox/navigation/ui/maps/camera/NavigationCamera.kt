@@ -88,6 +88,16 @@ import java.util.concurrent.CopyOnWriteArraySet
  * - [NavigationScaleGestureHandler] behaves as above, but allows for executing various scale
  * gestures to manipulate the camera's zoom level when in [NavigationCameraState.FOLLOWING] without
  * immediately falling back to [NavigationCameraState.IDLE].
+ *
+ * ## Debugging
+ * **This feature is currently experimental an subject to change.**
+ *
+ * If you are using the [MapboxNavigationViewportDataSource] instance,
+ * you can use [debugger] to provide a [MapboxNavigationViewportDataSourceDebugger] instance
+ * which will draw various info on the screen when the [NavigationCamera] operates to together with
+ * the [MapboxNavigationViewportDataSource].
+ *
+ * Make sure to also provide the same instance to [MapboxNavigationViewportDataSource.debugger].
  */
 @UiThread
 class NavigationCamera(
@@ -127,6 +137,9 @@ class NavigationCamera(
             }
         }
 
+    /**
+     * Set a [MapboxNavigationViewportDataSourceDebugger].
+     */
     var debugger: MapboxNavigationViewportDataSourceDebugger? = null
 
     private val sourceUpdateObserver = object : ViewportDataSourceUpdateObserver {
