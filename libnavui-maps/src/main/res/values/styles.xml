@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="MapboxStyleRecenter">
+        <item name="recenterButtonDrawable">@drawable/mapbox_ic_recenter</item>
+    </style>
     <style name="MapboxStyleRouteOverview">
         <item name="overviewButtonDrawable">@drawable/mapbox_ic_route_overview</item>
     </style>

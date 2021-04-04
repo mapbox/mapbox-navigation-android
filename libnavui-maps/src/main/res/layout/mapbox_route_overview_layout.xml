@@ -27,7 +27,7 @@
         android:layout_width="@dimen/mapbox_dimen_56dp"
         android:layout_height="@dimen/mapbox_dimen_56dp"
         android:background="@drawable/mapbox_bg_circle"
-        android:padding="@dimen/mapbox_dimen_18dp"
+        android:padding="@dimen/mapbox_dimen_16dp"
         app:elevation="0dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

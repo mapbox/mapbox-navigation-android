@@ -419,22 +419,29 @@ class MapboxNavigationActivity :
     private fun initViews() {
         binding.start.setOnClickListener {
             startNavigation()
-            binding.soundButton.unmute(muteUnmuteCallback)
+            binding.soundButton.unmuteAndExtend(2000L, muteUnmuteCallback)
             binding.start.visibility = GONE
             binding.soundButton.visibility = VISIBLE
             binding.routeOverview.visibility = VISIBLE
             binding.tripProgressCard.visibility = VISIBLE
+            binding.routeOverview.showTextAndExtend(2000L)
         }
         binding.stop.setOnClickListener {
             stopNavigation()
-            binding.maneuverView.visibility = GONE
+            binding.recenter.visibility = GONE
             binding.soundButton.visibility = GONE
+            binding.maneuverView.visibility = GONE
             binding.routeOverview.visibility = GONE
             binding.tripProgressCard.visibility = GONE
         }
+        binding.recenter.setOnClickListener {
+            updateCameraToFollowing()
+            binding.recenter.visibility = GONE
+        }
         binding.routeOverview.setOnClickListener {
-            binding.routeOverview.showTextAndExtend(2000L)
             updateCameraToOverview()
+            binding.recenter.visibility = VISIBLE
+            binding.recenter.showTextAndExtend(2000L)
         }
         binding.soundButton.setOnClickListener {
             if (isMuted) {

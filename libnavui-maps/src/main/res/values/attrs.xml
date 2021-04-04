@@ -4,4 +4,9 @@
         <!-- Defines the drawable representing route overview. -->
         <attr name="overviewButtonDrawable" format="reference" />
     </declare-styleable>
+
+    <declare-styleable name="MapboxRecenterButton">
+        <!-- Defines the drawable representing recenter. -->
+        <attr name="recenterButtonDrawable" format="reference" />
+    </declare-styleable>
 </resources>

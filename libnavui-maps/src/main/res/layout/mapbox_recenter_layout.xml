@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/soundButtonText"
+        android:id="@+id/recenterText"
         android:layout_height="@dimen/mapbox_dimen_56dp"
         android:layout_width="@dimen/mapbox_dimen_56dp"
         android:paddingStart="@dimen/mapbox_dimen_20dp"
@@ -15,20 +14,21 @@
         android:elevation="0dp"
         android:textSize="@dimen/mapbox_dimen_text_14sp"
         android:textAllCaps="true"
+        android:maxLines="1"
+        android:ellipsize="end"
         android:gravity="start|center_vertical"
-        app:layout_constraintEnd_toEndOf="@id/soundButtonIcon"
-        app:layout_constraintTop_toTopOf="@id/soundButtonIcon"
-        app:layout_constraintBottom_toBottomOf="@id/soundButtonIcon"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         android:background="@drawable/mapbox_bg_circle"
         android:textColor="@color/colorOnSurface" />
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/soundButtonIcon"
+        android:id="@+id/recenterIcon"
         android:layout_width="@dimen/mapbox_dimen_56dp"
         android:layout_height="@dimen/mapbox_dimen_56dp"
-        app:elevation="0dp"
-        android:padding="@dimen/mapbox_dimen_16dp"
         android:background="@drawable/mapbox_bg_circle"
+        android:padding="@dimen/mapbox_dimen_16dp"
+        app:elevation="0dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-</merge>
+</androidx.constraintlayout.widget.ConstraintLayout>
