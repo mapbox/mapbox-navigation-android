@@ -215,7 +215,7 @@ class MapboxSoundButton : ConstraintLayout {
 
     private companion object {
         const val SLIDE_DURATION = 300L
-        const val EXTEND_MUTED_TO_WIDTH = 140
+        const val EXTEND_MUTED_TO_WIDTH = 150
         const val EXTEND_UNMUTED_TO_WIDTH = 165
     }
 }

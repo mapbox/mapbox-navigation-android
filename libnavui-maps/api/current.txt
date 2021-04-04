@@ -259,13 +259,23 @@ package com.mapbox.navigation.ui.maps.camera.utils {
 
 package com.mapbox.navigation.ui.maps.camera.view {
 
+  public final class MapboxRecenterButton extends androidx.constraintlayout.widget.ConstraintLayout {
+    ctor public MapboxRecenterButton(android.content.Context context);
+    ctor public MapboxRecenterButton(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxRecenterButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void showTextAndExtend(long duration);
+    method public void updateStyle(@StyleRes int style);
+    field public static final int EXTEND_TO_WIDTH = 150; // 0x96
+    field public static final long SLIDE_DURATION = 300L; // 0x12cL
+  }
+
   public final class MapboxRouteOverviewButton extends androidx.constraintlayout.widget.ConstraintLayout {
     ctor public MapboxRouteOverviewButton(android.content.Context context);
     ctor public MapboxRouteOverviewButton(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxRouteOverviewButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
     method public void showTextAndExtend(long duration);
     method public void updateStyle(@StyleRes int style);
-    field public static final int EXTEND_TO_WIDTH = 175; // 0xaf
+    field public static final int EXTEND_TO_WIDTH = 165; // 0xa5
     field public static final long SLIDE_DURATION = 300L; // 0x12cL
   }
 

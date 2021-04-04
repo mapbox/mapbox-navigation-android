@@ -10,7 +10,7 @@ import android.view.View
 import androidx.annotation.StyleRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.mapbox.navigation.ui.maps.R
-import com.mapbox.navigation.ui.maps.databinding.MapboxRouteOverviewLayoutBinding
+import com.mapbox.navigation.ui.maps.databinding.MapboxRecenterLayoutBinding
 import com.mapbox.navigation.ui.utils.internal.extensions.afterMeasured
 import com.mapbox.navigation.ui.utils.internal.extensions.extend
 import com.mapbox.navigation.ui.utils.internal.extensions.shrink
@@ -19,15 +19,16 @@ import com.mapbox.navigation.ui.utils.internal.extensions.slideWidth
 /**
  * Default view to allow user to switch to route overview mode.
  */
-class MapboxRouteOverviewButton : ConstraintLayout {
+class MapboxRecenterButton : ConstraintLayout {
 
     private var textWidth = 0
     private var isAnimationRunning = false
-    private val binding = MapboxRouteOverviewLayoutBinding.inflate(
-        LayoutInflater.from(context),
-        this
-    )
     private val mainHandler = Handler(Looper.getMainLooper())
+    private val binding = MapboxRecenterLayoutBinding.inflate(
+        LayoutInflater.from(context),
+        this,
+        true
+    )
 
     /**
      *
@@ -63,19 +64,19 @@ class MapboxRouteOverviewButton : ConstraintLayout {
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        binding.routeOverviewText.afterMeasured {
+        binding.recenterText.afterMeasured {
             textWidth = width
         }
     }
 
     /**
-     * Allows you to change the style of [MapboxRouteOverviewButton].
+     * Allows you to change the style of [MapboxRecenterButton].
      * @param style Int
      */
     fun updateStyle(@StyleRes style: Int) {
         val typedArray = context.obtainStyledAttributes(
             style,
-            R.styleable.MapboxRouteOverviewButton
+            R.styleable.MapboxRecenterButton
         )
         applyAttributes(typedArray)
         typedArray.recycle()
@@ -90,22 +91,21 @@ class MapboxRouteOverviewButton : ConstraintLayout {
             isAnimationRunning = true
             val extendToWidth = EXTEND_TO_WIDTH * context.resources.displayMetrics.density
             val animator = getAnimator(textWidth, extendToWidth.toInt())
-            binding.routeOverviewText.extend(
+            binding.recenterText.extend(
                 animator,
                 doOnStart = {
-                    binding.routeOverviewText.text =
-                        context.getString(R.string.mapbox_route_overview)
-                    binding.routeOverviewText.visibility = View.VISIBLE
+                    binding.recenterText.text = context.getString(R.string.mapbox_recenter)
+                    binding.recenterText.visibility = View.VISIBLE
                     mainHandler.postDelayed(
                         {
                             val endAnimator = getAnimator(extendToWidth.toInt(), textWidth)
-                            binding.routeOverviewText.shrink(
+                            binding.recenterText.shrink(
                                 endAnimator,
                                 doOnStart = {
-                                    binding.routeOverviewText.text = null
+                                    binding.recenterText.text = null
                                 },
                                 doOnEnd = {
-                                    binding.routeOverviewText.visibility = View.INVISIBLE
+                                    binding.recenterText.visibility = View.INVISIBLE
                                     isAnimationRunning = false
                                 }
                             )
@@ -120,9 +120,9 @@ class MapboxRouteOverviewButton : ConstraintLayout {
     private fun initAttributes(attrs: AttributeSet?) {
         val typedArray = context.obtainStyledAttributes(
             attrs,
-            R.styleable.MapboxRouteOverviewButton,
+            R.styleable.MapboxRecenterButton,
             0,
-            R.style.MapboxStyleRouteOverview
+            R.style.MapboxStyleRecenter
         )
         applyAttributes(typedArray)
         typedArray.recycle()
@@ -130,15 +130,15 @@ class MapboxRouteOverviewButton : ConstraintLayout {
 
     private fun applyAttributes(typedArray: TypedArray) {
         typedArray.getDrawable(
-            R.styleable.MapboxRouteOverviewButton_overviewButtonDrawable
-        ).also { binding.routeOverviewIcon.setImageDrawable(it) }
+            R.styleable.MapboxRecenterButton_recenterButtonDrawable
+        ).also { binding.recenterIcon.setImageDrawable(it) }
     }
 
     private fun getAnimator(from: Int, to: Int) =
-        binding.routeOverviewText.slideWidth(from, to, SLIDE_DURATION)
+        binding.recenterText.slideWidth(from, to, SLIDE_DURATION)
 
     private companion object {
         const val SLIDE_DURATION = 300L
-        const val EXTEND_TO_WIDTH = 165
+        const val EXTEND_TO_WIDTH = 150
     }
 }
