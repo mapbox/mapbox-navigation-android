@@ -116,8 +116,8 @@ class RouteDrawingUtil(private val mapView: MapView) {
     fun clear() {
         touchPoints.clear()
         mapView.getMapboxMap().getStyle { style ->
-            style.getSourceAs<GeoJsonSource>(LINE_LAYER_SOURCE_ID)?.feature(
-                Feature.fromGeometry(LineString.fromLngLats(listOf()))
+            style.getSourceAs<GeoJsonSource>(LINE_LAYER_SOURCE_ID)?.featureCollection(
+                FeatureCollection.fromFeatures(listOf())
             )
             style.getSourceAs<GeoJsonSource>(LINE_END_SOURCE_ID)?.featureCollection(
                 FeatureCollection.fromFeatures(listOf())
