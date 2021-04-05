@@ -43,7 +43,7 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
     override fun getImplementationClass(): KClass<NavigationOptions> = NavigationOptions::class
 
     override fun getFilledUpBuilder(): NavigationOptions.Builder {
-        val context = mockk<Context>()
+        val context = mockk<Context>(relaxed = true)
         val appContext = mockk<Context>(relaxed = true)
         every { appContext.applicationContext } returns appContext
         every { context.applicationContext } returns appContext

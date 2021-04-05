@@ -1,7 +1,6 @@
 package com.mapbox.navigation.base.formatter
 
 import android.content.Context
-import com.mapbox.navigation.base.internal.VoiceUnit
 import com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import java.util.Locale
@@ -11,13 +10,13 @@ import java.util.Locale
  *
  * @param applicationContext from which to get localized strings from
  * @param locale the locale to use for localization of distance resources
- * @param unitType to use, or UNDEFINED to use default for locale country
+ * @param unitType to use for voice and visual information.
  * @param roundingIncrement increment by which to round small distances
  */
 class DistanceFormatterOptions private constructor(
     val applicationContext: Context,
     val locale: Locale,
-    @VoiceUnit.Type val unitType: String,
+    val unitType: UnitType,
     @Rounding.Increment val roundingIncrement: Int
 ) {
 
@@ -61,10 +60,12 @@ class DistanceFormatterOptions private constructor(
      * Regenerate whenever a change is made
      */
     override fun toString(): String {
-        return "DistanceFormatterOptions(applicationContext=$applicationContext," +
-            " locale=$locale," +
-            " unitType='$unitType'," +
-            " roundingIncrement=$roundingIncrement)"
+        return "DistanceFormatterOptions(" +
+            "applicationContext=$applicationContext, " +
+            "locale=$locale, " +
+            "unitType='$unitType', " +
+            "roundingIncrement=$roundingIncrement" +
+            ")"
     }
 
     /**
@@ -73,17 +74,18 @@ class DistanceFormatterOptions private constructor(
      */
     class Builder(applicationContext: Context) {
         private val applicationContext: Context = applicationContext.applicationContext
-        private var unitType: String = VoiceUnit.UNDEFINED
-        private var locale: Locale? = null
+        private var locale: Locale = applicationContext.inferDeviceLocale()
+        private var unitType: UnitType? = null
         private var roundingIncrement = Rounding.INCREMENT_FIFTY
 
         /**
-         * Policy for the various units of measurement, UNDEFINED uses default for locale country
+         * Policy for the various units of measurement.
+         * If null, default unit for locale country will be used.
          *
-         * @param unitType String
+         * @param unitType UnitType
          * @return Builder
          */
-        fun unitType(@VoiceUnit.Type unitType: String) =
+        fun unitType(unitType: UnitType?) =
             apply { this.unitType = unitType }
 
         /**
@@ -101,7 +103,7 @@ class DistanceFormatterOptions private constructor(
          * @param locale [Locale]
          * @return Builder
          */
-        fun locale(locale: Locale?) =
+        fun locale(locale: Locale) =
             apply { this.locale = locale }
 
         /**
@@ -109,19 +111,11 @@ class DistanceFormatterOptions private constructor(
          *
          * @return [DistanceFormatterOptions]
          */
-        fun build(): DistanceFormatterOptions {
-            val localeToUse: Locale = locale ?: applicationContext.inferDeviceLocale()
-            val unitTypeToUse: String = when (unitType) {
-                VoiceUnit.UNDEFINED -> localeToUse.getUnitTypeForLocale()
-                else -> unitType
-            }
-
-            return DistanceFormatterOptions(
-                applicationContext = applicationContext,
-                locale = localeToUse,
-                unitType = unitTypeToUse,
-                roundingIncrement = roundingIncrement
-            )
-        }
+        fun build() = DistanceFormatterOptions(
+            applicationContext = applicationContext,
+            locale = locale,
+            unitType = unitType ?: locale.getUnitTypeForLocale(),
+            roundingIncrement = roundingIncrement
+        )
     }
 }

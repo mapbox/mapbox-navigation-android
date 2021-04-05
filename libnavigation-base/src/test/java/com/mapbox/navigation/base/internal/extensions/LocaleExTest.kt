@@ -2,8 +2,7 @@ package com.mapbox.navigation.base.internal.extensions
 
 import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.navigation.base.internal.VoiceUnit.IMPERIAL
-import com.mapbox.navigation.base.internal.VoiceUnit.METRIC
+import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale
 import io.mockk.every
 import io.mockk.mockk
@@ -31,7 +30,7 @@ class LocaleExTest {
 
         val result = locale.getUnitTypeForLocale()
 
-        assertEquals(IMPERIAL, result)
+        assertEquals(UnitType.IMPERIAL, result)
     }
 
     @Test
@@ -42,7 +41,7 @@ class LocaleExTest {
 
         val result = locale.getUnitTypeForLocale()
 
-        assertEquals(IMPERIAL, result)
+        assertEquals(UnitType.IMPERIAL, result)
     }
 
     @Test
@@ -53,7 +52,7 @@ class LocaleExTest {
 
         val result = locale.getUnitTypeForLocale()
 
-        assertEquals(IMPERIAL, result)
+        assertEquals(UnitType.IMPERIAL, result)
     }
 
     @Test
@@ -64,7 +63,7 @@ class LocaleExTest {
 
         val result = locale.getUnitTypeForLocale()
 
-        assertEquals(METRIC, result)
+        assertEquals(UnitType.METRIC, result)
     }
 
     @Test

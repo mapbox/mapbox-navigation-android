@@ -3,7 +3,7 @@ package com.mapbox.navigation.ui.tripprogress.model
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
-import com.mapbox.navigation.base.internal.VoiceUnit
+import com.mapbox.navigation.base.formatter.UnitType
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,7 +21,7 @@ class DistanceRemainingFormatterTest {
     fun formatDistanceLargeDistanceImperialWithDefaultLocale() {
         val formatter = DistanceRemainingFormatter(
             DistanceFormatterOptions.Builder(ctx)
-                .unitType(VoiceUnit.IMPERIAL)
+                .unitType(UnitType.IMPERIAL)
                 .build()
         )
 
@@ -48,7 +48,7 @@ class DistanceRemainingFormatterTest {
         val formatter = DistanceRemainingFormatter(
             DistanceFormatterOptions.Builder(ctx)
                 .locale(Locale.JAPAN)
-                .unitType(VoiceUnit.IMPERIAL)
+                .unitType(UnitType.IMPERIAL)
                 .build()
         )
 
