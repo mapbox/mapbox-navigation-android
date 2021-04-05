@@ -31,20 +31,20 @@ package com.mapbox.navigation.base.formatter {
     method public android.content.Context getApplicationContext();
     method public java.util.Locale getLocale();
     method public int getRoundingIncrement();
-    method public String getUnitType();
+    method public com.mapbox.navigation.base.formatter.UnitType getUnitType();
     method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions.Builder toBuilder();
     property public final android.content.Context applicationContext;
     property public final java.util.Locale locale;
     property public final int roundingIncrement;
-    property public final String unitType;
+    property public final com.mapbox.navigation.base.formatter.UnitType unitType;
   }
 
   public static final class DistanceFormatterOptions.Builder {
     ctor public DistanceFormatterOptions.Builder(android.content.Context applicationContext);
     method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions build();
-    method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions.Builder locale(java.util.Locale? locale);
+    method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions.Builder locale(java.util.Locale locale);
     method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions.Builder roundingIncrement(@com.mapbox.navigation.base.formatter.Rounding.Increment int roundingIncrement);
-    method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions.Builder unitType(String unitType);
+    method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions.Builder unitType(com.mapbox.navigation.base.formatter.UnitType? unitType);
   }
 
   public final class Rounding {
@@ -57,6 +57,13 @@ package com.mapbox.navigation.base.formatter {
   }
 
   @IntDef({com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TEN, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TWENTY_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIFTY, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_ONE_HUNDRED}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface Rounding.Increment {
+  }
+
+  public enum UnitType {
+    method public final String getValue();
+    property public final String value;
+    enum_constant public static final com.mapbox.navigation.base.formatter.UnitType IMPERIAL;
+    enum_constant public static final com.mapbox.navigation.base.formatter.UnitType METRIC;
   }
 
 }

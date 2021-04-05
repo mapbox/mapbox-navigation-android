@@ -4,7 +4,7 @@ import android.content.Context
 import android.text.SpannableString
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
-import com.mapbox.navigation.base.internal.VoiceUnit
+import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.ui.base.formatter.ValueFormatter
 
 /**
@@ -225,8 +225,8 @@ class TripProgressUpdateFormatter private constructor(
             ValueFormatter<Double, SpannableString> {
             val options = DistanceFormatterOptions.Builder(context).build()
             val roundingUnit = when (options.unitType) {
-                VoiceUnit.IMPERIAL -> DEFAULT_ROUNDING_IMPERIAL
-                else -> DEFAULT_ROUNDING_METRIC
+                UnitType.IMPERIAL -> DEFAULT_ROUNDING_IMPERIAL
+                UnitType.METRIC -> DEFAULT_ROUNDING_METRIC
             }
             val finalOptions = options.toBuilder().roundingIncrement(roundingUnit).build()
             return DistanceRemainingFormatter(finalOptions)

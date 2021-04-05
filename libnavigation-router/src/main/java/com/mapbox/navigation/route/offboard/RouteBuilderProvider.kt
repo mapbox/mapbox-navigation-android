@@ -31,7 +31,7 @@ internal object RouteBuilderProvider {
             )
             .voiceInstructions(true)
             .bannerInstructions(true)
-            .voiceUnits(context.inferDeviceLocale().getUnitTypeForLocale())
+            .voiceUnits(context.inferDeviceLocale().getUnitTypeForLocale().value)
             .also { builder ->
                 if (urlSkuTokenProvider != null) {
                     builder.interceptor {

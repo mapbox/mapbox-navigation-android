@@ -2,7 +2,7 @@ package com.mapbox.navigation.base.internal.extensions
 
 import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.navigation.base.internal.VoiceUnit
+import com.mapbox.navigation.base.formatter.UnitType
 import java.util.Locale
 
 /**
@@ -14,22 +14,21 @@ import java.util.Locale
 object LocaleEx {
 
     /**
-     * Returns the [VoiceUnit] type for the specified locale. Try to avoid using this unnecessarily because
-     * all methods consuming unit type are able to handle the [VoiceUnit.UNDEFINED] type
+     * Returns the [UnitType] type for the specified locale. Try to avoid using this unnecessarily because
+     * all methods consuming unit type are able to handle the default unit type for the locale.
      *
      * @receiver Locale for which to return the default unit type
-     * @return String [VoiceUnit]
+     * @return [UnitType]
      */
     @JvmStatic
-    @VoiceUnit.Type
-    fun Locale.getUnitTypeForLocale(): String =
+    fun Locale.getUnitTypeForLocale(): UnitType =
         when (this.country.toUpperCase(this)) {
             "US", // US
             "LR", // Liberia
             "MM" -> // Burma
-                VoiceUnit.IMPERIAL
+                UnitType.IMPERIAL
             else ->
-                VoiceUnit.METRIC
+                UnitType.METRIC
         }
 
     /**

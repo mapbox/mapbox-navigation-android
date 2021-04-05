@@ -10,7 +10,7 @@ import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
-import com.mapbox.navigation.base.internal.VoiceUnit
+import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.core.R
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfConversion
@@ -31,13 +31,13 @@ class MapboxDistanceFormatter(
 ) : DistanceFormatter {
 
     private val smallUnit = when (options.unitType) {
-        VoiceUnit.IMPERIAL -> TurfConstants.UNIT_FEET
-        else -> TurfConstants.UNIT_METERS
+        UnitType.IMPERIAL -> TurfConstants.UNIT_FEET
+        UnitType.METRIC -> TurfConstants.UNIT_METERS
     }
 
     private val largeUnit = when (options.unitType) {
-        VoiceUnit.IMPERIAL -> TurfConstants.UNIT_MILES
-        else -> TurfConstants.UNIT_KILOMETERS
+        UnitType.IMPERIAL -> TurfConstants.UNIT_MILES
+        UnitType.METRIC -> TurfConstants.UNIT_KILOMETERS
     }
 
     companion object {
