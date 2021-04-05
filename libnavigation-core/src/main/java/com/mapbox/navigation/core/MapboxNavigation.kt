@@ -280,7 +280,7 @@ class MapboxNavigation(
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
         directionsSession.registerRoutesObserver(internalRoutesObserver)
 
-        roadObjectsStore = RoadObjectsStore(navigator)
+        roadObjectsStore = RoadObjectsStore(navigator, logger)
         graphAccessor = GraphAccessor(navigator)
     }
 
