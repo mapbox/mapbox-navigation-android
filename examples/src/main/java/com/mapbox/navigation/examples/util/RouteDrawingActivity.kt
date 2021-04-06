@@ -113,12 +113,12 @@ class RouteDrawingActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnEnableLongPress).setOnClickListener {
             when (routeDrawingUtilEnabled) {
                 false -> {
-                    routeDrawingUtilEnabled != routeDrawingUtilEnabled
+                    routeDrawingUtilEnabled = true
                     routeDrawingUtil.enable()
                     (it as Button).text = "Disable Long Press Map"
                 }
                 true -> {
-                    routeDrawingUtilEnabled != routeDrawingUtilEnabled
+                    routeDrawingUtilEnabled = false
                     routeDrawingUtil.disable()
                     (it as Button).text = "Enable Long Press Map"
                 }
