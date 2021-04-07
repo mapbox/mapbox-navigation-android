@@ -12,14 +12,20 @@ import com.mapbox.navigation.core.MapboxNavigation
 interface ArrivalObserver {
 
     /**
-     * Once [MapboxNavigation.navigateNextRouteLeg] has been called and returns true,
+     * Called when the [RouteProgress.currentState] has reached [RouteProgressState.ROUTE_COMPLETE],
+     * and the route progress has reached a waypoint on the route.
+     */
+    fun onWaypointArrival(routeProgress: RouteProgress)
+
+    /**
+     * Called when [MapboxNavigation.navigateNextRouteLeg] has been called and returns true,
      * this observer will be notified of the next route leg start.
      */
     fun onNextRouteLegStart(routeLegProgress: RouteLegProgress)
 
     /**
-     * This will be called once the [RouteProgress.currentState] has reached [RouteProgressState.ROUTE_COMPLETE].
-     * This means the device has reached the final destination on the route.
+     * Called once the [RouteProgress.currentState] has reached [RouteProgressState.ROUTE_COMPLETE],
+     * and the route progress has reached the final destination on the route.
      */
     fun onFinalDestinationArrival(routeProgress: RouteProgress)
 }

@@ -23,6 +23,10 @@ class ArrivalIdlingResource(
     init {
         mapboxNavigation?.registerArrivalObserver(
             object : ArrivalObserver {
+                override fun onWaypointArrival(routeProgress: RouteProgress) {
+                    // do nothing
+                }
+
                 override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
                     // do nothing
                 }
@@ -44,6 +48,10 @@ class ArrivalIdlingResource(
         if (isIdleNow) {
             callback?.onTransitionToIdle()
         }
+    }
+
+    override fun onWaypointArrival(routeProgress: RouteProgress) {
+        // do nothing
     }
 
     override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {

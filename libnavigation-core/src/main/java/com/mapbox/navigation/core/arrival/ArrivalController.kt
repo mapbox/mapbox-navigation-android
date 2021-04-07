@@ -26,25 +26,6 @@ interface ArrivalController {
 }
 
 /**
- * The default controller for arrival. This will move onto the next leg automatically
- * if there is one.
- */
-class AutoArrivalController : ArrivalController {
-
-    /**
-     * Default arrival options.
-     */
-    override fun arrivalOptions(): ArrivalOptions = ArrivalOptions.Builder().build()
-
-    /**
-     * By default this will move onto the next step.
-     */
-    override fun navigateNextRouteLeg(routeLegProgress: RouteLegProgress): Boolean {
-        return true
-    }
-}
-
-/**
  * Choose when to be notified of arrival.
  *
  * @param arrivalInSeconds While the next stop is less than [arrivalInSeconds] away,
