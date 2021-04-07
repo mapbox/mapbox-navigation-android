@@ -136,7 +136,7 @@ public class NavigationMapRoute implements LifecycleObserver {
         mapView, mapboxMap, styleRes, LAYER_ABOVE_UPCOMING_MANEUVER_ARROW, sourceMaxZoom, sourceTolerance
     );
     this.routeClickPadding = routeClickPadding;
-    this.mapRouteProgressChangeListener = buildMapRouteProgressChangeListener();
+    this.mapRouteProgressChangeListener = new MapRouteProgressChangeListener(routeLine, routeArrow);
     this.routeLineInitializedCallback = routeLineInitializedCallback;
     this.lifecycleOwner = lifecycleOwner;
     this.sourceMaxZoom = sourceMaxZoom;
@@ -302,7 +302,6 @@ public class NavigationMapRoute implements LifecycleObserver {
    */
   public void addProgressChangeListener(@NonNull MapboxNavigation navigation) {
     this.navigation = navigation;
-    this.mapRouteProgressChangeListener = buildMapRouteProgressChangeListener();
     navigation.registerRouteProgressObserver(mapRouteProgressChangeListener);
   }
 
@@ -367,6 +366,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_START)
   protected void onStart() {
+    this.mapRouteProgressChangeListener = new MapRouteProgressChangeListener(routeLine, routeArrow);
     addListeners();
     updateProgressChangeListener();
   }
@@ -494,15 +494,9 @@ public class NavigationMapRoute implements LifecycleObserver {
     if (navigation != null) {
       navigation.unregisterRouteProgressObserver(mapRouteProgressChangeListener);
     }
-    mapRouteProgressChangeListener = buildMapRouteProgressChangeListener();
     if (navigation != null) {
       navigation.registerRouteProgressObserver(mapRouteProgressChangeListener);
     }
-  }
-
-  @NonNull
-  private MapRouteProgressChangeListener buildMapRouteProgressChangeListener() {
-    return new MapRouteProgressChangeListener(routeLine, routeArrow);
   }
 
   protected final MapboxMap.OnMapClickListener mapClickListener = new MapboxMap.OnMapClickListener() {
