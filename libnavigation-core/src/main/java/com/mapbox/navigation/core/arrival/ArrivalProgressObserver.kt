@@ -14,6 +14,7 @@ internal class ArrivalProgressObserver(
     private var arrivalController: ArrivalController = AutoArrivalController()
     private val arrivalObservers = CopyOnWriteArraySet<ArrivalObserver>()
     private var finalDestinationArrived = false
+    private var waypointArrived = false
 
     fun attach(arrivalController: ArrivalController) {
         this.arrivalController = arrivalController
@@ -51,20 +52,35 @@ internal class ArrivalProgressObserver(
             ?: return
 
         val arrivalOptions = arrivalController.arrivalOptions()
-        val hasMoreLegs = hasMoreLegs(routeProgress)
-        if (routeProgress.currentState == RouteProgressState.ROUTE_COMPLETE && !hasMoreLegs) {
+        val arrivalProgress = toArrivalProgress(arrivalOptions, routeProgress, routeLegProgress)
+        val isComplete = routeProgress.currentState == RouteProgressState.ROUTE_COMPLETE
+        if (isComplete && !arrivalProgress.hasMoreLegs) {
             doOnFinalDestinationArrival(routeProgress)
-        } else if (routeProgress.currentState == RouteProgressState.ROUTE_COMPLETE && hasMoreLegs) {
-            doOnWaypointArrival(routeLegProgress)
-        } else if (arrivalOptions.arrivalInSeconds != null && hasMoreLegs) {
-            checkWaypointArrivalTime(arrivalOptions.arrivalInSeconds, routeLegProgress)
-        } else if (arrivalOptions.arrivalInMeters != null && hasMoreLegs) {
-            checkWaypointArrivalDistance(arrivalOptions.arrivalInMeters, routeLegProgress)
+        } else if (isComplete && arrivalProgress.hasMoreLegs) {
+            doOnWaypointArrival(arrivalProgress)
+        } else if (arrivalOptions.arrivalInSeconds != null && arrivalProgress.hasMoreLegs) {
+            checkWaypointArrivalTime(arrivalProgress)
+        } else if (arrivalOptions.arrivalInMeters != null && arrivalProgress.hasMoreLegs) {
+            checkWaypointArrivalDistance(arrivalProgress)
         }
-        if (!hasMoreLegs) {
-            finalDestinationArrived =
-                routeProgress.currentState == RouteProgressState.ROUTE_COMPLETE
+        if (arrivalProgress.hasMoreLegs) {
+            waypointArrived = isComplete
+        } else {
+            finalDestinationArrived = isComplete
         }
+    }
+
+    private fun toArrivalProgress(
+        arrivalOptions: ArrivalOptions,
+        routeProgress: RouteProgress,
+        routeLegProgress: RouteLegProgress
+    ): ArrivalProgress {
+        return ArrivalProgress(
+            arrivalOptions = arrivalOptions,
+            hasMoreLegs = hasMoreLegs(routeProgress),
+            routeProgress = routeProgress,
+            routeLegProgress = routeLegProgress
+        )
     }
 
     private fun hasMoreLegs(routeProgress: RouteProgress): Boolean {
@@ -73,25 +89,25 @@ internal class ArrivalProgressObserver(
         return (currentLegIndex != null && lastLegIndex != null) && currentLegIndex < lastLegIndex
     }
 
-    private fun checkWaypointArrivalTime(
-        arrivalInSeconds: Double,
-        routeLegProgress: RouteLegProgress
-    ) {
-        if (routeLegProgress.durationRemaining <= arrivalInSeconds) {
-            doOnWaypointArrival(routeLegProgress)
+    private fun checkWaypointArrivalTime(arrivalProgress: ArrivalProgress) {
+        val arrivalInSeconds = arrivalProgress.arrivalOptions.arrivalInSeconds!!
+        if (arrivalProgress.routeLegProgress.durationRemaining <= arrivalInSeconds) {
+            doOnWaypointArrival(arrivalProgress)
         }
     }
 
-    private fun checkWaypointArrivalDistance(
-        arrivalInMeters: Double,
-        routeLegProgress: RouteLegProgress
-    ) {
-        if (routeLegProgress.distanceRemaining <= arrivalInMeters) {
-            doOnWaypointArrival(routeLegProgress)
+    private fun checkWaypointArrivalDistance(arrivalProgress: ArrivalProgress) {
+        val arrivalInMeters = arrivalProgress.arrivalOptions.arrivalInMeters!!
+        if (arrivalProgress.routeLegProgress.distanceRemaining <= arrivalInMeters) {
+            doOnWaypointArrival(arrivalProgress)
         }
     }
 
-    private fun doOnWaypointArrival(routeLegProgress: RouteLegProgress) {
+    private fun doOnWaypointArrival(arrivalProgress: ArrivalProgress) {
+        if (!waypointArrived) {
+            arrivalObservers.forEach { it.onWaypointArrival(arrivalProgress.routeProgress) }
+        }
+        val routeLegProgress = arrivalProgress.routeLegProgress
         val moveToNextLeg = arrivalController.navigateNextRouteLeg(routeLegProgress)
         if (moveToNextLeg) {
             navigateNextRouteLeg()
@@ -104,3 +120,10 @@ internal class ArrivalProgressObserver(
         }
     }
 }
+
+private class ArrivalProgress(
+    val arrivalOptions: ArrivalOptions,
+    val hasMoreLegs: Boolean,
+    val routeProgress: RouteProgress,
+    val routeLegProgress: RouteLegProgress
+)

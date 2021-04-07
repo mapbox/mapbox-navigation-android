@@ -83,6 +83,7 @@ package com.mapbox.navigation.core.arrival {
   public interface ArrivalObserver {
     method public void onFinalDestinationArrival(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
     method public void onNextRouteLegStart(com.mapbox.navigation.base.trip.model.RouteLegProgress routeLegProgress);
+    method public void onWaypointArrival(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
   }
 
   public final class ArrivalOptions {

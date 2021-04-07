@@ -410,6 +410,10 @@ internal object MapboxNavigationTelemetry :
         sessionStart()
     }
 
+    override fun onWaypointArrival(routeProgress: RouteProgress) {
+        log("onWaypointDestinationArrival")
+    }
+
     override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
         log("onFinalDestinationArrival")
         this.routeProgress = routeProgress
