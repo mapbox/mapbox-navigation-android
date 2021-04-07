@@ -12,7 +12,6 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.LineString
-import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
@@ -22,6 +21,9 @@ import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObject
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
+import com.mapbox.navigation.core.navigator.GeometryType.ENTRANCE_POINT
+import com.mapbox.navigation.core.navigator.GeometryType.EXIT_POINT
+import com.mapbox.navigation.core.navigator.GeometryType.POINT_OR_LINE
 import com.mapbox.navigation.core.navigator.MappedRoadObject.EntranceAndExit
 import com.mapbox.navigation.core.navigator.MappedRoadObject.SingleObject
 import com.mapbox.navigation.core.trip.model.roadobject.border.CountryBorderCrossing
@@ -406,12 +408,12 @@ private fun com.mapbox.navigator.RouteAlert.toRoadObject(): MappedRoadObject {
         // so map to TunnelEntrance + TunnelExit
         RouteAlertType.TUNNEL_ENTRANCE -> EntranceAndExit(
             entrance = buildTunnelEntrance(
-                getPointGeometry(beginCoordinate),
+                getObjectGeometry(ENTRANCE_POINT),
                 tunnelInfo!!.toTunnelInfo(),
                 distance
             ),
             exit = buildTunnelExit(
-                getPointGeometry(endCoordinate),
+                getObjectGeometry(EXIT_POINT),
                 tunnelInfo!!.toTunnelInfo(),
                 length?.let { it + distance } ?: distance
             ),
@@ -419,7 +421,7 @@ private fun com.mapbox.navigator.RouteAlert.toRoadObject(): MappedRoadObject {
         )
         RouteAlertType.BORDER_CROSSING -> SingleObject(
             buildBorderCrossing(
-                getAlertGeometry(),
+                getObjectGeometry(),
                 borderCrossingInfo!!.from.toBorderCrossingAdminInfo(),
                 borderCrossingInfo!!.to.toBorderCrossingAdminInfo(),
                 distance
@@ -427,56 +429,56 @@ private fun com.mapbox.navigator.RouteAlert.toRoadObject(): MappedRoadObject {
         )
         RouteAlertType.TOLL_COLLECTION_POINT -> SingleObject(
             buildTollCollection(
-                getAlertGeometry(),
+                getObjectGeometry(),
                 tollCollectionInfo!!.toTollCollectionType(),
                 distance,
             )
         )
         RouteAlertType.SERVICE_AREA -> SingleObject(
-            buildRestStop(getAlertGeometry(), serviceAreaInfo!!.toRestStopType(), distance)
+            buildRestStop(getObjectGeometry(), serviceAreaInfo!!.toRestStopType(), distance)
         )
         // RouteAlert with type RESTRICTED_AREA contains coordinates of area's start and end,
         // so map to RestrictedAreaEntrance + RestrictedAreaExit
         RouteAlertType.RESTRICTED_AREA -> EntranceAndExit(
             entrance = buildRestrictedAreaEntrance(
-                getPointGeometry(beginCoordinate),
+                getObjectGeometry(ENTRANCE_POINT),
                 distance
             ),
             exit = buildRestrictedAreaExit(
-                getPointGeometry(endCoordinate),
+                getObjectGeometry(EXIT_POINT),
                 length?.let { it + distance } ?: distance
             ),
             entranceExitDistance = length ?: 0.0
         )
         RouteAlertType.INCIDENT -> SingleObject(
-            buildIncident(getAlertGeometry(), incidentInfo!!.toIncidentInfo(), distance)
+            buildIncident(getObjectGeometry(), incidentInfo!!.toIncidentInfo(), distance)
         )
         else -> throw IllegalArgumentException("not supported type: $type")
     }
 }
 
-private fun com.mapbox.navigator.RouteAlert.getAlertGeometry(): RoadObjectGeometry {
-    val shape = if (length != null) {
-        LineString.fromLngLats(listOf(beginCoordinate, endCoordinate))
-    } else {
-        Point.fromLngLat(beginCoordinate.longitude(), beginCoordinate.latitude())
+private fun com.mapbox.navigator.RouteAlert.getObjectGeometry(
+    geometryType: GeometryType = POINT_OR_LINE
+): RoadObjectGeometry {
+    val shape = when (geometryType) {
+        POINT_OR_LINE -> {
+            if (length != null) {
+                LineString.fromLngLats(listOf(beginCoordinate, endCoordinate))
+            } else {
+                beginCoordinate
+            }
+        }
+        ENTRANCE_POINT -> beginCoordinate
+        EXIT_POINT -> endCoordinate
     }
 
     return RoadObjectGeometry.Builder(
-        length = length,
-        shape = shape,
-        startGeometryIndex = beginGeometryIndex,
-        endGeometryIndex = endGeometryIndex,
+        length,
+        shape,
+        beginGeometryIndex,
+        endGeometryIndex,
     ).build()
 }
-
-private fun getPointGeometry(point: Point): RoadObjectGeometry =
-    RoadObjectGeometry.Builder(
-        length = null,
-        shape = Point.fromLngLat(point.longitude(), point.latitude()),
-        startGeometryIndex = null,
-        endGeometryIndex = null,
-    ).build()
 
 private fun com.mapbox.navigator.TunnelInfo.toTunnelInfo() =
     TunnelInfo.Builder(name = this.name).build()
@@ -666,11 +668,25 @@ internal fun NavigationStatus.prepareSpeedLimit(): SpeedLimit? {
     }
 }
 
-internal sealed class MappedRoadObject {
+private sealed class MappedRoadObject {
     internal data class SingleObject(val roadObject: RoadObject) : MappedRoadObject()
     internal data class EntranceAndExit(
         val entrance: RoadObject,
         val exit: RoadObject,
         val entranceExitDistance: Double
     ) : MappedRoadObject()
+}
+
+private enum class GeometryType {
+    // Used to split line-like object (Tunnel, RestrictedArea) into a pair of entrance-exit objects.
+    // Object will be an entrance Point with extra data (length, geometry indices).
+    ENTRANCE_POINT,
+
+    // Used to split line-like object (Tunnel, RestrictedArea) into a pair of entrance-exit objects.
+    // Object will be an exit Point with extra data (length, geometry indices).
+    EXIT_POINT,
+
+    // Used to map object to a Point or a LineString depending on the length.
+    // If length is null, we will get a Point without extra data (length, geometry indices).
+    POINT_OR_LINE,
 }
