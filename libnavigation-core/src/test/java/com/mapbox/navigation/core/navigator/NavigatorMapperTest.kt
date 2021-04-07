@@ -54,6 +54,15 @@ class NavigatorMapperTest {
     private val route: DirectionsRoute = mockk(relaxed = true)
     private val routeBufferGeoJson: Geometry = mockk(relaxed = true)
 
+    private val beginCoordinate = Point.fromLngLat(10.0, 20.0)
+    private val endCoordinate = Point.fromLngLat(33.0, 44.0)
+    private val pointGeometry = RoadObjectGeometry.Builder(
+        length = null,
+        shape = beginCoordinate,
+        startGeometryIndex = START_GEOMETRY_INDEX,
+        endGeometryIndex = START_GEOMETRY_INDEX
+    ).build()
+
     @Test
     fun `map matcher result sanity`() {
         val tripStatus = TripStatus(
@@ -327,13 +336,23 @@ class NavigatorMapperTest {
         )
 
         val expectedFirst = TunnelEntrance.Builder(
-            RoadObjectGeometry.Builder(null, Point.fromLngLat(10.0, 20.0), null, null).build(),
+            RoadObjectGeometry.Builder(
+                LENGTH,
+                beginCoordinate,
+                START_GEOMETRY_INDEX,
+                END_GEOMETRY_INDEX
+            ).build(),
             TunnelInfo.Builder("Ted Williams Tunnel").build()
         ).distanceFromStartOfRoute(DISTANCE_FROM_START_OF_ROUTE)
             .build()
 
         val expectedSecond = TunnelExit.Builder(
-            RoadObjectGeometry.Builder(null, Point.fromLngLat(33.0, 44.0), null, null).build(),
+            RoadObjectGeometry.Builder(
+                LENGTH,
+                endCoordinate,
+                START_GEOMETRY_INDEX,
+                END_GEOMETRY_INDEX
+            ).build(),
             TunnelInfo.Builder("Ted Williams Tunnel").build()
         ).distanceFromStartOfRoute(DISTANCE_FROM_START_OF_ROUTE + LENGTH)
             .build()
@@ -412,12 +431,7 @@ class NavigatorMapperTest {
             .00001
         )
         val expected = CountryBorderCrossing.Builder(
-            RoadObjectGeometry.Builder(
-                null,
-                shape = Point.fromLngLat(10.0, 20.0),
-                startGeometryIndex = 1,
-                endGeometryIndex = 1
-            ).build(),
+            pointGeometry,
             CountryBorderCrossingInfo.Builder(
                 CountryBorderCrossingAdminInfo.Builder("US", "USA").build(),
                 CountryBorderCrossingAdminInfo.Builder("CA", "CAN").build()
@@ -451,12 +465,7 @@ class NavigatorMapperTest {
             .00001
         )
         val expected = TollCollection.Builder(
-            RoadObjectGeometry.Builder(
-                null,
-                shape = Point.fromLngLat(10.0, 20.0),
-                startGeometryIndex = 1,
-                endGeometryIndex = 1
-            ).build(),
+            pointGeometry,
             TollCollectionType.TOLL_GANTRY
         ).distanceFromStartOfRoute(DISTANCE_FROM_START_OF_ROUTE)
             .build()
@@ -486,12 +495,7 @@ class NavigatorMapperTest {
             .00001
         )
         val expected = TollCollection.Builder(
-            RoadObjectGeometry.Builder(
-                null,
-                shape = Point.fromLngLat(10.0, 20.0),
-                startGeometryIndex = 1,
-                endGeometryIndex = 1
-            ).build(),
+            pointGeometry,
             TollCollectionType.TOLL_BOOTH
         ).distanceFromStartOfRoute(DISTANCE_FROM_START_OF_ROUTE)
             .build()
@@ -521,12 +525,7 @@ class NavigatorMapperTest {
             .00001
         )
         val expected = RestStop.Builder(
-            RoadObjectGeometry.Builder(
-                null,
-                shape = Point.fromLngLat(10.0, 20.0),
-                startGeometryIndex = 1,
-                endGeometryIndex = 1
-            ).build(),
+            pointGeometry,
             RestStopType.REST_AREA
         ).distanceFromStartOfRoute(DISTANCE_FROM_START_OF_ROUTE)
             .build()
@@ -552,12 +551,7 @@ class NavigatorMapperTest {
 
         assertEquals(DISTANCE_TO_START, upcomingRoadObject.distanceToStart, .00001)
         val expected = RestStop.Builder(
-            RoadObjectGeometry.Builder(
-                null,
-                shape = Point.fromLngLat(10.0, 20.0),
-                startGeometryIndex = 1,
-                endGeometryIndex = 1
-            ).build(),
+            pointGeometry,
             RestStopType.SERVICE_AREA
         ).distanceFromStartOfRoute(DISTANCE_FROM_START_OF_ROUTE)
             .build()
@@ -583,12 +577,22 @@ class NavigatorMapperTest {
         val upcomingRoadObjectSecond = routeProgress.upcomingRoadObjects[1]
 
         val expectedFirst = RestrictedAreaEntrance.Builder(
-            RoadObjectGeometry.Builder(null, Point.fromLngLat(10.0, 20.0), null, null).build()
+            RoadObjectGeometry.Builder(
+                LENGTH,
+                beginCoordinate,
+                START_GEOMETRY_INDEX,
+                END_GEOMETRY_INDEX
+            ).build()
         ).distanceFromStartOfRoute(DISTANCE_FROM_START_OF_ROUTE)
             .build()
 
         val expectedSecond = RestrictedAreaExit.Builder(
-            RoadObjectGeometry.Builder(null, Point.fromLngLat(33.0, 44.0), null, null).build()
+            RoadObjectGeometry.Builder(
+                LENGTH,
+                endCoordinate,
+                START_GEOMETRY_INDEX,
+                END_GEOMETRY_INDEX
+            ).build()
         ).distanceFromStartOfRoute(DISTANCE_FROM_START_OF_ROUTE + LENGTH)
             .build()
 
@@ -626,11 +630,9 @@ class NavigatorMapperTest {
         val expected = Incident.Builder(
             RoadObjectGeometry.Builder(
                 LENGTH,
-                LineString.fromLngLats(
-                    listOf(Point.fromLngLat(10.0, 20.0), Point.fromLngLat(33.0, 44.0))
-                ),
-                1,
-                2
+                LineString.fromLngLats(listOf(beginCoordinate, endCoordinate)),
+                START_GEOMETRY_INDEX,
+                END_GEOMETRY_INDEX
             ).build(),
             IncidentInfo.Builder("some_id")
                 .type(CONSTRUCTION)
@@ -799,10 +801,10 @@ class NavigatorMapperTest {
         type,
         DISTANCE_FROM_START_OF_ROUTE,
         if (hasLength) LENGTH else null,
-        Point.fromLngLat(10.0, 20.0),
-        1,
-        if (hasLength) Point.fromLngLat(33.0, 44.0) else Point.fromLngLat(10.0, 20.0),
-        if (hasLength) 2 else 1,
+        beginCoordinate,
+        START_GEOMETRY_INDEX,
+        if (hasLength) endCoordinate else beginCoordinate,
+        if (hasLength) END_GEOMETRY_INDEX else START_GEOMETRY_INDEX,
         incidentInfo, tunnelInfo, countryBorderCrossingInfo, tollCollectionInfo, serviceAreaInfo
     )
 
@@ -814,5 +816,7 @@ class NavigatorMapperTest {
         private const val DISTANCE_TO_START = 1234.0
         private const val DISTANCE_FROM_START_OF_ROUTE = 123.0
         private const val LENGTH = 456.0
+        private const val START_GEOMETRY_INDEX = 1
+        private const val END_GEOMETRY_INDEX = 2
     }
 }
