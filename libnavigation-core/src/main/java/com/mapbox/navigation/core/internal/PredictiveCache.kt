@@ -40,9 +40,7 @@ object PredictiveCache {
     fun currentMapsPredictiveCacheControllers(): List<String> =
         cachedMapsPredictiveCacheControllers.keys.toList()
 
-    fun removeMapsController(
-        tileVariant: String,
-    ) {
+    fun removeMapsController(tileVariant: String) {
         cachedMapsPredictiveCacheControllers.remove(tileVariant)
     }
 

@@ -3,9 +3,9 @@ package com.mapbox.navigation.base.options
 /**
  * PredictiveCacheLocationOptions.
  *
- * @param currentLocationRadiusInMeters How far around the user's location we're going to cache, in meters. Defaults to 20
- * @param routeBufferRadiusInMeters How far around the active route we're going to cache, in meters (if route is set). Defaults to 5
- * @param destinationLocationRadiusInMeters How far around the destination location we're going to cache, in meters (if route is set). Defaults to 50
+ * @param currentLocationRadiusInMeters How far around the user's location we're going to cache, in meters. Defaults to 20000 (20 km)
+ * @param routeBufferRadiusInMeters How far around the active route we're going to cache, in meters (if route is set). Defaults to 5000 (5 km)
+ * @param destinationLocationRadiusInMeters How far around the destination location we're going to cache, in meters (if route is set). Defaults to 50000 (50 km)
  */
 class PredictiveCacheLocationOptions private constructor(
     val currentLocationRadiusInMeters: Int,
