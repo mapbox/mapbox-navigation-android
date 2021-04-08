@@ -393,7 +393,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         navigator!!.createPredictiveCacheController(
             tileStore,
             createDefaultMapsPredictiveCacheControllerOptions(tileVariant),
-            createDefaultPredictiveLocationTrackerOptions(predictiveCacheLocationOptions)
+            predictiveCacheLocationOptions.toPredictiveLocationTrackerOptions()
         )
 
     /**
@@ -408,21 +408,17 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions
     ): PredictiveCacheController =
         navigator!!.createPredictiveCacheController(
-            createDefaultPredictiveLocationTrackerOptions(predictiveCacheLocationOptions)
+            predictiveCacheLocationOptions.toPredictiveLocationTrackerOptions()
         )
 
-    private fun createDefaultPredictiveLocationTrackerOptions(
-        predictiveCacheLocationOptions: PredictiveCacheLocationOptions
-    ): PredictiveLocationTrackerOptions =
+    private fun PredictiveCacheLocationOptions.toPredictiveLocationTrackerOptions() =
         PredictiveLocationTrackerOptions(
-            predictiveCacheLocationOptions.currentLocationRadiusInMeters,
-            predictiveCacheLocationOptions.routeBufferRadiusInMeters,
-            predictiveCacheLocationOptions.destinationLocationRadiusInMeters
+            currentLocationRadiusInMeters,
+            routeBufferRadiusInMeters,
+            destinationLocationRadiusInMeters
         )
 
-    private fun createDefaultMapsPredictiveCacheControllerOptions(
-        tileVariant: String
-    ): PredictiveCacheControllerOptions =
+    private fun createDefaultMapsPredictiveCacheControllerOptions(tileVariant: String) =
         PredictiveCacheControllerOptions(
             "",
             tileVariant,

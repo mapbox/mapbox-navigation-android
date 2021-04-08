@@ -111,14 +111,20 @@ class PredictiveCacheControllerTest {
 
         predictiveCacheController.setMapInstance(mockedMapboxMap)
 
-        verify(exactly = 1) {
+        verify(exactly = 2) {
             PredictiveCache.createMapsController(
                 mockedTileStore,
                 any(),
                 any()
             )
         }
-        assertEquals(listOf("mapbox.satellite"), slotIds)
+        assertEquals(
+            listOf(
+                "mapbox.mapbox-streets-v8,mapbox.mapbox-terrain-v2",
+                "mapbox.satellite"
+            ),
+            slotIds
+        )
 
         unmockkObject(PredictiveCache)
         unmockkStatic(TileStoreManager::class)
@@ -185,7 +191,7 @@ class PredictiveCacheControllerTest {
 
         predictiveCacheController.setMapInstance(mockedMapboxMap)
 
-        verify(exactly = 1) {
+        verify(exactly = 2) {
             PredictiveCache.createMapsController(
                 mockedTileStore,
                 any(),
