@@ -21,6 +21,7 @@ android {
         targetSdkVersion androidVersions.targetSdkVersion
         versionCode 1
 
+        // TODO we can delete this (i think)
         testInstrumentationRunner "androidx.benchmark.junit4.AndroidBenchmarkRunner"
 
         // Uncomment for local development
@@ -51,6 +52,8 @@ dependencies {
     implementation dependenciesList.kotlinStdLib
 
     androidTestImplementation project(':libtesting-ui')
+//    androidTestImplementation project(':libtesting-utils')
+
     androidTestImplementation dependenciesList.testRunner
     androidTestImplementation dependenciesList.androidxTestJunit
     androidTestImplementation dependenciesList.junit
