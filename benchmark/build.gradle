@@ -1,0 +1,58 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'androidx.benchmark'
+apply from: "${rootDir}/gradle/ktlint.gradle"
+
+android {
+    compileSdkVersion androidVersions.compileSdkVersion
+    buildToolsVersion "30.0.2"
+
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    defaultConfig {
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        versionCode 1
+
+        testInstrumentationRunner "androidx.benchmark.junit4.AndroidBenchmarkRunner"
+
+        // Uncomment for local development
+        testInstrumentationRunnerArgument 'androidx.benchmark.suppressErrors', 'DEBUGGABLE,EMULATOR,LOW_BATTERY,UNLOCKED'
+
+        // must be one of: none, sampled, or method
+        testInstrumentationRunnerArgument 'androidx.benchmark.profiling.mode', 'method'
+    }
+
+    testBuildType = "release"
+
+    buildTypes {
+        debug {
+            // Since debuggable can"t be modified by gradle for library modules,
+            // it must be done in a manifest - see src/androidTest/AndroidManifest.xml
+            isDefault = true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "benchmark-proguard-rules.pro"
+            signingConfig signingConfigs.debug
+        }
+    }
+}
+
+dependencies {
+    // Mapbox Navigation SDK
+    implementation project(':libnavigation-android')
+
+    implementation dependenciesList.kotlinStdLib
+
+    androidTestImplementation project(':libtesting-ui')
+    androidTestImplementation dependenciesList.testRunner
+    androidTestImplementation dependenciesList.androidxTestJunit
+    androidTestImplementation dependenciesList.junit
+    androidTestImplementation 'androidx.benchmark:benchmark-junit4:1.0.0'
+}

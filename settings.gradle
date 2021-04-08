@@ -1,6 +1,7 @@
 include ':examples',
         ':app-tests-wrapper',
         ':instrumentation-tests',
+        ':benchmark',
         ':libnavigation-android',
         ':libnavigator',
         ':libnavigation-base',
