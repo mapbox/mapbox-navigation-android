@@ -11,12 +11,14 @@ import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.DEFAULT_ROUTE_CLICK_PADDING_IN_DIP;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -498,6 +500,35 @@ public class NavigationMapRouteTest {
     theNavigationMapRoute.onNewRouteProgress(mock(RouteProgress.class, RETURNS_DEEP_STUBS));
 
     verify(mockedProgressChangeListener, never()).onRouteProgressChanged(any());
+  }
+
+  @Test
+  public void onStartCreatesNewProgressChangeListenerBeforeRegisteringExistingListener() {
+    ArgumentCaptor<MapRouteProgressChangeListener> changeListenerArgCaptor =
+            ArgumentCaptor.forClass(MapRouteProgressChangeListener.class);
+    MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
+    MapView mockedMapView = mock(MapView.class);
+    MapboxMap mockedMapboxMap = mock(MapboxMap.class);
+    int mockedStyleRes = 0;
+    MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
+            mock(MapView.OnDidFinishLoadingStyleListener.class);
+    MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
+    LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
+    MapRouteLine mockedMapRouteLine = mock(MapRouteLine.class);
+    MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
+    NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
+            mockedLifecycleOwner, mockedStyleRes, "", mockedDidFinishLoadingStyleListener,
+            mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
+    theNavigationMapRoute.addProgressChangeListener(mockedNavigation);
+
+    theNavigationMapRoute.onStart();
+
+    verify(mockedNavigation, times(3))
+            .registerRouteProgressObserver(changeListenerArgCaptor.capture());
+    assertNotEquals(
+            changeListenerArgCaptor.getAllValues().get(0),
+            changeListenerArgCaptor.getAllValues().get(1)
+    );
   }
 
   @Test
