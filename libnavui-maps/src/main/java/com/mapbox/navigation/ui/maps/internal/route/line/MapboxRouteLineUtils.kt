@@ -382,8 +382,8 @@ object MapboxRouteLineUtils {
     }
 
     private fun getRoadClassForIndex(roadClassArray: Array<String?>, index: Int): String? {
-        return if (roadClassArray.size > index) {
-            roadClassArray.slice(0..index).last { it != null }
+        return if (roadClassArray.isNotEmpty() && roadClassArray.size > index && index >= 0) {
+            return roadClassArray[index] ?: getRoadClassForIndex(roadClassArray, index - 1)
         } else {
             null
         }

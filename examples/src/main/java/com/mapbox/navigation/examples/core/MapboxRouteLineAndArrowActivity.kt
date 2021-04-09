@@ -456,17 +456,20 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
     @SuppressLint("MissingPermission")
     private fun initListeners() {
         viewBinding.startNavigation.setOnClickListener {
-            mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-            mapboxNavigation.startTripSession()
-            viewBinding.startNavigation.visibility = View.INVISIBLE
-            locationComponent.addOnIndicatorPositionChangedListener(onPositionChangedListener)
+            val route = mapboxNavigation.getRoutes().firstOrNull()
+            if (route != null) {
+                mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+                mapboxNavigation.startTripSession()
+                viewBinding.startNavigation.visibility = View.INVISIBLE
+                locationComponent.addOnIndicatorPositionChangedListener(onPositionChangedListener)
 
-            // RouteLine: Hiding the alternative routes when navigation starts.
-            mapboxMap.getStyle()?.apply {
-                routeLineView.hideAlternativeRoutes(this)
+                // RouteLine: Hiding the alternative routes when navigation starts.
+                mapboxMap.getStyle()?.apply {
+                    routeLineView.hideAlternativeRoutes(this)
+                }
+
+                startSimulation(route)
             }
-
-            startSimulation(mapboxNavigation.getRoutes()[0])
         }
         viewBinding.mapView.getGesturesPlugin().addOnMapClickListener(mapClickListener)
     }
