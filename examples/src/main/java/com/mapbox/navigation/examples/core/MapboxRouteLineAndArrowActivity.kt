@@ -215,7 +215,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
             // to the MapboxRouteLineApi to generate the data necessary to draw the route(s)
             // on the map.
             val routeLines = routes.map { RouteLine(it, null) }
-            val routeDrawData = routeLineApi.setRoutes(
+            routeLineApi.setRoutes(
                 routeLines,
                 object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
                     override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
