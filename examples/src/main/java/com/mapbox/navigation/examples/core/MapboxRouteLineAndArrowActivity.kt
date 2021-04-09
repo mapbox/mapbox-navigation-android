@@ -421,6 +421,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
 
     private val routesReqCallback: RoutesRequestCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
+            mapboxNavigation.setRoutes(routes)
             if (routes.isNotEmpty()) {
                 viewBinding.routeLoadingProgressBar.visibility = View.INVISIBLE
                 viewBinding.startNavigation.visibility = View.VISIBLE
