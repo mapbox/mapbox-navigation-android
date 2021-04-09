@@ -619,10 +619,8 @@ class MapboxRouteLineApi(
         routeFeatureData.addAll(routeFeatureDataDef.await())
         val partitionedRoutes = routeFeatureData.partition { it.route == directionsRoutes.first() }
 
-        val vanishingRouteLineInitDef = jobControl.scope.async(ThreadController.IODispatcher) {
-            partitionedRoutes.first.firstOrNull()?.let {
-                routeLineOptions.vanishingRouteLine?.initWithRoute(it.route)
-            }
+        partitionedRoutes.first.firstOrNull()?.let {
+            routeLineOptions.vanishingRouteLine?.initWithRoute(it.route)
         }
 
         val trafficLineExpressionDef = jobControl.scope.async(ThreadController.IODispatcher) {
@@ -758,7 +756,6 @@ class MapboxRouteLineApi(
         val wayPointsFeatureCollection = wayPointsFeatureCollectionDef.await()
         val primaryRouteSource = primaryRouteSourceDef.await()
         val restrictedSectionFeatureCollection = restrictedSectionFeatureCollectionDef.await()
-        vanishingRouteLineInitDef.await()
 
         return Expected.Success(
             RouteSetValue(
