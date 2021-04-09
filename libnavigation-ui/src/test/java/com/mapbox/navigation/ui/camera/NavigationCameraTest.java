@@ -14,13 +14,16 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.BaseTest;
 
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -270,6 +273,137 @@ public class NavigationCameraTest extends BaseTest {
 
     assertFalse(result);
     // verify no crash
+  }
+
+  @Test
+  public void showRouteGeometryOverview_includesRouteProgress() {
+    ArgumentCaptor<RouteInformation> argumentCaptor =
+            ArgumentCaptor.forClass(RouteInformation.class);
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    when(mapboxMap.getCameraPosition()).thenReturn(CameraPosition.DEFAULT);
+    MapboxNavigation navigation = mock(MapboxNavigation.class);
+    DirectionsRoute directionsRoute = mock(DirectionsRoute.class);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.getRoute()).thenReturn(directionsRoute);
+    DynamicCamera dynamicCamera = mock(DynamicCamera.class);
+    NavigationCamera camera = buildCamera(mapboxMap, navigation);
+    camera.setCamera(dynamicCamera);
+    List<Point> points = new ArrayList<>();
+    when(dynamicCamera.overview(any())).thenReturn(points);
+
+    camera.start(null);
+    camera.routeProgressObserver.onRouteProgressChanged(routeProgress);
+    camera.showRouteGeometryOverview(new int[4]);
+
+    verify(dynamicCamera).overview(argumentCaptor.capture());
+    assertNull(argumentCaptor.getValue().getRouteProgress());
+    assertEquals(directionsRoute, argumentCaptor.getValue().getRoute());
+  }
+
+  @Test
+  public void showRouteGeometryRemainingOverview_whenRouteProgressAndRouteAreNull() {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    MapboxNavigation navigation = mock(MapboxNavigation.class);
+    NavigationCamera camera = buildCamera(mapboxMap, navigation);
+
+    camera.start(null);
+    boolean result = camera.showRouteGeometryRemainingOverview(new int[4]);
+
+    assertFalse(result);
+    // verify no crash
+  }
+
+  @Test
+  public void showRouteGeometryRemainingOverview_animateCamera_whenRouteProgressIsNull() {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    MapboxNavigation navigation = mock(MapboxNavigation.class);
+    DirectionsRoute directionsRoute = mock(DirectionsRoute.class);
+    DynamicCamera dynamicCamera = mock(DynamicCamera.class);
+    NavigationCamera camera = buildCamera(mapboxMap, navigation);
+    camera.setCamera(dynamicCamera);
+    List<Point> points = new ArrayList<>();
+    points.add(mock(Point.class));
+    points.add(mock(Point.class));
+    points.add(mock(Point.class));
+    when(dynamicCamera.overview(any())).thenReturn(points);
+
+    camera.start(directionsRoute);
+    boolean result = camera.showRouteGeometryRemainingOverview(new int[4]);
+
+    assertTrue(result);
+    verify(mapboxMap).animateCamera(any(), anyInt(), any());
+  }
+
+  @Test
+  public void showRouteGeometryRemainingOverview_animateCamera_whenRouteInfoIsNull() {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    when(mapboxMap.getCameraPosition()).thenReturn(CameraPosition.DEFAULT);
+    MapboxNavigation navigation = mock(MapboxNavigation.class);
+    DirectionsRoute directionsRoute = mock(DirectionsRoute.class);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.getRoute()).thenReturn(directionsRoute);
+    DynamicCamera dynamicCamera = mock(DynamicCamera.class);
+    NavigationCamera camera = buildCamera(mapboxMap, navigation);
+    camera.setCamera(dynamicCamera);
+    List<Point> points = new ArrayList<>();
+    points.add(mock(Point.class));
+    points.add(mock(Point.class));
+    points.add(mock(Point.class));
+    when(dynamicCamera.overview(any())).thenReturn(points);
+
+    camera.start(null);
+    camera.routeProgressObserver.onRouteProgressChanged(routeProgress);
+    boolean result = camera.showRouteGeometryRemainingOverview(new int[4]);
+
+    assertTrue(result);
+    verify(mapboxMap).animateCamera(any(), anyInt(), any());
+  }
+
+  @Test
+  public void showRouteGeometryRemainingOverview_emptyRoute() {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    when(mapboxMap.getCameraPosition()).thenReturn(CameraPosition.DEFAULT);
+    MapboxNavigation navigation = mock(MapboxNavigation.class);
+    DirectionsRoute directionsRoute = mock(DirectionsRoute.class);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.getRoute()).thenReturn(directionsRoute);
+    DynamicCamera dynamicCamera = mock(DynamicCamera.class);
+    NavigationCamera camera = buildCamera(mapboxMap, navigation);
+    camera.setCamera(dynamicCamera);
+    List<Point> points = new ArrayList<>();
+    when(dynamicCamera.overview(any())).thenReturn(points);
+
+    camera.start(null);
+    camera.routeProgressObserver.onRouteProgressChanged(routeProgress);
+    boolean result = camera.showRouteGeometryRemainingOverview(new int[4]);
+
+    assertFalse(result);
+    // verify no crash
+  }
+
+  @Test
+  public void showRouteGeometryRemainingOverview_includesRouteProgress() {
+    ArgumentCaptor<RouteInformation> argumentCaptor =
+            ArgumentCaptor.forClass(RouteInformation.class);
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    when(mapboxMap.getCameraPosition()).thenReturn(CameraPosition.DEFAULT);
+    MapboxNavigation navigation = mock(MapboxNavigation.class);
+    DirectionsRoute directionsRoute = mock(DirectionsRoute.class);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.getRoute()).thenReturn(directionsRoute);
+    DynamicCamera dynamicCamera = mock(DynamicCamera.class);
+    NavigationCamera camera = buildCamera(mapboxMap, navigation);
+    camera.setCamera(dynamicCamera);
+    List<Point> points = new ArrayList<>();
+    when(dynamicCamera.overview(any())).thenReturn(points);
+
+    camera.start(null);
+    camera.routeProgressObserver.onRouteProgressChanged(routeProgress);
+    camera.showRouteGeometryRemainingOverview(new int[4]);
+
+    verify(dynamicCamera).overview(argumentCaptor.capture());
+    assertEquals(routeProgress, argumentCaptor.getValue().getRouteProgress());
+    assertEquals(directionsRoute, argumentCaptor.getValue().getRoute());
   }
 
   private NavigationCamera buildCamera() {

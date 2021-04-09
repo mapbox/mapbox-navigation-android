@@ -864,6 +864,21 @@ public class NavigationMapboxMap implements LifecycleObserver {
   }
 
   /**
+   * Adjusts the map camera to {@link DirectionsRoute} being traveled along to display
+   * the portion of the route that has not been traveled. This is different from the
+   * method showRouteGeometryOverview which will display the entire route.
+   * <p>
+   * Also includes the given padding.
+   *
+   * @param padding for creating the overview camera position
+   * @return true if the transition to overview succeeded, false otherwise
+   */
+  public boolean showRemainingRouteGeometryOverview(int[] padding) {
+    mapPaddingAdjustor.updatePaddingWith(ZERO_MAP_PADDING);
+    return mapCamera.showRouteGeometryRemainingOverview(padding);
+  }
+
+  /**
    * Enables or disables the way name chip underneath the location icon.
    *
    * @param isEnabled true to enable, false to disable
