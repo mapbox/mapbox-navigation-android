@@ -2,7 +2,6 @@ package com.mapbox.navigation.core.arrival
 
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 
 /**
@@ -12,7 +11,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 interface ArrivalObserver {
 
     /**
-     * Called when the [RouteProgress.currentState] has reached [RouteProgressState.ROUTE_COMPLETE],
+     * Called once the [ArrivalOptions] conditions have been met
      * and the route progress has reached a waypoint on the route.
      */
     fun onWaypointArrival(routeProgress: RouteProgress)
@@ -24,7 +23,7 @@ interface ArrivalObserver {
     fun onNextRouteLegStart(routeLegProgress: RouteLegProgress)
 
     /**
-     * Called once the [RouteProgress.currentState] has reached [RouteProgressState.ROUTE_COMPLETE],
+     * Called once the [ArrivalOptions] conditions have been met
      * and the route progress has reached the final destination on the route.
      */
     fun onFinalDestinationArrival(routeProgress: RouteProgress)

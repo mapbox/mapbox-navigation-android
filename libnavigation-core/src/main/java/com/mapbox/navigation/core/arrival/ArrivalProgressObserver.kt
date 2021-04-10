@@ -1,8 +1,9 @@
 package com.mapbox.navigation.core.arrival
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import java.util.concurrent.CopyOnWriteArraySet
@@ -13,8 +14,8 @@ internal class ArrivalProgressObserver(
 
     private var arrivalController: ArrivalController = AutoArrivalController()
     private val arrivalObservers = CopyOnWriteArraySet<ArrivalObserver>()
-    private var finalDestinationArrived = false
-    private var waypointArrived = false
+    private var routeArrived: DirectionsRoute? = null
+    private var routeLegArrived: RouteLeg? = null
 
     fun attach(arrivalController: ArrivalController) {
         this.arrivalController = arrivalController
@@ -52,35 +53,12 @@ internal class ArrivalProgressObserver(
             ?: return
 
         val arrivalOptions = arrivalController.arrivalOptions()
-        val arrivalProgress = toArrivalProgress(arrivalOptions, routeProgress, routeLegProgress)
-        val isComplete = routeProgress.currentState == RouteProgressState.ROUTE_COMPLETE
-        if (isComplete && !arrivalProgress.hasMoreLegs) {
-            doOnFinalDestinationArrival(routeProgress)
-        } else if (isComplete && arrivalProgress.hasMoreLegs) {
-            doOnWaypointArrival(arrivalProgress)
-        } else if (arrivalOptions.arrivalInSeconds != null && arrivalProgress.hasMoreLegs) {
-            checkWaypointArrivalTime(arrivalProgress)
-        } else if (arrivalOptions.arrivalInMeters != null && arrivalProgress.hasMoreLegs) {
-            checkWaypointArrivalDistance(arrivalProgress)
+        val hasMoreLegs = hasMoreLegs(routeProgress)
+        if (hasMoreLegs) {
+            checkWaypointArrival(arrivalOptions, routeProgress, routeLegProgress)
+        } else if (!hasMoreLegs) {
+            checkFinalDestinationArrival(arrivalOptions, routeProgress)
         }
-        if (arrivalProgress.hasMoreLegs) {
-            waypointArrived = isComplete
-        } else {
-            finalDestinationArrived = isComplete
-        }
-    }
-
-    private fun toArrivalProgress(
-        arrivalOptions: ArrivalOptions,
-        routeProgress: RouteProgress,
-        routeLegProgress: RouteLegProgress
-    ): ArrivalProgress {
-        return ArrivalProgress(
-            arrivalOptions = arrivalOptions,
-            hasMoreLegs = hasMoreLegs(routeProgress),
-            routeProgress = routeProgress,
-            routeLegProgress = routeLegProgress
-        )
     }
 
     private fun hasMoreLegs(routeProgress: RouteProgress): Boolean {
@@ -89,41 +67,51 @@ internal class ArrivalProgressObserver(
         return (currentLegIndex != null && lastLegIndex != null) && currentLegIndex < lastLegIndex
     }
 
-    private fun checkWaypointArrivalTime(arrivalProgress: ArrivalProgress) {
-        val arrivalInSeconds = arrivalProgress.arrivalOptions.arrivalInSeconds!!
-        if (arrivalProgress.routeLegProgress.durationRemaining <= arrivalInSeconds) {
-            doOnWaypointArrival(arrivalProgress)
+    private fun checkWaypointArrival(
+        arrivalOptions: ArrivalOptions,
+        routeProgress: RouteProgress,
+        routeLegProgress: RouteLegProgress
+    ) {
+        val isEarlyInTime = arrivalOptions.arrivalInSeconds != null &&
+            routeLegProgress.durationRemaining <= arrivalOptions.arrivalInSeconds
+        val isEarlyInDistance = arrivalOptions.arrivalInMeters != null &&
+            routeLegProgress.distanceRemaining <= arrivalOptions.arrivalInMeters
+        if (isEarlyInTime || isEarlyInDistance) {
+            doOnWaypointArrival(routeProgress, routeLegProgress)
         }
     }
 
-    private fun checkWaypointArrivalDistance(arrivalProgress: ArrivalProgress) {
-        val arrivalInMeters = arrivalProgress.arrivalOptions.arrivalInMeters!!
-        if (arrivalProgress.routeLegProgress.distanceRemaining <= arrivalInMeters) {
-            doOnWaypointArrival(arrivalProgress)
+    private fun doOnWaypointArrival(
+        routeProgress: RouteProgress,
+        routeLegProgress: RouteLegProgress
+    ) {
+        if (routeLegArrived != routeLegProgress.routeLeg) {
+            routeLegArrived = routeLegProgress.routeLeg
+            arrivalObservers.forEach { it.onWaypointArrival(routeProgress) }
         }
-    }
-
-    private fun doOnWaypointArrival(arrivalProgress: ArrivalProgress) {
-        if (!waypointArrived) {
-            arrivalObservers.forEach { it.onWaypointArrival(arrivalProgress.routeProgress) }
-        }
-        val routeLegProgress = arrivalProgress.routeLegProgress
         val moveToNextLeg = arrivalController.navigateNextRouteLeg(routeLegProgress)
         if (moveToNextLeg) {
             navigateNextRouteLeg()
         }
     }
 
-    private fun doOnFinalDestinationArrival(routeProgress: RouteProgress) {
-        if (!finalDestinationArrived) {
+    private fun checkFinalDestinationArrival(
+        arrivalOptions: ArrivalOptions,
+        routeProgress: RouteProgress
+    ) {
+        val isEarlyInTime = arrivalOptions.arrivalInSeconds != null &&
+            routeProgress.durationRemaining <= arrivalOptions.arrivalInSeconds
+        val isEarlyInDistance = arrivalOptions.arrivalInMeters != null &&
+            routeProgress.distanceRemaining <= arrivalOptions.arrivalInMeters
+        if (isEarlyInTime || isEarlyInDistance) {
+            doFinalDestinationArrival(routeProgress)
+        }
+    }
+
+    private fun doFinalDestinationArrival(routeProgress: RouteProgress) {
+        if (routeArrived != routeProgress.route) {
+            routeArrived = routeProgress.route
             arrivalObservers.forEach { it.onFinalDestinationArrival(routeProgress) }
         }
     }
 }
-
-private class ArrivalProgress(
-    val arrivalOptions: ArrivalOptions,
-    val hasMoreLegs: Boolean,
-    val routeProgress: RouteProgress,
-    val routeLegProgress: RouteLegProgress
-)

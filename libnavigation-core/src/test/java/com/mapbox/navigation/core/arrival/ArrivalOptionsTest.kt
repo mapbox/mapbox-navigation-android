@@ -17,4 +17,26 @@ class ArrivalOptionsTest : BuilderTest<ArrivalOptions, ArrivalOptions.Builder>()
     override fun trigger() {
         // only used to trigger JUnit4 to run this class if all test cases come from the parent
     }
+
+    @Test(expected = Throwable::class)
+    fun `negative arrival time is not supported`() {
+        ArrivalOptions.Builder()
+            .arrivalInMeters(-1.0)
+            .build()
+    }
+
+    @Test(expected = Throwable::class)
+    fun `negative arrival distance is not supported`() {
+        ArrivalOptions.Builder()
+            .arrivalInMeters(-1.0)
+            .build()
+    }
+
+    @Test(expected = Throwable::class)
+    fun `time or distance is required`() {
+        ArrivalOptions.Builder()
+            .arrivalInSeconds(null)
+            .arrivalInMeters(null)
+            .build()
+    }
 }
