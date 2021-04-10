@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
  * The default controller for arrival. This will move onto the next leg automatically
  * if there is one.
  */
-class AutoArrivalController : ArrivalController {
+open class AutoArrivalController : ArrivalController {
 
     private var routeLegCompletedTime: Long? = null
     private var currentRouteLeg: RouteLeg? = null

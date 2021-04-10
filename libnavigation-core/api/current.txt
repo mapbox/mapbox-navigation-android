@@ -101,7 +101,7 @@ package com.mapbox.navigation.core.arrival {
     method public com.mapbox.navigation.core.arrival.ArrivalOptions build();
   }
 
-  public final class AutoArrivalController implements com.mapbox.navigation.core.arrival.ArrivalController {
+  public class AutoArrivalController implements com.mapbox.navigation.core.arrival.ArrivalController {
     ctor public AutoArrivalController();
     method public com.mapbox.navigation.core.arrival.ArrivalOptions arrivalOptions();
     method public boolean navigateNextRouteLeg(com.mapbox.navigation.base.trip.model.RouteLegProgress routeLegProgress);

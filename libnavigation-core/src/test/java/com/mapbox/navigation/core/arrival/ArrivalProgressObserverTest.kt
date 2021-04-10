@@ -115,6 +115,7 @@ internal class ArrivalProgressObserverTest {
                     mockMultipleLegs()
                 }
                 every { currentLegProgress } returns mockk {
+                    every { routeLeg } returns mockk()
                     every { legIndex } returns 1
                     every { durationRemaining } returns 2.0
                     every { distanceRemaining } returns 8.0f
@@ -147,8 +148,11 @@ internal class ArrivalProgressObserverTest {
                 every { currentState } returns RouteProgressState.ROUTE_COMPLETE
                 every { route } returns mockk {
                     mockMultipleLegs()
+                    every { durationRemaining } returns 2.0
+                    every { distanceRemaining } returns 8.0f
                 }
                 every { currentLegProgress } returns mockk {
+                    every { routeLeg } returns mockk()
                     every { legIndex } returns 2
                     every { durationRemaining } returns 2.0
                     every { distanceRemaining } returns 8.0f
@@ -178,8 +182,11 @@ internal class ArrivalProgressObserverTest {
             every { currentState } returns RouteProgressState.ROUTE_COMPLETE
             every { route } returns mockk {
                 mockMultipleLegs()
+                every { durationRemaining } returns 2.0
+                every { distanceRemaining } returns 8.0f
             }
             every { currentLegProgress } returns mockk {
+                every { routeLeg } returns mockk()
                 every { legIndex } returns 2
                 every { durationRemaining } returns 2.0
                 every { distanceRemaining } returns 8.0f
@@ -212,6 +219,7 @@ internal class ArrivalProgressObserverTest {
             mockk {
                 every { currentState } returns RouteProgressState.LOCATION_TRACKING
                 every { currentLegProgress } returns mockk {
+                    every { routeLeg } returns mockk()
                     every { durationRemaining } returns 1.0
                     every { distanceRemaining } returns 15.0f
                     every { legIndex } returns 0
@@ -245,6 +253,7 @@ internal class ArrivalProgressObserverTest {
                     every { durationRemaining } returns 2.0
                     every { distanceRemaining } returns 8.0f
                     every { legIndex } returns 0
+                    every { routeLeg } returns mockk()
                 }
                 every { route } returns mockk {
                     mockMultipleLegs()
@@ -269,6 +278,7 @@ internal class ArrivalProgressObserverTest {
         val routeProgress: RouteProgress = mockk {
             every { currentState } returns RouteProgressState.LOCATION_TRACKING
             every { currentLegProgress } returns mockk {
+                every { routeLeg } returns mockk()
                 every { durationRemaining } returns 1.0
                 every { distanceRemaining } returns 15.0f
                 every { legIndex } returns 0
@@ -286,7 +296,7 @@ internal class ArrivalProgressObserverTest {
     }
 
     @Test
-    fun `should notify onWaypointArrival only once`() {
+    fun `should notify onWaypointArrival only once for early arrival`() {
         val onNextRouteLegStartCalls = slot<RouteLegProgress>()
         val onWaypointArrivalCalls = mutableListOf<RouteProgress>()
         val customArrivalController: ArrivalController = mockk {
@@ -300,11 +310,12 @@ internal class ArrivalProgressObserverTest {
             arrivalObserver.onWaypointArrival(capture(onWaypointArrivalCalls))
         } returns Unit
         val routeProgress: RouteProgress = mockk {
-            every { currentState } returns RouteProgressState.ROUTE_COMPLETE
+            every { currentState } returns RouteProgressState.LOCATION_TRACKING
             every { route } returns mockk {
                 mockMultipleLegs()
             }
             every { currentLegProgress } returns mockk {
+                every { routeLeg } returns mockk()
                 every { legIndex } returns 1
                 every { durationRemaining } returns 2.0
                 every { distanceRemaining } returns 8.0f
@@ -336,6 +347,7 @@ internal class ArrivalProgressObserverTest {
             mockk {
                 every { currentState } returns RouteProgressState.LOCATION_TRACKING
                 every { currentLegProgress } returns mockk {
+                    every { routeLeg } returns mockk()
                     every { durationRemaining } returns 360.0
                     every { distanceRemaining } returns 80.0f
                     every { legIndex } returns 0
@@ -358,6 +370,7 @@ internal class ArrivalProgressObserverTest {
                 mockMultipleLegs()
                 every { routeIndex() } returns "0"
                 every { currentLegProgress } returns mockk {
+                    every { routeLeg } returns mockk()
                     every { legIndex } returns 0
                     every { durationRemaining } returns 0.0
                     every { distanceRemaining } returns 0.0f

@@ -107,8 +107,11 @@ class ArrivalOptions private constructor(
          * Build the object. If you want to disable this feature set *null* in [MapboxNavigation.setArrivalController].
          */
         fun build(): ArrivalOptions {
-            check(arrivalInSeconds != null || arrivalInSeconds != null) {
+            check(arrivalInSeconds != null || arrivalInMeters != null) {
                 "Choose a method to be notified of arrival, time and/or distance."
+            }
+            check(arrivalInSeconds ?: 0.0 >= 0.0 && arrivalInMeters ?: 0.0 >= 0.0) {
+                "Arrival values must be >= 0.0 [$arrivalInSeconds, $arrivalInMeters]"
             }
             return ArrivalOptions(
                 arrivalInSeconds = arrivalInSeconds,
