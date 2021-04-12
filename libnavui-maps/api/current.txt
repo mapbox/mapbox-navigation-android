@@ -627,10 +627,12 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.geojson.FeatureCollection getAltRoute1Source();
     method public com.mapbox.geojson.FeatureCollection getAltRoute2Source();
     method public com.mapbox.geojson.FeatureCollection getPrimaryRouteSource();
+    method public com.mapbox.geojson.FeatureCollection getRestrictedRoadSource();
     method public com.mapbox.geojson.FeatureCollection getWaypointsSource();
     property public final com.mapbox.geojson.FeatureCollection altRoute1Source;
     property public final com.mapbox.geojson.FeatureCollection altRoute2Source;
     property public final com.mapbox.geojson.FeatureCollection primaryRouteSource;
+    property public final com.mapbox.geojson.FeatureCollection restrictedRoadSource;
     property public final com.mapbox.geojson.FeatureCollection waypointsSource;
   }
 

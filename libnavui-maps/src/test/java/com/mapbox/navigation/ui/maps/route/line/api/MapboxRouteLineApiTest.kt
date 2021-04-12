@@ -743,6 +743,7 @@ class MapboxRouteLineApiTest {
         assertTrue(result.value.altRoute2Source.features()!!.isEmpty())
         assertTrue(result.value.primaryRouteSource.features()!!.isEmpty())
         assertTrue(result.value.waypointsSource.features()!!.isEmpty())
+        assertTrue(result.value.restrictedRoadSource.features()!!.isEmpty())
     }
 
     @Test

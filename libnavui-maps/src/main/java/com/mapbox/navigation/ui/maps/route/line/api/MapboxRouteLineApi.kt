@@ -310,6 +310,7 @@ class MapboxRouteLineApi(
                             FeatureCollection.fromFeatures(listOf()),
                             FeatureCollection.fromFeatures(listOf()),
                             FeatureCollection.fromFeatures(listOf()),
+                            FeatureCollection.fromFeatures(listOf()),
                             FeatureCollection.fromFeatures(listOf())
                         )
                     )
