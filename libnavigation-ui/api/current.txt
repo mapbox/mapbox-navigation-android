@@ -242,6 +242,7 @@ package com.mapbox.navigation.ui.camera {
     method public void resume(android.location.Location?);
     method public void setCamera(com.mapbox.navigation.ui.camera.Camera!);
     method public boolean showRouteGeometryOverview(int[]);
+    method public boolean showRouteGeometryRemainingOverview(int[]);
     method @Deprecated public void showRouteOverview(int[]);
     method public void start(com.mapbox.api.directions.v5.models.DirectionsRoute?);
     method public void update(com.mapbox.navigation.ui.camera.NavigationCameraUpdate);
@@ -502,6 +503,7 @@ package com.mapbox.navigation.ui.map {
     method public void setOnRouteSelectionChangeListener(com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener);
     method public void setPuckDrawableSupplier(com.mapbox.navigation.ui.puck.PuckDrawableSupplier);
     method public void showAlternativeRoutes(boolean);
+    method public boolean showRemainingRouteGeometryOverview(int[]!);
     method public void showRoute();
     method public boolean showRouteGeometryOverview(int[]!);
     method @Deprecated public void showRouteOverview(int[]!);

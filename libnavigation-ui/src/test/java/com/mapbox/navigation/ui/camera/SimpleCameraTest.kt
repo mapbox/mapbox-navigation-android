@@ -1,7 +1,10 @@
 package com.mapbox.navigation.ui.camera
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.BaseTest
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -17,7 +20,19 @@ class SimpleCameraTest : BaseTest() {
     }
 
     @Test
-    fun overviewWillNotCachRoute() {
+    fun overview_withRouteProgress() {
+        val route = buildTestDirectionsRoute()
+        val routeProgress = mockk<RouteProgress> {
+            every { distanceTraveled } returns (route.distance() / 2).toFloat()
+        }
+
+        val result = SimpleCamera().overview(RouteInformation(route, null, routeProgress))
+
+        assertEquals(9, result.size)
+    }
+
+    @Test
+    fun overviewWillNotCacheRoute() {
         val route1 = buildTestDirectionsRoute()
         val route2 = getMultilegRoute()
         SimpleCamera().overview(RouteInformation(route1, null, null))

@@ -64,6 +64,9 @@ public class NavigationCamera {
    * Equivalent of the {@link CameraMode#TRACKING_GPS_NORTH}.
    */
   public static final int NAVIGATION_TRACKING_MODE_NORTH = 1;
+
+  private static final String NULL_ROUTE_ERROR_MESSAGE =
+          "Unable to show route overview, the route is null.";
   /**
    * Camera does not tack the user location.
    * <p>
@@ -233,18 +236,49 @@ public class NavigationCamera {
    */
   public boolean showRouteGeometryOverview(@NonNull int[] padding) {
     updateCameraTrackingMode(NAVIGATION_TRACKING_MODE_NONE);
-    DirectionsRoute currentRoute;
-    if (currentRouteProgress != null) {
-      currentRoute = currentRouteProgress.getRoute();
-    } else if (currentRouteInformation != null) {
-      currentRoute = currentRouteInformation.getRoute();
-    } else {
-      Timber.e("Unable to show route overview, the route is null.");
+    final DirectionsRoute currentRoute = getRoute();
+    if (currentRoute == null) {
+      Timber.e(NULL_ROUTE_ERROR_MESSAGE);
       return false;
+    } else {
+      final RouteInformation routeInformation =
+              new RouteInformation(currentRoute, null, null);
+      return showOverviewForRoute(padding, routeInformation);
     }
-    RouteInformation routeInformation =
-            new RouteInformation(currentRoute, null, null);
+  }
+
+  /**
+   * This method stops the map camera from tracking the current location, and then zooms
+   * out to an overview of the current route that has yet to be traveled.
+   *
+   * @param padding in pixels around the bounding box of the overview (left, top, right, bottom)
+   * @return true if the transition to overview succeeded, false otherwise
+   */
+  public boolean showRouteGeometryRemainingOverview(@NonNull int[] padding) {
+    final DirectionsRoute currentRoute = getRoute();
+    if (currentRoute == null) {
+      Timber.e(NULL_ROUTE_ERROR_MESSAGE);
+      return false;
+    } else {
+      final RouteInformation routeInformation =
+              new RouteInformation(currentRoute, null, currentRouteProgress);
+      return showOverviewForRoute(padding, routeInformation);
+    }
+  }
+
+  private boolean showOverviewForRoute(@NonNull int[] padding, RouteInformation routeInformation) {
+    updateCameraTrackingMode(NAVIGATION_TRACKING_MODE_NONE);
     return animateCameraForRouteOverview(routeInformation, padding);
+  }
+
+  private DirectionsRoute getRoute() {
+    if (currentRouteProgress != null) {
+      return currentRouteProgress.getRoute();
+    } else if (currentRouteInformation != null) {
+      return currentRouteInformation.getRoute();
+    } else {
+      return null;
+    }
   }
 
   /**
