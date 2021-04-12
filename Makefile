@@ -28,8 +28,8 @@ define run-gradle-tasks
 	done
 endef
 
-.PHONY: check
-check:
+.PHONY: check-lint
+check-lint:
 	$(call run-gradle-tasks,$(CORE_MODULES),ktlint) \
 	&& $(call run-gradle-tasks,$(UI_MODULES),ktlint) \
 	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),ktlint)
