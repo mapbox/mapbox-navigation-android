@@ -23,10 +23,8 @@ import java.util.List;
  */
 public class DynamicCamera extends SimpleCamera {
 
-  private static final double MAX_CAMERA_TILT = 60d;
-  private static final double MIN_CAMERA_TILT = 45d;
-  private static final double MAX_CAMERA_ZOOM = 16d;
-  private static final double MIN_CAMERA_ZOOM = 12d;
+  static final double MAX_CAMERA_ZOOM = 16.35d;
+  static final double MIN_CAMERA_ZOOM = 14d;
 
   @Nullable
   private MapboxMap mapboxMap;
@@ -43,20 +41,6 @@ public class DynamicCamera extends SimpleCamera {
   }
 
   @Override
-  public double tilt(@NonNull RouteInformation routeInformation) {
-    if (isShutdown) {
-      return DEFAULT_TILT;
-    }
-
-    RouteProgress progress = routeInformation.getRouteProgress();
-    if (progress != null) {
-      double distanceRemaining = progress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining();
-      return createTilt(distanceRemaining);
-    }
-    return super.tilt(routeInformation);
-  }
-
-  @Override
   public double zoom(@NonNull RouteInformation routeInformation) {
     if (isShutdown) {
       return DEFAULT_ZOOM;
@@ -70,7 +54,6 @@ public class DynamicCamera extends SimpleCamera {
     return mapboxMap.getCameraPosition().zoom;
   }
 
-
   /**
    * Called when the zoom level should force update on the next usage
    * of {@link DynamicCamera#zoom(RouteInformation)}.
@@ -82,24 +65,6 @@ public class DynamicCamera extends SimpleCamera {
   public void clearMap() {
     isShutdown = true;
     mapboxMap = null;
-  }
-
-  /**
-   * Creates a tilt value based on the distance remaining for the current {@link LegStep}.
-   * <p>
-   * Checks if the calculated value is within the set min / max bounds.
-   *
-   * @param distanceRemaining from the current step
-   * @return tilt within set min / max bounds
-   */
-  private double createTilt(double distanceRemaining) {
-    double tilt = distanceRemaining / 5;
-    if (tilt > MAX_CAMERA_TILT) {
-      return MAX_CAMERA_TILT;
-    } else if (tilt < MIN_CAMERA_TILT) {
-      return MIN_CAMERA_TILT;
-    }
-    return Math.round(tilt);
   }
 
   /**
