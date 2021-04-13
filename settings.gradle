@@ -18,4 +18,5 @@ include ':examples',
         ':libnavui-maneuver',
         ':libnavui-resources',
         ':libnavui-voice',
-        ':libnavui-speedlimit'
+        ':libnavui-speedlimit',
+        ':qa-test-app'
