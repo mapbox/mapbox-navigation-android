@@ -43,6 +43,7 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
+import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent.UI
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -57,6 +58,7 @@ import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.NavigationButton
 import com.mapbox.navigation.ui.NavigationConstants
 import com.mapbox.navigation.ui.SoundButton
+import com.mapbox.navigation.ui.camera.CustomDynamicCamera
 import com.mapbox.navigation.ui.camera.DynamicCamera
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheet
@@ -100,6 +102,7 @@ class BasicNavigationFragment :
     private lateinit var feedbackButton: NavigationButton
     private lateinit var instructionSoundButton: NavigationButton
     private lateinit var alertView: NavigationAlertView
+    private val replayRouteMapper = ReplayRouteMapper()
     private val mapboxReplayer = MapboxReplayer()
 
     private var mapboxMap: MapboxMap? = null
@@ -202,6 +205,14 @@ class BasicNavigationFragment :
                         .coordinates(originLocation.toPoint(), null, latLng.toPoint())
                         .alternatives(true)
                         .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                        .overview(DirectionsCriteria.OVERVIEW_FULL)
+                        .annotationsList(
+                            listOf(
+                                DirectionsCriteria.ANNOTATION_SPEED,
+                                DirectionsCriteria.ANNOTATION_DISTANCE,
+                                DirectionsCriteria.ANNOTATION_CONGESTION
+                            )
+                        )
                         .build(),
                     routesReqCallback
                 )
@@ -226,15 +237,15 @@ class BasicNavigationFragment :
                 .build().apply {
                     addOnCameraTrackingChangedListener(cameraTrackingChangedListener)
                     addProgressChangeListener(mapboxNavigation)
-                    setCamera(DynamicCamera(mapboxMap))
+                    setCamera(CustomDynamicCamera(mapboxMap))
                 }
 
-            if (shouldSimulateRoute()) {
-                mapboxNavigation
-                    .registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
-                mapboxReplayer.pushRealLocation(requireContext(), 0.0)
-                mapboxReplayer.play()
-            }
+//            if (shouldSimulateRoute()) {
+//                mapboxNavigation
+//                    .registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+//                mapboxReplayer.pushRealLocation(requireContext(), 0.0)
+//                mapboxReplayer.play()
+//            }
             mapboxNavigation
                 .navigationOptions
                 .locationEngine
@@ -290,6 +301,7 @@ class BasicNavigationFragment :
                     navigationMapboxMap?.startCamera(mapboxNavigation.getRoutes()[0])
 
                     mapboxNavigation.startTripSession()
+                    mapboxReplayer.play()
                 }
             }
         }
@@ -544,6 +556,9 @@ class BasicNavigationFragment :
             if (routes.isNotEmpty()) {
                 directionRoute = routes[0]
                 navigationMapboxMap?.drawRoute(routes[0])
+                val replayEvents = replayRouteMapper.mapDirectionsRouteLegAnnotation(routes[0])
+                mapboxReplayer.pushEvents(replayEvents)
+                mapboxReplayer.seekTo(replayEvents.first())
                 startNavigation.visibility = View.VISIBLE
                 startNavigation.isEnabled = true
             } else {
