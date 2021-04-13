@@ -55,7 +55,7 @@ object NavigationConstants {
     /**
      * Maximum milliseconds duration of the zoom/tilt adjustment animation while tracking.
      */
-    const val NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION = 1500L
+    const val NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION = 1000L
 
     /**
      * Minimum milliseconds duration of the zoom adjustment animation while tracking.

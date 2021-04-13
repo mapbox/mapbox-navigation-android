@@ -27,7 +27,7 @@ package com.mapbox.navigation.ui {
     field public static final com.mapbox.navigation.ui.NavigationConstants! INSTANCE;
     field public static final int NAVIGATION_HIGH_ALERT_DURATION = 15; // 0xf
     field public static final int NAVIGATION_LOW_ALERT_DURATION = 125; // 0x7d
-    field public static final long NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION = 1500L; // 0x5dcL
+    field public static final long NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION = 1000L; // 0x3e8L
     field public static final int NAVIGATION_MEDIUM_ALERT_DURATION = 70; // 0x46
     field public static final long NAVIGATION_MIN_CAMERA_TILT_ADJUSTMENT_ANIMATION_DURATION = 750L; // 0x2eeL
     field public static final long NAVIGATION_MIN_CAMERA_ZOOM_ADJUSTMENT_ANIMATION_DURATION = 300L; // 0x12cL
@@ -288,8 +288,8 @@ package com.mapbox.navigation.ui.camera {
     method public double tilt(com.mapbox.navigation.ui.camera.RouteInformation routeInformation);
     method public double zoom(com.mapbox.navigation.ui.camera.RouteInformation routeInformation);
     field public static final com.mapbox.navigation.ui.camera.SimpleCamera.Companion! Companion;
-    field protected static final int DEFAULT_TILT = 50; // 0x32
-    field protected static final double DEFAULT_ZOOM = 15.0;
+    field public static final double DEFAULT_TILT = 40.0;
+    field public static final double DEFAULT_ZOOM = 15.0;
   }
 
   public static final class SimpleCamera.Companion {

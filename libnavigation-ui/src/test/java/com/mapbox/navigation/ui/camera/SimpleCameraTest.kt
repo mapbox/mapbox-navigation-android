@@ -46,7 +46,7 @@ class SimpleCameraTest : BaseTest() {
     fun tilt() {
         val result = SimpleCamera().tilt(RouteInformation(null, null, null))
 
-        assertEquals(50.0, result, 0.0)
+        assertEquals(SimpleCamera.DEFAULT_TILT, result, 0.0)
     }
 
     @Test

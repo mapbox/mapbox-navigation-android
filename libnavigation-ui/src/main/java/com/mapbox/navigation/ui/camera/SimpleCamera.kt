@@ -11,7 +11,7 @@ import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMisc
 
 /**
- * The default camera used by [MapboxNavigation].
+ * The base camera implementation.
  */
 open class SimpleCamera : Camera() {
 
@@ -19,16 +19,16 @@ open class SimpleCamera : Camera() {
         /**
          * Default tilt angle for the Camera
          */
-        protected const val DEFAULT_TILT = 50
+        const val DEFAULT_TILT = 40.0
 
         /**
          * Default zoom level for the Camera
          */
-        protected const val DEFAULT_ZOOM = 15.0
+        const val DEFAULT_ZOOM = 15.0
     }
 
     override fun tilt(routeInformation: RouteInformation): Double {
-        return DEFAULT_TILT.toDouble()
+        return DEFAULT_TILT
     }
 
     override fun zoom(routeInformation: RouteInformation): Double {

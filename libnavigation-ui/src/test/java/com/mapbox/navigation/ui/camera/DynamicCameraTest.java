@@ -27,6 +27,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -76,7 +77,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
 
-    assertEquals(16d, maxCameraZoom, 0.1);
+    assertEquals(DynamicCamera.MAX_CAMERA_ZOOM, maxCameraZoom, 0.1);
   }
 
   @Test
@@ -92,7 +93,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
 
-    assertEquals(12d, maxCameraZoom, 0.1);
+    assertEquals(DynamicCamera.MIN_CAMERA_ZOOM, maxCameraZoom, 0.1);
   }
 
   @Test
@@ -129,7 +130,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double tilt = cameraEngine.tilt(routeInformation);
 
-    assertEquals(50d, tilt, 0.1);
+    assertEquals(DynamicCamera.DEFAULT_TILT, tilt, 0.1);
   }
 
   @Test
@@ -140,7 +141,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double tilt = cameraEngine.tilt(routeInformation);
 
-    assertEquals(60d, tilt, 0.1);
+    assertEquals(DynamicCamera.DEFAULT_TILT, tilt, 0.1);
   }
 
   @Test
@@ -151,7 +152,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double tilt = cameraEngine.tilt(routeInformation);
 
-    assertEquals(45d, tilt, 0.1);
+    assertEquals(DynamicCamera.DEFAULT_TILT, tilt, 0.1);
   }
 
   @Test
@@ -162,7 +163,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double tilt = cameraEngine.tilt(routeInformation);
 
-    assertEquals(45d, tilt, 0.1);
+    assertEquals(DynamicCamera.DEFAULT_TILT, tilt, 0.1);
   }
 
   @Test
@@ -196,7 +197,7 @@ public class DynamicCameraTest extends BaseTest {
 
     List<Point> overviewPoints = cameraEngine.overview(routeInformation);
 
-    assertEquals(true, overviewPoints.isEmpty());
+    assertTrue(overviewPoints.isEmpty());
   }
 
   @Nullable
