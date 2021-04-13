@@ -87,6 +87,29 @@ class RouteArrowUtilsTest {
     }
 
     @Test
+    fun `obtainArrowPointsFrom does not crash when upcomming step geometry is null`() {
+        val routeStepPoints = listOf(
+            Point.fromLngLat(-122.477395, 37.859513),
+            Point.fromLngLat(-122.4784726, 37.8587617),
+            Point.fromLngLat(-122.4784726, 37.8587617)
+        )
+        val stepProgress = mockk<RouteStepProgress> {
+            every { stepPoints } returns routeStepPoints
+        }
+        val routeLegProgress = mockk<RouteLegProgress> {
+            every { currentStepProgress } returns stepProgress
+        }
+        val routeProgress = mockk<RouteProgress> {
+            every { currentLegProgress } returns routeLegProgress
+            every { upcomingStepPoints } returns null
+        }
+
+        val result = RouteArrowUtils.obtainArrowPointsFrom(routeProgress)
+
+        assertTrue(result.isEmpty())
+    }
+
+    @Test
     fun obtainArrowPointsFrom() {
         val upcomingPoints = listOf(
             Point.fromLngLat(-122.477395, 37.859513),
