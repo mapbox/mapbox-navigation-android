@@ -265,8 +265,8 @@ class MapboxTripNotificationTest {
         notification.updateNotification(routeProgress)
 
         verify(exactly = 2) { bannerText.text() }
-        verify(exactly = 1) { collapsedViews.setTextViewText(any(), primaryText()) }
-        verify(exactly = 1) { expandedViews.setTextViewText(any(), primaryText()) }
+        verify(exactly = 2) { collapsedViews.setTextViewText(any(), primaryText()) }
+        verify(exactly = 2) { expandedViews.setTextViewText(any(), primaryText()) }
         assertEquals(notification.currentManeuverType, MANEUVER_TYPE)
         assertEquals(notification.currentManeuverModifier, MANEUVER_MODIFIER)
     }

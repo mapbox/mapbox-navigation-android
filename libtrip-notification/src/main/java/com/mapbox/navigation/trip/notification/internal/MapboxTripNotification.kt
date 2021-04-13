@@ -14,7 +14,6 @@ import android.graphics.Matrix
 import android.graphics.PointF
 import android.os.Build
 import android.text.SpannableString
-import android.text.TextUtils
 import android.text.format.DateFormat
 import android.view.View
 import android.view.View.GONE
@@ -326,17 +325,14 @@ class MapboxTripNotification constructor(
 
         routeProgress?.let {
             updateInstructionText(routeProgress.bannerInstructions)
+            updateManeuverState(routeProgress.bannerInstructions)
+            updateManeuverImage(
+                routeProgress.currentLegProgress?.currentStepProgress?.step?.drivingSide()
+                    ?: ManeuverModifier.RIGHT
+            )
             updateDistanceText(routeProgress)
             generateArrivalTime(routeProgress)?.let { formattedTime ->
                 updateViewsWithArrival(formattedTime)
-            }
-            routeProgress.bannerInstructions?.let { bannerInstructions ->
-                if (isManeuverStateChanged(bannerInstructions)) {
-                    updateManeuverImage(
-                        routeProgress.currentLegProgress?.currentStepProgress?.step?.drivingSide()
-                            ?: ManeuverModifier.RIGHT
-                    )
-                }
             }
             setFreeDriveMode(false)
         } ?: setFreeDriveMode(true)
@@ -413,17 +409,17 @@ class MapboxTripNotification constructor(
         bannerInstruction?.let { bannerIns ->
             val primaryText = bannerIns.primary().text()
             if (currentInstructionText.isNullOrEmpty() || currentInstructionText != primaryText) {
-                collapsedNotificationRemoteViews?.setTextViewText(
-                    R.id.notificationInstructionText,
-                    primaryText
-                )
-                expandedNotificationRemoteViews?.setTextViewText(
-                    R.id.notificationInstructionText,
-                    primaryText
-                )
                 currentInstructionText = primaryText
             }
         }
+        collapsedNotificationRemoteViews?.setTextViewText(
+            R.id.notificationInstructionText,
+            currentInstructionText
+        )
+        expandedNotificationRemoteViews?.setTextViewText(
+            R.id.notificationInstructionText,
+            currentInstructionText
+        )
     }
 
     private fun updateDistanceText(routeProgress: RouteProgress) {
@@ -487,28 +483,25 @@ class MapboxTripNotification constructor(
         }
     }
 
-    private fun isManeuverStateChanged(bannerInstruction: BannerInstructions): Boolean {
-        val previousManeuverType = currentManeuverType
-        val previousManeuverModifier = currentManeuverModifier
-        val previousRoundaboutAngle = currentRoundaboutAngle
-
-        updateManeuverState(bannerInstruction)
-
-        return !TextUtils.equals(currentManeuverType, previousManeuverType) ||
-            !TextUtils.equals(currentManeuverModifier, previousManeuverModifier) ||
-            currentRoundaboutAngle != previousRoundaboutAngle
-    }
-
-    private fun updateManeuverState(bannerInstruction: BannerInstructions) {
-        currentManeuverType = bannerInstruction.primary().type()
-        currentManeuverModifier = bannerInstruction.primary().modifier()
-
-        currentRoundaboutAngle = if (ROUNDABOUT_MANEUVER_TYPES.contains(currentManeuverType)) {
-            bannerInstruction.primary().degrees()?.toFloat()?.let {
-                adjustRoundaboutAngle(it)
+    private fun updateManeuverState(bannerInstruction: BannerInstructions?) {
+        bannerInstruction?.let { bannerIns ->
+            val maneuverType = bannerIns.primary().type()
+            if (currentManeuverType != maneuverType) {
+                currentManeuverType = maneuverType
             }
-        } else {
-            null
+            val maneuverModifier = bannerIns.primary().modifier()
+            if (currentManeuverModifier.isNullOrEmpty() ||
+                currentManeuverModifier != maneuverModifier
+            ) {
+                currentManeuverModifier = maneuverModifier
+            }
+            currentRoundaboutAngle = if (ROUNDABOUT_MANEUVER_TYPES.contains(currentManeuverType)) {
+                bannerIns.primary().degrees()?.toFloat()?.let {
+                    adjustRoundaboutAngle(it)
+                }
+            } else {
+                null
+            }
         }
     }
 
