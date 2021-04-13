@@ -34,6 +34,7 @@ class RouteRefreshControllerTest {
         every { profile() } returns DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
         every { overview() } returns DirectionsCriteria.OVERVIEW_FULL
         every { annotationsList() } returns listOf(DirectionsCriteria.ANNOTATION_MAXSPEED)
+        every { requestUuid() } returns "sadsad1212c"
     }
     private val validRoute: DirectionsRoute = mockk {
         every { routeOptions() } returns routeOptions

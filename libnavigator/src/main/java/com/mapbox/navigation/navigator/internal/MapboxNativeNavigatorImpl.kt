@@ -72,6 +72,9 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override var roadObjectsStore: RoadObjectsStore? = null
     private var logger: Logger? = null
 
+    // todo move to native
+    const val OFFLINE_UUID = "offline"
+
     // Route following
 
     /**
