@@ -32,11 +32,7 @@ public class CustomDynamicCamera extends SimpleCamera {
 
     private static final double MAX_CAMERA_TILT = 40d;
     private static final double MIN_CAMERA_TILT = 0d;
-    private static final double MAX_CAMERA_ZOOM = 16d;
-    private static final double MIN_CAMERA_ZOOM = 15.5d;
-
-    private static final double MAX_CAMERA_ZOOM_HIGH_SPEED = 15d;
-    private static final double MIN_CAMERA_ZOOM_HIGH_SPEED = 14.5d;
+    private static final double MAX_CAMERA_ZOOM = 16.35d;
 
     @Nullable
     private MapboxMap mapboxMap;
@@ -48,7 +44,6 @@ public class CustomDynamicCamera extends SimpleCamera {
     private boolean forceUpdateZoom;
     private boolean isShutdown = false;
     private double currentStepLookaheadDistance = 150.0;
-//    private double
 
     public CustomDynamicCamera(@NonNull MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
@@ -164,8 +159,6 @@ public class CustomDynamicCamera extends SimpleCamera {
             LatLng latlngOnRouteAtLookAheadDistance = new LatLng(lastPointOnRouteStepSlice.latitude(), lastPointOnRouteStepSlice.longitude());
             latLngs.add(currentLatLng);
             latLngs.add(latlngOnRouteAtLookAheadDistance);
-
-            mapboxMap.addPolyline()
 
             if (latLngs.size() < 1 || currentLatLng.equals(maneuverLatLng)) {
                 return mapboxMap.getCameraPosition();
