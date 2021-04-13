@@ -13,15 +13,14 @@ import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.base.trip.model.RouteProgressState;
 import com.mapbox.navigation.base.trip.model.RouteStepProgress;
 import com.mapbox.navigation.ui.NavigationConstants;
-import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 import com.mapbox.turf.TurfMisc;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,257 +29,243 @@ import java.util.List;
  */
 public class CustomDynamicCamera extends SimpleCamera {
 
-    private static final double MAX_CAMERA_TILT = 40d;
-    private static final double MIN_CAMERA_TILT = 0d;
-    private static final double MAX_CAMERA_ZOOM = 16.35d;
+  private static final double MAX_CAMERA_TILT = 40d;
+  private static final double MIN_CAMERA_TILT = 0d;
+  private static final double MAX_CAMERA_ZOOM = 16.35d;
+  private static final double MIN_CAMERA_ZOOM = 12d;
 
-    @Nullable
-    private MapboxMap mapboxMap;
-    @Nullable
-    private LegStep currentStep;
-    private boolean hasPassedLowAlertLevel;
-    private boolean hasPassedMediumAlertLevel;
-    private boolean hasPassedHighAlertLevel;
-    private boolean forceUpdateZoom;
-    private boolean isShutdown = false;
-    private double currentStepLookaheadDistance = 150.0;
+  @Nullable
+  private MapboxMap mapboxMap;
+  @Nullable
+  private LegStep currentStep;
+  private boolean hasPassedLowAlertLevel;
+  private boolean hasPassedMediumAlertLevel;
+  private boolean hasPassedHighAlertLevel;
+  private boolean forceUpdateZoom;
+  private boolean isShutdown = false;
+  private double currentStepLookaheadDistance = 150.0;
 
-    public CustomDynamicCamera(@NonNull MapboxMap mapboxMap) {
-        this.mapboxMap = mapboxMap;
+  public CustomDynamicCamera(@NonNull MapboxMap mapboxMap) {
+    this.mapboxMap = mapboxMap;
+  }
+
+  @Override
+  public double tilt(@NonNull RouteInformation routeInformation) {
+    if (isShutdown) {
+      return DEFAULT_TILT;
     }
 
-    @Override
-    public double tilt(@NonNull RouteInformation routeInformation) {
-        if (isShutdown) {
-            return DEFAULT_TILT;
-        }
+    RouteProgress progress = routeInformation.getRouteProgress();
+    if (progress != null) {
+      double distanceRemaining = progress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining();
+      return createTilt(distanceRemaining);
+    }
+    return super.tilt(routeInformation);
+  }
 
-        RouteProgress progress = routeInformation.getRouteProgress();
-        if (progress != null) {
-            double distanceRemaining = progress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining();
-            return createTilt(distanceRemaining);
-        }
-        return super.tilt(routeInformation);
+  @Override
+  public double zoom(@NonNull RouteInformation routeInformation) {
+    if (isShutdown) {
+      return DEFAULT_ZOOM;
     }
 
-    @Override
-    public double zoom(@NonNull RouteInformation routeInformation) {
-        if (isShutdown) {
-            return DEFAULT_ZOOM;
-        }
-
-        if (validLocationAndProgress(routeInformation) && shouldUpdateZoom(routeInformation)) {
-            return createZoom(routeInformation);
-        } else if (routeInformation.getRoute() != null) {
-            return super.zoom(routeInformation);
-        }
-        return mapboxMap.getCameraPosition().zoom;
+    if (validLocationAndProgress(routeInformation) && shouldUpdateZoom(routeInformation)) {
+      return createZoom(routeInformation);
+    } else if (routeInformation.getRoute() != null) {
+      return super.zoom(routeInformation);
     }
+    return mapboxMap.getCameraPosition().zoom;
+  }
 
 
-    /**
-     * Called when the zoom level should force update on the next usage
-     * of {@link DynamicCamera#zoom(RouteInformation)}.
-     */
-    public void forceResetZoomLevel() {
-        forceUpdateZoom = true;
+  /**
+   * Called when the zoom level should force update on the next usage.
+   */
+  public void forceResetZoomLevel() {
+    forceUpdateZoom = true;
+  }
+
+  /**
+   * Removes references to avoid leaks.
+   */
+  public void clearMap() {
+    isShutdown = true;
+    mapboxMap = null;
+  }
+
+  private double createTilt(double distanceRemaining) {
+    double tilt = distanceRemaining / 5;
+    if (tilt > MAX_CAMERA_TILT) {
+      return MAX_CAMERA_TILT;
+    } else if (tilt < MIN_CAMERA_TILT) {
+      return MIN_CAMERA_TILT;
     }
+    return Math.round(tilt);
+  }
 
-    public void clearMap() {
-        isShutdown = true;
-        mapboxMap = null;
+  private double createZoom(@NonNull RouteInformation routeInformation) {
+    CameraPosition position = createCameraPosition(routeInformation.getLocation(), routeInformation.getRouteProgress());
+    if (position == null) {
+      return DEFAULT_ZOOM;
     }
+    boolean routeProgressIsUncertain = routeInformation.getRouteProgress() != null
+        && routeInformation.getRouteProgress().getCurrentState() == RouteProgressState.ROUTE_UNCERTAIN;
 
-    /**
-     * Creates a tilt value based on the distance remaining for the current {@link LegStep}.
-     * <p>
-     * Checks if the calculated value is within the set min / max bounds.
-     *
-     * @param distanceRemaining from the current step
-     * @return tilt within set min / max bounds
-     */
-    private double createTilt(double distanceRemaining) {
-        double tilt = distanceRemaining / 5;
-        if (tilt > MAX_CAMERA_TILT) {
-            return MAX_CAMERA_TILT;
-        } else if (tilt < MIN_CAMERA_TILT) {
-            return MIN_CAMERA_TILT;
-        }
-        return Math.round(tilt);
+    if (routeProgressIsUncertain) {
+      return DEFAULT_ZOOM;
+    } else if (position.zoom > MAX_CAMERA_ZOOM) {
+      return MAX_CAMERA_ZOOM;
+    } else if (position.zoom < MIN_CAMERA_ZOOM) {
+      return MIN_CAMERA_ZOOM;
     }
+    return position.zoom;
+  }
 
-    /**
-     * Creates a zoom value based on the result of {@link MapboxMap#getCameraForLatLngBounds(LatLngBounds, int[])}.
-     * <p>
-     * 0 zoom is the world view, while 22 (default max threshold) is the closest you can position
-     * the camera to the map.
-     *
-     * @param routeInformation for current location and progress
-     * @return zoom within set min / max bounds
-     */
-    private double createZoom(@NonNull RouteInformation routeInformation) {
-        CameraPosition position = createCameraPosition(routeInformation.getLocation(), routeInformation.getRouteProgress());
-        if (position == null) {
-            return DEFAULT_ZOOM;
-        }
-        boolean routeProgressIsUncertain = routeInformation.getRouteProgress() != null
-                && routeInformation.getRouteProgress().getCurrentState() == RouteProgressState.ROUTE_UNCERTAIN;
+  @Nullable
+  private CameraPosition createCameraPosition(Location location, @NonNull RouteProgress routeProgress) {
+    LegStep upComingStep = routeProgress.getCurrentLegProgress().getUpcomingStep();
+    RouteStepProgress currentStepProgress = routeProgress.getCurrentLegProgress().getCurrentStepProgress();
+    if (upComingStep != null) {
+      Point stepManeuverPoint = upComingStep.maneuver().location();
 
-        if (routeProgressIsUncertain) {
-            return DEFAULT_ZOOM;
-        } else if (position.zoom > MAX_CAMERA_ZOOM) {
-            return MAX_CAMERA_ZOOM;
-        }
-        return position.zoom;
-    }
+      List<LatLng> latLngs = new ArrayList<>();
+      LatLng currentLatLng = new LatLng(location);
+      LatLng maneuverLatLng = new LatLng(stepManeuverPoint.latitude(), stepManeuverPoint.longitude());
+      latLngs.add(currentLatLng);
 
-    /**
-     * Creates a camera position with the current location and upcoming maneuver location.
-     * <p>
-     * Using {@link MapboxMap#getCameraForLatLngBounds(LatLngBounds, int[])} with a {@link LatLngBounds}
-     * that includes the current location and upcoming maneuver location.
-     *
-     * @param location      for current location
-     * @param routeProgress for upcoming maneuver location
-     * @return camera position that encompasses both locations
-     */
-    @Nullable
-    private CameraPosition createCameraPosition(Location location, @NonNull RouteProgress routeProgress) {
-        LegStep upComingStep = routeProgress.getCurrentLegProgress().getUpcomingStep();
-        RouteStepProgress currentStepProgress = routeProgress.getCurrentLegProgress().getCurrentStepProgress();
-        if (upComingStep != null) {
-            Point stepManeuverPoint = upComingStep.maneuver().location();
+      List<Point> routeStepSliceCoordinates = TurfMisc.lineSliceAlong(
+          LineString.fromLngLats(currentStepProgress.getStepPoints()),
+          currentStepProgress.getDistanceTraveled() / 1000.0,
+          (currentStepProgress.getDistanceTraveled() + currentStepLookaheadDistance) / 1000.0,
+          TurfConstants.UNIT_KILOMETERS
+      ).coordinates();
 
-            List<LatLng> latLngs = new ArrayList<>();
-            LatLng currentLatLng = new LatLng(location);
-            LatLng maneuverLatLng = new LatLng(stepManeuverPoint.latitude(), stepManeuverPoint.longitude());
-            LineString routeStepSlice = TurfMisc.lineSliceAlong(LineString.fromLngLats(currentStepProgress.getStepPoints()), currentStepProgress.getDistanceTraveled() / 1000.0, (currentStepProgress.getDistanceTraveled() + currentStepLookaheadDistance) / 1000.0, TurfConstants.UNIT_KILOMETERS);
-            Point lastPointOnRouteStepSlice = routeStepSlice.coordinates().get(routeStepSlice.coordinates().size()-1);
-            LatLng latlngOnRouteAtLookAheadDistance = new LatLng(lastPointOnRouteStepSlice.latitude(), lastPointOnRouteStepSlice.longitude());
-            latLngs.add(currentLatLng);
-            latLngs.add(latlngOnRouteAtLookAheadDistance);
+      if (routeStepSliceCoordinates.size() > 0) {
+        Point lastPointOnRouteStepSlice = routeStepSliceCoordinates.get(routeStepSliceCoordinates.size() - 1);
+        LatLng latlngOnRouteAtLookAheadDistance = new LatLng(
+            lastPointOnRouteStepSlice.latitude(),
+            lastPointOnRouteStepSlice.longitude()
+        );
+        latLngs.add(latlngOnRouteAtLookAheadDistance);
+      }
 
-            if (latLngs.size() < 1 || currentLatLng.equals(maneuverLatLng)) {
-                return mapboxMap.getCameraPosition();
-            }
-
-            LatLngBounds cameraBounds = new LatLngBounds.Builder()
-                    .includes(latLngs)
-                    .build();
-
-            int[] padding = {0, 0, 0, 0};
-            return mapboxMap.getCameraForLatLngBounds(cameraBounds, padding);
-        }
+      if (latLngs.size() < 1 || currentLatLng.equals(maneuverLatLng)) {
         return mapboxMap.getCameraPosition();
-    }
+      }
 
-    private boolean isForceUpdate() {
-        if (forceUpdateZoom) {
-            forceUpdateZoom = false;
-            return true;
-        }
-        return false;
-    }
+      LatLngBounds cameraBounds = new LatLngBounds.Builder()
+          .includes(latLngs)
+          .build();
 
-    /**
-     * Looks to see if we have a new step.
-     *
-     * @param routeProgress provides updated step information
-     * @return true if new step, false if not
-     */
-    private boolean isNewStep(@NonNull RouteProgress routeProgress) {
-        boolean isNewStep = currentStep == null
-                || !currentStep.equals(routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep());
-        currentStep = routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep();
-        resetAlertLevels(isNewStep);
-        currentStepLookaheadDistance = calculateLookaheadDistance(routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep());
-        return isNewStep;
+      int[] padding = {0, 0, 0, 0};
+      return mapboxMap.getCameraForLatLngBounds(cameraBounds, padding);
     }
+    return mapboxMap.getCameraPosition();
+  }
 
-    private void resetAlertLevels(boolean isNewStep) {
-        if (isNewStep) {
-            hasPassedLowAlertLevel = false;
-            hasPassedMediumAlertLevel = false;
-            hasPassedHighAlertLevel = false;
-        }
+  private boolean isForceUpdate() {
+    if (forceUpdateZoom) {
+      forceUpdateZoom = false;
+      return true;
     }
+    return false;
+  }
 
-    private double calculateLookaheadDistance(@NonNull LegStep legStep) {
-        List<Point> intersectionLocations = new ArrayList<Point>();
-        for (StepIntersection intersection: legStep.intersections()) {
-            intersectionLocations.add(intersection.location());
-        }
-        List<Double> intersectionDistances = new ArrayList<Double>();
-        for (int i=1; i<intersectionLocations.size(); i++) {
-            Double distance = TurfMeasurement.distance(intersectionLocations.get(i-1), intersectionLocations.get(i)) * 1000.0;
-            if (distance > 20.0) {
-                intersectionDistances.add(distance);
-            }
-        }
-        double intersectionDistanceNumerator = 0.0;
-        for (Double intersectionDistance: intersectionDistances) {
-            intersectionDistanceNumerator += intersectionDistance.doubleValue();
-        }
-        double averageIntersectionDistance = 150.0;
-        if (intersectionDistances.size() > 0) {
-            averageIntersectionDistance = intersectionDistanceNumerator / intersectionDistances.size();
-        }
-        return averageIntersectionDistance * 5.0;
-    }
+  private boolean isNewStep(@NonNull RouteProgress routeProgress) {
+    boolean isNewStep = currentStep == null
+        || !currentStep.equals(routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep());
+    currentStep = routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep();
+    resetAlertLevels(isNewStep);
+    currentStepLookaheadDistance = calculateLookaheadDistance(
+        routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep()
+    );
+    return isNewStep;
+  }
 
-    private boolean validLocationAndProgress(@NonNull RouteInformation routeInformation) {
-        return routeInformation.getLocation() != null && routeInformation.getRouteProgress() != null;
+  private void resetAlertLevels(boolean isNewStep) {
+    if (isNewStep) {
+      hasPassedLowAlertLevel = false;
+      hasPassedMediumAlertLevel = false;
+      hasPassedHighAlertLevel = false;
     }
+  }
 
-    private boolean shouldUpdateZoom(@NonNull RouteInformation routeInformation) {
-        RouteProgress progress = routeInformation.getRouteProgress();
-        return isForceUpdate()
-                || isNewStep(progress)
-                || isLowAlert(progress)
-                || isMediumAlert(progress)
-                || isHighAlert(progress)
-                || progress.getCurrentState() == RouteProgressState.ROUTE_UNCERTAIN;
+  private double calculateLookaheadDistance(@NonNull LegStep legStep) {
+    List<Point> intersectionLocations = new ArrayList<Point>();
+    for (StepIntersection intersection : legStep.intersections()) {
+      intersectionLocations.add(intersection.location());
     }
+    List<Double> intersectionDistances = new ArrayList<Double>();
+    for (int i = 1; i < intersectionLocations.size(); i++) {
+      double distance = TurfMeasurement.distance(intersectionLocations.get(i - 1), intersectionLocations.get(i)) * 1000.0;
+      if (distance > 20.0) {
+        intersectionDistances.add(distance);
+      }
+    }
+    double intersectionDistanceNumerator = 0.0;
+    for (Double intersectionDistance : intersectionDistances) {
+      intersectionDistanceNumerator += intersectionDistance;
+    }
+    double averageIntersectionDistance = 150.0;
+    if (intersectionDistances.size() > 0) {
+      averageIntersectionDistance = intersectionDistanceNumerator / intersectionDistances.size();
+    }
+    return averageIntersectionDistance * 5.0;
+  }
 
-    private boolean isLowAlert(@NonNull RouteProgress progress) {
-        if (!hasPassedLowAlertLevel) {
-            double durationRemaining = progress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining();
-            double stepDuration = progress.getCurrentLegProgress().getCurrentStepProgress().getStep().duration();
-            boolean isLowAlert = durationRemaining < NavigationConstants.NAVIGATION_LOW_ALERT_DURATION;
-            boolean hasValidStepDuration = stepDuration > NavigationConstants.NAVIGATION_LOW_ALERT_DURATION;
-            if (hasValidStepDuration && isLowAlert) {
-                hasPassedLowAlertLevel = true;
-                return true;
-            }
-        }
-        return false;
-    }
+  private boolean validLocationAndProgress(@NonNull RouteInformation routeInformation) {
+    return routeInformation.getLocation() != null && routeInformation.getRouteProgress() != null;
+  }
 
-    private boolean isMediumAlert(@NonNull RouteProgress progress) {
-        if (!hasPassedMediumAlertLevel) {
-            double durationRemaining = progress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining();
-            double stepDuration = progress.getCurrentLegProgress().getCurrentStepProgress().getStep().duration();
-            boolean isMediumAlert = durationRemaining < NavigationConstants.NAVIGATION_MEDIUM_ALERT_DURATION;
-            boolean hasValidStepDuration = stepDuration > NavigationConstants.NAVIGATION_MEDIUM_ALERT_DURATION;
-            if (hasValidStepDuration && isMediumAlert) {
-                hasPassedMediumAlertLevel = true;
-                return true;
-            }
-        }
-        return false;
-    }
+  private boolean shouldUpdateZoom(@NonNull RouteInformation routeInformation) {
+    RouteProgress progress = routeInformation.getRouteProgress();
+    return isForceUpdate()
+        || isNewStep(progress)
+        || isLowAlert(progress)
+        || isMediumAlert(progress)
+        || isHighAlert(progress)
+        || progress.getCurrentState() == RouteProgressState.ROUTE_UNCERTAIN;
+  }
 
-    private boolean isHighAlert(@NonNull RouteProgress progress) {
-        if (!hasPassedHighAlertLevel) {
-            double durationRemaining = progress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining();
-            double stepDuration = progress.getCurrentLegProgress().getCurrentStepProgress().getStep().duration();
-            boolean isHighAlert = durationRemaining < NavigationConstants.NAVIGATION_HIGH_ALERT_DURATION;
-            boolean hasValidStepDuration = stepDuration > NavigationConstants.NAVIGATION_HIGH_ALERT_DURATION;
-            if (hasValidStepDuration && isHighAlert) {
-                hasPassedHighAlertLevel = true;
-                return true;
-            }
-        }
-        return false;
+  private boolean isLowAlert(@NonNull RouteProgress progress) {
+    if (!hasPassedLowAlertLevel) {
+      double durationRemaining = progress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining();
+      double stepDuration = progress.getCurrentLegProgress().getCurrentStepProgress().getStep().duration();
+      boolean isLowAlert = durationRemaining < NavigationConstants.NAVIGATION_LOW_ALERT_DURATION;
+      boolean hasValidStepDuration = stepDuration > NavigationConstants.NAVIGATION_LOW_ALERT_DURATION;
+      if (hasValidStepDuration && isLowAlert) {
+        hasPassedLowAlertLevel = true;
+        return true;
+      }
     }
+    return false;
+  }
+
+  private boolean isMediumAlert(@NonNull RouteProgress progress) {
+    if (!hasPassedMediumAlertLevel) {
+      double durationRemaining = progress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining();
+      double stepDuration = progress.getCurrentLegProgress().getCurrentStepProgress().getStep().duration();
+      boolean isMediumAlert = durationRemaining < NavigationConstants.NAVIGATION_MEDIUM_ALERT_DURATION;
+      boolean hasValidStepDuration = stepDuration > NavigationConstants.NAVIGATION_MEDIUM_ALERT_DURATION;
+      if (hasValidStepDuration && isMediumAlert) {
+        hasPassedMediumAlertLevel = true;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean isHighAlert(@NonNull RouteProgress progress) {
+    if (!hasPassedHighAlertLevel) {
+      double durationRemaining = progress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining();
+      double stepDuration = progress.getCurrentLegProgress().getCurrentStepProgress().getStep().duration();
+      boolean isHighAlert = durationRemaining < NavigationConstants.NAVIGATION_HIGH_ALERT_DURATION;
+      boolean hasValidStepDuration = stepDuration > NavigationConstants.NAVIGATION_HIGH_ALERT_DURATION;
+      if (hasValidStepDuration && isHighAlert) {
+        hasPassedHighAlertLevel = true;
+        return true;
+      }
+    }
+    return false;
+  }
 }
