@@ -171,6 +171,7 @@ class MapboxOffboardRouter(
                                 message = "Failed to read refresh response",
                                 throwable = errorThrowable ?: Exception(
                                     "Message=[${response.message()}]; " +
+                                        "url = [${(call.request() as Request).url}]" +
                                         "errorBody = [${response.errorBody()}];" +
                                         "refresh route = [$routeAnnotations]"
                                 )
@@ -183,6 +184,7 @@ class MapboxOffboardRouter(
                             message = "Route refresh failed",
                             throwable = Exception(
                                 "Message=[${response.message()}]; " +
+                                    "url = [${(call.request() as Request).url}]" +
                                     "code = [${response.code()}];" +
                                     "errorBody = [${response.errorBody()}];"
                             )
@@ -193,7 +195,13 @@ class MapboxOffboardRouter(
 
             override fun onFailure(call: Call<DirectionsRefreshResponse>, t: Throwable) {
                 refreshRequests.remove(requestId)
-                callback.onError(RouteRefreshError(throwable = t))
+                callback.onError(
+                    RouteRefreshError(
+                        "Route refresh failed; " +
+                            "url = [${(call.request() as Request).url}]",
+                        throwable = t
+                    )
+                )
             }
         })
         return requestId

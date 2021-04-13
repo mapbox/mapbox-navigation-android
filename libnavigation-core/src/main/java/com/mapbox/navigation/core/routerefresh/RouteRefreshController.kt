@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.extensions.supportsRouteRefresh
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.internal.utils.isUuidValidForRefresh
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.MapboxTimer
 import kotlinx.coroutines.Job
@@ -43,7 +44,9 @@ internal class RouteRefreshController(
     fun start(): Job {
         stop()
         return routerRefreshTimer.startTimer {
-            val route = tripSession.route?.takeIf { it.routeOptions().supportsRouteRefresh() }
+            val route = tripSession.route
+                ?.takeIf { it.routeOptions().supportsRouteRefresh() }
+                ?.takeIf { it.routeOptions().isUuidValidForRefresh() }
             if (route != null) {
                 val legIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0
                 requestId = directionsSession.requestRouteRefresh(

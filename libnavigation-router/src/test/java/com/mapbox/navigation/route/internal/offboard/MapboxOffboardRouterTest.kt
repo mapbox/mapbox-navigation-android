@@ -21,7 +21,10 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.Request
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
@@ -90,6 +93,8 @@ class MapboxOffboardRouterTest : BaseTest() {
 
         offboardRouter =
             MapboxOffboardRouter(accessToken, context, mockSkuTokenProvider, true, mockk())
+
+        every { (refreshCall.request() as Request).url } returns "https://test.com".toHttpUrl()
     }
 
     @After
@@ -342,13 +347,14 @@ class MapboxOffboardRouterTest : BaseTest() {
     fun `route refresh failure - failed response`() {
         val originalRoute = mockRouteForRefresh("uuid_123", "1")
         val callback = mockk<RouteRefreshCallback>(relaxUnitFun = true)
+        val slot = slot<RouteRefreshError>()
         val ex = mockk<Exception>()
+        every { callback.onError(capture(slot)) } returns Unit
 
         offboardRouter.getRouteRefresh(originalRoute, 0, callback)
-
         refreshCallback.onFailure(refreshCall, ex)
 
-        verify(exactly = 1) { callback.onError(RouteRefreshError(throwable = ex)) }
+        assertEquals(slot.captured.throwable, ex)
     }
 
     @Test
