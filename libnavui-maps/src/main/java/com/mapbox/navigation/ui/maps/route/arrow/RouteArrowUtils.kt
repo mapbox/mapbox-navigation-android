@@ -25,18 +25,17 @@ import com.mapbox.turf.TurfMisc
 internal object RouteArrowUtils {
 
     fun obtainArrowPointsFrom(routeProgress: RouteProgress): List<Point> {
-        val reversedCurrent: List<Point> =
-            routeProgress.currentLegProgress?.currentStepProgress?.stepPoints?.reversed()
-                ?: listOf()
-
+        val reversedCurrent: List<Point> = routeProgress.currentLegProgress
+            ?.currentStepProgress?.stepPoints?.reversed()
+            ?: listOf()
         val arrowLineCurrent = LineString.fromLngLats(reversedCurrent)
-        val arrowLineUpcoming = LineString.fromLngLats(routeProgress.upcomingStepPoints!!)
-
-        if (arrowLineCurrent.coordinates().size < 2) {
+        if (reversedCurrent.size < 2) {
             return listOf()
         }
 
-        if (arrowLineUpcoming.coordinates().size < 2) {
+        val upcomingStepPoints = routeProgress.upcomingStepPoints ?: emptyList()
+        val arrowLineUpcoming = LineString.fromLngLats(upcomingStepPoints)
+        if (upcomingStepPoints.size < 2) {
             return listOf()
         }
 
