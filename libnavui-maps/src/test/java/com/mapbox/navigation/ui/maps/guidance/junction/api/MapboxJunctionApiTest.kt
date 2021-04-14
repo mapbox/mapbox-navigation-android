@@ -29,6 +29,7 @@ import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
@@ -230,6 +231,7 @@ class MapboxJunctionApiTest {
         assertEquals(expected.value.bytes, messageSlot.captured.value.bytes)
     }
 
+    @Ignore("Make this test an instrumentation test to avoid UnsatisfiedLinkError from Common 11+")
     @Test
     fun `process request signboard request cancel`() {
         val mockWebServer = MockWebServer()

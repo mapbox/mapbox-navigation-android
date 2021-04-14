@@ -6,7 +6,6 @@ import com.mapbox.bindgen.Value
 import com.mapbox.common.TileStore
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.TileStoreManager
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.PredictiveCache
@@ -61,18 +60,17 @@ class PredictiveCacheController @JvmOverloads constructor(
     private val onStyleLoadedListener = object : OnStyleLoadedListener {
         override fun onStyleLoaded() {
             map?.let { map ->
-                val tileStoreResult = TileStoreManager.getTileStore(map.getResourceOptions())
-                tileStoreResult.doOnSuccess { tileStore ->
-                    val currentMapSources = mutableListOf<String>()
-                    traverseMapSources(map) { tileVariant ->
-                        currentMapSources.add(tileVariant)
-                    }
-                    updateMapsControllers(
-                        currentMapSources,
-                        PredictiveCache.currentMapsPredictiveCacheControllers(),
-                        tileStore
-                    )
+                val tileStorePath = map.getResourceOptions().tileStorePath
+                val tileStore = retrieveTileStore(tileStorePath)
+                val currentMapSources = mutableListOf<String>()
+                traverseMapSources(map) { tileVariant ->
+                    currentMapSources.add(tileVariant)
                 }
+                updateMapsControllers(
+                    currentMapSources,
+                    PredictiveCache.currentMapsPredictiveCacheControllers(),
+                    tileStore
+                )
             }
         }
     }
@@ -88,11 +86,10 @@ class PredictiveCacheController @JvmOverloads constructor(
      */
     fun setMapInstance(map: MapboxMap) {
         removeMapInstance()
-        val tileStoreResult = TileStoreManager.getTileStore(map.getResourceOptions())
-        tileStoreResult.doOnSuccess { tileStore ->
-            traverseMapSources(map) { tileVariant ->
-                PredictiveCache.createMapsController(tileStore, tileVariant)
-            }
+        val tileStorePath = map.getResourceOptions().tileStorePath
+        val tileStore = retrieveTileStore(tileStorePath)
+        traverseMapSources(map) { tileVariant ->
+            PredictiveCache.createMapsController(tileStore, tileVariant)
         }
         map.addOnStyleLoadedListener(onStyleLoadedListener)
         this.map = map
@@ -120,11 +117,11 @@ class PredictiveCacheController @JvmOverloads constructor(
         PredictiveCache.clean()
     }
 
-    private fun Expected<TileStore, String>.doOnSuccess(action: (tileStore: TileStore) -> Unit) {
-        if (isError) {
-            handleError(error)
+    private fun retrieveTileStore(path: String?): TileStore {
+        return if (path == null) {
+            TileStore.getInstance()
         } else {
-            action(value!!)
+            TileStore.getInstance(path)
         }
     }
 

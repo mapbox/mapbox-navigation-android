@@ -6,6 +6,8 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.QueriedFeature
+import com.mapbox.maps.QueryFeaturesCallback
 import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
@@ -482,11 +484,12 @@ class MapboxRouteLineApi(
         return suspendCoroutine { continuation ->
             mapboxMap.queryRenderedFeatures(
                 mapClickPoint,
-                RenderedQueryOptions(layerIds, null)
-            ) {
-                val index = getIndexOfFirstFeature(it.value ?: listOf(), routeFeatures)
-                continuation.resume(index)
-            }
+                RenderedQueryOptions(layerIds, null),
+                QueryFeaturesCallback {
+                    val index = getIndexOfFirstFeature(it.value ?: listOf(), routeFeatures)
+                    continuation.resume(index)
+                }
+            )
         }
     }
 
@@ -499,21 +502,22 @@ class MapboxRouteLineApi(
         return suspendCoroutine { continuation ->
             mapboxMap.queryRenderedFeatures(
                 clickRect,
-                RenderedQueryOptions(layerIds, null)
-            ) {
-                val index = getIndexOfFirstFeature(it.value ?: listOf(), routeFeatures)
-                continuation.resume(index)
-            }
+                RenderedQueryOptions(layerIds, null),
+                QueryFeaturesCallback {
+                    val index = getIndexOfFirstFeature(it.value ?: listOf(), routeFeatures)
+                    continuation.resume(index)
+                }
+            )
         }
     }
 
     private fun getIndexOfFirstFeature(
-        features: List<Feature>,
+        features: List<QueriedFeature>,
         routeFeatures: List<FeatureCollection>
     ): Int {
         return features.distinct().run {
             routeFeatures.indexOfFirst {
-                it.features()?.get(0) ?.id() ?: 0 == this.firstOrNull()?.id()
+                it.features()?.get(0)?.id() ?: 0 == this.firstOrNull()?.feature?.id()
             }
         }
     }
