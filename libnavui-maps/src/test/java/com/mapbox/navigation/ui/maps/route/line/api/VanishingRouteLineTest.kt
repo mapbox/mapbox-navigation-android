@@ -71,6 +71,29 @@ class VanishingRouteLineTest {
     }
 
     @Test
+    fun initWithRoute_clearState() = coroutineRule.runBlockingTest {
+        val route = getRoute()
+        val vanishingRouteLine = VanishingRouteLine()
+
+        vanishingRouteLine.initWithRoute(route)
+        assertEquals(
+            8,
+            vanishingRouteLine.primaryRouteLineGranularDistances!!.distancesArray.size()
+        )
+        unmockkObject(ThreadController)
+        val jobControl = ThreadController.getMainScopeAndRootJob()
+        mockkObject(ThreadController)
+
+        every { ThreadController.getMainScopeAndRootJob() } returns jobControl
+        Runnable {
+            vanishingRouteLine.initWithRoute(getVeryLongRoute())
+        }.run()
+        jobControl.job.cancel()
+
+        assertNull(vanishingRouteLine.primaryRouteLineGranularDistances)
+    }
+
+    @Test
     fun updateVanishingPointState_when_LOCATION_TRACKING() {
         val vanishingRouteLine = VanishingRouteLine().also {
             it.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
@@ -154,6 +177,11 @@ class VanishingRouteLineTest {
 
     private fun getRoute(): DirectionsRoute {
         val routeAsJson = loadJsonFixture("short_route.json")
+        return DirectionsRoute.fromJson(routeAsJson)
+    }
+
+    private fun getVeryLongRoute(): DirectionsRoute {
+        val routeAsJson = loadJsonFixture("cross-country-route.json")
         return DirectionsRoute.fromJson(routeAsJson)
     }
 

@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -54,8 +55,6 @@ import com.mapbox.navigation.core.replay.history.ReplayEventBase;
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver;
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
-import com.mapbox.navigation.core.trip.session.MapMatcherResult;
-import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.examples.core.R;
 import com.mapbox.navigation.ui.base.model.Expected;
@@ -63,7 +62,6 @@ import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue;
 import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue;
 import com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError;
 import com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue;
-import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter;
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer;
 import com.mapbox.navigation.ui.maps.PredictiveCacheController;
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider;
@@ -80,11 +78,6 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue;
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue;
-import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi;
-import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter;
-import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError;
-import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue;
-import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -124,8 +117,6 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   private MapboxRouteLineView mapboxRouteLineView;
   private final MapboxRouteArrowApi routeArrow = new MapboxRouteArrowApi();
   private MapboxRouteArrowView routeArrowView;
-  private MapboxSpeedLimitApi speedLimitApi;
-  private MapboxSpeedLimitView speedLimitView;
 
   @SuppressLint("MissingPermission")
   @Override
@@ -184,16 +175,11 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
       Timber.e("predictive cache error: %s", message);
     });
     predictiveCacheController.setMapInstance(mapboxMap);
-
-    SpeedLimitFormatter speedLimitFormatter = new SpeedLimitFormatter(this);
-    speedLimitApi = new MapboxSpeedLimitApi(speedLimitFormatter);
-    speedLimitView = (MapboxSpeedLimitView)findViewById(R.id.speedLimitView);
   }
 
   @SuppressLint("MissingPermission")
   private void initListeners() {
     startNavigation.setOnClickListener(v -> {
-      mapboxNavigation.registerMapMatcherResultObserver(mapMatcherResultObserver);
       mapboxNavigation.startTripSession();
       startNavigation.setVisibility(View.GONE);
       getLocationComponent().addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener);
@@ -310,7 +296,6 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
       mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver);
       mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver);
       mapboxNavigation.unregisterRoutesObserver(routesObserver);
-      mapboxNavigation.unregisterMapMatcherResultObserver(mapMatcherResultObserver);
     }
     mapView.onStop();
   }
@@ -395,11 +380,15 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
       for (DirectionsRoute route : routes) {
         routeLines.add(new RouteLine(route, null));
       }
-
+      long start = System.currentTimeMillis();
       mapboxRouteLineApi.setRoutes(routeLines, new MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>() {
         @Override
         public void accept(Expected<RouteSetValue, RouteLineError> routeDrawData) {
+          Log.e("foobar", "total calc time: " + (System.currentTimeMillis() - start));
+
+          long startDraw = System.currentTimeMillis();
           mapboxRouteLineView.renderRouteDrawData(mapboxMap.getStyle(), routeDrawData);
+          Log.e("foobar", "total draw time: " + (System.currentTimeMillis() - startDraw));
         }
       });
     }
@@ -506,14 +495,6 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
           }
           );
       }
-    }
-  };
-
-  private final MapMatcherResultObserver mapMatcherResultObserver = new MapMatcherResultObserver() {
-    @Override public void onNewMapMatcherResult(@NotNull MapMatcherResult mapMatcherResult) {
-      Expected<UpdateSpeedLimitValue, UpdateSpeedLimitError> update =
-        speedLimitApi.updateSpeedLimit(mapMatcherResult.getSpeedLimit());
-      speedLimitView.render(update);
     }
   };
 

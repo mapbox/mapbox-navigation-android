@@ -38,15 +38,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_layers_24dp"/>
 
-    <com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
-        android:id="@+id/speedLimitView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="64dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
     <ProgressBar
         android:id="@+id/routeLoadingProgressBar"
         android:layout_width="wrap_content"
