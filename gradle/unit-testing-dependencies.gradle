@@ -3,6 +3,7 @@ dependencies {
     testImplementation dependenciesList.junit
     testImplementation dependenciesList.coroutinesTestAndroid
     testImplementation dependenciesList.mockk
+    testImplementation dependenciesList.mockito
     testImplementation dependenciesList.robolectric
     testImplementation dependenciesList.kotlinReflect
     testImplementation dependenciesList.mockwebserver

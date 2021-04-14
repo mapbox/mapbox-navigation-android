@@ -5,11 +5,11 @@ import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
-import com.mapbox.geojson.Feature
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.QueriedFeature
 import com.mapbox.maps.QueryFeaturesCallback
 import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.maps.ScreenBox
@@ -59,6 +59,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.UUID
+import kotlin.collections.ArrayList
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -774,11 +775,11 @@ class MapboxRouteLineApiTest {
         val uuids = listOf(UUID.randomUUID(), UUID.randomUUID())
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returnsMany uuids
-        val feature1 = mockk<Feature> {
-            every { id() } returns uuids[0].toString()
+        val feature1 = mockk<QueriedFeature> {
+            every { feature.id() } returns uuids[0].toString()
         }
-        val feature2 = mockk<Feature> {
-            every { id() } returns uuids[1].toString()
+        val feature2 = mockk<QueriedFeature> {
+            every { feature.id() } returns uuids[1].toString()
         }
         val route1 = getRoute()
         val route2 = getRoute()
@@ -787,7 +788,7 @@ class MapboxRouteLineApiTest {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
         val point = Point.fromLngLat(139.7745686, 35.677573)
-        val mockExpected = mockk<com.mapbox.bindgen.Expected<List<Feature>, String>> {
+        val mockExpected = mockk<com.mapbox.bindgen.Expected<List<QueriedFeature>, String>> {
             every { value } returns listOf(feature2, feature1)
         }
         val querySlot = slot<QueryFeaturesCallback>()
@@ -814,11 +815,11 @@ class MapboxRouteLineApiTest {
         val uuids = listOf(UUID.randomUUID(), UUID.randomUUID())
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returnsMany uuids
-        val feature1 = mockk<Feature> {
-            every { id() } returns uuids[0].toString()
+        val feature1 = mockk<QueriedFeature> {
+            every { feature.id() } returns uuids[0].toString()
         }
-        val feature2 = mockk<Feature> {
-            every { id() } returns uuids[1].toString()
+        val feature2 = mockk<QueriedFeature> {
+            every { feature.id() } returns uuids[1].toString()
         }
         val route1 = getRoute()
         val route2 = getRoute()
@@ -827,10 +828,10 @@ class MapboxRouteLineApiTest {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
         val point = Point.fromLngLat(139.7745686, 35.677573)
-        val emptyExpected = mockk<com.mapbox.bindgen.Expected<List<Feature>, String>> {
+        val emptyExpected = mockk<com.mapbox.bindgen.Expected<List<QueriedFeature>, String>> {
             every { value } returns listOf()
         }
-        val mockExpected = mockk<com.mapbox.bindgen.Expected<List<Feature>, String>> {
+        val mockExpected = mockk<com.mapbox.bindgen.Expected<List<QueriedFeature>, String>> {
             every { value } returns listOf(feature2, feature1)
         }
         val querySlot = slot<QueryFeaturesCallback>()
@@ -860,11 +861,11 @@ class MapboxRouteLineApiTest {
         val uuids = listOf(UUID.randomUUID(), UUID.randomUUID())
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returnsMany uuids
-        val feature1 = mockk<Feature> {
-            every { id() } returns uuids[0].toString()
+        val feature1 = mockk<QueriedFeature> {
+            every { feature.id() } returns uuids[0].toString()
         }
-        val feature2 = mockk<Feature> {
-            every { id() } returns uuids[1].toString()
+        val feature2 = mockk<QueriedFeature> {
+            every { feature.id() } returns uuids[1].toString()
         }
         val route1 = getRoute()
         val route2 = getRoute()
@@ -873,10 +874,10 @@ class MapboxRouteLineApiTest {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
         val point = Point.fromLngLat(139.7745686, 35.677573)
-        val emptyExpected = mockk<com.mapbox.bindgen.Expected<List<Feature>, String>> {
+        val emptyExpected = mockk<com.mapbox.bindgen.Expected<List<QueriedFeature>, String>> {
             every { value } returns listOf()
         }
-        val mockExpected = mockk<com.mapbox.bindgen.Expected<List<Feature>, String>> {
+        val mockExpected = mockk<com.mapbox.bindgen.Expected<List<QueriedFeature>, String>> {
             every { value } returns listOf(feature1, feature2)
         }
         val querySlot = slot<QueryFeaturesCallback>()

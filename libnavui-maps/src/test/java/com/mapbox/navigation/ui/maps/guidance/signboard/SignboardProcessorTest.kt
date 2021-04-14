@@ -126,7 +126,7 @@ class SignboardProcessorTest {
         val result = SignboardProcessor.process(action) as SignboardResult.SignboardRequest
 
         assertEquals(mockHttpRequest.url, result.request.url)
-        assertEquals(mockHttpRequest.body.isEmpty(), result.request.body.isEmpty())
+        assertEquals(mockHttpRequest.body?.isEmpty(), result.request.body?.isEmpty())
         assertEquals(mockHttpRequest.method, result.request.method)
         assertEquals(mockHttpRequest.headers, result.request.headers)
         assertEquals(mockHttpRequest.uaComponents, result.request.uaComponents)

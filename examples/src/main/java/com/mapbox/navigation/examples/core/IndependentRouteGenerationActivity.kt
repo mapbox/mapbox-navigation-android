@@ -17,12 +17,12 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
-import com.mapbox.maps.plugin.annotation.generated.CircleManager
-import com.mapbox.maps.plugin.annotation.generated.CircleOptions
-import com.mapbox.maps.plugin.annotation.generated.LineManager
-import com.mapbox.maps.plugin.annotation.generated.LineOptions
-import com.mapbox.maps.plugin.annotation.generated.createCircleManager
-import com.mapbox.maps.plugin.annotation.generated.createLineManager
+import com.mapbox.maps.plugin.annotation.generated.CircleAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.CircleAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.createCircleAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.createPolylineAnnotationManager
 import com.mapbox.maps.plugin.annotation.getAnnotationPlugin
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.getGesturesPlugin
@@ -59,8 +59,8 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
     private val navigationLocationProvider = NavigationLocationProvider()
     private lateinit var locationComponent: LocationComponentPlugin
     private lateinit var mapboxNavigation: MapboxNavigation
-    private lateinit var circleManager: CircleManager
-    private lateinit var lineManager: LineManager
+    private lateinit var circleManager: CircleAnnotationManager
+    private lateinit var lineManager: PolylineAnnotationManager
     private val mapboxReplayer = MapboxReplayer()
 
     private val tripProgressApi: MapboxTripProgressApi by lazy {
@@ -86,9 +86,9 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
 
         mapboxMap = binding.mapView.getMapboxMap()
         circleManager = binding.mapView.getAnnotationPlugin()
-            .createCircleManager(binding.mapView, null)
+            .createCircleAnnotationManager(binding.mapView, null)
         lineManager = binding.mapView.getAnnotationPlugin()
-            .createLineManager(binding.mapView, null)
+            .createPolylineAnnotationManager(binding.mapView, null)
         locationComponent = binding.mapView.getLocationComponentPlugin().apply {
             setLocationProvider(navigationLocationProvider)
             enabled = true
@@ -225,7 +225,7 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
             object : RoutesRequestCallback {
                 override fun onRoutesReady(routes: List<DirectionsRoute>) {
                     lineManager.create(
-                        LineOptions.fromFeature(
+                        PolylineAnnotationOptions.fromFeature(
                             Feature.fromGeometry(
                                 LineString.fromPolyline(routes[0].geometry()!!, 6)
                             )
@@ -275,7 +275,9 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
             }
         )
 
-        circleManager.create(CircleOptions.fromFeature(Feature.fromGeometry(destination))!!)
+        circleManager.create(
+            CircleAnnotationOptions.fromFeature(Feature.fromGeometry(destination))!!
+        )
     }
 
     private fun clearRouteSelectionUi() {
