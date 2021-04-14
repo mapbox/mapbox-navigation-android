@@ -10,5 +10,5 @@ ext {
     mapboxArtifactScmUrl = 'scm:git@github.com:mapbox/mapbox-navigation-android.git'
     mapboxArtifactLicenseName = 'Mapbox Terms of Service'
     mapboxArtifactLicenseUrl = 'https://www.mapbox.com/legal/tos/'
-    versionName = "km-crashlytics-SNAPSHOT"
+    versionName = "2.0.0-crashlytics-SNAPSHOT"
 }
