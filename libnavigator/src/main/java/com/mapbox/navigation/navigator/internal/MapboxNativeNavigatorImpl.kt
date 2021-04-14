@@ -17,7 +17,6 @@ import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.navigator.ActiveGuidanceOptionsMapper
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.BannerInstruction
-import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessor
@@ -425,7 +424,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         PredictiveCacheControllerOptions(
             "",
             tileVariant,
-            CacheDataDomain.MAPS,
+//            CacheDataDomain.MAPS,
             MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS,
             0
         )
