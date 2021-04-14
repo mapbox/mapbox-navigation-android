@@ -2,6 +2,24 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 1.6.1 - April 14, 2021
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Bug fixes and improvements
+- :warning: Changed `DynamicCamera`'s default tilt and zoom constraints to improve performance and readability of the map when in active navigation. [#4262](https://github.com/mapbox/mapbox-navigation-android/pull/4262)
+
+## Mapbox Navigation SDK 1.6.0 - April 14, 2021
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Features
+- Added additional route overview method to NavigationMapboxMap to display section of route not yet traveled rather than the full route. [#4247](https://github.com/mapbox/mapbox-navigation-android/pull/4247)
+
+#### Bug fixes and improvements
+- Show maneuver icon and text in the notification tray after changing b/w day and night mode. [#4256](https://github.com/mapbox/mapbox-navigation-android/pull/4256)
+- Bug fix for restoring route line on map when bringing application into foreground just after a reroute. [#4236](https://github.com/mapbox/mapbox-navigation-android/pull/4236)
+
 ## Mapbox Navigation SDK 2.0.0-beta.4 - April 1, 2021
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
