@@ -20,8 +20,27 @@ Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-an
 - Show maneuver icon and text in the notification tray after changing b/w day and night mode. [#4256](https://github.com/mapbox/mapbox-navigation-android/pull/4256)
 - Bug fix for restoring route line on map when bringing application into foreground just after a reroute. [#4236](https://github.com/mapbox/mapbox-navigation-android/pull/4236)
 
+## Mapbox Navigation SDK 2.0.0-beta.5 - April 9, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Features
+* :warning: Changed `MapboxNavigation#requestRoutes` to **not** automatically set the result as the primary route for the navigation experience. When calling `MapboxNavigation#requestRoutes` make sure to also call `MapboxNavigation#setRoutes` with a result. This change allows for dispatching and managing multiple route requests concurrently, including cancelling with `MapboxNavigation#cancelRouteRequest`. [#4184](https://github.com/mapbox/mapbox-navigation-android/pull/4184)
+* Exposed `MapboxSoundButton`. [#4117](https://github.com/mapbox/mapbox-navigation-android/pull/4117)
+* Exposed `MapboxRecenterButton`. [#4226](https://github.com/mapbox/mapbox-navigation-android/pull/4226)
+* Added support for signboard styling based on the stylesheet. See `MapboxSignboardOptions`. [#4217](https://github.com/mapbox/mapbox-navigation-android/pull/4217)
+* Added length, startGeometryIndex, endGeometryIndex to `entrance`/`exit` road objects when the source is the Directions API. [#4235](https://github.com/mapbox/mapbox-navigation-android/pull/4235)
+* :warning: Expanded `RouteArrowApi` functionality to include ability to add (and remove) multiple arrows to a map which also changes the method signatures. [#3980](https://github.com/mapbox/mapbox-navigation-android/pull/3980)
+* Added support for the composite sources in the `PredictiveCacheController`. [#4241](https://github.com/mapbox/mapbox-navigation-android/pull/4241)
+
+#### Bug fixes and improvements
+* Significantly improved the rendering time of the route line and the time to select an alternative. [#4244](https://github.com/mapbox/mapbox-navigation-android/pull/4244) [#4222](https://github.com/mapbox/mapbox-navigation-android/pull/4222) [#4209](https://github.com/mapbox/mapbox-navigation-android/pull/4209)
+* :warning: Made `UnitType` in `MapboxDistanceFormatter` type-safe. [#4224](https://github.com/mapbox/mapbox-navigation-android/pull/4224)
+
 ## Mapbox Navigation SDK 2.0.0-beta.4 - April 1, 2021
-Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
 
 ### Changelog
 #### Features
@@ -49,7 +68,8 @@ Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-an
 - Fixed bearings calculation on reroute. [#4199](https://github.com/mapbox/mapbox-navigation-android/pull/4199)
 
 ## Mapbox Navigation SDK 2.0.0-beta.3 - March 26, 2021
-Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
 
 ### Changelog
 #### Features
@@ -68,7 +88,8 @@ Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-an
 **When integrating this release, you might run into a crash on startup caused by cached data incompatibility. To resolve the issue, clear the application cache.**
 
 ## Mapbox Navigation SDK 2.0.0-beta.2 - March 19, 2021
-Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
 
 ### Changelog
 #### Bug fixes and improvements
