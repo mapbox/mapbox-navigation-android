@@ -61,6 +61,8 @@ import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.maneuver.model.StepDistance
 import com.mapbox.navigation.ui.maneuver.model.StepDistanceError
+import com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingArrivalApi
+import com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingHighlightApi
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
@@ -113,9 +115,10 @@ class MapboxNavigationActivity :
     private var routeArrowView: MapboxRouteArrowView? = null
     private var voiceInstructionsPlayer: MapboxVoiceInstructionsPlayer? = null
     private val mapboxReplayer: MapboxReplayer = MapboxReplayer()
+    private val buildingsArrivalApi = MapboxBuildingArrivalApi()
+    private val waypointsController = WaypointsController()
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
     private val routeArrowAPI: MapboxRouteArrowApi = MapboxRouteArrowApi()
-    private val waypointsController = WaypointsController()
     private val navigationLocationProvider = NavigationLocationProvider()
     private val pixelDensity = Resources.getSystem().displayMetrics.density
     private val overviewEdgeInsets: EdgeInsets by lazy {
@@ -357,6 +360,9 @@ class MapboxNavigationActivity :
             getMapboxAccessTokenFromResources(),
             Locale.US.language
         )
+
+        buildingsArrivalApi.buildingHighlightApi(MapboxBuildingHighlightApi(mapboxMap))
+        buildingsArrivalApi.enable(mapboxNavigation)
     }
 
     override fun onStart() {
@@ -384,6 +390,7 @@ class MapboxNavigationActivity :
         mapboxNavigation.onDestroy()
         speechAPI.cancel()
         voiceInstructionsPlayer?.shutdown()
+        buildingsArrivalApi.disable()
     }
 
     override fun onLowMemory() {

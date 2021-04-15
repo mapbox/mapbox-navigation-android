@@ -99,6 +99,11 @@
     </activity>
 
     <activity
+        android:name=".MapboxBuildingHighlightActivity"
+        android:label="@string/title_trip_progress">
+    </activity>
+
+    <activity
         android:name="com.mapbox.navigation.examples.MainActivity"
         android:screenOrientation="portrait">
       <intent-filter>
