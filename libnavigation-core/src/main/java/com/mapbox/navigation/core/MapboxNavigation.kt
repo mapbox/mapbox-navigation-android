@@ -901,7 +901,7 @@ class MapboxNavigation(
 
         return TilesConfig(
             offlineFilesPath,
-            null,
+            1024 * 1024 * 1024,
             null,
             null,
             THREADS_COUNT,
