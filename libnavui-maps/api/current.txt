@@ -18,6 +18,42 @@ package com.mapbox.navigation.ui.maps {
 
 }
 
+package com.mapbox.navigation.ui.maps.arrival.api {
+
+  public final class MapboxBuildingArrivalApi {
+    ctor public MapboxBuildingArrivalApi();
+    method public com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingArrivalApi buildingHighlightApi(com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingHighlightApi? mapboxBuildingHighlightApi);
+    method public void disable();
+    method public void enable(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+  }
+
+  public final class MapboxBuildingHighlightApi {
+    ctor public MapboxBuildingHighlightApi(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.navigation.ui.maps.arrival.model.MapboxBuildingHighlightOptions options = MapboxBuildingHighlightOptions.default);
+    method public void clear();
+    method public void highlightBuilding(com.mapbox.geojson.Point? point);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.arrival.model {
+
+  public final class MapboxBuildingHighlightOptions {
+    method public int getFillExtrusionColor();
+    method public double getFillExtrusionOpacity();
+    method public com.mapbox.navigation.ui.maps.arrival.model.MapboxBuildingHighlightOptions.Builder toBuilder();
+    property public final int fillExtrusionColor;
+    property public final double fillExtrusionOpacity;
+  }
+
+  public static final class MapboxBuildingHighlightOptions.Builder {
+    ctor public MapboxBuildingHighlightOptions.Builder();
+    method public com.mapbox.navigation.ui.maps.arrival.model.MapboxBuildingHighlightOptions build();
+    method public com.mapbox.navigation.ui.maps.arrival.model.MapboxBuildingHighlightOptions.Builder fillExtrusionColor(@ColorInt int fillExtrusionColor);
+    method public com.mapbox.navigation.ui.maps.arrival.model.MapboxBuildingHighlightOptions.Builder fillExtrusionOpacity(double fillExtrusionOpacity);
+  }
+
+}
+
 package com.mapbox.navigation.ui.maps.camera {
 
   @UiThread public final class NavigationCamera {
