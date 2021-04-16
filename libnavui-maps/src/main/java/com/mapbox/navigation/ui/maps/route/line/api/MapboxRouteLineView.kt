@@ -176,6 +176,11 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                     RouteConstants.WAYPOINT_SOURCE_ID,
                     clearRouteLineValue.value.waypointsSource
                 )
+                updateSource(
+                    style,
+                    RouteConstants.RESTRICTED_ROAD_SOURCE_ID,
+                    clearRouteLineValue.value.restrictedRoadSource
+                )
             }
         }
     }

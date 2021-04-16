@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.bindgen.Value
+import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.generated.Expression
@@ -30,6 +31,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.util.UUID
 
 @Config(shadows = [ShadowValueConverter::class])
 @RunWith(RobolectricTestRunner::class)
@@ -144,13 +146,12 @@ class MapboxRouteLineViewTest {
     fun renderClearRouteDataState() {
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val primaryRouteFeatureCollection = FeatureCollection.fromFeatures(listOf())
-        val altRoutesFeatureCollection = FeatureCollection.fromFeatures(listOf())
-        val waypointsFeatureCollection = FeatureCollection.fromFeatures(listOf())
-        val primarySourceSlot = slot<Value>()
-        val alt1SourceSlot = slot<Value>()
-        val alt2SourceSlot = slot<Value>()
-        val wayPointSourceSlot = slot<Value>()
+        val primaryRouteFeatureCollection =
+            FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
+        val altRoutesFeatureCollection = FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
+        val waypointsFeatureCollection = FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
+        val restrictedFeatureCollection = FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
+        val slots = mutableListOf<Value>()
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
@@ -167,6 +168,9 @@ class MapboxRouteLineViewTest {
                 getStyleSourceProperties(RouteConstants.WAYPOINT_SOURCE_ID)
             } returns geoJsonSourceExpected
             every {
+                getStyleSourceProperties(RouteConstants.RESTRICTED_ROAD_SOURCE_ID)
+            } returns geoJsonSourceExpected
+            every {
                 setStyleSourceProperty(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any(), any())
             } returns ExpectedFactory.createValue()
             every {
@@ -178,6 +182,9 @@ class MapboxRouteLineViewTest {
             every {
                 setStyleSourceProperty(RouteConstants.WAYPOINT_SOURCE_ID, any(), any())
             } returns ExpectedFactory.createValue()
+            every {
+                setStyleSourceProperty(RouteConstants.RESTRICTED_ROAD_SOURCE_ID, any(), any())
+            } returns ExpectedFactory.createValue()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -187,7 +194,8 @@ class MapboxRouteLineViewTest {
                 primaryRouteFeatureCollection,
                 altRoutesFeatureCollection,
                 altRoutesFeatureCollection,
-                waypointsFeatureCollection
+                waypointsFeatureCollection,
+                restrictedFeatureCollection
             )
         )
 
@@ -197,45 +205,56 @@ class MapboxRouteLineViewTest {
             style.setStyleSourceProperty(
                 RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
                 any(),
-                capture(primarySourceSlot)
+                capture(slots)
             )
         }
         assertEquals(
             primaryRouteFeatureCollection.toJson(),
-            primarySourceSlot.captured.contents as String
+            slots[0].contents as String
         )
         verify {
             style.setStyleSourceProperty(
                 RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
                 any(),
-                capture(alt1SourceSlot)
+                capture(slots)
             )
         }
         assertEquals(
-            primaryRouteFeatureCollection.toJson(),
-            alt1SourceSlot.captured.contents as String
+            altRoutesFeatureCollection.toJson(),
+            slots[1].contents as String
         )
         verify {
             style.setStyleSourceProperty(
                 RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
                 any(),
-                capture(alt2SourceSlot)
+                capture(slots)
             )
         }
         assertEquals(
-            primaryRouteFeatureCollection.toJson(),
-            alt2SourceSlot.captured.contents as String
+            altRoutesFeatureCollection.toJson(),
+            slots[2].contents as String
         )
         verify {
             style.setStyleSourceProperty(
-                RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                RouteConstants.WAYPOINT_SOURCE_ID,
                 any(),
-                capture(wayPointSourceSlot)
+                capture(slots)
             )
         }
         assertEquals(
-            primaryRouteFeatureCollection.toJson(),
-            wayPointSourceSlot.captured.contents as String
+            waypointsFeatureCollection.toJson(),
+            slots[3].contents as String
+        )
+        verify {
+            style.setStyleSourceProperty(
+                RouteConstants.RESTRICTED_ROAD_SOURCE_ID,
+                any(),
+                capture(slots)
+            )
+        }
+        assertEquals(
+            restrictedFeatureCollection.toJson(),
+            slots[4].contents as String
         )
         verify { MapboxRouteLineUtils.initializeLayers(style, options) }
         unmockkObject(MapboxRouteLineUtils)
@@ -323,21 +342,21 @@ class MapboxRouteLineViewTest {
     fun renderDrawRouteState() {
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val primaryRouteFeatureCollection = FeatureCollection.fromFeatures(listOf())
-        val alternativeRoute1FeatureCollection = FeatureCollection.fromFeatures(listOf())
-        val alternativeRoute2FeatureCollection = FeatureCollection.fromFeatures(listOf())
-        val waypointsFeatureCollection = FeatureCollection.fromFeatures(listOf())
-        val restrictedRoadsFeatureCollection = FeatureCollection.fromFeatures(listOf())
+        val primaryRouteFeatureCollection =
+            FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
+        val alternativeRoute1FeatureCollection =
+            FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
+        val alternativeRoute2FeatureCollection =
+            FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
+        val waypointsFeatureCollection = FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
+        val restrictedRoadsFeatureCollection =
+            FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
+        val slots = mutableListOf<Value>()
         val trafficLineExp = mockk<Expression>()
         val routeLineExp = mockk<Expression>()
         val casingLineEx = mockk<Expression>()
         val alternativeRoute1Expression = mockk<Expression>()
         val alternativeRoute2Expression = mockk<Expression>()
-        val primarySourceSlot = slot<Value>()
-        val alt1SourceSlot = slot<Value>()
-        val alt2SourceSlot = slot<Value>()
-        val wayPointSourceSlot = slot<Value>()
-        val restrictedRoadSourceSlot = slot<Value>()
         val state = com.mapbox.navigation.ui.base.model.Expected.Success(
             RouteSetValue(
                 primaryRouteFeatureCollection,
@@ -481,56 +500,56 @@ class MapboxRouteLineViewTest {
             style.setStyleSourceProperty(
                 RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
                 any(),
-                capture(primarySourceSlot)
+                capture(slots)
             )
         }
         assertEquals(
             primaryRouteFeatureCollection.toJson(),
-            primarySourceSlot.captured.contents as String
+            slots[0].contents as String
         )
         verify {
             style.setStyleSourceProperty(
                 RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
                 any(),
-                capture(alt1SourceSlot)
+                capture(slots)
             )
         }
         assertEquals(
-            primaryRouteFeatureCollection.toJson(),
-            alt1SourceSlot.captured.contents as String
+            alternativeRoute1FeatureCollection.toJson(),
+            slots[1].contents as String
         )
         verify {
             style.setStyleSourceProperty(
                 RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
                 any(),
-                capture(alt2SourceSlot)
+                capture(slots)
             )
         }
         assertEquals(
-            primaryRouteFeatureCollection.toJson(),
-            alt2SourceSlot.captured.contents as String
+            alternativeRoute2FeatureCollection.toJson(),
+            slots[2].contents as String
         )
         verify {
             style.setStyleSourceProperty(
                 RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
                 any(),
-                capture(wayPointSourceSlot)
+                capture(slots)
             )
         }
         assertEquals(
-            primaryRouteFeatureCollection.toJson(),
-            wayPointSourceSlot.captured.contents as String
+            waypointsFeatureCollection.toJson(),
+            slots[3].contents as String
         )
         verify {
             style.setStyleSourceProperty(
                 RouteConstants.RESTRICTED_ROAD_SOURCE_ID,
                 any(),
-                capture(restrictedRoadSourceSlot)
+                capture(slots)
             )
         }
         assertEquals(
             restrictedRoadsFeatureCollection.toJson(),
-            restrictedRoadSourceSlot.captured.contents as String
+            slots[4].contents as String
         )
         verify { MapboxRouteLineUtils.initializeLayers(style, options) }
         unmockkObject(MapboxRouteLineUtils)
@@ -1170,5 +1189,12 @@ class MapboxRouteLineViewTest {
 
         assertEquals(Visibility.VISIBLE, result)
         unmockkObject(MapboxRouteLineUtils)
+    }
+
+    private fun getEmptyFeature(): Feature {
+        return Feature.fromJson(
+            "{\"type\":\"Feature\",\"id\":\"${UUID.randomUUID()}\"," +
+                "\"geometry\":{\"type\":\"LineString\",\"coordinates\":[]}}"
+        )
     }
 }

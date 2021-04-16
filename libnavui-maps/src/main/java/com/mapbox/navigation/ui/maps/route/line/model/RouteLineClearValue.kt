@@ -9,10 +9,12 @@ import com.mapbox.geojson.FeatureCollection
  * @param altRoute1Source a feature collection representing an alternative route
  * @param altRoute2Source a feature collection representing an alternative route
  * @param waypointsSource a feature collection representing the origin and destination icons
+ * @param restrictedRoadSource a feature collection representing the restricted roads
  */
 class RouteLineClearValue internal constructor(
     val primaryRouteSource: FeatureCollection,
     val altRoute1Source: FeatureCollection,
     val altRoute2Source: FeatureCollection,
-    val waypointsSource: FeatureCollection
+    val waypointsSource: FeatureCollection,
+    val restrictedRoadSource: FeatureCollection
 )
