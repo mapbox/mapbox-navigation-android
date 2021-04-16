@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
+import android.media.AudioManager
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
@@ -28,6 +29,7 @@ internal class VoiceInstructionsTextPlayer(
         }
     }
     private var volumeLevel: Float = DEFAULT_VOLUME_LEVEL
+    private var streamType: Int = DEFAULT_STREAM_TYPE
     private var clientCallback: VoiceInstructionsPlayerCallback? = null
     private var currentPlay: SpeechAnnouncement? = null
 
@@ -71,6 +73,15 @@ internal class VoiceInstructionsTextPlayer(
         if (textToSpeech.isSpeaking && state.level == MUTE_VOLUME_LEVEL) {
             textToSpeech.stop()
         }
+    }
+
+    /**
+     * The method will change the stream type of our utterances
+     * @param type specifies the audio stream type to be used when speaking text or playing
+     * back a file. The value should be one of the STREAM_ constants defined in [AudioManager]
+     */
+    override fun stream(type: Int) {
+        streamType = type
     }
 
     /**
@@ -134,6 +145,7 @@ internal class VoiceInstructionsTextPlayer(
     private fun play(announcement: String) {
         val bundle = Bundle().apply {
             putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, volumeLevel)
+            putString(TextToSpeech.Engine.KEY_PARAM_STREAM, streamType.toString())
         }
         textToSpeech.speak(
             announcement,
@@ -148,6 +160,7 @@ internal class VoiceInstructionsTextPlayer(
         private const val LANGUAGE_NOT_SUPPORTED = "Language is not supported"
         private const val DEFAULT_UTTERANCE_ID = "default_id"
         private const val DEFAULT_VOLUME_LEVEL = 1.0f
+        private const val DEFAULT_STREAM_TYPE = TextToSpeech.Engine.DEFAULT_STREAM
         private const val MUTE_VOLUME_LEVEL = 0.0f
     }
 }

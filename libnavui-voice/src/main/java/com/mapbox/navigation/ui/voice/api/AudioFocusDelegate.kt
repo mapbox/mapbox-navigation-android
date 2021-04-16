@@ -1,8 +1,8 @@
 package com.mapbox.navigation.ui.voice.api
 
-internal interface AudioFocusDelegate {
+interface AudioFocusDelegate {
 
-    fun requestFocus()
+    fun requestFocus(): Boolean
 
     fun abandonFocus()
 }

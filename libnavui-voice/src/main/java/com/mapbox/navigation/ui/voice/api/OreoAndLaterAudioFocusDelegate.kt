@@ -15,8 +15,9 @@ internal class OreoAndLaterAudioFocusDelegate(
     private val audioFocusRequest: AudioFocusRequest =
         AudioFocusRequest.Builder(options.focusGain).build()
 
-    override fun requestFocus() {
-        audioManager.requestAudioFocus(audioFocusRequest)
+    override fun requestFocus(): Boolean {
+        return audioManager.requestAudioFocus(audioFocusRequest) ==
+            AudioManager.AUDIOFOCUS_REQUEST_GRANTED
     }
 
     override fun abandonFocus() {
