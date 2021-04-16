@@ -110,13 +110,17 @@ class MapboxMultipleArrowActivity : AppCompatActivity() {
     private fun init() {
         initStyle()
         initLocation()
-        initListeners()
     }
 
     private fun initStyle() {
-        mapboxMap.loadStyleUri(Style.MAPBOX_STREETS) {
-            // nothing to do for this example
-        }
+        mapboxMap.loadStyleUri(
+            Style.MAPBOX_STREETS,
+            object : Style.OnStyleLoaded {
+                override fun onStyleLoaded(style: Style) {
+                    initListeners(style)
+                }
+            }
+        )
     }
 
     // Using a hardcoded location for brevity
@@ -137,23 +141,23 @@ class MapboxMultipleArrowActivity : AppCompatActivity() {
         )
     }
 
-    private fun initListeners() {
+    private fun initListeners(style: Style) {
         binding.btnAdd.setOnClickListener {
             when (mapboxArrowApi.getArrows().size) {
                 0 -> {
                     // Notice the result of the call to addArrow is rendered by the routeArrowView.
                     mapboxArrowApi.addArrow(arrow0).apply {
-                        routeArrowView.render(mapboxMap.getStyle()!!, this)
+                        routeArrowView.render(style, this)
                     }
                 }
                 1 -> {
                     mapboxArrowApi.addArrow(arrow1).apply {
-                        routeArrowView.render(mapboxMap.getStyle()!!, this)
+                        routeArrowView.render(style, this)
                     }
                 }
                 2 -> {
                     mapboxArrowApi.addArrow(arrow2).apply {
-                        routeArrowView.render(mapboxMap.getStyle()!!, this)
+                        routeArrowView.render(style, this)
                     }
                 }
             }
@@ -163,7 +167,8 @@ class MapboxMultipleArrowActivity : AppCompatActivity() {
 
         binding.btnRemove.setOnClickListener {
             when (mapboxArrowApi.getArrows().size) {
-                0 -> { }
+                0 -> {
+                }
                 1 -> {
                     mapboxArrowApi.removeArrow(arrow0).apply {
                         routeArrowView.render(mapboxMap.getStyle()!!, this)
