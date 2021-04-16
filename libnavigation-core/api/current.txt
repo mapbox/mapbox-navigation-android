@@ -1120,6 +1120,10 @@ package com.mapbox.navigation.core.trip.session {
   }
 
   public final class RoadObjectsStore {
+    method @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public void addCustomGantryObject(String roadObjectId, java.util.List<com.mapbox.geojson.Point> gantry);
+    method @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public void addCustomPointObject(String roadObjectId, com.mapbox.geojson.Point point);
+    method @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public void addCustomPolygonObject(String roadObjectId, java.util.List<com.mapbox.geojson.Point> polygon);
+    method @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public void addCustomPolylineObject(String roadObjectId, java.util.List<com.mapbox.geojson.Point> polyline);
     method public void addCustomRoadObject(String roadObjectId, String openLRLocation, @com.mapbox.navigation.core.trip.model.eh.OpenLRStandard.Type String openLRStandard);
     method public java.util.List<java.lang.String> getRoadObjectIdsByEdgeIds(java.util.List<java.lang.Long> edgeIds);
     method public com.mapbox.navigation.core.trip.model.eh.EHorizonObjectLocation? getRoadObjectLocation(String roadObjectId);

@@ -33,7 +33,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - eh-snapshot-beta-5
       - release:
           filters:
             tags:
