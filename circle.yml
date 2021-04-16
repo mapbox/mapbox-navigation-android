@@ -382,7 +382,8 @@ jobs:
       - read-workspace
       - unit-tests-core
       - unit-tests-ui
-      - codecov
+# Disabling Codecov (for now) due to https://about.codecov.io/security-update/
+#      - codecov
 
   static-analysis:
     executor: ndk-r21-latest-executor
