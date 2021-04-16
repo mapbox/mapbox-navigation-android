@@ -161,11 +161,6 @@ interface MapboxNativeNavigator {
     // Offline
 
     /**
-     * Caches tiles around the last set route
-     */
-    fun cacheLastRoute()
-
-    /**
      * Uses valhalla and local tile data to generate mapbox-directions-api-like json.
      *
      * @param url the directions-based uri used when hitting the http service
