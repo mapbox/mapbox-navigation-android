@@ -120,21 +120,22 @@ commands:
 
   verify-changelog:
     steps:
-      - run:
-          name: Install python dependencies
-          command: python3 -m pip install requests
-      - run:
-          name: Verify that a changelog entry is present in the PR description
-          command: |
-            if [[ -n "$CIRCLE_PULL_REQUEST" ]]; then
-              if [[ -n "$GITHUB_ACCESS_TOKEN" ]]; then
-                python3 scripts/validate-changelog.py ${CIRCLE_PULL_REQUEST##*/} ${GITHUB_ACCESS_TOKEN}
-              else
-                echo "Missing access token, skipping changelog validation."
-              fi
-            else
-              echo "Not a PR, skipping changelog validation."
-            fi
+      - run: echo "Update the github_access_token"
+#      - run:
+#          name: Install python dependencies
+#          command: python3 -m pip install requests
+#      - run:
+#          name: Verify that a changelog entry is present in the PR description
+#          command: |
+#            if [[ -n "$CIRCLE_PULL_REQUEST" ]]; then
+#              if [[ -n "$GITHUB_ACCESS_TOKEN" ]]; then
+#                python3 scripts/validate-changelog.py ${CIRCLE_PULL_REQUEST##*/} ${GITHUB_ACCESS_TOKEN}
+#              else
+#                echo "Missing access token, skipping changelog validation."
+#              fi
+#            else
+#              echo "Not a PR, skipping changelog validation."
+#            fi
 
   assemble-module:
     parameters:
