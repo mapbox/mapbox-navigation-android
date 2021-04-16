@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
+import android.util.Log
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -18,7 +19,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 /**
  * This class implements a feature that can change the appearance of the route line behind the puck.
@@ -63,20 +63,25 @@ internal class VanishingRouteLine {
      * Initializes this class with the active primary route.
      */
     fun initWithRoute(route: DirectionsRoute) {
+        clear()
         jobControl.job.cancelChildren()
         jobControl.scope.launch {
-            val initResultDef = async(ThreadController.IODispatcher) {
-                val routePoints = parseRoutePoints(route)
-                val granularDistances = MapboxRouteLineUtils.calculateRouteGranularDistances(
-                    routePoints?.flatList
+            val parsedRoutePointsDef = async(ThreadController.IODispatcher) {
+                parseRoutePoints(route)
+            }
+            val parsedRoutePoints = parsedRoutePointsDef.await()
+
+            val granularDistancesDef = async(ThreadController.IODispatcher) {
+                MapboxRouteLineUtils.calculateRouteGranularDistances(
+                    parsedRoutePoints?.flatList
                         ?: emptyList()
                 )
-                Pair(routePoints, granularDistances)
             }
-            val resultPair = initResultDef.await()
+            val granularDistances = granularDistancesDef.await()
+
             if (coroutineContext.isActive) {
-                primaryRoutePoints = resultPair.first
-                primaryRouteLineGranularDistances = resultPair.second
+                primaryRoutePoints = parsedRoutePoints
+                primaryRouteLineGranularDistances = granularDistances
             }
         }
     }
@@ -105,7 +110,8 @@ internal class VanishingRouteLine {
         ) { granularDistances, index ->
             val upcomingIndex = granularDistances.distancesArray[index]
             if (upcomingIndex == null) {
-                Timber.e(
+                Log.e(
+                    "MbxVanishingRouteLine",
                     """
                        Upcoming route line index is null.
                        primaryRouteLineGranularDistances: $primaryRouteLineGranularDistances

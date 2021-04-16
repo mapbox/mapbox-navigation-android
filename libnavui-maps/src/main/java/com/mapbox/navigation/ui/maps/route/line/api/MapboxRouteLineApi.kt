@@ -620,13 +620,10 @@ class MapboxRouteLineApi(
         val routeFeatureDataDef = jobControl.scope.async(ThreadController.IODispatcher) {
             featureDataProvider()
         }
+        val routeFeatureDataResult = routeFeatureDataDef.await()
         routeFeatureData.clear()
-        routeFeatureData.addAll(routeFeatureDataDef.await())
+        routeFeatureData.addAll(routeFeatureDataResult)
         val partitionedRoutes = routeFeatureData.partition { it.route == directionsRoutes.first() }
-
-        partitionedRoutes.first.firstOrNull()?.let {
-            routeLineOptions.vanishingRouteLine?.initWithRoute(it.route)
-        }
 
         val trafficLineExpressionDef = jobControl.scope.async(ThreadController.IODispatcher) {
             val segments: List<RouteLineExpressionData> =
@@ -712,32 +709,10 @@ class MapboxRouteLineApi(
                 )
             }
 
-        val alternativeRoute1FeatureCollectionDef =
-            jobControl.scope.async(ThreadController.IODispatcher) {
-                partitionedRoutes.second.firstOrNull()?.featureCollection
-                    ?: FeatureCollection.fromFeatures(listOf())
-            }
-
-        val alternativeRoute2FeatureCollectionDef =
-            jobControl.scope.async(ThreadController.IODispatcher) {
-                if (partitionedRoutes.second.size > 1) {
-                    partitionedRoutes.second[1].featureCollection
-                } else {
-                    FeatureCollection.fromFeatures(listOf())
-                }
-            }
-
         val wayPointsFeatureCollectionDef = jobControl.scope.async(ThreadController.IODispatcher) {
             partitionedRoutes.first.firstOrNull()?.route?.run {
                 MapboxRouteLineUtils.buildWayPointFeatureCollection(this)
             } ?: FeatureCollection.fromFeatures(listOf())
-        }
-
-        val primaryRouteSourceDef = jobControl.scope.async(ThreadController.IODispatcher) {
-            partitionedRoutes.first.firstOrNull()?.featureCollection
-                ?: FeatureCollection.fromFeatures(
-                    listOf()
-                )
         }
 
         val restrictedSectionFeatureCollectionDef =
@@ -751,16 +726,34 @@ class MapboxRouteLineApi(
                 }
             }
 
+        val primaryRouteSource = partitionedRoutes.first.firstOrNull()?.featureCollection
+            ?: FeatureCollection.fromFeatures(
+                listOf()
+            )
+        val alternativeRoute1FeatureCollection =
+            partitionedRoutes.second.firstOrNull()?.featureCollection
+                ?: FeatureCollection.fromFeatures(listOf())
+        val alternativeRoute2FeatureCollection = if (partitionedRoutes.second.size > 1) {
+            partitionedRoutes.second[1].featureCollection
+        } else {
+            FeatureCollection.fromFeatures(listOf())
+        }
+
         val trafficLineExp = trafficLineExpressionDef.await()
         val routeLineExp = routeLineExpressionDef.await()
         val routeCasingLineExp = routeLineCasingExpressionDef.await()
         val altRoute1Exp = alternativeRoute1TrafficExpressionDef.await()
         val altRoute2Exp = alternativeRoute2TrafficExpressionDef.await()
-        val alternativeRoute1FeatureCollection = alternativeRoute1FeatureCollectionDef.await()
-        val alternativeRoute2FeatureCollection = alternativeRoute2FeatureCollectionDef.await()
         val wayPointsFeatureCollection = wayPointsFeatureCollectionDef.await()
-        val primaryRouteSource = primaryRouteSourceDef.await()
         val restrictedSectionFeatureCollection = restrictedSectionFeatureCollectionDef.await()
+
+        // This call is resource intensive so it needs to come last so that
+        // it doesn't consume resources used by the calculations above. The results
+        // of this call aren't necessary to return to the caller but the calculations above are.
+        // Putting this call above will delay the caller receiving the result.
+        partitionedRoutes.first.firstOrNull()?.let {
+            routeLineOptions.vanishingRouteLine?.initWithRoute(it.route)
+        }
 
         return Expected.Success(
             RouteSetValue(

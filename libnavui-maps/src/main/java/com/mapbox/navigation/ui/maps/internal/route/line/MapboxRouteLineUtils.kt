@@ -223,7 +223,7 @@ object MapboxRouteLineUtils {
         isPrimaryRoute: Boolean,
         routeLineColorResources: RouteLineColorResources
     ): List<RouteLineExpressionData> {
-        val trafficExpressionData = getRouteLineTrafficExpressionData(route)
+        val trafficExpressionData = getRouteLineTrafficExpressionDataFromCache(route)
         return when (trafficExpressionData.isEmpty()) {
             false -> getRouteLineExpressionDataWithStreetClassOverride(
                 trafficExpressionData,
@@ -331,6 +331,11 @@ object MapboxRouteLineUtils {
         return routeLineTrafficData
     }
 
+    private val getRouteLineTrafficExpressionDataFromCache: (route: DirectionsRoute) ->
+    List<RouteLineTrafficExpressionData> = { route: DirectionsRoute ->
+        getRouteLineTrafficExpressionData(route)
+    }.cacheResult(3)
+
     private fun getClosureRanges(leg: RouteLeg): List<IntRange> {
         return leg.closures()
             ?.filter { it.geometryIndexStart() != null && it.geometryIndexEnd() != null }
@@ -341,10 +346,7 @@ object MapboxRouteLineUtils {
 
     fun getRestrictedRouteSections(route: DirectionsRoute): List<List<Point>> {
         try {
-            val coordinates = LineString.fromPolyline(
-                route.geometry() ?: "",
-                Constants.PRECISION_6
-            ).coordinates()
+            val coordinates = decodeRoute(route).coordinates()
             val restrictedSections = mutableListOf<List<Point>>()
             var geoIndex: Int? = null
 
