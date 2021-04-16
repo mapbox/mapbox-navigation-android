@@ -2,6 +2,32 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.6 - April 16, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Features
+* Added a callback to the `ArrivalObserver` specifically for waypoint experiences. [#4238](https://github.com/mapbox/mapbox-navigation-android/pull/4238)
+
+#### Bug fixes and improvements
+* Refactored the route line API to improve performance. [#4271](https://github.com/mapbox/mapbox-navigation-android/pull/4271)
+* Significantly changed the way how the `MapboxNavigationViewportDataSource` generates the camera frames that are later animated by the `NavigationCamera`. You can read more about details in the `MapboxNavigationViewportDataSource` class documentation. [#4072](https://github.com/mapbox/mapbox-navigation-android/pull/4072)
+Highlights:
+    - When in the `FOLLOWING` state, the first point of the framed geometry will be placed at the bottom edge of the provided padding, centered horizontally. This typically refers to the user's location provided to the viewport data source, if available.
+    - **If you use the `MapboxNavigationViewportDataSource`, you should explicitly define `CameraOptions.padding` in all other camera transitions that your app is executing.**
+    - New features:
+        - calculating zoom level based on intersection density
+        - automatic pitching to 0 near maneuvers
+        - maximizing the view of the maneuver's geometry in pitch 0
+        - bearing smoothing based on the direction to the upcoming maneuver
+        - `MapboxNavigationViewportDataSourceDebugger` for visualizing frames and geometries
+* Fixed a bug for restricted road sections not getting cleared when calling API. [#4254](https://github.com/mapbox/mapbox-navigation-android/pull/4254)
+* Set `TilesConfig` `inMemoryTileCache` size to 1GB (1024 x 1024 x 1024). [#4272](https://github.com/mapbox/mapbox-navigation-android/pull/4272)
+* Fixed crash when routing new waypoints. [#4263](https://github.com/mapbox/mapbox-navigation-android/pull/4263)
+* Added check if `RouteOptions` has valid UUID to refresh route. [#4260](https://github.com/mapbox/mapbox-navigation-android/pull/4260)
+* Updated `ArrivalObserver` making the `onWaypointArrival` and `onFinalDestinationArrival` callbacks consistent, and can be specified through the `ArrivalController` as `ArrivalOptions`. [#4250](https://github.com/mapbox/mapbox-navigation-android/pull/4250)
+
 ## Mapbox Navigation SDK 1.6.1 - April 14, 2021
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
