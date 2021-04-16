@@ -106,7 +106,6 @@ class RouteDrawingActivity : AppCompatActivity() {
     private fun init() {
         initStyle()
         initLocation()
-        initListeners()
     }
 
     private fun initListeners() {
@@ -217,6 +216,7 @@ class RouteDrawingActivity : AppCompatActivity() {
             Style.MAPBOX_STREETS
         ) {
             routeDrawingUtil = RouteDrawingUtil(mapView)
+            initListeners()
         }
     }
 
