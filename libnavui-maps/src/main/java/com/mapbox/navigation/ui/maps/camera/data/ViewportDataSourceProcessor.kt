@@ -129,6 +129,32 @@ internal object ViewportDataSourceProcessor {
         } ?: emptyList()
     }
 
+    fun simplifyCompleteRoutePoints(
+        enabled: Boolean,
+        simplificationFactor: Int,
+        completeRoutePoints: List<List<List<Point>>>
+    ): List<List<List<Point>>> {
+        if (!enabled) {
+            return completeRoutePoints
+        }
+
+        if (simplificationFactor <= 0) {
+            Log.e(
+                "MbxViewportDataSource",
+                "overview simplification factor should be a positive integer"
+            )
+            return completeRoutePoints
+        }
+
+        return completeRoutePoints.map { steps ->
+            steps.map { stepPoints ->
+                stepPoints.filterIndexed { index, _ ->
+                    index % simplificationFactor == 0 || index == stepPoints.size - 1
+                }
+            }
+        }
+    }
+
     /**
      * Returns points to be framed on the remainder of the current step.
      */
@@ -219,14 +245,14 @@ internal object ViewportDataSourceProcessor {
     /**
      * Returns all remaining points on the route for overview purposes.
      */
-    fun getAllRemainingPointsOnRoute(
-        completeRoutePoints: List<List<List<Point>>>,
+    fun getRemainingPointsOnRoute(
+        simplifiedCompleteRoutePoints: List<List<List<Point>>>,
         pointsToFrameOnCurrentStep: List<Point>,
         currentLegProgress: RouteLegProgress,
         currentStepProgress: RouteStepProgress
     ): List<Point> {
-        val currentLegPoints = if (completeRoutePoints.isNotEmpty()) {
-            completeRoutePoints[currentLegProgress.legIndex]
+        val currentLegPoints = if (simplifiedCompleteRoutePoints.isNotEmpty()) {
+            simplifiedCompleteRoutePoints[currentLegProgress.legIndex]
         } else {
             emptyList()
         }

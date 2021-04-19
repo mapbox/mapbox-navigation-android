@@ -11,17 +11,18 @@ import com.mapbox.maps.Size
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.testing.FileUtils
-import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getAllRemainingPointsOnRoute
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getMapAnchoredPaddingFromUserPadding
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPitchFallbackFromRouteProgress
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPointsToFrameAfterCurrentManeuver
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPointsToFrameOnCurrentStep
+import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getRemainingPointsOnRoute
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getScreenBoxForFraming
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getSmootherBearingForMap
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.normalizeBearing
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteForPostManeuverFramingGeometry
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteIntersections
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
+import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.simplifyCompleteRoutePoints
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -68,6 +69,14 @@ class ViewportDataSourceProcessorTest {
     private val completeRoutePoints = decodeArrays3(
         Gson().fromJson(
             FileUtils.loadJsonFixture("multileg_route_all_points_per_step.json"),
+            List::class.java
+        ) as List<List<List<LinkedTreeMap<String, String>>>>,
+        pointAdapter
+    )
+
+    private val simplifiedCompleteRoutePoints = decodeArrays3(
+        Gson().fromJson(
+            FileUtils.loadJsonFixture("multileg_route_simplified_all_points_per_step.json"),
             List::class.java
         ) as List<List<List<LinkedTreeMap<String, String>>>>,
         pointAdapter
@@ -154,6 +163,58 @@ class ViewportDataSourceProcessorTest {
         )
 
         assertArrays2(expected, actual, doubleAdapter)
+    }
+
+    @Test
+    fun `test simplifyCompleteRoutePoints - disabled`() {
+        val expected: List<List<List<Point>>> = completeRoutePoints
+
+        val actual = simplifyCompleteRoutePoints(
+            enabled = false,
+            simplificationFactor = 25,
+            completeRoutePoints = completeRoutePoints
+        )
+
+        assertArrays3(expected, actual, pointAdapter)
+    }
+
+    @Test
+    fun `test simplifyCompleteRoutePoints - enabled`() {
+        val expected: List<List<List<Point>>> = simplifiedCompleteRoutePoints
+
+        val actual = simplifyCompleteRoutePoints(
+            enabled = true,
+            simplificationFactor = 25,
+            completeRoutePoints = completeRoutePoints
+        )
+
+        assertArrays3(expected, actual, pointAdapter)
+    }
+
+    @Test
+    fun `test simplifyCompleteRoutePoints - enabled, factor zero`() {
+        val expected: List<List<List<Point>>> = completeRoutePoints
+
+        val actual = simplifyCompleteRoutePoints(
+            enabled = true,
+            simplificationFactor = 0,
+            completeRoutePoints = completeRoutePoints
+        )
+
+        assertArrays3(expected, actual, pointAdapter)
+    }
+
+    @Test
+    fun `test simplifyCompleteRoutePoints - enabled, factor negative`() {
+        val expected: List<List<List<Point>>> = completeRoutePoints
+
+        val actual = simplifyCompleteRoutePoints(
+            enabled = true,
+            simplificationFactor = -2,
+            completeRoutePoints = completeRoutePoints
+        )
+
+        assertArrays3(expected, actual, pointAdapter)
     }
 
     @Test
@@ -421,7 +482,7 @@ class ViewportDataSourceProcessorTest {
     }
 
     @Test
-    fun `test getAllRemainingPointsOnRoute - empty current step`() {
+    fun `test getRemainingPointsOnRoute - empty current step`() {
         val stepProgress: RouteStepProgress = mockk {
             every { stepIndex } returns 4
         }
@@ -435,8 +496,8 @@ class ViewportDataSourceProcessorTest {
             Point.fromLngLat(-77.153468, 38.77091)
         )
 
-        val actual = getAllRemainingPointsOnRoute(
-            completeRoutePoints = completeRoutePoints,
+        val actual = getRemainingPointsOnRoute(
+            simplifiedCompleteRoutePoints = completeRoutePoints,
             pointsToFrameOnCurrentStep = emptyList(),
             currentLegProgress = legProgress,
             currentStepProgress = stepProgress
@@ -446,7 +507,7 @@ class ViewportDataSourceProcessorTest {
     }
 
     @Test
-    fun `test getAllRemainingPointsOnRoute`() {
+    fun `test getRemainingPointsOnRoute`() {
         val stepProgress: RouteStepProgress = mockk {
             every { stepIndex } returns 4
         }
@@ -462,8 +523,8 @@ class ViewportDataSourceProcessorTest {
             Point.fromLngLat(-77.153468, 38.77091)
         )
 
-        val actual = getAllRemainingPointsOnRoute(
-            completeRoutePoints = completeRoutePoints,
+        val actual = getRemainingPointsOnRoute(
+            simplifiedCompleteRoutePoints = completeRoutePoints,
             pointsToFrameOnCurrentStep = listOf(
                 Point.fromLngLat(-77.123, 38.77091),
                 Point.fromLngLat(-77.456, 38.77091)
