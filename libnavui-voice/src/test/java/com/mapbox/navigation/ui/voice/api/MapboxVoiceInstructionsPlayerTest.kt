@@ -80,6 +80,11 @@ class MapboxVoiceInstructionsPlayerTest {
                 anyLanguage
             )
         } returns mockedTextPlayer
+
+        every {
+            mockedAudioFocusDelegate.requestFocus()
+        } returns true
+
         val mapboxVoiceInstructionsPlayer =
             MapboxVoiceInstructionsPlayer(
                 aMockedContext,
@@ -94,6 +99,64 @@ class MapboxVoiceInstructionsPlayerTest {
         mapboxVoiceInstructionsPlayer.play(mockedPlay, voiceInstructionsPlayerConsumer)
 
         verify(exactly = 1) {
+            mockedFilePlayer.play(mockedPlay, any())
+        }
+        verify(exactly = 0) {
+            mockedTextPlayer.play(mockedPlay, any())
+        }
+        verify(exactly = 1) {
+            voiceInstructionsPlayerConsumer.accept(mockedPlay)
+        }
+    }
+
+    @Test
+    fun `don't play VoiceInstruction if focus not granted`() {
+        val anyAccessToken = "pk.123"
+        val anyLanguage = Locale.US.language
+        val mockedFilePlayer: VoiceInstructionsFilePlayer = mockk()
+        val mockedTextPlayer: VoiceInstructionsTextPlayer = mockk()
+        val voiceInstructionsPlayerCallbackSlot = slot<VoiceInstructionsPlayerCallback>()
+        val mockedAnnouncement: SpeechAnnouncement = mockk()
+        val mockedFile: File = mockk()
+        every { mockedAnnouncement.file } returns mockedFile
+        val mockedDonePlaying: SpeechAnnouncement = mockedAnnouncement
+        every {
+            mockedFilePlayer.play(any(), capture(voiceInstructionsPlayerCallbackSlot))
+        } answers {
+            voiceInstructionsPlayerCallbackSlot.captured.onDone(mockedDonePlaying)
+        }
+        every {
+            VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage
+            )
+        } returns mockedFilePlayer
+        every {
+            VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
+                aMockedContext,
+                anyLanguage
+            )
+        } returns mockedTextPlayer
+
+        every {
+            mockedAudioFocusDelegate.requestFocus()
+        } returns false
+
+        val mapboxVoiceInstructionsPlayer =
+            MapboxVoiceInstructionsPlayer(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions
+            )
+        val mockedPlay: SpeechAnnouncement = mockedAnnouncement
+        val voiceInstructionsPlayerConsumer: MapboxNavigationConsumer<SpeechAnnouncement> = mockk()
+        every { voiceInstructionsPlayerConsumer.accept(any()) } just Runs
+
+        mapboxVoiceInstructionsPlayer.play(mockedPlay, voiceInstructionsPlayerConsumer)
+
+        verify(exactly = 0) {
             mockedFilePlayer.play(mockedPlay, any())
         }
         verify(exactly = 0) {
@@ -133,6 +196,11 @@ class MapboxVoiceInstructionsPlayerTest {
                 anyLanguage
             )
         } returns mockedTextPlayer
+
+        every {
+            mockedAudioFocusDelegate.requestFocus()
+        } returns true
+
         val mapboxVoiceInstructionsPlayer =
             MapboxVoiceInstructionsPlayer(
                 aMockedContext,
@@ -192,6 +260,11 @@ class MapboxVoiceInstructionsPlayerTest {
                 anyLanguage
             )
         } returns mockedTextPlayer
+
+        every {
+            mockedAudioFocusDelegate.requestFocus()
+        } returns true
+
         val mapboxVoiceInstructionsPlayer =
             MapboxVoiceInstructionsPlayer(
                 aMockedContext,
@@ -321,6 +394,45 @@ class MapboxVoiceInstructionsPlayerTest {
         every { mockedVolume.level } returns 1.5f
 
         mapboxVoiceInstructionsPlayer.volume(mockedVolume)
+    }
+
+    @Test
+    fun streamType() {
+        val anyAccessToken = "pk.123"
+        val anyLanguage = Locale.US.language
+        val mockedFilePlayer: VoiceInstructionsFilePlayer = mockk()
+        every { mockedFilePlayer.stream(any()) } just Runs
+        val mockedTextPlayer: VoiceInstructionsTextPlayer = mockk()
+        every { mockedTextPlayer.stream(any()) } just Runs
+        every {
+            VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage
+            )
+        } returns mockedFilePlayer
+        every {
+            VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
+                aMockedContext,
+                anyLanguage
+            )
+        } returns mockedTextPlayer
+        val mapboxVoiceInstructionsPlayer =
+            MapboxVoiceInstructionsPlayer(
+                aMockedContext,
+                anyAccessToken,
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions
+            )
+        val mockedStreamType: Int = AudioManager.STREAM_MUSIC
+        mapboxVoiceInstructionsPlayer.stream(mockedStreamType)
+
+        verify(exactly = 1) {
+            mockedFilePlayer.stream(mockedStreamType)
+        }
+        verify(exactly = 1) {
+            mockedTextPlayer.stream(mockedStreamType)
+        }
     }
 
     @Test
