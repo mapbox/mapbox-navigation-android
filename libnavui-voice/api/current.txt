@@ -1,6 +1,11 @@
 // Signature format: 3.0
 package com.mapbox.navigation.ui.voice.api {
 
+  public interface AudioFocusDelegate {
+    method public void abandonFocus();
+    method public boolean requestFocus();
+  }
+
   public final class MapboxSpeechApi {
     ctor public MapboxSpeechApi(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions options = MapboxSpeechApiOptions.<init>().build());
     ctor public MapboxSpeechApi(android.content.Context context, String accessToken, String language);
@@ -10,11 +15,13 @@ package com.mapbox.navigation.ui.voice.api {
   }
 
   @UiThread public final class MapboxVoiceInstructionsPlayer {
+    ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options = VoiceInstructionsPlayerOptions.<init>().build(), com.mapbox.navigation.ui.voice.api.AudioFocusDelegate audioFocusDelegate = buildAndroidAudioFocus(context, options));
     ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options = VoiceInstructionsPlayerOptions.<init>().build());
     ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language);
     method public void clear();
     method public void play(com.mapbox.navigation.ui.voice.model.SpeechAnnouncement announcement, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.voice.model.SpeechAnnouncement> consumer);
     method public void shutdown();
+    method public void stream(int type);
     method public void volume(com.mapbox.navigation.ui.voice.model.SpeechVolume state);
   }
 
