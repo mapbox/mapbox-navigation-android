@@ -15,17 +15,18 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.utils.isSameUuid
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
-import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getAllRemainingPointsOnRoute
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getMapAnchoredPaddingFromUserPadding
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPitchFallbackFromRouteProgress
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPointsToFrameAfterCurrentManeuver
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPointsToFrameOnCurrentStep
+import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getRemainingPointsOnRoute
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getScreenBoxForFraming
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getSmootherBearingForMap
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.normalizeBearing
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteForPostManeuverFramingGeometry
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteIntersections
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
+import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.simplifyCompleteRoutePoints
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.ui.maps.camera.utils.toPoint
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -217,10 +218,11 @@ class MapboxNavigationViewportDataSource(
 
     private var route: DirectionsRoute? = null
     private var completeRoutePoints: List<List<List<Point>>> = emptyList()
+    private var simplifiedCompleteRoutePoints: List<List<List<Point>>> = emptyList()
     private var postManeuverFramingPoints: List<List<List<Point>>> = emptyList()
     private var pointsToFrameOnCurrentStep: List<Point> = emptyList()
     private var pointsToFrameAfterCurrentStep: List<Point> = emptyList()
-    private var remainingPointsOnRoute: List<Point> = emptyList()
+    private var simplifiedRemainingPointsOnRoute: List<Point> = emptyList()
     private var targetLocation: Location? = null
     private var averageIntersectionDistancesOnRoute: List<List<Double>> = emptyList()
 
@@ -387,7 +389,12 @@ class MapboxNavigationViewportDataSource(
     fun onRouteChanged(route: DirectionsRoute) {
         this.route = route
         completeRoutePoints = processRoutePoints(route)
-        remainingPointsOnRoute = completeRoutePoints.flatten().flatten()
+        simplifiedCompleteRoutePoints = simplifyCompleteRoutePoints(
+            options.overviewFrameOptions.geometrySimplification.enabled,
+            options.overviewFrameOptions.geometrySimplification.simplificationFactor,
+            completeRoutePoints
+        )
+        simplifiedRemainingPointsOnRoute = simplifiedCompleteRoutePoints.flatten().flatten()
         pointsToFrameOnCurrentStep = emptyList()
         pointsToFrameAfterCurrentStep = emptyList()
 
@@ -469,8 +476,8 @@ class MapboxNavigationViewportDataSource(
                 )
             }
 
-            remainingPointsOnRoute = getAllRemainingPointsOnRoute(
-                completeRoutePoints,
+            simplifiedRemainingPointsOnRoute = getRemainingPointsOnRoute(
+                simplifiedCompleteRoutePoints,
                 pointsToFrameOnCurrentStep,
                 currentLegProgress,
                 currentStepProgress
@@ -479,7 +486,7 @@ class MapboxNavigationViewportDataSource(
             followingPitchProperty.fallback = options.followingFrameOptions.defaultPitch
             pointsToFrameOnCurrentStep = emptyList()
             pointsToFrameAfterCurrentStep = emptyList()
-            remainingPointsOnRoute = emptyList()
+            simplifiedRemainingPointsOnRoute = emptyList()
         }
     }
 
@@ -508,7 +515,8 @@ class MapboxNavigationViewportDataSource(
         postManeuverFramingPoints = emptyList()
         pointsToFrameOnCurrentStep = emptyList()
         pointsToFrameAfterCurrentStep = emptyList()
-        remainingPointsOnRoute = emptyList()
+        simplifiedCompleteRoutePoints = emptyList()
+        simplifiedRemainingPointsOnRoute = emptyList()
         averageIntersectionDistancesOnRoute = emptyList()
         followingPitchProperty.fallback = options.followingFrameOptions.defaultPitch
     }
@@ -734,7 +742,7 @@ class MapboxNavigationViewportDataSource(
     }
 
     private fun updateOverviewData() {
-        val pointsForOverview = remainingPointsOnRoute.toMutableList()
+        val pointsForOverview = simplifiedRemainingPointsOnRoute.toMutableList()
 
         val localTargetLocation = targetLocation
         if (localTargetLocation != null) {

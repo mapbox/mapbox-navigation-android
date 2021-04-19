@@ -257,6 +257,13 @@ class OverviewFrameOptions internal constructor() {
     var maxZoom = 16.35
 
     /**
+     * Options that impact the simplification of geometries framed for overview.
+     *
+     * Simplifying geometries, especially for longer routes, can have a significant impact on the performance of generating frames and each [MapboxNavigationViewportDataSource.evaluate] calls.
+     */
+    val geometrySimplification = GeometrySimplification()
+
+    /**
      * If `true`, the source will manipulate Camera Center Property when producing overview frame
      * updates as necessary.
      *
@@ -305,4 +312,33 @@ class OverviewFrameOptions internal constructor() {
      * Defaults to `true`.
      */
     var paddingUpdatesAllowed = true
+
+    /**
+     * Options that impact the simplification of geometries framed for overview.
+     *
+     * Simplifying geometries, especially for longer routes, can have a significant impact on the performance of generating frames and each [MapboxNavigationViewportDataSource.evaluate] calls.
+     */
+    class GeometrySimplification internal constructor() {
+
+        /**
+         * **Preconditions**:
+         * - a route is provided via [MapboxNavigationViewportDataSource.onRouteChanged]
+         *
+         * If `true`, the frames generated for overview will use a simplified route geometry.
+         *
+         * Defaults to `true`.
+         *
+         * @see simplificationFactor
+         */
+        var enabled = true
+
+        /**
+         * Determines how many points of each step's geometry should be removed from framing.
+         *
+         * The default value of `25` means that every 25th point in the geometry will be taken for framing, plus the first and last point of each step.
+         *
+         * The factor has to be a positive integer.
+         */
+        var simplificationFactor = 25
+    }
 }

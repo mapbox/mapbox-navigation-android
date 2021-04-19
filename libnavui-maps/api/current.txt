@@ -169,6 +169,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
   public final class OverviewFrameOptions {
     method public boolean getBearingUpdatesAllowed();
     method public boolean getCenterUpdatesAllowed();
+    method public com.mapbox.navigation.ui.maps.camera.data.OverviewFrameOptions.GeometrySimplification getGeometrySimplification();
     method public double getMaxZoom();
     method public boolean getPaddingUpdatesAllowed();
     method public boolean getPitchUpdatesAllowed();
@@ -181,10 +182,20 @@ package com.mapbox.navigation.ui.maps.camera.data {
     method public void setZoomUpdatesAllowed(boolean p);
     property public final boolean bearingUpdatesAllowed;
     property public final boolean centerUpdatesAllowed;
+    property public final com.mapbox.navigation.ui.maps.camera.data.OverviewFrameOptions.GeometrySimplification geometrySimplification;
     property public final double maxZoom;
     property public final boolean paddingUpdatesAllowed;
     property public final boolean pitchUpdatesAllowed;
     property public final boolean zoomUpdatesAllowed;
+  }
+
+  public static final class OverviewFrameOptions.GeometrySimplification {
+    method public boolean getEnabled();
+    method public int getSimplificationFactor();
+    method public void setEnabled(boolean p);
+    method public void setSimplificationFactor(int p);
+    property public final boolean enabled;
+    property public final int simplificationFactor;
   }
 
   public final class ViewportData {

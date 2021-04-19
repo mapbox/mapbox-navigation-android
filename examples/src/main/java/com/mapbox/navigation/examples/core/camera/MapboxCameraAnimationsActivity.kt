@@ -55,6 +55,7 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.camera.AnimationAdapter.OnAnimationButtonClicked
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityCameraBinding
+import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
@@ -551,6 +552,7 @@ class MapboxCameraAnimationsActivity :
     }
 
     private fun findRoute(origin: Point, destination: Point) {
+        Utils.vibrate(this)
         val routeOptions: RouteOptions = RouteOptions.builder()
             .applyDefaultParams()
             .accessToken(getMapboxAccessTokenFromResources())
