@@ -13,7 +13,6 @@ import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
-import com.mapbox.navigation.ui.maps.camera.utils.shortestRotation
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMeasurement
@@ -360,12 +359,6 @@ internal object ViewportDataSourceProcessor {
         }
         return currentMapCameraBearing + shortestRotationDiff(output, currentMapCameraBearing)
     }
-
-    /**
-     * Returns a bearing change using the shortest path.
-     */
-    fun normalizeBearing(currentBearing: Double, targetBearing: Double) =
-        currentBearing + shortestRotation(currentBearing, targetBearing)
 
     private fun shortestRotationDiff(angle: Double, anchorAngle: Double): Double {
         if (angle.isNaN() || anchorAngle.isNaN()) {

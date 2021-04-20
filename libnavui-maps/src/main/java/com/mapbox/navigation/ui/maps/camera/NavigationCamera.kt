@@ -335,6 +335,7 @@ class NavigationCamera(
             } else {
                 finalState
             }
+
             finishAnimation(animation as AnimatorSet)
             externalListener?.onAnimationEnd(animation)
             updateFrame(viewportDataSource.getViewportData(), instant = false)

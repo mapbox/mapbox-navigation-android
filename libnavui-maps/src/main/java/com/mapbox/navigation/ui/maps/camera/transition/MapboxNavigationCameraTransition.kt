@@ -9,7 +9,7 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.CameraAnimatorOptions
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.NAVIGATION_CAMERA_OWNER
-import com.mapbox.navigation.ui.maps.camera.utils.shortestRotation
+import com.mapbox.navigation.ui.maps.camera.utils.normalizeBearing
 import kotlin.math.abs
 import kotlin.math.hypot
 
@@ -83,7 +83,7 @@ class MapboxNavigationCameraTransition(
         cameraOptions.bearing?.let { bearing ->
             var bearingShortestRotation = bearing
             currentMapCameraOptions.bearing?.let {
-                bearingShortestRotation = it + shortestRotation(it, bearing)
+                bearingShortestRotation = normalizeBearing(it, bearing)
             }
             val bearingDuration = 1800.0
             val bearingDelay = (zoomDelay + zoomDuration - bearingDuration).coerceAtLeast(0.0)
@@ -170,7 +170,7 @@ class MapboxNavigationCameraTransition(
         cameraOptions.bearing?.let { bearing ->
             var bearingShortestRotation = bearing
             currentMapCameraOptions.bearing?.let {
-                bearingShortestRotation = it + shortestRotation(it, bearing)
+                bearingShortestRotation = normalizeBearing(it, bearing)
             }
             val bearingAnimator = cameraPlugin.createBearingAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(bearingShortestRotation) {
@@ -248,7 +248,7 @@ class MapboxNavigationCameraTransition(
         cameraOptions.bearing?.let { bearing ->
             var bearingShortestRotation = bearing
             currentMapCamera.bearing?.let {
-                bearingShortestRotation = it + shortestRotation(it, bearing)
+                bearingShortestRotation = normalizeBearing(it, bearing)
             }
             val bearingAnimator = cameraPlugin.createBearingAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(bearingShortestRotation) {
