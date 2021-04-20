@@ -22,13 +22,13 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.get
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPointsToFrameOnCurrentStep
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getScreenBoxForFraming
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getSmootherBearingForMap
-import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.normalizeBearing
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteForPostManeuverFramingGeometry
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteIntersections
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
-import com.mapbox.navigation.ui.maps.camera.utils.toPoint
+import com.mapbox.navigation.ui.maps.camera.utils.normalizeBearing
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.toPoint
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.math.max
 import kotlin.math.min

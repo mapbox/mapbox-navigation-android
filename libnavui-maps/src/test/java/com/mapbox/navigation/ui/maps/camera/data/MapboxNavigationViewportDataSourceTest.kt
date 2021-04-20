@@ -26,7 +26,7 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.get
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteForPostManeuverFramingGeometry
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteIntersections
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
-import com.mapbox.navigation.ui.maps.camera.utils.toPoint
+import com.mapbox.navigation.utils.internal.toPoint
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
