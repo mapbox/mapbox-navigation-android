@@ -988,24 +988,59 @@ package com.mapbox.navigation.ui.maps.route.line.model {
   }
 
   public final class RouteSetValue {
-    method public com.mapbox.maps.extension.style.expressions.generated.Expression getAltRoute1TrafficExpression();
-    method public com.mapbox.maps.extension.style.expressions.generated.Expression getAltRoute2TrafficExpression();
+    method public kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? getAltRoute1TrafficExpressionProvider();
+    method public kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? getAltRoute2TrafficExpressionProvider();
     method public com.mapbox.geojson.FeatureCollection getAlternativeRoute1Source();
     method public com.mapbox.geojson.FeatureCollection getAlternativeRoute2Source();
     method public com.mapbox.maps.extension.style.expressions.generated.Expression getCasingLineExpression();
     method public com.mapbox.geojson.FeatureCollection getPrimaryRouteSource();
     method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteLineExpression();
-    method public com.mapbox.maps.extension.style.expressions.generated.Expression getTrafficLineExpression();
+    method public kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? getTrafficLineExpressionProvider();
     method public com.mapbox.geojson.FeatureCollection getWaypointsSource();
-    property public final com.mapbox.maps.extension.style.expressions.generated.Expression altRoute1TrafficExpression;
-    property public final com.mapbox.maps.extension.style.expressions.generated.Expression altRoute2TrafficExpression;
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue.MutableRouteSetValue toMutableValue();
+    property public final kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? altRoute1TrafficExpressionProvider;
+    property public final kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? altRoute2TrafficExpressionProvider;
     property public final com.mapbox.geojson.FeatureCollection alternativeRoute1Source;
     property public final com.mapbox.geojson.FeatureCollection alternativeRoute2Source;
     property public final com.mapbox.maps.extension.style.expressions.generated.Expression casingLineExpression;
     property public final com.mapbox.geojson.FeatureCollection primaryRouteSource;
     property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeLineExpression;
-    property public final com.mapbox.maps.extension.style.expressions.generated.Expression trafficLineExpression;
+    property public final kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? trafficLineExpressionProvider;
     property public final com.mapbox.geojson.FeatureCollection waypointsSource;
+  }
+
+  public static final class RouteSetValue.MutableRouteSetValue {
+    method public kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? getAltRoute1TrafficExpression();
+    method public kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? getAltRoute2TrafficExpression();
+    method public com.mapbox.geojson.FeatureCollection getAlternativeRoute1Source();
+    method public com.mapbox.geojson.FeatureCollection getAlternativeRoute2Source();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getCasingLineExpression();
+    method public com.mapbox.geojson.FeatureCollection getPrimaryRouteSource();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteLineExpression();
+    method public kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? getTrafficLineExpressionProvider();
+    method public com.mapbox.geojson.FeatureCollection getWaypointsSource();
+    method public void setAltRoute1TrafficExpression(kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? p);
+    method public void setAltRoute2TrafficExpression(kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? p);
+    method public void setAlternativeRoute1Source(com.mapbox.geojson.FeatureCollection p);
+    method public void setAlternativeRoute2Source(com.mapbox.geojson.FeatureCollection p);
+    method public void setCasingLineExpression(com.mapbox.maps.extension.style.expressions.generated.Expression p);
+    method public void setPrimaryRouteSource(com.mapbox.geojson.FeatureCollection p);
+    method public void setRouteLineExpression(com.mapbox.maps.extension.style.expressions.generated.Expression p);
+    method public void setTrafficLineExpressionProvider(kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? p);
+    method public void setWaypointsSource(com.mapbox.geojson.FeatureCollection p);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue toImmutableValue();
+    property public final kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? altRoute1TrafficExpression;
+    property public final kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? altRoute2TrafficExpression;
+    property public final com.mapbox.geojson.FeatureCollection alternativeRoute1Source;
+    property public final com.mapbox.geojson.FeatureCollection alternativeRoute2Source;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression casingLineExpression;
+    property public final com.mapbox.geojson.FeatureCollection primaryRouteSource;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeLineExpression;
+    property public final kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? trafficLineExpressionProvider;
+    property public final com.mapbox.geojson.FeatureCollection waypointsSource;
+  }
+
+  public final class RouteSetValueKt {
   }
 
   public final class RouteStyleDescriptor {

@@ -1642,6 +1642,30 @@ class MapboxRouteLineUtilsTest {
         assertEquals(result.flatList[126].longitude(), result.flatList[127].longitude(), 0.0)
     }
 
+    @Test
+    fun getTrafficLineExpressionProducer() {
+        val routeLineColorResources = RouteLineColorResources.Builder().build()
+        val expectedPrimaryTrafficLineExpression = "[step, [line-progress], " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            "0.9429639111009005, [rgba, 255.0, 149.0, 0.0, 1.0]]"
+        val route = loadRoute("short_route.json")
+
+        val result = MapboxRouteLineUtils.getTrafficLineExpressionProducer(
+            route,
+            listOf(),
+            routeLineColorResources,
+            true,
+            0.0,
+            routeLineColorResources.routeUnknownTrafficColor,
+            10.0
+        ).invoke()
+
+        assertEquals(
+            expectedPrimaryTrafficLineExpression,
+            result.toString()
+        )
+    }
+
     private fun getMultilegRoute(): DirectionsRoute {
         return loadRoute("multileg_route.json")
     }

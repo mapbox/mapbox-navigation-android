@@ -29,6 +29,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrafficExpressionData
@@ -863,6 +864,30 @@ object MapboxRouteLineUtils {
         val flatList = nestedList.flatten().flatten()
 
         return RoutePoints(nestedList, flatList)
+    }
+
+    internal fun getTrafficLineExpressionProducer(
+        route: DirectionsRoute,
+        trafficBackfillRoadClasses: List<String>,
+        colorResources: RouteLineColorResources,
+        isPrimaryRoute: Boolean,
+        vanishingPointOffset: Double,
+        fallbackRouteColor: Int,
+        restrictedRoadSectionScale: Double
+    ): RouteLineExpressionProvider = {
+        val segments: List<RouteLineExpressionData> = calculateRouteLineSegments(
+            route,
+            trafficBackfillRoadClasses,
+            isPrimaryRoute,
+            colorResources,
+            restrictedRoadSectionScale,
+            false
+        )
+        getTrafficLineExpression(
+            vanishingPointOffset,
+            segments,
+            fallbackRouteColor
+        )
     }
 
     private fun projectX(x: Double): Double {
