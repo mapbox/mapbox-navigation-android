@@ -299,6 +299,10 @@ class NavigationCamera(
         if (instant) {
             animatorSet.duration = 0
         }
+
+        // workaround for https://github.com/mapbox/mapbox-maps-android/issues/277
+        cameraPlugin.anchor = null
+
         animatorSet.start()
         runningAnimation = animatorSet
     }
