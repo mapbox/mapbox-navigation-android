@@ -129,6 +129,26 @@ class NavigationCameraTest {
         )
     }
 
+    /**
+     * workaround for https://github.com/mapbox/mapbox-maps-android/issues/277
+     */
+    @Test
+    fun `when following requested, anchor nullified`() {
+        navigationCamera.requestNavigationCameraToFollowing()
+
+        verify { cameraPlugin.anchor = null }
+    }
+
+    /**
+     * workaround for https://github.com/mapbox/mapbox-maps-android/issues/277
+     */
+    @Test
+    fun `when overview requested, anchor nullified`() {
+        navigationCamera.requestNavigationCameraToOverview()
+
+        verify { cameraPlugin.anchor = null }
+    }
+
     @Test
     fun `when following requested twice, transition executed once`() {
         navigationCamera.requestNavigationCameraToFollowing()
