@@ -4,6 +4,7 @@ import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.navigator.internal.NavigatorLoader.customConfig
 import com.mapbox.navigator.CacheFactory
+import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigFactory
 import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
@@ -52,7 +53,8 @@ internal object NavigatorLoader {
             nativeRouter,
             historyRecorder,
             graphAccessor,
-            openLRDecoder
+            openLRDecoder,
+            cache
         )
     }
 
@@ -78,5 +80,6 @@ internal object NavigatorLoader {
         val historyRecorderHandle: HistoryRecorderHandle,
         val graphAccessor: GraphAccessor,
         val openLRDecoder: OpenLRDecoder,
+        val cache: CacheHandle
     )
 }
