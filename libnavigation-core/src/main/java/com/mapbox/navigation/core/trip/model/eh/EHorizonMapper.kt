@@ -137,7 +137,8 @@ internal fun EdgeMetadata.mapToEHorizonEdgeMetadata(): EHorizonEdgeMetadata {
         countryCodeIso3,
         countryCodeIso2,
         stateCode,
-        isRightHandTraffic
+        isRightHandTraffic,
+        isOneway,
     )
 }
 
