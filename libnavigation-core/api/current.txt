@@ -584,6 +584,7 @@ package com.mapbox.navigation.core.trip.model.eh {
     method public String? getStateCode();
     method public boolean getToll();
     method public boolean getTunnel();
+    method public boolean isOneWay();
     method public boolean isRightHandTraffic();
     property public final boolean bridge;
     property public final String? countryCodeIso2;
@@ -591,6 +592,7 @@ package com.mapbox.navigation.core.trip.model.eh {
     property public final byte curvature;
     property public final String functionRoadClass;
     property public final double heading;
+    property public final boolean isOneWay;
     property public final boolean isRightHandTraffic;
     property public final Byte? laneCount;
     property public final double length;
