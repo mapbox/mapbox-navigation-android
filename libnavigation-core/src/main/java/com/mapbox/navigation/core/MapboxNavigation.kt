@@ -12,6 +12,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
+import com.mapbox.common.TilesetDescriptor
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.common.module.provider.ModuleProviderArgument
 import com.mapbox.navigation.base.formatter.DistanceFormatter
@@ -36,6 +37,7 @@ import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.fasterroute.RouteComparator
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
+import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
@@ -208,6 +210,12 @@ class MapboxNavigation(
      */
     val graphAccessor: GraphAccessor
 
+    /**
+     * [MapboxNavigation.tilesetDescriptorFactory] provide methods to build navigation
+     * [TilesetDescriptor]
+     */
+    val tilesetDescriptorFactory: TilesetDescriptorFactory
+
     init {
         ThreadController.init()
         logger = MapboxModuleProvider.createModule(MapboxModuleType.CommonLogger, ::paramsProvider)
@@ -301,6 +309,10 @@ class MapboxNavigation(
 
         roadObjectsStore = RoadObjectsStore(navigator)
         graphAccessor = GraphAccessor(navigator)
+        tilesetDescriptorFactory = TilesetDescriptorFactory(
+            navigationOptions.routingTilesOptions,
+            navigator.cache
+        )
     }
 
     /**

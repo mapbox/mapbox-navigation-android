@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigator.BannerInstruction
+import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessor
@@ -282,4 +283,6 @@ interface MapboxNativeNavigator {
     val roadObjectsStore: RoadObjectsStore?
 
     val openLRDecoder: OpenLRDecoder?
+
+    val cache: CacheHandle
 }

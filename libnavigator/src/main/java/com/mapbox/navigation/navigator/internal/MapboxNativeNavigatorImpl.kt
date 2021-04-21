@@ -18,6 +18,7 @@ import com.mapbox.navigation.navigator.ActiveGuidanceOptionsMapper
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.CacheDataDomain
+import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessor
@@ -70,6 +71,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override var graphAccessor: GraphAccessor? = null
     override var openLRDecoder: OpenLRDecoder? = null
     override var roadObjectsStore: RoadObjectsStore? = null
+    override lateinit var cache: CacheHandle
     private var logger: Logger? = null
 
     // todo move to native
@@ -98,6 +100,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         graphAccessor = nativeComponents.graphAccessor
         openLRDecoder = nativeComponents.openLRDecoder
         roadObjectsStore = nativeComponents.navigator.roadObjectStore()
+        cache = nativeComponents.cache
         route = null
         routeBufferGeoJson = null
         this.logger = logger

@@ -108,6 +108,7 @@ class MapboxNavigationTest {
         every { packageManager } returns mockk(relaxed = true)
         every { packageName } returns "com.mapbox.navigation.core.MapboxNavigationTest"
         every { filesDir } returns File("some/path")
+        every { navigator.cache } returns mockk()
     }
 
     private lateinit var mapboxNavigation: MapboxNavigation
