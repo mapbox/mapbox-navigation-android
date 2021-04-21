@@ -27,7 +27,7 @@ class ReplayRouteMapper @JvmOverloads constructor(
     var options: ReplayRouteOptions = ReplayRouteOptions.Builder().build()
 ) {
 
-    private val tag = Tag("MapboxReplayRouteMapper")
+    private val tag = Tag("MbxReplayRouteMapper")
     private val replayRouteDriver = ReplayRouteDriver()
     private var logger: Logger? = null
 

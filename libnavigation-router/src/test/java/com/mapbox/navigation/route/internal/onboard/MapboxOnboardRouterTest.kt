@@ -404,7 +404,7 @@ class MapboxOnboardRouterTest {
         private val destination = Point.fromLngLat(1.83, 1232.01)
 
         private const val TILE_PATH = "tiles"
-        private const val TAG = "MapboxOnboardRouter"
+        private const val TAG = "MbxOnboardRouter"
 
         private const val ROUTE_SIZE = 1
         private const val ROUTE_DISTANCE = 50369.7

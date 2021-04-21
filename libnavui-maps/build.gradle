@@ -50,7 +50,6 @@ dependencies {
     implementation dependenciesList.materialDesign
     implementation dependenciesList.kotlinStdLib
 
-    implementation dependenciesList.timber
     implementation dependenciesList.coroutinesAndroid
 
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"

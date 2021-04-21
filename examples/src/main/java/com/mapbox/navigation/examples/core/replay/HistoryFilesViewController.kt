@@ -1,6 +1,7 @@
 package com.mapbox.navigation.examples.core.replay
 
 import android.content.Context
+import android.util.Log
 import com.google.gson.Gson
 import com.mapbox.navigation.core.replay.history.ReplayHistoryDTO
 import com.mapbox.navigation.examples.core.R
@@ -9,7 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -19,6 +19,10 @@ import java.util.zip.GZIPInputStream
 import kotlin.text.Charsets.UTF_8
 
 class HistoryFilesViewController {
+
+    private companion object {
+        private const val TAG = "HistoryFilesViewController"
+    }
 
     private var viewAdapter: HistoryFileAdapter? = null
     private val historyFilesApi = HistoryFilesClient()
@@ -113,13 +117,13 @@ class HistoryFilesViewController {
                 .use { it.readText() }
             val historyDTO = Gson().fromJson(historyData, ReplayHistoryDTO::class.java)
             if (historyDTO.events.isNullOrEmpty()) {
-                Timber.e("Your history file is empty ${historyFileItem.path}")
+                Log.e(TAG, "Your history file is empty ${historyFileItem.path}")
                 null
             } else {
                 historyDTO
             }
         } catch (e: IOException) {
-            Timber.e(e, "Your history file failed to open ${historyFileItem.path}")
+            Log.e(TAG, "Your history file failed to open ${historyFileItem.path}: $e")
             throw e
         }
     }
@@ -160,7 +164,7 @@ class HistoryFilesViewController {
             inputStream.close()
             String(buffer, Charset.forName("UTF-8"))
         } catch (e: IOException) {
-            Timber.e(e, "Your history file failed to open ${historyFileItem.path}")
+            Log.e(TAG, "Your history file failed to open ${historyFileItem.path}: $e")
             throw e
         }
         Gson().fromJson(historyData, ReplayHistoryDTO::class.java)

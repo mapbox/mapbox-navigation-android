@@ -160,6 +160,6 @@ internal class MapboxRerouteController(
     }
 
     private companion object {
-        const val TAG = "MapboxRerouteController"
+        const val TAG = "MbxRerouteController"
     }
 }

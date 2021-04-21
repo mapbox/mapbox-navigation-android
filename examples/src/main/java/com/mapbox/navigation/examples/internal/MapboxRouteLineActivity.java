@@ -87,13 +87,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import timber.log.Timber;
-
 import static com.mapbox.android.gestures.Utils.dpToPx;
 import static com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID;
 
 public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapLongClickListener {
 
+  private static final String TAG = "MapboxRouteLineActivity";
   private final float routeClickPadding = dpToPx(30f);
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
   private MapView mapView;
@@ -172,7 +171,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     routeArrowView = new MapboxRouteArrowView(routeArrowOptions);
 
     predictiveCacheController = new PredictiveCacheController(mapboxNavigation, message -> {
-      Timber.e("predictive cache error: %s", message);
+      Log.e(TAG, "predictive cache error: " + message);
     });
     predictiveCacheController.setMapInstance(mapboxMap);
   }
@@ -200,41 +199,38 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
         Collections.shuffle(mapStyles);
         String style = mapStyles.get(0);
-        Timber.e("*** Chosen map style is %s", style);
-        mapboxMap.loadStyleUri(style, new Style.OnStyleLoaded() {
-          @Override
-          public void onStyleLoaded(@NotNull Style style) {
-            if (primaryRouteLineVisibility == Visibility.NONE) {
-              mapboxRouteLineView.hidePrimaryRoute(style);
-            } else {
-              mapboxRouteLineView.showPrimaryRoute(style);
-            }
-
-            if (alternativeRouteLineVisibility == Visibility.NONE) {
-              mapboxRouteLineView.hideAlternativeRoutes(style);
-            } else {
-              mapboxRouteLineView.showAlternativeRoutes(style);
-            }
-
-            mapboxRouteLineApi.getRouteDrawData(
-                    new MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>() {
-              @Override
-              public void accept(Expected<RouteSetValue, RouteLineError> redrawData) {
-                mapboxRouteLineView.renderRouteDrawData(style, redrawData);
-              }
-            });
-
-            ArrowVisibilityChangeValue arrowVisibilityState;
-            if (arrowVisibility == Visibility.NONE) {
-              arrowVisibilityState = routeArrow.hideManeuverArrow();
-            } else {
-              arrowVisibilityState = routeArrow.showManeuverArrow();
-            }
-            routeArrowView.render(style, arrowVisibilityState);
-
-            ArrowAddedValue redrawState = routeArrow.redraw();
-            routeArrowView.render(style, redrawState);
+        Log.e(TAG, "*** Chosen map style is " + style);
+        mapboxMap.loadStyleUri(style, style1 -> {
+          if (primaryRouteLineVisibility == Visibility.NONE) {
+            mapboxRouteLineView.hidePrimaryRoute(style1);
+          } else {
+            mapboxRouteLineView.showPrimaryRoute(style1);
           }
+
+          if (alternativeRouteLineVisibility == Visibility.NONE) {
+            mapboxRouteLineView.hideAlternativeRoutes(style1);
+          } else {
+            mapboxRouteLineView.showAlternativeRoutes(style1);
+          }
+
+          mapboxRouteLineApi.getRouteDrawData(
+              new MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>() {
+                @Override
+                public void accept(Expected<RouteSetValue, RouteLineError> redrawData) {
+                  mapboxRouteLineView.renderRouteDrawData(style1, redrawData);
+                }
+              });
+
+          ArrowVisibilityChangeValue arrowVisibilityState;
+          if (arrowVisibility == Visibility.NONE) {
+            arrowVisibilityState = routeArrow.hideManeuverArrow();
+          } else {
+            arrowVisibilityState = routeArrow.showManeuverArrow();
+          }
+          routeArrowView.render(style1, arrowVisibilityState);
+
+          ArrowAddedValue redrawState = routeArrow.redraw();
+          routeArrowView.render(style1, redrawState);
         }, null);
       }
     });
@@ -272,7 +268,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     mapboxMap.loadStyleUri(styleId, style -> {
       mapboxNavigation.getNavigationOptions().getLocationEngine().getLastLocation(locationEngineCallback);
       getGesturePlugin().addOnMapLongClickListener(this);
-    }, (mapLoadError, s) -> Timber.e("Error loading map: %s", mapLoadError.name()));
+    }, (mapLoadError, s) -> Log.e(TAG, "Error loading map: " + mapLoadError.name()));
   }
 
   @Override
@@ -362,13 +358,13 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
     @Override
     public void onRoutesRequestFailure(@NotNull Throwable throwable, @NotNull RouteOptions routeOptions) {
-      Timber.e("route request failure %s", throwable.toString());
+      Log.e(TAG, "route request failure " + throwable.toString());
       routeLoading.setVisibility(View.INVISIBLE);
     }
 
     @Override
     public void onRoutesRequestCanceled(@NotNull RouteOptions routeOptions) {
-      Timber.d("route request canceled");
+      Log.d(TAG, "route request canceled");
       routeLoading.setVisibility(View.INVISIBLE);
     }
   };
@@ -414,7 +410,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   private LocationObserver locationObserver = new LocationObserver() {
     @Override
     public void onRawLocationChanged(@NotNull Location rawLocation) {
-      Timber.d("raw location %s", rawLocation.toString());
+      Log.d(TAG, "raw location " + rawLocation.toString());
     }
 
     @Override
@@ -486,14 +482,14 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
       if (isNewRoute) {
         mapboxRouteLineApi.setRoutes(
-          Collections.singletonList(new RouteLine(routeProgress.getRoute(), null)),
-          new MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>() {
-            @Override
-            public void accept(Expected<RouteSetValue, RouteLineError> routeDrawData) {
-              mapboxRouteLineView.renderRouteDrawData(mapboxMap.getStyle(), routeDrawData);
+            Collections.singletonList(new RouteLine(routeProgress.getRoute(), null)),
+            new MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>() {
+              @Override
+              public void accept(Expected<RouteSetValue, RouteLineError> routeDrawData) {
+                mapboxRouteLineView.renderRouteDrawData(mapboxMap.getStyle(), routeDrawData);
+              }
             }
-          }
-          );
+        );
       }
     }
   };
@@ -503,9 +499,9 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
         @Override
         public void accept(Expected<ClosestRouteValue, RouteNotFound> closestRouteResult) {
           if (closestRouteResult instanceof Expected.Success) {
-            final DirectionsRoute selectedRoute = ((ClosestRouteValue)((Expected.Success) closestRouteResult).getValue()).getRoute();
-              if (selectedRoute != mapboxRouteLineApi.getPrimaryRoute()) {
-                mapboxRouteLineApi.updateToPrimaryRoute(
+            final DirectionsRoute selectedRoute = ((ClosestRouteValue) ((Expected.Success) closestRouteResult).getValue()).getRoute();
+            if (selectedRoute != mapboxRouteLineApi.getPrimaryRoute()) {
+              mapboxRouteLineApi.updateToPrimaryRoute(
                   selectedRoute,
                   new MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>() {
                     @Override
@@ -515,8 +511,8 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
                       // twice unnecessarily in this implementation.
                       mapboxNavigation.setRoutes(mapboxRouteLineApi.getRoutes());
                     }
-                });
-              }
+                  });
+            }
           }
         }
       };
@@ -559,7 +555,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
     @Override
     public void onFailure(@NonNull Exception exception) {
-      Timber.i(exception);
+      Log.i(TAG, exception.getMessage());
     }
   }
 }

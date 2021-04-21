@@ -2,10 +2,10 @@ package com.mapbox.navigation.qa_test_app.view
 
 import android.Manifest
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -45,7 +45,9 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
             activitySelectedDelegate,
             auxViewClickMap = mapOf(Pair(R.id.infoLabel, infoIconClickListenerFun))
         )
-        binding.activitiesList.addItemDecoration(DividerItemDecoration(this, layoutManager.orientation))
+        binding.activitiesList.addItemDecoration(
+            DividerItemDecoration(this, layoutManager.orientation)
+        )
 
         when (LocationPermissionsHelper.areLocationPermissionsGranted(this)) {
             true -> requestPermissionIfNotGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -55,7 +57,9 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
 
     override fun onStart() {
         super.onStart()
-        (binding.activitiesList.adapter as GenericListAdapter<TestActivityDescription, *>).swap(TestActivitySuite.testActivities)
+        (binding.activitiesList.adapter as GenericListAdapter<TestActivityDescription, *>).swap(
+            TestActivitySuite.testActivities
+        )
     }
 
     override fun onExplanationNeeded(permissionsToExplain: List<String>) {
@@ -113,16 +117,18 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
         }
     }
 
-    private val activitySelectedDelegate: GenericListAdapterItemSelectedFun<TestActivityDescription> = { positionAndElement ->
-        positionAndElement.second.launchActivityFun(this)
-    }
+    private val activitySelectedDelegate:
+        GenericListAdapterItemSelectedFun<TestActivityDescription> = { positionAndElement ->
+            positionAndElement.second.launchActivityFun(this)
+        }
 
-    private val infoIconClickListenerFun: GenericListAdapterItemSelectedFun<TestActivityDescription> = { positionAndElement ->
-        AlertDialog.Builder(this)
-            .setMessage(positionAndElement.second.fullDescriptionResource)
-            .setTitle("Test Description")
-            .setPositiveButton("Ok") { dlg, _ ->
-                dlg.dismiss()
-            }.show()
-    }
+    private val infoIconClickListenerFun:
+        GenericListAdapterItemSelectedFun<TestActivityDescription> = { positionAndElement ->
+            AlertDialog.Builder(this)
+                .setMessage(positionAndElement.second.fullDescriptionResource)
+                .setTitle("Test Description")
+                .setPositiveButton("Ok") { dlg, _ ->
+                    dlg.dismiss()
+                }.show()
+        }
 }

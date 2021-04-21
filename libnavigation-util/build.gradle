@@ -32,6 +32,7 @@ dependencies {
     implementation dependenciesList.androidXCore
     api dependenciesList.mapboxSdkDirectionsModels
     api dependenciesList.mapboxAndroidCommon
+    implementation dependenciesList.mapboxAnnotations
 
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
     testImplementation project(':libtesting-utils')
