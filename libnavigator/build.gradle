@@ -27,11 +27,11 @@ dependencies {
     implementation(project(':libnavigation-base'))
     implementation(project(':libnavigation-util'))
 
-    // Navigator
-    api dependenciesList.mapboxNavigator
-
     // mapbox-java GeoJSON
     api dependenciesList.mapboxSdkGeoJSON
+
+    // Navigator
+    api dependenciesList.mapboxNavigator
 
     implementation dependenciesList.mapboxAndroidCommon
 

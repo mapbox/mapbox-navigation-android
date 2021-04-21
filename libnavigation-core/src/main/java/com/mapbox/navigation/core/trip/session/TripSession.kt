@@ -5,6 +5,7 @@ import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.service.TripService
+import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 
 internal interface TripSession {
 
@@ -46,9 +47,13 @@ internal interface TripSession {
     fun updateSensorEvent(sensorEvent: SensorEvent)
     fun updateLegIndex(legIndex: Int): Boolean
 
-    fun registerRoadObjectsObserver(roadObjectsObserver: RoadObjectsObserver)
-    fun unregisterRoadObjectsObserver(roadObjectsObserver: RoadObjectsObserver)
-    fun unregisterAllRoadObjectsObservers()
+    fun registerRoadObjectsOnRouteObserver(
+        roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
+    )
+    fun unregisterRoadObjectsOnRouteObserver(
+        roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
+    )
+    fun unregisterAllRoadObjectsOnRouteObservers()
 
     fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver)
     fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver)

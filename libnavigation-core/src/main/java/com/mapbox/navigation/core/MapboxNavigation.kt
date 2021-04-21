@@ -21,7 +21,8 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
+import com.mapbox.navigation.base.trip.model.eh.EHorizonEdge
+import com.mapbox.navigation.base.trip.model.eh.EHorizonEdgeMetadata
 import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.arrival.ArrivalController
@@ -47,23 +48,22 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
-import com.mapbox.navigation.core.trip.model.eh.EHorizonEdge
-import com.mapbox.navigation.core.trip.model.eh.EHorizonEdgeMetadata
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
-import com.mapbox.navigation.core.trip.session.EHorizonObserver
-import com.mapbox.navigation.core.trip.session.GraphAccessor
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
-import com.mapbox.navigation.core.trip.session.RoadObjectsObserver
-import com.mapbox.navigation.core.trip.session.RoadObjectsStore
+import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
+import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
+import com.mapbox.navigation.core.trip.session.eh.GraphAccessor
+import com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcher
+import com.mapbox.navigation.core.trip.session.eh.RoadObjectsStore
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
@@ -200,8 +200,7 @@ class MapboxNavigation(
 
     /**
      * [MapboxNavigation.roadObjectsStore] provides methods to get road objects metadata,
-     * add and remove custom road
-     * objects.
+     * add and remove custom road objects.
      */
     val roadObjectsStore: RoadObjectsStore
 
@@ -216,6 +215,14 @@ class MapboxNavigation(
      * [TilesetDescriptor]
      */
     val tilesetDescriptorFactory: TilesetDescriptorFactory
+
+    /**
+     * [MapboxNavigation.roadObjectMatcher] provides methods to match custom road objects
+     * to the road graph. To make the road object discoverable by the electronic horizon module and
+     * the [EHorizonObserver] in particular it must be added to the [RoadObjectsStore] with
+     * [RoadObjectsStore.addCustomRoadObject]
+     */
+    val roadObjectMatcher: RoadObjectMatcher
 
     init {
         ThreadController.init()
@@ -314,6 +321,7 @@ class MapboxNavigation(
             navigationOptions.routingTilesOptions,
             navigator.cache
         )
+        roadObjectMatcher = RoadObjectMatcher(navigator)
     }
 
     /**
@@ -438,7 +446,7 @@ class MapboxNavigation(
         tripSession.unregisterAllStateObservers()
         tripSession.unregisterAllBannerInstructionsObservers()
         tripSession.unregisterAllVoiceInstructionsObservers()
-        tripSession.unregisterAllRoadObjectsObservers()
+        tripSession.unregisterAllRoadObjectsOnRouteObservers()
         tripSession.unregisterAllEHorizonObservers()
         tripSession.unregisterAllMapMatcherResultObservers()
         directionsSession.routes = emptyList()
@@ -677,23 +685,27 @@ class MapboxNavigation(
 
     /**
      * Registers an observer that gets notified whenever the route changes and provides the list
-     * of alerts on this new route, if there are any. The alerts returned here are equal to the ones
-     * available in [RouteProgress.upcomingRoadObjects], but they capture the whole route
-     * (not only what's ahead of us) and don't have the [UpcomingRoadObject.distanceToStart] data.
+     * of road objects on this new route, if there are any. The objects returned here are equal to
+     * the ones available in [RouteProgress.upcomingRoadObjects], but they capture the whole route
+     * (not only what's ahead of us).
      *
-     * @see unregisterRoadObjectsObserver
+     * @see unregisterRoadObjectsOnRouteObserver
      */
-    fun registerRoadObjectsObserver(roadObjectsObserver: RoadObjectsObserver) {
-        tripSession.registerRoadObjectsObserver(roadObjectsObserver)
+    fun registerRoadObjectsOnRouteObserver(
+        roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
+    ) {
+        tripSession.registerRoadObjectsOnRouteObserver(roadObjectsOnRouteObserver)
     }
 
     /**
-     * Unregisters the route alerts observer.
+     * Unregisters the route objects observer.
      *
-     * @see registerRoadObjectsObserver
+     * @see registerRoadObjectsOnRouteObserver
      */
-    fun unregisterRoadObjectsObserver(roadObjectsObserver: RoadObjectsObserver) {
-        tripSession.unregisterRoadObjectsObserver(roadObjectsObserver)
+    fun unregisterRoadObjectsOnRouteObserver(
+        roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
+    ) {
+        tripSession.unregisterRoadObjectsOnRouteObserver(roadObjectsOnRouteObserver)
     }
 
     /**
@@ -917,7 +929,10 @@ class MapboxNavigation(
 
         return TilesConfig(
             offlineFilesPath,
-            1024 * 1024 * 1024,
+            // TODO use TileStore from the options
+            // we pass null, so NavNative will use TileStore.getInstance(offlineFilesPath)
+            null,
+            null,
             null,
             null,
             THREADS_COUNT,
@@ -928,7 +943,7 @@ class MapboxNavigation(
                 navigationOptions.accessToken ?: "",
                 USER_AGENT,
                 BuildConfig.NAV_NATIVE_SDK_VERSION,
-                NativeSkuTokenProvider(),
+                false,
                 navigationOptions.routingTilesOptions.minDaysBetweenServerAndLocalTilesVersion
             )
         )

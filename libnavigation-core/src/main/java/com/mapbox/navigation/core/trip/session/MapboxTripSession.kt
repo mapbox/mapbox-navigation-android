@@ -13,7 +13,7 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.roadobject.RoadObject
+import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.internal.utils.isSameRoute
 import com.mapbox.navigation.core.internal.utils.isSameUuid
 import com.mapbox.navigation.core.navigator.getMapMatcherResult
@@ -24,6 +24,8 @@ import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
 import com.mapbox.navigation.core.sensors.SensorMapper
 import com.mapbox.navigation.core.trip.service.TripService
+import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
+import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.navigator.internal.TripStatus
@@ -117,7 +119,8 @@ internal class MapboxTripSession(
     private val stateObservers = CopyOnWriteArraySet<TripSessionStateObserver>()
     private val bannerInstructionsObservers = CopyOnWriteArraySet<BannerInstructionsObserver>()
     private val voiceInstructionsObservers = CopyOnWriteArraySet<VoiceInstructionsObserver>()
-    private val routeAlertsObservers = CopyOnWriteArraySet<RoadObjectsObserver>()
+    private val roadObjectsOnRouteObservers =
+        CopyOnWriteArraySet<RoadObjectsOnRouteObserver>()
     private val mapMatcherResultObservers = CopyOnWriteArraySet<MapMatcherResultObserver>()
 
     private val bannerInstructionEvent = BannerInstructionEvent()
@@ -143,13 +146,13 @@ internal class MapboxTripSession(
     private var rawLocation: Location? = null
     private var enhancedLocation: Location? = null
     private var routeProgress: RouteProgress? = null
-    private var roadObjects: List<RoadObject> = emptyList()
+    private var roadObjects: List<UpcomingRoadObject> = emptyList()
         set(value) {
             if (field == value) {
                 return
             }
             field = value
-            routeAlertsObservers.forEach { it.onNewRoadObjects(value) }
+            roadObjectsOnRouteObservers.forEach { it.onNewRoadObjectsOnTheRoute(value) }
         }
     private var mapMatcherResult: MapMatcherResult? = null
 
@@ -410,17 +413,21 @@ internal class MapboxTripSession(
         return navigator.updateLegIndex(legIndex)
     }
 
-    override fun registerRoadObjectsObserver(roadObjectsObserver: RoadObjectsObserver) {
-        routeAlertsObservers.add(roadObjectsObserver)
-        roadObjectsObserver.onNewRoadObjects(roadObjects)
+    override fun registerRoadObjectsOnRouteObserver(
+        roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
+    ) {
+        roadObjectsOnRouteObservers.add(roadObjectsOnRouteObserver)
+        roadObjectsOnRouteObserver.onNewRoadObjectsOnTheRoute(roadObjects)
     }
 
-    override fun unregisterRoadObjectsObserver(roadObjectsObserver: RoadObjectsObserver) {
-        routeAlertsObservers.remove(roadObjectsObserver)
+    override fun unregisterRoadObjectsOnRouteObserver(
+        roadObjectsOnRouteObserver: RoadObjectsOnRouteObserver
+    ) {
+        roadObjectsOnRouteObservers.remove(roadObjectsOnRouteObserver)
     }
 
-    override fun unregisterAllRoadObjectsObservers() {
-        routeAlertsObservers.clear()
+    override fun unregisterAllRoadObjectsOnRouteObservers() {
+        roadObjectsOnRouteObservers.clear()
     }
 
     override fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver) {

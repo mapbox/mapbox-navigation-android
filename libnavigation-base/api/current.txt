@@ -523,46 +523,556 @@ package com.mapbox.navigation.base.trip.model {
 
 }
 
+package com.mapbox.navigation.base.trip.model.eh {
+
+  public final class EHorizon {
+    method public com.mapbox.navigation.base.trip.model.eh.EHorizonEdge current(com.mapbox.navigation.base.trip.model.eh.EHorizonPosition position);
+    method public com.mapbox.navigation.base.trip.model.eh.EHorizonEdge getStart();
+    method public java.util.List<java.util.List<com.mapbox.navigation.base.trip.model.eh.EHorizonEdge>> mpp();
+    method public java.util.List<java.util.List<com.mapbox.navigation.base.trip.model.eh.EHorizonEdge>> mpp(com.mapbox.navigation.base.trip.model.eh.EHorizonPosition position);
+    property public final com.mapbox.navigation.base.trip.model.eh.EHorizonEdge start;
+  }
+
+  public final class EHorizonEdge {
+    method public long getId();
+    method public byte getLevel();
+    method public java.util.List<com.mapbox.navigation.base.trip.model.eh.EHorizonEdge> getOut();
+    method public double getProbability();
+    method public boolean isMpp();
+    property public final long id;
+    property public final byte level;
+    property public final java.util.List<com.mapbox.navigation.base.trip.model.eh.EHorizonEdge> out;
+    property public final double probability;
+  }
+
+  public final class EHorizonEdgeMetadata {
+    method public boolean getBridge();
+    method public String? getCountryCodeIso2();
+    method public String? getCountryCodeIso3();
+    method public byte getCurvature();
+    method public String getFunctionRoadClass();
+    method public double getHeading();
+    method public Byte? getLaneCount();
+    method public double getLength();
+    method public Double? getMeanElevation();
+    method public boolean getMotorway();
+    method public java.util.List<com.mapbox.navigation.base.trip.model.eh.RoadName> getNames();
+    method public boolean getRamp();
+    method public double getSpeed();
+    method public Double? getSpeedLimit();
+    method public String? getStateCode();
+    method public boolean getToll();
+    method public boolean getTunnel();
+    method public boolean isOneWay();
+    method public boolean isRightHandTraffic();
+    property public final boolean bridge;
+    property public final String? countryCodeIso2;
+    property public final String? countryCodeIso3;
+    property public final byte curvature;
+    property public final String functionRoadClass;
+    property public final double heading;
+    property public final boolean isOneWay;
+    property public final boolean isRightHandTraffic;
+    property public final Byte? laneCount;
+    property public final double length;
+    property public final Double? meanElevation;
+    property public final boolean motorway;
+    property public final java.util.List<com.mapbox.navigation.base.trip.model.eh.RoadName> names;
+    property public final boolean ramp;
+    property public final double speed;
+    property public final Double? speedLimit;
+    property public final String? stateCode;
+    property public final boolean toll;
+    property public final boolean tunnel;
+  }
+
+  public final class EHorizonGraphPath {
+    method public java.util.List<java.lang.Long> getEdges();
+    method public double getLength();
+    method public double getPercentAlongBegin();
+    method public double getPercentAlongEnd();
+    property public final java.util.List<java.lang.Long> edges;
+    property public final double length;
+    property public final double percentAlongBegin;
+    property public final double percentAlongEnd;
+  }
+
+  public final class EHorizonGraphPosition {
+    method public long getEdgeId();
+    method public double getPercentAlong();
+    property public final long edgeId;
+    property public final double percentAlong;
+  }
+
+  public final class EHorizonMapperKt {
+  }
+
+  public final class EHorizonPosition {
+    method public com.mapbox.navigation.base.trip.model.eh.EHorizon getEHorizon();
+    method public com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPosition getEHorizonGraphPosition();
+    method public String getEHorizonResultType();
+    property public final com.mapbox.navigation.base.trip.model.eh.EHorizon eHorizon;
+    property public final com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPosition eHorizonGraphPosition;
+    property public final String eHorizonResultType;
+  }
+
+  public final class EHorizonResultType {
+    field public static final String INITIAL = "INITIAL";
+    field public static final com.mapbox.navigation.base.trip.model.eh.EHorizonResultType INSTANCE;
+    field public static final String UPDATE = "UPDATE";
+  }
+
+  @StringDef({com.mapbox.navigation.base.trip.model.eh.EHorizonResultType.INITIAL, com.mapbox.navigation.base.trip.model.eh.EHorizonResultType.UPDATE}) @kotlin.annotation.Retention public static @interface EHorizonResultType.Type {
+  }
+
+  public final class OpenLRStandard {
+    field public static final com.mapbox.navigation.base.trip.model.eh.OpenLRStandard INSTANCE;
+    field public static final String TOM_TOM = "TOM_TOM";
+    field public static final String TPEG = "TPEG";
+  }
+
+  @StringDef({com.mapbox.navigation.base.trip.model.eh.OpenLRStandard.TOM_TOM, com.mapbox.navigation.base.trip.model.eh.OpenLRStandard.TPEG}) @kotlin.annotation.Retention public static @interface OpenLRStandard.Type {
+  }
+
+  public final class RoadClass {
+    field public static final com.mapbox.navigation.base.trip.model.eh.RoadClass INSTANCE;
+    field public static final String MOTORWAY = "MOTORWAY";
+    field public static final String PRIMARY = "PRIMARY";
+    field public static final String RESIDENTIAL = "RESIDENTIAL";
+    field public static final String SECONDARY = "SECONDARY";
+    field public static final String SERVICE_OTHER = "SERVICE_OTHER";
+    field public static final String TERTIARY = "TERTIARY";
+    field public static final String TRUNK = "TRUNK";
+    field public static final String UNCLASSIFIED = "UNCLASSIFIED";
+  }
+
+  @StringDef({com.mapbox.navigation.base.trip.model.eh.RoadClass.MOTORWAY, com.mapbox.navigation.base.trip.model.eh.RoadClass.TRUNK, com.mapbox.navigation.base.trip.model.eh.RoadClass.PRIMARY, com.mapbox.navigation.base.trip.model.eh.RoadClass.SECONDARY, com.mapbox.navigation.base.trip.model.eh.RoadClass.TERTIARY, com.mapbox.navigation.base.trip.model.eh.RoadClass.UNCLASSIFIED, com.mapbox.navigation.base.trip.model.eh.RoadClass.RESIDENTIAL, com.mapbox.navigation.base.trip.model.eh.RoadClass.SERVICE_OTHER}) @kotlin.annotation.Retention public static @interface RoadClass.Type {
+  }
+
+  public final class RoadName {
+    method public String getName();
+    method public boolean getShielded();
+    property public final String name;
+    property public final boolean shielded;
+  }
+
+}
+
 package com.mapbox.navigation.base.trip.model.roadobject {
 
   public abstract class RoadObject {
-    ctor public RoadObject(int objectType, Double? distanceFromStartOfRoute, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry);
-    method public final Double? getDistanceFromStartOfRoute();
-    method public final com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry getObjectGeometry();
+    method public final String getId();
+    method public final Double? getLength();
+    method public final com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation getLocation();
     method public final int getObjectType();
-    property public final Double? distanceFromStartOfRoute;
-    property public final com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry objectGeometry;
-    property public final int objectType;
-  }
-
-  public final class RoadObjectGeometry {
-    method public Integer? getEndGeometryIndex();
-    method public Double? getLength();
-    method public com.mapbox.geojson.Geometry getShape();
-    method public Integer? getStartGeometryIndex();
-    method public com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry.Builder toBuilder();
-    property public final Integer? endGeometryIndex;
+    method public final String getProvider();
+    property public final String id;
     property public final Double? length;
-    property public final com.mapbox.geojson.Geometry shape;
-    property public final Integer? startGeometryIndex;
+    property public final com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation location;
+    property public final int objectType;
+    property public final String provider;
   }
 
-  public static final class RoadObjectGeometry.Builder {
-    ctor public RoadObjectGeometry.Builder(Double? length, com.mapbox.geojson.Geometry shape, Integer? startGeometryIndex, Integer? endGeometryIndex);
-    method public com.mapbox.navigation.base.trip.model.roadobject.RoadObjectGeometry build();
+  public final class RoadObjectEdgeLocation {
+    method public double getPercentAlongBegin();
+    method public double getPercentAlongEnd();
+    property public final double percentAlongBegin;
+    property public final double percentAlongEnd;
+  }
+
+  public final class RoadObjectEnterExitInfo {
+    method public boolean getEnterFromStartOrExitFromEnd();
+    method public String getRoadObjectId();
+    method public int getType();
+    property public final boolean enterFromStartOrExitFromEnd;
+    property public final String roadObjectId;
+    property public final int type;
+  }
+
+  public final class RoadObjectMapperKt {
+  }
+
+  public final class RoadObjectMatcherError {
+    method public String getError();
+    method public String getRoadObjectId();
+    property public final String error;
+    property public final String roadObjectId;
+  }
+
+  public final class RoadObjectPassInfo {
+    method public String getRoadObjectId();
+    method public int getType();
+    property public final String roadObjectId;
+    property public final int type;
+  }
+
+  public final class RoadObjectPosition {
+    method public com.mapbox.geojson.Point getCoordinate();
+    method public com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPosition getEHorizonGraphPosition();
+    property public final com.mapbox.geojson.Point coordinate;
+    property public final com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPosition eHorizonGraphPosition;
+  }
+
+  public final class RoadObjectProvider {
+    field public static final String CUSTOM = "CUSTOM";
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider INSTANCE;
+    field public static final String MAPBOX = "MAPBOX";
+  }
+
+  @StringDef({com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider.MAPBOX, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider.CUSTOM}) @kotlin.annotation.Retention public static @interface RoadObjectProvider.Type {
+  }
+
+  public final class RoadObjectType {
+    field public static final int BRIDGE = 5; // 0x5
+    field public static final int COUNTRY_BORDER_CROSSING = 1; // 0x1
+    field public static final int CUSTOM = 7; // 0x7
+    field public static final int INCIDENT = 6; // 0x6
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType INSTANCE;
+    field public static final int RESTRICTED_AREA = 4; // 0x4
+    field public static final int REST_STOP = 3; // 0x3
+    field public static final int TOLL_COLLECTION = 2; // 0x2
+    field public static final int TUNNEL = 0; // 0x0
+  }
+
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TUNNEL, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.COUNTRY_BORDER_CROSSING, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TOLL_COLLECTION, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.REST_STOP, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RESTRICTED_AREA, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.BRIDGE, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.INCIDENT, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.CUSTOM}) @kotlin.annotation.Retention public static @interface RoadObjectType.Type {
   }
 
   public final class UpcomingRoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo? getDistanceInfo();
     method public double getDistanceToStart();
     method public com.mapbox.navigation.base.trip.model.roadobject.RoadObject getRoadObject();
-    method public com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject.Builder toBuilder();
+    property public final com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo? distanceInfo;
     property public final double distanceToStart;
     property public final com.mapbox.navigation.base.trip.model.roadobject.RoadObject roadObject;
   }
 
-  public static final class UpcomingRoadObject.Builder {
-    ctor public UpcomingRoadObject.Builder(com.mapbox.navigation.base.trip.model.roadobject.RoadObject roadObject, double distanceRemaining);
-    method public com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject build();
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.border {
+
+  public final class CountryBorderCrossing extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingInfo getCountryBorderCrossingInfo();
+    property public final com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingInfo countryBorderCrossingInfo;
+  }
+
+  public final class CountryBorderCrossingAdminInfo {
+    method public String getCode();
+    method public String getCodeAlpha3();
+    property public final String code;
+    property public final String codeAlpha3;
+  }
+
+  public final class CountryBorderCrossingInfo {
+    method public com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo getFrom();
+    method public com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo getTo();
+    property public final com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo from;
+    property public final com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo to;
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.bridge {
+
+  public final class Bridge extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.custom {
+
+  public final class Custom extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.distanceinfo {
+
+  public final class GantryDistanceInfo extends com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo {
+    method public double getDistanceToStart();
+    property public double distanceToStart;
+  }
+
+  public final class LineDistanceInfo extends com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo {
+    method public double getDistanceToEnd();
+    method public double getDistanceToEntry();
+    method public double getDistanceToExit();
+    method public double getDistanceToStart();
+    method public boolean getEntryFromStart();
+    method public double getLength();
+    property public final double distanceToEnd;
+    property public final double distanceToEntry;
+    property public final double distanceToExit;
+    property public double distanceToStart;
+    property public final boolean entryFromStart;
+    property public final double length;
+  }
+
+  public final class PointDistanceInfo extends com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo {
+    method public double getDistanceToStart();
+    property public double distanceToStart;
+  }
+
+  public final class PolygonDistanceInfo extends com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo {
+    method public double getDistanceToNearestEntry();
+    method public double getDistanceToNearestExit();
+    method public double getDistanceToStart();
+    method public boolean getInside();
+    property public final double distanceToNearestEntry;
+    property public final double distanceToNearestExit;
+    property public double distanceToStart;
+    property public final boolean inside;
+  }
+
+  public abstract class RoadObjectDistanceInfo {
+    method public final int getDistanceInfoType();
+    method public abstract double getDistanceToStart();
+    method public final String getRoadObjectId();
+    method public final int getRoadObjectType();
+    property public final int distanceInfoType;
+    property public abstract double distanceToStart;
+    property public final String roadObjectId;
+    property public final int roadObjectType;
+  }
+
+  public final class RoadObjectDistanceInfoType {
+    field public static final int GANTRY = 0; // 0x0
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType INSTANCE;
+    field public static final int LINE = 1; // 0x1
+    field public static final int POINT = 2; // 0x2
+    field public static final int POLYGON = 3; // 0x3
+    field public static final int SUB_GRAPH = 4; // 0x4
+  }
+
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType.GANTRY, com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType.LINE, com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType.POINT, com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType.POLYGON, com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType.SUB_GRAPH}) @kotlin.annotation.Retention public static @interface RoadObjectDistanceInfoType.Type {
+  }
+
+  public final class SubGraphDistanceInfo extends com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo {
+    method public double getDistanceToNearestEntry();
+    method public double getDistanceToNearestExit();
+    method public double getDistanceToStart();
+    method public boolean getInside();
+    property public final double distanceToNearestEntry;
+    property public final double distanceToNearestExit;
+    property public double distanceToStart;
+    property public final boolean inside;
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.incident {
+
+  public final class Incident extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo getInfo();
+    property public final com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentInfo info;
+  }
+
+  public final class IncidentCongestion {
+    method public Integer? getValue();
+    property public final Integer? value;
+  }
+
+  public final class IncidentImpact {
+    field public static final String CRITICAL = "critical";
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact INSTANCE;
+    field public static final String LOW = "low";
+    field public static final String MAJOR = "major";
+    field public static final String MINOR = "minor";
+    field public static final String UNKNOWN = "unknown";
+  }
+
+  @StringDef({com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact.UNKNOWN, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact.CRITICAL, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact.MAJOR, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact.MINOR, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentImpact.LOW}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface IncidentImpact.Impact {
+  }
+
+  public final class IncidentInfo {
+    method public java.util.List<java.lang.Integer>? getAlertcCodes();
+    method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongestion? getCongestion();
+    method public java.util.Date? getCreationTime();
+    method public String? getDescription();
+    method public java.util.Date? getEndTime();
+    method public String getId();
+    method public String getImpact();
+    method public java.util.Date? getStartTime();
+    method public String? getSubType();
+    method public String? getSubTypeDescription();
+    method public int getType();
+    method public boolean isClosed();
+    property public final java.util.List<java.lang.Integer>? alertcCodes;
+    property public final com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongestion? congestion;
+    property public final java.util.Date? creationTime;
+    property public final String? description;
+    property public final java.util.Date? endTime;
+    property public final String id;
+    property public final String impact;
+    property public final boolean isClosed;
+    property public final java.util.Date? startTime;
+    property public final String? subType;
+    property public final String? subTypeDescription;
+    property public final int type;
+  }
+
+  public final class IncidentType {
+    field public static final int ACCIDENT = 41; // 0x29
+    field public static final int CONGESTION = 42; // 0x2a
+    field public static final int CONSTRUCTION = 43; // 0x2b
+    field public static final int DISABLED_VEHICLE = 44; // 0x2c
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType INSTANCE;
+    field public static final int LANE_RESTRICTION = 45; // 0x2d
+    field public static final int MASS_TRANSIT = 46; // 0x2e
+    field public static final int MISCELLANEOUS = 47; // 0x2f
+    field public static final int OTHER_NEWS = 48; // 0x30
+    field public static final int PLANNED_EVENT = 49; // 0x31
+    field public static final int ROAD_CLOSURE = 50; // 0x32
+    field public static final int ROAD_HAZARD = 51; // 0x33
+    field public static final int UNKNOWN = 40; // 0x28
+    field public static final int WEATHER = 52; // 0x34
+  }
+
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.UNKNOWN, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.ACCIDENT, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.CONGESTION, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.CONSTRUCTION, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.DISABLED_VEHICLE, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.LANE_RESTRICTION, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.MASS_TRANSIT, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.MISCELLANEOUS, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.OTHER_NEWS, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.PLANNED_EVENT, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.ROAD_CLOSURE, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.ROAD_HAZARD, com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentType.WEATHER}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface IncidentType.Type {
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.location {
+
+  public final class GantryLocation extends com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation {
+    method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition> getPositions();
+    property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition> positions;
+  }
+
+  public final class OpenLRLineLocation extends com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation {
+    method public com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPath getGraphPath();
+    property public final com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPath graphPath;
+  }
+
+  public final class OpenLROrientation {
+    field public static final int AGAINST_LINE_DIRECTION = 2; // 0x2
+    field public static final int BOTH = 3; // 0x3
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.location.OpenLROrientation INSTANCE;
+    field public static final int NO_ORIENTATION_OR_UNKNOWN = 0; // 0x0
+    field public static final int WITH_LINE_DIRECTION = 1; // 0x1
+  }
+
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.location.OpenLROrientation.NO_ORIENTATION_OR_UNKNOWN, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLROrientation.WITH_LINE_DIRECTION, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLROrientation.AGAINST_LINE_DIRECTION, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLROrientation.BOTH}) @kotlin.annotation.Retention public static @interface OpenLROrientation.Type {
+  }
+
+  public final class OpenLRPointLocation extends com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation {
+    method public int getOpenLROrientation();
+    method public int getOpenLRSideOfRoad();
+    method public com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPosition getPosition();
+    property public final int openLROrientation;
+    property public final int openLRSideOfRoad;
+    property public final com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPosition position;
+  }
+
+  public final class OpenLRSideOfRoad {
+    field public static final int BOTH = 3; // 0x3
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.location.OpenLRSideOfRoad INSTANCE;
+    field public static final int LEFT = 2; // 0x2
+    field public static final int ON_ROAD_OR_UNKNOWN = 0; // 0x0
+    field public static final int RIGHT = 1; // 0x1
+  }
+
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.location.OpenLRSideOfRoad.ON_ROAD_OR_UNKNOWN, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLRSideOfRoad.RIGHT, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLRSideOfRoad.LEFT, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLRSideOfRoad.BOTH}) @kotlin.annotation.Retention public static @interface OpenLRSideOfRoad.Type {
+  }
+
+  public final class PointLocation extends com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation {
+    method public com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition getPosition();
+    property public final com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition position;
+  }
+
+  public final class PolygonLocation extends com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation {
+    method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition> getEntries();
+    method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition> getExits();
+    property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition> entries;
+    property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition> exits;
+  }
+
+  public final class PolylineLocation extends com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation {
+    method public com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPath getPath();
+    property public final com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPath path;
+  }
+
+  public abstract class RoadObjectLocation {
+    method public final int getLocationType();
+    method public final com.mapbox.geojson.Geometry getShape();
+    property public final int locationType;
+    property public final com.mapbox.geojson.Geometry shape;
+  }
+
+  public final class RoadObjectLocationType {
+    field public static final int GANTRY = 0; // 0x0
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType INSTANCE;
+    field public static final int OPEN_LR_LINE = 1; // 0x1
+    field public static final int OPEN_LR_POINT = 2; // 0x2
+    field public static final int POINT = 3; // 0x3
+    field public static final int POLYGON = 4; // 0x4
+    field public static final int POLYLINE = 5; // 0x5
+    field public static final int ROUTE_ALERT = 6; // 0x6
+  }
+
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.GANTRY, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.OPEN_LR_LINE, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.OPEN_LR_POINT, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.POINT, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.POLYGON, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.POLYLINE, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.ROUTE_ALERT}) @kotlin.annotation.Retention public static @interface RoadObjectLocationType.Type {
+  }
+
+  public final class RouteAlertLocation extends com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation {
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.restrictedarea {
+
+  public final class RestrictedArea extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.reststop {
+
+  public final class RestStop extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public int getRestStopType();
+    property public final int restStopType;
+  }
+
+  public final class RestStopType {
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStopType INSTANCE;
+    field public static final int REST_AREA = 1; // 0x1
+    field public static final int SERVICE_AREA = 2; // 0x2
+    field public static final int UNKNOWN = -1; // 0xffffffff
+  }
+
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStopType.UNKNOWN, com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStopType.REST_AREA, com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStopType.SERVICE_AREA}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface RestStopType.Type {
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.tollcollection {
+
+  public final class TollCollection extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public int getTollCollectionType();
+    property public final int tollCollectionType;
+  }
+
+  public final class TollCollectionType {
+    field public static final com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollectionType INSTANCE;
+    field public static final int TOLL_BOOTH = 1; // 0x1
+    field public static final int TOLL_GANTRY = 2; // 0x2
+    field public static final int UNKNOWN = -1; // 0xffffffff
+  }
+
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollectionType.UNKNOWN, com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollectionType.TOLL_BOOTH, com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollectionType.TOLL_GANTRY}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface TollCollectionType.Type {
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.roadobject.tunnel {
+
+  public final class Tunnel extends com.mapbox.navigation.base.trip.model.roadobject.RoadObject {
+    method public com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo getInfo();
+    property public final com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo info;
+  }
+
+  public final class TunnelInfo {
+    method public String? getName();
+    property public final String? name;
   }
 
 }

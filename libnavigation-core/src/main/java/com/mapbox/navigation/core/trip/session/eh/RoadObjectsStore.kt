@@ -1,0 +1,102 @@
+package com.mapbox.navigation.core.trip.session.eh
+
+import com.mapbox.navigation.base.internal.factory.EHorizonInstanceFactory
+import com.mapbox.navigation.base.internal.factory.RoadObjectInstanceFactory
+import com.mapbox.navigation.base.trip.model.roadobject.RoadObject
+import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectEdgeLocation
+import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
+import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo
+import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+
+/**
+ * [MapboxNavigation.roadObjectsStore] provides methods to get road objects metadata, add and remove
+ * custom road objects.
+ */
+class RoadObjectsStore internal constructor(
+    private val navigator: MapboxNativeNavigator,
+) {
+
+    /**
+     * Returns mapping `road object id -> RoadObjectEdgeLocation` for all road objects
+     * which are lying on the edge with given id.
+     * @param edgeId
+     */
+    fun getRoadObjectsOnTheEdge(edgeId: Long): Map<String, RoadObjectEdgeLocation> {
+        val roadObjects = mutableMapOf<String, RoadObjectEdgeLocation>()
+        navigator.roadObjectsStore?.get(edgeId)?.forEach { (objectId, objectEdgeLocation) ->
+            roadObjects[objectId] =
+                EHorizonInstanceFactory.buildRoadObjectEdgeLocation(objectEdgeLocation)
+        }
+
+        return roadObjects
+    }
+
+    /**
+     * Returns roadObject, if such object cannot be found returns null.
+     * @param roadObjectId
+     */
+    fun getRoadObject(roadObjectId: String): RoadObject? {
+        return navigator.roadObjectsStore?.getRoadObject(roadObjectId)?.let {
+            RoadObjectInstanceFactory.buildRoadObject(it)
+        }
+    }
+
+    /**
+     * Returns list of road object ids which are (partially) belong to `edgeIds`.
+     * @param edgeIds list of edge ids
+     *
+     * @return list of road object ids
+     */
+    fun getRoadObjectIdsByEdgeIds(edgeIds: List<Long>): List<String> {
+        return navigator.roadObjectsStore?.getRoadObjectIdsByEdgeIds(edgeIds) ?: emptyList()
+    }
+
+    /**
+     * Adds road object to be tracked in electronic horizon. In case if object with such id already
+     * exists updates it.
+     * @param roadObject object to add
+     */
+    fun addCustomRoadObject(roadObject: RoadObject) {
+        val nativeRoadObject = RoadObjectInstanceFactory.buildNativeRoadObject(roadObject)
+        navigator.roadObjectsStore?.addCustomRoadObject(nativeRoadObject)
+    }
+
+    /**
+     * Removes road object (i.e. stops tracking it in electronic horizon)
+     * @param roadObjectId of road object
+     */
+    fun removeCustomRoadObject(roadObjectId: String) {
+        navigator.roadObjectsStore?.removeCustomRoadObject(roadObjectId)
+    }
+
+    /**
+     * Removes all road object (i.e. stops tracking them in electronic horizon)
+     */
+    fun removeAllCustomRoadObjects() {
+        navigator.roadObjectsStore?.removeAllCustomRoadObjects()
+    }
+
+    /**
+     * Returns a list of [UpcomingRoadObject]
+     * @param distances a map of [String] roadObjectIds and [RoadObjectDistanceInfo]
+     */
+    fun getUpcomingRoadObjects(
+        distances: List<RoadObjectDistanceInfo>
+    ): List<UpcomingRoadObject> {
+        val upcomingObjects = mutableListOf<UpcomingRoadObject>()
+        distances.forEach {
+            getRoadObject(it.roadObjectId)?.let { roadObject ->
+                upcomingObjects.add(
+                    RoadObjectInstanceFactory.buildUpcomingRoadObject(
+                        roadObject,
+                        it.distanceToStart,
+                        it
+                    )
+                )
+            }
+        }
+
+        return upcomingObjects
+    }
+}

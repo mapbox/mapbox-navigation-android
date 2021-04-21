@@ -1,0 +1,137 @@
+package com.mapbox.navigation.core.trip.session.eh
+
+import com.mapbox.navigation.base.internal.factory.EHorizonInstanceFactory
+import com.mapbox.navigation.base.trip.model.eh.EHorizonPosition
+import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigator.ElectronicHorizonObserver
+import com.mapbox.navigator.ElectronicHorizonPosition
+import kotlinx.coroutines.launch
+import java.util.concurrent.CopyOnWriteArraySet
+
+internal class EHorizonSubscriptionManagerImpl(
+    private val navigator: MapboxNativeNavigator
+) : EHorizonSubscriptionManager {
+
+    private val mainJobController = ThreadController.getMainScopeAndRootJob()
+    private val eHorizonObservers = CopyOnWriteArraySet<EHorizonObserver>()
+    private var currentPosition: EHorizonPosition? = null
+    private var currentDistances: List<RoadObjectDistanceInfo>? = null
+
+    private val electronicHorizonObserver = object : ElectronicHorizonObserver() {
+        override fun onRoadObjectEnter(
+            roadObjectInfo: com.mapbox.navigator.RoadObjectEnterExitInfo
+        ) {
+            notifyAllObservers {
+                onRoadObjectEnter(
+                    EHorizonInstanceFactory.buildRoadObjectEnterExitInfo(roadObjectInfo)
+                )
+            }
+        }
+
+        override fun onRoadObjectExit(
+            roadObjectInfo: com.mapbox.navigator.RoadObjectEnterExitInfo
+        ) {
+            notifyAllObservers {
+                onRoadObjectExit(
+                    EHorizonInstanceFactory.buildRoadObjectEnterExitInfo(roadObjectInfo)
+                )
+            }
+        }
+
+        override fun onPositionUpdated(
+            position: ElectronicHorizonPosition,
+            distances: MutableList<com.mapbox.navigator.RoadObjectDistance>
+        ) {
+            mainJobController.scope.launch {
+                val eHorizonPosition = EHorizonInstanceFactory.buildEHorizonPosition(position)
+                val eHorizonDistances = mutableListOf<RoadObjectDistanceInfo>()
+                distances.forEach {
+                    eHorizonDistances.add(EHorizonInstanceFactory.buildRoadObjectDistance(it))
+                }
+
+                currentPosition = eHorizonPosition
+                currentDistances = eHorizonDistances
+
+                notifyAllObservers {
+                    onPositionUpdated(eHorizonPosition, eHorizonDistances)
+                }
+            }
+        }
+
+        override fun onRoadObjectPassed(info: com.mapbox.navigator.RoadObjectPassInfo) {
+            notifyAllObservers {
+                onRoadObjectPassed(
+                    EHorizonInstanceFactory.buildRoadObjectPassInfo(info)
+                )
+            }
+        }
+    }
+
+    private val roadObjectsStoreObserver =
+        object : com.mapbox.navigator.RoadObjectsStoreObserver() {
+            override fun onRoadObjectAdded(roadObjectId: String) {
+                notifyAllObservers { onRoadObjectAdded(roadObjectId) }
+            }
+
+            override fun onRoadObjectUpdated(roadObjectId: String) {
+                notifyAllObservers { onRoadObjectUpdated(roadObjectId) }
+            }
+
+            override fun onRoadObjectRemoved(roadObjectId: String) {
+                notifyAllObservers { onRoadObjectRemoved(roadObjectId) }
+            }
+        }
+
+    private fun notifyAllObservers(action: suspend EHorizonObserver.() -> Unit) {
+        mainJobController.scope.launch {
+            eHorizonObservers.forEach {
+                it.action()
+            }
+        }
+    }
+
+    override fun registerObserver(observer: EHorizonObserver) {
+        if (eHorizonObservers.isEmpty()) {
+            setNavigatorObservers()
+        }
+        eHorizonObservers.add(observer)
+        ifNonNull(currentPosition, currentDistances) { position, distances ->
+            observer.onPositionUpdated(position, distances)
+        }
+    }
+
+    override fun unregisterObserver(observer: EHorizonObserver) {
+        eHorizonObservers.remove(observer)
+        if (eHorizonObservers.isEmpty()) {
+            removeNavigatorObservers()
+        }
+    }
+
+    override fun unregisterAllObservers() {
+        eHorizonObservers.clear()
+        removeNavigatorObservers()
+    }
+
+    override fun reset() {
+        // TODO do we need to cache more field? EHorizonObjects?
+        currentDistances = null
+        currentPosition = null
+    }
+
+    private fun setNavigatorObservers() {
+        navigator.run {
+            setElectronicHorizonObserver(electronicHorizonObserver)
+            setRoadObjectsStoreObserver(roadObjectsStoreObserver)
+        }
+    }
+
+    private fun removeNavigatorObservers() {
+        navigator.run {
+            setElectronicHorizonObserver(null)
+            setRoadObjectsStoreObserver(null)
+        }
+    }
+}

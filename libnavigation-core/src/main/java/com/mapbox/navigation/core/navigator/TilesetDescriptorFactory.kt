@@ -16,7 +16,7 @@ class TilesetDescriptorFactory internal constructor(
 ) {
 
     /**
-     * Creates TilesetDescriptor using the specified dataset and version.
+     * Creates TilesetDescriptor using the specified dataset, profile and version.
      *
      * @param tilesDataset string built out of `<account>[.<graph>]` variables.
      * Account can be `mapbox` for default datasets or your username for other.
@@ -39,45 +39,17 @@ class TilesetDescriptorFactory internal constructor(
         )
 
     /**
-     * Creates TilesetDescriptor using the specified dataset and latest locally available version.
-     *
-     * @param tilesDataset string built out of `<account>[.<graph>]` variables.
-     * Account can be `mapbox` for default datasets or your username for other.
-     * Graph can be left blank if you don't target any custom datasets.
-     * If null [RoutingTilesOptions.tilesDataset] will be used.
-     * @param tilesProfile profile of the dataset.
-     * If null [RoutingTilesOptions.tilesProfile] will be used.
+     * Gets TilesetDescriptor which corresponds to the currently used routing tiles dataset
+     * and the specified `tilesVersion`.
+     * @param tilesVersion TilesetDescriptor version
      */
-    @JvmOverloads
-    fun buildLatestLocal(
-        tilesDataset: String? = null,
-        tilesProfile: String? = null
-    ): TilesetDescriptor =
-        nativeFactoryWrapper.buildLatestLocal(
-            cache,
-            combineDatasetWithProfile(tilesDataset, tilesProfile)
-        )
+    fun getSpecificVersion(tilesVersion: String): TilesetDescriptor =
+        nativeFactoryWrapper.getSpecificVersion(cache, tilesVersion)
 
     /**
-     * Creates TilesetDescriptor using the specified dataset and latest version retrieved from
-     * the server.
-     *
-     * @param tilesDataset string built out of `<account>[.<graph>]` variables.
-     * Account can be `mapbox` for default datasets or your username for other.
-     * Graph can be left blank if you don't target any custom datasets.
-     * If null [RoutingTilesOptions.tilesDataset] will be used.
-     * @param tilesProfile profile of the dataset.
-     * If null [RoutingTilesOptions.tilesProfile] will be used.
+     * Gets TilesetDescriptor which corresponds to the latest available version of routing tiles.
      */
-    @JvmOverloads
-    fun buildLatestServer(
-        tilesDataset: String? = null,
-        tilesProfile: String? = null
-    ): TilesetDescriptor =
-        nativeFactoryWrapper.buildLatestServer(
-            cache,
-            combineDatasetWithProfile(tilesDataset, tilesProfile)
-        )
+    fun getLatest(): TilesetDescriptor = nativeFactoryWrapper.getLatest(cache)
 
     private fun combineDatasetWithProfile(tilesDataset: String?, tilesProfile: String?): String {
         val dataset: String = tilesDataset ?: routingTilesOptions.tilesDataset
@@ -92,31 +64,28 @@ class TilesetDescriptorFactory internal constructor(
 
     // need the wrapper to avoid UnsatisfiedLinkError in unit tests
     internal interface NativeFactoryWrapper {
+        fun getSpecificVersion(cache: CacheHandle, tilesVersion: String): TilesetDescriptor
+        fun getLatest(cache: CacheHandle): TilesetDescriptor
         fun build(tilesDatasetAndProfile: String, tilesVersion: String): TilesetDescriptor
-        fun buildLatestLocal(cache: CacheHandle, tilesDatasetAndProfile: String): TilesetDescriptor
-        fun buildLatestServer(cache: CacheHandle, tilesDatasetAndProfile: String): TilesetDescriptor
     }
 
     internal class NativeFactoryWrapperImpl : NativeFactoryWrapper {
+        override fun getSpecificVersion(
+            cache: CacheHandle,
+            tilesVersion: String
+        ): TilesetDescriptor {
+            return NativeTilesetDescriptorFactory.getSpecificVersion(cache, tilesVersion)
+        }
+
+        override fun getLatest(cache: CacheHandle): TilesetDescriptor {
+            return NativeTilesetDescriptorFactory.getLatest(cache)
+        }
+
         override fun build(
             tilesDatasetAndProfile: String,
             tilesVersion: String
         ): TilesetDescriptor {
             return NativeTilesetDescriptorFactory.build(tilesDatasetAndProfile, tilesVersion)
-        }
-
-        override fun buildLatestLocal(
-            cache: CacheHandle,
-            tilesDatasetAndProfile: String
-        ): TilesetDescriptor {
-            return NativeTilesetDescriptorFactory.buildLatestLocal(cache, tilesDatasetAndProfile)
-        }
-
-        override fun buildLatestServer(
-            cache: CacheHandle,
-            tilesDatasetAndProfile: String
-        ): TilesetDescriptor {
-            return NativeTilesetDescriptorFactory.buildLatestServer(cache, tilesDatasetAndProfile)
         }
     }
 }

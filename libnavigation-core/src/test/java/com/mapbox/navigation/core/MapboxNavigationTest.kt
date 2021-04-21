@@ -34,7 +34,7 @@ import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
-import com.mapbox.navigation.core.trip.session.RoadObjectsObserver
+import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -342,7 +342,7 @@ class MapboxNavigationTest {
     fun onDestroy_unregisters_TripSession_routeAlerts_observers() {
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { tripSession.unregisterAllRoadObjectsObservers() }
+        verify(exactly = 1) { tripSession.unregisterAllRoadObjectsOnRouteObservers() }
     }
 
     @Test
@@ -563,20 +563,20 @@ class MapboxNavigationTest {
 
     @Test
     fun `road objects observer is registered in the trip session`() {
-        val observer: RoadObjectsObserver = mockk()
+        val observer: RoadObjectsOnRouteObserver = mockk()
 
-        mapboxNavigation.registerRoadObjectsObserver(observer)
+        mapboxNavigation.registerRoadObjectsOnRouteObserver(observer)
 
-        verify(exactly = 1) { tripSession.registerRoadObjectsObserver(observer) }
+        verify(exactly = 1) { tripSession.registerRoadObjectsOnRouteObserver(observer) }
     }
 
     @Test
     fun `road objects observer is unregistered in the trip session`() {
-        val observer: RoadObjectsObserver = mockk()
+        val observer: RoadObjectsOnRouteObserver = mockk()
 
-        mapboxNavigation.unregisterRoadObjectsObserver(observer)
+        mapboxNavigation.unregisterRoadObjectsOnRouteObserver(observer)
 
-        verify(exactly = 1) { tripSession.unregisterRoadObjectsObserver(observer) }
+        verify(exactly = 1) { tripSession.unregisterRoadObjectsOnRouteObserver(observer) }
     }
 
     @Test
