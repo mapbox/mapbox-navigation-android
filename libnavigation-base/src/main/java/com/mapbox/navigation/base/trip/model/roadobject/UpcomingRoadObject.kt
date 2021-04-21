@@ -1,25 +1,34 @@
 package com.mapbox.navigation.base.trip.model.roadobject
 
+import com.mapbox.navigation.base.trip.model.eh.EHorizon
+import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo
+import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType
+
 /**
- * Holds the road objects and the distance to the point where the alert occurs,
- * or start an alert if it has length.
+ * Holds the road objects and the distance to the start of the object.
+ * There are two sources of road objects: active route and the electronic horizon.
+ * Road objects coming from the electronic horizon will also have [RoadObjectDistanceInfo]
+ * Available [RoadObjectDistanceInfo] types are:
+ * - [RoadObjectDistanceInfoType.GANTRY]
+ * - [RoadObjectDistanceInfoType.LINE]
+ * - [RoadObjectDistanceInfoType.POINT]
+ * - [RoadObjectDistanceInfoType.POLYGON]
+ * - [RoadObjectDistanceInfoType.SUB_GRAPH]
  *
  * @param roadObject road object
- * @param distanceToStart distance to the start of the alert.
- * If the object has a length, and we've passed the start point,
- * **this value will be negative** until we cross the finish point of the objects's geometry.
- * This negative value, together with [RoadObjectGeometry.length]
- * can be used to calculate the distance since the start of an object.
+ * @param distanceToStart remaining distance to the start of the object.
+ * This value will be negative after passing the start of the object and until we cross the finish
+ * point of the [RoadObject]s geometryfor objects that are on the actively navigated route,
+ * but it will be zero for [EHorizon] objects.
+ * @param distanceInfo provides extra distance details for the road objects. It will be non-null
+ * for objects coming from the electronic horizon and null for objects that are on the current route
+ * that we are actively navigating on.
  */
-class UpcomingRoadObject private constructor(
+class UpcomingRoadObject internal constructor(
     val roadObject: RoadObject,
-    val distanceToStart: Double
+    val distanceToStart: Double,
+    val distanceInfo: RoadObjectDistanceInfo?,
 ) {
-
-    /**
-     * Transform this object into a builder to mutate the values.
-     */
-    fun toBuilder() = Builder(roadObject, distanceToStart)
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -32,6 +41,7 @@ class UpcomingRoadObject private constructor(
 
         if (roadObject != other.roadObject) return false
         if (distanceToStart != other.distanceToStart) return false
+        if (distanceInfo != other.distanceInfo) return false
 
         return true
     }
@@ -42,6 +52,7 @@ class UpcomingRoadObject private constructor(
     override fun hashCode(): Int {
         var result = roadObject.hashCode()
         result = 31 * result + distanceToStart.hashCode()
+        result = 31 * result + (distanceInfo?.hashCode() ?: 0)
         return result
     }
 
@@ -49,22 +60,10 @@ class UpcomingRoadObject private constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "UpcomingRoadObject(roadObject=$roadObject, distanceRemaining=$distanceToStart)"
-    }
-
-    /**
-     * Use to create a new instance.
-     *
-     * @see UpcomingRoadObject
-     */
-    class Builder(
-        private val roadObject: RoadObject,
-        private val distanceRemaining: Double
-    ) {
-
-        /**
-         * Build the object instance.
-         */
-        fun build() = UpcomingRoadObject(roadObject, distanceRemaining)
+        return "UpcomingRoadObject(" +
+            "roadObject=$roadObject, " +
+            "distanceToStart=$distanceToStart, " +
+            "distanceInfo=$distanceInfo" +
+            ")"
     }
 }

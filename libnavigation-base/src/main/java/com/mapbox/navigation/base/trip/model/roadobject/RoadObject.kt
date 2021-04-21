@@ -1,38 +1,50 @@
 package com.mapbox.navigation.base.trip.model.roadobject
 
+import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation
+import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType
+
 /**
  * Abstract class that serves as a base for all road objects.
+ * There are two sources of road objects: active route and the electronic horizon.
+ * Objects coming from different sources might be duplicated and they will not have the same IDs.
  *
- * Available road object types are:
- * - [TunnelEntrance]
- * - [TunnelExit]
- * - [CountryBorderCrossing]
- * - [TollCollection]
- * - [RestStop]
- * - [RestrictedAreaEntrance]
- * - [RestrictedAreaExit]
- * - [BridgeEntrance]
- * - [BridgeExit]
- * - [Incident]
- * - [Custom]
- *
+ * @param id id of the road object. If we get the same objects (e.g. [RoadObjectType.TUNNEL]) from
+ * the electronic horizon and the active route, they will not have the same IDs.
  * @param objectType constant describing the object type, see [RoadObjectType].
- * @param distanceFromStartOfRoute distance to this object since the start of the route.
- * Will be null for road objects returned by Electronic Horizon.
- * @param objectGeometry geometry details of the object.
+ * Available road object types are:
+ * - [RoadObjectType.TUNNEL]
+ * - [RoadObjectType.COUNTRY_BORDER_CROSSING]
+ * - [RoadObjectType.TOLL_COLLECTION]
+ * - [RoadObjectType.REST_STOP]
+ * - [RoadObjectType.RESTRICTED_AREA]
+ * - [RoadObjectType.BRIDGE]
+ * - [RoadObjectType.INCIDENT]
+ * - [RoadObjectType.CUSTOM]
+ *
+ * @param length length of the object, null if the object is point-like.
+ * @param location location of the road object.
+ * Road objects coming from the electronic horizon might have the next [RoadObjectLocationType]:
+ * - [RoadObjectLocationType.GANTRY]
+ * - [RoadObjectLocationType.OPEN_LR_LINE]
+ * - [RoadObjectLocationType.OPEN_LR_POINT]
+ * - [RoadObjectLocationType.POINT]
+ * - [RoadObjectLocationType.POLYGON]
+ * - [RoadObjectLocationType.POLYLINE]
+ * - [RoadObjectLocationType.POLYLINE]
+ *
+ * Road objects coming from the active route will have only [RoadObjectLocationType]:
+ * - [RoadObjectLocationType.ROUTE_ALERT]
+ *
+ * @param provider provider of the road object
  */
-abstract class RoadObject(
+abstract class RoadObject internal constructor(
+    val id: String,
     val objectType: Int,
-    distanceFromStartOfRoute: Double?,
-    val objectGeometry: RoadObjectGeometry,
+    val length: Double?,
+    val location: RoadObjectLocation,
+    val provider: String,
+    internal val nativeRoadObject: com.mapbox.navigator.RoadObject
 ) {
-    /**
-     * Distance to this object since the start of the route.
-     * Will be null for road objects returned by Electronic Horizon.
-     */
-    val distanceFromStartOfRoute: Double? = distanceFromStartOfRoute?.let {
-        if (it >= 0) it else null
-    }
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -43,9 +55,12 @@ abstract class RoadObject(
 
         other as RoadObject
 
+        if (id != other.id) return false
         if (objectType != other.objectType) return false
-        if (distanceFromStartOfRoute != other.distanceFromStartOfRoute) return false
-        if (objectGeometry != other.objectGeometry) return false
+        if (length != other.length) return false
+        if (location != other.location) return false
+        if (provider != other.provider) return false
+        if (nativeRoadObject != other.nativeRoadObject) return false
 
         return true
     }
@@ -54,9 +69,12 @@ abstract class RoadObject(
      * Returns a hash code value for the object.
      */
     override fun hashCode(): Int {
-        var result = objectType.hashCode()
-        result = 31 * result + distanceFromStartOfRoute.hashCode()
-        result = 31 * result + (objectGeometry.hashCode())
+        var result = id.hashCode()
+        result = 31 * result + objectType
+        result = 31 * result + (length?.hashCode() ?: 0)
+        result = 31 * result + location.hashCode()
+        result = 31 * result + provider.hashCode()
+        result = 31 * result + nativeRoadObject.hashCode()
         return result
     }
 
@@ -65,9 +83,11 @@ abstract class RoadObject(
      */
     override fun toString(): String {
         return "RoadObject(" +
-            "type=$objectType, " +
-            "distanceFromStartOfRoute=$distanceFromStartOfRoute, " +
-            "objectGeometry=$objectGeometry" +
+            "id='$id', " +
+            "objectType=$objectType, " +
+            "length=$length, " +
+            "location=$location, " +
+            "provider='$provider'" +
             ")"
     }
 }

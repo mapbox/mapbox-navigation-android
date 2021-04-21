@@ -1,29 +1,25 @@
 package com.mapbox.navigation.core.trip.session
 
-import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectDistanceInfo
-import com.mapbox.navigation.core.trip.model.eh.EHorizonObjectEnterExitInfo
-import com.mapbox.navigation.core.trip.model.eh.EHorizonPosition
-import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonObjectDistanceInfo
-import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonObjectEnterExitInfo
-import com.mapbox.navigation.core.trip.model.eh.mapToEHorizonPosition
+import com.mapbox.navigation.base.internal.factory.EHorizonInstanceFactory
+import com.mapbox.navigation.base.trip.model.eh.EHorizonPosition
+import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
+import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
+import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManagerImpl
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.ElectronicHorizonPosition
-import com.mapbox.navigator.RoadObjectDistanceInfo
+import com.mapbox.navigator.RoadObjectDistance
 import com.mapbox.navigator.RoadObjectEnterExitInfo
 import com.mapbox.navigator.RoadObjectsStoreObserver
 import io.mockk.CapturingSlot
 import io.mockk.Runs
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
 import io.mockk.unmockkObject
-import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
@@ -31,7 +27,12 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.util.HashMap
+
+private typealias SDKRoadObjectDistanceInfo =
+    com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo
+
+private typealias SDKRoadObjectEnterExitInfo =
+    com.mapbox.navigation.base.trip.model.roadobject.RoadObjectEnterExitInfo
 
 @ExperimentalCoroutinesApi
 class EHorizonSubscriptionManagerTest {
@@ -39,33 +40,37 @@ class EHorizonSubscriptionManagerTest {
     var coroutineRule = MainCoroutineRule()
     private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     private val roadObjectEnterExitInfo: RoadObjectEnterExitInfo = mockk(relaxed = true)
-    private val eHorizonObjectEnterExitInfo: EHorizonObjectEnterExitInfo = mockk(relaxed = true)
+    private val eHorizonObjectEnterExitInfo: SDKRoadObjectEnterExitInfo = mockk(relaxed = true)
     private val electronicHorizonPosition: ElectronicHorizonPosition = mockk(relaxed = true)
     private val eHorizonPosition: EHorizonPosition = mockk(relaxed = true)
-    private val roadObjectDistanceInfo: RoadObjectDistanceInfo = mockk(relaxed = true)
-    private val eHorizonObjectDistanceInfo: EHorizonObjectDistanceInfo = mockk(relaxed = true)
+    private val roadObjectDistance: RoadObjectDistance = mockk(relaxed = true)
+    private val eHorizonObjectDistance: SDKRoadObjectDistanceInfo = mockk(relaxed = true)
     private val subscriptionManager: EHorizonSubscriptionManager =
-        EHorizonSubscriptionManagerImpl(navigator)
+        EHorizonSubscriptionManagerImpl(
+            navigator
+        )
 
     @Before
     fun setUp() {
         mockkObject(ThreadController)
         every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
-        mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
-        mockkStatic("com.mapbox.navigation.core.trip.model.eh.EHorizonMapper")
-        coEvery { roadObjectEnterExitInfo.mapToEHorizonObjectEnterExitInfo() } coAnswers
-            { eHorizonObjectEnterExitInfo }
-        coEvery { electronicHorizonPosition.mapToEHorizonPosition() } coAnswers
-            { eHorizonPosition }
-        coEvery { roadObjectDistanceInfo.mapToEHorizonObjectDistanceInfo() } coAnswers
-            { eHorizonObjectDistanceInfo }
+
+        mockkObject(EHorizonInstanceFactory)
+        every {
+            EHorizonInstanceFactory.buildRoadObjectDistance(any())
+        } returns eHorizonObjectDistance
+        every {
+            EHorizonInstanceFactory.buildEHorizonPosition(any())
+        } coAnswers { eHorizonPosition }
+        every {
+            EHorizonInstanceFactory.buildRoadObjectEnterExitInfo(any())
+        } coAnswers { eHorizonObjectEnterExitInfo }
     }
 
     @After
     fun cleanUp() {
         unmockkObject(ThreadController)
-        unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
-        unmockkStatic("com.mapbox.navigation.core.trip.model.eh.EHorizonMapper")
+        unmockkObject(EHorizonInstanceFactory)
         subscriptionManager.unregisterAllObservers()
     }
 
@@ -163,16 +168,16 @@ class EHorizonSubscriptionManagerTest {
         subscriptionManager.registerObserver(secondObserver)
         subscriptionManager.registerObserver(thirdObserver)
 
-        val map = HashMap<String, RoadObjectDistanceInfo>()
-        map[POSITION_DISTANCE] = roadObjectDistanceInfo
-        val expectedMap = HashMap<String, EHorizonObjectDistanceInfo>()
-        expectedMap[POSITION_DISTANCE] = eHorizonObjectDistanceInfo
+        val list = mutableListOf<RoadObjectDistance>()
+        list.add(roadObjectDistance)
+        val expectedList = mutableListOf<SDKRoadObjectDistanceInfo>()
+        expectedList.add(eHorizonObjectDistance)
 
-        eHorizonObserverSlot.captured.onPositionUpdated(electronicHorizonPosition, map)
+        eHorizonObserverSlot.captured.onPositionUpdated(electronicHorizonPosition, list)
 
-        verify(exactly = 1) { firstObserver.onPositionUpdated(eHorizonPosition, expectedMap) }
-        verify(exactly = 1) { secondObserver.onPositionUpdated(eHorizonPosition, expectedMap) }
-        verify(exactly = 1) { thirdObserver.onPositionUpdated(eHorizonPosition, expectedMap) }
+        verify(exactly = 1) { firstObserver.onPositionUpdated(eHorizonPosition, expectedList) }
+        verify(exactly = 1) { secondObserver.onPositionUpdated(eHorizonPosition, expectedList) }
+        verify(exactly = 1) { thirdObserver.onPositionUpdated(eHorizonPosition, expectedList) }
     }
 
     @Test
@@ -224,7 +229,6 @@ class EHorizonSubscriptionManagerTest {
     }
 
     private companion object {
-        private const val POSITION_DISTANCE = "position_distance"
         private const val ROAD_OBJECT_ID = "road_object_id"
     }
 }

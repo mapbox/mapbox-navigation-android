@@ -10,9 +10,9 @@ import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
-import com.mapbox.navigator.OpenLRDecoder
 import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
+import com.mapbox.navigator.RoadObjectMatcher
 import com.mapbox.navigator.Router
 import com.mapbox.navigator.RunLoopExecutorFactory
 import com.mapbox.navigator.SettingsProfile
@@ -46,15 +46,15 @@ internal object NavigatorLoader {
         )
         val nativeRouter = Router(cache, historyRecorder)
         val graphAccessor = GraphAccessor(cache)
-        val openLRDecoder = OpenLRDecoder(cache)
+        val roadObjectMatcher = RoadObjectMatcher(cache)
 
         return NativeComponents(
             navigator,
             nativeRouter,
             historyRecorder,
             graphAccessor,
-            openLRDecoder,
-            cache
+            cache,
+            roadObjectMatcher
         )
     }
 
@@ -79,7 +79,7 @@ internal object NavigatorLoader {
         val nativeRouter: Router,
         val historyRecorderHandle: HistoryRecorderHandle,
         val graphAccessor: GraphAccessor,
-        val openLRDecoder: OpenLRDecoder,
-        val cache: CacheHandle
+        val cache: CacheHandle,
+        val roadObjectMatcher: RoadObjectMatcher,
     )
 }
