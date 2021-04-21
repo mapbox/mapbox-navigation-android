@@ -5,8 +5,6 @@
     <string name="description_navigation" translatable="false">Demonstrates basic turn by turn navigation.</string>
     <string name="title_route_line" translatable="false">Routeline and Route Arrow Example</string>
     <string name="description_route_line" translatable="false">Demonstrates the use of the route line API.</string>
-    <string name="title_route_line_internal" translatable="false">Routeline Tool (internal)</string>
-    <string name="description_route_line_internal" translatable="false">Internal route line development tool.</string>
     <string name="title_camera" translatable="false">Camera Example</string>
     <string name="description_camera" translatable="false">Demonstrates the use of camera animations API.</string>
     <string name="title_snapshotter" translatable="false">Snapshotter Example</string>
