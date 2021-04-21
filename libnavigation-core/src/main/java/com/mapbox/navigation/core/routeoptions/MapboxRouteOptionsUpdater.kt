@@ -10,7 +10,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import kotlin.math.min
 
 private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
-private const val TAG = "MapboxRouteOptionsProvider"
+private const val TAG = "MbxRouteOptionsProvider"
 
 /**
  * Default implementation of [RouteOptionsUpdater].

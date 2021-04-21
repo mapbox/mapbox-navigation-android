@@ -1,12 +1,13 @@
 package com.mapbox.navigation.instrumentation_tests.ui.routeline
 
 import android.content.Context
-import android.util.Log
 import androidx.annotation.IntegerRes
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.BasicNavigationViewActivity
 import com.mapbox.navigation.instrumentation_tests.utils.idling.MapStyleInitIdlingResource
@@ -20,6 +21,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -62,7 +64,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
         val consumerLongRoute =
             object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
                 override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
-                    Log.e("SetRouteCancellationTest", "long")
+                    LoggerProvider.logger.e(Tag("SetRouteCancellationTest"), Message("long"))
                     val primaryRoute = routeLineApi.getPrimaryRoute()
                     val contents = (value as Expected.Success).value
                         .trafficLineExpression.contents as ArrayList<*>
@@ -78,7 +80,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
         val consumerShortRoute =
             object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
                 override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
-                    Log.e("SetRouteCancellationTest", "short")
+                    LoggerProvider.logger.e(Tag("SetRouteCancellationTest"), Message("short"))
                     val primaryRoute = routeLineApi.getPrimaryRoute()
                     val contents = (value as Expected.Success).value
                         .trafficLineExpression.contents as ArrayList<*>

@@ -39,7 +39,6 @@ ext {
       mockkVersion              : '1.10.0',
       butterknife               : '10.1.0',
       leakCanaryVersion         : '2.3',
-      timber                    : '4.7.1',
       espressoVersion           : '3.1.0',
       commonsIO                 : '2.6',
       robolectric               : '4.3.1',
@@ -125,7 +124,6 @@ ext {
       lifecycleCompiler         : "androidx.lifecycle:lifecycle-compiler:${version.lifecycle}",
 
       // square crew
-      timber                    : "com.jakewharton.timber:timber:${version.timber}",
       leakCanaryDebug           : "com.squareup.leakcanary:leakcanary-android:${version.leakCanaryVersion}",
 
       // instrumentation test

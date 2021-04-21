@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.android.core.location.LocationEngineCallback
@@ -29,17 +30,18 @@ import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.qa_test_app.databinding.AlternativeRouteActivityLayoutBinding
+import com.mapbox.navigation.qa_test_app.utils.Utils.getMapboxAccessToken
+import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.updateToPrimaryRoute
-import com.mapbox.navigation.qa_test_app.utils.Utils.getMapboxAccessToken
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
@@ -49,9 +51,12 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
+
+    private companion object {
+        private const val TAG = "AlternativeRouteActivity"
+    }
 
     private val routeClickPadding = Utils.dpToPx(30f)
     private val navigationLocationProvider = NavigationLocationProvider()
@@ -140,7 +145,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val locationObserver: LocationObserver = object : LocationObserver {
         override fun onRawLocationChanged(rawLocation: Location) {
-            Timber.d("raw location %s", rawLocation.toString())
+            Log.d(TAG, "raw location $rawLocation")
         }
 
         override fun onEnhancedLocationChanged(
@@ -174,15 +179,15 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             Style.MAPBOX_STREETS
         ) {
             mapboxNavigation.navigationOptions.locationEngine.getLastLocation(object :
-                LocationEngineCallback<LocationEngineResult> {
-                override fun onSuccess(result: LocationEngineResult) {
-                    result.lastLocation?.let {
-                        locationObserver.onEnhancedLocationChanged(it, listOf())
+                    LocationEngineCallback<LocationEngineResult> {
+                    override fun onSuccess(result: LocationEngineResult) {
+                        result.lastLocation?.let {
+                            locationObserver.onEnhancedLocationChanged(it, listOf())
+                        }
                     }
-                }
 
-                override fun onFailure(exception: Exception) {}
-            })
+                    override fun onFailure(exception: Exception) {}
+                })
             binding.mapView.getGesturesPlugin().addOnMapLongClickListener(this)
         }
     }
@@ -212,7 +217,25 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             .coordinates(listOf(origin, destination))
             .alternatives(true)
             .build()
-        mapboxNavigation.requestRoutes(routeOptions)
+        mapboxNavigation.requestRoutes(
+            routeOptions,
+            object : RoutesRequestCallback {
+                override fun onRoutesReady(routes: List<DirectionsRoute>) {
+                    mapboxNavigation.setRoutes(routes)
+                }
+
+                override fun onRoutesRequestFailure(
+                    throwable: Throwable,
+                    routeOptions: RouteOptions
+                ) {
+                    // no impl
+                }
+
+                override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
+                    // no impl
+                }
+            }
+        )
     }
 
     @SuppressLint("MissingPermission")
@@ -250,7 +273,10 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             val routelines = routes.map { RouteLine(it, null) }
             CoroutineScope(Dispatchers.Main).launch {
                 routeLineApi.setRoutes(routelines).apply {
-                    routeLineView.renderRouteDrawData(binding.mapView.getMapboxMap().getStyle()!!, this)
+                    routeLineView.renderRouteDrawData(
+                        binding.mapView.getMapboxMap().getStyle()!!,
+                        this
+                    )
                 }
             }
         }

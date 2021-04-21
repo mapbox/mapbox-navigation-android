@@ -99,7 +99,7 @@ internal object MapboxNavigationTelemetry :
     OffRouteObserver,
     NavigationSessionStateObserver,
     ArrivalObserver {
-    internal val TAG = Tag("MAPBOX_TELEMETRY")
+    internal val TAG = Tag("MbxTelemetry")
 
     private const val ONE_SECOND = 1000
     private const val MOCK_PROVIDER = "com.mapbox.navigation.core.replay.ReplayLocationEngine"

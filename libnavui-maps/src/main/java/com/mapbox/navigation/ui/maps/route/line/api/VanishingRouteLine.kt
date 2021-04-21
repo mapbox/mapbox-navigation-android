@@ -1,7 +1,8 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
-import android.util.Log
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
@@ -14,6 +15,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineExpressions
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
@@ -110,13 +112,15 @@ internal class VanishingRouteLine {
         ) { granularDistances, index ->
             val upcomingIndex = granularDistances.distancesArray[index]
             if (upcomingIndex == null) {
-                Log.e(
-                    "MbxVanishingRouteLine",
-                    """
+                LoggerProvider.logger.e(
+                    Tag("MbxVanishingRouteLine"),
+                    Message(
+                        """
                        Upcoming route line index is null.
                        primaryRouteLineGranularDistances: $primaryRouteLineGranularDistances
                        primaryRouteRemainingDistancesIndex: $primaryRouteRemainingDistancesIndex
-                    """.trimIndent()
+                        """.trimIndent()
+                    )
                 )
                 return null
             }

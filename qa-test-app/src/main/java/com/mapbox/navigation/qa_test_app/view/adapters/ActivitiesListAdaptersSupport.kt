@@ -17,11 +17,13 @@ object ActivitiesListAdaptersSupport {
         holder.itemView.findViewById<TextView>(R.id.activityLabel)?.text = element.label
     }
 
-    val viewHolderFactory: (parent: ViewGroup, viewType:Int) -> ActivityViewHolder = { parent, _ ->
-        LayoutInflater.from(parent.context).inflate(R.layout.test_activity_item_layout, parent, false).run {
+    val viewHolderFactory: (parent: ViewGroup, viewType: Int) -> ActivityViewHolder = { parent, _ ->
+        LayoutInflater.from(parent.context).inflate(
+            R.layout.test_activity_item_layout, parent, false
+        ).run {
             ActivityViewHolder(this)
         }
     }
 
-    class ActivityViewHolder constructor(itemView: View): RecyclerView.ViewHolder(itemView)
+    class ActivityViewHolder constructor(itemView: View) : RecyclerView.ViewHolder(itemView)
 }

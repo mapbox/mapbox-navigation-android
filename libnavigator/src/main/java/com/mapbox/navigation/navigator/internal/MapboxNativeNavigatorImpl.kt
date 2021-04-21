@@ -56,7 +56,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private const val BUFFER_DILATION: Short = 1
     private const val PRIMARY_ROUTE_INDEX = 0
     private const val SINGLE_THREAD = 1
-    private const val TAG = "MapboxNativeNavigatorImpl"
+    private const val TAG = "MbxNativeNavigatorImpl"
 
     // TODO: What should be the default value? Should we expose it publicly?
     private const val MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS = 2

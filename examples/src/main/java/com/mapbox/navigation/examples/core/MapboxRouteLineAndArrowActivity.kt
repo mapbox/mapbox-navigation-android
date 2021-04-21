@@ -376,7 +376,6 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
                 viewBinding.mapView.getGesturesPlugin().addOnMapLongClickListener(this)
             },
             object : OnMapLoadErrorListener {
-                @SuppressLint("LogNotTimber")
                 override fun onMapLoadError(mapLoadError: MapLoadErrorType, message: String) {
                     Log.e(
                         MapboxRouteLineAndArrowActivity::class.java.simpleName,

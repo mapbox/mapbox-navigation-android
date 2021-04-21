@@ -2,6 +2,7 @@ package com.mapbox.navigation.examples.util
 
 import android.annotation.SuppressLint
 import android.graphics.Color
+import android.util.Log
 import android.widget.Toast
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.matching.v5.MapboxMapMatching
@@ -25,7 +26,6 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import timber.log.Timber
 
 /**
  * A utility for drawing a line on a map and using map matching to get a route.
@@ -61,6 +61,7 @@ class RouteDrawingUtil(private val mapView: MapView) {
     private val touchPoints = mutableListOf<Point>()
 
     companion object {
+        private const val TAG = "RouteDrawingUtil"
         const val LINE_LAYER_SOURCE_ID = "DRAW_UTIL_LINE_LAYER_SOURCE_ID"
         const val LINE_LAYER_ID = "DRAW_UTIL_LINE_LAYER_ID"
         const val LINE_END_LAYER_ID = "DRAW_UTIL_LINE_END_LAYER_ID"
@@ -129,7 +130,8 @@ class RouteDrawingUtil(private val mapView: MapView) {
         touchPoints.add(point)
         mapView.getMapboxMap().getStyle { style ->
             when (touchPoints.size) {
-                0 -> { }
+                0 -> {
+                }
                 1 -> {
                     style.getSourceAs<GeoJsonSource>(LINE_END_SOURCE_ID)?.feature(
                         Feature.fromGeometry(touchPoints.first())
@@ -200,7 +202,7 @@ class RouteDrawingUtil(private val mapView: MapView) {
         mapMatching.enqueueCall(
             object : Callback<MapMatchingResponse> {
                 override fun onFailure(call: Call<MapMatchingResponse>, t: Throwable) {
-                    Timber.e("MapMatching request failure %s", t.toString())
+                    Log.e(TAG, "MapMatching request failure $t")
                 }
 
                 override fun onResponse(
@@ -208,7 +210,8 @@ class RouteDrawingUtil(private val mapView: MapView) {
                     response: Response<MapMatchingResponse>
                 ) {
                     if (response.body()?.matchings()?.size ?: 0 == 0) {
-                        Timber.e(
+                        Log.e(
+                            TAG,
                             "Failed to get a route with " +
                                 "message ${response.code()} ${response.message()}"
                         )

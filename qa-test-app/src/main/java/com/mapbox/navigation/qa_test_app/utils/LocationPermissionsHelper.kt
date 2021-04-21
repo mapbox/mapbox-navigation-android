@@ -105,4 +105,3 @@ class LocationPermissionsHelper(private val listener: PermissionsListener?) {
         }
     }
 }
-

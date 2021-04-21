@@ -1,8 +1,9 @@
 package com.mapbox.navigation.ui.maps.camera.data
 
-import android.util.Log
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
@@ -13,6 +14,7 @@ import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMeasurement
@@ -20,6 +22,8 @@ import com.mapbox.turf.TurfMisc
 import kotlin.math.abs
 
 internal object ViewportDataSourceProcessor {
+
+    private const val TAG = "MbxViewportDataSource"
 
     /**
      * Returns complete route points in nested arrays of points for all steps in all legs arranged as \[legs]\[steps]\[points].
@@ -56,9 +60,9 @@ internal object ViewportDataSourceProcessor {
                 val stepsPoints = completeRoutePoints[legIndex]
 
                 if (legSteps.size != stepsPoints.size) {
-                    Log.e(
-                        "MbxViewportDataSource",
-                        "Unable to calculate geometry after maneuvers. Invalid route."
+                    LoggerProvider.logger.e(
+                        Tag(TAG),
+                        Message("Unable to calculate geometry after maneuvers. Invalid route.")
                     )
                     return emptyList()
                 }
@@ -138,9 +142,9 @@ internal object ViewportDataSourceProcessor {
         }
 
         if (simplificationFactor <= 0) {
-            Log.e(
-                "MbxViewportDataSource",
-                "overview simplification factor should be a positive integer"
+            LoggerProvider.logger.e(
+                Tag(TAG),
+                Message("overview simplification factor should be a positive integer")
             )
             return completeRoutePoints
         }
@@ -196,7 +200,7 @@ internal object ViewportDataSourceProcessor {
                 TurfConstants.UNIT_KILOMETERS
             ).coordinates()
         } catch (e: TurfException) {
-            Log.e("MbxViewportDataSource", e.message.toString())
+            LoggerProvider.logger.e(Tag(TAG), Message(e.message.toString()))
             emptyList()
         }
     }
@@ -286,12 +290,14 @@ internal object ViewportDataSourceProcessor {
                 top + bottom > mapSize.height ||
                 left + right > mapSize.width
             ) {
-                Log.e(
-                    "MbxViewportDataSource",
-                    """Provided following padding does fit the map size:
+                LoggerProvider.logger.e(
+                    Tag(TAG),
+                    Message(
+                        """Provided following padding does fit the map size:
                         |mapSize: $mapSize
                         |padding: $padding
                     """.trimMargin()
+                    )
                 )
                 return EdgeInsets(
                     mapSize.height / 2.0,

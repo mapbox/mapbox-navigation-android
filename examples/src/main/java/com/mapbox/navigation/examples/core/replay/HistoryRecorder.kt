@@ -1,12 +1,12 @@
 package com.mapbox.navigation.examples.core.replay
 
+import android.util.Log
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -58,7 +58,7 @@ class HistoryRecorder(
         val history = navigation.retrieveHistory()
         navigation.toggleHistory(false)
         if (history == "{}") {
-            Timber.e("Your history file is empty")
+            Log.e(TAG, "Your history file is empty")
         } else {
             val filename = createFilename(startedAt)
             writeFile(filename, history)
@@ -76,7 +76,7 @@ class HistoryRecorder(
                     gzip.write(history.toByteArray())
                 }
             }
-            Timber.i("History file saved to ${file.absolutePath}")
+            Log.i(TAG, "History file saved to ${file.absolutePath}")
         }
     }
 
@@ -86,5 +86,6 @@ class HistoryRecorder(
     companion object {
         val utcFormatter = SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.US)
             .also { it.timeZone = TimeZone.getTimeZone("UTC") }
+        private const val TAG = "HistoryRecorder"
     }
 }

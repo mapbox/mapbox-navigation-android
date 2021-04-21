@@ -39,6 +39,7 @@ import com.mapbox.navigation.core.trip.session.RoadObjectsObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.TilesConfig
@@ -133,12 +134,8 @@ class MapboxNavigationTest {
                 any()
             )
         } returns hybridRouter
-        every {
-            MapboxModuleProvider.createModule<Logger>(
-                MapboxModuleType.CommonLogger,
-                any()
-            )
-        } returns logger
+        mockkObject(LoggerProvider)
+        every { LoggerProvider.logger } returns logger
         every {
             MapboxModuleProvider.createModule<TripNotification>(
                 MapboxModuleType.NavigationTripNotification,
@@ -170,6 +167,7 @@ class MapboxNavigationTest {
     @After
     fun tearDown() {
         unmockkObject(MapboxModuleProvider)
+        unmockkObject(LoggerProvider)
         unmockkObject(NavigationComponentProvider)
 
         ThreadController.cancelAllNonUICoroutines()

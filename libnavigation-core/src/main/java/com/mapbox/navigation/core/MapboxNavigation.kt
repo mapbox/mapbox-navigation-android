@@ -68,6 +68,7 @@ import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.utils.internal.JobControl
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.NetworkStatusService
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -218,7 +219,7 @@ class MapboxNavigation(
 
     init {
         ThreadController.init()
-        logger = MapboxModuleProvider.createModule(MapboxModuleType.CommonLogger, ::paramsProvider)
+        logger = LoggerProvider.logger
         navigator = NavigationComponentProvider.createNativeNavigator(
             navigationOptions.deviceProfile,
             navigatorConfig,
