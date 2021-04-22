@@ -85,7 +85,7 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
     }
 
     /**
-     *The method will set the audio stream type
+     * The method will set the audio stream type
      * @param type Audio stream type. See [AudioManager] for a list of stream types.
      */
     fun stream(type: Int) {
