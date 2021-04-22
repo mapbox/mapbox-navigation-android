@@ -109,14 +109,14 @@ class TilesetDescriptorFactory internal constructor(
             cache: CacheHandle,
             tilesDatasetAndProfile: String
         ): TilesetDescriptor {
-            return NativeTilesetDescriptorFactory.buildLatestLocal(cache, tilesDatasetAndProfile)
+            return NativeTilesetDescriptorFactory.buildLatestLocal(cache)
         }
 
         override fun buildLatestServer(
             cache: CacheHandle,
             tilesDatasetAndProfile: String
         ): TilesetDescriptor {
-            return NativeTilesetDescriptorFactory.buildLatestServer(cache, tilesDatasetAndProfile)
+            return NativeTilesetDescriptorFactory.buildLatestServer(cache)
         }
     }
 }
