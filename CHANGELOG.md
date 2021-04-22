@@ -2,6 +2,34 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.7 - April 23, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Features
+* Expose TilesetDescriptorFactory [#4283](https://github.com/mapbox/mapbox-navigation-android/pull/4283)
+* Add building highlight on arrival [#4078](https://github.com/mapbox/mapbox-navigation-android/pull/4078)
+* Add EHorizon isOneWay property [#4295](https://github.com/mapbox/mapbox-navigation-android/pull/4295)
+#### Bug fixes and improvements
+* Bug fix for route line related concurrent modification of collection. [#4298](https://github.com/mapbox/mapbox-navigation-android/pull/4298)
+* Made route reference checks more robust in the `MapboxNavigationViewportDataSource` and improved logs to avoid situations where a route reference is mismatched and could produce incorrect frames or crash. [#4302](https://github.com/mapbox/mapbox-navigation-android/pull/4302)
+* Map `ResourceOptions` contains tile store instance (TileStore API). Tile store usage is enabled by default, `ResourceOptions.tileStoreEnabled` flag is introduced to disable it. This changed the integration with the `PredictiveCacheControler` which contains update integration docs. [#4310](https://github.com/mapbox/mapbox-navigation-android/pull/4310)
+* Removed Timber across SDK [#4300](https://github.com/mapbox/mapbox-navigation-android/pull/4300)
+* Fixed an issue with the `NavigationCamera` occasionally spinning around when a transition to a state (typically `overview`) finished. [#4293](https://github.com/mapbox/mapbox-navigation-android/pull/4293)
+* Fixed an issue with the `NavigationCamera` transitions occasionally finishing at an incorrect visual target. This could occur when a gesture interaction with the map preceded the transition. See [mapbox-maps-android/issues/277](https://github.com/mapbox/mapbox-maps-android/issues/277) for details and workarounds. [#4296](https://github.com/mapbox/mapbox-navigation-android/pull/4296)
+* Introduced `MapboxNavigationViewportDataSourceOptions.overviewFrameOptions.geometrySimplification` which by default simplifies the route geometry used for overview framing by a factor of 25 to improve performance of frame generation, especially for longer routes. [#4286](https://github.com/mapbox/mapbox-navigation-android/pull/4286)
+
+## Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+
+- Mapbox Maps SDK `v10.0.0-beta.18` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.18))
+- Mapbox Navigation Native `v48.0.4`
+- Mapbox Core Common `v11.0.2`
+- Mapbox Java `5.9.0-alpha.5` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v5.9.0-alpha.5))
+- Mapbox Android Core `v3.1.1`
+- Mapbox Android Telemetry `v6.2.2`
+
 ## Mapbox Navigation SDK 2.0.0-beta.6 - April 16, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
