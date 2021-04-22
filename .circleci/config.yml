@@ -299,6 +299,18 @@ commands:
           name: Download native libraries for crashlytics
           command: ./gradlew downloadUnstrippedNativeLibsDir
 
+  upload-native-libs-to-crashlytics:
+    steps:
+      - run:
+          name: Generate crashlytics symbol file felease
+          command: ./gradlew examples:generateCrashlyticsSymbolFileRelease -d | grep "com.google.firebase.crashlytics"
+      - run:
+          name: Upload crashlytics mapping file felease
+          command: ./gradlew examples:uploadCrashlyticsMappingFileRelease -d | grep "com.google.firebase.crashlytics"
+      - run:
+          name: Upload crashlytics symbol file release
+          command: ./gradlew examples:uploadCrashlyticsSymbolFileRelease -d | grep "com.google.firebase.crashlytics"
+
   run-internal-firebase-instrumentation:
     parameters:
       module_wrapper:
@@ -464,6 +476,7 @@ jobs:
           variant: "Release"
           inject_token: true
       - login-google-cloud-platform
+      - upload-native-libs-to-crashlytics
       - run-firebase-robo:
           module_target: "examples"
           variant: "release"
