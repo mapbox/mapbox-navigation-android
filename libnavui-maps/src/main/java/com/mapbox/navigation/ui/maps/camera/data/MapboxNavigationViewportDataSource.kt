@@ -14,7 +14,7 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.internal.utils.isSameUuid
+import com.mapbox.navigation.core.internal.utils.isSameRoute
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getMapAnchoredPaddingFromUserPadding
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPitchFallbackFromRouteProgress
@@ -199,6 +199,7 @@ class MapboxNavigationViewportDataSource(
 ) : ViewportDataSource {
 
     internal companion object {
+        private const val TAG = "MbxViewportDataSource"
         internal val NULL_ISLAND_POINT = Point.fromLngLat(0.0, 0.0)
         internal val EMPTY_EDGE_INSETS = EdgeInsets(0.0, 0.0, 0.0, 0.0)
         internal const val ZERO_PITCH = 0.0
@@ -389,6 +390,7 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun onRouteChanged(route: DirectionsRoute) {
+        clearRouteData()
         this.route = route
         completeRoutePoints = processRoutePoints(route)
         simplifiedCompleteRoutePoints = simplifyCompleteRoutePoints(
@@ -397,8 +399,6 @@ class MapboxNavigationViewportDataSource(
             completeRoutePoints
         )
         simplifiedRemainingPointsOnRoute = simplifiedCompleteRoutePoints.flatten().flatten()
-        pointsToFrameOnCurrentStep = emptyList()
-        pointsToFrameAfterCurrentStep = emptyList()
 
         options.followingFrameOptions.intersectionDensityCalculation.run {
             averageIntersectionDistancesOnRoute = processRouteIntersections(
@@ -434,16 +434,27 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun onRouteProgressChanged(routeProgress: RouteProgress) {
-        // todo abort if there's no route cached or differs from the one in rp
-        if (this.route == null) {
-            return
-        }
-
-        if (this.route?.isSameUuid(routeProgress.route) != true) {
+        val currentRoute = this.route
+        if (currentRoute == null) {
             LoggerProvider.logger.w(
-                Tag("MbxViewportDataSource"),
-                Message("Provided route and navigated route do not have the same UUID.")
+                Tag(TAG),
+                Message(
+                    "You're calling #onRouteProgressChanged but you didn't call #onRouteChanged."
+                )
             )
+            clearProgressData()
+            return
+        } else if (!currentRoute.isSameRoute(routeProgress.route)) {
+            LoggerProvider.logger.e(
+                Tag(TAG),
+                Message(
+                    "Provided route (#onRouteChanged) and navigated route " +
+                        "(#onRouteProgressChanged) are not the same. " +
+                        "Aborting framed geometry updates based on route progress."
+                )
+            )
+            clearProgressData()
+            return
         }
 
         ifNonNull(
@@ -485,10 +496,13 @@ class MapboxNavigationViewportDataSource(
                 currentStepProgress
             )
         } ?: run {
-            followingPitchProperty.fallback = options.followingFrameOptions.defaultPitch
-            pointsToFrameOnCurrentStep = emptyList()
-            pointsToFrameAfterCurrentStep = emptyList()
-            simplifiedRemainingPointsOnRoute = emptyList()
+            LoggerProvider.logger.e(
+                Tag(TAG),
+                Message(
+                    "You're calling #onRouteProgressChanged with empty leg or step progress."
+                )
+            )
+            clearProgressData()
         }
     }
 
@@ -515,12 +529,16 @@ class MapboxNavigationViewportDataSource(
         route = null
         completeRoutePoints = emptyList()
         postManeuverFramingPoints = emptyList()
+        simplifiedCompleteRoutePoints = emptyList()
+        averageIntersectionDistancesOnRoute = emptyList()
+        clearProgressData()
+    }
+
+    private fun clearProgressData() {
+        followingPitchProperty.fallback = options.followingFrameOptions.defaultPitch
         pointsToFrameOnCurrentStep = emptyList()
         pointsToFrameAfterCurrentStep = emptyList()
-        simplifiedCompleteRoutePoints = emptyList()
-        simplifiedRemainingPointsOnRoute = emptyList()
-        averageIntersectionDistancesOnRoute = emptyList()
-        followingPitchProperty.fallback = options.followingFrameOptions.defaultPitch
+        simplifiedRemainingPointsOnRoute = simplifiedCompleteRoutePoints.flatten().flatten()
     }
 
     /**

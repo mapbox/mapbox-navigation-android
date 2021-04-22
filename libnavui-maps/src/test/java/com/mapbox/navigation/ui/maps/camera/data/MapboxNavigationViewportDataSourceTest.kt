@@ -12,6 +12,7 @@ import com.mapbox.maps.Size
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
+import com.mapbox.navigation.core.internal.utils.isSameRoute
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.BEARING_NORTH
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.EMPTY_EDGE_INSETS
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.NULL_ISLAND_POINT
@@ -30,7 +31,9 @@ import com.mapbox.navigation.utils.internal.toPoint
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.unmockkObject
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -196,6 +199,9 @@ class MapboxNavigationViewportDataSourceTest {
         every { route.routeOptions() } returns mockk {
             every { requestUuid() } returns "mock_uuid"
         }
+
+        mockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
+        every { route.isSameRoute(any()) } returns true
     }
 
     @Test
@@ -950,6 +956,153 @@ class MapboxNavigationViewportDataSourceTest {
     }
 
     @Test
+    fun `verify frame - location + route + progress + reset route`() {
+        every {
+            getPitchFallbackFromRouteProgress(
+                viewportDataSource.options.followingFrameOptions.pitchNearManeuvers.enabled,
+                viewportDataSource.options.followingFrameOptions.pitchNearManeuvers
+                    .triggerDistanceFromManeuver,
+                viewportDataSource.options.followingFrameOptions.defaultPitch,
+                any()
+            )
+        } returns ZERO_PITCH
+
+        val stepProgress = mockk<RouteStepProgress> {
+            every { distanceRemaining } returns 123f
+        }
+        val legProgress = mockk<RouteLegProgress> {
+            every { currentStepProgress } returns stepProgress
+        }
+        every { routeProgress.currentLegProgress } returns legProgress
+        every { routeProgress.route } returns route
+
+        val location = createLocation()
+
+        // following mocks
+        val followingCameraOptions = createCameraOptions {
+            center(location.toPoint())
+            bearing(smoothedBearing)
+            pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
+            zoom(viewportDataSource.options.followingFrameOptions.minZoom)
+            padding(maxPitchEdgeInsets)
+        }
+
+        // overview mocks
+        val overviewCenter = Point.fromLngLat(5.0, 6.0)
+        val overviewZoom = 10.0
+        val overviewCameraOptions = createCameraOptions {
+            center(overviewCenter)
+            bearing(BEARING_NORTH)
+            pitch(ZERO_PITCH)
+            zoom(overviewZoom)
+        }
+        val expectedOverviewFramingPoints = mutableListOf(location.toPoint()).apply {
+            addAll(completeRoutePointsFlat)
+        }
+        every {
+            mapboxMap.cameraForCoordinates(
+                expectedOverviewFramingPoints,
+                EMPTY_EDGE_INSETS,
+                BEARING_NORTH,
+                ZERO_PITCH
+            )
+        } returns overviewCameraOptions
+
+        // run
+        viewportDataSource.onLocationChanged(location)
+        viewportDataSource.onRouteChanged(route)
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+        viewportDataSource.onRouteChanged(route)
+        viewportDataSource.evaluate()
+        val data = viewportDataSource.getViewportData()
+
+        // verify
+        assertEquals(
+            followingCameraOptions,
+            data.cameraForFollowing
+        )
+        assertEquals(
+            overviewCameraOptions,
+            data.cameraForOverview
+        )
+    }
+
+    @Test
+    fun `verify frame - location + route + progress + reset route and forget to update`() {
+        every {
+            getPitchFallbackFromRouteProgress(
+                viewportDataSource.options.followingFrameOptions.pitchNearManeuvers.enabled,
+                viewportDataSource.options.followingFrameOptions.pitchNearManeuvers
+                    .triggerDistanceFromManeuver,
+                viewportDataSource.options.followingFrameOptions.defaultPitch,
+                any()
+            )
+        } returns ZERO_PITCH
+
+        val stepProgress = mockk<RouteStepProgress> {
+            every { distanceRemaining } returns 123f
+        }
+        val legProgress = mockk<RouteLegProgress> {
+            every { currentStepProgress } returns stepProgress
+        }
+        every { routeProgress.currentLegProgress } returns legProgress
+        every { routeProgress.route } returns route
+
+        val location = createLocation()
+
+        // following mocks
+        val followingCameraOptions = createCameraOptions {
+            center(location.toPoint())
+            bearing(smoothedBearing)
+            pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
+            zoom(viewportDataSource.options.followingFrameOptions.minZoom)
+            padding(maxPitchEdgeInsets)
+        }
+
+        // overview mocks
+        val overviewCenter = Point.fromLngLat(5.0, 6.0)
+        val overviewZoom = 10.0
+        val overviewCameraOptions = createCameraOptions {
+            center(overviewCenter)
+            bearing(BEARING_NORTH)
+            pitch(ZERO_PITCH)
+            zoom(overviewZoom)
+        }
+        val expectedOverviewFramingPoints = mutableListOf(location.toPoint()).apply {
+            addAll(completeRoutePointsFlat)
+        }
+        every {
+            mapboxMap.cameraForCoordinates(
+                expectedOverviewFramingPoints,
+                EMPTY_EDGE_INSETS,
+                BEARING_NORTH,
+                ZERO_PITCH
+            )
+        } returns overviewCameraOptions
+
+        // run
+        viewportDataSource.onLocationChanged(location)
+        viewportDataSource.onRouteChanged(route)
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+
+        every { route.isSameRoute(any()) } returns false
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+
+        viewportDataSource.evaluate()
+        val data = viewportDataSource.getViewportData()
+
+        // verify
+        assertEquals(
+            followingCameraOptions,
+            data.cameraForFollowing
+        )
+        assertEquals(
+            overviewCameraOptions,
+            data.cameraForOverview
+        )
+    }
+
+    @Test
     fun `verify frame - overrides`() {
         val location = createLocation()
         val expectedPoints = listOf(location.toPoint())
@@ -1014,6 +1167,7 @@ class MapboxNavigationViewportDataSourceTest {
     @After
     fun tearDown() {
         unmockkObject(ViewportDataSourceProcessor)
+        unmockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
     }
 
     private fun createLocation(
