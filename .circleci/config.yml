@@ -43,6 +43,10 @@ workflows:
   default:
     jobs:
       - prepare-and-assemble
+      - changelog-verification:
+          filters:
+            branches:
+              ignore: /^(main|release-.*)/
       - static-analysis:
           requires:
             - prepare-and-assemble
@@ -58,12 +62,6 @@ workflows:
       - instrumentation-tests:
           requires:
             - prepare-and-assemble
-      - changelog-verification:
-          requires:
-            - static-analysis
-          filters:
-            branches:
-              ignore: /^(main|release-.*)/
 #      - mobile-metrics-dry-run:
 #          type: approval
 #      - mobile-metrics-benchmarks:
@@ -126,12 +124,11 @@ commands:
       - run:
           name: Verify that a changelog entry is present in the PR description
           command: |
+            curl -Ls https://mapbox-release-engineering.s3.amazonaws.com/mbx-ci/latest/mbx-ci-linux-amd64 > mbx-ci
+            chmod 755 ./mbx-ci
+            MBX_CI_GITHUB_TOKEN=$(./mbx-ci github reader token)
             if [[ -n "$CIRCLE_PULL_REQUEST" ]]; then
-              if [[ -n "$GITHUB_ACCESS_TOKEN" ]]; then
-                python3 scripts/validate-changelog.py ${CIRCLE_PULL_REQUEST##*/} ${GITHUB_ACCESS_TOKEN}
-              else
-                echo "Missing access token, skipping changelog validation."
-              fi
+              python3 scripts/validate-changelog.py ${CIRCLE_PULL_REQUEST##*/} ${MBX_CI_GITHUB_TOKEN}
             else
               echo "Not a PR, skipping changelog validation."
             fi
@@ -449,7 +446,7 @@ jobs:
   changelog-verification:
     executor: ndk-r21-latest-executor
     steps:
-      - read-workspace
+      - checkout
       - verify-changelog
 
   ui-robo-tests:
