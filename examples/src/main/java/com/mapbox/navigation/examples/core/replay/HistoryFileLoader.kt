@@ -1,6 +1,7 @@
 package com.mapbox.navigation.examples.core.replay
 
 import android.content.Context
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.gson.stream.JsonReader
 import com.mapbox.navigation.core.replay.history.ReplayEventStream
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +21,7 @@ class HistoryFileLoader {
         val fileName = "replay-history-activity.json"
         val inputStream: InputStream = context.assets.open(fileName)
         val jsonReader = JsonReader(InputStreamReader(inputStream))
+        FirebaseCrashlytics.getInstance().log("loadHistoryJsonFromAssets")
         return ReplayEventStream(jsonReader)
     }
 }

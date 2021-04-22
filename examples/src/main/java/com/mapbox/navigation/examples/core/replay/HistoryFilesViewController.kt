@@ -1,8 +1,9 @@
 package com.mapbox.navigation.examples.core.replay
 
 import android.content.Context
-import android.util.Log
 import android.content.res.AssetManager.ACCESS_STREAMING
+import android.util.Log
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
 import com.mapbox.navigation.core.replay.history.ReplayEventStream
@@ -36,6 +37,7 @@ class HistoryFilesViewController {
     ) {
         this.viewAdapter = viewAdapter
         viewAdapter.itemClicked = { historyFileItem ->
+            FirebaseCrashlytics.getInstance().log("selected historyFileItem $historyFileItem")
             when (historyFileItem.dataSource) {
                 ReplayDataSource.ASSETS_DIRECTORY -> requestFromAssets(
                     context.applicationContext,
@@ -119,6 +121,7 @@ class HistoryFilesViewController {
             val gzipInputStream = GZIPInputStream(inputStream)
             JsonReader(InputStreamReader(gzipInputStream))
         } catch (e: IOException) {
+            FirebaseCrashlytics.getInstance().recordException(e)
             Log.e(TAG, "Your history file failed to open ${historyFileItem.path}: $e")
             throw e
         }
