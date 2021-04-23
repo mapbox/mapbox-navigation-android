@@ -15,11 +15,11 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
-import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
+import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
-import com.mapbox.maps.plugin.gestures.getGesturesPlugin
+import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
-import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
+import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
@@ -257,7 +257,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxMap.loadStyleUri(
             MAPBOX_STREETS
         ) {
-            binding.mapView.getGesturesPlugin().addOnMapLongClickListener(this)
+            binding.mapView.gestures.addOnMapLongClickListener(this)
         }
     }
 
@@ -266,7 +266,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private fun getMapCamera(): CameraAnimationsPlugin {
-        return binding.mapView.getCameraAnimationsPlugin()
+        return binding.mapView.camera
     }
 
     private fun startSimulation(route: DirectionsRoute) {
@@ -325,7 +325,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         binding = LayoutActivityManeuverBinding.inflate(layoutInflater)
         setContentView(binding.root)
         mapboxMap = binding.mapView.getMapboxMap()
-        locationComponent = binding.mapView.getLocationComponentPlugin().apply {
+        locationComponent = binding.mapView.location.apply {
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }

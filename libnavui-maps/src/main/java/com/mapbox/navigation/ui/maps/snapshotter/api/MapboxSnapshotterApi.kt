@@ -6,11 +6,11 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
+import com.mapbox.maps.MapInitOptions
 import com.mapbox.maps.MapInterface
 import com.mapbox.maps.MapSnapshotOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.MapboxOptions
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
 import com.mapbox.maps.SnapshotStyleListener
@@ -50,7 +50,7 @@ class MapboxSnapshotterApi(
     private val snapshotter: Snapshotter
 
     init {
-        val resourceOptions = MapboxOptions.getDefaultResourceOptions(context)
+        val resourceOptions = MapInitOptions.getDefaultResourceOptions(context)
         val mapSnapshotOptions = MapSnapshotOptions.Builder()
             .resourceOptions(resourceOptions)
             .size(options.size)

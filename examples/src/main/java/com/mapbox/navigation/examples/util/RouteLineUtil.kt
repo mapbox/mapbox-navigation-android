@@ -8,7 +8,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
-import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
+import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -123,7 +123,7 @@ class RouteLineUtil(private val activity: AppCompatActivity) : LifecycleObserver
     private fun onStart() {
         mapView.getMapboxMap().getStyle { style ->
             this@RouteLineUtil.style = style
-            mapView.getLocationComponentPlugin().addOnIndicatorPositionChangedListener(
+            mapView.location.addOnIndicatorPositionChangedListener(
                 onIndicatorPositionChangedListener
             )
             mapboxNavigation.registerRoutesObserver(routesObserver)
@@ -133,7 +133,7 @@ class RouteLineUtil(private val activity: AppCompatActivity) : LifecycleObserver
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     private fun onStop() {
-        mapView.getLocationComponentPlugin().removeOnIndicatorPositionChangedListener(
+        mapView.location.removeOnIndicatorPositionChangedListener(
             onIndicatorPositionChangedListener
         )
         mapboxNavigation.unregisterRoutesObserver(routesObserver)

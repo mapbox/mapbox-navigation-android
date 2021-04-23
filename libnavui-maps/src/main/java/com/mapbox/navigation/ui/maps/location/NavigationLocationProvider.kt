@@ -22,7 +22,7 @@ import java.util.concurrent.CopyOnWriteArraySet
  * #### Example usage
  * Initialize the location plugin:
  * ```
- * locationComponent = mapView.getLocationComponentPlugin().apply {
+ * locationComponent = mapView.location.apply {
  *     setLocationProvider(navigationLocationProvider)
  *     addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
  *     enabled = true

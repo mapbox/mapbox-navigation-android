@@ -178,7 +178,7 @@ import kotlin.math.min
  * ```kotlin
  * private fun animateToPOI() {
  *     // request camera to idle first or use `NavigationBasicGesturesHandler` or `NavigationScaleGestureHandler`
- *     mapView.getCameraAnimationsPlugin().flyTo(
+ *     mapView.camera.flyTo(
  *         CameraOptions.Builder()
  *             .padding(edgeInsets)
  *             .center(point)

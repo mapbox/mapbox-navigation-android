@@ -7,7 +7,9 @@ import com.mapbox.bindgen.Value
 import com.mapbox.common.TileStore
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.ResourceOptions
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
+import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.PredictiveCache
 import com.mapbox.navigation.utils.internal.LoggerProvider
@@ -32,10 +34,8 @@ private const val RASTER_SOURCE_TYPE = "raster"
  * whenever the [MapView] is destroyed to avoid leaking references or downloading unnecessary
  * resources. When the map instance is recreated, set it back with [setMapInstance].
  *
- * The system only supports map styles that do not use source compositing,
- * make sure to disable source compositing in Mapbox Studio.
- * See https://docs.mapbox.com/studio-manual/reference/styles/#source-compositing
- * for more information.
+ * The map instance has to be configured with a valid [TileStore] instance at the same path that was provided to [RoutingTilesOptions.filePath].
+ * You need to call [TileStore.getInstance] with a path and pass it to [ResourceOptions.tileStore] or use the Maps SDK's tile store path XML attribute.
  *
  * The system only supports source hosted on Mapbox Services which URL starts with "mapbox://".
  *
@@ -62,8 +62,11 @@ class PredictiveCacheController @JvmOverloads constructor(
     private val onStyleLoadedListener = object : OnStyleLoadedListener {
         override fun onStyleLoaded() {
             map?.let { map ->
-                val tileStorePath = map.getResourceOptions().tileStorePath
-                val tileStore = retrieveTileStore(tileStorePath)
+                val tileStore = map.getResourceOptions().tileStore
+                if (tileStore == null) {
+                    handleError("TileStore instance not configured for the Map.")
+                    return
+                }
                 val currentMapSources = mutableListOf<String>()
                 traverseMapSources(map) { tileVariant ->
                     currentMapSources.add(tileVariant)
@@ -88,8 +91,11 @@ class PredictiveCacheController @JvmOverloads constructor(
      */
     fun setMapInstance(map: MapboxMap) {
         removeMapInstance()
-        val tileStorePath = map.getResourceOptions().tileStorePath
-        val tileStore = retrieveTileStore(tileStorePath)
+        val tileStore = map.getResourceOptions().tileStore
+        if (tileStore == null) {
+            handleError("TileStore instance not configured for the Map.")
+            return
+        }
         traverseMapSources(map) { tileVariant ->
             PredictiveCache.createMapsController(tileStore, tileVariant)
         }
@@ -117,14 +123,6 @@ class PredictiveCacheController @JvmOverloads constructor(
     fun onDestroy() {
         removeMapInstance()
         PredictiveCache.clean()
-    }
-
-    private fun retrieveTileStore(path: String?): TileStore {
-        return if (path == null) {
-            TileStore.getInstance()
-        } else {
-            TileStore.getInstance(path)
-        }
     }
 
     private fun traverseMapSources(map: MapboxMap, fn: (String) -> Unit) {

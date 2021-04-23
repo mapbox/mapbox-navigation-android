@@ -16,11 +16,11 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
-import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
+import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
-import com.mapbox.maps.plugin.gestures.getGesturesPlugin
+import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
-import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
+import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -176,13 +176,13 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
         mapboxMap.loadStyleUri(
             MAPBOX_STREETS
         ) {
-            binding.mapView.getGesturesPlugin().addOnMapLongClickListener(this)
+            binding.mapView.gestures.addOnMapLongClickListener(this)
 
             /**
              * Try attaching to the map click listener, highlight the building the
              * user has selected.
              */
-            binding.mapView.getGesturesPlugin().addOnMapClickListener { point ->
+            binding.mapView.gestures.addOnMapClickListener { point ->
                 buildingHighlightApi.highlightBuilding(point)
                 false
             }
@@ -194,7 +194,7 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
     }
 
     private fun getMapCamera(): CameraAnimationsPlugin {
-        return binding.mapView.getCameraAnimationsPlugin()
+        return binding.mapView.camera
     }
 
     private fun startSimulation(route: DirectionsRoute) {
@@ -279,7 +279,7 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
          */
         buildingsArrivalApi.buildingHighlightApi(buildingHighlightApi)
 
-        locationComponent = binding.mapView.getLocationComponentPlugin().apply {
+        locationComponent = binding.mapView.location.apply {
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }
