@@ -300,11 +300,11 @@ class MapboxRouteLineApi(
     ) {
         jobControl.scope.launch {
             mutex.withLock {
+                routeLineOptions.vanishingRouteLine?.clear()
                 routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
                 directionsRoutes.clear()
                 routeFeatureData.clear()
                 routeLineExpressionData.clear()
-                routeLineOptions.vanishingRouteLine?.clear()
 
                 consumer.accept(
                     Expected.Success(
@@ -617,6 +617,7 @@ class MapboxRouteLineApi(
     private suspend fun buildDrawRoutesState(
         featureDataProvider: () -> List<RouteFeatureData>
     ): Expected<RouteSetValue, RouteLineError> {
+        routeLineOptions.vanishingRouteLine?.clear()
         val routeFeatureDataDef = jobControl.scope.async(ThreadController.IODispatcher) {
             featureDataProvider()
         }

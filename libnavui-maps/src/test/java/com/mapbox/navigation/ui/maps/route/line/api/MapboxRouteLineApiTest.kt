@@ -177,6 +177,25 @@ class MapboxRouteLineApiTest {
     }
 
     @Test
+    fun setRoutes_clearsVanishingRouteLine() = coroutineRule.runBlockingTest {
+        val vanishingRouteLine = mockk<VanishingRouteLine>(relaxed = true)
+        val realOptions = MapboxRouteLineOptions.Builder(ctx).build()
+        val options = mockk<MapboxRouteLineOptions>()
+        every { options.routeLayerProvider } returns realOptions.routeLayerProvider
+        every { options.resourceProvider } returns realOptions.resourceProvider
+        every { options.vanishingRouteLine } returns vanishingRouteLine
+        every { options.enableRestrictedRoadLayer } returns false
+
+        val api = MapboxRouteLineApi(options)
+        val route = getRoute()
+        val routes = listOf(RouteLine(route, null))
+
+        api.setRoutes(routes)
+
+        verify { vanishingRouteLine.clear() }
+    }
+
+    @Test
     fun setRoutes_setsVanishPointToZero() = coroutineRule.runBlockingTest {
         val options = MapboxRouteLineOptions.Builder(ctx)
             .withVanishingRouteLineEnabled(true)
