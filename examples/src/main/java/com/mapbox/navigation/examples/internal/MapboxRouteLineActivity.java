@@ -24,13 +24,14 @@ import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
+import com.mapbox.common.TileStore;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Point;
 import com.mapbox.maps.CameraOptions;
 import com.mapbox.maps.EdgeInsets;
+import com.mapbox.maps.MapInitOptions;
 import com.mapbox.maps.MapView;
 import com.mapbox.maps.MapboxMap;
-import com.mapbox.maps.MapboxMapOptions;
 import com.mapbox.maps.ResourceOptions;
 import com.mapbox.maps.Style;
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility;
@@ -45,6 +46,7 @@ import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin;
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPluginImpl;
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener;
 import com.mapbox.navigation.base.options.NavigationOptions;
+import com.mapbox.navigation.base.options.RoutingTilesOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
@@ -58,16 +60,16 @@ import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.examples.core.R;
 import com.mapbox.navigation.ui.base.model.Expected;
-import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue;
-import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue;
-import com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError;
-import com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue;
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer;
 import com.mapbox.navigation.ui.maps.PredictiveCacheController;
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider;
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi;
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView;
+import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue;
+import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue;
+import com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError;
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions;
+import com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue;
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi;
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView;
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue;
@@ -122,14 +124,37 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.layout_activity_routeline);
-    MapboxMapOptions mapboxMapOptions = new MapboxMapOptions(this, getResources().getDisplayMetrics().density, null);
+
+    String path = this.getApplicationContext().getFilesDir().getAbsolutePath();
+    NavigationOptions navigationOptions = new NavigationOptions.Builder(this)
+        .accessToken(getMapboxAccessTokenFromResources())
+        .locationEngine(new ReplayLocationEngine(mapboxReplayer))
+        .routingTilesOptions(
+            new RoutingTilesOptions.Builder()
+                .build()
+                .toBuilder()
+                .filePath(path)
+                .build()
+        )
+        .build();
+
+    TileStore tileStore =
+        TileStore.getInstance(path);
     ResourceOptions resourceOptions = new ResourceOptions.Builder()
         .accessToken(getMapboxAccessTokenFromResources())
         .assetPath(getFilesDir().getAbsolutePath())
         .cachePath(getFilesDir().getAbsolutePath() + "/mbx.db")
         .cacheSize(100_000_000L) // 100 MB
-        .tileStorePath(getFilesDir().getAbsolutePath() + "/maps_tile_store/")
+        .tileStore(tileStore)
         .build();
+    MapInitOptions mapboxMapOptions = new MapInitOptions(
+        this,
+        resourceOptions,
+        MapInitOptions.Companion.getDefaultMapOptions(this),
+        null,
+        false,
+        null
+    );
     mapboxMapOptions.setResourceOptions(resourceOptions);
     mapView = new MapView(this, mapboxMapOptions);
     RelativeLayout mapLayout = findViewById(R.id.mapView_container);
@@ -147,11 +172,11 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     locationComponent.setEnabled(true);
     mapCamera = getMapCamera();
 
-    init();
+    init(navigationOptions);
   }
 
-  private void init() {
-    initNavigation();
+  private void init(NavigationOptions navigationOptions) {
+    initNavigation(navigationOptions);
     initStyle();
     initListeners();
 
@@ -239,13 +264,8 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   }
 
   @SuppressLint("MissingPermission")
-  private void initNavigation() {
-    mapboxNavigation = new MapboxNavigation(
-        new NavigationOptions.Builder(this)
-            .accessToken(getMapboxAccessTokenFromResources())
-            .locationEngine(new ReplayLocationEngine(mapboxReplayer))
-            .build()
-    );
+  private void initNavigation(NavigationOptions navigationOptions) {
+    mapboxNavigation = new MapboxNavigation(navigationOptions);
 
     mapboxReplayer.pushRealLocation(this, 0.0);
     mapboxReplayer.playbackSpeed(1.5);
@@ -442,7 +462,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   }
 
   private CameraAnimationsPlugin getMapCamera() {
-    return CameraAnimationsPluginImplKt.getCameraAnimationsPlugin(mapView);
+    return CameraAnimationsPluginImplKt.getCamera(mapView);
   }
 
   private GesturesPluginImpl getGesturePlugin() {

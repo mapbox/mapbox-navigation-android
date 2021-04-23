@@ -20,16 +20,15 @@ import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.LocationPuck2D
+import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.animation.easeTo
-import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
 import com.mapbox.maps.plugin.delegates.listeners.eventdata.MapLoadErrorType
-import com.mapbox.maps.plugin.gestures.GesturesPlugin
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
-import com.mapbox.maps.plugin.gestures.getGesturesPlugin
+import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
-import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
+import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
@@ -321,7 +320,7 @@ class MapboxNavigationActivity :
         binding = LayoutActivityNavigationBinding.inflate(layoutInflater)
         setContentView(binding.root)
         mapboxMap = binding.mapView.getMapboxMap()
-        locationComponent = binding.mapView.getLocationComponentPlugin().apply {
+        locationComponent = binding.mapView.location.apply {
             this.locationPuck = LocationPuck2D(
                 bearingImage = ContextCompat.getDrawable(
                     this@MapboxNavigationActivity,
@@ -338,10 +337,10 @@ class MapboxNavigationActivity :
         )
         navigationCamera = NavigationCamera(
             binding.mapView.getMapboxMap(),
-            binding.mapView.getCameraAnimationsPlugin(),
+            binding.mapView.camera,
             viewportDataSource
         )
-        binding.mapView.getCameraAnimationsPlugin().addCameraAnimationsLifecycleListener(
+        binding.mapView.camera.addCameraAnimationsLifecycleListener(
             NavigationBasicGesturesHandler(navigationCamera)
         )
         init()
@@ -506,7 +505,7 @@ class MapboxNavigationActivity :
         mapboxMap.loadStyleUri(
             Style.MAPBOX_STREETS,
             {
-                getGesturePlugin().addOnMapLongClickListener(this)
+                binding.mapView.gestures.addOnMapLongClickListener(this)
             },
             object : OnMapLoadErrorListener {
                 override fun onMapLoadError(mapLoadErrorType: MapLoadErrorType, msg: String) {
@@ -587,10 +586,6 @@ class MapboxNavigationActivity :
                 }
             )
         }
-    }
-
-    private fun getGesturePlugin(): GesturesPlugin {
-        return binding.mapView.getGesturesPlugin()
     }
 
     private fun getMapboxAccessTokenFromResources(): String {

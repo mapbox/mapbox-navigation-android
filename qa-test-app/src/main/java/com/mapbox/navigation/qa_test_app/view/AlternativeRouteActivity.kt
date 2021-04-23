@@ -27,6 +27,7 @@ import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.getGesturesPlugin
 import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
+import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -67,7 +68,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private val mapCamera: CameraAnimationsPlugin by lazy {
-        binding.mapView.getCameraAnimationsPlugin()
+        binding.mapView.camera
     }
 
     private val mapboxNavigation: MapboxNavigation by lazy {
@@ -131,7 +132,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private fun initNavigation() {
-        binding.mapView.getLocationComponentPlugin().apply {
+        binding.mapView.location.apply {
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }
@@ -188,7 +189,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
                     override fun onFailure(exception: Exception) {}
                 })
-            binding.mapView.getGesturesPlugin().addOnMapLongClickListener(this)
+            binding.mapView.gestures.addOnMapLongClickListener(this)
         }
     }
 
@@ -256,7 +257,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             startSimulation(mapboxNavigation.getRoutes()[0])
         }
 
-        binding.mapView.getGesturesPlugin().addOnMapClickListener(mapClickListener)
+        binding.mapView.gestures.addOnMapClickListener(mapClickListener)
     }
 
     private fun startSimulation(route: DirectionsRoute) {

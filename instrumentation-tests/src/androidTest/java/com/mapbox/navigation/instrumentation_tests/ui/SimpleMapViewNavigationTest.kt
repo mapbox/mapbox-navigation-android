@@ -5,9 +5,9 @@ import androidx.core.content.ContextCompat
 import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.maps.plugin.LocationPuck2D
-import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
+import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
-import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
+import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -122,7 +122,7 @@ abstract class SimpleMapViewNavigationTest :
             )
             navigationCamera = NavigationCamera(
                 activity.mapboxMap,
-                activity.binding.mapView.getCameraAnimationsPlugin(),
+                activity.binding.mapView.camera,
                 mapboxNavigationViewportDataSource
             )
             navigationCamera.requestNavigationCameraToFollowing()
@@ -155,7 +155,7 @@ abstract class SimpleMapViewNavigationTest :
     protected fun addLocationPuck() {
         runOnMainSync {
             navigationLocationProvider = NavigationLocationProvider()
-            locationPlugin = activity.binding.mapView.getLocationComponentPlugin()
+            locationPlugin = activity.binding.mapView.location
             locationPlugin.setLocationProvider(navigationLocationProvider)
             locationPlugin.locationPuck = LocationPuck2D(
                 bearingImage = ContextCompat.getDrawable(

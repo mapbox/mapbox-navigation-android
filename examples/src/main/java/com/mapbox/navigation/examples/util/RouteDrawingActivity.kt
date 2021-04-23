@@ -13,16 +13,17 @@ import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.TileStore
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.MapInitOptions
 import com.mapbox.maps.MapView
-import com.mapbox.maps.MapboxMapOptions
 import com.mapbox.maps.ResourceOptions
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
-import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
+import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
-import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
+import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.clearRouteLine
@@ -81,20 +82,21 @@ class RouteDrawingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_route_drawing_activity)
-        val mapboxMapOptions = MapboxMapOptions(this, resources.displayMetrics.density, null)
+        val tileStore = TileStore.getInstance()
+        val mapboxMapOptions = MapInitOptions(this)
         val resourceOptions = ResourceOptions.Builder()
             .accessToken(getMapboxAccessTokenFromResources())
             .assetPath(filesDir.absolutePath)
             .cachePath(filesDir.absolutePath + "/mbx.db")
             .cacheSize(100000000L) // 100 MB
-            .tileStorePath(filesDir.absolutePath + "/maps_tile_store/")
+            .tileStore(tileStore)
             .build()
         mapboxMapOptions.resourceOptions = resourceOptions
         mapView = MapView(this, mapboxMapOptions)
         val mapLayout = findViewById<RelativeLayout>(R.id.mapView_container)
         mapLayout.addView(mapView)
         navigationLocationProvider = NavigationLocationProvider()
-        locationComponent = mapView.getLocationComponentPlugin().apply {
+        locationComponent = mapView.location.apply {
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }
@@ -225,6 +227,6 @@ class RouteDrawingActivity : AppCompatActivity() {
     }
 
     private fun getMapCamera(): CameraAnimationsPlugin {
-        return mapView.getCameraAnimationsPlugin()
+        return mapView.camera
     }
 }
