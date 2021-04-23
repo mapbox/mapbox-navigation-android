@@ -19,7 +19,9 @@ import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
+import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -28,16 +30,33 @@ import org.robolectric.annotation.Config
 @Config(shadows = [ShadowTileStore::class])
 @RunWith(RobolectricTestRunner::class)
 class PredictiveCacheControllerTest {
+
+    private val errorHandler = mockk<PredictiveCacheControllerErrorHandler>() {
+        every { onError(any()) } just Runs
+    }
+
+    @Before
+    fun setup() {
+        mockkObject(PredictiveCache)
+        mockkStatic(TileStore::class)
+    }
+
+    @After
+    fun teardown() {
+        unmockkObject(PredictiveCache)
+        unmockkStatic(TileStore::class)
+    }
+
     @Test
     fun `initialize creates Navigation Predictive Cache Controller`() {
         val mockedMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        mockkObject(PredictiveCache)
         every {
             PredictiveCache.createNavigationController(any())
         } just Runs
 
         PredictiveCacheController(
             mockedMapboxNavigation,
+            errorHandler
         )
 
         verify {
@@ -46,19 +65,18 @@ class PredictiveCacheControllerTest {
             )
         }
 
-        unmockkObject(PredictiveCache)
+        verify(exactly = 0) { errorHandler.onError(any()) }
     }
 
     @Test
-    fun `initialize creates Maps Predictive Cache Controllers - null tileStorePath`() {
+    fun `null tileStore creates error message and does not initialize Predictive Cache Controllers`() {
         val mockedMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        mockkObject(PredictiveCache)
         every {
             PredictiveCache.createNavigationController(any())
         } just Runs
         val mockedMapboxMap = mockk<MapboxMap>(relaxed = true)
         every {
-            mockedMapboxMap.getResourceOptions().tileStorePath
+            mockedMapboxMap.getResourceOptions().tileStore
         } returns null
         val style = mockk<Style>()
         every {
@@ -76,71 +94,27 @@ class PredictiveCacheControllerTest {
         )
         every { style.styleSources } returns styleSources
 
-        val mockedPropertiesVector = mockk<Expected<Value, String>>(relaxed = true)
-        val contentsVector = mutableMapOf<String, Value>()
-        contentsVector["type"] = Value("vector")
-        contentsVector["url"] = Value("mapbox://mapbox.mapbox-streets-v8,mapbox.mapbox-terrain-v2")
-        every { mockedPropertiesVector.value?.contents } returns contentsVector
-        every { style.getStyleSourceProperties(mockedIds[0]) } returns mockedPropertiesVector
-
-        val mockedPropertiesGeojson = mockk<Expected<Value, String>>(relaxed = true)
-        val contentsGeojson = mutableMapOf<String, Value>()
-        contentsGeojson["type"] = Value("geojson")
-        every { mockedPropertiesGeojson.value?.contents } returns contentsGeojson
-        every { style.getStyleSourceProperties(mockedIds[1]) } returns mockedPropertiesGeojson
-
-        val mockedPropertiesRaster = mockk<Expected<Value, String>>(relaxed = true)
-        val contentsRaster = mutableMapOf<String, Value>()
-        contentsRaster["type"] = Value("raster")
-        contentsRaster["url"] = Value("mapbox://mapbox.satellite")
-        every { mockedPropertiesRaster.value?.contents } returns contentsRaster
-        every { style.getStyleSourceProperties(mockedIds[2]) } returns mockedPropertiesRaster
-
         val predictiveCacheController = PredictiveCacheController(
             mockedMapboxNavigation,
+            errorHandler
         )
-        val mockedTileStore = mockk<TileStore>()
-        mockkStatic(TileStore::class)
-        every {
-            TileStore.getInstance()
-        } returns mockedTileStore
-        val slotIds = mutableListOf<String>()
-        every {
-            PredictiveCache.createMapsController(mockedTileStore, capture(slotIds))
-        } just Runs
 
         predictiveCacheController.setMapInstance(mockedMapboxMap)
 
-        verify(exactly = 2) {
-            PredictiveCache.createMapsController(
-                mockedTileStore,
-                any(),
-                any()
-            )
-        }
-        assertEquals(
-            listOf(
-                "mapbox.mapbox-streets-v8,mapbox.mapbox-terrain-v2",
-                "mapbox.satellite"
-            ),
-            slotIds
-        )
-
-        unmockkObject(PredictiveCache)
-        unmockkStatic(TileStore::class)
+        verify { errorHandler.onError(any()) }
     }
 
     @Test
-    fun `initialize creates Maps Predictive Cache Controllers - non-null tileStorePath`() {
+    fun `non-null tileStore initializes Maps Predictive Cache Controllers`() {
         val mockedMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        mockkObject(PredictiveCache)
         every {
             PredictiveCache.createNavigationController(any())
         } just Runs
-        val mockedMapboxMap = mockk<MapboxMap>(relaxed = true)
-        every {
-            mockedMapboxMap.getResourceOptions().tileStorePath
-        } returns "/test/path"
+        val mockedTileStore = mockk<TileStore>()
+        every { TileStore.getInstance(any()) } returns mockedTileStore
+        val mockedMapboxMap = mockk<MapboxMap>(relaxed = true) {
+            every { getResourceOptions().tileStore } returns mockedTileStore
+        }
         val style = mockk<Style>()
         every {
             mockedMapboxMap.getStyle()
@@ -179,12 +153,9 @@ class PredictiveCacheControllerTest {
 
         val predictiveCacheController = PredictiveCacheController(
             mockedMapboxNavigation,
+            errorHandler
         )
-        val mockedTileStore = mockk<TileStore>()
-        mockkStatic(TileStore::class)
-        every {
-            TileStore.getInstance(any())
-        } returns mockedTileStore
+
         val slotIds = mutableListOf<String>()
         every {
             PredictiveCache.createMapsController(mockedTileStore, capture(slotIds))
@@ -206,19 +177,20 @@ class PredictiveCacheControllerTest {
             ),
             slotIds
         )
-
-        unmockkObject(PredictiveCache)
-        unmockkStatic(TileStore::class)
+        verify(exactly = 0) { errorHandler.onError(any()) }
     }
 
     @Test
     fun `style change triggers Maps Predictive Cache Controllers update`() {
         val mockedMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        mockkObject(PredictiveCache)
         every {
             PredictiveCache.createNavigationController(any())
         } just Runs
-        val mockedMapboxMap = mockk<MapboxMap>(relaxed = true)
+        val mockedTileStore = mockk<TileStore>()
+        every { TileStore.getInstance(any()) } returns mockedTileStore
+        val mockedMapboxMap = mockk<MapboxMap>(relaxed = true) {
+            every { getResourceOptions().tileStore } returns mockedTileStore
+        }
         val style = mockk<Style>()
         every {
             mockedMapboxMap.getStyle()
@@ -257,12 +229,8 @@ class PredictiveCacheControllerTest {
 
         val predictiveCacheController = PredictiveCacheController(
             mockedMapboxNavigation,
+            errorHandler
         )
-        val mockedTileStore = mockk<TileStore>()
-        mockkStatic(TileStore::class)
-        every {
-            TileStore.getInstance(any())
-        } returns mockedTileStore
         val slotIds = mutableListOf<String>()
         every {
             PredictiveCache.createMapsController(mockedTileStore, capture(slotIds))
@@ -318,8 +286,6 @@ class PredictiveCacheControllerTest {
 
         assertEquals(listOf("mapbox.satellite"), removeSlotIds)
         assertEquals(listOf("mapbox.mapbox-streets-v9"), addSlotIds)
-
-        unmockkObject(PredictiveCache)
-        unmockkStatic(TileStore::class)
+        verify(exactly = 0) { errorHandler.onError(any()) }
     }
 }

@@ -25,14 +25,14 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
-import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
+import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
 import com.mapbox.maps.plugin.delegates.listeners.eventdata.MapLoadErrorType
 import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
-import com.mapbox.maps.plugin.gestures.getGesturesPlugin
+import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
-import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
+import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -90,7 +90,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
     }
 
     private val locationComponent by lazy {
-        viewBinding.mapView.getLocationComponentPlugin().apply {
+        viewBinding.mapView.location.apply {
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }
@@ -106,7 +106,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
     }
 
     private val mapCamera by lazy {
-        viewBinding.mapView.getCameraAnimationsPlugin()
+        viewBinding.mapView.camera
     }
 
     // RouteLine: Route line related colors can be customized via the RouteLineColorResources.
@@ -373,7 +373,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
                 mapboxNavigation.navigationOptions.locationEngine.getLastLocation(
                     locationEngineCallback
                 )
-                viewBinding.mapView.getGesturesPlugin().addOnMapLongClickListener(this)
+                viewBinding.mapView.gestures.addOnMapLongClickListener(this)
             },
             object : OnMapLoadErrorListener {
                 override fun onMapLoadError(mapLoadError: MapLoadErrorType, message: String) {
@@ -470,7 +470,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
                 startSimulation(route)
             }
         }
-        viewBinding.mapView.getGesturesPlugin().addOnMapClickListener(mapClickListener)
+        viewBinding.mapView.gestures.addOnMapClickListener(mapClickListener)
     }
 
     // Starts the navigation simulator

@@ -18,11 +18,11 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
-import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
+import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
 import com.mapbox.maps.plugin.delegates.listeners.eventdata.MapLoadErrorType
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
-import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
+import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -114,7 +114,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
                 mapboxNavigation.navigationOptions.locationEngine.getLastLocation(
                     locationEngineCallback
                 )
-                locationComponent = binding.mapView.getLocationComponentPlugin().apply {
+                locationComponent = binding.mapView.location.apply {
                     this.locationPuck = LocationPuck2D(
                         bearingImage = ContextCompat.getDrawable(
                             this@ReplayHistoryActivity,
@@ -126,7 +126,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
                 }
                 navigationCamera = NavigationCamera(
                     binding.mapView.getMapboxMap(),
-                    binding.mapView.getCameraAnimationsPlugin(),
+                    binding.mapView.camera,
                     viewportDataSource
                 )
 
@@ -157,7 +157,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
     private fun updateCamera(location: Location) {
         val mapAnimationOptionsBuilder = MapAnimationOptions.Builder()
             .duration(1500L)
-        binding.mapView.getCameraAnimationsPlugin().easeTo(
+        binding.mapView.camera.easeTo(
             CameraOptions.Builder()
                 .center(Point.fromLngLat(location.longitude, location.latitude))
                 .bearing(location.bearing.toDouble())

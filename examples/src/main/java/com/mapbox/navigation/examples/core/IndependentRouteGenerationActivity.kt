@@ -16,18 +16,18 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
-import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
+import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.CircleAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.CircleAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createCircleAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.createPolylineAnnotationManager
-import com.mapbox.maps.plugin.annotation.getAnnotationPlugin
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
-import com.mapbox.maps.plugin.gestures.getGesturesPlugin
+import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
-import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
+import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -85,11 +85,11 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         mapboxMap = binding.mapView.getMapboxMap()
-        circleManager = binding.mapView.getAnnotationPlugin()
+        circleManager = binding.mapView.annotations
             .createCircleAnnotationManager(binding.mapView, null)
-        lineManager = binding.mapView.getAnnotationPlugin()
+        lineManager = binding.mapView.annotations
             .createPolylineAnnotationManager(binding.mapView, null)
-        locationComponent = binding.mapView.getLocationComponentPlugin().apply {
+        locationComponent = binding.mapView.location.apply {
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }
@@ -102,7 +102,7 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
         mapboxMap.loadStyleUri(
             Style.MAPBOX_STREETS,
             { style: Style ->
-                binding.mapView.getGesturesPlugin().addOnMapLongClickListener(
+                binding.mapView.gestures.addOnMapLongClickListener(
                     mapLongClickListener
                 )
             }
@@ -195,7 +195,7 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
     private fun updateCamera(point: Point) {
         val mapAnimationOptionsBuilder = MapAnimationOptions.Builder()
         mapAnimationOptionsBuilder.duration(1500L)
-        binding.mapView.getCameraAnimationsPlugin().flyTo(
+        binding.mapView.camera.flyTo(
             CameraOptions.Builder()
                 .center(point)
                 .bearing(0.0)

@@ -50,7 +50,7 @@ import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
  * viewportDataSource.debugger = debugger
  * navigationCamera = NavigationCamera(
  *     mapView.getMapboxMap(),
- *     mapView.getCameraAnimationsPlugin(),
+ *     mapView.camera,
  *     viewportDataSource
  * )
  * navigationCamera.debugger = debugger
