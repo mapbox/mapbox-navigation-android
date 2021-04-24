@@ -17,6 +17,7 @@ import java.util.Locale
  * Offline implementation of [VoiceInstructionsPlayer].
  * @property context Context
  * @property language [Locale] language (ISO 639)
+ * @property options [VoiceInstructionsPlayerOptions]
  */
 internal class VoiceInstructionsTextPlayer(
     private val context: Context,

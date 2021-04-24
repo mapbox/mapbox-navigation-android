@@ -13,6 +13,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.util.Locale
 
 /**
  * Online implementation of [VoiceInstructionsPlayer].
@@ -20,6 +21,7 @@ import java.io.IOException
  * @property context Context
  * @property accessToken String
  * @property language [Locale] language (ISO 639)
+ * @property options [VoiceInstructionsPlayerOptions]
  */
 internal class VoiceInstructionsFilePlayer(
     private val context: Context,
