@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.voice.api
 import android.content.Context
 import android.media.MediaPlayer
 import android.os.Build
-import android.util.Log
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
