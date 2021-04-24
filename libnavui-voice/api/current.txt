@@ -2,7 +2,7 @@
 package com.mapbox.navigation.ui.voice.api {
 
   public interface AudioFocusDelegate {
-    method public void abandonFocus();
+    method public boolean abandonFocus();
     method public boolean requestFocus();
   }
 
@@ -21,7 +21,6 @@ package com.mapbox.navigation.ui.voice.api {
     method public void clear();
     method public void play(com.mapbox.navigation.ui.voice.model.SpeechAnnouncement announcement, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.voice.model.SpeechAnnouncement> consumer);
     method public void shutdown();
-    method public void stream(int type);
     method public void volume(com.mapbox.navigation.ui.voice.model.SpeechVolume state);
   }
 
@@ -88,15 +87,21 @@ package com.mapbox.navigation.ui.voice.options {
   }
 
   public final class VoiceInstructionsPlayerOptions {
+    method public android.media.AudioAttributes getAudioAttributes();
     method public int getFocusGain();
+    method @Deprecated public int getStreamType();
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder toBuilder();
+    property public final android.media.AudioAttributes audioAttributes;
     property public final int focusGain;
+    property @Deprecated public final int streamType;
   }
 
   public static final class VoiceInstructionsPlayerOptions.Builder {
     ctor public VoiceInstructionsPlayerOptions.Builder();
+    method @RequiresApi(api=android.os.Build.VERSION_CODES.O) public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder audioAttributes(android.media.AudioAttributes audioAttributes);
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions build();
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder focusGain(int focusGain);
+    method @Deprecated @RequiresApi(api=android.os.Build.VERSION_CODES.BASE) public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder streamType(int streamType);
   }
 
 }
