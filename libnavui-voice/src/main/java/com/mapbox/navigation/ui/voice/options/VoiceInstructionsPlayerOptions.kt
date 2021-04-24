@@ -50,6 +50,9 @@ class VoiceInstructionsPlayerOptions private constructor(
         }
     }
 
+    /**
+     * Returns a string representation of the object.
+     */
     override fun toString(): String {
         return "VoiceInstructionsPlayerOptions(" +
             "focusGain=$focusGain, " +
@@ -58,6 +61,9 @@ class VoiceInstructionsPlayerOptions private constructor(
             ")"
     }
 
+    /**
+     * Regenerate whenever a change is made
+     */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -71,6 +77,9 @@ class VoiceInstructionsPlayerOptions private constructor(
         return true
     }
 
+    /**
+     * Regenerate whenever a change is made
+     */
     override fun hashCode(): Int {
         var result = focusGain
         result = 31 * result + streamType
