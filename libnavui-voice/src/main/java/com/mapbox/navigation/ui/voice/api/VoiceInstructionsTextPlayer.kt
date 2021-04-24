@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
-import android.media.AudioManager
+import android.os.Build
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
@@ -9,6 +9,7 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
+import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import java.util.Locale
 
@@ -19,7 +20,8 @@ import java.util.Locale
  */
 internal class VoiceInstructionsTextPlayer(
     private val context: Context,
-    private val language: String
+    private val language: String,
+    private val options: VoiceInstructionsPlayerOptions,
 ) : VoiceInstructionsPlayer {
 
     private var isLanguageSupported: Boolean = false
@@ -29,7 +31,6 @@ internal class VoiceInstructionsTextPlayer(
         }
     }
     private var volumeLevel: Float = DEFAULT_VOLUME_LEVEL
-    private var streamType: Int = DEFAULT_STREAM_TYPE
     private var clientCallback: VoiceInstructionsPlayerCallback? = null
     private var currentPlay: SpeechAnnouncement? = null
 
@@ -73,15 +74,6 @@ internal class VoiceInstructionsTextPlayer(
         if (textToSpeech.isSpeaking && state.level == MUTE_VOLUME_LEVEL) {
             textToSpeech.stop()
         }
-    }
-
-    /**
-     * The method will change the stream type of our utterances
-     * @param type specifies the audio stream type to be used when speaking text or playing
-     * back a file. The value should be one of the STREAM_ constants defined in [AudioManager]
-     */
-    override fun stream(type: Int) {
-        streamType = type
     }
 
     /**
@@ -145,7 +137,12 @@ internal class VoiceInstructionsTextPlayer(
     private fun play(announcement: String) {
         val bundle = Bundle().apply {
             putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, volumeLevel)
-            putString(TextToSpeech.Engine.KEY_PARAM_STREAM, streamType.toString())
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                putString(TextToSpeech.Engine.KEY_PARAM_STREAM, options.streamType.toString())
+            }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            textToSpeech.setAudioAttributes(options.audioAttributes)
         }
         textToSpeech.speak(
             announcement,
@@ -156,11 +153,11 @@ internal class VoiceInstructionsTextPlayer(
     }
 
     private companion object {
-        private const val TAG = "MbxVoiceInstructionsTextPlayer"
+
+        private const val TAG = "MbxTextPlayer"
         private const val LANGUAGE_NOT_SUPPORTED = "Language is not supported"
         private const val DEFAULT_UTTERANCE_ID = "default_id"
         private const val DEFAULT_VOLUME_LEVEL = 1.0f
-        private const val DEFAULT_STREAM_TYPE = TextToSpeech.Engine.DEFAULT_STREAM
         private const val MUTE_VOLUME_LEVEL = 0.0f
     }
 }

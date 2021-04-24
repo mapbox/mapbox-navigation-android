@@ -71,13 +71,15 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedTextPlayer
 
@@ -129,13 +131,15 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedTextPlayer
 
@@ -187,13 +191,15 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedTextPlayer
 
@@ -251,13 +257,15 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedTextPlayer
 
@@ -299,13 +307,15 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedTextPlayer
         val mapboxVoiceInstructionsPlayer =
@@ -340,13 +350,15 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedTextPlayer
         val mapboxVoiceInstructionsPlayer =
@@ -374,13 +386,15 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedTextPlayer
         val mapboxVoiceInstructionsPlayer =
@@ -397,45 +411,6 @@ class MapboxVoiceInstructionsPlayerTest {
     }
 
     @Test
-    fun streamType() {
-        val anyAccessToken = "pk.123"
-        val anyLanguage = Locale.US.language
-        val mockedFilePlayer: VoiceInstructionsFilePlayer = mockk()
-        every { mockedFilePlayer.stream(any()) } just Runs
-        val mockedTextPlayer: VoiceInstructionsTextPlayer = mockk()
-        every { mockedTextPlayer.stream(any()) } just Runs
-        every {
-            VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
-                aMockedContext,
-                anyAccessToken,
-                anyLanguage
-            )
-        } returns mockedFilePlayer
-        every {
-            VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
-                aMockedContext,
-                anyLanguage
-            )
-        } returns mockedTextPlayer
-        val mapboxVoiceInstructionsPlayer =
-            MapboxVoiceInstructionsPlayer(
-                aMockedContext,
-                anyAccessToken,
-                anyLanguage,
-                mockedVoiceInstructionsPlayerOptions
-            )
-        val mockedStreamType: Int = AudioManager.STREAM_MUSIC
-        mapboxVoiceInstructionsPlayer.stream(mockedStreamType)
-
-        verify(exactly = 1) {
-            mockedFilePlayer.stream(mockedStreamType)
-        }
-        verify(exactly = 1) {
-            mockedTextPlayer.stream(mockedStreamType)
-        }
-    }
-
-    @Test
     fun clear() {
         val anyAccessToken = "pk.123"
         val anyLanguage = Locale.US.language
@@ -447,13 +422,15 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedTextPlayer
         val mapboxVoiceInstructionsPlayer =
@@ -486,13 +463,15 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
-                anyLanguage
+                anyLanguage,
+                mockedVoiceInstructionsPlayerOptions,
             )
         } returns mockedTextPlayer
         val mapboxVoiceInstructionsPlayer =

@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.voice.api
 
+import android.media.AudioAttributes
 import android.media.AudioManager
 import android.os.Build.VERSION_CODES.LOLLIPOP
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
@@ -21,6 +22,13 @@ class AudioFocusDelegateProviderTest {
         every {
             mockedVoiceInstructionsPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+
+        every {
+            mockedVoiceInstructionsPlayerOptions.audioAttributes
+        } returns AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
 
         val actual = AudioFocusDelegateProvider.retrieveAudioFocusDelegate(
             mockedAudioManager,

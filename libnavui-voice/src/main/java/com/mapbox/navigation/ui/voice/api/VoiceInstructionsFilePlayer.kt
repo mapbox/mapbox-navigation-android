@@ -1,12 +1,14 @@
 package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
-import android.media.AudioManager
 import android.media.MediaPlayer
+import android.os.Build
+import android.util.Log
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
+import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import java.io.File
 import java.io.FileInputStream
@@ -23,12 +25,12 @@ import java.io.IOException
 internal class VoiceInstructionsFilePlayer(
     private val context: Context,
     private val accessToken: String,
-    private val language: String
+    private val language: String,
+    private val options: VoiceInstructionsPlayerOptions,
 ) : VoiceInstructionsPlayer {
 
     private var mediaPlayer: MediaPlayer? = null
     private var volumeLevel: Float = DEFAULT_VOLUME_LEVEL
-    private var streamType: Int = DEFAULT_STREAM_TYPE
     private var clientCallback: VoiceInstructionsPlayerCallback? = null
     private var currentPlay: SpeechAnnouncement? = null
 
@@ -71,14 +73,6 @@ internal class VoiceInstructionsFilePlayer(
     }
 
     /**
-     * The method will set the audio stream type for this MediaPlayer.
-     * @param type Audio stream type. See [AudioManager] for a list of stream types.
-     */
-    override fun stream(type: Int) {
-        streamType = type
-    }
-
-    /**
      * Clears any announcements queued.
      */
     override fun clear() {
@@ -101,7 +95,11 @@ internal class VoiceInstructionsFilePlayer(
             FileInputStream(instruction).use { fis ->
                 mediaPlayer = MediaPlayer().apply {
                     setDataSource(fis.fd)
-                    setAudioStreamType()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        setAudioAttributes(options.audioAttributes)
+                    } else {
+                        setAudioStreamType(options.streamType)
+                    }
                     prepareAsync()
                 }
                 setVolume(volumeLevel)
@@ -144,15 +142,6 @@ internal class VoiceInstructionsFilePlayer(
         mediaPlayer?.setVolume(level, level)
     }
 
-    /**
-     * Successful invoke of this method does not change the state.
-     * In order for the target audio stream type to become effective,
-     * this method must be called before prepare() or prepareAsync().
-     */
-    private fun setAudioStreamType() {
-        mediaPlayer?.setAudioStreamType(streamType)
-    }
-
     private fun resetMediaPlayer(mp: MediaPlayer?) {
         mp?.release()
         mediaPlayer = null
@@ -160,8 +149,7 @@ internal class VoiceInstructionsFilePlayer(
 
     private companion object {
 
-        private const val TAG = "MbxVoiceInstructionsFilePlayer"
+        private const val TAG = "MbxFilePlayer"
         private const val DEFAULT_VOLUME_LEVEL = 1.0f
-        private const val DEFAULT_STREAM_TYPE = AudioManager.STREAM_MUSIC
     }
 }

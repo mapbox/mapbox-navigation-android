@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.voice.api
 
-import android.media.AudioManager
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 
@@ -24,12 +23,6 @@ internal interface VoiceInstructionsPlayer {
      * @param state volume level.
      */
     fun volume(state: SpeechVolume)
-
-    /**
-     * The method will set the audio stream type for player.
-     * @param type Audio stream type. See [AudioManager] for a list of stream types.
-     */
-    fun stream(type: Int)
 
     /**
      * Clears any announcements queued.

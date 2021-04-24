@@ -12,15 +12,22 @@ internal class OreoAndLaterAudioFocusDelegate(
     options: VoiceInstructionsPlayerOptions
 ) : AudioFocusDelegate {
 
-    private val audioFocusRequest: AudioFocusRequest =
-        AudioFocusRequest.Builder(options.focusGain).build()
+    private val audioFocusRequest: AudioFocusRequest = AudioFocusRequest.Builder(options.focusGain)
+        .setAudioAttributes(options.audioAttributes)
+        .build()
 
     override fun requestFocus(): Boolean {
-        return audioManager.requestAudioFocus(audioFocusRequest) ==
-            AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+        return when (audioManager.requestAudioFocus(audioFocusRequest)) {
+            AudioManager.AUDIOFOCUS_REQUEST_GRANTED,
+            AudioManager.AUDIOFOCUS_REQUEST_DELAYED -> true
+            else -> false
+        }
     }
 
-    override fun abandonFocus() {
-        audioManager.abandonAudioFocusRequest(audioFocusRequest)
+    override fun abandonFocus(): Boolean {
+        return when (audioManager.abandonAudioFocusRequest(audioFocusRequest)) {
+            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> true
+            else -> false
+        }
     }
 }

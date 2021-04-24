@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.voice.api
 
+import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.AudioManager.AUDIOFOCUS_REQUEST_DELAYED
@@ -25,6 +26,13 @@ class OreoAndLaterAudioFocusDelegateTest {
         every {
             mockedVoiceInstructionsPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+        every {
+            mockedVoiceInstructionsPlayerOptions.audioAttributes
+        } returns AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
+
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
             mockedAudioManager,
             mockedVoiceInstructionsPlayerOptions
@@ -43,12 +51,49 @@ class OreoAndLaterAudioFocusDelegateTest {
     }
 
     @Test
-    fun `oreo and later audio delegates return true when audio focus is granted`() {
+    fun `oreo and later audio focus delegate request focus with voice assistance attribute`() {
         val mockedAudioManager = mockk<AudioManager>(relaxed = true)
         val mockedVoiceInstructionsPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
         every {
             mockedVoiceInstructionsPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+        every {
+            mockedVoiceInstructionsPlayerOptions.audioAttributes
+        } returns AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
+
+        val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
+            mockedAudioManager,
+            mockedVoiceInstructionsPlayerOptions
+        )
+        val slotAudioFocusRequest = slot<AudioFocusRequest>()
+
+        oreoAndLaterAudioFocusDelegate.requestFocus()
+
+        verify(exactly = 1) {
+            mockedAudioManager.requestAudioFocus(capture(slotAudioFocusRequest))
+        }
+        assertEquals(
+            AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE,
+            slotAudioFocusRequest.captured.audioAttributes.usage
+        )
+    }
+
+    @Test
+    fun `oreo and later delegate requestFocus returns false when requestAudioFocus is granted`() {
+        val mockedAudioManager = mockk<AudioManager>(relaxed = true)
+        val mockedVoiceInstructionsPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
+        every {
+            mockedVoiceInstructionsPlayerOptions.focusGain
+        } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+        every {
+            mockedVoiceInstructionsPlayerOptions.audioAttributes
+        } returns AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
 
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
             mockedAudioManager,
@@ -61,8 +106,8 @@ class OreoAndLaterAudioFocusDelegateTest {
         } returns AUDIOFOCUS_REQUEST_GRANTED
 
         assertEquals(
+            true,
             oreoAndLaterAudioFocusDelegate.requestFocus(),
-            true
         )
 
         verify(exactly = 1) {
@@ -71,12 +116,18 @@ class OreoAndLaterAudioFocusDelegateTest {
     }
 
     @Test
-    fun `oreo and later audio delegates return false when audio focus is failed`() {
+    fun `oreo and later delegate requestFocus returns false when requestAudioFocus is failed`() {
         val mockedAudioManager = mockk<AudioManager>(relaxed = true)
         val mockedVoiceInstructionsPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
         every {
             mockedVoiceInstructionsPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+        every {
+            mockedVoiceInstructionsPlayerOptions.audioAttributes
+        } returns AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
 
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
             mockedAudioManager,
@@ -89,8 +140,8 @@ class OreoAndLaterAudioFocusDelegateTest {
         } returns AUDIOFOCUS_REQUEST_FAILED
 
         assertEquals(
+            false,
             oreoAndLaterAudioFocusDelegate.requestFocus(),
-            false
         )
 
         verify(exactly = 1) {
@@ -99,12 +150,18 @@ class OreoAndLaterAudioFocusDelegateTest {
     }
 
     @Test
-    fun `oreo and later audio delegates return false when audio focus is delayed`() {
+    fun `oreo and later delegate requestFocus returns true when requestAudioFocus is delayed`() {
         val mockedAudioManager = mockk<AudioManager>(relaxed = true)
         val mockedVoiceInstructionsPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
         every {
             mockedVoiceInstructionsPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+        every {
+            mockedVoiceInstructionsPlayerOptions.audioAttributes
+        } returns AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
 
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
             mockedAudioManager,
@@ -117,8 +174,8 @@ class OreoAndLaterAudioFocusDelegateTest {
         } returns AUDIOFOCUS_REQUEST_DELAYED
 
         assertEquals(
+            true,
             oreoAndLaterAudioFocusDelegate.requestFocus(),
-            false
         )
 
         verify(exactly = 1) {
@@ -127,26 +184,74 @@ class OreoAndLaterAudioFocusDelegateTest {
     }
 
     @Test
-    fun `oreo and later audio focus delegate abandon focus`() {
+    fun `oreo and later abandon focus returns true when abandonAudioFocusRequest is granted`() {
         val mockedAudioManager = mockk<AudioManager>(relaxed = true)
         val mockedVoiceInstructionsPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
         every {
             mockedVoiceInstructionsPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+
+        every {
+            mockedVoiceInstructionsPlayerOptions.audioAttributes
+        } returns AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
+
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
             mockedAudioManager,
             mockedVoiceInstructionsPlayerOptions
         )
-        val requestSlotAudioFocusRequest = slot<AudioFocusRequest>()
-        every {
-            mockedAudioManager.requestAudioFocus(capture(requestSlotAudioFocusRequest))
-        } returns AUDIOFOCUS_REQUEST_GRANTED
-        oreoAndLaterAudioFocusDelegate.requestFocus()
 
-        oreoAndLaterAudioFocusDelegate.abandonFocus()
+        val slotAudioFocusRequest = slot<AudioFocusRequest>()
+
+        every {
+            mockedAudioManager.abandonAudioFocusRequest(any())
+        } returns AUDIOFOCUS_REQUEST_GRANTED
+
+        assertEquals(
+            true,
+            oreoAndLaterAudioFocusDelegate.abandonFocus(),
+        )
 
         verify(exactly = 1) {
-            mockedAudioManager.abandonAudioFocusRequest(requestSlotAudioFocusRequest.captured)
+            mockedAudioManager.abandonAudioFocusRequest(capture(slotAudioFocusRequest))
+        }
+    }
+
+    @Test
+    fun `oreo and later abandon focus returns false when abandonAudioFocusRequest is failed`() {
+        val mockedAudioManager = mockk<AudioManager>(relaxed = true)
+        val mockedVoiceInstructionsPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
+        every {
+            mockedVoiceInstructionsPlayerOptions.focusGain
+        } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+
+        every {
+            mockedVoiceInstructionsPlayerOptions.audioAttributes
+        } returns AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
+
+        val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
+            mockedAudioManager,
+            mockedVoiceInstructionsPlayerOptions
+        )
+
+        val slotAudioFocusRequest = slot<AudioFocusRequest>()
+
+        every {
+            mockedAudioManager.abandonAudioFocusRequest(any())
+        } returns AUDIOFOCUS_REQUEST_FAILED
+
+        assertEquals(
+            false,
+            oreoAndLaterAudioFocusDelegate.abandonFocus(),
+        )
+
+        verify(exactly = 1) {
+            mockedAudioManager.abandonAudioFocusRequest(capture(slotAudioFocusRequest))
         }
     }
 }

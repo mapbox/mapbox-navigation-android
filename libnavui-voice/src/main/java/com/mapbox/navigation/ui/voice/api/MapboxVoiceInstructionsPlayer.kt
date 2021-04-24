@@ -34,11 +34,16 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
         VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
             context,
             accessToken,
-            language
+            language,
+            options,
         )
     private val textPlayer: VoiceInstructionsTextPlayer =
-        VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(context, language)
-    private var localCallback: VoiceInstructionsPlayerCallback =
+        VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
+            context,
+            language,
+            options
+        )
+    private val localCallback: VoiceInstructionsPlayerCallback =
         object : VoiceInstructionsPlayerCallback {
             override fun onDone(announcement: SpeechAnnouncement) {
                 audioFocusDelegate.abandonFocus()
@@ -82,15 +87,6 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
         }
         filePlayer.volume(state)
         textPlayer.volume(state)
-    }
-
-    /**
-     * The method will set the audio stream type
-     * @param type Audio stream type. See [AudioManager] for a list of stream types.
-     */
-    fun stream(type: Int) {
-        filePlayer.stream(type)
-        textPlayer.stream(type)
     }
 
     /**

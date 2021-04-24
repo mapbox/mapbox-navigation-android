@@ -13,6 +13,7 @@ interface AudioFocusDelegate {
 
     /**
      * Abandon audio focus. Causes the previous focus owner, if any, to receive focus.
+     * @return true on successful focus change request.
      */
-    fun abandonFocus()
+    fun abandonFocus(): Boolean
 }
