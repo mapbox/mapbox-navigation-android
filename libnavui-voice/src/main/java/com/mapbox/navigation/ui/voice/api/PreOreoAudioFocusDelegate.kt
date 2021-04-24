@@ -9,11 +9,12 @@ internal class PreOreoAudioFocusDelegate(
 ) : AudioFocusDelegate {
 
     override fun requestFocus(): Boolean {
-        return when (audioManager.requestAudioFocus(
+        val result = audioManager.requestAudioFocus(
             null,
             options.streamType,
             options.focusGain
-        )) {
+        )
+        return when (result) {
             AudioManager.AUDIOFOCUS_REQUEST_GRANTED,
             AudioManager.AUDIOFOCUS_REQUEST_DELAYED -> true
             else -> false

@@ -51,7 +51,11 @@ class VoiceInstructionsPlayerOptions private constructor(
     }
 
     override fun toString(): String {
-        return "VoiceInstructionsPlayerOptions(focusGain=$focusGain, streamType=$streamType, audioAttributes=$audioAttributes)"
+        return "VoiceInstructionsPlayerOptions(" +
+            "focusGain=$focusGain, " +
+            "streamType=$streamType, " +
+            "audioAttributes=$audioAttributes" +
+            ")"
     }
 
     override fun equals(other: Any?): Boolean {
