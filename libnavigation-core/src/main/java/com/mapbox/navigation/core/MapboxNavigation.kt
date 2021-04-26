@@ -286,11 +286,12 @@ class MapboxNavigation(
             logger
         )
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
+            navigationOptions.routeRefreshOptions,
             directionsSession,
             tripSession,
             logger
         )
-        if (navigationOptions.isRouteRefreshEnabled) {
+        if (navigationOptions.routeRefreshOptions.enabled) {
             routeRefreshController.start()
         }
 
@@ -875,7 +876,10 @@ class MapboxNavigation(
                     NetworkStatusService::class.java,
                     NetworkStatusService(navigationOptions.applicationContext)
                 ),
-                ModuleProviderArgument(Boolean::class.java, navigationOptions.isRouteRefreshEnabled)
+                ModuleProviderArgument(
+                    Boolean::class.java,
+                    navigationOptions.routeRefreshOptions.enabled
+                )
             )
             MapboxModuleType.NavigationTripNotification -> arrayOf(
                 ModuleProviderArgument(NavigationOptions::class.java, navigationOptions),
