@@ -1961,6 +1961,18 @@ License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENS
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Kotlin Stdlib Jdk7 (Kotlin Standard Library JDK 7 extension).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Kotlin Stdlib Jdk8 (Kotlin Standard Library JDK 8 extension).
+URL: [https://kotlinlang.org/](https://kotlinlang.org/)
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 
 
 #### Navigation UI speed limit module
