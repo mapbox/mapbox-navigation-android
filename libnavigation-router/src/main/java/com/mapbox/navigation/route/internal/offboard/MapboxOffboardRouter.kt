@@ -59,7 +59,7 @@ class MapboxOffboardRouter(
         callback: Router.Callback
     ): Long {
         val mapboxDirections = RouteBuilderProvider
-            .getBuilder(context, urlSkuTokenProvider)
+            .getBuilder(urlSkuTokenProvider)
             .routeOptions(routeOptions, refreshEnabled)
             .build()
         val requestId = directionRequests.put(mapboxDirections)

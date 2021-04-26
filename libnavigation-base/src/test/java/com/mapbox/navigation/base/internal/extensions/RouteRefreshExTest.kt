@@ -3,6 +3,7 @@ package com.mapbox.navigation.base.internal.extensions
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.extensions.applyDefaultOptions
 import com.mapbox.navigation.base.extensions.supportsRouteRefresh
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -18,7 +19,7 @@ class RouteRefreshExTest {
                 Point.fromLngLat(-121.483304, 38.583313)
             )
         )
-        .applyDefaultParams()
+        .applyDefaultOptions()
 
     @Test
     fun `should enable route refresh with all the criteria`() {

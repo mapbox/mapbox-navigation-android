@@ -60,7 +60,7 @@ class MapboxOnboardRouter(
         callback: Router.Callback
     ): Long {
         val httpUrl = RouteBuilderProvider
-            .getBuilder(context, null)
+            .getBuilder(null)
             .routeOptions(routeOptions, false)
             .build()
             .httpUrl()

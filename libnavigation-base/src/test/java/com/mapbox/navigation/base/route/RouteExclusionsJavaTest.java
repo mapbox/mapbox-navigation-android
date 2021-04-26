@@ -4,7 +4,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
-import com.mapbox.navigation.base.internal.extensions.MapboxRouteOptionsUtils;
+import com.mapbox.navigation.base.extensions.RouteOptionsEx;
 import com.mapbox.navigation.testing.FileUtils;
 
 import org.junit.Test;
@@ -26,7 +26,7 @@ public class RouteExclusionsJavaTest {
     List<Point> coordinates = new ArrayList<>();
     coordinates.add(origin);
     coordinates.add(destination);
-    RouteOptions.Builder routeOptionsBuilder = MapboxRouteOptionsUtils.applyDefaultParams(
+    RouteOptions.Builder routeOptionsBuilder = RouteOptionsEx.applyDefaultOptions(
         RouteOptions.builder()
             .coordinates(coordinates)
             .accessToken("pk.123")
@@ -48,7 +48,7 @@ public class RouteExclusionsJavaTest {
     List<Point> coordinates = new ArrayList<>();
     coordinates.add(origin);
     coordinates.add(destination);
-    RouteOptions routeOptionsWithoutExclusions = MapboxRouteOptionsUtils.applyDefaultParams(
+    RouteOptions routeOptionsWithoutExclusions = RouteOptionsEx.applyDefaultOptions(
         RouteOptions.builder()
             .coordinates(coordinates)
             .accessToken("pk.123")

@@ -37,7 +37,6 @@ import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -54,6 +53,7 @@ import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.camera.AnimationAdapter.OnAnimationButtonClicked
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityCameraBinding
 import com.mapbox.navigation.examples.util.Utils
+import com.mapbox.navigation.examples.util.applyAllOptions
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
@@ -558,12 +558,7 @@ class MapboxCameraAnimationsActivity :
     private fun findRoute(origin: Point, destination: Point) {
         Utils.vibrate(this)
         val routeOptions: RouteOptions = RouteOptions.builder()
-            .applyDefaultParams()
-            .accessToken(getMapboxAccessTokenFromResources())
-            .coordinates(listOf(origin, destination))
-            .alternatives(true)
-            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-            .overview(DirectionsCriteria.OVERVIEW_FULL)
+            .applyAllOptions(this)
             .annotationsList(
                 listOf(
                     DirectionsCriteria.ANNOTATION_SPEED,

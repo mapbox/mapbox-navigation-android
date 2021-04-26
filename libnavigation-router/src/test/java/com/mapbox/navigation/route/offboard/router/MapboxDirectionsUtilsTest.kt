@@ -3,7 +3,7 @@ package com.mapbox.navigation.route.offboard.router
 import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
+import com.mapbox.navigation.base.extensions.applyDefaultOptions
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Test
@@ -22,7 +22,7 @@ class MapboxDirectionsUtilsTest {
                     Point.fromLngLat(-121.483304, 38.583313)
                 )
             )
-            .applyDefaultParams()
+            .applyDefaultOptions()
             .build()
 
         mapboxDirectionsBuilder.routeOptions(routeOptions, refreshEnabled = true)

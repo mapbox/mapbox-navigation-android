@@ -18,7 +18,6 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -32,6 +31,7 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityVoiceBinding
+import com.mapbox.navigation.examples.util.applyAllOptions
 import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
@@ -309,7 +309,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private fun findRoute(origin: Point, destination: Point) {
         val routeOptions: RouteOptions = RouteOptions.builder()
-            .applyDefaultParams()
+            .applyAllOptions(this)
             .accessToken(getMapboxAccessTokenFromResources())
             .coordinates(listOf(origin, destination))
             .voiceInstructions(true)

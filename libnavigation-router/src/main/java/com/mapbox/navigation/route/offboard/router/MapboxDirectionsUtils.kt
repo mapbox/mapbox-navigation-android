@@ -17,6 +17,9 @@ internal fun MapboxDirections.Builder.routeOptions(
     options: RouteOptions,
     refreshEnabled: Boolean
 ): MapboxDirections.Builder {
+
+    enableRefresh(refreshEnabled)
+
     check(options.coordinates().size >= 2) { "At least 2 coordinates should be provided." }
 
     baseUrl(options.baseUrl())
@@ -31,7 +34,9 @@ internal fun MapboxDirections.Builder.routeOptions(
         }
     }
 
-    alternatives(options.alternatives() ?: false)
+    options.alternatives()?.let {
+        alternatives(it)
+    }
 
     options.language()?.let {
         language(Locale(it))
@@ -44,8 +49,13 @@ internal fun MapboxDirections.Builder.routeOptions(
         bearings(it)
     }
 
-    continueStraight(options.continueStraight() ?: false)
-    roundaboutExits(options.roundaboutExits() ?: false)
+    options.continueStraight()?.let {
+        continueStraight(it)
+    }
+
+    options.roundaboutExits()?.let {
+        roundaboutExits(it)
+    }
 
     options.geometries()?.let {
         geometries(options.geometries())
@@ -55,14 +65,25 @@ internal fun MapboxDirections.Builder.routeOptions(
         overview(it)
     }
 
-    steps(options.steps() ?: true)
+    options.steps()?.let {
+        steps(it)
+    }
 
     options.annotationsList()?.let {
         annotations(it)
     }
 
-    voiceInstructions(options.voiceInstructions() ?: true)
-    bannerInstructions(options.bannerInstructions() ?: true)
+    options.voiceInstructions()?.let {
+        voiceInstructions(it)
+    }
+
+    options.voiceInstructions()?.let {
+        voiceInstructions(it)
+    }
+
+    options.bannerInstructions()?.let {
+        bannerInstructions(it)
+    }
 
     options.voiceUnits()?.let {
         voiceUnits(it)
@@ -101,8 +122,6 @@ internal fun MapboxDirections.Builder.routeOptions(
     options.snappingClosuresList()?.let {
         snappingClosures(it)
     }
-
-    enableRefresh(refreshEnabled)
 
     eventListener(EVENT_LISTENER)
 

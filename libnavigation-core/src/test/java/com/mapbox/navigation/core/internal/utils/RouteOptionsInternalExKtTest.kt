@@ -2,11 +2,11 @@ package com.mapbox.navigation.core.internal.utils
 
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
+import com.mapbox.navigation.base.extensions.applyDefaultOptions
 import org.junit.Assert
 import org.junit.Test
 
-class RouteOptionsExTest {
+class RouteOptionsInternalExKtTest {
     @Test
     fun `check valid uuid for cases route options is null, uuid is empty and uuid is offline`() {
         val cases = listOf(
@@ -39,7 +39,7 @@ class RouteOptionsExTest {
 
     private fun provideRouteOptions(uuid: String): RouteOptions =
         RouteOptions.builder()
-            .applyDefaultParams()
+            .applyDefaultOptions()
             .coordinates(listOf(Point.fromLngLat(0.0, 0.0), Point.fromLngLat(1.1, 1.1)))
             .accessToken("pk.**")
             .requestUuid(uuid)
