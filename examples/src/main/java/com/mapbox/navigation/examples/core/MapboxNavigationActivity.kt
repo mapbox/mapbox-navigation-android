@@ -122,33 +122,33 @@ class MapboxNavigationActivity :
     private val pixelDensity = Resources.getSystem().displayMetrics.density
     private val overviewEdgeInsets: EdgeInsets by lazy {
         EdgeInsets(
+            128.0 * pixelDensity,
             40.0 * pixelDensity,
-            40.0 * pixelDensity,
-            40.0 * pixelDensity,
+            100.0 * pixelDensity,
             40.0 * pixelDensity
         )
     }
     private val landscapeOverviewEdgeInsets: EdgeInsets by lazy {
         EdgeInsets(
-            20.0 * pixelDensity,
-            mapboxMap.getSize().width.toDouble() / 1.75,
+            30.0 * pixelDensity,
+            380.0 * pixelDensity,
             20.0 * pixelDensity,
             20.0 * pixelDensity
         )
     }
     private val followingEdgeInsets: EdgeInsets by lazy {
         EdgeInsets(
-            mapboxMap.getSize().height.toDouble() * 2.0 / 3.0,
-            0.0 * pixelDensity,
-            0.0 * pixelDensity,
-            0.0 * pixelDensity
+            180.0 * pixelDensity,
+            40.0 * pixelDensity,
+            150.0 * pixelDensity,
+            40.0 * pixelDensity
         )
     }
     private val landscapeFollowingEdgeInsets: EdgeInsets by lazy {
         EdgeInsets(
-            mapboxMap.getSize().height.toDouble() * 2.0 / 5.0,
-            mapboxMap.getSize().width.toDouble() / 2.0,
-            0.0 * pixelDensity,
+            30.0 * pixelDensity,
+            380.0 * pixelDensity,
+            110.0 * pixelDensity,
             40.0 * pixelDensity
         )
     }
