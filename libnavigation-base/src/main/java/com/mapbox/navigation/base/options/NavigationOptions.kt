@@ -6,6 +6,7 @@ import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.route.RouteRefreshOptions
 
 /**
  * Default navigator approximate prediction in milliseconds
@@ -34,7 +35,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * @param isDebugLoggingEnabled Boolean
  * @param deviceProfile [DeviceProfile] defines how navigation data should be interpretation
  * @param eHorizonOptions [EHorizonOptions] defines configuration for the Electronic Horizon
- * @param isRouteRefreshEnabled Boolean *true* if need to enable route refresh mechanism, otherwise *false*
+ * @param routeRefreshOptions defines configuration for refreshing routes
  * @param incidentsOptions defines configuration for live incidents
  */
 class NavigationOptions private constructor(
@@ -51,7 +52,7 @@ class NavigationOptions private constructor(
     val isDebugLoggingEnabled: Boolean,
     val deviceProfile: DeviceProfile,
     val eHorizonOptions: EHorizonOptions,
-    val isRouteRefreshEnabled: Boolean,
+    val routeRefreshOptions: RouteRefreshOptions,
     val incidentsOptions: IncidentsOptions,
 ) {
 
@@ -71,7 +72,7 @@ class NavigationOptions private constructor(
         isDebugLoggingEnabled(isDebugLoggingEnabled)
         deviceProfile(deviceProfile)
         eHorizonOptions(eHorizonOptions)
-        isRouteRefreshEnabled(isRouteRefreshEnabled)
+        routeRefreshOptions(routeRefreshOptions)
         incidentsOptions(incidentsOptions)
     }
 
@@ -97,7 +98,7 @@ class NavigationOptions private constructor(
         if (isDebugLoggingEnabled != other.isDebugLoggingEnabled) return false
         if (deviceProfile != other.deviceProfile) return false
         if (eHorizonOptions != other.eHorizonOptions) return false
-        if (isRouteRefreshEnabled != other.isRouteRefreshEnabled) return false
+        if (routeRefreshOptions != other.routeRefreshOptions) return false
         if (incidentsOptions != other.incidentsOptions) return false
 
         return true
@@ -120,7 +121,7 @@ class NavigationOptions private constructor(
         result = 31 * result + isDebugLoggingEnabled.hashCode()
         result = 31 * result + deviceProfile.hashCode()
         result = 31 * result + eHorizonOptions.hashCode()
-        result = 31 * result + isRouteRefreshEnabled.hashCode()
+        result = 31 * result + routeRefreshOptions.hashCode()
         result = 31 * result + incidentsOptions.hashCode()
         return result
     }
@@ -143,7 +144,7 @@ class NavigationOptions private constructor(
             "isDebugLoggingEnabled=$isDebugLoggingEnabled, " +
             "deviceProfile=$deviceProfile, " +
             "eHorizonOptions=$eHorizonOptions " +
-            "isRouteRefreshEnabled=$isRouteRefreshEnabled " +
+            "routeRefreshOptions=$routeRefreshOptions " +
             "incidentsOptions=$incidentsOptions" +
             ")"
     }
@@ -173,7 +174,7 @@ class NavigationOptions private constructor(
         private var isDebugLoggingEnabled: Boolean = false
         private var deviceProfile: DeviceProfile = DeviceProfile.Builder().build()
         private var eHorizonOptions: EHorizonOptions = EHorizonOptions.Builder().build()
-        private var isRouteRefreshEnabled: Boolean = true
+        private var routeRefreshOptions: RouteRefreshOptions = RouteRefreshOptions.Builder().build()
         private var incidentsOptions: IncidentsOptions = IncidentsOptions.Builder().build()
 
         /**
@@ -251,14 +252,10 @@ class NavigationOptions private constructor(
             apply { this.eHorizonOptions = eHorizonOptions }
 
         /**
-         * Defines if route refresh is enabled.
-         *
-         * See [com.mapbox.navigation.base.extensions.supportsRouteRefresh]
-         * for a list of requirements that your route request needs to meet to be eligible for
-         * refresh calls.
+         * Defines configuration for route refresh
          */
-        fun isRouteRefreshEnabled(flag: Boolean): Builder =
-            apply { this.isRouteRefreshEnabled = flag }
+        fun routeRefreshOptions(routeRefreshOptions: RouteRefreshOptions): Builder =
+            apply { this.routeRefreshOptions = routeRefreshOptions }
 
         /**
          * Defines configuration for live incidents
@@ -286,7 +283,7 @@ class NavigationOptions private constructor(
                 isDebugLoggingEnabled = isDebugLoggingEnabled,
                 deviceProfile = deviceProfile,
                 eHorizonOptions = eHorizonOptions,
-                isRouteRefreshEnabled = isRouteRefreshEnabled,
+                routeRefreshOptions = routeRefreshOptions,
                 incidentsOptions = incidentsOptions,
             )
         }

@@ -19,6 +19,7 @@ import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.options.IncidentsOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.TripNotification
@@ -233,16 +234,17 @@ class MapboxNavigationTest {
     fun init_routeRefreshController_start_called_when_isRouteRefresh_enabled() {
         ThreadController.cancelAllUICoroutines()
         mockkObject(RouteRefreshControllerProvider)
+        val routeRefreshOptions = RouteRefreshOptions.Builder()
+            .enabled(true)
+            .build()
         every {
             RouteRefreshControllerProvider.createRouteRefreshController(
-                directionsSession,
-                tripSession,
-                logger
+                any(), any(), any(), any()
             )
         } returns routeRefreshController
         every { routeRefreshController.start() } returns mockk()
         val navigationOptions = provideNavigationOptions()
-            .isRouteRefreshEnabled(true)
+            .routeRefreshOptions(routeRefreshOptions)
             .build()
 
         mapboxNavigation = MapboxNavigation(navigationOptions)
@@ -256,16 +258,17 @@ class MapboxNavigationTest {
     fun init_routeRefreshController_start_not_called_when_isRouteRefresh_disabled() {
         ThreadController.cancelAllUICoroutines()
         mockkObject(RouteRefreshControllerProvider)
+        val routeRefreshOptions = RouteRefreshOptions.Builder()
+            .enabled(false)
+            .build()
         every {
             RouteRefreshControllerProvider.createRouteRefreshController(
-                directionsSession,
-                tripSession,
-                logger
+                any(), any(), any(), any()
             )
         } returns routeRefreshController
         every { routeRefreshController.start() } returns mockk()
         val navigationOptions = provideNavigationOptions()
-            .isRouteRefreshEnabled(false)
+            .routeRefreshOptions(routeRefreshOptions)
             .build()
 
         mapboxNavigation = MapboxNavigation(navigationOptions)

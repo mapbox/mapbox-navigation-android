@@ -181,11 +181,11 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.android.core.location.LocationEngineRequest getLocationEngineRequest();
     method public long getNavigatorPredictionMillis();
     method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions getPredictiveCacheLocationOptions();
+    method public com.mapbox.navigation.base.route.RouteRefreshOptions getRouteRefreshOptions();
     method public com.mapbox.navigation.base.options.RoutingTilesOptions getRoutingTilesOptions();
     method public int getTimeFormatType();
     method public boolean isDebugLoggingEnabled();
     method public boolean isFromNavigationUi();
-    method public boolean isRouteRefreshEnabled();
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder toBuilder();
     property public final String? accessToken;
     property public final android.content.Context applicationContext;
@@ -195,11 +195,11 @@ package com.mapbox.navigation.base.options {
     property public final com.mapbox.navigation.base.options.IncidentsOptions incidentsOptions;
     property public final boolean isDebugLoggingEnabled;
     property public final boolean isFromNavigationUi;
-    property public final boolean isRouteRefreshEnabled;
     property public final com.mapbox.android.core.location.LocationEngine locationEngine;
     property public final com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest;
     property public final long navigatorPredictionMillis;
     property public final com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions;
+    property public final com.mapbox.navigation.base.route.RouteRefreshOptions routeRefreshOptions;
     property public final com.mapbox.navigation.base.options.RoutingTilesOptions routingTilesOptions;
     property public final int timeFormatType;
   }
@@ -214,11 +214,11 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder incidentsOptions(com.mapbox.navigation.base.options.IncidentsOptions incidentsOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder isDebugLoggingEnabled(boolean flag);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder isFromNavigationUi(boolean flag);
-    method public com.mapbox.navigation.base.options.NavigationOptions.Builder isRouteRefreshEnabled(boolean flag);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngine(com.mapbox.android.core.location.LocationEngine locationEngine);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngineRequest(com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder navigatorPredictionMillis(long predictionMillis);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder predictiveCacheLocationOptions(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions);
+    method public com.mapbox.navigation.base.options.NavigationOptions.Builder routeRefreshOptions(com.mapbox.navigation.base.route.RouteRefreshOptions routeRefreshOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder routingTilesOptions(com.mapbox.navigation.base.options.RoutingTilesOptions routingTilesOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder timeFormatType(int type);
   }
@@ -324,6 +324,21 @@ package com.mapbox.navigation.base.route {
     method public Throwable? getThrowable();
     property public final String? message;
     property public final Throwable? throwable;
+  }
+
+  public final class RouteRefreshOptions {
+    method public boolean getEnabled();
+    method public long getIntervalMillis();
+    method public com.mapbox.navigation.base.route.RouteRefreshOptions.Builder toBuilder();
+    property public final boolean enabled;
+    property public final long intervalMillis;
+  }
+
+  public static final class RouteRefreshOptions.Builder {
+    ctor public RouteRefreshOptions.Builder();
+    method public com.mapbox.navigation.base.route.RouteRefreshOptions build();
+    method public com.mapbox.navigation.base.route.RouteRefreshOptions.Builder enabled(boolean enabled);
+    method public com.mapbox.navigation.base.route.RouteRefreshOptions.Builder intervalMillis(long intervalMillis);
   }
 
   public interface Router {

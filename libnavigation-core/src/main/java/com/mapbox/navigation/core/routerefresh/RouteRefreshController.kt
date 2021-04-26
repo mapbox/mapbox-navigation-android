@@ -7,12 +7,12 @@ import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.extensions.supportsRouteRefresh
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
+import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.internal.utils.isUuidValidForRefresh
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.MapboxTimer
 import kotlinx.coroutines.Job
-import java.util.concurrent.TimeUnit
 
 /**
  * This class is responsible for refreshing the current direction route's traffic.
@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit
  * can be refreshed are handled by this class. Calling [start] will restart the refresh timer.
  */
 internal class RouteRefreshController(
+    routeRefreshOptions: RouteRefreshOptions,
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession,
     private val logger: Logger
@@ -33,13 +34,11 @@ internal class RouteRefreshController(
         internal val TAG = Tag("MbxRouteRefreshController")
     }
 
-    private val routerRefreshTimer = MapboxTimer()
+    private val routerRefreshTimer = MapboxTimer().apply {
+        restartAfterMillis = routeRefreshOptions.intervalMillis
+    }
 
     private var requestId: Long? = null
-
-    init {
-        routerRefreshTimer.restartAfterMillis = TimeUnit.MINUTES.toMillis(5)
-    }
 
     fun start(): Job {
         stop()

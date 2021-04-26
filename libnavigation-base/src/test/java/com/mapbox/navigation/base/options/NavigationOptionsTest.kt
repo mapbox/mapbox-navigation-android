@@ -7,6 +7,7 @@ import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
+import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.testing.BuilderTest
 import io.mockk.every
 import io.mockk.mockk
@@ -67,7 +68,12 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
             .predictiveCacheLocationOptions(mockk())
             .timeFormatType(1)
             .eHorizonOptions(mockk())
-            .isRouteRefreshEnabled(false)
+            .routeRefreshOptions(
+                RouteRefreshOptions.Builder()
+                    .enabled(false)
+                    .intervalMillis(132345L)
+                    .build()
+            )
             .incidentsOptions(mockk())
     }
 
