@@ -1,6 +1,20 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
+  "Outputs": {
+    "AccessKeyId": {
+      "Value": { "Ref": "AccessKey" }
+    },
+    "SecretAccessKey": {
+      "Value": { "Fn::GetAtt": ["AccessKey", "SecretAccessKey"] }
+    }
+  },
   "Resources": {
+    "AccessKey": {
+      "Type": "AWS::IAM::AccessKey",
+      "Properties": {
+        "UserName": { "Ref": "User" }
+      }
+    },
     "User": {
       "Type": "AWS::IAM::User",
       "Properties": {
