@@ -5,10 +5,8 @@ import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -34,6 +32,7 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityBuildingHighlightBinding
 import com.mapbox.navigation.examples.core.waypoints.WaypointsController
+import com.mapbox.navigation.examples.util.applyAllOptions
 import com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingArrivalApi
 import com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingHighlightApi
 import com.mapbox.navigation.ui.maps.arrival.model.MapboxBuildingHighlightOptions
@@ -224,14 +223,9 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
 
     private fun findRoute(origin: Point) {
         val routeOptions = RouteOptions.builder()
-            .baseUrl(Constants.BASE_API_URL)
-            .user(Constants.MAPBOX_USER)
-            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-            .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
-            .requestUuid("")
+            .applyAllOptions(this)
             .accessToken(getMapboxAccessTokenFromResources())
             .coordinates(waypointsController.coordinates(origin))
-            .alternatives(true)
             .build()
         mapboxNavigation.requestRoutes(
             routeOptions,

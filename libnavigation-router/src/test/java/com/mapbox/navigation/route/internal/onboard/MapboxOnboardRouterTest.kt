@@ -8,7 +8,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
+import com.mapbox.navigation.base.extensions.applyDefaultOptions
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
@@ -97,7 +97,7 @@ class MapboxOnboardRouterTest {
 
         mockkObject(RouteBuilderProvider)
         every {
-            RouteBuilderProvider.getBuilder(context, null)
+            RouteBuilderProvider.getBuilder(null)
         } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.interceptor(any()) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.enableRefresh(any()) } returns mapboxDirectionsBuilder
@@ -389,7 +389,7 @@ class MapboxOnboardRouterTest {
 
     private fun provideDefaultRouteOptions(): RouteOptions {
         return RouteOptions.builder()
-            .applyDefaultParams()
+            .applyDefaultOptions()
             .apply {
                 accessToken(ACCESS_TOKEN)
                 coordinates(origin, waypoints, destination)

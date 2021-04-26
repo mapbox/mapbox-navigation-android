@@ -3,7 +3,7 @@ package com.mapbox.navigation.instrumentation_tests.core
 import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
+import com.mapbox.navigation.base.extensions.applyDefaultOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
@@ -72,7 +72,7 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
         runOnMainSync {
             mapboxNavigation.startTripSession()
             mapboxNavigation.requestRoutes(
-                RouteOptions.builder().applyDefaultParams()
+                RouteOptions.builder().applyDefaultOptions()
                     .baseUrl(mockWebServerRule.baseUrl)
                     .accessToken(getMapboxAccessTokenFromResources(activity))
                     .coordinates(mockRoute.routeWaypoints).build(),

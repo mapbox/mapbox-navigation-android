@@ -361,7 +361,7 @@ class NavigationRouteTest {
     }
 
     private fun provideNavigationOffboardRouteBuilder() =
-        RouteBuilderProvider.getBuilder(context, mockSkuTokenProvider)
+        RouteBuilderProvider.getBuilder(mockSkuTokenProvider)
 
     private fun provideDefaultRouteOptionsBuilder() =
         RouteOptions.builder()

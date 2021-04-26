@@ -19,6 +19,9 @@ package com.mapbox.navigation.base {
 package com.mapbox.navigation.base.extensions {
 
   public final class RouteOptionsEx {
+    method public static com.mapbox.api.directions.v5.models.RouteOptions.Builder applyDefaultOptions(com.mapbox.api.directions.v5.models.RouteOptions.Builder);
+    method public static com.mapbox.api.directions.v5.models.RouteOptions.Builder applyLocationAndVoiceUnit(com.mapbox.api.directions.v5.models.RouteOptions.Builder, android.content.Context context);
+    method public static com.mapbox.api.directions.v5.models.RouteOptions.Builder applyRecommendedOptions(com.mapbox.api.directions.v5.models.RouteOptions.Builder);
     method public static boolean supportsRouteRefresh(com.mapbox.api.directions.v5.models.RouteOptions?);
   }
 

@@ -12,10 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.gestures.Utils
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -27,6 +25,9 @@ import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.extensions.applyDefaultOptions
+import com.mapbox.navigation.base.extensions.applyLocationAndVoiceUnit
+import com.mapbox.navigation.base.extensions.applyRecommendedOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -208,11 +209,9 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private fun findRoute(origin: Point?, destination: Point?) {
         val routeOptions = RouteOptions.builder()
-            .baseUrl(Constants.BASE_API_URL)
-            .user(Constants.MAPBOX_USER)
-            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-            .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
-            .requestUuid("")
+            .applyDefaultOptions()
+            .applyLocationAndVoiceUnit(this)
+            .applyRecommendedOptions()
             .accessToken(getMapboxAccessToken(this))
             .coordinates(listOf(origin, destination))
             .alternatives(true)

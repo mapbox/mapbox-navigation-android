@@ -376,11 +376,16 @@ class MapboxNavigation(
      * })
      * ```
      *
-     * @param routeOptions params for the route request
+     * @param routeOptions params for the route request. Use [com.mapbox.navigation.base.extensions.applyDefaultOptions]
+     * to apply default params. Also see [com.mapbox.navigation.base.extensions.applyLocationAndVoiceUnit],
+     * [com.mapbox.navigation.base.extensions.applyRecommendedOptions].
      * @param routesRequestCallback listener that gets notified when request state changes
      * @return requestId, see [cancelRouteRequest]
      * @see [registerRoutesObserver]
      * @see [registerRouteProgressObserver]
+     * @see [com.mapbox.navigation.base.extensions.applyDefaultOptions]
+     * @see [com.mapbox.navigation.base.extensions.applyLocationAndVoiceUnit]
+     * @see [com.mapbox.navigation.base.extensions.applyRecommendedOptions]
      */
     fun requestRoutes(
         routeOptions: RouteOptions,

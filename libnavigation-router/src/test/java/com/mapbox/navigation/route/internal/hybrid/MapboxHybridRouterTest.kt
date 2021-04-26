@@ -6,7 +6,7 @@ import android.net.ConnectivityManager
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
+import com.mapbox.navigation.base.extensions.applyDefaultOptions
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
@@ -417,7 +417,7 @@ class MapboxHybridRouterTest {
 
     private fun provideDefaultRouteOptions(): RouteOptions {
         return RouteOptions.builder()
-            .applyDefaultParams()
+            .applyDefaultOptions()
             .apply {
                 accessToken("")
                 coordinates(Point.fromLngLat(.0, .0), null, Point.fromLngLat(.0, .0))
