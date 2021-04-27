@@ -209,7 +209,7 @@ class MapboxNavigationViewportDataSource(
     /**
      * Set a [MapboxNavigationViewportDataSourceDebugger].
      */
-    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @ExperimentalMapboxNavigationAPI
     var debugger: MapboxNavigationViewportDataSourceDebugger? = null
 
     /**

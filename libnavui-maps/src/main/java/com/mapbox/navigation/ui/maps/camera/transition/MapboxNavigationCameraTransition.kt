@@ -3,15 +3,16 @@ package com.mapbox.navigation.ui.maps.camera.transition
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import androidx.core.view.animation.PathInterpolatorCompat
-import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.CameraAnimatorOptions
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.NAVIGATION_CAMERA_OWNER
+import com.mapbox.navigation.ui.maps.camera.utils.constraintDurationTo
+import com.mapbox.navigation.ui.maps.camera.utils.createAnimatorSet
 import com.mapbox.navigation.ui.maps.camera.utils.normalizeBearing
+import com.mapbox.navigation.ui.maps.camera.utils.screenDistanceFromMapCenterToTarget
 import kotlin.math.abs
-import kotlin.math.hypot
 
 private const val LINEAR_ANIMATION_DURATION = 1000L
 private const val MAXIMUM_LOW_TO_HIGH_DURATION = 3000L
@@ -27,7 +28,8 @@ class MapboxNavigationCameraTransition(
 ) : NavigationCameraTransition {
 
     override fun transitionFromLowZoomToHighZoom(
-        cameraOptions: CameraOptions
+        cameraOptions: CameraOptions,
+        transitionOptions: NavigationCameraTransitionOptions
     ): AnimatorSet {
         val animators = mutableListOf<ValueAnimator>()
         val currentMapCameraOptions = mapboxMap.getCameraOptions(null)
@@ -35,6 +37,7 @@ class MapboxNavigationCameraTransition(
         var centerDuration = 0L
         cameraOptions.center?.let { center ->
             val screenDistanceFromMapCenterToLocation = screenDistanceFromMapCenterToTarget(
+                mapboxMap = mapboxMap,
                 currentCenter = currentMapCameraOptions.center ?: center,
                 targetCenter = center
             )
@@ -130,13 +133,12 @@ class MapboxNavigationCameraTransition(
             animators.add(paddingAnimator)
         }
 
-        return AnimatorSet().apply {
-            playTogether(*(animators.toTypedArray()))
-        }
+        return createAnimatorSet(animators).constraintDurationTo(transitionOptions.maxDuration)
     }
 
     override fun transitionFromHighZoomToLowZoom(
-        cameraOptions: CameraOptions
+        cameraOptions: CameraOptions,
+        transitionOptions: NavigationCameraTransitionOptions
     ): AnimatorSet {
         val animators = mutableListOf<ValueAnimator>()
         val currentMapCameraOptions = mapboxMap.getCameraOptions(null)
@@ -210,13 +212,12 @@ class MapboxNavigationCameraTransition(
             animators.add(paddingAnimator)
         }
 
-        return AnimatorSet().apply {
-            playTogether(*(animators.toTypedArray()))
-        }
+        return createAnimatorSet(animators).constraintDurationTo(transitionOptions.maxDuration)
     }
 
     override fun transitionLinear(
-        cameraOptions: CameraOptions
+        cameraOptions: CameraOptions,
+        transitionOptions: NavigationCameraTransitionOptions
     ): AnimatorSet {
         val animators = mutableListOf<ValueAnimator>()
         val currentMapCamera = mapboxMap.getCameraOptions(null)
@@ -285,20 +286,6 @@ class MapboxNavigationCameraTransition(
             animators.add(paddingAnimator)
         }
 
-        return AnimatorSet().apply {
-            playTogether(*(animators.toTypedArray()))
-        }
-    }
-
-    private fun screenDistanceFromMapCenterToTarget(
-        currentCenter: Point,
-        targetCenter: Point
-    ): Double {
-        val currentCenterScreenCoordinate = mapboxMap.pixelForCoordinate(currentCenter)
-        val locationScreenCoordinate = mapboxMap.pixelForCoordinate(targetCenter)
-        return hypot(
-            currentCenterScreenCoordinate.x - locationScreenCoordinate.x,
-            currentCenterScreenCoordinate.y - locationScreenCoordinate.y
-        )
+        return createAnimatorSet(animators).constraintDurationTo(transitionOptions.maxDuration)
     }
 }

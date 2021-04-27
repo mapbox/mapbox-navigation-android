@@ -19,6 +19,7 @@ class AnimationAdapter(
     init {
         animationList.add(AnimationType.Following)
         animationList.add(AnimationType.Overview)
+        animationList.add(AnimationType.FastFollowing)
         animationList.add(AnimationType.ToPOI)
         animationList.add(AnimationType.LookAtPOIWhenFollowing)
         animationList.add(AnimationType.RemoveRoute)

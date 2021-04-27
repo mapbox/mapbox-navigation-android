@@ -61,9 +61,19 @@ package com.mapbox.navigation.ui.maps.camera {
     method public com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger? getDebugger();
     method public com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState getState();
     method public void registerNavigationCameraStateChangeObserver(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver navigationCameraStateChangedObserver);
-    method public void requestNavigationCameraToFollowing(android.animation.Animator.AnimatorListener? animatorListener = null);
+    method public void requestNavigationCameraToFollowing(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder,kotlin.Unit> stateTransitionOptionsBlock, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder,kotlin.Unit> frameTransitionOptionsBlock, android.animation.Animator.AnimatorListener? animatorListener = null);
+    method public void requestNavigationCameraToFollowing(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder,kotlin.Unit> stateTransitionOptionsBlock, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder,kotlin.Unit> frameTransitionOptionsBlock);
+    method public void requestNavigationCameraToFollowing(com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions stateTransitionOptions = DEFAULT_STATE_TRANSITION_OPT, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT, android.animation.Animator.AnimatorListener? animatorListener = null);
+    method public void requestNavigationCameraToFollowing(com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions stateTransitionOptions = DEFAULT_STATE_TRANSITION_OPT, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT);
+    method public void requestNavigationCameraToFollowing(com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions stateTransitionOptions = DEFAULT_STATE_TRANSITION_OPT);
+    method public void requestNavigationCameraToFollowing();
     method public void requestNavigationCameraToIdle();
-    method public void requestNavigationCameraToOverview(android.animation.Animator.AnimatorListener? animatorListener = null);
+    method public void requestNavigationCameraToOverview(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder,kotlin.Unit> stateTransitionOptionsBlock, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder,kotlin.Unit> frameTransitionOptionsBlock, android.animation.Animator.AnimatorListener? animatorListener = null);
+    method public void requestNavigationCameraToOverview(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder,kotlin.Unit> stateTransitionOptionsBlock, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder,kotlin.Unit> frameTransitionOptionsBlock);
+    method public void requestNavigationCameraToOverview(com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions stateTransitionOptions = DEFAULT_STATE_TRANSITION_OPT, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT, android.animation.Animator.AnimatorListener? animatorListener = null);
+    method public void requestNavigationCameraToOverview(com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions stateTransitionOptions = DEFAULT_STATE_TRANSITION_OPT, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT);
+    method public void requestNavigationCameraToOverview(com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions stateTransitionOptions = DEFAULT_STATE_TRANSITION_OPT);
+    method public void requestNavigationCameraToOverview();
     method public void resetFrame();
     method public void setDebugger(com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger? p);
     method public void unregisterNavigationCameraStateChangeObserver(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver navigationCameraStateChangedObserver);
@@ -341,33 +351,45 @@ package com.mapbox.navigation.ui.maps.camera.transition {
 
   public final class MapboxNavigationCameraStateTransition implements com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition {
     ctor public MapboxNavigationCameraStateTransition(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransition navigationCameraTransition = MapboxNavigationCameraTransition(mapboxMap, cameraPlugin));
-    method public android.animation.AnimatorSet transitionToFollowing(com.mapbox.maps.CameraOptions cameraOptions);
-    method public android.animation.AnimatorSet transitionToOverview(com.mapbox.maps.CameraOptions cameraOptions);
-    method public android.animation.AnimatorSet updateFrameForFollowing(com.mapbox.maps.CameraOptions cameraOptions);
-    method public android.animation.AnimatorSet updateFrameForOverview(com.mapbox.maps.CameraOptions cameraOptions);
+    method public android.animation.AnimatorSet transitionToFollowing(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet transitionToOverview(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet updateFrameForFollowing(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet updateFrameForOverview(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
   }
 
   public final class MapboxNavigationCameraTransition implements com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransition {
     ctor public MapboxNavigationCameraTransition(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin);
-    method public android.animation.AnimatorSet transitionFromHighZoomToLowZoom(com.mapbox.maps.CameraOptions cameraOptions);
-    method public android.animation.AnimatorSet transitionFromLowZoomToHighZoom(com.mapbox.maps.CameraOptions cameraOptions);
-    method public android.animation.AnimatorSet transitionLinear(com.mapbox.maps.CameraOptions cameraOptions);
+    method public android.animation.AnimatorSet transitionFromHighZoomToLowZoom(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet transitionFromLowZoomToHighZoom(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet transitionLinear(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
   }
 
   public final class MapboxNavigationCameraTransitionKt {
   }
 
   public interface NavigationCameraStateTransition {
-    method public android.animation.AnimatorSet transitionToFollowing(com.mapbox.maps.CameraOptions cameraOptions);
-    method public android.animation.AnimatorSet transitionToOverview(com.mapbox.maps.CameraOptions cameraOptions);
-    method public android.animation.AnimatorSet updateFrameForFollowing(com.mapbox.maps.CameraOptions cameraOptions);
-    method public android.animation.AnimatorSet updateFrameForOverview(com.mapbox.maps.CameraOptions cameraOptions);
+    method public android.animation.AnimatorSet transitionToFollowing(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet transitionToOverview(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet updateFrameForFollowing(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet updateFrameForOverview(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
   }
 
   public interface NavigationCameraTransition {
-    method public android.animation.AnimatorSet transitionFromHighZoomToLowZoom(com.mapbox.maps.CameraOptions cameraOptions);
-    method public android.animation.AnimatorSet transitionFromLowZoomToHighZoom(com.mapbox.maps.CameraOptions cameraOptions);
-    method public android.animation.AnimatorSet transitionLinear(com.mapbox.maps.CameraOptions cameraOptions);
+    method public android.animation.AnimatorSet transitionFromHighZoomToLowZoom(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet transitionFromLowZoomToHighZoom(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet transitionLinear(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+  }
+
+  public final class NavigationCameraTransitionOptions {
+    method public long getMaxDuration();
+    method public com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder toBuilder();
+    property public final long maxDuration;
+  }
+
+  public static final class NavigationCameraTransitionOptions.Builder {
+    ctor public NavigationCameraTransitionOptions.Builder();
+    method public com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions build();
+    method public com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions.Builder maxDuration(long maxDuration);
   }
 
 }
