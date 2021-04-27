@@ -26,6 +26,7 @@ import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState.TRANSITI
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver
 import com.mapbox.navigation.ui.maps.camera.transition.MapboxNavigationCameraStateTransition
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition
+import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -114,9 +115,15 @@ class NavigationCamera(
          * @see CameraAnimator.owner
          */
         const val NAVIGATION_CAMERA_OWNER = "NAVIGATION_CAMERA_OWNER"
+
+        internal val DEFAULT_STATE_TRANSITION_OPT =
+            NavigationCameraTransitionOptions.Builder().maxDuration(3500L).build()
+        internal val DEFAULT_FRAME_TRANSITION_OPT =
+            NavigationCameraTransitionOptions.Builder().maxDuration(1000L).build()
     }
 
     private var runningAnimation: AnimatorSet? = null
+    private var frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT
 
     private val navigationCameraStateChangedObservers =
         CopyOnWriteArraySet<NavigationCameraStateChangedObserver>()
@@ -139,7 +146,7 @@ class NavigationCamera(
     /**
      * Set a [MapboxNavigationViewportDataSourceDebugger].
      */
-    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @ExperimentalMapboxNavigationAPI
     var debugger: MapboxNavigationViewportDataSourceDebugger? = null
 
     private val sourceUpdateObserver = object : ViewportDataSourceUpdateObserver {
@@ -158,23 +165,65 @@ class NavigationCamera(
      *
      * The target camera position is obtained with [ViewportDataSource.getViewportData].
      *
-     * @param animatorListener invoked on transition's progress
+     * @param stateTransitionOptionsBlock options that impact the transition animation from the current state to the requested state.
+     * Defaults to [NavigationCameraTransitionOptions.maxDuration] equal to 3500 millis.
+     * @param frameTransitionOptionsBlock options that impact the transition animations between viewport frames in the selected state.
+     * This refers to camera transition on each [ViewportDataSource] update when [FOLLOWING] is engaged.
+     * Defaults to [NavigationCameraTransitionOptions.maxDuration] equal to 1000 millis.
+     * @param animatorListener invoked on transition's progress.
      */
+    @JvmOverloads
     fun requestNavigationCameraToFollowing(
+        stateTransitionOptionsBlock: ((NavigationCameraTransitionOptions.Builder).() -> Unit),
+        frameTransitionOptionsBlock: ((NavigationCameraTransitionOptions.Builder).() -> Unit),
+        animatorListener: Animator.AnimatorListener? = null
+    ) {
+        requestNavigationCameraToFollowing(
+            stateTransitionOptions =
+            NavigationCameraTransitionOptions.Builder().apply(stateTransitionOptionsBlock).build(),
+            frameTransitionOptions =
+            NavigationCameraTransitionOptions.Builder().apply(frameTransitionOptionsBlock).build(),
+            animatorListener = animatorListener
+        )
+    }
+
+    /**
+     * Executes a transition to [FOLLOWING] state. When started, goes to [TRANSITION_TO_FOLLOWING]
+     * and to the final [FOLLOWING] when ended. If transition is canceled, state goes to [IDLE].
+     *
+     * The target camera position is obtained with [ViewportDataSource.getViewportData].
+     *
+     * @param stateTransitionOptions options that impact the transition animation from the current state to the requested state.
+     * Defaults to [NavigationCameraTransitionOptions.maxDuration] equal to 3500 millis.
+     * @param frameTransitionOptions options that impact the transition animations between viewport frames in the selected state.
+     * This refers to camera transition on each [ViewportDataSource] update when [FOLLOWING] is engaged.
+     * Defaults to [NavigationCameraTransitionOptions.maxDuration] equal to 1000 millis.
+     * @param animatorListener invoked on transition's progress.
+     */
+    @JvmOverloads
+    fun requestNavigationCameraToFollowing(
+        stateTransitionOptions: NavigationCameraTransitionOptions = DEFAULT_STATE_TRANSITION_OPT,
+        frameTransitionOptions: NavigationCameraTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT,
         animatorListener: Animator.AnimatorListener? = null
     ) {
         when (state) {
             TRANSITION_TO_FOLLOWING, FOLLOWING -> {
+                // this should invoke animatorListener
+                // https://github.com/mapbox/mapbox-navigation-android/issues/4341
                 return
             }
             IDLE, TRANSITION_TO_OVERVIEW, OVERVIEW -> {
                 val data = viewportDataSource.getViewportData()
                 startAnimation(
-                    stateTransition.transitionToFollowing(data.cameraForFollowing).apply {
+                    stateTransition.transitionToFollowing(
+                        data.cameraForFollowing,
+                        stateTransitionOptions
+                    ).apply {
                         addListener(
                             createTransitionListener(
                                 TRANSITION_TO_FOLLOWING,
                                 FOLLOWING,
+                                frameTransitionOptions,
                                 animatorListener
                             )
                         )
@@ -191,23 +240,65 @@ class NavigationCamera(
      *
      * The target camera position is obtained with [ViewportDataSource.getViewportData].
      *
-     * @param animatorListener invoked on transition's progress
+     * @param stateTransitionOptionsBlock options that impact the transition animation from the current state to the requested state.
+     * Defaults to [NavigationCameraTransitionOptions.maxDuration] equal to 3500 millis.
+     * @param frameTransitionOptionsBlock options that impact the transition animations between viewport frames in the selected state.
+     * This refers to camera transition on each [ViewportDataSource] update when [OVERVIEW] is engaged.
+     * Defaults to [NavigationCameraTransitionOptions.maxDuration] equal to 1000 millis.
+     * @param animatorListener invoked on transition's progress.
      */
+    @JvmOverloads
     fun requestNavigationCameraToOverview(
+        stateTransitionOptionsBlock: ((NavigationCameraTransitionOptions.Builder).() -> Unit),
+        frameTransitionOptionsBlock: ((NavigationCameraTransitionOptions.Builder).() -> Unit),
+        animatorListener: Animator.AnimatorListener? = null
+    ) {
+        requestNavigationCameraToOverview(
+            stateTransitionOptions =
+            NavigationCameraTransitionOptions.Builder().apply(stateTransitionOptionsBlock).build(),
+            frameTransitionOptions =
+            NavigationCameraTransitionOptions.Builder().apply(frameTransitionOptionsBlock).build(),
+            animatorListener = animatorListener
+        )
+    }
+
+    /**
+     * Executes a transition to [OVERVIEW] state. When started, goes to [TRANSITION_TO_OVERVIEW]
+     * and to the final [OVERVIEW] when ended. If transition is canceled, state goes to [IDLE].
+     *
+     * The target camera position is obtained with [ViewportDataSource.getViewportData].
+     *
+     * @param stateTransitionOptions options that impact the transition animation from the current state to the requested state.
+     * Defaults to [NavigationCameraTransitionOptions.maxDuration] equal to 3500 millis.
+     * @param frameTransitionOptions options that impact the transition animations between viewport frames in the selected state.
+     * This refers to camera transition on each [ViewportDataSource] update when [OVERVIEW] is engaged.
+     * Defaults to [NavigationCameraTransitionOptions.maxDuration] equal to 1000 millis.
+     * @param animatorListener invoked on transition's progress.
+     */
+    @JvmOverloads
+    fun requestNavigationCameraToOverview(
+        stateTransitionOptions: NavigationCameraTransitionOptions = DEFAULT_STATE_TRANSITION_OPT,
+        frameTransitionOptions: NavigationCameraTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT,
         animatorListener: Animator.AnimatorListener? = null
     ) {
         when (state) {
             TRANSITION_TO_OVERVIEW, OVERVIEW -> {
+                // this should invoke animatorListener
+                // https://github.com/mapbox/mapbox-navigation-android/issues/4341
                 return
             }
             IDLE, TRANSITION_TO_FOLLOWING, FOLLOWING -> {
                 val data = viewportDataSource.getViewportData()
                 startAnimation(
-                    stateTransition.transitionToOverview(data.cameraForOverview).apply {
+                    stateTransition.transitionToOverview(
+                        data.cameraForOverview,
+                        stateTransitionOptions
+                    ).apply {
                         addListener(
                             createTransitionListener(
                                 TRANSITION_TO_OVERVIEW,
                                 OVERVIEW,
+                                frameTransitionOptions,
                                 animatorListener
                             )
                         )
@@ -223,6 +314,7 @@ class NavigationCamera(
      */
     fun requestNavigationCameraToIdle() {
         if (state != IDLE) {
+            this@NavigationCamera.frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT
             cancelAnimation()
             state = IDLE
         }
@@ -242,7 +334,10 @@ class NavigationCamera(
         when (state) {
             FOLLOWING -> {
                 startAnimation(
-                    stateTransition.updateFrameForFollowing(viewportData.cameraForFollowing).apply {
+                    stateTransition.updateFrameForFollowing(
+                        viewportData.cameraForFollowing,
+                        frameTransitionOptions
+                    ).apply {
                         addListener(createFrameListener())
                     },
                     instant
@@ -250,7 +345,10 @@ class NavigationCamera(
             }
             OVERVIEW -> {
                 startAnimation(
-                    stateTransition.updateFrameForOverview(viewportData.cameraForOverview).apply {
+                    stateTransition.updateFrameForOverview(
+                        viewportData.cameraForOverview,
+                        frameTransitionOptions
+                    ).apply {
                         addListener(createFrameListener())
                     },
                     instant
@@ -319,21 +417,27 @@ class NavigationCamera(
     private fun createTransitionListener(
         progressState: NavigationCameraState,
         finalState: NavigationCameraState,
+        frameTransitionOptions: NavigationCameraTransitionOptions,
         externalListener: Animator.AnimatorListener?
     ) = object : Animator.AnimatorListener {
 
         private var isCanceled = false
 
         override fun onAnimationStart(animation: Animator?) {
+            this@NavigationCamera.frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT
             state = progressState
             externalListener?.onAnimationStart(animation)
         }
 
         override fun onAnimationEnd(animation: Animator?) {
-            state = if (isCanceled) {
-                IDLE
+            if (isCanceled) {
+                requestNavigationCameraToIdle()
             } else {
-                finalState
+                state = finalState
+            }
+
+            if (!isCanceled) {
+                this@NavigationCamera.frameTransitionOptions = frameTransitionOptions
             }
 
             finishAnimation(animation as AnimatorSet)

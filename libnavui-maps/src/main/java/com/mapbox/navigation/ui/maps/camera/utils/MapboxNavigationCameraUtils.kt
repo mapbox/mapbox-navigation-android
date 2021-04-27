@@ -1,5 +1,10 @@
 package com.mapbox.navigation.ui.maps.camera.utils
 
+import android.animation.Animator
+import android.animation.AnimatorSet
+import com.mapbox.geojson.Point
+import com.mapbox.maps.MapboxMap
+import kotlin.math.hypot
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -22,4 +27,39 @@ private fun shortestRotation(from: Double, to: Double): Double {
 private fun Double.roundTo(numFractionDigits: Int): Double {
     val factor = 10.0.pow(numFractionDigits.toDouble())
     return (this * factor).roundToInt() / factor
+}
+
+/**
+ * Takes the longest animation in the set (including delay an duration) and scales the duration down to match the duration constraint if it's exceeded.
+ * All other animations are scaled by the same factor which allows to mostly keep the same composition and "feel" of the animation set while shortening its duration.
+ */
+internal fun AnimatorSet.constraintDurationTo(maxDuration: Long): AnimatorSet {
+    childAnimations.maxByOrNull { it.startDelay + it.duration }?.let {
+        val longestExecutionTime = it.startDelay + it.duration
+        if (longestExecutionTime > maxDuration) {
+            val factor = maxDuration / (longestExecutionTime).toDouble()
+            childAnimations.forEach { animator ->
+                animator.startDelay = (animator.startDelay * factor).toLong()
+                animator.duration = (animator.duration * factor).toLong()
+            }
+        }
+    }
+    return this
+}
+
+internal fun createAnimatorSet(animators: List<Animator>) = AnimatorSet().apply {
+    playTogether(*(animators.toTypedArray()))
+}
+
+internal fun screenDistanceFromMapCenterToTarget(
+    mapboxMap: MapboxMap,
+    currentCenter: Point,
+    targetCenter: Point
+): Double {
+    val currentCenterScreenCoordinate = mapboxMap.pixelForCoordinate(currentCenter)
+    val locationScreenCoordinate = mapboxMap.pixelForCoordinate(targetCenter)
+    return hypot(
+        currentCenterScreenCoordinate.x - locationScreenCoordinate.x,
+        currentCenterScreenCoordinate.y - locationScreenCoordinate.y
+    )
 }

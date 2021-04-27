@@ -16,24 +16,45 @@ class MapboxNavigationCameraStateTransition(
         MapboxNavigationCameraTransition(mapboxMap, cameraPlugin)
 ) : NavigationCameraStateTransition {
 
-    override fun transitionToFollowing(cameraOptions: CameraOptions): AnimatorSet {
-        return navigationCameraTransition.transitionFromLowZoomToHighZoom(cameraOptions)
+    override fun transitionToFollowing(
+        cameraOptions: CameraOptions,
+        transitionOptions: NavigationCameraTransitionOptions
+    ): AnimatorSet {
+        return navigationCameraTransition.transitionFromLowZoomToHighZoom(
+            cameraOptions,
+            transitionOptions
+        )
     }
 
-    override fun transitionToOverview(cameraOptions: CameraOptions): AnimatorSet {
+    override fun transitionToOverview(
+        cameraOptions: CameraOptions,
+        transitionOptions: NavigationCameraTransitionOptions
+    ): AnimatorSet {
         val currentZoom = mapboxMap.getCameraOptions(null).zoom ?: 0.0
         return if (currentZoom < cameraOptions.zoom ?: currentZoom) {
-            navigationCameraTransition.transitionFromLowZoomToHighZoom(cameraOptions)
+            navigationCameraTransition.transitionFromLowZoomToHighZoom(
+                cameraOptions,
+                transitionOptions
+            )
         } else {
-            navigationCameraTransition.transitionFromHighZoomToLowZoom(cameraOptions)
+            navigationCameraTransition.transitionFromHighZoomToLowZoom(
+                cameraOptions,
+                transitionOptions
+            )
         }
     }
 
-    override fun updateFrameForFollowing(cameraOptions: CameraOptions): AnimatorSet {
-        return navigationCameraTransition.transitionLinear(cameraOptions)
+    override fun updateFrameForFollowing(
+        cameraOptions: CameraOptions,
+        transitionOptions: NavigationCameraTransitionOptions
+    ): AnimatorSet {
+        return navigationCameraTransition.transitionLinear(cameraOptions, transitionOptions)
     }
 
-    override fun updateFrameForOverview(cameraOptions: CameraOptions): AnimatorSet {
-        return navigationCameraTransition.transitionLinear(cameraOptions)
+    override fun updateFrameForOverview(
+        cameraOptions: CameraOptions,
+        transitionOptions: NavigationCameraTransitionOptions
+    ): AnimatorSet {
+        return navigationCameraTransition.transitionLinear(cameraOptions, transitionOptions)
     }
 }

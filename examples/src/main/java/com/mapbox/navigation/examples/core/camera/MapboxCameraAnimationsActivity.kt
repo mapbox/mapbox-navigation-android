@@ -483,7 +483,7 @@ class MapboxCameraAnimationsActivity :
     @SuppressLint("MissingPermission")
     override fun onButtonClicked(animationType: AnimationType) {
         when (animationType) {
-            AnimationType.Following -> {
+            AnimationType.Following, AnimationType.FastFollowing -> {
                 followingEdgeInsets = if (followingEdgeInsets == paddedFollowingEdgeInsets) {
                     notPaddedEdgeInsets
                 } else {
@@ -492,7 +492,18 @@ class MapboxCameraAnimationsActivity :
                 viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed = true
                 viewportDataSource.followingPadding = followingEdgeInsets
                 viewportDataSource.evaluate()
-                navigationCamera.requestNavigationCameraToFollowing()
+                if (animationType == AnimationType.Following) {
+                    navigationCamera.requestNavigationCameraToFollowing()
+                } else {
+                    navigationCamera.requestNavigationCameraToFollowing(
+                        stateTransitionOptionsBlock = {
+                            maxDuration(750L)
+                        },
+                        frameTransitionOptionsBlock = {
+                            maxDuration(333L)
+                        }
+                    )
+                }
             }
             AnimationType.Overview -> {
                 viewportDataSource.overviewPadding = overviewEdgeInsets

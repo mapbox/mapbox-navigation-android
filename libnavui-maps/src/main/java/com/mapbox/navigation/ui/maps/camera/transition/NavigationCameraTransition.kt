@@ -13,9 +13,13 @@ interface NavigationCameraTransition {
      * The timings and delays are biased toward making sure the center point is visible
      * before zooming in and changing bearing and pitch.
      *
-     * @param cameraOptions to transition to
+     * @param cameraOptions camera position to transition to
+     * @param transitionOptions transition options
      */
-    fun transitionFromLowZoomToHighZoom(cameraOptions: CameraOptions): AnimatorSet
+    fun transitionFromLowZoomToHighZoom(
+        cameraOptions: CameraOptions,
+        transitionOptions: NavigationCameraTransitionOptions
+    ): AnimatorSet
 
     /**
      * This transition moves the camera from zoomed in to zoomed out.
@@ -23,9 +27,13 @@ interface NavigationCameraTransition {
      * The timings and delays are made to favor zooming out first in order to
      * minimize fast moves over map geometry.
      *
-     * @param cameraOptions to transition to
+     * @param cameraOptions camera position to transition to
+     * @param transitionOptions transition options
      */
-    fun transitionFromHighZoomToLowZoom(cameraOptions: CameraOptions): AnimatorSet
+    fun transitionFromHighZoomToLowZoom(
+        cameraOptions: CameraOptions,
+        transitionOptions: NavigationCameraTransitionOptions
+    ): AnimatorSet
 
     /**
      * This transition is for use in frequently animating between points on a map.
@@ -33,7 +41,11 @@ interface NavigationCameraTransition {
      *
      * This transition works best where frequent, continuous updates are needed.
      *
-     * @param cameraOptions to transition to
+     * @param cameraOptions camera position to transition to
+     * @param transitionOptions transition options
      */
-    fun transitionLinear(cameraOptions: CameraOptions): AnimatorSet
+    fun transitionLinear(
+        cameraOptions: CameraOptions,
+        transitionOptions: NavigationCameraTransitionOptions
+    ): AnimatorSet
 }

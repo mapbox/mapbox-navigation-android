@@ -1,8 +1,15 @@
 package com.mapbox.navigation.ui.maps.camera.utils
 
+import android.animation.Animator
+import android.animation.AnimatorSet
+import android.animation.ValueAnimator
+import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class MapboxNavigationCameraUtilsKtTest {
 
     @Test
@@ -111,5 +118,72 @@ class MapboxNavigationCameraUtilsKtTest {
         )
 
         assertEquals(expected, actual, 1E-14)
+    }
+
+    @Test
+    fun `test createAnimatorSet`() {
+        val animators = listOf<Animator>(mockk(), mockk())
+        val expected = AnimatorSet().apply {
+            playTogether(*(animators.toTypedArray()))
+        }.childAnimations
+
+        val actual = createAnimatorSet(animators).childAnimations
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `test constraintDurationTo - no adjustments`() {
+        val animators = listOf<Animator>(
+            ValueAnimator.ofFloat().apply {
+                startDelay = 700
+                duration = 1300
+            },
+            ValueAnimator.ofFloat().apply {
+                startDelay = 0
+                duration = 1000
+            }
+        )
+        val expected = createAnimatorSet(animators).childAnimations
+
+        val actual = createAnimatorSet(animators)
+            .constraintDurationTo(2000)
+            .childAnimations
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `test constraintDurationTo - adjustment needed`() {
+        val originalAnimators = listOf<Animator>(
+            ValueAnimator.ofFloat().apply {
+                startDelay = 1000
+                duration = 3000
+            },
+            ValueAnimator.ofFloat().apply {
+                startDelay = 0
+                duration = 1000
+            }
+        )
+        val expectedAnimators = listOf<Animator>(
+            ValueAnimator.ofFloat().apply {
+                startDelay = 500
+                duration = 1500
+            },
+            ValueAnimator.ofFloat().apply {
+                startDelay = 0
+                duration = 500
+            }
+        )
+        val expected = createAnimatorSet(expectedAnimators).childAnimations
+
+        val actual = createAnimatorSet(originalAnimators)
+            .constraintDurationTo(2000)
+            .childAnimations
+
+        assertEquals(expected[0].startDelay, actual[0].startDelay)
+        assertEquals(expected[0].duration, actual[0].duration)
+        assertEquals(expected[1].startDelay, actual[1].startDelay)
+        assertEquals(expected[1].duration, actual[1].duration)
     }
 }
