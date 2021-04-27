@@ -1,22 +1,21 @@
 package com.mapbox.navigation.ui.maps.arrival.api
 
-import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.QueriedFeature
 import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.maps.Style
+import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.get
+import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.id
+import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.inExpression
 import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.interpolate
 import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.linear
-import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.literal
 import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.zoom
 import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.FillExtrusionLayer
-import com.mapbox.maps.extension.style.sources.addSource
-import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
-import com.mapbox.maps.extension.style.sources.getSource
+import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.navigation.ui.maps.arrival.model.MapboxBuildingHighlightOptions
 
 /**
@@ -45,13 +44,11 @@ class MapboxBuildingHighlightApi(
             }
 
             val screenCoordinate = mapboxMap.pixelForCoordinate(point)
-            val queryOptions = RenderedQueryOptions(listOf("building"), null)
 
+            val queryOptions = RenderedQueryOptions(listOf(BUILDING_LAYER_ID), null)
             mapboxMap.queryRenderedFeatures(screenCoordinate, queryOptions) { expected ->
                 val queriedFeature: List<QueriedFeature> = expected.value ?: emptyList()
-                if (queriedFeature.isNotEmpty()) {
-                    updateBuildingLayer(style, queriedFeature)
-                }
+                updateBuildingLayer(style, queriedFeature)
             }
         }
     }
@@ -61,8 +58,7 @@ class MapboxBuildingHighlightApi(
      */
     fun clear() {
         mapboxMap.getStyle { style ->
-            style.removeStyleLayer(BUILDING_LAYER_ID)
-            style.removeStyleSource(BUILDING_SOURCE_ID)
+            style.removeStyleLayer(HIGHLIGHT_BUILDING_LAYER_ID)
         }
     }
 
@@ -70,29 +66,24 @@ class MapboxBuildingHighlightApi(
         style: Style,
         queriedFeature: List<QueriedFeature>
     ) {
-        val layerId = BUILDING_LAYER_ID
-        val sourceId = BUILDING_SOURCE_ID
+        val layerId = HIGHLIGHT_BUILDING_LAYER_ID
 
-        val features = queriedFeature.map { it.feature }
-        if (style.styleSourceExists(sourceId)) {
-            (style.getSource(sourceId) as GeoJsonSource)
-                .featureCollection(FeatureCollection.fromFeatures(features))
-        } else {
-            style.addSource(
-                GeoJsonSource.Builder(sourceId)
-                    .featureCollection(FeatureCollection.fromFeatures(features))
-                    .build()
-            )
-        }
+        val ids = queriedFeature.mapNotNull { it.feature.id()?.toLong() }
 
+        val selectedBuilding = inExpression(id(), literal(ids))
         if (!style.styleLayerExists(layerId)) {
             style.addLayer(
-                FillExtrusionLayer(layerId, sourceId)
+                FillExtrusionLayer(layerId, COMPOSITE_SOURCE_ID)
+                    .sourceLayer(BUILDING_LAYER_ID)
+                    .filter(selectedBuilding)
                     .fillExtrusionColor(options.fillExtrusionColor)
                     .fillExtrusionOpacity(options.fillExtrusionOpacity)
                     .fillExtrusionBase(get("min-height"))
                     .fillExtrusionHeight(heightExpression())
             )
+        } else {
+            (style.getLayer(layerId) as FillExtrusionLayer)
+                .filter(selectedBuilding)
         }
     }
 
@@ -104,7 +95,8 @@ class MapboxBuildingHighlightApi(
         )
 
     private companion object {
-        private const val BUILDING_LAYER_ID = "mapbox-building-highlight-layer"
-        private const val BUILDING_SOURCE_ID = "mapbox-building-highlight-source"
+        private const val HIGHLIGHT_BUILDING_LAYER_ID = "mapbox-building-highlight-layer"
+        private const val BUILDING_LAYER_ID = "building"
+        private const val COMPOSITE_SOURCE_ID = "composite"
     }
 }
