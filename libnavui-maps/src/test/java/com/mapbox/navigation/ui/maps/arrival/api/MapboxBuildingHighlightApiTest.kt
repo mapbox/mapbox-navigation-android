@@ -25,9 +25,7 @@ class MapboxBuildingHighlightApiTest {
     }
     private val style: Style = mockk {
         every { styleLayerExists(any()) } returns false
-        every { styleSourceExists(any()) } returns false
         every { addStyleLayer(any(), any()) } returns expected
-        every { addStyleSource(any(), any()) } returns expected
     }
 
     /** Mock querying features **/
@@ -50,27 +48,6 @@ class MapboxBuildingHighlightApiTest {
     @Test
     fun `highlight null point is a no-op`() {
         buildingHighlightApi.highlightBuilding(null)
-    }
-
-    @Test
-    fun `should add style source when building is selected`() {
-        every { mapboxMap.pixelForCoordinate(any()) } returns mockk {
-            every { x } returns 134.0
-            every { y } returns 160.0
-        }
-        every { mapboxMap.queryRenderedFeatures(any<ScreenCoordinate>(), any(), any()) } answers {
-            thirdArg<QueryFeaturesCallback>().run(mockSuccessQueriedFeature())
-        }
-
-        val testPoint = Point.fromLngLat(-122.431969, 37.777663)
-        buildingHighlightApi.highlightBuilding(testPoint)
-        onStyleLoadedSlot.captured.onStyleLoaded(style)
-
-        val sourceIdSlot = CapturingSlot<String>()
-        val propertySlot = CapturingSlot<Value>()
-        verify { style.addStyleSource(capture(sourceIdSlot), capture(propertySlot)) }
-        assertTrue(sourceIdSlot.isCaptured)
-        assertTrue(propertySlot.isCaptured)
     }
 
     @Test
