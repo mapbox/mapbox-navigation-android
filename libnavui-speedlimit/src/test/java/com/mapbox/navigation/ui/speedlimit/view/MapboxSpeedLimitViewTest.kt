@@ -7,6 +7,7 @@ import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 import com.mapbox.navigation.base.speed.model.SpeedLimitUnit
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.navigation.ui.speedlimit.R
 import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter
 import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue
 import com.mapbox.navigation.utils.internal.JobControl
@@ -52,6 +53,29 @@ class MapboxSpeedLimitViewTest {
     @After
     fun tearDown() {
         unmockkObject(ThreadController)
+    }
+
+    @Test
+    fun `constructor with context`() {
+        val view = MapboxSpeedLimitView(ctx)
+
+        assertNotNull(view.currentTextColor)
+    }
+
+    @Test
+    fun `constructor with context and attr`() {
+        val view = MapboxSpeedLimitView(ctx, null)
+        val expectedColor = ctx.getColor(R.color.mapbox_speed_limit_text_color)
+
+        assertEquals(expectedColor, view.currentTextColor)
+    }
+
+    @Test
+    fun `constructor with context attr and defStyleAttr`() {
+        val view = MapboxSpeedLimitView(ctx, null)
+        val expectedColor = ctx.getColor(R.color.mapbox_speed_limit_text_color)
+
+        assertEquals(expectedColor, view.currentTextColor)
     }
 
     @Test

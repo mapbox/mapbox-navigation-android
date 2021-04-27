@@ -15,11 +15,39 @@ import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue
 /**
  * A view that can be added to activity layouts which displays trip progress.
  */
-class MapboxTripProgressView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr) {
+class MapboxTripProgressView : FrameLayout {
+
+    /**
+     *
+     * @param context Context
+     * @constructor
+     */
+    constructor(context: Context) : super(context)
+
+    /**
+     *
+     * @param context Context
+     * @param attrs AttributeSet?
+     * @constructor
+     */
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
+        initAttributes(attrs)
+    }
+
+    /**
+     *
+     * @param context Context
+     * @param attrs AttributeSet?
+     * @param defStyleAttr Int
+     * @constructor
+     */
+    constructor(
+        context: Context,
+        attrs: AttributeSet?,
+        defStyleAttr: Int
+    ) : super(context, attrs, defStyleAttr) {
+        initAttributes(attrs)
+    }
 
     private val binding =
         MapboxTripProgressLayoutBinding.inflate(
@@ -27,10 +55,6 @@ class MapboxTripProgressView @JvmOverloads constructor(
             this,
             true
         )
-
-    init {
-        initAttributes(attrs)
-    }
 
     /**
      * Allows you to change the style of [MapboxTripProgressView].

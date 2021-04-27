@@ -25,21 +25,43 @@ import kotlinx.coroutines.launch
 /**
  * A view component intended to consume data produced by the [MapboxSpeedLimitApi].
  */
-class MapboxSpeedLimitView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : AppCompatTextView(context, attrs, defStyleAttr) {
+class MapboxSpeedLimitView : AppCompatTextView {
 
     private var speedLimitBackgroundColor: Int = 0
     private var speedLimitViennaBorderColor: Int = 0
     private var speedLimitMutcdBorderColor: Int = 0
     private var speedLimitSign: SpeedLimitSign? = null
 
-    init {
+    /**
+     *
+     * @param context Context
+     * @constructor
+     */
+    constructor(context: Context) : super(context)
+
+    /**
+     *
+     * @param context Context
+     * @param attrs AttributeSet?
+     * @constructor
+     */
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
         initAttributes(attrs)
-        gravity = Gravity.CENTER
-        textSize = context.resources.getDimension(R.dimen.mapbox_dimen_text_6sp)
+    }
+
+    /**
+     *
+     * @param context Context
+     * @param attrs AttributeSet?
+     * @param defStyleAttr Int
+     * @constructor
+     */
+    constructor(
+        context: Context,
+        attrs: AttributeSet?,
+        defStyleAttr: Int
+    ) : super(context, attrs, defStyleAttr) {
+        initAttributes(attrs)
     }
 
     /**
@@ -97,6 +119,8 @@ class MapboxSpeedLimitView @JvmOverloads constructor(
     }
 
     private fun initAttributes(attrs: AttributeSet?) {
+        gravity = Gravity.CENTER
+        textSize = context.resources.getDimension(R.dimen.mapbox_dimen_text_6sp)
         val typedArray: TypedArray = context.obtainStyledAttributes(
             attrs,
             R.styleable.MapboxSpeedLimitView,
