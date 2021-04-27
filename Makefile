@@ -19,6 +19,7 @@ libnavigation-android \
 libnavui-speedlimit \
 
 APPLICATION_MODULES = \
+qa-test-app \
 examples \
 instrumentation-tests \
 

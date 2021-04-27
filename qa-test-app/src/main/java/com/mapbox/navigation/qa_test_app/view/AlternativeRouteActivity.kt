@@ -22,11 +22,10 @@ import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
-import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
+import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
-import com.mapbox.maps.plugin.gestures.getGesturesPlugin
-import com.mapbox.maps.plugin.locationcomponent.getLocationComponentPlugin
+import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
@@ -56,7 +55,7 @@ import kotlinx.coroutines.launch
 class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private companion object {
-        private const val TAG = "AlternativeRouteActivity"
+        private const val TAG = "AlternativeRouteActvt"
     }
 
     private val routeClickPadding = Utils.dpToPx(30f)
