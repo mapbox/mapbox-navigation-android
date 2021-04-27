@@ -12,6 +12,7 @@ import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,6 +30,32 @@ class MapboxTripProgressViewTest {
     }
 
     @Test
+    fun `constructor with context`() {
+        val view = MapboxTripProgressView(ctx)
+        val timeRemainingView = view.findViewById<TextView>(R.id.timeRemainingText)
+
+        assertNotNull(timeRemainingView.currentTextColor)
+    }
+
+    @Test
+    fun `constructor with context and attr`() {
+        val view = MapboxTripProgressView(ctx, null)
+        val timeRemainingView = view.findViewById<TextView>(R.id.timeRemainingText)
+        val expectedColor = ctx.getColor(R.color.mapbox_trip_progress_text_color)
+
+        assertEquals(expectedColor, timeRemainingView.currentTextColor)
+    }
+
+    @Test
+    fun `constructor with context attr and defStyleAttr`() {
+        val view = MapboxTripProgressView(ctx, null)
+        val timeRemainingView = view.findViewById<TextView>(R.id.distanceRemainingText)
+        val expectedColor = ctx.getColor(R.color.mapbox_trip_progress_text_color)
+
+        assertEquals(expectedColor, timeRemainingView.currentTextColor)
+    }
+
+    @Test
     fun initAttributes() {
         val expectedTextColor = ctx.getColor(R.color.mapbox_trip_progress_text_color)
         val expectedDividerColor = ctx.getColor(R.color.mapbox_trip_progress_divider_color)
@@ -36,7 +63,7 @@ class MapboxTripProgressViewTest {
             R.color.mapbox_trip_progress_view_background_color
         )
 
-        val view = MapboxTripProgressView(ctx)
+        val view = MapboxTripProgressView(ctx, null)
 
         assertEquals(
             expectedTextColor,
@@ -71,7 +98,7 @@ class MapboxTripProgressViewTest {
     fun initAttributes_landscape() {
         val expectedDividerColor = ctx.getColor(R.color.mapbox_trip_progress_divider_color)
 
-        val view = MapboxTripProgressView(ctx)
+        val view = MapboxTripProgressView(ctx, null)
 
         assertEquals(
             expectedDividerColor,

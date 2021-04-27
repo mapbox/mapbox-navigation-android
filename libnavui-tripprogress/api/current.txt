@@ -79,9 +79,9 @@ package com.mapbox.navigation.ui.tripprogress.model {
 package com.mapbox.navigation.ui.tripprogress.view {
 
   public final class MapboxTripProgressView extends android.widget.FrameLayout {
-    ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
-    ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxTripProgressView(android.content.Context context);
+    ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxTripProgressView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
     method public void render(com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue result);
     method public void updateStyle(@StyleRes int style);
   }

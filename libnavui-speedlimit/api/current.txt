@@ -42,9 +42,9 @@ package com.mapbox.navigation.ui.speedlimit.model {
 package com.mapbox.navigation.ui.speedlimit.view {
 
   public final class MapboxSpeedLimitView extends androidx.appcompat.widget.AppCompatTextView {
-    ctor public MapboxSpeedLimitView(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
-    ctor public MapboxSpeedLimitView(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxSpeedLimitView(android.content.Context context);
+    ctor public MapboxSpeedLimitView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxSpeedLimitView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
     method public void render(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError> expected);
     method public void updateStyle(@StyleRes int styleResource);
     field public static final int BORDER_INSET = 6; // 0x6
