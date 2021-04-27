@@ -6,6 +6,7 @@ import android.media.AudioManager
 import android.media.AudioManager.AUDIOFOCUS_REQUEST_DELAYED
 import android.media.AudioManager.AUDIOFOCUS_REQUEST_FAILED
 import android.media.AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+import com.mapbox.navigation.ui.voice.options.PlayerAttributes
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import io.mockk.every
 import io.mockk.mockk
@@ -27,11 +28,8 @@ class OreoAndLaterAudioFocusDelegateTest {
             mockedVoiceInstructionsPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
         every {
-            mockedVoiceInstructionsPlayerOptions.audioAttributes
-        } returns AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
+            mockedVoiceInstructionsPlayerOptions.playerAttributes
+        } returns PlayerAttributes.OreoAndLaterAttributes()
 
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
             mockedAudioManager,
@@ -58,11 +56,8 @@ class OreoAndLaterAudioFocusDelegateTest {
             mockedVoiceInstructionsPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
         every {
-            mockedVoiceInstructionsPlayerOptions.audioAttributes
-        } returns AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
+            mockedVoiceInstructionsPlayerOptions.playerAttributes
+        } returns PlayerAttributes.OreoAndLaterAttributes()
 
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
             mockedAudioManager,
@@ -89,11 +84,8 @@ class OreoAndLaterAudioFocusDelegateTest {
             mockedVoiceInstructionsPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
         every {
-            mockedVoiceInstructionsPlayerOptions.audioAttributes
-        } returns AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
+            mockedVoiceInstructionsPlayerOptions.playerAttributes
+        } returns PlayerAttributes.OreoAndLaterAttributes()
 
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
             mockedAudioManager,
@@ -123,11 +115,8 @@ class OreoAndLaterAudioFocusDelegateTest {
             mockedVoiceInstructionsPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
         every {
-            mockedVoiceInstructionsPlayerOptions.audioAttributes
-        } returns AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
+            mockedVoiceInstructionsPlayerOptions.playerAttributes
+        } returns PlayerAttributes.OreoAndLaterAttributes()
 
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
             mockedAudioManager,
@@ -157,11 +146,8 @@ class OreoAndLaterAudioFocusDelegateTest {
             mockedVoiceInstructionsPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
         every {
-            mockedVoiceInstructionsPlayerOptions.audioAttributes
-        } returns AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
+            mockedVoiceInstructionsPlayerOptions.playerAttributes
+        } returns PlayerAttributes.OreoAndLaterAttributes()
 
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
             mockedAudioManager,
@@ -192,11 +178,8 @@ class OreoAndLaterAudioFocusDelegateTest {
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
 
         every {
-            mockedVoiceInstructionsPlayerOptions.audioAttributes
-        } returns AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
+            mockedVoiceInstructionsPlayerOptions.playerAttributes
+        } returns PlayerAttributes.OreoAndLaterAttributes()
 
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
             mockedAudioManager,
@@ -228,11 +211,8 @@ class OreoAndLaterAudioFocusDelegateTest {
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
 
         every {
-            mockedVoiceInstructionsPlayerOptions.audioAttributes
-        } returns AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
+            mockedVoiceInstructionsPlayerOptions.playerAttributes
+        } returns PlayerAttributes.OreoAndLaterAttributes()
 
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
             mockedAudioManager,

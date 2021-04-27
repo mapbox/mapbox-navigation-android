@@ -86,22 +86,47 @@ package com.mapbox.navigation.ui.voice.options {
     method public com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions build();
   }
 
-  public final class VoiceInstructionsPlayerOptions {
+  public abstract sealed class PlayerAttributes {
+    method public abstract int getStreamType();
+    property public abstract int streamType;
+  }
+
+  @RequiresApi(api=android.os.Build.VERSION_CODES.O) public static final class PlayerAttributes.OreoAndLaterAttributes extends com.mapbox.navigation.ui.voice.options.PlayerAttributes {
+    ctor public PlayerAttributes.OreoAndLaterAttributes(int usage = 12, int contentType = 2);
+    method public int component1();
+    method public int component2();
+    method @RequiresApi(api=android.os.Build.VERSION_CODES.O) public com.mapbox.navigation.ui.voice.options.PlayerAttributes.OreoAndLaterAttributes copy(int usage, int contentType);
     method public android.media.AudioAttributes getAudioAttributes();
-    method public int getFocusGain();
-    method @Deprecated public int getStreamType();
-    method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder toBuilder();
+    method public int getContentType();
+    method public int getStreamType();
+    method public int getUsage();
     property public final android.media.AudioAttributes audioAttributes;
+    property public final int contentType;
+    property public int streamType;
+    property public final int usage;
+  }
+
+  public static final class PlayerAttributes.PreOreoAttributes extends com.mapbox.navigation.ui.voice.options.PlayerAttributes {
+    ctor public PlayerAttributes.PreOreoAttributes(int streamType = 3);
+    method public int component1();
+    method public com.mapbox.navigation.ui.voice.options.PlayerAttributes.PreOreoAttributes copy(int streamType);
+    method public int getStreamType();
+    property public int streamType;
+  }
+
+  public final class VoiceInstructionsPlayerOptions {
+    method public int getFocusGain();
+    method public com.mapbox.navigation.ui.voice.options.PlayerAttributes getPlayerAttributes();
+    method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder toBuilder();
     property public final int focusGain;
-    property @Deprecated public final int streamType;
+    property public final com.mapbox.navigation.ui.voice.options.PlayerAttributes playerAttributes;
   }
 
   public static final class VoiceInstructionsPlayerOptions.Builder {
     ctor public VoiceInstructionsPlayerOptions.Builder();
-    method @RequiresApi(api=android.os.Build.VERSION_CODES.O) public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder audioAttributes(android.media.AudioAttributes audioAttributes);
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions build();
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder focusGain(int focusGain);
-    method @Deprecated @RequiresApi(api=android.os.Build.VERSION_CODES.BASE) public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder streamType(int streamType);
+    method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder playerAttributes(com.mapbox.navigation.ui.voice.options.PlayerAttributes playerAttributes);
   }
 
 }

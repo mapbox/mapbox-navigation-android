@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
@@ -9,6 +8,7 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
+import com.mapbox.navigation.ui.voice.options.PlayerAttributes
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import java.util.Locale
@@ -138,12 +138,17 @@ internal class VoiceInstructionsTextPlayer(
     private fun play(announcement: String) {
         val bundle = Bundle().apply {
             putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, volumeLevel)
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                putString(TextToSpeech.Engine.KEY_PARAM_STREAM, options.streamType.toString())
-            }
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            textToSpeech.setAudioAttributes(options.audioAttributes)
+        when (val attributes = options.playerAttributes) {
+            is PlayerAttributes.OreoAndLaterAttributes -> {
+                textToSpeech.setAudioAttributes(attributes.audioAttributes)
+            }
+            is PlayerAttributes.PreOreoAttributes -> {
+                bundle.putString(
+                    TextToSpeech.Engine.KEY_PARAM_STREAM,
+                    attributes.streamType.toString()
+                )
+            }
         }
         textToSpeech.speak(
             announcement,

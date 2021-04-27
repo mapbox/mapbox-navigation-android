@@ -1,11 +1,12 @@
 package com.mapbox.navigation.ui.voice.api
 
 import android.media.AudioManager
+import com.mapbox.navigation.ui.voice.options.PlayerAttributes
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class PreOreoAudioFocusDelegateTest {
@@ -18,8 +19,8 @@ class PreOreoAudioFocusDelegateTest {
             mockedVoiceInstructionsPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
         every {
-            mockedVoiceInstructionsPlayerOptions.streamType
-        } returns AudioManager.STREAM_MUSIC
+            mockedVoiceInstructionsPlayerOptions.playerAttributes
+        } returns PlayerAttributes.PreOreoAttributes()
 
         val preOreoAudioFocusDelegate = PreOreoAudioFocusDelegate(
             mockedAudioManager,
@@ -45,8 +46,8 @@ class PreOreoAudioFocusDelegateTest {
             mockedVoiceInstructionsPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
         every {
-            mockedVoiceInstructionsPlayerOptions.streamType
-        } returns AudioManager.STREAM_MUSIC
+            mockedVoiceInstructionsPlayerOptions.playerAttributes
+        } returns PlayerAttributes.PreOreoAttributes()
         every {
             mockedAudioManager.requestAudioFocus(
                 null,
@@ -60,7 +61,7 @@ class PreOreoAudioFocusDelegateTest {
             mockedVoiceInstructionsPlayerOptions
         )
 
-        Assert.assertEquals(
+        assertEquals(
             true,
             preOreoAudioFocusDelegate.requestFocus(),
         )
@@ -82,8 +83,8 @@ class PreOreoAudioFocusDelegateTest {
             mockedVoiceInstructionsPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
         every {
-            mockedVoiceInstructionsPlayerOptions.streamType
-        } returns AudioManager.STREAM_MUSIC
+            mockedVoiceInstructionsPlayerOptions.playerAttributes
+        } returns PlayerAttributes.PreOreoAttributes()
         every {
             mockedAudioManager.requestAudioFocus(
                 null,
@@ -97,7 +98,7 @@ class PreOreoAudioFocusDelegateTest {
             mockedVoiceInstructionsPlayerOptions
         )
 
-        Assert.assertEquals(
+        assertEquals(
             preOreoAudioFocusDelegate.requestFocus(),
             false
         )
@@ -119,8 +120,8 @@ class PreOreoAudioFocusDelegateTest {
             mockedVoiceInstructionsPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
         every {
-            mockedVoiceInstructionsPlayerOptions.streamType
-        } returns AudioManager.STREAM_MUSIC
+            mockedVoiceInstructionsPlayerOptions.playerAttributes
+        } returns PlayerAttributes.PreOreoAttributes()
 
         every {
             mockedAudioManager.requestAudioFocus(
@@ -135,7 +136,7 @@ class PreOreoAudioFocusDelegateTest {
             mockedVoiceInstructionsPlayerOptions
         )
 
-        Assert.assertEquals(
+        assertEquals(
             preOreoAudioFocusDelegate.requestFocus(),
             true
         )
@@ -171,7 +172,7 @@ class PreOreoAudioFocusDelegateTest {
 
         val preOreoAudioFocusDelegate = PreOreoAudioFocusDelegate(mockedAudioManager, mockk())
 
-        Assert.assertEquals(
+        assertEquals(
             preOreoAudioFocusDelegate.abandonFocus(),
             true
         )
@@ -190,7 +191,7 @@ class PreOreoAudioFocusDelegateTest {
 
         val preOreoAudioFocusDelegate = PreOreoAudioFocusDelegate(mockedAudioManager, mockk())
 
-        Assert.assertEquals(
+        assertEquals(
             preOreoAudioFocusDelegate.abandonFocus(),
             false
         )
