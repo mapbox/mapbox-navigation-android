@@ -33,7 +33,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - lp-debugger-beta.6
       - release:
           filters:
             tags:
