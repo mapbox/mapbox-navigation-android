@@ -49,6 +49,13 @@ interface MapboxNativeNavigator {
         logger: Logger
     ): MapboxNativeNavigator
 
+    fun recreateNavigatorInstance(
+        deviceProfile: DeviceProfile,
+        navigatorConfig: NavigatorConfig,
+        tilesConfig: TilesConfig,
+        logger: Logger
+    )
+
     /**
      * Reset the navigator state with the same configuration. The location becomes unknown,
      * but the [NavigatorConfig] stays the same. This can be used to transport the

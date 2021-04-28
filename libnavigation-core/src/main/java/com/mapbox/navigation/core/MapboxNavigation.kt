@@ -17,6 +17,7 @@ import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.common.module.provider.ModuleProviderArgument
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -81,6 +82,7 @@ import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 import java.lang.reflect.Field
 import java.util.Locale
 
@@ -170,7 +172,7 @@ class MapboxNavigation(
     private val accessToken: String? = navigationOptions.accessToken
     private val mainJobController: JobControl = ThreadController.getMainScopeAndRootJob()
     private val directionsSession: DirectionsSession
-    private val navigator: MapboxNativeNavigator
+    private var navigator: MapboxNativeNavigator
     private val tripService: TripService
     private val tripSession: TripSession
     private val navigationSession: NavigationSession
@@ -815,6 +817,23 @@ class MapboxNavigation(
      */
     fun detachFasterRouteObserver() {
         fasterRouteController.stop()
+    }
+
+    @ExperimentalMapboxNavigationAPI
+    fun recreateNavigatorInstance() {
+        val route = tripSession.route
+        val routeProgress = tripSession.getRouteProgress()
+        navigator.recreateNavigatorInstance(
+            navigationOptions.deviceProfile,
+            navigatorConfig,
+            createTilesConfig(),
+            logger
+        )
+        ifNonNull(route) { route ->
+            ThreadController.getMainScopeAndRootJob().scope.launch {
+                navigator.setRoute(route, routeProgress?.currentLegProgress?.legIndex ?: 0)
+            }
+        }
     }
 
     /**

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.mapbox.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </com.mapbox.maps.MapView>
+
+    <TextView
+        android:id="@+id/routeProgressLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/mapbox_dimen_16dp"
+        android:layout_marginTop="@dimen/mapbox_dimen_32dp"
+        android:text="Route Progress:"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/routeProgressText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/mapbox_dimen_8dp"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@+id/routeProgressLabel"
+        app:layout_constraintStart_toEndOf="@+id/routeProgressLabel"
+        app:layout_constraintTop_toTopOf="@+id/routeProgressLabel"
+        tools:text="RouteProgress text" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/startNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/primary"
+        android:text="Start Navigation"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatCheckBox
+        android:id="@+id/useSilentWaypoints"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Use silent waypoint"
+        app:layout_constraintBottom_toTopOf="@+id/startNavigation"
+        android:layout_marginEnd="@dimen/mapbox_dimen_8dp"
+        android:layout_marginBottom="@dimen/mapbox_dimen_8dp"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/recreateNavigator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Re-create navigator"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

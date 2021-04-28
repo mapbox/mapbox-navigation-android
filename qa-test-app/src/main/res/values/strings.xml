@@ -1,4 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" tools:ignore="MissingTranslation">Kaizen</string>
     <string name="alternative_route_selection_description" tools:ignore="MissingTranslation">Tests the selecting of an alternative route line. \n\n1. Long press a point on the map in order to get a primary route and at least one alternative route. \n\n2. Select an alternative route by touching it. The touched route should appear as the primary route and the previous primary route should appear as an alternative. \n\n3. Click start navigation and make sure the puck follows the selected route.</string>
+    <string name="force_navigator_recreating_description" tools:ignore="MissingTranslation">Forcing recreating NavNative Navigator</string>
 </resources>

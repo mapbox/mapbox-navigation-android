@@ -107,6 +107,28 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         return this
     }
 
+    override fun recreateNavigatorInstance(
+        deviceProfile: DeviceProfile,
+        navigatorConfig: NavigatorConfig,
+        tilesConfig: TilesConfig,
+        logger: Logger
+    ) {
+        val nativeComponents = NavigatorLoader.createNavigator(
+            deviceProfile,
+            navigatorConfig,
+            tilesConfig
+        )
+        navigator = nativeComponents.navigator
+        nativeRouter = nativeComponents.nativeRouter
+        historyRecorderHandle = nativeComponents.historyRecorderHandle
+        graphAccessor = nativeComponents.graphAccessor
+        openLRDecoder = nativeComponents.openLRDecoder
+        roadObjectsStore = nativeComponents.navigator.roadObjectStore()
+        cache = nativeComponents.cache
+
+        this.logger = logger
+    }
+
     override fun resetRideSession() {
         navigator!!.resetRideSession()
     }
