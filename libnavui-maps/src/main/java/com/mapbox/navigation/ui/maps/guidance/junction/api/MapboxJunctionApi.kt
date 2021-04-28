@@ -105,20 +105,42 @@ class MapboxJunctionApi(
         val response = httpResponse.result
         val action = JunctionAction.ProcessJunctionResponse(response)
         when (val result = JunctionProcessor.process(action)) {
-            is JunctionResult.Junction.Success -> {
-                consumer.accept(Expected.Success(JunctionValue(result.data)))
+            is JunctionResult.JunctionRaster.Success -> {
+                onJunctionAvailable(result.data, consumer)
             }
-            is JunctionResult.Junction.Failure -> {
+            is JunctionResult.JunctionRaster.Failure -> {
                 consumer.accept(
                     Expected.Failure(JunctionError(result.error, null))
                 )
             }
-            is JunctionResult.Junction.Empty -> {
+            is JunctionResult.JunctionRaster.Empty -> {
                 consumer.accept(
                     Expected.Failure(
                         JunctionError("No junction available for current maneuver.", null)
                     )
                 )
+            }
+            else -> {
+                consumer.accept(
+                    Expected.Failure(
+                        JunctionError("Inappropriate $result emitted for $action.", null)
+                    )
+                )
+            }
+        }
+    }
+
+    private fun onJunctionAvailable(
+        data: ByteArray,
+        consumer: MapboxNavigationConsumer<Expected<JunctionValue, JunctionError>>
+    ) {
+        val action = JunctionAction.ParseRasterToBitmap(data)
+        when (val result = JunctionProcessor.process(action)) {
+            is JunctionResult.JunctionBitmap.Success -> {
+                consumer.accept(Expected.Success(JunctionValue(result.junction)))
+            }
+            is JunctionResult.JunctionBitmap.Failure -> {
+                consumer.accept(Expected.Failure(JunctionError(result.message, null)))
             }
             else -> {
                 consumer.accept(

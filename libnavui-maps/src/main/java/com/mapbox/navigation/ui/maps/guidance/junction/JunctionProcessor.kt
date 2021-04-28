@@ -8,6 +8,7 @@ import com.mapbox.common.HttpRequest
 import com.mapbox.common.HttpRequestError
 import com.mapbox.common.HttpResponseData
 import com.mapbox.common.UAComponents
+import com.mapbox.navigation.ui.maps.guidance.junction.api.MapboxRasterToBitmapParser
 import com.mapbox.navigation.ui.utils.internal.extensions.getBannerComponents
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 
@@ -35,6 +36,9 @@ internal object JunctionProcessor {
             }
             is JunctionAction.ProcessJunctionResponse -> {
                 processResponse(action.response)
+            }
+            is JunctionAction.ParseRasterToBitmap -> {
+                processRaster(action.data)
             }
         }
     }
@@ -93,32 +97,43 @@ internal object JunctionProcessor {
                     when (responseData.code) {
                         CODE_200 -> {
                             if (responseData.data.isEmpty()) {
-                                JunctionResult.Junction.Empty
+                                JunctionResult.JunctionRaster.Empty
                             } else {
-                                JunctionResult.Junction.Success(responseData.data)
+                                JunctionResult.JunctionRaster.Success(responseData.data)
                             }
                         }
                         CODE_401 -> {
-                            JunctionResult.Junction.Failure(
+                            JunctionResult.JunctionRaster.Failure(
                                 "Your token cannot access this " +
                                     "resource, contact support"
                             )
                         }
                         CODE_404 -> {
-                            JunctionResult.Junction.Failure("Resource is missing")
+                            JunctionResult.JunctionRaster.Failure("Resource is missing")
                         }
                         else -> {
-                            JunctionResult.Junction.Failure("Unknown error")
+                            JunctionResult.JunctionRaster.Failure("Unknown error")
                         }
                     }
-                } ?: JunctionResult.Junction.Empty
+                } ?: JunctionResult.JunctionRaster.Empty
             }
             response.isError -> {
-                return JunctionResult.Junction.Failure(response.error?.message)
+                return JunctionResult.JunctionRaster.Failure(response.error?.message)
             }
             else -> {
-                return JunctionResult.Junction.Failure(response.error?.message)
+                return JunctionResult.JunctionRaster.Failure(response.error?.message)
             }
+        }
+    }
+
+    private fun processRaster(
+        raster: ByteArray
+    ): JunctionResult {
+        return when (val expected = MapboxRasterToBitmapParser.parse(raster)) {
+            is com.mapbox.navigation.ui.base.model.Expected.Failure ->
+                JunctionResult.JunctionBitmap.Failure(expected.error)
+            is com.mapbox.navigation.ui.base.model.Expected.Success ->
+                JunctionResult.JunctionBitmap.Success(expected.value)
         }
     }
 }

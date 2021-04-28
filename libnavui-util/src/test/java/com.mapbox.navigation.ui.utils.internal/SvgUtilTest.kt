@@ -1,16 +1,21 @@
 package com.mapbox.navigation.ui.utils.internal
 
 import android.graphics.Bitmap
+import com.caverock.androidsvg.SVGExternalFileResolver
+import com.caverock.androidsvg.SVGParseException
 import com.mapbox.navigation.testing.MainCoroutineRule
+import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayInputStream
+import java.lang.Exception
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -178,6 +183,7 @@ class SvgUtilTest {
     @Test
     fun `render bitmap with width check bitmap properties`() =
         coroutineRule.runBlockingTest {
+            val mockResolver = mockk<SVGExternalFileResolver>()
             val mockWidth = 400
             val mockAspecRatio = 0.7727272727
             val mockHeight: Int = (mockWidth * mockAspecRatio).toInt()
@@ -188,7 +194,12 @@ class SvgUtilTest {
                 Bitmap.Config.ARGB_8888
             )
 
-            val actual = SvgUtil.renderAsBitmapWithWidth(mockStream, mockWidth, "")
+            val actual = SvgUtil.renderAsBitmapWithWidth(
+                mockStream,
+                mockWidth,
+                "",
+                mockResolver
+            )
 
             assertEquals(mockSignboard.height, actual?.height)
             assertEquals(mockSignboard.width, actual?.width)
@@ -198,10 +209,16 @@ class SvgUtilTest {
     @Test
     fun `render bitmap with width bitmap non null`() =
         coroutineRule.runBlockingTest {
+            val mockResolver = mockk<SVGExternalFileResolver>()
             val mockWidth = 400
             val mockStream = ByteArrayInputStream(validSvg.toByteArray())
 
-            val actual = SvgUtil.renderAsBitmapWithWidth(mockStream, mockWidth, "")
+            val actual = SvgUtil.renderAsBitmapWithWidth(
+                mockStream,
+                mockWidth,
+                "",
+                mockResolver
+            )
 
             assertNotNull(actual)
         }
@@ -209,33 +226,51 @@ class SvgUtilTest {
     @Test
     fun `render bitmap with width bitmap null`() =
         coroutineRule.runBlockingTest {
+            val mockResolver = mockk<SVGExternalFileResolver>()
             val mockWidth = 400
             val mockStream = ByteArrayInputStream(byteArrayOf(12, 55, 98))
 
-            val actual = SvgUtil.renderAsBitmapWithWidth(mockStream, mockWidth, "")
-
-            assertNull(actual)
+            assertThrows(SVGParseException::class.java) {
+                SvgUtil.renderAsBitmapWithWidth(
+                    mockStream,
+                    mockWidth,
+                    "",
+                    mockResolver
+                )
+            }
         }
 
     @Test
     fun `render bitmap with width css styles null`() =
         coroutineRule.runBlockingTest {
+            val mockResolver = mockk<SVGExternalFileResolver>()
             val mockWidth = 400
             val mockStream = ByteArrayInputStream(byteArrayOf(12, 55, 98))
 
-            val actual = SvgUtil.renderAsBitmapWithWidth(mockStream, mockWidth)
-
-            assertNull(actual)
+            assertThrows(SVGParseException::class.java) {
+                SvgUtil.renderAsBitmapWithWidth(
+                    mockStream,
+                    mockWidth,
+                    "",
+                    mockResolver
+                )
+            }
         }
 
     @Test
     fun `render bitmap with width bitmap null no viewBox`() =
         coroutineRule.runBlockingTest {
+            val mockResolver = mockk<SVGExternalFileResolver>()
             val mockWidth = 400
             val mockStream = ByteArrayInputStream(invalidSvg.toByteArray())
 
-            val actual = SvgUtil.renderAsBitmapWithWidth(mockStream, mockWidth, "")
-
-            assertNull(actual)
+            assertThrows("SVG's viewBox is null", Exception::class.java) {
+                SvgUtil.renderAsBitmapWithWidth(
+                    mockStream,
+                    mockWidth,
+                    "",
+                    mockResolver
+                )
+            }
         }
 }

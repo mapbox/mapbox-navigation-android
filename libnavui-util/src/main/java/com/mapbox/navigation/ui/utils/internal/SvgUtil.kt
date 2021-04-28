@@ -4,7 +4,9 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import com.caverock.androidsvg.RenderOptions
 import com.caverock.androidsvg.SVG
+import com.caverock.androidsvg.SVGExternalFileResolver
 import java.io.ByteArrayInputStream
+import kotlin.jvm.Throws
 
 object SvgUtil {
 
@@ -32,25 +34,24 @@ object SvgUtil {
     }
 
     @JvmStatic
-    suspend fun renderAsBitmapWithWidth(
+    @Throws
+    fun renderAsBitmapWithWidth(
         stream: ByteArrayInputStream,
         desiredWidth: Int,
-        cssStyles: String? = null
-    ): Bitmap? {
-        return try {
-            val svg = SVG.getFromInputStream(stream)
+        cssStyles: String? = null,
+        resolver: SVGExternalFileResolver
+    ): Bitmap {
+        SVG.registerExternalFileResolver(resolver)
+        val svg = SVG.getFromInputStream(stream)
+        svg.setDocumentWidth("100%")
+        svg.setDocumentHeight("100%")
 
-            svg.setDocumentWidth("100%")
-            svg.setDocumentHeight("100%")
-            if (svg.documentViewBox == null) {
-                null
-            } else {
-                val aspectRatio = svg.documentViewBox.bottom / svg.documentViewBox.right
-                val calculatedHeight = (desiredWidth * aspectRatio).toInt()
-                renderBitmap(svg, desiredWidth, calculatedHeight, cssStyles)
-            }
-        } catch (exception: Exception) {
-            null
+        return if (svg.documentViewBox == null) {
+            throw Exception("SVG's viewBox is null")
+        } else {
+            val aspectRatio = svg.documentViewBox.bottom / svg.documentViewBox.right
+            val calculatedHeight = (desiredWidth * aspectRatio).toInt()
+            renderBitmap(svg, desiredWidth, calculatedHeight, cssStyles)
         }
     }
 
@@ -59,7 +60,7 @@ object SvgUtil {
         width: Int,
         height: Int,
         cssStyles: String? = null
-    ): Bitmap? {
+    ): Bitmap {
         val signboard = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val signboardCanvas = Canvas(signboard)
         cssStyles?.let {

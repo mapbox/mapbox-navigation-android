@@ -11,8 +11,10 @@ import com.mapbox.common.HttpRequestError
 import com.mapbox.common.HttpRequestErrorType
 import com.mapbox.common.HttpResponseData
 import com.mapbox.common.UAComponents
+import com.mapbox.navigation.ui.maps.guidance.junction.api.MapboxRasterToBitmapParser
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -137,12 +139,12 @@ class JunctionProcessorTest {
         val response: Expected<HttpResponseData?, HttpRequestError?> =
             ExpectedFactory.createValue(mockHttpResponseData)
         val action = JunctionAction.ProcessJunctionResponse(response)
-        val expected = JunctionResult.Junction.Failure(
+        val expected = JunctionResult.JunctionRaster.Failure(
             "Your token cannot access this " +
                 "resource, contact support"
         )
 
-        val result = JunctionProcessor.process(action) as JunctionResult.Junction.Failure
+        val result = JunctionProcessor.process(action) as JunctionResult.JunctionRaster.Failure
 
         assertEquals(expected.error, result.error)
     }
@@ -152,10 +154,10 @@ class JunctionProcessorTest {
         val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(404L, ByteArray(0))
         val response: Expected<HttpResponseData?, HttpRequestError?> =
             ExpectedFactory.createValue(mockHttpResponseData)
-        val expected = JunctionResult.Junction.Failure("Resource is missing")
+        val expected = JunctionResult.JunctionRaster.Failure("Resource is missing")
         val action = JunctionAction.ProcessJunctionResponse(response)
 
-        val result = JunctionProcessor.process(action) as JunctionResult.Junction.Failure
+        val result = JunctionProcessor.process(action) as JunctionResult.JunctionRaster.Failure
 
         assertEquals(expected.error, result.error)
     }
@@ -165,10 +167,10 @@ class JunctionProcessorTest {
         val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(500L, ByteArray(0))
         val response: Expected<HttpResponseData?, HttpRequestError?> =
             ExpectedFactory.createValue(mockHttpResponseData)
-        val expected = JunctionResult.Junction.Failure("Unknown error")
+        val expected = JunctionResult.JunctionRaster.Failure("Unknown error")
         val action = JunctionAction.ProcessJunctionResponse(response)
 
-        val result = JunctionProcessor.process(action) as JunctionResult.Junction.Failure
+        val result = JunctionProcessor.process(action) as JunctionResult.JunctionRaster.Failure
 
         assertEquals(expected.error, result.error)
     }
@@ -176,10 +178,10 @@ class JunctionProcessorTest {
     @Test
     fun `process action signboard process response result no data`() {
         val response: Expected<HttpResponseData?, HttpRequestError?> = ExpectedFactory.createValue()
-        val expected = JunctionResult.Junction.Empty
+        val expected = JunctionResult.JunctionRaster.Empty
         val action = JunctionAction.ProcessJunctionResponse(response)
 
-        val result = JunctionProcessor.process(action) as JunctionResult.Junction.Empty
+        val result = JunctionProcessor.process(action) as JunctionResult.JunctionRaster.Empty
 
         assertEquals(expected, result)
     }
@@ -193,26 +195,41 @@ class JunctionProcessorTest {
                     "Connection Error"
                 )
             )
-        val expected = JunctionResult.Junction.Failure("Connection Error")
+        val expected = JunctionResult.JunctionRaster.Failure("Connection Error")
         val action = JunctionAction.ProcessJunctionResponse(response)
 
-        val result = JunctionProcessor.process(action) as JunctionResult.Junction.Failure
+        val result = JunctionProcessor.process(action) as JunctionResult.JunctionRaster.Failure
 
         assertEquals(expected.error, result.error)
     }
 
     @Test
-    fun `process action signboard process response result success`() {
+    fun `process action junction process response result success`() {
         val mockData = byteArrayOf(12, -12, 23, 65, -56, 74, 88, 90, -92, -11)
         val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(200L, mockData)
         val response: Expected<HttpResponseData?, HttpRequestError?> =
             ExpectedFactory.createValue(mockHttpResponseData)
-        val expected = JunctionResult.Junction.Success(mockData)
+        val expected = JunctionResult.JunctionRaster.Success(mockData)
         val action = JunctionAction.ProcessJunctionResponse(response)
 
-        val result = JunctionProcessor.process(action) as JunctionResult.Junction.Success
+        val result = JunctionProcessor.process(action) as JunctionResult.JunctionRaster.Success
 
         assertEquals(expected.data, result.data)
+    }
+
+    @Test
+    fun `process action junction process raster to bitmap failure`() {
+        mockkStatic(MapboxRasterToBitmapParser::class)
+        val mockData = byteArrayOf()
+        val action = JunctionAction.ParseRasterToBitmap(mockData)
+        every { MapboxRasterToBitmapParser.parse(any()) } returns
+            com.mapbox.navigation.ui.base.model.Expected.Failure(
+                "Error parsing raster to bitmap as raster is empty"
+            )
+
+        val result = JunctionProcessor.process(action) as JunctionResult.JunctionBitmap.Failure
+
+        assertEquals("Error parsing raster to bitmap as raster is empty", result.message)
     }
 
     private fun getComponentGuidanceViewType(): BannerComponents {

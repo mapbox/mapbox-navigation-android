@@ -12,6 +12,8 @@ import com.mapbox.common.HttpRequestError
 import com.mapbox.common.HttpRequestErrorType
 import com.mapbox.common.HttpResponseData
 import com.mapbox.common.UAComponents
+import com.mapbox.navigation.ui.maps.guidance.signboard.api.SvgToBitmapParser
+import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -138,12 +140,12 @@ class SignboardProcessorTest {
         val response: Expected<HttpResponseData?, HttpRequestError?> =
             createValue(mockHttpResponseData)
         val action = SignboardAction.ProcessSignboardResponse(response)
-        val expected = SignboardResult.Signboard.Failure(
+        val expected = SignboardResult.SignboardSvg.Failure(
             "Your token cannot access this " +
                 "resource, contact support"
         )
 
-        val result = SignboardProcessor.process(action) as SignboardResult.Signboard.Failure
+        val result = SignboardProcessor.process(action) as SignboardResult.SignboardSvg.Failure
 
         assertEquals(expected.error, result.error)
     }
@@ -153,10 +155,10 @@ class SignboardProcessorTest {
         val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(404L, ByteArray(0))
         val response: Expected<HttpResponseData?, HttpRequestError?> =
             createValue(mockHttpResponseData)
-        val expected = SignboardResult.Signboard.Failure("Resource is missing")
+        val expected = SignboardResult.SignboardSvg.Failure("Resource is missing")
         val action = SignboardAction.ProcessSignboardResponse(response)
 
-        val result = SignboardProcessor.process(action) as SignboardResult.Signboard.Failure
+        val result = SignboardProcessor.process(action) as SignboardResult.SignboardSvg.Failure
 
         assertEquals(expected.error, result.error)
     }
@@ -166,10 +168,10 @@ class SignboardProcessorTest {
         val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(500L, ByteArray(0))
         val response: Expected<HttpResponseData?, HttpRequestError?> =
             createValue(mockHttpResponseData)
-        val expected = SignboardResult.Signboard.Failure("Unknown error")
+        val expected = SignboardResult.SignboardSvg.Failure("Unknown error")
         val action = SignboardAction.ProcessSignboardResponse(response)
 
-        val result = SignboardProcessor.process(action) as SignboardResult.Signboard.Failure
+        val result = SignboardProcessor.process(action) as SignboardResult.SignboardSvg.Failure
 
         assertEquals(expected.error, result.error)
     }
@@ -177,10 +179,10 @@ class SignboardProcessorTest {
     @Test
     fun `process action signboard process response result no data`() {
         val response: Expected<HttpResponseData?, HttpRequestError?> = createValue()
-        val expected = SignboardResult.Signboard.Empty
+        val expected = SignboardResult.SignboardSvg.Empty
         val action = SignboardAction.ProcessSignboardResponse(response)
 
-        val result = SignboardProcessor.process(action) as SignboardResult.Signboard.Empty
+        val result = SignboardProcessor.process(action) as SignboardResult.SignboardSvg.Empty
 
         assertEquals(expected, result)
     }
@@ -194,10 +196,10 @@ class SignboardProcessorTest {
                     "Connection Error"
                 )
             )
-        val expected = SignboardResult.Signboard.Failure("Connection Error")
+        val expected = SignboardResult.SignboardSvg.Failure("Connection Error")
         val action = SignboardAction.ProcessSignboardResponse(response)
 
-        val result = SignboardProcessor.process(action) as SignboardResult.Signboard.Failure
+        val result = SignboardProcessor.process(action) as SignboardResult.SignboardSvg.Failure
 
         assertEquals(expected.error, result.error)
     }
@@ -208,12 +210,27 @@ class SignboardProcessorTest {
         val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(200L, mockData)
         val response: Expected<HttpResponseData?, HttpRequestError?> =
             createValue(mockHttpResponseData)
-        val expected = SignboardResult.Signboard.Success(mockData)
+        val expected = SignboardResult.SignboardSvg.Success(mockData)
         val action = SignboardAction.ProcessSignboardResponse(response)
 
-        val result = SignboardProcessor.process(action) as SignboardResult.Signboard.Success
+        val result = SignboardProcessor.process(action) as SignboardResult.SignboardSvg.Success
 
         assertEquals(expected.data, result.data)
+    }
+
+    @Test
+    fun `process action signboard process bytearray to bitmap failure`() {
+        val mockParser = mockk<SvgToBitmapParser>()
+        val mockData = byteArrayOf(12, -12, 23, 65, -56, 74, 88, 90, -92, -11)
+        val mockOptions = mockk<MapboxSignboardOptions>()
+        val action = SignboardAction.ParseSvgToBitmap(mockData, mockParser, mockOptions)
+        every {
+            mockParser.parse(any(), any())
+        } returns com.mapbox.navigation.ui.base.model.Expected.Failure("whatever")
+
+        val result = SignboardProcessor.process(action) as SignboardResult.SignboardBitmap.Failure
+
+        assertEquals("whatever", result.message)
     }
 
     private fun getComponentGuidanceViewType(): BannerComponents {

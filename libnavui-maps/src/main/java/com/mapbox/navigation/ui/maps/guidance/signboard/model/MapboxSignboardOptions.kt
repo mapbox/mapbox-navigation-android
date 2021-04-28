@@ -67,7 +67,7 @@ class MapboxSignboardOptions private constructor(
 
         private var cssStyles: String =
             "text { font-family: Arial, Helvetica, sans-serif; font-size: 0.8em }"
-        private var desiredSignboardWidth: Int = 400
+        private var desiredSignboardWidth: Int = 600
 
         /**
          * apply css styles to the builder
