@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.guidance.signboard.api
 
+import android.graphics.Bitmap
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.common.HttpRequest
 import com.mapbox.common.HttpRequestError
@@ -42,13 +43,12 @@ class MapboxSignboardApiTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
+    val mockParser: SvgToBitmapParser = mockk(relaxed = true)
     private val consumer:
         MapboxNavigationConsumer<Expected<SignboardValue, SignboardError>> = mockk(relaxed = true)
     private val bannerInstructions: BannerInstructions = mockk()
-    private val signboardApi = MapboxSignboardApi(
-        "pk.1234",
-        MapboxSignboardOptions.Builder().build()
-    )
+    private val signboardOptions = mockk<MapboxSignboardOptions>()
+    private val signboardApi = MapboxSignboardApi("pk.1234", mockParser, signboardOptions)
 
     @Before
     fun setUp() {
@@ -126,7 +126,7 @@ class MapboxSignboardApiTest {
             every { result } returns mockResponseData
             every { request } returns mockRequest
         }
-        val mockResult = mockk<SignboardResult.Signboard.Empty>()
+        val mockResult = mockk<SignboardResult.SignboardSvg.Empty>()
         every {
             SignboardProcessor.process(
                 SignboardAction.ProcessSignboardResponse(mockResponseData)
@@ -168,7 +168,7 @@ class MapboxSignboardApiTest {
             every { result } returns mockResponseData
             every { request } returns mockRequest
         }
-        val mockResult = mockk<SignboardResult.Signboard.Failure> {
+        val mockResult = mockk<SignboardResult.SignboardSvg.Failure> {
             every { error } returns mockError
         }
         val expected = mockk<Expected.Failure<SignboardError>> {
@@ -189,7 +189,7 @@ class MapboxSignboardApiTest {
     }
 
     @Test
-    fun `process state signboard available signboard success`() {
+    fun `process state signboard available signboard svg success parse fail`() {
         val mockUrl = "https//abc.mapbox.com"
         val mockUrlWithAccessToken = "https//abc.mapbox.com?access_token=pk.1234"
         val httpResponseCallbackSlot = slot<HttpResponseCallback>()
@@ -215,24 +215,86 @@ class MapboxSignboardApiTest {
             every { result } returns mockResponseData
             every { request } returns mockRequest
         }
-        val mockResult = mockk<SignboardResult.Signboard.Success> {
+        val mockSvgResult = mockk<SignboardResult.SignboardSvg.Success> {
             every { data } returns mockData
-        }
-        val expected = mockk<Expected.Success<SignboardValue>> {
-            every { value.bytes } returns mockData
         }
         every {
             SignboardProcessor.process(
                 SignboardAction.ProcessSignboardResponse(mockResponseData)
             )
-        } returns mockResult
+        } returns mockSvgResult
+        val mockParseFailure = Expected.Failure("This is an error")
+        every { mockParser.parse(mockData, signboardOptions) } returns mockParseFailure
+        every {
+            SignboardProcessor.process(
+                SignboardAction.ParseSvgToBitmap(mockData, mockParser, signboardOptions)
+            )
+        } returns SignboardResult.SignboardBitmap.Failure("This is an error")
+        val expected = mockk<Expected.Failure<SignboardError>> {
+            every { error.errorMessage } returns "This is an error"
+        }
+        val messageSlot = slot<Expected.Failure<SignboardError>>()
+
+        signboardApi.generateSignboard(bannerInstructions, consumer)
+        httpResponseCallbackSlot.captured.run(mockResponse)
+
+        verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
+        assertEquals(expected.error.errorMessage, messageSlot.captured.error.errorMessage)
+    }
+
+    @Test
+    fun `process state signboard available signboard svg success parse success`() {
+        val mockUrl = "https//abc.mapbox.com"
+        val mockUrlWithAccessToken = "https//abc.mapbox.com?access_token=pk.1234"
+        val httpResponseCallbackSlot = slot<HttpResponseCallback>()
+        val mockRequest = mockk<HttpRequest>()
+        val mockHttpService = mockk<HttpServiceInterface>() {
+            every { request(mockRequest, capture(httpResponseCallbackSlot)) } returns 0
+        }
+        every { CommonSingletonModuleProvider.httpServiceInstance } returns mockHttpService
+        every {
+            SignboardProcessor.process(
+                SignboardAction.CheckSignboardAvailability(bannerInstructions)
+            )
+        } returns SignboardResult.SignboardAvailable(mockUrl)
+        every {
+            SignboardProcessor.process(
+                SignboardAction.PrepareSignboardRequest(mockUrlWithAccessToken)
+            )
+        } returns SignboardResult.SignboardRequest(mockRequest)
+        val mockData = byteArrayOf(-12, 12, 34, 55, -45)
+        val mockResponseData =
+            mockk<com.mapbox.bindgen.Expected<HttpResponseData?, HttpRequestError?>>()
+        val mockResponse = mockk<HttpResponse> {
+            every { result } returns mockResponseData
+            every { request } returns mockRequest
+        }
+        val mockSvgResult = mockk<SignboardResult.SignboardSvg.Success> {
+            every { data } returns mockData
+        }
+        every {
+            SignboardProcessor.process(
+                SignboardAction.ProcessSignboardResponse(mockResponseData)
+            )
+        } returns mockSvgResult
+        val mockBitmap = mockk<Bitmap>()
+        val mockParseSuccess = Expected.Success(mockBitmap)
+        every { mockParser.parse(mockData, signboardOptions) } returns mockParseSuccess
+        every {
+            SignboardProcessor.process(
+                SignboardAction.ParseSvgToBitmap(mockData, mockParser, signboardOptions)
+            )
+        } returns SignboardResult.SignboardBitmap.Success(mockBitmap)
+        val expected = mockk<Expected.Success<SignboardValue>> {
+            every { value.bitmap } returns mockBitmap
+        }
         val messageSlot = slot<Expected.Success<SignboardValue>>()
 
         signboardApi.generateSignboard(bannerInstructions, consumer)
         httpResponseCallbackSlot.captured.run(mockResponse)
 
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
-        assertEquals(expected.value.bytes, messageSlot.captured.value.bytes)
+        assertEquals(expected.value.bitmap, messageSlot.captured.value.bitmap)
     }
 
     @Ignore("Make this test an instrumentation test to avoid UnsatisfiedLinkError from Common 11+")

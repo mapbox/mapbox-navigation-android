@@ -35,9 +35,9 @@ android {
 
 dependencies {
     api project(":libnavigation-util")
+    api dependenciesList.svgParser
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.androidXAnnotation
-    implementation dependenciesList.svgParser
 
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
     testImplementation(project(':libtesting-utils'))

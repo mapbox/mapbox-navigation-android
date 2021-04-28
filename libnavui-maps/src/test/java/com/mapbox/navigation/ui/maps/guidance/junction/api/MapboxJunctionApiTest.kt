@@ -1,5 +1,7 @@
 package com.mapbox.navigation.ui.maps.guidance.junction.api
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.common.HttpRequest
 import com.mapbox.common.HttpRequestError
@@ -20,6 +22,7 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
@@ -62,7 +65,7 @@ class MapboxJunctionApiTest {
     }
 
     @Test
-    fun `process state signboard unavailable`() {
+    fun `process state junction unavailable`() {
         every {
             JunctionProcessor.process(
                 JunctionAction.CheckJunctionAvailability(bannerInstructions)
@@ -96,13 +99,13 @@ class MapboxJunctionApiTest {
     }
 
     @Test
-    fun `process state signboard available signboard empty`() {
+    fun `process state junction available junction empty`() {
         val mockUrl = "https//abc.mapbox.com"
         val mockUrlWithAccessToken = "https//abc.mapbox.com&access_token=pk.1234"
         val httpResponseCallbackSlot = slot<HttpResponseCallback>()
         val mockRequest = mockk<HttpRequest>()
         val expectedError = "No junction available for current maneuver."
-        val mockHttpService = mockk<HttpServiceInterface>() {
+        val mockHttpService = mockk<HttpServiceInterface> {
             every { request(mockRequest, capture(httpResponseCallbackSlot)) } returns 0
         }
         every { CommonSingletonModuleProvider.httpServiceInstance } returns mockHttpService
@@ -122,7 +125,7 @@ class MapboxJunctionApiTest {
             every { result } returns mockResponseData
             every { request } returns mockRequest
         }
-        val mockResult = mockk<JunctionResult.Junction.Empty>()
+        val mockResult = mockk<JunctionResult.JunctionRaster.Empty>()
         every {
             JunctionProcessor.process(
                 JunctionAction.ProcessJunctionResponse(mockResponseData)
@@ -138,13 +141,13 @@ class MapboxJunctionApiTest {
     }
 
     @Test
-    fun `process state signboard available signboard failure`() {
+    fun `process state junction available junction failure`() {
         val mockUrl = "https//abc.mapbox.com"
         val mockUrlWithAccessToken = "https//abc.mapbox.com&access_token=pk.1234"
         val httpResponseCallbackSlot = slot<HttpResponseCallback>()
         val mockRequest = mockk<HttpRequest>()
         val mockError = "Resource is missing"
-        val mockHttpService = mockk<HttpServiceInterface>() {
+        val mockHttpService = mockk<HttpServiceInterface> {
             every { request(mockRequest, capture(httpResponseCallbackSlot)) } returns 0
         }
         every { CommonSingletonModuleProvider.httpServiceInstance } returns mockHttpService
@@ -164,7 +167,7 @@ class MapboxJunctionApiTest {
             every { result } returns mockResponseData
             every { request } returns mockRequest
         }
-        val mockResult = mockk<JunctionResult.Junction.Failure> {
+        val mockResult = mockk<JunctionResult.JunctionRaster.Failure> {
             every { error } returns mockError
         }
         val expected = mockk<Expected.Failure<JunctionError>> {
@@ -185,12 +188,12 @@ class MapboxJunctionApiTest {
     }
 
     @Test
-    fun `process state signboard available signboard success`() {
+    fun `process state junction available junction raster success parse fail`() {
         val mockUrl = "https//abc.mapbox.com"
         val mockUrlWithAccessToken = "https//abc.mapbox.com&access_token=pk.1234"
         val httpResponseCallbackSlot = slot<HttpResponseCallback>()
         val mockRequest = mockk<HttpRequest>()
-        val mockHttpService = mockk<HttpServiceInterface>() {
+        val mockHttpService = mockk<HttpServiceInterface> {
             every { request(mockRequest, capture(httpResponseCallbackSlot)) } returns 0
         }
         every { CommonSingletonModuleProvider.httpServiceInstance } returns mockHttpService
@@ -204,36 +207,102 @@ class MapboxJunctionApiTest {
                 JunctionAction.PrepareJunctionRequest(mockUrlWithAccessToken)
             )
         } returns JunctionResult.JunctionRequest(mockRequest)
-        val mockData = byteArrayOf(-12, 12, 34, 55, -45)
+        val mockData = byteArrayOf()
         val mockResponseData =
             mockk<com.mapbox.bindgen.Expected<HttpResponseData?, HttpRequestError?>>()
         val mockResponse = mockk<HttpResponse> {
             every { result } returns mockResponseData
             every { request } returns mockRequest
         }
-        val mockResult = mockk<JunctionResult.Junction.Success> {
+        val mockRasterResult = mockk<JunctionResult.JunctionRaster.Success> {
             every { data } returns mockData
-        }
-        val expected = mockk<Expected.Success<JunctionValue>> {
-            every { value.bytes } returns mockData
         }
         every {
             JunctionProcessor.process(
                 JunctionAction.ProcessJunctionResponse(mockResponseData)
             )
-        } returns mockResult
+        } returns mockRasterResult
+        val mockParseFailure = Expected.Failure("Error parsing raster to bitmap as raster is empty")
+        mockkStatic(MapboxRasterToBitmapParser::class)
+        every { MapboxRasterToBitmapParser.parse(mockData) } returns mockParseFailure
+        every {
+            JunctionProcessor.process(
+                JunctionAction.ParseRasterToBitmap(mockData)
+            )
+        } returns JunctionResult.JunctionBitmap.Failure(mockParseFailure.error)
+        val expected = mockk<Expected.Failure<JunctionError>> {
+            every { error.errorMessage } returns mockParseFailure.error
+        }
+        val messageSlot = slot<Expected.Failure<JunctionError>>()
+
+        junctionApi.generateJunction(bannerInstructions, consumer)
+        httpResponseCallbackSlot.captured.run(mockResponse)
+
+        verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
+        assertEquals(expected.error.errorMessage, messageSlot.captured.error.errorMessage)
+    }
+
+    @Test
+    fun `process state junction available junction raster success parse success`() {
+        val mockUrl = "https//abc.mapbox.com"
+        val mockUrlWithAccessToken = "https//abc.mapbox.com&access_token=pk.1234"
+        val httpResponseCallbackSlot = slot<HttpResponseCallback>()
+        val mockRequest = mockk<HttpRequest>()
+        val mockHttpService = mockk<HttpServiceInterface> {
+            every { request(mockRequest, capture(httpResponseCallbackSlot)) } returns 0
+        }
+        every { CommonSingletonModuleProvider.httpServiceInstance } returns mockHttpService
+        every {
+            JunctionProcessor.process(
+                JunctionAction.CheckJunctionAvailability(bannerInstructions)
+            )
+        } returns JunctionResult.JunctionAvailable(mockUrl)
+        every {
+            JunctionProcessor.process(
+                JunctionAction.PrepareJunctionRequest(mockUrlWithAccessToken)
+            )
+        } returns JunctionResult.JunctionRequest(mockRequest)
+        val mockData = byteArrayOf(12, -12, 23, 45, 67, 65, 44, 45, 12, 34, 45, 56, 76)
+        val mockResponseData =
+            mockk<com.mapbox.bindgen.Expected<HttpResponseData?, HttpRequestError?>>()
+        val mockResponse = mockk<HttpResponse> {
+            every { result } returns mockResponseData
+            every { request } returns mockRequest
+        }
+        val mockRasterResult = mockk<JunctionResult.JunctionRaster.Success> {
+            every { data } returns mockData
+        }
+        every {
+            JunctionProcessor.process(
+                JunctionAction.ProcessJunctionResponse(mockResponseData)
+            )
+        } returns mockRasterResult
+        mockkStatic(BitmapFactory::class)
+        val mockBitmap = mockk<Bitmap>()
+        every { BitmapFactory.decodeByteArray(mockData, 0, mockData.size) } returns mockBitmap
+        val mockParseSuccess = Expected.Success(mockBitmap)
+        mockkObject(MapboxRasterToBitmapParser)
+        every { MapboxRasterToBitmapParser.parse(mockData) } returns mockParseSuccess
+        every {
+            JunctionProcessor.process(
+                JunctionAction.ParseRasterToBitmap(mockData)
+            )
+        } returns JunctionResult.JunctionBitmap.Success(mockParseSuccess.value)
+        val expected = mockk<Expected.Success<JunctionValue>> {
+            every { value.bitmap } returns mockBitmap
+        }
         val messageSlot = slot<Expected.Success<JunctionValue>>()
 
         junctionApi.generateJunction(bannerInstructions, consumer)
         httpResponseCallbackSlot.captured.run(mockResponse)
 
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
-        assertEquals(expected.value.bytes, messageSlot.captured.value.bytes)
+        assertEquals(expected.value.bitmap, messageSlot.captured.value.bitmap)
     }
 
     @Ignore("Make this test an instrumentation test to avoid UnsatisfiedLinkError from Common 11+")
     @Test
-    fun `process request signboard request cancel`() {
+    fun `process request junction request cancel`() {
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(MockResponse().setResponseCode(401))
         mockWebServer.start()

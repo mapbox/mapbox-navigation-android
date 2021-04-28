@@ -8,8 +8,12 @@ import com.mapbox.common.HttpRequest
 import com.mapbox.common.HttpRequestError
 import com.mapbox.common.HttpResponseData
 import com.mapbox.common.UAComponents
+import com.mapbox.navigation.ui.maps.guidance.signboard.api.SvgToBitmapParser
+import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions
 import com.mapbox.navigation.ui.utils.internal.extensions.getBannerComponents
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+
+private typealias NavExpected<V, E> = com.mapbox.navigation.ui.base.model.Expected<V, E>
 
 internal object SignboardProcessor {
 
@@ -35,6 +39,9 @@ internal object SignboardProcessor {
             }
             is SignboardAction.ProcessSignboardResponse -> {
                 processResponse(action.response)
+            }
+            is SignboardAction.ParseSvgToBitmap -> {
+                processSvg(action.svg, action.parser, action.options)
             }
         }
     }
@@ -93,32 +100,45 @@ internal object SignboardProcessor {
                     when (responseData.code) {
                         CODE_200 -> {
                             if (responseData.data.isEmpty()) {
-                                SignboardResult.Signboard.Empty
+                                SignboardResult.SignboardSvg.Empty
                             } else {
-                                SignboardResult.Signboard.Success(responseData.data)
+                                SignboardResult.SignboardSvg.Success(responseData.data)
                             }
                         }
                         CODE_401 -> {
-                            SignboardResult.Signboard.Failure(
+                            SignboardResult.SignboardSvg.Failure(
                                 "Your token cannot access this " +
                                     "resource, contact support"
                             )
                         }
                         CODE_404 -> {
-                            SignboardResult.Signboard.Failure("Resource is missing")
+                            SignboardResult.SignboardSvg.Failure("Resource is missing")
                         }
                         else -> {
-                            SignboardResult.Signboard.Failure("Unknown error")
+                            SignboardResult.SignboardSvg.Failure("Unknown error")
                         }
                     }
-                } ?: SignboardResult.Signboard.Empty
+                } ?: SignboardResult.SignboardSvg.Empty
             }
             response.isError -> {
-                return SignboardResult.Signboard.Failure(response.error?.message)
+                return SignboardResult.SignboardSvg.Failure(response.error?.message)
             }
             else -> {
-                return SignboardResult.Signboard.Failure(response.error?.message)
+                return SignboardResult.SignboardSvg.Failure(response.error?.message)
             }
+        }
+    }
+
+    private fun processSvg(
+        svg: ByteArray,
+        parser: SvgToBitmapParser,
+        options: MapboxSignboardOptions
+    ): SignboardResult {
+        return when (val expected = parser.parse(svg, options)) {
+            is com.mapbox.navigation.ui.base.model.Expected.Failure ->
+                SignboardResult.SignboardBitmap.Failure(expected.error)
+            is com.mapbox.navigation.ui.base.model.Expected.Success ->
+                SignboardResult.SignboardBitmap.Success(expected.value)
         }
     }
 }

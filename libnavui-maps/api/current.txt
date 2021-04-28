@@ -450,8 +450,8 @@ package com.mapbox.navigation.ui.maps.guidance.junction.model {
   }
 
   public final class JunctionValue {
-    method public byte[] getBytes();
-    property public final byte[] bytes;
+    method public android.graphics.Bitmap getBitmap();
+    property public final android.graphics.Bitmap bitmap;
   }
 
 }
@@ -467,17 +467,38 @@ package com.mapbox.navigation.ui.maps.guidance.junction.view {
 
 }
 
+package com.mapbox.navigation.ui.maps.guidance.signboard {
+
+  public final class SignboardProcessorKt {
+  }
+
+}
+
 package com.mapbox.navigation.ui.maps.guidance.signboard.api {
 
+  public class MapboxExternalFileResolver extends com.caverock.androidsvg.SVGExternalFileResolver {
+    ctor public MapboxExternalFileResolver(android.content.res.AssetManager assetManager);
+  }
+
   public final class MapboxSignboardApi {
-    ctor public MapboxSignboardApi(String accessToken, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options = MapboxSignboardOptions.<init>().build());
-    ctor public MapboxSignboardApi(String accessToken);
+    ctor public MapboxSignboardApi(String accessToken, com.mapbox.navigation.ui.maps.guidance.signboard.api.SvgToBitmapParser parser, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options = MapboxSignboardOptions.<init>().build());
+    ctor public MapboxSignboardApi(String accessToken, com.mapbox.navigation.ui.maps.guidance.signboard.api.SvgToBitmapParser parser);
+    ctor public MapboxSignboardApi(String accessToken, android.content.Context applicationContext, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options = MapboxSignboardOptions.<init>().build());
     method public void cancelAll();
     method public void generateSignboard(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue,com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError>> consumer);
     field public static final com.mapbox.navigation.ui.maps.guidance.signboard.api.MapboxSignboardApi.Companion Companion;
   }
 
   public static final class MapboxSignboardApi.Companion {
+  }
+
+  public final class MapboxSvgToBitmapParser implements com.mapbox.navigation.ui.maps.guidance.signboard.api.SvgToBitmapParser {
+    ctor public MapboxSvgToBitmapParser(com.caverock.androidsvg.SVGExternalFileResolver externalFileResolver);
+    method public com.mapbox.navigation.ui.base.model.Expected<android.graphics.Bitmap,java.lang.String> parse(byte[] svg, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options);
+  }
+
+  public interface SvgToBitmapParser {
+    method public com.mapbox.navigation.ui.base.model.Expected<android.graphics.Bitmap,java.lang.String> parse(byte[] svg, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options);
   }
 
 }
@@ -507,10 +528,8 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.model {
   }
 
   public final class SignboardValue {
-    method public byte[] getBytes();
-    method public com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions getOptions();
-    property public final byte[] bytes;
-    property public final com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options;
+    method public android.graphics.Bitmap getBitmap();
+    property public final android.graphics.Bitmap bitmap;
   }
 
 }

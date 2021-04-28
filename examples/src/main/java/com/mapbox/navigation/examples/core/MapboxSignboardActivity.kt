@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -12,6 +13,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.Style
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
@@ -80,7 +82,7 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
      * data that is consumed by the [MapboxSignboardView] in the view layout.
      */
     private val signboardApi: MapboxSignboardApi by lazy {
-        MapboxSignboardApi(getMapboxRouteAccessToken(this))
+        MapboxSignboardApi(getMapboxRouteAccessToken(this), applicationContext)
     }
 
     /**
@@ -92,6 +94,14 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
         MapboxNavigationConsumer<Expected<SignboardValue, SignboardError>> {
         override fun accept(value: Expected<SignboardValue, SignboardError>) {
             // The data obtained must be rendered by [MapboxSignboardView]
+            when (value) {
+                is Expected.Failure -> {
+                    binding.signboardView.visibility = View.GONE
+                }
+                is Expected.Success -> {
+                    binding.signboardView.visibility = View.VISIBLE
+                }
+            }
             binding.signboardView.render(value)
         }
     }
@@ -192,10 +202,13 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
     @SuppressLint("MissingPermission")
     private fun initStyle() {
         mapboxMap.loadStyleUri(
-            MAPBOX_STREETS
-        ) {
-            binding.mapView.gestures.addOnMapLongClickListener(this)
-        }
+            MAPBOX_STREETS,
+            object : Style.OnStyleLoaded {
+                override fun onStyleLoaded(style: Style) {
+                    binding.mapView.gestures.addOnMapLongClickListener(this@MapboxSignboardActivity)
+                }
+            }
+        )
     }
 
     private fun startSimulation(route: DirectionsRoute) {
