@@ -1,6 +1,8 @@
 package com.mapbox.navigation.core.replay.route
 
+import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.turf.TurfMeasurement
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -285,5 +287,22 @@ class ReplayRouteInterpolatorTest {
 
         assertEquals(bearing, coordinates[0].bearing, 0.0001)
         assertEquals(bearing, coordinates[1].bearing, 0.0001)
+    }
+
+    @Test
+    fun `should not slow down on a freeway`() {
+        val jsonResource = FileUtils.loadJsonFixture("route_with_wide_turns.txt")
+        val coordinates = LineString.fromJson(jsonResource).coordinates()
+        val options = ReplayRouteOptions.Builder()
+            .maxSpeedMps(30.0)
+            .maxAcceleration(3.0)
+            .minAcceleration(-4.0)
+            .build()
+
+        val speedProfile = routeInterpolator.createSpeedProfile(options, coordinates)
+
+        speedProfile.subList(1, speedProfile.lastIndex - 2).forEach {
+            assertTrue(it.speedMps > 20.0)
+        }
     }
 }
