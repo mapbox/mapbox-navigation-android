@@ -257,8 +257,9 @@ class MapboxCameraAnimationsActivity :
         initNavigation()
 
         val debugger = MapboxNavigationViewportDataSourceDebugger(
-            this,
-            binding.mapView
+            context = this,
+            mapView = binding.mapView,
+            layerAbove = "road-label"
         ).apply {
             enabled = true
         }

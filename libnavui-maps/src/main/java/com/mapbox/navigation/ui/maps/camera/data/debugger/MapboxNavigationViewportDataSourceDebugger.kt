@@ -11,6 +11,7 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
+import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.addLayerAbove
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.sources.addSource
@@ -55,11 +56,14 @@ import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
  * )
  * navigationCamera.debugger = debugger
  * ```
+ *
+ * @param layerAbove layer in the current map style above which the debug layer with framed geometries should be placed
  */
 @ExperimentalMapboxNavigationAPI
-class MapboxNavigationViewportDataSourceDebugger(
+class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
     private val context: Context,
-    private val mapView: MapView
+    private val mapView: MapView,
+    private val layerAbove: String? = null
 ) {
     private val pointsSourceId = "mbx_viewport_data_source_points_source"
     private val pointsLayerId = "mbx_viewport_data_source_points_layer"
@@ -248,7 +252,11 @@ class MapboxNavigationViewportDataSourceDebugger(
                     lineColor(Color.CYAN)
                     lineWidth(5.0)
                 }
-                style.addLayerAbove(layer, "road-label")
+                if (layerAbove != null && style.styleLayerExists(layerAbove)) {
+                    style.addLayerAbove(layer, layerAbove)
+                } else {
+                    style.addLayer(layer)
+                }
             }
 
             val source = style.getSource(pointsSourceId) as GeoJsonSource
