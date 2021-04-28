@@ -65,11 +65,12 @@ internal class ReplayRouteSmoother {
             segmentRoute(distinctPoints, segmentStart.routeIndex!!, segmentEnd.routeIndex!!)
         val distance = TurfMeasurement.length(segmentRoute, TurfConstants.UNIT_METERS)
         val bearing = TurfMeasurement.bearing(segmentStart.point, segmentEnd.point)
+        val normalizedBearing = (bearing + 360.0) % 360.0
         segmentStart.apply {
-            this.bearing = bearing
+            this.bearing = normalizedBearing
             this.distance = distance
         }
-        return bearing
+        return normalizedBearing
     }
 
     /**

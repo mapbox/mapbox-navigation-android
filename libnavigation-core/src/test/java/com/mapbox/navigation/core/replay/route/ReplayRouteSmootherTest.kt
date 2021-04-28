@@ -158,4 +158,24 @@ class ReplayRouteSmootherTest {
 
         assertEquals(2, segment.size)
     }
+
+    @Test
+    fun `should not create negative bearings`() {
+        val coordinates = listOf(
+            Point.fromLngLat(-121.472171, 38.563588),
+            Point.fromLngLat(-121.473008, 38.560814),
+            Point.fromLngLat(-121.474514, 38.556303),
+            Point.fromLngLat(-121.474535, 38.555855),
+            Point.fromLngLat(-121.474221, 38.553555),
+            Point.fromLngLat(-121.474191, 38.553223),
+            Point.fromLngLat(-121.474146, 38.552734),
+            Point.fromLngLat(-121.474128, 38.552361),
+        )
+
+        val speedProfile = routeSmoother.smoothRoute(coordinates, recommendedThresholdMeters)
+        speedProfile.forEach {
+            val bearingWithinRange = it.bearing >= 0.0 && it.bearing < 360.0
+            assertTrue(bearingWithinRange)
+        }
+    }
 }
