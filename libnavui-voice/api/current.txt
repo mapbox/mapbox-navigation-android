@@ -87,31 +87,14 @@ package com.mapbox.navigation.ui.voice.options {
   }
 
   public abstract sealed class PlayerAttributes {
+    method public final void applyOn(android.media.MediaPlayer mediaPlayer);
+    method public final void applyOn(android.speech.tts.TextToSpeech textToSpeech, android.os.Bundle bundle);
+    method @RequiresApi(api=android.os.Build.VERSION_CODES.O) public final void applyOn(android.media.AudioFocusRequest.Builder audioFocusRequestBuilder);
+    method protected abstract kotlin.jvm.functions.Function1<android.media.AudioFocusRequest.Builder,kotlin.Unit> configureAudioFocusRequestBuilder();
+    method protected abstract kotlin.jvm.functions.Function1<android.media.MediaPlayer,kotlin.Unit> configureMediaPlayer();
+    method protected abstract kotlin.jvm.functions.Function2<android.speech.tts.TextToSpeech,android.os.Bundle,kotlin.Unit> configureTextToSpeech();
     method public abstract int getStreamType();
     property public abstract int streamType;
-  }
-
-  @RequiresApi(api=android.os.Build.VERSION_CODES.O) public static final class PlayerAttributes.OreoAndLaterAttributes extends com.mapbox.navigation.ui.voice.options.PlayerAttributes {
-    ctor public PlayerAttributes.OreoAndLaterAttributes(int usage = 12, int contentType = 2);
-    method public int component1();
-    method public int component2();
-    method @RequiresApi(api=android.os.Build.VERSION_CODES.O) public com.mapbox.navigation.ui.voice.options.PlayerAttributes.OreoAndLaterAttributes copy(int usage, int contentType);
-    method public android.media.AudioAttributes getAudioAttributes();
-    method public int getContentType();
-    method public int getStreamType();
-    method public int getUsage();
-    property public final android.media.AudioAttributes audioAttributes;
-    property public final int contentType;
-    property public int streamType;
-    property public final int usage;
-  }
-
-  public static final class PlayerAttributes.PreOreoAttributes extends com.mapbox.navigation.ui.voice.options.PlayerAttributes {
-    ctor public PlayerAttributes.PreOreoAttributes(int streamType = 3);
-    method public int component1();
-    method public com.mapbox.navigation.ui.voice.options.PlayerAttributes.PreOreoAttributes copy(int streamType);
-    method public int getStreamType();
-    property public int streamType;
   }
 
   public final class VoiceInstructionsPlayerOptions {

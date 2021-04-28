@@ -8,7 +8,6 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
-import com.mapbox.navigation.ui.voice.options.PlayerAttributes
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import java.util.Locale
@@ -139,17 +138,8 @@ internal class VoiceInstructionsTextPlayer(
         val bundle = Bundle().apply {
             putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, volumeLevel)
         }
-        when (val attributes = options.playerAttributes) {
-            is PlayerAttributes.OreoAndLaterAttributes -> {
-                textToSpeech.setAudioAttributes(attributes.audioAttributes)
-            }
-            is PlayerAttributes.PreOreoAttributes -> {
-                bundle.putString(
-                    TextToSpeech.Engine.KEY_PARAM_STREAM,
-                    attributes.streamType.toString()
-                )
-            }
-        }
+        options.playerAttributes.applyOn(textToSpeech, bundle)
+
         textToSpeech.speak(
             announcement,
             TextToSpeech.QUEUE_FLUSH,

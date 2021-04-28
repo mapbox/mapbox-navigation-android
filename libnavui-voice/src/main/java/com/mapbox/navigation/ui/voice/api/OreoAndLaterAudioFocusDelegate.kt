@@ -4,7 +4,6 @@ import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.mapbox.navigation.ui.voice.options.PlayerAttributes
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 
 @RequiresApi(api = Build.VERSION_CODES.O)
@@ -32,10 +31,6 @@ internal class OreoAndLaterAudioFocusDelegate(
 
     private fun buildAudioFocusRequest(options: VoiceInstructionsPlayerOptions) = AudioFocusRequest
         .Builder(options.focusGain)
-        .apply {
-            if (options.playerAttributes is PlayerAttributes.OreoAndLaterAttributes) {
-                setAudioAttributes(options.playerAttributes.audioAttributes)
-            }
-        }
+        .apply { options.playerAttributes.applyOn(this) }
         .build()
 }

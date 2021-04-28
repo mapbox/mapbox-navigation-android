@@ -6,7 +6,6 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
-import com.mapbox.navigation.ui.voice.options.PlayerAttributes
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import java.io.File
@@ -96,14 +95,7 @@ internal class VoiceInstructionsFilePlayer(
             FileInputStream(instruction).use { fis ->
                 mediaPlayer = MediaPlayer().apply {
                     setDataSource(fis.fd)
-                    when (val attributes = options.playerAttributes) {
-                        is PlayerAttributes.OreoAndLaterAttributes -> {
-                            setAudioAttributes(attributes.audioAttributes)
-                        }
-                        is PlayerAttributes.PreOreoAttributes -> {
-                            setAudioStreamType(attributes.streamType)
-                        }
-                    }
+                    options.playerAttributes.applyOn(this)
                     prepareAsync()
                 }
                 setVolume(volumeLevel)
