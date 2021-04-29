@@ -510,28 +510,31 @@ internal class MapboxTripSession(
             }
             val enhancedLocation = status.navigationStatus.location.toLocation()
             val keyPoints = status.navigationStatus.key_points.toLocations()
-            updateEnhancedLocation(enhancedLocation, keyPoints)
-            if (!isActive) {
-                return@launch
+            // fixme null-island location
+            if (enhancedLocation.latitude != 0.0 && enhancedLocation.longitude != 0.0) {
+                updateEnhancedLocation(enhancedLocation, keyPoints)
+                if (!isActive) {
+                    return@launch
+                }
+                updateMapMatcherResult(status.getMapMatcherResult(enhancedLocation, keyPoints))
+                if (!isActive) {
+                    return@launch
+                }
+                val remainingWaypoints = ifNonNull(status.route?.routeOptions()?.coordinates()?.size) {
+                    it - status.navigationStatus.nextWaypointIndex
+                } ?: 0
+                val routeProgress = getRouteProgressFrom(
+                    status.route,
+                    status.routeBufferGeoJson,
+                    status.navigationStatus,
+                    remainingWaypoints
+                )
+                updateRouteProgress(routeProgress)
+                if (!isActive) {
+                    return@launch
+                }
+                isOffRoute = status.navigationStatus.routeState == RouteState.OFF_ROUTE
             }
-            updateMapMatcherResult(status.getMapMatcherResult(enhancedLocation, keyPoints))
-            if (!isActive) {
-                return@launch
-            }
-            val remainingWaypoints = ifNonNull(status.route?.routeOptions()?.coordinates()?.size) {
-                it - status.navigationStatus.nextWaypointIndex
-            } ?: 0
-            val routeProgress = getRouteProgressFrom(
-                status.route,
-                status.routeBufferGeoJson,
-                status.navigationStatus,
-                remainingWaypoints
-            )
-            updateRouteProgress(routeProgress)
-            if (!isActive) {
-                return@launch
-            }
-            isOffRoute = status.navigationStatus.routeState == RouteState.OFF_ROUTE
         }
         updateNavigatorStatusDataJob.invokeOnCompletion {
             updateNavigatorStatusDataJobs.remove(updateNavigatorStatusDataJob)
