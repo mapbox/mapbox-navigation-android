@@ -52,7 +52,7 @@ class MapboxNavigationViewportDataSourceTest {
         .anchor(null)
         .build()
     private val mapSize = Size(1000f, 1000f)
-    private val maxPitchEdgeInsets = EdgeInsets(1.0, 2.0, 3.0, 4.0)
+    private val singlePixelEdgeInsets = EdgeInsets(1.0, 2.0, 3.0, 4.0)
     private val followingScreenBox = ScreenBox(
         ScreenCoordinate(1.0, 2.0),
         ScreenCoordinate(3.0, 4.0)
@@ -125,7 +125,7 @@ class MapboxNavigationViewportDataSourceTest {
         viewportDataSource = MapboxNavigationViewportDataSource(mapboxMap)
 
         mockkObject(ViewportDataSourceProcessor)
-        every { getMapAnchoredPaddingFromUserPadding(mapSize, any()) } returns maxPitchEdgeInsets
+        every { getMapAnchoredPaddingFromUserPadding(mapSize, any()) } returns singlePixelEdgeInsets
         every { getScreenBoxForFraming(mapSize, any()) } returns followingScreenBox
         every {
             getSmootherBearingForMap(
@@ -249,7 +249,7 @@ class MapboxNavigationViewportDataSourceTest {
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
             zoom(viewportDataSource.options.followingFrameOptions.minZoom)
-            padding(maxPitchEdgeInsets)
+            padding(singlePixelEdgeInsets)
         }
 
         // overview mocks
@@ -295,7 +295,7 @@ class MapboxNavigationViewportDataSourceTest {
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
             zoom(viewportDataSource.options.followingFrameOptions.minZoom)
-            padding(maxPitchEdgeInsets)
+            padding(singlePixelEdgeInsets)
         }
 
         // overview mocks
@@ -417,7 +417,7 @@ class MapboxNavigationViewportDataSourceTest {
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
             zoom(mapboxMap.getCameraOptions().zoom)
-            padding(maxPitchEdgeInsets)
+            padding(singlePixelEdgeInsets)
         }
         val followingZoom = 16.0
         val followingCameraOptions = fallbackOptions.toBuilder()
@@ -489,7 +489,7 @@ class MapboxNavigationViewportDataSourceTest {
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
             zoom(mapboxMap.getCameraOptions().zoom)
-            padding(maxPitchEdgeInsets)
+            padding(singlePixelEdgeInsets)
         }
         val followingZoom = 16.0
         val followingCameraOptions = fallbackOptions.toBuilder()
@@ -640,7 +640,7 @@ class MapboxNavigationViewportDataSourceTest {
             bearing(smoothedBearing)
             pitch(ZERO_PITCH)
             zoom(mapboxMap.getCameraOptions().zoom)
-            padding(maxPitchEdgeInsets)
+            padding(singlePixelEdgeInsets)
         }
         val followingZoom = 16.0
         val followingCameraOptions = fallbackOptions.toBuilder()
@@ -677,7 +677,7 @@ class MapboxNavigationViewportDataSourceTest {
 
         // run
         viewportDataSource.options.followingFrameOptions
-            .maximizeViewableRouteGeometryWhenPitchZero = false
+            .maximizeViewableGeometryWhenPitchZero = false
         viewportDataSource.onLocationChanged(location)
         viewportDataSource.onRouteChanged(route)
         viewportDataSource.onRouteProgressChanged(routeProgress)
@@ -715,7 +715,7 @@ class MapboxNavigationViewportDataSourceTest {
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
             zoom(viewportDataSource.options.followingFrameOptions.minZoom)
-            padding(maxPitchEdgeInsets)
+            padding(singlePixelEdgeInsets)
         }
         val pointsForInitialFollowingFrame = mutableListOf<Point>().apply {
             add(location.toPoint())
@@ -810,19 +810,8 @@ class MapboxNavigationViewportDataSourceTest {
             bearing(smoothedBearing)
             pitch(ZERO_PITCH)
             zoom(viewportDataSource.options.followingFrameOptions.minZoom)
-            padding(EMPTY_EDGE_INSETS)
+            padding(singlePixelEdgeInsets)
         }
-        val pointsForFinalFollowingFrame = mutableListOf<Point>().apply {
-            add(location.toPoint())
-        }
-        every {
-            mapboxMap.cameraForCoordinates(
-                pointsForFinalFollowingFrame,
-                EMPTY_EDGE_INSETS,
-                smoothedBearing,
-                ZERO_PITCH
-            )
-        } returns followingCameraOptions
 
         // overview mocks
         val pointsForInitialOverviewFrame = mutableListOf<Point>().apply {
@@ -898,7 +887,7 @@ class MapboxNavigationViewportDataSourceTest {
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
             zoom(mapboxMap.getCameraOptions().zoom)
-            padding(maxPitchEdgeInsets)
+            padding(singlePixelEdgeInsets)
         }
         val followingZoom = 16.0
         val followingCameraOptions = fallbackOptions.toBuilder()
@@ -984,7 +973,7 @@ class MapboxNavigationViewportDataSourceTest {
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
             zoom(viewportDataSource.options.followingFrameOptions.minZoom)
-            padding(maxPitchEdgeInsets)
+            padding(singlePixelEdgeInsets)
         }
 
         // overview mocks
@@ -1056,7 +1045,7 @@ class MapboxNavigationViewportDataSourceTest {
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
             zoom(viewportDataSource.options.followingFrameOptions.minZoom)
-            padding(maxPitchEdgeInsets)
+            padding(singlePixelEdgeInsets)
         }
 
         // overview mocks
@@ -1121,7 +1110,7 @@ class MapboxNavigationViewportDataSourceTest {
             bearing(followingBearing)
             pitch(followingPitch)
             zoom(followingZoom)
-            padding(maxPitchEdgeInsets)
+            padding(singlePixelEdgeInsets)
         }
 
         // overview mocks

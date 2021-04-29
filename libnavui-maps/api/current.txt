@@ -98,7 +98,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
     method public com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FrameGeometryAfterManeuver getFrameGeometryAfterManeuver();
     method public com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.IntersectionDensityCalculation getIntersectionDensityCalculation();
     method public double getMaxZoom();
-    method public boolean getMaximizeViewableRouteGeometryWhenPitchZero();
+    method public boolean getMaximizeViewableGeometryWhenPitchZero();
     method public double getMinZoom();
     method public boolean getPaddingUpdatesAllowed();
     method public com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.PitchNearManeuvers getPitchNearManeuvers();
@@ -108,7 +108,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
     method public void setCenterUpdatesAllowed(boolean p);
     method public void setDefaultPitch(double p);
     method public void setMaxZoom(double p);
-    method public void setMaximizeViewableRouteGeometryWhenPitchZero(boolean p);
+    method public void setMaximizeViewableGeometryWhenPitchZero(boolean p);
     method public void setMinZoom(double p);
     method public void setPaddingUpdatesAllowed(boolean p);
     method public void setPitchUpdatesAllowed(boolean p);
@@ -120,7 +120,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
     property public final com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.FrameGeometryAfterManeuver frameGeometryAfterManeuver;
     property public final com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.IntersectionDensityCalculation intersectionDensityCalculation;
     property public final double maxZoom;
-    property public final boolean maximizeViewableRouteGeometryWhenPitchZero;
+    property public final boolean maximizeViewableGeometryWhenPitchZero;
     property public final double minZoom;
     property public final boolean paddingUpdatesAllowed;
     property public final com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions.PitchNearManeuvers pitchNearManeuvers;
