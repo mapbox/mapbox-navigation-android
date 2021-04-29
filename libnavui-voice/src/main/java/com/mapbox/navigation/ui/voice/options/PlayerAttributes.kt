@@ -60,7 +60,7 @@ sealed class PlayerAttributes {
     /**
      * Attributes for API below Android O
      */
-    internal data class PreOreoAttributes @JvmOverloads constructor(
+    internal data class PreOreoAttributes(
         override val streamType: Int = AudioManager.STREAM_MUSIC
     ) : PlayerAttributes() {
 
