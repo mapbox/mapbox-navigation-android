@@ -44,13 +44,14 @@ class FollowingFrameOptions internal constructor() {
     var maxZoom = 16.35
 
     /**
-     * When a produced **following frame** has pitch `0`,
+     * When a produced **following frame** has pitch `0` and there are at least 2 points available for framing,
      * the puck will not be tied to the bottom edge of the [MapboxNavigationViewportDataSource.followingPadding] and instead move
-     * around the centroid of the maneuver's geometry to maximize the view of the maneuver's geometry within the [MapboxNavigationViewportDataSource.followingPadding].
+     * around the centroid of the framed geometry (user location plus additional points to frame together or maneuver if route is available)
+     * to maximize the view of that geometry within the [MapboxNavigationViewportDataSource.followingPadding].
      *
      * Defaults to `true`.
      */
-    var maximizeViewableRouteGeometryWhenPitchZero = true
+    var maximizeViewableGeometryWhenPitchZero = true
 
     /**
      * Options that modify the framed route geometries based on the intersection density.

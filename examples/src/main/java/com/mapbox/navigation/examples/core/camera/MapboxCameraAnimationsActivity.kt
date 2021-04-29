@@ -125,7 +125,7 @@ class MapboxCameraAnimationsActivity :
         )
     }
 
-    private var followingEdgeInsets = notPaddedEdgeInsets
+    private var followingEdgeInsets = paddedFollowingEdgeInsets
         set(value) {
             field = value
             viewportDataSource.followingPadding = value
@@ -484,11 +484,7 @@ class MapboxCameraAnimationsActivity :
     override fun onButtonClicked(animationType: AnimationType) {
         when (animationType) {
             AnimationType.Following, AnimationType.FastFollowing -> {
-                followingEdgeInsets = if (followingEdgeInsets == paddedFollowingEdgeInsets) {
-                    notPaddedEdgeInsets
-                } else {
-                    paddedFollowingEdgeInsets
-                }
+                followingEdgeInsets = paddedFollowingEdgeInsets
                 viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed = true
                 viewportDataSource.followingPadding = followingEdgeInsets
                 viewportDataSource.evaluate()

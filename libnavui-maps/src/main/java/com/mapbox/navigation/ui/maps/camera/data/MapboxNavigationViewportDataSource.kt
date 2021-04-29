@@ -96,7 +96,7 @@ import kotlin.math.min
  *
  * **When following frame is used, the first point of the framed geometry list will be placed at the bottom edge of this padding, centered horizontally.**
  * This typically refers to the user's location provided via [onLocationChanged], if available.
- * This can be influenced with [FollowingFrameOptions.maximizeViewableRouteGeometryWhenPitchZero].
+ * This can be influenced by [FollowingFrameOptions.maximizeViewableGeometryWhenPitchZero] when there are at least 2 points available for framing.
  *
  * **The geometries that are below the bottom edge of the following padding on screen (based on camera's bearing) are ignored and not being framed.**
  * It's impossible to find a zoom level that would fit geometries that are below the vanishing point of the camera,
@@ -255,7 +255,7 @@ class MapboxNavigationViewportDataSource(
      *
      * **When following frame is used, the first point of the framed geometry list will be placed at the bottom edge of this padding, centered horizontally.**
      * This typically refers to the user's location provided via [onLocationChanged], if available.
-     * This can be influenced with [FollowingFrameOptions.maximizeViewableRouteGeometryWhenPitchZero].
+     * This can be influenced by [FollowingFrameOptions.maximizeViewableGeometryWhenPitchZero] when there are at least 2 points available for framing.
      *
      * The frame will contain the remaining portion of the current [LegStep] of the route provided via [onRouteChanged]
      * based on [onRouteProgressChanged].
@@ -717,7 +717,8 @@ class MapboxNavigationViewportDataSource(
         }
 
         val cameraFrame =
-            if (options.followingFrameOptions.maximizeViewableRouteGeometryWhenPitchZero &&
+            if (pointsForFollowing.size > 1 &&
+                options.followingFrameOptions.maximizeViewableGeometryWhenPitchZero &&
                 followingPitchProperty.get() == ZERO_PITCH
             ) {
                 mapboxMap.cameraForCoordinates(
