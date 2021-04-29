@@ -1,6 +1,11 @@
 // Signature format: 3.0
 package com.mapbox.navigation.ui.voice.api {
 
+  public interface AudioFocusDelegate {
+    method public boolean abandonFocus();
+    method public boolean requestFocus();
+  }
+
   public final class MapboxSpeechApi {
     ctor public MapboxSpeechApi(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions options = MapboxSpeechApiOptions.<init>().build());
     ctor public MapboxSpeechApi(android.content.Context context, String accessToken, String language);
@@ -10,6 +15,7 @@ package com.mapbox.navigation.ui.voice.api {
   }
 
   @UiThread public final class MapboxVoiceInstructionsPlayer {
+    ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options = VoiceInstructionsPlayerOptions.<init>().build(), com.mapbox.navigation.ui.voice.api.AudioFocusDelegate audioFocusDelegate = buildAndroidAudioFocus(context, options));
     ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options = VoiceInstructionsPlayerOptions.<init>().build());
     ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language);
     method public void clear();
@@ -80,16 +86,27 @@ package com.mapbox.navigation.ui.voice.options {
     method public com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions build();
   }
 
+  public abstract sealed class PlayerAttributes {
+    method protected abstract kotlin.jvm.functions.Function1<android.media.AudioFocusRequest.Builder,kotlin.Unit> configureAudioFocusRequestBuilder();
+    method protected abstract kotlin.jvm.functions.Function1<android.media.MediaPlayer,kotlin.Unit> configureMediaPlayer();
+    method protected abstract kotlin.jvm.functions.Function2<android.speech.tts.TextToSpeech,android.os.Bundle,kotlin.Unit> configureTextToSpeech();
+    method public abstract int getStreamType();
+    property public abstract int streamType;
+  }
+
   public final class VoiceInstructionsPlayerOptions {
     method public int getFocusGain();
+    method public com.mapbox.navigation.ui.voice.options.PlayerAttributes getPlayerAttributes();
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder toBuilder();
     property public final int focusGain;
+    property public final com.mapbox.navigation.ui.voice.options.PlayerAttributes playerAttributes;
   }
 
   public static final class VoiceInstructionsPlayerOptions.Builder {
     ctor public VoiceInstructionsPlayerOptions.Builder();
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions build();
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder focusGain(int focusGain);
+    method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder playerAttributes(com.mapbox.navigation.ui.voice.options.PlayerAttributes playerAttributes);
   }
 
 }

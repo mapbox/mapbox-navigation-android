@@ -8,15 +8,23 @@ internal class PreOreoAudioFocusDelegate(
     private val options: VoiceInstructionsPlayerOptions
 ) : AudioFocusDelegate {
 
-    override fun requestFocus() {
-        audioManager.requestAudioFocus(
+    override fun requestFocus(): Boolean {
+        val result = audioManager.requestAudioFocus(
             null,
-            AudioManager.STREAM_MUSIC,
+            options.playerAttributes.streamType,
             options.focusGain
         )
+        return when (result) {
+            AudioManager.AUDIOFOCUS_REQUEST_GRANTED,
+            AudioManager.AUDIOFOCUS_REQUEST_DELAYED -> true
+            else -> false
+        }
     }
 
-    override fun abandonFocus() {
-        audioManager.abandonAudioFocus(null)
+    override fun abandonFocus(): Boolean {
+        return when (audioManager.abandonAudioFocus(null)) {
+            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> true
+            else -> false
+        }
     }
 }

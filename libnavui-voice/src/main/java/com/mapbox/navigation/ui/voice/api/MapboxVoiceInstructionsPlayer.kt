@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * @property accessToken String
  * @property language [Locale] language (ISO 639)
  * @property options [VoiceInstructionsPlayerOptions] (optional)
+ * @property audioFocusDelegate [AudioFocusDelegate] (optional)
  */
 @UiThread
 class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
@@ -24,7 +25,8 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
     private val accessToken: String,
     private val language: String,
     private val options: VoiceInstructionsPlayerOptions = VoiceInstructionsPlayerOptions.Builder()
-        .build()
+        .build(),
+    private val audioFocusDelegate: AudioFocusDelegate = buildAndroidAudioFocus(context, options),
 ) {
 
     private val playCallbackQueue: Queue<PlayCallback> = ConcurrentLinkedQueue()
@@ -32,11 +34,16 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
         VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
             context,
             accessToken,
-            language
+            language,
+            options,
         )
     private val textPlayer: VoiceInstructionsTextPlayer =
-        VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(context, language)
-    private var localCallback: VoiceInstructionsPlayerCallback =
+        VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
+            context,
+            language,
+            options
+        )
+    private val localCallback: VoiceInstructionsPlayerCallback =
         object : VoiceInstructionsPlayerCallback {
             override fun onDone(announcement: SpeechAnnouncement) {
                 audioFocusDelegate.abandonFocus()
@@ -47,11 +54,6 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
                 play()
             }
         }
-    private val audioFocusDelegate: AudioFocusDelegate =
-        AudioFocusDelegateProvider.retrieveAudioFocusDelegate(
-            context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
-            options
-        )
 
     /**
      * Given [SpeechAnnouncement] the method will play the voice instruction.
@@ -109,12 +111,15 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
 
     private fun play() {
         if (playCallbackQueue.isNotEmpty()) {
-            audioFocusDelegate.requestFocus()
             val currentPlayCallback = playCallbackQueue.peek()
             val currentPlay = currentPlayCallback.announcement
-            currentPlay.file?.let {
-                filePlayer.play(currentPlay, localCallback)
-            } ?: textPlayer.play(currentPlay, localCallback)
+            if (audioFocusDelegate.requestFocus()) {
+                currentPlay.file?.let {
+                    filePlayer.play(currentPlay, localCallback)
+                } ?: textPlayer.play(currentPlay, localCallback)
+            } else {
+                localCallback.onDone(currentPlay)
+            }
         }
     }
 
@@ -123,6 +128,15 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
     }
 
     private companion object {
+
+        private fun buildAndroidAudioFocus(
+            context: Context,
+            options: VoiceInstructionsPlayerOptions,
+        ) = AudioFocusDelegateProvider.retrieveAudioFocusDelegate(
+            context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
+            options
+        )
+
         private const val MAX_VOLUME_LEVEL = 1.0f
         private const val MIN_VOLUME_LEVEL = 0.0f
     }

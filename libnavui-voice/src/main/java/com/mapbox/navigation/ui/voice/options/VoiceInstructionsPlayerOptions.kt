@@ -4,16 +4,24 @@ import android.media.AudioManager
 
 /**
  * VoiceInstructionsPlayerOptions.
- *
- * @param focusGain specifies how audio focus will be requested.
- * Valid values for focus requests are
- * [AudioManager.AUDIOFOCUS_GAIN], [AudioManager.AUDIOFOCUS_GAIN_TRANSIENT],
- * [AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK] and
- * [AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE].
- * [AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK] is used by default.
  */
 class VoiceInstructionsPlayerOptions private constructor(
-    val focusGain: Int
+    /**
+     * Defines how audio focus will be requested.
+     * Defaults to [AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK]
+     * Valid values for focus requests are
+     * [AudioManager.AUDIOFOCUS_GAIN], [AudioManager.AUDIOFOCUS_GAIN_TRANSIENT],
+     * [AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK] and
+     * [AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE].
+     * [AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK] is used by default.
+     */
+    val focusGain: Int,
+
+    /**
+     * Defines how the audio system handles routing
+     * and focus decisions for the specified source.
+     */
+    val playerAttributes: PlayerAttributes,
 ) {
 
     /**
@@ -21,6 +29,7 @@ class VoiceInstructionsPlayerOptions private constructor(
      */
     fun toBuilder(): Builder = Builder().apply {
         focusGain(focusGain)
+        playerAttributes(playerAttributes)
     }
 
     /**
@@ -33,6 +42,7 @@ class VoiceInstructionsPlayerOptions private constructor(
         other as VoiceInstructionsPlayerOptions
 
         if (focusGain != other.focusGain) return false
+        if (playerAttributes != other.playerAttributes) return false
 
         return true
     }
@@ -41,16 +51,17 @@ class VoiceInstructionsPlayerOptions private constructor(
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        return focusGain.hashCode()
+        var result = focusGain
+        result = 31 * result + playerAttributes.hashCode()
+        return result
     }
 
     /**
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "VoiceInstructionsPlayerOptions(" +
-            "focusGain=$focusGain" +
-            ")"
+        return "VoiceInstructionsPlayerOptions(focusGain=$focusGain, " +
+            "playerAttributes=$playerAttributes)"
     }
 
     /**
@@ -59,6 +70,8 @@ class VoiceInstructionsPlayerOptions private constructor(
     class Builder {
 
         private var focusGain: Int = AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+        private var playerAttributes: PlayerAttributes =
+            PlayerAttributesProvider.retrievePlayerAttributes()
 
         /**
          * Specifies how audio focus will be requested.
@@ -83,15 +96,26 @@ class VoiceInstructionsPlayerOptions private constructor(
             }
 
         /**
+         * Specifies how the audio system handles routing
+         * and focus decisions for the specified source.
+         */
+        fun playerAttributes(playerAttributes: PlayerAttributes): Builder =
+            apply {
+                this.playerAttributes = playerAttributes
+            }
+
+        /**
          * Build the [VoiceInstructionsPlayerOptions]
          */
         fun build(): VoiceInstructionsPlayerOptions {
             return VoiceInstructionsPlayerOptions(
-                focusGain = focusGain
+                focusGain = focusGain,
+                playerAttributes = playerAttributes,
             )
         }
 
         private companion object {
+
             private val validFocusGainValues = listOf(
                 AudioManager.AUDIOFOCUS_GAIN,
                 AudioManager.AUDIOFOCUS_GAIN_TRANSIENT,

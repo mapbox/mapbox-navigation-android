@@ -8,6 +8,7 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
+import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import java.util.Locale
 
@@ -15,10 +16,12 @@ import java.util.Locale
  * Offline implementation of [VoiceInstructionsPlayer].
  * @property context Context
  * @property language [Locale] language (ISO 639)
+ * @property options [VoiceInstructionsPlayerOptions]
  */
 internal class VoiceInstructionsTextPlayer(
     private val context: Context,
-    private val language: String
+    private val language: String,
+    private val options: VoiceInstructionsPlayerOptions,
 ) : VoiceInstructionsPlayer {
 
     private var isLanguageSupported: Boolean = false
@@ -135,6 +138,8 @@ internal class VoiceInstructionsTextPlayer(
         val bundle = Bundle().apply {
             putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, volumeLevel)
         }
+        options.playerAttributes.applyOn(textToSpeech, bundle)
+
         textToSpeech.speak(
             announcement,
             TextToSpeech.QUEUE_FLUSH,
@@ -144,7 +149,8 @@ internal class VoiceInstructionsTextPlayer(
     }
 
     private companion object {
-        private const val TAG = "MbxVoiceInstructionsTextPlayer"
+
+        private const val TAG = "MbxTextPlayer"
         private const val LANGUAGE_NOT_SUPPORTED = "Language is not supported"
         private const val DEFAULT_UTTERANCE_ID = "default_id"
         private const val DEFAULT_VOLUME_LEVEL = 1.0f
