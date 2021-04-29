@@ -34,14 +34,14 @@ sealed class PlayerAttributes {
     /**
      * Configure [MediaPlayer]
      */
-    fun applyOn(mediaPlayer: MediaPlayer) {
+    internal fun applyOn(mediaPlayer: MediaPlayer) {
         configureMediaPlayer()(mediaPlayer)
     }
 
     /**
      * Configure [TextToSpeech]
      */
-    fun applyOn(textToSpeech: TextToSpeech, bundle: Bundle) {
+    internal fun applyOn(textToSpeech: TextToSpeech, bundle: Bundle) {
         configureTextToSpeech()(textToSpeech, bundle)
     }
 
@@ -49,7 +49,7 @@ sealed class PlayerAttributes {
      * Configure [AudioFocusRequest.Builder]
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
-    fun applyOn(audioFocusRequestBuilder: AudioFocusRequest.Builder) {
+    internal fun applyOn(audioFocusRequestBuilder: AudioFocusRequest.Builder) {
         configureAudioFocusRequestBuilder()(audioFocusRequestBuilder)
     }
 

@@ -87,9 +87,6 @@ package com.mapbox.navigation.ui.voice.options {
   }
 
   public abstract sealed class PlayerAttributes {
-    method public final void applyOn(android.media.MediaPlayer mediaPlayer);
-    method public final void applyOn(android.speech.tts.TextToSpeech textToSpeech, android.os.Bundle bundle);
-    method @RequiresApi(api=android.os.Build.VERSION_CODES.O) public final void applyOn(android.media.AudioFocusRequest.Builder audioFocusRequestBuilder);
     method protected abstract kotlin.jvm.functions.Function1<android.media.AudioFocusRequest.Builder,kotlin.Unit> configureAudioFocusRequestBuilder();
     method protected abstract kotlin.jvm.functions.Function1<android.media.MediaPlayer,kotlin.Unit> configureMediaPlayer();
     method protected abstract kotlin.jvm.functions.Function2<android.speech.tts.TextToSpeech,android.os.Bundle,kotlin.Unit> configureTextToSpeech();
