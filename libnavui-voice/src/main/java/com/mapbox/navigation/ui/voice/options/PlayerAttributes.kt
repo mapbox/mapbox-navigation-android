@@ -90,7 +90,7 @@ sealed class PlayerAttributes {
      * Attributes for API Android O and above
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
-    internal data class OreoAndLaterAttributes @JvmOverloads constructor(
+    internal data class OreoAndLaterAttributes(
         /**
          * Specifies why the source is playing and controls routing, focus, and volume decisions.
          * Defaults to [AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE]
