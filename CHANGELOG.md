@@ -2,6 +2,31 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.8 - April 30, 2021
+
+ For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+ ### Changelog
+ #### Features
+ * Refactored `AudioFocusDelegate` to a public interface and is now optional to `MapboxVoiceInstructionsPlayer`. `MediaPlayer` stream type can now be customized and results of audio focus can now be handled. [#4278](https://github.com/mapbox/mapbox-navigation-android/pull/4278)
+ * Made route refresh interval configurable. [#4321](https://github.com/mapbox/mapbox-navigation-android/pull/4321)
+ * Exposed `NavigationCameraTransitionOptions` via `NavigationCamera` state requests. Those options provide high-level constraints for all of the transitions that `NavigationCamera` executes and can be used to, for example, adjust the duration of the transitions. [#4332](https://github.com/mapbox/mapbox-navigation-android/pull/4332)
+ #### Bug fixes and improvements
+ * Removed `@JvmOverloads` from all Mapbox Views. [#4323](https://github.com/mapbox/mapbox-navigation-android/pull/4323)
+ * Changed where the `MapboxNavigationViewportDataSourceDebugger`'s debug layer is positioned on the map. By default, the layer will be placed on top of the stack unless a reference ID is provided. This prevents a crash that was occurring if the previously hardcoded layer ID wasn't present in the style. [#4334](https://github.com/mapbox/mapbox-navigation-android/pull/4334)
+ * Fixed replay's simulated driver issue where it will nearly stop on the freeway, by normalizing bearing for speed profile calculations. [#4338](https://github.com/mapbox/mapbox-navigation-android/pull/4338)
+ * Fixed an issue where the user location was incorrectly positioned in the center of the screen in the following state when the pitch was zero, `maximizeViewableRouteGeometryWhenPitchZero` was set, and no other points were available for framing. Now the user location is correctly tied to the bottom edge of the padding if that's the only geometry to frame. The flag was also renamed to `maximizeViewableGeometryWhenPitchZero`. [#4343](https://github.com/mapbox/mapbox-navigation-android/pull/4343)
+
+ ## Mapbox dependencies
+ This release depends, and has been tested with, the following Mapbox dependencies:
+
+ - Mapbox Maps SDK `v10.0.0-beta.18` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.18))
+ - Mapbox Navigation Native `v48.0.5`
+ - Mapbox Core Common `v11.0.2`
+ - Mapbox Java `5.9.0-alpha.5` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v5.9.0-alpha.5))
+ - Mapbox Android Core `v3.1.1`
+ - Mapbox Android Telemetry `v6.2.2`
+
 ## Mapbox Navigation SDK 2.0.0-beta.7 - April 23, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
