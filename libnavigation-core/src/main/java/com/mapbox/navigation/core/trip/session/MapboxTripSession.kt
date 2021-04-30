@@ -26,18 +26,15 @@ import com.mapbox.navigation.core.sensors.SensorMapper
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
-import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.NavigationStatus
+import com.mapbox.navigator.NavigationStatusOrigin
+import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.RouteState
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -45,7 +42,7 @@ import java.util.concurrent.CopyOnWriteArraySet
  *
  * @param tripService TripService
  * @param navigationOptions the navigator options
- * For more information see [MapboxNativeNavigator.getStatus]. Unit is milliseconds
+ * For more information see [MapboxNativeNavigatorImpl.generateTripStatusFrom]. Unit is milliseconds
  * @param navigator Native navigator
  * @param threadController controller for main/io jobs
  * @param logger interface for logging any events
@@ -62,16 +59,6 @@ internal class MapboxTripSession(
     private val eHorizonSubscriptionManager: EHorizonSubscriptionManager,
 ) : TripSession {
 
-    companion object {
-        @Volatile
-        internal var UNCONDITIONAL_STATUS_POLLING_PATIENCE = 2000L
-
-        @Volatile
-        internal var UNCONDITIONAL_STATUS_POLLING_INTERVAL = 1000L
-    }
-
-    private var updateNavigatorStatusDataJobs: MutableList<Job> = CopyOnWriteArrayList()
-
     override var route: DirectionsRoute? = null
         set(value) {
             val isSameUuid = value?.isSameUuid(field) ?: false
@@ -81,7 +68,6 @@ internal class MapboxTripSession(
                 roadObjects = emptyList()
                 routeProgress = null
             }
-            cancelOngoingUpdateNavigatorStatusDataJobs()
             val updateRouteJob = threadController.getMainScopeAndRootJob().scope.launch {
                 when {
                     isSameUuid && isSameRoute && value != null -> {
@@ -96,21 +82,13 @@ internal class MapboxTripSession(
             }
             mainJobController.scope.launch {
                 updateRouteJob.join()
-                updateDataFromNavigatorStatus()
             }
             isOffRoute = false
             invalidateLatestBannerInstructionEvent()
         }
 
-    private fun cancelOngoingUpdateNavigatorStatusDataJobs() {
-        updateNavigatorStatusDataJobs.forEach {
-            it.cancel()
-        }
-    }
-
     private val ioJobController: JobControl = threadController.getIOScopeAndRootJob()
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
-    private var unconditionalStatusPollingJob: Job? = null
 
     private val locationObservers = CopyOnWriteArraySet<LocationObserver>()
     private val routeProgressObservers = CopyOnWriteArraySet<RouteProgressObserver>()
@@ -181,9 +159,40 @@ internal class MapboxTripSession(
         if (state == TripSessionState.STARTED) {
             return
         }
+        setNavigatorObserver()
         tripService.startService()
         startLocationUpdates()
         state = TripSessionState.STARTED
+    }
+
+    private fun setNavigatorObserver() {
+        navigator.setNavigatorObserver(
+            object : NavigatorObserver() {
+                override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
+                    mainJobController.scope.launch {
+                        val tripStatus = MapboxNativeNavigatorImpl.generateTripStatusFrom(status)
+                        val enhancedLocation = tripStatus.navigationStatus.location.toLocation()
+                        val keyPoints = tripStatus.navigationStatus.key_points.toLocations()
+                        updateEnhancedLocation(enhancedLocation, keyPoints)
+                        updateMapMatcherResult(
+                            tripStatus.getMapMatcherResult(enhancedLocation, keyPoints)
+                        )
+                        val remainingWaypoints =
+                            ifNonNull(tripStatus.route?.routeOptions()?.coordinates()?.size) {
+                                it - tripStatus.navigationStatus.nextWaypointIndex
+                            } ?: 0
+                        val routeProgress = getRouteProgressFrom(
+                            tripStatus.route,
+                            tripStatus.routeBufferGeoJson,
+                            tripStatus.navigationStatus,
+                            remainingWaypoints
+                        )
+                        updateRouteProgress(routeProgress)
+                        isOffRoute = tripStatus.navigationStatus.routeState == RouteState.OFF_ROUTE
+                    }
+                }
+            }
+        )
     }
 
     private fun startLocationUpdates() {
@@ -202,6 +211,7 @@ internal class MapboxTripSession(
         if (state == TripSessionState.STOPPED) {
             return
         }
+        navigator.setNavigatorObserver(null)
         tripService.stopService()
         stopLocationUpdates()
         ioJobController.job.cancelChildren()
@@ -220,7 +230,6 @@ internal class MapboxTripSession(
         enhancedLocation = null
         routeProgress = null
         isOffRoute = false
-        updateNavigatorStatusDataJobs.clear()
         eHorizonSubscriptionManager.reset()
     }
 
@@ -471,70 +480,13 @@ internal class MapboxTripSession(
     }
 
     private fun updateRawLocation(rawLocation: Location) {
-        unconditionalStatusPollingJob?.cancel()
         if (state != TripSessionState.STARTED) return
 
         this.rawLocation = rawLocation
         locationObservers.forEach { it.onRawLocationChanged(rawLocation) }
         mainJobController.scope.launch {
             navigator.updateLocation(rawLocation.toFixLocation())
-            updateDataFromNavigatorStatus()
         }
-
-        unconditionalStatusPollingJob = ioJobController.scope.launch {
-            delay(UNCONDITIONAL_STATUS_POLLING_PATIENCE)
-            while (isActive) {
-                mainJobController.scope.launch {
-                    updateDataFromNavigatorStatus()
-                }
-                delay(UNCONDITIONAL_STATUS_POLLING_INTERVAL)
-            }
-        }
-    }
-
-    private fun updateDataFromNavigatorStatus() {
-        val updateNavigatorStatusDataJob = mainJobController.scope.launch {
-            if (state != TripSessionState.STARTED) {
-                return@launch
-            }
-
-            val status = getNavigatorStatus()
-            if (!isActive) {
-                return@launch
-            }
-            val enhancedLocation = status.navigationStatus.location.toLocation()
-            val keyPoints = status.navigationStatus.key_points.toLocations()
-            updateEnhancedLocation(enhancedLocation, keyPoints)
-            if (!isActive) {
-                return@launch
-            }
-            updateMapMatcherResult(status.getMapMatcherResult(enhancedLocation, keyPoints))
-            if (!isActive) {
-                return@launch
-            }
-            val remainingWaypoints = ifNonNull(status.route?.routeOptions()?.coordinates()?.size) {
-                it - status.navigationStatus.nextWaypointIndex
-            } ?: 0
-            val routeProgress = getRouteProgressFrom(
-                status.route,
-                status.routeBufferGeoJson,
-                status.navigationStatus,
-                remainingWaypoints
-            )
-            updateRouteProgress(routeProgress)
-            if (!isActive) {
-                return@launch
-            }
-            isOffRoute = status.navigationStatus.routeState == RouteState.OFF_ROUTE
-        }
-        updateNavigatorStatusDataJob.invokeOnCompletion {
-            updateNavigatorStatusDataJobs.remove(updateNavigatorStatusDataJob)
-        }
-        updateNavigatorStatusDataJobs.add(updateNavigatorStatusDataJob)
-    }
-
-    private suspend fun getNavigatorStatus(): TripStatus {
-        return navigator.getStatus(navigationOptions.navigatorPredictionMillis)
     }
 
     private fun updateEnhancedLocation(location: Location, keyPoints: List<Location>) {

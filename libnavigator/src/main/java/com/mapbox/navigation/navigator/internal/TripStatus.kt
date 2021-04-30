@@ -11,7 +11,7 @@ import com.mapbox.navigator.NavigationStatus
  * @param routeBufferGeoJson
  * @param navigationStatus
  *
- * @see [MapboxNativeNavigator.getStatus]
+ * @see [MapboxNativeNavigatorImpl.generateTripStatusFrom]
  */
 data class TripStatus(
     val route: DirectionsRoute?,
