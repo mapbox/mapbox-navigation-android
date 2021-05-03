@@ -2,98 +2,79 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
 
-  <com.mapbox.maps.MapView
-      android:id="@+id/mapView"
-      android:layout_width="0dp"
-      android:layout_height="0dp"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      />
+    <com.mapbox.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-  <androidx.cardview.widget.CardView
-      android:id="@+id/tripProgressCard"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      app:cardUseCompatPadding="false"
-      app:cardElevation="@dimen/mapbox_dimen_8dp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintBottom_toBottomOf="parent"
-      android:visibility="gone"
-      >
-    <com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
-        android:id="@+id/tripProgressView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    <androidx.cardview.widget.CardView
+        android:id="@+id/tripProgressCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        app:cardElevation="@dimen/mapbox_dimen_8dp"
+        app:cardUseCompatPadding="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-    <ImageView
-        android:id="@+id/stop"
-        android:layout_width="@dimen/mapbox_dimen_48dp"
-        android:layout_height="@dimen/mapbox_dimen_48dp"
-        android:layout_marginEnd="@dimen/mapbox_dimen_12dp"
-        android:layout_gravity="end|center_vertical"
-        app:srcCompat="@drawable/mapbox_ic_end_navigation"
-        />
-  </androidx.cardview.widget.CardView>
+        <com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
+            android:id="@+id/tripProgressView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-  <com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
-      android:id="@+id/maneuverView"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_margin="4dp"
-      android:visibility="gone"
-      app:layout_constraintTop_toTopOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent" />
+        <ImageView
+            android:id="@+id/stop"
+            android:layout_width="@dimen/mapbox_dimen_48dp"
+            android:layout_height="@dimen/mapbox_dimen_48dp"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="@dimen/mapbox_dimen_12dp"
+            app:srcCompat="@drawable/mapbox_ic_end_navigation" />
+    </androidx.cardview.widget.CardView>
 
-  <com.google.android.material.floatingactionbutton.FloatingActionButton
-      android:id="@+id/start"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_margin="@dimen/mapbox_dimen_16dp"
-      android:background="@color/colorSecondary"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:fabSize="auto"
-      android:src="@drawable/mapbox_ic_start_navigation"
-      android:visibility="gone"
-      />
+    <com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
+        android:id="@+id/maneuverView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-  <com.mapbox.navigation.ui.voice.view.MapboxSoundButton
-      android:id="@+id/soundButton"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="@dimen/mapbox_dimen_8dp"
-      android:visibility="invisible"
-      android:layout_marginEnd="@dimen/mapbox_dimen_16dp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/maneuverView"
-      />
+    <com.mapbox.navigation.ui.voice.view.MapboxSoundButton
+        android:id="@+id/soundButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/mapbox_dimen_8dp"
+        android:layout_marginEnd="@dimen/mapbox_dimen_16dp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/maneuverView" />
 
-  <com.mapbox.navigation.ui.maps.camera.view.MapboxRouteOverviewButton
-      android:id="@+id/routeOverview"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="@dimen/mapbox_dimen_8dp"
-      android:visibility="invisible"
-      android:layout_marginEnd="@dimen/mapbox_dimen_16dp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/soundButton"
-      />
+    <com.mapbox.navigation.ui.maps.camera.view.MapboxRouteOverviewButton
+        android:id="@+id/routeOverview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/mapbox_dimen_8dp"
+        android:layout_marginEnd="@dimen/mapbox_dimen_16dp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/soundButton" />
 
-  <com.mapbox.navigation.ui.maps.camera.view.MapboxRecenterButton
-      android:id="@+id/recenter"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="@dimen/mapbox_dimen_8dp"
-      android:visibility="invisible"
-      android:layout_marginEnd="@dimen/mapbox_dimen_16dp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/routeOverview"
-      />
+    <com.mapbox.navigation.ui.maps.camera.view.MapboxRecenterButton
+        android:id="@+id/recenter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/mapbox_dimen_8dp"
+        android:layout_marginEnd="@dimen/mapbox_dimen_16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/routeOverview" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
