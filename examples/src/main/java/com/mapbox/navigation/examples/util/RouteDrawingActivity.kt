@@ -56,9 +56,7 @@ class RouteDrawingActivity : AppCompatActivity() {
 
     private val routeLineResources: RouteLineResources by lazy {
         RouteLineResources.Builder()
-            .restrictedRoadLineWidth(7.0)
-            .restrictedRoadOpacity(1.0)
-            .restrictedRoadDashArray(listOf(.5, 2.0))
+            .restrictedRoadSectionScale(7.0)
             .routeLineColorResources(routeColorResources)
             .build()
     }
@@ -75,7 +73,6 @@ class RouteDrawingActivity : AppCompatActivity() {
         MapboxRouteLineOptions.Builder(this)
             .withRouteLineResources(routeLineResources)
             .withRouteLineBelowLayerId("road-label")
-            .withRestrictedRoadLayerEnabled(true)
             .build()
     }
 

@@ -97,11 +97,6 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                     RouteConstants.WAYPOINT_SOURCE_ID,
                     routeDrawData.value.waypointsSource
                 )
-                updateSource(
-                    style,
-                    RouteConstants.RESTRICTED_ROAD_SOURCE_ID,
-                    routeDrawData.value.restrictedRoadSource
-                )
             }
             is Expected.Failure -> { }
         }
@@ -175,11 +170,6 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                     style,
                     RouteConstants.WAYPOINT_SOURCE_ID,
                     clearRouteLineValue.value.waypointsSource
-                )
-                updateSource(
-                    style,
-                    RouteConstants.RESTRICTED_ROAD_SOURCE_ID,
-                    clearRouteLineValue.value.restrictedRoadSource
                 )
             }
         }

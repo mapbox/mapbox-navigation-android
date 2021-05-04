@@ -6,6 +6,7 @@ import com.mapbox.geojson.LineString
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
@@ -161,7 +162,8 @@ class VanishingRouteLineTest {
                 getRoute(),
                 listOf(),
                 true,
-                colorResources
+                colorResources,
+                RouteConstants.RESTRICTED_ROAD_SECTION_SCALE
             )
 
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(

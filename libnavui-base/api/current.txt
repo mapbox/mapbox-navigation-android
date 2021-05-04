@@ -21,6 +21,7 @@ package com.mapbox.navigation.ui.base.formatter {
 package com.mapbox.navigation.ui.base.internal.model.route {
 
   public final class RouteConstants {
+    method public int getALTERNATE_RESTRICTED_ROAD_COLOR();
     method public int getALTERNATE_ROUTE_CASING_COLOR();
     method public int getALTERNATE_ROUTE_DEFAULT_COLOR();
     method public int getALTERNATE_ROUTE_HEAVY_TRAFFIC_COLOR();
@@ -38,7 +39,6 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     method public int getMANEUVER_ARROW_COLOR();
     method public int getORIGIN_WAYPOINT_ICON();
     method public int getRESTRICTED_ROAD_COLOR();
-    method public java.util.List<java.lang.Double> getRESTRICTED_ROAD_DASH_ARRAY();
     method public int getROUTE_CASING_COLOR();
     method public int getROUTE_CLOSURE_COLOR();
     method public int getROUTE_DEFAULT_COLOR();
@@ -50,6 +50,8 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     method public int getROUTE_SEVERE_TRAFFIC_COLOR();
     method public int getROUTE_UNKNOWN_TRAFFIC_COLOR();
     method public java.util.List<java.lang.String> getTRAFFIC_BACKFILL_ROAD_CLASSES();
+    method public int getTRANSPARENT_COLOR();
+    property public final int ALTERNATE_RESTRICTED_ROAD_COLOR;
     property public final int ALTERNATE_ROUTE_CASING_COLOR;
     property public final int ALTERNATE_ROUTE_DEFAULT_COLOR;
     property public final int ALTERNATE_ROUTE_HEAVY_TRAFFIC_COLOR;
@@ -67,7 +69,6 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     property public final int MANEUVER_ARROW_COLOR;
     property public final int ORIGIN_WAYPOINT_ICON;
     property public final int RESTRICTED_ROAD_COLOR;
-    property public final java.util.List<java.lang.Double> RESTRICTED_ROAD_DASH_ARRAY;
     property public final int ROUTE_CASING_COLOR;
     property public final int ROUTE_CLOSURE_COLOR;
     property public final int ROUTE_DEFAULT_COLOR;
@@ -79,6 +80,7 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     property public final int ROUTE_SEVERE_TRAFFIC_COLOR;
     property public final int ROUTE_UNKNOWN_TRAFFIC_COLOR;
     property public final java.util.List<java.lang.String> TRAFFIC_BACKFILL_ROAD_CLASSES;
+    property public final int TRANSPARENT_COLOR;
     field public static final String ALTERNATIVE_ROUTE1_SOURCE_ID = "mapbox-navigation-alt-route1-source";
     field public static final String ALTERNATIVE_ROUTE2_SOURCE_ID = "mapbox-navigation-alt-route2-source";
     field public static final String ARROW_BEARING = "mapbox-navigation-arrow-bearing";
@@ -87,7 +89,7 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     field public static final String ARROW_HEAD_SOURCE_ID = "mapbox-navigation-arrow-head-source";
     field public static final double ARROW_HIDDEN_ZOOM_LEVEL = 14.0;
     field public static final String ARROW_SHAFT_SOURCE_ID = "mapbox-navigation-arrow-shaft-source";
-    field public static final String ClOSURE_CONGESTION_VALUE = "closed";
+    field public static final String CLOSURE_CONGESTION_VALUE = "closed";
     field public static final String DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER = "mapboxDescriptorPlaceHolderUnused";
     field public static final double DEFAULT_ROUTE_SOURCES_TOLERANCE = 0.375;
     field public static final String DESTINATION_MARKER_NAME = "destinationMarker";
@@ -110,9 +112,8 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     field public static final double OPAQUE = 0.0;
     field public static final String ORIGIN_MARKER_NAME = "originMarker";
     field public static final String PRIMARY_ROUTE_SOURCE_ID = "mapbox-navigation-route-source";
-    field public static final double RESTRICTED_ROAD_LINE_OPACITY = 1.0;
-    field public static final double RESTRICTED_ROAD_LINE_WIDTH = 7.0;
-    field public static final String RESTRICTED_ROAD_SOURCE_ID = "mapbox-restricted-road-source";
+    field public static final String RESTRICTED_CONGESTION_VALUE = "restricted";
+    field public static final double RESTRICTED_ROAD_SECTION_SCALE = 10.0;
     field public static final boolean ROUNDED_LINE_CAP = true;
     field public static final double ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS = 1.0;
     field public static final String SEVERE_CONGESTION_VALUE = "severe";

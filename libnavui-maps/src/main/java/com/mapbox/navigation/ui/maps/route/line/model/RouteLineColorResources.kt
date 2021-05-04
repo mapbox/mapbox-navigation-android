@@ -33,6 +33,8 @@ import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
  * @param alternativeRouteCasingColor the color used for the alternative route casing line(s) which
  * is positioned below the route line giving the line the appearance of a boarder
  * @param restrictedRoadColor the color for the restricted road indicator(s)
+ * @param alternativeRouteRestrictedRoadColor the color for the restricted road indicator(s) for
+ * alternative routes.
  * @param routeClosureColor the color used for the route closure line
  * @param alternativeRouteClosureColor the color used for the alternative route closure line(s)
  */
@@ -54,6 +56,7 @@ class RouteLineColorResources private constructor(
     @ColorInt val alternativeRouteSevereColor: Int,
     @ColorInt val alternativeRouteCasingColor: Int,
     @ColorInt val restrictedRoadColor: Int,
+    @ColorInt val alternativeRouteRestrictedRoadColor: Int,
     @ColorInt val routeClosureColor: Int,
     @ColorInt val alternativeRouteClosureColor: Int
 ) {
@@ -80,6 +83,7 @@ class RouteLineColorResources private constructor(
             .alternativeRouteSevereColor(alternativeRouteSevereColor)
             .alternativeRouteCasingColor(alternativeRouteCasingColor)
             .restrictedRoadColor(restrictedRoadColor)
+            .alternativeRouteRestrictedRoadColor(alternativeRouteRestrictedRoadColor)
             .routeClosureColor(routeClosureColor)
             .alternativeRouteClosureColor(alternativeRouteClosureColor)
     }
@@ -106,6 +110,7 @@ class RouteLineColorResources private constructor(
             "alternativeRouteSevereColor=$alternativeRouteSevereColor, " +
             "alternativeRouteCasingColor=$alternativeRouteCasingColor, " +
             "restrictedRoadColor=$restrictedRoadColor, " +
+            "alternativeRouteRestrictedRoadColor=$alternativeRouteRestrictedRoadColor, " +
             "routeClosureColor=$routeClosureColor, " +
             "alternativeRouteClosureColor=$alternativeRouteClosureColor" +
             ")"
@@ -138,6 +143,8 @@ class RouteLineColorResources private constructor(
         if (alternativeRouteUnknownTrafficColor != other.alternativeRouteUnknownTrafficColor)
             return false
         if (restrictedRoadColor != other.restrictedRoadColor) return false
+        if (alternativeRouteRestrictedRoadColor != other.alternativeRouteRestrictedRoadColor)
+            return false
         if (routeClosureColor != other.routeClosureColor) return false
         if (alternativeRouteClosureColor != other.alternativeRouteClosureColor) return false
 
@@ -165,6 +172,7 @@ class RouteLineColorResources private constructor(
         result = 31 * result + alternativeRouteSevereColor
         result = 31 * result + alternativeRouteCasingColor
         result = 31 * result + restrictedRoadColor
+        result = 31 * result + alternativeRouteRestrictedRoadColor
         result = 31 * result + routeClosureColor
         result = 31 * result + alternativeRouteClosureColor
         return result
@@ -196,6 +204,8 @@ class RouteLineColorResources private constructor(
         private var routeLineTraveledCasingColor: Int =
             RouteConstants.ROUTE_LINE_TRAVELED_CASING_COLOR
         private var restrictedRoadColor: Int = RouteConstants.RESTRICTED_ROAD_COLOR
+        private var alternativeRouteRestrictedRoadColor: Int =
+            RouteConstants.ALTERNATE_RESTRICTED_ROAD_COLOR
         private var routeClosureColor: Int = RouteConstants.ROUTE_CLOSURE_COLOR
         private var alternativeRouteClosureColor: Int =
             RouteConstants.ALTERNATIVE_ROUTE_CLOSURE_COLOR
@@ -376,9 +386,21 @@ class RouteLineColorResources private constructor(
             apply { this.restrictedRoadColor = color }
 
         /**
+         * The color used for the alternative route restricted road representation.
+         *
+         * @param color the color to be used
+         *
+         * @return the builder
+         */
+        fun alternativeRouteRestrictedRoadColor(@ColorInt color: Int): Builder =
+            apply { this.alternativeRouteRestrictedRoadColor = color }
+
+        /**
          * The color used for road closure sections of a route.
          *
          * @param color the color to be used
+         *
+         * @return the builder
          */
         fun routeClosureColor(@ColorInt color: Int): Builder =
             apply { this.routeClosureColor = color }
@@ -387,6 +409,8 @@ class RouteLineColorResources private constructor(
          * The color used for road closure sections of an alternative route(s).
          *
          * @param color the color to be used
+         *
+         * @return the builder
          */
         fun alternativeRouteClosureColor(@ColorInt color: Int): Builder =
             apply { this.alternativeRouteClosureColor = color }
@@ -415,6 +439,7 @@ class RouteLineColorResources private constructor(
                 alternativeRouteSevereColor,
                 alternativeRouteCasingColor,
                 restrictedRoadColor,
+                alternativeRouteRestrictedRoadColor,
                 routeClosureColor,
                 alternativeRouteClosureColor
             )
