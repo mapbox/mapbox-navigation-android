@@ -29,9 +29,17 @@ class MapboxTurnIconManeuverTest {
     }
 
     @Test
-    fun `render primary maneuver icon flip icon`() {
-        val maneuver = getRoundaboutPrimaryManeuver()
-        val turnIcon = getTurnIconForPrimary(maneuver)
+    fun `when primary driving side and degrees not null then rotationY should not be zero`() {
+        val maneuver = PrimaryManeuver
+            .Builder()
+            .text("I-880")
+            .type(StepManeuver.ROUNDABOUT)
+            .degrees(23.0)
+            .modifier(ManeuverModifier.LEFT)
+            .drivingSide("left")
+            .componentList(listOf())
+            .build()
+        val turnIcon = getRoundaboutWithPrimary(maneuver)
         val view = MapboxTurnIconManeuver(ctx)
         val expectedFlip = 180f
         every {
@@ -47,9 +55,43 @@ class MapboxTurnIconManeuverTest {
     }
 
     @Test
-    fun `render sub maneuver icon flip icon`() {
-        val maneuver = getRoundaboutSubManeuver()
-        val turnIcon = getTurnIconForSub(maneuver)
+    fun `when primary driving side and degrees null then rotationY should be zero`() {
+        val maneuver = PrimaryManeuver
+            .Builder()
+            .text("I-880")
+            .type(StepManeuver.TURN)
+            .degrees(null)
+            .modifier(ManeuverModifier.LEFT)
+            .drivingSide(null)
+            .componentList(listOf())
+            .build()
+        val turnIcon = getTurnIcon()
+        val view = MapboxTurnIconManeuver(ctx)
+        val expectedFlip = 0f
+        every {
+            turnIconHelper.retrieveTurnIcon(
+                maneuver.type, maneuver.degrees?.toFloat(), maneuver.drivingSide, maneuver.modifier
+            )
+        } returns turnIcon
+
+        view.renderPrimaryTurnIcon(maneuver)
+        val actualFlip = view.rotationY
+
+        assertEquals(expectedFlip, actualFlip)
+    }
+
+    @Test
+    fun `when sub driving side and degrees not null then rotationY should not be zero`() {
+        val maneuver = SubManeuver
+            .Builder()
+            .text("I-880")
+            .type(StepManeuver.ROUNDABOUT)
+            .degrees(23.0)
+            .modifier(ManeuverModifier.LEFT)
+            .drivingSide("left")
+            .componentList(listOf())
+            .build()
+        val turnIcon = getRoundaboutWithSub(maneuver)
         val view = MapboxTurnIconManeuver(ctx)
         val expectedFlip = 180f
         every {
@@ -64,37 +106,98 @@ class MapboxTurnIconManeuverTest {
         assertEquals(expectedFlip, actualFlip)
     }
 
-    private fun getRoundaboutPrimaryManeuver() = PrimaryManeuver
-        .Builder()
-        .text("I-880")
-        .type(StepManeuver.ROUNDABOUT)
-        .degrees(23.0)
-        .modifier(ManeuverModifier.LEFT)
-        .drivingSide("left")
-        .componentList(listOf())
-        .build()
+    @Test
+    fun `when sub driving side and degrees null then rotationY should be zero`() {
+        val maneuver = SubManeuver
+            .Builder()
+            .text("I-880")
+            .type(StepManeuver.TURN)
+            .degrees(null)
+            .modifier(ManeuverModifier.LEFT)
+            .drivingSide(null)
+            .componentList(listOf())
+            .build()
+        val turnIcon = getTurnIcon()
+        val view = MapboxTurnIconManeuver(ctx)
+        val expectedFlip = 0f
+        every {
+            turnIconHelper.retrieveTurnIcon(
+                maneuver.type, maneuver.degrees?.toFloat(), maneuver.drivingSide, maneuver.modifier
+            )
+        } returns turnIcon
 
-    private fun getTurnIconForPrimary(maneuver: PrimaryManeuver) = TurnIcon(
-        maneuver.degrees?.toFloat(),
-        maneuver.drivingSide,
+        view.renderSubTurnIcon(maneuver)
+        val actualFlip = view.rotationY
+
+        assertEquals(expectedFlip, actualFlip)
+    }
+
+    @Test
+    fun `when maneuver roundabout followed by normal turn then rotation angle is zero`() {
+        val view = MapboxTurnIconManeuver(ctx)
+        val expectedFlip = 0f
+        val roundaboutManeuver = PrimaryManeuver
+            .Builder()
+            .text("I-880")
+            .type(StepManeuver.ROUNDABOUT)
+            .degrees(23.0)
+            .modifier(ManeuverModifier.LEFT)
+            .drivingSide("left")
+            .componentList(listOf())
+            .build()
+        val turnManeuver = PrimaryManeuver
+            .Builder()
+            .text("I-880")
+            .type(StepManeuver.TURN)
+            .degrees(null)
+            .modifier(ManeuverModifier.LEFT)
+            .drivingSide(null)
+            .componentList(listOf())
+            .build()
+        val roundaboutTurnIcon = getRoundaboutWithPrimary(roundaboutManeuver)
+        val turnIcon = getTurnIcon()
+        every {
+            turnIconHelper.retrieveTurnIcon(
+                roundaboutManeuver.type,
+                roundaboutManeuver.degrees?.toFloat(),
+                roundaboutManeuver.drivingSide,
+                roundaboutManeuver.modifier
+            )
+        } returns roundaboutTurnIcon
+        every {
+            turnIconHelper.retrieveTurnIcon(
+                turnManeuver.type,
+                turnManeuver.degrees?.toFloat(),
+                turnManeuver.drivingSide,
+                turnManeuver.modifier
+            )
+        } returns turnIcon
+
+        view.renderPrimaryTurnIcon(roundaboutManeuver)
+        view.renderPrimaryTurnIcon(turnManeuver)
+        val actualFlip = view.rotationY
+
+        assertEquals(expectedFlip, actualFlip)
+    }
+
+    private fun getTurnIcon() = TurnIcon(
+        null,
+        null,
         false,
         R.drawable.mapbox_ic_turn_left
     )
 
-    private fun getRoundaboutSubManeuver() = SubManeuver
-        .Builder()
-        .text("I-880")
-        .type(StepManeuver.ROUNDABOUT)
-        .degrees(23.0)
-        .modifier(ManeuverModifier.LEFT)
-        .drivingSide("left")
-        .componentList(listOf())
-        .build()
+    private fun getRoundaboutWithPrimary(maneuver: PrimaryManeuver) = TurnIcon(
+        maneuver.degrees?.toFloat(),
+        maneuver.drivingSide,
+        true,
+        R.drawable.mapbox_ic_roundabout_left
+    )
 
-    private fun getTurnIconForSub(maneuver: SubManeuver) = TurnIcon(
+    private fun getRoundaboutWithSub(maneuver: SubManeuver) = TurnIcon(
         maneuver.degrees?.toFloat(),
         maneuver.drivingSide,
         false,
-        R.drawable.mapbox_ic_turn_left
+        R.drawable.mapbox_ic_roundabout_left
     )
 }
