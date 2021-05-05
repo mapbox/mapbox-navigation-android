@@ -77,7 +77,7 @@ class MapboxSpeechApi @JvmOverloads constructor(
         voiceAPI.clean(announcement)
     }
 
-    private suspend fun retrieveVoiceFile(
+    internal suspend fun retrieveVoiceFile(
         voiceInstruction: VoiceInstructions,
         consumer: MapboxNavigationConsumer<Expected<SpeechValue, SpeechError>>
     ) {
