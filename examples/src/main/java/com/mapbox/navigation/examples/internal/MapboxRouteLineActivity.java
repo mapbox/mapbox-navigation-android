@@ -138,28 +138,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
         )
         .build();
 
-    TileStore tileStore =
-        TileStore.getInstance(path);
-    ResourceOptions resourceOptions = new ResourceOptions.Builder()
-        .accessToken(getMapboxAccessTokenFromResources())
-        .assetPath(getFilesDir().getAbsolutePath())
-        .cachePath(getFilesDir().getAbsolutePath() + "/mbx.db")
-        .cacheSize(100_000_000L) // 100 MB
-        .tileStore(tileStore)
-        .build();
-    MapInitOptions mapboxMapOptions = new MapInitOptions(
-        this,
-        resourceOptions,
-        MapInitOptions.Companion.getDefaultMapOptions(this),
-        null,
-        false,
-        null
-    );
-    mapboxMapOptions.setResourceOptions(resourceOptions);
-    mapView = new MapView(this, mapboxMapOptions);
-    RelativeLayout mapLayout = findViewById(R.id.mapView_container);
-    mapLayout.addView(mapView);
-
+    mapView = findViewById(R.id.mapView);
     startNavigation = findViewById(R.id.startNavigation);
     routeLoading = findViewById(R.id.routeLoadingProgressBar);
     mapboxMap = mapView.getMapboxMap();

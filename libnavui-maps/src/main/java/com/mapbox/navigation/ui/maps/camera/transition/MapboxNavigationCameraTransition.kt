@@ -32,13 +32,13 @@ class MapboxNavigationCameraTransition(
         transitionOptions: NavigationCameraTransitionOptions
     ): AnimatorSet {
         val animators = mutableListOf<ValueAnimator>()
-        val currentMapCameraOptions = mapboxMap.getCameraOptions(null)
+        val currentMapCameraState = mapboxMap.cameraState
 
         var centerDuration = 0L
         cameraOptions.center?.let { center ->
             val screenDistanceFromMapCenterToLocation = screenDistanceFromMapCenterToTarget(
                 mapboxMap = mapboxMap,
-                currentCenter = currentMapCameraOptions.center ?: center,
+                currentCenter = currentMapCameraState.center,
                 targetCenter = center
             )
 
@@ -61,11 +61,8 @@ class MapboxNavigationCameraTransition(
         var zoomDelay = 0.0
         var zoomDuration = 0L
         cameraOptions.zoom?.let { zoom ->
-            val currentMapCameraZoom = currentMapCameraOptions.zoom
-            val zoomDelta = currentMapCameraZoom?.let {
-                abs(zoom - it)
-            } ?: zoom
-
+            val currentMapCameraZoom = currentMapCameraState.zoom
+            val zoomDelta = abs(zoom - currentMapCameraZoom)
             val zoomAnimationRate = 2.2
             zoomDelay = centerDuration * 0.5
             zoomDuration = ((zoomDelta / zoomAnimationRate) * 1000.0).toLong()
@@ -84,10 +81,7 @@ class MapboxNavigationCameraTransition(
         }
 
         cameraOptions.bearing?.let { bearing ->
-            var bearingShortestRotation = bearing
-            currentMapCameraOptions.bearing?.let {
-                bearingShortestRotation = normalizeBearing(it, bearing)
-            }
+            val bearingShortestRotation = normalizeBearing(currentMapCameraState.bearing, bearing)
             val bearingDuration = 1800.0
             val bearingDelay = (zoomDelay + zoomDuration - bearingDuration).coerceAtLeast(0.0)
             val bearingAnimator = cameraPlugin.createBearingAnimator(
@@ -141,7 +135,7 @@ class MapboxNavigationCameraTransition(
         transitionOptions: NavigationCameraTransitionOptions
     ): AnimatorSet {
         val animators = mutableListOf<ValueAnimator>()
-        val currentMapCameraOptions = mapboxMap.getCameraOptions(null)
+        val currentMapCameraState = mapboxMap.cameraState
 
         cameraOptions.center?.let { center ->
             val centerAnimator = cameraPlugin.createCenterAnimator(
@@ -170,10 +164,7 @@ class MapboxNavigationCameraTransition(
         }
 
         cameraOptions.bearing?.let { bearing ->
-            var bearingShortestRotation = bearing
-            currentMapCameraOptions.bearing?.let {
-                bearingShortestRotation = normalizeBearing(it, bearing)
-            }
+            val bearingShortestRotation = normalizeBearing(currentMapCameraState.bearing, bearing)
             val bearingAnimator = cameraPlugin.createBearingAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(bearingShortestRotation) {
                     owner(NAVIGATION_CAMERA_OWNER)
@@ -220,7 +211,6 @@ class MapboxNavigationCameraTransition(
         transitionOptions: NavigationCameraTransitionOptions
     ): AnimatorSet {
         val animators = mutableListOf<ValueAnimator>()
-        val currentMapCamera = mapboxMap.getCameraOptions(null)
 
         cameraOptions.center?.let { center ->
             val centerAnimator = cameraPlugin.createCenterAnimator(
@@ -247,10 +237,7 @@ class MapboxNavigationCameraTransition(
         }
 
         cameraOptions.bearing?.let { bearing ->
-            var bearingShortestRotation = bearing
-            currentMapCamera.bearing?.let {
-                bearingShortestRotation = normalizeBearing(it, bearing)
-            }
+            val bearingShortestRotation = normalizeBearing(mapboxMap.cameraState.bearing, bearing)
             val bearingAnimator = cameraPlugin.createBearingAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(bearingShortestRotation) {
                     owner(NAVIGATION_CAMERA_OWNER)
