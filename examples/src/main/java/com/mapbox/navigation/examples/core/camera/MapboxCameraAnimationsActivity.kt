@@ -369,7 +369,7 @@ class MapboxCameraAnimationsActivity :
         mapboxMap.addOnCameraChangeListener {
             this.runOnUiThread {
                 if (navigationCamera.state == NavigationCameraState.FOLLOWING &&
-                    mapboxMap.getCameraOptions().pitch!! < 0.1
+                    mapboxMap.cameraState.pitch < 0.1
                 ) {
                     // this is added to avoid locking zoom level after scaling in top-down following
                     viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed = true
@@ -459,12 +459,12 @@ class MapboxCameraAnimationsActivity :
 
     @SuppressLint("SetTextI18n")
     private fun updateCameraChangeView() {
-        mapboxMap.getCameraOptions(null).let { currentMapCamera ->
+        mapboxMap.cameraState.let { currentMapCamera ->
             binding.cameraChangeViewState.text = "state: ${navigationCamera.state}"
             binding.cameraChangeViewLng.text = "lng: " +
-                currentMapCamera.center?.longitude().formatNumber()
+                currentMapCamera.center.longitude().formatNumber()
             binding.cameraChangeViewLat.text =
-                "lat: ${currentMapCamera.center?.latitude().formatNumber()}"
+                "lat: ${currentMapCamera.center.latitude().formatNumber()}"
             binding.cameraChangeViewZoom.text = "zoom: ${currentMapCamera.zoom.formatNumber()}"
             binding.cameraChangeViewBearing.text =
                 "bearing: ${currentMapCamera.bearing.formatNumber()}"
@@ -472,10 +472,10 @@ class MapboxCameraAnimationsActivity :
             binding.cameraChangeViewPadding.text =
                 """
                     |padding:
-                    |  top: ${currentMapCamera.padding?.top.formatNumber()}
-                    |  left: ${currentMapCamera.padding?.left.formatNumber()}
-                    |  bottom: ${currentMapCamera.padding?.bottom.formatNumber()}
-                    |  right: ${currentMapCamera.padding?.right.formatNumber()}
+                    |  top: ${currentMapCamera.padding.top.formatNumber()}
+                    |  left: ${currentMapCamera.padding.left.formatNumber()}
+                    |  bottom: ${currentMapCamera.padding.bottom.formatNumber()}
+                    |  right: ${currentMapCamera.padding.right.formatNumber()}
                """.trimMargin()
         }
     }
@@ -530,7 +530,7 @@ class MapboxCameraAnimationsActivity :
             }
             AnimationType.LookAtPOIWhenFollowing -> {
                 if (lookAtPoint == null) {
-                    val center = mapboxMap.getCameraOptions(null).center
+                    val center = mapboxMap.cameraState.center
                         ?: Point.fromLngLat(0.0, 0.0)
                     lookAtPoint = Point.fromLngLat(
                         (center.longitude()) + 0.003,

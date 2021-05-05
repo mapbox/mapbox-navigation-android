@@ -208,7 +208,7 @@ class MapboxSnapshotterApi(
                 (mapInterface.size.width * options.density) -
                     (options.edgeInsets.left + options.edgeInsets.right)
                 ) / 2 + (options.edgeInsets.left)
-        cameraOptions.padding = getEdgeInsets(
+        val padding = getEdgeInsets(
             Size(
                 mapInterface.size.width * options.density,
                 mapInterface.size.height * options.density
@@ -219,6 +219,9 @@ class MapboxSnapshotterApi(
             )
         )
         return cameraOptions
+            .toBuilder()
+            .padding(padding)
+            .build()
     }
 
     private fun getEdgeInsets(

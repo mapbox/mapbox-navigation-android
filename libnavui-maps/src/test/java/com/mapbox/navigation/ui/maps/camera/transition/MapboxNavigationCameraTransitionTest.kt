@@ -45,9 +45,9 @@ class MapboxNavigationCameraTransitionTest {
 
     @Test
     fun `transitionFromLowZoomToHighZoom - bearing is normalized`() {
-        every { mapboxMap.getCameraOptions() } returns CameraOptions.Builder()
-            .bearing(10.0)
-            .build()
+        every { mapboxMap.cameraState } returns mockk {
+            every { bearing } returns 10.0
+        }
         val cameraOptions = CameraOptions.Builder()
             .bearing(350.0)
             .build()
@@ -62,9 +62,10 @@ class MapboxNavigationCameraTransitionTest {
 
     @Test
     fun `transitionFromHighZoomToLowZoom - bearing is normalized`() {
-        every { mapboxMap.getCameraOptions() } returns CameraOptions.Builder()
-            .bearing(10.0)
-            .build()
+        every { mapboxMap.cameraState } returns mockk {
+            every { bearing } returns 10.0
+        }
+
         val cameraOptions = CameraOptions.Builder()
             .bearing(350.0)
             .build()
@@ -79,9 +80,9 @@ class MapboxNavigationCameraTransitionTest {
 
     @Test
     fun `transitionLinear - bearing is normalized`() {
-        every { mapboxMap.getCameraOptions() } returns CameraOptions.Builder()
-            .bearing(10.0)
-            .build()
+        every { mapboxMap.cameraState } returns mockk {
+            every { bearing } returns 10.0
+        }
         val cameraOptions = CameraOptions.Builder()
             .bearing(350.0)
             .build()
@@ -96,7 +97,11 @@ class MapboxNavigationCameraTransitionTest {
 
     @Test
     fun `transitionFromLowZoomToHighZoom - duration constrained`() {
-        every { mapboxMap.getCameraOptions() } returns mockk(relaxed = true)
+        every { mapboxMap.cameraState } returns mockk {
+            every { center } returns mockk()
+            every { zoom } returns 0.0
+            every { bearing } returns 0.0
+        }
         val cameraOptions: CameraOptions = mockk(relaxed = true)
 
         val animator =
@@ -108,7 +113,11 @@ class MapboxNavigationCameraTransitionTest {
 
     @Test
     fun `transitionFromHighZoomToLowZoom - duration constrained`() {
-        every { mapboxMap.getCameraOptions() } returns mockk(relaxed = true)
+        every { mapboxMap.cameraState } returns mockk {
+            every { center } returns mockk()
+            every { zoom } returns 0.0
+            every { bearing } returns 0.0
+        }
         val cameraOptions: CameraOptions = mockk(relaxed = true)
 
         val animator =
@@ -120,7 +129,11 @@ class MapboxNavigationCameraTransitionTest {
 
     @Test
     fun `transitionLinear - duration constrained`() {
-        every { mapboxMap.getCameraOptions() } returns mockk(relaxed = true)
+        every { mapboxMap.cameraState } returns mockk {
+            every { center } returns mockk()
+            every { zoom } returns 0.0
+            every { bearing } returns 0.0
+        }
         val cameraOptions: CameraOptions = mockk(relaxed = true)
 
         val animator = transitions.transitionLinear(cameraOptions, DEFAULT_FRAME_TRANSITION_OPT)

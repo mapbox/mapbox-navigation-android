@@ -30,7 +30,7 @@ class MapboxNavigationCameraStateTransition(
         cameraOptions: CameraOptions,
         transitionOptions: NavigationCameraTransitionOptions
     ): AnimatorSet {
-        val currentZoom = mapboxMap.getCameraOptions(null).zoom ?: 0.0
+        val currentZoom = mapboxMap.cameraState.zoom
         return if (currentZoom < cameraOptions.zoom ?: currentZoom) {
             navigationCameraTransition.transitionFromLowZoomToHighZoom(
                 cameraOptions,

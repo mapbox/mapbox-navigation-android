@@ -150,13 +150,13 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
     }
 
     private fun updateMapCameraCenter() {
-        val center = mapboxMap.pixelForCoordinate(mapboxMap.getCameraOptions().center!!)
+        val center = mapboxMap.pixelForCoordinate(mapboxMap.cameraState.center)
         cameraCenter.x = center.x.toFloat() - cameraCenter.width / 2
         cameraCenter.y = center.y.toFloat() - cameraCenter.height / 2
     }
 
     private fun updateMapPadding() {
-        val padding = mapboxMap.getCameraOptions().padding!!
+        val padding = mapboxMap.cameraState.padding
 
         val width = (mapView.width - padding.left - padding.right).toInt()
         val height = (mapView.height - padding.top - padding.bottom).toInt()

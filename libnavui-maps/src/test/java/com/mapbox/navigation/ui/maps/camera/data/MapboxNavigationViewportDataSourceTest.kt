@@ -4,6 +4,7 @@ import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.CameraState
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.ScreenBox
@@ -43,14 +44,13 @@ import org.junit.Test
 
 class MapboxNavigationViewportDataSourceTest {
     private val mapboxMap: MapboxMap = mockk(relaxUnitFun = true)
-    private val emptyCameraOptions = CameraOptions.Builder()
-        .center(NULL_ISLAND_POINT)
-        .bearing(BEARING_NORTH)
-        .pitch(ZERO_PITCH)
-        .zoom(0.0)
-        .padding(EMPTY_EDGE_INSETS)
-        .anchor(null)
-        .build()
+    private val emptyCameraState = CameraState(
+        NULL_ISLAND_POINT,
+        EMPTY_EDGE_INSETS,
+        0.0,
+        BEARING_NORTH,
+        ZERO_PITCH
+    )
     private val mapSize = Size(1000f, 1000f)
     private val singlePixelEdgeInsets = EdgeInsets(1.0, 2.0, 3.0, 4.0)
     private val followingScreenBox = ScreenBox(
@@ -119,7 +119,7 @@ class MapboxNavigationViewportDataSourceTest {
 
     @Before
     fun setup() {
-        every { mapboxMap.getCameraOptions() } returns emptyCameraOptions
+        every { mapboxMap.cameraState } returns emptyCameraState
         every { mapboxMap.getSize() } returns mapSize
 
         viewportDataSource = MapboxNavigationViewportDataSource(mapboxMap)
@@ -211,8 +211,6 @@ class MapboxNavigationViewportDataSourceTest {
 
     @Test
     fun `empty source initializes at null island`() {
-        every { mapboxMap.getCameraOptions() } returns emptyCameraOptions
-
         val data = viewportDataSource.getViewportData()
 
         assertEquals(
@@ -416,7 +414,7 @@ class MapboxNavigationViewportDataSourceTest {
             center(location.toPoint())
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
-            zoom(mapboxMap.getCameraOptions().zoom)
+            zoom(mapboxMap.cameraState.zoom)
             padding(singlePixelEdgeInsets)
         }
         val followingZoom = 16.0
@@ -488,7 +486,7 @@ class MapboxNavigationViewportDataSourceTest {
             center(location.toPoint())
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
-            zoom(mapboxMap.getCameraOptions().zoom)
+            zoom(mapboxMap.cameraState.zoom)
             padding(singlePixelEdgeInsets)
         }
         val followingZoom = 16.0
@@ -639,7 +637,7 @@ class MapboxNavigationViewportDataSourceTest {
             center(location.toPoint())
             bearing(smoothedBearing)
             pitch(ZERO_PITCH)
-            zoom(mapboxMap.getCameraOptions().zoom)
+            zoom(mapboxMap.cameraState.zoom)
             padding(singlePixelEdgeInsets)
         }
         val followingZoom = 16.0
@@ -886,7 +884,7 @@ class MapboxNavigationViewportDataSourceTest {
             center(location.toPoint())
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
-            zoom(mapboxMap.getCameraOptions().zoom)
+            zoom(mapboxMap.cameraState.zoom)
             padding(singlePixelEdgeInsets)
         }
         val followingZoom = 16.0
@@ -1170,6 +1168,13 @@ class MapboxNavigationViewportDataSourceTest {
     }
 
     private fun createCameraOptions(block: CameraOptions.Builder.() -> Unit): CameraOptions {
-        return emptyCameraOptions.toBuilder().apply(block).build()
+        return CameraOptions.Builder()
+            .zoom(emptyCameraState.zoom)
+            .bearing(emptyCameraState.bearing)
+            .padding(emptyCameraState.padding)
+            .center(emptyCameraState.center)
+            .pitch(emptyCameraState.pitch)
+            .apply(block)
+            .build()
     }
 }

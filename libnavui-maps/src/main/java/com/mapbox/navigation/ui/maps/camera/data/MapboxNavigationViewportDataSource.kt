@@ -11,6 +11,7 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.toCameraOptions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -688,11 +689,11 @@ class MapboxNavigationViewportDataSource(
 
         if (pointsForFollowing.isEmpty()) {
             options.followingFrameOptions.run {
-                val cameraOptions = mapboxMap.getCameraOptions()
-                followingBearingProperty.fallback = cameraOptions.bearing!!
+                val cameraState = mapboxMap.cameraState
+                followingBearingProperty.fallback = cameraState.bearing
                 followingPitchProperty.fallback = defaultPitch
-                followingCenterProperty.fallback = cameraOptions.center!!
-                followingZoomProperty.fallback = max(min(cameraOptions.zoom!!, maxZoom), minZoom)
+                followingCenterProperty.fallback = cameraState.center
+                followingZoomProperty.fallback = max(min(cameraState.zoom, maxZoom), minZoom)
             }
             // nothing to frame
             return
@@ -704,7 +705,7 @@ class MapboxNavigationViewportDataSource(
                 getSmootherBearingForMap(
                     enabled,
                     maxBearingAngleDiff,
-                    mapboxMap.getCameraOptions().bearing ?: BEARING_NORTH,
+                    mapboxMap.cameraState.bearing,
                     locationBearing,
                     pointsForFollowing
                 )
@@ -730,17 +731,15 @@ class MapboxNavigationViewportDataSource(
             } else {
                 val mapSize = mapboxMap.getSize()
                 val screenBox = getScreenBoxForFraming(mapSize, followingPadding)
-
-                val fallbackCameraOptions = mapboxMap.getCameraOptions()
-                    .toBuilder()
+                val cameraState = mapboxMap.cameraState
+                val fallbackCameraOptions = CameraOptions.Builder()
                     .center(
-                        pointsForFollowing.firstOrNull()
-                            ?: mapboxMap.getCameraOptions().center!!
+                        pointsForFollowing.firstOrNull() ?: cameraState.center
                     )
                     .padding(getMapAnchoredPaddingFromUserPadding(mapSize, followingPadding))
                     .bearing(followingBearingProperty.get())
                     .pitch(followingPitchProperty.get())
-                    .zoom(mapboxMap.getCameraOptions().zoom!!)
+                    .zoom(cameraState.zoom)
                     .build()
                 if (pointsForFollowing.size > 1) {
                     mapboxMap.cameraForCoordinates(
@@ -774,18 +773,18 @@ class MapboxNavigationViewportDataSource(
 
         if (pointsForOverview.isEmpty()) {
             options.overviewFrameOptions.run {
-                val cameraOptions = mapboxMap.getCameraOptions()
-                overviewBearingProperty.fallback = cameraOptions.bearing!!
-                overviewPitchProperty.fallback = cameraOptions.pitch!!
-                overviewCenterProperty.fallback = cameraOptions.center!!
-                overviewZoomProperty.fallback = min(cameraOptions.zoom!!, maxZoom)
+                val cameraState = mapboxMap.cameraState
+                overviewBearingProperty.fallback = cameraState.bearing
+                overviewPitchProperty.fallback = cameraState.pitch
+                overviewCenterProperty.fallback = cameraState.center
+                overviewZoomProperty.fallback = min(cameraState.zoom, maxZoom)
             }
             // nothing to frame
             return
         }
 
         overviewBearingProperty.fallback = normalizeBearing(
-            mapboxMap.getCameraOptions(null).bearing ?: BEARING_NORTH,
+            mapboxMap.cameraState.bearing,
             BEARING_NORTH
         )
 
@@ -797,7 +796,7 @@ class MapboxNavigationViewportDataSource(
                 overviewPitchProperty.get()
             )
         } else {
-            mapboxMap.getCameraOptions()
+            mapboxMap.cameraState.toCameraOptions()
         }
 
         overviewCenterProperty.fallback = cameraFrame.center!!
