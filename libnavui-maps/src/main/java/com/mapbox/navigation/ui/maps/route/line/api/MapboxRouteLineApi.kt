@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
@@ -309,7 +308,6 @@ class MapboxRouteLineApi(
                 consumer.accept(
                     Expected.Success(
                         RouteLineClearValue(
-                            FeatureCollection.fromFeatures(listOf()),
                             FeatureCollection.fromFeatures(listOf()),
                             FeatureCollection.fromFeatures(listOf()),
                             FeatureCollection.fromFeatures(listOf()),
@@ -633,7 +631,8 @@ class MapboxRouteLineApi(
                         this,
                         routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
                         true,
-                        routeLineOptions.resourceProvider.routeLineColorResources
+                        routeLineOptions.resourceProvider.routeLineColorResources,
+                        routeLineOptions.resourceProvider.restrictedRoadSectionScale
                     )
                 } ?: listOf()
             routeLineExpressionData.clear()
@@ -672,7 +671,8 @@ class MapboxRouteLineApi(
                             this,
                             routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
                             false,
-                            routeLineOptions.resourceProvider.routeLineColorResources
+                            routeLineOptions.resourceProvider.routeLineColorResources,
+                            routeLineOptions.resourceProvider.restrictedRoadSectionScale
                         )
                     } ?: listOf()
                 MapboxRouteLineUtils.getTrafficLineExpression(
@@ -694,7 +694,8 @@ class MapboxRouteLineApi(
                                 this,
                                 routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
                                 false,
-                                routeLineOptions.resourceProvider.routeLineColorResources
+                                routeLineOptions.resourceProvider.routeLineColorResources,
+                                routeLineOptions.resourceProvider.restrictedRoadSectionScale
                             )
                         }
                     } else {
@@ -716,17 +717,6 @@ class MapboxRouteLineApi(
             } ?: FeatureCollection.fromFeatures(listOf())
         }
 
-        val restrictedSectionFeatureCollectionDef =
-            jobControl.scope.async(ThreadController.IODispatcher) {
-                if (routeLineOptions.enableRestrictedRoadLayer) {
-                    partitionedRoutes.first.firstOrNull()?.route?.run {
-                        getRestrictedRoadFeatureCollection(this)
-                    } ?: FeatureCollection.fromFeatures(listOf())
-                } else {
-                    FeatureCollection.fromFeatures(listOf())
-                }
-            }
-
         val primaryRouteSource = partitionedRoutes.first.firstOrNull()?.featureCollection
             ?: FeatureCollection.fromFeatures(
                 listOf()
@@ -746,7 +736,6 @@ class MapboxRouteLineApi(
         val altRoute1Exp = alternativeRoute1TrafficExpressionDef.await()
         val altRoute2Exp = alternativeRoute2TrafficExpressionDef.await()
         val wayPointsFeatureCollection = wayPointsFeatureCollectionDef.await()
-        val restrictedSectionFeatureCollection = restrictedSectionFeatureCollectionDef.await()
 
         // This call is resource intensive so it needs to come last so that
         // it doesn't consume resources used by the calculations above. The results
@@ -766,17 +755,8 @@ class MapboxRouteLineApi(
                 altRoute2Exp,
                 alternativeRoute1FeatureCollection,
                 alternativeRoute2FeatureCollection,
-                wayPointsFeatureCollection,
-                restrictedSectionFeatureCollection
+                wayPointsFeatureCollection
             )
         )
-    }
-
-    private fun getRestrictedRoadFeatureCollection(route: DirectionsRoute): FeatureCollection {
-        return MapboxRouteLineUtils.getRestrictedRouteSections(route).map {
-            Feature.fromGeometry(LineString.fromLngLats(it))
-        }.run {
-            FeatureCollection.fromFeatures(this)
-        }
     }
 }

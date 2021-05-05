@@ -18,7 +18,6 @@ import com.mapbox.navigation.ui.maps.route.line.api.VanishingRouteLine
  * @param routeLineBelowLayerId determines the elevation of the route layers
  * @param vanishingRouteLine an instance of the VanishingRouteLine
  * @param tolerance the tolerance value used when configuring the underlying map source
- * @param enableRestrictedRoadLayer whether or not the restricted road layer should be enabled
  */
 class MapboxRouteLineOptions private constructor(
     val resourceProvider: RouteLineResources,
@@ -27,8 +26,7 @@ class MapboxRouteLineOptions private constructor(
     val destinationIcon: Drawable,
     val routeLineBelowLayerId: String?,
     internal var vanishingRouteLine: VanishingRouteLine? = null,
-    val tolerance: Double,
-    val enableRestrictedRoadLayer: Boolean = false
+    val tolerance: Double
 ) {
 
     /**
@@ -44,8 +42,7 @@ class MapboxRouteLineOptions private constructor(
             routeLineBelowLayerId,
             routeLayerProvider.routeStyleDescriptors,
             vanishingRouteLineEnabled,
-            tolerance,
-            enableRestrictedRoadLayer
+            tolerance
         )
     }
 
@@ -65,7 +62,6 @@ class MapboxRouteLineOptions private constructor(
         if (routeLineBelowLayerId != other.routeLineBelowLayerId) return false
         if (vanishingRouteLine != other.vanishingRouteLine) return false
         if (tolerance != other.tolerance) return false
-        if (enableRestrictedRoadLayer != other.enableRestrictedRoadLayer) return false
 
         return true
     }
@@ -81,7 +77,6 @@ class MapboxRouteLineOptions private constructor(
         result = 31 * result + (routeLineBelowLayerId?.hashCode() ?: 0)
         result = 31 * result + (vanishingRouteLine?.hashCode() ?: 0)
         result = 31 * result + (tolerance.hashCode())
-        result = 31 * result + (enableRestrictedRoadLayer.hashCode())
         return result
     }
 
@@ -95,8 +90,7 @@ class MapboxRouteLineOptions private constructor(
             "destinationIcon=$destinationIcon, " +
             "routeLineBelowLayerId=$routeLineBelowLayerId, " +
             "vanishingRouteLine=$vanishingRouteLine, " +
-            "tolerance=$tolerance, " +
-            "enableRestrictedRoadLayer=$enableRestrictedRoadLayer)"
+            "tolerance=$tolerance)"
     }
 
     /**
@@ -114,8 +108,7 @@ class MapboxRouteLineOptions private constructor(
         private var routeLineBelowLayerId: String?,
         private var routeStyleDescriptors: List<RouteStyleDescriptor>,
         private var vanishingRouteLineEnabled: Boolean,
-        private var tolerance: Double,
-        private var enableRestrictedRoadLayer: Boolean
+        private var tolerance: Double
     ) {
 
         /**
@@ -129,8 +122,7 @@ class MapboxRouteLineOptions private constructor(
             null,
             listOf(),
             false,
-            DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            false
+            DEFAULT_ROUTE_SOURCES_TOLERANCE
         )
 
         /**
@@ -174,14 +166,6 @@ class MapboxRouteLineOptions private constructor(
             this.tolerance = tolerance
             return this
         }
-
-        /**
-         * Determines if the restricted road layer is enabled
-         *
-         * @param enabled
-         */
-        fun withRestrictedRoadLayerEnabled(enabled: Boolean): Builder =
-            apply { this.enableRestrictedRoadLayer = enabled }
 
         /**
          * [RouteStyleDescriptor] is an override of an alternative route line coloring based on
@@ -234,8 +218,7 @@ class MapboxRouteLineOptions private constructor(
                 destinationIcon!!,
                 routeLineBelowLayerId,
                 vanishingRouteLine,
-                tolerance,
-                enableRestrictedRoadLayer
+                tolerance
             )
         }
     }

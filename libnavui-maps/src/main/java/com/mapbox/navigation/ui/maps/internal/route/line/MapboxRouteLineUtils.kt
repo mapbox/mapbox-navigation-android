@@ -170,8 +170,11 @@ object MapboxRouteLineUtils {
                 RouteConstants.UNKNOWN_CONGESTION_VALUE -> {
                     routeLineColorResources.routeUnknownTrafficColor
                 }
-                RouteConstants.ClOSURE_CONGESTION_VALUE -> {
+                RouteConstants.CLOSURE_CONGESTION_VALUE -> {
                     routeLineColorResources.routeClosureColor
+                }
+                RouteConstants.RESTRICTED_CONGESTION_VALUE -> {
+                    routeLineColorResources.restrictedRoadColor
                 }
                 else -> routeLineColorResources.routeDefaultColor
             }
@@ -191,8 +194,11 @@ object MapboxRouteLineUtils {
                 RouteConstants.UNKNOWN_CONGESTION_VALUE -> {
                     routeLineColorResources.alternativeRouteUnknownTrafficColor
                 }
-                RouteConstants.ClOSURE_CONGESTION_VALUE -> {
+                RouteConstants.CLOSURE_CONGESTION_VALUE -> {
                     routeLineColorResources.alternativeRouteClosureColor
+                }
+                RouteConstants.RESTRICTED_CONGESTION_VALUE -> {
+                    routeLineColorResources.alternativeRouteRestrictedRoadColor
                 }
                 else -> {
                     routeLineColorResources.alternativeRouteDefaultColor
@@ -223,7 +229,8 @@ object MapboxRouteLineUtils {
         route: DirectionsRoute,
         trafficBackfillRoadClasses: List<String>,
         isPrimaryRoute: Boolean,
-        routeLineColorResources: RouteLineColorResources
+        routeLineColorResources: RouteLineColorResources,
+        restrictedRoadSectionScale: Double
     ): List<RouteLineExpressionData> {
         val trafficExpressionData = getRouteLineTrafficExpressionDataFromCache(route)
         return when (trafficExpressionData.isEmpty()) {
@@ -232,7 +239,8 @@ object MapboxRouteLineUtils {
                 route.distance(),
                 routeLineColorResources,
                 isPrimaryRoute,
-                trafficBackfillRoadClasses
+                trafficBackfillRoadClasses,
+                restrictedRoadSectionScale
             )
             true -> listOf(
                 RouteLineExpressionData(
@@ -270,6 +278,7 @@ object MapboxRouteLineUtils {
         route.legs()?.forEach { leg ->
             ifNonNull(leg.annotation()?.distance()) { distanceList ->
                 val closureRanges = getClosureRanges(leg).asSequence()
+                val restrictedRanges = getRestrictedRouteLegRanges(leg).asSequence()
                 val intersectionsWithGeometryIndex = leg.steps()
                     ?.mapNotNull { it.intersections() }
                     ?.flatten()
@@ -292,8 +301,13 @@ object MapboxRouteLineUtils {
 
                 leg.annotation()?.congestion()?.forEachIndexed { index, congestion ->
                     val isInAClosure = closureRanges.any { it.contains(index) }
-                    val congestionValue: String =
-                        if (isInAClosure) RouteConstants.ClOSURE_CONGESTION_VALUE else congestion
+                    val isInRestrictedRange = restrictedRanges.any { it.contains(index) }
+                    val congestionValue: String = when {
+                        isInRestrictedRange -> RouteConstants.RESTRICTED_CONGESTION_VALUE
+                        isInAClosure -> RouteConstants.CLOSURE_CONGESTION_VALUE
+                        else -> congestion
+                    }
+
                     val roadClass = getRoadClassForIndex(roadClassArray, index)
                     if (index == 0) {
                         routeLineTrafficData.add(
@@ -346,45 +360,25 @@ object MapboxRouteLineUtils {
             } ?: listOf()
     }
 
-    fun getRestrictedRouteSections(route: DirectionsRoute): List<List<Point>> {
-        try {
-            val coordinates = decodeRoute(route).coordinates()
-            val restrictedSections = mutableListOf<List<Point>>()
-            var geoIndex: Int? = null
-
-            route.legs()
-                ?.mapNotNull { it.steps() }
-                ?.flatten()
-                ?.mapNotNull { it.intersections() }
-                ?.flatten()
-                ?.forEach { stepIntersection ->
-                    if (stepIntersection.classes()?.contains("restricted") == true) {
-                        if (geoIndex == null) {
-                            geoIndex = stepIntersection.geometryIndex()
-                        }
-                    } else {
-                        if (geoIndex != null && stepIntersection.geometryIndex() != null) {
-                            val section = coordinates.subList(
-                                geoIndex!!,
-                                stepIntersection.geometryIndex()!! + 1
-                            )
-                            restrictedSections.add(section)
-                            geoIndex = null
-                        }
+    internal fun getRestrictedRouteLegRanges(leg: RouteLeg): List<IntRange> {
+        var geoIndex: Int? = null
+        val ranges = mutableListOf<IntRange>()
+        leg.steps()
+            ?.mapNotNull { it.intersections() }
+            ?.flatten()
+            ?.forEach { stepIntersection ->
+                if (stepIntersection.classes()?.contains("restricted") == true) {
+                    if (geoIndex == null) {
+                        geoIndex = stepIntersection.geometryIndex()
+                    }
+                } else {
+                    if (geoIndex != null && stepIntersection.geometryIndex() != null) {
+                        ranges.add(IntRange(geoIndex!!, stepIntersection.geometryIndex()!!))
+                        geoIndex = null
                     }
                 }
-            return restrictedSections
-        } catch (ex: Exception) {
-            LoggerProvider.logger.e(
-                Tag(TAG),
-                Message(
-                    "Failed to extract route restrictions. " +
-                        "This could be caused by missing data in the DirectionsRoute"
-                ),
-                ex
-            )
-        }
-        return listOf()
+            }
+        return ranges
     }
 
     private tailrec fun getRoadClassForIndex(roadClassArray: Array<String?>, index: Int): String? {
@@ -415,7 +409,8 @@ object MapboxRouteLineUtils {
         routeDistance: Double,
         routeLineColorResources: RouteLineColorResources,
         isPrimaryRoute: Boolean,
-        trafficOverrideRoadClasses: List<String>
+        trafficOverrideRoadClasses: List<String>,
+        restrictedRoadSectionScale: Double
     ): List<RouteLineExpressionData> {
         val expressionDataToReturn = mutableListOf<RouteLineExpressionData>()
         trafficExpressionData.forEachIndexed { index, trafficExpData ->
@@ -450,6 +445,55 @@ object MapboxRouteLineUtils {
                         trafficColor
                     )
                 )
+            }
+
+            if (
+                trafficExpData.trafficCongestionIdentifier ==
+                RouteConstants.RESTRICTED_CONGESTION_VALUE
+            ) {
+                val hardStop = if (index < (trafficExpressionData.lastIndex)) {
+                    trafficExpressionData[index + 1].distanceFromOrigin
+                } else {
+                    routeDistance
+                }
+                val restrictedSegments = getRestrictedSegments(
+                    trafficExpData,
+                    hardStop,
+                    restrictedRoadSectionScale,
+                    routeDistance,
+                    trafficColor
+                )
+                expressionDataToReturn.addAll(restrictedSegments)
+            }
+        }
+        return expressionDataToReturn
+    }
+
+    private fun getRestrictedSegments(
+        trafficExpData: RouteLineTrafficExpressionData,
+        hardStop: Double,
+        restrictedRoadSectionScale: Double,
+        routeDistance: Double,
+        filledColorInt: Int
+    ): List<RouteLineExpressionData> {
+        val expressionDataToReturn = mutableListOf<RouteLineExpressionData>()
+        var distOffset = trafficExpData.distanceFromOrigin + restrictedRoadSectionScale
+        var nextColor = RouteConstants.TRANSPARENT_COLOR
+
+        while (distOffset < hardStop) {
+            val sectionPercentDistance = distOffset / routeDistance
+            expressionDataToReturn.add(
+                RouteLineExpressionData(
+                    sectionPercentDistance,
+                    nextColor
+                )
+            )
+
+            distOffset += restrictedRoadSectionScale
+            nextColor = if (nextColor == RouteConstants.TRANSPARENT_COLOR) {
+                filledColorInt
+            } else {
+                RouteConstants.TRANSPARENT_COLOR
             }
         }
         return expressionDataToReturn
@@ -725,17 +769,6 @@ object MapboxRouteLineUtils {
             }.bindTo(style)
         }
 
-        if (options.enableRestrictedRoadLayer &&
-            !style.styleSourceExists(RouteConstants.RESTRICTED_ROAD_SOURCE_ID)
-        ) {
-            geoJsonSource(RouteConstants.RESTRICTED_ROAD_SOURCE_ID) {
-                maxzoom(16)
-                lineMetrics(true)
-                featureCollection(FeatureCollection.fromFeatures(listOf<Feature>()))
-                tolerance(options.tolerance)
-            }.bindTo(style)
-        }
-
         options.routeLayerProvider.buildAlternativeRouteCasingLayers(
             style,
             options.resourceProvider.routeLineColorResources.alternativeRouteCasingColor
@@ -781,15 +814,6 @@ object MapboxRouteLineUtils {
             options.originIcon,
             options.destinationIcon
         ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
-
-        if (options.enableRestrictedRoadLayer) {
-            options.routeLayerProvider.buildAccessRestrictionsLayer(
-                options.resourceProvider.restrictedRoadDashArray,
-                options.resourceProvider.restrictedRoadOpacity,
-                options.resourceProvider.routeLineColorResources.restrictedRoadColor,
-                options.resourceProvider.restrictedRoadLineWidth
-            ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
-        }
     }
 
     internal fun layersAreInitialized(style: Style): Boolean {

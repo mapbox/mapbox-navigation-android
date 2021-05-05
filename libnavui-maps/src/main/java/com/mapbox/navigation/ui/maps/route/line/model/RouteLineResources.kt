@@ -4,9 +4,7 @@ import androidx.annotation.DrawableRes
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.DESTINATION_WAYPOINT_ICON
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.ORIGIN_WAYPOINT_ICON
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.RESTRICTED_ROAD_DASH_ARRAY
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.RESTRICTED_ROAD_LINE_OPACITY
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.RESTRICTED_ROAD_LINE_WIDTH
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.RESTRICTED_ROAD_SECTION_SCALE
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.ROUNDED_LINE_CAP
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.TRAFFIC_BACKFILL_ROAD_CLASSES
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.buildScalingExpression
@@ -32,10 +30,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.bu
  * alternative route casing line scaling
  * @param alternativeRouteTrafficLineScaleExpression an expression governing the behavior of
  * alternative route traffic line scaling
- * @param restrictedRoadDashArray a list of values for configuring the dashed line representing
- * restricted sections of a route line
- * @param restrictedRoadOpacity the opacity of the restricted road dashed line
- * @param restrictedRoadLineWidth the width of the restricted road dashed line
+ * @param restrictedRoadSectionScale the width of the restricted road dashed line
  */
 class RouteLineResources private constructor(
     val routeLineColorResources: RouteLineColorResources,
@@ -49,9 +44,7 @@ class RouteLineResources private constructor(
     val alternativeRouteLineScaleExpression: Expression,
     val alternativeRouteCasingLineScaleExpression: Expression,
     val alternativeRouteTrafficLineScaleExpression: Expression,
-    val restrictedRoadDashArray: List<Double>,
-    val restrictedRoadOpacity: Double,
-    val restrictedRoadLineWidth: Double
+    val restrictedRoadSectionScale: Double
 ) {
 
     /**
@@ -70,9 +63,7 @@ class RouteLineResources private constructor(
             .alternativeRouteLineScaleExpression(alternativeRouteLineScaleExpression)
             .alternativeRouteCasingLineScaleExpression(alternativeRouteCasingLineScaleExpression)
             .alternativeRouteTrafficLineScaleExpression(alternativeRouteTrafficLineScaleExpression)
-            .restrictedRoadDashArray(restrictedRoadDashArray)
-            .restrictedRoadOpacity(restrictedRoadOpacity)
-            .restrictedRoadLineWidth(restrictedRoadLineWidth)
+            .restrictedRoadSectionScale(restrictedRoadSectionScale)
     }
 
     /**
@@ -101,9 +92,7 @@ class RouteLineResources private constructor(
             "routeCasingLineScaleExpression=$routeCasingLineScaleExpression, " +
             "routeTrafficLineScaleExpression=$routeTrafficLineScaleExpression, " +
             "trafficBackfillRoadClasses=$trafficBackfillRoadClasses, " +
-            "restrictedRoadDashArray=$restrictedRoadDashArray, " +
-            "restrictedRoadOpacity=$restrictedRoadOpacity, " +
-            "restrictedRoadLineWidth=$restrictedRoadLineWidth)"
+            "restrictedRoadSectionScale=$restrictedRoadSectionScale)"
     }
 
     /**
@@ -133,9 +122,7 @@ class RouteLineResources private constructor(
             alternativeRouteTrafficLineScaleExpression !=
             other.alternativeRouteTrafficLineScaleExpression
         ) return false
-        if (restrictedRoadDashArray != other.restrictedRoadDashArray) return false
-        if (restrictedRoadOpacity != other.restrictedRoadOpacity) return false
-        if (restrictedRoadLineWidth != other.restrictedRoadLineWidth) return false
+        if (restrictedRoadSectionScale != other.restrictedRoadSectionScale) return false
 
         return true
     }
@@ -155,9 +142,7 @@ class RouteLineResources private constructor(
         result = 31 * result + alternativeRouteLineScaleExpression.hashCode()
         result = 31 * result + alternativeRouteCasingLineScaleExpression.hashCode()
         result = 31 * result + alternativeRouteTrafficLineScaleExpression.hashCode()
-        result = 31 * result + restrictedRoadDashArray.hashCode()
-        result = 31 * result + restrictedRoadOpacity.hashCode()
-        result = 31 * result + restrictedRoadLineWidth.hashCode()
+        result = 31 * result + restrictedRoadSectionScale.hashCode()
         return result
     }
 
@@ -228,9 +213,7 @@ class RouteLineResources private constructor(
                 RouteLineScaleValue(22f, 18f, 1f)
             )
         )
-        private var restrictedRoadDashArray: List<Double> = RESTRICTED_ROAD_DASH_ARRAY
-        private var restrictedRoadOpacity: Double = RESTRICTED_ROAD_LINE_OPACITY
-        private var restrictedRoadLineWidth: Double = RESTRICTED_ROAD_LINE_WIDTH
+        private var restrictedRoadSectionScale: Double = RESTRICTED_ROAD_SECTION_SCALE
 
         /**
          * The route line color resources to use.
@@ -347,30 +330,16 @@ class RouteLineResources private constructor(
             apply { this.alternativeRouteTrafficLineScaleExpression = expression }
 
         /**
-         * The dash array parameter for the restricted road layer.
-         * See [LineLayer] LineDasharray for more information. An empty list will show a
-         * solid line.
+         * A restricted road or section of road is represented by a dashed line. The dashed line
+         * alternates between a length of color and a transparent section of equal length. The
+         * lengths of the colored and transparent parts of the dashed line is determined
+         * by this value. A larger value will result in longer colored sections and longer
+         * transparent sections between the colored sections.
          *
-         * @param dashArray value of lineDasharray
+         * @param scaleValue the scaleValue of the line segments
          */
-        fun restrictedRoadDashArray(dashArray: List<Double>): Builder =
-            apply { this.restrictedRoadDashArray = dashArray }
-
-        /**
-         * The opacity for the restricted road line.
-         *
-         * @param opacity the opacity value
-         */
-        fun restrictedRoadOpacity(opacity: Double): Builder =
-            apply { this.restrictedRoadOpacity = opacity }
-
-        /**
-         * The width of the restricted road line
-         *
-         * @param width the width of the line
-         */
-        fun restrictedRoadLineWidth(width: Double): Builder =
-            apply { this.restrictedRoadLineWidth = width }
+        fun restrictedRoadSectionScale(scaleValue: Double): Builder =
+            apply { this.restrictedRoadSectionScale = scaleValue }
 
         /**
          * Creates a instance of RouteLineResources
@@ -393,9 +362,7 @@ class RouteLineResources private constructor(
                 alternativeRouteLineScaleExpression,
                 alternativeRouteCasingLineScaleExpression,
                 alternativeRouteTrafficLineScaleExpression,
-                restrictedRoadDashArray,
-                restrictedRoadOpacity,
-                restrictedRoadLineWidth
+                restrictedRoadSectionScale
             )
         }
     }

@@ -150,7 +150,6 @@ class MapboxRouteLineViewTest {
             FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
         val altRoutesFeatureCollection = FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
         val waypointsFeatureCollection = FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
-        val restrictedFeatureCollection = FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
         val slots = mutableListOf<Value>()
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
@@ -168,9 +167,6 @@ class MapboxRouteLineViewTest {
                 getStyleSourceProperties(RouteConstants.WAYPOINT_SOURCE_ID)
             } returns geoJsonSourceExpected
             every {
-                getStyleSourceProperties(RouteConstants.RESTRICTED_ROAD_SOURCE_ID)
-            } returns geoJsonSourceExpected
-            every {
                 setStyleSourceProperty(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any(), any())
             } returns ExpectedFactory.createValue()
             every {
@@ -182,9 +178,6 @@ class MapboxRouteLineViewTest {
             every {
                 setStyleSourceProperty(RouteConstants.WAYPOINT_SOURCE_ID, any(), any())
             } returns ExpectedFactory.createValue()
-            every {
-                setStyleSourceProperty(RouteConstants.RESTRICTED_ROAD_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -194,8 +187,7 @@ class MapboxRouteLineViewTest {
                 primaryRouteFeatureCollection,
                 altRoutesFeatureCollection,
                 altRoutesFeatureCollection,
-                waypointsFeatureCollection,
-                restrictedFeatureCollection
+                waypointsFeatureCollection
             )
         )
 
@@ -244,17 +236,6 @@ class MapboxRouteLineViewTest {
         assertEquals(
             waypointsFeatureCollection.toJson(),
             slots[3].contents as String
-        )
-        verify {
-            style.setStyleSourceProperty(
-                RouteConstants.RESTRICTED_ROAD_SOURCE_ID,
-                any(),
-                capture(slots)
-            )
-        }
-        assertEquals(
-            restrictedFeatureCollection.toJson(),
-            slots[4].contents as String
         )
         verify { MapboxRouteLineUtils.initializeLayers(style, options) }
         unmockkObject(MapboxRouteLineUtils)
@@ -349,8 +330,6 @@ class MapboxRouteLineViewTest {
         val alternativeRoute2FeatureCollection =
             FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
         val waypointsFeatureCollection = FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
-        val restrictedRoadsFeatureCollection =
-            FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
         val slots = mutableListOf<Value>()
         val trafficLineExp = mockk<Expression>()
         val routeLineExp = mockk<Expression>()
@@ -367,8 +346,7 @@ class MapboxRouteLineViewTest {
                 alternativeRoute2Expression,
                 alternativeRoute1FeatureCollection,
                 alternativeRoute2FeatureCollection,
-                waypointsFeatureCollection,
-                restrictedRoadsFeatureCollection
+                waypointsFeatureCollection
             )
         )
         val style = mockk<Style> {
@@ -438,9 +416,6 @@ class MapboxRouteLineViewTest {
                 getStyleSourceProperties(RouteConstants.WAYPOINT_SOURCE_ID)
             } returns geoJsonSourceExpected
             every {
-                getStyleSourceProperties(RouteConstants.RESTRICTED_ROAD_SOURCE_ID)
-            } returns geoJsonSourceExpected
-            every {
                 setStyleSourceProperty(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any(), any())
             } returns ExpectedFactory.createValue()
             every {
@@ -451,9 +426,6 @@ class MapboxRouteLineViewTest {
             } returns ExpectedFactory.createValue()
             every {
                 setStyleSourceProperty(RouteConstants.WAYPOINT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
-            every {
-                setStyleSourceProperty(RouteConstants.RESTRICTED_ROAD_SOURCE_ID, any(), any())
             } returns ExpectedFactory.createValue()
         }.also {
             mockCheckForLayerInitialization(it)
@@ -539,17 +511,6 @@ class MapboxRouteLineViewTest {
         assertEquals(
             waypointsFeatureCollection.toJson(),
             slots[3].contents as String
-        )
-        verify {
-            style.setStyleSourceProperty(
-                RouteConstants.RESTRICTED_ROAD_SOURCE_ID,
-                any(),
-                capture(slots)
-            )
-        }
-        assertEquals(
-            restrictedRoadsFeatureCollection.toJson(),
-            slots[4].contents as String
         )
         verify { MapboxRouteLineUtils.initializeLayers(style, options) }
         unmockkObject(MapboxRouteLineUtils)
