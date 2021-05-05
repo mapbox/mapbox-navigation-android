@@ -14,6 +14,11 @@ package com.mapbox.navigation.ui.voice.api {
     method public void generate(com.mapbox.api.directions.v5.models.VoiceInstructions voiceInstruction, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.voice.model.SpeechValue,com.mapbox.navigation.ui.voice.model.SpeechError>> consumer);
   }
 
+  public final class MapboxSpeechApiExtension {
+    method public suspend Object? generate(com.mapbox.navigation.ui.voice.api.MapboxSpeechApi, com.mapbox.api.directions.v5.models.VoiceInstructions voiceInstruction, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.voice.model.SpeechValue,com.mapbox.navigation.ui.voice.model.SpeechError>,kotlin.Unit> block, kotlin.coroutines.Continuation<? super kotlin.Unit> p);
+    field public static final com.mapbox.navigation.ui.voice.api.MapboxSpeechApiExtension INSTANCE;
+  }
+
   @UiThread public final class MapboxVoiceInstructionsPlayer {
     ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options = VoiceInstructionsPlayerOptions.<init>().build(), com.mapbox.navigation.ui.voice.api.AudioFocusDelegate audioFocusDelegate = buildAndroidAudioFocus(context, options));
     ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String accessToken, String language, com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options = VoiceInstructionsPlayerOptions.<init>().build());
