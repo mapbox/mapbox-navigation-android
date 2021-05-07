@@ -185,6 +185,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.android.core.location.LocationEngineRequest getLocationEngineRequest();
     method public long getNavigatorPredictionMillis();
     method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions getPredictiveCacheLocationOptions();
+    method public com.mapbox.navigation.base.route.RouteAlternativesOptions getRouteAlternativesOptions();
     method public com.mapbox.navigation.base.route.RouteRefreshOptions getRouteRefreshOptions();
     method public com.mapbox.navigation.base.options.RoutingTilesOptions getRoutingTilesOptions();
     method public int getTimeFormatType();
@@ -203,6 +204,7 @@ package com.mapbox.navigation.base.options {
     property public final com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest;
     property public final long navigatorPredictionMillis;
     property public final com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions;
+    property public final com.mapbox.navigation.base.route.RouteAlternativesOptions routeAlternativesOptions;
     property public final com.mapbox.navigation.base.route.RouteRefreshOptions routeRefreshOptions;
     property public final com.mapbox.navigation.base.options.RoutingTilesOptions routingTilesOptions;
     property public final int timeFormatType;
@@ -222,6 +224,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngineRequest(com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder navigatorPredictionMillis(long predictionMillis);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder predictiveCacheLocationOptions(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions);
+    method public com.mapbox.navigation.base.options.NavigationOptions.Builder routeAlternativesOptions(com.mapbox.navigation.base.route.RouteAlternativesOptions routeAlternativesOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder routeRefreshOptions(com.mapbox.navigation.base.route.RouteRefreshOptions routeRefreshOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder routingTilesOptions(com.mapbox.navigation.base.options.RoutingTilesOptions routingTilesOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder timeFormatType(int type);
@@ -310,6 +313,18 @@ package com.mapbox.navigation.base.route {
     property public final com.mapbox.api.directions.v5.models.LegStep step;
     property public final int stepIndex;
     property public final String type;
+  }
+
+  public final class RouteAlternativesOptions {
+    method public long getIntervalMillis();
+    method public com.mapbox.navigation.base.route.RouteAlternativesOptions.Builder toBuilder();
+    property public final long intervalMillis;
+  }
+
+  public static final class RouteAlternativesOptions.Builder {
+    ctor public RouteAlternativesOptions.Builder();
+    method public com.mapbox.navigation.base.route.RouteAlternativesOptions build();
+    method public com.mapbox.navigation.base.route.RouteAlternativesOptions.Builder intervalMillis(long intervalMillis);
   }
 
   public final class RouteExclusions {

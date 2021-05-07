@@ -3,14 +3,15 @@ package com.mapbox.navigation.core.routeoptions
 import android.location.Location
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.core.fasterroute.FasterRouteController
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 
 /**
- * Updater is used for *Reroute* and *Faster Route* flow.
+ * Updater is used for *Reroute* and *Route Alternatives* flow.
  *
- * It's used every time when turn-by-turn navigation goes off-route (see [OffRouteObserver])
- * and when needs to find faster route (see [FasterRouteController]) to fetch a new route using a transformed original request.
+ * It's used when turn-by-turn navigation goes off-route (see [OffRouteObserver])
+ * and when route alternatives (see [RouteAlternativesController]) are requested.
+ * For example, this is needed in order to filter the waypoints that have been completed.
  *
  * @see MapboxRouteOptionsUpdater
  */

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.navigator
+package com.mapbox.navigation.navigator.internal
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -8,7 +8,7 @@ import com.mapbox.navigator.ActiveGuidanceMode
 import com.mapbox.navigator.ActiveGuidanceOptions
 import com.mapbox.navigator.Waypoint
 
-internal object ActiveGuidanceOptionsMapper {
+object ActiveGuidanceOptionsMapper {
 
     private const val GEOJSON = "geojson"
 
@@ -33,7 +33,7 @@ internal object ActiveGuidanceOptionsMapper {
         }
     }
 
-    private fun mapToActiveGuidanceGeometry(geometry: String?): ActiveGuidanceGeometryEncoding {
+    fun mapToActiveGuidanceGeometry(geometry: String?): ActiveGuidanceGeometryEncoding {
         return when (geometry) {
             DirectionsCriteria.GEOMETRY_POLYLINE ->
                 ActiveGuidanceGeometryEncoding.KPOLYLINE5
