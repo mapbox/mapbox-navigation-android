@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.navigator.internal.ActiveGuidanceOptionsMapper
 import com.mapbox.navigator.ActiveGuidanceGeometryEncoding
 import com.mapbox.navigator.ActiveGuidanceMode
 import com.mapbox.navigator.ActiveGuidanceOptions

@@ -420,7 +420,7 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun fasterRoute_noRouteOptions_noRequest() {
+    fun routeAlternatives_noRouteOptions_noRequest() {
         every { directionsSession.getPrimaryRouteOptions() } returns null
         verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
 
@@ -428,7 +428,7 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun fasterRoute_noEnhancedLocation_noRequest() {
+    fun routeAlternatives_noEnhancedLocation_noRequest() {
         every { tripSession.getEnhancedLocation() } returns null
         verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
 
@@ -519,7 +519,7 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun `don't interrupt faster route request on a standalone route request`() {
+    fun `don't interrupt reroute requests on a standalone route request`() {
         every { directionsSession.requestRoutes(any(), any()) } returns 1L
         mapboxNavigation.requestRoutes(mockk(), mockk())
 

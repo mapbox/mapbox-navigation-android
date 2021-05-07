@@ -21,6 +21,7 @@ import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.eh.EHorizonEdge
@@ -34,16 +35,14 @@ import com.mapbox.navigation.core.arrival.AutoArrivalController
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.fasterroute.FasterRouteController
-import com.mapbox.navigation.core.fasterroute.FasterRouteDetector
-import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
-import com.mapbox.navigation.core.fasterroute.RouteComparator
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver
 import com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
@@ -177,7 +176,7 @@ class MapboxNavigation(
     private val logger: Logger
     private val internalRoutesObserver: RoutesObserver
     private val internalOffRouteObserver: OffRouteObserver
-    private val fasterRouteController: FasterRouteController
+    private val routeAlternativesController: RouteAlternativesController
     private val routeRefreshController: RouteRefreshController
     private val arrivalProgressObserver: ArrivalProgressObserver
     private val electronicHorizonOptions: ElectronicHorizonOptions = ElectronicHorizonOptions(
@@ -298,12 +297,12 @@ class MapboxNavigation(
 
         val routeOptionsProvider = MapboxRouteOptionsUpdater()
 
-        fasterRouteController = FasterRouteController(
+        routeAlternativesController = RouteAlternativesController(
+            navigationOptions.routeAlternativesOptions,
+            navigator,
             directionsSession,
             tripSession,
-            routeOptionsProvider,
-            FasterRouteDetector(RouteComparator()),
-            logger
+            routeOptionsProvider
         )
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
             navigationOptions.routeRefreshOptions,
@@ -438,6 +437,7 @@ class MapboxNavigation(
      */
     fun setRoutes(routes: List<DirectionsRoute>) {
         rerouteController?.interrupt()
+        routeAlternativesController.interrupt()
         directionsSession.routes = routes
     }
 
@@ -468,12 +468,12 @@ class MapboxNavigation(
         tripSession.unregisterAllRoadObjectsOnRouteObservers()
         tripSession.unregisterAllEHorizonObservers()
         tripSession.unregisterAllMapMatcherResultObservers()
+        routeAlternativesController.unregisterAll()
+        routeRefreshController.stop()
         directionsSession.routes = emptyList()
         resetTripSession()
 
         navigationSession.unregisterAllNavigationSessionStateObservers()
-        fasterRouteController.stop()
-        routeRefreshController.stop()
         MapboxNavigationTelemetry.unregisterListeners(this@MapboxNavigation)
         ThreadController.cancelAllNonUICoroutines()
         ThreadController.cancelAllUICoroutines()
@@ -802,19 +802,20 @@ class MapboxNavigation(
     }
 
     /**
-     * Start observing faster routes for a trip session via [FasterRouteObserver]
+     * Start observing alternatives routes for a trip session via [RouteAlternativesObserver].
+     * Route alternatives are requested periodically based on [RouteAlternativesOptions].
      *
-     * @param fasterRouteObserver FasterRouteObserver
+     * @param routeAlternativesObserver RouteAlternativesObserver
      */
-    fun attachFasterRouteObserver(fasterRouteObserver: FasterRouteObserver) {
-        fasterRouteController.attach(fasterRouteObserver)
+    fun registerRouteAlternativesObserver(routeAlternativesObserver: RouteAlternativesObserver) {
+        routeAlternativesController.register(routeAlternativesObserver)
     }
 
     /**
-     * Stop observing the possibility of faster routes.
+     * Stop observing the possibility of route alternatives.
      */
-    fun detachFasterRouteObserver() {
-        fasterRouteController.stop()
+    fun unregisterRouteAlternativesObserver(routeAlternativesObserver: RouteAlternativesObserver) {
+        routeAlternativesController.unregister(routeAlternativesObserver)
     }
 
     /**

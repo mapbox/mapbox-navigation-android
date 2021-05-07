@@ -14,7 +14,6 @@ import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
-import com.mapbox.navigation.navigator.ActiveGuidanceOptionsMapper
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.CacheDataDomain
@@ -354,6 +353,27 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      */
     override fun getVoiceInstruction(index: Int): VoiceInstruction? =
         navigator!!.getVoiceInstruction(index)
+
+    /**
+     * Compare given route with current route.
+     * Routes are considered the same if one of the routes is a suffix of another
+     * without the first and last intersection.
+     *
+     * If we don't have an active route, return `true`.
+     * If given route has less or equal 2 intersections we consider them different
+     *
+     * @param directionsRoute the route to compare
+     *
+     * @return `true` if route is different, `false` otherwise.
+     */
+    override suspend fun isDifferentRoute(
+        directionsRoute: DirectionsRoute
+    ): Boolean = withContext(NavigatorDispatcher) {
+        val alternativeJson = directionsRoute.toJson()
+        val guidanceGeometry = ActiveGuidanceOptionsMapper
+            .mapToActiveGuidanceGeometry(directionsRoute.routeOptions()?.geometries())
+        navigator!!.isDifferentRoute(alternativeJson, guidanceGeometry)
+    }
 
     // EH
 
