@@ -21,7 +21,7 @@ import androidx.annotation.RequiresApi
  * PlayerAttributes implements attributes that define how the audio system handles routing
  * and focus decisions for the specified source.
  */
-sealed class PlayerAttributes {
+abstract class PlayerAttributes {
 
     /**
      * Specifies which stream will be used for playing
