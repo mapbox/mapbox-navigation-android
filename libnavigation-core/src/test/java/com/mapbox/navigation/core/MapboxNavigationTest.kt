@@ -29,6 +29,8 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
@@ -83,6 +85,8 @@ class MapboxNavigationTest {
     private val distanceFormatterOptions: DistanceFormatterOptions = mockk(relaxed = true)
     private val routingTilesOptions: RoutingTilesOptions = mockk(relaxed = true)
     private val routeRefreshController: RouteRefreshController = mockk(relaxUnitFun = true)
+    private val routeAlternativesController: RouteAlternativesController =
+        mockk(relaxUnitFun = true)
     private val routeProgress: RouteProgress = mockk(relaxed = true)
     private val navigationSession: NavigationSession = mockk(relaxUnitFun = true)
     private val logger: Logger = mockk(relaxUnitFun = true)
@@ -144,6 +148,11 @@ class MapboxNavigationTest {
         } returns mockk()
 
         mockkObject(NavigationComponentProvider)
+        mockkObject(RouteRefreshControllerProvider)
+        mockkObject(RouteAlternativesControllerProvider)
+        every {
+            RouteAlternativesControllerProvider.create(any(), any(), any(), any(), any())
+        } returns routeAlternativesController
 
         every { applicationContext.applicationContext } returns applicationContext
 
@@ -170,6 +179,8 @@ class MapboxNavigationTest {
         unmockkObject(TileStoreProvider)
         unmockkObject(LoggerProvider)
         unmockkObject(NavigationComponentProvider)
+        unmockkObject(RouteRefreshControllerProvider)
+        unmockkObject(RouteAlternativesControllerProvider)
 
         ThreadController.cancelAllNonUICoroutines()
         ThreadController.cancelAllUICoroutines()
@@ -233,7 +244,6 @@ class MapboxNavigationTest {
     @Test
     fun init_routeRefreshController_start_called_when_isRouteRefresh_enabled() {
         ThreadController.cancelAllUICoroutines()
-        mockkObject(RouteRefreshControllerProvider)
         val routeRefreshOptions = RouteRefreshOptions.Builder()
             .enabled(true)
             .build()
@@ -250,14 +260,11 @@ class MapboxNavigationTest {
         mapboxNavigation = MapboxNavigation(navigationOptions)
 
         verify(exactly = 1) { routeRefreshController.start() }
-
-        unmockkObject(RouteRefreshControllerProvider)
     }
 
     @Test
     fun init_routeRefreshController_start_not_called_when_isRouteRefresh_disabled() {
         ThreadController.cancelAllUICoroutines()
-        mockkObject(RouteRefreshControllerProvider)
         val routeRefreshOptions = RouteRefreshOptions.Builder()
             .enabled(false)
             .build()
@@ -274,8 +281,6 @@ class MapboxNavigationTest {
         mapboxNavigation = MapboxNavigation(navigationOptions)
 
         verify(exactly = 0) { routeRefreshController.start() }
-
-        unmockkObject(RouteRefreshControllerProvider)
     }
 
     @Test
@@ -425,7 +430,7 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun fasterRoute_noRouteOptions_noRequest() {
+    fun routeAlternatives_noRouteOptions_noRequest() {
         every { directionsSession.getPrimaryRouteOptions() } returns null
         verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
 
@@ -433,7 +438,7 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun fasterRoute_noEnhancedLocation_noRequest() {
+    fun routeAlternatives_noEnhancedLocation_noRequest() {
         every { tripSession.getEnhancedLocation() } returns null
         verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
 
@@ -524,7 +529,7 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun `don't interrupt faster route request on a standalone route request`() {
+    fun `don't interrupt reroute requests on a standalone route request`() {
         every { directionsSession.requestRoutes(any(), any()) } returns 1L
         mapboxNavigation.requestRoutes(mockk(), mockk())
 
@@ -538,6 +543,25 @@ class MapboxNavigationTest {
         mapboxNavigation.setRoutes(mockk())
 
         verify(exactly = 1) { rerouteController.interrupt() }
+
+        mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun `don't interrupt route alternatives on a standalone route request`() {
+        every { directionsSession.requestRoutes(any(), any()) } returns 1L
+        mapboxNavigation.requestRoutes(mockk(), mockk())
+
+        verify(exactly = 0) { routeAlternativesController.interrupt() }
+
+        mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun `interrupt route alternatives on set route`() {
+        mapboxNavigation.setRoutes(mockk())
+
+        verify(exactly = 1) { routeAlternativesController.interrupt() }
 
         mapboxNavigation.onDestroy()
     }

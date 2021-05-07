@@ -233,6 +233,20 @@ interface MapboxNativeNavigator {
      */
     fun getVoiceInstruction(index: Int): VoiceInstruction?
 
+    /**
+     * Compare given route with current route.
+     * Routes are considered the same if one of the routes is a suffix of another
+     * without the first and last intersection.
+     *
+     * If we don't have an active route, return `true`.
+     * If given route has less or equal 2 intersections we consider them different
+     *
+     * @param directionsRoute the route to compare
+     *
+     * @return `true` if route is different, `false` otherwise.
+     */
+    suspend fun isDifferentRoute(directionsRoute: DirectionsRoute): Boolean
+
     // EH
 
     /**

@@ -6,6 +6,7 @@ import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 
 /**
@@ -36,6 +37,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * @param deviceProfile [DeviceProfile] defines how navigation data should be interpretation
  * @param eHorizonOptions [EHorizonOptions] defines configuration for the Electronic Horizon
  * @param routeRefreshOptions defines configuration for refreshing routes
+ * @param routeAlternativesOptions defines configuration for observing alternatives while navigating
  * @param incidentsOptions defines configuration for live incidents
  */
 class NavigationOptions private constructor(
@@ -53,6 +55,7 @@ class NavigationOptions private constructor(
     val deviceProfile: DeviceProfile,
     val eHorizonOptions: EHorizonOptions,
     val routeRefreshOptions: RouteRefreshOptions,
+    val routeAlternativesOptions: RouteAlternativesOptions,
     val incidentsOptions: IncidentsOptions,
 ) {
 
@@ -73,6 +76,7 @@ class NavigationOptions private constructor(
         deviceProfile(deviceProfile)
         eHorizonOptions(eHorizonOptions)
         routeRefreshOptions(routeRefreshOptions)
+        routeAlternativesOptions(routeAlternativesOptions)
         incidentsOptions(incidentsOptions)
     }
 
@@ -99,6 +103,7 @@ class NavigationOptions private constructor(
         if (deviceProfile != other.deviceProfile) return false
         if (eHorizonOptions != other.eHorizonOptions) return false
         if (routeRefreshOptions != other.routeRefreshOptions) return false
+        if (routeAlternativesOptions != other.routeAlternativesOptions) return false
         if (incidentsOptions != other.incidentsOptions) return false
 
         return true
@@ -122,6 +127,7 @@ class NavigationOptions private constructor(
         result = 31 * result + deviceProfile.hashCode()
         result = 31 * result + eHorizonOptions.hashCode()
         result = 31 * result + routeRefreshOptions.hashCode()
+        result = 31 * result + routeAlternativesOptions.hashCode()
         result = 31 * result + incidentsOptions.hashCode()
         return result
     }
@@ -145,6 +151,7 @@ class NavigationOptions private constructor(
             "deviceProfile=$deviceProfile, " +
             "eHorizonOptions=$eHorizonOptions " +
             "routeRefreshOptions=$routeRefreshOptions " +
+            "routeAlternativesOptions=$routeAlternativesOptions " +
             "incidentsOptions=$incidentsOptions" +
             ")"
     }
@@ -175,6 +182,8 @@ class NavigationOptions private constructor(
         private var deviceProfile: DeviceProfile = DeviceProfile.Builder().build()
         private var eHorizonOptions: EHorizonOptions = EHorizonOptions.Builder().build()
         private var routeRefreshOptions: RouteRefreshOptions = RouteRefreshOptions.Builder().build()
+        private var routeAlternativesOptions: RouteAlternativesOptions =
+            RouteAlternativesOptions.Builder().build()
         private var incidentsOptions: IncidentsOptions = IncidentsOptions.Builder().build()
 
         /**
@@ -258,6 +267,12 @@ class NavigationOptions private constructor(
             apply { this.routeRefreshOptions = routeRefreshOptions }
 
         /**
+         * Defines configuration for route refresh
+         */
+        fun routeAlternativesOptions(routeAlternativesOptions: RouteAlternativesOptions): Builder =
+            apply { this.routeAlternativesOptions = routeAlternativesOptions }
+
+        /**
          * Defines configuration for live incidents
          */
         fun incidentsOptions(incidentsOptions: IncidentsOptions): Builder =
@@ -284,6 +299,7 @@ class NavigationOptions private constructor(
                 deviceProfile = deviceProfile,
                 eHorizonOptions = eHorizonOptions,
                 routeRefreshOptions = routeRefreshOptions,
+                routeAlternativesOptions = routeAlternativesOptions,
                 incidentsOptions = incidentsOptions,
             )
         }
