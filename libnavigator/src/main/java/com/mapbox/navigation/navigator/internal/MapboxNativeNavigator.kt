@@ -1,5 +1,6 @@
 package com.mapbox.navigation.navigator.internal
 
+import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.bindgen.Expected
@@ -246,6 +247,12 @@ interface MapboxNativeNavigator {
      * @return `true` if route is different, `false` otherwise.
      */
     suspend fun isDifferentRoute(directionsRoute: DirectionsRoute): Boolean
+
+    /**
+     * If isDifferentRoute is false, return false. If the route is different,
+     * check if the location is on route.
+     */
+    suspend fun isAlternativeRoute(location: Location, directionsRoute: DirectionsRoute): Boolean
 
     // EH
 

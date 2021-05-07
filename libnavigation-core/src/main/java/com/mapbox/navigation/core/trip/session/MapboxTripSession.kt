@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.trip.session
 import android.hardware.SensorEvent
 import android.location.Location
 import android.os.Looper
+import android.util.Log
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.BannerInstructions
@@ -555,6 +556,7 @@ internal class MapboxTripSession(
 
     private fun updateRouteProgress(progress: RouteProgress?) {
         routeProgress = progress
+        Log.i("kyle_debug", "kyle_debug updateRouteProgress ${routeProgress?.durationRemaining}")
         tripService.updateNotification(progress)
         progress?.let { progress ->
             routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }

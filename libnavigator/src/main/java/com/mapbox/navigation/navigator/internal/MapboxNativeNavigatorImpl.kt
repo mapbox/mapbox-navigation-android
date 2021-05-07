@@ -1,5 +1,6 @@
 package com.mapbox.navigation.navigator.internal
 
+import android.location.Location
 import android.os.SystemClock
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.Logger
@@ -10,6 +11,7 @@ import com.mapbox.common.TileStore
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.gson.GeometryGeoJson
+import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
@@ -72,6 +74,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override var roadObjectsStore: RoadObjectsStore? = null
     override lateinit var cache: CacheHandle
     private var logger: Logger? = null
+    private val onRouteCalculator = OnRouteCalculator()
 
     // todo move to native
     const val OFFLINE_UUID = "offline"
@@ -373,6 +376,20 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         val guidanceGeometry = ActiveGuidanceOptionsMapper
             .mapToActiveGuidanceGeometry(directionsRoute.routeOptions()?.geometries())
         navigator!!.isDifferentRoute(alternativeJson, guidanceGeometry)
+    }
+
+    override suspend fun isAlternativeRoute(
+        location: Location,
+        directionsRoute: DirectionsRoute
+    ): Boolean = withContext(NavigatorDispatcher) {
+        val isDifferentRoute = isDifferentRoute(directionsRoute)
+        if (!isDifferentRoute) {
+            return@withContext false
+        }
+        val geometry = directionsRoute.geometry() ?: return@withContext false
+        val coordinates = PolylineUtils.decode(geometry, 6)
+        val point = Point.fromLngLat(location.longitude, location.latitude)
+        onRouteCalculator.isOnRoute(point, coordinates)
     }
 
     // EH

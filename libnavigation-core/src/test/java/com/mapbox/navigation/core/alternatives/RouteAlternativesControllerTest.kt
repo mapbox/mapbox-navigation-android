@@ -39,9 +39,12 @@ class RouteAlternativesControllerTest {
     private val directionsSession: DirectionsSession = mockk() {
         every { cancelRouteRequest(any()) } just Runs
         every { routes } returns emptyList()
+        every { routes = any() } answers { }
     }
     private val tripSession: TripSession = mockk {
-        every { getRouteProgress() } returns mockk()
+        every { getRouteProgress() } returns mockk {
+            every { route } returns mockk()
+        }
     }
     private val routeAlternativesObserver: RouteAlternativesObserver = mockk {
         every { onRouteAlternatives(any(), any()) } returns Unit
@@ -75,7 +78,6 @@ class RouteAlternativesControllerTest {
                 capture(routesRequestCallbacks)
             )
         } returns 1L
-        every { tripSession.getRouteProgress() } returns mockk()
         mockkObject(LoggerProvider) {
             every { LoggerProvider.logger } returns mockk(relaxed = true)
         }

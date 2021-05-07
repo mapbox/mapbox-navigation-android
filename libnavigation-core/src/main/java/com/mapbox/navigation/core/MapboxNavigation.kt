@@ -304,6 +304,8 @@ class MapboxNavigation(
             tripSession,
             routeOptionsProvider
         )
+        tripSession.registerMapMatcherResultObserver(routeAlternativesController)
+
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
             navigationOptions.routeRefreshOptions,
             directionsSession,
