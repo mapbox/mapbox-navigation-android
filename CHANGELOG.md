@@ -2,6 +2,28 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.9 - May 7, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Features
+- Added uncertain location puck drawable. [#4358](https://github.com/mapbox/mapbox-navigation-android/pull/4358)
+- Made `PlayerAttributes` an abstract class. [#4365](https://github.com/mapbox/mapbox-navigation-android/pull/4365)
+
+#### Bug fixes and improvements
+- Changed restricted roads to be represented as part of the traffic line and will vanish along with the rest of the line when the vanishing route line feature is enabled. [#4360](https://github.com/mapbox/mapbox-navigation-android/pull/4360)
+
+## Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+
+- Mapbox Maps SDK `v10.0.0-beta.19` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.19))
+- Mapbox Navigation Native `v48.0.5`
+- Mapbox Core Common `v11.0.2`
+- Mapbox Java `5.9.0-alpha.5` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v5.9.0-alpha.5))
+- Mapbox Android Core `v3.1.1`
+- Mapbox Android Telemetry `v6.2.2`
+
 ## Mapbox Navigation SDK 2.0.0-beta.8 - April 30, 2021
 
  For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
