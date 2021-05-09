@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
-import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 
 internal object VoiceInstructionsFilePlayerProvider {
 
@@ -9,11 +8,11 @@ internal object VoiceInstructionsFilePlayerProvider {
         context: Context,
         accessToken: String,
         language: String,
-        options: VoiceInstructionsPlayerOptions,
+        playerAttributes: VoiceInstructionsPlayerAttributes,
     ): VoiceInstructionsFilePlayer = VoiceInstructionsFilePlayer(
         context,
         accessToken,
         language,
-        options,
+        playerAttributes,
     )
 }

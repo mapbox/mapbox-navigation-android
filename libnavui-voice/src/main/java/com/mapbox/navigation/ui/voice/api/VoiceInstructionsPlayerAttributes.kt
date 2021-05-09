@@ -1,35 +1,24 @@
-package com.mapbox.navigation.ui.voice.options
+package com.mapbox.navigation.ui.voice.api
 
 import android.media.AudioAttributes
-import android.media.AudioAttributes.CONTENT_TYPE_MUSIC
-import android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION
-import android.media.AudioAttributes.CONTENT_TYPE_SPEECH
-import android.media.AudioAttributes.USAGE_ALARM
-import android.media.AudioAttributes.USAGE_ASSISTANCE_SONIFICATION
-import android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE
-import android.media.AudioAttributes.USAGE_VOICE_COMMUNICATION
-import android.media.AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING
 import android.media.AudioFocusRequest
-import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import androidx.annotation.RequiresApi
+import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 
 /**
  * PlayerAttributes implements attributes that define how the audio system handles routing
  * and focus decisions for the specified source.
  */
-abstract class PlayerAttributes {
+sealed class VoiceInstructionsPlayerAttributes {
 
     /**
-     * Specifies which stream will be used for playing
-     * Defaults to [AudioManager.STREAM_MUSIC]
-     * See [AudioManager] for a list of stream types.
-     * Supports pre Oreo and above implementations
+     * VoiceInstructionsPlayerOptions.
      */
-    abstract val streamType: Int
+    abstract val options: VoiceInstructionsPlayerOptions
 
     /**
      * Configure [MediaPlayer]
@@ -61,12 +50,12 @@ abstract class PlayerAttributes {
      * Attributes for API below Android O
      */
     internal data class PreOreoAttributes(
-        override val streamType: Int = AudioManager.STREAM_MUSIC
-    ) : PlayerAttributes() {
+        override val options: VoiceInstructionsPlayerOptions,
+    ) : VoiceInstructionsPlayerAttributes() {
 
         override fun configureMediaPlayer(): MediaPlayer.() -> Unit {
             return {
-                setAudioStreamType(streamType)
+                setAudioStreamType(options.streamType)
             }
         }
 
@@ -74,7 +63,7 @@ abstract class PlayerAttributes {
             return { bundle ->
                 bundle.putString(
                     TextToSpeech.Engine.KEY_PARAM_STREAM,
-                    streamType.toString()
+                    options.streamType.toString()
                 )
             }
         }
@@ -91,46 +80,21 @@ abstract class PlayerAttributes {
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
     internal data class OreoAndLaterAttributes(
-        /**
-         * Specifies why the source is playing and controls routing, focus, and volume decisions.
-         * Defaults to [AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE]
-         * See [AudioAttributes] for a list of usage types.
-         */
-        val usage: Int = AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE,
-
-        /**
-         * Specifies what source is playing (music, movie, speech, sonification, unknown).
-         * Defaults to [AudioAttributes.CONTENT_TYPE_MUSIC]
-         * See [AudioAttributes] for a list of content types.
-         */
-        val contentType: Int = CONTENT_TYPE_MUSIC
-    ) : PlayerAttributes() {
+        override val options: VoiceInstructionsPlayerOptions,
+    ) : VoiceInstructionsPlayerAttributes() {
 
         /**
          * Specifies a collection of attributes describing information about an audio stream.
          */
         private val audioAttributes: AudioAttributes = AudioAttributes.Builder()
-            .setUsage(usage)
-            .setContentType(contentType)
-            .build()
-
-        override val streamType: Int
-            // Compatibility mappings
-            // https://source.android.com/devices/audio/attributes#compatibility
-            get() = when (contentType) {
-                CONTENT_TYPE_SPEECH -> AudioManager.STREAM_VOICE_CALL
-                CONTENT_TYPE_MUSIC -> AudioManager.STREAM_MUSIC
-                CONTENT_TYPE_SONIFICATION -> when (usage) {
-                    USAGE_VOICE_COMMUNICATION -> AudioManager.STREAM_VOICE_CALL
-                    USAGE_ASSISTANCE_SONIFICATION -> AudioManager.STREAM_SYSTEM
-                    USAGE_NOTIFICATION_RINGTONE -> AudioManager.STREAM_RING
-                    USAGE_ALARM -> AudioManager.STREAM_ALARM
-                    USAGE_VOICE_COMMUNICATION_SIGNALLING -> AudioManager.STREAM_DTMF
-                    else -> AudioManager.STREAM_NOTIFICATION
+            .let { builder ->
+                if (options.useLegacyApi) {
+                    builder.buildLegacy()
+                } else {
+                    builder.buildNormal()
                 }
-
-                else -> AudioManager.STREAM_MUSIC
             }
+            .build()
 
         override fun configureMediaPlayer(): MediaPlayer.() -> Unit {
             return {
@@ -149,5 +113,10 @@ abstract class PlayerAttributes {
                 setAudioAttributes(audioAttributes)
             }
         }
+
+        private fun AudioAttributes.Builder.buildNormal() = setUsage(options.usage)
+            .setContentType(options.contentType)
+
+        private fun AudioAttributes.Builder.buildLegacy() = setLegacyStreamType(options.streamType)
     }
 }

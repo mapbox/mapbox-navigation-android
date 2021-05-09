@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.voice.options
 
+import android.media.AudioAttributes
 import android.media.AudioManager
 
 /**
@@ -18,10 +19,34 @@ class VoiceInstructionsPlayerOptions private constructor(
     val focusGain: Int,
 
     /**
-     * Defines how the audio system handles routing
-     * and focus decisions for the specified source.
+     * Defines which stream will be used for playing
+     * Defaults to [AudioManager.STREAM_MUSIC]
+     * See [AudioManager] for a list of stream types.
+     * Supports pre Oreo and above implementations
      */
-    val playerAttributes: PlayerAttributes,
+    val streamType: Int,
+
+    /**
+     * Defines why the source is playing and controls routing, focus, and volume decisions.
+     * Defaults to [AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE]
+     * See [AudioAttributes] for a list of usage types.
+     */
+    val usage: Int,
+
+    /**
+     * Defines what source is playing (music, movie, speech, sonification, unknown).
+     * Defaults to [AudioAttributes.CONTENT_TYPE_MUSIC]
+     * See [AudioAttributes] for a list of content types.
+     */
+    val contentType: Int,
+
+    /**
+     * Specifies attributes as inferred from the legacy stream types.
+     * Defaults to False
+     * Warning: When this value is true any other attributes such as
+     * usage, content type, flags or haptic control will ignore.
+     */
+    val useLegacyApi: Boolean,
 ) {
 
     /**
@@ -29,7 +54,10 @@ class VoiceInstructionsPlayerOptions private constructor(
      */
     fun toBuilder(): Builder = Builder().apply {
         focusGain(focusGain)
-        playerAttributes(playerAttributes)
+        streamType(streamType)
+        usage(usage)
+        contentType(contentType)
+        useLegacyApi(useLegacyApi)
     }
 
     /**
@@ -42,7 +70,10 @@ class VoiceInstructionsPlayerOptions private constructor(
         other as VoiceInstructionsPlayerOptions
 
         if (focusGain != other.focusGain) return false
-        if (playerAttributes != other.playerAttributes) return false
+        if (streamType != other.streamType) return false
+        if (usage != other.usage) return false
+        if (contentType != other.contentType) return false
+        if (useLegacyApi != other.useLegacyApi) return false
 
         return true
     }
@@ -52,16 +83,22 @@ class VoiceInstructionsPlayerOptions private constructor(
      */
     override fun hashCode(): Int {
         var result = focusGain
-        result = 31 * result + playerAttributes.hashCode()
+        result = 31 * result + streamType
+        result = 31 * result + usage
+        result = 31 * result + contentType
+        result = 31 * result + useLegacyApi.hashCode()
         return result
     }
 
     /**
-     * Returns a string representation of the object.
+     * Regenerate whenever a change is made
      */
     override fun toString(): String {
         return "VoiceInstructionsPlayerOptions(focusGain=$focusGain, " +
-            "playerAttributes=$playerAttributes)"
+            "streamType=$streamType, " +
+            "usage=$usage, " +
+            "contentType=$contentType, " +
+            "useLegacyApi=$useLegacyApi)"
     }
 
     /**
@@ -70,8 +107,10 @@ class VoiceInstructionsPlayerOptions private constructor(
     class Builder {
 
         private var focusGain: Int = AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
-        private var playerAttributes: PlayerAttributes =
-            PlayerAttributesProvider.retrievePlayerAttributes()
+        private var streamType: Int = AudioManager.STREAM_MUSIC
+        private var usage: Int = AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE
+        private var contentType: Int = AudioAttributes.CONTENT_TYPE_MUSIC
+        private var useLegacyApi: Boolean = false
 
         /**
          * Specifies how audio focus will be requested.
@@ -96,12 +135,46 @@ class VoiceInstructionsPlayerOptions private constructor(
             }
 
         /**
-         * Specifies how the audio system handles routing
-         * and focus decisions for the specified source.
+         * Specifies which stream will be used for playing
+         * Defaults to [AudioManager.STREAM_MUSIC]
+         * See [AudioManager] for a list of stream types.
+         * Supports pre Oreo and above implementations
          */
-        fun playerAttributes(playerAttributes: PlayerAttributes): Builder =
+        fun streamType(streamType: Int): Builder =
             apply {
-                this.playerAttributes = playerAttributes
+                this.streamType = streamType
+            }
+
+        /**
+         * Specifies which stream will be used for playing
+         * Defaults to [AudioManager.STREAM_MUSIC]
+         * See [AudioManager] for a list of stream types.
+         * Supports pre Oreo and above implementations
+         */
+        fun usage(usage: Int): Builder =
+            apply {
+                this.usage = usage
+            }
+
+        /**
+         * Specifies what source is playing (music, movie, speech, sonification, unknown).
+         * Defaults to [AudioAttributes.CONTENT_TYPE_MUSIC]
+         * See [AudioAttributes] for a list of content types.
+         */
+        fun contentType(contentType: Int): Builder =
+            apply {
+                this.contentType = contentType
+            }
+
+        /**
+         * Specifies attributes as inferred from the legacy stream types.
+         * Defaults to false
+         * Warning: When this value is true any other attributes such as
+         * usage, content type, flags or haptic control will ignore
+         */
+        fun useLegacyApi(useLegacyApi: Boolean): Builder =
+            apply {
+                this.useLegacyApi = useLegacyApi
             }
 
         /**
@@ -110,7 +183,10 @@ class VoiceInstructionsPlayerOptions private constructor(
         fun build(): VoiceInstructionsPlayerOptions {
             return VoiceInstructionsPlayerOptions(
                 focusGain = focusGain,
-                playerAttributes = playerAttributes,
+                streamType = streamType,
+                usage = usage,
+                contentType = contentType,
+                useLegacyApi = useLegacyApi,
             )
         }
 

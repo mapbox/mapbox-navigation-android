@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.voice.api
 
 import android.media.AudioManager
-import com.mapbox.navigation.ui.voice.options.PlayerAttributes
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import io.mockk.every
 import io.mockk.mockk
@@ -14,17 +13,23 @@ class PreOreoAudioFocusDelegateTest {
     @Test
     fun `pre oreo audio focus delegate request focus`() {
         val mockedAudioManager: AudioManager = mockk(relaxed = true)
-        val mockedVoiceInstructionsPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
+        val mockedPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
         every {
-            mockedVoiceInstructionsPlayerOptions.focusGain
+            mockedPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+
         every {
-            mockedVoiceInstructionsPlayerOptions.playerAttributes
-        } returns PlayerAttributes.PreOreoAttributes()
+            mockedPlayerOptions.streamType
+        } returns AudioManager.STREAM_MUSIC
+
+        val mockedPlayerAttributes: VoiceInstructionsPlayerAttributes = mockk()
+        every {
+            mockedPlayerAttributes.options
+        } returns mockedPlayerOptions
 
         val preOreoAudioFocusDelegate = PreOreoAudioFocusDelegate(
             mockedAudioManager,
-            mockedVoiceInstructionsPlayerOptions
+            mockedPlayerAttributes,
         )
 
         preOreoAudioFocusDelegate.requestFocus()
@@ -41,13 +46,20 @@ class PreOreoAudioFocusDelegateTest {
     @Test
     fun `pre oreo audio delegate returns true when audio focus is granted`() {
         val mockedAudioManager = mockk<AudioManager>(relaxed = true)
-        val mockedVoiceInstructionsPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
+        val mockedPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
         every {
-            mockedVoiceInstructionsPlayerOptions.focusGain
+            mockedPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+
         every {
-            mockedVoiceInstructionsPlayerOptions.playerAttributes
-        } returns PlayerAttributes.PreOreoAttributes()
+            mockedPlayerOptions.streamType
+        } returns AudioManager.STREAM_MUSIC
+
+        val mockedPlayerAttributes: VoiceInstructionsPlayerAttributes = mockk()
+        every {
+            mockedPlayerAttributes.options
+        } returns mockedPlayerOptions
+
         every {
             mockedAudioManager.requestAudioFocus(
                 null,
@@ -58,7 +70,7 @@ class PreOreoAudioFocusDelegateTest {
 
         val preOreoAudioFocusDelegate = PreOreoAudioFocusDelegate(
             mockedAudioManager,
-            mockedVoiceInstructionsPlayerOptions
+            mockedPlayerAttributes,
         )
 
         assertEquals(
@@ -78,13 +90,20 @@ class PreOreoAudioFocusDelegateTest {
     @Test
     fun `pre oreo audio delegate returns false when audio focus is failed`() {
         val mockedAudioManager = mockk<AudioManager>(relaxed = true)
-        val mockedVoiceInstructionsPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
+        val mockedPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
         every {
-            mockedVoiceInstructionsPlayerOptions.focusGain
+            mockedPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+
         every {
-            mockedVoiceInstructionsPlayerOptions.playerAttributes
-        } returns PlayerAttributes.PreOreoAttributes()
+            mockedPlayerOptions.streamType
+        } returns AudioManager.STREAM_MUSIC
+
+        val mockedPlayerAttributes: VoiceInstructionsPlayerAttributes = mockk()
+        every {
+            mockedPlayerAttributes.options
+        } returns mockedPlayerOptions
+
         every {
             mockedAudioManager.requestAudioFocus(
                 null,
@@ -95,7 +114,7 @@ class PreOreoAudioFocusDelegateTest {
 
         val preOreoAudioFocusDelegate = PreOreoAudioFocusDelegate(
             mockedAudioManager,
-            mockedVoiceInstructionsPlayerOptions
+            mockedPlayerAttributes,
         )
 
         assertEquals(
@@ -115,13 +134,19 @@ class PreOreoAudioFocusDelegateTest {
     @Test
     fun `pre oreo audio delegate returns true when audio focus is delayed`() {
         val mockedAudioManager = mockk<AudioManager>(relaxed = true)
-        val mockedVoiceInstructionsPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
+        val mockedPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
         every {
-            mockedVoiceInstructionsPlayerOptions.focusGain
+            mockedPlayerOptions.focusGain
         } returns AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+
         every {
-            mockedVoiceInstructionsPlayerOptions.playerAttributes
-        } returns PlayerAttributes.PreOreoAttributes()
+            mockedPlayerOptions.streamType
+        } returns AudioManager.STREAM_MUSIC
+
+        val mockedPlayerAttributes: VoiceInstructionsPlayerAttributes = mockk()
+        every {
+            mockedPlayerAttributes.options
+        } returns mockedPlayerOptions
 
         every {
             mockedAudioManager.requestAudioFocus(
@@ -133,7 +158,7 @@ class PreOreoAudioFocusDelegateTest {
 
         val preOreoAudioFocusDelegate = PreOreoAudioFocusDelegate(
             mockedAudioManager,
-            mockedVoiceInstructionsPlayerOptions
+            mockedPlayerAttributes,
         )
 
         assertEquals(

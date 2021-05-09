@@ -26,22 +26,30 @@ class MapboxVoiceInstructionsPlayerTest {
     private val aMockedContext: Context = mockk(relaxed = true)
     private val audioManager = mockk<AudioManager>(relaxed = true)
     private val mockedAudioFocusDelegate: AudioFocusDelegate = mockk(relaxed = true)
-    private val mockedVoiceInstructionsPlayerOptions: VoiceInstructionsPlayerOptions = mockk()
+    private val mockedPlayerAttributes: VoiceInstructionsPlayerAttributes = mockk(relaxed = true)
+    private val mockedPlayerOptions: VoiceInstructionsPlayerOptions = mockk(relaxed = true)
 
     @Before
     fun setUp() {
         mockkObject(VoiceInstructionsFilePlayerProvider)
         mockkObject(VoiceInstructionsTextPlayerProvider)
         mockkObject(AudioFocusDelegateProvider)
+        mockkObject(VoiceInstructionsPlayerAttributesProvider)
         every {
             aMockedContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         } returns audioManager
+        every { mockedPlayerAttributes.options } returns mockedPlayerOptions
         every {
             AudioFocusDelegateProvider.retrieveAudioFocusDelegate(
                 audioManager,
-                mockedVoiceInstructionsPlayerOptions
+                mockedPlayerAttributes
             )
         } returns mockedAudioFocusDelegate
+        every {
+            VoiceInstructionsPlayerAttributesProvider.retrievePlayerAttributes(
+                mockedPlayerOptions
+            )
+        } returns mockedPlayerAttributes
     }
 
     @After
@@ -49,6 +57,7 @@ class MapboxVoiceInstructionsPlayerTest {
         unmockkObject(VoiceInstructionsFilePlayerProvider)
         unmockkObject(VoiceInstructionsTextPlayerProvider)
         unmockkObject(AudioFocusDelegateProvider)
+        unmockkObject(VoiceInstructionsPlayerAttributesProvider)
     }
 
     @Test
@@ -72,14 +81,14 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedTextPlayer
 
@@ -92,7 +101,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions
+                mockedPlayerOptions
             )
         val mockedPlay: SpeechAnnouncement = mockedAnnouncement
         val voiceInstructionsPlayerConsumer: MapboxNavigationConsumer<SpeechAnnouncement> = mockk()
@@ -132,14 +141,14 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedTextPlayer
 
@@ -152,7 +161,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions
+                mockedPlayerOptions
             )
         val mockedPlay: SpeechAnnouncement = mockedAnnouncement
         val voiceInstructionsPlayerConsumer: MapboxNavigationConsumer<SpeechAnnouncement> = mockk()
@@ -192,14 +201,14 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedTextPlayer
 
@@ -212,7 +221,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions
+                mockedPlayerOptions
             )
         val mockedPlay: SpeechAnnouncement = mockedAnnouncement
         val voiceInstructionsPlayerConsumer: MapboxNavigationConsumer<SpeechAnnouncement> = mockk()
@@ -258,14 +267,14 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedTextPlayer
 
@@ -278,7 +287,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions
+                mockedPlayerOptions
             )
         val mockedPlay: SpeechAnnouncement = mockedAnnouncement
         val voiceInstructionsPlayerConsumer: MapboxNavigationConsumer<SpeechAnnouncement> = mockk()
@@ -308,14 +317,14 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedTextPlayer
         val mapboxVoiceInstructionsPlayer =
@@ -323,7 +332,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions
+                mockedPlayerOptions
             )
         val mockedVolume: SpeechVolume = mockk()
         every { mockedVolume.level } returns 0.5f
@@ -351,14 +360,14 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedTextPlayer
         val mapboxVoiceInstructionsPlayer =
@@ -366,7 +375,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions
+                mockedPlayerOptions
             )
         val mockedVolume: SpeechVolume = mockk()
         every { mockedVolume.level } returns -0.5f
@@ -387,14 +396,14 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedTextPlayer
         val mapboxVoiceInstructionsPlayer =
@@ -402,7 +411,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions
+                mockedPlayerOptions
             )
         val mockedVolume: SpeechVolume = mockk()
         every { mockedVolume.level } returns 1.5f
@@ -423,14 +432,14 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedTextPlayer
         val mapboxVoiceInstructionsPlayer =
@@ -438,7 +447,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions
+                mockedPlayerOptions
             )
 
         mapboxVoiceInstructionsPlayer.clear()
@@ -464,14 +473,14 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
         every {
             VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
                 aMockedContext,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions,
+                mockedPlayerAttributes,
             )
         } returns mockedTextPlayer
         val mapboxVoiceInstructionsPlayer =
@@ -479,7 +488,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions
+                mockedPlayerOptions
             )
 
         mapboxVoiceInstructionsPlayer.shutdown()
@@ -502,7 +511,7 @@ class MapboxVoiceInstructionsPlayerTest {
                 aMockedContext,
                 anyAccessToken,
                 anyLanguage,
-                mockedVoiceInstructionsPlayerOptions
+                mockedPlayerOptions
             )
         val mockedPlay: SpeechAnnouncement = mockedAnnouncement
         val voiceInstructionsPlayerConsumer: MapboxNavigationConsumer<SpeechAnnouncement> = mockk()

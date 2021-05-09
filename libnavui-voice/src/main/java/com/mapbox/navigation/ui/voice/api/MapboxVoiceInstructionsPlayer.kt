@@ -29,19 +29,21 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
     private val audioFocusDelegate: AudioFocusDelegate = buildAndroidAudioFocus(context, options),
 ) {
 
+    private val attributes: VoiceInstructionsPlayerAttributes =
+        VoiceInstructionsPlayerAttributesProvider.retrievePlayerAttributes(options)
     private val playCallbackQueue: Queue<PlayCallback> = ConcurrentLinkedQueue()
     private val filePlayer: VoiceInstructionsFilePlayer =
         VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
             context,
             accessToken,
             language,
-            options,
+            attributes,
         )
     private val textPlayer: VoiceInstructionsTextPlayer =
         VoiceInstructionsTextPlayerProvider.retrieveVoiceInstructionsTextPlayer(
             context,
             language,
-            options
+            attributes,
         )
     private val localCallback: VoiceInstructionsPlayerCallback =
         object : VoiceInstructionsPlayerCallback {
@@ -134,7 +136,7 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
             options: VoiceInstructionsPlayerOptions,
         ) = AudioFocusDelegateProvider.retrieveAudioFocusDelegate(
             context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
-            options
+            VoiceInstructionsPlayerAttributesProvider.retrievePlayerAttributes(options)
         )
 
         private const val MAX_VOLUME_LEVEL = 1.0f

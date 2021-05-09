@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.voice.options
 
+import android.media.AudioAttributes
 import android.media.AudioManager
 import com.mapbox.navigation.testing.BuilderTest
 import org.junit.Test
@@ -17,7 +18,10 @@ class VoiceInstructionsPlayerOptionsTest :
     override fun getFilledUpBuilder(): VoiceInstructionsPlayerOptions.Builder =
         VoiceInstructionsPlayerOptions.Builder()
             .focusGain(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
-            .playerAttributes(PlayerAttributes.PreOreoAttributes(AudioManager.STREAM_ALARM))
+            .streamType(AudioManager.STREAM_RING)
+            .usage(AudioAttributes.USAGE_MEDIA)
+            .contentType(AudioAttributes.CONTENT_TYPE_MOVIE)
+            .useLegacyApi(true)
 
     @Test
     override fun trigger() {

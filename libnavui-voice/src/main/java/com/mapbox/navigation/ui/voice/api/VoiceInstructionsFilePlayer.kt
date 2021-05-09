@@ -6,7 +6,6 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
-import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import java.io.File
 import java.io.FileInputStream
@@ -20,13 +19,13 @@ import java.util.Locale
  * @property context Context
  * @property accessToken String
  * @property language [Locale] language (ISO 639)
- * @property options [VoiceInstructionsPlayerOptions]
+ * @property playerAttributes [VoiceInstructionsPlayerAttributes]
  */
 internal class VoiceInstructionsFilePlayer(
     private val context: Context,
     private val accessToken: String,
     private val language: String,
-    private val options: VoiceInstructionsPlayerOptions,
+    private val playerAttributes: VoiceInstructionsPlayerAttributes,
 ) : VoiceInstructionsPlayer {
 
     private var mediaPlayer: MediaPlayer? = null
@@ -95,7 +94,7 @@ internal class VoiceInstructionsFilePlayer(
             FileInputStream(instruction).use { fis ->
                 mediaPlayer = MediaPlayer().apply {
                     setDataSource(fis.fd)
-                    options.playerAttributes.applyOn(this)
+                    playerAttributes.applyOn(this)
                     prepareAsync()
                 }
                 setVolume(volumeLevel)
