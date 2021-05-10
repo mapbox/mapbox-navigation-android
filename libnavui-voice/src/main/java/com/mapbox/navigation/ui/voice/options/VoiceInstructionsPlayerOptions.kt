@@ -44,7 +44,7 @@ class VoiceInstructionsPlayerOptions private constructor(
      * Specifies attributes as inferred from the legacy stream types.
      * Defaults to False
      * Warning: When this value is true any other attributes such as
-     * usage, content type, flags or haptic control will ignore.
+     * usage, content type, flags or haptic control will be ignored.
      */
     val useLegacyApi: Boolean,
 ) {
