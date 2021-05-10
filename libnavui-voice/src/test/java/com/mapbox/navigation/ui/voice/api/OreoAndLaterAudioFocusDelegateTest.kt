@@ -70,8 +70,8 @@ class OreoAndLaterAudioFocusDelegateTest {
             mockedPlayerOptions.contentType
         } returns AudioAttributes.CONTENT_TYPE_MUSIC
 
-        val playerAttributes = VoiceInstructionsPlayerAttributesProvider.
-            retrievePlayerAttributes(mockedPlayerOptions)
+        val playerAttributes =
+            VoiceInstructionsPlayerAttributesProvider.retrievePlayerAttributes(mockedPlayerOptions)
 
         val oreoAndLaterAudioFocusDelegate = OreoAndLaterAudioFocusDelegate(
             mockedAudioManager,

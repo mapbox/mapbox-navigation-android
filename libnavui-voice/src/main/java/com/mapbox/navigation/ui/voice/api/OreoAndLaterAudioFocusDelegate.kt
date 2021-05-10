@@ -28,7 +28,9 @@ internal class OreoAndLaterAudioFocusDelegate(
         }
     }
 
-    private fun buildAudioFocusRequest(playerAttributes: VoiceInstructionsPlayerAttributes) = AudioFocusRequest
+    private fun buildAudioFocusRequest(
+        playerAttributes: VoiceInstructionsPlayerAttributes
+    ) = AudioFocusRequest
         .Builder(playerAttributes.options.focusGain)
         .apply { playerAttributes.applyOn(this) }
         .build()
