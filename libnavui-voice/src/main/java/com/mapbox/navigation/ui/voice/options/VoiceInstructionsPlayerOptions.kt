@@ -91,7 +91,7 @@ class VoiceInstructionsPlayerOptions private constructor(
     }
 
     /**
-     * Regenerate whenever a change is made
+     * Returns a string representation of the object.
      */
     override fun toString(): String {
         return "VoiceInstructionsPlayerOptions(focusGain=$focusGain, " +
