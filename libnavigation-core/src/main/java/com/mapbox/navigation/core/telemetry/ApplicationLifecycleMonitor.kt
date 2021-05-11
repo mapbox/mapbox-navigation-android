@@ -29,8 +29,8 @@ internal class ApplicationLifecycleMonitor(
         initCurrentOrientation(application)
     }
 
-    override fun onActivityStarted(activity: Activity?) {
-        activity?.let {
+    override fun onActivityStarted(activity: Activity) {
+        activity.let {
             val newOrientation = it.resources.configuration.orientation
             // If a new orientation is found, set it to the current
             if (!currentOrientation.compareAndSet(newOrientation, newOrientation)) {
@@ -50,16 +50,16 @@ internal class ApplicationLifecycleMonitor(
         }
     }
 
-    override fun onActivityResumed(activity: Activity?) {
+    override fun onActivityResumed(activity: Activity) {
         resumes.add(System.currentTimeMillis())
     }
 
-    override fun onActivityPaused(activity: Activity?) {
+    override fun onActivityPaused(activity: Activity) {
         pauses.add(System.currentTimeMillis())
     }
 
-    override fun onActivityDestroyed(activity: Activity?) {
-        activity?.let {
+    override fun onActivityDestroyed(activity: Activity) {
+        activity.let {
             if (it.isFinishing) {
                 it.application.unregisterActivityLifecycleCallbacks(this)
             }
@@ -68,13 +68,13 @@ internal class ApplicationLifecycleMonitor(
 
     //region Unused Lifecycle Methods
 
-    override fun onActivityCreated(activity: Activity?, bundle: Bundle?) {
+    override fun onActivityCreated(activity: Activity, bundle: Bundle?) {
     }
 
-    override fun onActivityStopped(activity: Activity?) {
+    override fun onActivityStopped(activity: Activity) {
     }
 
-    override fun onActivitySaveInstanceState(activity: Activity?, bundle: Bundle?) {
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
     }
 
     //endregion

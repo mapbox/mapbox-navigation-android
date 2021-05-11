@@ -34,12 +34,12 @@ class NetworkStatusService(private val applicationContext: Context) {
 
             val callback: ConnectivityManager.NetworkCallback =
                 object : ConnectivityManager.NetworkCallback() {
-                    override fun onAvailable(network: Network?) {
+                    override fun onAvailable(network: Network) {
                         super.onAvailable(network)
                         networkStatusChannel.offer(NetworkStatus(true))
                     }
 
-                    override fun onLost(network: Network?) {
+                    override fun onLost(network: Network) {
                         super.onLost(network)
                         networkStatusChannel.offer(NetworkStatus(false))
                     }
