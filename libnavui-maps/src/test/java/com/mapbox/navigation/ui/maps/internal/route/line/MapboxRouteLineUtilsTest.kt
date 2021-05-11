@@ -1026,6 +1026,28 @@ class MapboxRouteLineUtilsTest {
         assertEquals(1, result.size)
     }
 
+    // The route used here for testing produced an erroneous edge case. The
+    // getRouteLineTrafficExpressionData method was always producing a distanceFromOrigin value
+    // of 0.0 for the beginning of each route leg. This could cause an error when creating the
+    // traffic expression because the distanceFromOrigin value is used to determine the
+    // percentage of distance traveled. These values need to be in ascending order to create a
+    // valid line gradient expression. This error won't occur in single leg routes and will
+    // only occur in multileg routes when there is a traffic congestion change at the first point in
+    // the leg. This is because duplicate traffic congestion values are dropped. The route
+    // used in the test below happens to have restricted section overlapping at the first point
+    // of a leg. Since a restriction overrides a traffic congestion value, there is
+    // no duplication so no values are dropped which exposes the bug that this test is intended
+    // to guard against.
+    @Test
+    fun getRouteLineTrafficExpressionDataMultiLegRouteWithTrafficChangeAtWaypoint() {
+        val route = loadRoute("long-multi-leg-route-with-restrictions.json")
+
+        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
+
+        assertEquals(276, trafficExpressionData.size)
+        assertEquals(360468.8999999996, trafficExpressionData[194].distanceFromOrigin, 0.0)
+    }
+
     @Test
     fun getRouteLineExpressionDataWithStreetClassOverrideWhenHasRoadRestrictions() {
         val colorResources = RouteLineColorResources.Builder()
@@ -1218,7 +1240,7 @@ class MapboxRouteLineUtilsTest {
 
         assertEquals(19, result.size)
         assertEquals(0.039793906743275334, result[1].offset, 0.0)
-        assertEquals(0.989831291992653, result.last().offset, 0.0)
+        assertEquals(0.9924011283895643, result.last().offset, 0.0)
     }
 
     @Test
