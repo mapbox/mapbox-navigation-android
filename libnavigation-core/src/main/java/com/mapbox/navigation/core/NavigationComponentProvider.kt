@@ -47,13 +47,11 @@ internal object NavigationComponentProvider {
         navigationOptions: NavigationOptions,
         navigator: MapboxNativeNavigator,
         logger: Logger,
-        accessToken: String?
     ): TripSession = MapboxTripSession(
         tripService,
         navigationOptions,
         navigator = navigator,
         logger = logger,
-        accessToken = accessToken,
         eHorizonSubscriptionManager = EHorizonSubscriptionManagerImpl(navigator),
     )
 
