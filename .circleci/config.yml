@@ -12,9 +12,9 @@ parameters:
 #---------- EXECUTORS ----------
 #-------------------------------
 executors:
-  ndk-r21-latest-executor:
+  ndk-r21e-latest-executor:
     docker:
-      - image: mbgl/android-ndk-r21:latest
+      - image: mbgl/android-ndk-r21e:latest
     working_directory: ~/code
     environment:
       FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION: << pipeline.parameters.mapbox_navigation_native_snapshot >>
@@ -414,7 +414,7 @@ commands:
 #--------------------------
 jobs:
   prepare-and-assemble:
-    executor: ndk-r21-latest-executor
+    executor: ndk-r21e-latest-executor
     steps:
       - checkout
       - restore-gradle-cache
@@ -436,7 +436,7 @@ jobs:
       - write-workspace
 
   unit-tests:
-    executor: ndk-r21-latest-executor
+    executor: ndk-r21e-latest-executor
     steps:
       - read-workspace
       - unit-tests-core
@@ -445,7 +445,7 @@ jobs:
 #      - codecov
 
   static-analysis:
-    executor: ndk-r21-latest-executor
+    executor: ndk-r21e-latest-executor
     steps:
       - read-workspace
       - verify-codestyle
@@ -456,13 +456,13 @@ jobs:
       - check-public-documentation
 
   changelog-verification:
-    executor: ndk-r21-latest-executor
+    executor: ndk-r21e-latest-executor
     steps:
       - checkout
       - verify-changelog
 
   ui-robo-tests:
-    executor: ndk-r21-latest-executor
+    executor: ndk-r21e-latest-executor
     environment:
       JVM_OPTS: -Xmx3200m
       BUILDTYPE: Debug
@@ -482,7 +482,7 @@ jobs:
           variant: "release"
 
   internal-instrumentation-tests:
-    executor: ndk-r21-latest-executor
+    executor: ndk-r21e-latest-executor
     environment:
       JVM_OPTS: -Xmx3200m
       BUILDTYPE: Debug
@@ -496,7 +496,7 @@ jobs:
           variant: "debug"
 
   instrumentation-tests:
-    executor: ndk-r21-latest-executor
+    executor: ndk-r21e-latest-executor
     environment:
       JVM_OPTS: -Xmx3200m
       BUILDTYPE: Debug
@@ -508,13 +508,13 @@ jobs:
           variant: "debug"
 
   mobile-metrics-benchmarks:
-    executor: ndk-r21-latest-executor
+    executor: ndk-r21e-latest-executor
     steps:
       - checkout
       - trigger-mobile-metrics
 
   release-snapshot:
-    executor: ndk-r21-latest-executor
+    executor: ndk-r21e-latest-executor
     steps:
       - checkout
       - generate-version-name
@@ -529,7 +529,7 @@ jobs:
 #      - trigger-mobile-metrics
 
   release:
-    executor: ndk-r21-latest-executor
+    executor: ndk-r21e-latest-executor
     steps:
       - checkout
       - generate-version-name
