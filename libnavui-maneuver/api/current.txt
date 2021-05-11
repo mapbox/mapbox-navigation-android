@@ -612,7 +612,10 @@ package com.mapbox.navigation.ui.maneuver.view {
     method public void updateSubManeuverViewVisibility(int visibility);
     method public void updateTurnIconResources(com.mapbox.navigation.ui.maneuver.model.TurnIconResources turnIconResources);
     method public void updateTurnIconStyle(@StyleRes int style);
+    method public void updateUpcomingManeuverStepDistanceTextAppearance(@StyleRes int style);
     method public void updateUpcomingManeuversVisibility(int visibility);
+    method public void updateUpcomingPrimaryManeuverTextAppearance(@StyleRes int style);
+    method public void updateUpcomingSecondaryManeuverTextAppearance(@StyleRes int style);
   }
 
   public final class MapboxPrimaryManeuver extends androidx.appcompat.widget.AppCompatTextView {
@@ -659,6 +662,9 @@ package com.mapbox.navigation.ui.maneuver.view {
     method public int getItemCount();
     method public void onBindViewHolder(com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder holder, int position);
     method public com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType);
+    method public void updateUpcomingManeuverStepDistanceTextAppearance(@StyleRes int style);
+    method public void updateUpcomingPrimaryManeuverTextAppearance(@StyleRes int style);
+    method public void updateUpcomingSecondaryManeuverTextAppearance(@StyleRes int style);
   }
 
   public final class MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {

@@ -141,6 +141,7 @@ class MapboxManeuverView : ConstraintLayout {
 
     /**
      * Allows you to change the text appearance of primary maneuver text.
+     * @see [TextViewCompat.setTextAppearance]
      * @param style Int
      */
     fun updatePrimaryManeuverTextAppearance(@StyleRes style: Int) {
@@ -149,6 +150,7 @@ class MapboxManeuverView : ConstraintLayout {
 
     /**
      * Allows you to change the text appearance of secondary maneuver text.
+     * @see [TextViewCompat.setTextAppearance]
      * @param style Int
      */
     fun updateSecondaryManeuverTextAppearance(@StyleRes style: Int) {
@@ -157,6 +159,7 @@ class MapboxManeuverView : ConstraintLayout {
 
     /**
      * Allows you to change the text appearance of sub maneuver text.
+     * @see [TextViewCompat.setTextAppearance]
      * @param style Int
      */
     fun updateSubManeuverTextAppearance(@StyleRes style: Int) {
@@ -165,10 +168,38 @@ class MapboxManeuverView : ConstraintLayout {
 
     /**
      * Allows you to change the text appearance of step distance text.
+     * @see [TextViewCompat.setTextAppearance]
      * @param style Int
      */
     fun updateStepDistanceTextAppearance(@StyleRes style: Int) {
         TextViewCompat.setTextAppearance(mainLayoutBinding.stepDistance, style)
+    }
+
+    /**
+     * Allows you to change the text appearance of primary maneuver text in upcoming maneuver list.
+     * @see [TextViewCompat.setTextAppearance]
+     * @param style Int
+     */
+    fun updateUpcomingPrimaryManeuverTextAppearance(@StyleRes style: Int) {
+        upcomingManeuverAdapter.updateUpcomingPrimaryManeuverTextAppearance(style)
+    }
+
+    /**
+     * Allows you to change the text appearance of secondary maneuver text in upcoming maneuver list.
+     * @see [TextViewCompat.setTextAppearance]
+     * @param style Int
+     */
+    fun updateUpcomingSecondaryManeuverTextAppearance(@StyleRes style: Int) {
+        upcomingManeuverAdapter.updateUpcomingSecondaryManeuverTextAppearance(style)
+    }
+
+    /**
+     * Allows you to change the text appearance of step distance text in upcoming maneuver list.
+     * @see [TextViewCompat.setTextAppearance]
+     * @param style Int
+     */
+    fun updateUpcomingManeuverStepDistanceTextAppearance(@StyleRes style: Int) {
+        upcomingManeuverAdapter.updateUpcomingManeuverStepDistanceTextAppearance(style)
     }
 
     /**
