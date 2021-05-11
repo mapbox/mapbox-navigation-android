@@ -5,7 +5,9 @@ import android.view.LayoutInflater
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.annotation.StyleRes
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
@@ -18,6 +20,7 @@ import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.StepDistance
 import com.mapbox.navigation.ui.maneuver.model.TotalManeuverDistance
 import com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder
+import com.mapbox.navigation.utils.internal.ifNonNull
 
 /**
  * Default recycler adapter to render upcoming maneuvers for the [RouteLeg].
@@ -30,6 +33,9 @@ class MapboxUpcomingManeuverAdapter(
     private val context: Context
 ) : RecyclerView.Adapter<MapboxUpcomingManeuverViewHolder>() {
 
+    @StyleRes private var stepDistanceAppearance: Int? = null
+    @StyleRes private var primaryManeuverAppearance: Int? = null
+    @StyleRes private var secondaryManeuverAppearance: Int? = null
     private val inflater = LayoutInflater.from(context)
     private val upcomingManeuverList = mutableListOf<Maneuver>()
 
@@ -67,6 +73,33 @@ class MapboxUpcomingManeuverAdapter(
     }
 
     /**
+     * Allows you to change the text appearance of step distance text in upcoming maneuver list.
+     * @see [TextViewCompat.setTextAppearance]
+     * @param style Int
+     */
+    fun updateUpcomingManeuverStepDistanceTextAppearance(@StyleRes style: Int) {
+        stepDistanceAppearance = style
+    }
+
+    /**
+     * Allows you to change the text appearance of primary maneuver text in upcoming maneuver list.
+     * @see [TextViewCompat.setTextAppearance]
+     * @param style Int
+     */
+    fun updateUpcomingPrimaryManeuverTextAppearance(@StyleRes style: Int) {
+        primaryManeuverAppearance = style
+    }
+
+    /**
+     * Allows you to change the text appearance of secondary maneuver text in upcoming maneuver list.
+     * @see [TextViewCompat.setTextAppearance]
+     * @param style Int
+     */
+    fun updateUpcomingSecondaryManeuverTextAppearance(@StyleRes style: Int) {
+        secondaryManeuverAppearance = style
+    }
+
+    /**
      * Invoke to add all upcoming maneuvers to the recycler view.
      * @param upcomingManeuvers List<Maneuver>
      */
@@ -98,6 +131,27 @@ class MapboxUpcomingManeuverAdapter(
             drawSecondaryManeuver(secondary)
             drawPrimaryManeuver(primary)
             drawTotalStepDistance(totalStepDistance)
+            updateStepDistanceTextAppearance()
+            updateUpcomingPrimaryManeuverTextAppearance()
+            updateUpcomingSecondaryManeuverTextAppearance()
+        }
+
+        private fun updateUpcomingPrimaryManeuverTextAppearance() {
+            ifNonNull(primaryManeuverAppearance) { appearance ->
+                TextViewCompat.setTextAppearance(viewBinding.primaryManeuverText, appearance)
+            }
+        }
+
+        private fun updateUpcomingSecondaryManeuverTextAppearance() {
+            ifNonNull(secondaryManeuverAppearance) { appearance ->
+                TextViewCompat.setTextAppearance(viewBinding.secondaryManeuverText, appearance)
+            }
+        }
+
+        private fun updateStepDistanceTextAppearance() {
+            ifNonNull(stepDistanceAppearance) { appearance ->
+                TextViewCompat.setTextAppearance(viewBinding.stepDistance, appearance)
+            }
         }
 
         private fun drawPrimaryManeuver(primary: PrimaryManeuver) {
