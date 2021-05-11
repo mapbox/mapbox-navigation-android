@@ -7,7 +7,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
-import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
@@ -154,14 +153,13 @@ class MapboxTripSessionTest {
         every { locationEngineResult.locations } returns listOf(location)
     }
 
-    private fun buildTripSession(accessToken: String? = "pk.1234"): TripSession {
+    private fun buildTripSession(): TripSession {
         return MapboxTripSession(
             tripService,
             navigationOptions,
             navigator,
             ThreadController,
             logger,
-            accessToken,
             eHorizonSubscriptionManager,
         )
     }
@@ -1027,14 +1025,4 @@ class MapboxTripSessionTest {
         locationCallbackSlot.captured.onSuccess(locationEngineResult)
         parentJob.cancelAndJoin()
     }
-
-    private fun getBannerComponent() =
-        BannerComponents.builder()
-            .text("some text")
-            .type("guidance-view")
-            .imageUrl(
-                "https://api.mapbox.com/guidance-views/v1/1580515200/" +
-                    "jct/CB211101?arrow_ids=CB21110A"
-            )
-            .build()
 }

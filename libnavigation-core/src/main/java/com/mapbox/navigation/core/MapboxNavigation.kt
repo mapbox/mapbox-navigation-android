@@ -250,7 +250,6 @@ class MapboxNavigation(
             navigationOptions = navigationOptions,
             navigator = navigator,
             logger = logger,
-            accessToken = accessToken
         )
         tripSession.registerStateObserver(navigationSession)
 

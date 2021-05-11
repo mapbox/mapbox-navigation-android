@@ -58,7 +58,6 @@ internal class MapboxTripSession(
     private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl,
     private val threadController: ThreadController = ThreadController,
     private val logger: Logger,
-    private val accessToken: String?,
     private val eHorizonSubscriptionManager: EHorizonSubscriptionManager,
 ) : TripSession {
 

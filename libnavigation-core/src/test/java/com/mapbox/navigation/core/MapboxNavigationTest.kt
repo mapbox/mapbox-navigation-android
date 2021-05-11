@@ -7,12 +7,10 @@ import android.location.Location
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.telemetry.MapboxTelemetryConstants.MAPBOX_SHARED_PREFERENCES
 import com.mapbox.annotation.module.MapboxModuleType
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.common.module.provider.MapboxModuleProvider
-import com.mapbox.core.constants.Constants
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
@@ -83,10 +81,7 @@ class MapboxNavigationTest {
     private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
     private val distanceFormatterOptions: DistanceFormatterOptions = mockk(relaxed = true)
     private val routingTilesOptions: RoutingTilesOptions = mockk(relaxed = true)
-    private val fasterRouteRequestCallback: RoutesRequestCallback = mockk(relaxed = true)
     private val routeRefreshController: RouteRefreshController = mockk(relaxUnitFun = true)
-    private val routeOptions: RouteOptions = provideDefaultRouteOptionsBuilder().build()
-    private val routes: List<DirectionsRoute> = listOf(mockk())
     private val routeProgress: RouteProgress = mockk(relaxed = true)
     private val navigationSession: NavigationSession = mockk(relaxUnitFun = true)
     private val logger: Logger = mockk(relaxUnitFun = true)
@@ -781,7 +776,6 @@ class MapboxNavigationTest {
                 navigationOptions = navigationOptions,
                 navigator = navigator,
                 logger = logger,
-                accessToken = "pk.1234"
             )
         } returns tripSession
         every { tripSession.getEnhancedLocation() } returns location
@@ -802,16 +796,6 @@ class MapboxNavigationTest {
             navigationSession
         }
     }
-
-    private fun provideDefaultRouteOptionsBuilder() =
-        RouteOptions.builder()
-            .accessToken(accessToken)
-            .baseUrl(Constants.BASE_API_URL)
-            .user(Constants.MAPBOX_USER)
-            .profile(DirectionsCriteria.PROFILE_DRIVING)
-            .coordinates(emptyList())
-            .geometries("")
-            .requestUuid("")
 
     private fun provideNavigationOptions() =
         NavigationOptions
