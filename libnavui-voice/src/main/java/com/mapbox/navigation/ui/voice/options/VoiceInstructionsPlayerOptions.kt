@@ -27,16 +27,22 @@ class VoiceInstructionsPlayerOptions private constructor(
     val streamType: Int,
 
     /**
-     * Defines why the source is playing and controls routing, focus, and volume decisions.
+     * Defines the context in which the stream is used, providing information about
+     * why the sound is playing and what the sound is used for.
+     * Usage information is more expressive than a stream type and allows platforms
+     * or routing policies to refine volume or routing decisions
      * Defaults to [AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE]
-     * See [AudioAttributes] for a list of usage types.
+     * @see <a href="https://source.android.com/devices/audio/attributes#using">Using attributes</a>
      */
     val usage: Int,
 
     /**
-     * Defines what source is playing (music, movie, speech, sonification, unknown).
+     * Defines what the sound is and expresses the general category of the content such as movie,
+     * speech, or beep/ringtone. The audio framework uses content type information to selectively
+     * configure audio post-processing blocks. While supplying the content type is optional,
+     * you should include type information whenever the content type is known
      * Defaults to [AudioAttributes.CONTENT_TYPE_MUSIC]
-     * See [AudioAttributes] for a list of content types.
+     * @see <a href="https://source.android.com/devices/audio/attributes#content-type">Content type</a>
      */
     val contentType: Int,
 
@@ -45,6 +51,7 @@ class VoiceInstructionsPlayerOptions private constructor(
      * Defaults to False
      * Warning: When this value is true any other attributes such as
      * usage, content type, flags or haptic control will be ignored.
+     * @see <a href="https://developer.android.com/reference/android/media/AudioAttributes.Builder#setLegacyStreamType(int)">Legacy stream type documentation</a>
      */
     val useLegacyApi: Boolean,
 ) {
