@@ -1,9 +1,10 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
+import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.supportsRouteRefresh
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
@@ -34,18 +35,15 @@ class RouteRefreshControllerTest {
     private val logger: Logger = mockk {
         every { w(any(), any()) } just Runs
     }
-    private val routeOptions: RouteOptions = mockk {
-        every { profile() } returns DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
-        every { overview() } returns DirectionsCriteria.OVERVIEW_FULL
-        every { annotationsList() } returns listOf(DirectionsCriteria.ANNOTATION_MAXSPEED)
-        every { requestUuid() } returns "sadsad1212c"
-    }
+    private val routeOptions: RouteOptions = provideRouteOptions("test_uuid")
     private val validRoute: DirectionsRoute = mockk {
         every { routeOptions() } returns routeOptions
     }
 
+    private val routeRefreshOptions = RouteRefreshOptions.Builder().build()
+
     private val routeRefreshController = RouteRefreshController(
-        RouteRefreshOptions.Builder().build(),
+        routeRefreshOptions,
         directionsSession,
         tripSession,
         logger
@@ -55,7 +53,7 @@ class RouteRefreshControllerTest {
 
     @Before
     fun setup() {
-        mockkStatic("com.mapbox.navigation.base.extensions.RouteOptionsEx")
+        mockkStatic("com.mapbox.navigation.base.extensions.RouteOptionsExtensions")
         every { tripSession.getRouteProgress() } returns mockk {
             every { currentLegProgress } returns mockk {
                 every { legIndex } returns 0
@@ -150,8 +148,49 @@ class RouteRefreshControllerTest {
         verify(exactly = 1) { directionsSession.cancelRouteRefreshRequest(requestId) }
     }
 
+    @Test
+    fun `do not send a request when route options is null`() {
+        every { validRoute.routeOptions() } returns null
+
+        routeRefreshController.start()
+        coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis * 2)
+        routeRefreshController.stop()
+
+        verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
+    }
+
+    @Test
+    fun `do not send a request when uuid is empty`() {
+        every { validRoute.routeOptions() } returns provideRouteOptions("")
+
+        routeRefreshController.start()
+        coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis * 2)
+        routeRefreshController.stop()
+
+        verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
+    }
+
+    @Test
+    fun `do not send a request when uuid is offline`() {
+        every { validRoute.routeOptions() } returns provideRouteOptions("offline")
+
+        routeRefreshController.start()
+        coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis * 2)
+        routeRefreshController.stop()
+
+        verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
+    }
+
+    private fun provideRouteOptions(uuid: String): RouteOptions =
+        RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .coordinates(listOf(Point.fromLngLat(0.0, 0.0), Point.fromLngLat(1.1, 1.1)))
+            .accessToken("pk.**")
+            .requestUuid(uuid)
+            .build()
+
     @After
     fun tearDown() {
-        unmockkStatic("com.mapbox.navigation.base.extensions.RouteOptionsEx")
+        unmockkStatic("com.mapbox.navigation.base.extensions.RouteOptionsExtensions")
     }
 }

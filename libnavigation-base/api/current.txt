@@ -21,6 +21,8 @@ package com.mapbox.navigation.base.extensions {
   public final class RouteOptionsExtensions {
     method public static com.mapbox.api.directions.v5.models.RouteOptions.Builder applyDefaultNavigationOptions(com.mapbox.api.directions.v5.models.RouteOptions.Builder);
     method public static com.mapbox.api.directions.v5.models.RouteOptions.Builder applyLanguageAndVoiceUnitOptions(com.mapbox.api.directions.v5.models.RouteOptions.Builder, android.content.Context context);
+    method public static com.mapbox.api.directions.v5.models.RouteOptions.Builder coordinates(com.mapbox.api.directions.v5.models.RouteOptions.Builder, com.mapbox.geojson.Point origin, java.util.List<com.mapbox.geojson.Point>? waypoints = null, com.mapbox.geojson.Point destination);
+    method public static com.mapbox.api.directions.v5.models.RouteOptions.Builder coordinates(com.mapbox.api.directions.v5.models.RouteOptions.Builder, com.mapbox.geojson.Point origin, com.mapbox.geojson.Point destination);
     method public static boolean supportsRouteRefresh(com.mapbox.api.directions.v5.models.RouteOptions?);
   }
 

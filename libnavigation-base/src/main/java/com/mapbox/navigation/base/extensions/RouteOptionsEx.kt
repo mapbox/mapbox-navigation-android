@@ -6,6 +6,7 @@ import android.content.Context
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.core.constants.Constants
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import java.util.Locale
@@ -80,3 +81,29 @@ fun RouteOptions.Builder.applyLanguageAndVoiceUnitOptions(context: Context): Rou
         language(context.inferDeviceLocale().language)
         voiceUnits(context.inferDeviceLocale().getUnitTypeForLocale().value)
     }
+
+/**
+ * Takes a list of [Point]s and correctly adds them as waypoints in the correct order.
+ *
+ * @receiver RouteOptions.Builder
+ * @param origin Point
+ * @param waypoints List<Point?>?
+ * @param destination Point
+ * @return RouteOptions.Builder
+ */
+@JvmOverloads
+fun RouteOptions.Builder.coordinates(
+    origin: Point,
+    waypoints: List<Point>? = null,
+    destination: Point
+): RouteOptions.Builder {
+    val coordinates = mutableListOf<Point>().apply {
+        add(origin)
+        waypoints?.forEach { add(it) }
+        add(destination)
+    }
+
+    coordinates(coordinates)
+
+    return this
+}

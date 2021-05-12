@@ -1,6 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import androidx.test.espresso.Espresso
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -77,7 +78,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRequestHandler(
-                profile = "driving",
+                profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
                 jsonResponse = readRawFileText(activity, R.raw.reroute_response_dc_very_short),
                 expectedCoordinates = listOf(
                     Point.fromLngLat(
