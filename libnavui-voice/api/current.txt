@@ -24,6 +24,14 @@ package com.mapbox.navigation.ui.voice.api {
     method public void volume(com.mapbox.navigation.ui.voice.model.SpeechVolume state);
   }
 
+  public abstract sealed class VoiceInstructionsPlayerAttributes {
+    method protected abstract kotlin.jvm.functions.Function1<android.media.AudioFocusRequest.Builder,kotlin.Unit> configureAudioFocusRequestBuilder();
+    method protected abstract kotlin.jvm.functions.Function1<android.media.MediaPlayer,kotlin.Unit> configureMediaPlayer();
+    method protected abstract kotlin.jvm.functions.Function2<android.speech.tts.TextToSpeech,android.os.Bundle,kotlin.Unit> configureTextToSpeech();
+    method public abstract com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions getOptions();
+    property public abstract com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions options;
+  }
+
 }
 
 package com.mapbox.navigation.ui.voice.model {
@@ -86,28 +94,28 @@ package com.mapbox.navigation.ui.voice.options {
     method public com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions build();
   }
 
-  public abstract class PlayerAttributes {
-    ctor public PlayerAttributes();
-    method protected abstract kotlin.jvm.functions.Function1<android.media.AudioFocusRequest.Builder,kotlin.Unit> configureAudioFocusRequestBuilder();
-    method protected abstract kotlin.jvm.functions.Function1<android.media.MediaPlayer,kotlin.Unit> configureMediaPlayer();
-    method protected abstract kotlin.jvm.functions.Function2<android.speech.tts.TextToSpeech,android.os.Bundle,kotlin.Unit> configureTextToSpeech();
-    method public abstract int getStreamType();
-    property public abstract int streamType;
-  }
-
   public final class VoiceInstructionsPlayerOptions {
+    method public int getContentType();
     method public int getFocusGain();
-    method public com.mapbox.navigation.ui.voice.options.PlayerAttributes getPlayerAttributes();
+    method public int getStreamType();
+    method public int getUsage();
+    method public boolean getUseLegacyApi();
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder toBuilder();
+    property public final int contentType;
     property public final int focusGain;
-    property public final com.mapbox.navigation.ui.voice.options.PlayerAttributes playerAttributes;
+    property public final int streamType;
+    property public final int usage;
+    property public final boolean useLegacyApi;
   }
 
   public static final class VoiceInstructionsPlayerOptions.Builder {
     ctor public VoiceInstructionsPlayerOptions.Builder();
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions build();
+    method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder contentType(int contentType);
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder focusGain(int focusGain);
-    method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder playerAttributes(com.mapbox.navigation.ui.voice.options.PlayerAttributes playerAttributes);
+    method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder streamType(int streamType);
+    method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder usage(int usage);
+    method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder useLegacyApi(boolean useLegacyApi);
   }
 
 }

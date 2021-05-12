@@ -1,18 +1,17 @@
 package com.mapbox.navigation.ui.voice.api
 
 import android.media.AudioManager
-import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 
 internal class PreOreoAudioFocusDelegate(
     private val audioManager: AudioManager,
-    private val options: VoiceInstructionsPlayerOptions
+    private val playerAttributes: VoiceInstructionsPlayerAttributes,
 ) : AudioFocusDelegate {
 
     override fun requestFocus(): Boolean {
         val result = audioManager.requestAudioFocus(
             null,
-            options.playerAttributes.streamType,
-            options.focusGain
+            playerAttributes.options.streamType,
+            playerAttributes.options.focusGain
         )
         return when (result) {
             AudioManager.AUDIOFOCUS_REQUEST_GRANTED,
