@@ -2,11 +2,11 @@ package com.mapbox.navigation.core.routeoptions
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import kotlin.math.min
 
 private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
@@ -15,9 +15,7 @@ private const val TAG = "MbxRouteOptionsProvider"
 /**
  * Default implementation of [RouteOptionsUpdater].
  */
-class MapboxRouteOptionsUpdater(
-    private val logger: Logger? = null
-) : RouteOptionsUpdater {
+class MapboxRouteOptionsUpdater : RouteOptionsUpdater {
 
     /**
      * Provides a new [RouteOptions] instance based on the original request options and the current route progress.
@@ -33,7 +31,7 @@ class MapboxRouteOptionsUpdater(
         if (routeOptions == null || routeProgress == null || location == null) {
             val msg = "Cannot combine RouteOptions, invalid inputs. routeOptions, " +
                 "routeProgress, and location mustn't be null"
-            logger?.e(
+            LoggerProvider.logger.e(
                 Tag(TAG),
                 Message(msg)
             )
@@ -48,10 +46,10 @@ class MapboxRouteOptionsUpdater(
             val msg = """
                 Reroute failed. There are no remaining waypoints on the route.
                 routeOptions=$routeOptions
-                routeProgress=$routeProgress
                 location=$location
+                routeProgress=$routeProgress
             """.trimIndent()
-            logger?.e(
+            LoggerProvider.logger.e(
                 Tag(TAG),
                 Message(msg)
             )
@@ -118,14 +116,20 @@ class MapboxRouteOptionsUpdater(
                         )
                     )
             }
-        } catch (e: IndexOutOfBoundsException) {
-            throw RuntimeException(
-                "${e.localizedMessage}\n" +
-                    "routeOptions=[$routeOptions]\n" +
-                    "routeProgress=[$routeProgress]\n" +
-                    "location=[$location]",
-                e
+        } catch (e: Exception) {
+            LoggerProvider.logger.e(
+                Tag(TAG),
+                Message("routeOptions=[$routeOptions]")
             )
+            LoggerProvider.logger.e(
+                Tag(TAG),
+                Message("location=[$location]")
+            )
+            LoggerProvider.logger.e(
+                Tag(TAG),
+                Message("routeProgress=[$routeProgress]")
+            )
+            throw e
         }
 
         return RouteOptionsUpdater.RouteOptionsResult.Success(optionsBuilder.build())

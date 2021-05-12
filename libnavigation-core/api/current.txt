@@ -416,7 +416,7 @@ package com.mapbox.navigation.core.reroute {
 package com.mapbox.navigation.core.routeoptions {
 
   public final class MapboxRouteOptionsUpdater implements com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater {
-    ctor public MapboxRouteOptionsUpdater(com.mapbox.base.common.logger.Logger? logger = null);
+    ctor public MapboxRouteOptionsUpdater();
     method public com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult update(com.mapbox.api.directions.v5.models.RouteOptions? routeOptions, com.mapbox.navigation.base.trip.model.RouteProgress? routeProgress, android.location.Location? location);
   }
 

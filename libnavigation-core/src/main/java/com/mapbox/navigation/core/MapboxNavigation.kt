@@ -275,7 +275,7 @@ class MapboxNavigation(
             )
         }
 
-        val routeOptionsProvider = MapboxRouteOptionsUpdater(logger)
+        val routeOptionsProvider = MapboxRouteOptionsUpdater()
 
         fasterRouteController = FasterRouteController(
             directionsSession,
