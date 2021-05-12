@@ -4,14 +4,12 @@ import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import io.mockk.MockKAnnotations
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -64,9 +62,6 @@ class MapboxRouteOptionsUpdaterParameterizedTest(
         )
     }
 
-    @MockK
-    private lateinit var logger: Logger
-
     private val accessToken = "pk.1234pplffd"
 
     private lateinit var routeRefreshAdapter: MapboxRouteOptionsUpdater
@@ -77,7 +72,7 @@ class MapboxRouteOptionsUpdaterParameterizedTest(
         MockKAnnotations.init(this, relaxUnitFun = true, relaxed = true)
         mockLocation()
 
-        routeRefreshAdapter = MapboxRouteOptionsUpdater(logger)
+        routeRefreshAdapter = MapboxRouteOptionsUpdater()
     }
 
     @Test

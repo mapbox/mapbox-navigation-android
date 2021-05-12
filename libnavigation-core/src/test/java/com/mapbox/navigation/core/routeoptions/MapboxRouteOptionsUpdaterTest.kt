@@ -4,13 +4,11 @@ import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import io.mockk.MockKAnnotations
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -20,9 +18,6 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 class MapboxRouteOptionsUpdaterTest {
-
-    @MockK
-    private lateinit var logger: Logger
 
     private lateinit var routeRefreshAdapter: MapboxRouteOptionsUpdater
     private lateinit var location: Location
@@ -94,7 +89,7 @@ class MapboxRouteOptionsUpdaterTest {
         MockKAnnotations.init(this, relaxUnitFun = true, relaxed = true)
         mockLocation()
 
-        routeRefreshAdapter = MapboxRouteOptionsUpdater(logger)
+        routeRefreshAdapter = MapboxRouteOptionsUpdater()
     }
 
     @Test
@@ -177,8 +172,7 @@ class MapboxRouteOptionsUpdaterTest {
 
             assertTrue(
                 message,
-                routeRefreshAdapter
-                    .update(routeOptions, routeProgress, location)
+                routeRefreshAdapter.update(routeOptions, routeProgress, location)
                 is RouteOptionsUpdater.RouteOptionsResult.Error
             )
         }
@@ -197,8 +191,6 @@ class MapboxRouteOptionsUpdaterTest {
         val remainingWaypointsParameter: Int,
         val expectedBearings: List<List<Double>?>
     ) {
-        @MockK
-        private lateinit var logger: Logger
 
         private lateinit var routeRefreshAdapter: MapboxRouteOptionsUpdater
         private lateinit var location: Location
@@ -277,7 +269,7 @@ class MapboxRouteOptionsUpdaterTest {
             MockKAnnotations.init(this, relaxUnitFun = true, relaxed = true)
             mockLocation()
 
-            routeRefreshAdapter = MapboxRouteOptionsUpdater(logger)
+            routeRefreshAdapter = MapboxRouteOptionsUpdater()
         }
 
         @Test
