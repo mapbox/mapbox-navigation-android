@@ -2,6 +2,61 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.10 - May 12, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Features
+* Added `RoadObjectMatcher`. ([#4364](https://github.com/mapbox/mapbox-navigation-android/pull/4364))
+* Added ability to change the text appearance for primary, secondary and total step distance of upcoming maneuver instructions. ([#4378](https://github.com/mapbox/mapbox-navigation-android/pull/4378))
+* Added params to `VoiceInstructionsPlayerOptions`. ([#4373](https://github.com/mapbox/mapbox-navigation-android/pull/4373))
+* Added a parser that parses svg to bitmap for signboards. ([#4335](https://github.com/mapbox/mapbox-navigation-android/pull/4335))
+* Introduced `MapboxExternalFileResolver` that helps you to resolve fonts for signboards. You can now inject your own resolver as well if you don't wish to use the default. ([#4335](https://github.com/mapbox/mapbox-navigation-android/pull/4335))
+
+#### Bug fixes and improvements
+- Refactored `TilesetDescriptorFactory`. ([#4364](https://github.com/mapbox/mapbox-navigation-android/pull/4364))
+- Updated `EHorizon` API and refactored `RoadObject`:
+  - Moved all `EHorizon` and `RoadObject` **`data classes`** to `base` module. ([#4364](https://github.com/mapbox/mapbox-navigation-android/pull/4364))
+  - Made all the constructors `internal`. ([#4364](https://github.com/mapbox/mapbox-navigation-android/pull/4364))
+  - Exposed `RoadObjectInstaceFactory` and `EHorizonInstanceFactory` that lives under an `internal` package in the `base` module, which is only there for the `core` module to access it. ([#4364](https://github.com/mapbox/mapbox-navigation-android/pull/4364))
+* :warning: Requesting a route via `MapboxNavigation#requestRoutes` does not automatically append any defaults. Defaults are now available under these extensions:
+  - `RouteOptions.Builder.applyDefaultNavigationOptions()` that applies the options that are required for the route request to execute or otherwise recommended for the Navigation SDK and all of its features to provide the best car navigation experience.
+  - `RouteOptions.Builder.applyLanguageAndVoiceUnitOptions(context: Context)` that applies the options that adapt the returned instructions' language and voice unit based on the device's `Locale`.
+The extensions are very much recommended to be called when building the `RouteOptions` object and then tweaked for a specific use case. ([#4320](https://github.com/mapbox/mapbox-navigation-android/pull/4320))
+* Changed `VoiceInstructionsPlayerAttributes` to `sealed class`. ([#4373](https://github.com/mapbox/mapbox-navigation-android/pull/4373))
+* Bug fix for calculating mutli-leg routes with traffic congestion changes or restrictions at the first point of a route leg. ([#4383](https://github.com/mapbox/mapbox-navigation-android/pull/4383))
+* `MapboxSignboardAPI` now returns `Bitmap` instead of `ByteArray`. ([#4335](https://github.com/mapbox/mapbox-navigation-android/pull/4335))
+* `MapboxJunctionAPI` now returns `Bitmap` instead of `ByteArray`. ([#4335](https://github.com/mapbox/mapbox-navigation-android/pull/4335))
+
+## Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+
+- Mapbox Maps SDK `v10.0.0-beta.19` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.19))
+- Mapbox Navigation Native `v49.0.1`
+- Mapbox Core Common `v11.0.2`
+- Mapbox Java `5.9.0-alpha.5` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v5.9.0-alpha.5))
+- Mapbox Android Core `v3.1.1`
+- Mapbox Android Telemetry `v6.2.2`
+
+## Mapbox Navigation SDK 2.0.0-beta.9.1 - May 12, 2021
+
+ For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+ ### Changelog
+ #### Bug fixes and improvements
+ * Bug fix for calculating mutli-leg routes with traffic congestion changes or restrictions at the first point of a route leg. [#4383](https://github.com/mapbox/mapbox-navigation-android/pull/4383)
+
+ ## Mapbox dependencies
+ This release depends, and has been tested with, the following Mapbox dependencies:
+
+ - Mapbox Maps SDK `v10.0.0-beta.19` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.19))
+ - Mapbox Navigation Native `v48.0.5`
+ - Mapbox Core Common `v11.0.2`
+ - Mapbox Java `5.9.0-alpha.5` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v5.9.0-alpha.5))
+ - Mapbox Android Core `v3.1.1`
+ - Mapbox Android Telemetry `v6.2.2`
+
 ## Mapbox Navigation SDK 2.0.0-beta.9 - May 7, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
