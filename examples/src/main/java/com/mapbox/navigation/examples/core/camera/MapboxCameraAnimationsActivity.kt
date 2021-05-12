@@ -13,7 +13,6 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.FeatureCollection
@@ -37,6 +36,8 @@ import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -53,7 +54,6 @@ import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.camera.AnimationAdapter.OnAnimationButtonClicked
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityCameraBinding
 import com.mapbox.navigation.examples.util.Utils
-import com.mapbox.navigation.examples.util.applyAllOptions
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
@@ -558,14 +558,10 @@ class MapboxCameraAnimationsActivity :
     private fun findRoute(origin: Point, destination: Point) {
         Utils.vibrate(this)
         val routeOptions: RouteOptions = RouteOptions.builder()
-            .applyAllOptions(this)
-            .annotationsList(
-                listOf(
-                    DirectionsCriteria.ANNOTATION_SPEED,
-                    DirectionsCriteria.ANNOTATION_DISTANCE,
-                    DirectionsCriteria.ANNOTATION_CONGESTION
-                )
-            )
+            .applyDefaultNavigationOptions()
+            .applyLanguageAndVoiceUnitOptions(this)
+            .accessToken(getMapboxAccessTokenFromResources())
+            .coordinates(listOf(origin, destination))
             .build()
 
         mapboxNavigation.requestRoutes(

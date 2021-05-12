@@ -25,9 +25,8 @@ import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.navigation.base.extensions.applyDefaultOptions
-import com.mapbox.navigation.base.extensions.applyLocationAndVoiceUnit
-import com.mapbox.navigation.base.extensions.applyRecommendedOptions
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -209,9 +208,8 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private fun findRoute(origin: Point?, destination: Point?) {
         val routeOptions = RouteOptions.builder()
-            .applyDefaultOptions()
-            .applyLocationAndVoiceUnit(this)
-            .applyRecommendedOptions()
+            .applyDefaultNavigationOptions()
+            .applyLanguageAndVoiceUnitOptions(this)
             .accessToken(getMapboxAccessToken(this))
             .coordinates(listOf(origin, destination))
             .alternatives(true)

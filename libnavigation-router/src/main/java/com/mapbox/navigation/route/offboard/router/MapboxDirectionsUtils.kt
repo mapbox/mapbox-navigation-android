@@ -58,7 +58,7 @@ internal fun MapboxDirections.Builder.routeOptions(
     }
 
     options.geometries()?.let {
-        geometries(options.geometries())
+        geometries(it)
     }
 
     options.overview()?.let {

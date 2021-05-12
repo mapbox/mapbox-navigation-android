@@ -1,4 +1,4 @@
-@file:JvmName("RouteOptionsEx")
+@file:JvmName("RouteOptionsExtensions")
 
 package com.mapbox.navigation.base.extensions
 
@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.core.constants.Constants
 import com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
+import java.util.Locale
 
 /**
  * Indicates whether the route options supports route refresh.
@@ -21,6 +22,7 @@ import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
  * - [DirectionsCriteria.ANNOTATION_SPEED]
  * - [DirectionsCriteria.ANNOTATION_DURATION]
  * - [DirectionsCriteria.ANNOTATION_DISTANCE]
+ * - [DirectionsCriteria.ANNOTATION_CLOSURE]
  *
  * @receiver RouteOptions
  * @return Boolean
@@ -36,48 +38,45 @@ fun RouteOptions?.supportsRouteRefresh(): Boolean {
             it == DirectionsCriteria.ANNOTATION_MAXSPEED ||
             it == DirectionsCriteria.ANNOTATION_SPEED ||
             it == DirectionsCriteria.ANNOTATION_DURATION ||
-            it == DirectionsCriteria.ANNOTATION_DISTANCE
+            it == DirectionsCriteria.ANNOTATION_DISTANCE ||
+            it == DirectionsCriteria.ANNOTATION_CLOSURE
     } ?: false
     return isTrafficProfile && isOverviewFull && hasCongestionOrMaxSpeed
 }
 
 /**
- * Applies default [RouteOptions] parameters to the RouteOptions builder
- *
- * @receiver RouteOptions.Builder
- * @return RouteOptions.Builder
+ * Applies the [RouteOptions] that are required for the route request to execute
+ * or otherwise recommended for the Navigation SDK and all of its features to provide the best car navigation experience.
  */
-fun RouteOptions.Builder.applyDefaultOptions(): RouteOptions.Builder = also {
+fun RouteOptions.Builder.applyDefaultNavigationOptions(): RouteOptions.Builder = apply {
     baseUrl(Constants.BASE_API_URL)
     user(Constants.MAPBOX_USER)
-    profile(DirectionsCriteria.PROFILE_DRIVING)
+    profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
     geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
-    requestUuid("")
-}
-
-/**
- * Apply [RouteOptions] location and voice unit based on [Context]
- */
-fun RouteOptions.Builder.applyLocationAndVoiceUnit(context: Context): RouteOptions.Builder = also {
-    language(context.inferDeviceLocale().language)
-    voiceUnits(context.inferDeviceLocale().getUnitTypeForLocale().value)
-}
-
-/**
- * Apply recommended options: _continueStraight_, _roundaboutExits_, _overview_, _steps_,
- * _annotationList_ (congestion and distance), _voiceInstruction_, and _bannerInstructions_.
- */
-fun RouteOptions.Builder.applyRecommendedOptions(): RouteOptions.Builder = also {
-    continueStraight(true)
-    roundaboutExits(true)
     overview(DirectionsCriteria.OVERVIEW_FULL)
     steps(true)
+    continueStraight(true)
+    roundaboutExits(true)
     annotationsList(
         listOf(
             DirectionsCriteria.ANNOTATION_CONGESTION,
-            DirectionsCriteria.ANNOTATION_DISTANCE
+            DirectionsCriteria.ANNOTATION_MAXSPEED,
+            DirectionsCriteria.ANNOTATION_SPEED,
+            DirectionsCriteria.ANNOTATION_DURATION,
+            DirectionsCriteria.ANNOTATION_DISTANCE,
+            DirectionsCriteria.ANNOTATION_CLOSURE
         )
     )
     voiceInstructions(true)
     bannerInstructions(true)
+    requestUuid("")
 }
+
+/**
+ * Applies the [RouteOptions] that adapt the returned instructions' language and voice unit based on the device's [Locale].
+ */
+fun RouteOptions.Builder.applyLanguageAndVoiceUnitOptions(context: Context): RouteOptions.Builder =
+    apply {
+        language(context.inferDeviceLocale().language)
+        voiceUnits(context.inferDeviceLocale().getUnitTypeForLocale().value)
+    }

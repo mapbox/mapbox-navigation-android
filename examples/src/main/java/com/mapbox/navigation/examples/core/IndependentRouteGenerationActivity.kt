@@ -28,6 +28,8 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -43,7 +45,6 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityIndependentRouteGenerationBinding
 import com.mapbox.navigation.examples.util.RouteLineUtil
 import com.mapbox.navigation.examples.util.Utils
-import com.mapbox.navigation.examples.util.applyAllOptions
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
 import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
@@ -215,7 +216,8 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
         }
 
         val routeOptions = RouteOptions.builder()
-            .applyAllOptions(this)
+            .applyDefaultNavigationOptions()
+            .applyLanguageAndVoiceUnitOptions(this)
             .accessToken(Utils.getMapboxAccessToken(this))
             .coordinates(listOf(origin, destination))
             .alternatives(false)

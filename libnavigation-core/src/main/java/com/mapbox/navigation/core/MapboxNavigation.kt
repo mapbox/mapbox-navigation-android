@@ -15,6 +15,8 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.common.module.provider.ModuleProviderArgument
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -80,6 +82,7 @@ import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.channels.ReceiveChannel
 import java.lang.reflect.Field
+import java.util.Locale
 
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
@@ -123,10 +126,21 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  * - [setRoutes] sets new routes, clear current ones, or changes the route at primary index 0.
  * The routes are immediately available via the [RoutesObserver] and the first route (at index 0) is going to be chosen as the primary one.
  *
+ * **Make sure to use the [applyDefaultNavigationOptions] for the best navigation experience** (and to set required request parameters).
+ * You can also use [applyLanguageAndVoiceUnitOptions] get instructions' language and voice unit based on the device's [Locale].
+ * It's also worth exploring other available options (like enabling alternative routes, specifying destination approach type, defining waypoint types, etc.).
+ *
  * Example:
  * ```
+ * val routeOptions = RouteOptions.builder()
+ *   .applyDefaultNavigationOptions()
+ *   .applyLanguageAndVoiceUnitOptions(context)
+ *   .accessToken(token)
+ *   .coordinates(listOf(origin, destination))
+ *   .alternatives(true)
+ *   .build()
  * mapboxNavigation.requestRoutes(
- *     options,
+ *     routeOptions,
  *     object : RoutesRequestCallback {
  *         override fun onRoutesReady(routes: List<DirectionsRoute>) {
  *             mapboxNavigation.setRoutes(routes)
@@ -376,16 +390,16 @@ class MapboxNavigation(
      * })
      * ```
      *
-     * @param routeOptions params for the route request. Use [com.mapbox.navigation.base.extensions.applyDefaultOptions]
-     * to apply default params. Also see [com.mapbox.navigation.base.extensions.applyLocationAndVoiceUnit],
-     * [com.mapbox.navigation.base.extensions.applyRecommendedOptions].
+     * @param routeOptions params for the route request.
+     * **Make sure to use the [applyDefaultNavigationOptions] for the best navigation experience** (and to set required request parameters).
+     * You can also use [applyLanguageAndVoiceUnitOptions] get instructions' language and voice unit based on the device's [Locale].
+     * It's also worth exploring other available options (like enabling alternative routes, specifying destination approach type, defining waypoint types, etc.)
      * @param routesRequestCallback listener that gets notified when request state changes
      * @return requestId, see [cancelRouteRequest]
      * @see [registerRoutesObserver]
      * @see [registerRouteProgressObserver]
-     * @see [com.mapbox.navigation.base.extensions.applyDefaultOptions]
-     * @see [com.mapbox.navigation.base.extensions.applyLocationAndVoiceUnit]
-     * @see [com.mapbox.navigation.base.extensions.applyRecommendedOptions]
+     * @see [applyDefaultNavigationOptions]
+     * @see [applyLanguageAndVoiceUnitOptions]
      */
     fun requestRoutes(
         routeOptions: RouteOptions,

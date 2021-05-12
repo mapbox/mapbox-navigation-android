@@ -4,7 +4,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.extensions.applyDefaultOptions
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.testing.FileUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -17,7 +17,7 @@ class RouteExclusionsTest {
         val origin = Point.fromLngLat(14.75513115258181, 55.19464648744247)
         val destination = Point.fromLngLat(12.54071010365584, 55.68521471271404)
         val routeOptionsBuilder = RouteOptions.builder()
-            .applyDefaultOptions()
+            .applyDefaultNavigationOptions()
             .coordinates(listOf(origin, destination))
             .accessToken("pk.123")
 
@@ -34,7 +34,7 @@ class RouteExclusionsTest {
         val origin = Point.fromLngLat(14.75513115258181, 55.19464648744247)
         val destination = Point.fromLngLat(12.54071010365584, 55.68521471271404)
         val routeOptionsWithoutExclusions = RouteOptions.builder()
-            .applyDefaultOptions()
+            .applyDefaultNavigationOptions()
             .coordinates(listOf(origin, destination))
             .accessToken("pk.123")
             .build()
