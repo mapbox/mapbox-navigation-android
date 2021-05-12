@@ -275,7 +275,7 @@ object MapboxRouteLineUtils {
         var runningDistance = 0.0
         val routeLineTrafficData = mutableListOf<RouteLineTrafficExpressionData>()
 
-        route.legs()?.forEach { leg ->
+        route.legs()?.forEachIndexed { legIndex, leg ->
             ifNonNull(leg.annotation()?.distance()) { distanceList ->
                 val closureRanges = getClosureRanges(leg).asSequence()
                 val restrictedRanges = getRestrictedRouteLegRanges(leg).asSequence()
@@ -307,12 +307,19 @@ object MapboxRouteLineUtils {
                         isInAClosure -> RouteConstants.CLOSURE_CONGESTION_VALUE
                         else -> congestion
                     }
-
                     val roadClass = getRoadClassForIndex(roadClassArray, index)
+
                     if (index == 0) {
+                        val distanceFromOrigin = if (legIndex > 0) {
+                            runningDistance += distanceList[index]
+                            runningDistance
+                        } else {
+                            0.0
+                        }
+
                         routeLineTrafficData.add(
                             RouteLineTrafficExpressionData(
-                                0.0,
+                                distanceFromOrigin,
                                 congestionValue,
                                 roadClass
                             )
@@ -339,7 +346,6 @@ object MapboxRouteLineUtils {
                         }
                     }
                 }
-
                 runningDistance += distanceList.last()
             }
         }
