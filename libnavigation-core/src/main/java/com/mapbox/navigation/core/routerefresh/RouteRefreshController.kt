@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
@@ -9,8 +10,8 @@ import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
-import com.mapbox.navigation.core.internal.utils.isUuidValidForRefresh
 import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.utils.internal.MapboxTimer
 import kotlinx.coroutines.Job
 
@@ -95,4 +96,15 @@ internal class RouteRefreshController(
             )
         }
     }
+
+    /**
+     * Check if uuid is valid:
+     * - [RouteOptions] is not **null**;
+     * - uuid is not empty;
+     * - uuid is not equal to [MapboxNativeNavigatorImpl.OFFLINE_UUID].
+     */
+    private fun RouteOptions?.isUuidValidForRefresh(): Boolean =
+        this != null &&
+            requestUuid().isNotEmpty() &&
+            requestUuid() != MapboxNativeNavigatorImpl.OFFLINE_UUID
 }

@@ -4,7 +4,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
-import com.mapbox.navigation.base.extensions.RouteOptionsEx;
+import com.mapbox.navigation.base.extensions.RouteOptionsExtensions;
 import com.mapbox.navigation.testing.FileUtils;
 
 import org.junit.Test;
@@ -26,11 +26,12 @@ public class RouteExclusionsJavaTest {
     List<Point> coordinates = new ArrayList<>();
     coordinates.add(origin);
     coordinates.add(destination);
-    RouteOptions.Builder routeOptionsBuilder = RouteOptionsEx.applyDefaultOptions(
-        RouteOptions.builder()
-            .coordinates(coordinates)
-            .accessToken("pk.123")
-    );
+    RouteOptions.Builder routeOptionsBuilder =
+        RouteOptionsExtensions.applyDefaultNavigationOptions(
+            RouteOptions.builder()
+                .coordinates(coordinates)
+                .accessToken("pk.123")
+        );
 
     RouteOptions routeOptionsWithExclusions = RouteExclusions.exclude(
         routeOptionsBuilder,
@@ -48,11 +49,12 @@ public class RouteExclusionsJavaTest {
     List<Point> coordinates = new ArrayList<>();
     coordinates.add(origin);
     coordinates.add(destination);
-    RouteOptions routeOptionsWithoutExclusions = RouteOptionsEx.applyDefaultOptions(
-        RouteOptions.builder()
-            .coordinates(coordinates)
-            .accessToken("pk.123")
-    ).build();
+    RouteOptions routeOptionsWithoutExclusions =
+        RouteOptionsExtensions.applyDefaultNavigationOptions(
+            RouteOptions.builder()
+                .coordinates(coordinates)
+                .accessToken("pk.123")
+        ).build();
     DirectionsRoute directionsRoute = DirectionsRoute.builder()
         .routeOptions(routeOptionsWithoutExclusions)
         .distance(183888.609)

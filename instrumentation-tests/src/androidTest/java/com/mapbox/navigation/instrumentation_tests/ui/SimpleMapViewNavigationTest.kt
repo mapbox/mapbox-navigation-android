@@ -6,6 +6,7 @@ import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -94,8 +95,11 @@ abstract class SimpleMapViewNavigationTest :
 
     protected fun addRouteLine() {
         runOnMainSync {
-            routeLineView = MapboxRouteLineView(MapboxRouteLineOptions.Builder(activity).build())
-            routeLineApi = MapboxRouteLineApi(MapboxRouteLineOptions.Builder(activity).build())
+            val options = MapboxRouteLineOptions.Builder(activity)
+                .withRouteLineBelowLayerId(LocationComponentConstants.LOCATION_INDICATOR_LAYER)
+                .build()
+            routeLineView = MapboxRouteLineView(options)
+            routeLineApi = MapboxRouteLineApi(options)
 
             mapboxNavigation.registerRoutesObserver(object : RoutesObserver {
                 override fun onRoutesChanged(routes: List<DirectionsRoute>) {

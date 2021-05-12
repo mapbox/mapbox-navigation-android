@@ -3,11 +3,9 @@ package com.mapbox.navigation.instrumentation_tests.utils.routes
 
 import android.content.Context
 import androidx.annotation.IntegerRes
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsResponse
-import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.core.constants.Constants
-import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.utils.bufferFromRawFile
@@ -28,7 +26,7 @@ object MockRoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = "driving",
+                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = jsonResponse,
                     expectedCoordinates = coordinates
                 ),
