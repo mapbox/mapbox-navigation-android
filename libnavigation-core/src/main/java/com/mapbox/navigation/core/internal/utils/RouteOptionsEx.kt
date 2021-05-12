@@ -9,7 +9,7 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
  * - uuid is not empty;
  * - uuid is not equal to [MapboxNativeNavigatorImpl.OFFLINE_UUID].
  */
-fun RouteOptions?.isUuidValidForRefresh(): Boolean =
+internal fun RouteOptions?.isUuidValidForRefresh(): Boolean =
     this != null &&
         requestUuid().isNotEmpty() &&
         requestUuid() != MapboxNativeNavigatorImpl.OFFLINE_UUID

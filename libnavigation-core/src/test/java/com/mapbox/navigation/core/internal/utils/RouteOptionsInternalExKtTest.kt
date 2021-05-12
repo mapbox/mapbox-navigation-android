@@ -2,7 +2,7 @@ package com.mapbox.navigation.core.internal.utils
 
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.extensions.applyDefaultOptions
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import org.junit.Assert
 import org.junit.Test
 
@@ -39,7 +39,7 @@ class RouteOptionsInternalExKtTest {
 
     private fun provideRouteOptions(uuid: String): RouteOptions =
         RouteOptions.builder()
-            .applyDefaultOptions()
+            .applyDefaultNavigationOptions()
             .coordinates(listOf(Point.fromLngLat(0.0, 0.0), Point.fromLngLat(1.1, 1.1)))
             .accessToken("pk.**")
             .requestUuid(uuid)

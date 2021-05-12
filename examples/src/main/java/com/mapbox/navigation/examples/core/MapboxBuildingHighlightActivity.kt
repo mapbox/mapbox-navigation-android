@@ -19,6 +19,8 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -32,7 +34,6 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityBuildingHighlightBinding
 import com.mapbox.navigation.examples.core.waypoints.WaypointsController
-import com.mapbox.navigation.examples.util.applyAllOptions
 import com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingArrivalApi
 import com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingHighlightApi
 import com.mapbox.navigation.ui.maps.arrival.model.MapboxBuildingHighlightOptions
@@ -223,7 +224,8 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
 
     private fun findRoute(origin: Point) {
         val routeOptions = RouteOptions.builder()
-            .applyAllOptions(this)
+            .applyDefaultNavigationOptions()
+            .applyLanguageAndVoiceUnitOptions(this)
             .accessToken(getMapboxAccessTokenFromResources())
             .coordinates(waypointsController.coordinates(origin))
             .build()
