@@ -22,7 +22,7 @@ with requests.get(url, headers = headers) as r:
         skip_changelog = True
         break
 
-  matches = re.search(r'<changelog>(.+)</changelog>', pr_description) is not None
+  matches = re.search(r'<changelog>(.+)</changelog>', pr_description, flags=re.S) is not None
 
   if skip_changelog and matches:
     raise Exception("Both `skip changelog` label and `<changelog></changelog>` closure present.")
