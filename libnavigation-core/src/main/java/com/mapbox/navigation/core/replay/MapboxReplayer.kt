@@ -6,9 +6,10 @@ import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
+import com.mapbox.navigation.core.replay.history.ReplayEventBuffer
 import com.mapbox.navigation.core.replay.history.ReplayEventSimulator
+import com.mapbox.navigation.core.replay.history.ReplayEventStream
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
-import com.mapbox.navigation.core.replay.history.ReplayEvents
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import java.util.Collections.singletonList
@@ -18,8 +19,8 @@ import java.util.Collections.singletonList
  */
 class MapboxReplayer {
 
-    private val replayEvents = ReplayEvents(mutableListOf())
-    private val replayEventSimulator = ReplayEventSimulator(replayEvents)
+    private val replayEventBuffer = ReplayEventBuffer()
+    private val replayEventSimulator = ReplayEventSimulator(replayEventBuffer)
 
     private val replayEventsObservers: MutableSet<ReplayEventsObserver> = mutableSetOf()
 
@@ -30,9 +31,18 @@ class MapboxReplayer {
      * @param events the events to be replayed.
      * @return [MapboxReplayer]
      */
-    fun pushEvents(events: List<ReplayEventBase>): MapboxReplayer {
-        this.replayEvents.events.addAll(events)
-        return this
+    fun pushEvents(events: List<ReplayEventBase>) = apply {
+        replayEventBuffer.pushEvents(events)
+    }
+
+    /**
+     * Attach a stream of events to be replayed. There can only be one stream at a time,
+     * any previous stream attached will be closed automatically.
+     *
+     * This method for pushing events, is more memory efficient than pushing large event lists.
+     */
+    fun attachStream(eventStream: ReplayEventStream) = apply {
+        replayEventBuffer.attachStream(eventStream)
     }
 
     /**
@@ -42,7 +52,7 @@ class MapboxReplayer {
     fun clearEvents() {
         stop()
         seekTo(0.0)
-        replayEvents.events.clear()
+        replayEventBuffer.clear()
     }
 
     /**
@@ -78,7 +88,9 @@ class MapboxReplayer {
      * registered via [registerObserver]
      */
     fun play() {
+        replayEventBuffer.bufferEvents()
         replayEventSimulator.launchSimulator { replayEvents ->
+            replayEventBuffer.bufferEvents()
             replayEventsObservers.forEach { it.replayEvents(replayEvents) }
         }
     }
@@ -115,7 +127,7 @@ class MapboxReplayer {
      * Use this function to play the first location received from your [LocationEngine].
      */
     fun playFirstLocation() {
-        val firstUpdateLocation = replayEvents.events.firstOrNull { replayEvent ->
+        val firstUpdateLocation = replayEventBuffer.events.firstOrNull { replayEvent ->
             replayEvent is ReplayEventUpdateLocation
         }
         firstUpdateLocation?.let { replayEvent ->
@@ -152,9 +164,9 @@ class MapboxReplayer {
      * @return the duration in seconds
      */
     fun durationSeconds(): Double {
-        val firstEvent = replayEvents.events.firstOrNull()
+        val firstEvent = replayEventBuffer.events.firstOrNull()
             ?: return 0.0
-        val lastEvent = replayEvents.events.last()
+        val lastEvent = replayEventBuffer.events.last()
         return lastEvent.eventTimestamp - firstEvent.eventTimestamp
     }
 
@@ -162,7 +174,7 @@ class MapboxReplayer {
      * The time of an event, relative to the duration of the replay.
      */
     fun eventSeconds(eventTimestamp: Double): Double {
-        val firstEvent = replayEvents.events.firstOrNull()
+        val firstEvent = replayEventBuffer.events.firstOrNull()
             ?: return 0.0
         return eventTimestamp - firstEvent.eventTimestamp
     }
@@ -173,10 +185,10 @@ class MapboxReplayer {
      * @param replayTime time in seconds between 0.0 to [durationSeconds]
      */
     fun seekTo(replayTime: Double) {
-        val firstEventTime = replayEvents.events.firstOrNull()?.eventTimestamp
+        val firstEventTime = replayEventBuffer.events.firstOrNull()?.eventTimestamp
             ?: return
         val offsetTime = replayTime + firstEventTime
-        val indexOfEvent = replayEvents.events
+        val indexOfEvent = replayEventBuffer.events
             .indexOfFirst { offsetTime <= it.eventTimestamp }
         check(indexOfEvent >= 0) {
             "Make sure your replayTime is less than replayDurationSeconds " +
@@ -193,7 +205,7 @@ class MapboxReplayer {
      * @throws IllegalStateException if [replayEvent] was not pushed
      */
     fun seekTo(replayEvent: ReplayEventBase) {
-        val indexOfEvent = replayEvents.events.indexOf(replayEvent)
+        val indexOfEvent = replayEventBuffer.events.indexOf(replayEvent)
         check(indexOfEvent >= 0) { "You must first pushEvents and then seekTo an event" }
 
         replayEventSimulator.seekTo(indexOfEvent)
