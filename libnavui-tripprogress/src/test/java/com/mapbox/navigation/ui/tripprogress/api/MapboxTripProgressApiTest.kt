@@ -28,7 +28,7 @@ class MapboxTripProgressApiTest {
             }
             every { distanceTraveled } returns 50f
             every { route } returns mockk<DirectionsRoute> {
-                every { currentState } returns RouteProgressState.LOCATION_TRACKING
+                every { currentState } returns RouteProgressState.TRACKING
             }
         }
 

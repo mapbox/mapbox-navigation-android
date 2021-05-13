@@ -483,13 +483,12 @@ package com.mapbox.navigation.base.trip.model {
   }
 
   public enum RouteProgressState {
+    enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState COMPLETE;
+    enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState INITIALIZED;
     enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState LOCATION_STALE;
-    enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState LOCATION_TRACKING;
     enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState OFF_ROUTE;
-    enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState ROUTE_COMPLETE;
-    enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState ROUTE_INITIALIZED;
-    enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState ROUTE_INVALID;
-    enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState ROUTE_UNCERTAIN;
+    enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState TRACKING;
+    enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState UNCERTAIN;
   }
 
   public final class RouteStepProgress {

@@ -495,7 +495,7 @@ class MapboxRouteLineApiTest {
             }
         }
 
-        api.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
+        api.updateVanishingPointState(RouteProgressState.TRACKING)
         api.setRoutes(listOf(RouteLine(route, null)))
         api.updateUpcomingRoutePointIndex(routeProgress)
 
@@ -536,7 +536,7 @@ class MapboxRouteLineApiTest {
                 }
             }
         }
-        api.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
+        api.updateVanishingPointState(RouteProgressState.TRACKING)
         api.setRoutes(listOf(RouteLine(route, null)))
 
         api.updateUpcomingRoutePointIndex(routeProgress)
@@ -574,7 +574,7 @@ class MapboxRouteLineApiTest {
                     }
                 }
             }
-            api.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
+            api.updateVanishingPointState(RouteProgressState.TRACKING)
             api.setRoutes(listOf(RouteLine(route, null)))
 
             api.updateUpcomingRoutePointIndex(routeProgress)
@@ -602,7 +602,7 @@ class MapboxRouteLineApiTest {
                     every { currentStepProgress } returns null
                 }
             }
-            api.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
+            api.updateVanishingPointState(RouteProgressState.TRACKING)
             api.setRoutes(listOf(RouteLine(route, null)))
 
             api.updateUpcomingRoutePointIndex(routeProgress)
@@ -627,7 +627,7 @@ class MapboxRouteLineApiTest {
             val routeProgress = mockk<RouteProgress> {
                 every { currentLegProgress } returns null
             }
-            api.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
+            api.updateVanishingPointState(RouteProgressState.TRACKING)
             api.setRoutes(listOf(RouteLine(route, null)))
 
             api.updateUpcomingRoutePointIndex(routeProgress)
@@ -663,16 +663,16 @@ class MapboxRouteLineApiTest {
                     every { stepIndex } returns 2
                 }
             }
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
+            every { currentState } returns RouteProgressState.TRACKING
         }
-        api.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
+        api.updateVanishingPointState(RouteProgressState.TRACKING)
         api.setRoutes(listOf(RouteLine(route, null)))
 
         api.updateWithRouteProgress(routeProgress)
 
         verify { mockVanishingRouteLine.primaryRouteRemainingDistancesIndex = null }
         verify {
-            mockVanishingRouteLine.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
+            mockVanishingRouteLine.updateVanishingPointState(RouteProgressState.TRACKING)
         }
     }
 
@@ -696,7 +696,7 @@ class MapboxRouteLineApiTest {
         val route = getRoute()
         val api = MapboxRouteLineApi(options)
 
-        api.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
+        api.updateVanishingPointState(RouteProgressState.TRACKING)
         api.setRoutes(listOf(RouteLine(route, null)))
 
         val result = api.updateTraveledRouteLine(Point.fromLngLat(-122.4727051, 37.7577627))
@@ -711,7 +711,7 @@ class MapboxRouteLineApiTest {
             .build()
 
         MapboxRouteLineApi(options).updateVanishingPointState(
-            RouteProgressState.LOCATION_TRACKING
+            RouteProgressState.TRACKING
         )
 
         assertEquals(

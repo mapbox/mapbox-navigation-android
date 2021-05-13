@@ -46,7 +46,7 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
         )
         routeCompleteIdlingResource = RouteProgressStateIdlingResource(
             mapboxNavigation,
-            RouteProgressState.ROUTE_COMPLETE
+            RouteProgressState.COMPLETE
         )
     }
 
@@ -58,9 +58,8 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
         routeCompleteIdlingResource.register()
 
         val expectedStates = RouteProgressStateTransitionAssertion(mapboxNavigation) {
-            optionalState(RouteProgressState.ROUTE_INVALID)
-            requiredState(RouteProgressState.LOCATION_TRACKING)
-            requiredState(RouteProgressState.ROUTE_COMPLETE)
+            requiredState(RouteProgressState.TRACKING)
+            requiredState(RouteProgressState.COMPLETE)
         }
 
         // execute

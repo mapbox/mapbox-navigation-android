@@ -21,7 +21,7 @@ class TripProgressProcessorTest {
             }
             every { distanceTraveled } returns 50f
             every { route } returns mockk {
-                every { currentState } returns RouteProgressState.LOCATION_TRACKING
+                every { currentState } returns RouteProgressState.TRACKING
             }
         }
         val expectedEta = Calendar.getInstance().also {

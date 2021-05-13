@@ -19,7 +19,7 @@ import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.RouteProgressState.LOCATION_TRACKING
+import com.mapbox.navigation.base.trip.model.RouteProgressState.TRACKING
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.NavigationSession
@@ -1003,7 +1003,7 @@ class MapboxNavigationTelemetryTest {
 
     private fun mockRouteProgress() {
         every { routeProgress.route } returns originalRoute
-        every { routeProgress.currentState } returns LOCATION_TRACKING
+        every { routeProgress.currentState } returns TRACKING
         every { routeProgress.currentLegProgress } returns legProgress
         every { routeProgress.distanceRemaining } returns ROUTE_PROGRESS_DISTANCE_REMAINING
         every { routeProgress.durationRemaining } returns ROUTE_PROGRESS_DURATION_REMAINING

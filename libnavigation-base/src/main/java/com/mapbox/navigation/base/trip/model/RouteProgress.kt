@@ -153,7 +153,7 @@ class RouteProgress private constructor(
         private var routeGeometryWithBuffer: Geometry? = null
         private var bannerInstructions: BannerInstructions? = null
         private var voiceInstructions: VoiceInstructions? = null
-        private var currentState: RouteProgressState = RouteProgressState.ROUTE_INVALID
+        private var currentState: RouteProgressState = RouteProgressState.INITIALIZED
         private var currentLegProgress: RouteLegProgress? = null
         private var upcomingStepPoints: List<Point>? = null
         private var inTunnel: Boolean = false

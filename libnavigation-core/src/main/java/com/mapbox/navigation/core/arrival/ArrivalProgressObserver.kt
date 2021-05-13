@@ -54,14 +54,13 @@ internal class ArrivalProgressObserver(
             ?: return
 
         when (routeProgress.currentState) {
-            RouteProgressState.LOCATION_TRACKING,
-            RouteProgressState.ROUTE_COMPLETE -> {
+            RouteProgressState.TRACKING,
+            RouteProgressState.COMPLETE -> {
                 // continue
             }
-            RouteProgressState.ROUTE_INVALID,
-            RouteProgressState.ROUTE_INITIALIZED,
+            RouteProgressState.INITIALIZED,
             RouteProgressState.OFF_ROUTE,
-            RouteProgressState.ROUTE_UNCERTAIN,
+            RouteProgressState.UNCERTAIN,
             RouteProgressState.LOCATION_STALE -> {
                 return
             }

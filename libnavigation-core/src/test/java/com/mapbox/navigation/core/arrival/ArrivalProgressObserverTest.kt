@@ -36,7 +36,7 @@ class ArrivalProgressObserverTest {
     @Test
     fun `should not crash with null route progress values`() {
         val routeProgress: RouteProgress = mockk {
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
+            every { currentState } returns RouteProgressState.TRACKING
             every { route } returns mockk {
                 mockMultipleLegs()
                 every { routeIndex() } returns null
@@ -55,7 +55,7 @@ class ArrivalProgressObserverTest {
     @Test
     fun `should do nothing when currentLegProgress is null`() {
         val routeProgress: RouteProgress = mockk {
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
+            every { currentState } returns RouteProgressState.TRACKING
             every { route } returns mockk {
                 every { currentLegProgress } returns null
             }
@@ -70,7 +70,7 @@ class ArrivalProgressObserverTest {
     @Test
     fun `should not navigateNextRouteLeg when currentLegProgress is null`() {
         every { tripSession.getRouteProgress() } returns mockk {
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
+            every { currentState } returns RouteProgressState.TRACKING
             every { route } returns mockk {
                 mockMultipleLegs()
                 every { currentLegProgress } returns null
@@ -83,7 +83,7 @@ class ArrivalProgressObserverTest {
     @Test
     fun `should not navigateNextRouteLeg when route legs is empty`() {
         every { tripSession.getRouteProgress() } returns mockk {
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
+            every { currentState } returns RouteProgressState.TRACKING
             every { route } returns mockk {
                 every { legs() } returns emptyList()
                 every { currentLegProgress } returns mockk {
@@ -110,7 +110,7 @@ class ArrivalProgressObserverTest {
         arrivalProgressObserver.attach(customArrivalController)
         arrivalProgressObserver.onRouteProgressChanged(
             mockk {
-                every { currentState } returns RouteProgressState.ROUTE_COMPLETE
+                every { currentState } returns RouteProgressState.COMPLETE
                 every { route } returns mockk {
                     mockMultipleLegs()
                 }
@@ -145,7 +145,7 @@ class ArrivalProgressObserverTest {
         arrivalProgressObserver.attach(customArrivalController)
         arrivalProgressObserver.onRouteProgressChanged(
             mockk {
-                every { currentState } returns RouteProgressState.ROUTE_COMPLETE
+                every { currentState } returns RouteProgressState.COMPLETE
                 every { route } returns mockk {
                     mockMultipleLegs()
                     every { durationRemaining } returns 2.0
@@ -179,7 +179,7 @@ class ArrivalProgressObserverTest {
             arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls))
         } returns Unit
         val routeProgress: RouteProgress = mockk {
-            every { currentState } returns RouteProgressState.ROUTE_COMPLETE
+            every { currentState } returns RouteProgressState.COMPLETE
             every { route } returns mockk {
                 mockMultipleLegs()
                 every { durationRemaining } returns 2.0
@@ -217,7 +217,7 @@ class ArrivalProgressObserverTest {
         arrivalProgressObserver.attach(customArrivalController)
         arrivalProgressObserver.onRouteProgressChanged(
             mockk {
-                every { currentState } returns RouteProgressState.LOCATION_TRACKING
+                every { currentState } returns RouteProgressState.TRACKING
                 every { currentLegProgress } returns mockk {
                     every { routeLeg } returns mockk()
                     every { durationRemaining } returns 1.0
@@ -248,7 +248,7 @@ class ArrivalProgressObserverTest {
         arrivalProgressObserver.attach(customArrivalController)
         arrivalProgressObserver.onRouteProgressChanged(
             mockk {
-                every { currentState } returns RouteProgressState.LOCATION_TRACKING
+                every { currentState } returns RouteProgressState.TRACKING
                 every { currentLegProgress } returns mockk {
                     every { durationRemaining } returns 2.0
                     every { distanceRemaining } returns 8.0f
@@ -276,7 +276,7 @@ class ArrivalProgressObserverTest {
             }
         }
         val routeProgress: RouteProgress = mockk {
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
+            every { currentState } returns RouteProgressState.TRACKING
             every { currentLegProgress } returns mockk {
                 every { routeLeg } returns mockk()
                 every { durationRemaining } returns 1.0
@@ -310,7 +310,7 @@ class ArrivalProgressObserverTest {
             arrivalObserver.onWaypointArrival(capture(onWaypointArrivalCalls))
         } returns Unit
         val routeProgress: RouteProgress = mockk {
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
+            every { currentState } returns RouteProgressState.TRACKING
             every { route } returns mockk {
                 mockMultipleLegs()
             }
@@ -345,7 +345,7 @@ class ArrivalProgressObserverTest {
         arrivalProgressObserver.attach(customArrivalController)
         arrivalProgressObserver.onRouteProgressChanged(
             mockk {
-                every { currentState } returns RouteProgressState.LOCATION_TRACKING
+                every { currentState } returns RouteProgressState.TRACKING
                 every { currentLegProgress } returns mockk {
                     every { routeLeg } returns mockk()
                     every { durationRemaining } returns 360.0
@@ -365,7 +365,7 @@ class ArrivalProgressObserverTest {
     fun `should navigate to next waypoint automatically using options`() {
         val testNavigateNextRouteLeg = true
         val routeProgress: RouteProgress = mockk {
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
+            every { currentState } returns RouteProgressState.TRACKING
             every { route } returns mockk {
                 mockMultipleLegs()
                 every { routeIndex() } returns "0"
@@ -397,7 +397,7 @@ class ArrivalProgressObserverTest {
     fun `should not navigate to next waypoint automatically using options`() {
         val testNavigateNextRouteLeg = false
         every { tripSession.getRouteProgress() } returns mockk {
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
+            every { currentState } returns RouteProgressState.TRACKING
             every { route } returns mockk {
                 mockMultipleLegs()
                 every { routeIndex() } returns "0"
@@ -424,7 +424,7 @@ class ArrivalProgressObserverTest {
     @Test
     fun `navigateNextRouteLeg should return true when route leg is updated`() {
         every { tripSession.getRouteProgress() } returns mockk {
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
+            every { currentState } returns RouteProgressState.TRACKING
             every { route } returns mockk {
                 mockMultipleLegs()
                 every { routeIndex() } returns "0"
@@ -443,7 +443,7 @@ class ArrivalProgressObserverTest {
     @Test
     fun `navigateNextRouteLeg should return false when route leg is not updated`() {
         every { tripSession.getRouteProgress() } returns mockk {
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
+            every { currentState } returns RouteProgressState.TRACKING
             every { route } returns mockk {
                 mockMultipleLegs()
                 every { routeIndex() } returns "0"
@@ -470,7 +470,7 @@ class ArrivalProgressObserverTest {
             arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls))
         } returns Unit
         every { tripSession.getRouteProgress() } returns mockk {
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
+            every { currentState } returns RouteProgressState.TRACKING
             every { route } returns mockk {
                 mockMultipleLegs()
                 every { routeIndex() } returns "0"
