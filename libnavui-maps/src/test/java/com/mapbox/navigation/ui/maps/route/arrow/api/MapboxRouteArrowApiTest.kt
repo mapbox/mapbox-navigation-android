@@ -49,7 +49,7 @@ class MapboxRouteArrowApiTest {
                     every { stepIndex } returns 2
                 }
             }
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
+            every { currentState } returns RouteProgressState.TRACKING
             every { upcomingStepPoints } returns upcomingPoints
         }
 
@@ -360,7 +360,7 @@ class MapboxRouteArrowApiTest {
                     every { stepIndex } returns 2
                 }
             }
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
+            every { currentState } returns RouteProgressState.TRACKING
             every { upcomingStepPoints } returns upcomingPoints
         }
         val api = MapboxRouteArrowApi()

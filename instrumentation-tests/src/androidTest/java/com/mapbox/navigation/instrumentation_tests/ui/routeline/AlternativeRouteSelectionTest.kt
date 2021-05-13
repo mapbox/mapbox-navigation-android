@@ -78,7 +78,7 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
 
         routeProgressIdlingResource = RouteProgressStateIdlingResource(
             mapboxNavigation,
-            RouteProgressState.LOCATION_TRACKING
+            RouteProgressState.TRACKING
         )
 
         runOnMainSync {

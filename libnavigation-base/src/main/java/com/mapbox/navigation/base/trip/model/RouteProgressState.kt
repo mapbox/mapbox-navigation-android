@@ -1,54 +1,38 @@
 package com.mapbox.navigation.base.trip.model
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
-
 /**
  * Contains the various progress states that can occur while navigating.
  */
 enum class RouteProgressState {
 
     /**
-     * The [com.mapbox.api.directions.v5.models.DirectionsRoute] provided
-     * via [com.mapbox.navigation.core.MapboxNavigation.setRoutes]
-     * when in `Active Guidance` is not valid.
+     * We have initialized route, but haven't started route tracking yet: all [RouteProgress] fields are valid.
      */
-    ROUTE_INVALID,
+    INITIALIZED,
 
     /**
-     * The [DirectionsRoute] is valid
-     * and [com.mapbox.navigation.core.MapboxNavigation] is waiting for
-     * sufficient [android.location.Location] updates
-     * from the [com.mapbox.android.core.location.LocationEngine].
+     * We are on the route: all [RouteProgress] fields are valid.
      */
-    ROUTE_INITIALIZED,
+    TRACKING,
 
     /**
-     * The user has arrived at the destination of the given [com.mapbox.api.directions.v5.models.RouteLeg].
+     * We've approached to the end of route's leg: all [RouteProgress] fields are valid.
      */
-    ROUTE_COMPLETE,
+    COMPLETE,
 
     /**
-     * [com.mapbox.navigation.core.MapboxNavigation] is now confidently tracking the
-     * location updates and processing them against the route.
+     * We've gone of route: all [RouteProgress] fields are invalid.
      */
-    LOCATION_TRACKING,
+    OFF_ROUTE,
+
+    /**
+     * We are probably about to go off-route: all [RouteProgress] fields are valid.
+     */
+    UNCERTAIN,
 
     /**
      * A lack of [android.location.Location] updates has caused a lack of confidence in the
      * progress updates being sent.
      */
-    LOCATION_STALE,
-
-    /**
-     * State when we detect an off-route.
-     */
-    OFF_ROUTE,
-
-    /**
-     * State when we start following a route.
-     *
-     * After a certain number of tracking points, we gain confidence and switch to tracking state.
-     * We do map-matching rather than route line snapping during this state.
-     */
-    ROUTE_UNCERTAIN
+    LOCATION_STALE
 }

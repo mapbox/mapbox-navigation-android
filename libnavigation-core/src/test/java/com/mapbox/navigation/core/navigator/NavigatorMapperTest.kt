@@ -221,10 +221,26 @@ class NavigatorMapperTest {
 
     @Test
     fun `route progress is null when route is null`() {
-        val navigationStatus: NavigationStatus = mockk()
+        val navigationStatus: NavigationStatus = mockk {
+            every { routeState } returns RouteState.TRACKING
+        }
 
         val routeProgress = getRouteProgressFrom(
             null,
+            null,
+            navigationStatus,
+            mockk(relaxed = true)
+        )
+
+        assertNull(routeProgress)
+    }
+
+    @Test
+    fun `route progress is null when status is invalid`() {
+        every { navigationStatus.routeState } returns RouteState.INVALID
+
+        val routeProgress = getRouteProgressFrom(
+            directionsRoute,
             null,
             navigationStatus,
             mockk(relaxed = true)

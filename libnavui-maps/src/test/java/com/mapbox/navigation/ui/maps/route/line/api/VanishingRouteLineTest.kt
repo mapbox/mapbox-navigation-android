@@ -97,7 +97,7 @@ class VanishingRouteLineTest {
     @Test
     fun updateVanishingPointState_when_LOCATION_TRACKING() {
         val vanishingRouteLine = VanishingRouteLine().also {
-            it.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
+            it.updateVanishingPointState(RouteProgressState.TRACKING)
         }
 
         assertEquals(VanishingPointState.ENABLED, vanishingRouteLine.vanishingPointState)
@@ -106,7 +106,7 @@ class VanishingRouteLineTest {
     @Test
     fun updateVanishingPointState_when_ROUTE_COMPLETE() {
         val vanishingRouteLine = VanishingRouteLine().also {
-            it.updateVanishingPointState(RouteProgressState.ROUTE_COMPLETE)
+            it.updateVanishingPointState(RouteProgressState.COMPLETE)
         }
 
         assertEquals(

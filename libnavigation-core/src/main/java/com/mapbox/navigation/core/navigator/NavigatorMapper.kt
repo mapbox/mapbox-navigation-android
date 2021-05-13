@@ -69,6 +69,9 @@ private fun NavigationStatus.getRouteProgress(
     routeBufferGeoJson: Geometry?,
     remainingWaypoints: Int
 ): RouteProgress? {
+    if (routeState == RouteState.INVALID) {
+        return null
+    }
     route?.let {
         val upcomingStepIndex = stepIndex + ONE_INDEX
 
@@ -145,7 +148,7 @@ private fun NavigationStatus.getRouteProgress(
 
                         var bannerInstructions =
                             bannerInstruction?.mapToDirectionsApi(currentStep)
-                        if (it == RouteProgressState.ROUTE_INITIALIZED) {
+                        if (it == RouteProgressState.INITIALIZED) {
                             bannerInstructions =
                                 MapboxNativeNavigatorImpl.getBannerInstruction(
                                     FIRST_BANNER_INSTRUCTION
@@ -246,12 +249,13 @@ private fun VoiceInstruction.mapToDirectionsApi(): VoiceInstructions? {
 
 private fun RouteState.convertState(): RouteProgressState {
     return when (this) {
-        RouteState.INVALID -> RouteProgressState.ROUTE_INVALID
-        RouteState.INITIALIZED -> RouteProgressState.ROUTE_INITIALIZED
-        RouteState.TRACKING -> RouteProgressState.LOCATION_TRACKING
-        RouteState.COMPLETE -> RouteProgressState.ROUTE_COMPLETE
+        RouteState.INVALID ->
+            throw IllegalArgumentException("invalid route progress state not supported")
+        RouteState.INITIALIZED -> RouteProgressState.INITIALIZED
+        RouteState.TRACKING -> RouteProgressState.TRACKING
+        RouteState.COMPLETE -> RouteProgressState.COMPLETE
         RouteState.OFF_ROUTE -> RouteProgressState.OFF_ROUTE
-        RouteState.UNCERTAIN -> RouteProgressState.ROUTE_UNCERTAIN
+        RouteState.UNCERTAIN -> RouteProgressState.UNCERTAIN
     }
 }
 

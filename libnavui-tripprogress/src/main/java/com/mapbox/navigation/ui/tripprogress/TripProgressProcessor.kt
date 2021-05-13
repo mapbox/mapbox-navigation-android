@@ -13,7 +13,7 @@ internal class TripProgressProcessor {
     private fun calculateTripProgress(
         action: TripProgressAction.CalculateTripProgress
     ): TripProgressResult.RouteProgressCalculation {
-        val eta = if (action.routeProgress.currentState == RouteProgressState.ROUTE_COMPLETE) {
+        val eta = if (action.routeProgress.currentState == RouteProgressState.COMPLETE) {
             Calendar.getInstance()
         } else {
             Calendar.getInstance().also {
@@ -23,7 +23,7 @@ internal class TripProgressProcessor {
         val percentRouteTraveled = getPercentDistanceTraveled(action.routeProgress)
 
         return when (action.routeProgress.currentState) {
-            RouteProgressState.ROUTE_COMPLETE -> TripProgressResult.RouteProgressCalculation(
+            RouteProgressState.COMPLETE -> TripProgressResult.RouteProgressCalculation(
                 Calendar.getInstance().timeInMillis,
                 0.0,
                 0.0,

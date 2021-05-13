@@ -27,13 +27,12 @@ class RouteStateObserverParametrizedTest(
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
         fun data() = listOf(
-            arrayOf(RouteProgressState.ROUTE_INVALID, false, false),
-            arrayOf(RouteProgressState.ROUTE_UNCERTAIN, false, false),
+            arrayOf(RouteProgressState.UNCERTAIN, false, false),
             arrayOf(RouteProgressState.OFF_ROUTE, false, false),
-            arrayOf(RouteProgressState.ROUTE_INITIALIZED, false, false),
+            arrayOf(RouteProgressState.INITIALIZED, false, false),
             arrayOf(RouteProgressState.LOCATION_STALE, false, false),
-            arrayOf(RouteProgressState.ROUTE_COMPLETE, true, true),
-            arrayOf(RouteProgressState.LOCATION_TRACKING, true, true)
+            arrayOf(RouteProgressState.COMPLETE, true, true),
+            arrayOf(RouteProgressState.TRACKING, true, true)
         )
     }
 

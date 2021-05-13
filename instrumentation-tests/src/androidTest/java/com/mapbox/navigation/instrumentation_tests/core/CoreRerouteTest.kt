@@ -52,7 +52,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         )
         locationTrackingIdlingResource = RouteProgressStateIdlingResource(
             mapboxNavigation,
-            RouteProgressState.LOCATION_TRACKING
+            RouteProgressState.TRACKING
         )
         offRouteIdlingResource = RouteProgressStateIdlingResource(
             mapboxNavigation,
@@ -92,11 +92,10 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         locationTrackingIdlingResource.register()
 
         val expectedStates = RouteProgressStateTransitionAssertion(mapboxNavigation) {
-            optionalState(RouteProgressState.ROUTE_INVALID)
-            requiredState(RouteProgressState.LOCATION_TRACKING)
+            requiredState(RouteProgressState.TRACKING)
             requiredState(RouteProgressState.OFF_ROUTE)
-            optionalState(RouteProgressState.ROUTE_INITIALIZED)
-            requiredState(RouteProgressState.LOCATION_TRACKING)
+            optionalState(RouteProgressState.INITIALIZED)
+            requiredState(RouteProgressState.TRACKING)
         }
 
         // start a route
