@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import java.util.concurrent.CopyOnWriteArraySet
@@ -51,6 +52,20 @@ internal class ArrivalProgressObserver(
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
         val routeLegProgress = routeProgress.currentLegProgress
             ?: return
+
+        when (routeProgress.currentState) {
+            RouteProgressState.LOCATION_TRACKING,
+            RouteProgressState.ROUTE_COMPLETE -> {
+                // continue
+            }
+            RouteProgressState.ROUTE_INVALID,
+            RouteProgressState.ROUTE_INITIALIZED,
+            RouteProgressState.OFF_ROUTE,
+            RouteProgressState.ROUTE_UNCERTAIN,
+            RouteProgressState.LOCATION_STALE -> {
+                return
+            }
+        }
 
         val arrivalOptions = arrivalController.arrivalOptions()
         val hasMoreLegs = hasMoreLegs(routeProgress)
