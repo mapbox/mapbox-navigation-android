@@ -17,7 +17,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-internal class ArrivalProgressObserverTest {
+class ArrivalProgressObserverTest {
 
     private val tripSession: TripSession = mockk()
     private val arrivalObserver: ArrivalObserver = mockk {
