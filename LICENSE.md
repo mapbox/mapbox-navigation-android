@@ -218,12 +218,6 @@ License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the Mapbox Android Core Library.
-URL: [https://github.com/mapbox/mapbox-events-android](https://github.com/mapbox/mapbox-events-android)
-License: [The MIT License](https://opensource.org/licenses/MIT)
-
-===========================================================================
-
 Mapbox Navigation uses portions of the Mapbox Annotations (Artifact that provides Mapbox module and plugin annotations).
 URL: [https://github.com/mapbox/mapbox-base-android](https://github.com/mapbox/mapbox-base-android)
 License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
@@ -256,6 +250,11 @@ License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 
 Mapbox Navigation uses portions of the Mapbox Navigation Native (Common multi-platform navigation logic).
 URL: [https://github.com/mapbox/mapbox-navigation-native](https://github.com/mapbox/mapbox-navigation-native)
+License: [Mapbox Terms of Service](https://www.mapbox.com/tos)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the mapbox-android-core.
 License: [Mapbox Terms of Service](https://www.mapbox.com/tos)
 
 ===========================================================================
@@ -568,9 +567,8 @@ License: [The Apache Software License, Version 2.0](https://www.apache.org/licen
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the Mapbox Android Telemetry Library.
-URL: [https://github.com/mapbox/mapbox-events-android](https://github.com/mapbox/mapbox-events-android)
-License: [The MIT License](https://opensource.org/licenses/MIT)
+Mapbox Navigation uses portions of the mapbox-android-telemetry.
+License: [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
