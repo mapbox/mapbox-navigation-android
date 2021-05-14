@@ -15,7 +15,7 @@ interface EHorizonObserver {
     /**
      * This callback might be called multiple times when the position changes.
      * @param position current electronic horizon position (map matched position + e-horizon tree)
-     * @param distances map road object id -> EHorizonObjectDistanceInfo for upcoming road objects
+     * @param distances a list of [RoadObjectDistanceInfo] for upcoming road objects
      *
      */
     fun onPositionUpdated(

@@ -56,6 +56,6 @@ class TollCollection internal constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "TollCollectionAlert(tollCollectionType=$tollCollectionType), ${super.toString()}"
+        return "TollCollection(tollCollectionType=$tollCollectionType), ${super.toString()}"
     }
 }

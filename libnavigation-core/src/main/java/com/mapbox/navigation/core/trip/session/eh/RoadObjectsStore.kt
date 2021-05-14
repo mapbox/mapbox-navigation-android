@@ -34,7 +34,7 @@ class RoadObjectsStore internal constructor(
 
     /**
      * Returns roadObject, if such object cannot be found returns null.
-     * @param roadObjectId
+     * @param roadObjectId id of the road object
      */
     fun getRoadObject(roadObjectId: String): RoadObject? {
         return navigator.roadObjectsStore?.getRoadObject(roadObjectId)?.let {
@@ -63,15 +63,15 @@ class RoadObjectsStore internal constructor(
     }
 
     /**
-     * Removes road object (i.e. stops tracking it in electronic horizon)
-     * @param roadObjectId of road object
+     * Removes custom road object (i.e. stops tracking it in electronic horizon)
+     * @param roadObjectId id of the road object
      */
     fun removeCustomRoadObject(roadObjectId: String) {
         navigator.roadObjectsStore?.removeCustomRoadObject(roadObjectId)
     }
 
     /**
-     * Removes all road object (i.e. stops tracking them in electronic horizon)
+     * Removes all custom road objects (i.e. stops tracking them in electronic horizon)
      */
     fun removeAllCustomRoadObjects() {
         navigator.roadObjectsStore?.removeAllCustomRoadObjects()
@@ -79,7 +79,7 @@ class RoadObjectsStore internal constructor(
 
     /**
      * Returns a list of [UpcomingRoadObject]
-     * @param distances a map of [String] roadObjectIds and [RoadObjectDistanceInfo]
+     * @param distances a list of [RoadObjectDistanceInfo]
      */
     fun getUpcomingRoadObjects(
         distances: List<RoadObjectDistanceInfo>

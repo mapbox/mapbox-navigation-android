@@ -30,6 +30,6 @@ class RestrictedArea internal constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "RestrictedAreaEntranceAlert() ${super.toString()}"
+        return "RestrictedArea() ${super.toString()}"
     }
 }

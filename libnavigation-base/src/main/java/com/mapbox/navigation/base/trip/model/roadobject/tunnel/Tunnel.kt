@@ -49,6 +49,6 @@ class Tunnel internal constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "TunnelEntranceAlert(info=$info), ${super.toString()}"
+        return "Tunnel(info=$info), ${super.toString()}"
     }
 }
