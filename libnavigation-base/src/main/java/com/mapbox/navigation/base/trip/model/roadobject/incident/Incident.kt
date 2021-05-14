@@ -48,7 +48,7 @@ class Incident internal constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "IncidentAlert(" +
+        return "Incident(" +
             "info=$info" +
             "), ${super.toString()}"
     }

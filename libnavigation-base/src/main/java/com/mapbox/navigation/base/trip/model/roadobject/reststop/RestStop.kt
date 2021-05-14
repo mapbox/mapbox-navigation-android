@@ -49,6 +49,6 @@ class RestStop internal constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "RestStopAlert(restStopType=$restStopType), ${super.toString()}"
+        return "RestStop(restStopType=$restStopType), ${super.toString()}"
     }
 }

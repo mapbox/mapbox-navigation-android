@@ -56,7 +56,7 @@ class CountryBorderCrossing internal constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "CountryBorderCrossingAlert(" +
+        return "CountryBorderCrossing(" +
             "countryBorderCrossingInfo=$countryBorderCrossingInfo), ${super.toString()}"
     }
 }
