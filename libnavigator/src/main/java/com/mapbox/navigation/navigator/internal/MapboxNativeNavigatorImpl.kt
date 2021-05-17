@@ -20,6 +20,7 @@ import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
+import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
@@ -122,7 +123,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         nativeRouter = nativeComponents.nativeRouter
         historyRecorderHandle = nativeComponents.historyRecorderHandle
         graphAccessor = nativeComponents.graphAccessor
-        openLRDecoder = nativeComponents.openLRDecoder
+        roadObjectMatcher = nativeComponents.roadObjectMatcher
         roadObjectsStore = nativeComponents.navigator.roadObjectStore()
         cache = nativeComponents.cache
 
@@ -395,6 +396,10 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      */
     override fun setRoadObjectsStoreObserver(roadObjectsStoreObserver: RoadObjectsStoreObserver?) {
         roadObjectsStore?.setObserver(roadObjectsStoreObserver)
+    }
+
+    override fun setFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver?) {
+        navigator!!.setFallbackVersionsObserver(fallbackVersionsObserver)
     }
 
     /**

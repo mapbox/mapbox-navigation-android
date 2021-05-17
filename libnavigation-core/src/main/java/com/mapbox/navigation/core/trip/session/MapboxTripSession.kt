@@ -122,6 +122,7 @@ internal class MapboxTripSession(
     private val roadObjectsOnRouteObservers =
         CopyOnWriteArraySet<RoadObjectsOnRouteObserver>()
     private val mapMatcherResultObservers = CopyOnWriteArraySet<MapMatcherResultObserver>()
+    private val fallbackVersionsObservers = CopyOnWriteArraySet<FallbackVersionsObserver>()
 
     private val bannerInstructionEvent = BannerInstructionEvent()
 
@@ -155,6 +156,21 @@ internal class MapboxTripSession(
             roadObjectsOnRouteObservers.forEach { it.onNewRoadObjectsOnTheRoute(value) }
         }
     private var mapMatcherResult: MapMatcherResult? = null
+
+    private val nativeFallbackVersionsObserver =
+        object : com.mapbox.navigator.FallbackVersionsObserver() {
+            override fun onFallbackVersionsFound(versions: MutableList<String>) {
+                fallbackVersionsObservers.forEach {
+                    it.onFallbackVersionsFound(versions)
+                }
+            }
+
+            override fun onCanReturnToLatest() {
+                fallbackVersionsObservers.forEach {
+                    it.onCanReturnToLatest()
+                }
+            }
+        }
 
     /**
      * Return raw location
@@ -459,6 +475,29 @@ internal class MapboxTripSession(
 
     override fun unregisterAllMapMatcherResultObservers() {
         mapMatcherResultObservers.clear()
+    }
+
+    override fun registerFallbackVersionsObserver(
+        fallbackVersionsObserver: FallbackVersionsObserver
+    ) {
+        if (fallbackVersionsObservers.isEmpty()) {
+            navigator.setFallbackVersionsObserver(nativeFallbackVersionsObserver)
+        }
+        fallbackVersionsObservers.add(fallbackVersionsObserver)
+    }
+
+    override fun unregisterFallbackVersionsObserver(
+        fallbackVersionsObserver: FallbackVersionsObserver
+    ) {
+        fallbackVersionsObservers.remove(fallbackVersionsObserver)
+        if (fallbackVersionsObservers.isEmpty()) {
+            navigator.setFallbackVersionsObserver(null)
+        }
+    }
+
+    override fun unregisterAllFallbackVersionsObservers() {
+        fallbackVersionsObservers.clear()
+        navigator.setFallbackVersionsObserver(null)
     }
 
     private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {

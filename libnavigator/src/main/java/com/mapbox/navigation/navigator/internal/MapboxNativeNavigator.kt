@@ -12,6 +12,7 @@ import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
+import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.NavigationStatus
@@ -255,6 +256,8 @@ interface MapboxNativeNavigator {
      * @param roadObjectsStoreObserver
      */
     fun setRoadObjectsStoreObserver(roadObjectsStoreObserver: RoadObjectsStoreObserver?)
+
+    fun setFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver?)
 
     // Predictive cache
 

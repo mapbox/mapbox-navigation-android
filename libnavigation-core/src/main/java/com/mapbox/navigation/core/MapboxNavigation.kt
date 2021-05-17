@@ -15,9 +15,9 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.common.module.provider.ModuleProviderArgument
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -53,6 +53,7 @@ import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
+import com.mapbox.navigation.core.trip.session.FallbackVersionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
@@ -775,6 +776,18 @@ class MapboxNavigation(
         tripSession.unregisterMapMatcherResultObserver(mapMatcherResultObserver)
     }
 
+    fun registerFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver) {
+        tripSession.registerFallbackVersionsObserver(fallbackVersionsObserver)
+    }
+
+    fun unregisterFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver) {
+        tripSession.unregisterFallbackVersionsObserver(fallbackVersionsObserver)
+    }
+
+    fun unregisterAllFallbackVersionsObservers() {
+        tripSession.unregisterAllFallbackVersionsObservers()
+    }
+
     /**
      * Send user feedback about an issue or problem with the Navigation SDK.
      *
@@ -820,13 +833,13 @@ class MapboxNavigation(
     }
 
     @ExperimentalMapboxNavigationAPI
-    fun recreateNavigatorInstance() {
+    fun recreateNavigatorInstance(tilesVersion: String) {
         val route = tripSession.route
         val routeProgress = tripSession.getRouteProgress()
         navigator.recreateNavigatorInstance(
             navigationOptions.deviceProfile,
             navigatorConfig,
-            createTilesConfig(),
+            createTilesConfig(isFallback = true, tilesVersion = tilesVersion),
             logger
         )
         ifNonNull(route) { route ->
@@ -955,7 +968,10 @@ class MapboxNavigation(
         tripSession.updateSensorEvent(sensorEvent)
     }
 
-    private fun createTilesConfig(): TilesConfig {
+    private fun createTilesConfig(
+        isFallback: Boolean = false,
+        tilesVersion: String? = null
+    ): TilesConfig {
         // TODO StrictMode may report a violation as we're creating a File from the Main
         val offlineFilesPath = RoutingTilesFiles(navigationOptions.applicationContext, logger)
             .absolutePath(navigationOptions.routingTilesOptions)
@@ -977,11 +993,11 @@ class MapboxNavigation(
             TileEndpointConfiguration(
                 navigationOptions.routingTilesOptions.tilesBaseUri.toString(),
                 dataset,
-                navigationOptions.routingTilesOptions.tilesVersion,
+                tilesVersion ?: navigationOptions.routingTilesOptions.tilesVersion,
                 navigationOptions.accessToken ?: "",
                 USER_AGENT,
                 BuildConfig.NAV_NATIVE_SDK_VERSION,
-                false,
+                isFallback,
                 navigationOptions.routingTilesOptions.minDaysBetweenServerAndLocalTilesVersion
             )
         )

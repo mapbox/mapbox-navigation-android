@@ -62,4 +62,8 @@ internal interface TripSession {
     fun registerMapMatcherResultObserver(mapMatcherResultObserver: MapMatcherResultObserver)
     fun unregisterMapMatcherResultObserver(mapMatcherResultObserver: MapMatcherResultObserver)
     fun unregisterAllMapMatcherResultObservers()
+
+    fun registerFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver)
+    fun unregisterFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver)
+    fun unregisterAllFallbackVersionsObservers()
 }
