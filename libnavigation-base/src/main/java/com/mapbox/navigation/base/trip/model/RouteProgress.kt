@@ -38,6 +38,8 @@ import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
  * between 0 and 1 and isn't guaranteed to reach 1 before the user reaches the end of the route.
  * @param remainingWaypoints [Int] number of waypoints remaining on the current route.
  * @param upcomingRoadObjects list of upcoming road objects.
+ * @param stale `true` if there were no location updates for a significant amount which causes
+ * a lack of confidence in the progress updates being sent.
  */
 class RouteProgress private constructor(
     val route: DirectionsRoute,
@@ -53,7 +55,8 @@ class RouteProgress private constructor(
     val durationRemaining: Double,
     val fractionTraveled: Float,
     val remainingWaypoints: Int,
-    val upcomingRoadObjects: List<UpcomingRoadObject>
+    val upcomingRoadObjects: List<UpcomingRoadObject>,
+    val stale: Boolean
 ) {
 
     /**
@@ -73,6 +76,7 @@ class RouteProgress private constructor(
         .fractionTraveled(fractionTraveled)
         .remainingWaypoints(remainingWaypoints)
         .upcomingRoadObjects(upcomingRoadObjects)
+        .stale(stale)
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -97,6 +101,7 @@ class RouteProgress private constructor(
         if (fractionTraveled != other.fractionTraveled) return false
         if (remainingWaypoints != other.remainingWaypoints) return false
         if (upcomingRoadObjects != other.upcomingRoadObjects) return false
+        if (stale != other.stale) return false
 
         return true
     }
@@ -119,6 +124,7 @@ class RouteProgress private constructor(
         result = 31 * result + fractionTraveled.hashCode()
         result = 31 * result + remainingWaypoints
         result = 31 * result + upcomingRoadObjects.hashCode()
+        result = 31 * result + stale.hashCode()
         return result
     }
 
@@ -140,7 +146,8 @@ class RouteProgress private constructor(
             "durationRemaining=$durationRemaining, " +
             "fractionTraveled=$fractionTraveled, " +
             "remainingWaypoints=$remainingWaypoints, " +
-            "upcomingRoadObjects=$upcomingRoadObjects" +
+            "upcomingRoadObjects=$upcomingRoadObjects, " +
+            "stale=$stale" +
             ")"
     }
 
@@ -163,6 +170,7 @@ class RouteProgress private constructor(
         private var fractionTraveled: Float = 0f
         private var remainingWaypoints: Int = 0
         private var upcomingRoadObjects: List<UpcomingRoadObject> = emptyList()
+        private var stale: Boolean = false
 
         /**
          * Current [DirectionsRoute] geometry with a buffer
@@ -193,7 +201,7 @@ class RouteProgress private constructor(
             apply { this.voiceInstructions = voiceInstructions }
 
         /**
-         * The current state of progress along the route.  Provides route and location tracking
+         * The current state of progress along the route. Provides route and location tracking
          * information.
          *
          * @return Builder
@@ -275,6 +283,15 @@ class RouteProgress private constructor(
             apply { this.upcomingRoadObjects = upcomingRoadObjects }
 
         /**
+         * True if there were no location updates for a significant amount of time which causes
+         * a lack of confidence in the progress updates being sent.
+         *
+         * @return Builder
+         */
+        fun stale(stale: Boolean): Builder =
+            apply { this.stale = stale }
+
+        /**
          * Build new instance of [RouteProgress]
          *
          * @return RouteProgress
@@ -295,7 +312,8 @@ class RouteProgress private constructor(
                 durationRemaining,
                 fractionTraveled,
                 remainingWaypoints,
-                upcomingRoadObjects
+                upcomingRoadObjects,
+                stale
             )
         }
     }

@@ -140,11 +140,7 @@ private fun NavigationStatus.getRouteProgress(
                     )
 
                     routeState.convertState().let {
-                        if (stale) {
-                            routeProgressBuilder.currentState(RouteProgressState.LOCATION_STALE)
-                        } else {
-                            routeProgressBuilder.currentState(it)
-                        }
+                        routeProgressBuilder.currentState(it)
 
                         var bannerInstructions =
                             bannerInstruction?.mapToDirectionsApi(currentStep)
@@ -194,6 +190,8 @@ private fun NavigationStatus.getRouteProgress(
         routeProgressBuilder.voiceInstructions(voiceInstruction?.mapToDirectionsApi())
 
         routeProgressBuilder.upcomingRoadObjects(upcomingRouteAlerts.toUpcomingRoadObjects())
+
+        routeProgressBuilder.stale(stale)
 
         return routeProgressBuilder.build()
     }

@@ -23,6 +23,7 @@ class RouteProgressTest : BuilderTest<RouteProgress, RouteProgress.Builder>() {
             .fractionTraveled(101112f)
             .remainingWaypoints(131415)
             .upcomingRoadObjects(mockk(relaxed = true))
+            .stale(true)
     }
 
     @Test
