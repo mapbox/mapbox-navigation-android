@@ -60,10 +60,13 @@ internal class ArrivalProgressObserver(
             }
             RouteProgressState.INITIALIZED,
             RouteProgressState.OFF_ROUTE,
-            RouteProgressState.UNCERTAIN,
-            RouteProgressState.LOCATION_STALE -> {
+            RouteProgressState.UNCERTAIN -> {
                 return
             }
+        }
+
+        if (routeProgress.stale) {
+            return
         }
 
         val arrivalOptions = arrivalController.arrivalOptions()

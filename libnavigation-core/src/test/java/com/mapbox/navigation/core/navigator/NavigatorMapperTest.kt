@@ -6,7 +6,6 @@ import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.speed.model.SpeedLimit
-import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
 import com.mapbox.navigation.core.trip.session.MapMatcherResult
@@ -26,8 +25,10 @@ import com.mapbox.navigator.UpcomingRouteAlert
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class NavigatorMapperTest {
@@ -262,7 +263,7 @@ class NavigatorMapperTest {
     }
 
     @Test
-    fun `route progress state location stale`() {
+    fun `route progress state stale`() {
         every { navigationStatus.stale } returns true
         val routeProgress = getRouteProgressFrom(
             directionsRoute,
@@ -271,7 +272,20 @@ class NavigatorMapperTest {
             mockk(relaxed = true)
         )
 
-        assertEquals(RouteProgressState.LOCATION_STALE, routeProgress!!.currentState)
+        assertTrue(routeProgress!!.stale)
+    }
+
+    @Test
+    fun `route progress state not stale`() {
+        every { navigationStatus.stale } returns false
+        val routeProgress = getRouteProgressFrom(
+            directionsRoute,
+            null,
+            navigationStatus,
+            mockk(relaxed = true)
+        )
+
+        assertFalse(routeProgress!!.stale)
     }
 
     @Test

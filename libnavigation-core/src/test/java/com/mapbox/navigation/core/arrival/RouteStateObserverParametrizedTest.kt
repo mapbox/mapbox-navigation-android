@@ -18,6 +18,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 class RouteStateObserverParametrizedTest(
     private val routeProgressState: RouteProgressState,
+    private val isStale: Boolean,
     private val nextLegStart: Boolean,
     private val finalDestinationArrival: Boolean
 ) {
@@ -27,12 +28,42 @@ class RouteStateObserverParametrizedTest(
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
         fun data() = listOf(
-            arrayOf(RouteProgressState.UNCERTAIN, false, false),
-            arrayOf(RouteProgressState.OFF_ROUTE, false, false),
-            arrayOf(RouteProgressState.INITIALIZED, false, false),
-            arrayOf(RouteProgressState.LOCATION_STALE, false, false),
-            arrayOf(RouteProgressState.COMPLETE, true, true),
-            arrayOf(RouteProgressState.TRACKING, true, true)
+            arrayOf(
+                /*routeProgressState*/ RouteProgressState.UNCERTAIN,
+                /*isStale*/ false,
+                /*nextLegStart*/ false,
+                /*finalDestinationArrival*/ false
+            ),
+            arrayOf(
+                /*routeProgressState*/ RouteProgressState.OFF_ROUTE,
+                /*isStale*/ false,
+                /*nextLegStart*/ false,
+                /*finalDestinationArrival*/ false
+            ),
+            arrayOf(
+                /*routeProgressState*/ RouteProgressState.INITIALIZED,
+                /*isStale*/ false,
+                /*nextLegStart*/ false,
+                /*finalDestinationArrival*/ false
+            ),
+            arrayOf(
+                /*routeProgressState*/ RouteProgressState.COMPLETE,
+                /*isStale*/ true,
+                /*nextLegStart*/ false,
+                /*finalDestinationArrival*/ false
+            ),
+            arrayOf(
+                /*routeProgressState*/ RouteProgressState.COMPLETE,
+                /*isStale*/ false,
+                /*nextLegStart*/ true,
+                /*finalDestinationArrival*/ true
+            ),
+            arrayOf(
+                /*routeProgressState*/ RouteProgressState.TRACKING,
+                /*isStale*/ false,
+                /*nextLegStart*/ true,
+                /*finalDestinationArrival*/ true
+            )
         )
     }
 
@@ -66,6 +97,7 @@ class RouteStateObserverParametrizedTest(
         arrivalProgressObserver.onRouteProgressChanged(
             mockk {
                 every { currentState } returns routeProgressState
+                every { stale } returns isStale
                 every { route } returns mockk {
                     mockMultipleLegs()
                 }
@@ -101,6 +133,7 @@ class RouteStateObserverParametrizedTest(
         arrivalProgressObserver.onRouteProgressChanged(
             mockk {
                 every { currentState } returns routeProgressState
+                every { stale } returns isStale
                 every { route } returns mockk {
                     mockMultipleLegs()
                     every { durationRemaining } returns 2.0

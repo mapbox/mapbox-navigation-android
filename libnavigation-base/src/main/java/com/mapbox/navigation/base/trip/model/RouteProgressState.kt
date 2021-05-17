@@ -21,18 +21,12 @@ enum class RouteProgressState {
     COMPLETE,
 
     /**
-     * We've gone of route: all [RouteProgress] fields are invalid.
+     * We've gone off route: all [RouteProgress] fields are invalid.
      */
     OFF_ROUTE,
 
     /**
      * We are probably about to go off-route: all [RouteProgress] fields are valid.
      */
-    UNCERTAIN,
-
-    /**
-     * A lack of [android.location.Location] updates has caused a lack of confidence in the
-     * progress updates being sent.
-     */
-    LOCATION_STALE
+    UNCERTAIN
 }
