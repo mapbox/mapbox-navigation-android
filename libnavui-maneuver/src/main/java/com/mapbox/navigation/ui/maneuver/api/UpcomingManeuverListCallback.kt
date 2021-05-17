@@ -7,7 +7,7 @@ import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 /**
  * Interface definition for a callback to be invoked when a upcoming maneuver data is processed.
  */
-interface UpcomingManeuverListCallback {
+fun interface UpcomingManeuverListCallback {
 
     /**
      * Invoked when all the upcoming maneuvers are ready.

@@ -1,7 +1,7 @@
 // Signature format: 3.0
 package com.mapbox.navigation.ui.maneuver.api {
 
-  public interface ManeuverCallback {
+  public fun interface ManeuverCallback {
     method public void onManeuver(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maneuver.model.Maneuver,com.mapbox.navigation.ui.maneuver.model.ManeuverError> maneuver);
   }
 
@@ -15,11 +15,11 @@ package com.mapbox.navigation.ui.maneuver.api {
     method public void getUpcomingManeuverList(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, com.mapbox.navigation.ui.maneuver.api.UpcomingManeuverListCallback callback);
   }
 
-  public interface StepDistanceRemainingCallback {
+  public fun interface StepDistanceRemainingCallback {
     method public void onStepDistanceRemaining(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maneuver.model.StepDistance,com.mapbox.navigation.ui.maneuver.model.StepDistanceError> distanceRemaining);
   }
 
-  public interface UpcomingManeuverListCallback {
+  public fun interface UpcomingManeuverListCallback {
     method public void onUpcomingManeuvers(com.mapbox.navigation.ui.base.model.Expected<? extends java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>,com.mapbox.navigation.ui.maneuver.model.ManeuverError> maneuvers);
   }
 

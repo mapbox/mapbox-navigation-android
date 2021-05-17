@@ -8,7 +8,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
  * information is updated on route progress.
  * @see [RouteProgress]
  */
-interface BannerInstructionsObserver {
+fun interface BannerInstructionsObserver {
 
     /**
      * Called whenever new banner instruction available

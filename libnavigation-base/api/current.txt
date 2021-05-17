@@ -30,7 +30,7 @@ package com.mapbox.navigation.base.extensions {
 
 package com.mapbox.navigation.base.formatter {
 
-  public interface DistanceFormatter {
+  public fun interface DistanceFormatter {
     method public android.text.SpannableString formatDistance(double distance);
   }
 
@@ -91,7 +91,7 @@ package com.mapbox.navigation.base.metrics {
   @StringDef({com.mapbox.navigation.base.metrics.DirectionsMetrics.ROUTE_RETRIEVAL, com.mapbox.navigation.base.metrics.NavigationMetrics.ARRIVE, com.mapbox.navigation.base.metrics.NavigationMetrics.CANCEL_SESSION, com.mapbox.navigation.base.metrics.NavigationMetrics.DEPART, com.mapbox.navigation.base.metrics.NavigationMetrics.REROUTE, com.mapbox.navigation.base.metrics.NavigationMetrics.FEEDBACK, com.mapbox.navigation.base.metrics.NavigationMetrics.INITIAL_GPS, com.mapbox.navigation.base.metrics.NavigationMetrics.FASTER_ROUTE, com.mapbox.navigation.base.metrics.NavigationMetrics.APP_USER_TURNSTILE, com.mapbox.navigation.base.metrics.NavigationMetrics.FREE_DRIVE}) public static @interface MetricEvent.Metric {
   }
 
-  public interface MetricsObserver {
+  public fun interface MetricsObserver {
     method public void onMetricUpdated(@com.mapbox.navigation.base.metrics.MetricEvent.Metric String metricName, String jsonStringData);
   }
 

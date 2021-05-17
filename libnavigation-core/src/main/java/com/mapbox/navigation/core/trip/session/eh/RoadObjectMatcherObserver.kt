@@ -7,7 +7,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectMatcherError
 /**
  * Road objects matching listener. Callbacks are fired when matching is finished.
  */
-interface RoadObjectMatcherObserver {
+fun interface RoadObjectMatcherObserver {
     /**
      * Road object matching result.
      */

@@ -5,7 +5,7 @@ import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 /**
  * Interface definition for a callback to be invoked when a voice instruction is played.
  */
-internal interface VoiceInstructionsPlayerCallback {
+internal fun interface VoiceInstructionsPlayerCallback {
 
     /**
      * Invoked when the speech player is done playing.

@@ -3,7 +3,7 @@ package com.mapbox.navigation.base.metrics
 /**
  * Interface for observe metric events handled.
  */
-interface MetricsObserver {
+fun interface MetricsObserver {
 
     /**
      * Called when metric event handled by [MetricsReporter.addEvent]

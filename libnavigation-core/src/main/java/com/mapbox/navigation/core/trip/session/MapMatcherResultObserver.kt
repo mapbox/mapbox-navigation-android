@@ -5,7 +5,7 @@ package com.mapbox.navigation.core.trip.session
  *
  * @see [MapMatcherResult]
  */
-interface MapMatcherResultObserver {
+fun interface MapMatcherResultObserver {
 
     /**
      * Called whenever a new enhanced location is available.

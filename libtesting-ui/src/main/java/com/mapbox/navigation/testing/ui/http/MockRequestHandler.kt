@@ -6,7 +6,7 @@ import okhttp3.mockwebserver.RecordedRequest
 /**
  * Handles a [MockWebServerRule]'s [RecordedRequest].
  */
-interface MockRequestHandler {
+fun interface MockRequestHandler {
 
     /**
      * Invoked whenever a test makes a request with [MockWebServerRule.baseUrl].

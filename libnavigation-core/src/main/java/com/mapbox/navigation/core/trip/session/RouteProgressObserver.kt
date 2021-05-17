@@ -7,7 +7,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
  *
  * @see [RouteProgress]
  */
-interface RouteProgressObserver {
+fun interface RouteProgressObserver {
     /**
      * Invoked every time the [RouteProgress] is updated
      * @param routeProgress [RouteProgress]

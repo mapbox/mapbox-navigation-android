@@ -14,7 +14,7 @@ import com.mapbox.navigation.core.trip.session.OffRouteObserver
  *
  * @see MapboxRouteOptionsUpdater
  */
-interface RouteOptionsUpdater {
+fun interface RouteOptionsUpdater {
 
     /**
      * Provides a new [RouteOptions] instance based on the original request options and the current route progress.

@@ -1,5 +1,5 @@
 package com.mapbox.navigation.core
 
-internal interface NavigationSessionStateObserver {
+internal fun interface NavigationSessionStateObserver {
     fun onNavigationSessionStateChanged(navigationSession: NavigationSession.State)
 }

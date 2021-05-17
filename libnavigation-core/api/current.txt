@@ -115,7 +115,7 @@ package com.mapbox.navigation.core.arrival {
 
 package com.mapbox.navigation.core.directions.session {
 
-  public interface RoutesObserver {
+  public fun interface RoutesObserver {
     method public void onRoutesChanged(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
   }
 
@@ -202,7 +202,7 @@ package com.mapbox.navigation.core.replay {
 
 package com.mapbox.navigation.core.replay.history {
 
-  public interface CustomEventMapper {
+  public fun interface CustomEventMapper {
     method public com.mapbox.navigation.core.replay.history.ReplayEventBase? map(String eventType, java.util.Map<?,?> properties);
   }
 
@@ -267,7 +267,7 @@ package com.mapbox.navigation.core.replay.history {
     property public final java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> events;
   }
 
-  public interface ReplayEventsObserver {
+  public fun interface ReplayEventsObserver {
     method public void replayEvents(java.util.List<? extends com.mapbox.navigation.core.replay.history.ReplayEventBase> events);
   }
 
@@ -371,11 +371,11 @@ package com.mapbox.navigation.core.reroute {
     property public abstract com.mapbox.navigation.core.reroute.RerouteState state;
   }
 
-  public static interface RerouteController.RerouteStateObserver {
+  public static fun interface RerouteController.RerouteStateObserver {
     method public void onRerouteStateChanged(com.mapbox.navigation.core.reroute.RerouteState rerouteState);
   }
 
-  public static interface RerouteController.RoutesCallback {
+  public static fun interface RerouteController.RoutesCallback {
     method public void onNewRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
   }
 
@@ -421,7 +421,7 @@ package com.mapbox.navigation.core.routeoptions {
   public final class MapboxRouteOptionsUpdaterKt {
   }
 
-  public interface RouteOptionsUpdater {
+  public fun interface RouteOptionsUpdater {
     method public com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult update(com.mapbox.api.directions.v5.models.RouteOptions? routeOptions, com.mapbox.navigation.base.trip.model.RouteProgress? routeProgress, android.location.Location? location);
   }
 
@@ -562,7 +562,7 @@ package com.mapbox.navigation.core.telemetry.events {
 
 package com.mapbox.navigation.core.trip.session {
 
-  public interface BannerInstructionsObserver {
+  public fun interface BannerInstructionsObserver {
     method public void onNewBannerInstructions(com.mapbox.api.directions.v5.models.BannerInstructions bannerInstructions);
   }
 
@@ -588,19 +588,19 @@ package com.mapbox.navigation.core.trip.session {
     property public final com.mapbox.navigation.base.speed.model.SpeedLimit? speedLimit;
   }
 
-  public interface MapMatcherResultObserver {
+  public fun interface MapMatcherResultObserver {
     method public void onNewMapMatcherResult(com.mapbox.navigation.core.trip.session.MapMatcherResult mapMatcherResult);
   }
 
-  public interface OffRouteObserver {
+  public fun interface OffRouteObserver {
     method public void onOffRouteStateChanged(boolean offRoute);
   }
 
-  public interface RoadObjectsOnRouteObserver {
+  public fun interface RoadObjectsOnRouteObserver {
     method public void onNewRoadObjectsOnTheRoute(java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> roadObjects);
   }
 
-  public interface RouteProgressObserver {
+  public fun interface RouteProgressObserver {
     method public void onRouteProgressChanged(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
   }
 
@@ -609,11 +609,11 @@ package com.mapbox.navigation.core.trip.session {
     enum_constant public static final com.mapbox.navigation.core.trip.session.TripSessionState STOPPED;
   }
 
-  public interface TripSessionStateObserver {
+  public fun interface TripSessionStateObserver {
     method public void onSessionStateChanged(com.mapbox.navigation.core.trip.session.TripSessionState tripSessionState);
   }
 
-  public interface VoiceInstructionsObserver {
+  public fun interface VoiceInstructionsObserver {
     method public void onNewVoiceInstructions(com.mapbox.api.directions.v5.models.VoiceInstructions voiceInstructions);
   }
 
@@ -651,7 +651,7 @@ package com.mapbox.navigation.core.trip.session.eh {
   public final class RoadObjectMatcherKt {
   }
 
-  public interface RoadObjectMatcherObserver {
+  public fun interface RoadObjectMatcherObserver {
     method public void onRoadObjectMatched(com.mapbox.bindgen.Expected<com.mapbox.navigation.base.trip.model.roadobject.RoadObject,com.mapbox.navigation.base.trip.model.roadobject.RoadObjectMatcherError> result);
   }
 
