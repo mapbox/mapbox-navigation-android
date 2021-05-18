@@ -948,9 +948,7 @@ class MapboxNavigation(
 
         return TilesConfig(
             offlineFilesPath,
-            // TODO use TileStore from the options
-            // we pass null, so NavNative will use TileStore.getInstance(offlineFilesPath)
-            null,
+            navigationOptions.routingTilesOptions.tileStore,
             null,
             null,
             null,

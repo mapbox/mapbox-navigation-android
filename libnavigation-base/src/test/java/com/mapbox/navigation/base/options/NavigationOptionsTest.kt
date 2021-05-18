@@ -7,11 +7,14 @@ import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
+import com.mapbox.navigation.base.internal.tilestore.TileStoreProvider
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.testing.BuilderTest
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -34,11 +37,16 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
     fun setup() {
         mockkStatic(LocationEngineProvider::class)
         every { LocationEngineProvider.getBestLocationEngine(any()) } returns mockk()
+
+        mockkObject(TileStoreProvider)
+        every { TileStoreProvider.getDefaultTileStoreInstance() } returns mockk()
+        every { TileStoreProvider.getTileStoreInstance(any()) } returns mockk()
     }
 
     @After
     fun teardown() {
         unmockkStatic(LocationEngineProvider::class)
+        unmockkObject(TileStoreProvider)
     }
 
     override fun getImplementationClass(): KClass<NavigationOptions> = NavigationOptions::class

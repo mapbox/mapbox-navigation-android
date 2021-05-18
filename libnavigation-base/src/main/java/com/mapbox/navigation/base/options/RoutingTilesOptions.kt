@@ -1,5 +1,7 @@
 package com.mapbox.navigation.base.options
 
+import com.mapbox.common.TileStore
+import com.mapbox.navigation.base.internal.tilestore.TileStoreProvider
 import java.net.URI
 
 /**
@@ -8,14 +10,19 @@ import java.net.URI
  * Routing tiles are stored on-device and used for map-matching (enhanced location production),
  * offline routing, Electronic Horizon generation, and other.
  *
- * @param tilesBaseUri scheme and host, for example `"https://api.mapbox.com"`
+ * @param tilesBaseUri scheme and host, for example `"https://api.mapbox.com"`.
+ * If empty, the navigator works in the fallback mode all the time
+ * (route line following; no full map-matching; no map-matching in free drive).
  * @param tilesDataset string built out of `<account>[.<graph>]` variables.
  * Account can be `mapbox` for default datasets or your username for other.
  * Graph can be left blank if you don't target any custom datasets.
  * @param tilesProfile profile of the dataset.
  * One of (driving|driving-traffic|walking|cycling|truck).
  * @param tilesVersion version of tiles, chosen automatically if empty
- * @param filePath used for storing road network tiles
+ * @param filePath used for persistent configuration and history files storing.
+ * @param tileStore tile store instance. It manages downloads and storage for requests to
+ * tile-related API endpoints. For offline/predictive-caching use cases this instance should be
+ * the same that is passed to map resource options.
  * @param minDaysBetweenServerAndLocalTilesVersion is the minimum time in days between local version of tiles
  * and latest on the server to consider using the latest version of routing tiles from the server.
  * **As updating tiles frequently consumes considerably energy and bandwidth**.
@@ -27,6 +34,7 @@ class RoutingTilesOptions private constructor(
     val tilesProfile: String,
     val tilesVersion: String,
     val filePath: String?,
+    val tileStore: TileStore,
     val minDaysBetweenServerAndLocalTilesVersion: Int
 ) {
     /**
@@ -38,6 +46,7 @@ class RoutingTilesOptions private constructor(
         tilesProfile(tilesProfile)
         tilesVersion(tilesVersion)
         filePath(filePath)
+        tileStore(tileStore)
         minDaysBetweenServerAndLocalTilesVersion(minDaysBetweenServerAndLocalTilesVersion)
     }
 
@@ -55,6 +64,7 @@ class RoutingTilesOptions private constructor(
         if (tilesProfile != other.tilesProfile) return false
         if (tilesVersion != other.tilesVersion) return false
         if (filePath != other.filePath) return false
+        if (tileStore != other.tileStore) return false
         if (minDaysBetweenServerAndLocalTilesVersion
             != other.minDaysBetweenServerAndLocalTilesVersion
         ) return false
@@ -71,7 +81,8 @@ class RoutingTilesOptions private constructor(
         result = 31 * result + tilesProfile.hashCode()
         result = 31 * result + tilesVersion.hashCode()
         result = 31 * result + (filePath?.hashCode() ?: 0)
-        result = 31 * result + minDaysBetweenServerAndLocalTilesVersion.hashCode()
+        result = 31 * result + tileStore.hashCode()
+        result = 31 * result + minDaysBetweenServerAndLocalTilesVersion
         return result
     }
 
@@ -85,6 +96,7 @@ class RoutingTilesOptions private constructor(
             "tilesProfile='$tilesProfile', " +
             "tilesVersion='$tilesVersion', " +
             "filePath=$filePath, " +
+            "tileStore=$tileStore, " +
             "minDaysBetweenServerAndLocalTilesVersion=$minDaysBetweenServerAndLocalTilesVersion" +
             ")"
     }
@@ -100,12 +112,15 @@ class RoutingTilesOptions private constructor(
         private var tilesProfile: String = "driving-traffic"
         private var tilesVersion: String = ""
         private var filePath: String? = null
+        private var tileStore: TileStore = TileStoreProvider.getDefaultTileStoreInstance()
         private var minDaysBetweenServerAndLocalTilesVersion: Int = 56 // 8 weeks
 
         /**
          * Override the routing tiles base endpoint with a [URI].
          *
          * Expects scheme and host, for example `"https://api.mapbox.com"`.
+         * If empty, the navigator works in the fallback mode all the time
+         * (route line following; no full map-matching; no map-matching in free drive).
          */
         fun tilesBaseUri(tilesBaseUri: URI): Builder =
             apply {
@@ -155,9 +170,18 @@ class RoutingTilesOptions private constructor(
 
         /**
          * Creates a custom file path to store the road network tiles.
+         * It is used for persistent configuration and history files storing.
          */
         fun filePath(filePath: String?): Builder =
             apply { this.filePath = filePath }
+
+        /**
+         * Override tile store instance. It manages downloads and storage for requests to
+         * tile-related API endpoints. For offline/predictive-caching use cases this instance
+         * should be the same that is passed to map resource options.
+         */
+        fun tileStore(tileStore: TileStore): Builder =
+            apply { this.tileStore = tileStore }
 
         /**
          * Override minimum time in days between local version of tiles and latest on the server
@@ -192,6 +216,7 @@ class RoutingTilesOptions private constructor(
                 tilesProfile = tilesProfile,
                 tilesVersion = tilesVersion,
                 filePath = filePath,
+                tileStore = tileStore,
                 minDaysBetweenServerAndLocalTilesVersion = minDaysBetweenServerAndLocalTilesVersion
             )
         }
