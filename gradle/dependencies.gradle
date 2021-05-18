@@ -51,7 +51,7 @@ ext {
       firebaseCrashlytics       : '17.3.1',
       multidex                  : '2.0.0',
       json                      : '20180813',
-      coroutinesAndroid         : '1.4.3',
+      coroutinesAndroid         : '1.5.0',
       okhttp                    : '4.9.0',
       okio                      : '2.10.0',
       androidxTestJunit         : '1.1.1',
