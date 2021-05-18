@@ -14,6 +14,7 @@ import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
+import com.mapbox.navigation.base.internal.tilestore.TileStoreProvider
 import com.mapbox.navigation.base.options.IncidentsOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -123,6 +124,9 @@ class MapboxNavigationTest {
     @Before
     fun setUp() {
         mockkObject(MapboxModuleProvider)
+        mockkObject(TileStoreProvider)
+        every { TileStoreProvider.getDefaultTileStoreInstance() } returns mockk()
+
         val hybridRouter: Router = mockk(relaxUnitFun = true)
         every {
             MapboxModuleProvider.createModule<Router>(
@@ -163,6 +167,7 @@ class MapboxNavigationTest {
     @After
     fun tearDown() {
         unmockkObject(MapboxModuleProvider)
+        unmockkObject(TileStoreProvider)
         unmockkObject(LoggerProvider)
         unmockkObject(NavigationComponentProvider)
 
