@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
@@ -28,16 +29,22 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
+import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.replay.ReplayLocationEngine
+import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityNavigationBinding
+import com.mapbox.navigation.examples.core.replay.HistoryRecorder
 import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
@@ -81,6 +88,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 class MapboxNavigationActivity : AppCompatActivity() {
 
@@ -147,6 +155,8 @@ class MapboxNavigationActivity : AppCompatActivity() {
     private lateinit var routeLineView: MapboxRouteLineView
     private lateinit var routeArrowView: MapboxRouteArrowView
     private val routeArrowAPI: MapboxRouteArrowApi = MapboxRouteArrowApi()
+    private val mapboxReplayer = MapboxReplayer()
+    private lateinit var historyRecorder: HistoryRecorder
 
     /* ----- Voice instruction callbacks ----- */
     private val voiceInstructionsObserver = object : VoiceInstructionsObserver {
@@ -291,15 +301,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
                 // generate route geometries asynchronously and render them
-                CoroutineScope(Dispatchers.Main).launch {
-                    val result = routeLineAPI.setRoutes(
-                        listOf(RouteLine(routes.first(), null))
-                    )
-                    val style = mapboxMap.getStyle()
-                    if (style != null) {
-                        routeLineView.renderRouteDrawData(style, result)
-                    }
-                }
+                updateRouteLines(routes)
 
                 // update the camera position to account for the new route
                 viewportDataSource.onRouteChanged(routes.first())
@@ -329,6 +331,17 @@ class MapboxNavigationActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateRouteLines(routes: List<DirectionsRoute>) {
+        CoroutineScope(Dispatchers.Main).launch {
+            val routeLines = routes.map { RouteLine(it, null) }
+            val result = routeLineAPI.setRoutes(routeLines)
+            val style = mapboxMap.getStyle()
+            if (style != null) {
+                routeLineView.renderRouteDrawData(style, result)
+            }
+        }
+    }
+
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -352,8 +365,20 @@ class MapboxNavigationActivity : AppCompatActivity() {
         mapboxNavigation = MapboxNavigation(
             NavigationOptions.Builder(this)
                 .accessToken(getMapboxAccessTokenFromResources())
+                .routeAlternativesOptions(
+                    RouteAlternativesOptions.Builder()
+                        .intervalMillis(TimeUnit.SECONDS.toMillis(10))
+                        .build()
+                )
+                .locationEngine(ReplayLocationEngine(mapboxReplayer))
                 .build()
         )
+        historyRecorder = HistoryRecorder(mapboxNavigation)
+        mapboxNavigation.registerTripSessionStateObserver(historyRecorder)
+        mapboxReplayer.play()
+        mapboxReplayer.pushRealLocation(this, 0.0)
+        mapboxNavigation.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+
         // move the camera to current location on the first update
         mapboxNavigation.registerLocationObserver(object : LocationObserver {
             override fun onRawLocationChanged(rawLocation: Location) {
@@ -371,6 +396,23 @@ class MapboxNavigationActivity : AppCompatActivity() {
                 keyPoints: List<Location>
             ) {
                 // not handled
+            }
+        })
+        mapboxNavigation.registerRouteAlternativesObserver(object : RouteAlternativesObserver {
+            override fun onRouteAlternatives(
+                routeProgress: RouteProgress,
+                alternatives: List<DirectionsRoute>
+            ) {
+                val durationRemaining = routeProgress.durationRemaining
+                val alternativeRouteDuration = alternatives.firstOrNull()?.duration() ?: Double.MAX_VALUE
+                Log.i("kyle_debug", "kyle_debug $alternativeRouteDuration < $durationRemaining")
+                val routes = mutableListOf<DirectionsRoute>()
+                routes.add(routeProgress.route)
+                routes.addAll(alternatives)
+                updateRouteLines(routes)
+                if (alternativeRouteDuration < durationRemaining) {
+                    mapboxNavigation.setRoutes(routes)
+                }
             }
         })
 
@@ -544,12 +586,14 @@ class MapboxNavigationActivity : AppCompatActivity() {
             RouteOptions.builder()
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
+                .alternatives(true)
                 .accessToken(getMapboxAccessTokenFromResources())
                 .coordinates(listOf(origin, destination))
                 .build(),
             object : RoutesRequestCallback {
                 override fun onRoutesReady(routes: List<DirectionsRoute>) {
-                    setRouteAndStartNavigation(routes.first())
+
+                    setRouteAndStartNavigation(routes)
                 }
 
                 override fun onRoutesRequestFailure(
@@ -566,9 +610,9 @@ class MapboxNavigationActivity : AppCompatActivity() {
         )
     }
 
-    private fun setRouteAndStartNavigation(route: DirectionsRoute) {
+    private fun setRouteAndStartNavigation(routes: List<DirectionsRoute>) {
         // set route
-        mapboxNavigation.setRoutes(listOf(route))
+        mapboxNavigation.setRoutes(routes.reversed())
 
         // show UI elements
         binding.soundButton.visibility = VISIBLE

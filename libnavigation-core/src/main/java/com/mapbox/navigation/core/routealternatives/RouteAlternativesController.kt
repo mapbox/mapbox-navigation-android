@@ -7,6 +7,8 @@ import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
+import com.mapbox.navigation.core.trip.session.MapMatcherResult
+import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -23,7 +25,7 @@ internal class RouteAlternativesController(
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession,
     private val routeOptionsUpdater: RouteOptionsUpdater
-) {
+) : MapMatcherResultObserver {
     private val jobControl = ThreadController.getMainScopeAndRootJob()
 
     private val mapboxTimer = MapboxTimer()
@@ -108,6 +110,10 @@ internal class RouteAlternativesController(
                     tripSession.getState() == TripSessionState.STARTED
                 ) {
                     val alternatives = routes.filter { navigator.isDifferentRoute(it) }
+                    val refreshedRoutes = mutableListOf<DirectionsRoute>()
+                    refreshedRoutes.add(routeProgress.route)
+                    refreshedRoutes.addAll(alternatives)
+                    directionsSession.routes = refreshedRoutes
                     observers.forEach { it.onRouteAlternatives(routeProgress, alternatives) }
                 }
             }
@@ -122,6 +128,19 @@ internal class RouteAlternativesController(
 
         override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
             logger.w(msg = Message("Route alternatives request canceled"))
+        }
+    }
+
+    override fun onNewMapMatcherResult(mapMatcherResult: MapMatcherResult) {
+        val routeProgress = tripSession.getRouteProgress()
+            ?: return
+        jobControl.scope.launch {
+            val alternatives = directionsSession.routes.filter { alternative ->
+                navigator.isAlternativeRoute(
+                    mapMatcherResult.enhancedLocation,
+                    alternative)
+            }
+            observers.forEach { it.onRouteAlternatives(routeProgress, alternatives) }
         }
     }
 }
