@@ -62,11 +62,11 @@ workflows:
       - instrumentation-tests:
           requires:
             - prepare-and-assemble
-#      - mobile-metrics-dry-run:
-#          type: approval
-#      - mobile-metrics-benchmarks:
-#          requires:
-#            - mobile-metrics-dry-run
+      - mobile-metrics-dry-run:
+          type: approval
+      - mobile-metrics-benchmarks:
+          requires:
+            - mobile-metrics-dry-run
 
 #------------------------------
 #---------- COMMANDS ----------
@@ -526,7 +526,7 @@ jobs:
           artifact-type: "core"
       - publish-artifacts:
           artifact-type: "ui"
-#      - trigger-mobile-metrics
+      - trigger-mobile-metrics
 
   release:
     executor: ndk-r21e-latest-executor

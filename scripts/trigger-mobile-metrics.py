@@ -36,7 +36,7 @@ def TriggerWorkflow(token, commit, publish):
       print("Started run_android_navigation_benchmark: %s" % response_dict)
 
 def TriggerJob(token, commit, job):
-    url = "https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/main"
+    url = "https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master"
 
     headers = {
         "Content-Type": "application/json",
@@ -75,8 +75,10 @@ def Main():
 
   # These jobs need to be refactored into workflows.
   if publishResults:
-    TriggerJob(token, commit, "android-navigation-code-coverage")
-    TriggerJob(token, commit, "android-navigation-binary-size")
+    TriggerJob(token, commit, "android-navigation-benchmark")
+    # "android-navigation-code-coverage" and "android-navigation-binary-size" are not no supported yet
+    # TriggerJob(token, commit, "android-navigation-code-coverage")
+    # TriggerJob(token, commit, "android-navigation-binary-size")
   else:
     TriggerJob(token, commit, "android-navigation-code-coverage-ci")
     TriggerJob(token, commit, "android-navigation-binary-size-ci")
