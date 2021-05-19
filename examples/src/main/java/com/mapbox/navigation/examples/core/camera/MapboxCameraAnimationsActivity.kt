@@ -39,7 +39,6 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
@@ -47,7 +46,6 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationObserver
-import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.R
@@ -148,93 +146,92 @@ class MapboxCameraAnimationsActivity :
         GeoJsonSource.Builder("circle_source").data("")
     )
 
-    private val mapMatcherResultObserver = object : MapMatcherResultObserver {
-        override fun onNewMapMatcherResult(mapMatcherResult: MapMatcherResult) {
-            val transitionOptions: (ValueAnimator.() -> Unit)? = if (mapMatcherResult.isTeleport) {
-                {
-                    duration = 0
-                }
-            } else {
-                {
-                    duration = 1000
-                }
+    private val mapMatcherResultObserver = MapMatcherResultObserver { mapMatcherResult ->
+        val transitionOptions: (ValueAnimator.() -> Unit) = if (mapMatcherResult.isTeleport) {
+            {
+                duration = 0
             }
-            navigationLocationProvider.changePosition(
-                mapMatcherResult.enhancedLocation,
-                mapMatcherResult.keyPoints,
-                latLngTransitionOptions = transitionOptions,
-                bearingTransitionOptions = transitionOptions
+        } else {
+            {
+                duration = 1000
+            }
+        }
+        navigationLocationProvider.changePosition(
+            mapMatcherResult.enhancedLocation,
+            mapMatcherResult.keyPoints,
+            latLngTransitionOptions = transitionOptions,
+            bearingTransitionOptions = transitionOptions
+        )
+        viewportDataSource.onLocationChanged(mapMatcherResult.enhancedLocation)
+
+        lookAtPoint?.run {
+            val point = Point.fromLngLat(
+                mapMatcherResult.enhancedLocation.longitude,
+                mapMatcherResult.enhancedLocation.latitude,
             )
-            viewportDataSource.onLocationChanged(mapMatcherResult.enhancedLocation)
+            val bearing = TurfMeasurement.bearing(point, this)
+            viewportDataSource.followingBearingPropertyOverride(bearing)
+        }
 
-            lookAtPoint?.run {
-                val point = Point.fromLngLat(
-                    mapMatcherResult.enhancedLocation.longitude,
-                    mapMatcherResult.enhancedLocation.latitude,
-                )
-                val bearing = TurfMeasurement.bearing(point, this)
-                viewportDataSource.followingBearingPropertyOverride(bearing)
+        viewportDataSource.evaluate()
+        if (mapMatcherResult.isTeleport) {
+            navigationCamera.resetFrame()
+        }
+    }
+
+    private val routeProgressObserver = RouteProgressObserver { routeProgress ->
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+        viewportDataSource.evaluate()
+
+        routeLineAPI?.updateWithRouteProgress(routeProgress)
+
+        routeArrowAPI.addUpcomingManeuverArrow(routeProgress).apply {
+            ifNonNull(routeArrowView, mapboxMap.getStyle()) { view, style ->
+                view.renderManeuverUpdate(style, this)
             }
+        }
+    }
 
+    private val routesObserver = RoutesObserver { routes ->
+        if (routes.isNotEmpty()) {
+            CoroutineScope(Dispatchers.Main).launch {
+                routeLineAPI?.setRoutes(listOf(RouteLine(routes[0], null)))?.apply {
+                    ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
+                        view.renderRouteDrawData(style, this)
+                    }
+                }
+            }
+            startSimulation(routes[0])
+            viewportDataSource.onRouteChanged(routes.first())
+            viewportDataSource.overviewPadding = overviewEdgeInsets
             viewportDataSource.evaluate()
-            if (mapMatcherResult.isTeleport) {
-                navigationCamera.resetFrame()
+            navigationCamera.requestNavigationCameraToOverview()
+        } else {
+            CoroutineScope(Dispatchers.Main).launch {
+                routeArrowAPI.clearArrows().apply {
+                    ifNonNull(routeArrowView, mapboxMap.getStyle()) { view, style ->
+                        view.render(style, this)
+                    }
+                }
+                routeLineAPI?.clearRouteLine()?.apply {
+                    ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
+                        view.renderClearRouteLineValue(style, this)
+                    }
+                }
             }
+            viewportDataSource.clearRouteData()
+            navigationCamera.requestNavigationCameraToIdle()
         }
     }
 
-    private val routeProgressObserver = object : RouteProgressObserver {
-        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            viewportDataSource.onRouteProgressChanged(routeProgress)
-            viewportDataSource.evaluate()
-
-            routeArrowAPI.addUpcomingManeuverArrow(routeProgress).apply {
-                ifNonNull(routeArrowView, mapboxMap.getStyle()) { view, style ->
-                    view.renderManeuverUpdate(style, this)
+    private val onIndicatorPositionChangedListener =
+        OnIndicatorPositionChangedListener { point ->
+            routeLineAPI?.updateTraveledRouteLine(point)?.apply {
+                ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
+                    view.renderVanishingRouteLineUpdateValue(style, this)
                 }
             }
         }
-    }
-
-    private val routesObserver = object : RoutesObserver {
-        override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            if (routes.isNotEmpty()) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    routeLineAPI?.setRoutes(listOf(RouteLine(routes[0], null)))?.apply {
-                        ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
-                            view.renderRouteDrawData(style, this)
-                        }
-                    }
-                }
-                startSimulation(routes[0])
-                viewportDataSource.onRouteChanged(routes.first())
-                viewportDataSource.overviewPadding = overviewEdgeInsets
-                viewportDataSource.evaluate()
-                navigationCamera.requestNavigationCameraToOverview()
-            } else {
-                CoroutineScope(Dispatchers.Main).launch {
-                    routeArrowAPI.clearArrows().apply {
-                        ifNonNull(routeArrowView, mapboxMap.getStyle()) { view, style ->
-                            view.render(style, this)
-                        }
-                    }
-                    routeLineAPI?.clearRouteLine()?.apply {
-                        ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
-                            view.renderClearRouteLineValue(style, this)
-                        }
-                    }
-                }
-                viewportDataSource.clearRouteData()
-                navigationCamera.requestNavigationCameraToIdle()
-            }
-        }
-    }
-
-    private val onIndicatorPositionChangedListener = object : OnIndicatorPositionChangedListener {
-        override fun onIndicatorPositionChanged(point: Point) {
-            routeLineAPI?.updateTraveledRouteLine(point)
-        }
-    }
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -315,6 +312,7 @@ class MapboxCameraAnimationsActivity :
     private fun initRouteLine() {
         val mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(this)
             .withRouteLineBelowLayerId("road-label")
+            .withVanishingRouteLineEnabled(true)
             .build()
         routeLineAPI = MapboxRouteLineApi(mapboxRouteLineOptions)
         routeLineView = MapboxRouteLineView(mapboxRouteLineOptions)
@@ -440,10 +438,10 @@ class MapboxCameraAnimationsActivity :
                 style.addLayer(poiLayer)
             },
             object : OnMapLoadErrorListener {
-                override fun onMapLoadError(mapLoadErrorType: MapLoadErrorType, msg: String) {
+                override fun onMapLoadError(mapLoadErrorType: MapLoadErrorType, message: String) {
                     Log.e(
                         "CameraAnimationsAct",
-                        "Error loading map - error type: $mapLoadErrorType, message: $msg"
+                        "Error loading map - error type: $mapLoadErrorType, message: $message"
                     )
                 }
             }
@@ -531,7 +529,6 @@ class MapboxCameraAnimationsActivity :
             AnimationType.LookAtPOIWhenFollowing -> {
                 if (lookAtPoint == null) {
                     val center = mapboxMap.cameraState.center
-                        ?: Point.fromLngLat(0.0, 0.0)
                     lookAtPoint = Point.fromLngLat(
                         (center.longitude()) + 0.003,
                         (center.latitude()) + 0.003
