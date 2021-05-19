@@ -51,7 +51,7 @@ class MapboxRouteLineViewTest {
             it["source"] = sourceValue
         }
     }
-    private val layerPropertyExpected = mockk<Expected<Value, String>> {
+    private val layerPropertyExpected = mockk<Expected<String, Value>> {
         every { value.hint(Value::class) } returns layerValue
     }
     private val geoJsonSourceTypeValue = mockk<Value> {
@@ -62,7 +62,7 @@ class MapboxRouteLineViewTest {
             it["type"] = geoJsonSourceTypeValue
         }
     }
-    private val geoJsonSourceExpected = mockk<Expected<Value, String>> {
+    private val geoJsonSourceExpected = mockk<Expected<String, Value>> {
         every { value.hint(Value::class) } returns geoJsonSourceValue
     }
 
@@ -122,16 +122,16 @@ class MapboxRouteLineViewTest {
             } returns geoJsonSourceExpected
             every {
                 setStyleSourceProperty(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleSourceProperty(RouteConstants.WAYPOINT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -168,16 +168,16 @@ class MapboxRouteLineViewTest {
             } returns geoJsonSourceExpected
             every {
                 setStyleSourceProperty(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleSourceProperty(RouteConstants.WAYPOINT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -273,21 +273,21 @@ class MapboxRouteLineViewTest {
                     "line-gradient",
                     trafficLineExp
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
                     "line-gradient",
                     routeLineExp
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
                     "line-gradient",
                     casingLineEx
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -368,21 +368,21 @@ class MapboxRouteLineViewTest {
                     "line-gradient",
                     trafficLineExp
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
                     "line-gradient",
                     routeLineExp
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
                     "line-gradient",
                     casingLineEx
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 getStyleLayerProperties(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
             } returns layerPropertyExpected
@@ -395,14 +395,14 @@ class MapboxRouteLineViewTest {
                     "line-gradient",
                     alternativeRoute1Expression
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
                     "line-gradient",
                     alternativeRoute2Expression
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 getStyleSourceProperties(RouteConstants.PRIMARY_ROUTE_SOURCE_ID)
             } returns geoJsonSourceExpected
@@ -417,16 +417,16 @@ class MapboxRouteLineViewTest {
             } returns geoJsonSourceExpected
             every {
                 setStyleSourceProperty(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleSourceProperty(RouteConstants.WAYPOINT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -531,40 +531,40 @@ class MapboxRouteLineViewTest {
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 getStyleLayerProperties(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 getStyleLayerProperties(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -622,40 +622,40 @@ class MapboxRouteLineViewTest {
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 getStyleLayerProperties(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 getStyleLayerProperties(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -718,79 +718,79 @@ class MapboxRouteLineViewTest {
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 getStyleLayerProperties(RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 getStyleLayerProperties(RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 getStyleLayerProperties(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 getStyleLayerProperties(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 getStyleLayerProperties(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -886,79 +886,79 @@ class MapboxRouteLineViewTest {
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 getStyleLayerProperties(RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 getStyleLayerProperties(RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 getStyleLayerProperties(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 getStyleLayerProperties(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 getStyleLayerProperties(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -1047,14 +1047,14 @@ class MapboxRouteLineViewTest {
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.WAYPOINT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.WAYPOINT_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -1088,14 +1088,14 @@ class MapboxRouteLineViewTest {
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteConstants.WAYPOINT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.WAYPOINT_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }

@@ -131,7 +131,7 @@ class PredictiveCacheController @JvmOverloads constructor(
             ?: emptyList()
 
         for (source in filteredSources) {
-            val properties: Expected<Value, String>? = map.getStyle()?.getStyleSourceProperties(
+            val properties: Expected<String, Value>? = map.getStyle()?.getStyleSourceProperties(
                 source.id
             )
             if (properties != null) {

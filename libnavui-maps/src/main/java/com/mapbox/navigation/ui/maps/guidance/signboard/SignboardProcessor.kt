@@ -13,8 +13,6 @@ import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOpt
 import com.mapbox.navigation.ui.utils.internal.extensions.getBannerComponents
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 
-private typealias NavExpected<V, E> = com.mapbox.navigation.ui.base.model.Expected<V, E>
-
 internal object SignboardProcessor {
 
     private const val USER_AGENT_KEY = "User-Agent"
@@ -92,41 +90,36 @@ internal object SignboardProcessor {
     }
 
     private fun processResponse(
-        response: Expected<HttpResponseData?, HttpRequestError?>
+        response: Expected<HttpRequestError, HttpResponseData>
     ): SignboardResult {
-        when {
-            response.isValue -> {
-                return response.value?.let { responseData ->
-                    when (responseData.code) {
-                        CODE_200 -> {
-                            if (responseData.data.isEmpty()) {
-                                SignboardResult.SignboardSvg.Empty
-                            } else {
-                                SignboardResult.SignboardSvg.Success(responseData.data)
-                            }
-                        }
-                        CODE_401 -> {
-                            SignboardResult.SignboardSvg.Failure(
-                                "Your token cannot access this " +
-                                    "resource, contact support"
-                            )
-                        }
-                        CODE_404 -> {
-                            SignboardResult.SignboardSvg.Failure("Resource is missing")
-                        }
-                        else -> {
-                            SignboardResult.SignboardSvg.Failure("Unknown error")
+        return response.fold(
+            { error ->
+                SignboardResult.SignboardSvg.Failure(error.message)
+            },
+            { responseData ->
+                when (responseData.code) {
+                    CODE_200 -> {
+                        if (responseData.data.isEmpty()) {
+                            SignboardResult.SignboardSvg.Empty
+                        } else {
+                            SignboardResult.SignboardSvg.Success(responseData.data)
                         }
                     }
-                } ?: SignboardResult.SignboardSvg.Empty
+                    CODE_401 -> {
+                        SignboardResult.SignboardSvg.Failure(
+                            "Your token cannot access this " +
+                                "resource, contact support"
+                        )
+                    }
+                    CODE_404 -> {
+                        SignboardResult.SignboardSvg.Failure("Resource is missing")
+                    }
+                    else -> {
+                        SignboardResult.SignboardSvg.Failure("Unknown error")
+                    }
+                }
             }
-            response.isError -> {
-                return SignboardResult.SignboardSvg.Failure(response.error?.message)
-            }
-            else -> {
-                return SignboardResult.SignboardSvg.Failure(response.error?.message)
-            }
-        }
+        )
     }
 
     private fun processSvg(

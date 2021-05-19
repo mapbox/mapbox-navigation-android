@@ -343,23 +343,23 @@ class MapboxRouteLineUtilsTest {
             every { styleLayerExists(LocationComponentConstants.MODEL_LAYER) } returns true
             every {
                 addStyleSource(RouteConstants.WAYPOINT_SOURCE_ID, any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 addStyleSource(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 addStyleSource(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID, any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 addStyleSource(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID, any())
-            } returns ExpectedFactory.createValue()
-            every { addStyleLayer(any(), any()) } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
+            every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
                 addImage(RouteConstants.ORIGIN_MARKER_NAME, any<Bitmap>())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 addImage(RouteConstants.DESTINATION_MARKER_NAME, any<Bitmap>())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }
 
         MapboxRouteLineUtils.initializeLayers(style, options)
@@ -1568,7 +1568,7 @@ class MapboxRouteLineUtilsTest {
                 it["source"] = sourceValue
             }
         }
-        val layerPropertyExpected = mockk<Expected<Value, String>> {
+        val layerPropertyExpected = mockk<Expected<String, Value>> {
             every { value.hint(Value::class) } returns layerValue
         }
         val stylePropertyValue = mockk<StylePropertyValue> {

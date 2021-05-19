@@ -24,7 +24,7 @@ import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.CircleLayer
 import com.mapbox.maps.extension.style.sources.addSource
-import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
@@ -142,9 +142,7 @@ class MapboxCameraAnimationsActivity :
     private val poiLayer = CircleLayer("circle_layer", "circle_source")
         .circleColor(Color.RED)
         .circleRadius(10.0)
-    private val poiSource = GeoJsonSource(
-        GeoJsonSource.Builder("circle_source").data("")
-    )
+    private val poiSource = geoJsonSource("circle_source") { }.data("")
 
     private val mapMatcherResultObserver = MapMatcherResultObserver { mapMatcherResult ->
         val transitionOptions: (ValueAnimator.() -> Unit) = if (mapMatcherResult.isTeleport) {

@@ -47,7 +47,7 @@ class NavigatorMapperTest {
             mockk {
                 every { offRoadProba } returns 0f
                 every { speedLimit } returns createSpeedLimit()
-                every { map_matcher_output } returns mockk {
+                every { mapMatcherOutput } returns mockk {
                     every { isTeleport } returns false
                     every { matches } returns listOf(
                         mockk {
@@ -84,7 +84,7 @@ class NavigatorMapperTest {
             mockk {
                 every { offRoadProba } returns 0.5f
                 every { speedLimit } returns createSpeedLimit()
-                every { map_matcher_output } returns mockk {
+                every { mapMatcherOutput } returns mockk {
                     every { isTeleport } returns false
                     every { matches } returns listOf(
                         mockk {
@@ -121,7 +121,7 @@ class NavigatorMapperTest {
             mockk {
                 every { offRoadProba } returns 0.500009f
                 every { speedLimit } returns createSpeedLimit()
-                every { map_matcher_output } returns mockk {
+                every { mapMatcherOutput } returns mockk {
                     every { isTeleport } returns false
                     every { matches } returns listOf(
                         mockk {
@@ -158,7 +158,7 @@ class NavigatorMapperTest {
             mockk {
                 every { offRoadProba } returns 0f
                 every { speedLimit } returns createSpeedLimit()
-                every { map_matcher_output } returns mockk {
+                every { mapMatcherOutput } returns mockk {
                     every { isTeleport } returns true
                     every { matches } returns listOf(
                         mockk {
@@ -195,7 +195,7 @@ class NavigatorMapperTest {
             mockk {
                 every { offRoadProba } returns 1f
                 every { speedLimit } returns createSpeedLimit()
-                every { map_matcher_output } returns mockk {
+                every { mapMatcherOutput } returns mockk {
                     every { isTeleport } returns false
                     every { matches } returns listOf()
                 }
@@ -414,12 +414,7 @@ class NavigatorMapperTest {
         MatchedRoadObjectLocation.valueOf(RouteAlertLocation(shape)),
         com.mapbox.navigator.RoadObjectType.TUNNEL,
         RoadObjectProvider.MAPBOX,
-        RoadObjectMetadata.valueOf(
-            com.mapbox.navigator.TunnelInfo(
-                "Ted Williams Tunnel",
-                LENGTH // will be removed when NN fixes TunnelInfo
-            )
-        )
+        RoadObjectMetadata.valueOf(com.mapbox.navigator.TunnelInfo("Ted Williams Tunnel"))
     )
 
     private fun RoadObject.toUpcomingRouteAlert(

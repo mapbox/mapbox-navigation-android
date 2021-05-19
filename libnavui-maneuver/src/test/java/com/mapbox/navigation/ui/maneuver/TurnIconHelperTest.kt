@@ -35,10 +35,10 @@ class TurnIconHelperTest {
         val mockType: String? = null
         val mockDegrees: Float? = null
         val mockModifier: String? = null
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_invalid
         )
@@ -47,7 +47,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -58,10 +58,10 @@ class TurnIconHelperTest {
         val mockType: String? = null
         val mockDegrees: Float? = null
         val mockModifier: String? = LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_invalid_left
         )
@@ -70,7 +70,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -81,10 +81,10 @@ class TurnIconHelperTest {
         val mockType: String? = null
         val mockDegrees: Float? = null
         val mockModifier: String? = RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_invalid_right
         )
@@ -93,7 +93,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -104,10 +104,10 @@ class TurnIconHelperTest {
         val mockType: String? = null
         val mockDegrees: Float? = null
         val mockModifier: String? = STRAIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_invalid_straight
         )
@@ -116,7 +116,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -127,10 +127,10 @@ class TurnIconHelperTest {
         val mockType: String? = null
         val mockDegrees: Float? = null
         val mockModifier: String? = UTURN
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_invalid_uturn
         )
@@ -139,7 +139,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -150,10 +150,10 @@ class TurnIconHelperTest {
         val mockType: String? = null
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_invalid_slight_right
         )
@@ -162,7 +162,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -173,10 +173,10 @@ class TurnIconHelperTest {
         val mockType: String? = null
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_invalid_slight_left
         )
@@ -185,7 +185,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -196,10 +196,10 @@ class TurnIconHelperTest {
         val mockType: String? = null
         val mockDegrees: Float? = null
         val mockModifier: String? = SHARP_RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_invalid
         )
@@ -208,7 +208,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -219,10 +219,10 @@ class TurnIconHelperTest {
         val mockType: String? = null
         val mockDegrees: Float? = null
         val mockModifier: String? = SHARP_LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_invalid
         )
@@ -231,7 +231,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -242,10 +242,10 @@ class TurnIconHelperTest {
         val mockType: String? = null
         val mockDegrees: Float? = null
         val mockModifier: String? = " "
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_invalid
         )
@@ -254,7 +254,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -265,10 +265,10 @@ class TurnIconHelperTest {
         val mockType: String? = ARRIVE
         val mockDegrees: Float? = null
         val mockModifier: String? = null
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_arrive
         )
@@ -277,7 +277,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -288,10 +288,10 @@ class TurnIconHelperTest {
         val mockType: String? = DEPART
         val mockDegrees: Float? = null
         val mockModifier: String? = null
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_depart
         )
@@ -300,7 +300,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -311,10 +311,10 @@ class TurnIconHelperTest {
         val mockType: String? = ON_RAMP
         val mockDegrees: Float? = null
         val mockModifier: String? = null
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_on_ramp
         )
@@ -323,7 +323,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -334,10 +334,10 @@ class TurnIconHelperTest {
         val mockType: String? = OFF_RAMP
         val mockDegrees: Float? = null
         val mockModifier: String? = null
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_off_ramp
         )
@@ -346,7 +346,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -357,10 +357,10 @@ class TurnIconHelperTest {
         val mockType: String? = CONTINUE
         val mockDegrees: Float? = null
         val mockModifier: String? = null
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_continue
         )
@@ -369,7 +369,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -380,10 +380,10 @@ class TurnIconHelperTest {
         val mockType: String? = FORK
         val mockDegrees: Float? = null
         val mockModifier: String? = null
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_fork
         )
@@ -392,7 +392,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -403,10 +403,10 @@ class TurnIconHelperTest {
         val mockType: String? = TURN
         val mockDegrees: Float? = null
         val mockModifier: String? = null
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_turn_straight
         )
@@ -415,7 +415,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -426,10 +426,10 @@ class TurnIconHelperTest {
         val mockType: String? = MERGE
         val mockDegrees: Float? = null
         val mockModifier: String? = null
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_merge_straight
         )
@@ -438,7 +438,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -449,10 +449,10 @@ class TurnIconHelperTest {
         val mockType: String? = NEW_NAME
         val mockDegrees: Float? = null
         val mockModifier: String? = null
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_new_name_straight
         )
@@ -461,7 +461,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -472,10 +472,10 @@ class TurnIconHelperTest {
         val mockType: String? = END_OF_ROAD
         val mockDegrees: Float? = null
         val mockModifier: String? = null
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_end_of_road_left
         )
@@ -484,7 +484,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -495,10 +495,10 @@ class TurnIconHelperTest {
         val mockType: String? = NOTIFICATION
         val mockDegrees: Float? = null
         val mockModifier: String? = null
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_notification_straight
         )
@@ -507,7 +507,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -518,10 +518,10 @@ class TurnIconHelperTest {
         val mockType: String? = " "
         val mockDegrees: Float? = null
         val mockModifier: String? = null
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_invalid
         )
@@ -530,7 +530,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -541,10 +541,10 @@ class TurnIconHelperTest {
         val mockType: String? = ARRIVE
         val mockDegrees: Float? = null
         val mockModifier: String? = LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_arrive_left
         )
@@ -553,7 +553,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -564,10 +564,10 @@ class TurnIconHelperTest {
         val mockType: String? = ARRIVE
         val mockDegrees: Float? = null
         val mockModifier: String? = RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_arrive_right
         )
@@ -576,7 +576,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -587,10 +587,10 @@ class TurnIconHelperTest {
         val mockType: String? = ARRIVE
         val mockDegrees: Float? = null
         val mockModifier: String? = STRAIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_arrive_straight
         )
@@ -599,7 +599,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -610,10 +610,10 @@ class TurnIconHelperTest {
         val mockType: String? = DEPART
         val mockDegrees: Float? = null
         val mockModifier: String? = LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_depart_left
         )
@@ -622,7 +622,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -633,10 +633,10 @@ class TurnIconHelperTest {
         val mockType: String? = DEPART
         val mockDegrees: Float? = null
         val mockModifier: String? = RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_depart_right
         )
@@ -645,7 +645,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -656,10 +656,10 @@ class TurnIconHelperTest {
         val mockType: String? = DEPART
         val mockDegrees: Float? = null
         val mockModifier: String? = STRAIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_depart_straight
         )
@@ -668,7 +668,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -679,10 +679,10 @@ class TurnIconHelperTest {
         val mockType: String? = CONTINUE
         val mockDegrees: Float? = null
         val mockModifier: String? = LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_continue_left
         )
@@ -691,7 +691,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -702,10 +702,10 @@ class TurnIconHelperTest {
         val mockType: String? = CONTINUE
         val mockDegrees: Float? = null
         val mockModifier: String? = RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_continue_right
         )
@@ -714,7 +714,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -725,10 +725,10 @@ class TurnIconHelperTest {
         val mockType: String? = CONTINUE
         val mockDegrees: Float? = null
         val mockModifier: String? = STRAIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_continue_straight
         )
@@ -737,7 +737,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -748,10 +748,10 @@ class TurnIconHelperTest {
         val mockType: String? = CONTINUE
         val mockDegrees: Float? = null
         val mockModifier: String? = UTURN
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_continue_uturn
         )
@@ -760,7 +760,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -771,10 +771,10 @@ class TurnIconHelperTest {
         val mockType: String? = CONTINUE
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_continue_slight_left
         )
@@ -783,7 +783,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -794,10 +794,10 @@ class TurnIconHelperTest {
         val mockType: String? = CONTINUE
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_continue_slight_right
         )
@@ -806,7 +806,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -817,10 +817,10 @@ class TurnIconHelperTest {
         val mockType: String? = END_OF_ROAD
         val mockDegrees: Float? = null
         val mockModifier: String? = LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_end_of_road_left
         )
@@ -829,7 +829,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -840,10 +840,10 @@ class TurnIconHelperTest {
         val mockType: String? = END_OF_ROAD
         val mockDegrees: Float? = null
         val mockModifier: String? = RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_end_of_road_right
         )
@@ -852,7 +852,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -863,10 +863,10 @@ class TurnIconHelperTest {
         val mockType: String? = FORK
         val mockDegrees: Float? = null
         val mockModifier: String? = RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_fork_right
         )
@@ -875,7 +875,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -886,10 +886,10 @@ class TurnIconHelperTest {
         val mockType: String? = FORK
         val mockDegrees: Float? = null
         val mockModifier: String? = LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_fork_left
         )
@@ -898,7 +898,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -909,10 +909,10 @@ class TurnIconHelperTest {
         val mockType: String? = FORK
         val mockDegrees: Float? = null
         val mockModifier: String? = STRAIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_fork_straight
         )
@@ -921,7 +921,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -932,10 +932,10 @@ class TurnIconHelperTest {
         val mockType: String? = FORK
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_fork_slight_left
         )
@@ -944,7 +944,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -955,10 +955,10 @@ class TurnIconHelperTest {
         val mockType: String? = FORK
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_fork_slight_right
         )
@@ -967,7 +967,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -978,10 +978,10 @@ class TurnIconHelperTest {
         val mockType: String? = MERGE
         val mockDegrees: Float? = null
         val mockModifier: String? = RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_merge_right
         )
@@ -990,7 +990,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1001,10 +1001,10 @@ class TurnIconHelperTest {
         val mockType: String? = MERGE
         val mockDegrees: Float? = null
         val mockModifier: String? = LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_merge_left
         )
@@ -1013,7 +1013,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1024,10 +1024,10 @@ class TurnIconHelperTest {
         val mockType: String? = MERGE
         val mockDegrees: Float? = null
         val mockModifier: String? = STRAIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_merge_straight
         )
@@ -1036,7 +1036,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1047,10 +1047,10 @@ class TurnIconHelperTest {
         val mockType: String? = MERGE
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_merge_slight_left
         )
@@ -1059,7 +1059,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1070,10 +1070,10 @@ class TurnIconHelperTest {
         val mockType: String? = MERGE
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_merge_slight_right
         )
@@ -1082,7 +1082,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1093,10 +1093,10 @@ class TurnIconHelperTest {
         val mockType: String? = NEW_NAME
         val mockDegrees: Float? = null
         val mockModifier: String? = RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_new_name_right
         )
@@ -1105,7 +1105,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1116,10 +1116,10 @@ class TurnIconHelperTest {
         val mockType: String? = NEW_NAME
         val mockDegrees: Float? = null
         val mockModifier: String? = LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_new_name_left
         )
@@ -1128,7 +1128,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1139,10 +1139,10 @@ class TurnIconHelperTest {
         val mockType: String? = NEW_NAME
         val mockDegrees: Float? = null
         val mockModifier: String? = STRAIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_new_name_straight
         )
@@ -1151,7 +1151,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1162,10 +1162,10 @@ class TurnIconHelperTest {
         val mockType: String? = NEW_NAME
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_new_name_slight_left
         )
@@ -1174,7 +1174,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1185,10 +1185,10 @@ class TurnIconHelperTest {
         val mockType: String? = NEW_NAME
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_new_name_slight_right
         )
@@ -1197,7 +1197,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1208,10 +1208,10 @@ class TurnIconHelperTest {
         val mockType: String? = NEW_NAME
         val mockDegrees: Float? = null
         val mockModifier: String? = SHARP_LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_new_name_sharp_left
         )
@@ -1220,7 +1220,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1231,10 +1231,10 @@ class TurnIconHelperTest {
         val mockType: String? = NEW_NAME
         val mockDegrees: Float? = null
         val mockModifier: String? = SHARP_RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_new_name_sharp_right
         )
@@ -1243,7 +1243,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1254,10 +1254,10 @@ class TurnIconHelperTest {
         val mockType: String? = NOTIFICATION
         val mockDegrees: Float? = null
         val mockModifier: String? = RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_notification_right
         )
@@ -1266,7 +1266,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1277,10 +1277,10 @@ class TurnIconHelperTest {
         val mockType: String? = NOTIFICATION
         val mockDegrees: Float? = null
         val mockModifier: String? = LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_notification_left
         )
@@ -1289,7 +1289,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1300,10 +1300,10 @@ class TurnIconHelperTest {
         val mockType: String? = NOTIFICATION
         val mockDegrees: Float? = null
         val mockModifier: String? = STRAIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_notification_straight
         )
@@ -1312,7 +1312,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1323,10 +1323,10 @@ class TurnIconHelperTest {
         val mockType: String? = NOTIFICATION
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_notification_slight_left
         )
@@ -1335,7 +1335,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1346,10 +1346,10 @@ class TurnIconHelperTest {
         val mockType: String? = NOTIFICATION
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_notification_slight_right
         )
@@ -1358,7 +1358,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1369,10 +1369,10 @@ class TurnIconHelperTest {
         val mockType: String? = NOTIFICATION
         val mockDegrees: Float? = null
         val mockModifier: String? = SHARP_LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_notification_sharp_left
         )
@@ -1381,7 +1381,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1392,10 +1392,10 @@ class TurnIconHelperTest {
         val mockType: String? = NOTIFICATION
         val mockDegrees: Float? = null
         val mockModifier: String? = SHARP_RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_notification_sharp_right
         )
@@ -1404,7 +1404,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1415,10 +1415,10 @@ class TurnIconHelperTest {
         val mockType: String? = OFF_RAMP
         val mockDegrees: Float? = null
         val mockModifier: String? = LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_off_ramp_left
         )
@@ -1427,7 +1427,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1438,10 +1438,10 @@ class TurnIconHelperTest {
         val mockType: String? = OFF_RAMP
         val mockDegrees: Float? = null
         val mockModifier: String? = RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_off_ramp_right
         )
@@ -1450,7 +1450,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1461,10 +1461,10 @@ class TurnIconHelperTest {
         val mockType: String? = OFF_RAMP
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_off_ramp_slight_left
         )
@@ -1473,7 +1473,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1484,10 +1484,10 @@ class TurnIconHelperTest {
         val mockType: String? = OFF_RAMP
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_off_ramp_slight_right
         )
@@ -1496,7 +1496,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1507,10 +1507,10 @@ class TurnIconHelperTest {
         val mockType: String? = ON_RAMP
         val mockDegrees: Float? = null
         val mockModifier: String? = RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_on_ramp_right
         )
@@ -1519,7 +1519,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1530,10 +1530,10 @@ class TurnIconHelperTest {
         val mockType: String? = ON_RAMP
         val mockDegrees: Float? = null
         val mockModifier: String? = LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_on_ramp_left
         )
@@ -1542,7 +1542,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1553,10 +1553,10 @@ class TurnIconHelperTest {
         val mockType: String? = ON_RAMP
         val mockDegrees: Float? = null
         val mockModifier: String? = STRAIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_on_ramp_straight
         )
@@ -1565,7 +1565,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1576,10 +1576,10 @@ class TurnIconHelperTest {
         val mockType: String? = ON_RAMP
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_on_ramp_slight_left
         )
@@ -1588,7 +1588,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1599,10 +1599,10 @@ class TurnIconHelperTest {
         val mockType: String? = ON_RAMP
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_on_ramp_slight_right
         )
@@ -1611,7 +1611,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1622,10 +1622,10 @@ class TurnIconHelperTest {
         val mockType: String? = ON_RAMP
         val mockDegrees: Float? = null
         val mockModifier: String? = SHARP_LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_on_ramp_sharp_left
         )
@@ -1634,7 +1634,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1645,10 +1645,10 @@ class TurnIconHelperTest {
         val mockType: String? = ON_RAMP
         val mockDegrees: Float? = null
         val mockModifier: String? = SHARP_RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_on_ramp_sharp_right
         )
@@ -1657,7 +1657,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1666,10 +1666,10 @@ class TurnIconHelperTest {
         val mockType: String? = TURN
         val mockDegrees: Float? = null
         val mockModifier: String? = RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_turn_right
         )
@@ -1678,7 +1678,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1689,10 +1689,10 @@ class TurnIconHelperTest {
         val mockType: String? = TURN
         val mockDegrees: Float? = null
         val mockModifier: String? = LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_turn_left
         )
@@ -1701,7 +1701,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1712,10 +1712,10 @@ class TurnIconHelperTest {
         val mockType: String? = TURN
         val mockDegrees: Float? = null
         val mockModifier: String? = STRAIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_turn_straight
         )
@@ -1724,7 +1724,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1735,10 +1735,10 @@ class TurnIconHelperTest {
         val mockType: String? = TURN
         val mockDegrees: Float? = null
         val mockModifier: String? = UTURN
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_uturn
         )
@@ -1747,7 +1747,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1758,10 +1758,10 @@ class TurnIconHelperTest {
         val mockType: String? = TURN
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_turn_slight_left
         )
@@ -1770,7 +1770,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1781,10 +1781,10 @@ class TurnIconHelperTest {
         val mockType: String? = TURN
         val mockDegrees: Float? = null
         val mockModifier: String? = SLIGHT_RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_turn_slight_right
         )
@@ -1793,7 +1793,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1804,10 +1804,10 @@ class TurnIconHelperTest {
         val mockType: String? = TURN
         val mockDegrees: Float? = null
         val mockModifier: String? = SHARP_LEFT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_turn_sharp_left
         )
@@ -1816,7 +1816,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1827,10 +1827,10 @@ class TurnIconHelperTest {
         val mockType: String? = TURN
         val mockDegrees: Float? = null
         val mockModifier: String? = SHARP_RIGHT
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_turn_sharp_right
         )
@@ -1839,7 +1839,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)
@@ -1850,10 +1850,10 @@ class TurnIconHelperTest {
         val mockType: String? = " "
         val mockDegrees: Float? = null
         val mockModifier: String? = " "
-        val mockDrivingSide: String? = null
+        val mockDRIVINGSide: String? = null
         val expected = TurnIcon(
             mockDegrees,
-            mockDrivingSide,
+            mockDRIVINGSide,
             false,
             R.drawable.mapbox_ic_invalid
         )
@@ -1862,7 +1862,7 @@ class TurnIconHelperTest {
             mockType,
             mockDegrees,
             mockModifier,
-            mockDrivingSide
+            mockDRIVINGSide
         )
 
         assertEquals(expected, actual)

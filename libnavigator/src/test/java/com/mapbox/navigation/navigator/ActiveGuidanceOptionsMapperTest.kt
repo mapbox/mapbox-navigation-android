@@ -23,8 +23,8 @@ class ActiveGuidanceOptionsMapperTest {
 
         assertEquals(
             ActiveGuidanceOptions(
-                ActiveGuidanceMode.KDRIVING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE6,
+                ActiveGuidanceMode.DRIVING,
+                ActiveGuidanceGeometryEncoding.POLYLINE6,
                 listOf()
             ),
             drivingPolyline6
@@ -39,8 +39,8 @@ class ActiveGuidanceOptionsMapperTest {
 
         assertEquals(
             ActiveGuidanceOptions(
-                ActiveGuidanceMode.KDRIVING,
-                ActiveGuidanceGeometryEncoding.KPOLYLINE6,
+                ActiveGuidanceMode.DRIVING,
+                ActiveGuidanceGeometryEncoding.POLYLINE6,
                 listOf()
             ),
             drivingPolyline6

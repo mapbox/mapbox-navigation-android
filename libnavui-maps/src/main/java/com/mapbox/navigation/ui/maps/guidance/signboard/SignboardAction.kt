@@ -18,7 +18,7 @@ internal sealed class SignboardAction {
     ) : SignboardAction()
 
     data class ProcessSignboardResponse(
-        val response: Expected<HttpResponseData?, HttpRequestError?>
+        val response: Expected<HttpRequestError, HttpResponseData>
     ) : SignboardAction()
 
     data class ParseSvgToBitmap(

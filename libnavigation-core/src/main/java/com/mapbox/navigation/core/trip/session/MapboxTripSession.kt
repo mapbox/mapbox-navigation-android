@@ -509,7 +509,7 @@ internal class MapboxTripSession(
                 return@launch
             }
             val enhancedLocation = status.navigationStatus.location.toLocation()
-            val keyPoints = status.navigationStatus.key_points.toLocations()
+            val keyPoints = status.navigationStatus.keyPoints.toLocations()
             updateEnhancedLocation(enhancedLocation, keyPoints)
             if (!isActive) {
                 return@launch

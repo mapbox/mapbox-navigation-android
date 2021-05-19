@@ -131,20 +131,20 @@ class PredictiveCacheControllerTest {
         )
         every { style.styleSources } returns styleSources
 
-        val mockedPropertiesVector = mockk<Expected<Value, String>>(relaxed = true)
+        val mockedPropertiesVector = mockk<Expected<String, Value>>(relaxed = true)
         val contentsVector = mutableMapOf<String, Value>()
         contentsVector["type"] = Value("vector")
         contentsVector["url"] = Value("mapbox://mapbox.mapbox-streets-v8,mapbox.mapbox-terrain-v2")
         every { mockedPropertiesVector.value?.contents } returns contentsVector
         every { style.getStyleSourceProperties(mockedIds[0]) } returns mockedPropertiesVector
 
-        val mockedPropertiesGeojson = mockk<Expected<Value, String>>(relaxed = true)
+        val mockedPropertiesGeojson = mockk<Expected<String, Value>>(relaxed = true)
         val contentsGeojson = mutableMapOf<String, Value>()
         contentsGeojson["type"] = Value("geojson")
         every { mockedPropertiesGeojson.value?.contents } returns contentsGeojson
         every { style.getStyleSourceProperties(mockedIds[1]) } returns mockedPropertiesGeojson
 
-        val mockedPropertiesRaster = mockk<Expected<Value, String>>(relaxed = true)
+        val mockedPropertiesRaster = mockk<Expected<String, Value>>(relaxed = true)
         val contentsRaster = mutableMapOf<String, Value>()
         contentsRaster["type"] = Value("raster")
         contentsRaster["url"] = Value("mapbox://mapbox.satellite")
@@ -207,20 +207,20 @@ class PredictiveCacheControllerTest {
         )
         every { style.styleSources } returns styleSources
 
-        val mockedPropertiesVector = mockk<Expected<Value, String>>(relaxed = true)
+        val mockedPropertiesVector = mockk<Expected<String, Value>>(relaxed = true)
         val contentsVector = mutableMapOf<String, Value>()
         contentsVector["type"] = Value("vector")
         contentsVector["url"] = Value("mapbox://mapbox.mapbox-streets-v8,mapbox.mapbox-terrain-v2")
         every { mockedPropertiesVector.value?.contents } returns contentsVector
         every { style.getStyleSourceProperties(mockedIds[0]) } returns mockedPropertiesVector
 
-        val mockedPropertiesGeojson = mockk<Expected<Value, String>>(relaxed = true)
+        val mockedPropertiesGeojson = mockk<Expected<String, Value>>(relaxed = true)
         val contentsGeojson = mutableMapOf<String, Value>()
         contentsGeojson["type"] = Value("geojson")
         every { mockedPropertiesGeojson.value?.contents } returns contentsGeojson
         every { style.getStyleSourceProperties(mockedIds[1]) } returns mockedPropertiesGeojson
 
-        val mockedPropertiesRaster = mockk<Expected<Value, String>>(relaxed = true)
+        val mockedPropertiesRaster = mockk<Expected<String, Value>>(relaxed = true)
         val contentsRaster = mutableMapOf<String, Value>()
         contentsRaster["type"] = Value("raster")
         contentsRaster["url"] = Value("mapbox://mapbox.satellite")
@@ -261,7 +261,7 @@ class PredictiveCacheControllerTest {
         )
         every { newStyle.styleSources } returns newStyleSources
 
-        val newMockedPropertiesVector = mockk<Expected<Value, String>>(relaxed = true)
+        val newMockedPropertiesVector = mockk<Expected<String, Value>>(relaxed = true)
         val newContentsVector = mutableMapOf<String, Value>()
         newContentsVector["type"] = Value("vector")
         newContentsVector["url"] = Value("mapbox://mapbox.mapbox-streets-v9")

@@ -134,7 +134,7 @@ class MapboxTripSessionTest {
         coEvery { navigator.updateAnnotations(any()) } returns Unit
 
         every { navigationStatus.location } returns fixLocation
-        every { navigationStatus.key_points } returns keyFixPoints
+        every { navigationStatus.keyPoints } returns keyFixPoints
         every { navigationStatus.routeState } returns RouteState.TRACKING
 
         every { tripStatus.navigationStatus } returns navigationStatus

@@ -775,7 +775,7 @@ class MapboxRouteLineApiTest {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
         val point = Point.fromLngLat(139.7745686, 35.677573)
-        val mockExpected = mockk<com.mapbox.bindgen.Expected<List<QueriedFeature>, String>> {
+        val mockExpected = mockk<com.mapbox.bindgen.Expected<String, List<QueriedFeature>>> {
             every { value } returns listOf(feature2, feature1)
         }
         val querySlot = slot<QueryFeaturesCallback>()
@@ -815,10 +815,10 @@ class MapboxRouteLineApiTest {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
         val point = Point.fromLngLat(139.7745686, 35.677573)
-        val emptyExpected = mockk<com.mapbox.bindgen.Expected<List<QueriedFeature>, String>> {
+        val emptyExpected = mockk<com.mapbox.bindgen.Expected<String, List<QueriedFeature>>> {
             every { value } returns listOf()
         }
-        val mockExpected = mockk<com.mapbox.bindgen.Expected<List<QueriedFeature>, String>> {
+        val mockExpected = mockk<com.mapbox.bindgen.Expected<String, List<QueriedFeature>>> {
             every { value } returns listOf(feature2, feature1)
         }
         val querySlot = slot<QueryFeaturesCallback>()
@@ -861,10 +861,10 @@ class MapboxRouteLineApiTest {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
         val point = Point.fromLngLat(139.7745686, 35.677573)
-        val emptyExpected = mockk<com.mapbox.bindgen.Expected<List<QueriedFeature>, String>> {
+        val emptyExpected = mockk<com.mapbox.bindgen.Expected<String, List<QueriedFeature>>> {
             every { value } returns listOf()
         }
-        val mockExpected = mockk<com.mapbox.bindgen.Expected<List<QueriedFeature>, String>> {
+        val mockExpected = mockk<com.mapbox.bindgen.Expected<String, List<QueriedFeature>>> {
             every { value } returns listOf(feature1, feature2)
         }
         val querySlot = slot<QueryFeaturesCallback>()

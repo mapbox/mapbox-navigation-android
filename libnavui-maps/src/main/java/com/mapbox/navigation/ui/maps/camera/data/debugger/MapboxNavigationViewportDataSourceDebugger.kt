@@ -16,6 +16,7 @@ import com.mapbox.maps.extension.style.layers.addLayerAbove
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
 import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
@@ -241,9 +242,7 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
         val style = mapboxMap.getStyle()
         if (enabled && style != null && style.fullyLoaded) {
             if (!style.styleSourceExists(pointsSourceId)) {
-                val source = GeoJsonSource(
-                    GeoJsonSource.Builder(pointsSourceId).featureCollection(featureCollection)
-                )
+                val source = geoJsonSource(pointsSourceId) { }.featureCollection(featureCollection)
                 style.addSource(source)
             }
 

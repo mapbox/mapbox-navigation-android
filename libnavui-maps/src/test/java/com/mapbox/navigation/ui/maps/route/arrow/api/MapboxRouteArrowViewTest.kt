@@ -52,7 +52,7 @@ class MapboxRouteArrowViewTest {
             it["source"] = sourceValue
         }
     }
-    private val layerPropertyExpected = mockk<Expected<Value, String>> {
+    private val layerPropertyExpected = mockk<Expected<String, Value>> {
         every { value.hint(Value::class) } returns layerValue
     }
     private val geoJsonSourceTypeValue = mockk<Value> {
@@ -63,7 +63,7 @@ class MapboxRouteArrowViewTest {
             it["type"] = geoJsonSourceTypeValue
         }
     }
-    private val geoJsonSourceExpected = mockk<Expected<Value, String>> {
+    private val geoJsonSourceExpected = mockk<Expected<String, Value>> {
         every { value.hint(Value::class) } returns geoJsonSourceValue
     }
 
@@ -88,14 +88,14 @@ class MapboxRouteArrowViewTest {
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -143,14 +143,14 @@ class MapboxRouteArrowViewTest {
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
 
             every {
                 getStyleSourceProperties(RouteConstants.ARROW_HEAD_SOURCE_ID)
@@ -160,10 +160,10 @@ class MapboxRouteArrowViewTest {
             } returns geoJsonSourceExpected
             every {
                 setStyleSourceProperty(RouteConstants.ARROW_HEAD_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleSourceProperty(RouteConstants.ARROW_SHAFT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -222,14 +222,14 @@ class MapboxRouteArrowViewTest {
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
 
             every {
                 getStyleSourceProperties(RouteConstants.ARROW_HEAD_SOURCE_ID)
@@ -239,10 +239,10 @@ class MapboxRouteArrowViewTest {
             } returns geoJsonSourceExpected
             every {
                 setStyleSourceProperty(RouteConstants.ARROW_HEAD_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleSourceProperty(RouteConstants.ARROW_SHAFT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -269,14 +269,14 @@ class MapboxRouteArrowViewTest {
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
 
             every {
                 getStyleSourceProperties(RouteConstants.ARROW_HEAD_SOURCE_ID)
@@ -286,10 +286,10 @@ class MapboxRouteArrowViewTest {
             } returns geoJsonSourceExpected
             every {
                 setStyleSourceProperty(RouteConstants.ARROW_HEAD_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleSourceProperty(RouteConstants.ARROW_SHAFT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -345,14 +345,14 @@ class MapboxRouteArrowViewTest {
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
 
             every {
                 getStyleSourceProperties(RouteConstants.ARROW_HEAD_SOURCE_ID)
@@ -362,10 +362,10 @@ class MapboxRouteArrowViewTest {
             } returns geoJsonSourceExpected
             every {
                 setStyleSourceProperty(RouteConstants.ARROW_HEAD_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleSourceProperty(RouteConstants.ARROW_SHAFT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -424,14 +424,14 @@ class MapboxRouteArrowViewTest {
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
 
             every {
                 getStyleSourceProperties(RouteConstants.ARROW_HEAD_SOURCE_ID)
@@ -441,10 +441,10 @@ class MapboxRouteArrowViewTest {
             } returns geoJsonSourceExpected
             every {
                 setStyleSourceProperty(RouteConstants.ARROW_HEAD_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleSourceProperty(RouteConstants.ARROW_SHAFT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -501,14 +501,14 @@ class MapboxRouteArrowViewTest {
             } returns layerPropertyExpected
             every {
                 setStyleSourceProperty(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleLayerProperty(
                     RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
                     "visibility",
                     any()
                 )
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
 
             every {
                 getStyleSourceProperties(RouteConstants.ARROW_HEAD_SOURCE_ID)
@@ -518,10 +518,10 @@ class MapboxRouteArrowViewTest {
             } returns geoJsonSourceExpected
             every {
                 setStyleSourceProperty(RouteConstants.ARROW_HEAD_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 setStyleSourceProperty(RouteConstants.ARROW_SHAFT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
         }
