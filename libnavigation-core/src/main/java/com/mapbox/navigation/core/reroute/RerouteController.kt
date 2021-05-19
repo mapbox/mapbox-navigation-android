@@ -49,7 +49,7 @@ interface RerouteController {
      * Route Callback is useful to set new route(s) on reroute event. Doing the same as
      * [MapboxNavigation.setRoutes].
      */
-    interface RoutesCallback {
+    fun interface RoutesCallback {
         /**
          * Called whenever new route(s) has been fetched.
          * @see [MapboxNavigation.setRoutes]
@@ -60,7 +60,7 @@ interface RerouteController {
     /**
      * [RerouteState] observer
      */
-    interface RerouteStateObserver {
+    fun interface RerouteStateObserver {
 
         /**
          * Invoked whenever re-route state has changed.

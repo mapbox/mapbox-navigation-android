@@ -5,7 +5,7 @@ import java.net.URL
 /**
  * Internal usage.
  */
-interface UrlSkuTokenProvider {
+fun interface UrlSkuTokenProvider {
 
     /**
      * Returns a token attached to the URI query.

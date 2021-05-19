@@ -1,18 +1,7 @@
 // Signature format: 3.0
-package com.mapbox.navigation.ui.base {
-
-  public interface MapboxState {
-  }
-
-  public interface MapboxView<S extends com.mapbox.navigation.ui.base.MapboxState> {
-    method public void render(S state);
-  }
-
-}
-
 package com.mapbox.navigation.ui.base.formatter {
 
-  public interface ValueFormatter<T, R> {
+  public fun interface ValueFormatter<T, R> {
     method public R! format(T? update);
   }
 
@@ -177,8 +166,8 @@ package com.mapbox.navigation.ui.base.model.route {
 
 package com.mapbox.navigation.ui.base.util {
 
-  @java.lang.FunctionalInterface public interface MapboxNavigationConsumer<T> {
-    method public default void accept(T? value);
+  public fun interface MapboxNavigationConsumer<T> {
+    method public void accept(T? value);
   }
 
 }

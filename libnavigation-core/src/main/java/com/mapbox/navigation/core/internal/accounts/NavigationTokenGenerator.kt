@@ -1,5 +1,5 @@
 package com.mapbox.navigation.core.internal.accounts
 
-internal interface NavigationTokenGenerator {
+internal fun interface NavigationTokenGenerator {
     fun getSKUToken(): String
 }

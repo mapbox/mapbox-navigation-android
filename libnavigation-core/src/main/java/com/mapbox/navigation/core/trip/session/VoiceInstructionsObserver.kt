@@ -6,7 +6,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 /**
  * Voice instruction interface, which can be registered via [MapboxNavigation.registerVoiceInstructionsObserver]
  */
-interface VoiceInstructionsObserver {
+fun interface VoiceInstructionsObserver {
     /**
      * Called every time on a new [VoiceInstructions] is applicable
      */

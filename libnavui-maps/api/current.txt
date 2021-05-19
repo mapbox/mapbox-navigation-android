@@ -9,7 +9,7 @@ package com.mapbox.navigation.ui.maps {
     method public void setMapInstance(com.mapbox.maps.MapboxMap map);
   }
 
-  public interface PredictiveCacheControllerErrorHandler {
+  public fun interface PredictiveCacheControllerErrorHandler {
     method public void onError(String? message);
   }
 
@@ -264,7 +264,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
   public final class ViewportDataSourceProcessorKt {
   }
 
-  public interface ViewportDataSourceUpdateObserver {
+  public fun interface ViewportDataSourceUpdateObserver {
     method public void viewportDataSourceUpdated(com.mapbox.navigation.ui.maps.camera.data.ViewportData viewportData);
   }
 
@@ -292,7 +292,7 @@ package com.mapbox.navigation.ui.maps.camera.lifecycle {
     method public void onAnimatorStarting(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator animator, String? owner);
   }
 
-  public interface NavigationScaleGestureActionListener {
+  public fun interface NavigationScaleGestureActionListener {
     method public void onNavigationScaleGestureAction();
   }
 
@@ -342,7 +342,7 @@ package com.mapbox.navigation.ui.maps.camera.state {
     enum_constant public static final com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState TRANSITION_TO_OVERVIEW;
   }
 
-  public interface NavigationCameraStateChangedObserver {
+  public fun interface NavigationCameraStateChangedObserver {
     method public void onNavigationCameraStateChanged(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState navigationCameraState);
   }
 
@@ -497,7 +497,7 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.api {
     method public com.mapbox.navigation.ui.base.model.Expected<android.graphics.Bitmap,java.lang.String> parse(byte[] svg, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options);
   }
 
-  public interface SvgToBitmapParser {
+  public fun interface SvgToBitmapParser {
     method public com.mapbox.navigation.ui.base.model.Expected<android.graphics.Bitmap,java.lang.String> parse(byte[] svg, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options);
   }
 

@@ -10,7 +10,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 /**
  * Additional mapper that can be used with [ReplayHistoryMapper].
  */
-interface CustomEventMapper {
+fun interface CustomEventMapper {
 
     /**
      * Override to map your own custom events from history files,

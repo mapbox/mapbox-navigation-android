@@ -5,7 +5,7 @@ package com.mapbox.navigation.ui.maps
  *
  * @see PredictiveCacheController
  */
-interface PredictiveCacheControllerErrorHandler {
+fun interface PredictiveCacheControllerErrorHandler {
 
     /**
      * Called whenever there's an error with Predictive Cache.

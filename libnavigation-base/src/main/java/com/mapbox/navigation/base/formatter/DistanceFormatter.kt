@@ -5,7 +5,7 @@ import android.text.SpannableString
 /**
  * An interface, which provides correctly formatted distances.
  */
-interface DistanceFormatter {
+fun interface DistanceFormatter {
 
     /**
      * Returns a formatted SpannableString

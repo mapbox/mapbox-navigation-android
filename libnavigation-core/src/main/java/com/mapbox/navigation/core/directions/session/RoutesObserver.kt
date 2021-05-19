@@ -4,9 +4,9 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.core.MapboxNavigation
 
 /**
- * Interface definition for an observer that get's notified whenever a list of maintained routes changes.
+ * Interface definition for an observer that gets notified whenever a list of maintained routes changes.
  */
-interface RoutesObserver {
+fun interface RoutesObserver {
 
     /**
      * Invoked whenever a list of routes changes.

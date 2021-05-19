@@ -3,7 +3,7 @@ package com.mapbox.navigation.ui.maps.camera.state
 /**
  * Observer that gets notified whenever [NavigationCameraState] changes.
  */
-interface NavigationCameraStateChangedObserver {
+fun interface NavigationCameraStateChangedObserver {
 
     /**
      * Called whenever [NavigationCameraState] changes.

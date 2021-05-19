@@ -8,7 +8,7 @@ import com.mapbox.navigation.core.MapboxNavigation
  *
  * @see MapboxNavigation.registerRoadObjectsOnRouteObserver
  */
-interface RoadObjectsOnRouteObserver {
+fun interface RoadObjectsOnRouteObserver {
 
     /**
      * Invoked when the route has changed and new road objects are available,

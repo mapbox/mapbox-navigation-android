@@ -8,7 +8,7 @@ import androidx.annotation.ColorInt
  * Maneuver icon drawer. Used along with maneuver type and modifier. Used by [ManeuverIconHelper]
  * as a general interface to drawing junction views
  */
-interface ManeuverIconDrawer {
+fun interface ManeuverIconDrawer {
 
     /**
      * Draws the maneuver icon

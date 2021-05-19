@@ -7,7 +7,7 @@ import com.mapbox.navigation.ui.maneuver.model.StepDistanceError
 /**
  * Interface definition for a callback to be invoked when a distance remaining data is processed.
  */
-interface StepDistanceRemainingCallback {
+fun interface StepDistanceRemainingCallback {
 
     /**
      * Invoked when distance remaining to finish a step is ready

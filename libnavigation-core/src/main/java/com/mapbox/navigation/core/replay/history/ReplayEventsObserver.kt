@@ -5,7 +5,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 /**
  * Used to observe events replayed by the [MapboxReplayer]
  */
-interface ReplayEventsObserver {
+fun interface ReplayEventsObserver {
 
     /**
      * Called with all events that occurred within a time window

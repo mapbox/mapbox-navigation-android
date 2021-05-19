@@ -1,5 +1,5 @@
 package com.mapbox.navigation.testing.ui.assertions
 
-interface NavigationAssertion {
+fun interface NavigationAssertion {
     fun assert()
 }
