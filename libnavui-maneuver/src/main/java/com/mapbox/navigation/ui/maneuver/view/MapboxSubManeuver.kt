@@ -43,8 +43,6 @@ class MapboxSubManeuver @JvmOverloads constructor(
             exitView,
             maneuver
         )
-        if (instruction.isNotEmpty()) {
-            text = instruction
-        }
+        text = instruction
     }
 }
