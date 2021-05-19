@@ -27,6 +27,7 @@ class MapboxBuildingHighlightApiTest {
     private val style: Style = mockk {
         every { styleLayerExists(any()) } returns false
         every { addStyleLayer(any(), any()) } returns expected
+        every { removeStyleLayer(any()) } returns mockk()
     }
 
     /** Mock querying features **/
