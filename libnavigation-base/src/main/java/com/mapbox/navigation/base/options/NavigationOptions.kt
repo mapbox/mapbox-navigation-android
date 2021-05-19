@@ -16,7 +16,7 @@ import com.mapbox.navigation.base.route.RouteRefreshOptions
  * in such a way as to project the location forward along the current trajectory so as to
  * appear more in sync with the users ground-truth location
  */
-const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
+const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L
 
 /**
  * This value will be used to offset the time at which the current location was calculated

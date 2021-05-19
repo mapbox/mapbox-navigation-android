@@ -1,6 +1,5 @@
 package com.mapbox.navigation.navigator.internal
 
-import android.os.SystemClock
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
@@ -22,6 +21,7 @@ import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
+import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.PredictiveCacheController
 import com.mapbox.navigator.PredictiveCacheControllerOptions
 import com.mapbox.navigator.PredictiveLocationTrackerOptions
@@ -40,7 +40,6 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -149,31 +148,11 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         return navigator!!.updateSensorData(sensorData)
     }
 
-    /**
-     * Gets the status as an offset in time from the last fixed location. This
-     * allows the caller to get predicted statuses in the future along the route if
-     * the device is unable to get fixed locations. Poor reception would be one reason.
-     *
-     * This method uses previous fixes to snap the user's location to the route
-     * and verify that the user is still on the route. This method also determines
-     * if an instruction needs to be called out for the user.
-     *
-     * @param navigatorPredictionMillis millis for navigation status predictions.
-     *
-     * @return the last [TripStatus] as a result of fixed location updates. If the timestamp
-     * is earlier than a previous call, the last status will be returned. The function does not support re-winding time.
-     */
-    override suspend fun getStatus(navigatorPredictionMillis: Long): TripStatus =
-        withContext(NavigatorDispatcher) {
-            val nanos = SystemClock.elapsedRealtimeNanos() + TimeUnit.MILLISECONDS.toNanos(
-                navigatorPredictionMillis
-            )
-            val status = navigator!!.getStatus(nanos)
-            TripStatus(
-                route,
-                status
-            )
-        }
+    override fun addNavigatorObserver(navigatorObserver: NavigatorObserver) =
+        navigator!!.addObserver(navigatorObserver)
+
+    override fun removeNavigatorObserver(navigatorObserver: NavigatorObserver) =
+        navigator!!.removeObserver(navigatorObserver)
 
     // Routing
 

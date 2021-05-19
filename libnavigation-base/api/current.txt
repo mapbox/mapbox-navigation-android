@@ -249,7 +249,7 @@ package com.mapbox.navigation.base.options {
   }
 
   public final class NavigationOptionsKt {
-    field public static final long DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L; // 0x44cL
+    field public static final long DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L; // 0x3e8L
   }
 
   public final class PredictiveCacheLocationOptions {

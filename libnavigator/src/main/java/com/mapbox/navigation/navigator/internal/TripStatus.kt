@@ -8,8 +8,6 @@ import com.mapbox.navigator.NavigationStatus
  *
  * @param route
  * @param navigationStatus
- *
- * @see [MapboxNativeNavigator.getStatus]
  */
 data class TripStatus(
     val route: DirectionsRoute?,

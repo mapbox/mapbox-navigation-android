@@ -28,6 +28,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
+// TODO: Refactor https://github.com/mapbox/mapbox-navigation-android/issues/4429
 class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
     @get:Rule
