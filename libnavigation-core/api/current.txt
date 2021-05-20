@@ -23,6 +23,7 @@ package com.mapbox.navigation.core {
     method public void registerEHorizonObserver(com.mapbox.navigation.core.trip.session.eh.EHorizonObserver eHorizonObserver);
     method public void registerLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
     method public void registerMapMatcherResultObserver(com.mapbox.navigation.core.trip.session.MapMatcherResultObserver mapMatcherResultObserver);
+    method public void registerNavigationVersionSwitchObserver(com.mapbox.navigation.core.NavigationVersionSwitchObserver observer);
     method public void registerOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
     method public void registerRoadObjectsOnRouteObserver(com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver roadObjectsOnRouteObserver);
     method public void registerRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver routeAlternativesObserver);
@@ -47,6 +48,7 @@ package com.mapbox.navigation.core {
     method public void unregisterEHorizonObserver(com.mapbox.navigation.core.trip.session.eh.EHorizonObserver eHorizonObserver);
     method public void unregisterLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
     method public void unregisterMapMatcherResultObserver(com.mapbox.navigation.core.trip.session.MapMatcherResultObserver mapMatcherResultObserver);
+    method public void unregisterNavigationVersionSwitchObserver(com.mapbox.navigation.core.NavigationVersionSwitchObserver observer);
     method public void unregisterOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
     method public void unregisterRoadObjectsOnRouteObserver(com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver roadObjectsOnRouteObserver);
     method public void unregisterRouteAlternativesObserver(com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver routeAlternativesObserver);
@@ -71,6 +73,11 @@ package com.mapbox.navigation.core {
     method public static boolean isCreated();
     method public static com.mapbox.navigation.core.MapboxNavigation retrieve();
     field public static final com.mapbox.navigation.core.MapboxNavigationProvider INSTANCE;
+  }
+
+  public interface NavigationVersionSwitchObserver {
+    method public void onSwitchToFallbackVersion(String? tilesVersion);
+    method public void onSwitchToTargetVersion(String? tilesVersion);
   }
 
 }

@@ -19,6 +19,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.arrival.ArrivalController
@@ -42,10 +43,15 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.TilesConfig
 import io.mockk.Ordering
+import io.mockk.Runs
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
@@ -55,8 +61,10 @@ import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -776,6 +784,139 @@ class MapboxNavigationTest {
         mapboxNavigation.onDestroy()
 
         verify(exactly = 1) { directionsSession.shutdown() }
+    }
+
+    @Test
+    fun `register internalFallbackVersionsObserver`() {
+        verify(exactly = 1) { tripSession.registerFallbackVersionsObserver(any()) }
+
+        mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun `unregisterAllFallbackVersionsObservers on destroy`() {
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { tripSession.unregisterAllFallbackVersionsObservers() }
+    }
+
+    @Test
+    fun `verify tile config tilesVersion and isFallback on init`() {
+        ThreadController.cancelAllUICoroutines()
+        val slot = slot<TilesConfig>()
+        every {
+            NavigationComponentProvider.createNativeNavigator(any(), any(), capture(slot), any())
+        } returns navigator
+        val tilesVersion = "tilesVersion"
+        val options = navigationOptions.toBuilder()
+            .routingTilesOptions(
+                RoutingTilesOptions.Builder()
+                    .tilesVersion(tilesVersion)
+                    .build()
+            )
+            .build()
+
+        mapboxNavigation = MapboxNavigation(options)
+
+        assertEquals(tilesVersion, slot.captured.endpointConfig?.version)
+        assertFalse(slot.captured.endpointConfig?.isFallback!!)
+
+        mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun `verify tile config tilesVersion and isFallback on fallback`() {
+        ThreadController.cancelAllUICoroutines()
+
+        val fallbackObserverSlot = slot<FallbackVersionsObserver>()
+        every {
+            tripSession.registerFallbackVersionsObserver(capture(fallbackObserverSlot))
+        } just Runs
+        every { tripSession.route } returns null
+        every { tripSession.getRouteProgress() } returns mockk()
+
+        mapboxNavigation = MapboxNavigation(navigationOptions)
+
+        val tileConfigSlot = slot<TilesConfig>()
+        every {
+            navigator.recreate(
+                any(),
+                any(),
+                capture(tileConfigSlot),
+                any()
+            )
+        } just Runs
+
+        val tilesVersion = "tilesVersion"
+        val latestTilesVersion = "latestTilesVersion"
+        fallbackObserverSlot.captured.onFallbackVersionsFound(
+            listOf(tilesVersion, latestTilesVersion)
+        )
+
+        assertEquals(latestTilesVersion, tileConfigSlot.captured.endpointConfig?.version)
+        assertTrue(tileConfigSlot.captured.endpointConfig?.isFallback!!)
+
+        mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun `verify tile config tilesVersion and isFallback on return to latest tiles version`() {
+        ThreadController.cancelAllUICoroutines()
+
+        val fallbackObserverSlot = slot<FallbackVersionsObserver>()
+        every {
+            tripSession.registerFallbackVersionsObserver(capture(fallbackObserverSlot))
+        } just Runs
+        every { tripSession.route } returns null
+        every { tripSession.getRouteProgress() } returns mockk()
+
+        mapboxNavigation = MapboxNavigation(navigationOptions)
+
+        val tileConfigSlot = slot<TilesConfig>()
+        every {
+            navigator.recreate(
+                any(),
+                any(),
+                capture(tileConfigSlot),
+                any()
+            )
+        } just Runs
+
+        fallbackObserverSlot.captured.onCanReturnToLatest()
+
+        assertEquals("", tileConfigSlot.captured.endpointConfig?.version)
+        assertFalse(tileConfigSlot.captured.endpointConfig?.isFallback!!)
+
+        mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun `verify route and routeProgress are set after navigator recreation`() = runBlocking {
+        ThreadController.cancelAllUICoroutines()
+
+        val fallbackObserverSlot = slot<FallbackVersionsObserver>()
+        every {
+            tripSession.registerFallbackVersionsObserver(capture(fallbackObserverSlot))
+        } just Runs
+        val route: DirectionsRoute = mockk()
+        val routeProgress: RouteProgress = mockk()
+        val legProgress: RouteLegProgress = mockk()
+        val index = 137
+        every { tripSession.route } returns route
+        every { tripSession.getRouteProgress() } returns routeProgress
+        every { routeProgress.currentLegProgress } returns legProgress
+        every { legProgress.legIndex } returns index
+        coEvery { navigator.setRoute(any(), any()) } returns mockk()
+
+        mapboxNavigation = MapboxNavigation(navigationOptions)
+
+        fallbackObserverSlot.captured.onFallbackVersionsFound(listOf("version"))
+
+        coVerify {
+            navigator.setRoute(route, index)
+        }
+
+        mapboxNavigation.onDestroy()
     }
 
     private fun mockLocation() {

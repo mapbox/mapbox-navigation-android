@@ -32,6 +32,7 @@ import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.RouteState
 import kotlinx.coroutines.Job
@@ -122,6 +123,7 @@ internal class MapboxTripSession(
     private val roadObjectsOnRouteObservers =
         CopyOnWriteArraySet<RoadObjectsOnRouteObserver>()
     private val mapMatcherResultObservers = CopyOnWriteArraySet<MapMatcherResultObserver>()
+    private val fallbackVersionsObservers = CopyOnWriteArraySet<FallbackVersionsObserver>()
 
     private val bannerInstructionEvent = BannerInstructionEvent()
 
@@ -155,6 +157,33 @@ internal class MapboxTripSession(
             roadObjectsOnRouteObservers.forEach { it.onNewRoadObjectsOnTheRoute(value) }
         }
     private var mapMatcherResult: MapMatcherResult? = null
+
+    private val nativeFallbackVersionsObserver =
+        object : com.mapbox.navigator.FallbackVersionsObserver() {
+            override fun onFallbackVersionsFound(versions: MutableList<String>) {
+                mainJobController.scope.launch {
+                    fallbackVersionsObservers.forEach {
+                        it.onFallbackVersionsFound(versions)
+                    }
+                }
+            }
+
+            override fun onCanReturnToLatest() {
+                mainJobController.scope.launch {
+                    fallbackVersionsObservers.forEach {
+                        it.onCanReturnToLatest()
+                    }
+                }
+            }
+        }
+
+    init {
+        navigator.setNativeNavigatorRecreationObserver {
+            if (fallbackVersionsObservers.isNotEmpty()) {
+                navigator.setFallbackVersionsObserver(nativeFallbackVersionsObserver)
+            }
+        }
+    }
 
     /**
      * Return raw location
@@ -459,6 +488,29 @@ internal class MapboxTripSession(
 
     override fun unregisterAllMapMatcherResultObservers() {
         mapMatcherResultObservers.clear()
+    }
+
+    override fun registerFallbackVersionsObserver(
+        fallbackVersionsObserver: FallbackVersionsObserver
+    ) {
+        if (fallbackVersionsObservers.isEmpty()) {
+            navigator.setFallbackVersionsObserver(nativeFallbackVersionsObserver)
+        }
+        fallbackVersionsObservers.add(fallbackVersionsObserver)
+    }
+
+    override fun unregisterFallbackVersionsObserver(
+        fallbackVersionsObserver: FallbackVersionsObserver
+    ) {
+        fallbackVersionsObservers.remove(fallbackVersionsObserver)
+        if (fallbackVersionsObservers.isEmpty()) {
+            navigator.setFallbackVersionsObserver(null)
+        }
+    }
+
+    override fun unregisterAllFallbackVersionsObservers() {
+        fallbackVersionsObservers.clear()
+        navigator.setFallbackVersionsObserver(null)
     }
 
     private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {

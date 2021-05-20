@@ -7,14 +7,39 @@ import com.mapbox.navigator.PredictiveCacheController
 
 object PredictiveCache {
 
-    private var cachedNavigationPredictiveCacheControllers =
+    private val cachedNavigationPredictiveCacheControllers =
         mutableListOf<PredictiveCacheController>()
-    private var cachedMapsPredictiveCacheControllers =
+    private val cachedMapsPredictiveCacheControllers =
         mutableMapOf<String, PredictiveCacheController>()
+
+    private val navPredictiveCacheLocationOptions =
+        mutableListOf<PredictiveCacheLocationOptions>()
+    private val mapsPredictiveCacheLocationOptions =
+        mutableMapOf<String, Pair<TileStore, PredictiveCacheLocationOptions>>()
+
+    init {
+        // recreate controllers with the same options but with a new navigator instance
+        MapboxNativeNavigatorImpl.setNativeNavigatorRecreationObserver {
+            cachedNavigationPredictiveCacheControllers.clear()
+            cachedMapsPredictiveCacheControllers.clear()
+
+            navPredictiveCacheLocationOptions.forEach {
+                createNavigationController(it)
+            }
+            mapsPredictiveCacheLocationOptions.forEach {
+                createMapsController(
+                    tileStore = it.value.first,
+                    tileVariant = it.key,
+                    predictiveCacheLocationOptions = it.value.second
+                )
+            }
+        }
+    }
 
     fun createNavigationController(
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions
     ) {
+        navPredictiveCacheLocationOptions.add(predictiveCacheLocationOptions)
         val predictiveCacheController =
             MapboxNativeNavigatorImpl.createNavigationPredictiveCacheController(
                 predictiveCacheLocationOptions
@@ -35,6 +60,8 @@ object PredictiveCache {
                 predictiveCacheLocationOptions
             )
         cachedMapsPredictiveCacheControllers[tileVariant] = predictiveCacheController
+        mapsPredictiveCacheLocationOptions[tileVariant] =
+            Pair(tileStore, predictiveCacheLocationOptions)
     }
 
     fun currentMapsPredictiveCacheControllers(): List<String> =
@@ -42,10 +69,13 @@ object PredictiveCache {
 
     fun removeMapsController(tileVariant: String) {
         cachedMapsPredictiveCacheControllers.remove(tileVariant)
+        mapsPredictiveCacheLocationOptions.remove(tileVariant)
     }
 
     fun clean() {
-        cachedNavigationPredictiveCacheControllers = mutableListOf()
-        cachedMapsPredictiveCacheControllers = mutableMapOf()
+        cachedNavigationPredictiveCacheControllers.clear()
+        cachedMapsPredictiveCacheControllers.clear()
+        navPredictiveCacheLocationOptions.clear()
+        mapsPredictiveCacheLocationOptions.clear()
     }
 }

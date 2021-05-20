@@ -19,6 +19,7 @@ import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
+import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
@@ -41,6 +42,7 @@ import com.mapbox.navigator.VoiceInstruction
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
+import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
@@ -72,6 +74,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override var roadObjectsStore: RoadObjectsStore? = null
     override lateinit var cache: CacheHandle
     private var logger: Logger? = null
+    private val nativeNavigatorRecreationObservers =
+        CopyOnWriteArraySet<NativeNavigatorRecreationObserver>()
 
     // todo move to native
     const val OFFLINE_UUID = "offline"
@@ -88,6 +92,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         tilesConfig: TilesConfig,
         logger: Logger
     ): MapboxNativeNavigator {
+        navigator?.shutdown()
+
         val nativeComponents = NavigatorLoader.createNavigator(
             deviceProfile,
             navigatorConfig,
@@ -104,6 +110,21 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         routeBufferGeoJson = null
         this.logger = logger
         return this
+    }
+
+    /**
+     * Recreate native objects and notify listeners.
+     */
+    override fun recreate(
+        deviceProfile: DeviceProfile,
+        navigatorConfig: NavigatorConfig,
+        tilesConfig: TilesConfig,
+        logger: Logger
+    ) {
+        create(deviceProfile, navigatorConfig, tilesConfig, logger)
+        nativeNavigatorRecreationObservers.forEach {
+            it.onNativeNavigatorRecreated()
+        }
     }
 
     override fun resetRideSession() {
@@ -393,6 +414,23 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      */
     override fun setRoadObjectsStoreObserver(roadObjectsStoreObserver: RoadObjectsStoreObserver?) {
         roadObjectsStore?.setObserver(roadObjectsStoreObserver)
+    }
+
+    override fun setFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver?) {
+        navigator!!.setFallbackVersionsObserver(fallbackVersionsObserver)
+    }
+
+    override fun setNativeNavigatorRecreationObserver(
+        nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver
+    ) {
+        nativeNavigatorRecreationObservers.add(nativeNavigatorRecreationObserver)
+    }
+
+    override fun unregisterAllObservers() {
+        navigator!!.setElectronicHorizonObserver(null)
+        navigator!!.setFallbackVersionsObserver(null)
+        roadObjectsStore?.setObserver(null)
+        nativeNavigatorRecreationObservers.clear()
     }
 
     /**

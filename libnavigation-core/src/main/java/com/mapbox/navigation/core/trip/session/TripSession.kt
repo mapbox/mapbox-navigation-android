@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
+import com.mapbox.navigator.FallbackVersionsObserver
 
 internal interface TripSession {
 
@@ -62,4 +63,8 @@ internal interface TripSession {
     fun registerMapMatcherResultObserver(mapMatcherResultObserver: MapMatcherResultObserver)
     fun unregisterMapMatcherResultObserver(mapMatcherResultObserver: MapMatcherResultObserver)
     fun unregisterAllMapMatcherResultObservers()
+
+    fun registerFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver)
+    fun unregisterFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver)
+    fun unregisterAllFallbackVersionsObservers()
 }

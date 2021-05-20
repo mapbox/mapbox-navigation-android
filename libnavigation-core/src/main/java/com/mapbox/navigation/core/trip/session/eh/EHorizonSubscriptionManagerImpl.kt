@@ -85,10 +85,10 @@ internal class EHorizonSubscriptionManagerImpl(
             }
         }
 
-    private fun notifyAllObservers(action: suspend EHorizonObserver.() -> Unit) {
-        mainJobController.scope.launch {
-            eHorizonObservers.forEach {
-                it.action()
+    init {
+        navigator.setNativeNavigatorRecreationObserver {
+            if (eHorizonObservers.isNotEmpty()) {
+                setNavigatorObservers()
             }
         }
     }
@@ -132,6 +132,14 @@ internal class EHorizonSubscriptionManagerImpl(
         navigator.run {
             setElectronicHorizonObserver(null)
             setRoadObjectsStoreObserver(null)
+        }
+    }
+
+    private fun notifyAllObservers(action: suspend EHorizonObserver.() -> Unit) {
+        mainJobController.scope.launch {
+            eHorizonObservers.forEach {
+                it.action()
+            }
         }
     }
 }
