@@ -311,9 +311,7 @@ class MapboxNavigation(
             tripSession,
             logger
         )
-        if (navigationOptions.routeRefreshOptions.enabled) {
-            routeRefreshController.start()
-        }
+        routeRefreshController.restart()
 
         defaultRerouteController = MapboxRerouteController(
             directionsSession,
@@ -439,6 +437,7 @@ class MapboxNavigation(
     fun setRoutes(routes: List<DirectionsRoute>) {
         rerouteController?.interrupt()
         routeAlternativesController.interrupt()
+        routeRefreshController.restart()
         directionsSession.routes = routes
     }
 
