@@ -13,7 +13,6 @@ import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.utils.internal.MapboxTimer
-import kotlinx.coroutines.Job
 
 /**
  * This class is responsible for refreshing the current direction route's traffic.
@@ -21,11 +20,11 @@ import kotlinx.coroutines.Job
  *
  * If the route is successfully refreshed, this class will update the [TripSession.route]
  *
- * [start] and [stop] are attached to the application lifecycle. Observing routes that
- * can be refreshed are handled by this class. Calling [start] will restart the refresh timer.
+ * [attach] and [stop] are attached to the application lifecycle. Observing routes that
+ * can be refreshed are handled by this class. Calling [attach] will restart the refresh timer.
  */
 internal class RouteRefreshController(
-    routeRefreshOptions: RouteRefreshOptions,
+    private val routeRefreshOptions: RouteRefreshOptions,
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession,
     private val logger: Logger
@@ -39,42 +38,56 @@ internal class RouteRefreshController(
         restartAfterMillis = routeRefreshOptions.intervalMillis
     }
 
-    private var requestId: Long? = null
+    private var currentRequestId: Long? = null
 
-    fun start(): Job {
+    /**
+     * If route refresh is enabled, attach a refresh poller.
+     * Cancel old timers, and cancel pending requests.
+     */
+    fun restart() {
         stop()
-        return routerRefreshTimer.startTimer {
-            val route = tripSession.route
-                ?.takeIf { it.routeOptions().supportsRouteRefresh() }
-                ?.takeIf { it.routeOptions().isUuidValidForRefresh() }
-            if (route != null) {
-                val legIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0
-                requestId = directionsSession.requestRouteRefresh(
-                    route,
-                    legIndex,
-                    routeRefreshCallback
-                )
-            } else {
-                logger.w(
-                    TAG,
-                    Message(
-                        """
-                           The route is not qualified for route refresh feature.
-                           See com.mapbox.navigation.base.extensions.supportsRouteRefresh
-                           extension for details.
-                        """.trimIndent()
-                    )
-                )
+        if (routeRefreshOptions.enabled) {
+            routerRefreshTimer.startTimer {
+                refreshRoute()
             }
         }
     }
 
+    /**
+     * Cancel old timers, and cancel pending requests.
+     */
     fun stop() {
-        requestId?.let {
-            directionsSession.cancelRouteRefreshRequest(it)
-            requestId = null
-        }
         routerRefreshTimer.stopJobs()
+        currentRequestId?.let {
+            directionsSession.cancelRouteRefreshRequest(it)
+            currentRequestId = null
+        }
+    }
+
+    private fun refreshRoute() {
+        val route = tripSession.route
+            ?.takeIf { it.routeOptions().supportsRouteRefresh() }
+            ?.takeIf { it.routeOptions().isUuidValidForRefresh() }
+        if (route != null) {
+            val legIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0
+            currentRequestId?.let { directionsSession.cancelRouteRefreshRequest(it) }
+            currentRequestId = directionsSession.requestRouteRefresh(
+                route,
+                legIndex,
+                routeRefreshCallback
+            )
+        } else {
+            logger.w(
+                TAG,
+                Message(
+                    """
+                        The route is not qualified for route refresh feature.
+                        See com.mapbox.navigation.base.extensions.supportsRouteRefresh
+                        extension for details.
+                    """.trimIndent()
+                )
+            )
+        }
     }
 
     private val routeRefreshCallback = object : RouteRefreshCallback {
@@ -86,6 +99,7 @@ internal class RouteRefreshController(
                 directionsSessionRoutes[0] = directionsRoute
                 directionsSession.routes = directionsSessionRoutes
             }
+            currentRequestId = null
         }
 
         override fun onError(error: RouteRefreshError) {
@@ -94,6 +108,7 @@ internal class RouteRefreshController(
                 msg = Message("Route refresh error: ${error.message}"),
                 tr = error.throwable
             )
+            currentRequestId = null
         }
     }
 
