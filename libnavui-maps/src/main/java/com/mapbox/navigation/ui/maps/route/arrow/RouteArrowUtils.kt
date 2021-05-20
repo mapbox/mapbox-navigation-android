@@ -87,15 +87,15 @@ internal object RouteArrowUtils {
         }
 
         if (
-            options.arrowHeadIconBorder.intrinsicHeight > 0 &&
-            options.arrowHeadIconBorder.intrinsicWidth > 0
+            options.arrowHeadIconCasing.intrinsicHeight > 0 &&
+            options.arrowHeadIconCasing.intrinsicWidth > 0
         ) {
             val arrowHeadCasingDrawable = DrawableCompat.wrap(
-                options.arrowHeadIconBorder
+                options.arrowHeadIconCasing
             )
             DrawableCompat.setTint(
                 arrowHeadCasingDrawable.mutate(),
-                options.arrowBorderColor
+                options.arrowCasingColor
             )
             val arrowHeadCasingBitmap = arrowHeadCasingDrawable.getBitmap()
             style.addImage(RouteConstants.ARROW_HEAD_ICON_CASING, arrowHeadCasingBitmap)
@@ -127,7 +127,7 @@ internal object RouteArrowUtils {
         )
             .lineColor(
                 Expression.color(
-                    options.arrowBorderColor
+                    options.arrowCasingColor
                 )
             )
             .lineWidth(

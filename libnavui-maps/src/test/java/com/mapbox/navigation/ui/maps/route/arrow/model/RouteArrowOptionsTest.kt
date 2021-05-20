@@ -28,10 +28,10 @@ class RouteArrowOptionsTest {
     }
 
     @Test
-    fun withArrowBorderColorTest() {
-        val options = RouteArrowOptions.Builder(ctx).withArrowBorderColor(5).build()
+    fun withArrowCasingColorTest() {
+        val options = RouteArrowOptions.Builder(ctx).withArrowCasingColor(5).build()
 
-        assertEquals(5, options.arrowBorderColor)
+        assertEquals(5, options.arrowCasingColor)
     }
 
     @Test
@@ -49,7 +49,7 @@ class RouteArrowOptionsTest {
             .withArrowHeadIconCasingDrawable(RouteConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE)
             .build()
 
-        assertNotNull(options.arrowHeadIconBorder)
+        assertNotNull(options.arrowHeadIconCasing)
     }
 
     @Test
@@ -71,7 +71,7 @@ class RouteArrowOptionsTest {
         val options = RouteArrowOptions.Builder(ctx)
             .withArrowColor(1)
             .withAboveLayerId("someLayerId")
-            .withArrowBorderColor(2)
+            .withArrowCasingColor(2)
             .withArrowHeadIconDrawable(RouteConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE)
             .withArrowHeadIconCasingDrawable(RouteConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE)
             .withTolerance(.111)
@@ -80,10 +80,10 @@ class RouteArrowOptionsTest {
             .build()
 
         assertEquals(1, options.arrowColor)
-        assertEquals(2, options.arrowBorderColor)
+        assertEquals(2, options.arrowCasingColor)
         assertEquals("someLayerId", options.aboveLayerId)
         assertNotNull(options.arrowHeadIcon)
-        assertNotNull(options.arrowHeadIconBorder)
+        assertNotNull(options.arrowHeadIconCasing)
         assertEquals(.111, options.tolerance, 0.0)
     }
 }

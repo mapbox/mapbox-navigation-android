@@ -120,7 +120,7 @@ object RouteConstants {
     val MANEUVER_ARROW_COLOR = Color.parseColor("#FFFFFF")
 
     @ColorInt
-    val MANEUVER_ARROW_BORDER_COLOR = Color.parseColor("#2D3F53")
+    val MANEUVER_ARROW_CASING_COLOR = Color.parseColor("#2D3F53")
 
     @ColorInt
     val ROUTE_CLOSURE_COLOR = Color.parseColor("#000000")
