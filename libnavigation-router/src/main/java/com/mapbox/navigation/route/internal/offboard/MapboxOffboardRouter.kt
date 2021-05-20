@@ -135,9 +135,11 @@ class MapboxOffboardRouter(
         legIndex: Int,
         callback: RouteRefreshCallback
     ): Long {
+        val routeOptions = route.routeOptions()
         val mapboxDirectionsRefresh = RouteBuilderProvider.getRefreshBuilder()
             .accessToken(accessToken)
-            .requestId(route.routeOptions()?.requestUuid())
+            .baseUrl(routeOptions?.baseUrl())
+            .requestId(routeOptions?.requestUuid())
             .routeIndex(route.routeIndex()?.toIntOrNull() ?: 0)
             .legIndex(legIndex)
             .interceptor {

@@ -39,6 +39,7 @@ class MapboxOffboardRouterTest : BaseTest() {
     private val mapboxDirectionsRefresh = mockk<MapboxDirectionsRefresh>(relaxed = true)
     private val mapboxDirectionsRefreshBuilder = mockk<MapboxDirectionsRefresh.Builder>()
     private val context = mockk<Context>()
+    private val mockBaseUrl = "https://api.mapbox.test.com"
     private val accessToken = "pk.1234"
     private lateinit var offboardRouter: MapboxOffboardRouter
     private lateinit var routeCallback: Callback<DirectionsResponse>
@@ -70,6 +71,9 @@ class MapboxOffboardRouterTest : BaseTest() {
         // refresh
         mockkObject(RouteRefreshCallbackMapper)
         every { RouteBuilderProvider.getRefreshBuilder() } returns mapboxDirectionsRefreshBuilder
+        every {
+            mapboxDirectionsRefreshBuilder.baseUrl(any())
+        } returns mapboxDirectionsRefreshBuilder
         every {
             mapboxDirectionsRefreshBuilder.accessToken(accessToken)
         } returns mapboxDirectionsRefreshBuilder
@@ -271,6 +275,7 @@ class MapboxOffboardRouterTest : BaseTest() {
         offboardRouter.getRouteRefresh(route, 1, mockk(relaxUnitFun = true))
 
         verify(exactly = 1) {
+            mapboxDirectionsRefreshBuilder.baseUrl(mockBaseUrl)
             mapboxDirectionsRefreshBuilder.accessToken(accessToken)
             mapboxDirectionsRefreshBuilder.requestId("uuid_123")
             mapboxDirectionsRefreshBuilder.routeIndex(1)
@@ -284,6 +289,7 @@ class MapboxOffboardRouterTest : BaseTest() {
         offboardRouter.getRouteRefresh(route, 1, mockk(relaxUnitFun = true))
 
         verify(exactly = 1) {
+            mapboxDirectionsRefreshBuilder.baseUrl(mockBaseUrl)
             mapboxDirectionsRefreshBuilder.accessToken(accessToken)
             mapboxDirectionsRefreshBuilder.requestId("uuid_321")
             mapboxDirectionsRefreshBuilder.routeIndex(0)
@@ -490,11 +496,14 @@ class MapboxOffboardRouterTest : BaseTest() {
     }
 
     private fun mockRouteForRefresh(
-        uuid: String? = null,
-        routeIndex: String? = null
-    ): DirectionsRoute = mockk<DirectionsRoute>().also {
-        every { it.routeOptions()?.requestUuid() } returns uuid
-        every { it.routeIndex() } returns routeIndex
+        mockRequestUuid: String,
+        mockRouteIndex: String
+    ): DirectionsRoute = mockk {
+        every { routeOptions() } returns mockk {
+            every { baseUrl() } returns mockBaseUrl
+            every { requestUuid() } returns mockRequestUuid
+        }
+        every { routeIndex() } returns mockRouteIndex
     }
 
     private fun mockAnnotationsForRefresh(): DirectionsRouteRefresh = mockk()

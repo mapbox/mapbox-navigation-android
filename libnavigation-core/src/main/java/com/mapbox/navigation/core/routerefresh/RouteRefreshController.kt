@@ -84,6 +84,7 @@ internal class RouteRefreshController(
                         The route is not qualified for route refresh feature.
                         See com.mapbox.navigation.base.extensions.supportsRouteRefresh
                         extension for details.
+                        ${route?.routeOptions()}
                     """.trimIndent()
                 )
             )
