@@ -28,6 +28,14 @@ class RoadObjectMatcher internal constructor(
 
     private val roadObjectMatcherObservers = CopyOnWriteArraySet<RoadObjectMatcherObserver>()
 
+    init {
+        navigator.setNativeNavigatorRecreationObserver {
+            if (roadObjectMatcherObservers.isNotEmpty()) {
+                navigator.roadObjectMatcher?.setListener(roadObjectMatcherListener)
+            }
+        }
+    }
+
     /**
      * Register road object matcher observer. It needs to be registered before any of the other
      * methods are called. Otherwise, the results are lost.
