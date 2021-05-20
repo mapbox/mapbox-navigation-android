@@ -12,19 +12,19 @@ import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.PRIMARY_ROU
  * Options for determining the appearance of maneuver arrow(s)
  *
  * @param arrowColor the color of the arrow shaft
- * @param arrowBorderColor the color of the arrow shaft border
+ * @param arrowCasingColor the color of the arrow shaft border
  * @param arrowHeadIcon the drawable to represent the arrow head
- * @param arrowHeadIconBorder the drawable to represent the arrow head border
+ * @param arrowHeadIconCasing the drawable to represent the arrow head border
  * @param aboveLayerId indicates the maneuver arrow map layers appear above this layer on the map
  * @param tolerance the tolerance value used when configuring the underlying map source
  */
 class RouteArrowOptions private constructor(
     @ColorInt val arrowColor: Int,
-    @ColorInt val arrowBorderColor: Int,
+    @ColorInt val arrowCasingColor: Int,
     private val arrowHeadIconDrawable: Int,
     private val arrowHeadIconCasingDrawable: Int,
     val arrowHeadIcon: Drawable,
-    val arrowHeadIconBorder: Drawable,
+    val arrowHeadIconCasing: Drawable,
     val aboveLayerId: String,
     val tolerance: Double
 ) {
@@ -38,7 +38,7 @@ class RouteArrowOptions private constructor(
         return Builder(
             context,
             arrowColor,
-            arrowBorderColor,
+            arrowCasingColor,
             arrowHeadIconDrawable,
             arrowHeadIconCasingDrawable,
             aboveLayerId,
@@ -56,11 +56,11 @@ class RouteArrowOptions private constructor(
         other as RouteArrowOptions
 
         if (arrowColor != other.arrowColor) return false
-        if (arrowBorderColor != other.arrowBorderColor) return false
+        if (arrowCasingColor != other.arrowCasingColor) return false
         if (arrowHeadIconDrawable != other.arrowHeadIconDrawable) return false
         if (arrowHeadIconCasingDrawable != other.arrowHeadIconCasingDrawable) return false
         if (arrowHeadIcon != other.arrowHeadIcon) return false
-        if (arrowHeadIconBorder != other.arrowHeadIconBorder) return false
+        if (arrowHeadIconCasing != other.arrowHeadIconCasing) return false
         if (aboveLayerId != other.aboveLayerId) return false
         if (tolerance != other.tolerance) return false
 
@@ -72,11 +72,11 @@ class RouteArrowOptions private constructor(
      */
     override fun hashCode(): Int {
         var result = arrowColor
-        result = 31 * result + arrowBorderColor
+        result = 31 * result + arrowCasingColor
         result = 31 * result + arrowHeadIconDrawable
         result = 31 * result + arrowHeadIconCasingDrawable
         result = 31 * result + arrowHeadIcon.hashCode()
-        result = 31 * result + arrowHeadIconBorder.hashCode()
+        result = 31 * result + arrowHeadIconCasing.hashCode()
         result = 31 * result + aboveLayerId.hashCode()
         result = 31 * result + (tolerance.hashCode())
         return result
@@ -87,11 +87,11 @@ class RouteArrowOptions private constructor(
      */
     override fun toString(): String {
         return "RouteArrowOptions(arrowColor=$arrowColor, " +
-            "arrowBorderColor=$arrowBorderColor, " +
+            "arrowCasingColor=$arrowCasingColor, " +
             "arrowHeadIconDrawable=$arrowHeadIconDrawable, " +
             "arrowHeadIconCasingDrawable=$arrowHeadIconCasingDrawable, " +
             "arrowHeadIcon=$arrowHeadIcon, " +
-            "arrowHeadIconBorder=$arrowHeadIconBorder, " +
+            "arrowHeadIconCasing=$arrowHeadIconCasing, " +
             "aboveLayerId='$aboveLayerId', " +
             "tolerance=$tolerance)"
     }
@@ -102,7 +102,7 @@ class RouteArrowOptions private constructor(
     class Builder internal constructor(
         private val context: Context,
         private var arrowColor: Int,
-        private var arrowBorderColor: Int,
+        private var arrowCasingColor: Int,
         private var arrowHeadIconDrawable: Int,
         private var arrowHeadIconCasingDrawable: Int,
         private var aboveLayerId: String?,
@@ -115,7 +115,7 @@ class RouteArrowOptions private constructor(
         constructor(context: Context) : this(
             context,
             RouteConstants.MANEUVER_ARROW_COLOR,
-            RouteConstants.MANEUVER_ARROW_BORDER_COLOR,
+            RouteConstants.MANEUVER_ARROW_CASING_COLOR,
             RouteConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE,
             RouteConstants.MANEUVER_ARROWHEAD_ICON_CASING_DRAWABLE,
             null,
@@ -135,8 +135,8 @@ class RouteArrowOptions private constructor(
          *
          * @param color the color to be used
          */
-        fun withArrowBorderColor(@ColorInt color: Int): Builder =
-            apply { this.arrowBorderColor = color }
+        fun withArrowCasingColor(@ColorInt color: Int): Builder =
+            apply { this.arrowCasingColor = color }
 
         /**
          * Indicates the drawable of the arrow head.
@@ -195,7 +195,7 @@ class RouteArrowOptions private constructor(
 
             return RouteArrowOptions(
                 arrowColor,
-                arrowBorderColor,
+                arrowCasingColor,
                 arrowHeadIconDrawable,
                 arrowHeadIconCasingDrawable,
                 arrowHeadIcon!!,

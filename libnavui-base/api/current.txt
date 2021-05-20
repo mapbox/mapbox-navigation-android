@@ -24,7 +24,7 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     method public int getDESTINATION_WAYPOINT_ICON();
     method public int getMANEUVER_ARROWHEAD_ICON_CASING_DRAWABLE();
     method public int getMANEUVER_ARROWHEAD_ICON_DRAWABLE();
-    method public int getMANEUVER_ARROW_BORDER_COLOR();
+    method public int getMANEUVER_ARROW_CASING_COLOR();
     method public int getMANEUVER_ARROW_COLOR();
     method public int getORIGIN_WAYPOINT_ICON();
     method public int getRESTRICTED_ROAD_COLOR();
@@ -54,7 +54,7 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     property public final int DESTINATION_WAYPOINT_ICON;
     property public final int MANEUVER_ARROWHEAD_ICON_CASING_DRAWABLE;
     property public final int MANEUVER_ARROWHEAD_ICON_DRAWABLE;
-    property public final int MANEUVER_ARROW_BORDER_COLOR;
+    property public final int MANEUVER_ARROW_CASING_COLOR;
     property public final int MANEUVER_ARROW_COLOR;
     property public final int ORIGIN_WAYPOINT_ICON;
     property public final int RESTRICTED_ROAD_COLOR;

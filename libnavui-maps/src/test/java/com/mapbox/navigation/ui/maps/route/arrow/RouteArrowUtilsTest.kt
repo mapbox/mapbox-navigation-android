@@ -412,9 +412,9 @@ class RouteArrowUtilsTest {
         val mockOptions = mockk<RouteArrowOptions> {
             every { aboveLayerId } returns options.aboveLayerId
             every { tolerance } returns options.tolerance
-            every { arrowBorderColor } returns options.arrowBorderColor
+            every { arrowCasingColor } returns options.arrowCasingColor
             every { arrowColor } returns options.arrowColor
-            every { arrowHeadIconBorder } returns options.arrowHeadIconBorder
+            every { arrowHeadIconCasing } returns options.arrowHeadIconCasing
             every { arrowHeadIcon } returns mockk<Drawable> {
                 every { intrinsicHeight } returns 0
                 every { intrinsicWidth } returns 1
@@ -434,9 +434,9 @@ class RouteArrowUtilsTest {
         val mockOptions = mockk<RouteArrowOptions> {
             every { aboveLayerId } returns options.aboveLayerId
             every { tolerance } returns options.tolerance
-            every { arrowBorderColor } returns options.arrowBorderColor
+            every { arrowCasingColor } returns options.arrowCasingColor
             every { arrowColor } returns options.arrowColor
-            every { arrowHeadIconBorder } returns options.arrowHeadIconBorder
+            every { arrowHeadIconCasing } returns options.arrowHeadIconCasing
             every { arrowHeadIcon } returns mockk<Drawable> {
                 every { intrinsicHeight } returns 1
                 every { intrinsicWidth } returns 0
@@ -456,10 +456,10 @@ class RouteArrowUtilsTest {
         val mockOptions = mockk<RouteArrowOptions> {
             every { aboveLayerId } returns options.aboveLayerId
             every { tolerance } returns options.tolerance
-            every { arrowBorderColor } returns options.arrowBorderColor
+            every { arrowCasingColor } returns options.arrowCasingColor
             every { arrowColor } returns options.arrowColor
             every { arrowHeadIcon } returns options.arrowHeadIcon
-            every { arrowHeadIconBorder } returns mockk<Drawable> {
+            every { arrowHeadIconCasing } returns mockk<Drawable> {
                 every { intrinsicHeight } returns 0
                 every { intrinsicWidth } returns 1
             }
@@ -478,10 +478,10 @@ class RouteArrowUtilsTest {
         val mockOptions = mockk<RouteArrowOptions> {
             every { aboveLayerId } returns options.aboveLayerId
             every { tolerance } returns options.tolerance
-            every { arrowBorderColor } returns options.arrowBorderColor
+            every { arrowCasingColor } returns options.arrowCasingColor
             every { arrowColor } returns options.arrowColor
             every { arrowHeadIcon } returns options.arrowHeadIcon
-            every { arrowHeadIconBorder } returns mockk<Drawable> {
+            every { arrowHeadIconCasing } returns mockk<Drawable> {
                 every { intrinsicHeight } returns 0
                 every { intrinsicWidth } returns 1
             }
