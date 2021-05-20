@@ -1,16 +1,19 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.generated.Expression
+import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
-import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getLayerVisibility
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.initializeLayers
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -18,6 +21,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue
+import com.mapbox.navigation.utils.internal.LoggerProvider
 
 /**
  * Responsible for rendering side effects produced by the [MapboxRouteLineApi]. The [MapboxRouteLineApi]
@@ -30,6 +34,12 @@ import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateVa
  */
 class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
 
+    private companion object {
+        private val TAG = Tag("MbxMapboxRouteLineView")
+    }
+
+    private var layersMap: HashMap<String, Layer> = hashMapOf()
+
     /**
      * Will initialize the route line related layers. Other calls in this class will initialize
      * the layers if they have not yet been initialized. If you have a use case for initializing
@@ -38,7 +48,15 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style a valid [Style] instance
      */
     fun initializeLayers(style: Style) {
-        initializeLayers(style, options)
+        if (!style.fullyLoaded) {
+            LoggerProvider.logger.e(
+                TAG,
+                Message("Provided style is not fully loaded.")
+            )
+            layersMap = hashMapOf()
+        } else if (!MapboxRouteLineUtils.layersAreInitialized(style)) {
+            layersMap = initializeLayers(style, options)
+        }
     }
 
     /**
@@ -48,7 +66,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param routeDrawData a [Expected<RouteSetValue, RouteLineError>]
      */
     fun renderRouteDrawData(style: Style, routeDrawData: Expected<RouteSetValue, RouteLineError>) {
-        initializeLayers(style, options)
+        initializeLayers(style)
 
         when (routeDrawData) {
             is Expected.Success -> {
@@ -112,6 +130,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         style: Style,
         update: Expected<VanishingRouteLineUpdateValue, RouteLineError>
     ) {
+        initializeLayers(style)
         when (update) {
             is Expected.Failure -> { }
             is Expected.Success -> {
@@ -149,7 +168,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         when (clearRouteLineValue) {
             is Expected.Failure -> { }
             is Expected.Success -> {
-                initializeLayers(style, options)
+                initializeLayers(style)
 
                 updateSource(
                     style,
@@ -181,6 +200,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the [Style]
      */
     fun showPrimaryRoute(style: Style) {
+        initializeLayers(style)
         updateLayerVisibility(
             style,
             RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID, Visibility.VISIBLE
@@ -201,6 +221,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the [Style]
      */
     fun hidePrimaryRoute(style: Style) {
+        initializeLayers(style)
         updateLayerVisibility(
             style,
             RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID, Visibility.NONE
@@ -221,6 +242,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the [Style]
      */
     fun showAlternativeRoutes(style: Style) {
+        initializeLayers(style)
         updateLayerVisibility(
             style,
             RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID, Visibility.VISIBLE
@@ -253,6 +275,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the [Style]
      */
     fun hideAlternativeRoutes(style: Style) {
+        initializeLayers(style)
         updateLayerVisibility(
             style,
             RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID, Visibility.NONE
@@ -321,7 +344,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
 
     private fun updateLayerVisibility(style: Style, layerId: String, visibility: Visibility) {
         if (style.isFullyLoaded()) {
-            style.getLayer(layerId)?.visibility(visibility)
+            layersMap[layerId]?.visibility(visibility)
         }
     }
 
@@ -335,8 +358,19 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
 
     private fun updateLineGradient(style: Style, layerId: String, expression: Expression) {
         if (style.isFullyLoaded()) {
-            style.getLayer(layerId)?.let {
-                (it as LineLayer).lineGradient(expression)
+            val layer = layersMap[layerId]
+            if (layer is LineLayer) {
+                layer.lineGradient(expression)
+            } else {
+                LoggerProvider.logger.e(
+                    TAG,
+                    Message(
+                        """
+                        Error updating gradient.
+                        Layer with id "$layerId" does not exist or is not a LineLayer.
+                        """.trimIndent()
+                    )
+                )
             }
         }
     }

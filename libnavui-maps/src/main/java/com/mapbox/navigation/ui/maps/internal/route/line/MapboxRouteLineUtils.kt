@@ -18,6 +18,7 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.dsl.generated.color
 import com.mapbox.maps.extension.style.expressions.dsl.generated.eq
 import com.mapbox.maps.extension.style.expressions.generated.Expression
+import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
@@ -729,10 +730,11 @@ object MapboxRouteLineUtils {
         return expressions.plus(color(defaultColor))
     }
 
-    internal fun initializeLayers(style: Style, options: MapboxRouteLineOptions) {
-        if (!style.fullyLoaded || layersAreInitialized(style)) {
-            return
-        }
+    internal fun initializeLayers(
+        style: Style,
+        options: MapboxRouteLineOptions
+    ): HashMap<String, Layer> {
+        val map = hashMapOf<String, Layer>()
 
         val belowLayerIdToUse: String? =
             getBelowLayerIdToUse(
@@ -780,6 +782,7 @@ object MapboxRouteLineUtils {
             options.resourceProvider.routeLineColorResources.alternativeRouteCasingColor
         ).forEach {
             it.bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+            map[it.layerId] = it
         }
 
         options.routeLayerProvider.buildAlternativeRouteLayers(
@@ -788,6 +791,7 @@ object MapboxRouteLineUtils {
             options.resourceProvider.routeLineColorResources.alternativeRouteDefaultColor
         ).forEach {
             it.bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+            map[it.layerId] = it
         }
 
         options.routeLayerProvider.buildAlternativeRouteTrafficLayers(
@@ -796,30 +800,45 @@ object MapboxRouteLineUtils {
             options.resourceProvider.routeLineColorResources.alternativeRouteDefaultColor
         ).forEach {
             it.bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+            map[it.layerId] = it
         }
 
         options.routeLayerProvider.buildPrimaryRouteCasingLayer(
             style,
             options.resourceProvider.routeLineColorResources.routeCasingColor
-        ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+        ).apply {
+            bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+            map[layerId] = this
+        }
 
         options.routeLayerProvider.buildPrimaryRouteLayer(
             style,
             options.resourceProvider.roundedLineCap,
             options.resourceProvider.routeLineColorResources.routeDefaultColor
-        ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+        ).apply {
+            bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+            map[layerId] = this
+        }
 
         options.routeLayerProvider.buildPrimaryRouteTrafficLayer(
             style,
             options.resourceProvider.roundedLineCap,
             options.resourceProvider.routeLineColorResources.routeDefaultColor
-        ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+        ).apply {
+            bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+            map[layerId] = this
+        }
 
         options.routeLayerProvider.buildWayPointLayer(
             style,
             options.originIcon,
             options.destinationIcon
-        ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+        ).apply {
+            bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+            map[layerId] = this
+        }
+
+        return map
     }
 
     internal fun layersAreInitialized(style: Style): Boolean {
