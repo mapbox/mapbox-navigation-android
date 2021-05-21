@@ -11,5 +11,5 @@ fun interface RoadObjectMatcherObserver {
     /**
      * Road object matching result.
      */
-    fun onRoadObjectMatched(result: Expected<RoadObject, RoadObjectMatcherError>)
+    fun onRoadObjectMatched(result: Expected<RoadObjectMatcherError, RoadObject>)
 }

@@ -121,7 +121,7 @@ class MapboxSignboardApiTest {
             )
         } returns SignboardResult.SignboardRequest(mockRequest)
         val mockResponseData =
-            mockk<com.mapbox.bindgen.Expected<HttpResponseData?, HttpRequestError?>>()
+            mockk<com.mapbox.bindgen.Expected<HttpRequestError, HttpResponseData>>()
         val mockResponse = mockk<HttpResponse> {
             every { result } returns mockResponseData
             every { request } returns mockRequest
@@ -163,7 +163,7 @@ class MapboxSignboardApiTest {
             )
         } returns SignboardResult.SignboardRequest(mockRequest)
         val mockResponseData =
-            mockk<com.mapbox.bindgen.Expected<HttpResponseData?, HttpRequestError?>>()
+            mockk<com.mapbox.bindgen.Expected<HttpRequestError, HttpResponseData>>()
         val mockResponse = mockk<HttpResponse> {
             every { result } returns mockResponseData
             every { request } returns mockRequest
@@ -210,7 +210,7 @@ class MapboxSignboardApiTest {
         } returns SignboardResult.SignboardRequest(mockRequest)
         val mockData = byteArrayOf(-12, 12, 34, 55, -45)
         val mockResponseData =
-            mockk<com.mapbox.bindgen.Expected<HttpResponseData?, HttpRequestError?>>()
+            mockk<com.mapbox.bindgen.Expected<HttpRequestError, HttpResponseData>>()
         val mockResponse = mockk<HttpResponse> {
             every { result } returns mockResponseData
             every { request } returns mockRequest
@@ -264,7 +264,7 @@ class MapboxSignboardApiTest {
         } returns SignboardResult.SignboardRequest(mockRequest)
         val mockData = byteArrayOf(-12, 12, 34, 55, -45)
         val mockResponseData =
-            mockk<com.mapbox.bindgen.Expected<HttpResponseData?, HttpRequestError?>>()
+            mockk<com.mapbox.bindgen.Expected<HttpRequestError, HttpResponseData>>()
         val mockResponse = mockk<HttpResponse> {
             every { result } returns mockResponseData
             every { request } returns mockRequest

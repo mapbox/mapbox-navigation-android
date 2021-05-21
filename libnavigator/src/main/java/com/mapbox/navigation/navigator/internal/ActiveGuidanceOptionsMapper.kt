@@ -22,27 +22,27 @@ object ActiveGuidanceOptionsMapper {
     private fun mapToActiveGuidanceMode(profile: String?): ActiveGuidanceMode {
         return when (profile) {
             DirectionsCriteria.PROFILE_DRIVING_TRAFFIC, DirectionsCriteria.PROFILE_DRIVING -> {
-                ActiveGuidanceMode.KDRIVING
+                ActiveGuidanceMode.DRIVING
             }
             DirectionsCriteria.PROFILE_WALKING ->
-                ActiveGuidanceMode.KWALKING
+                ActiveGuidanceMode.WALKING
             DirectionsCriteria.PROFILE_CYCLING ->
-                ActiveGuidanceMode.KCYCLING
+                ActiveGuidanceMode.CYCLING
             else ->
-                ActiveGuidanceMode.KDRIVING
+                ActiveGuidanceMode.DRIVING
         }
     }
 
     fun mapToActiveGuidanceGeometry(geometry: String?): ActiveGuidanceGeometryEncoding {
         return when (geometry) {
             DirectionsCriteria.GEOMETRY_POLYLINE ->
-                ActiveGuidanceGeometryEncoding.KPOLYLINE5
+                ActiveGuidanceGeometryEncoding.POLYLINE5
             DirectionsCriteria.GEOMETRY_POLYLINE6 ->
-                ActiveGuidanceGeometryEncoding.KPOLYLINE6
+                ActiveGuidanceGeometryEncoding.POLYLINE6
             GEOJSON ->
-                ActiveGuidanceGeometryEncoding.KGEO_JSON
+                ActiveGuidanceGeometryEncoding.GEO_JSON
             else ->
-                ActiveGuidanceGeometryEncoding.KPOLYLINE6
+                ActiveGuidanceGeometryEncoding.POLYLINE6
         }
     }
 

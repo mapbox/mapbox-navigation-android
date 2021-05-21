@@ -467,13 +467,6 @@ package com.mapbox.navigation.ui.maps.guidance.junction.view {
 
 }
 
-package com.mapbox.navigation.ui.maps.guidance.signboard {
-
-  public final class SignboardProcessorKt {
-  }
-
-}
-
 package com.mapbox.navigation.ui.maps.guidance.signboard.api {
 
   public class MapboxExternalFileResolver extends com.caverock.androidsvg.SVGExternalFileResolver {

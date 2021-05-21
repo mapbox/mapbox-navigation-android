@@ -89,41 +89,36 @@ internal object JunctionProcessor {
     }
 
     private fun processResponse(
-        response: Expected<HttpResponseData?, HttpRequestError?>
+        response: Expected<HttpRequestError, HttpResponseData>
     ): JunctionResult {
-        when {
-            response.isValue -> {
-                return response.value?.let { responseData ->
-                    when (responseData.code) {
-                        CODE_200 -> {
-                            if (responseData.data.isEmpty()) {
-                                JunctionResult.JunctionRaster.Empty
-                            } else {
-                                JunctionResult.JunctionRaster.Success(responseData.data)
-                            }
-                        }
-                        CODE_401 -> {
-                            JunctionResult.JunctionRaster.Failure(
-                                "Your token cannot access this " +
-                                    "resource, contact support"
-                            )
-                        }
-                        CODE_404 -> {
-                            JunctionResult.JunctionRaster.Failure("Resource is missing")
-                        }
-                        else -> {
-                            JunctionResult.JunctionRaster.Failure("Unknown error")
+        return response.fold(
+            { error ->
+                JunctionResult.JunctionRaster.Failure(error.message)
+            },
+            { responseData ->
+                when (responseData.code) {
+                    CODE_200 -> {
+                        if (responseData.data.isEmpty()) {
+                            JunctionResult.JunctionRaster.Empty
+                        } else {
+                            JunctionResult.JunctionRaster.Success(responseData.data)
                         }
                     }
-                } ?: JunctionResult.JunctionRaster.Empty
+                    CODE_401 -> {
+                        JunctionResult.JunctionRaster.Failure(
+                            "Your token cannot access this " +
+                                "resource, contact support"
+                        )
+                    }
+                    CODE_404 -> {
+                        JunctionResult.JunctionRaster.Failure("Resource is missing")
+                    }
+                    else -> {
+                        JunctionResult.JunctionRaster.Failure("Unknown error")
+                    }
+                }
             }
-            response.isError -> {
-                return JunctionResult.JunctionRaster.Failure(response.error?.message)
-            }
-            else -> {
-                return JunctionResult.JunctionRaster.Failure(response.error?.message)
-            }
-        }
+        )
     }
 
     private fun processRaster(

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.arrival.api
 
 import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.None
 import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
@@ -20,7 +21,7 @@ import org.junit.Test
 class MapboxBuildingHighlightApiTest {
 
     /** Mock map styles **/
-    private val expected: Expected<Void, String> = mockk {
+    private val expected: Expected<String, None> = mockk {
         every { error } returns null
     }
     private val style: Style = mockk {
@@ -29,7 +30,7 @@ class MapboxBuildingHighlightApiTest {
     }
 
     /** Mock querying features **/
-    private val queriedFeaturesExpected: Expected<List<QueriedFeature>, String> = mockk {
+    private val queriedFeaturesExpected: Expected<String, List<QueriedFeature>> = mockk {
         every { value } returns emptyList()
         every { error } returns null
     }
@@ -69,7 +70,7 @@ class MapboxBuildingHighlightApiTest {
         assertTrue(propertySlot.isCaptured)
     }
 
-    private fun mockSuccessQueriedFeature() = mockk<Expected<List<QueriedFeature>, String>> {
+    private fun mockSuccessQueriedFeature() = mockk<Expected<String, List<QueriedFeature>>> {
         mockk {
             every { value } returns listOf(
                 mockk {

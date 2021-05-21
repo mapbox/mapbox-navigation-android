@@ -70,13 +70,13 @@ class MapboxOnboardRouterTest {
 
     private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     private val routerCallback: Router.Callback = mockk(relaxUnitFun = true)
-    private val routerResultSuccess: Expected<String, RouterError> = mockk {
+    private val routerResultSuccess: Expected<RouterError, String> = mockk {
         every { isValue } returns true
         every { isError } returns false
         every { value } returns SUCCESS_RESPONSE
         every { error } returns null
     }
-    private val routerResultFailure: Expected<String, RouterError> = mockk {
+    private val routerResultFailure: Expected<RouterError, String> = mockk {
         every { isValue } returns false
         every { isError } returns true
         every { value } returns null

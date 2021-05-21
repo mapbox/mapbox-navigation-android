@@ -120,7 +120,7 @@ class MapboxJunctionApiTest {
             )
         } returns JunctionResult.JunctionRequest(mockRequest)
         val mockResponseData =
-            mockk<com.mapbox.bindgen.Expected<HttpResponseData?, HttpRequestError?>>()
+            mockk<com.mapbox.bindgen.Expected<HttpRequestError, HttpResponseData>>()
         val mockResponse = mockk<HttpResponse> {
             every { result } returns mockResponseData
             every { request } returns mockRequest
@@ -162,7 +162,7 @@ class MapboxJunctionApiTest {
             )
         } returns JunctionResult.JunctionRequest(mockRequest)
         val mockResponseData =
-            mockk<com.mapbox.bindgen.Expected<HttpResponseData?, HttpRequestError?>>()
+            mockk<com.mapbox.bindgen.Expected<HttpRequestError, HttpResponseData>>()
         val mockResponse = mockk<HttpResponse> {
             every { result } returns mockResponseData
             every { request } returns mockRequest
@@ -209,7 +209,7 @@ class MapboxJunctionApiTest {
         } returns JunctionResult.JunctionRequest(mockRequest)
         val mockData = byteArrayOf()
         val mockResponseData =
-            mockk<com.mapbox.bindgen.Expected<HttpResponseData?, HttpRequestError?>>()
+            mockk<com.mapbox.bindgen.Expected<HttpRequestError, HttpResponseData>>()
         val mockResponse = mockk<HttpResponse> {
             every { result } returns mockResponseData
             every { request } returns mockRequest
@@ -264,7 +264,7 @@ class MapboxJunctionApiTest {
         } returns JunctionResult.JunctionRequest(mockRequest)
         val mockData = byteArrayOf(12, -12, 23, 45, 67, 65, 44, 45, 12, 34, 45, 56, 76)
         val mockResponseData =
-            mockk<com.mapbox.bindgen.Expected<HttpResponseData?, HttpRequestError?>>()
+            mockk<com.mapbox.bindgen.Expected<HttpRequestError, HttpResponseData>>()
         val mockResponse = mockk<HttpResponse> {
             every { result } returns mockResponseData
             every { request } returns mockRequest

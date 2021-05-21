@@ -136,7 +136,7 @@ class JunctionProcessorTest {
     @Test
     fun `process action signboard process response result unauthorized access`() {
         val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(401L, ByteArray(0))
-        val response: Expected<HttpResponseData?, HttpRequestError?> =
+        val response: Expected<HttpRequestError, HttpResponseData> =
             ExpectedFactory.createValue(mockHttpResponseData)
         val action = JunctionAction.ProcessJunctionResponse(response)
         val expected = JunctionResult.JunctionRaster.Failure(
@@ -152,7 +152,7 @@ class JunctionProcessorTest {
     @Test
     fun `process action signboard process response result resource missing`() {
         val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(404L, ByteArray(0))
-        val response: Expected<HttpResponseData?, HttpRequestError?> =
+        val response: Expected<HttpRequestError, HttpResponseData> =
             ExpectedFactory.createValue(mockHttpResponseData)
         val expected = JunctionResult.JunctionRaster.Failure("Resource is missing")
         val action = JunctionAction.ProcessJunctionResponse(response)
@@ -165,7 +165,7 @@ class JunctionProcessorTest {
     @Test
     fun `process action signboard process response result unknown error`() {
         val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(500L, ByteArray(0))
-        val response: Expected<HttpResponseData?, HttpRequestError?> =
+        val response: Expected<HttpRequestError, HttpResponseData> =
             ExpectedFactory.createValue(mockHttpResponseData)
         val expected = JunctionResult.JunctionRaster.Failure("Unknown error")
         val action = JunctionAction.ProcessJunctionResponse(response)
@@ -177,7 +177,9 @@ class JunctionProcessorTest {
 
     @Test
     fun `process action signboard process response result no data`() {
-        val response: Expected<HttpResponseData?, HttpRequestError?> = ExpectedFactory.createValue()
+        val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(200L, ByteArray(0))
+        val response: Expected<HttpRequestError, HttpResponseData> =
+            ExpectedFactory.createValue(mockHttpResponseData)
         val expected = JunctionResult.JunctionRaster.Empty
         val action = JunctionAction.ProcessJunctionResponse(response)
 
@@ -188,7 +190,7 @@ class JunctionProcessorTest {
 
     @Test
     fun `process action signboard process response result failure`() {
-        val response: Expected<HttpResponseData?, HttpRequestError?> =
+        val response: Expected<HttpRequestError, HttpResponseData> =
             ExpectedFactory.createError(
                 getMockHttpRequestError(
                     HttpRequestErrorType.CONNECTION_ERROR,
@@ -207,7 +209,7 @@ class JunctionProcessorTest {
     fun `process action junction process response result success`() {
         val mockData = byteArrayOf(12, -12, 23, 65, -56, 74, 88, 90, -92, -11)
         val mockHttpResponseData: HttpResponseData = getMockHttpResponseData(200L, mockData)
-        val response: Expected<HttpResponseData?, HttpRequestError?> =
+        val response: Expected<HttpRequestError, HttpResponseData> =
             ExpectedFactory.createValue(mockHttpResponseData)
         val expected = JunctionResult.JunctionRaster.Success(mockData)
         val action = JunctionAction.ProcessJunctionResponse(response)

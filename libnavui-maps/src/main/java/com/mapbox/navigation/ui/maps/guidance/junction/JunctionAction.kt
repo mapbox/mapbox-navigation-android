@@ -16,7 +16,7 @@ internal sealed class JunctionAction {
     ) : JunctionAction()
 
     data class ProcessJunctionResponse(
-        val response: Expected<HttpResponseData?, HttpRequestError?>
+        val response: Expected<HttpRequestError, HttpResponseData>
     ) : JunctionAction()
 
     data class ParseRasterToBitmap(

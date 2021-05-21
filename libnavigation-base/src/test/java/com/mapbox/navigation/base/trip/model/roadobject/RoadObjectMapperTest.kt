@@ -246,10 +246,7 @@ class RoadObjectMapperTest {
 
     private val tunnel = createRoadObject(
         type = com.mapbox.navigator.RoadObjectType.TUNNEL,
-        tunnelInfo = com.mapbox.navigator.TunnelInfo(
-            "Ted Williams Tunnel",
-            LENGTH // will be removed when NN fixes TunnelInfo
-        )
+        tunnelInfo = com.mapbox.navigator.TunnelInfo("Ted Williams Tunnel")
     )
 
     private val countryBorderCrossing = createRoadObject(

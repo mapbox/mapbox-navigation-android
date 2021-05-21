@@ -285,9 +285,9 @@ internal fun TripStatus.getMapMatcherResult(
         keyPoints,
         navigationStatus.offRoadProba > 0.5,
         navigationStatus.offRoadProba,
-        navigationStatus.map_matcher_output.isTeleport,
+        navigationStatus.mapMatcherOutput.isTeleport,
         navigationStatus.prepareSpeedLimit(),
-        navigationStatus.map_matcher_output.matches.firstOrNull()?.proba ?: 0f
+        navigationStatus.mapMatcherOutput.matches.firstOrNull()?.proba ?: 0f
     )
 }
 

@@ -61,10 +61,10 @@ internal object NavigatorLoader {
     private fun settingsProfile(deviceProfile: DeviceProfile): SettingsProfile {
         return when (deviceProfile.deviceType) {
             DeviceType.HANDHELD -> {
-                SettingsProfile(ProfileApplication.KMOBILE, ProfilePlatform.KANDROID)
+                SettingsProfile(ProfileApplication.MOBILE, ProfilePlatform.ANDROID)
             }
             DeviceType.AUTOMOBILE -> {
-                SettingsProfile(ProfileApplication.KAUTO, ProfilePlatform.KANDROID)
+                SettingsProfile(ProfileApplication.AUTO, ProfilePlatform.ANDROID)
             }
             else -> throw NotImplementedError("Unknown device profile")
         }

@@ -275,7 +275,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @param url the directions-based uri used when hitting the http service
      * @return a [RouterResult] object with the json and a success/fail boolean
      */
-    override suspend fun getRoute(url: String): Expected<String, RouterError> {
+    override suspend fun getRoute(url: String): Expected<RouterError, String> {
         return suspendCoroutine { continuation ->
             nativeRouter!!.getRoute(url) {
                 continuation.resume(it)

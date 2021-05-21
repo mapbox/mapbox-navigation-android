@@ -41,9 +41,9 @@ class RoadObjectMatcher internal constructor(
 
     private val roadObjectMatcherListener = object : RoadObjectMatcherListener() {
         override fun onRoadObjectMatched(
-            roadObject: Expected<RoadObject, RoadObjectMatcherError>
+            roadObject: Expected<RoadObjectMatcherError, RoadObject>
         ) {
-            val result: Expected<SDKRoadObject, SDKRoadObjectMatcherError> =
+            val result: Expected<SDKRoadObjectMatcherError, SDKRoadObject> =
                 if (roadObject.isValue) {
                     ExpectedFactory.createValue(
                         RoadObjectInstanceFactory.buildRoadObject(roadObject.value!!)

@@ -221,7 +221,7 @@ class RouteArrowUtilsTest {
             (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!.contents
         )
         assertEquals(
-            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            "null",
             (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
         )
         assertEquals(
@@ -242,7 +242,7 @@ class RouteArrowUtilsTest {
             (headSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!.contents
         )
         assertEquals(
-            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            "null",
             (headSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
         )
         assertEquals(
@@ -328,7 +328,7 @@ class RouteArrowUtilsTest {
             (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!.contents
         )
         assertEquals(
-            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            "null",
             (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
         )
         assertEquals(
@@ -349,7 +349,7 @@ class RouteArrowUtilsTest {
             (headSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!.contents
         )
         assertEquals(
-            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            "null",
             (headSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
         )
         assertEquals(
@@ -509,37 +509,37 @@ class RouteArrowUtilsTest {
             every { styleLayerExists("mapbox-navigation-route-traffic-layer") } returns true
             every {
                 addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, any())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every { getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) } returns mockk()
             every {
                 removeStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING)
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 addImage(RouteConstants.ARROW_HEAD_ICON_CASING, any<Bitmap>())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every { getStyleImage(RouteConstants.ARROW_HEAD_ICON) } returns mockk()
             every {
                 removeStyleImage(RouteConstants.ARROW_HEAD_ICON)
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 addImage(RouteConstants.ARROW_HEAD_ICON, any<Bitmap>())
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 removeStyleLayer(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID)
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID)
-            } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
             every {
                 removeStyleLayer(RouteLayerConstants.ARROW_HEAD_LAYER_ID)
-            } returns ExpectedFactory.createValue()
-            every { addStyleLayer(any(), any()) } returns ExpectedFactory.createValue()
+            } returns ExpectedFactory.createNone()
+            every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
         }
     }
 }

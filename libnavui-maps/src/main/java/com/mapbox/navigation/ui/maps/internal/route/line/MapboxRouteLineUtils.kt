@@ -743,18 +743,16 @@ object MapboxRouteLineUtils {
         if (!style.styleSourceExists(RouteConstants.WAYPOINT_SOURCE_ID)) {
             geoJsonSource(RouteConstants.WAYPOINT_SOURCE_ID) {
                 maxzoom(16)
-                featureCollection(FeatureCollection.fromFeatures(listOf()))
                 tolerance(options.tolerance)
-            }.bindTo(style)
+            }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
         }
 
         if (!style.styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID)) {
             geoJsonSource(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) {
                 maxzoom(16)
                 lineMetrics(true)
-                featureCollection(FeatureCollection.fromFeatures(listOf<Feature>()))
                 tolerance(options.tolerance)
-            }.bindTo(style)
+            }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
         }
 
         if (!style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID)) {
@@ -762,17 +760,15 @@ object MapboxRouteLineUtils {
                 maxzoom(16)
                 lineMetrics(true)
                 tolerance(options.tolerance)
-                featureCollection(FeatureCollection.fromFeatures(listOf<Feature>()))
-            }.bindTo(style)
+            }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
         }
 
         if (!style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID)) {
             geoJsonSource(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) {
                 maxzoom(16)
                 lineMetrics(true)
-                featureCollection(FeatureCollection.fromFeatures(listOf<Feature>()))
                 tolerance(options.tolerance)
-            }.bindTo(style)
+            }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
         }
 
         options.routeLayerProvider.buildAlternativeRouteCasingLayers(
