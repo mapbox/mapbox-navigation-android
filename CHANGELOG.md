@@ -2,6 +2,35 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.11 - May 21, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Features
+* Added `TileStore` to the `RoutingTilesOptions` [#4408](https://github.com/mapbox/mapbox-navigation-android/pull/4408)
+* Exposed `com.mapbox.bindgen.Expected#fold`, `com.mapbox.bindgen.Expected#map`, and other mapping functions. [#4417](https://github.com/mapbox/mapbox-navigation-android/pull/4417)
+* Removed `Expected<E, V> ExpectedFactory#createValue()` and replaced it with `Expected<E, None> ExpectedFactory#createNone()` which means that value can never be `null` and improves consumption from Kotlin. [#4417](https://github.com/mapbox/mapbox-navigation-android/pull/4417)
+
+#### Bug fixes and improvements
+* Hardened arrival events to trigger only when `RouteProgressState` is `ROUTE_COMPLETE` or `LOCATION_TRACKING` to avoid cases where we are uncertain/stale/rerouting but still reporting arrival. [#4392](https://github.com/mapbox/mapbox-navigation-android/pull/4392)
+* Converted SAM interfaces into Functional (SAM) interfaces [#4406](https://github.com/mapbox/mapbox-navigation-android/pull/4406)
+* Swapped the `com.mapbox.bindgen.Expected` generic params from `<Value, Error>` to `<Error, Value>` to match platform conventions. [#4417](https://github.com/mapbox/mapbox-navigation-android/pull/4417)
+* Fixed either show sub banner or lane guidance. [#4413](https://github.com/mapbox/mapbox-navigation-android/pull/4413)
+* Fixed the race condition in `RouteRefreshController` where `setRoute` will not cancel old refresh requests. [#4421](https://github.com/mapbox/mapbox-navigation-android/pull/4421)
+* Fixed rotation angle to 0 on `MapboxManeuverTurnIcon` for regular turns. [#4423](https://github.com/mapbox/mapbox-navigation-android/pull/4423)
+* Changed terminology used for route arrow border for correctness and consistency. [#4428](https://github.com/mapbox/mapbox-navigation-android/pull/4428)
+
+## Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+
+- Mapbox Maps SDK `v10.0.0-beta.20` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.20))
+- Mapbox Navigation Native `v50.0.0`
+- Mapbox Core Common `v12.0.0`
+- Mapbox Java `5.9.0-alpha.5` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v5.9.0-alpha.5))
+- Mapbox Android Core `v4.0.1`
+- Mapbox Android Telemetry `v6.0.1`
+
 ## Mapbox Navigation SDK 2.0.0-beta.10 - May 12, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
