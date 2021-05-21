@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.trip.service
 
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.TripNotificationState
 import com.mapbox.navigation.core.trip.session.TripSession
 
 /**
@@ -21,7 +22,7 @@ internal interface TripService {
     /**
      * Update the trip's information in the notification bar
      */
-    fun updateNotification(routeProgress: RouteProgress?)
+    fun updateNotification(tripNotificationState: TripNotificationState)
 
     /**
      * Return *true* if service is started

@@ -559,6 +559,28 @@ package com.mapbox.navigation.base.trip.model {
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder stepPoints(java.util.List<com.mapbox.geojson.Point>? stepPoints);
   }
 
+  public abstract sealed class TripNotificationState {
+  }
+
+  public static final class TripNotificationState.TripNotificationData extends com.mapbox.navigation.base.trip.model.TripNotificationState {
+    method public com.mapbox.api.directions.v5.models.BannerInstructions? component1();
+    method public Double? component2();
+    method public Double? component3();
+    method public String? component4();
+    method public com.mapbox.navigation.base.trip.model.TripNotificationState.TripNotificationData copy(com.mapbox.api.directions.v5.models.BannerInstructions? bannerInstructions, Double? distanceRemaining, Double? durationRemaining, String? drivingSide);
+    method public com.mapbox.api.directions.v5.models.BannerInstructions? getBannerInstructions();
+    method public Double? getDistanceRemaining();
+    method public String? getDrivingSide();
+    method public Double? getDurationRemaining();
+    property public final com.mapbox.api.directions.v5.models.BannerInstructions? bannerInstructions;
+    property public final Double? distanceRemaining;
+    property public final String? drivingSide;
+    property public final Double? durationRemaining;
+  }
+
+  public static final class TripNotificationState.TripNotificationFreeState extends com.mapbox.navigation.base.trip.model.TripNotificationState {
+  }
+
 }
 
 package com.mapbox.navigation.base.trip.model.eh {
@@ -1126,7 +1148,7 @@ package com.mapbox.navigation.base.trip.notification {
     method public int getNotificationId();
     method public void onTripSessionStarted();
     method public void onTripSessionStopped();
-    method public void updateNotification(com.mapbox.navigation.base.trip.model.RouteProgress? routeProgress);
+    method public void updateNotification(com.mapbox.navigation.base.trip.model.TripNotificationState state);
   }
 
 }

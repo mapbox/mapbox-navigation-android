@@ -10,6 +10,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
+import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -606,7 +607,7 @@ internal class MapboxTripSession(
 
     private fun updateRouteProgress(progress: RouteProgress?) {
         routeProgress = progress
-        tripService.updateNotification(progress)
+        tripService.updateNotification(buildTripNotificationState(progress))
         progress?.let { progress ->
             routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
             if (bannerInstructionEvent.isOccurring(progress)) {

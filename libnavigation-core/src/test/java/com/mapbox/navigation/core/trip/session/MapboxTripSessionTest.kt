@@ -353,6 +353,7 @@ class MapboxTripSessionTest {
 
     @Test
     fun routeProgressObserverSuccess() = coroutineRule.runBlockingTest {
+        every { routeProgress.currentLegProgress } returns null
         tripSession = buildTripSession()
         tripSession.start()
         val observer: RouteProgressObserver = mockk(relaxUnitFun = true)
@@ -421,6 +422,7 @@ class MapboxTripSessionTest {
 
     @Test
     fun routeProgressObserverDoubleRegister() = coroutineRule.runBlockingTest {
+        every { routeProgress.currentLegProgress } returns null
         tripSession = buildTripSession()
         tripSession.start()
         val observer: RouteProgressObserver = mockk(relaxUnitFun = true)
@@ -435,6 +437,7 @@ class MapboxTripSessionTest {
 
     @Test
     fun offRouteObserverCalledWhenStatusIsDifferentToCurrent() = coroutineRule.runBlockingTest {
+        every { routeProgress.currentLegProgress } returns null
         tripSession = buildTripSession()
         tripSession.start()
         val offRouteObserver: OffRouteObserver = mockk(relaxUnitFun = true)
@@ -468,6 +471,7 @@ class MapboxTripSessionTest {
 
     @Test
     fun isOffRouteIsSetToFalseWhenSettingARoute() = coroutineRule.runBlockingTest {
+        every { routeProgress.currentLegProgress } returns null
         tripSession = buildTripSession()
         tripSession.route = route
         tripSession.start()
@@ -491,6 +495,7 @@ class MapboxTripSessionTest {
 
     @Test
     fun isOffRouteIsSetToFalseWhenSettingANullRoute() = coroutineRule.runBlockingTest {
+        every { routeProgress.currentLegProgress } returns null
         tripSession = buildTripSession()
         tripSession.route = route
         tripSession.start()
@@ -765,6 +770,7 @@ class MapboxTripSessionTest {
 
     @Test
     fun unregisterAllBannerInstructionsObservers() = coroutineRule.runBlockingTest {
+        every { routeProgress.currentLegProgress } returns null
         val bannerInstructionsObserver: BannerInstructionsObserver = mockk(relaxUnitFun = true)
         val bannerInstructions: BannerInstructions = mockk()
 
@@ -793,6 +799,7 @@ class MapboxTripSessionTest {
 
     @Test
     fun unregisterAllVoiceInstructionsObservers() = coroutineRule.runBlockingTest {
+        every { routeProgress.currentLegProgress } returns null
         val voiceInstructionsObserver: VoiceInstructionsObserver = mockk(relaxUnitFun = true)
         val voiceInstructions: VoiceInstructions = mockk()
         every { routeProgress.bannerInstructions } returns null

@@ -11,6 +11,7 @@ import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.common.module.provider.ModuleProviderArgument
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
 import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
@@ -101,7 +102,7 @@ internal class TripServiceActivity : AppCompatActivity() {
     private fun changeText() {
         textUpdateJob = mainJobController.scope.launch {
             while (isActive) {
-                mapboxTripService.updateNotification(null)
+                mapboxTripService.updateNotification(buildTripNotificationState(null))
                 delay(1000L)
             }
         }

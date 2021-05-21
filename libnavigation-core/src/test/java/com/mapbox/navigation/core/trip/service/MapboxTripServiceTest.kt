@@ -3,7 +3,9 @@ package com.mapbox.navigation.core.trip.service
 import android.app.Notification
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
+import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.TripNotificationState
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import io.mockk.every
 import io.mockk.mockk
@@ -122,11 +124,25 @@ class MapboxTripServiceTest {
 
     @Test
     fun tripNotification_updateNotificationWhenUpdateNotificationCalled() {
-        val routeProgress: RouteProgress = mockk()
+        val routeProgress: RouteProgress = mockk {
+            every { bannerInstructions } returns null
+            every { currentLegProgress } returns null
+        }
 
-        service.updateNotification(routeProgress)
+        service.updateNotification(buildTripNotificationState(routeProgress))
 
-        verify(exactly = 1) { tripNotification.updateNotification(routeProgress) }
+        verify(exactly = 1) { tripNotification.updateNotification(any<TripNotificationState>()) }
+    }
+
+    @Test
+    fun tripNotification_updateNotificationWhenUpdateNotificationCalledWhenRouteProgressNull() {
+        service.updateNotification(buildTripNotificationState(null))
+
+        verify(exactly = 1) {
+            tripNotification.updateNotification(
+                any<TripNotificationState.TripNotificationFreeState>()
+            )
+        }
     }
 
     @Test
