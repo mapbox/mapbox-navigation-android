@@ -74,25 +74,40 @@ import kotlin.coroutines.suspendCoroutine
  *
  * When one or more [DirectionsRoute] objects are retrieved from [MapboxNavigation] they can be displayed
  * on the map by calling [mapboxRouteLineApi.setRoutes()] and then passing the object returned to the
- * view class via [mapboxRouteLineView.render()] which will draw the route(s) on the map. Note, if
+ * view class via [MapboxRouteLineView.renderRouteDrawData] which will draw the route(s) on the map. Note, if
  * passing more than one route to the setRoutes method, the first route in the collection will be
- * considered the primary route. There is a known bug in the Map SDK that prevents clicking on a
- * drawn alternative route in order to select it as the primary route. This issue will be resolved
- * in an upcoming build.
+ * considered the primary route.
  *
- * Calls to the [MapboxRouteLineView::render] command always take the current Map Style object as an
- * argument. It is important to ensure the Style object is always current. If the application
- * changes the map style at runtime the new Style should be passed as an argument to the render
- * method following the style change.
+ * Calls to the [MapboxRouteLineView.renderRouteDrawData] command always take the current [MapboxMap]
+ * [Style] object as an argument. It is important to ensure the [Style] object is always current.
+ * If the application changes the map style at runtime the new [Style] should be passed as an
+ * argument to the render method following the style change.
  *
- * In almost all cases the [MapboxRouteLineApi] class methods return a state object that should be
- * passed to the [MapboxRouteLineView] render method.
+ * In order to display traffic congestion indications on the route line it is necessary to
+ * request routes with specific [RouteOptions].  At a minimum the following options are necessary:
  *
- * Customizing the route line and arrow appearance can be done via the [MapboxRouteLineOptions] and
- * [RouteArrowOptions]. In the 1.x version of the Navigation SDK this customization was done by
- * overriding the Mapbox defaults defined in the styles.xml. In this version of the SDK the
- * customization is done by providing values to the [MapboxRouteLineOptions.Builder] and
- * [RouteArrowOptions.Builder]. Default values are used for any custom values that are not provided.
+ * ```kotlin
+ *  val routeOptions = RouteOptions.builder()
+ *      .baseUrl(Constants.BASE_API_URL)
+ *      .user(Constants.MAPBOX_USER)
+ *      .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+ *      .overview(DirectionsCriteria.OVERVIEW_FULL)
+ *      .steps(true)
+ *      .annotationsList(
+ *          listOf(
+ *              DirectionsCriteria.ANNOTATION_CONGESTION,
+ *              DirectionsCriteria.ANNOTATION_DURATION,
+ *              DirectionsCriteria.ANNOTATION_DISTANCE,
+ *          )
+ *      )
+ *      .requestUuid("")
+ *      .accessToken("mapToken")
+ *      .coordinates(listOf(origin, destination))
+ *      .build()
+ * ```
+ * A good starting point might be RouteOptions.Builder.applyDefaultNavigationOptions() which will
+ * include the options above.
+ *
  *
  * Vanishing Route Line:
  * The "vanishing route line" is a feature which changes the appearance of the route line
@@ -106,10 +121,10 @@ import kotlin.coroutines.suspendCoroutine
  * .withVanishingRouteLineEnabled(true)
  * .build()
  * ```
- * 2. Register an [OnIndicatorPositionChangedListener] with the [LocationComponent]:
+ * 2. Register an [OnIndicatorPositionChangedListener] with the [LocationComponentPluginImpl]:
  *
  * ```kotlin
- * locationComponent.addOnIndicatorPositionChangedListener(myIndicatorPositionChangedListener)
+ * mapView.getPlugin(LocationComponentPluginImpl.class).addOnIndicatorPositionChangedListener(myIndicatorPositionChangedListener)
  * ```
  * (Be sure to unregister this listener appropriately according to the lifecycle of your activity
  * or Fragment in order to prevent resource leaks.)
@@ -120,7 +135,7 @@ import kotlin.coroutines.suspendCoroutine
  * ```kotlin
  * val vanishingRouteLineData = mapboxRouteLineApi.updateTraveledRouteLine(point)
  * if (vanishingRouteLineData != null && mapboxMap.getStyle() != null) {
- * mapboxRouteLineView.render(mapboxMap.getStyle(), vanishingRouteLineData);
+ * mapboxRouteLineView.renderVanishingRouteLineUpdateValue(mapboxMap.getStyle(), vanishingRouteLineData);
  * }
  * ```
  *
@@ -152,9 +167,8 @@ class MapboxRouteLineApi(
     private val mutex = Mutex()
 
     /**
-     * @return the vanishing point of the route line if an instance of VanishingRouteLine
-     * was supplied during instantiation. If no instance of VanishingRouteLine was supplied
-     * 0.0 is returned.
+     * @return the vanishing point of the route line if the vanishing route line feature was enabled
+     * in the [MapboxRouteLineOptions]. If not 0.0 is returned.
      */
     fun getVanishPointOffset(): Double {
         return routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0
@@ -238,8 +252,8 @@ class MapboxRouteLineApi(
 
     /**
      * Indicates the point the route line should change from its default color to the vanishing
-     * color behind the puck. Calling this method has no effect if null was passed for the
-     * VanishingRouteLine parameter in the constructor of this class.
+     * color behind the puck. Calling this method has no effect if the vanishing route line
+     * feature was not enabled in the [MapboxRouteLineOptions].
      *
      * @param point representing the current position of the puck
      *
@@ -321,13 +335,13 @@ class MapboxRouteLineApi(
 
     /**
      * Sets the value of the vanishing point of the route line to the value specified. This is used
-     * for the vanishing route line feature and is only applicable if an instance of
-     * [VanishingRouteLine] was supplied at the time of instantiation.
+     * for the vanishing route line feature and is only applicable only if the feature was enabled
+     * in the [MapboxRouteLineOptions].
      *
      * @param offset a value representing the percentage of the distance traveled along the route
      *
      * @return a state representing the side effects to be rendered on the map which will update
-     * the appearance of the route line or null if the vanishing route line feature is inactive.
+     * the appearance of the route line or an error.
      */
     fun setVanishingOffset(
         offset: Double
@@ -374,8 +388,8 @@ class MapboxRouteLineApi(
 
     /**
      * Used for the vanishing route line feature, this method updates the vanishing point
-     * calculation point based on the route progress. If null was passed as a parameter for
-     * [VanishingRouteLine] during instantiation, this method does not need to be called.
+     * calculation point based on the route progress. If the vanishing route line feature
+     * was not enabled in [MapboxRouteLineOptions], this method does not need to be called.
      *
      * @param routeProgress a route progress object
      */
@@ -535,13 +549,6 @@ class MapboxRouteLineApi(
              * cut-off point which we can safely ignore.
              * We'll add the distance from the upcoming point to the current's puck position later.
              */
-            /**
-             * Finds the count of remaining points in the current step.
-             *
-             * TurfMisc.lineSliceAlong places an additional point at index 0 to mark the precise
-             * cut-off point which we can safely ignore.
-             * We'll add the distance from the upcoming point to the current's puck position later.
-             */
             allRemainingPoints += try {
                 TurfMisc.lineSliceAlong(
                     LineString.fromLngLats(currentStepProgress.stepPoints ?: emptyList()),
@@ -553,10 +560,6 @@ class MapboxRouteLineApi(
                 0
             }
 
-            /**
-             * Add to the count of remaining points all of the remaining points on the current leg,
-             * after the current step.
-             */
             /**
              * Add to the count of remaining points all of the remaining points on the current leg,
              * after the current step.
@@ -573,18 +576,10 @@ class MapboxRouteLineApi(
             /**
              * Add to the count of remaining points all of the remaining legs.
              */
-
-            /**
-             * Add to the count of remaining points all of the remaining legs.
-             */
             for (i in currentLegProgress.legIndex + 1 until completeRoutePoints.nestedList.size) {
                 allRemainingPoints += completeRoutePoints.nestedList[i].flatten().size
             }
 
-            /**
-             * When we know the number of remaining points and the number of all points,
-             * calculate the index of the upcoming point.
-             */
             /**
              * When we know the number of remaining points and the number of all points,
              * calculate the index of the upcoming point.
