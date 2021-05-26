@@ -112,9 +112,12 @@ class MapboxTripSessionTest {
     @Before
     fun setUp() {
         mockkObject(ThreadController)
-        mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
-        mockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
-        mockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
+        mockkStatic(DirectionsRoute::isSameRoute)
+        mockkStatic(DirectionsRoute::isSameUuid)
+        mockkStatic(TripStatus::getMapMatcherResult)
+        mockkStatic(Location::toFixLocation)
+        mockkStatic(FixLocation::toLocation)
+        mockkStatic(List<FixLocation>::toLocations)
         mockkObject(TileStoreProvider)
         every { TileStoreProvider.getDefaultTileStoreInstance() } returns mockk()
         every { TileStoreProvider.getTileStoreInstance(any()) } returns mockk()
@@ -1022,9 +1025,12 @@ class MapboxTripSessionTest {
     @After
     fun cleanUp() {
         unmockkObject(ThreadController)
-        unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
-        unmockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
-        unmockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
+        unmockkStatic(DirectionsRoute::isSameRoute)
+        unmockkStatic(DirectionsRoute::isSameUuid)
+        unmockkStatic(TripStatus::getMapMatcherResult)
+        unmockkStatic(Location::toFixLocation)
+        unmockkStatic(FixLocation::toLocation)
+        unmockkStatic(List<FixLocation>::toLocations)
         unmockkObject(TileStoreProvider)
     }
 

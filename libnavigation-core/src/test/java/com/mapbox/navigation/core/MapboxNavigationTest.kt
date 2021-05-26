@@ -493,10 +493,12 @@ class MapboxNavigationTest {
 
     @Test
     fun reRoute_not_called() {
-        val offRouteObserverSlot = slot<OffRouteObserver>()
+        val offRouteObserverSlot = mutableListOf<OffRouteObserver>()
         verify { tripSession.registerOffRouteObserver(capture(offRouteObserverSlot)) }
 
-        offRouteObserverSlot.captured.onOffRouteStateChanged(false)
+        offRouteObserverSlot.forEach {
+            it.onOffRouteStateChanged(false)
+        }
 
         verify(exactly = 0) { rerouteController.reroute(any()) }
 
