@@ -26,7 +26,6 @@ import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.ReplayHistoryActivity
 import com.mapbox.navigation.examples.core.camera.MapboxCameraAnimationsActivity
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityMainBinding
-import com.mapbox.navigation.examples.internal.MapboxRouteLineActivity
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper.Companion.areLocationPermissionsGranted
 import com.mapbox.navigation.examples.util.RouteDrawingActivity
@@ -124,11 +123,6 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_multiple_arrows),
                 getString(R.string.description_multiple_arrows),
                 MapboxMultipleArrowActivity::class.java
-            ),
-            SampleItem(
-                getString(R.string.title_route_line_internal),
-                getString(R.string.description_route_line_internal),
-                MapboxRouteLineActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_draw_utility),

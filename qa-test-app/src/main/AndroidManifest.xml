@@ -22,6 +22,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".view.AlternativeRouteActivity"/>
+        <activity android:name=".view.MapboxRouteLineActivity"/>
+        <activity android:name=".view.util.RouteDrawingActivity"/>
     </application>
 
 </manifest>
