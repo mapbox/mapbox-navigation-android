@@ -26,6 +26,13 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 * Removed the `ROUTE_` prefix from `RouteProgressState` values and updated the documentation. [#4391](https://github.com/mapbox/mapbox-navigation-android/pull/4391)
 * Moved the `RouteProgressState.LOCATION_STALE` to `RouteProgress.stale`. [#4391](https://github.com/mapbox/mapbox-navigation-android/pull/4391)
 
+#### Known issues
+When using this release, the merged Manifest comes with an unnecessary `WRITE_SETTINGS` permission declaration. You can ignore that permission and not request it or add this to your Manifest file as a workaround:
+```
+<uses-permission android:name="android.permission.WRITE_SETTINGS" tools:node="remove"/>
+```
+This permission declaration will be removed in future releases.
+
 ## Mapbox dependencies
 This release depends, and has been tested with, the following Mapbox dependencies:
 
