@@ -33,13 +33,12 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * Like the route line components the [MapboxRouteArrowApi] consumes data from the Navigation SDK,
  * specifically the [RouteProgress], and produces data for rendering on the map by the
- * [MapboxRouteArrowView]. While the route line has no dependency on the [MapboxRouteArrowApi],
- * the [MapboxRouteArrowApi] indirectly depends on the [MapboxRouteLineApi]. So the
- * [MapboxRouteLineApi] can be used without the [MapboxRouteArrowApi] the inverse is not currently
- * supported. Simple usage of the maneuver arrows would look like:
+ * [MapboxRouteArrowView]. Simple usage of the maneuver arrows would look like:
  *
  * ```java
  * RouteArrowOptions routeArrowOptions = new RouteArrowOptions.Builder(context)
+ *  .withAboveLayerId(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+ *  .build()
  * MapboxRouteArrowApi routeArrow = new MapboxRouteArrowApi()
  * MapboxRouteArrowView routeArrowView = new MapboxRouteArrowView(routeArrowOptions)
  * ```
@@ -48,9 +47,20 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * ```kotlin
  * val routeArrowOptions = RouteArrowOptions.Builder(context)
+ *      .withAboveLayerId(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+ *      .build()
  * val routeArrow = MapboxRouteArrowApi()
  * val routeArrowView = MapboxRouteArrowView(routeArrowOptions)
  * ```
+ * NOTE: the above example is setting the layer above which the arrow(s) should be located. This
+ * constant is a good starting point but you may have a use case that requires setting the
+ * layer elevation for the arrows differently. In addition, if using this constant it is important
+ * that the route line related layers be initialized before any rendering of the arrows is done.
+ * The route line related layers can be created either by calling [MapboxRouteLineView.initializeLayers]
+ * or by calling one of the render methods on [MapboxRouteLineView]. In most cases it is not
+ * necessary to explicitly call [MapboxRouteLineView.initializeLayers] as calling any of the
+ * render methods of [MapboxRouteLineView] will initialize the layers and typically a route line
+ * will be drawn before a maneuver arrow.
  *
  * In order for the [MapboxRouteArrowApi] to function it needs route progress updates.
  * An application should register a [RouteProgressObserver] with the [MapboxNavigation] class
