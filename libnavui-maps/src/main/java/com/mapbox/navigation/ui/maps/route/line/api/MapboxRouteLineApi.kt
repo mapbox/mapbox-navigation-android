@@ -6,12 +6,12 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.QueriedFeature
-import com.mapbox.maps.QueryFeaturesCallback
 import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.core.internal.utils.isSameRoute
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
@@ -156,7 +156,7 @@ import kotlin.coroutines.suspendCoroutine
  * @param routeLineOptions used for determining the appearance and/or behavior of the route line
  */
 class MapboxRouteLineApi(
-    private var routeLineOptions: MapboxRouteLineOptions
+    private val routeLineOptions: MapboxRouteLineOptions
 ) {
     private var primaryRoute: DirectionsRoute? = null
     private val directionsRoutes: MutableList<DirectionsRoute> = mutableListOf()
@@ -497,12 +497,11 @@ class MapboxRouteLineApi(
         return suspendCoroutine { continuation ->
             mapboxMap.queryRenderedFeatures(
                 mapClickPoint,
-                RenderedQueryOptions(layerIds, null),
-                QueryFeaturesCallback {
-                    val index = getIndexOfFirstFeature(it.value ?: listOf(), routeFeatures)
-                    continuation.resume(index)
-                }
-            )
+                RenderedQueryOptions(layerIds, null)
+            ) {
+                val index = getIndexOfFirstFeature(it.value ?: listOf(), routeFeatures)
+                continuation.resume(index)
+            }
         }
     }
 
@@ -515,12 +514,11 @@ class MapboxRouteLineApi(
         return suspendCoroutine { continuation ->
             mapboxMap.queryRenderedFeatures(
                 clickRect,
-                RenderedQueryOptions(layerIds, null),
-                QueryFeaturesCallback {
-                    val index = getIndexOfFirstFeature(it.value ?: listOf(), routeFeatures)
-                    continuation.resume(index)
-                }
-            )
+                RenderedQueryOptions(layerIds, null)
+            ) {
+                val index = getIndexOfFirstFeature(it.value ?: listOf(), routeFeatures)
+                continuation.resume(index)
+            }
         }
     }
 
@@ -542,6 +540,7 @@ class MapboxRouteLineApi(
             routeLineOptions.vanishingRouteLine?.primaryRoutePoints
         ) { currentLegProgress, currentStepProgress, completeRoutePoints ->
             var allRemainingPoints = 0
+
             /**
              * Finds the count of remaining points in the current step.
              *
@@ -600,17 +599,22 @@ class MapboxRouteLineApi(
         newRoutes: List<DirectionsRoute>,
         featureDataProvider: () -> List<RouteFeatureData>
     ): Expected<RouteSetValue, RouteLineError> {
+        ifNonNull(newRoutes.firstOrNull()) { primaryRouteCandidate ->
+            if (!primaryRouteCandidate.isSameRoute(primaryRoute)) {
+                routeLineOptions.vanishingRouteLine?.clear()
+                routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
+            }
+        }
+
         directionsRoutes.clear()
         directionsRoutes.addAll(newRoutes)
         primaryRoute = newRoutes.firstOrNull()
-        routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
         return buildDrawRoutesState(featureDataProvider)
     }
 
     private suspend fun buildDrawRoutesState(
         featureDataProvider: () -> List<RouteFeatureData>
     ): Expected<RouteSetValue, RouteLineError> {
-        routeLineOptions.vanishingRouteLine?.clear()
         val routeFeatureDataDef = jobControl.scope.async(ThreadController.IODispatcher) {
             featureDataProvider()
         }
@@ -735,9 +739,15 @@ class MapboxRouteLineApi(
         // This call is resource intensive so it needs to come last so that
         // it doesn't consume resources used by the calculations above. The results
         // of this call aren't necessary to return to the caller but the calculations above are.
-        // Putting this call above will delay the caller receiving the result.
-        partitionedRoutes.first.firstOrNull()?.let {
-            routeLineOptions.vanishingRouteLine?.initWithRoute(it.route)
+        // Putting this call above will delay the caller receiving the result. There is a check
+        // for primaryRouteLineGranularDistances being null because this value is cleared only
+        // if the primary route has changed via setRoutes. If there's no change in the primary
+        // route there's no need to re-init the vanishing route line which is an expensive
+        // operation.
+        if (routeLineOptions.vanishingRouteLine?.primaryRouteLineGranularDistances == null) {
+            partitionedRoutes.first.firstOrNull()?.let {
+                routeLineOptions.vanishingRouteLine?.initWithRoute(it.route)
+            }
         }
 
         return Expected.Success(

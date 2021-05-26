@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.content.Context
 import android.graphics.Color
+import android.util.SparseArray
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
@@ -30,6 +31,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.pa
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
@@ -137,11 +139,9 @@ class MapboxRouteLineApiTest {
         val api = MapboxRouteLineApi(options).also {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
-        val consumer = object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
-            override fun accept(result: Expected<RouteSetValue, RouteLineError>) {
-                consumerCalled = true
-                assertEquals(route2, api.getPrimaryRoute())
-            }
+        val consumer = MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
+            consumerCalled = true
+            assertEquals(route2, api.getPrimaryRoute())
         }
 
         api.updateToPrimaryRoute(route2, consumer)
@@ -195,6 +195,47 @@ class MapboxRouteLineApiTest {
     }
 
     @Test
+    fun setRoutes_notClearsVanishingRouteLine_WhenSamePrimaryRoute() =
+        coroutineRule.runBlockingTest {
+            val vanishingRouteLine = mockk<VanishingRouteLine>(relaxed = true)
+            val realOptions = MapboxRouteLineOptions.Builder(ctx).build()
+            val options = mockk<MapboxRouteLineOptions>()
+            every { options.routeLayerProvider } returns realOptions.routeLayerProvider
+            every { options.resourceProvider } returns realOptions.resourceProvider
+            every { options.vanishingRouteLine } returns vanishingRouteLine
+
+            val api = MapboxRouteLineApi(options)
+            val route = getRoute()
+            val routes = listOf(RouteLine(route, null))
+
+            api.setRoutes(routes)
+            api.setRoutes(routes)
+
+            verify(exactly = 1) { vanishingRouteLine.clear() }
+        }
+
+    @Test
+    fun setRoutes_notClearsVanishingRouteLine_WhenSamePrimaryRoute_differentAnnotations() =
+        coroutineRule.runBlockingTest {
+            val vanishingRouteLine = mockk<VanishingRouteLine>(relaxed = true)
+            val realOptions = MapboxRouteLineOptions.Builder(ctx).build()
+            val options = mockk<MapboxRouteLineOptions>()
+            every { options.routeLayerProvider } returns realOptions.routeLayerProvider
+            every { options.resourceProvider } returns realOptions.resourceProvider
+            every { options.vanishingRouteLine } returns vanishingRouteLine
+
+            val api = MapboxRouteLineApi(options)
+            val route = getRoute()
+            val routeAsJson = route.toJson().replace("unknown", "severe")
+            val sameRouteDifferentAnnotations = DirectionsRoute.fromJson(routeAsJson)
+
+            api.setRoutes(listOf(RouteLine(route, null)))
+            api.setRoutes(listOf(RouteLine(sameRouteDifferentAnnotations, null)))
+
+            verify(exactly = 1) { vanishingRouteLine.clear() }
+        }
+
+    @Test
     fun setRoutes_setsVanishPointToZero() = coroutineRule.runBlockingTest {
         val options = MapboxRouteLineOptions.Builder(ctx)
             .withVanishingRouteLineEnabled(true)
@@ -210,6 +251,25 @@ class MapboxRouteLineApiTest {
 
         assertEquals(0.0, result, 0.0)
         assertEquals(0.0, options.vanishingRouteLine!!.vanishPointOffset, 0.0)
+    }
+
+    @Test
+    fun setRoutes_doesNotResetVanishingPointWhenSameRoute() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withVanishingRouteLineEnabled(true)
+            .build()
+        options.vanishingRouteLine!!.vanishPointOffset = 99.9
+
+        val api = MapboxRouteLineApi(options)
+        val route = getRoute()
+        val routes = listOf(RouteLine(route, null))
+        api.setRoutes(routes)
+        api.setVanishingOffset(25.0)
+
+        api.setRoutes(routes)
+
+        assertEquals(25.0, api.getVanishPointOffset(), 0.0)
+        assertEquals(25.0, options.vanishingRouteLine!!.vanishPointOffset, 0.0)
     }
 
     @Test
@@ -303,34 +363,32 @@ class MapboxRouteLineApiTest {
             "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}"
         val route = getRoute()
         val routes = listOf(RouteLine(route, null))
-        val consumer = object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
-            override fun accept(t: Expected<RouteSetValue, RouteLineError>) {
-                callbackCalled = true
-                val result = t as Expected.Success
-                assertEquals(expectedCasingExpression, result.value.casingLineExpression.toString())
-                assertEquals(
-                    expectedRouteLineExpression,
-                    result.value.routeLineExpression.toString()
-                )
-                assertEquals(
-                    expectedTrafficLineExpression,
-                    result.value.trafficLineExpression.toString()
-                )
-                assertEquals(
-                    expectedPrimaryRouteSourceGeometry,
-                    result.value.primaryRouteSource.features()!![0].geometry().toString()
-                )
-                assertTrue(result.value.alternativeRoute1Source.features()!!.isEmpty())
-                assertTrue(result.value.alternativeRoute2Source.features()!!.isEmpty())
-                assertEquals(
-                    expectedWaypointFeature0,
-                    result.value.waypointsSource.features()!![0].geometry().toString()
-                )
-                assertEquals(
-                    expectedWaypointFeature1,
-                    result.value.waypointsSource.features()!![1].geometry().toString()
-                )
-            }
+        val consumer = MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> { t ->
+            callbackCalled = true
+            val result = t as Expected.Success
+            assertEquals(expectedCasingExpression, result.value.casingLineExpression.toString())
+            assertEquals(
+                expectedRouteLineExpression,
+                result.value.routeLineExpression.toString()
+            )
+            assertEquals(
+                expectedTrafficLineExpression,
+                result.value.trafficLineExpression.toString()
+            )
+            assertEquals(
+                expectedPrimaryRouteSourceGeometry,
+                result.value.primaryRouteSource.features()!![0].geometry().toString()
+            )
+            assertTrue(result.value.alternativeRoute1Source.features()!!.isEmpty())
+            assertTrue(result.value.alternativeRoute2Source.features()!!.isEmpty())
+            assertEquals(
+                expectedWaypointFeature0,
+                result.value.waypointsSource.features()!![0].geometry().toString()
+            )
+            assertEquals(
+                expectedWaypointFeature1,
+                result.value.waypointsSource.features()!![1].geometry().toString()
+            )
         }
 
         api.setRoutes(routes, consumer)
@@ -413,6 +471,51 @@ class MapboxRouteLineApiTest {
             result.value.alternativeRoute2Source.features()!!.first().properties().toString()
         )
     }
+
+    @Test
+    fun setRoutes_notCallsVanishingRouteLine_initWithRoute_whenGranularDistancesNotNull() =
+        coroutineRule.runBlockingTest {
+            val vanishingRouteLine = mockk<VanishingRouteLine>(relaxed = true) {
+                every { primaryRouteLineGranularDistances } returns RouteLineGranularDistances(
+                    25.0,
+                    SparseArray()
+                )
+            }
+            val realOptions = MapboxRouteLineOptions.Builder(ctx).build()
+            val options = mockk<MapboxRouteLineOptions>()
+            every { options.routeLayerProvider } returns realOptions.routeLayerProvider
+            every { options.resourceProvider } returns realOptions.resourceProvider
+            every { options.vanishingRouteLine } returns vanishingRouteLine
+
+            val api = MapboxRouteLineApi(options)
+            val route = getRoute()
+            val routes = listOf(RouteLine(route, null))
+
+            api.setRoutes(routes)
+
+            verify(exactly = 0) { vanishingRouteLine.initWithRoute(route) }
+        }
+
+    @Test
+    fun setRoutes_callsVanishingRouteLine_initWithRoute_whenGranularDistancesIsNull() =
+        coroutineRule.runBlockingTest {
+            val vanishingRouteLine = mockk<VanishingRouteLine>(relaxed = true) {
+                every { primaryRouteLineGranularDistances } returns null
+            }
+            val realOptions = MapboxRouteLineOptions.Builder(ctx).build()
+            val options = mockk<MapboxRouteLineOptions>()
+            every { options.routeLayerProvider } returns realOptions.routeLayerProvider
+            every { options.resourceProvider } returns realOptions.resourceProvider
+            every { options.vanishingRouteLine } returns vanishingRouteLine
+
+            val api = MapboxRouteLineApi(options)
+            val route = getRoute()
+            val routes = listOf(RouteLine(route, null))
+
+            api.setRoutes(routes)
+
+            verify { vanishingRouteLine.initWithRoute(route) }
+        }
 
     @Test
     fun getRouteDrawData() = coroutineRule.runBlockingTest {
@@ -514,6 +617,7 @@ class MapboxRouteLineApiTest {
         val mockVanishingRouteLine = mockk<VanishingRouteLine>(relaxUnitFun = true) {
             every { primaryRoutePoints } returns parseRoutePoints(route)
             every { vanishPointOffset } returns 0.0
+            every { primaryRouteLineGranularDistances } returns null
         }
         val options = mockk<MapboxRouteLineOptions> {
             every { vanishingRouteLine } returns mockVanishingRouteLine
@@ -552,6 +656,7 @@ class MapboxRouteLineApiTest {
             val mockVanishingRouteLine = mockk<VanishingRouteLine>(relaxUnitFun = true) {
                 every { primaryRoutePoints } returns null
                 every { vanishPointOffset } returns 0.0
+                every { primaryRouteLineGranularDistances } returns null
             }
             val options = mockk<MapboxRouteLineOptions> {
                 every { vanishingRouteLine } returns mockVanishingRouteLine
@@ -590,6 +695,7 @@ class MapboxRouteLineApiTest {
             val mockVanishingRouteLine = mockk<VanishingRouteLine>(relaxUnitFun = true) {
                 every { primaryRoutePoints } returns parseRoutePoints(route)
                 every { vanishPointOffset } returns 0.0
+                every { primaryRouteLineGranularDistances } returns null
             }
             val options = mockk<MapboxRouteLineOptions> {
                 every { vanishingRouteLine } returns mockVanishingRouteLine
@@ -618,6 +724,7 @@ class MapboxRouteLineApiTest {
             val mockVanishingRouteLine = mockk<VanishingRouteLine>(relaxUnitFun = true) {
                 every { primaryRoutePoints } returns parseRoutePoints(route)
                 every { vanishPointOffset } returns 0.0
+                every { primaryRouteLineGranularDistances } returns null
             }
             val options = mockk<MapboxRouteLineOptions> {
                 every { vanishingRouteLine } returns mockVanishingRouteLine
@@ -642,6 +749,7 @@ class MapboxRouteLineApiTest {
         val mockVanishingRouteLine = mockk<VanishingRouteLine>(relaxUnitFun = true) {
             every { primaryRoutePoints } returns null
             every { vanishPointOffset } returns 0.0
+            every { primaryRouteLineGranularDistances } returns null
         }
         val options = mockk<MapboxRouteLineOptions> {
             every { vanishingRouteLine } returns mockVanishingRouteLine
