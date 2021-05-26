@@ -11,6 +11,7 @@ interface MetricEvent {
     /**
      * [MetricEvent] names scope
      */
+    @Retention(AnnotationRetention.BINARY)
     @StringDef(
         DirectionsMetrics.ROUTE_RETRIEVAL,
         NavigationMetrics.ARRIVE,

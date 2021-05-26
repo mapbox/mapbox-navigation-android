@@ -44,7 +44,7 @@ object Rounding {
     /**
      * Defines the increment displayed on the instruction view
      */
-    @Retention(AnnotationRetention.SOURCE)
+    @Retention(AnnotationRetention.BINARY)
     @IntDef(
         INCREMENT_FIVE,
         INCREMENT_TEN,

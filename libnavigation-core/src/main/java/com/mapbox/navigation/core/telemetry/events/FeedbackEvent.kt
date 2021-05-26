@@ -238,7 +238,7 @@ object FeedbackEvent {
     /**
      * Type of feedback mean WHAT happen
      */
-    @Retention(AnnotationRetention.SOURCE)
+    @Retention(AnnotationRetention.BINARY)
     @StringDef(
         GENERAL_ISSUE,
         ACCIDENT,
@@ -261,7 +261,7 @@ object FeedbackEvent {
     /**
      * Feedback source mean WHERE happen
      */
-    @Retention(AnnotationRetention.SOURCE)
+    @Retention(AnnotationRetention.BINARY)
     @StringDef(
         REROUTE,
         UI
@@ -271,7 +271,7 @@ object FeedbackEvent {
     /**
      * Detail description for different feedback type
      */
-    @Retention(AnnotationRetention.SOURCE)
+    @Retention(AnnotationRetention.BINARY)
     @StringDef(
         TURN_ICON_INCORRECT,
         STREET_NAME_INCORRECT,

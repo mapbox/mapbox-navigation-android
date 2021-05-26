@@ -42,7 +42,7 @@ object RoadObjectDistanceInfoType {
     /**
      * Retention policy for the RoadObjectDistanceInfoType
      */
-    @Retention
+    @Retention(AnnotationRetention.BINARY)
     @IntDef(
         GANTRY,
         LINE,

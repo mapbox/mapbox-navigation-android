@@ -31,7 +31,7 @@ object OpenLRSideOfRoad {
     /**
      * Retention policy for the OpenLRSideOfRoad
      */
-    @Retention
+    @Retention(AnnotationRetention.BINARY)
     @IntDef(
         ON_ROAD_OR_UNKNOWN,
         RIGHT,

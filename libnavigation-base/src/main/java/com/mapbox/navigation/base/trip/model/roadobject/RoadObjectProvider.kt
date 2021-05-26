@@ -20,7 +20,7 @@ object RoadObjectProvider {
     /**
      * Retention policy for the RoadObjectProvider
      */
-    @Retention
+    @Retention(AnnotationRetention.BINARY)
     @StringDef(
         MAPBOX,
         CUSTOM

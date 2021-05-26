@@ -36,7 +36,7 @@ object TimeFormat {
      *
      * When [NONE_SPECIFIED] is selected -> Depends on user's device settings
      */
-    @Retention(AnnotationRetention.SOURCE)
+    @Retention(AnnotationRetention.BINARY)
     @IntDef(
         NONE_SPECIFIED,
         TWELVE_HOURS,

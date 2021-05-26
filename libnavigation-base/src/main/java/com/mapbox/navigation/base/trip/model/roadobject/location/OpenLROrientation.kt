@@ -31,7 +31,7 @@ object OpenLROrientation {
     /**
      * Retention policy for the OpenLROrientation
      */
-    @Retention
+    @Retention(AnnotationRetention.BINARY)
     @IntDef(
         NO_ORIENTATION_OR_UNKNOWN,
         WITH_LINE_DIRECTION,

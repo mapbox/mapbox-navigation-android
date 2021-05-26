@@ -35,7 +35,7 @@ object IncidentImpact {
     /**
      * Incident Alert impact.
      */
-    @Retention(AnnotationRetention.SOURCE)
+    @Retention(AnnotationRetention.BINARY)
     @StringDef(
         UNKNOWN,
         CRITICAL,

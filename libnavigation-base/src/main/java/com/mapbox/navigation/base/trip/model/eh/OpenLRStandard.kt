@@ -21,7 +21,7 @@ object OpenLRStandard {
     /**
      * Retention policy for the OpenLRStandard
      */
-    @Retention
+    @Retention(AnnotationRetention.BINARY)
     @StringDef(TOM_TOM, TPEG)
     annotation class Type
 }

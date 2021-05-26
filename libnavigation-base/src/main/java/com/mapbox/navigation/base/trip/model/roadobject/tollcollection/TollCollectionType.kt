@@ -27,7 +27,7 @@ object TollCollectionType {
     /**
      * Toll collection type.
      */
-    @Retention(AnnotationRetention.SOURCE)
+    @Retention(AnnotationRetention.BINARY)
     @IntDef(
         UNKNOWN,
         TOLL_BOOTH,
