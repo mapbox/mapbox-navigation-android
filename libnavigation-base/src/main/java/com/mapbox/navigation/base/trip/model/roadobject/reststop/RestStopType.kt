@@ -27,7 +27,7 @@ object RestStopType {
     /**
      * Rest stop type.
      */
-    @Retention(AnnotationRetention.SOURCE)
+    @Retention(AnnotationRetention.BINARY)
     @IntDef(
         UNKNOWN,
         REST_AREA,

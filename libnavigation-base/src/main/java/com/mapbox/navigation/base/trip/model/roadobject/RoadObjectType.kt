@@ -60,7 +60,7 @@ object RoadObjectType {
     /**
      * Retention policy for the RoadObjectType
      */
-    @Retention
+    @Retention(AnnotationRetention.BINARY)
     @IntDef(
         TUNNEL,
         COUNTRY_BORDER_CROSSING,

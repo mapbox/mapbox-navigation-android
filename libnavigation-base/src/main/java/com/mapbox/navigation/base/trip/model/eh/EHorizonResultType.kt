@@ -27,7 +27,7 @@ object EHorizonResultType {
     /**
      * Retention policy for the EHorizonResultType
      */
-    @Retention
+    @Retention(AnnotationRetention.BINARY)
     @StringDef(INITIAL, UPDATE)
     annotation class Type
 }

@@ -75,7 +75,7 @@ object IncidentType {
     /**
      * Incident type.
      */
-    @Retention(AnnotationRetention.SOURCE)
+    @Retention(AnnotationRetention.BINARY)
     @IntDef(
         UNKNOWN,
         ACCIDENT,

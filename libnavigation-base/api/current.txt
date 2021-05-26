@@ -88,7 +88,7 @@ package com.mapbox.navigation.base.metrics {
     property public abstract String metricName;
   }
 
-  @StringDef({com.mapbox.navigation.base.metrics.DirectionsMetrics.ROUTE_RETRIEVAL, com.mapbox.navigation.base.metrics.NavigationMetrics.ARRIVE, com.mapbox.navigation.base.metrics.NavigationMetrics.CANCEL_SESSION, com.mapbox.navigation.base.metrics.NavigationMetrics.DEPART, com.mapbox.navigation.base.metrics.NavigationMetrics.REROUTE, com.mapbox.navigation.base.metrics.NavigationMetrics.FEEDBACK, com.mapbox.navigation.base.metrics.NavigationMetrics.INITIAL_GPS, com.mapbox.navigation.base.metrics.NavigationMetrics.FASTER_ROUTE, com.mapbox.navigation.base.metrics.NavigationMetrics.APP_USER_TURNSTILE, com.mapbox.navigation.base.metrics.NavigationMetrics.FREE_DRIVE}) public static @interface MetricEvent.Metric {
+  @StringDef({com.mapbox.navigation.base.metrics.DirectionsMetrics.ROUTE_RETRIEVAL, com.mapbox.navigation.base.metrics.NavigationMetrics.ARRIVE, com.mapbox.navigation.base.metrics.NavigationMetrics.CANCEL_SESSION, com.mapbox.navigation.base.metrics.NavigationMetrics.DEPART, com.mapbox.navigation.base.metrics.NavigationMetrics.REROUTE, com.mapbox.navigation.base.metrics.NavigationMetrics.FEEDBACK, com.mapbox.navigation.base.metrics.NavigationMetrics.INITIAL_GPS, com.mapbox.navigation.base.metrics.NavigationMetrics.FASTER_ROUTE, com.mapbox.navigation.base.metrics.NavigationMetrics.APP_USER_TURNSTILE, com.mapbox.navigation.base.metrics.NavigationMetrics.FREE_DRIVE}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface MetricEvent.Metric {
   }
 
   public fun interface MetricsObserver {
@@ -645,7 +645,7 @@ package com.mapbox.navigation.base.trip.model.eh {
     field public static final String UPDATE = "UPDATE";
   }
 
-  @StringDef({com.mapbox.navigation.base.trip.model.eh.EHorizonResultType.INITIAL, com.mapbox.navigation.base.trip.model.eh.EHorizonResultType.UPDATE}) @kotlin.annotation.Retention public static @interface EHorizonResultType.Type {
+  @StringDef({com.mapbox.navigation.base.trip.model.eh.EHorizonResultType.INITIAL, com.mapbox.navigation.base.trip.model.eh.EHorizonResultType.UPDATE}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface EHorizonResultType.Type {
   }
 
   public final class OpenLRStandard {
@@ -654,7 +654,7 @@ package com.mapbox.navigation.base.trip.model.eh {
     field public static final String TPEG = "TPEG";
   }
 
-  @StringDef({com.mapbox.navigation.base.trip.model.eh.OpenLRStandard.TOM_TOM, com.mapbox.navigation.base.trip.model.eh.OpenLRStandard.TPEG}) @kotlin.annotation.Retention public static @interface OpenLRStandard.Type {
+  @StringDef({com.mapbox.navigation.base.trip.model.eh.OpenLRStandard.TOM_TOM, com.mapbox.navigation.base.trip.model.eh.OpenLRStandard.TPEG}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface OpenLRStandard.Type {
   }
 
   public final class RoadClass {
@@ -669,7 +669,7 @@ package com.mapbox.navigation.base.trip.model.eh {
     field public static final String UNCLASSIFIED = "UNCLASSIFIED";
   }
 
-  @StringDef({com.mapbox.navigation.base.trip.model.eh.RoadClass.MOTORWAY, com.mapbox.navigation.base.trip.model.eh.RoadClass.TRUNK, com.mapbox.navigation.base.trip.model.eh.RoadClass.PRIMARY, com.mapbox.navigation.base.trip.model.eh.RoadClass.SECONDARY, com.mapbox.navigation.base.trip.model.eh.RoadClass.TERTIARY, com.mapbox.navigation.base.trip.model.eh.RoadClass.UNCLASSIFIED, com.mapbox.navigation.base.trip.model.eh.RoadClass.RESIDENTIAL, com.mapbox.navigation.base.trip.model.eh.RoadClass.SERVICE_OTHER}) @kotlin.annotation.Retention public static @interface RoadClass.Type {
+  @StringDef({com.mapbox.navigation.base.trip.model.eh.RoadClass.MOTORWAY, com.mapbox.navigation.base.trip.model.eh.RoadClass.TRUNK, com.mapbox.navigation.base.trip.model.eh.RoadClass.PRIMARY, com.mapbox.navigation.base.trip.model.eh.RoadClass.SECONDARY, com.mapbox.navigation.base.trip.model.eh.RoadClass.TERTIARY, com.mapbox.navigation.base.trip.model.eh.RoadClass.UNCLASSIFIED, com.mapbox.navigation.base.trip.model.eh.RoadClass.RESIDENTIAL, com.mapbox.navigation.base.trip.model.eh.RoadClass.SERVICE_OTHER}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface RoadClass.Type {
   }
 
   public final class RoadName {
@@ -742,7 +742,7 @@ package com.mapbox.navigation.base.trip.model.roadobject {
     field public static final String MAPBOX = "MAPBOX";
   }
 
-  @StringDef({com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider.MAPBOX, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider.CUSTOM}) @kotlin.annotation.Retention public static @interface RoadObjectProvider.Type {
+  @StringDef({com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider.MAPBOX, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider.CUSTOM}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface RoadObjectProvider.Type {
   }
 
   public final class RoadObjectType {
@@ -757,7 +757,7 @@ package com.mapbox.navigation.base.trip.model.roadobject {
     field public static final int TUNNEL = 0; // 0x0
   }
 
-  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TUNNEL, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.COUNTRY_BORDER_CROSSING, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TOLL_COLLECTION, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.REST_STOP, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RESTRICTED_AREA, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.BRIDGE, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.INCIDENT, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.CUSTOM}) @kotlin.annotation.Retention public static @interface RoadObjectType.Type {
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TUNNEL, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.COUNTRY_BORDER_CROSSING, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.TOLL_COLLECTION, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.REST_STOP, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.RESTRICTED_AREA, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.BRIDGE, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.INCIDENT, com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType.CUSTOM}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface RoadObjectType.Type {
   }
 
   public final class UpcomingRoadObject {
@@ -866,7 +866,7 @@ package com.mapbox.navigation.base.trip.model.roadobject.distanceinfo {
     field public static final int SUB_GRAPH = 4; // 0x4
   }
 
-  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType.GANTRY, com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType.LINE, com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType.POINT, com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType.POLYGON, com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType.SUB_GRAPH}) @kotlin.annotation.Retention public static @interface RoadObjectDistanceInfoType.Type {
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType.GANTRY, com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType.LINE, com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType.POINT, com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType.POLYGON, com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType.SUB_GRAPH}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface RoadObjectDistanceInfoType.Type {
   }
 
   public final class SubGraphDistanceInfo extends com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo {
@@ -975,7 +975,7 @@ package com.mapbox.navigation.base.trip.model.roadobject.location {
     field public static final int WITH_LINE_DIRECTION = 1; // 0x1
   }
 
-  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.location.OpenLROrientation.NO_ORIENTATION_OR_UNKNOWN, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLROrientation.WITH_LINE_DIRECTION, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLROrientation.AGAINST_LINE_DIRECTION, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLROrientation.BOTH}) @kotlin.annotation.Retention public static @interface OpenLROrientation.Type {
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.location.OpenLROrientation.NO_ORIENTATION_OR_UNKNOWN, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLROrientation.WITH_LINE_DIRECTION, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLROrientation.AGAINST_LINE_DIRECTION, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLROrientation.BOTH}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface OpenLROrientation.Type {
   }
 
   public final class OpenLRPointLocation extends com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation {
@@ -995,7 +995,7 @@ package com.mapbox.navigation.base.trip.model.roadobject.location {
     field public static final int RIGHT = 1; // 0x1
   }
 
-  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.location.OpenLRSideOfRoad.ON_ROAD_OR_UNKNOWN, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLRSideOfRoad.RIGHT, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLRSideOfRoad.LEFT, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLRSideOfRoad.BOTH}) @kotlin.annotation.Retention public static @interface OpenLRSideOfRoad.Type {
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.location.OpenLRSideOfRoad.ON_ROAD_OR_UNKNOWN, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLRSideOfRoad.RIGHT, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLRSideOfRoad.LEFT, com.mapbox.navigation.base.trip.model.roadobject.location.OpenLRSideOfRoad.BOTH}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface OpenLRSideOfRoad.Type {
   }
 
   public final class PointLocation extends com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation {
@@ -1033,7 +1033,7 @@ package com.mapbox.navigation.base.trip.model.roadobject.location {
     field public static final int ROUTE_ALERT = 6; // 0x6
   }
 
-  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.GANTRY, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.OPEN_LR_LINE, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.OPEN_LR_POINT, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.POINT, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.POLYGON, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.POLYLINE, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.ROUTE_ALERT}) @kotlin.annotation.Retention public static @interface RoadObjectLocationType.Type {
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.GANTRY, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.OPEN_LR_LINE, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.OPEN_LR_POINT, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.POINT, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.POLYGON, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.POLYLINE, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.ROUTE_ALERT}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface RoadObjectLocationType.Type {
   }
 
   public final class RouteAlertLocation extends com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation {

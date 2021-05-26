@@ -60,7 +60,7 @@ object RoadObjectLocationType {
     /**
      * Retention policy for the RoadObjectLocationType
      */
-    @Retention
+    @Retention(AnnotationRetention.BINARY)
     @IntDef(
         GANTRY,
         OPEN_LR_LINE,

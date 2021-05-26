@@ -60,7 +60,7 @@ object RoadClass {
     /**
      * Road class type.
      */
-    @Retention
+    @Retention(AnnotationRetention.BINARY)
     @StringDef(
         MOTORWAY,
         TRUNK,
