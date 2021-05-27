@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.arrival
 import android.os.SystemClock
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
+import com.mapbox.navigation.core.arrival.AutoArrivalController.Companion.AUTO_ARRIVAL_NANOS
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -12,7 +13,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import java.util.concurrent.TimeUnit
 
 class AutoArrivalControllerTest {
 
@@ -30,37 +30,35 @@ class AutoArrivalControllerTest {
 
     @Test
     fun `should navigate next at predicted arrival`() {
-        val arrivalInSeconds = arrivalController.arrivalOptions().arrivalInSeconds?.toInt() ?: 0
         val routeLeg = mockk<RouteLeg>()
 
-        mockSecond(100)
+        mockNanos(100)
         assertFalse(arrivalController.navigateNextRouteLeg(mockProgress(routeLeg)))
-        mockSecond(100 + arrivalInSeconds - 1)
+        mockNanos(100 + AUTO_ARRIVAL_NANOS - 1)
         assertFalse(arrivalController.navigateNextRouteLeg(mockProgress(routeLeg)))
-        mockSecond(100 + arrivalInSeconds)
+        mockNanos(100 + AUTO_ARRIVAL_NANOS)
         assertTrue(arrivalController.navigateNextRouteLeg(mockProgress(routeLeg)))
     }
 
     @Test
     fun `should restart timer if rerouted`() {
-        val arrivalInSeconds = arrivalController.arrivalOptions().arrivalInSeconds?.toInt() ?: 0
         val routeLeg = mockk<RouteLeg>()
 
-        mockSecond(100)
+        mockNanos(100)
         assertFalse(arrivalController.navigateNextRouteLeg(mockProgress(routeLeg)))
-        mockSecond(100 + arrivalInSeconds)
+        mockNanos(100L + AUTO_ARRIVAL_NANOS)
         val reroutedRouteLeg = mockk<RouteLeg>()
         assertFalse(arrivalController.navigateNextRouteLeg(mockProgress(reroutedRouteLeg)))
-        mockSecond(100 + arrivalInSeconds + arrivalInSeconds - 1)
+        mockNanos(100 + AUTO_ARRIVAL_NANOS + AUTO_ARRIVAL_NANOS - 1)
         assertFalse(arrivalController.navigateNextRouteLeg(mockProgress(reroutedRouteLeg)))
 
-        mockSecond(100 + arrivalInSeconds + arrivalInSeconds)
+        mockNanos(100 + AUTO_ARRIVAL_NANOS + AUTO_ARRIVAL_NANOS)
         assertTrue(arrivalController.navigateNextRouteLeg(mockProgress(reroutedRouteLeg)))
     }
 
-    private fun mockSecond(second: Int) = every {
+    private fun mockNanos(nanos: Long) = every {
         SystemClock.elapsedRealtimeNanos()
-    } returns TimeUnit.SECONDS.toNanos(second.toLong())
+    } returns nanos
 
     private fun mockProgress(mockedRouteLeg: RouteLeg) = mockk<RouteLegProgress> {
         every { routeLeg } returns mockedRouteLeg

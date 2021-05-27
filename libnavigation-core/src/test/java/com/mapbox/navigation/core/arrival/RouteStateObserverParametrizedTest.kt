@@ -61,8 +61,8 @@ class RouteStateObserverParametrizedTest(
             arrayOf(
                 /*routeProgressState*/ RouteProgressState.TRACKING,
                 /*isStale*/ false,
-                /*nextLegStart*/ true,
-                /*finalDestinationArrival*/ true
+                /*nextLegStart*/ false,
+                /*finalDestinationArrival*/ false
             )
         )
     }
@@ -87,10 +87,6 @@ class RouteStateObserverParametrizedTest(
         val onFinalDestinationArrivalCalls = slot<RouteProgress>()
         val customArrivalController: ArrivalController = mockk {
             every { navigateNextRouteLeg(capture(onNextRouteLegStartCalls)) } returns false
-            every { arrivalOptions() } returns mockk {
-                every { arrivalInSeconds } returns null
-                every { arrivalInMeters } returns 10.0
-            }
         }
 
         arrivalProgressObserver.attach(customArrivalController)
@@ -120,10 +116,6 @@ class RouteStateObserverParametrizedTest(
         val onFinalDestinationArrivalCalls = slot<RouteProgress>()
         val customArrivalController: ArrivalController = mockk {
             every { navigateNextRouteLeg(capture(onNextRouteLegStartCalls)) } returns false
-            every { arrivalOptions() } returns mockk {
-                every { arrivalInSeconds } returns null
-                every { arrivalInMeters } returns 10.0
-            }
         }
         every {
             arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls))

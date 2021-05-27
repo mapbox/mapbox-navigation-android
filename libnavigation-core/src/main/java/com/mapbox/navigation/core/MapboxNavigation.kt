@@ -697,7 +697,8 @@ class MapboxNavigation(
 
     /**
      * Registers [ArrivalObserver]. Monitor arrival at stops and destinations. For more control
-     * of arrival at stops, see [setArrivalController].
+     * of arrival at stops, see [setArrivalController]. Use [RouteProgressObserver] to create
+     * custom experiences for arrival based on time or distance.
      *
      * @see [unregisterArrivalObserver]
      */

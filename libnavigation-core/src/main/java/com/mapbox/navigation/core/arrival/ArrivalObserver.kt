@@ -7,16 +7,13 @@ import com.mapbox.navigation.core.MapboxNavigation
 
 /**
  * This gives many observers the ability to monitor the progress of arrival.
- * To control the behavior of arrival, see [ArrivalController]
+ * To control the behavior of arrival, see [ArrivalController].
  */
 interface ArrivalObserver {
 
     /**
-     * Called once the [ArrivalOptions] conditions have been met
-     * and the route progress has reached a waypoint on the route.
-     *
-     * [RouteProgress.currentState] has to be one of [RouteProgressState.LOCATION_TRACKING] or [RouteProgressState.ROUTE_COMPLETE]
-     * to trigger this event.
+     * Triggered when the [RouteProgress.currentState] is equal to [RouteProgressState.COMPLETE],
+     * once per route leg, and when there are more route legs to navigate. If we're on the last leg of the route [onFinalDestinationArrival] is called instead.
      */
     fun onWaypointArrival(routeProgress: RouteProgress)
 
@@ -27,11 +24,8 @@ interface ArrivalObserver {
     fun onNextRouteLegStart(routeLegProgress: RouteLegProgress)
 
     /**
-     * Called once the [ArrivalOptions] conditions have been met
-     * and the route progress has reached the final destination on the route.
-     *
-     * [RouteProgress.currentState] has to be one of [RouteProgressState.LOCATION_TRACKING] or [RouteProgressState.ROUTE_COMPLETE]
-     * to trigger this event.
+     * Triggered when the [RouteProgress.currentState] is equal to [RouteProgressState.COMPLETE],
+     * once when there are no more route legs to navigate.
      */
     fun onFinalDestinationArrival(routeProgress: RouteProgress)
 }
