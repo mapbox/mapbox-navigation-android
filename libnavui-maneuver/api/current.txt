@@ -281,7 +281,6 @@ package com.mapbox.navigation.ui.maneuver.model {
     method public int getTurnIconDepartStraight();
     method public int getTurnIconEndRoadLeft();
     method public int getTurnIconEndRoadRight();
-    method public int getTurnIconFlag();
     method public int getTurnIconFork();
     method public int getTurnIconForkLeft();
     method public int getTurnIconForkRight();
@@ -344,11 +343,6 @@ package com.mapbox.navigation.ui.maneuver.model {
     method public int getTurnIconRoundaboutSlightLeft();
     method public int getTurnIconRoundaboutSlightRight();
     method public int getTurnIconRoundaboutStraight();
-    method public int getTurnIconTrafficCircle();
-    method public int getTurnIconTrafficCircleLeft();
-    method public int getTurnIconTrafficCircleRight();
-    method public int getTurnIconTrafficCircleSlightLeft();
-    method public int getTurnIconTrafficCircleSlightRight();
     method public int getTurnIconTurnLeft();
     method public int getTurnIconTurnRight();
     method public int getTurnIconTurnSharpLeft();
@@ -356,7 +350,6 @@ package com.mapbox.navigation.ui.maneuver.model {
     method public int getTurnIconTurnSlightLeft();
     method public int getTurnIconTurnSlightRight();
     method public int getTurnIconTurnStraight();
-    method public int getTurnIconUpdown();
     method public int getTurnIconUturn();
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder toBuilder();
     property public final int turnIconArrive;
@@ -376,7 +369,6 @@ package com.mapbox.navigation.ui.maneuver.model {
     property public final int turnIconDepartStraight;
     property public final int turnIconEndRoadLeft;
     property public final int turnIconEndRoadRight;
-    property public final int turnIconFlag;
     property public final int turnIconFork;
     property public final int turnIconForkLeft;
     property public final int turnIconForkRight;
@@ -439,11 +431,6 @@ package com.mapbox.navigation.ui.maneuver.model {
     property public final int turnIconRoundaboutSlightLeft;
     property public final int turnIconRoundaboutSlightRight;
     property public final int turnIconRoundaboutStraight;
-    property public final int turnIconTrafficCircle;
-    property public final int turnIconTrafficCircleLeft;
-    property public final int turnIconTrafficCircleRight;
-    property public final int turnIconTrafficCircleSlightLeft;
-    property public final int turnIconTrafficCircleSlightRight;
     property public final int turnIconTurnLeft;
     property public final int turnIconTurnRight;
     property public final int turnIconTurnSharpLeft;
@@ -451,7 +438,6 @@ package com.mapbox.navigation.ui.maneuver.model {
     property public final int turnIconTurnSlightLeft;
     property public final int turnIconTurnSlightRight;
     property public final int turnIconTurnStraight;
-    property public final int turnIconUpdown;
     property public final int turnIconUturn;
   }
 
@@ -475,7 +461,6 @@ package com.mapbox.navigation.ui.maneuver.model {
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconDepartStraight(@DrawableRes int turnIconDepartStraight);
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconEndRoadLeft(@DrawableRes int turnIconEndRoadLeft);
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconEndRoadRight(@DrawableRes int turnIconEndRoadRight);
-    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconFlag(@DrawableRes int turnIconFlag);
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconFork(@DrawableRes int turnIconFork);
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconForkLeft(@DrawableRes int turnIconForkLeft);
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconForkRight(@DrawableRes int turnIconForkRight);
@@ -538,11 +523,6 @@ package com.mapbox.navigation.ui.maneuver.model {
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRoundaboutSlightLeft(@DrawableRes int turnIconRoundaboutSlightLeft);
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRoundaboutSlightRight(@DrawableRes int turnIconRoundaboutSlightRight);
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconRoundaboutStraight(@DrawableRes int turnIconRoundaboutStraight);
-    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTrafficCircle(@DrawableRes int turnIconTrafficCircle);
-    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTrafficCircleLeft(@DrawableRes int turnIconTrafficCircleLeft);
-    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTrafficCircleRight(@DrawableRes int turnIconTrafficCircleRight);
-    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTrafficCircleSlightLeft(@DrawableRes int turnIconTrafficCircleSlightLeft);
-    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTrafficCircleSlightRight(@DrawableRes int turnIconTrafficCircleSlightRight);
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTurnLeft(@DrawableRes int turnIconTurnLeft);
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTurnRight(@DrawableRes int turnIconTurnRight);
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTurnSharpLeft(@DrawableRes int turnIconTurnSharpLeft);
@@ -550,7 +530,6 @@ package com.mapbox.navigation.ui.maneuver.model {
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTurnSlightLeft(@DrawableRes int turnIconTurnSlightLeft);
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTurnSlightRight(@DrawableRes int turnIconTurnSlightRight);
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconTurnStraight(@DrawableRes int turnIconTurnStraight);
-    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconUpdown(@DrawableRes int turnIconUpdown);
     method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources.Builder turnIconUturn(@DrawableRes int turnIconUturn);
   }
 
