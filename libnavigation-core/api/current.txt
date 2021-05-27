@@ -85,7 +85,6 @@ package com.mapbox.navigation.core {
 package com.mapbox.navigation.core.arrival {
 
   public interface ArrivalController {
-    method public com.mapbox.navigation.core.arrival.ArrivalOptions arrivalOptions();
     method public boolean navigateNextRouteLeg(com.mapbox.navigation.base.trip.model.RouteLegProgress routeLegProgress);
   }
 
@@ -95,24 +94,8 @@ package com.mapbox.navigation.core.arrival {
     method public void onWaypointArrival(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
   }
 
-  public final class ArrivalOptions {
-    method public Double? getArrivalInMeters();
-    method public Double? getArrivalInSeconds();
-    method public com.mapbox.navigation.core.arrival.ArrivalOptions.Builder toBuilder();
-    property public final Double? arrivalInMeters;
-    property public final Double? arrivalInSeconds;
-  }
-
-  public static final class ArrivalOptions.Builder {
-    ctor public ArrivalOptions.Builder();
-    method public com.mapbox.navigation.core.arrival.ArrivalOptions.Builder arrivalInMeters(Double? arriveInMeters);
-    method public com.mapbox.navigation.core.arrival.ArrivalOptions.Builder arrivalInSeconds(Double? arriveInSeconds);
-    method public com.mapbox.navigation.core.arrival.ArrivalOptions build();
-  }
-
   public class AutoArrivalController implements com.mapbox.navigation.core.arrival.ArrivalController {
     ctor public AutoArrivalController();
-    method public com.mapbox.navigation.core.arrival.ArrivalOptions arrivalOptions();
     method public boolean navigateNextRouteLeg(com.mapbox.navigation.base.trip.model.RouteLegProgress routeLegProgress);
   }
 

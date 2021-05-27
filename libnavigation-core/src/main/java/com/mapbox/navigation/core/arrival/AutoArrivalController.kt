@@ -15,13 +15,7 @@ open class AutoArrivalController : ArrivalController {
     private var currentRouteLeg: RouteLeg? = null
 
     /**
-     * Default arrival options.
-     */
-    override fun arrivalOptions(): ArrivalOptions = ArrivalOptions.Builder().build()
-
-    /**
-     * By default this will move onto the next step after [ArrivalOptions.arrivalInSeconds]
-     * seconds have passed.
+     * Moves onto the next leg after 5 seconds have passed.
      */
     override fun navigateNextRouteLeg(routeLegProgress: RouteLegProgress): Boolean {
         if (currentRouteLeg != routeLegProgress.routeLeg) {
@@ -30,13 +24,15 @@ open class AutoArrivalController : ArrivalController {
         }
 
         val elapsedTimeNanos = SystemClock.elapsedRealtimeNanos() - (routeLegCompletedTime ?: 0L)
-        val arrivalInSeconds = arrivalOptions().arrivalInSeconds?.toLong() ?: 0L
-        val arrivalInNanos = TimeUnit.SECONDS.toNanos(arrivalInSeconds)
-        val shouldNavigateNextRouteLeg = elapsedTimeNanos >= arrivalInNanos
+        val shouldNavigateNextRouteLeg = elapsedTimeNanos >= AUTO_ARRIVAL_NANOS
         if (shouldNavigateNextRouteLeg) {
             currentRouteLeg = null
             routeLegCompletedTime = null
         }
         return shouldNavigateNextRouteLeg
+    }
+
+    internal companion object {
+        val AUTO_ARRIVAL_NANOS = TimeUnit.SECONDS.toNanos(5L)
     }
 }
