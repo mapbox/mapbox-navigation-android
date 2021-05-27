@@ -10,7 +10,7 @@ import com.mapbox.api.directions.v5.models.StepIntersection
 import com.mapbox.api.directions.v5.utils.FormatUtils
 import com.mapbox.api.directions.v5.utils.ParseUtils
 
-private const val COMMA_DELIMETER = ","
+private const val COMMA_DELIMITER = ","
 
 /**
  * Exclude certain road types from routing.
@@ -18,7 +18,7 @@ private const val COMMA_DELIMETER = ","
  * @param exclusionCriteria see [RouteOptions.Builder.exclude] for possible types.
  */
 fun RouteOptions.Builder.exclude(vararg exclusionCriteria: String): RouteOptions.Builder =
-    this.exclude(FormatUtils.join(COMMA_DELIMETER, exclusionCriteria.asList()).toString())
+    this.exclude(FormatUtils.join(COMMA_DELIMITER, exclusionCriteria.asList()).toString())
 
 /**
  * Violated road type.
@@ -50,7 +50,7 @@ data class ExclusionViolation(
  */
 fun DirectionsRoute.exclusionViolations(): List<ExclusionViolation> {
     val exclusionViolations = mutableListOf<ExclusionViolation>()
-    val excludeCriteria = ParseUtils.parseToStrings(this.routeOptions()?.exclude(), COMMA_DELIMETER)
+    val excludeCriteria = ParseUtils.parseToStrings(this.routeOptions()?.exclude(), COMMA_DELIMITER)
     excludeCriteria?.let {
         this.legs()?.forEachIndexed { legIndex, leg ->
             leg.steps()?.forEachIndexed { stepIndex, step ->

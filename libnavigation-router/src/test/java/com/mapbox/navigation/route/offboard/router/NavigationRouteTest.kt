@@ -16,8 +16,10 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import okhttp3.Request
 import org.hamcrest.CoreMatchers.containsString
+import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThat
@@ -31,13 +33,7 @@ import java.util.Locale
 class NavigationRouteTest {
 
     companion object {
-        @BeforeClass
-        @JvmStatic
-        fun init() {
-            mockkStatic("com.mapbox.navigation.base.internal.extensions.ContextEx")
-        }
-
-        const val ACESS_TOKEN = "pk.XXX"
+        private const val ACESS_TOKEN = "pk.XXX"
     }
 
     @get:Rule
@@ -52,6 +48,7 @@ class NavigationRouteTest {
 
     @Before
     fun setup() {
+        mockkStatic(Context::inferDeviceLocale)
         MockKAnnotations.init(this)
         every { context.inferDeviceLocale() } returns Locale.US
         every {
@@ -358,6 +355,11 @@ class NavigationRouteTest {
         val requestUrl = (navigationRoute.cloneCall().request() as Request).url.toString()
 
         assertFalse(requestUrl.contains("snapping_include_closures"))
+    }
+
+    @After
+    fun teardown() {
+        unmockkStatic(Context::inferDeviceLocale)
     }
 
     private fun provideNavigationOffboardRouteBuilder() =

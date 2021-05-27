@@ -1,5 +1,3 @@
-@file:JvmName("LocationEx")
-
 package com.mapbox.navigation.core.navigator
 
 import android.location.Location

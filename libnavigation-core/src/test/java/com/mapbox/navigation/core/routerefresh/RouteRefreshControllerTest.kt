@@ -62,7 +62,7 @@ class RouteRefreshControllerTest {
 
     @Before
     fun setup() {
-        mockkStatic("com.mapbox.navigation.base.extensions.RouteOptionsExtensions")
+        mockkStatic(RouteOptions::supportsRouteRefresh)
         every { tripSession.getRouteProgress() } returns mockk {
             every { currentLegProgress } returns mockk {
                 every { legIndex } returns 0
@@ -288,6 +288,6 @@ class RouteRefreshControllerTest {
 
     @After
     fun tearDown() {
-        unmockkStatic("com.mapbox.navigation.base.extensions.RouteOptionsExtensions")
+        unmockkStatic(RouteOptions::supportsRouteRefresh)
     }
 }

@@ -1,5 +1,3 @@
-@file:JvmName("BitmapEx")
-
 package com.mapbox.navigation.ui.utils.internal.extensions
 
 import android.content.res.Resources

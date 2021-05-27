@@ -52,11 +52,13 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkObject
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import org.junit.After
+import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -120,8 +122,14 @@ class MapboxNavigationTest {
 
         @BeforeClass
         @JvmStatic
-        fun initialize() {
-            mockkStatic("com.mapbox.navigation.base.internal.extensions.ContextEx")
+        fun beforeClass() {
+            mockkStatic(Context::inferDeviceLocale)
+        }
+
+        @AfterClass
+        @JvmStatic
+        fun afterClass() {
+            unmockkStatic(Context::inferDeviceLocale)
         }
     }
 
