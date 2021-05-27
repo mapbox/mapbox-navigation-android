@@ -2,6 +2,33 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.12 - May 27, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
+* When setting routes with the `MapboxRouteLineApi`, if the primary route hasn't changed the traffic will be recalculated while the state of the vanishing route line will remain unchanged. [#4444](https://github.com/mapbox/mapbox-navigation-android/pull/4444)
+* Fixed an issue where the route refresh request wasn't respecting `RouteOptions#baseUrl`. [#4427](https://github.com/mapbox/mapbox-navigation-android/pull/4427)
+* Fixed logic to show roundabout for left-side driving. The icons are now correctly flipped. [#4445](https://github.com/mapbox/mapbox-navigation-android/pull/4445)
+
+#### Known issues
+When using this release, the merged Manifest comes with an unnecessary `WRITE_SETTINGS` permission declaration. You can ignore that permission and not request it or add this to your Manifest file as a workaround:
+```
+<uses-permission android:name="android.permission.WRITE_SETTINGS" tools:node="remove"/>
+```
+This permission declaration will be removed in future releases.
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+
+- Mapbox Maps SDK `v10.0.0-beta.20` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.20))
+- Mapbox Navigation Native `v50.0.0`
+- Mapbox Core Common `v12.0.0`
+- Mapbox Java `5.9.0-alpha.5` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v5.9.0-alpha.5))
+- Mapbox Android Core `v4.0.2`
+- Mapbox Android Telemetry `v7.0.3`
+
 ## Mapbox Navigation SDK 2.0.0-beta.11 - May 21, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
@@ -33,7 +60,7 @@ When using this release, the merged Manifest comes with an unnecessary `WRITE_SE
 ```
 This permission declaration will be removed in future releases.
 
-## Mapbox dependencies
+### Mapbox dependencies
 This release depends, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-beta.20` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.20))
@@ -70,7 +97,7 @@ The extensions are very much recommended to be called when building the `RouteOp
 * `MapboxSignboardAPI` now returns `Bitmap` instead of `ByteArray`. ([#4335](https://github.com/mapbox/mapbox-navigation-android/pull/4335))
 * `MapboxJunctionAPI` now returns `Bitmap` instead of `ByteArray`. ([#4335](https://github.com/mapbox/mapbox-navigation-android/pull/4335))
 
-## Mapbox dependencies
+### Mapbox dependencies
 This release depends, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-beta.19` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.19))
@@ -88,7 +115,7 @@ This release depends, and has been tested with, the following Mapbox dependencie
  #### Bug fixes and improvements
  * Bug fix for calculating mutli-leg routes with traffic congestion changes or restrictions at the first point of a route leg. [#4383](https://github.com/mapbox/mapbox-navigation-android/pull/4383)
 
- ## Mapbox dependencies
+ ### Mapbox dependencies
  This release depends, and has been tested with, the following Mapbox dependencies:
 
  - Mapbox Maps SDK `v10.0.0-beta.19` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.19))
@@ -110,7 +137,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 #### Bug fixes and improvements
 - Changed restricted roads to be represented as part of the traffic line and will vanish along with the rest of the line when the vanishing route line feature is enabled. [#4360](https://github.com/mapbox/mapbox-navigation-android/pull/4360)
 
-## Mapbox dependencies
+### Mapbox dependencies
 This release depends, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-beta.19` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.19))
@@ -135,7 +162,7 @@ This release depends, and has been tested with, the following Mapbox dependencie
  * Fixed replay's simulated driver issue where it will nearly stop on the freeway, by normalizing bearing for speed profile calculations. [#4338](https://github.com/mapbox/mapbox-navigation-android/pull/4338)
  * Fixed an issue where the user location was incorrectly positioned in the center of the screen in the following state when the pitch was zero, `maximizeViewableRouteGeometryWhenPitchZero` was set, and no other points were available for framing. Now the user location is correctly tied to the bottom edge of the padding if that's the only geometry to frame. The flag was also renamed to `maximizeViewableGeometryWhenPitchZero`. [#4343](https://github.com/mapbox/mapbox-navigation-android/pull/4343)
 
- ## Mapbox dependencies
+ ### Mapbox dependencies
  This release depends, and has been tested with, the following Mapbox dependencies:
 
  - Mapbox Maps SDK `v10.0.0-beta.18` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.18))
@@ -163,7 +190,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 * Fixed an issue with the `NavigationCamera` transitions occasionally finishing at an incorrect visual target. This could occur when a gesture interaction with the map preceded the transition. See [mapbox-maps-android/issues/277](https://github.com/mapbox/mapbox-maps-android/issues/277) for details and workarounds. [#4296](https://github.com/mapbox/mapbox-navigation-android/pull/4296)
 * Introduced `MapboxNavigationViewportDataSourceOptions.overviewFrameOptions.geometrySimplification` which by default simplifies the route geometry used for overview framing by a factor of 25 to improve performance of frame generation, especially for longer routes. [#4286](https://github.com/mapbox/mapbox-navigation-android/pull/4286)
 
-## Mapbox dependencies
+### Mapbox dependencies
 This release depends, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-beta.18` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.18))
