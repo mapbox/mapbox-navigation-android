@@ -4,16 +4,16 @@ import android.content.Context
 import android.os.Build
 import android.os.LocaleList
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.util.ReflectionHelpers
 import java.util.Locale
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 @Config(manifest = Config.NONE, sdk = [Build.VERSION_CODES.N])
 class ContextExTest {
 

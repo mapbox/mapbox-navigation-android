@@ -39,7 +39,6 @@ dependencies {
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.androidXAnnotation
 
-    apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
     testImplementation(project(':libtesting-utils'))
 }
 

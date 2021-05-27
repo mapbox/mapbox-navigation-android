@@ -2,14 +2,14 @@ package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.maneuver.model.LaneIndicator
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class MapboxLaneGuidanceAdapterTest {
 
     lateinit var ctx: Context

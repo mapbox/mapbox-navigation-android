@@ -32,6 +32,7 @@ import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.FixLocation
@@ -66,12 +67,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class MapboxTripSessionTest {
 

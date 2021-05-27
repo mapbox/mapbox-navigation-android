@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue
@@ -12,10 +13,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class MapboxJunctionViewTest {
 
     private lateinit var ctx: Context

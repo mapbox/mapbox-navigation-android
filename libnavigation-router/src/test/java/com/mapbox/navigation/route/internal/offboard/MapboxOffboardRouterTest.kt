@@ -64,7 +64,9 @@ class MapboxOffboardRouterTest : BaseTest() {
         every { mapboxDirections.enqueueCall(capture(routeListener)) } answers {
             routeCallback = routeListener.captured
         }
-        every { routeOptions.coordinates().size } returns 2
+        every { routeOptions.coordinates() } returns mockk(relaxed = true) {
+            every { size } returns 2
+        }
         every { routeCall.isCanceled } returns false
 
         // refresh

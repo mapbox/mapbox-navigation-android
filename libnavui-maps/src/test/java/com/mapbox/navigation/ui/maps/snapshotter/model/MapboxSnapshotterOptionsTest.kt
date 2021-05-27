@@ -6,13 +6,13 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.Size
 import com.mapbox.navigation.testing.BuilderTest
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import kotlin.reflect.KClass
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class MapboxSnapshotterOptionsTest : BuilderTest<MapboxSnapshotterOptions,
     MapboxSnapshotterOptions.Builder>() {
 

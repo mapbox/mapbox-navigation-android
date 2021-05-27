@@ -55,7 +55,7 @@ dependencies {
     implementation dependenciesList.androidStartup
 
     testImplementation project(':libtesting-utils')
-    apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
+
     testImplementation dependenciesList.commonsIO
 
     testImplementation project(':libnavigation-router')

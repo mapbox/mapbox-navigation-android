@@ -3,14 +3,14 @@ package com.mapbox.navigation.ui.maps.route.line.model
 import android.content.Context
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class MapboxRouteLineOptionsTest {
 
     lateinit var ctx: Context

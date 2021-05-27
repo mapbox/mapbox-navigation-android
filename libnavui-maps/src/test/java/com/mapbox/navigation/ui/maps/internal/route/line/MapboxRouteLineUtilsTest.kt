@@ -20,6 +20,7 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.common.ShadowValueConverter
@@ -41,11 +42,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @Config(shadows = [ShadowValueConverter::class])
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class MapboxRouteLineUtilsTest {
 
     lateinit var ctx: Context

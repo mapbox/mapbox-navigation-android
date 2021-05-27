@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.TurnIconHelper
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
@@ -15,9 +16,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class MapboxTurnIconManeuverTest {
 
     private val turnIconHelper = mockk<TurnIconHelper>()

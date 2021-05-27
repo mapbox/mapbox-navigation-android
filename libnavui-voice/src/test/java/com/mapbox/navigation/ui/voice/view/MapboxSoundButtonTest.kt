@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.R
 import io.mockk.Ordering
@@ -19,13 +20,12 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.LooperMode
 import org.robolectric.shadows.ShadowLooper
 
 @LooperMode(LooperMode.Mode.PAUSED)
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
 class MapboxSoundButtonTest {
 

@@ -6,6 +6,7 @@ import com.mapbox.geojson.LineString
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
@@ -29,10 +30,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 @ExperimentalCoroutinesApi
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class VanishingRouteLineTest {
 
     @get:Rule

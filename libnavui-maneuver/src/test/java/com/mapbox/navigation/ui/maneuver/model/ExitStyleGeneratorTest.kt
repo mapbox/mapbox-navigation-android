@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable
 import android.text.style.ImageSpan
 import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.utils.internal.extensions.drawableWithHeight
 import com.mapbox.navigation.ui.utils.internal.extensions.getAsBitmap
 import io.mockk.every
@@ -17,9 +18,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class ExitStyleGeneratorTest {
 
     lateinit var ctx: Context
