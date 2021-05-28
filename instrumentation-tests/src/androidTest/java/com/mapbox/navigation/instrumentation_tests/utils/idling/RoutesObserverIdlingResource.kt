@@ -56,9 +56,11 @@ class RoutesObserverIdlingResource(
     }
 
     /** Used to communicate with **/
-    private val routesObserver = RoutesObserver { routes ->
-        mutableRoutesObserved.add(routes)
-        callback?.onTransitionToIdle()
+    private val routesObserver = object : RoutesObserver {
+        override fun onRoutesChanged(routes: List<DirectionsRoute>) {
+            mutableRoutesObserved.add(routes)
+            callback?.onTransitionToIdle()
+        }
     }
 
     /** Used to communicate with the [IdlingRegistry] **/
