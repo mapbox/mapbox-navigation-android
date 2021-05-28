@@ -8,12 +8,12 @@ import androidx.test.espresso.idling.CountingIdlingResource
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.BasicNavigationViewActivity
 import com.mapbox.navigation.instrumentation_tests.utils.idling.MapStyleInitIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.testing.ui.BaseTest
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -62,35 +62,29 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
         val shortRoutes = listOf(RouteLine(shortRoute, null))
 
         val consumerLongRoute =
-            object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
-                override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
-                    LoggerProvider.logger.e(Tag("SetRouteCancellationTest"), Message("long"))
-                    val primaryRoute = routeLineApi.getPrimaryRoute()
-                    val contents = (value as Expected.Success).value
-                        .trafficLineExpression.contents as ArrayList<*>
-                    assertEquals(
-                        625,
-                        contents.size
-                    )
-                    assertEquals(longRoute, primaryRoute)
-                    myResourceIdler.decrement()
-                }
+            MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { value ->
+                LoggerProvider.logger.e(Tag("SetRouteCancellationTest"), Message("long"))
+                val primaryRoute = routeLineApi.getPrimaryRoute()
+                val contents = value.value!!.trafficLineExpression.contents as ArrayList<*>
+                assertEquals(
+                    625,
+                    contents.size
+                )
+                assertEquals(longRoute, primaryRoute)
+                myResourceIdler.decrement()
             }
 
         val consumerShortRoute =
-            object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
-                override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
-                    LoggerProvider.logger.e(Tag("SetRouteCancellationTest"), Message("short"))
-                    val primaryRoute = routeLineApi.getPrimaryRoute()
-                    val contents = (value as Expected.Success).value
-                        .trafficLineExpression.contents as ArrayList<*>
-                    assertEquals(shortRoute, primaryRoute)
-                    assertEquals(
-                        7,
-                        contents.size
-                    )
-                    myResourceIdler.decrement()
-                }
+            MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { value ->
+                LoggerProvider.logger.e(Tag("SetRouteCancellationTest"), Message("short"))
+                val primaryRoute = routeLineApi.getPrimaryRoute()
+                val contents = value.value!!.trafficLineExpression.contents as ArrayList<*>
+                assertEquals(shortRoute, primaryRoute)
+                assertEquals(
+                    7,
+                    contents.size
+                )
+                myResourceIdler.decrement()
             }
 
         myResourceIdler.increment()
@@ -115,31 +109,27 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
         val shortRoutes = listOf(RouteLine(shortRoute, null))
 
         val consumer =
-            object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
-                override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
-                    val primaryRoute = routeLineApi.getPrimaryRoute()
-                    // The long route result should come in first even though it takes longer.
-                    if (consumerCallCount == 0) {
-                        val contents = (value as Expected.Success).value
-                            .trafficLineExpression.contents as ArrayList<*>
-                        assertEquals(
-                            625,
-                            contents.size
-                        )
-                        assertEquals(longRoute, primaryRoute)
-                    } else {
-                        val contents = (value as Expected.Success).value
-                            .trafficLineExpression.contents as ArrayList<*>
-                        assertEquals(shortRoute, primaryRoute)
-                        assertEquals(
-                            7,
-                            contents.size
-                        )
-                    }
-
-                    consumerCallCount += 1
-                    myResourceIdler.decrement()
+            MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { value ->
+                val primaryRoute = routeLineApi.getPrimaryRoute()
+                // The long route result should come in first even though it takes longer.
+                if (consumerCallCount == 0) {
+                    val contents = value.value!!.trafficLineExpression.contents as ArrayList<*>
+                    assertEquals(
+                        625,
+                        contents.size
+                    )
+                    assertEquals(longRoute, primaryRoute)
+                } else {
+                    val contents = value.value!!.trafficLineExpression.contents as ArrayList<*>
+                    assertEquals(shortRoute, primaryRoute)
+                    assertEquals(
+                        7,
+                        contents.size
+                    )
                 }
+
+                consumerCallCount += 1
+                myResourceIdler.decrement()
             }
 
         myResourceIdler.increment()
@@ -161,31 +151,26 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
         val routeLines = listOf(RouteLine(route, null))
         var clearInvoked = false
 
-        val consumer = object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
-            override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
-                check(!clearInvoked)
-                val primaryRoute = routeLineApi.getPrimaryRoute()
-                val contents = (value as Expected.Success).value
-                    .trafficLineExpression.contents as ArrayList<*>
-                assertEquals(route, primaryRoute)
-                assertEquals(
-                    625,
-                    contents.size
-                )
-                myResourceIdler.decrement()
-            }
+        val consumer = MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { value ->
+            check(!clearInvoked)
+            val primaryRoute = routeLineApi.getPrimaryRoute()
+            val contents = value.value!!.trafficLineExpression.contents as ArrayList<*>
+            assertEquals(route, primaryRoute)
+            assertEquals(
+                625,
+                contents.size
+            )
+            myResourceIdler.decrement()
         }
 
         val clearConsumer =
-            object : MapboxNavigationConsumer<Expected<RouteLineClearValue, RouteLineError>> {
-                override fun accept(value: Expected<RouteLineClearValue, RouteLineError>) {
-                    clearInvoked = true
-                    assertEquals(
-                        0,
-                        (value as Expected.Success).value.primaryRouteSource.features()!!.size
-                    )
-                    myResourceIdler.decrement()
-                }
+            MapboxNavigationConsumer<Expected<RouteLineError, RouteLineClearValue>> { value ->
+                clearInvoked = true
+                assertEquals(
+                    0,
+                    value.value!!.primaryRouteSource.features()!!.size
+                )
+                myResourceIdler.decrement()
             }
 
         myResourceIdler.increment()

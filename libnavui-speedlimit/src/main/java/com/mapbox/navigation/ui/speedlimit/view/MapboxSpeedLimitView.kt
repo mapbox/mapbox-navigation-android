@@ -14,8 +14,8 @@ import android.view.Gravity
 import androidx.annotation.StyleRes
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
+import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.speedlimit.R
 import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError
 import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue
@@ -81,13 +81,14 @@ class MapboxSpeedLimitView : AppCompatTextView {
     /**
      * Updates this view with speed limit related data.
      *
-     * @param expected a Expected<UpdateSpeedLimitValue, UpdateSpeedLimitError>
+     * @param expected a Expected<UpdateSpeedLimitError, UpdateSpeedLimitValue>
      */
-    fun render(expected: Expected<UpdateSpeedLimitValue, UpdateSpeedLimitError>) {
+    fun render(expected: Expected<UpdateSpeedLimitError, UpdateSpeedLimitValue>) {
         ThreadController.getMainScopeAndRootJob().scope.launch {
-            when (expected) {
-                is Expected.Failure -> {
-                    speedLimitSign?.let { sign ->
+            expected.fold(
+                { // error
+                    val sign = speedLimitSign
+                    if (sign != null) {
                         val speedLimitSpan = when (sign) {
                             SpeedLimitSign.MUTCD -> {
                                 getSpeedLimitSpannable(
@@ -101,20 +102,20 @@ class MapboxSpeedLimitView : AppCompatTextView {
                         }
                         setText(speedLimitSpan, BufferType.SPANNABLE)
                     }
-                }
-                is Expected.Success -> {
-                    speedLimitSign = expected.value.signFormat
-                    updateBackgroundSize(expected.value.signFormat)
-                    val drawable = getViewDrawable(expected.value.signFormat)
+                },
+                { value ->
+                    speedLimitSign = value.signFormat
+                    updateBackgroundSize(value.signFormat)
+                    val drawable = getViewDrawable(value.signFormat)
                     val formatterSpeedLimit =
-                        expected.value.speedLimitFormatter.format(expected.value)
+                        value.speedLimitFormatter.format(value)
                     val speedLimitSpan =
-                        getSpeedLimitSpannable(expected.value.signFormat, formatterSpeedLimit)
+                        getSpeedLimitSpannable(value.signFormat, formatterSpeedLimit)
 
                     background = drawable
                     setText(speedLimitSpan, BufferType.SPANNABLE)
                 }
-            }
+            )
         }
     }
 

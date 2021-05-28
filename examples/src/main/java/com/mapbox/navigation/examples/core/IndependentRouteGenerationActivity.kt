@@ -32,7 +32,6 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
@@ -101,13 +100,12 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
 
     private fun initStyle() {
         mapboxMap.loadStyleUri(
-            Style.MAPBOX_STREETS,
-            { style: Style ->
-                binding.mapView.gestures.addOnMapLongClickListener(
-                    mapLongClickListener
-                )
-            }
-        )
+            Style.MAPBOX_STREETS
+        ) {
+            binding.mapView.gestures.addOnMapLongClickListener(
+                mapLongClickListener
+            )
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -147,40 +145,34 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
         }
     }
 
-    private val routesObserver = object : RoutesObserver {
-        override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            if (routes.isNotEmpty()) {
-                startSimulation(routes[0])
-                binding.tripProgressView.visibility = View.VISIBLE
-            } else {
-                mapboxReplayer.stop()
-                binding.tripProgressView.visibility = View.GONE
-            }
+    private val routesObserver = RoutesObserver { routes ->
+        if (routes.isNotEmpty()) {
+            startSimulation(routes[0])
+            binding.tripProgressView.visibility = View.VISIBLE
+        } else {
+            mapboxReplayer.stop()
+            binding.tripProgressView.visibility = View.GONE
         }
     }
 
-    private val routeProgressObserver = object : RouteProgressObserver {
-        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            tripProgressApi.getTripProgress(routeProgress).let { update ->
-                binding.tripProgressView.render(update)
-            }
+    private val routeProgressObserver = RouteProgressObserver { routeProgress ->
+        tripProgressApi.getTripProgress(routeProgress).let { update ->
+            binding.tripProgressView.render(update)
         }
     }
 
-    private val mapLongClickListener = object : OnMapLongClickListener {
-        override fun onMapLongClick(point: Point): Boolean {
-            Utils.vibrate(this@IndependentRouteGenerationActivity)
+    private val mapLongClickListener = OnMapLongClickListener { point ->
+        Utils.vibrate(this@IndependentRouteGenerationActivity)
 
-            val currentLocation = navigationLocationProvider.lastLocation
-            if (currentLocation != null) {
-                val originPoint = Point.fromLngLat(
-                    currentLocation.longitude,
-                    currentLocation.latitude
-                )
-                findRoute(originPoint, point)
-            }
-            return true
+        val currentLocation = navigationLocationProvider.lastLocation
+        if (currentLocation != null) {
+            val originPoint = Point.fromLngLat(
+                currentLocation.longitude,
+                currentLocation.latitude
+            )
+            findRoute(originPoint, point)
         }
+        true
     }
 
     private fun startSimulation(route: DirectionsRoute) {

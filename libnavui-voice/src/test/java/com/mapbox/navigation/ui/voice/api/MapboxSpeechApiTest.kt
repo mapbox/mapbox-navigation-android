@@ -2,8 +2,8 @@ package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.VoiceAction
 import com.mapbox.navigation.ui.voice.VoiceProcessor
@@ -86,8 +86,8 @@ class MapboxSpeechApiTest {
         """.trimIndent()
         every { mockedVoiceInstructions.announcement() } returns anAnnouncement
         every { mockedVoiceInstructions.ssmlAnnouncement() } returns aSsmlAnnouncement
-        val speechConsumer: MapboxNavigationConsumer<Expected<SpeechValue, SpeechError>> = mockk()
-        val speechValueSlot = slot<Expected.Success<SpeechValue>>()
+        val speechConsumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> = mockk()
+        val speechValueSlot = slot<Expected<SpeechError, SpeechValue>>()
         every { speechConsumer.accept(capture(speechValueSlot)) } just Runs
         val mockedInstructionFile: File = mockk()
         val mockedVoiceApi: MapboxVoiceApi = mockk()
@@ -130,7 +130,7 @@ class MapboxSpeechApiTest {
         """.trimIndent()
         every { mockedVoiceInstructions.announcement() } returns anAnnouncement
         every { mockedVoiceInstructions.ssmlAnnouncement() } returns aSsmlAnnouncement
-        val speechConsumer: MapboxNavigationConsumer<Expected<SpeechValue, SpeechError>> = mockk()
+        val speechConsumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> = mockk()
         every { speechConsumer.accept(any()) } just Runs
         val mockedVoiceError: VoiceState.VoiceError = VoiceState.VoiceError(
             "code: 204, error: No data available"
@@ -149,7 +149,7 @@ class MapboxSpeechApiTest {
             )
         } returns mockedVoiceApi
         val mapboxSpeechApi = MapboxSpeechApi(aMockedContext, anyAccessToken, anyLanguage)
-        val speechErrorSlot = slot<Expected.Failure<SpeechError>>()
+        val speechErrorSlot = slot<Expected<SpeechError, SpeechValue>>()
         val mockedTypeAndAnnouncement: TypeAndAnnouncement = mockk()
         every { mockedTypeAndAnnouncement.type } returns "ssml"
         every { mockedTypeAndAnnouncement.announcement } returns aSsmlAnnouncement
@@ -166,14 +166,14 @@ class MapboxSpeechApiTest {
         }
         assertEquals(
             "code: 204, error: No data available",
-            speechErrorSlot.captured.error.errorMessage
+            speechErrorSlot.captured.error!!.errorMessage
         )
-        assertEquals(anAnnouncement, speechErrorSlot.captured.error.fallback.announcement)
+        assertEquals(anAnnouncement, speechErrorSlot.captured.error!!.fallback.announcement)
         assertEquals(
             aSsmlAnnouncement,
-            speechErrorSlot.captured.error.fallback.ssmlAnnouncement
+            speechErrorSlot.captured.error!!.fallback.ssmlAnnouncement
         )
-        assertNull(speechErrorSlot.captured.error.fallback.file)
+        assertNull(speechErrorSlot.captured.error!!.fallback.file)
     }
 
     @Test
@@ -192,7 +192,7 @@ class MapboxSpeechApiTest {
         """.trimIndent()
         every { mockedVoiceInstructions.announcement() } returns anAnnouncement
         every { mockedVoiceInstructions.ssmlAnnouncement() } returns aSsmlAnnouncement
-        val speechConsumer: MapboxNavigationConsumer<Expected<SpeechValue, SpeechError>> = mockk()
+        val speechConsumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> = mockk()
         every { speechConsumer.accept(any()) } just Runs
         val mockedVoiceError: VoiceState.VoiceError = VoiceState.VoiceError(
             "code: 204, error: No data available"
@@ -234,7 +234,7 @@ class MapboxSpeechApiTest {
             val anyAccessToken = "pk.123"
             val anyLanguage = Locale.US.language
             val mockedVoiceInstructions: VoiceInstructions = mockk()
-            val speechConsumer: MapboxNavigationConsumer<Expected<SpeechValue, SpeechError>> =
+            val speechConsumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> =
                 mockk()
             val mockedVoiceResponse: VoiceState.VoiceResponse = VoiceState.VoiceResponse(mockk())
             val mockedVoiceApi: MapboxVoiceApi = mockk()

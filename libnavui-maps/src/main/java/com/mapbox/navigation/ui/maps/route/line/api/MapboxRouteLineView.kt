@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
+import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.generated.Expression
@@ -9,7 +10,6 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getLayerVisibility
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.initializeLayers
@@ -45,60 +45,58 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * Applies drawing related side effects.
      *
      * @param style a valid [Style] instance
-     * @param routeDrawData a [Expected<RouteSetValue, RouteLineError>]
+     * @param routeDrawData a [Expected<RouteLineError, RouteSetValue>]
      */
-    fun renderRouteDrawData(style: Style, routeDrawData: Expected<RouteSetValue, RouteLineError>) {
+    fun renderRouteDrawData(style: Style, routeDrawData: Expected<RouteLineError, RouteSetValue>) {
         initializeLayers(style, options)
 
-        when (routeDrawData) {
-            is Expected.Success -> {
-                updateLineGradient(
-                    style,
-                    RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
-                    routeDrawData.value.trafficLineExpression
-                )
-                updateLineGradient(
-                    style,
-                    RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
-                    routeDrawData.value.routeLineExpression
-                )
-                updateLineGradient(
-                    style,
-                    RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
-                    routeDrawData.value.casingLineExpression
-                )
-                updateSource(
-                    style,
-                    RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
-                    routeDrawData.value.primaryRouteSource
-                )
-                updateSource(
-                    style,
-                    RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
-                    routeDrawData.value.alternativeRoute1Source
-                )
-                updateSource(
-                    style,
-                    RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
-                    routeDrawData.value.alternativeRoute2Source
-                )
-                updateLineGradient(
-                    style,
-                    RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
-                    routeDrawData.value.altRoute1TrafficExpression
-                )
-                updateLineGradient(
-                    style,
-                    RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
-                    routeDrawData.value.altRoute2TrafficExpression
-                )
-                updateSource(
-                    style,
-                    RouteConstants.WAYPOINT_SOURCE_ID,
-                    routeDrawData.value.waypointsSource
-                )
-            }
-            is Expected.Failure -> { }
+        routeDrawData.onValue {
+
+            updateLineGradient(
+                style,
+                RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                it.trafficLineExpression
+            )
+            updateLineGradient(
+                style,
+                RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
+                it.routeLineExpression
+            )
+            updateLineGradient(
+                style,
+                RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+                it.casingLineExpression
+            )
+            updateSource(
+                style,
+                RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
+                it.primaryRouteSource
+            )
+            updateSource(
+                style,
+                RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
+                it.alternativeRoute1Source
+            )
+            updateSource(
+                style,
+                RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                it.alternativeRoute2Source
+            )
+            updateLineGradient(
+                style,
+                RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
+                it.altRoute1TrafficExpression
+            )
+            updateLineGradient(
+                style,
+                RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
+                it.altRoute2TrafficExpression
+            )
+            updateSource(
+                style,
+                RouteConstants.WAYPOINT_SOURCE_ID,
+                it.waypointsSource
+            )
         }
     }
 
@@ -110,29 +108,26 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      */
     fun renderVanishingRouteLineUpdateValue(
         style: Style,
-        update: Expected<VanishingRouteLineUpdateValue, RouteLineError>
+        update: Expected<RouteLineError, VanishingRouteLineUpdateValue>
     ) {
-        when (update) {
-            is Expected.Failure -> { }
-            is Expected.Success -> {
-                initializeLayers(style, options)
+        update.onValue {
+            initializeLayers(style, options)
 
-                updateLineGradient(
-                    style,
-                    RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
-                    update.value.trafficLineExpression
-                )
-                updateLineGradient(
-                    style,
-                    RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
-                    update.value.routeLineExpression
-                )
-                updateLineGradient(
-                    style,
-                    RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
-                    update.value.casingLineExpression
-                )
-            }
+            updateLineGradient(
+                style,
+                RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                it.trafficLineExpression
+            )
+            updateLineGradient(
+                style,
+                RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
+                it.routeLineExpression
+            )
+            updateLineGradient(
+                style,
+                RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+                it.casingLineExpression
+            )
         }
     }
 
@@ -144,34 +139,31 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      */
     fun renderClearRouteLineValue(
         style: Style,
-        clearRouteLineValue: Expected<RouteLineClearValue, RouteLineError>
+        clearRouteLineValue: Expected<RouteLineError, RouteLineClearValue>
     ) {
-        when (clearRouteLineValue) {
-            is Expected.Failure -> { }
-            is Expected.Success -> {
-                initializeLayers(style, options)
+        clearRouteLineValue.onValue {
+            initializeLayers(style, options)
 
-                updateSource(
-                    style,
-                    RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
-                    clearRouteLineValue.value.primaryRouteSource
-                )
-                updateSource(
-                    style,
-                    RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
-                    clearRouteLineValue.value.altRoute1Source
-                )
-                updateSource(
-                    style,
-                    RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
-                    clearRouteLineValue.value.altRoute2Source
-                )
-                updateSource(
-                    style,
-                    RouteConstants.WAYPOINT_SOURCE_ID,
-                    clearRouteLineValue.value.waypointsSource
-                )
-            }
+            updateSource(
+                style,
+                RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
+                it.primaryRouteSource
+            )
+            updateSource(
+                style,
+                RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
+                it.altRoute1Source
+            )
+            updateSource(
+                style,
+                RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                it.altRoute2Source
+            )
+            updateSource(
+                style,
+                RouteConstants.WAYPOINT_SOURCE_ID,
+                it.waypointsSource
+            )
         }
     }
 

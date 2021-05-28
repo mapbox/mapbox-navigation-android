@@ -12,7 +12,7 @@ import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.HORIZONTAL
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
-import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.databinding.MapboxMainManeuverLayoutBinding
 import com.mapbox.navigation.ui.maneuver.databinding.MapboxManeuverLayoutBinding
@@ -105,14 +105,9 @@ class MapboxManeuverView : ConstraintLayout {
      * Invoke the method to render primary, secondary, sub instructions and lane information.
      * @param maneuver Expected
      */
-    fun renderManeuver(maneuver: Expected<Maneuver, ManeuverError>) {
-        when (maneuver) {
-            is Expected.Success -> {
-                drawManeuver(maneuver.value)
-            }
-            is Expected.Failure -> {
-                // Not handled
-            }
+    fun renderManeuver(maneuver: Expected<ManeuverError, Maneuver>) {
+        maneuver.onValue {
+            drawManeuver(it)
         }
     }
 

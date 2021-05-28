@@ -24,7 +24,6 @@ import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
@@ -37,7 +36,6 @@ import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityManeuverBinding
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.maneuver.api.ManeuverCallback
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.api.StepDistanceRemainingCallback
@@ -127,14 +125,12 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
      * containing either a success in the form of [Maneuver] or failure in the form of
      * [ManeuverError].
      */
-    private val currentManeuverCallback = object : ManeuverCallback {
-        override fun onManeuver(maneuver: Expected<Maneuver, ManeuverError>) {
-            // The data obtained must be rendered by [MapboxManeuverView]
-            if (binding.maneuverView.visibility != VISIBLE) {
-                binding.maneuverView.visibility = VISIBLE
-            }
-            binding.maneuverView.renderManeuver(maneuver)
+    private val currentManeuverCallback = ManeuverCallback { maneuver ->
+        // The data obtained must be rendered by [MapboxManeuverView]
+        if (binding.maneuverView.visibility != VISIBLE) {
+            binding.maneuverView.visibility = VISIBLE
         }
+        binding.maneuverView.renderManeuver(maneuver)
     }
 
     /**
@@ -142,19 +138,10 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
      * containing either a success in the form of [StepDistance] or failure in the form of
      * [StepDistanceError].
      */
-    private val stepDistanceRemainingCallback = object : StepDistanceRemainingCallback {
-        override fun onStepDistanceRemaining(
-            distanceRemaining: Expected<StepDistance, StepDistanceError>
-        ) {
-            when (distanceRemaining) {
-                is Expected.Success -> {
-                    // The data obtained must be rendered by [MapboxManeuverView]
-                    binding.maneuverView.renderDistanceRemaining(distanceRemaining.value)
-                }
-                is Expected.Failure -> {
-                    // Not handled
-                }
-            }
+    private val stepDistanceRemainingCallback = StepDistanceRemainingCallback { distanceRemaining ->
+        distanceRemaining.onValue {
+            // The data obtained must be rendered by [MapboxManeuverView]
+            binding.maneuverView.renderDistanceRemaining(it)
         }
     }
 
@@ -163,17 +150,10 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
      * containing either a success in the form of list of [Maneuver] or failure in the form of
      * [ManeuverError].
      */
-    private val upcomingManeuversCallback = object : UpcomingManeuverListCallback {
-        override fun onUpcomingManeuvers(maneuvers: Expected<List<Maneuver>, ManeuverError>) {
-            when (maneuvers) {
-                is Expected.Success -> {
-                    // The data obtained must be rendered by [MapboxManeuverView]
-                    binding.maneuverView.renderUpcomingManeuvers(maneuvers.value)
-                }
-                is Expected.Failure -> {
-                    // Not handled
-                }
-            }
+    private val upcomingManeuversCallback = UpcomingManeuverListCallback { maneuvers ->
+        maneuvers.onValue {
+            // The data obtained must be rendered by [MapboxManeuverView]
+            binding.maneuverView.renderUpcomingManeuvers(it)
         }
     }
 
@@ -193,20 +173,18 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
-    private val routeProgressObserver = object : RouteProgressObserver {
-        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            // The upcoming maneuver list component is driven by route progress updates.
-            // Passing the route progress to the MapboxManeuverApi generates the data
-            // for updating the view.
-            maneuverApi.getUpcomingManeuverList(routeProgress, upcomingManeuversCallback)
-            ifNonNull(routeProgress.currentLegProgress) { legProgress ->
-                ifNonNull(legProgress.currentStepProgress) {
-                    maneuverApi.getStepDistanceRemaining(it, stepDistanceRemainingCallback)
-                }
+    private val routeProgressObserver = RouteProgressObserver { routeProgress ->
+        // The upcoming maneuver list component is driven by route progress updates.
+        // Passing the route progress to the MapboxManeuverApi generates the data
+        // for updating the view.
+        maneuverApi.getUpcomingManeuverList(routeProgress, upcomingManeuversCallback)
+        ifNonNull(routeProgress.currentLegProgress) { legProgress ->
+            ifNonNull(legProgress.currentStepProgress) {
+                maneuverApi.getStepDistanceRemaining(it, stepDistanceRemainingCallback)
             }
-            routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
-                routeArrowView.renderManeuverUpdate(mapboxMap.getStyle()!!, this)
-            }
+        }
+        routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
+            routeArrowView.renderManeuverUpdate(mapboxMap.getStyle()!!, this)
         }
     }
 

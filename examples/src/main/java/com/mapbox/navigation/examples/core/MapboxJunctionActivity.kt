@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -36,7 +37,6 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityJunctionBinding
 import com.mapbox.navigation.examples.util.Utils.getMapboxAccessToken
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.guidance.junction.api.MapboxJunctionApi
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError
@@ -91,13 +91,11 @@ class MapboxJunctionActivity : AppCompatActivity(), OnMapLongClickListener {
      * containing either a success in the form of [JunctionValue] or failure in the form of
      * [JunctionError].
      */
-    private val junctionCallback = object :
-        MapboxNavigationConsumer<Expected<JunctionValue, JunctionError>> {
-        override fun accept(value: Expected<JunctionValue, JunctionError>) {
+    private val junctionCallback =
+        MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>> { value ->
             // The data obtained must be rendered by [MapboxJunctionView]
             binding.junctionView.render(value)
         }
-    }
 
     private val routeLineResources: RouteLineResources by lazy {
         RouteLineResources.Builder().build()

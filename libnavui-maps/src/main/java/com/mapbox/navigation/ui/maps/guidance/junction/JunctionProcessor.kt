@@ -124,11 +124,13 @@ internal object JunctionProcessor {
     private fun processRaster(
         raster: ByteArray
     ): JunctionResult {
-        return when (val expected = MapboxRasterToBitmapParser.parse(raster)) {
-            is com.mapbox.navigation.ui.base.model.Expected.Failure ->
-                JunctionResult.JunctionBitmap.Failure(expected.error)
-            is com.mapbox.navigation.ui.base.model.Expected.Success ->
-                JunctionResult.JunctionBitmap.Success(expected.value)
-        }
+        return MapboxRasterToBitmapParser.parse(raster).fold(
+            { error ->
+                JunctionResult.JunctionBitmap.Failure(error)
+            },
+            { value ->
+                JunctionResult.JunctionBitmap.Success(value)
+            }
+        )
     }
 }

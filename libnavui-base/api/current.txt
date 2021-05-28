@@ -118,29 +118,6 @@ package com.mapbox.navigation.ui.base.internal.model.route {
 
 }
 
-package com.mapbox.navigation.ui.base.model {
-
-  public abstract sealed class Expected<V, E> {
-  }
-
-  public static final class Expected.Failure<E> extends com.mapbox.navigation.ui.base.model.Expected {
-    ctor public Expected.Failure(E? error);
-    method public E! component1();
-    method public com.mapbox.navigation.ui.base.model.Expected.Failure<E> copy(E! error);
-    method public E! getError();
-    property public final E! error;
-  }
-
-  public static final class Expected.Success<V> extends com.mapbox.navigation.ui.base.model.Expected {
-    ctor public Expected.Success(V? value);
-    method public V! component1();
-    method public com.mapbox.navigation.ui.base.model.Expected.Success<V> copy(V! value);
-    method public V! getValue();
-    property public final V! value;
-  }
-
-}
-
 package com.mapbox.navigation.ui.base.model.route {
 
   public final class RouteLayerConstants {

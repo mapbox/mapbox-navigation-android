@@ -26,8 +26,6 @@ import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvid
 import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
-import com.mapbox.navigation.ui.base.model.Expected
-import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
@@ -35,8 +33,6 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
-import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -101,21 +97,16 @@ abstract class SimpleMapViewNavigationTest :
             routeLineView = MapboxRouteLineView(options)
             routeLineApi = MapboxRouteLineApi(options)
 
-            mapboxNavigation.registerRoutesObserver(object : RoutesObserver {
-                override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-                    routeLineApi.setRoutes(
-                        listOf(RouteLine(mockRoute.routeResponse.routes()[0], null)),
-                        object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
-                            override fun accept(result: Expected<RouteSetValue, RouteLineError>) {
-                                routeLineView.renderRouteDrawData(
-                                    activity.mapboxMap.getStyle()!!,
-                                    result
-                                )
-                            }
-                        }
+            mapboxNavigation.registerRoutesObserver {
+                routeLineApi.setRoutes(
+                    listOf(RouteLine(mockRoute.routeResponse.routes()[0], null))
+                ) { result ->
+                    routeLineView.renderRouteDrawData(
+                        activity.mapboxMap.getStyle()!!,
+                        result
                     )
                 }
-            })
+            }
         }
     }
 

@@ -1,10 +1,9 @@
 package com.mapbox.navigation.ui.maps.internal.route.line
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
-import com.mapbox.navigation.ui.base.model.Expected
-import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
@@ -29,16 +28,11 @@ object MapboxRouteLineApiExtensions {
      * newly designated route line.
      */
     suspend fun MapboxRouteLineApi.updateToPrimaryRoute(route: DirectionsRoute):
-        Expected<RouteSetValue, RouteLineError> {
+        Expected<RouteLineError, RouteSetValue> {
         return suspendCoroutine { continuation ->
             this.updateToPrimaryRoute(
-                route,
-                object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
-                    override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
-                        continuation.resume(value)
-                    }
-                }
-            )
+                route
+            ) { value -> continuation.resume(value) }
         }
     }
 
@@ -51,16 +45,11 @@ object MapboxRouteLineApiExtensions {
      * @return a state which contains the side effects to be applied to the map
      */
     suspend fun MapboxRouteLineApi.setRoutes(newRoutes: List<RouteLine>):
-        Expected<RouteSetValue, RouteLineError> {
+        Expected<RouteLineError, RouteSetValue> {
         return suspendCoroutine { continuation ->
             this.setRoutes(
-                newRoutes,
-                object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
-                    override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
-                        continuation.resume(value)
-                    }
-                }
-            )
+                newRoutes
+            ) { value -> continuation.resume(value) }
         }
     }
 
@@ -68,15 +57,9 @@ object MapboxRouteLineApiExtensions {
      * @return a state which contains the side effects to be applied to the map. The data
      * can be used to draw the current route line(s) on the map.
      */
-    suspend fun MapboxRouteLineApi.getRouteDrawData(): Expected<RouteSetValue, RouteLineError> {
+    suspend fun MapboxRouteLineApi.getRouteDrawData(): Expected<RouteLineError, RouteSetValue> {
         return suspendCoroutine { continuation ->
-            this.getRouteDrawData(
-                object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
-                    override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
-                        continuation.resume(value)
-                    }
-                }
-            )
+            this.getRouteDrawData { value -> continuation.resume(value) }
         }
     }
 
@@ -98,18 +81,13 @@ object MapboxRouteLineApiExtensions {
         target: Point,
         mapboxMap: MapboxMap,
         padding: Float,
-    ): Expected<ClosestRouteValue, RouteNotFound> {
+    ): Expected<RouteNotFound, ClosestRouteValue> {
         return suspendCoroutine { continuation ->
             this.findClosestRoute(
                 target,
                 mapboxMap,
-                padding,
-                object : MapboxNavigationConsumer<Expected<ClosestRouteValue, RouteNotFound>> {
-                    override fun accept(value: Expected<ClosestRouteValue, RouteNotFound>) {
-                        continuation.resume(value)
-                    }
-                }
-            )
+                padding
+            ) { value -> continuation.resume(value) }
         }
     }
 
@@ -119,14 +97,9 @@ object MapboxRouteLineApiExtensions {
      * @return a state representing the side effects to be rendered on the map. In this case
      * the map should appear without any route lines.
      */
-    suspend fun MapboxRouteLineApi.clearRouteLine(): Expected<RouteLineClearValue, RouteLineError> {
+    suspend fun MapboxRouteLineApi.clearRouteLine(): Expected<RouteLineError, RouteLineClearValue> {
         return suspendCoroutine { continuation ->
-            this.clearRouteLine(
-                object : MapboxNavigationConsumer<Expected<RouteLineClearValue, RouteLineError>> {
-                    override fun accept(value: Expected<RouteLineClearValue, RouteLineError>) {
-                        continuation.resume(value)
-                    }
-                })
+            this.clearRouteLine { value -> continuation.resume(value) }
         }
     }
 }

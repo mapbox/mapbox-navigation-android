@@ -3,10 +3,10 @@ package com.mapbox.navigation.ui.speedlimit.view
 import android.content.Context
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 import com.mapbox.navigation.base.speed.model.SpeedLimitUnit
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.speedlimit.R
 import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter
 import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue
@@ -88,7 +88,7 @@ class MapboxSpeedLimitViewTest {
         )
 
         val view = MapboxSpeedLimitView(ctx).also {
-            it.render(Expected.Success(state))
+            it.render(ExpectedFactory.createValue(state))
         }
 
         assertEquals("MAX\n20", view.text.toString())
@@ -104,7 +104,7 @@ class MapboxSpeedLimitViewTest {
         )
 
         val view = MapboxSpeedLimitView(ctx).also {
-            it.render(Expected.Success(state))
+            it.render(ExpectedFactory.createValue(state))
         }
 
         assertEquals("MAX\n5", view.text.toString())
@@ -120,7 +120,7 @@ class MapboxSpeedLimitViewTest {
         )
 
         val view = MapboxSpeedLimitView(ctx).also {
-            it.render(Expected.Success(state))
+            it.render(ExpectedFactory.createValue(state))
         }
 
         assertEquals("35", view.text.toString())
@@ -136,7 +136,7 @@ class MapboxSpeedLimitViewTest {
         )
 
         val view = MapboxSpeedLimitView(ctx).also {
-            it.render(Expected.Success(state))
+            it.render(ExpectedFactory.createValue(state))
         }
 
         assertNotNull(view.background)
@@ -152,7 +152,7 @@ class MapboxSpeedLimitViewTest {
         )
 
         val view = MapboxSpeedLimitView(ctx).also {
-            it.render(Expected.Success(state))
+            it.render(ExpectedFactory.createValue(state))
         }
 
         assertNotNull(view.background)

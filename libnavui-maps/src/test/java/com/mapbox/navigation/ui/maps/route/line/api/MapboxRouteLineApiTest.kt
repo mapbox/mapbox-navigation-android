@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.util.SparseArray
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.bindgen.Expected
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
@@ -19,7 +20,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.clearRouteLine
@@ -54,6 +54,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -61,7 +62,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.UUID
-import kotlin.collections.ArrayList
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -139,7 +139,7 @@ class MapboxRouteLineApiTest {
         val api = MapboxRouteLineApi(options).also {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
-        val consumer = MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
+        val consumer = MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> {
             consumerCalled = true
             assertEquals(route2, api.getPrimaryRoute())
         }
@@ -296,27 +296,27 @@ class MapboxRouteLineApiTest {
         val route = getRoute()
         val routes = listOf(RouteLine(route, null))
 
-        val result = api.setRoutes(routes) as Expected.Success
+        val result = api.setRoutes(routes)
 
-        assertEquals(expectedCasingExpression, result.value.casingLineExpression.toString())
-        assertEquals(expectedRouteLineExpression, result.value.routeLineExpression.toString())
+        assertEquals(expectedCasingExpression, result.value!!.casingLineExpression.toString())
+        assertEquals(expectedRouteLineExpression, result.value!!.routeLineExpression.toString())
         assertEquals(
             expectedTrafficLineExpression,
-            result.value.trafficLineExpression.toString()
+            result.value!!.trafficLineExpression.toString()
         )
         assertEquals(
             expectedPrimaryRouteSourceGeometry,
-            result.value.primaryRouteSource.features()!![0].geometry().toString()
+            result.value!!.primaryRouteSource.features()!![0].geometry().toString()
         )
-        assertTrue(result.value.alternativeRoute1Source.features()!!.isEmpty())
-        assertTrue(result.value.alternativeRoute2Source.features()!!.isEmpty())
+        assertTrue(result.value!!.alternativeRoute1Source.features()!!.isEmpty())
+        assertTrue(result.value!!.alternativeRoute2Source.features()!!.isEmpty())
         assertEquals(
             expectedWaypointFeature0,
-            result.value.waypointsSource.features()!![0].geometry().toString()
+            result.value!!.waypointsSource.features()!![0].geometry().toString()
         )
         assertEquals(
             expectedWaypointFeature1,
-            result.value.waypointsSource.features()!![1].geometry().toString()
+            result.value!!.waypointsSource.features()!![1].geometry().toString()
         )
     }
 
@@ -330,12 +330,15 @@ class MapboxRouteLineApiTest {
             RouteLine(getRouteWithRoadClasses(), null)
         )
 
-        val result = api.setRoutes(routes) as Expected.Success
+        val result = api.setRoutes(routes)
 
-        assertNotEquals(result.value.alternativeRoute1Source, result.value.alternativeRoute2Source)
         assertNotEquals(
-            result.value.altRoute1TrafficExpression,
-            result.value.altRoute2TrafficExpression
+            result.value!!.alternativeRoute1Source,
+            result.value!!.alternativeRoute2Source
+        )
+        assertNotEquals(
+            result.value!!.altRoute1TrafficExpression,
+            result.value!!.altRoute2TrafficExpression
         )
     }
 
@@ -363,31 +366,31 @@ class MapboxRouteLineApiTest {
             "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}"
         val route = getRoute()
         val routes = listOf(RouteLine(route, null))
-        val consumer = MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> { t ->
+        val consumer = MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { t ->
             callbackCalled = true
-            val result = t as Expected.Success
-            assertEquals(expectedCasingExpression, result.value.casingLineExpression.toString())
+            val result = t
+            assertEquals(expectedCasingExpression, result.value!!.casingLineExpression.toString())
             assertEquals(
                 expectedRouteLineExpression,
-                result.value.routeLineExpression.toString()
+                result.value!!.routeLineExpression.toString()
             )
             assertEquals(
                 expectedTrafficLineExpression,
-                result.value.trafficLineExpression.toString()
+                result.value!!.trafficLineExpression.toString()
             )
             assertEquals(
                 expectedPrimaryRouteSourceGeometry,
-                result.value.primaryRouteSource.features()!![0].geometry().toString()
+                result.value!!.primaryRouteSource.features()!![0].geometry().toString()
             )
-            assertTrue(result.value.alternativeRoute1Source.features()!!.isEmpty())
-            assertTrue(result.value.alternativeRoute2Source.features()!!.isEmpty())
+            assertTrue(result.value!!.alternativeRoute1Source.features()!!.isEmpty())
+            assertTrue(result.value!!.alternativeRoute2Source.features()!!.isEmpty())
             assertEquals(
                 expectedWaypointFeature0,
-                result.value.waypointsSource.features()!![0].geometry().toString()
+                result.value!!.waypointsSource.features()!![0].geometry().toString()
             )
             assertEquals(
                 expectedWaypointFeature1,
-                result.value.waypointsSource.features()!![1].geometry().toString()
+                result.value!!.waypointsSource.features()!![1].geometry().toString()
             )
         }
 
@@ -425,19 +428,19 @@ class MapboxRouteLineApiTest {
             RouteLine(altRoute2, null)
         )
 
-        val result = api.setRoutes(routes) as Expected.Success
+        val result = api.setRoutes(routes)
 
         assertEquals(
             expectedPrimaryTrafficLineExpression,
-            result.value.trafficLineExpression.toString()
+            result.value!!.trafficLineExpression.toString()
         )
         assertEquals(
             expectedAlternative1TrafficLineExpression,
-            result.value.altRoute1TrafficExpression.toString()
+            result.value!!.altRoute1TrafficExpression.toString()
         )
         assertEquals(
             expectedAlternative2TrafficLineExpression,
-            result.value.altRoute2TrafficExpression.toString()
+            result.value!!.altRoute2TrafficExpression.toString()
         )
     }
 
@@ -460,15 +463,15 @@ class MapboxRouteLineApiTest {
             RouteLine(altRoute2, "alternativeRoute2")
         )
 
-        val result = api.setRoutes(routes) as Expected.Success
+        val result = api.setRoutes(routes)
 
         assertEquals(
             "{\"alternativeRoute1\":true}",
-            result.value.alternativeRoute1Source.features()!!.first().properties().toString()
+            result.value!!.alternativeRoute1Source.features()!!.first().properties().toString()
         )
         assertEquals(
             "{\"alternativeRoute2\":true}",
-            result.value.alternativeRoute2Source.features()!!.first().properties().toString()
+            result.value!!.alternativeRoute2Source.features()!!.first().properties().toString()
         )
     }
 
@@ -542,24 +545,24 @@ class MapboxRouteLineApiTest {
         val routes = listOf(RouteLine(route, null))
         api.setRoutes(routes)
 
-        val result = api.getRouteDrawData() as Expected.Success
+        val result = api.getRouteDrawData()
 
-        assertEquals(expectedCasingExpression, result.value.casingLineExpression.toString())
-        assertEquals(expectedRouteLineExpression, result.value.routeLineExpression.toString())
-        assertEquals(expectedTrafficLineExpression, result.value.trafficLineExpression.toString())
+        assertEquals(expectedCasingExpression, result.value!!.casingLineExpression.toString())
+        assertEquals(expectedRouteLineExpression, result.value!!.routeLineExpression.toString())
+        assertEquals(expectedTrafficLineExpression, result.value!!.trafficLineExpression.toString())
         assertEquals(
             expectedPrimaryRouteSourceGeometry,
-            result.value.primaryRouteSource.features()!![0].geometry().toString()
+            result.value!!.primaryRouteSource.features()!![0].geometry().toString()
         )
-        assertTrue(result.value.alternativeRoute1Source.features()!!.isEmpty())
-        assertTrue(result.value.alternativeRoute2Source.features()!!.isEmpty())
+        assertTrue(result.value!!.alternativeRoute1Source.features()!!.isEmpty())
+        assertTrue(result.value!!.alternativeRoute2Source.features()!!.isEmpty())
         assertEquals(
             expectedWaypointFeature0,
-            result.value.waypointsSource.features()!![0].geometry().toString()
+            result.value!!.waypointsSource.features()!![0].geometry().toString()
         )
         assertEquals(
             expectedWaypointFeature1,
-            result.value.waypointsSource.features()!![1].geometry().toString()
+            result.value!!.waypointsSource.features()!![1].geometry().toString()
         )
     }
 
@@ -603,11 +606,10 @@ class MapboxRouteLineApiTest {
         api.updateUpcomingRoutePointIndex(routeProgress)
 
         val result = api.updateTraveledRouteLine(lineString.coordinates()[1])
-            as Expected.Success
 
-        assertEquals(expectedCasingExpression, result.value.casingLineExpression.toString())
-        assertEquals(expectedRouteExpression, result.value.routeLineExpression.toString())
-        assertEquals(expectedTrafficExpression, result.value.trafficLineExpression.toString())
+        assertEquals(expectedCasingExpression, result.value!!.casingLineExpression.toString())
+        assertEquals(expectedRouteExpression, result.value!!.routeLineExpression.toString())
+        assertEquals(expectedTrafficExpression, result.value!!.trafficLineExpression.toString())
     }
 
     @Test
@@ -793,7 +795,7 @@ class MapboxRouteLineApiTest {
 
         val result = api.updateTraveledRouteLine(Point.fromLngLat(-122.4727051, 37.7577627))
 
-        assertTrue(result is Expected.Failure)
+        assertNotNull(result.error)
     }
 
     @Test
@@ -809,7 +811,7 @@ class MapboxRouteLineApiTest {
 
         val result = api.updateTraveledRouteLine(Point.fromLngLat(-122.4727051, 37.7577627))
 
-        assertTrue(result is Expected.Failure)
+        assertNotNull(result.error)
     }
 
     @Test
@@ -833,12 +835,12 @@ class MapboxRouteLineApiTest {
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val api = MapboxRouteLineApi(options)
 
-        val result = api.clearRouteLine() as Expected.Success
+        val result = api.clearRouteLine()
 
-        assertTrue(result.value.altRoute1Source.features()!!.isEmpty())
-        assertTrue(result.value.altRoute2Source.features()!!.isEmpty())
-        assertTrue(result.value.primaryRouteSource.features()!!.isEmpty())
-        assertTrue(result.value.waypointsSource.features()!!.isEmpty())
+        assertTrue(result.value!!.altRoute1Source.features()!!.isEmpty())
+        assertTrue(result.value!!.altRoute2Source.features()!!.isEmpty())
+        assertTrue(result.value!!.primaryRouteSource.features()!!.isEmpty())
+        assertTrue(result.value!!.waypointsSource.features()!!.isEmpty())
     }
 
     @Test
@@ -857,11 +859,11 @@ class MapboxRouteLineApiTest {
             options
         )
 
-        val result = api.setVanishingOffset(.5) as Expected.Success
+        val result = api.setVanishingOffset(.5)
 
-        assertEquals(trafficExpression, result.value.casingLineExpression.toString())
-        assertEquals(routeLineExpression, result.value.routeLineExpression.toString())
-        assertEquals(casingExpression, result.value.casingLineExpression.toString())
+        assertEquals(trafficExpression, result.value!!.casingLineExpression.toString())
+        assertEquals(routeLineExpression, result.value!!.routeLineExpression.toString())
+        assertEquals(casingExpression, result.value!!.casingLineExpression.toString())
     }
 
     @ExperimentalCoroutinesApi
@@ -898,9 +900,9 @@ class MapboxRouteLineApiTest {
             } answers { querySlot.captured.run(mockExpected) }
         }
 
-        val result = api.findClosestRoute(point, mockkMap, 50f) as Expected.Success
+        val result = api.findClosestRoute(point, mockkMap, 50f)
 
-        assertEquals(route2, result.value.route)
+        assertEquals(route2, result.value!!.route)
         unmockkStatic(UUID::class)
     }
 
@@ -944,9 +946,9 @@ class MapboxRouteLineApiTest {
             }
         }
 
-        val result = api.findClosestRoute(point, mockkMap, 50f) as Expected.Success
+        val result = api.findClosestRoute(point, mockkMap, 50f)
 
-        assertEquals(route2, result.value.route)
+        assertEquals(route2, result.value!!.route)
         unmockkStatic(UUID::class)
     }
 
@@ -1004,9 +1006,9 @@ class MapboxRouteLineApiTest {
             }
         }
 
-        val result = api.findClosestRoute(point, mockkMap, 50f) as Expected.Success
+        val result = api.findClosestRoute(point, mockkMap, 50f)
 
-        assertEquals(route1, result.value.route)
+        assertEquals(route1, result.value!!.route)
         unmockkStatic(UUID::class)
     }
 
@@ -1019,12 +1021,12 @@ class MapboxRouteLineApiTest {
 
         val longRouteDef = async {
             val result = api.setRoutes(longRoute)
-            ((result as Expected.Success).value.trafficLineExpression.contents as ArrayList<*>).size
+            (result.value!!.trafficLineExpression.contents as ArrayList<*>).size
         }
         delay(40)
         val shortRouteDef = async {
             val result = api.setRoutes(shortRoute)
-            ((result as Expected.Success).value.trafficLineExpression.contents as ArrayList<*>).size
+            (result.value!!.trafficLineExpression.contents as ArrayList<*>).size
         }
 
         assertEquals(7, shortRouteDef.await())

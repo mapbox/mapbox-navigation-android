@@ -1,6 +1,6 @@
 package com.mapbox.navigation.ui.maneuver.api
 
-import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 
@@ -13,5 +13,5 @@ fun interface ManeuverCallback {
      * Invoked when [Maneuver] is ready.
      * @param maneuver CurrentManeuver represents maneuver to be represented on the view.
      */
-    fun onManeuver(maneuver: Expected<Maneuver, ManeuverError>)
+    fun onManeuver(maneuver: Expected<ManeuverError, Maneuver>)
 }

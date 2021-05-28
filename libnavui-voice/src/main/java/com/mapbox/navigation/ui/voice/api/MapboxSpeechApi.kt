@@ -2,7 +2,8 @@ package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
 import com.mapbox.api.directions.v5.models.VoiceInstructions
-import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.VoiceAction
 import com.mapbox.navigation.ui.voice.VoiceProcessor
@@ -52,7 +53,7 @@ class MapboxSpeechApi @JvmOverloads constructor(
      */
     fun generate(
         voiceInstruction: VoiceInstructions,
-        consumer: MapboxNavigationConsumer<Expected<SpeechValue, SpeechError>>
+        consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>>
     ) {
         currentVoiceFileJob?.cancel()
         currentVoiceFileJob = mainJobController.scope.launch {
@@ -79,7 +80,7 @@ class MapboxSpeechApi @JvmOverloads constructor(
 
     private suspend fun retrieveVoiceFile(
         voiceInstruction: VoiceInstructions,
-        consumer: MapboxNavigationConsumer<Expected<SpeechValue, SpeechError>>
+        consumer: MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>>
     ) {
         when (val result = voiceAPI.retrieveVoiceFile(voiceInstruction)) {
             is VoiceState.VoiceResponse -> {
@@ -91,7 +92,7 @@ class MapboxSpeechApi @JvmOverloads constructor(
                 val announcement = voiceInstruction.announcement()
                 val ssmlAnnouncement = voiceInstruction.ssmlAnnouncement()
                 consumer.accept(
-                    Expected.Success(
+                    ExpectedFactory.createValue(
                         SpeechValue(
                             // Can't be null as it's checked in retrieveVoiceFile
                             SpeechAnnouncement.Builder(announcement!!).apply {
@@ -107,7 +108,7 @@ class MapboxSpeechApi @JvmOverloads constructor(
                     voiceInstruction
                 ) { available ->
                     consumer.accept(
-                        Expected.Failure(
+                        ExpectedFactory.createError(
                             SpeechError(
                                 result.exception,
                                 null,

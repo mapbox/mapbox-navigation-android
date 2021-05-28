@@ -22,6 +22,7 @@ import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
+import com.mapbox.bindgen.Expected;
 import com.mapbox.geojson.Point;
 import com.mapbox.maps.CameraOptions;
 import com.mapbox.maps.EdgeInsets;
@@ -54,7 +55,6 @@ import com.mapbox.navigation.core.replay.route.ReplayRouteMapper;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.qa_test_app.R;
-import com.mapbox.navigation.ui.base.model.Expected;
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer;
 import com.mapbox.navigation.ui.maps.PredictiveCacheController;
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider;
@@ -104,10 +104,10 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   private Button startNavigation;
   private ProgressBar routeLoading;
   private final List<String> mapStyles = Arrays.asList(
-          Style.MAPBOX_STREETS,
-          Style.OUTDOORS,
-          Style.LIGHT,
-          Style.SATELLITE_STREETS
+      Style.MAPBOX_STREETS,
+      Style.OUTDOORS,
+      Style.LIGHT,
+      Style.SATELLITE_STREETS
   );
   private MapboxRouteLineApi mapboxRouteLineApi;
   private MapboxRouteLineView mapboxRouteLineView;
@@ -122,16 +122,16 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
     String path = this.getApplicationContext().getFilesDir().getAbsolutePath();
     NavigationOptions navigationOptions = new NavigationOptions.Builder(this)
-            .accessToken(getMapboxAccessTokenFromResources())
-            .locationEngine(new ReplayLocationEngine(mapboxReplayer))
-            .routingTilesOptions(
-                    new RoutingTilesOptions.Builder()
-                            .build()
-                            .toBuilder()
-                            .filePath(path)
-                            .build()
-            )
-            .build();
+        .accessToken(getMapboxAccessTokenFromResources())
+        .locationEngine(new ReplayLocationEngine(mapboxReplayer))
+        .routingTilesOptions(
+            new RoutingTilesOptions.Builder()
+                .build()
+                .toBuilder()
+                .filePath(path)
+                .build()
+        )
+        .build();
 
     mapView = findViewById(R.id.mapView);
     startNavigation = findViewById(R.id.startNavigation);
@@ -140,7 +140,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     navigationLocationProvider = new NavigationLocationProvider();
     locationComponent = getLocationComponent();
     locationComponent.setLocationPuck(
-            new LocationPuck2D(null, ContextCompat.getDrawable(this, R.drawable.mapbox_navigation_puck_icon), null, null)
+        new LocationPuck2D(null, ContextCompat.getDrawable(this, R.drawable.mapbox_navigation_puck_icon), null, null)
     );
     locationComponent.setLocationProvider(navigationLocationProvider);
     locationComponent.setEnabled(true);
@@ -156,17 +156,17 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
     RouteLineResources routeLineResources = new RouteLineResources.Builder().build();
     MapboxRouteLineOptions mapboxRouteLineOptions = new MapboxRouteLineOptions.Builder(this)
-            .withRouteLineResources(routeLineResources)
-            .withVanishingRouteLineEnabled(true)
-            .withRouteLineBelowLayerId("road-label")
-            .build();
+        .withRouteLineResources(routeLineResources)
+        .withVanishingRouteLineEnabled(true)
+        .withRouteLineBelowLayerId("road-label")
+        .build();
 
     mapboxRouteLineApi = new MapboxRouteLineApi(mapboxRouteLineOptions);
     mapboxRouteLineView = new MapboxRouteLineView(mapboxRouteLineOptions);
 
     RouteArrowOptions routeArrowOptions = new RouteArrowOptions.Builder(this)
-            .withAboveLayerId(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
-            .build();
+        .withAboveLayerId(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+        .build();
     routeArrowView = new MapboxRouteArrowView(routeArrowOptions);
 
     predictiveCacheController = new PredictiveCacheController(mapboxNavigation, message -> {
@@ -213,12 +213,8 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
           }
 
           mapboxRouteLineApi.getRouteDrawData(
-                  new MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>() {
-                    @Override
-                    public void accept(Expected<RouteSetValue, RouteLineError> redrawData) {
-                      mapboxRouteLineView.renderRouteDrawData(style1, redrawData);
-                    }
-                  });
+              redrawData -> mapboxRouteLineView.renderRouteDrawData(style1, redrawData)
+          );
 
           ArrowVisibilityChangeValue arrowVisibilityState;
           if (arrowVisibility == Visibility.NONE) {
@@ -313,8 +309,8 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     Location currentLocation = navigationLocationProvider.getLastLocation();
     if (currentLocation != null) {
       Point originPoint = Point.fromLngLat(
-              currentLocation.getLongitude(),
-              currentLocation.getLatitude()
+          currentLocation.getLongitude(),
+          currentLocation.getLatitude()
       );
       findRoute(originPoint, point);
       routeLoading.setVisibility(View.VISIBLE);
@@ -327,14 +323,14 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     RouteOptionsExtensions.applyDefaultNavigationOptions(builder);
     RouteOptionsExtensions.applyLanguageAndVoiceUnitOptions(builder, this);
     RouteOptions routeOptions = builder
-            .accessToken(getMapboxAccessTokenFromResources())
-            .coordinates(Arrays.asList(origin, destination))
-            .alternatives(true)
-            .build();
+        .accessToken(getMapboxAccessTokenFromResources())
+        .coordinates(Arrays.asList(origin, destination))
+        .alternatives(true)
+        .build();
 
     mapboxNavigation.requestRoutes(
-            routeOptions,
-            routesReqCallback
+        routeOptions,
+        routesReqCallback
     );
   }
 
@@ -369,15 +365,12 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
         routeLines.add(new RouteLine(route, null));
       }
       long start = System.currentTimeMillis();
-      mapboxRouteLineApi.setRoutes(routeLines, new MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>() {
-        @Override
-        public void accept(Expected<RouteSetValue, RouteLineError> routeDrawData) {
-          Log.e("foobar", "total calc time: " + (System.currentTimeMillis() - start));
+      mapboxRouteLineApi.setRoutes(routeLines, routeDrawData -> {
+        Log.e("foobar", "total calc time: " + (System.currentTimeMillis() - start));
 
-          long startDraw = System.currentTimeMillis();
-          mapboxRouteLineView.renderRouteDrawData(mapboxMap.getStyle(), routeDrawData);
-          Log.e("foobar", "total draw time: " + (System.currentTimeMillis() - startDraw));
-        }
+        long startDraw = System.currentTimeMillis();
+        mapboxRouteLineView.renderRouteDrawData(mapboxMap.getStyle(), routeDrawData);
+        Log.e("foobar", "total draw time: " + (System.currentTimeMillis() - startDraw));
       });
     }
   };
@@ -407,8 +400,8 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
     @Override
     public void onEnhancedLocationChanged(
-            @NotNull Location enhancedLocation,
-            @NotNull List<? extends Location> keyPoints
+        @NotNull Location enhancedLocation,
+        @NotNull List<? extends Location> keyPoints
     ) {
       navigationLocationProvider.changePosition(enhancedLocation, keyPoints, null, null);
       updateCamera(enhancedLocation);
@@ -418,14 +411,14 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   private void updateCamera(Location location) {
     MapAnimationOptions.Builder mapAnimationOptionsBuilder = new MapAnimationOptions.Builder();
     mapCamera.easeTo(
-            new CameraOptions.Builder()
-                    .center(Point.fromLngLat(location.getLongitude(), location.getLatitude()))
-                    .bearing((double) location.getBearing())
-                    .pitch(45.0)
-                    .zoom(17.0)
-                    .padding(new EdgeInsets(1000, 0, 0, 0))
-                    .build(),
-            mapAnimationOptionsBuilder.build()
+        new CameraOptions.Builder()
+            .center(Point.fromLngLat(location.getLongitude(), location.getLatitude()))
+            .bearing((double) location.getBearing())
+            .pitch(45.0)
+            .zoom(17.0)
+            .padding(new EdgeInsets(1000, 0, 0, 0))
+            .build(),
+        mapAnimationOptionsBuilder.build()
     );
   }
 
@@ -444,7 +437,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   private ReplayProgressObserver replayProgressObserver = new ReplayProgressObserver(mapboxReplayer);
 
   private OnIndicatorPositionChangedListener onIndicatorPositionChangedListener = point -> {
-    Expected<VanishingRouteLineUpdateValue, RouteLineError> vanishingRouteLineData = mapboxRouteLineApi.updateTraveledRouteLine(point);
+    Expected<RouteLineError, VanishingRouteLineUpdateValue> vanishingRouteLineData = mapboxRouteLineApi.updateTraveledRouteLine(point);
     if (vanishingRouteLineData != null && mapboxMap.getStyle() != null) {
       mapboxRouteLineView.renderVanishingRouteLineUpdateValue(mapboxMap.getStyle(), vanishingRouteLineData);
     }
@@ -458,7 +451,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
       }
       mapboxRouteLineApi.updateWithRouteProgress(routeProgress);
 
-      Expected<UpdateManeuverArrowValue, InvalidPointError> updateArrowState = routeArrow.addUpcomingManeuverArrow(routeProgress);
+      Expected<InvalidPointError, UpdateManeuverArrowValue> updateArrowState = routeArrow.addUpcomingManeuverArrow(routeProgress);
       routeArrowView.renderManeuverUpdate(mapboxMap.getStyle(), updateArrowState);
 
       DirectionsRoute currentRoute = routeProgress.getRoute();
@@ -474,40 +467,33 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
       if (isNewRoute) {
         mapboxRouteLineApi.setRoutes(
-                Collections.singletonList(new RouteLine(routeProgress.getRoute(), null)),
-                new MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>() {
-                  @Override
-                  public void accept(Expected<RouteSetValue, RouteLineError> routeDrawData) {
-                    mapboxRouteLineView.renderRouteDrawData(mapboxMap.getStyle(), routeDrawData);
-                  }
-                }
+            Collections.singletonList(new RouteLine(routeProgress.getRoute(), null)),
+            routeDrawData ->
+                mapboxRouteLineView.renderRouteDrawData(mapboxMap.getStyle(), routeDrawData)
         );
       }
     }
   };
 
-  private final MapboxNavigationConsumer<Expected<ClosestRouteValue, RouteNotFound>> closestRouteResultConsumer =
-          new MapboxNavigationConsumer<Expected<ClosestRouteValue, RouteNotFound>>() {
-            @Override
-            public void accept(Expected<ClosestRouteValue, RouteNotFound> closestRouteResult) {
-              if (closestRouteResult instanceof Expected.Success) {
-                final DirectionsRoute selectedRoute = ((ClosestRouteValue) ((Expected.Success) closestRouteResult).getValue()).getRoute();
-                if (selectedRoute != mapboxRouteLineApi.getPrimaryRoute()) {
-                  mapboxRouteLineApi.updateToPrimaryRoute(
-                          selectedRoute,
-                          new MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>() {
-                            @Override
-                            public void accept(Expected<RouteSetValue, RouteLineError> routeSetValueRouteLineErrorExpected) {
-                              // NOTE: We don't have to render the state because there is a RoutesObserver on the
-                              // MapboxNavigation object which will draw the routes. Rendering the state would draw the routes
-                              // twice unnecessarily in this implementation.
-                              mapboxNavigation.setRoutes(mapboxRouteLineApi.getRoutes());
-                            }
-                          });
-                }
-              }
+  private final MapboxNavigationConsumer<Expected<RouteNotFound, ClosestRouteValue>> closestRouteResultConsumer =
+      new MapboxNavigationConsumer<Expected<RouteNotFound, ClosestRouteValue>>() {
+        @Override
+        public void accept(Expected<RouteNotFound, ClosestRouteValue> closestRouteResult) {
+          closestRouteResult.onValue(input -> {
+            final DirectionsRoute selectedRoute = input.getRoute();
+            if (selectedRoute != mapboxRouteLineApi.getPrimaryRoute()) {
+              mapboxRouteLineApi.updateToPrimaryRoute(
+                  selectedRoute,
+                  routeSetValueRouteLineErrorExpected -> {
+                    // NOTE: We don't have to render the state because there is a RoutesObserver on the
+                    // MapboxNavigation object which will draw the routes. Rendering the state would draw the routes
+                    // twice unnecessarily in this implementation.
+                    mapboxNavigation.setRoutes(mapboxRouteLineApi.getRoutes());
+                  });
             }
-          };
+          });
+        }
+      };
 
   private final OnMapClickListener mapClickListener = new OnMapClickListener() {
     @Override

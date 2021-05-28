@@ -4,7 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue
 import org.junit.Assert
@@ -28,7 +29,8 @@ class MapboxJunctionViewTest {
     @Test
     fun `render junction null when error`() {
         val view = MapboxJunctionView(ctx)
-        val junction = Expected.Failure(JunctionError("whatever", null))
+        val junction: Expected<JunctionError, JunctionValue> =
+            ExpectedFactory.createError(JunctionError("whatever", null))
         val expected = null
 
         view.render(junction)
@@ -40,7 +42,8 @@ class MapboxJunctionViewTest {
     fun `render junction when success`() {
         val view = MapboxJunctionView(ctx)
         val mockBitmap = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888)
-        val junction = Expected.Success(JunctionValue(mockBitmap))
+        val junction: Expected<JunctionError, JunctionValue> =
+            ExpectedFactory.createValue(JunctionValue(mockBitmap))
 
         view.render(junction)
 

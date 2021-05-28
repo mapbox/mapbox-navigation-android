@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.maps.guidance.signboard.api
 
 import android.graphics.Bitmap
-import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions
 
 /**
@@ -22,5 +22,5 @@ fun interface SvgToBitmapParser {
     fun parse(
         svg: ByteArray,
         options: MapboxSignboardOptions
-    ): Expected<Bitmap, String>
+    ): Expected<String, Bitmap>
 }

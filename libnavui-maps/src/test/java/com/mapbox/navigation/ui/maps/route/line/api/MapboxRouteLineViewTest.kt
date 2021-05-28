@@ -16,6 +16,7 @@ import com.mapbox.navigation.ui.maps.common.ShadowValueConverter
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue
 import io.mockk.MockKAnnotations
@@ -182,7 +183,7 @@ class MapboxRouteLineViewTest {
             mockCheckForLayerInitialization(it)
         }
 
-        val state = com.mapbox.navigation.ui.base.model.Expected.Success(
+        val state: Expected<RouteLineError, RouteLineClearValue> = ExpectedFactory.createValue(
             RouteLineClearValue(
                 primaryRouteFeatureCollection,
                 altRoutesFeatureCollection,
@@ -248,13 +249,14 @@ class MapboxRouteLineViewTest {
         val trafficLineExp = mockk<Expression>()
         val routeLineExp = mockk<Expression>()
         val casingLineEx = mockk<Expression>()
-        val state = com.mapbox.navigation.ui.base.model.Expected.Success(
-            VanishingRouteLineUpdateValue(
-                trafficLineExp,
-                routeLineExp,
-                casingLineEx
+        val state: Expected<RouteLineError, VanishingRouteLineUpdateValue> =
+            ExpectedFactory.createValue(
+                VanishingRouteLineUpdateValue(
+                    trafficLineExp,
+                    routeLineExp,
+                    casingLineEx
+                )
             )
-        )
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
@@ -336,7 +338,7 @@ class MapboxRouteLineViewTest {
         val casingLineEx = mockk<Expression>()
         val alternativeRoute1Expression = mockk<Expression>()
         val alternativeRoute2Expression = mockk<Expression>()
-        val state = com.mapbox.navigation.ui.base.model.Expected.Success(
+        val state: Expected<RouteLineError, RouteSetValue> = ExpectedFactory.createValue(
             RouteSetValue(
                 primaryRouteFeatureCollection,
                 trafficLineExp,
