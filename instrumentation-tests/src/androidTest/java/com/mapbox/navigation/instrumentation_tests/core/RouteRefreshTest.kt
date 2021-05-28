@@ -4,7 +4,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.MapboxNavigation
@@ -114,7 +114,17 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     }
 
     private fun requestDirectionsRouteSync(coordinates: List<Point>): List<DirectionsRoute> {
-        val routeOptions = RouteOptions.builder().applyDefaultNavigationOptions()
+        val routeOptions = RouteOptions.builder().applyDefaultParams()
+            .annotationsList(
+                listOf(
+                    DirectionsCriteria.ANNOTATION_CONGESTION,
+                    DirectionsCriteria.ANNOTATION_MAXSPEED,
+                    DirectionsCriteria.ANNOTATION_SPEED,
+                    DirectionsCriteria.ANNOTATION_DURATION,
+                    DirectionsCriteria.ANNOTATION_DISTANCE,
+                    DirectionsCriteria.ANNOTATION_CLOSURE
+                )
+            )
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
             .alternatives(true)
             .coordinates(coordinates)
