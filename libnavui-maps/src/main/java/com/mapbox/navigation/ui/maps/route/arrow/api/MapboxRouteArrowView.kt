@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.route.arrow.api
 
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Style
@@ -10,7 +11,6 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSourceAs
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.arrow.RouteArrowUtils.initializeLayers
@@ -49,7 +49,7 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
     }
 
     /**
-     * Renders an [Expected<UpdateManeuverArrowValue, InvalidPointError>] applying view side
+     * Renders an [Expected<InvalidPointError, UpdateManeuverArrowValue>] applying view side
      * effects based on the data it contains.
      *
      * @param style a valid map style object
@@ -57,24 +57,22 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
      */
     fun renderManeuverUpdate(
         style: Style,
-        expectedValue: Expected<UpdateManeuverArrowValue, InvalidPointError>
+        expectedValue: Expected<InvalidPointError, UpdateManeuverArrowValue>
     ) {
         initializeLayers(style, options)
 
-        when (expectedValue) {
-            is Expected.Failure -> {
-                LoggerProvider.logger.e(Tag(TAG), Message(expectedValue.error.errorMessage))
+        expectedValue.onError {
+            LoggerProvider.logger.e(Tag(TAG), Message(it.errorMessage))
+        }
+        expectedValue.onValue { value ->
+            value.layerVisibilityModifications.forEach {
+                updateLayerVisibility(style, it.first, it.second)
             }
-            is Expected.Success -> {
-                expectedValue.value.layerVisibilityModifications.forEach {
-                    updateLayerVisibility(style, it.first, it.second)
-                }
-                expectedValue.value.arrowHeadFeature?.apply {
-                    updateSource(style, RouteConstants.ARROW_HEAD_SOURCE_ID, this)
-                }
-                expectedValue.value.arrowShaftFeature?.apply {
-                    updateSource(style, RouteConstants.ARROW_SHAFT_SOURCE_ID, this)
-                }
+            value.arrowHeadFeature?.apply {
+                updateSource(style, RouteConstants.ARROW_HEAD_SOURCE_ID, this)
+            }
+            value.arrowShaftFeature?.apply {
+                updateSource(style, RouteConstants.ARROW_SHAFT_SOURCE_ID, this)
             }
         }
     }
@@ -106,15 +104,15 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
      * @param style a valid map style object
      * @param expectedValue a state containing data for applying the view side effects.
      */
-    fun render(style: Style, expectedValue: Expected<ArrowAddedValue, InvalidPointError>) {
-        when (expectedValue) {
-            is Expected.Failure -> {
-                LoggerProvider.logger.e(Tag(TAG), Message(expectedValue.error.errorMessage))
+    fun render(style: Style, expectedValue: Expected<InvalidPointError, ArrowAddedValue>) {
+        expectedValue.fold(
+            { error ->
+                LoggerProvider.logger.e(Tag(TAG), Message(error.errorMessage))
+            },
+            { value ->
+                render(style, value)
             }
-            is Expected.Success -> {
-                render(style, expectedValue.value)
-            }
-        }
+        )
     }
 
     /**

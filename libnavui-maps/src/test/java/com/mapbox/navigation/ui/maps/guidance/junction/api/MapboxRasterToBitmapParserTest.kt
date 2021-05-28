@@ -4,7 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -27,11 +28,12 @@ class MapboxRasterToBitmapParserTest {
     @Test
     fun `when raster empty parse fail`() {
         val mockRaster = byteArrayOf()
-        val expected = Expected.Failure("Error parsing raster to bitmap as raster is empty")
+        val expected: Expected<String, Bitmap> =
+            ExpectedFactory.createError("Error parsing raster to bitmap as raster is empty")
 
         val actual = MapboxRasterToBitmapParser.parse(mockRaster)
 
-        assertEquals(expected, actual)
+        assertEquals(expected.error!!, actual.error!!)
     }
 
     @Test
@@ -40,10 +42,10 @@ class MapboxRasterToBitmapParserTest {
         val mockBitmap = mockk<Bitmap>()
         mockkStatic(BitmapFactory::class)
         every { BitmapFactory.decodeByteArray(mockRaster, 0, mockRaster.size) } returns mockBitmap
-        val expected = Expected.Success(mockBitmap)
+        val expected: Expected<String, Bitmap> = ExpectedFactory.createValue(mockBitmap)
 
         val actual = MapboxRasterToBitmapParser.parse(mockRaster)
 
-        assertEquals(expected, actual)
+        assertEquals(expected.value!!, actual.value!!)
     }
 }

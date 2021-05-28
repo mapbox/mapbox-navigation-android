@@ -3,7 +3,7 @@ package com.mapbox.navigation.ui.maps.guidance.junction.view
 import android.content.Context
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
-import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue
 
@@ -45,14 +45,14 @@ class MapboxJunctionView : AppCompatImageView {
      *
      * @param result type [Expected] which holds either the junction or error
      */
-    fun render(result: Expected<JunctionValue, JunctionError>) {
-        when (result) {
-            is Expected.Success -> {
-                setImageBitmap(result.value.bitmap)
-            }
-            is Expected.Failure -> {
+    fun render(result: Expected<JunctionError, JunctionValue>) {
+        result.fold(
+            { // error
                 setImageBitmap(null)
+            },
+            { value ->
+                setImageBitmap(value.bitmap)
             }
-        }
+        )
     }
 }

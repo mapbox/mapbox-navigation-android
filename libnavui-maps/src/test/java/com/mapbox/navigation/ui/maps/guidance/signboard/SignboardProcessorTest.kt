@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerView
 import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.bindgen.ExpectedFactory.createError
 import com.mapbox.bindgen.ExpectedFactory.createValue
 import com.mapbox.common.HttpMethod
@@ -228,7 +229,7 @@ class SignboardProcessorTest {
         val action = SignboardAction.ParseSvgToBitmap(mockData, mockParser, mockOptions)
         every {
             mockParser.parse(any(), any())
-        } returns com.mapbox.navigation.ui.base.model.Expected.Failure("whatever")
+        } returns ExpectedFactory.createError("whatever")
 
         val result = SignboardProcessor.process(action) as SignboardResult.SignboardBitmap.Failure
 

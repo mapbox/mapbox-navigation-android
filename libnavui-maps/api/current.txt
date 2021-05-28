@@ -431,7 +431,7 @@ package com.mapbox.navigation.ui.maps.guidance.junction.api {
   public final class MapboxJunctionApi {
     ctor public MapboxJunctionApi(String accessToken);
     method public void cancelAll();
-    method public void generateJunction(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue,com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError>> consumer);
+    method public void generateJunction(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError,com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue>> consumer);
     field public static final com.mapbox.navigation.ui.maps.guidance.junction.api.MapboxJunctionApi.Companion Companion;
   }
 
@@ -462,7 +462,7 @@ package com.mapbox.navigation.ui.maps.guidance.junction.view {
     ctor public MapboxJunctionView(android.content.Context context);
     ctor public MapboxJunctionView(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxJunctionView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    method public void render(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue,com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError> result);
+    method public void render(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError,com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue> result);
   }
 
 }
@@ -478,7 +478,7 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.api {
     ctor public MapboxSignboardApi(String accessToken, com.mapbox.navigation.ui.maps.guidance.signboard.api.SvgToBitmapParser parser);
     ctor public MapboxSignboardApi(String accessToken, android.content.Context applicationContext, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options = MapboxSignboardOptions.<init>().build());
     method public void cancelAll();
-    method public void generateSignboard(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue,com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError>> consumer);
+    method public void generateSignboard(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError,com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue>> consumer);
     field public static final com.mapbox.navigation.ui.maps.guidance.signboard.api.MapboxSignboardApi.Companion Companion;
   }
 
@@ -487,11 +487,11 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.api {
 
   public final class MapboxSvgToBitmapParser implements com.mapbox.navigation.ui.maps.guidance.signboard.api.SvgToBitmapParser {
     ctor public MapboxSvgToBitmapParser(com.caverock.androidsvg.SVGExternalFileResolver externalFileResolver);
-    method public com.mapbox.navigation.ui.base.model.Expected<android.graphics.Bitmap,java.lang.String> parse(byte[] svg, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options);
+    method public com.mapbox.bindgen.Expected<java.lang.String,android.graphics.Bitmap> parse(byte[] svg, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options);
   }
 
   public fun interface SvgToBitmapParser {
-    method public com.mapbox.navigation.ui.base.model.Expected<android.graphics.Bitmap,java.lang.String> parse(byte[] svg, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options);
+    method public com.mapbox.bindgen.Expected<java.lang.String,android.graphics.Bitmap> parse(byte[] svg, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options);
   }
 
 }
@@ -533,7 +533,7 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.view {
     ctor public MapboxSignboardView(android.content.Context context);
     ctor public MapboxSignboardView(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxSignboardView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    method public void render(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue,com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError> result);
+    method public void render(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError,com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue> result);
   }
 
 }
@@ -541,11 +541,11 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.view {
 package com.mapbox.navigation.ui.maps.internal.route.line {
 
   public final class MapboxRouteLineApiExtensions {
-    method public suspend Object? clearRouteLine(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, kotlin.coroutines.Continuation<? super com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError>> p);
-    method public suspend Object? findClosestRoute(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, com.mapbox.geojson.Point target, com.mapbox.maps.MapboxMap mapboxMap, float padding, kotlin.coroutines.Continuation<? super com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue,com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound>> p);
-    method public suspend Object? getRouteDrawData(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, kotlin.coroutines.Continuation<? super com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError>> p);
-    method public suspend Object? setRoutes(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLine> newRoutes, kotlin.coroutines.Continuation<? super com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError>> p);
-    method public suspend Object? updateToPrimaryRoute(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, com.mapbox.api.directions.v5.models.DirectionsRoute route, kotlin.coroutines.Continuation<? super com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError>> p);
+    method public suspend Object? clearRouteLine(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue>> p);
+    method public suspend Object? findClosestRoute(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, com.mapbox.geojson.Point target, com.mapbox.maps.MapboxMap mapboxMap, float padding, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound,com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue>> p);
+    method public suspend Object? getRouteDrawData(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> p);
+    method public suspend Object? setRoutes(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLine> newRoutes, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> p);
+    method public suspend Object? updateToPrimaryRoute(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, com.mapbox.api.directions.v5.models.DirectionsRoute route, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> p);
     field public static final com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions INSTANCE;
   }
 
@@ -579,8 +579,8 @@ package com.mapbox.navigation.ui.maps.route.arrow.api {
 
   public final class MapboxRouteArrowApi {
     ctor public MapboxRouteArrowApi();
-    method public com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue,com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError> addArrow(com.mapbox.navigation.ui.maps.route.arrow.model.ManeuverArrow arrow);
-    method public com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue,com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError> addUpcomingManeuverArrow(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError,com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue> addArrow(com.mapbox.navigation.ui.maps.route.arrow.model.ManeuverArrow arrow);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError,com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue> addUpcomingManeuverArrow(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
     method public com.mapbox.navigation.ui.maps.route.arrow.model.ClearArrowsValue clearArrows();
     method public java.util.List<com.mapbox.navigation.ui.maps.route.arrow.model.ManeuverArrow> getArrows();
     method public com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue hideManeuverArrow();
@@ -594,10 +594,10 @@ package com.mapbox.navigation.ui.maps.route.arrow.api {
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getVisibility(com.mapbox.maps.Style style);
     method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue visibilityChange);
     method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue arrowAdded);
-    method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue,com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError> expectedValue);
+    method public void render(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError,com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue> expectedValue);
     method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.arrow.model.RemoveArrowValue state);
     method public void render(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.route.arrow.model.ClearArrowsValue state);
-    method public void renderManeuverUpdate(com.mapbox.maps.Style style, com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue,com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError> expectedValue);
+    method public void renderManeuverUpdate(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError,com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue> expectedValue);
   }
 
 }
@@ -686,16 +686,16 @@ package com.mapbox.navigation.ui.maps.route.line.api {
 
   public final class MapboxRouteLineApi {
     ctor public MapboxRouteLineApi(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions routeLineOptions);
-    method public void clearRouteLine(com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError>> consumer);
-    method public void findClosestRoute(com.mapbox.geojson.Point target, com.mapbox.maps.MapboxMap mapboxMap, float padding, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue,com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound>> resultConsumer);
+    method public void clearRouteLine(com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue>> consumer);
+    method public void findClosestRoute(com.mapbox.geojson.Point target, com.mapbox.maps.MapboxMap mapboxMap, float padding, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound,com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue>> resultConsumer);
     method public com.mapbox.api.directions.v5.models.DirectionsRoute? getPrimaryRoute();
-    method public void getRouteDrawData(com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError>> consumer);
+    method public void getRouteDrawData(com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> consumer);
     method public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
     method public double getVanishPointOffset();
-    method public void setRoutes(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLine> newRoutes, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError>> consumer);
-    method public com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError> setVanishingOffset(double offset);
-    method public void updateToPrimaryRoute(com.mapbox.api.directions.v5.models.DirectionsRoute route, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError>> consumer);
-    method public com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError> updateTraveledRouteLine(com.mapbox.geojson.Point point);
+    method public void setRoutes(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLine> newRoutes, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> consumer);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue> setVanishingOffset(double offset);
+    method public void updateToPrimaryRoute(com.mapbox.api.directions.v5.models.DirectionsRoute route, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> consumer);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue> updateTraveledRouteLine(com.mapbox.geojson.Point point);
     method public void updateWithRouteProgress(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
   }
 
@@ -708,9 +708,9 @@ package com.mapbox.navigation.ui.maps.route.line.api {
     method public void hideOriginAndDestinationPoints(com.mapbox.maps.Style style);
     method public void hidePrimaryRoute(com.mapbox.maps.Style style);
     method public void initializeLayers(com.mapbox.maps.Style style);
-    method public void renderClearRouteLineValue(com.mapbox.maps.Style style, com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError> clearRouteLineValue);
-    method public void renderRouteDrawData(com.mapbox.maps.Style style, com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError> routeDrawData);
-    method public void renderVanishingRouteLineUpdateValue(com.mapbox.maps.Style style, com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue,com.mapbox.navigation.ui.maps.route.line.model.RouteLineError> update);
+    method public void renderClearRouteLineValue(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue> clearRouteLineValue);
+    method public void renderRouteDrawData(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue> routeDrawData);
+    method public void renderVanishingRouteLineUpdateValue(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue> update);
     method public void setOptions(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions p);
     method public void showAlternativeRoutes(com.mapbox.maps.Style style);
     method public void showOriginAndDestinationPoints(com.mapbox.maps.Style style);
@@ -1030,7 +1030,7 @@ package com.mapbox.navigation.ui.maps.snapshotter.api {
   public final class MapboxSnapshotterApi {
     ctor public MapboxSnapshotterApi(android.content.Context context, com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions options, com.mapbox.maps.MapView mapView);
     method public void cancel();
-    method public void generateSnapshot(com.mapbox.navigation.base.trip.model.RouteProgress progress, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotValue,com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotError>> consumer);
+    method public void generateSnapshot(com.mapbox.navigation.base.trip.model.RouteProgress progress, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotError,com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotValue>> consumer);
     method public android.content.Context getContext();
     property public final android.content.Context context;
   }
@@ -1086,7 +1086,7 @@ package com.mapbox.navigation.ui.maps.snapshotter.view {
     ctor public MapboxSnapshotView(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
     ctor public MapboxSnapshotView(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxSnapshotView(android.content.Context context);
-    method public void render(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotValue,com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotError> result);
+    method public void render(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotError,com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotValue> result);
   }
 
 }

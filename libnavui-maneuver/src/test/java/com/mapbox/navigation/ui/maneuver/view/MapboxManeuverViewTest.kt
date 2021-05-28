@@ -13,7 +13,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
-import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.model.Component
 import com.mapbox.navigation.ui.maneuver.model.DelimiterComponentNode
@@ -22,6 +23,7 @@ import com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode
 import com.mapbox.navigation.ui.maneuver.model.Lane
 import com.mapbox.navigation.ui.maneuver.model.LaneIndicator
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
+import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode
 import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
@@ -476,7 +478,7 @@ class MapboxManeuverViewTest {
         val secondaryManeuver = getMockSecondaryManeuver()
         val stepDistance = TotalManeuverDistance(45.0)
         val laneGuidance = null
-        val mockExpected = Expected.Success(
+        val mockExpected: Expected<ManeuverError, Maneuver> = ExpectedFactory.createValue(
             Maneuver(
                 primaryManeuver, stepDistance, secondaryManeuver, subManeuver, laneGuidance
             )

@@ -2,7 +2,7 @@
 package com.mapbox.navigation.ui.maneuver.api {
 
   public fun interface ManeuverCallback {
-    method public void onManeuver(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maneuver.model.Maneuver,com.mapbox.navigation.ui.maneuver.model.ManeuverError> maneuver);
+    method public void onManeuver(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,com.mapbox.navigation.ui.maneuver.model.Maneuver> maneuver);
   }
 
   public final class MapboxManeuverApi {
@@ -16,11 +16,11 @@ package com.mapbox.navigation.ui.maneuver.api {
   }
 
   public fun interface StepDistanceRemainingCallback {
-    method public void onStepDistanceRemaining(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maneuver.model.StepDistance,com.mapbox.navigation.ui.maneuver.model.StepDistanceError> distanceRemaining);
+    method public void onStepDistanceRemaining(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.StepDistanceError,com.mapbox.navigation.ui.maneuver.model.StepDistance> distanceRemaining);
   }
 
   public fun interface UpcomingManeuverListCallback {
-    method public void onUpcomingManeuvers(com.mapbox.navigation.ui.base.model.Expected<? extends java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>,com.mapbox.navigation.ui.maneuver.model.ManeuverError> maneuvers);
+    method public void onUpcomingManeuvers(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> maneuvers);
   }
 
 }
@@ -575,7 +575,7 @@ package com.mapbox.navigation.ui.maneuver.view {
     ctor public MapboxManeuverView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
     method public void renderAddLanes(com.mapbox.navigation.ui.maneuver.model.Lane lane);
     method public void renderDistanceRemaining(com.mapbox.navigation.ui.maneuver.model.StepDistance stepDistance);
-    method public void renderManeuver(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.maneuver.model.Maneuver,com.mapbox.navigation.ui.maneuver.model.ManeuverError> maneuver);
+    method public void renderManeuver(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,com.mapbox.navigation.ui.maneuver.model.Maneuver> maneuver);
     method public void renderPrimaryManeuver(com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver primary);
     method public void renderRemoveLanes();
     method public void renderSecondaryManeuver(com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? secondary);

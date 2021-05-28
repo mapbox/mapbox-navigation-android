@@ -2,6 +2,8 @@ package com.mapbox.navigation.ui.maps.snapshotter.api
 
 import android.content.Context
 import com.mapbox.api.directions.v5.models.BannerComponents
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -21,7 +23,6 @@ import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.snapshotter.SnapshotterAction
 import com.mapbox.navigation.ui.maps.snapshotter.SnapshotterProcessor
@@ -67,7 +68,7 @@ class MapboxSnapshotterApi(
      */
     fun generateSnapshot(
         progress: RouteProgress,
-        consumer: MapboxNavigationConsumer<Expected<SnapshotValue, SnapshotError>>
+        consumer: MapboxNavigationConsumer<Expected<SnapshotError, SnapshotValue>>
     ) {
         val bannerInstructions = progress.bannerInstructions
         ifNonNull(bannerInstructions) { instruction ->
@@ -110,17 +111,21 @@ class MapboxSnapshotterApi(
                             when (bitmapResult) {
                                 is SnapshotterResult.Snapshot.Success -> {
                                     consumer.accept(
-                                        Expected.Success(SnapshotValue(bitmapResult.bitmap))
+                                        ExpectedFactory.createValue(
+                                            SnapshotValue(bitmapResult.bitmap)
+                                        )
                                     )
                                 }
                                 is SnapshotterResult.Snapshot.Failure -> {
                                     consumer.accept(
-                                        Expected.Failure(SnapshotError(bitmapResult.error, null))
+                                        ExpectedFactory.createError(
+                                            SnapshotError(bitmapResult.error, null)
+                                        )
                                     )
                                 }
                                 else -> {
                                     consumer.accept(
-                                        Expected.Failure(
+                                        ExpectedFactory.createError(
                                             SnapshotError(
                                                 "Inappropriate $result emitted for $action.",
                                                 null
@@ -131,7 +136,7 @@ class MapboxSnapshotterApi(
                             }
                         }
                     } ?: consumer.accept(
-                        Expected.Failure(
+                        ExpectedFactory.createError(
                             SnapshotError(
                                 "Camera position or upcoming step points cannot be null",
                                 null
@@ -141,7 +146,7 @@ class MapboxSnapshotterApi(
                 }
                 is SnapshotterResult.SnapshotUnavailable -> {
                     consumer.accept(
-                        Expected.Failure(
+                        ExpectedFactory.createError(
                             SnapshotError(
                                 "No snapshot available for the current maneuver",
                                 null
@@ -154,7 +159,7 @@ class MapboxSnapshotterApi(
                 is SnapshotterResult.Snapshot.Failure,
                 is SnapshotterResult.SnapshotLineLayer -> {
                     consumer.accept(
-                        Expected.Failure(
+                        ExpectedFactory.createError(
                             SnapshotError(
                                 "Inappropriate $result emitted for $action.",
                                 null

@@ -5,17 +5,19 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.maneuver.ManeuverAction
 import com.mapbox.navigation.ui.maneuver.ManeuverProcessor
 import com.mapbox.navigation.ui.maneuver.ManeuverResult
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
+import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.StepDistance
+import com.mapbox.navigation.ui.maneuver.model.StepDistanceError
 import com.mapbox.navigation.ui.maneuver.model.TotalManeuverDistance
 import io.mockk.coEvery
 import io.mockk.every
@@ -50,12 +52,12 @@ class MapboxManeuverApiTest {
                 ManeuverAction.GetStepDistanceRemaining(mockRouteStepProgress)
             )
         } returns mockResult
-        val messageSlot = slot<Expected.Success<StepDistance>>()
+        val messageSlot = slot<Expected<StepDistanceError, StepDistance>>()
 
         mapboxManeuverApi.getStepDistanceRemaining(mockRouteStepProgress, callback)
 
         verify(exactly = 1) { callback.onStepDistanceRemaining(capture(messageSlot)) }
-        assertEquals(expectedDistanceRemaining, messageSlot.captured.value.distance, 0.0)
+        assertEquals(expectedDistanceRemaining, messageSlot.captured.value!!.distance, 0.0)
     }
 
     @Test
@@ -94,15 +96,15 @@ class MapboxManeuverApiTest {
                 ManeuverAction.GetManeuver(mockBannerInstruction)
             )
         } returns mockResult
-        val slot = slot<Expected.Success<Maneuver>>()
+        val slot = slot<Expected<ManeuverError, Maneuver>>()
 
         mapboxManeuverApi.getManeuver(mockBannerInstruction, callback)
 
         verify(exactly = 1) { callback.onManeuver(capture(slot)) }
-        assertEquals(expected.primary.text, slot.captured.value.primary.text)
-        assertNull(slot.captured.value.secondary)
-        assertNull(slot.captured.value.sub)
-        assertEquals(expected.totalManeuverDistance, slot.captured.value.totalManeuverDistance)
+        assertEquals(expected.primary.text, slot.captured.value!!.primary.text)
+        assertNull(slot.captured.value!!.secondary)
+        assertNull(slot.captured.value!!.sub)
+        assertEquals(expected.totalManeuverDistance, slot.captured.value!!.totalManeuverDistance)
     }
 
     @Test
@@ -133,17 +135,17 @@ class MapboxManeuverApiTest {
                 ManeuverAction.GetAllBannerInstructions(mockRouteProgress)
             )
         } returns mockAllBannerInstructions
-        val slot = slot<Expected.Success<List<Maneuver>>>()
+        val slot = slot<Expected<ManeuverError, List<Maneuver>>>()
 
         mapboxManeuverApi.getUpcomingManeuverList(mockRouteProgress, callback)
 
         verify(exactly = 1) { callback.onUpcomingManeuvers(capture(slot)) }
-        assertEquals(mockBannerInstruction2.primary().text(), slot.captured.value[0].primary.text)
-        assertNull(slot.captured.value[0].secondary)
-        assertNull(slot.captured.value[0].sub)
+        assertEquals(mockBannerInstruction2.primary().text(), slot.captured.value!![0].primary.text)
+        assertNull(slot.captured.value!![0].secondary)
+        assertNull(slot.captured.value!![0].sub)
         assertEquals(
             mockBannerInstruction2.distanceAlongGeometry(),
-            slot.captured.value[0].totalManeuverDistance.totalDistance,
+            slot.captured.value!![0].totalManeuverDistance.totalDistance,
             0.0
         )
     }

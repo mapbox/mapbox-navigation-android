@@ -2,7 +2,8 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.api
 
 import android.graphics.Bitmap
 import com.caverock.androidsvg.SVGExternalFileResolver
-import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions
 import com.mapbox.navigation.ui.utils.internal.SvgUtil
 import java.io.ByteArrayInputStream
@@ -26,10 +27,10 @@ class MapboxSvgToBitmapParser(
     override fun parse(
         svg: ByteArray,
         options: MapboxSignboardOptions
-    ): Expected<Bitmap, String> {
+    ): Expected<String, Bitmap> {
         return try {
             val stream = ByteArrayInputStream(svg)
-            Expected.Success(
+            ExpectedFactory.createValue(
                 SvgUtil.renderAsBitmapWithWidth(
                     stream,
                     options.desiredSignboardWidth,
@@ -38,7 +39,7 @@ class MapboxSvgToBitmapParser(
                 )
             )
         } catch (ex: Exception) {
-            Expected.Failure(ex.message ?: "")
+            ExpectedFactory.createError(ex.message ?: "")
         }
     }
 }

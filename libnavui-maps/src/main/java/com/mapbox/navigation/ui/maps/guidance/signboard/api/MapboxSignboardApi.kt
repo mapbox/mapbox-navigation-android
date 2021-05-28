@@ -3,9 +3,10 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.api
 import android.content.Context
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.HttpResponse
 import com.mapbox.common.core.module.CommonSingletonModuleProvider
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardAction
 import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardProcessor
@@ -55,7 +56,7 @@ class MapboxSignboardApi @JvmOverloads constructor(
      */
     fun generateSignboard(
         instructions: BannerInstructions,
-        consumer: MapboxNavigationConsumer<Expected<SignboardValue, SignboardError>>
+        consumer: MapboxNavigationConsumer<Expected<SignboardError, SignboardValue>>
     ) {
         val action = SignboardAction.CheckSignboardAvailability(instructions)
         when (val result = SignboardProcessor.process(action)) {
@@ -76,14 +77,14 @@ class MapboxSignboardApi @JvmOverloads constructor(
             }
             is SignboardResult.SignboardUnavailable -> {
                 consumer.accept(
-                    Expected.Failure(
+                    ExpectedFactory.createError(
                         SignboardError("No signboard available for current maneuver.", null)
                     )
                 )
             }
             else -> {
                 consumer.accept(
-                    Expected.Failure(
+                    ExpectedFactory.createError(
                         SignboardError("Inappropriate $result emitted for $action.", null)
                     )
                 )
@@ -104,7 +105,7 @@ class MapboxSignboardApi @JvmOverloads constructor(
 
     private fun onSignboardResponse(
         httpResponse: HttpResponse,
-        consumer: MapboxNavigationConsumer<Expected<SignboardValue, SignboardError>>
+        consumer: MapboxNavigationConsumer<Expected<SignboardError, SignboardValue>>
     ) {
         val filteredList = requestList.filter {
             it.httpRequest != httpResponse.request
@@ -119,19 +120,19 @@ class MapboxSignboardApi @JvmOverloads constructor(
             }
             is SignboardResult.SignboardSvg.Failure -> {
                 consumer.accept(
-                    Expected.Failure(SignboardError(result.error, null))
+                    ExpectedFactory.createError(SignboardError(result.error, null))
                 )
             }
             is SignboardResult.SignboardSvg.Empty -> {
                 consumer.accept(
-                    Expected.Failure(
+                    ExpectedFactory.createError(
                         SignboardError("No signboard available for current maneuver.", null)
                     )
                 )
             }
             else -> {
                 consumer.accept(
-                    Expected.Failure(
+                    ExpectedFactory.createError(
                         SignboardError("Inappropriate $result emitted for $action.", null)
                     )
                 )
@@ -141,19 +142,19 @@ class MapboxSignboardApi @JvmOverloads constructor(
 
     private fun onSvgAvailable(
         svg: ByteArray,
-        consumer: MapboxNavigationConsumer<Expected<SignboardValue, SignboardError>>
+        consumer: MapboxNavigationConsumer<Expected<SignboardError, SignboardValue>>
     ) {
         val action = SignboardAction.ParseSvgToBitmap(svg, parser, options)
         when (val result = SignboardProcessor.process(action)) {
             is SignboardResult.SignboardBitmap.Success -> {
-                consumer.accept(Expected.Success(SignboardValue(result.signboard)))
+                consumer.accept(ExpectedFactory.createValue(SignboardValue(result.signboard)))
             }
             is SignboardResult.SignboardBitmap.Failure -> {
-                consumer.accept(Expected.Failure(SignboardError(result.message, null)))
+                consumer.accept(ExpectedFactory.createError(SignboardError(result.message, null)))
             }
             else -> {
                 consumer.accept(
-                    Expected.Failure(
+                    ExpectedFactory.createError(
                         SignboardError("Inappropriate $result emitted for $action.", null)
                     )
                 )

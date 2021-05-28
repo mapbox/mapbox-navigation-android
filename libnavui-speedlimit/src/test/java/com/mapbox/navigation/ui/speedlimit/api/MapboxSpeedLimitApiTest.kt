@@ -4,7 +4,6 @@ import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 import com.mapbox.navigation.base.speed.model.SpeedLimitUnit
 import com.mapbox.navigation.ui.base.formatter.ValueFormatter
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.speedlimit.SpeedLimitProcessor
 import com.mapbox.navigation.ui.speedlimit.SpeedLimitResult
 import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue
@@ -33,12 +32,12 @@ class MapboxSpeedLimitApiTest {
             SpeedLimitSign.MUTCD
         )
 
-        val result = api.updateSpeedLimit(speedLimit) as Expected.Success
+        val result = api.updateSpeedLimit(speedLimit)
 
-        assertEquals(35, result.value.speedKPH)
-        assertEquals(SpeedLimitSign.MUTCD, result.value.signFormat)
-        assertEquals(SpeedLimitUnit.KILOMETRES_PER_HOUR, result.value.speedUnit)
-        assertEquals(formatter, result.value.speedLimitFormatter)
+        assertEquals(35, result.value!!.speedKPH)
+        assertEquals(SpeedLimitSign.MUTCD, result.value!!.signFormat)
+        assertEquals(SpeedLimitUnit.KILOMETRES_PER_HOUR, result.value!!.speedUnit)
+        assertEquals(formatter, result.value!!.speedLimitFormatter)
     }
 
     @Test
@@ -54,8 +53,8 @@ class MapboxSpeedLimitApiTest {
         }
         val api = MapboxSpeedLimitApi(formatter, processor)
 
-        val result = api.updateSpeedLimit(null) as Expected.Failure
+        val result = api.updateSpeedLimit(null)
 
-        assertEquals(result.error.errorMessage, "Speed Limit data not available")
+        assertEquals(result.error!!.errorMessage, "Speed Limit data not available")
     }
 }

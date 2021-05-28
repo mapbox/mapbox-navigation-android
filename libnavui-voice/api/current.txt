@@ -11,7 +11,7 @@ package com.mapbox.navigation.ui.voice.api {
     ctor public MapboxSpeechApi(android.content.Context context, String accessToken, String language);
     method public void cancel();
     method public void clean(com.mapbox.navigation.ui.voice.model.SpeechAnnouncement announcement);
-    method public void generate(com.mapbox.api.directions.v5.models.VoiceInstructions voiceInstruction, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.voice.model.SpeechValue,com.mapbox.navigation.ui.voice.model.SpeechError>> consumer);
+    method public void generate(com.mapbox.api.directions.v5.models.VoiceInstructions voiceInstruction, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.voice.model.SpeechError,com.mapbox.navigation.ui.voice.model.SpeechValue>> consumer);
   }
 
   @UiThread public final class MapboxVoiceInstructionsPlayer {

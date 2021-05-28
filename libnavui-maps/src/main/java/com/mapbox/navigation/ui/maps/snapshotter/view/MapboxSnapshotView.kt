@@ -3,7 +3,7 @@ package com.mapbox.navigation.ui.maps.snapshotter.view
 import android.content.Context
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
-import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.ui.maps.snapshotter.api.MapboxSnapshotterApi
 import com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotError
 import com.mapbox.navigation.ui.maps.snapshotter.model.SnapshotValue
@@ -19,18 +19,18 @@ class MapboxSnapshotView @JvmOverloads constructor(
 
     /**
      * Invoke to render the snapshot based on data or error conditions.
-     * @param result Expected<SnapshotValue, SnapshotError>
+     * @param result Expected<SnapshotError, SnapshotValue>
      */
-    fun render(result: Expected<SnapshotValue, SnapshotError>) {
-        when (result) {
-            is Expected.Success -> {
-                visibility = VISIBLE
-                setImageBitmap(result.value.snapshot)
-            }
-            is Expected.Failure -> {
+    fun render(result: Expected<SnapshotError, SnapshotValue>) {
+        result.fold(
+            { // error
                 setImageBitmap(null)
                 visibility = GONE
+            },
+            { value ->
+                visibility = VISIBLE
+                setImageBitmap(value.snapshot)
             }
-        }
+        )
     }
 }

@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -33,7 +34,6 @@ import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivitySnapshotBinding
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
@@ -100,13 +100,11 @@ class MapboxSnapshotActivity : AppCompatActivity(), OnMapLongClickListener {
      * containing either a success in the form of [SnapshotValue] or failure in the form of
      * [SnapshotError].
      */
-    private val snapshotConsumer = object :
-        MapboxNavigationConsumer<Expected<SnapshotValue, SnapshotError>> {
-        override fun accept(value: Expected<SnapshotValue, SnapshotError>) {
+    private val snapshotConsumer =
+        MapboxNavigationConsumer<Expected<SnapshotError, SnapshotValue>> { value ->
             // The data obtained must be rendered by [MapboxSnapshotView]
             binding.snapshotView.render(value)
         }
-    }
 
     private val routeLineResources: RouteLineResources by lazy {
         RouteLineResources.Builder().build()

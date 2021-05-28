@@ -3,6 +3,8 @@ package com.mapbox.navigation.ui.maps.guidance.junction.api
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.HttpRequest
 import com.mapbox.common.HttpRequestError
 import com.mapbox.common.HttpResponse
@@ -11,7 +13,6 @@ import com.mapbox.common.HttpResponseData
 import com.mapbox.common.HttpServiceInterface
 import com.mapbox.common.core.module.CommonSingletonModuleProvider
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionAction
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionProcessor
@@ -45,7 +46,7 @@ class MapboxJunctionApiTest {
     var coroutineRule = MainCoroutineRule()
 
     private val consumer:
-        MapboxNavigationConsumer<Expected<JunctionValue, JunctionError>> = mockk(relaxed = true)
+        MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>> = mockk(relaxed = true)
     private val bannerInstructions: BannerInstructions = mockk()
     private val junctionApi = MapboxJunctionApi("pk.1234")
 
@@ -71,14 +72,14 @@ class MapboxJunctionApiTest {
                 JunctionAction.CheckJunctionAvailability(bannerInstructions)
             )
         } returns JunctionResult.JunctionUnavailable
-        val messageSlot = slot<Expected.Failure<JunctionError>>()
+        val messageSlot = slot<Expected<JunctionError, JunctionValue>>()
 
         junctionApi.generateJunction(bannerInstructions, consumer)
 
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
         assertEquals(
             "No junction available for current maneuver.",
-            messageSlot.captured.error.errorMessage
+            messageSlot.captured.error!!.errorMessage
         )
     }
 
@@ -87,14 +88,14 @@ class MapboxJunctionApiTest {
         val mockResult = JunctionResult.JunctionRequest(mockk())
         val mockAction = JunctionAction.CheckJunctionAvailability(bannerInstructions)
         every { JunctionProcessor.process(mockAction) } returns mockResult
-        val messageSlot = slot<Expected.Failure<JunctionError>>()
+        val messageSlot = slot<Expected<JunctionError, JunctionValue>>()
 
         junctionApi.generateJunction(bannerInstructions, consumer)
 
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
         assertEquals(
             "Inappropriate $mockResult emitted for $mockAction.",
-            messageSlot.captured.error.errorMessage
+            messageSlot.captured.error!!.errorMessage
         )
     }
 
@@ -131,13 +132,13 @@ class MapboxJunctionApiTest {
                 JunctionAction.ProcessJunctionResponse(mockResponseData)
             )
         } returns mockResult
-        val messageSlot = slot<Expected.Failure<JunctionError>>()
+        val messageSlot = slot<Expected<JunctionError, JunctionValue>>()
 
         junctionApi.generateJunction(bannerInstructions, consumer)
         httpResponseCallbackSlot.captured.run(mockResponse)
 
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
-        assertEquals(expectedError, messageSlot.captured.error.errorMessage)
+        assertEquals(expectedError, messageSlot.captured.error!!.errorMessage)
     }
 
     @Test
@@ -162,7 +163,7 @@ class MapboxJunctionApiTest {
             )
         } returns JunctionResult.JunctionRequest(mockRequest)
         val mockResponseData =
-            mockk<com.mapbox.bindgen.Expected<HttpRequestError, HttpResponseData>>()
+            mockk<Expected<HttpRequestError, HttpResponseData>>()
         val mockResponse = mockk<HttpResponse> {
             every { result } returns mockResponseData
             every { request } returns mockRequest
@@ -170,21 +171,23 @@ class MapboxJunctionApiTest {
         val mockResult = mockk<JunctionResult.JunctionRaster.Failure> {
             every { error } returns mockError
         }
-        val expected = mockk<Expected.Failure<JunctionError>> {
-            every { error.errorMessage } returns mockError
+        val expected = mockk<Expected<JunctionError, JunctionValue>> {
+            every { error } returns mockk {
+                every { errorMessage } returns mockError
+            }
         }
         every {
             JunctionProcessor.process(
                 JunctionAction.ProcessJunctionResponse(mockResponseData)
             )
         } returns mockResult
-        val messageSlot = slot<Expected.Failure<JunctionError>>()
+        val messageSlot = slot<Expected<JunctionError, JunctionValue>>()
 
         junctionApi.generateJunction(bannerInstructions, consumer)
         httpResponseCallbackSlot.captured.run(mockResponse)
 
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
-        assertEquals(expected.error.errorMessage, messageSlot.captured.error.errorMessage)
+        assertEquals(expected.error!!.errorMessage, messageSlot.captured.error!!.errorMessage)
     }
 
     @Test
@@ -222,24 +225,25 @@ class MapboxJunctionApiTest {
                 JunctionAction.ProcessJunctionResponse(mockResponseData)
             )
         } returns mockRasterResult
-        val mockParseFailure = Expected.Failure("Error parsing raster to bitmap as raster is empty")
+        val mockParseFailure: Expected<String, Bitmap> =
+            ExpectedFactory.createError("Error parsing raster to bitmap as raster is empty")
         mockkStatic(MapboxRasterToBitmapParser::class)
         every { MapboxRasterToBitmapParser.parse(mockData) } returns mockParseFailure
         every {
             JunctionProcessor.process(
                 JunctionAction.ParseRasterToBitmap(mockData)
             )
-        } returns JunctionResult.JunctionBitmap.Failure(mockParseFailure.error)
-        val expected = mockk<Expected.Failure<JunctionError>> {
-            every { error.errorMessage } returns mockParseFailure.error
+        } returns JunctionResult.JunctionBitmap.Failure(mockParseFailure.error!!)
+        val expected = mockk<Expected<JunctionError, JunctionValue>> {
+            every { error!!.errorMessage } returns mockParseFailure.error
         }
-        val messageSlot = slot<Expected.Failure<JunctionError>>()
+        val messageSlot = slot<Expected<JunctionError, JunctionValue>>()
 
         junctionApi.generateJunction(bannerInstructions, consumer)
         httpResponseCallbackSlot.captured.run(mockResponse)
 
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
-        assertEquals(expected.error.errorMessage, messageSlot.captured.error.errorMessage)
+        assertEquals(expected.error!!.errorMessage, messageSlot.captured.error!!.errorMessage)
     }
 
     @Test
@@ -280,24 +284,25 @@ class MapboxJunctionApiTest {
         mockkStatic(BitmapFactory::class)
         val mockBitmap = mockk<Bitmap>()
         every { BitmapFactory.decodeByteArray(mockData, 0, mockData.size) } returns mockBitmap
-        val mockParseSuccess = Expected.Success(mockBitmap)
+        val mockParseSuccess: Expected<String, Bitmap> =
+            ExpectedFactory.createValue(mockBitmap)
         mockkObject(MapboxRasterToBitmapParser)
         every { MapboxRasterToBitmapParser.parse(mockData) } returns mockParseSuccess
         every {
             JunctionProcessor.process(
                 JunctionAction.ParseRasterToBitmap(mockData)
             )
-        } returns JunctionResult.JunctionBitmap.Success(mockParseSuccess.value)
-        val expected = mockk<Expected.Success<JunctionValue>> {
-            every { value.bitmap } returns mockBitmap
+        } returns JunctionResult.JunctionBitmap.Success(mockParseSuccess.value!!)
+        val expected = mockk<Expected<JunctionError, JunctionValue>> {
+            every { value!!.bitmap } returns mockBitmap
         }
-        val messageSlot = slot<Expected.Success<JunctionValue>>()
+        val messageSlot = slot<Expected<JunctionError, JunctionValue>>()
 
         junctionApi.generateJunction(bannerInstructions, consumer)
         httpResponseCallbackSlot.captured.run(mockResponse)
 
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
-        assertEquals(expected.value.bitmap, messageSlot.captured.value.bitmap)
+        assertEquals(expected.value!!.bitmap, messageSlot.captured.value!!.bitmap)
     }
 
     @Ignore("Make this test an instrumentation test to avoid UnsatisfiedLinkError from Common 11+")
@@ -313,8 +318,9 @@ class MapboxJunctionApiTest {
                 JunctionAction.CheckJunctionAvailability(bannerInstructions)
             )
         } returns JunctionResult.JunctionAvailable(mockWebServer.url(mockUrl).toString())
-        val mockFailure = Expected.Failure(JunctionError("Canceled", null))
-        val messageSlot = slot<Expected.Failure<JunctionError>>()
+        val mockFailure: Expected<JunctionError, JunctionValue> =
+            ExpectedFactory.createError(JunctionError("Canceled", null))
+        val messageSlot = slot<Expected<JunctionError, JunctionValue>>()
         val latch = CountDownLatch(1)
         every { consumer.accept(capture(messageSlot)) } answers { latch.countDown() }
 
@@ -323,7 +329,7 @@ class MapboxJunctionApiTest {
         latch.await(300, TimeUnit.MILLISECONDS)
 
         verify(exactly = 1) { consumer.accept(any()) }
-        assertEquals(mockFailure.error.errorMessage, messageSlot.captured.error.errorMessage)
+        assertEquals(mockFailure.error!!.errorMessage, messageSlot.captured.error!!.errorMessage)
         mockWebServer.shutdown()
     }
 }

@@ -18,6 +18,7 @@ import com.mapbox.navigation.ui.maps.route.arrow.RouteArrowUtils
 import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue
 import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue
 import com.mapbox.navigation.ui.maps.route.arrow.model.ClearArrowsValue
+import com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError
 import com.mapbox.navigation.ui.maps.route.arrow.model.RemoveArrowValue
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue
@@ -170,7 +171,7 @@ class MapboxRouteArrowViewTest {
 
         MapboxRouteArrowView(options).renderManeuverUpdate(
             style,
-            com.mapbox.navigation.ui.base.model.Expected.Success(state)
+            ExpectedFactory.createValue(state)
         )
 
         verify {
@@ -377,7 +378,7 @@ class MapboxRouteArrowViewTest {
         val arrowHeadFeature = Feature.fromJson(featureJson)
         val arrowShaftFeatureCollection = FeatureCollection.fromFeatures(listOf(arrowShaftFeature))
         val arrowHeadFeatureCollection = FeatureCollection.fromFeatures(listOf(arrowHeadFeature))
-        val state = com.mapbox.navigation.ui.base.model.Expected.Success(
+        val state: Expected<InvalidPointError, ArrowAddedValue> = ExpectedFactory.createValue(
             ArrowAddedValue(
                 arrowShaftFeatureCollection,
                 arrowHeadFeatureCollection

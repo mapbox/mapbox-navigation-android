@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -33,7 +34,6 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityVoiceBinding
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
@@ -143,41 +143,37 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
      * [SpeechError].
      */
     private val speechCallback =
-        object : MapboxNavigationConsumer<Expected<SpeechValue, SpeechError>> {
-            override fun accept(value: Expected<SpeechValue, SpeechError>) {
-                when (value) {
-                    is Expected.Success -> {
-                        // The data obtained in the form of speech announcement is played using
-                        // voiceInstructionsPlayer.
-                        voiceInstructionsPlayer.play(
-                            value.value.announcement,
-                            voiceInstructionsPlayerCallback
-                        )
-                    }
-                    is Expected.Failure -> {
-                        // The data obtained in the form of an error is played using
-                        // voiceInstructionsPlayer.
-                        voiceInstructionsPlayer.play(
-                            value.error.fallback,
-                            voiceInstructionsPlayerCallback
-                        )
-                    }
+        MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> { expected ->
+            expected.fold(
+                { error ->
+                    // The data obtained in the form of an error is played using
+                    // voiceInstructionsPlayer.
+                    voiceInstructionsPlayer.play(
+                        error.fallback,
+                        voiceInstructionsPlayerCallback
+                    )
+                },
+                { value ->
+                    // The data obtained in the form of speech announcement is played using
+                    // voiceInstructionsPlayer.
+                    voiceInstructionsPlayer.play(
+                        value.announcement,
+                        voiceInstructionsPlayerCallback
+                    )
                 }
-            }
+            )
         }
 
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
-    private val soundButtonCallback = object : MapboxNavigationConsumer<Boolean> {
-        override fun accept(value: Boolean) {
-            isMuted = value.also {
-                if (it) {
-                    // This is used to set the speech volume to mute.
-                    voiceInstructionsPlayer.volume(SpeechVolume(0.0f))
-                } else {
-                    // This is used to set the speech volume to max
-                    voiceInstructionsPlayer.volume(SpeechVolume(1.0f))
-                }
+    private val soundButtonCallback = MapboxNavigationConsumer<Boolean> { value ->
+        isMuted = value.also {
+            if (it) {
+                // This is used to set the speech volume to mute.
+                voiceInstructionsPlayer.volume(SpeechVolume(0.0f))
+            } else {
+                // This is used to set the speech volume to max
+                voiceInstructionsPlayer.volume(SpeechVolume(1.0f))
             }
         }
     }

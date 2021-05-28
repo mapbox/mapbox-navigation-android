@@ -127,11 +127,13 @@ internal object SignboardProcessor {
         parser: SvgToBitmapParser,
         options: MapboxSignboardOptions
     ): SignboardResult {
-        return when (val expected = parser.parse(svg, options)) {
-            is com.mapbox.navigation.ui.base.model.Expected.Failure ->
-                SignboardResult.SignboardBitmap.Failure(expected.error)
-            is com.mapbox.navigation.ui.base.model.Expected.Success ->
-                SignboardResult.SignboardBitmap.Success(expected.value)
-        }
+        return parser.parse(svg, options).fold(
+            { error ->
+                SignboardResult.SignboardBitmap.Failure(error)
+            },
+            { value ->
+                SignboardResult.SignboardBitmap.Success(value)
+            }
+        )
     }
 }

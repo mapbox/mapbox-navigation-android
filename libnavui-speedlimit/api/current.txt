@@ -5,7 +5,7 @@ package com.mapbox.navigation.ui.speedlimit.api {
     ctor public MapboxSpeedLimitApi(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> formatter);
     method public com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> getFormatter();
     method public void setFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> p);
-    method public com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError> updateSpeedLimit(com.mapbox.navigation.base.speed.model.SpeedLimit? speedLimit);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError,com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue> updateSpeedLimit(com.mapbox.navigation.base.speed.model.SpeedLimit? speedLimit);
     property public final com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> formatter;
   }
 
@@ -45,7 +45,7 @@ package com.mapbox.navigation.ui.speedlimit.view {
     ctor public MapboxSpeedLimitView(android.content.Context context);
     ctor public MapboxSpeedLimitView(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxSpeedLimitView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    method public void render(com.mapbox.navigation.ui.base.model.Expected<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError> expected);
+    method public void render(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError,com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue> expected);
     method public void updateStyle(@StyleRes int styleResource);
     field public static final int BORDER_INSET = 6; // 0x6
     field public static final int INNER_BACKGROUND_MUTCD_INSET = 9; // 0x9

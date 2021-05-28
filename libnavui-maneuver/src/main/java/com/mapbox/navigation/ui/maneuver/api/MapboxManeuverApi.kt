@@ -4,10 +4,11 @@ import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.maneuver.ManeuverAction
 import com.mapbox.navigation.ui.maneuver.ManeuverProcessor
 import com.mapbox.navigation.ui.maneuver.ManeuverResult.GetAllBannerInstructions
@@ -57,7 +58,7 @@ class MapboxManeuverApi internal constructor(
         maneuverJob = mainJobController.scope.launch {
             val action = ManeuverAction.GetManeuver(bannerInstruction)
             val result = processor.process(action) as GetManeuver
-            callback.onManeuver(Expected.Success(result.maneuver))
+            callback.onManeuver(ExpectedFactory.createValue(result.maneuver))
         }
     }
 
@@ -75,7 +76,9 @@ class MapboxManeuverApi internal constructor(
             val action = ManeuverAction.GetStepDistanceRemaining(routeStepProgress)
             val result = processor.process(action) as GetStepDistanceRemaining
             callback.onStepDistanceRemaining(
-                Expected.Success(StepDistance(distanceFormatter, result.distanceRemaining))
+                ExpectedFactory.createValue(
+                    StepDistance(distanceFormatter, result.distanceRemaining)
+                )
             )
         }
     }
@@ -104,7 +107,7 @@ class MapboxManeuverApi internal constructor(
             val allManeuversAction =
                 ManeuverAction.GetAllManeuvers(allBannersAfterStep.bannerInstructions)
             val allManeuvers = processor.process(allManeuversAction) as GetAllManeuvers
-            callback.onUpcomingManeuvers(Expected.Success(allManeuvers.maneuverList))
+            callback.onUpcomingManeuvers(ExpectedFactory.createValue(allManeuvers.maneuverList))
         }
     }
 

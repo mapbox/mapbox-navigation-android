@@ -1,6 +1,8 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
@@ -13,7 +15,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.internal.utils.isSameRoute
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
@@ -193,7 +194,7 @@ class MapboxRouteLineApi(
      */
     fun updateToPrimaryRoute(
         route: DirectionsRoute,
-        consumer: MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>
+        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
         jobControl.scope.launch {
             mutex.withLock {
@@ -218,7 +219,7 @@ class MapboxRouteLineApi(
      */
     fun setRoutes(
         newRoutes: List<RouteLine>,
-        consumer: MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>
+        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
         jobControl.scope.launch {
             mutex.withLock {
@@ -238,7 +239,7 @@ class MapboxRouteLineApi(
      * the consumer should be passed to the render method of the [MapboxRouteLineView]
      */
     fun getRouteDrawData(
-        consumer: MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>>
+        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
         jobControl.scope.launch {
             mutex.withLock {
@@ -261,12 +262,12 @@ class MapboxRouteLineApi(
      */
     fun updateTraveledRouteLine(
         point: Point
-    ): Expected<VanishingRouteLineUpdateValue, RouteLineError> {
+    ): Expected<RouteLineError, VanishingRouteLineUpdateValue> {
         if (routeLineOptions.vanishingRouteLine?.vanishingPointState ==
             VanishingPointState.DISABLED || System.nanoTime() - lastIndexUpdateTimeNano >
             RouteConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO
         ) {
-            return Expected.Failure(
+            return ExpectedFactory.createError(
                 RouteLineError(
                     "Vanishing point state is disabled or too much time has " +
                         "elapsed since last update.",
@@ -284,14 +285,14 @@ class MapboxRouteLineApi(
 
         return when (routeLineExpressions) {
             null -> {
-                Expected.Failure(
+                ExpectedFactory.createError(
                     RouteLineError(
                         "No expression generated for update.",
                         null
                     )
                 )
             }
-            else -> Expected.Success(
+            else -> ExpectedFactory.createValue(
                 VanishingRouteLineUpdateValue(
                     routeLineExpressions.trafficLineExpression,
                     routeLineExpressions.routeLineExpression,
@@ -309,7 +310,7 @@ class MapboxRouteLineApi(
      * the map should appear without any route lines.
      */
     fun clearRouteLine(
-        consumer: MapboxNavigationConsumer<Expected<RouteLineClearValue, RouteLineError>>
+        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineClearValue>>
     ) {
         jobControl.scope.launch {
             mutex.withLock {
@@ -320,7 +321,7 @@ class MapboxRouteLineApi(
                 routeLineExpressionData.clear()
 
                 consumer.accept(
-                    Expected.Success(
+                    ExpectedFactory.createValue(
                         RouteLineClearValue(
                             FeatureCollection.fromFeatures(listOf()),
                             FeatureCollection.fromFeatures(listOf()),
@@ -345,7 +346,7 @@ class MapboxRouteLineApi(
      */
     fun setVanishingOffset(
         offset: Double
-    ): Expected<VanishingRouteLineUpdateValue, RouteLineError> {
+    ): Expected<RouteLineError, VanishingRouteLineUpdateValue> {
         routeLineOptions.vanishingRouteLine?.vanishPointOffset = offset
         return if (offset >= 0) {
             val trafficLineExpression = MapboxRouteLineUtils.getTrafficLineExpression(
@@ -372,7 +373,7 @@ class MapboxRouteLineApi(
                     routeLineOptions.resourceProvider.routeLineColorResources.routeCasingColor
                 )
 
-            Expected.Success(
+            ExpectedFactory.createValue(
                 VanishingRouteLineUpdateValue(
                     trafficLineExpression,
                     routeLineExpression,
@@ -380,7 +381,7 @@ class MapboxRouteLineApi(
                 )
             )
         } else {
-            Expected.Failure(
+            ExpectedFactory.createError(
                 RouteLineError("Offset value should be greater than or equal to 0", null)
             )
         }
@@ -414,7 +415,7 @@ class MapboxRouteLineApi(
         target: Point,
         mapboxMap: MapboxMap,
         padding: Float,
-        resultConsumer: MapboxNavigationConsumer<Expected<ClosestRouteValue, RouteNotFound>>
+        resultConsumer: MapboxNavigationConsumer<Expected<RouteNotFound, ClosestRouteValue>>
     ) {
         jobControl.scope.launch {
             mutex.withLock {
@@ -428,7 +429,7 @@ class MapboxRouteLineApi(
         target: Point,
         mapboxMap: MapboxMap,
         padding: Float,
-    ): Expected<ClosestRouteValue, RouteNotFound> {
+    ): Expected<RouteNotFound, ClosestRouteValue> {
         val mapClickPoint = mapboxMap.pixelForCoordinate(target)
         val leftFloat = (mapClickPoint.x - padding)
         val rightFloat = (mapClickPoint.x + padding)
@@ -454,7 +455,9 @@ class MapboxRouteLineApi(
         )
 
         return if (clickPointFeatureIndex >= 0) {
-            Expected.Success(ClosestRouteValue(routesAndFeatures[clickPointFeatureIndex].route))
+            ExpectedFactory.createValue(
+                ClosestRouteValue(routesAndFeatures[clickPointFeatureIndex].route)
+            )
         } else {
             val clickRectFeatureIndex = queryMapForFeatureIndex(
                 mapboxMap,
@@ -468,7 +471,9 @@ class MapboxRouteLineApi(
                 features
             )
             if (clickRectFeatureIndex >= 0) {
-                Expected.Success(ClosestRouteValue(routesAndFeatures[clickRectFeatureIndex].route))
+                ExpectedFactory.createValue(
+                    ClosestRouteValue(routesAndFeatures[clickRectFeatureIndex].route)
+                )
             } else {
                 val index = queryMapForFeatureIndex(
                     mapboxMap,
@@ -480,9 +485,11 @@ class MapboxRouteLineApi(
                     features
                 )
                 if (index >= 0) {
-                    Expected.Success(ClosestRouteValue(routesAndFeatures[index].route))
+                    ExpectedFactory.createValue(ClosestRouteValue(routesAndFeatures[index].route))
                 } else {
-                    Expected.Failure(RouteNotFound("No route found in query area.", null))
+                    ExpectedFactory.createError(
+                        RouteNotFound("No route found in query area.", null)
+                    )
                 }
             }
         }
@@ -598,7 +605,7 @@ class MapboxRouteLineApi(
     private suspend fun setNewRouteData(
         newRoutes: List<DirectionsRoute>,
         featureDataProvider: () -> List<RouteFeatureData>
-    ): Expected<RouteSetValue, RouteLineError> {
+    ): Expected<RouteLineError, RouteSetValue> {
         ifNonNull(newRoutes.firstOrNull()) { primaryRouteCandidate ->
             if (!primaryRouteCandidate.isSameRoute(primaryRoute)) {
                 routeLineOptions.vanishingRouteLine?.clear()
@@ -614,7 +621,7 @@ class MapboxRouteLineApi(
 
     private suspend fun buildDrawRoutesState(
         featureDataProvider: () -> List<RouteFeatureData>
-    ): Expected<RouteSetValue, RouteLineError> {
+    ): Expected<RouteLineError, RouteSetValue> {
         val routeFeatureDataDef = jobControl.scope.async(ThreadController.IODispatcher) {
             featureDataProvider()
         }
@@ -750,7 +757,7 @@ class MapboxRouteLineApi(
             }
         }
 
-        return Expected.Success(
+        return ExpectedFactory.createValue(
             RouteSetValue(
                 primaryRouteSource,
                 trafficLineExp,

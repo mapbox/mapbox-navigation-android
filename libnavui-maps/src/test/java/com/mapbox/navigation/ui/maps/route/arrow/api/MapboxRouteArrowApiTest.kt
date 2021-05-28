@@ -9,7 +9,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.testing.FileUtils
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError
 import com.mapbox.navigation.ui.maps.route.arrow.model.ManeuverArrow
@@ -54,11 +53,11 @@ class MapboxRouteArrowApiTest {
         }
 
         val result =
-            MapboxRouteArrowApi().addUpcomingManeuverArrow(routeProgress) as Expected.Success
+            MapboxRouteArrowApi().addUpcomingManeuverArrow(routeProgress)
 
-        assertEquals(4, result.value.layerVisibilityModifications.size)
-        assertEquals(expectedShaftFeature, result.value.arrowShaftFeature!!.toJson())
-        assertEquals(expectedHeadFeature, result.value.arrowHeadFeature!!.toJson())
+        assertEquals(4, result.value!!.layerVisibilityModifications.size)
+        assertEquals(expectedShaftFeature, result.value!!.arrowShaftFeature!!.toJson())
+        assertEquals(expectedHeadFeature, result.value!!.arrowHeadFeature!!.toJson())
     }
 
     @Test
@@ -80,7 +79,7 @@ class MapboxRouteArrowApiTest {
         }
 
         val result =
-            MapboxRouteArrowApi().addUpcomingManeuverArrow(routeProgress) as Expected.Failure
+            MapboxRouteArrowApi().addUpcomingManeuverArrow(routeProgress)
 
         assertTrue(result.error is InvalidPointError)
     }
@@ -177,10 +176,9 @@ class MapboxRouteArrowApiTest {
         val firstManeuverArrow = ManeuverArrow(firstPoints)
 
         val state = MapboxRouteArrowApi().addArrow(firstManeuverArrow)
-            as Expected.Success
 
-        assertEquals(1, state.value.arrowHeadFeatureCollection.features()!!.size)
-        assertEquals(1, state.value.arrowShaftFeatureCollection.features()!!.size)
+        assertEquals(1, state.value!!.arrowHeadFeatureCollection.features()!!.size)
+        assertEquals(1, state.value!!.arrowShaftFeatureCollection.features()!!.size)
     }
 
     @Test

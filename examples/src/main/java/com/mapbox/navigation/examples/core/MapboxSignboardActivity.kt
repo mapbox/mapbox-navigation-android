@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -36,7 +37,6 @@ import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivitySignboardBinding
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.guidance.signboard.api.MapboxSignboardApi
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError
@@ -91,21 +91,17 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
      * containing either a success in the form of [SignboardValue] or failure in the form of
      * [SignboardError].
      */
-    private val signboardCallback = object :
-        MapboxNavigationConsumer<Expected<SignboardValue, SignboardError>> {
-        override fun accept(value: Expected<SignboardValue, SignboardError>) {
+    private val signboardCallback =
+        MapboxNavigationConsumer<Expected<SignboardError, SignboardValue>> { expected ->
             // The data obtained must be rendered by [MapboxSignboardView]
-            when (value) {
-                is Expected.Failure -> {
-                    binding.signboardView.visibility = View.GONE
-                }
-                is Expected.Success -> {
-                    binding.signboardView.visibility = View.VISIBLE
-                }
+            expected.onValue {
+                binding.signboardView.visibility = View.VISIBLE
             }
-            binding.signboardView.render(value)
+            expected.onError {
+                binding.signboardView.visibility = View.GONE
+            }
+            binding.signboardView.render(expected)
         }
-    }
 
     private val routeLineResources: RouteLineResources by lazy {
         RouteLineResources.Builder().build()

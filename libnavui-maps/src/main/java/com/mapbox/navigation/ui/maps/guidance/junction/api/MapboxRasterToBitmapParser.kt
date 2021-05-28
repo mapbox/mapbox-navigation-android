@@ -2,7 +2,8 @@ package com.mapbox.navigation.ui.maps.guidance.junction.api
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import com.mapbox.navigation.ui.base.model.Expected
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 
 /**
  * Utility class that provides a method allowing to convert raster [ByteArray] to [Bitmap]
@@ -16,12 +17,12 @@ internal object MapboxRasterToBitmapParser {
      * @return [Expected] contains [Bitmap] if successful or error otherwise.
      */
     @JvmStatic
-    fun parse(raster: ByteArray): Expected<Bitmap, String> {
+    fun parse(raster: ByteArray): Expected<String, Bitmap> {
         return when {
-            raster.isNotEmpty() -> Expected.Success(
+            raster.isNotEmpty() -> ExpectedFactory.createValue(
                 BitmapFactory.decodeByteArray(raster, 0, raster.size)
             )
-            else -> Expected.Failure("Error parsing raster to bitmap as raster is empty")
+            else -> ExpectedFactory.createError("Error parsing raster to bitmap as raster is empty")
         }
     }
 }

@@ -2,9 +2,10 @@ package com.mapbox.navigation.ui.maps.guidance.junction.api
 
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.HttpResponse
 import com.mapbox.common.core.module.CommonSingletonModuleProvider
-import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionAction
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionProcessor
@@ -39,7 +40,7 @@ class MapboxJunctionApi(
      */
     fun generateJunction(
         instructions: BannerInstructions,
-        consumer: MapboxNavigationConsumer<Expected<JunctionValue, JunctionError>>
+        consumer: MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>
     ) {
         val action = JunctionAction.CheckJunctionAvailability(instructions)
         when (val result = JunctionProcessor.process(action)) {
@@ -48,14 +49,14 @@ class MapboxJunctionApi(
             }
             is JunctionResult.JunctionUnavailable -> {
                 consumer.accept(
-                    Expected.Failure(
+                    ExpectedFactory.createError(
                         JunctionError("No junction available for current maneuver.", null)
                     )
                 )
             }
             else -> {
                 consumer.accept(
-                    Expected.Failure(
+                    ExpectedFactory.createError(
                         JunctionError("Inappropriate $result emitted for $action.", null)
                     )
                 )
@@ -76,7 +77,7 @@ class MapboxJunctionApi(
 
     private fun makeJunctionRequest(
         result: JunctionResult.JunctionAvailable,
-        consumer: MapboxNavigationConsumer<Expected<JunctionValue, JunctionError>>
+        consumer: MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>
     ) {
         val requestAction = JunctionAction.PrepareJunctionRequest(
             result.junctionUrl.plus(ACCESS_TOKEN.plus(accessToken))
@@ -95,7 +96,7 @@ class MapboxJunctionApi(
 
     private fun onJunctionResponse(
         httpResponse: HttpResponse,
-        consumer: MapboxNavigationConsumer<Expected<JunctionValue, JunctionError>>
+        consumer: MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>
     ) {
         val filteredList = requestList.filter {
             it.httpRequest != httpResponse.request
@@ -110,19 +111,19 @@ class MapboxJunctionApi(
             }
             is JunctionResult.JunctionRaster.Failure -> {
                 consumer.accept(
-                    Expected.Failure(JunctionError(result.error, null))
+                    ExpectedFactory.createError(JunctionError(result.error, null))
                 )
             }
             is JunctionResult.JunctionRaster.Empty -> {
                 consumer.accept(
-                    Expected.Failure(
+                    ExpectedFactory.createError(
                         JunctionError("No junction available for current maneuver.", null)
                     )
                 )
             }
             else -> {
                 consumer.accept(
-                    Expected.Failure(
+                    ExpectedFactory.createError(
                         JunctionError("Inappropriate $result emitted for $action.", null)
                     )
                 )
@@ -132,19 +133,19 @@ class MapboxJunctionApi(
 
     private fun onJunctionAvailable(
         data: ByteArray,
-        consumer: MapboxNavigationConsumer<Expected<JunctionValue, JunctionError>>
+        consumer: MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>
     ) {
         val action = JunctionAction.ParseRasterToBitmap(data)
         when (val result = JunctionProcessor.process(action)) {
             is JunctionResult.JunctionBitmap.Success -> {
-                consumer.accept(Expected.Success(JunctionValue(result.junction)))
+                consumer.accept(ExpectedFactory.createValue(JunctionValue(result.junction)))
             }
             is JunctionResult.JunctionBitmap.Failure -> {
-                consumer.accept(Expected.Failure(JunctionError(result.message, null)))
+                consumer.accept(ExpectedFactory.createError(JunctionError(result.message, null)))
             }
             else -> {
                 consumer.accept(
-                    Expected.Failure(
+                    ExpectedFactory.createError(
                         JunctionError("Inappropriate $result emitted for $action.", null)
                     )
                 )

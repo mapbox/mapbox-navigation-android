@@ -225,7 +225,7 @@ class JunctionProcessorTest {
         val mockData = byteArrayOf()
         val action = JunctionAction.ParseRasterToBitmap(mockData)
         every { MapboxRasterToBitmapParser.parse(any()) } returns
-            com.mapbox.navigation.ui.base.model.Expected.Failure(
+            ExpectedFactory.createError(
                 "Error parsing raster to bitmap as raster is empty"
             )
 
