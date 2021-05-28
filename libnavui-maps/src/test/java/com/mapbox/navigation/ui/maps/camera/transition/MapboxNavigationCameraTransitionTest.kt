@@ -32,7 +32,7 @@ class MapboxNavigationCameraTransitionTest {
 
     @Before
     fun setup() {
-        mockkStatic("com.mapbox.navigation.ui.maps.camera.utils.MapboxNavigationCameraUtilsKt")
+        mockkStatic(AnimatorSet::constraintDurationTo)
         every { createAnimatorSet(any()) } returns animatorSet
         every { animatorSet.constraintDurationTo(any()) } returns constrainedSet
         every { screenDistanceFromMapCenterToTarget(mapboxMap, any(), any()) } returns 1000.0
@@ -144,6 +144,6 @@ class MapboxNavigationCameraTransitionTest {
 
     @After
     fun tearDown() {
-        unmockkStatic("com.mapbox.navigation.ui.maps.camera.utils.MapboxNavigationCameraUtilsKt")
+        unmockkStatic(AnimatorSet::constraintDurationTo)
     }
 }

@@ -1,7 +1,7 @@
 package com.mapbox.navigation.base.formatter
 
 import android.content.Context
-import com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale
+import com.mapbox.navigation.base.internal.extensions.getUnitTypeForLocale
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import java.util.Locale
 

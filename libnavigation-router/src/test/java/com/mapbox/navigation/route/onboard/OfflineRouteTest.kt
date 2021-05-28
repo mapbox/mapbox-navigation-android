@@ -5,18 +5,18 @@ import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.route.internal.util.httpUrl
 import com.mapbox.navigation.testing.BuilderTest
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import io.mockk.mockk
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.UnsupportedEncodingException
 import java.net.URL
 import java.net.URLDecoder
 import kotlin.reflect.KClass
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 internal class OfflineRouteTest : BuilderTest<OfflineRoute, OfflineRoute.Builder>() {
 

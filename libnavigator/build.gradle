@@ -42,7 +42,6 @@ dependencies {
     implementation dependenciesList.coroutinesCore
 
     testImplementation(project(':libtesting-utils'))
-    apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
 }
 
 apply from: "${rootDir}/gradle/track-public-apis.gradle"

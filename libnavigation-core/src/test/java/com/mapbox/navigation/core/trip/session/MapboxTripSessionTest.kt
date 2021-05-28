@@ -32,6 +32,7 @@ import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.FixLocation
@@ -66,12 +67,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class MapboxTripSessionTest {
 
@@ -112,9 +112,12 @@ class MapboxTripSessionTest {
     @Before
     fun setUp() {
         mockkObject(ThreadController)
-        mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
-        mockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
-        mockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
+        mockkStatic(DirectionsRoute::isSameRoute)
+        mockkStatic(DirectionsRoute::isSameUuid)
+        mockkStatic(TripStatus::getMapMatcherResult)
+        mockkStatic(Location::toFixLocation)
+        mockkStatic(FixLocation::toLocation)
+        mockkStatic(List<FixLocation>::toLocations)
         mockkObject(TileStoreProvider)
         every { TileStoreProvider.getDefaultTileStoreInstance() } returns mockk()
         every { TileStoreProvider.getTileStoreInstance(any()) } returns mockk()
@@ -1022,9 +1025,12 @@ class MapboxTripSessionTest {
     @After
     fun cleanUp() {
         unmockkObject(ThreadController)
-        unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
-        unmockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
-        unmockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
+        unmockkStatic(DirectionsRoute::isSameRoute)
+        unmockkStatic(DirectionsRoute::isSameUuid)
+        unmockkStatic(TripStatus::getMapMatcherResult)
+        unmockkStatic(Location::toFixLocation)
+        unmockkStatic(FixLocation::toLocation)
+        unmockkStatic(List<FixLocation>::toLocations)
         unmockkObject(TileStoreProvider)
     }
 

@@ -9,6 +9,7 @@ import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.PredictiveCache
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -24,11 +25,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @Config(shadows = [ShadowTileStore::class])
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class PredictiveCacheControllerTest {
 
     private val errorHandler = mockk<PredictiveCacheControllerErrorHandler>() {

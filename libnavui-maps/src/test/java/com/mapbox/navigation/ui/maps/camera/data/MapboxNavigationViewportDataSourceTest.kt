@@ -200,7 +200,7 @@ class MapboxNavigationViewportDataSourceTest {
             every { requestUuid() } returns "mock_uuid"
         }
 
-        mockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
+        mockkStatic(DirectionsRoute::isSameRoute)
         every { route.isSameRoute(any()) } returns true
     }
 
@@ -1154,7 +1154,7 @@ class MapboxNavigationViewportDataSourceTest {
     @After
     fun tearDown() {
         unmockkObject(ViewportDataSourceProcessor)
-        unmockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
+        unmockkStatic(DirectionsRoute::isSameRoute)
     }
 
     private fun createLocation(

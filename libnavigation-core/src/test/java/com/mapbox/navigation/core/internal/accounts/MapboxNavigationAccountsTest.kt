@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.internal.accounts
 
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -7,10 +8,9 @@ import io.mockk.unmockkObject
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import java.net.URL
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class MapboxNavigationAccountsTest {
 
     @Test

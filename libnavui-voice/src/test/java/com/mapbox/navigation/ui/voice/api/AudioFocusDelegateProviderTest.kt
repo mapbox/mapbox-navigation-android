@@ -3,16 +3,16 @@ package com.mapbox.navigation.ui.voice.api
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build.VERSION_CODES.LOLLIPOP
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class AudioFocusDelegateProviderTest {
 
     @Test

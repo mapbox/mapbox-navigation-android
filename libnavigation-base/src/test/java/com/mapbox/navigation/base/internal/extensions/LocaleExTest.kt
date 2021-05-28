@@ -1,25 +1,23 @@
 package com.mapbox.navigation.base.internal.extensions
 
 import android.content.Context
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.formatter.UnitType
-import com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.BeforeClass
+import org.junit.Before
 import org.junit.Test
 import java.util.Locale
 
 class LocaleExTest {
 
-    companion object {
-        @BeforeClass
-        @JvmStatic
-        fun initialize() {
-            mockkStatic("com.mapbox.navigation.base.internal.extensions.ContextEx")
-        }
+    @Before
+    fun setup() {
+        mockkStatic(Locale::getUnitTypeForLocale)
+        mockkStatic(Context::inferDeviceLocale)
     }
 
     @Test
@@ -66,26 +64,9 @@ class LocaleExTest {
         assertEquals(UnitType.METRIC, result)
     }
 
-    @Test
-    fun getLocaleDirectionsRouteNonNullVoiceLanguage() {
-        val context = mockk<Context>()
-        val directionsRoute = mockk<DirectionsRoute>()
-        every { directionsRoute.voiceLanguage() } returns "en"
-
-        val result = LocaleEx.getLocaleDirectionsRoute(directionsRoute, context)
-
-        assertEquals("en", result.language)
-    }
-
-    @Test
-    fun getLocaleDirectionsRouteNullVoiceLanguage() {
-        val context = mockk<Context>()
-        val directionsRoute = mockk<DirectionsRoute>()
-        every { directionsRoute.voiceLanguage() } returns null
-        every { context.inferDeviceLocale() } returns Locale("en")
-
-        val result = LocaleEx.getLocaleDirectionsRoute(directionsRoute, context)
-
-        assertEquals("en", result.language)
+    @After
+    fun teardown() {
+        unmockkStatic(Locale::getUnitTypeForLocale)
+        unmockkStatic(Context::inferDeviceLocale)
     }
 }

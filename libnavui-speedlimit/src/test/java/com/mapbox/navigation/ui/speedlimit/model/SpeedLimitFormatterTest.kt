@@ -5,15 +5,15 @@ import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 import com.mapbox.navigation.base.speed.model.SpeedLimitUnit
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class SpeedLimitFormatterTest {
 
     private lateinit var ctx: Context

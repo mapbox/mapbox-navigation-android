@@ -1,4 +1,3 @@
-@file:JvmName("CachedNavigationFeedbackEventEx")
 package com.mapbox.navigation.core.internal.utils
 
 import com.mapbox.navigation.core.internal.telemetry.CachedNavigationFeedbackEvent

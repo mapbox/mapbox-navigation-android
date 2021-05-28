@@ -1,5 +1,3 @@
-@file:JvmName("TextViewEx")
-
 package com.mapbox.navigation.ui.utils.internal.extensions
 
 import android.graphics.Bitmap

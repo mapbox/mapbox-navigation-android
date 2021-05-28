@@ -19,7 +19,12 @@ android {
 }
 
 dependencies {
-    implementation dependenciesList.junit
-    implementation dependenciesList.coroutinesTestAndroid
-    implementation dependenciesList.kotlinReflect
+    api dependenciesList.androidxTestJunit
+    api dependenciesList.junit
+    api dependenciesList.coroutinesTestAndroid
+    api dependenciesList.mockk
+    api dependenciesList.mockito
+    api dependenciesList.robolectric
+    api dependenciesList.kotlinReflect
+    api dependenciesList.mockwebserver
 }

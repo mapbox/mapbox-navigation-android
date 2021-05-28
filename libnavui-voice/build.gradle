@@ -51,7 +51,6 @@ dependencies {
     implementation dependenciesList.androidXConstraintLayout
     implementation dependenciesList.androidXAppCompat
 
-    apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
     testImplementation(project(':libtesting-utils'))
 }
 

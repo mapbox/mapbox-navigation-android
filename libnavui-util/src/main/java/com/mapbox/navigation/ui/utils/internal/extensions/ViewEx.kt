@@ -1,5 +1,3 @@
-@file:JvmName("ViewEx")
-
 package com.mapbox.navigation.ui.utils.internal.extensions
 
 import android.animation.Animator

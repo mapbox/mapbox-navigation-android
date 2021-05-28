@@ -6,19 +6,20 @@ import android.graphics.drawable.Drawable
 import android.text.style.ImageSpan
 import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.utils.internal.extensions.drawableWithHeight
 import com.mapbox.navigation.ui.utils.internal.extensions.getAsBitmap
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class ExitStyleGeneratorTest {
 
     lateinit var ctx: Context
@@ -32,8 +33,8 @@ class ExitStyleGeneratorTest {
     fun `when exit number and desired height then return image span`() {
         val desiredHeight = 50
         val resources = ctx.resources
-        mockkStatic("com.mapbox.navigation.ui.utils.internal.extensions.BitmapEx")
-        mockkStatic("com.mapbox.navigation.ui.utils.internal.extensions.TextViewEx")
+        mockkStatic(Bitmap::drawableWithHeight)
+        mockkStatic(TextView::getAsBitmap)
         val mockExitText = "23"
         val mockDrawable = mockk<Drawable>()
         val mockBitmap = mockk<Bitmap> {
@@ -55,5 +56,8 @@ class ExitStyleGeneratorTest {
         assertTrue(spannable.isNotEmpty())
         assertTrue(imageSpan.size == 1)
         assertEquals(mockDrawable, drawableFromImageSpan)
+
+        unmockkStatic(Bitmap::drawableWithHeight)
+        unmockkStatic(TextView::getAsBitmap)
     }
 }

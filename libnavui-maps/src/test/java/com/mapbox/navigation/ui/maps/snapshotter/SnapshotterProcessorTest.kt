@@ -12,6 +12,7 @@ import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.Image
 import com.mapbox.maps.MapSnapshotInterface
 import com.mapbox.navigation.testing.FileUtils
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.maps.snapshotter.model.CameraPosition
 import com.mapbox.navigation.ui.maps.snapshotter.model.MapboxSnapshotterOptions
 import com.mapbox.turf.TurfMeasurement
@@ -21,10 +22,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import java.nio.ByteBuffer
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class SnapshotterProcessorTest {
 
     lateinit var ctx: Context
