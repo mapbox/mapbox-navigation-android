@@ -139,9 +139,11 @@ class MapboxRouteLineApiTest {
         val api = MapboxRouteLineApi(options).also {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
-        val consumer = MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
-            consumerCalled = true
-            assertEquals(route2, api.getPrimaryRoute())
+        val consumer = object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
+            override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
+                consumerCalled = true
+                assertEquals(route2, api.getPrimaryRoute())
+            }
         }
 
         api.updateToPrimaryRoute(route2, consumer)
@@ -363,32 +365,34 @@ class MapboxRouteLineApiTest {
             "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}"
         val route = getRoute()
         val routes = listOf(RouteLine(route, null))
-        val consumer = MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> { t ->
-            callbackCalled = true
-            val result = t as Expected.Success
-            assertEquals(expectedCasingExpression, result.value.casingLineExpression.toString())
-            assertEquals(
-                expectedRouteLineExpression,
-                result.value.routeLineExpression.toString()
-            )
-            assertEquals(
-                expectedTrafficLineExpression,
-                result.value.trafficLineExpression.toString()
-            )
-            assertEquals(
-                expectedPrimaryRouteSourceGeometry,
-                result.value.primaryRouteSource.features()!![0].geometry().toString()
-            )
-            assertTrue(result.value.alternativeRoute1Source.features()!!.isEmpty())
-            assertTrue(result.value.alternativeRoute2Source.features()!!.isEmpty())
-            assertEquals(
-                expectedWaypointFeature0,
-                result.value.waypointsSource.features()!![0].geometry().toString()
-            )
-            assertEquals(
-                expectedWaypointFeature1,
-                result.value.waypointsSource.features()!![1].geometry().toString()
-            )
+        val consumer = object : MapboxNavigationConsumer<Expected<RouteSetValue, RouteLineError>> {
+            override fun accept(value: Expected<RouteSetValue, RouteLineError>) {
+                callbackCalled = true
+                val result = value as Expected.Success
+                assertEquals(expectedCasingExpression, result.value.casingLineExpression.toString())
+                assertEquals(
+                    expectedRouteLineExpression,
+                    result.value.routeLineExpression.toString()
+                )
+                assertEquals(
+                    expectedTrafficLineExpression,
+                    result.value.trafficLineExpression.toString()
+                )
+                assertEquals(
+                    expectedPrimaryRouteSourceGeometry,
+                    result.value.primaryRouteSource.features()!![0].geometry().toString()
+                )
+                assertTrue(result.value.alternativeRoute1Source.features()!!.isEmpty())
+                assertTrue(result.value.alternativeRoute2Source.features()!!.isEmpty())
+                assertEquals(
+                    expectedWaypointFeature0,
+                    result.value.waypointsSource.features()!![0].geometry().toString()
+                )
+                assertEquals(
+                    expectedWaypointFeature1,
+                    result.value.waypointsSource.features()!![1].geometry().toString()
+                )
+            }
         }
 
         api.setRoutes(routes, consumer)
