@@ -255,7 +255,7 @@ package com.mapbox.navigation.base.options {
   public final class RoutingTilesOptions {
     method public String? getFilePath();
     method public int getMinDaysBetweenServerAndLocalTilesVersion();
-    method public com.mapbox.common.TileStore getTileStore();
+    method public com.mapbox.common.TileStore? getTileStore();
     method public java.net.URI getTilesBaseUri();
     method public String getTilesDataset();
     method public String getTilesProfile();
@@ -263,7 +263,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder toBuilder();
     property public final String? filePath;
     property public final int minDaysBetweenServerAndLocalTilesVersion;
-    property public final com.mapbox.common.TileStore tileStore;
+    property public final com.mapbox.common.TileStore? tileStore;
     property public final java.net.URI tilesBaseUri;
     property public final String tilesDataset;
     property public final String tilesProfile;
@@ -275,7 +275,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.RoutingTilesOptions build();
     method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder filePath(String? filePath);
     method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder minDaysBetweenServerAndLocalTilesVersion(int minDaysBetweenServerAndLocalTilesVersion);
-    method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder tileStore(com.mapbox.common.TileStore tileStore);
+    method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder tileStore(com.mapbox.common.TileStore? tileStore);
     method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder tilesBaseUri(java.net.URI tilesBaseUri);
     method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder tilesDataset(String tilesDataset);
     method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder tilesProfile(String tilesProfile);

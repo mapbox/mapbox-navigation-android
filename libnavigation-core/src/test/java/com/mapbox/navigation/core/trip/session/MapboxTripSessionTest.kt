@@ -12,7 +12,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.geojson.Geometry
-import com.mapbox.navigation.base.internal.tilestore.TileStoreProvider
 import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_PREDICTION_MILLIS
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -115,9 +114,6 @@ class MapboxTripSessionTest {
         mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         mockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
         mockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
-        mockkObject(TileStoreProvider)
-        every { TileStoreProvider.getDefaultTileStoreInstance() } returns mockk()
-        every { TileStoreProvider.getTileStoreInstance(any()) } returns mockk()
         every { location.toFixLocation() } returns fixLocation
         every { fixLocation.toLocation() } returns location
         every { keyFixPoints.toLocations() } returns keyPoints
@@ -1025,7 +1021,6 @@ class MapboxTripSessionTest {
         unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         unmockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
         unmockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
-        unmockkObject(TileStoreProvider)
     }
 
     private suspend fun updateLocationAndJoin() {
