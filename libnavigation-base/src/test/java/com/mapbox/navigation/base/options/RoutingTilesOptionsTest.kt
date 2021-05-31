@@ -1,14 +1,8 @@
 package com.mapbox.navigation.base.options
 
-import com.mapbox.navigation.base.internal.tilestore.TileStoreProvider
 import com.mapbox.navigation.testing.BuilderTest
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
-import junit.framework.TestCase.assertEquals
-import org.junit.After
-import org.junit.Before
+import org.junit.Assert
 import org.junit.Test
 import java.net.URI
 import java.net.URISyntaxException
@@ -26,20 +20,8 @@ class RoutingTilesOptionsTest : BuilderTest<RoutingTilesOptions, RoutingTilesOpt
             .tilesProfile("driving")
             .tilesVersion("456")
             .filePath("123")
-            .tileStore(TileStoreProvider.getTileStoreInstance("tile_store_path"))
+            .tileStore(mockk())
             .minDaysBetweenServerAndLocalTilesVersion(0)
-    }
-
-    @Before
-    fun setup() {
-        mockkObject(TileStoreProvider)
-        every { TileStoreProvider.getDefaultTileStoreInstance() } returns mockk()
-        every { TileStoreProvider.getTileStoreInstance(any()) } returns mockk()
-    }
-
-    @After
-    fun teardown() {
-        unmockkObject(TileStoreProvider)
     }
 
     @Test
@@ -93,19 +75,9 @@ class RoutingTilesOptionsTest : BuilderTest<RoutingTilesOptions, RoutingTilesOpt
     }
 
     @Test
-    fun `default TileStore instance is used by default`() {
+    fun `null TileStore instance is used by default`() {
         val defaultOptions = RoutingTilesOptions.Builder().build()
 
-        assertEquals(TileStoreProvider.getDefaultTileStoreInstance(), defaultOptions.tileStore)
-    }
-
-    @Test
-    fun `custom TileStore instance overrides a default one`() {
-        val customTileStore = TileStoreProvider.getTileStoreInstance("custom_tile_store_path")
-        val options = RoutingTilesOptions.Builder()
-            .tileStore(customTileStore)
-            .build()
-
-        assertEquals(customTileStore, options.tileStore)
+        Assert.assertNull(defaultOptions.tileStore)
     }
 }
