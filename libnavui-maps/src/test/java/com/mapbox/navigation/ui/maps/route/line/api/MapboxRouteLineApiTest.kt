@@ -26,7 +26,6 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExten
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.getRouteDrawData
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.updateToPrimaryRoute
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.parseRoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
@@ -98,55 +97,6 @@ class MapboxRouteLineApiTest {
         val result = api.getPrimaryRoute()
 
         assertEquals(route, result)
-    }
-
-    @Test // todo needs more testing
-    fun getUpdatePrimaryRouteIndexStateSetsPrimaryRoute() = coroutineRule.runBlockingTest {
-        val route1 = getRoute()
-        val route2 = getRoute()
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val api = MapboxRouteLineApi(options).also {
-            it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
-        }
-
-        api.updateToPrimaryRoute(route2)
-
-        assertEquals(route2, api.getPrimaryRoute())
-    }
-
-    @Test
-    fun updateToPrimaryRoute_NoDuplicates() = coroutineRule.runBlockingTest {
-        val route1 = getRoute()
-        val route2 = getMultilegRoute()
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val api = MapboxRouteLineApi(options).also {
-            it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
-        }
-        api.updateToPrimaryRoute(route2)
-
-        val updatedRoutes = api.getRoutes()
-
-        assertEquals(2, updatedRoutes.size)
-        assertEquals(route2, updatedRoutes[0])
-    }
-
-    @Test
-    fun updateToPrimaryRouteWithCallback() = coroutineRule.runBlockingTest {
-        val route1 = getRoute()
-        val route2 = getRoute()
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
-        var consumerCalled = false
-        val api = MapboxRouteLineApi(options).also {
-            it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
-        }
-        val consumer = MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> {
-            consumerCalled = true
-            assertEquals(route2, api.getPrimaryRoute())
-        }
-
-        api.updateToPrimaryRoute(route2, consumer)
-
-        assertTrue(consumerCalled)
     }
 
     @Test

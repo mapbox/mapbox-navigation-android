@@ -186,30 +186,6 @@ class MapboxRouteLineApi(
     fun getPrimaryRoute(): DirectionsRoute? = primaryRoute
 
     /**
-     * Updates which route is identified as the primary route.
-     *
-     * @param route the [DirectionsRoute] which should be designated as the primary
-     * @param consumer a consumer of the result of calling this method which should be applied to
-     * a render method in [MapboxRouteLineView]
-     */
-    fun updateToPrimaryRoute(
-        route: DirectionsRoute,
-        consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
-    ) {
-        jobControl.scope.launch {
-            mutex.withLock {
-                val newRoutes = directionsRoutes.filter { it != route }.toMutableList().also {
-                    it.add(0, route)
-                }
-                val featureDataProvider: () -> List<RouteFeatureData> =
-                    MapboxRouteLineUtils.getRouteFeatureDataProvider(newRoutes)
-                val routeData = setNewRouteData(newRoutes, featureDataProvider)
-                consumer.accept(routeData)
-            }
-        }
-    }
-
-    /**
      * Sets the routes that will be operated on.
      *
      * @param newRoutes one or more routes. The first route in the collection will be considered
