@@ -193,12 +193,34 @@ internal object ViewportDataSourceProcessor {
         return try {
             val currentStepFullPoints = currentStepProgress.stepPoints ?: emptyList()
             // todo bottom slice might not be needed since we always append the user location
-            TurfMisc.lineSliceAlong(
+            val lineSliceCoordinatesForLookaheadDistance = TurfMisc.lineSliceAlong(
                 LineString.fromLngLats(currentStepFullPoints),
                 distanceTraveledOnStepKM,
                 lookaheadDistanceForZoom,
                 TurfConstants.UNIT_KILOMETERS
             ).coordinates()
+            val outputCoordinates: MutableList<Point> = emptyList<Point>().toMutableList()
+            val firstEdgeBearing = TurfMeasurement.bearing(lineSliceCoordinatesForLookaheadDistance[0], lineSliceCoordinatesForLookaheadDistance[1])
+            outputCoordinates.add(lineSliceCoordinatesForLookaheadDistance[0])
+            for (index in lineSliceCoordinatesForLookaheadDistance.indices) {
+                if (index == 0) {
+                    continue
+                }
+                val coord = lineSliceCoordinatesForLookaheadDistance[index-1]?.let {
+                    val thisEdgeBearing = TurfMeasurement.bearing(it, lineSliceCoordinatesForLookaheadDistance[index])
+                    if (abs(shortestRotationDiff(thisEdgeBearing, firstEdgeBearing)) < 100.0) {
+                        lineSliceCoordinatesForLookaheadDistance[index]
+                    } else {
+                        null
+                    }
+                }
+                if (coord != null) {
+                    outputCoordinates.add(coord)
+                } else {
+                    break
+                }
+            }
+            outputCoordinates
         } catch (e: TurfException) {
             LoggerProvider.logger.e(Tag(TAG), Message(e.message.toString()))
             emptyList()
