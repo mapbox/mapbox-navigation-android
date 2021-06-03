@@ -31,10 +31,11 @@ class MapboxStepDistanceTest {
             mockk {
                 every { formatDistance(mockStepDistanceRemaining) } returns SpannableString("13 mi")
             },
+            75.0,
             mockStepDistanceRemaining
         )
 
-        view.render(mockState)
+        view.renderDistanceRemaining(mockState)
         val actual = view.text
 
         assertEquals(expected, actual)

@@ -22,11 +22,35 @@ import com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode
  * @property rightDrawable Drawable? denotes the style for exit sign that is on the right.
  * @property exitBackground Drawable? denotes the exit board style.
  */
-class MapboxExitText @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : AppCompatTextView(context, attrs, defStyleAttr) {
+class MapboxExitText : AppCompatTextView {
+
+    /**
+     *
+     * @param context Context
+     * @constructor
+     */
+    constructor(context: Context) : super(context)
+
+    /**
+     *
+     * @param context Context
+     * @param attrs AttributeSet?
+     * @constructor
+     */
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+
+    /**
+     *
+     * @param context Context
+     * @param attrs AttributeSet?
+     * @param defStyleAttr Int
+     * @constructor
+     */
+    constructor(
+        context: Context,
+        attrs: AttributeSet?,
+        defStyleAttr: Int
+    ) : super(context, attrs, defStyleAttr)
 
     private var leftDrawable = ContextCompat.getDrawable(
         context, R.drawable.mapbox_ic_exit_arrow_left

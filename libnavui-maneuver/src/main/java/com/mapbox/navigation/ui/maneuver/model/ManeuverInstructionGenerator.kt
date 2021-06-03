@@ -11,7 +11,8 @@ internal object ManeuverInstructionGenerator {
         context: Context,
         desiredHeight: Int,
         exitView: MapboxExitText,
-        maneuver: PrimaryManeuver
+        maneuver: PrimaryManeuver,
+        roadShield: RoadShield? = null
     ): SpannableStringBuilder {
         val instructionBuilder = SpannableStringBuilder()
         maneuver.componentList.forEach { component ->
@@ -35,7 +36,7 @@ internal object ManeuverInstructionGenerator {
                         node.text,
                         desiredHeight,
                         context.resources,
-                        node.shieldIcon,
+                        roadShield,
                         instructionBuilder
                     )
                 }
@@ -51,7 +52,8 @@ internal object ManeuverInstructionGenerator {
         context: Context,
         desiredHeight: Int,
         exitView: MapboxExitText,
-        maneuver: SecondaryManeuver?
+        maneuver: SecondaryManeuver?,
+        roadShield: RoadShield? = null
     ): SpannableStringBuilder {
         val instructionBuilder = SpannableStringBuilder()
         maneuver?.componentList?.forEach { component ->
@@ -75,7 +77,7 @@ internal object ManeuverInstructionGenerator {
                         node.text,
                         desiredHeight,
                         context.resources,
-                        node.shieldIcon,
+                        roadShield,
                         instructionBuilder
                     )
                 }
@@ -91,7 +93,8 @@ internal object ManeuverInstructionGenerator {
         context: Context,
         desiredHeight: Int,
         exitView: MapboxExitText,
-        maneuver: SubManeuver?
+        maneuver: SubManeuver?,
+        roadShield: RoadShield? = null
     ): SpannableStringBuilder {
         val instructionBuilder = SpannableStringBuilder()
         maneuver?.componentList?.forEach { component ->
@@ -115,7 +118,7 @@ internal object ManeuverInstructionGenerator {
                         node.text,
                         desiredHeight,
                         context.resources,
-                        node.shieldIcon,
+                        roadShield,
                         instructionBuilder
                     )
                 }
@@ -153,14 +156,14 @@ internal object ManeuverInstructionGenerator {
         shieldText: String,
         desiredHeight: Int,
         resources: Resources,
-        shieldIcon: ByteArray?,
+        roadShield: RoadShield?,
         builder: SpannableStringBuilder
     ) {
         val roadShieldBuilder = RoadShieldGenerator.styleAndGetRoadShield(
             shieldText,
             desiredHeight,
             resources,
-            shieldIcon
+            roadShield
         )
         builder.append(roadShieldBuilder)
         builder.append(" ")

@@ -14,9 +14,10 @@ internal object RoadShieldGenerator {
         shieldText: String,
         desiredHeight: Int,
         resources: Resources,
-        shieldIcon: ByteArray?
+        roadShield: RoadShield? = null
     ): SpannableStringBuilder {
         val roadShieldBuilder = SpannableStringBuilder(shieldText)
+        val shieldIcon = roadShield?.shieldIcon
         if (shieldIcon != null && shieldIcon.isNotEmpty()) {
             val stream = ByteArrayInputStream(shieldIcon)
             val svgBitmap = SvgUtil.renderAsBitmapWithHeight(stream, desiredHeight)

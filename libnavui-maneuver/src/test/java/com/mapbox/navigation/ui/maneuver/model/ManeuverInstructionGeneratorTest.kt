@@ -50,7 +50,7 @@ class ManeuverInstructionGeneratorTest {
         val mockDesiredHeight = 50
         val mockExitView = mockk<MapboxExitText>(relaxed = true)
         every {
-            RoadShieldGenerator.styleAndGetRoadShield(any(), any(), any(), any())
+            RoadShieldGenerator.styleAndGetRoadShield(any(), any(), any())
         } returns SpannableStringBuilder("I-880")
         val expected = SpannableStringBuilder("I-880 / Central Avenue ")
 
@@ -69,7 +69,7 @@ class ManeuverInstructionGeneratorTest {
         val mockDesiredHeight = 50
         val mockExitView = mockk<MapboxExitText>(relaxed = true)
         every {
-            RoadShieldGenerator.styleAndGetRoadShield(any(), any(), any(), any())
+            RoadShieldGenerator.styleAndGetRoadShield(any(), any(), any())
         } returns SpannableStringBuilder("I-880")
 
         val spannable = ManeuverInstructionGenerator.generateSecondary(
@@ -97,7 +97,7 @@ class ManeuverInstructionGeneratorTest {
         val mockDesiredHeight = 50
         val mockExitView = mockk<MapboxExitText>(relaxed = true)
         every {
-            RoadShieldGenerator.styleAndGetRoadShield(any(), any(), any(), any())
+            RoadShieldGenerator.styleAndGetRoadShield(any(), any(), any())
         } returns SpannableStringBuilder("I-880")
         val expected = SpannableStringBuilder("I-880 / Central Avenue ")
 
@@ -116,7 +116,7 @@ class ManeuverInstructionGeneratorTest {
         val mockDesiredHeight = 50
         val mockExitView = mockk<MapboxExitText>(relaxed = true)
         every {
-            RoadShieldGenerator.styleAndGetRoadShield(any(), any(), any(), any())
+            RoadShieldGenerator.styleAndGetRoadShield(any(), any(), any())
         } returns SpannableStringBuilder("I-880")
 
         val spannable = ManeuverInstructionGenerator.generateSub(
@@ -144,7 +144,7 @@ class ManeuverInstructionGeneratorTest {
         val mockDesiredHeight = 50
         val mockExitView = mockk<MapboxExitText>(relaxed = true)
         every {
-            RoadShieldGenerator.styleAndGetRoadShield(any(), any(), any(), any())
+            RoadShieldGenerator.styleAndGetRoadShield(any(), any(), any())
         } returns SpannableStringBuilder("I-880")
         val expected = SpannableStringBuilder("I-880 / Central Avenue ")
 

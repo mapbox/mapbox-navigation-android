@@ -1,29 +1,22 @@
 package com.mapbox.navigation.ui.maneuver
 
-import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.RouteStepProgress
 
 internal sealed class ManeuverAction {
 
-    data class GetManeuver(
-        val bannerInstruction: BannerInstructions
-    ) : ManeuverAction()
-
-    data class GetStepDistanceRemaining(
-        val stepProgress: RouteStepProgress
-    ) : ManeuverAction()
-
-    data class GetAllBannerInstructions(
-        val routeProgress: RouteProgress
-    ) : ManeuverAction()
-
-    data class GetAllBannerInstructionsAfterStep(
+    data class GetManeuverList(
         val routeProgress: RouteProgress,
-        val bannerInstructions: List<BannerInstructions>
+        val maneuverState: ManeuverState,
+        val distanceFormatter: DistanceFormatter
     ) : ManeuverAction()
 
-    data class GetAllManeuvers(
-        val bannerInstructions: List<BannerInstructions>
+    data class GetManeuverListWithRoute(
+        val route: DirectionsRoute,
+        val routeLeg: RouteLeg? = null,
+        val maneuverState: ManeuverState,
+        val distanceFormatter: DistanceFormatter
     ) : ManeuverAction()
 }

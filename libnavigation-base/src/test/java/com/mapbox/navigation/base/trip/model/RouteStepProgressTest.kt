@@ -12,6 +12,7 @@ class RouteStepProgressTest : BuilderTest<RouteStepProgress, RouteStepProgress.B
         return RouteStepProgress.Builder()
             .stepIndex(123)
             .intersectionIndex(987)
+            .instructionIndex(101112)
             .step(mockk(relaxed = true))
             .stepPoints(mockk(relaxed = true))
             .distanceRemaining(456f)

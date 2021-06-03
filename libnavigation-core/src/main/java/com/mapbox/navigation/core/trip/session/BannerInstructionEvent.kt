@@ -1,9 +1,11 @@
 package com.mapbox.navigation.core.trip.session
 
 import com.mapbox.api.directions.v5.models.BannerInstructions
-import com.mapbox.navigation.base.trip.model.RouteProgress
 
 internal class BannerInstructionEvent {
+
+    var latestInstructionIndex: Int? = null
+        private set
 
     var bannerInstructions: BannerInstructions? = null
         private set
@@ -11,16 +13,20 @@ internal class BannerInstructionEvent {
     var latestBannerInstructions: BannerInstructions? = null
         private set
 
-    fun isOccurring(routeProgress: RouteProgress): Boolean = updateCurrentBanner(routeProgress)
+    fun isOccurring(bannerInstructions: BannerInstructions?, instructionIndex: Int?): Boolean {
+        return updateCurrentBanner(bannerInstructions, instructionIndex)
+    }
 
     fun invalidateLatestBannerInstructions() {
         latestBannerInstructions = null
+        latestInstructionIndex = null
     }
 
-    private fun updateCurrentBanner(routeProgress: RouteProgress): Boolean {
-        bannerInstructions = routeProgress.bannerInstructions
+    private fun updateCurrentBanner(banner: BannerInstructions?, instructionIndex: Int?): Boolean {
+        bannerInstructions = banner
         if (bannerInstructions != null && bannerInstructions!! != latestBannerInstructions) {
             latestBannerInstructions = bannerInstructions
+            latestInstructionIndex = instructionIndex
             return true
         }
         return false

@@ -80,8 +80,7 @@ class RoadShieldGeneratorTest {
         val spannable = RoadShieldGenerator.styleAndGetRoadShield(
             mockShieldText,
             mockDesiredHeight,
-            mockResources,
-            null
+            mockResources
         )
         val imageSpan = spannable.getSpans(0, spannable.length, ImageSpan::class.java)
 
@@ -99,8 +98,7 @@ class RoadShieldGeneratorTest {
         val spannable = RoadShieldGenerator.styleAndGetRoadShield(
             mockShieldText,
             mockDesiredHeight,
-            mockResources,
-            mockShieldIcon
+            mockResources
         )
         val imageSpan = spannable.getSpans(0, spannable.length, ImageSpan::class.java)
 
@@ -113,13 +111,11 @@ class RoadShieldGeneratorTest {
         val mockShieldText = "880"
         val mockDesiredHeight = 50
         val mockResources = ctx.resources
-        val mockShieldIcon = byteArrayOf(67, -87, 45, 33, 59)
 
         val spannable = RoadShieldGenerator.styleAndGetRoadShield(
             mockShieldText,
             mockDesiredHeight,
-            mockResources,
-            mockShieldIcon
+            mockResources
         )
         val imageSpan = spannable.getSpans(0, spannable.length, ImageSpan::class.java)
 
@@ -137,7 +133,7 @@ class RoadShieldGeneratorTest {
             mockShieldText,
             mockDesiredHeight,
             mockResources,
-            mockShieldIcon
+            RoadShield("https://this_is_my_url", mockShieldIcon)
         )
         val imageSpan = spannable.getSpans(0, spannable.length, ImageSpan::class.java)
 

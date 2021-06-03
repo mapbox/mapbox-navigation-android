@@ -9,7 +9,7 @@
         android:id="@+id/maneuver"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="@dimen/mapbox_dimen_16dp"
+        app:cardCornerRadius="@dimen/mapbox_dimen_8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">

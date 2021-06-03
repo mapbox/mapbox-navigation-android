@@ -226,7 +226,9 @@ class NavigatorMapperTest {
         val routeProgress = getRouteProgressFrom(
             null,
             navigationStatus,
-            mockk(relaxed = true)
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            0
         )
 
         assertNull(routeProgress)
@@ -239,7 +241,9 @@ class NavigatorMapperTest {
         val routeProgress = getRouteProgressFrom(
             directionsRoute,
             navigationStatus,
-            mockk(relaxed = true)
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            0
         )
 
         assertNull(routeProgress)
@@ -250,7 +254,9 @@ class NavigatorMapperTest {
         val routeProgress = getRouteProgressFrom(
             directionsRoute,
             navigationStatus,
-            mockk(relaxed = true)
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            0
         )
 
         assertNotNull(routeProgress)
@@ -262,7 +268,9 @@ class NavigatorMapperTest {
         val routeProgress = getRouteProgressFrom(
             directionsRoute,
             navigationStatus,
-            mockk(relaxed = true)
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            0
         )
 
         assertTrue(routeProgress!!.stale)
@@ -274,7 +282,9 @@ class NavigatorMapperTest {
         val routeProgress = getRouteProgressFrom(
             directionsRoute,
             navigationStatus,
-            mockk(relaxed = true)
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            0
         )
 
         assertFalse(routeProgress!!.stale)
@@ -301,7 +311,9 @@ class NavigatorMapperTest {
         val routeProgress = getRouteProgressFrom(
             directionsRoute,
             navigationStatus,
-            mockk(relaxed = true)
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            0
         )
 
         assertEquals(stepProgress, routeProgress!!.currentLegProgress!!.currentStepProgress)
@@ -329,7 +341,9 @@ class NavigatorMapperTest {
         val routeProgress = getRouteProgressFrom(
             mockk(relaxed = true),
             navigationStatus,
-            mockk(relaxed = true)
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            0
         )
         val upcomingRouteAlerts = routeProgress!!.upcomingRoadObjects
 

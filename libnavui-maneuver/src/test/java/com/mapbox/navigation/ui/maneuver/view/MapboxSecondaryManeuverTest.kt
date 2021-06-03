@@ -34,6 +34,7 @@ class MapboxSecondaryManeuverTest {
         val componentList = createComponentList()
         val state = SecondaryManeuver
             .Builder()
+            .id("1234abcd")
             .text("Exit 23 I-880/Central")
             .type(StepManeuver.TURN)
             .degrees(null)

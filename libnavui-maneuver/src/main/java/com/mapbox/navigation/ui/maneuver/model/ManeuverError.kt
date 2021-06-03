@@ -7,6 +7,6 @@ package com.mapbox.navigation.ui.maneuver.model
  * @param throwable an optional throwable value expressing the error
  */
 class ManeuverError internal constructor(
-    val errorMessage: String,
-    val throwable: Throwable?
+    val errorMessage: String?,
+    val throwable: Throwable? = null
 )

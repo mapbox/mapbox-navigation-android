@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maneuver.model
 
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
+import java.util.UUID
 
 /**
  * "primary": {
@@ -26,6 +27,7 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
  * }
  *
  * A simplified data structure representing [BannerInstructions.primary]
+ * @property id String A unique id
  * @property text String Plain text with all the [BannerComponents] text combined.
  * @property type String? indicates the type of maneuver.
  * @property degrees Double? degrees at which you will be exiting a roundabout.
@@ -37,6 +39,7 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
  */
 
 class PrimaryManeuver private constructor(
+    val id: String,
     val text: String,
     val type: String? = null,
     val degrees: Double? = null,
@@ -54,6 +57,7 @@ class PrimaryManeuver private constructor(
 
         other as PrimaryManeuver
 
+        if (id != other.id) return false
         if (text != other.text) return false
         if (type != other.type) return false
         if (degrees != other.degrees) return false
@@ -68,7 +72,8 @@ class PrimaryManeuver private constructor(
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        var result = text.hashCode()
+        var result = id.hashCode()
+        result = 31 * result + (text.hashCode())
         result = 31 * result + (type?.hashCode() ?: 0)
         result = 31 * result + (degrees?.hashCode() ?: 0)
         result = 31 * result + (modifier?.hashCode() ?: 0)
@@ -96,6 +101,7 @@ class PrimaryManeuver private constructor(
      */
     fun toBuilder(): Builder {
         return Builder()
+            .id(id)
             .text(text)
             .type(type)
             .degrees(degrees)
@@ -106,6 +112,7 @@ class PrimaryManeuver private constructor(
 
     /**
      * Build a new [PrimaryManeuver]
+     * @property id String
      * @property text String
      * @property type String?
      * @property degrees Double?
@@ -114,12 +121,21 @@ class PrimaryManeuver private constructor(
      * @property componentList List<Component>
      */
     class Builder {
+        private var id: String = UUID.randomUUID().toString()
         private var text: String = ""
         private var type: String? = null
         private var degrees: Double? = null
         private var modifier: String? = null
         private var drivingSide: String? = null
         private var componentList: List<Component> = listOf()
+
+        /**
+         * apply id to the Builder.
+         * @param id String
+         * @return Builder
+         */
+        fun id(id: String): Builder =
+            apply { this.id = id }
 
         /**
          * apply text to the Builder.
@@ -175,6 +191,7 @@ class PrimaryManeuver private constructor(
          */
         fun build(): PrimaryManeuver {
             return PrimaryManeuver(
+                id,
                 text,
                 type,
                 degrees,

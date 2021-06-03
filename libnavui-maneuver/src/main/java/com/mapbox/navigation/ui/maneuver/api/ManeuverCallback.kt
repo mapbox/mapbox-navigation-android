@@ -5,13 +5,13 @@ import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 
 /**
- * Interface definition for a callback to be invoked when a current maneuver data is processed.
+ * An interface that is triggered when maneuvers are ready.
  */
 fun interface ManeuverCallback {
 
     /**
-     * Invoked when [Maneuver] is ready.
-     * @param maneuver CurrentManeuver represents maneuver to be represented on the view.
+     * The method is invoked if there is a success or failure computing a list of [Maneuver] instructions.
+     * @param maneuvers Expected with a value List<Maneuver> if success and an error value if failure.
      */
-    fun onManeuver(maneuver: Expected<ManeuverError, Maneuver>)
+    fun onManeuvers(maneuvers: Expected<ManeuverError, List<Maneuver>>)
 }

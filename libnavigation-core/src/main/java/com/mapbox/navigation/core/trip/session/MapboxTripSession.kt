@@ -14,13 +14,16 @@ import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.internal.utils.isSameRoute
 import com.mapbox.navigation.core.internal.utils.isSameUuid
+import com.mapbox.navigation.core.navigator.convertState
 import com.mapbox.navigation.core.navigator.getMapMatcherResult
 import com.mapbox.navigation.core.navigator.getRouteInitInfo
 import com.mapbox.navigation.core.navigator.getRouteProgressFrom
 import com.mapbox.navigation.core.navigator.getTripStatusFrom
+import com.mapbox.navigation.core.navigator.mapToDirectionsApi
 import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
@@ -33,6 +36,7 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
@@ -213,12 +217,54 @@ internal class MapboxTripSession(
                 ifNonNull(tripStatus.route?.routeOptions()?.coordinates()?.size) {
                     it - tripStatus.navigationStatus.nextWaypointIndex
                 } ?: 0
+
+            var triggerObserver = false
+            if (tripStatus.navigationStatus.routeState != RouteState.INVALID) {
+                route?.let { route ->
+                    ifNonNull(route.legs()) { legs ->
+                        val currentLeg = legs[tripStatus.navigationStatus.legIndex]
+                        ifNonNull(currentLeg?.steps()) { steps ->
+                            val currentStep = steps[tripStatus.navigationStatus.stepIndex]
+                            val state = tripStatus.navigationStatus.routeState.convertState()
+                            val nativeBannerInstruction: BannerInstruction? =
+                                if (state == RouteProgressState.INITIALIZED) {
+                                    MapboxNativeNavigatorImpl.getBannerInstruction(0)
+                                } else {
+                                    tripStatus.navigationStatus.bannerInstruction
+                                }.let {
+                                    // workaround for
+                                    // github.com/mapbox/mapbox-navigation-native/issues/3466
+                                    // there are cases where first status update with a new route
+                                    // does not provide banner instructions so we need to
+                                    // backfill them
+                                    if (
+                                        it == null &&
+                                        bannerInstructionEvent.latestBannerInstructions == null
+                                    ) {
+                                        MapboxNativeNavigatorImpl.getBannerInstruction(0)
+                                    } else {
+                                        it
+                                    }
+                                }
+                            val bannerInstructions: BannerInstructions? =
+                                nativeBannerInstruction?.mapToDirectionsApi(currentStep)
+                            triggerObserver = bannerInstructionEvent.isOccurring(
+                                bannerInstructions,
+                                nativeBannerInstruction?.index
+                            )
+                        }
+                    }
+                }
+            }
             val routeProgress = getRouteProgressFrom(
                 tripStatus.route,
                 tripStatus.navigationStatus,
-                remainingWaypoints
+                remainingWaypoints,
+                bannerInstructionEvent.latestBannerInstructions,
+                bannerInstructionEvent.latestInstructionIndex
             )
-            updateRouteProgress(routeProgress)
+            updateRouteProgress(routeProgress, triggerObserver)
+
             isOffRoute = tripStatus.navigationStatus.routeState == RouteState.OFF_ROUTE
         }
     }
@@ -554,12 +600,15 @@ internal class MapboxTripSession(
         mapMatcherResultObservers.forEach { it.onNewMapMatcherResult(mapMatcherResult) }
     }
 
-    private fun updateRouteProgress(progress: RouteProgress?) {
+    private fun updateRouteProgress(
+        progress: RouteProgress?,
+        shouldTriggerBannerInstructionsObserver: Boolean
+    ) {
         routeProgress = progress
         tripService.updateNotification(buildTripNotificationState(progress))
         progress?.let { progress ->
             routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
-            if (bannerInstructionEvent.isOccurring(progress)) {
+            if (shouldTriggerBannerInstructionsObserver) {
                 checkBannerInstructionEvent { bannerInstruction ->
                     bannerInstructionsObservers.forEach {
                         it.onNewBannerInstructions(bannerInstruction)

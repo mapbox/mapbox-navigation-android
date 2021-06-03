@@ -6,6 +6,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.model.ManeuverInstructionGenerator
+import com.mapbox.navigation.ui.maneuver.model.RoadShield
 import com.mapbox.navigation.ui.maneuver.model.SubManeuver
 
 /**
@@ -14,11 +15,41 @@ import com.mapbox.navigation.ui.maneuver.model.SubManeuver
  * @property attrs AttributeSet
  * @property defStyleAttr Int
  */
-class MapboxSubManeuver @JvmOverloads constructor(
-    context: Context,
-    private val attrs: AttributeSet? = null,
-    private val defStyleAttr: Int = 0
-) : AppCompatTextView(context, attrs, defStyleAttr) {
+class MapboxSubManeuver : AppCompatTextView {
+
+    private var defStyleAttr = 0
+    private var attrs: AttributeSet? = null
+
+    /**
+     *
+     * @param context Context
+     * @constructor
+     */
+    constructor(context: Context) : super(context)
+
+    /**
+     *
+     * @param context Context
+     * @param attrs AttributeSet?
+     * @constructor
+     */
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+
+    /**
+     *
+     * @param context Context
+     * @param attrs AttributeSet?
+     * @param defStyleAttr Int
+     * @constructor
+     */
+    constructor(
+        context: Context,
+        attrs: AttributeSet?,
+        defStyleAttr: Int
+    ) : super(context, attrs, defStyleAttr) {
+        this.attrs = attrs
+        this.defStyleAttr = defStyleAttr
+    }
 
     private var leftDrawable = ContextCompat.getDrawable(
         context, R.drawable.mapbox_ic_exit_arrow_left
@@ -31,17 +62,19 @@ class MapboxSubManeuver @JvmOverloads constructor(
     )
 
     /**
-     * Invoke the method to render sub instructions
+     * Invoke the method to render sub maneuver instructions
      * @param maneuver SubManeuver
      */
-    fun render(maneuver: SubManeuver?) {
+    @JvmOverloads
+    fun render(maneuver: SubManeuver?, roadShield: RoadShield? = null) {
         val exitView = MapboxExitText(context, attrs, defStyleAttr)
         exitView.setExitStyle(exitBackground, leftDrawable, rightDrawable)
         val instruction = ManeuverInstructionGenerator.generateSub(
             context,
             lineHeight,
             exitView,
-            maneuver
+            maneuver,
+            roadShield
         )
         text = instruction
     }
