@@ -783,6 +783,7 @@ class MapboxNavigation(
      * @param feedbackSubType array of [FeedbackEvent.Description] (optional)
      * @param appMetadata [AppMetadata] information (optional)
      */
+    @JvmOverloads
     fun postUserFeedback(
         @FeedbackEvent.Type feedbackType: String,
         description: String,
@@ -967,7 +968,7 @@ class MapboxNavigation(
         )
     }
 
-    companion object {
+    private companion object {
         private const val USER_AGENT: String = "MapboxNavigationNative"
         private const val THREADS_COUNT = 2
     }
