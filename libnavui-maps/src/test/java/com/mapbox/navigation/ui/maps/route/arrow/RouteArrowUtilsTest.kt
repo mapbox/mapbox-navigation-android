@@ -20,7 +20,6 @@ import com.mapbox.navigation.ui.maps.common.ShadowValueConverter
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -198,8 +197,7 @@ class RouteArrowUtilsTest {
     @Test
     fun initializeLayers() {
         val options = RouteArrowOptions.Builder(ctx).build()
-        val shaftSourceValueSlot = slot<Value>()
-        val headSourceValueSlot = slot<Value>()
+        val addStyleSourceSlots = mutableListOf<Value>()
         val addStyleLayerSlots = mutableListOf<Value>()
         val addStyleLayerPositionSlots = mutableListOf<LayerPosition>()
         val style = getFullMockedStyle()
@@ -209,45 +207,45 @@ class RouteArrowUtilsTest {
         verify {
             style.addStyleSource(
                 RouteConstants.ARROW_SHAFT_SOURCE_ID,
-                capture(shaftSourceValueSlot)
+                capture(addStyleSourceSlots)
             )
         }
         assertEquals(
             "geojson",
-            (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["type"]!!.contents
+            (addStyleSourceSlots[0].contents as HashMap<String, Value>)["type"]!!.contents
         )
         assertEquals(
             16L,
-            (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!.contents
+            (addStyleSourceSlots[0].contents as HashMap<String, Value>)["maxzoom"]!!.contents
         )
         assertEquals(
             "null",
-            (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
+            (addStyleSourceSlots[0].contents as HashMap<String, Value>)["data"]!!.contents
         )
         assertEquals(
             RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)
+            (addStyleSourceSlots[0].contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
         verify {
-            style.addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, capture(headSourceValueSlot))
+            style.addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, capture(addStyleSourceSlots))
         }
         assertEquals(
             "geojson",
-            (headSourceValueSlot.captured.contents as HashMap<String, Value>)["type"]!!.contents
+            (addStyleSourceSlots[1].contents as HashMap<String, Value>)["type"]!!.contents
         )
         assertEquals(
             16L,
-            (headSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!.contents
+            (addStyleSourceSlots[1].contents as HashMap<String, Value>)["maxzoom"]!!.contents
         )
         assertEquals(
             "null",
-            (headSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
+            (addStyleSourceSlots[1].contents as HashMap<String, Value>)["data"]!!.contents
         )
         assertEquals(
             RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            (headSourceValueSlot.captured.contents as HashMap<String, Value>)
+            (addStyleSourceSlots[1].contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
@@ -302,8 +300,7 @@ class RouteArrowUtilsTest {
     @Test
     fun initializeLayers_whenAboveLayerNotExists() {
         val options = RouteArrowOptions.Builder(ctx).build()
-        val shaftSourceValueSlot = slot<Value>()
-        val headSourceValueSlot = slot<Value>()
+        val addStyleSourceSlots = mutableListOf<Value>()
         val addStyleLayerSlots = mutableListOf<Value>()
         val addStyleLayerPositionSlots = mutableListOf<LayerPosition>()
         val style = getFullMockedStyle()
@@ -316,45 +313,45 @@ class RouteArrowUtilsTest {
         verify {
             style.addStyleSource(
                 RouteConstants.ARROW_SHAFT_SOURCE_ID,
-                capture(shaftSourceValueSlot)
+                capture(addStyleSourceSlots)
             )
         }
         assertEquals(
             "geojson",
-            (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["type"]!!.contents
+            (addStyleSourceSlots[0].contents as HashMap<String, Value>)["type"]!!.contents
         )
         assertEquals(
             16L,
-            (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!.contents
+            (addStyleSourceSlots[0].contents as HashMap<String, Value>)["maxzoom"]!!.contents
         )
         assertEquals(
             "null",
-            (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
+            (addStyleSourceSlots[0].contents as HashMap<String, Value>)["data"]!!.contents
         )
         assertEquals(
             RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)
+            (addStyleSourceSlots[0].contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
         verify {
-            style.addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, capture(headSourceValueSlot))
+            style.addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, capture(addStyleSourceSlots))
         }
         assertEquals(
             "geojson",
-            (headSourceValueSlot.captured.contents as HashMap<String, Value>)["type"]!!.contents
+            (addStyleSourceSlots[1].contents as HashMap<String, Value>)["type"]!!.contents
         )
         assertEquals(
             16L,
-            (headSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!.contents
+            (addStyleSourceSlots[1].contents as HashMap<String, Value>)["maxzoom"]!!.contents
         )
         assertEquals(
             "null",
-            (headSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
+            (addStyleSourceSlots[1].contents as HashMap<String, Value>)["data"]!!.contents
         )
         assertEquals(
             RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            (headSourceValueSlot.captured.contents as HashMap<String, Value>)
+            (addStyleSourceSlots[1].contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 

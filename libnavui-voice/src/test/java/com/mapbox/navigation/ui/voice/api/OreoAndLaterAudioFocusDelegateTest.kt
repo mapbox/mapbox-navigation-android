@@ -6,7 +6,6 @@ import android.media.AudioManager
 import android.media.AudioManager.AUDIOFOCUS_REQUEST_DELAYED
 import android.media.AudioManager.AUDIOFOCUS_REQUEST_FAILED
 import android.media.AudioManager.AUDIOFOCUS_REQUEST_GRANTED
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import io.mockk.every
 import io.mockk.mockk
@@ -15,8 +14,9 @@ import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class OreoAndLaterAudioFocusDelegateTest {
 
     @Test

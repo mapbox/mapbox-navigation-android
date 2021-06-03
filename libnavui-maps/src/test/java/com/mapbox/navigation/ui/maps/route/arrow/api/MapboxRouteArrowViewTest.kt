@@ -133,8 +133,7 @@ class MapboxRouteArrowViewTest {
             arrowHeadFeature
         )
         val visibilityValueSlot = slot<Value>()
-        val arrowHeadSourceSlot = slot<Value>()
-        val arrowShaftSourceSlot = slot<Value>()
+        val sourcesSlots = mutableListOf<Value>()
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
@@ -188,23 +187,23 @@ class MapboxRouteArrowViewTest {
             style.setStyleSourceProperty(
                 RouteConstants.ARROW_HEAD_SOURCE_ID,
                 any(),
-                capture(arrowHeadSourceSlot)
+                capture(sourcesSlots)
             )
         }
         assertEquals(
             arrowHeadFeature.toJson(),
-            arrowHeadSourceSlot.captured.contents.toString()
+            sourcesSlots[0].contents.toString()
         )
         verify {
             style.setStyleSourceProperty(
                 RouteConstants.ARROW_SHAFT_SOURCE_ID,
                 any(),
-                capture(arrowShaftSourceSlot)
+                capture(sourcesSlots)
             )
         }
         assertEquals(
             arrowShaftFeature.toJson(),
-            arrowShaftSourceSlot.captured.contents.toString()
+            sourcesSlots[1].contents.toString()
         )
         verify { RouteArrowUtils.initializeLayers(style, options) }
         unmockkObject(RouteArrowUtils)
@@ -293,8 +292,7 @@ class MapboxRouteArrowViewTest {
         }.also {
             mockCheckForLayerInitialization(it)
         }
-        val arrowHeadSourceSlot = slot<Value>()
-        val arrowShaftSourceSlot = slot<Value>()
+        val sourcesSlots = mutableListOf<Value>()
         val featureJson = "{\"type\":\"Feature\",\"geometry\":{\"type\":\"LineString\"," +
             "\"coordinates\":[[-122.5234885,37.9754331]]}}"
         val arrowShaftFeature = Feature.fromJson(featureJson)
@@ -312,23 +310,23 @@ class MapboxRouteArrowViewTest {
             style.setStyleSourceProperty(
                 RouteConstants.ARROW_HEAD_SOURCE_ID,
                 any(),
-                capture(arrowHeadSourceSlot)
+                capture(sourcesSlots)
             )
         }
         assertEquals(
             arrowHeadFeatureCollection.toJson(),
-            arrowHeadSourceSlot.captured.contents.toString()
+            sourcesSlots[0].contents.toString()
         )
         verify {
             style.setStyleSourceProperty(
                 RouteConstants.ARROW_SHAFT_SOURCE_ID,
                 any(),
-                capture(arrowShaftSourceSlot)
+                capture(sourcesSlots)
             )
         }
         assertEquals(
             arrowShaftFeatureCollection.toJson(),
-            arrowShaftSourceSlot.captured.contents.toString()
+            sourcesSlots[1].contents.toString()
         )
         unmockkObject(RouteArrowUtils)
     }
@@ -369,8 +367,7 @@ class MapboxRouteArrowViewTest {
         }.also {
             mockCheckForLayerInitialization(it)
         }
-        val arrowHeadSourceSlot = slot<Value>()
-        val arrowShaftSourceSlot = slot<Value>()
+        val sourcesSlots = mutableListOf<Value>()
         val featureJson = "{\"type\":\"Feature\",\"geometry\":{\"type\":\"LineString\"," +
             "\"coordinates\":[[-122.5234885,37.9754331]]}}"
         val arrowShaftFeature = Feature.fromJson(featureJson)
@@ -390,23 +387,23 @@ class MapboxRouteArrowViewTest {
             style.setStyleSourceProperty(
                 RouteConstants.ARROW_HEAD_SOURCE_ID,
                 any(),
-                capture(arrowHeadSourceSlot)
+                capture(sourcesSlots)
             )
         }
         assertEquals(
             arrowHeadFeatureCollection.toJson(),
-            arrowHeadSourceSlot.captured.contents.toString()
+            sourcesSlots[0].contents.toString()
         )
         verify {
             style.setStyleSourceProperty(
                 RouteConstants.ARROW_SHAFT_SOURCE_ID,
                 any(),
-                capture(arrowShaftSourceSlot)
+                capture(sourcesSlots)
             )
         }
         assertEquals(
             arrowShaftFeatureCollection.toJson(),
-            arrowShaftSourceSlot.captured.contents.toString()
+            sourcesSlots[1].contents.toString()
         )
         verify { RouteArrowUtils.initializeLayers(style, options) }
         unmockkObject(RouteArrowUtils)
@@ -448,8 +445,7 @@ class MapboxRouteArrowViewTest {
         }.also {
             mockCheckForLayerInitialization(it)
         }
-        val arrowHeadSourceSlot = slot<Value>()
-        val arrowShaftSourceSlot = slot<Value>()
+        val sourcesSlots = mutableListOf<Value>()
         val featureJson = "{\"type\":\"Feature\",\"geometry\":{\"type\":\"LineString\"," +
             "\"coordinates\":[[-122.5234885,37.9754331]]}}"
         val arrowShaftFeature = Feature.fromJson(featureJson)
@@ -467,23 +463,23 @@ class MapboxRouteArrowViewTest {
             style.setStyleSourceProperty(
                 RouteConstants.ARROW_HEAD_SOURCE_ID,
                 any(),
-                capture(arrowHeadSourceSlot)
+                capture(sourcesSlots)
             )
         }
         assertEquals(
             arrowHeadFeatureCollection.toJson(),
-            arrowHeadSourceSlot.captured.contents.toString()
+            sourcesSlots[0].contents.toString()
         )
         verify {
             style.setStyleSourceProperty(
                 RouteConstants.ARROW_SHAFT_SOURCE_ID,
                 any(),
-                capture(arrowShaftSourceSlot)
+                capture(sourcesSlots)
             )
         }
         assertEquals(
             arrowShaftFeatureCollection.toJson(),
-            arrowShaftSourceSlot.captured.contents.toString()
+            sourcesSlots[1].contents.toString()
         )
         verify { RouteArrowUtils.initializeLayers(style, options) }
         unmockkObject(RouteArrowUtils)
@@ -525,8 +521,7 @@ class MapboxRouteArrowViewTest {
         }.also {
             mockCheckForLayerInitialization(it)
         }
-        val arrowHeadSourceSlot = slot<Value>()
-        val arrowShaftSourceSlot = slot<Value>()
+        val sourcesSlots = mutableListOf<Value>()
         val featureJson = "{\"type\":\"Feature\",\"geometry\":{\"type\":\"LineString\"," +
             "\"coordinates\":[[-122.5234885,37.9754331]]}}"
         val arrowShaftFeature = Feature.fromJson(featureJson)
@@ -544,23 +539,23 @@ class MapboxRouteArrowViewTest {
             style.setStyleSourceProperty(
                 RouteConstants.ARROW_HEAD_SOURCE_ID,
                 any(),
-                capture(arrowHeadSourceSlot)
+                capture(sourcesSlots)
             )
         }
         assertEquals(
             arrowHeadFeatureCollection.toJson(),
-            arrowHeadSourceSlot.captured.contents.toString()
+            sourcesSlots[0].contents.toString()
         )
         verify {
             style.setStyleSourceProperty(
                 RouteConstants.ARROW_SHAFT_SOURCE_ID,
                 any(),
-                capture(arrowShaftSourceSlot)
+                capture(sourcesSlots)
             )
         }
         assertEquals(
             arrowShaftFeatureCollection.toJson(),
-            arrowShaftSourceSlot.captured.contents.toString()
+            sourcesSlots[1].contents.toString()
         )
         verify { RouteArrowUtils.initializeLayers(style, options) }
         unmockkObject(RouteArrowUtils)

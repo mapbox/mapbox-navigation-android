@@ -7,7 +7,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -17,12 +16,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.text.SimpleDateFormat
 import java.util.Date
 
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class EstimatedTimeToArrivalFormatterTest {
 
     private lateinit var ctx: Context

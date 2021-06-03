@@ -9,7 +9,6 @@ import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
 import com.mapbox.navigation.base.internal.tilestore.TileStoreProvider
 import com.mapbox.navigation.testing.BuilderTest
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -23,10 +22,11 @@ import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import kotlin.reflect.KClass
 
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.Builder>() {
 

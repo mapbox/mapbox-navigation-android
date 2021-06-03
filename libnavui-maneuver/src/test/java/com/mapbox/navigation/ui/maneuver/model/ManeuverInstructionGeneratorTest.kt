@@ -6,7 +6,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.maneuver.view.MapboxExitText
 import io.mockk.every
 import io.mockk.mockk
@@ -18,8 +17,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class ManeuverInstructionGeneratorTest {
 
     private lateinit var mockContext: Context

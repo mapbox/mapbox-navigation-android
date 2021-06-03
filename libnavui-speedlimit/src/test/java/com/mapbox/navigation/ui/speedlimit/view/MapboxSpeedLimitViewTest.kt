@@ -6,7 +6,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 import com.mapbox.navigation.base.speed.model.SpeedLimitUnit
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.speedlimit.R
 import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter
@@ -26,11 +25,12 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @ExperimentalCoroutinesApi
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class MapboxSpeedLimitViewTest {
 
     lateinit var ctx: Context

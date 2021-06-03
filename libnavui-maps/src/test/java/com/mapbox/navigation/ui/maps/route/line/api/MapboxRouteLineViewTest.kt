@@ -520,9 +520,7 @@ class MapboxRouteLineViewTest {
     fun showPrimaryRoute() {
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val primaryRouteValueSlot = slot<Value>()
-        val trafficValueSlot = slot<Value>()
-        val casingValueSlot = slot<Value>()
+        val routeValueSlots = mutableListOf<Value>()
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
@@ -575,34 +573,34 @@ class MapboxRouteLineViewTest {
             style.setStyleLayerProperty(
                 RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
                 "visibility",
-                capture(primaryRouteValueSlot)
+                capture(routeValueSlots)
             )
         }
         verify {
             style.setStyleLayerProperty(
                 RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
                 "visibility",
-                capture(trafficValueSlot)
+                capture(routeValueSlots)
             )
         }
         verify {
             style.setStyleLayerProperty(
                 RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
                 "visibility",
-                capture(casingValueSlot)
+                capture(routeValueSlots)
             )
         }
         assertEquals(
             Visibility.VISIBLE.value.toLowerCase(),
-            primaryRouteValueSlot.captured.contents.toString().toLowerCase()
+            routeValueSlots[0].contents.toString().toLowerCase()
         )
         assertEquals(
             Visibility.VISIBLE.value.toLowerCase(),
-            trafficValueSlot.captured.contents.toString().toLowerCase()
+            routeValueSlots[1].contents.toString().toLowerCase()
         )
         assertEquals(
             Visibility.VISIBLE.value.toLowerCase(),
-            casingValueSlot.captured.contents.toString().toLowerCase()
+            routeValueSlots[2].contents.toString().toLowerCase()
         )
         unmockkObject(MapboxRouteLineUtils)
     }
@@ -611,9 +609,7 @@ class MapboxRouteLineViewTest {
     fun hidePrimaryRoute() {
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val primaryRouteValueSlot = slot<Value>()
-        val trafficValueSlot = slot<Value>()
-        val casingValueSlot = slot<Value>()
+        val routeSlots = mutableListOf<Value>()
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
@@ -666,34 +662,34 @@ class MapboxRouteLineViewTest {
             style.setStyleLayerProperty(
                 RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
                 "visibility",
-                capture(primaryRouteValueSlot)
+                capture(routeSlots)
             )
         }
         verify {
             style.setStyleLayerProperty(
                 RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
                 "visibility",
-                capture(trafficValueSlot)
+                capture(routeSlots)
             )
         }
         verify {
             style.setStyleLayerProperty(
                 RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
                 "visibility",
-                capture(casingValueSlot)
+                capture(routeSlots)
             )
         }
         assertEquals(
             Visibility.NONE.value.toLowerCase(),
-            primaryRouteValueSlot.captured.contents.toString().toLowerCase()
+            routeSlots[0].contents.toString().toLowerCase()
         )
         assertEquals(
             Visibility.NONE.value.toLowerCase(),
-            trafficValueSlot.captured.contents.toString().toLowerCase()
+            routeSlots[1].contents.toString().toLowerCase()
         )
         assertEquals(
             Visibility.NONE.value.toLowerCase(),
-            casingValueSlot.captured.contents.toString().toLowerCase()
+            routeSlots[2].contents.toString().toLowerCase()
         )
         unmockkObject(MapboxRouteLineUtils)
     }
@@ -702,12 +698,7 @@ class MapboxRouteLineViewTest {
     fun showAlternativeRoutes() {
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val alternativeRoute1ValueSlot = slot<Value>()
-        val alternativeRoute1TrafficValueSlot = slot<Value>()
-        val alternativeRoute1CasingValueSlot = slot<Value>()
-        val alternativeRoute2ValueSlot = slot<Value>()
-        val alternativeRoute2TrafficValueSlot = slot<Value>()
-        val alternativeRoute2CasingValueSlot = slot<Value>()
+        val alternativeRouteSlots = mutableListOf<Value>()
 
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
@@ -801,67 +792,67 @@ class MapboxRouteLineViewTest {
             style.setStyleLayerProperty(
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
                 "visibility",
-                capture(alternativeRoute1ValueSlot)
+                capture(alternativeRouteSlots)
             )
         }
         verify {
             style.setStyleLayerProperty(
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
                 "visibility",
-                capture(alternativeRoute1TrafficValueSlot)
+                capture(alternativeRouteSlots)
             )
         }
         verify {
             style.setStyleLayerProperty(
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
                 "visibility",
-                capture(alternativeRoute1CasingValueSlot)
+                capture(alternativeRouteSlots)
             )
         }
         verify {
             style.setStyleLayerProperty(
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
                 "visibility",
-                capture(alternativeRoute2ValueSlot)
+                capture(alternativeRouteSlots)
             )
         }
         verify {
             style.setStyleLayerProperty(
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
                 "visibility",
-                capture(alternativeRoute2TrafficValueSlot)
+                capture(alternativeRouteSlots)
             )
         }
         verify {
             style.setStyleLayerProperty(
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID,
                 "visibility",
-                capture(alternativeRoute2CasingValueSlot)
+                capture(alternativeRouteSlots)
             )
         }
         assertEquals(
             Visibility.VISIBLE.value.toLowerCase(),
-            alternativeRoute1ValueSlot.captured.contents.toString().toLowerCase()
+            alternativeRouteSlots[0].contents.toString().toLowerCase()
         )
         assertEquals(
             Visibility.VISIBLE.value.toLowerCase(),
-            alternativeRoute1TrafficValueSlot.captured.contents.toString().toLowerCase()
+            alternativeRouteSlots[1].contents.toString().toLowerCase()
         )
         assertEquals(
             Visibility.VISIBLE.value.toLowerCase(),
-            alternativeRoute1CasingValueSlot.captured.contents.toString().toLowerCase()
+            alternativeRouteSlots[2].contents.toString().toLowerCase()
         )
         assertEquals(
             Visibility.VISIBLE.value.toLowerCase(),
-            alternativeRoute2ValueSlot.captured.contents.toString().toLowerCase()
+            alternativeRouteSlots[3].contents.toString().toLowerCase()
         )
         assertEquals(
             Visibility.VISIBLE.value.toLowerCase(),
-            alternativeRoute2TrafficValueSlot.captured.contents.toString().toLowerCase()
+            alternativeRouteSlots[4].contents.toString().toLowerCase()
         )
         assertEquals(
             Visibility.VISIBLE.value.toLowerCase(),
-            alternativeRoute2CasingValueSlot.captured.contents.toString().toLowerCase()
+            alternativeRouteSlots[5].contents.toString().toLowerCase()
         )
         unmockkObject(MapboxRouteLineUtils)
     }
@@ -870,13 +861,7 @@ class MapboxRouteLineViewTest {
     fun hideAlternativeRoutes() {
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val alternativeRoute1ValueSlot = slot<Value>()
-        val alternativeRoute1TrafficValueSlot = slot<Value>()
-        val alternativeRoute1CasingValueSlot = slot<Value>()
-        val alternativeRoute2ValueSlot = slot<Value>()
-        val alternativeRoute2TrafficValueSlot = slot<Value>()
-        val alternativeRoute2CasingValueSlot = slot<Value>()
-
+        val alternativeRoutesSlots = mutableListOf<Value>()
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
@@ -969,67 +954,67 @@ class MapboxRouteLineViewTest {
             style.setStyleLayerProperty(
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
                 "visibility",
-                capture(alternativeRoute1ValueSlot)
+                capture(alternativeRoutesSlots)
             )
         }
         verify {
             style.setStyleLayerProperty(
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
                 "visibility",
-                capture(alternativeRoute1TrafficValueSlot)
+                capture(alternativeRoutesSlots)
             )
         }
         verify {
             style.setStyleLayerProperty(
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
                 "visibility",
-                capture(alternativeRoute1CasingValueSlot)
+                capture(alternativeRoutesSlots)
             )
         }
         verify {
             style.setStyleLayerProperty(
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
                 "visibility",
-                capture(alternativeRoute2ValueSlot)
+                capture(alternativeRoutesSlots)
             )
         }
         verify {
             style.setStyleLayerProperty(
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
                 "visibility",
-                capture(alternativeRoute2TrafficValueSlot)
+                capture(alternativeRoutesSlots)
             )
         }
         verify {
             style.setStyleLayerProperty(
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID,
                 "visibility",
-                capture(alternativeRoute2CasingValueSlot)
+                capture(alternativeRoutesSlots)
             )
         }
         assertEquals(
             Visibility.NONE.value.toLowerCase(),
-            alternativeRoute1ValueSlot.captured.contents.toString().toLowerCase()
+            alternativeRoutesSlots[0].contents.toString().toLowerCase()
         )
         assertEquals(
             Visibility.NONE.value.toLowerCase(),
-            alternativeRoute1TrafficValueSlot.captured.contents.toString().toLowerCase()
+            alternativeRoutesSlots[1].contents.toString().toLowerCase()
         )
         assertEquals(
             Visibility.NONE.value.toLowerCase(),
-            alternativeRoute1CasingValueSlot.captured.contents.toString().toLowerCase()
+            alternativeRoutesSlots[2].contents.toString().toLowerCase()
         )
         assertEquals(
             Visibility.NONE.value.toLowerCase(),
-            alternativeRoute2ValueSlot.captured.contents.toString().toLowerCase()
+            alternativeRoutesSlots[3].contents.toString().toLowerCase()
         )
         assertEquals(
             Visibility.NONE.value.toLowerCase(),
-            alternativeRoute2TrafficValueSlot.captured.contents.toString().toLowerCase()
+            alternativeRoutesSlots[4].contents.toString().toLowerCase()
         )
         assertEquals(
             Visibility.NONE.value.toLowerCase(),
-            alternativeRoute2CasingValueSlot.captured.contents.toString().toLowerCase()
+            alternativeRoutesSlots[5].contents.toString().toLowerCase()
         )
         unmockkObject(MapboxRouteLineUtils)
     }

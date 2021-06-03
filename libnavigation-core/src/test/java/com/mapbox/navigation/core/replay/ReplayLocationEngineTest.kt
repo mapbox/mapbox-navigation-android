@@ -9,7 +9,6 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.navigation.core.replay.history.ReplayEventGetStatus
 import com.mapbox.navigation.core.replay.history.ReplayEventLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -21,8 +20,9 @@ import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class ReplayLocationEngineTest {
 
     private val mapboxReplayer: MapboxReplayer = mockk {

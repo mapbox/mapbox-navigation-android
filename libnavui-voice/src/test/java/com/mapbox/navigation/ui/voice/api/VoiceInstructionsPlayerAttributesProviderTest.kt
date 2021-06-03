@@ -1,14 +1,14 @@
 package com.mapbox.navigation.ui.voice.api
 
 import android.os.Build
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class VoiceInstructionsPlayerAttributesProviderTest {
 
     @Test

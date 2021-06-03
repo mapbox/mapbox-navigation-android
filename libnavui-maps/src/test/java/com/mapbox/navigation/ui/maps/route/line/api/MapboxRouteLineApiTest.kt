@@ -18,7 +18,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.base.model.Expected
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
@@ -58,11 +57,12 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.util.UUID
 import kotlin.collections.ArrayList
 
 @ExperimentalCoroutinesApi
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class MapboxRouteLineApiTest {
 
     lateinit var ctx: Context

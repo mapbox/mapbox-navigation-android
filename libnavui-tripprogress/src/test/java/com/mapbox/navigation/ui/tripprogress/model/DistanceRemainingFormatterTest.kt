@@ -4,14 +4,14 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.formatter.UnitType
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.util.Locale
 
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class DistanceRemainingFormatterTest {
 
     private val ctx: Context = ApplicationProvider.getApplicationContext()

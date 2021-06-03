@@ -3,13 +3,13 @@ package com.mapbox.navigation.ui.maps.camera.utils
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class MapboxNavigationCameraUtilsKtTest {
 
     @Test

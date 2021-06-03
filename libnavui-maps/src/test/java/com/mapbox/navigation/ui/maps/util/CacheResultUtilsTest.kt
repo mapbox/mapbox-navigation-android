@@ -1,12 +1,12 @@
 package com.mapbox.navigation.ui.maps.util
 
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class CacheResultUtilsTest {
 
     @Test

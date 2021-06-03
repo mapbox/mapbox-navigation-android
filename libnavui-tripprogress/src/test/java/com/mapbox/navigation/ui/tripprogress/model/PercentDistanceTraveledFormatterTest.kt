@@ -1,11 +1,11 @@
 package com.mapbox.navigation.ui.tripprogress.model
 
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class PercentDistanceTraveledFormatterTest {
 
     @Test

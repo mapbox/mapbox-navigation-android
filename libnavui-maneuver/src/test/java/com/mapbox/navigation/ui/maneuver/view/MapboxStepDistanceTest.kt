@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.maneuver.view
 import android.content.Context
 import android.text.SpannableString
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.maneuver.model.StepDistance
 import io.mockk.every
 import io.mockk.mockk
@@ -11,8 +10,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class MapboxStepDistanceTest {
 
     lateinit var ctx: Context

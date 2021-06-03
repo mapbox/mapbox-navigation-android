@@ -6,7 +6,6 @@ import android.text.SpannableString
 import android.view.View
 import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.tripprogress.R
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue
@@ -17,9 +16,10 @@ import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class MapboxTripProgressViewTest {
 
     lateinit var ctx: Context
@@ -112,27 +112,11 @@ class MapboxTripProgressViewTest {
 
     @Test
     fun render_Update() {
-        val formatter = TripProgressUpdateFormatter.Builder(ctx)
-            .estimatedTimeToArrivalFormatter(
-                mockk {
-                    every { format(1L) } returns SpannableString("11:59")
-                }
-            )
-            .distanceRemainingFormatter(
-                mockk {
-                    every { format(2.0) } returns SpannableString("44 mi")
-                }
-            )
-            .timeRemainingFormatter(
-                mockk {
-                    every { format(3.0) } returns SpannableString("5 min")
-                }
-            )
-            .percentRouteTraveledFormatter(
-                mockk {
-                    every { format(4.0) } returns SpannableString("10%")
-                }
-            ).build()
+        val mockedFormatter = mockk<TripProgressUpdateFormatter>()
+        every { mockedFormatter.getEstimatedTimeToArrival(1L) } returns SpannableString("11:59")
+        every { mockedFormatter.getDistanceRemaining(2.0) } returns SpannableString("44 mi")
+        every { mockedFormatter.getTimeRemaining(3.0) } returns SpannableString("5 min")
+        every { mockedFormatter.getPercentRouteTraveled(4.0) } returns SpannableString("10%")
         val state = TripProgressUpdateValue(
             1L,
             2.0,
@@ -140,7 +124,7 @@ class MapboxTripProgressViewTest {
             4.0,
             5.0,
             6,
-            formatter
+            mockedFormatter
         )
 
         val view = MapboxTripProgressView(ctx).also {

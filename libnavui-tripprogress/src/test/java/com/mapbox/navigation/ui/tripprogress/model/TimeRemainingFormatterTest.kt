@@ -7,7 +7,6 @@ import android.text.Spannable
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -15,11 +14,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.util.Locale
 
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class TimeRemainingFormatterTest {
 
     private lateinit var ctx: Context

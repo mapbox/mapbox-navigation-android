@@ -33,7 +33,6 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrafficExpression
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
 import org.junit.Assert
 import org.junit.Assert.assertEquals
@@ -294,10 +293,7 @@ class MapboxRouteLineUtilsTest {
         val options = MapboxRouteLineOptions.Builder(ctx)
             .withRouteLineBelowLayerId(LocationComponentConstants.MODEL_LAYER)
             .build()
-        val waypointSourceValueSlot = slot<Value>()
-        val primaryRouteSourceValueSlot = slot<Value>()
-        val alternativeRoute1SourceValueSlot = slot<Value>()
-        val alternativeRoute2SourceValueSlot = slot<Value>()
+        val addStyleSourceSlots = mutableListOf<Value>()
         val addStyleLayerSlots = mutableListOf<Value>()
         val addStyleLayerPositionSlots = mutableListOf<LayerPosition>()
         val mockLayer = mockk<StyleObjectInfo> {
@@ -366,121 +362,121 @@ class MapboxRouteLineUtilsTest {
 
         verify {
             style.addStyleSource(
-                RouteConstants.WAYPOINT_SOURCE_ID, capture(waypointSourceValueSlot)
+                RouteConstants.WAYPOINT_SOURCE_ID, capture(addStyleSourceSlots)
             )
         }
         assertEquals(
             "geojson",
-            (waypointSourceValueSlot.captured.contents as HashMap<String, Value>)["type"]!!.contents
+            (addStyleSourceSlots[0].contents as HashMap<String, Value>)["type"]!!.contents
         )
         assertEquals(
             16L,
-            (waypointSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!
+            (addStyleSourceSlots[0].contents as HashMap<String, Value>)["maxzoom"]!!
                 .contents
         )
         assertEquals(
             "{\"type\":\"FeatureCollection\",\"features\":[]}",
-            (waypointSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
+            (addStyleSourceSlots[0].contents as HashMap<String, Value>)["data"]!!.contents
         )
         assertEquals(
             RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            (waypointSourceValueSlot.captured.contents as HashMap<String, Value>)
+            (addStyleSourceSlots[0].contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
         verify {
             style.addStyleSource(
                 RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
-                capture(primaryRouteSourceValueSlot)
+                capture(addStyleSourceSlots)
             )
         }
         assertEquals(
             "geojson",
-            (primaryRouteSourceValueSlot.captured.contents as HashMap<String, Value>)["type"]
+            (addStyleSourceSlots[1].contents as HashMap<String, Value>)["type"]
             !!.contents
         )
         assertEquals(
             16L,
-            (primaryRouteSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]
+            (addStyleSourceSlots[1].contents as HashMap<String, Value>)["maxzoom"]
             !!.contents
         )
         assertEquals(
             true,
-            (primaryRouteSourceValueSlot.captured.contents as HashMap<String, Value>)["lineMetrics"]
+            (addStyleSourceSlots[1].contents as HashMap<String, Value>)["lineMetrics"]
             !!.contents
         )
         assertEquals(
             "{\"type\":\"FeatureCollection\",\"features\":[]}",
-            (primaryRouteSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]
+            (addStyleSourceSlots[1].contents as HashMap<String, Value>)["data"]
             !!.contents
         )
         assertEquals(
             RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            (primaryRouteSourceValueSlot.captured.contents as HashMap<String, Value>)
+            (addStyleSourceSlots[1].contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
         verify {
             style.addStyleSource(
                 RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
-                capture(alternativeRoute1SourceValueSlot)
+                capture(addStyleSourceSlots)
             )
         }
         assertEquals(
             "geojson",
-            (alternativeRoute1SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (addStyleSourceSlots[2].contents as HashMap<String, Value>)
             ["type"]!!.contents
         )
         assertEquals(
             16L,
-            (alternativeRoute1SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (addStyleSourceSlots[2].contents as HashMap<String, Value>)
             ["maxzoom"]!!.contents
         )
         assertEquals(
             true,
-            (alternativeRoute1SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (addStyleSourceSlots[2].contents as HashMap<String, Value>)
             ["lineMetrics"]!!.contents
         )
         assertEquals(
             "{\"type\":\"FeatureCollection\",\"features\":[]}",
-            (alternativeRoute1SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (addStyleSourceSlots[2].contents as HashMap<String, Value>)
             ["data"]!!.contents
         )
         assertEquals(
             RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            (alternativeRoute1SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (addStyleSourceSlots[2].contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
         verify {
             style.addStyleSource(
                 RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
-                capture(alternativeRoute2SourceValueSlot)
+                capture(addStyleSourceSlots)
             )
         }
         assertEquals(
             "geojson",
-            (alternativeRoute2SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (addStyleSourceSlots[3].contents as HashMap<String, Value>)
             ["type"]!!.contents
         )
         assertEquals(
             16L,
-            (alternativeRoute2SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (addStyleSourceSlots[3].contents as HashMap<String, Value>)
             ["maxzoom"]!!.contents
         )
         assertEquals(
             true,
-            (alternativeRoute2SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (addStyleSourceSlots[3].contents as HashMap<String, Value>)
             ["lineMetrics"]!!.contents
         )
         assertEquals(
             "{\"type\":\"FeatureCollection\",\"features\":[]}",
-            (alternativeRoute2SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (addStyleSourceSlots[3].contents as HashMap<String, Value>)
             ["data"]!!.contents
         )
         assertEquals(
             RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            (alternativeRoute2SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (addStyleSourceSlots[3].contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
@@ -1556,21 +1552,12 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun getLayerVisibility() {
-        val layerTypeValue = mockk<Value> {
-            every { contents } returns "line"
-        }
-        val sourceValue = mockk<Value> {
-            every { contents } returns "mapbox-navigation-route-source"
-        }
-        val layerValue = mockk<Value> {
-            every { contents } returns HashMap<String, Value>().also {
-                it["type"] = layerTypeValue
-                it["source"] = sourceValue
-            }
-        }
-        val layerPropertyExpected = mockk<Expected<String, Value>> {
-            every { value.hint(Value::class) } returns layerValue
-        }
+        val layerPropertyExpected = mockk<Expected<String, Value>>(relaxed = true)
+        val contentsVector = mutableMapOf<String, Value>()
+        contentsVector["type"] = Value("line")
+        contentsVector["source"] = Value("mapbox-navigation-route-source")
+        every { layerPropertyExpected.value?.contents } returns contentsVector
+
         val stylePropertyValue = mockk<StylePropertyValue> {
             every { kind } returns StylePropertyValueKind.CONSTANT
             every { value } returns Value.valueOf("visible")

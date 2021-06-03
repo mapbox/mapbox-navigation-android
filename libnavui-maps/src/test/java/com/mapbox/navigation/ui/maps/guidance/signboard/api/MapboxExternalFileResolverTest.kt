@@ -3,14 +3,14 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.api
 import android.content.Context
 import android.content.res.AssetManager
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class MapboxExternalFileResolverTest {
 
     private lateinit var ctx: Context

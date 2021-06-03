@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.R
 import io.mockk.Ordering
@@ -20,12 +19,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.LooperMode
 import org.robolectric.shadows.ShadowLooper
 
 @LooperMode(LooperMode.Mode.PAUSED)
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
 class MapboxSoundButtonTest {
 
@@ -135,7 +135,7 @@ class MapboxSoundButtonTest {
     fun `mute and unmute and extend multiple times is allowed`() {
         val view = MapboxSoundButton(ctx)
         val soundButtonText = view.findViewById<AppCompatTextView>(R.id.soundButtonText)
-        val messageSlot = slot<Boolean>()
+        val messageSlots = mutableListOf<Boolean>()
 
         view.muteAndExtend(100, consumer)
         view.muteAndExtend(100, consumer)
@@ -145,7 +145,7 @@ class MapboxSoundButtonTest {
         view.unmuteAndExtend(100, consumer)
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-        verify(exactly = 6) { consumer.accept(capture(messageSlot)) }
+        verify(exactly = 6) { consumer.accept(capture(messageSlots)) }
         verify(ordering = Ordering.SEQUENCE) {
             consumer.accept(true)
             consumer.accept(true)

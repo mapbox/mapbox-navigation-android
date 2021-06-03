@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Typeface
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.ManeuverModifier
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode
 import org.junit.Assert.assertEquals
@@ -12,8 +11,9 @@ import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class MapboxExitTextTest {
 
     lateinit var ctx: Context

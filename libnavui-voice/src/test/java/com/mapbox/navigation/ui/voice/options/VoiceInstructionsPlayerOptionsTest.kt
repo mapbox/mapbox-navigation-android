@@ -3,12 +3,12 @@ package com.mapbox.navigation.ui.voice.options
 import android.media.AudioAttributes
 import android.media.AudioManager
 import com.mapbox.navigation.testing.BuilderTest
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.reflect.KClass
 
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class VoiceInstructionsPlayerOptionsTest :
     BuilderTest<VoiceInstructionsPlayerOptions, VoiceInstructionsPlayerOptions.Builder>() {
 

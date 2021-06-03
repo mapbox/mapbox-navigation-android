@@ -4,7 +4,6 @@ import android.content.Context
 import android.widget.ImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.maps.R
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertNotNull
@@ -13,10 +12,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
 
 @ExperimentalCoroutinesApi
-@RunWith(NavSDKRobolectricTestRunner::class)
+@RunWith(RobolectricTestRunner::class)
 class MapboxRouteOverviewButtonTest {
 
     private lateinit var ctx: Context
