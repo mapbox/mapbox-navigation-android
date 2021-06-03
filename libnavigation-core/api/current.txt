@@ -16,6 +16,8 @@ package com.mapbox.navigation.core {
     method public boolean navigateNextRouteLeg();
     method public void onDestroy();
     method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray(), com.mapbox.navigation.core.telemetry.events.AppMetadata? appMetadata = null);
+    method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray());
+    method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot);
     method public void registerArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
     method public void registerBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
     method public void registerEHorizonObserver(com.mapbox.navigation.core.trip.session.eh.EHorizonObserver eHorizonObserver);
@@ -58,10 +60,6 @@ package com.mapbox.navigation.core {
     property public final com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcher roadObjectMatcher;
     property public final com.mapbox.navigation.core.trip.session.eh.RoadObjectsStore roadObjectsStore;
     property public final com.mapbox.navigation.core.navigator.TilesetDescriptorFactory tilesetDescriptorFactory;
-    field public static final com.mapbox.navigation.core.MapboxNavigation.Companion Companion;
-  }
-
-  public static final class MapboxNavigation.Companion {
   }
 
   public final class MapboxNavigationKt {
