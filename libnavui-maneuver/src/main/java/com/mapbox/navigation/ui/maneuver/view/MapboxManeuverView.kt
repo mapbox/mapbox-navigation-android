@@ -10,10 +10,11 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView.HORIZONTAL
+import androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.ui.maneuver.R
+import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.databinding.MapboxMainManeuverLayoutBinding
 import com.mapbox.navigation.ui.maneuver.databinding.MapboxManeuverLayoutBinding
 import com.mapbox.navigation.ui.maneuver.databinding.MapboxSubManeuverLayoutBinding
@@ -21,6 +22,7 @@ import com.mapbox.navigation.ui.maneuver.model.Lane
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
+import com.mapbox.navigation.ui.maneuver.model.RoadShield
 import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.StepDistance
 import com.mapbox.navigation.ui.maneuver.model.SubManeuver
@@ -28,35 +30,31 @@ import com.mapbox.navigation.ui.maneuver.model.TurnIconResources
 
 /**
  * Default view to render a maneuver.
- * @property laneGuidanceAdapter MapboxLaneGuidanceAdapter
- * @property upcomingManeuverAdapter MapboxUpcomingManeuverAdapter
- * @constructor
+ *
+ * @see MapboxManeuverApi
  */
 class MapboxManeuverView : ConstraintLayout {
 
     /**
+     * Default view to render a maneuver.
      *
-     * @param context Context
-     * @constructor
+     * @see MapboxManeuverApi
      */
     constructor(context: Context) : super(context)
 
     /**
+     * Default view to render a maneuver.
      *
-     * @param context Context
-     * @param attrs AttributeSet?
-     * @constructor
+     * @see MapboxManeuverApi
      */
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
         initAttributes(attrs)
     }
 
     /**
+     * Default view to render a maneuver.
      *
-     * @param context Context
-     * @param attrs AttributeSet?
-     * @param defStyleAttr Int
-     * @constructor
+     * @see MapboxManeuverApi
      */
     constructor(
         context: Context,
@@ -76,6 +74,24 @@ class MapboxManeuverView : ConstraintLayout {
     private val mainLayoutBinding = MapboxMainManeuverLayoutBinding.bind(binding.root)
     private val subLayoutBinding = MapboxSubManeuverLayoutBinding.bind(binding.root)
 
+    private val maneuverToRoadShield = mutableMapOf<String, RoadShield?>()
+    private val currentlyRenderedManeuvers: MutableList<Maneuver> = mutableListOf()
+
+    /**
+     * The property enables/disables showing the list of upcoming maneuvers.
+     * Note: The View doesn't maintain the state of this property. If the device undergoes
+     * screen rotation changes make sure to set this property again at appropriate place.
+     */
+    var upcomingManeuverRenderingEnabled = true
+        set(value) {
+            if (value != field) {
+                if (!value && binding.upcomingManeuverRecycler.visibility == VISIBLE) {
+                    updateUpcomingManeuversVisibility(GONE)
+                }
+            }
+            field = value
+        }
+
     /**
      * Initialize.
      */
@@ -91,24 +107,63 @@ class MapboxManeuverView : ConstraintLayout {
         }
 
         this.setOnClickListener {
-            if (binding.upcomingManeuverRecycler.visibility == GONE) {
-                updateUpcomingManeuversVisibility(VISIBLE)
-            } else {
-                updateUpcomingManeuversVisibility(GONE)
-                binding.upcomingManeuverRecycler.smoothScrollToPosition(0)
-                updateSubManeuverViewVisibility(binding.subManeuverLayout.visibility)
+            if (upcomingManeuverRenderingEnabled) {
+                if (binding.upcomingManeuverRecycler.visibility == GONE) {
+                    updateUpcomingManeuversVisibility(VISIBLE)
+                } else {
+                    updateUpcomingManeuversVisibility(GONE)
+                    binding.upcomingManeuverRecycler.smoothScrollToPosition(0)
+                    updateSubManeuverViewVisibility(binding.subManeuverLayout.visibility)
+                }
             }
         }
     }
 
     /**
-     * Invoke the method to render primary, secondary, sub instructions and lane information.
-     * @param maneuver Expected
+     * Invoke the method to render the maneuvers.
+     *
+     * The first maneuver on the list will be rendered as the current maneuver while the rest of the maneuvers will be rendered as upcoming maneuvers.
+     *
+     * You can control the number of maneuvers that will be rendered by manipulating the provided list,
+     * for example, you can render the current maneuver and a list of up to 5 upcoming maneuvers like this:
+     * ```
+     * maneuverView.renderManeuvers(
+     *     maneuvers.mapValue {
+     *         it.take(6)
+     *     }
+     * )
+     * ```
+     *
+     * If there were any shields provided via [renderManeuverShields], those shields will be attached to corresponding [Maneuver]s during rendering.
+     *
+     * This method ignores empty lists of maneuvers and will not clean up the view if an empty list is provided.
+     *
+     * @param maneuvers maneuvers to render
+     * @see MapboxManeuverApi.getManeuvers
      */
-    fun renderManeuver(maneuver: Expected<ManeuverError, Maneuver>) {
-        maneuver.onValue {
-            drawManeuver(it)
+    fun renderManeuvers(maneuvers: Expected<ManeuverError, List<Maneuver>>) {
+        maneuvers.onValue { list ->
+            if (list.isNotEmpty()) {
+                currentlyRenderedManeuvers.clear()
+                currentlyRenderedManeuvers.addAll(list)
+                renderManeuvers()
+            }
         }
+    }
+
+    /**
+     * Invoke the method to update rendered maneuvers with road shields.
+     *
+     * The provided shields are mapped to IDs of [PrimaryManeuver], [SecondaryManeuver], and [SubManeuver]
+     * and if a maneuver has already been rendered via [renderManeuvers], the respective shields' text will be changed to the shield icon.
+     *
+     * Invoking this method also caches all of the available shields. Whenever [renderManeuvers] is invoked, the cached shields are reused for rendering.
+     *
+     * @param shieldMap the map of maneuver IDs to available shields
+     */
+    fun renderManeuverShields(shieldMap: Map<String, RoadShield?>) {
+        maneuverToRoadShield.putAll(shieldMap)
+        renderManeuvers()
     }
 
     /**
@@ -253,8 +308,9 @@ class MapboxManeuverView : ConstraintLayout {
      * Invoke the method to render primary instructions on top of [MapboxManeuverView]
      * @param primary PrimaryManeuver
      */
-    fun renderPrimaryManeuver(primary: PrimaryManeuver) {
-        mainLayoutBinding.primaryManeuverText.render(primary)
+    @JvmOverloads
+    fun renderPrimaryManeuver(primary: PrimaryManeuver, roadShield: RoadShield? = null) {
+        mainLayoutBinding.primaryManeuverText.render(primary, roadShield)
         mainLayoutBinding.maneuverIcon.renderPrimaryTurnIcon(primary)
     }
 
@@ -262,16 +318,18 @@ class MapboxManeuverView : ConstraintLayout {
      * Invoke the method to render secondary instructions on top of [MapboxManeuverView]
      * @param secondary SecondaryManeuver?
      */
-    fun renderSecondaryManeuver(secondary: SecondaryManeuver?) {
-        mainLayoutBinding.secondaryManeuverText.render(secondary)
+    @JvmOverloads
+    fun renderSecondaryManeuver(secondary: SecondaryManeuver?, roadShield: RoadShield? = null) {
+        mainLayoutBinding.secondaryManeuverText.render(secondary, roadShield)
     }
 
     /**
      * Invoke the method to render sub instructions on top of [MapboxManeuverView]
      * @param sub SubManeuver?
      */
-    fun renderSubManeuver(sub: SubManeuver?) {
-        subLayoutBinding.subManeuverText.render(sub)
+    @JvmOverloads
+    fun renderSubManeuver(sub: SubManeuver?, roadShield: RoadShield? = null) {
+        subLayoutBinding.subManeuverText.render(sub, roadShield)
         subLayoutBinding.subManeuverIcon.renderSubTurnIcon(sub)
     }
 
@@ -291,19 +349,19 @@ class MapboxManeuverView : ConstraintLayout {
     }
 
     /**
-     * Invoke the method to render list of upcoming instructions on top of [MapboxManeuverView]
-     * @param maneuvers List<Maneuver>
-     */
-    fun renderUpcomingManeuvers(maneuvers: List<Maneuver>) {
-        upcomingManeuverAdapter.addUpcomingManeuvers(maneuvers)
-    }
-
-    /**
      * Invoke the method to render step distance remaining on top of [MapboxManeuverView]
      * @param stepDistance StepDistance
      */
     fun renderDistanceRemaining(stepDistance: StepDistance) {
-        mainLayoutBinding.stepDistance.render(stepDistance)
+        mainLayoutBinding.stepDistance.renderDistanceRemaining(stepDistance)
+    }
+
+    private fun renderManeuvers() {
+        if (currentlyRenderedManeuvers.isNotEmpty()) {
+            drawManeuver(currentlyRenderedManeuvers[0], maneuverToRoadShield)
+            upcomingManeuverAdapter.updateRoadShields(maneuverToRoadShield)
+            drawUpcomingManeuvers(currentlyRenderedManeuvers.drop(1))
+        }
     }
 
     private fun initAttributes(attrs: AttributeSet?) {
@@ -371,25 +429,34 @@ class MapboxManeuverView : ConstraintLayout {
         )
     }
 
-    private fun drawManeuver(maneuver: Maneuver) {
+    private fun drawUpcomingManeuvers(maneuvers: List<Maneuver>) {
+        upcomingManeuverAdapter.addUpcomingManeuvers(maneuvers)
+    }
+
+    private fun drawManeuver(maneuver: Maneuver, shieldMap: Map<String, RoadShield?>) {
         val primary = maneuver.primary
         val secondary = maneuver.secondary
         val sub = maneuver.sub
         val lane = maneuver.laneGuidance
+        val stepDistance = maneuver.stepDistance
+        val primaryId = primary.id
+        val secondaryId = secondary?.id
+        val subId = sub?.id
         if (secondary?.componentList != null) {
             updateSecondaryManeuverVisibility(VISIBLE)
-            renderSecondaryManeuver(secondary)
+            renderSecondaryManeuver(secondary, shieldMap[secondaryId])
         } else {
             updateSecondaryManeuverVisibility(GONE)
         }
-        renderPrimaryManeuver(primary)
+        renderPrimaryManeuver(primary, shieldMap[primaryId])
+        renderDistanceRemaining(stepDistance)
         if (sub?.componentList != null || lane != null) {
             updateSubManeuverViewVisibility(VISIBLE)
         } else {
             updateSubManeuverViewVisibility(GONE)
         }
         if (sub?.componentList != null) {
-            renderSubManeuver(sub)
+            renderSubManeuver(sub, shieldMap[subId])
         } else {
             renderSubManeuver(null)
         }

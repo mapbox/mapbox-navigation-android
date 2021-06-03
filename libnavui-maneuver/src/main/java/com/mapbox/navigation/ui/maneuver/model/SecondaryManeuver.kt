@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maneuver.model
 
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
+import java.util.UUID
 
 /**
  * "secondary": {
@@ -26,6 +27,7 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
  * }
  *
  * A simplified data structure representing [BannerInstructions.secondary]
+ * @property id String A unique id
  * @property text String Plain text with all the [BannerComponents] text combined.
  * @property type String? indicates the type of maneuver.
  * @property degrees Double? degrees at which you will be exiting a roundabout.
@@ -36,6 +38,7 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
  * @constructor
  */
 class SecondaryManeuver private constructor(
+    val id: String,
     val text: String,
     val type: String? = null,
     val degrees: Double? = null,
@@ -53,6 +56,7 @@ class SecondaryManeuver private constructor(
 
         other as SecondaryManeuver
 
+        if (id != other.id) return false
         if (text != other.text) return false
         if (type != other.type) return false
         if (degrees != other.degrees) return false
@@ -67,7 +71,8 @@ class SecondaryManeuver private constructor(
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        var result = text.hashCode()
+        var result = id.hashCode()
+        result = 31 * result + (text.hashCode())
         result = 31 * result + (type?.hashCode() ?: 0)
         result = 31 * result + (degrees?.hashCode() ?: 0)
         result = 31 * result + (modifier?.hashCode() ?: 0)
@@ -81,6 +86,7 @@ class SecondaryManeuver private constructor(
      */
     override fun toString(): String {
         return "SecondaryManeuver(" +
+            "id='$id', " +
             "text='$text', " +
             "type=$type, " +
             "degrees=$degrees, " +
@@ -95,6 +101,7 @@ class SecondaryManeuver private constructor(
      */
     fun toBuilder(): Builder {
         return Builder()
+            .id(id)
             .text(text)
             .type(type)
             .degrees(degrees)
@@ -105,6 +112,7 @@ class SecondaryManeuver private constructor(
 
     /**
      * Build a new [SecondaryManeuver]
+     * @property id String
      * @property text String
      * @property type String?
      * @property degrees Double?
@@ -113,12 +121,21 @@ class SecondaryManeuver private constructor(
      * @property componentList List<Component>
      */
     class Builder {
+        private var id: String = UUID.randomUUID().toString()
         private var text: String = ""
         private var type: String? = null
         private var degrees: Double? = null
         private var modifier: String? = null
         private var drivingSide: String? = null
         private var componentList: List<Component> = listOf()
+
+        /**
+         * apply id to the Builder.
+         * @param id Long
+         * @return Builder
+         */
+        fun id(id: String): Builder =
+            apply { this.id = id }
 
         /**
          * apply text to the Builder.
@@ -174,6 +191,7 @@ class SecondaryManeuver private constructor(
          */
         fun build(): SecondaryManeuver {
             return SecondaryManeuver(
+                id,
                 text,
                 type,
                 degrees,

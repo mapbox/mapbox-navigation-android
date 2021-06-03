@@ -10,15 +10,13 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
-import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.ui.maneuver.databinding.MapboxItemUpcomingManeuversLayoutBinding
 import com.mapbox.navigation.ui.maneuver.databinding.MapboxMainManeuverLayoutBinding
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
+import com.mapbox.navigation.ui.maneuver.model.RoadShield
 import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.StepDistance
-import com.mapbox.navigation.ui.maneuver.model.TotalManeuverDistance
 import com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder
 import com.mapbox.navigation.utils.internal.ifNonNull
 
@@ -38,6 +36,7 @@ class MapboxUpcomingManeuverAdapter(
     @StyleRes private var secondaryManeuverAppearance: Int? = null
     private val inflater = LayoutInflater.from(context)
     private val upcomingManeuverList = mutableListOf<Maneuver>()
+    private val maneuverShieldMap = mutableMapOf<String, RoadShield?>()
 
     /**
      * Binds the given View to the position.
@@ -70,6 +69,15 @@ class MapboxUpcomingManeuverAdapter(
     override fun onBindViewHolder(holder: MapboxUpcomingManeuverViewHolder, position: Int) {
         val maneuver = upcomingManeuverList[position]
         holder.bindUpcomingManeuver(maneuver)
+    }
+
+    /**
+     * Given a [Map] of id to [RoadShield], the function maintains a map of id to [RoadShield] that
+     * is used to render the shield on the view
+     * @param shieldMap Map<String, RoadShield?>
+     */
+    fun updateRoadShields(shieldMap: Map<String, RoadShield?>) {
+        maneuverShieldMap.putAll(shieldMap)
     }
 
     /**
@@ -127,10 +135,12 @@ class MapboxUpcomingManeuverAdapter(
         fun bindUpcomingManeuver(maneuver: Maneuver) {
             val primary = maneuver.primary
             val secondary = maneuver.secondary
-            val totalStepDistance = maneuver.totalManeuverDistance
-            drawSecondaryManeuver(secondary)
-            drawPrimaryManeuver(primary)
-            drawTotalStepDistance(totalStepDistance)
+            val stepDistance = maneuver.stepDistance
+            val primaryId = primary.id
+            val secondaryId = secondary?.id
+            drawPrimaryManeuver(primary, maneuverShieldMap[primaryId])
+            drawSecondaryManeuver(secondary, maneuverShieldMap[secondaryId])
+            drawTotalStepDistance(stepDistance)
             updateStepDistanceTextAppearance()
             updateUpcomingPrimaryManeuverTextAppearance()
             updateUpcomingSecondaryManeuverTextAppearance()
@@ -154,24 +164,22 @@ class MapboxUpcomingManeuverAdapter(
             }
         }
 
-        private fun drawPrimaryManeuver(primary: PrimaryManeuver) {
-            viewBinding.primaryManeuverText.render(primary)
+        private fun drawPrimaryManeuver(primary: PrimaryManeuver, roadShield: RoadShield? = null) {
+            viewBinding.primaryManeuverText.render(primary, roadShield)
             viewBinding.maneuverIcon.renderPrimaryTurnIcon(primary)
         }
 
-        private fun drawTotalStepDistance(totalStepDistance: TotalManeuverDistance) {
-            viewBinding.stepDistance.render(
-                StepDistance(
-                    MapboxDistanceFormatter(DistanceFormatterOptions.Builder(context).build()),
-                    totalStepDistance.totalDistance
-                )
-            )
+        private fun drawTotalStepDistance(stepDistance: StepDistance) {
+            viewBinding.stepDistance.renderTotalStepDistance(stepDistance)
         }
 
-        private fun drawSecondaryManeuver(secondary: SecondaryManeuver?) {
+        private fun drawSecondaryManeuver(
+            secondary: SecondaryManeuver?,
+            roadShield: RoadShield? = null
+        ) {
             if (secondary != null) {
                 viewBinding.secondaryManeuverText.visibility = VISIBLE
-                viewBinding.secondaryManeuverText.render(secondary)
+                viewBinding.secondaryManeuverText.render(secondary, roadShield)
                 updateConstraintsToHaveSecondary()
                 viewBinding.primaryManeuverText.maxLines = 1
             } else {

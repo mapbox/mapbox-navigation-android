@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
+import android.text.SpannableString
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
@@ -13,8 +14,8 @@ import com.mapbox.navigation.ui.maneuver.model.Component
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
+import com.mapbox.navigation.ui.maneuver.model.StepDistance
 import com.mapbox.navigation.ui.maneuver.model.TextComponentNode
-import com.mapbox.navigation.ui.maneuver.model.TotalManeuverDistance
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -100,7 +101,7 @@ class MapboxUpcomingManeuverAdapterTest {
         val viewHolder: MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder =
             adapter.onCreateViewHolder(rvParent, 0)
         val expected = distanceFormatter.formatDistance(
-            upcomingManeuverList[0].totalManeuverDistance.totalDistance
+            upcomingManeuverList[0].stepDistance.totalDistance
         )
 
         adapter.addUpcomingManeuvers(upcomingManeuverList)
@@ -111,10 +112,13 @@ class MapboxUpcomingManeuverAdapterTest {
     }
 
     private fun getUpcomingManeuver(primaryText: String): List<Maneuver> {
-        val totalStepDistance = mockk<TotalManeuverDistance> {
-            every { totalDistance } returns 32.0
+        val stepDistance = mockk<StepDistance> {
+            every { totalDistance } returns 75.0
+            every { distanceRemaining } returns 45.0
+            every { distanceFormatter.formatDistance(any()) } returns SpannableString("200 ft")
         }
         val primaryManeuver = mockk<PrimaryManeuver> {
+            every { id } returns "1234abcd"
             every { text } returns primaryText
             every { type } returns StepManeuver.TURN
             every { degrees } returns null
@@ -133,6 +137,7 @@ class MapboxUpcomingManeuverAdapterTest {
             )
         }
         val secondaryManeuver = mockk<SecondaryManeuver> {
+            every { id } returns "abcd1234"
             every { text } returns "Davis Street"
             every { type } returns StepManeuver.TURN
             every { degrees } returns null
@@ -152,7 +157,7 @@ class MapboxUpcomingManeuverAdapterTest {
         }
         val maneuver = Maneuver(
             primaryManeuver,
-            totalStepDistance,
+            stepDistance,
             secondaryManeuver,
             null,
             null

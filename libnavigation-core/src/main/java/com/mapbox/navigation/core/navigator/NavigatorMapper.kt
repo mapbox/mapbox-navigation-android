@@ -19,7 +19,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.trip.session.MapMatcherResult
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.BannerComponent
@@ -57,9 +56,16 @@ internal fun getRouteInitInfo(routeInfo: RouteInfo?) = routeInfo.toRouteInitInfo
 internal fun getRouteProgressFrom(
     directionsRoute: DirectionsRoute?,
     status: NavigationStatus,
-    remainingWaypoints: Int
+    remainingWaypoints: Int,
+    bannerInstructions: BannerInstructions?,
+    instructionIndex: Int?
 ): RouteProgress? {
-    return status.getRouteProgress(directionsRoute, remainingWaypoints)
+    return status.getRouteProgress(
+        directionsRoute,
+        remainingWaypoints,
+        bannerInstructions,
+        instructionIndex
+    )
 }
 
 internal fun NavigationStatus.getTripStatusFrom(
@@ -72,7 +78,9 @@ internal fun NavigationStatus.getTripStatusFrom(
 
 private fun NavigationStatus.getRouteProgress(
     route: DirectionsRoute?,
-    remainingWaypoints: Int
+    remainingWaypoints: Int,
+    bannerInstructions: BannerInstructions?,
+    instructionIndex: Int?
 ): RouteProgress? {
     if (routeState == RouteState.INVALID) {
         return null
@@ -146,17 +154,8 @@ private fun NavigationStatus.getRouteProgress(
 
                     routeState.convertState().let {
                         routeProgressBuilder.currentState(it)
-
-                        var bannerInstructions =
-                            bannerInstruction?.mapToDirectionsApi(currentStep)
-                        if (it == RouteProgressState.INITIALIZED) {
-                            bannerInstructions =
-                                MapboxNativeNavigatorImpl.getBannerInstruction(
-                                    FIRST_BANNER_INSTRUCTION
-                                )
-                                    ?.mapToDirectionsApi(currentStep)
-                        }
                         routeProgressBuilder.bannerInstructions(bannerInstructions)
+                        stepProgressBuilder.instructionIndex(instructionIndex)
                     }
                 }
 
@@ -202,7 +201,7 @@ private fun NavigationStatus.getRouteProgress(
     return null
 }
 
-private fun BannerInstruction.mapToDirectionsApi(currentStep: LegStep): BannerInstructions {
+internal fun BannerInstruction.mapToDirectionsApi(currentStep: LegStep): BannerInstructions {
     return BannerInstructions.builder()
         .distanceAlongGeometry(this.remainingStepDistance.toDouble())
         .primary(this.primary.mapToDirectionsApi())
@@ -249,7 +248,7 @@ private fun VoiceInstruction.mapToDirectionsApi(): VoiceInstructions? {
         .build()
 }
 
-private fun RouteState.convertState(): RouteProgressState {
+internal fun RouteState.convertState(): RouteProgressState {
     return when (this) {
         RouteState.INVALID ->
             throw IllegalArgumentException("invalid route progress state not supported")

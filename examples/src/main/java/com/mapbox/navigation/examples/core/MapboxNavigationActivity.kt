@@ -7,6 +7,7 @@ import android.location.Location
 import android.os.Bundle
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -33,13 +34,13 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
-import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityNavigationBinding
 import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
+import com.mapbox.navigation.ui.maneuver.api.ManeuverCallback
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
@@ -156,6 +157,22 @@ class MapboxNavigationActivity : AppCompatActivity() {
             }
         }
 
+    private val maneuverCallback = ManeuverCallback { maneuvers ->
+        maneuvers.fold(
+            { error ->
+                Toast.makeText(
+                    this@MapboxNavigationActivity,
+                    error.errorMessage,
+                    Toast.LENGTH_SHORT
+                ).show()
+            },
+            { list ->
+                binding.maneuverView.visibility = VISIBLE
+                binding.maneuverView.renderManeuvers(maneuvers)
+            }
+        )
+    }
+
     private val speechCallback =
         MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> { expected ->
             expected.fold(
@@ -212,37 +229,10 @@ class MapboxNavigationActivity : AppCompatActivity() {
             }
 
             // update top maneuver instructions
-            maneuverApi.getUpcomingManeuverList(
-                routeProgress
-            ) { maneuvers ->
-                maneuvers.onValue {
-                    binding.maneuverView.renderUpcomingManeuvers(it)
-                }
-            }
-            val routeStepProgress = routeProgress.currentLegProgress?.currentStepProgress
-            if (routeStepProgress != null) {
-                maneuverApi.getStepDistanceRemaining(
-                    routeStepProgress
-                ) { distanceRemaining ->
-                    distanceRemaining.onValue {
-                        binding.maneuverView.renderDistanceRemaining(it)
-                    }
-                }
-            }
+            maneuverApi.getManeuvers(routeProgress, maneuverCallback)
 
             // update bottom trip progress summary
             binding.tripProgressView.render(tripProgressApi.getTripProgress(routeProgress))
-        }
-    }
-
-    /* ----- Maneuver instruction callbacks ----- */
-    private val bannerInstructionsObserver = BannerInstructionsObserver { bannerInstructions ->
-        binding.maneuverView.visibility = VISIBLE
-        maneuverApi.getManeuver(
-            bannerInstructions
-        ) { maneuver ->
-            // updates the maneuver view whenever new data is available
-            binding.maneuverView.renderManeuver(maneuver)
         }
     }
 
@@ -461,7 +451,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
-        mapboxNavigation.registerBannerInstructionsObserver(bannerInstructionsObserver)
     }
 
     override fun onStop() {
@@ -471,7 +460,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
-        mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver)
     }
 
     override fun onDestroy() {

@@ -3,11 +3,13 @@ package com.mapbox.navigation.examples.core
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
+import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -32,18 +34,13 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
-import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityManeuverBinding
 import com.mapbox.navigation.ui.maneuver.api.ManeuverCallback
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
-import com.mapbox.navigation.ui.maneuver.api.StepDistanceRemainingCallback
-import com.mapbox.navigation.ui.maneuver.api.UpcomingManeuverListCallback
-import com.mapbox.navigation.ui.maneuver.model.Maneuver
-import com.mapbox.navigation.ui.maneuver.model.ManeuverError
-import com.mapbox.navigation.ui.maneuver.model.StepDistance
-import com.mapbox.navigation.ui.maneuver.model.StepDistanceError
+import com.mapbox.navigation.ui.maneuver.api.RoadShieldCallback
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
@@ -55,6 +52,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -74,6 +72,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var binding: LayoutActivityManeuverBinding
     private lateinit var locationComponent: LocationComponentPlugin
+    private var isNavigating = false
 
     private val mapboxReplayer = MapboxReplayer()
     private val navigationLocationProvider = NavigationLocationProvider()
@@ -120,95 +119,60 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         MapboxRouteArrowView(RouteArrowOptions.Builder(this).build())
     }
 
-    /**
-     * The result of invoking [MapboxManeuverApi.getManeuver] is returned as a callback
-     * containing either a success in the form of [Maneuver] or failure in the form of
-     * [ManeuverError].
-     */
-    private val currentManeuverCallback = ManeuverCallback { maneuver ->
-        // The data obtained must be rendered by [MapboxManeuverView]
-        if (binding.maneuverView.visibility != VISIBLE) {
-            binding.maneuverView.visibility = VISIBLE
-        }
-        binding.maneuverView.renderManeuver(maneuver)
-    }
-
-    /**
-     * The result of invoking [MapboxManeuverApi.getStepDistanceRemaining] is returned as a callback
-     * containing either a success in the form of [StepDistance] or failure in the form of
-     * [StepDistanceError].
-     */
-    private val stepDistanceRemainingCallback = StepDistanceRemainingCallback { distanceRemaining ->
-        distanceRemaining.onValue {
-            // The data obtained must be rendered by [MapboxManeuverView]
-            binding.maneuverView.renderDistanceRemaining(it)
-        }
-    }
-
-    /**
-     * The result of invoking [MapboxManeuverApi.getUpcomingManeuverList] is returned as a callback
-     * containing either a success in the form of list of [Maneuver] or failure in the form of
-     * [ManeuverError].
-     */
-    private val upcomingManeuversCallback = UpcomingManeuverListCallback { maneuvers ->
-        maneuvers.onValue {
-            // The data obtained must be rendered by [MapboxManeuverView]
-            binding.maneuverView.renderUpcomingManeuvers(it)
-        }
-    }
-
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
-    private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {}
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
-            navigationLocationProvider.changePosition(
-                enhancedLocation,
-                keyPoints,
+    private val roadShieldCallback = RoadShieldCallback { _, shields, errors ->
+        binding.maneuverView.renderManeuverShields(shields)
+        errors.forEach { (id, error) ->
+            LoggerProvider.logger.e(
+                Tag("MbxManeuverActivity"),
+                Message("id: $id -- error: ${error.url} - ${error.message}")
             )
-            updateCamera(enhancedLocation)
+        }
+    }
+
+    private val callback = ManeuverCallback { maneuvers ->
+        maneuvers.onError { error ->
+            LoggerProvider.logger.e(Tag("MbxManeuverActivity"), Message(error.errorMessage!!))
+        }
+        maneuvers.onValue {
+            if (binding.maneuverView.visibility == INVISIBLE) {
+                binding.maneuverView.visibility = VISIBLE
+            }
+            binding.maneuverView.renderManeuvers(maneuvers)
+            maneuverApi.getRoadShields(it, roadShieldCallback)
+        }
+    }
+
+    private val mapMatcherResultObserver = MapMatcherResultObserver { mapMatcherResult ->
+        navigationLocationProvider.changePosition(
+            mapMatcherResult.enhancedLocation,
+            mapMatcherResult.keyPoints
+        )
+        if (isNavigating) {
+            updateCamera(mapMatcherResult.enhancedLocation)
         }
     }
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
-        // The upcoming maneuver list component is driven by route progress updates.
-        // Passing the route progress to the MapboxManeuverApi generates the data
-        // for updating the view.
-        maneuverApi.getUpcomingManeuverList(routeProgress, upcomingManeuversCallback)
-        ifNonNull(routeProgress.currentLegProgress) { legProgress ->
-            ifNonNull(legProgress.currentStepProgress) {
-                maneuverApi.getStepDistanceRemaining(it, stepDistanceRemainingCallback)
-            }
-        }
+        maneuverApi.getManeuvers(routeProgress, callback)
         routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
             routeArrowView.renderManeuverUpdate(mapboxMap.getStyle()!!, this)
         }
     }
 
-    private val bannerInstructionObserver = object : BannerInstructionsObserver {
-        override fun onNewBannerInstructions(bannerInstructions: BannerInstructions) {
-            // The maneuver component is driven by banner instruction updates.
-            // Passing the banner instruction to the MapboxManeuverApi generates the data
-            // for updating the view.
-            maneuverApi.getManeuver(bannerInstructions, currentManeuverCallback)
-        }
-    }
-
-    private val routesObserver = object : RoutesObserver {
-        override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            if (routes.isNotEmpty()) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    routeLineApi.setRoutes(
-                        listOf(RouteLine(routes[0], null))
-                    ).apply {
-                        routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
-                    }
+    private val routesObserver = RoutesObserver { routes ->
+        if (routes.isNotEmpty()) {
+            CoroutineScope(Dispatchers.Main).launch {
+                routeLineApi.setRoutes(
+                    listOf(RouteLine(routes[0], null))
+                ).apply {
+                    routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
                 }
-                startSimulation(routes[0])
             }
+            isNavigating = true
+            startSimulation(routes[0])
+            maneuverApi.getManeuvers(routes.first(), callback)
         }
     }
 
@@ -227,6 +191,23 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxNavigation.startTripSession()
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.play()
+        mapboxNavigation.registerLocationObserver(object : LocationObserver {
+            override fun onRawLocationChanged(rawLocation: Location) {
+                updateCamera(rawLocation)
+                navigationLocationProvider.changePosition(
+                    rawLocation,
+                )
+                mapboxNavigation.unregisterLocationObserver(this)
+            }
+
+            override fun onEnhancedLocationChanged(
+                enhancedLocation: Location,
+                keyPoints: List<Location>
+            ) {
+                //
+            }
+        })
+        mapboxNavigation.registerMapMatcherResultObserver(mapMatcherResultObserver)
     }
 
     @SuppressLint("MissingPermission")
@@ -252,12 +233,12 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxReplayer.play()
     }
 
-    private fun findRoute(origin: Point, destination: Point) {
+    private fun findRoute(origin: Point, waypoint: List<Point>?, destination: Point) {
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
             .accessToken(getMapboxAccessTokenFromResources())
-            .coordinates(origin, null, destination)
+            .coordinates(origin, waypoint, destination)
             .build()
         mapboxNavigation.requestRoutes(
             routeOptions,
@@ -312,10 +293,8 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         binding.mapView.onStart()
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.registerRoutesObserver(routesObserver)
-            mapboxNavigation.registerLocationObserver(locationObserver)
             mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
             mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
-            mapboxNavigation.registerBannerInstructionsObserver(bannerInstructionObserver)
         }
     }
 
@@ -323,10 +302,8 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         super.onStop()
         binding.mapView.onStop()
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
-        mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
-        mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionObserver)
     }
 
     override fun onDestroy() {
@@ -346,7 +323,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
                 currentLocation.longitude,
                 currentLocation.latitude
             )
-            findRoute(originPoint, point)
+            findRoute(originPoint, null, point)
         }
         return false
     }

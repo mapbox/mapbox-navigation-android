@@ -1,137 +1,178 @@
 package com.mapbox.navigation.ui.maneuver.api
 
-import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
-import com.mapbox.api.directions.v5.models.LegStep
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
-import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.ui.maneuver.ManeuverAction
 import com.mapbox.navigation.ui.maneuver.ManeuverProcessor
-import com.mapbox.navigation.ui.maneuver.ManeuverResult.GetAllBannerInstructions
-import com.mapbox.navigation.ui.maneuver.ManeuverResult.GetAllBannerInstructionsAfterStep
-import com.mapbox.navigation.ui.maneuver.ManeuverResult.GetAllManeuvers
-import com.mapbox.navigation.ui.maneuver.ManeuverResult.GetManeuver
-import com.mapbox.navigation.ui.maneuver.ManeuverResult.GetStepDistanceRemaining
-import com.mapbox.navigation.ui.maneuver.model.StepDistance
+import com.mapbox.navigation.ui.maneuver.ManeuverResult
+import com.mapbox.navigation.ui.maneuver.ManeuverState
+import com.mapbox.navigation.ui.maneuver.RoadShieldContentManager
+import com.mapbox.navigation.ui.maneuver.model.Maneuver
+import com.mapbox.navigation.ui.maneuver.model.ManeuverError
+import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
+import com.mapbox.navigation.ui.maneuver.model.RoadShield
+import com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode
+import com.mapbox.navigation.ui.maneuver.model.RoadShieldError
+import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
+import com.mapbox.navigation.ui.maneuver.model.SubManeuver
+import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
- * Used to generate representation of maneuvers based on [BannerInstructions]
- * @property distanceFormatter DistanceFormatter
+ * Mapbox Maneuver Api allows you to request [Maneuver] instructions given
+ * a [DirectionsRoute] (to get all maneuvers for the provided route)
+ * or [RouteProgress] (to get remaining maneuvers for the provided route).
+ *
+ * You can use the default [MapboxManeuverView] to render the results of the functions exposed by this API.
  */
 class MapboxManeuverApi internal constructor(
     private val distanceFormatter: DistanceFormatter,
     private val processor: ManeuverProcessor
 ) {
 
-    /**
-     * @param formatter contains various instances for use in formatting distance related data
-     * for display in the UI
-     *
-     * @return a [MapboxManeuverApi]
-     */
-    constructor(formatter: DistanceFormatter) : this(formatter, ManeuverProcessor())
-
     private val mainJobController: JobControl by lazy { ThreadController.getMainScopeAndRootJob() }
-    private var maneuverJob: Job? = null
-    private var upcomingManeuverListJob: Job? = null
-    private var stepDistanceRemainingJob: Job? = null
+    private val maneuverState = ManeuverState()
+    private val roadShieldContentManager = RoadShieldContentManager()
 
     /**
-     * Given [BannerInstructions] the method goes through the list of [BannerComponents] and returns
-     * a [Expected] wrapped inside [ManeuverCallback]
-     * @param bannerInstruction BannerInstructions object representing [BannerInstructions]
-     * @param callback ManeuverCallback contains [Expected]
+     * Mapbox Maneuver Api allows you to request [Maneuver] instructions given
+     * a [DirectionsRoute] (to get all maneuvers for the provided route)
+     * or [RouteProgress] (to get remaining maneuvers for the provided route).
      */
-    fun getManeuver(
-        bannerInstruction: BannerInstructions,
-        callback: ManeuverCallback
+    constructor(formatter: DistanceFormatter) : this(formatter, ManeuverProcessor)
+
+    /**
+     * The function calls [ManeuverCallback] with a list of [Maneuver]s which are wrappers on top of [BannerInstructions] that are in the provided route.
+     *
+     * If a [RouteLeg] param is provided, the returned list will only contain [Maneuver]s for the [RouteLeg] provided as param,
+     * otherwise, the returned list will only contain [Maneuver]s for the first [RouteLeg] in a [DirectionsRoute].
+     *
+     * @param route route for which to generate maneuver objects
+     * @param routeLeg specify to inform the API of the [RouteLeg] you wish to get the list of [Maneuver].
+     * By default the API returns the list of maneuvers for the first [RouteLeg] in a [DirectionsRoute]
+     * @param callback invoked with appropriate result
+     * @see MapboxManeuverView.renderManeuvers
+     * @see getRoadShields
+     */
+    @JvmOverloads
+    fun getManeuvers(
+        route: DirectionsRoute,
+        callback: ManeuverCallback,
+        routeLeg: RouteLeg? = null
     ) {
-        maneuverJob?.cancel()
-        maneuverJob = mainJobController.scope.launch {
-            val action = ManeuverAction.GetManeuver(bannerInstruction)
-            val result = processor.process(action) as GetManeuver
-            callback.onManeuver(ExpectedFactory.createValue(result.maneuver))
+        val action = ManeuverAction.GetManeuverListWithRoute(
+            route,
+            routeLeg,
+            maneuverState,
+            distanceFormatter
+        )
+        when (val result = processor.process(action)) {
+            is ManeuverResult.GetManeuverList.Success -> {
+                val allManeuvers = result.maneuvers
+                callback.onManeuvers(ExpectedFactory.createValue(allManeuvers))
+            }
+            is ManeuverResult.GetManeuverList.Failure -> {
+                callback.onManeuvers(ExpectedFactory.createError(ManeuverError(result.error)))
+            }
+            else -> {
+                callback.onManeuvers(
+                    ExpectedFactory.createError(
+                        ManeuverError(
+                            "Inappropriate  $result emitted for $action.", null
+                        )
+                    )
+                )
+            }
         }
     }
 
     /**
-     * Given [RouteStepProgress] the method returns the distance remaining to finish the [LegStep]
-     * @param routeStepProgress RouteStepProgress progress object specific to the current step the user is on
-     * @param callback StepDistanceRemainingCallback contains [Expected]
+     * The function calls [ManeuverCallback] with a list of [Maneuver]s which are wrappers on top of [BannerInstructions] that are in the provided route.
+     *
+     * Given [RouteProgress] the function prepares a list of remaining [Maneuver]s on the currently active route leg ([RouteLegProgress]).
+     *
+     * The first upcoming [Maneuver] object will also contain an up-to-date distance remaining
+     * from the current user location to the maneuver point, based on [RouteProgress].
+     *
+     * @param routeProgress current route progress
+     * @param callback invoked with appropriate result
+     * @see MapboxManeuverView.renderManeuvers
+     * @see getRoadShields
      */
-    fun getStepDistanceRemaining(
-        routeStepProgress: RouteStepProgress,
-        callback: StepDistanceRemainingCallback
+    fun getManeuvers(
+        routeProgress: RouteProgress,
+        callback: ManeuverCallback
     ) {
-        stepDistanceRemainingJob?.cancel()
-        stepDistanceRemainingJob = mainJobController.scope.launch {
-            val action = ManeuverAction.GetStepDistanceRemaining(routeStepProgress)
-            val result = processor.process(action) as GetStepDistanceRemaining
-            callback.onStepDistanceRemaining(
-                ExpectedFactory.createValue(
-                    StepDistance(distanceFormatter, result.distanceRemaining)
+        val action = ManeuverAction.GetManeuverList(routeProgress, maneuverState, distanceFormatter)
+        when (
+            val result = processor.process(action)
+        ) {
+            is ManeuverResult.GetManeuverListWithProgress.Success -> {
+                val allManeuvers = result.maneuvers
+                callback.onManeuvers(ExpectedFactory.createValue(allManeuvers))
+            }
+            is ManeuverResult.GetManeuverListWithProgress.Failure -> {
+                callback.onManeuvers(ExpectedFactory.createError(ManeuverError(result.error)))
+            }
+            else -> {
+                callback.onManeuvers(
+                    ExpectedFactory.createError(
+                        ManeuverError(
+                            "Inappropriate $result emitted for $action.", null
+                        )
+                    )
                 )
+            }
+        }
+    }
+
+    /**
+     * Given a list of [Maneuver] the function requests road shields (if available) using urls associated in
+     * [RoadShieldComponentNode].
+     *
+     * If you do not wish to download all of the shields at once,
+     * make sure to pass in only a list of maneuvers that you'd like download the road shields.
+     *
+     * The function is safe to be called repeatably, all the results are cached in-memory
+     * and requests are managed to avoid duplicating network bandwidth usage.
+     *
+     * The return maps of [String] to [RoadShield] or [RoadShieldError] in [RoadShieldCallback.onRoadShields]
+     * can be used when displaying [PrimaryManeuver], [SecondaryManeuver], and [SubManeuver].
+     *
+     * @param maneuvers list of maneuvers
+     * @param callback invoked with appropriate result
+     * @see MapboxManeuverView.renderManeuverShields
+     */
+    fun getRoadShields(
+        maneuvers: List<Maneuver>,
+        callback: RoadShieldCallback
+    ) {
+        mainJobController.scope.launch {
+            val result = roadShieldContentManager.getShields(
+                maneuvers
+            )
+            callback.onRoadShields(
+                maneuvers,
+                result.shields,
+                result.errors
             )
         }
     }
 
     /**
-     * For a given [RouteLeg] the method returns all the maneuvers in the [LegStep] wrapped inside
-     * [UpcomingManeuverListCallback].
-     * @param routeProgress RouteProgress
-     * @param callback UpcomingManeuverListCallback contains [Expected]
+     * Invoke the function to cancel any job invoked through other APIs
      */
-    fun getUpcomingManeuverList(
-        routeProgress: RouteProgress,
-        callback: UpcomingManeuverListCallback
-    ) {
-        upcomingManeuverListJob?.cancel()
-        upcomingManeuverListJob = mainJobController.scope.launch {
-            val allBannersAction = ManeuverAction.GetAllBannerInstructions(routeProgress)
-            val allBanners = processor.process(allBannersAction) as GetAllBannerInstructions
-            val allBannersAfterStepAction =
-                ManeuverAction.GetAllBannerInstructionsAfterStep(
-                    routeProgress,
-                    allBanners.bannerInstructions
-                )
-            val allBannersAfterStep = processor
-                .process(allBannersAfterStepAction) as GetAllBannerInstructionsAfterStep
-            val allManeuversAction =
-                ManeuverAction.GetAllManeuvers(allBannersAfterStep.bannerInstructions)
-            val allManeuvers = processor.process(allManeuversAction) as GetAllManeuvers
-            callback.onUpcomingManeuvers(ExpectedFactory.createValue(allManeuvers.maneuverList))
+    fun cancel() {
+        roadShieldContentManager.cancelAll()
+        mainJobController.job.children.forEach {
+            it.cancel()
         }
-    }
-
-    /**
-     * The function cancels the current job [getManeuver] and doesn't return the callback
-     * associated with it.
-     */
-    fun cancelManeuver() {
-        maneuverJob?.cancel()
-    }
-
-    /**
-     * The function cancels the current job [getUpcomingManeuverList] and doesn't return the
-     * callback associated with it.
-     */
-    fun cancelUpcomingManeuverList() {
-        upcomingManeuverListJob?.cancel()
-    }
-
-    /**
-     * The function cancels the current job [getStepDistanceRemaining] and doesn't return
-     * the callback associated with it.
-     */
-    fun cancelStepDistanceRemaining() {
-        stepDistanceRemainingJob?.cancel()
     }
 }

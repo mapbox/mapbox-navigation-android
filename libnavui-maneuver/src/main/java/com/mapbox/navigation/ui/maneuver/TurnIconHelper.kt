@@ -275,10 +275,11 @@ internal class TurnIconHelper(
                 )
             }
             type.isNullOrEmpty() && !modifier.isNullOrEmpty() -> {
+                val shouldFlip = shouldFlipUturn(modifier, drivingSide)
                 TurnIcon(
                     degrees,
                     drivingSide,
-                    false,
+                    shouldFlip,
                     getTurnIconWithNullType(modifier)
                 )
             }
@@ -291,10 +292,11 @@ internal class TurnIconHelper(
                 )
             }
             !type.isNullOrEmpty() && !modifier.isNullOrEmpty() -> {
+                val shouldFlip = shouldFlipUturn(modifier, drivingSide)
                 TurnIcon(
                     degrees,
                     drivingSide,
-                    false,
+                    shouldFlip,
                     getTurnIconWithTypeAndModifier(type, modifier)
                 )
             }
@@ -366,6 +368,14 @@ internal class TurnIconHelper(
             else -> {
                 turnIconMap[TurnIconPair(null, null)]
             }
+        }
+    }
+
+    private fun shouldFlipUturn(modifier: String?, drivingSide: String?): Boolean {
+        return if (modifier == UTURN) {
+            shouldFlipIcon(drivingSide)
+        } else {
+            false
         }
     }
 

@@ -528,6 +528,7 @@ package com.mapbox.navigation.base.trip.model {
     method public float getDistanceTraveled();
     method public double getDurationRemaining();
     method public float getFractionTraveled();
+    method public Integer? getInstructionIndex();
     method public int getIntersectionIndex();
     method public com.mapbox.api.directions.v5.models.LegStep? getStep();
     method public int getStepIndex();
@@ -537,6 +538,7 @@ package com.mapbox.navigation.base.trip.model {
     property public final float distanceTraveled;
     property public final double durationRemaining;
     property public final float fractionTraveled;
+    property public final Integer? instructionIndex;
     property public final int intersectionIndex;
     property public final com.mapbox.api.directions.v5.models.LegStep? step;
     property public final int stepIndex;
@@ -550,6 +552,7 @@ package com.mapbox.navigation.base.trip.model {
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder distanceTraveled(float distanceTraveled);
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder durationRemaining(double durationRemaining);
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder fractionTraveled(float fractionTraveled);
+    method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder instructionIndex(Integer? instructionIndex);
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder intersectionIndex(int intersectionIndex);
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder step(com.mapbox.api.directions.v5.models.LegStep? step);
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder stepIndex(int stepIndex);
