@@ -149,9 +149,9 @@ class NavigationOptions private constructor(
             "isFromNavigationUi=$isFromNavigationUi, " +
             "isDebugLoggingEnabled=$isDebugLoggingEnabled, " +
             "deviceProfile=$deviceProfile, " +
-            "eHorizonOptions=$eHorizonOptions " +
-            "routeRefreshOptions=$routeRefreshOptions " +
-            "routeAlternativesOptions=$routeAlternativesOptions " +
+            "eHorizonOptions=$eHorizonOptions, " +
+            "routeRefreshOptions=$routeRefreshOptions, " +
+            "routeAlternativesOptions=$routeAlternativesOptions, " +
             "incidentsOptions=$incidentsOptions" +
             ")"
     }

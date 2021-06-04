@@ -11,7 +11,6 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
-import com.mapbox.geojson.Geometry
 import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_PREDICTION_MILLIS
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -81,7 +80,6 @@ class MapboxTripSessionTest {
 
     private val tripService: TripService = mockk(relaxUnitFun = true)
     private val route: DirectionsRoute = mockk(relaxed = true)
-    private val routeBufferGeoJson: Geometry = mockk(relaxed = true)
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
@@ -135,12 +133,11 @@ class MapboxTripSessionTest {
 
         every { tripStatus.navigationStatus } returns navigationStatus
         every { tripStatus.route } returns route
-        every { tripStatus.routeBufferGeoJson } returns routeBufferGeoJson
 
         every { tripStatus.getMapMatcherResult(any(), any()) } returns mapMatcherResult
         every { routeProgress.bannerInstructions } returns null
         every { routeProgress.voiceInstructions } returns null
-        every { getRouteProgressFrom(any(), any(), any(), any()) } returns routeProgress
+        every { getRouteProgressFrom(any(), any(), any()) } returns routeProgress
         every { route.isSameUuid(any()) } returns false
         every { route.isSameRoute(any()) } returns false
         every { route.routeOptions()?.requestUuid() } returns "uuid"
@@ -369,7 +366,7 @@ class MapboxTripSessionTest {
 
     @Test
     fun routeProgressObserverNotCalledWhenInFreeDrive() = coroutineRule.runBlockingTest {
-        every { getRouteProgressFrom(any(), any(), any(), any()) } returns null
+        every { getRouteProgressFrom(any(), any(), any()) } returns null
         tripSession = buildTripSession()
         tripSession.start()
         val observer: RouteProgressObserver = mockk(relaxUnitFun = true)

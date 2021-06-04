@@ -461,7 +461,6 @@ package com.mapbox.navigation.base.trip.model {
     method public boolean getInTunnel();
     method public int getRemainingWaypoints();
     method public com.mapbox.api.directions.v5.models.DirectionsRoute getRoute();
-    method public com.mapbox.geojson.Geometry? getRouteGeometryWithBuffer();
     method public boolean getStale();
     method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> getUpcomingRoadObjects();
     method public java.util.List<com.mapbox.geojson.Point>? getUpcomingStepPoints();
@@ -477,7 +476,6 @@ package com.mapbox.navigation.base.trip.model {
     property public final boolean inTunnel;
     property public final int remainingWaypoints;
     property public final com.mapbox.api.directions.v5.models.DirectionsRoute route;
-    property public final com.mapbox.geojson.Geometry? routeGeometryWithBuffer;
     property public final boolean stale;
     property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> upcomingRoadObjects;
     property public final java.util.List<com.mapbox.geojson.Point>? upcomingStepPoints;
@@ -496,7 +494,6 @@ package com.mapbox.navigation.base.trip.model {
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder fractionTraveled(float fractionTraveled);
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder inTunnel(boolean inTunnel);
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder remainingWaypoints(int remainingWaypoints);
-    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder routeGeometryWithBuffer(com.mapbox.geojson.Geometry? routeGeometryWithBuffer);
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder stale(boolean stale);
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder upcomingRoadObjects(java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> upcomingRoadObjects);
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder upcomingStepPoints(java.util.List<com.mapbox.geojson.Point>? upcomingStepPoints);

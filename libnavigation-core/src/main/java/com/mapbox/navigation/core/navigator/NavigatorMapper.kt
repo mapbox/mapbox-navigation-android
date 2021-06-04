@@ -10,7 +10,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
-import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.internal.factory.RoadObjectInstanceFactory
 import com.mapbox.navigation.base.speed.model.SpeedLimit
@@ -57,16 +56,14 @@ internal fun getRouteInitInfo(routeInfo: RouteInfo?) = routeInfo.toRouteInitInfo
  */
 internal fun getRouteProgressFrom(
     directionsRoute: DirectionsRoute?,
-    routeBufferGeoJson: Geometry?,
     status: NavigationStatus,
     remainingWaypoints: Int
 ): RouteProgress? {
-    return status.getRouteProgress(directionsRoute, routeBufferGeoJson, remainingWaypoints)
+    return status.getRouteProgress(directionsRoute, remainingWaypoints)
 }
 
 private fun NavigationStatus.getRouteProgress(
     route: DirectionsRoute?,
-    routeBufferGeoJson: Geometry?,
     remainingWaypoints: Int
 ): RouteProgress? {
     if (routeState == RouteState.INVALID) {
@@ -185,7 +182,6 @@ private fun NavigationStatus.getRouteProgress(
         routeProgressBuilder.currentLegProgress(legProgressBuilder.build())
 
         routeProgressBuilder.inTunnel(inTunnel)
-        routeProgressBuilder.routeGeometryWithBuffer(routeBufferGeoJson)
 
         routeProgressBuilder.voiceInstructions(voiceInstruction?.mapToDirectionsApi())
 

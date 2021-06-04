@@ -7,14 +7,10 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.TileStore
-import com.mapbox.geojson.Geometry
-import com.mapbox.geojson.Point
-import com.mapbox.geojson.gson.GeometryGeoJson
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
-import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.CacheHandle
@@ -53,8 +49,6 @@ import kotlin.coroutines.suspendCoroutine
  */
 object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
-    private const val GRID_SIZE = 0.0025f
-    private const val BUFFER_DILATION: Short = 1
     private const val PRIMARY_ROUTE_INDEX = 0
     private const val SINGLE_THREAD = 1
     private const val TAG = "MbxNativeNavigatorImpl"
@@ -68,7 +62,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private var nativeRouter: Router? = null
     private var historyRecorderHandle: HistoryRecorderHandle? = null
     private var route: DirectionsRoute? = null
-    private var routeBufferGeoJson: Geometry? = null
     override var graphAccessor: GraphAccessor? = null
     override var roadObjectMatcher: RoadObjectMatcher? = null
     override var roadObjectsStore: RoadObjectsStore? = null
@@ -107,7 +100,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         roadObjectsStore = nativeComponents.navigator.roadObjectStore()
         cache = nativeComponents.cache
         route = null
-        routeBufferGeoJson = null
         this.logger = logger
         return this
     }
@@ -176,7 +168,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             val status = navigator!!.getStatus(nanos)
             TripStatus(
                 route,
-                routeBufferGeoJson,
                 status
             )
         }
@@ -206,11 +197,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 legIndex,
                 ActiveGuidanceOptionsMapper.mapFrom(route)
             ).let { it.value }
-
-            val geometryWithBuffer = getRouteGeometryWithBuffer(GRID_SIZE, BUFFER_DILATION)
-            routeBufferGeoJson = ifNonNull(geometryWithBuffer) {
-                GeometryGeoJson.fromJson(it)
-            }
 
             result
         }
@@ -256,27 +242,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         navigator!!.getBannerInstruction(index)
 
     /**
-     * Gets a polygon around the currently loaded route. The method uses a bitmap approach
-     * in which you specify a grid size (pixel size) and a dilation (how many pixels) to
-     * expand the initial grid cells that are intersected by the route.
-     *
-     * @param gridSize the size of the individual grid cells
-     * @param bufferDilation the number of pixels to dilate the initial intersection by it can
-     * be thought of as controlling the halo thickness around the route
-     *
-     * @return a geojson as [String] representing the route buffer polygon
-     */
-    override fun getRouteGeometryWithBuffer(gridSize: Float, bufferDilation: Short): String? {
-        return try {
-            navigator!!.getRouteBufferGeoJson(gridSize, bufferDilation)
-        } catch (error: Error) {
-            // failed to obtain the route buffer
-            // workaround for https://github.com/mapbox/mapbox-navigation-android/issues/2337
-            null
-        }
-    }
-
-    /**
      * Follows a new leg of the already loaded directions.
      * Returns an initialized navigation status if no errors occurred
      * otherwise, it returns an invalid navigation status state.
@@ -304,32 +269,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         }
     }
 
-    /**
-     * Passes in an input path to the tar file and output path.
-     *
-     * @param tarPath The path to the packed tiles.
-     * @param destinationPath The path to the unpacked files.
-     *
-     * @return the number of unpacked tiles
-     */
-    override fun unpackTiles(tarPath: String, destinationPath: String): Long =
-        Router.unpackTiles(tarPath, destinationPath)
-
-    /**
-     * Removes tiles wholly within the supplied bounding box. If the tile is not
-     * contained completely within the bounding box, it will remain in the cache.
-     * After removing files from the cache, any routers should be reconfigured
-     * to synchronize their in-memory cache with the disk.
-     *
-     * @param tilePath The path to the tiles.
-     * @param southwest The lower left coord of the bounding box.
-     * @param northeast The upper right coord of the bounding box.
-     *
-     * @return the number of tiles removed
-     */
-    override fun removeTiles(tilePath: String, southwest: Point, northeast: Point): Long =
-        Router.removeTiles(tilePath, southwest, northeast)
-
     // History traces
 
     /**
@@ -339,7 +278,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return a json representing the series of events that happened since the last time
      * the history was toggled on.
      */
-    override fun getHistory(): String = String(historyRecorderHandle?.history ?: byteArrayOf())
+    override fun getHistory(): String = String(byteArrayOf())
 
     /**
      * Toggles the recording of history on or off.
@@ -348,7 +287,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @param isEnabled set this to true to turn on history recording and false to turn it off
      */
     override fun toggleHistory(isEnabled: Boolean) {
-        historyRecorderHandle?.enable(isEnabled)
+        // no op
     }
 
     /**

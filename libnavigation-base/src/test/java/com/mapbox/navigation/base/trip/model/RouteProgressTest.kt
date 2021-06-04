@@ -10,7 +10,6 @@ class RouteProgressTest : BuilderTest<RouteProgress, RouteProgress.Builder>() {
 
     override fun getFilledUpBuilder(): RouteProgress.Builder {
         return RouteProgress.Builder(mockk(relaxed = true))
-            .routeGeometryWithBuffer(mockk(relaxed = true))
             .bannerInstructions(mockk(relaxed = true))
             .voiceInstructions(mockk(relaxed = true))
             .currentState(mockk(relaxed = true))

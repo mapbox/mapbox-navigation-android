@@ -499,6 +499,8 @@ class MapboxNavigation(
     /**
      * API used to retrieve logged location and route progress samples for debug purposes.
      *
+     * Note that this is returning an empty string (no-op) in this release
+     *
      * @return history trace string
      */
     fun retrieveHistory(): String {
@@ -507,6 +509,8 @@ class MapboxNavigation(
 
     /**
      * API used to enable/disable location and route progress samples logs for debug purposes.
+     *
+     * Note that this is no-op in this release
      */
     fun toggleHistory(isEnabled: Boolean) {
         MapboxNativeNavigatorImpl.toggleHistory(isEnabled)
@@ -514,6 +518,8 @@ class MapboxNavigation(
 
     /**
      * API used to artificially add debug events to logs.
+     *
+     * Note that this is no-op in this release
      */
     fun addHistoryEvent(eventType: String, eventJsonProperties: String) {
         MapboxNativeNavigatorImpl.addHistoryEvent(eventType, eventJsonProperties)
@@ -878,21 +884,17 @@ class MapboxNavigation(
         navigationSession.unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
     }
 
-    private fun createInternalRoutesObserver() = object : RoutesObserver {
-        override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            if (routes.isNotEmpty()) {
-                tripSession.route = routes[0]
-            } else {
-                tripSession.route = null
-            }
+    private fun createInternalRoutesObserver() = RoutesObserver { routes ->
+        if (routes.isNotEmpty()) {
+            tripSession.route = routes[0]
+        } else {
+            tripSession.route = null
         }
     }
 
-    private fun createInternalOffRouteObserver() = object : OffRouteObserver {
-        override fun onOffRouteStateChanged(offRoute: Boolean) {
-            if (offRoute) {
-                reroute()
-            }
+    private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->
+        if (offRoute) {
+            reroute()
         }
     }
 
@@ -916,7 +918,7 @@ class MapboxNavigation(
             }
         }
 
-        override fun onCanReturnToLatest() {
+        override fun onCanReturnToLatest(version: String) {
             recreateNavigatorInstance(
                 isFallback = false,
                 tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
@@ -955,13 +957,7 @@ class MapboxNavigation(
     }
 
     private fun reroute() {
-        rerouteController?.reroute(
-            object : RerouteController.RoutesCallback {
-                override fun onNewRoutes(routes: List<DirectionsRoute>) {
-                    setRoutes(routes)
-                }
-            }
-        )
+        rerouteController?.reroute { routes -> setRoutes(routes) }
     }
 
     private fun obtainUserAgent(isFromNavigationUi: Boolean): String {
@@ -1065,6 +1061,7 @@ class MapboxNavigation(
                 USER_AGENT,
                 BuildConfig.NAV_NATIVE_SDK_VERSION,
                 isFallback,
+                navigationOptions.routingTilesOptions.tilesVersion,
                 navigationOptions.routingTilesOptions.minDaysBetweenServerAndLocalTilesVersion
             )
         )

@@ -35,8 +35,8 @@ internal object NavigatorLoader {
             deviceProfile.customConfig
         )
         val runLoopExecutor = RunLoopExecutorFactory.build()
-        val historyRecorder = HistoryRecorderHandle.build("", config)
-        val cache = CacheFactory.build(tilesConfig, config, runLoopExecutor, historyRecorder)
+        val historyRecorder = null
+        val cache = CacheFactory.build(tilesConfig, config, historyRecorder)
 
         val navigator = Navigator(
             config,
@@ -77,7 +77,7 @@ internal object NavigatorLoader {
     internal data class NativeComponents(
         val navigator: Navigator,
         val nativeRouter: Router,
-        val historyRecorderHandle: HistoryRecorderHandle,
+        val historyRecorderHandle: HistoryRecorderHandle?,
         val graphAccessor: GraphAccessor,
         val cache: CacheHandle,
         val roadObjectMatcher: RoadObjectMatcher,
