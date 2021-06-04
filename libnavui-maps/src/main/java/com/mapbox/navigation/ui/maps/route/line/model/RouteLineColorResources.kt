@@ -37,6 +37,8 @@ import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
  * alternative routes.
  * @param routeClosureColor the color used for the route closure line
  * @param alternativeRouteClosureColor the color used for the alternative route closure line(s)
+ * @param inActiveRouteLegsColor the color used for route legs that aren't currently
+ * being navigated.
  */
 class RouteLineColorResources private constructor(
     @ColorInt val routeLineTraveledColor: Int,
@@ -58,7 +60,8 @@ class RouteLineColorResources private constructor(
     @ColorInt val restrictedRoadColor: Int,
     @ColorInt val alternativeRouteRestrictedRoadColor: Int,
     @ColorInt val routeClosureColor: Int,
-    @ColorInt val alternativeRouteClosureColor: Int
+    @ColorInt val alternativeRouteClosureColor: Int,
+    @ColorInt val inActiveRouteLegsColor: Int,
 ) {
 
     /**
@@ -86,6 +89,7 @@ class RouteLineColorResources private constructor(
             .alternativeRouteRestrictedRoadColor(alternativeRouteRestrictedRoadColor)
             .routeClosureColor(routeClosureColor)
             .alternativeRouteClosureColor(alternativeRouteClosureColor)
+            .inActiveRouteLegsColor(inActiveRouteLegsColor)
     }
 
     /**
@@ -112,7 +116,8 @@ class RouteLineColorResources private constructor(
             "restrictedRoadColor=$restrictedRoadColor, " +
             "alternativeRouteRestrictedRoadColor=$alternativeRouteRestrictedRoadColor, " +
             "routeClosureColor=$routeClosureColor, " +
-            "alternativeRouteClosureColor=$alternativeRouteClosureColor" +
+            "alternativeRouteClosureColor=$alternativeRouteClosureColor, " +
+            "inActiveRouteLegsColor=$inActiveRouteLegsColor" +
             ")"
     }
 
@@ -147,6 +152,8 @@ class RouteLineColorResources private constructor(
             return false
         if (routeClosureColor != other.routeClosureColor) return false
         if (alternativeRouteClosureColor != other.alternativeRouteClosureColor) return false
+        if (inActiveRouteLegsColor != other.inActiveRouteLegsColor)
+            return false
 
         return true
     }
@@ -175,6 +182,7 @@ class RouteLineColorResources private constructor(
         result = 31 * result + alternativeRouteRestrictedRoadColor
         result = 31 * result + routeClosureColor
         result = 31 * result + alternativeRouteClosureColor
+        result = 31 * result + inActiveRouteLegsColor
         return result
     }
 
@@ -209,6 +217,8 @@ class RouteLineColorResources private constructor(
         private var routeClosureColor: Int = RouteConstants.ROUTE_CLOSURE_COLOR
         private var alternativeRouteClosureColor: Int =
             RouteConstants.ALTERNATIVE_ROUTE_CLOSURE_COLOR
+        private var inActiveRouteLegsColor: Int =
+            RouteConstants.IN_ACTIVE_ROUTE_LEG_COLOR
 
         /**
          * The color of the section of route line behind the puck representing the section
@@ -416,6 +426,16 @@ class RouteLineColorResources private constructor(
             apply { this.alternativeRouteClosureColor = color }
 
         /**
+         * The color used for route legs that aren't currently being navigated.
+         *
+         * @param color the color to be used
+         *
+         * @return the builder
+         */
+        fun inActiveRouteLegsColor(@ColorInt color: Int): Builder =
+            apply { this.inActiveRouteLegsColor = color }
+
+        /**
          * Creates a instance of RouteLineResources
          *
          * @return the instance
@@ -441,7 +461,8 @@ class RouteLineColorResources private constructor(
                 restrictedRoadColor,
                 alternativeRouteRestrictedRoadColor,
                 routeClosureColor,
-                alternativeRouteClosureColor
+                alternativeRouteClosureColor,
+                inActiveRouteLegsColor
             )
         }
     }

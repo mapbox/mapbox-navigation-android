@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.route.line.api
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -142,7 +143,7 @@ class VanishingRouteLineTest {
     fun getTraveledRouteLineExpressions() {
         val expectedTrafficExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0," +
             " [rgba, 255.0, 255.0, 255.0, 1.0]]"
-        val expectedRouteLineExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 2.0, 0.0]," +
+        val expectedRouteLineExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0]," +
             " 0.0, [rgba, 0.0, 0.0, 3.0, 0.0]]"
         val expectedCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 10.0, 0.0]," +
             " 0.0, [rgba, 0.0, 0.0, 4.0, 0.0]]"
@@ -170,12 +171,56 @@ class VanishingRouteLineTest {
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(
             lineString.coordinates()[0],
             segments,
-            genericMockResourceProvider
+            genericMockResourceProvider,
+            -1
         )
 
         assertEquals(expectedTrafficExpression, result!!.trafficLineExpression.toString())
         assertEquals(expectedRouteLineExpression, result.routeLineExpression.toString())
         assertEquals(expectedCasingExpression, result.routeLineCasingExpression.toString())
+    }
+
+    @Test
+    fun getTraveledRouteLineExpressions_multilegRoute_deEmphasizeNonActiveLegs() {
+        val expectedTrafficExp = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
+            "0.13240839439705454, [rgba, 86.0, 168.0, 251.0, 1.0], 0.18199725933538882, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.2256358178763112, [rgba, 86.0, 168.0, 251.0, 1.0]," +
+            " 0.32147751186805656, [rgba, 255.0, 149.0, 0.0, 1.0], 0.3838765722116185, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4891841628737826, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val expectedRouteLineExp = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
+            "0.13240839439705454, [rgba, 86.0, 168.0, 251.0, 1.0], 0.4891841628737826, " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val expectedCasingExp = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0]," +
+            " 0.13240839439705454, [rgba, 47.0, 122.0, 198.0, 1.0], 0.4891841628737826," +
+            " [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val route = getMultilegWithTwoLegs()
+        val vanishingRouteLine = VanishingRouteLine()
+        vanishingRouteLine.initWithRoute(route)
+        vanishingRouteLine.primaryRouteRemainingDistancesIndex = 7
+        vanishingRouteLine.vanishPointOffset = 0.1322571610688955
+        val segments = listOf(
+            RouteLineExpressionData(0.0, -27392, 0),
+            RouteLineExpressionData(0.07932429566550842, -45747, 0),
+            RouteLineExpressionData(0.10338667841237215, -11097861, 0),
+            RouteLineExpressionData(0.18199725933538882, -27392, 0),
+            RouteLineExpressionData(0.2256358178763112, -11097861, 0),
+            RouteLineExpressionData(0.32147751186805656, -27392, 0),
+            RouteLineExpressionData(0.3838765722116185, -11097861, 0),
+            RouteLineExpressionData(0.4891841628737826, 0, 1),
+            RouteLineExpressionData(0.5402820600662328, 0, 1),
+            RouteLineExpressionData(0.9738127865054893, 0, 1)
+        )
+
+        val result = vanishingRouteLine.getTraveledRouteLineExpressions(
+            Point.fromLngLat(-122.52351984901476, 37.97384101461195),
+            segments,
+            RouteLineResources.Builder().build(),
+            0
+        )
+
+        assertEquals(expectedTrafficExp, result!!.trafficLineExpression.toString())
+        assertEquals(expectedRouteLineExp, result.routeLineExpression.toString())
+        assertEquals(expectedCasingExp, result.routeLineCasingExpression.toString())
     }
 
     private fun getRoute(): DirectionsRoute {
@@ -191,7 +236,7 @@ class VanishingRouteLineTest {
     private val genericMockResourceProvider = mockk<RouteLineResources> {
         every { routeLineColorResources } returns mockk<RouteLineColorResources> {
             every { routeUnknownTrafficColor } returns 1
-            every { routeLineTraveledColor } returns 2
+            every { routeLineTraveledColor } returns 0
             every { routeDefaultColor } returns 3
             every { routeCasingColor } returns 4
             every { routeLowCongestionColor } returns 5
@@ -200,7 +245,13 @@ class VanishingRouteLineTest {
             every { routeHeavyColor } returns 8
             every { alternativeRouteUnknownTrafficColor } returns 9
             every { routeLineTraveledCasingColor } returns 10
+            every { inActiveRouteLegsColor } returns 11
         }
         every { trafficBackfillRoadClasses } returns listOf()
+    }
+
+    private fun getMultilegWithTwoLegs(): DirectionsRoute {
+        val routeAsJson = loadJsonFixture("multileg-route-two-legs.json")
+        return DirectionsRoute.fromJson(routeAsJson)
     }
 }

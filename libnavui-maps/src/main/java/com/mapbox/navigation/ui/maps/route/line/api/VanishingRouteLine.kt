@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
+import android.graphics.Color
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
@@ -105,6 +106,7 @@ internal class VanishingRouteLine {
         point: Point,
         routeLineExpressionData: List<RouteLineExpressionData>,
         routeResourceProvider: RouteLineResources,
+        activeLegIndex: Int,
     ): VanishingRouteLineExpressions? {
         ifNonNull(
             primaryRouteLineGranularDistances,
@@ -170,21 +172,31 @@ internal class VanishingRouteLine {
                 return null
             }
             vanishPointOffset = offset
+
             val trafficLineExpression = MapboxRouteLineUtils.getTrafficLineExpression(
                 offset,
-                routeLineExpressionData,
-                routeResourceProvider.routeLineColorResources.routeUnknownTrafficColor
-            )
-            val routeLineExpression = MapboxRouteLineUtils.getVanishingRouteLineExpression(
-                offset,
                 routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
-                routeResourceProvider.routeLineColorResources.routeDefaultColor
+                routeResourceProvider.routeLineColorResources.routeUnknownTrafficColor,
+                routeLineExpressionData
             )
-            val routeLineCasingExpression = MapboxRouteLineUtils.getVanishingRouteLineExpression(
+
+            val routeLineExpression = MapboxRouteLineUtils.getRouteLineExpression(
                 offset,
-                routeResourceProvider.routeLineColorResources.routeLineTraveledCasingColor,
-                routeResourceProvider.routeLineColorResources.routeCasingColor
+                routeLineExpressionData,
+                routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
+                routeResourceProvider.routeLineColorResources.routeDefaultColor,
+                routeResourceProvider.routeLineColorResources.inActiveRouteLegsColor,
+                activeLegIndex
             )
+            val routeLineCasingExpression = MapboxRouteLineUtils.getRouteLineExpression(
+                offset,
+                routeLineExpressionData,
+                routeResourceProvider.routeLineColorResources.routeLineTraveledCasingColor,
+                routeResourceProvider.routeLineColorResources.routeCasingColor,
+                Color.TRANSPARENT,
+                activeLegIndex
+            )
+
             return VanishingRouteLineExpressions(
                 trafficLineExpression,
                 routeLineExpression,

@@ -26,6 +26,23 @@ class CacheResultUtilsTest {
     }
 
     @Test
+    fun cacheResult2() {
+        var counter = 0
+        val testFun: (a: Int, b: Int) -> Int = { a: Int, b: Int ->
+            counter += 1
+            a + b + counter
+        }.cacheResult(1)
+
+        testFun(5, 0)
+        testFun(5, 0)
+
+        val result = testFun(5, 0)
+
+        assertEquals(6, result)
+        assertEquals(1, counter)
+    }
+
+    @Test
     fun cacheMaxSize() {
         var counter = 0
         val testFun: (a: Int) -> Int = { a: Int ->

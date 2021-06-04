@@ -17,8 +17,8 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.in
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
-import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue
 import com.mapbox.navigation.utils.internal.ThreadController
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -160,9 +160,9 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the Style
      * @param update an instance of VanishingRouteLineUpdateState
      */
-    fun renderVanishingRouteLineUpdateValue(
+    fun renderRouteLineUpdate(
         style: Style,
-        update: Expected<RouteLineError, VanishingRouteLineUpdateValue>
+        update: Expected<RouteLineError, RouteLineUpdateValue>
     ) {
         jobControl.scope.launch {
             mutex.withLock {

@@ -70,7 +70,7 @@ class RouteLineUtil(private val activity: AppCompatActivity) : LifecycleObserver
 
     private val onIndicatorPositionChangedListener = OnIndicatorPositionChangedListener { point ->
         routeLineApi.updateTraveledRouteLine(point).apply {
-            routeLineView.renderVanishingRouteLineUpdateValue(style, this)
+            routeLineView.renderRouteLineUpdate(style, this)
         }
     }
 
@@ -86,7 +86,10 @@ class RouteLineUtil(private val activity: AppCompatActivity) : LifecycleObserver
 
     private val routeProgressObserver: RouteProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            routeLineApi.updateWithRouteProgress(routeProgress)
+            routeLineApi.updateWithRouteProgress(routeProgress) { result ->
+                routeLineView.renderRouteLineUpdate(style, result)
+            }
+
             routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
                 routeArrowView.renderManeuverUpdate(style, this)
             }

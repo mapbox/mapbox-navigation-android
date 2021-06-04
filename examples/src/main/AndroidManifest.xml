@@ -98,6 +98,11 @@
     </activity>
 
     <activity
+        android:name=".MultiLegRouteExampleActivity"
+        android:label="@string/title_multileg_route">
+    </activity>
+
+    <activity
         android:name="com.mapbox.navigation.examples.MainActivity"
         android:screenOrientation="portrait">
       <intent-filter>
