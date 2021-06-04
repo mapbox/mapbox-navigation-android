@@ -57,21 +57,20 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun getTrafficLineExpressionTest() {
-        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0," +
-            " [rgba, 86.0, 168.0, 251.0, 1.0], 0.015670907645820537, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.11898525632162987, " +
+        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
             "[rgba, 86.0, 168.0, 251.0, 1.0]]"
 
         val expressionDatas = listOf(
-            RouteLineExpressionData(0.0, -11097861),
-            RouteLineExpressionData(0.015670907645820537, -11097861),
-            RouteLineExpressionData(0.11898525632162987, -11097861)
+            RouteLineExpressionData(0.0, -11097861, 0),
+            RouteLineExpressionData(0.015670907645820537, -11097861, 0),
+            RouteLineExpressionData(0.11898525632162987, -11097861, 0)
         )
 
         val result = MapboxRouteLineUtils.getTrafficLineExpression(
             0.0,
-            expressionDatas,
-            -11097861
+            Color.TRANSPARENT,
+            -11097861,
+            expressionDatas
         )
 
         assertEquals(expectedExpression, result.toString())
@@ -80,25 +79,43 @@ class MapboxRouteLineUtilsTest {
     @Test
     fun getTrafficLineExpressionDuplicateOffsetsRemoved() {
         val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.7868200761181402, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.7930120224665551, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.7932530928525063, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.7964017663976524, [rgba, 86.0, 168.0, 251.0, 1.0]]"
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.7964017663976524, [rgba, 255.0, 0.0, 0.0, 1.0]]"
         val expressionDatas = listOf(
-            RouteLineExpressionData(0.7868200761181402, -11097861),
-            RouteLineExpressionData(0.7930120224665551, -11097861),
-            RouteLineExpressionData(0.7932530928525063, -11097861),
-            RouteLineExpressionData(0.7932530928525063, -11097861),
-            RouteLineExpressionData(0.7964017663976524, -11097861)
+            RouteLineExpressionData(0.7868200761181402, -11097861, 0),
+            RouteLineExpressionData(0.7930120224665551, -11097861, 0),
+            RouteLineExpressionData(0.7932530928525063, -11097861, 0),
+            RouteLineExpressionData(0.7932530928525063, -11097861, 0),
+            RouteLineExpressionData(0.7964017663976524, Color.RED, 0)
         )
 
         val result = MapboxRouteLineUtils.getTrafficLineExpression(
+            0.0,
+            Color.TRANSPARENT,
+            -11097861,
+            expressionDatas
+        )
+
+        assertEquals(result.toString(), expectedExpression)
+    }
+
+    @Test
+    fun getFilteredRouteLineExpressionDataDuplicateOffsetsRemoved() {
+        val expressionDatas = listOf(
+            RouteLineExpressionData(0.7868200761181402, -11097861, 0),
+            RouteLineExpressionData(0.7930120224665551, -11097861, 0),
+            RouteLineExpressionData(0.7932530928525063, -11097861, 0),
+            RouteLineExpressionData(0.7932530928525063, -11097861, 0),
+            RouteLineExpressionData(0.7964017663976524, -11097861, 0)
+        )
+
+        val result = MapboxRouteLineUtils.getFilteredRouteLineExpressionData(
             0.0,
             expressionDatas,
             -11097861
         )
 
-        assertEquals(result.toString(), expectedExpression)
+        assertEquals(2, expressionDatas.count { it.offset == 0.7932530928525063 })
+        assertEquals(1, result.count { it.offset == 0.7932530928525063 })
     }
 
     @Test
@@ -145,8 +162,9 @@ class MapboxRouteLineUtilsTest {
 
         val result = MapboxRouteLineUtils.getTrafficLineExpression(
             0.0,
-            segments,
-            -11097861
+            Color.TRANSPARENT,
+            -11097861,
+            segments
         )
 
         assertEquals(expectedExpression, result.toString())
@@ -157,7 +175,7 @@ class MapboxRouteLineUtilsTest {
         val expectedExpression = "[step, [line-progress], [rgba, 255.0, 77.0, 77.0, 1.0]" +
             ", 3.0, [rgba, 86.0, 168.0, 251.0, 1.0]]"
 
-        val result = MapboxRouteLineUtils.getVanishingRouteLineExpression(3.0, -45747, -11097861)
+        val result = MapboxRouteLineUtils.getRouteLineExpression(3.0, -45747, -11097861)
 
         assertEquals(expectedExpression, result.toString())
     }
@@ -1061,7 +1079,7 @@ class MapboxRouteLineUtilsTest {
         )
 
         assertTrue(result.all { it.segmentColor == -1 })
-        assertEquals(1, result.size)
+        assertEquals(2, result.size)
     }
 
     @Test
@@ -1215,6 +1233,16 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
+    fun getRouteLineTrafficExpressionData_whenFirstDistanceInSecondLegIsZero() {
+        val route = getMultilegWithTwoLegs()
+        val result = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
+
+        assertEquals(20, result.size)
+        assertEquals(478.70000000000005, result[7].distanceFromOrigin, 0.0)
+        assertEquals(478.73487833756155, result[8].distanceFromOrigin, 0.0)
+    }
+
+    @Test
     fun calculateRouteLineSegmentsWithRouteRestrictions() {
         val colorResources = RouteLineColorResources.Builder()
             .routeUnknownTrafficColor(-9)
@@ -1267,7 +1295,7 @@ class MapboxRouteLineUtilsTest {
             false
         )
 
-        assertEquals(19, result.size)
+        assertEquals(20, result.size)
         assertEquals(0.039793906743275334, result[1].offset, 0.0)
         assertEquals(0.9924011283895643, result.last().offset, 0.0)
     }
@@ -1318,6 +1346,27 @@ class MapboxRouteLineUtilsTest {
         assertEquals(1, result.size)
         assertEquals(0.0, result[0].offset, 0.0)
         assertEquals(colorResources.routeDefaultColor, result[0].segmentColor)
+    }
+
+    @Test
+    fun calculateRouteLineSegments_when_styleINactiveRouteLegsIndependently() {
+        val colors = RouteLineColorResources.Builder().build()
+        val route = getMultilegWithTwoLegs()
+
+        val result = MapboxRouteLineUtils.calculateRouteLineSegments(
+            route,
+            listOf(),
+            true,
+            colors,
+            1.0,
+            true
+        )
+
+        result.indexOfFirst { it.legIndex == 1 }
+
+        assertEquals(12, result.size)
+        assertEquals(5, result.indexOfFirst { it.legIndex == 1 })
+        assertEquals(0.48807892461540975, result[5].offset, 0.0)
     }
 
     @Test
@@ -1656,8 +1705,9 @@ class MapboxRouteLineUtilsTest {
             routeLineColorResources,
             true,
             0.0,
+            Color.TRANSPARENT,
             routeLineColorResources.routeUnknownTrafficColor,
-            10.0
+            0.0
         ).invoke()
 
         assertEquals(
@@ -1666,8 +1716,43 @@ class MapboxRouteLineUtilsTest {
         )
     }
 
+    @Test
+    fun getRouteLineExpression() {
+        val expectedExpression = "[step, [line-progress], [rgba, 255.0, 0.0, 0.0, 1.0], 0.2," +
+            " [rgba, 86.0, 168.0, 251.0, 1.0], 0.48807892461540975, " +
+            "[rgba, 255.0, 255.0, 0.0, 1.0]]"
+        val colorResources = RouteLineColorResources.Builder()
+            .inActiveRouteLegsColor(Color.YELLOW)
+            .build()
+        val route = getMultilegWithTwoLegs()
+        val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
+            route,
+            listOf(),
+            true,
+            colorResources,
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            false
+        )
+
+        val result = MapboxRouteLineUtils.getRouteLineExpression(
+            .20,
+            segments,
+            Color.RED,
+            colorResources.routeDefaultColor,
+            colorResources.inActiveRouteLegsColor,
+            0
+        )
+
+        assertEquals(expectedExpression, result.toString())
+    }
+
     private fun getMultilegRoute(): DirectionsRoute {
         return loadRoute("multileg_route.json")
+    }
+
+    private fun getMultilegWithTwoLegs(): DirectionsRoute {
+        val routeAsJson = loadJsonFixture("multileg-route-two-legs.json")
+        return DirectionsRoute.fromJson(routeAsJson)
     }
 
     private fun loadRoute(routeFileName: String): DirectionsRoute {

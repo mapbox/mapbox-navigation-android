@@ -228,14 +228,18 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
         val result = routeLineApi.updateTraveledRouteLine(point)
         mapboxMap.getStyle()?.apply {
             // Render the result to update the map.
-            routeLineView.renderVanishingRouteLineUpdateValue(this, result)
+            routeLineView.renderRouteLineUpdate(this, result)
         }
     }
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         // RouteLine: This line is only necessary if the vanishing route line feature
         // is enabled.
-        routeLineApi.updateWithRouteProgress(routeProgress)
+        routeLineApi.updateWithRouteProgress(routeProgress) { result ->
+            mapboxMap.getStyle()?.apply {
+                routeLineView.renderRouteLineUpdate(this, result)
+            }
+        }
 
         // RouteArrow: The next maneuver arrows are driven by route progress events.
         // Generate the next maneuver arrow update data and pass it to the view class

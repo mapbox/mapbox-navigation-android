@@ -54,10 +54,10 @@ object RouteConstants {
     val TRAFFIC_BACKFILL_ROAD_CLASSES = emptyList<String>()
 
     @ColorInt
-    val ROUTE_LINE_TRAVELED_COLOR = Color.parseColor("#00000000")
+    val ROUTE_LINE_TRAVELED_COLOR = Color.TRANSPARENT
 
     @ColorInt
-    val ROUTE_LINE_TRAVELED_CASING_COLOR = Color.parseColor("#00000000")
+    val ROUTE_LINE_TRAVELED_CASING_COLOR = Color.TRANSPARENT
 
     @ColorInt
     val ROUTE_DEFAULT_COLOR = Color.parseColor("#56A8FB")
@@ -107,9 +107,6 @@ object RouteConstants {
     @ColorInt
     val ALTERNATE_RESTRICTED_ROAD_COLOR = Color.parseColor("#333333")
 
-    @ColorInt
-    val TRANSPARENT_COLOR = Color.parseColor("#00000000")
-
     @DrawableRes
     val ORIGIN_WAYPOINT_ICON: Int = R.drawable.mapbox_ic_route_origin
 
@@ -127,6 +124,9 @@ object RouteConstants {
 
     @ColorInt
     val ALTERNATIVE_ROUTE_CLOSURE_COLOR = Color.parseColor("#333333")
+
+    @ColorInt
+    val IN_ACTIVE_ROUTE_LEG_COLOR = Color.TRANSPARENT
 
     @DrawableRes
     val MANEUVER_ARROWHEAD_ICON_DRAWABLE: Int = R.drawable.mapbox_ic_arrow_head

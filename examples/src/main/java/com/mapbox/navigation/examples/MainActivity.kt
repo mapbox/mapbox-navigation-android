@@ -22,6 +22,7 @@ import com.mapbox.navigation.examples.core.MapboxSignboardActivity
 import com.mapbox.navigation.examples.core.MapboxSnapshotActivity
 import com.mapbox.navigation.examples.core.MapboxTripProgressActivity
 import com.mapbox.navigation.examples.core.MapboxVoiceActivity
+import com.mapbox.navigation.examples.core.MultiLegRouteExampleActivity
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.ReplayHistoryActivity
 import com.mapbox.navigation.examples.core.camera.MapboxCameraAnimationsActivity
@@ -125,11 +126,6 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 MapboxMultipleArrowActivity::class.java
             ),
             SampleItem(
-                getString(R.string.title_draw_utility),
-                getString(R.string.description_draw_utility),
-                RouteDrawingActivity::class.java
-            ),
-            SampleItem(
                 getString(R.string.title_independent_route),
                 getString(R.string.description_independent_route),
                 IndependentRouteGenerationActivity::class.java
@@ -138,6 +134,16 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_building_highlight),
                 getString(R.string.description_building_highlight),
                 MapboxBuildingHighlightActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_multileg_route),
+                getString(R.string.description_multileg_route),
+                MultiLegRouteExampleActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_draw_utility),
+                getString(R.string.description_draw_utility),
+                RouteDrawingActivity::class.java
             )
         )
     }
