@@ -17,6 +17,7 @@ executors:
       - image: mbgl/android-ndk-r21:latest
     working_directory: ~/code
     environment:
+      MBX_CI_DOMAIN: o619qyc20d.execute-api.us-east-1.amazonaws.com
       FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION: << pipeline.parameters.mapbox_navigation_native_snapshot >>
       ALLOW_SNAPSHOT_REPOSITORY: << pipeline.parameters.mapbox_navigation_native_upstream >>
       
@@ -124,8 +125,6 @@ commands:
       - run:
           name: Verify that a changelog entry is present in the PR description
           command: |
-            curl -Ls https://mapbox-release-engineering.s3.amazonaws.com/mbx-ci/latest/mbx-ci-linux-amd64 > mbx-ci
-            chmod 755 ./mbx-ci
             MBX_CI_GITHUB_TOKEN=$(./mbx-ci github reader token)
             if [[ -n "$CIRCLE_PULL_REQUEST" ]]; then
               python3 scripts/validate-changelog.py ${CIRCLE_PULL_REQUEST##*/} ${MBX_CI_GITHUB_TOKEN}
@@ -409,6 +408,20 @@ commands:
             pip3 install requests
             python3 scripts/trigger-mobile-metrics.py
 
+  prepare-mbx-ci:
+    steps:
+      - run:
+          name: Install mbx-ci
+          command: |
+            curl -Ls https://mapbox-release-engineering.s3.amazonaws.com/mbx-ci/latest/mbx-ci-linux-amd64 > mbx-ci && chmod 755 ./mbx-ci
+
+  setup-aws-credentials:
+    steps:
+      - run:
+          name: Obtain AWS credentials
+          command: |
+            ./mbx-ci aws setup
+
 #--------------------------
 #---------- JOBS ----------
 #--------------------------
@@ -459,6 +472,7 @@ jobs:
     executor: ndk-r21-latest-executor
     steps:
       - checkout
+      - prepare-mbx-ci
       - verify-changelog
 
   ui-robo-tests:
@@ -522,6 +536,8 @@ jobs:
       - assemble-ui-release
       - check-public-documentation
       - generate-documentation
+      - prepare-mbx-ci
+      - setup-aws-credentials
       - publish-artifacts:
           artifact-type: "core"
       - publish-artifacts:
@@ -537,6 +553,8 @@ jobs:
       - assemble-ui-release
       - check-public-documentation
       - generate-documentation
+      - prepare-mbx-ci
+      - setup-aws-credentials
       - publish-artifacts:
           artifact-type: "core"
       - publish-artifacts:
