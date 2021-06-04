@@ -1,7 +1,5 @@
 package com.mapbox.navigation.navigator.internal
 
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.navigator.internal.NavigatorLoader.customConfig
@@ -29,9 +27,7 @@ internal object NavigatorLoader {
     fun createNavigator(
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
-        tilesConfig: TilesConfig,
-        historyDir: String?,
-        logger: Logger,
+        tilesConfig: TilesConfig
     ): NativeComponents {
         val config = ConfigFactory.build(
             settingsProfile(deviceProfile),
@@ -39,20 +35,7 @@ internal object NavigatorLoader {
             deviceProfile.customConfig
         )
         val runLoopExecutor = RunLoopExecutorFactory.build()
-        val historyRecorder = if (historyDir != null) {
-            val historyRecorderHandle = HistoryRecorderHandle.build(historyDir, config)
-            if (historyRecorderHandle == null) {
-                logger.d(
-                    msg = Message(
-                        "historyDir is empty or historyDir path is not a directory or " +
-                            "HistoryRecorder couldn't create directory at historyDir path."
-                    )
-                )
-            }
-            historyRecorderHandle
-        } else {
-            null
-        }
+        val historyRecorder = null
         val cache = CacheFactory.build(tilesConfig, config, historyRecorder)
 
         val navigator = Navigator(

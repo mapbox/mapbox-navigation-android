@@ -882,7 +882,7 @@ class MapboxNavigationTest {
             )
         } just Runs
 
-        fallbackObserverSlot.captured.onCanReturnToLatest()
+        fallbackObserverSlot.captured.onCanReturnToLatest("")
 
         assertEquals("", tileConfigSlot.captured.endpointConfig?.version)
         assertFalse(tileConfigSlot.captured.endpointConfig?.isFallback!!)

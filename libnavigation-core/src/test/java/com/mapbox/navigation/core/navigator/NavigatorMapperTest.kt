@@ -36,14 +36,12 @@ class NavigatorMapperTest {
     private val enhancedLocation: Location = mockk(relaxed = true)
     private val keyPoints: List<Location> = mockk(relaxed = true)
     private val route: DirectionsRoute = mockk(relaxed = true)
-    private val routeBufferGeoJson: Geometry = mockk(relaxed = true)
     private val shape: Geometry = Point.fromLngLat(LONGITUDE, LATITUDE)
 
     @Test
     fun `map matcher result sanity`() {
         val tripStatus = TripStatus(
             route,
-            routeBufferGeoJson,
             mockk {
                 every { offRoadProba } returns 0f
                 every { speedLimit } returns createSpeedLimit()
@@ -80,7 +78,6 @@ class NavigatorMapperTest {
     fun `map matcher result when close to being off road`() {
         val tripStatus = TripStatus(
             route,
-            routeBufferGeoJson,
             mockk {
                 every { offRoadProba } returns 0.5f
                 every { speedLimit } returns createSpeedLimit()
@@ -117,7 +114,6 @@ class NavigatorMapperTest {
     fun `map matcher result when off road`() {
         val tripStatus = TripStatus(
             route,
-            routeBufferGeoJson,
             mockk {
                 every { offRoadProba } returns 0.500009f
                 every { speedLimit } returns createSpeedLimit()
@@ -154,7 +150,6 @@ class NavigatorMapperTest {
     fun `map matcher result teleport`() {
         val tripStatus = TripStatus(
             route,
-            routeBufferGeoJson,
             mockk {
                 every { offRoadProba } returns 0f
                 every { speedLimit } returns createSpeedLimit()
@@ -191,7 +186,6 @@ class NavigatorMapperTest {
     fun `map matcher result no edge matches`() {
         val tripStatus = TripStatus(
             route,
-            routeBufferGeoJson,
             mockk {
                 every { offRoadProba } returns 1f
                 every { speedLimit } returns createSpeedLimit()
@@ -228,7 +222,6 @@ class NavigatorMapperTest {
 
         val routeProgress = getRouteProgressFrom(
             null,
-            null,
             navigationStatus,
             mockk(relaxed = true)
         )
@@ -242,7 +235,6 @@ class NavigatorMapperTest {
 
         val routeProgress = getRouteProgressFrom(
             directionsRoute,
-            null,
             navigationStatus,
             mockk(relaxed = true)
         )
@@ -254,7 +246,6 @@ class NavigatorMapperTest {
     fun `route progress minimum requirements`() {
         val routeProgress = getRouteProgressFrom(
             directionsRoute,
-            null,
             navigationStatus,
             mockk(relaxed = true)
         )
@@ -267,7 +258,6 @@ class NavigatorMapperTest {
         every { navigationStatus.stale } returns true
         val routeProgress = getRouteProgressFrom(
             directionsRoute,
-            null,
             navigationStatus,
             mockk(relaxed = true)
         )
@@ -280,7 +270,6 @@ class NavigatorMapperTest {
         every { navigationStatus.stale } returns false
         val routeProgress = getRouteProgressFrom(
             directionsRoute,
-            null,
             navigationStatus,
             mockk(relaxed = true)
         )
@@ -308,7 +297,6 @@ class NavigatorMapperTest {
 
         val routeProgress = getRouteProgressFrom(
             directionsRoute,
-            null,
             navigationStatus,
             mockk(relaxed = true)
         )
@@ -336,7 +324,6 @@ class NavigatorMapperTest {
         )
 
         val routeProgress = getRouteProgressFrom(
-            mockk(relaxed = true),
             mockk(relaxed = true),
             navigationStatus,
             mockk(relaxed = true)

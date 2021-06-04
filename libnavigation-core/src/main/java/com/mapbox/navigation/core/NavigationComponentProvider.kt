@@ -28,16 +28,9 @@ internal object NavigationComponentProvider {
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
-        historyDir: String?,
         logger: Logger
     ): MapboxNativeNavigator =
-        MapboxNativeNavigatorImpl.create(
-            deviceProfile,
-            navigatorConfig,
-            tilesConfig,
-            historyDir,
-            logger
-        )
+        MapboxNativeNavigatorImpl.create(deviceProfile, navigatorConfig, tilesConfig, logger)
 
     fun createTripService(
         applicationContext: Context,

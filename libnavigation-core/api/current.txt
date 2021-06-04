@@ -1,10 +1,6 @@
 // Signature format: 3.0
 package com.mapbox.navigation.core {
 
-  public fun interface HistoryObserver {
-    method public void onHistoryDumped(String? filepath);
-  }
-
   @UiThread public final class MapboxNavigation {
     ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public void addHistoryEvent(String eventType, String eventJsonProperties);
@@ -37,7 +33,7 @@ package com.mapbox.navigation.core {
     method public void registerVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
     method public long requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.core.directions.session.RoutesRequestCallback routesRequestCallback);
     method public void resetTripSession();
-    method public void retrieveHistory(com.mapbox.navigation.core.HistoryObserver observer);
+    method public String retrieveHistory();
     method public String? retrieveSsmlAnnouncementInstruction(int index);
     method public void setArrivalController(com.mapbox.navigation.core.arrival.ArrivalController? arrivalController = com.mapbox.navigation.core.arrival.AutoArrivalController());
     method public void setArrivalController();
@@ -46,6 +42,7 @@ package com.mapbox.navigation.core {
     method public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession();
     method public void stopTripSession();
+    method public void toggleHistory(boolean isEnabled);
     method public void unregisterArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
     method public void unregisterBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
     method public void unregisterEHorizonObserver(com.mapbox.navigation.core.trip.session.eh.EHorizonObserver eHorizonObserver);

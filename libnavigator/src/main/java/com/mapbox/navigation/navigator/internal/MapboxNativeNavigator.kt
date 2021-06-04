@@ -10,7 +10,6 @@ import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.CacheHandle
-import com.mapbox.navigator.DumpHistoryCallback
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
@@ -44,7 +43,6 @@ interface MapboxNativeNavigator {
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
-        historyDir: String?,
         logger: Logger
     ): MapboxNativeNavigator
 
@@ -55,7 +53,6 @@ interface MapboxNativeNavigator {
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
-        historyDir: String?,
         logger: Logger
     )
 
@@ -172,7 +169,15 @@ interface MapboxNativeNavigator {
      * @return a json representing the series of events that happened since the last time
      * the history was toggled on.
      */
-    fun getHistory(result: DumpHistoryCallback)
+    fun getHistory(): String
+
+    /**
+     * Toggles the recording of history on or off.
+     * Toggling will reset all history calls [getHistory] first before toggling to retain a copy.
+     *
+     * @param isEnabled set this to true to turn on history recording and false to turn it off
+     */
+    fun toggleHistory(isEnabled: Boolean)
 
     /**
      * Adds a custom event to the navigator's history. This can be useful to log things that

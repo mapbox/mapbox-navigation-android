@@ -14,7 +14,6 @@ import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.CacheHandle
-import com.mapbox.navigator.DumpHistoryCallback
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
@@ -84,7 +83,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
-        historyDir: String?,
         logger: Logger
     ): MapboxNativeNavigator {
         navigator?.shutdown()
@@ -92,9 +90,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         val nativeComponents = NavigatorLoader.createNavigator(
             deviceProfile,
             navigatorConfig,
-            tilesConfig,
-            historyDir,
-            logger
+            tilesConfig
         )
         navigator = nativeComponents.navigator
         nativeRouter = nativeComponents.nativeRouter
@@ -115,10 +111,9 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
-        historyDir: String?,
         logger: Logger
     ) {
-        create(deviceProfile, navigatorConfig, tilesConfig, historyDir, logger)
+        create(deviceProfile, navigatorConfig, tilesConfig, logger)
         nativeNavigatorRecreationObservers.forEach {
             it.onNativeNavigatorRecreated()
         }
@@ -283,8 +278,16 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return a json representing the series of events that happened since the last time
      * the history was toggled on.
      */
-    override fun getHistory(result: DumpHistoryCallback) {
-        historyRecorderHandle?.dumpHistory(result)
+    override fun getHistory(): String = String(byteArrayOf())
+
+    /**
+     * Toggles the recording of history on or off.
+     * Toggling will reset all history calls [getHistory] first before toggling to retain a copy.
+     *
+     * @param isEnabled set this to true to turn on history recording and false to turn it off
+     */
+    override fun toggleHistory(isEnabled: Boolean) {
+        // no op
     }
 
     /**
