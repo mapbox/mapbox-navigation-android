@@ -21,22 +21,6 @@ import kotlin.coroutines.suspendCoroutine
 object MapboxRouteLineApiExtensions {
 
     /**
-     * Updates which route is identified as the primary route.
-     *
-     * @param route the [DirectionsRoute] which should be designated as the primary
-     * @return a state which contains the side effects to be applied to the map displaying the
-     * newly designated route line.
-     */
-    suspend fun MapboxRouteLineApi.updateToPrimaryRoute(route: DirectionsRoute):
-        Expected<RouteLineError, RouteSetValue> {
-        return suspendCoroutine { continuation ->
-            this.updateToPrimaryRoute(
-                route
-            ) { value -> continuation.resume(value) }
-        }
-    }
-
-    /**
      * Sets the routes that will be operated on.
      *
      * @param newRoutes one or more routes. The first route in the collection will be considered

@@ -103,26 +103,34 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
             assertEquals(3, routeLineApi.getRoutes().size)
 
             val soonToBePrimaryRoute = routeLineApi.getRoutes()[1]
-            routeLineApi.updateToPrimaryRoute(
-                soonToBePrimaryRoute
-            ) {
-                assertEquals(soonToBePrimaryRoute, routeLineApi.getRoutes()[0])
-
-                mapboxNavigation.setRoutes(routeLineApi.getRoutes())
-                mapboxNavigation.registerRouteProgressObserver(
-                    object : RouteProgressObserver {
-                        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-                            // only need one route progress for this test
-                            mapboxNavigation.unregisterRouteProgressObserver(this)
-
-                            assertEquals(routeLineApi.getRoutes()[0], routeProgress.route)
-                            routeProgressIdlingResource.unregister()
-                            myResourceIdler.decrement()
-                        }
-                    }
+            val updatedRoutes = routeLineApi.getRoutes()
+                .filter { it != soonToBePrimaryRoute }
+                .toMutableList()
+                .also {
+                    it.add(0, soonToBePrimaryRoute)
+                }
+            val updatedRouteLines = updatedRoutes.map { RouteLine(it, null) }
+            routeLineApi.setRoutes(updatedRouteLines) { result ->
+                routeLineView.renderRouteDrawData(
+                    activity.mapboxMap.getStyle()!!,
+                    result
                 )
-                mapboxNavigation.startTripSession()
             }
+
+            mapboxNavigation.setRoutes(updatedRoutes)
+            mapboxNavigation.registerRouteProgressObserver(
+                object : RouteProgressObserver {
+                    override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+                        // only need one route progress for this test
+                        mapboxNavigation.unregisterRouteProgressObserver(this)
+
+                        assertEquals(routeLineApi.getRoutes()[0], routeProgress.route)
+                        routeProgressIdlingResource.unregister()
+                        myResourceIdler.decrement()
+                    }
+                }
+            )
+            mapboxNavigation.startTripSession()
         }
 
         Espresso.onIdle()
@@ -139,9 +147,7 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
                     val routeLines = directionsResponse.routes().map {
                         RouteLine(it, null)
                     }
-                    routeLineApi.setRoutes(
-                        routeLines
-                    ) { result ->
+                    routeLineApi.setRoutes(routeLines) { result ->
                         routeLineView.renderRouteDrawData(
                             activity.mapboxMap.getStyle()!!,
                             result

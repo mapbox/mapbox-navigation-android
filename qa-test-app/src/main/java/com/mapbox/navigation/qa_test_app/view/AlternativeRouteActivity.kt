@@ -40,7 +40,6 @@ import com.mapbox.navigation.qa_test_app.databinding.AlternativeRouteActivityLay
 import com.mapbox.navigation.qa_test_app.utils.Utils.getMapboxAccessToken
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.updateToPrimaryRoute
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
@@ -288,8 +287,13 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
 
             val routeFound = result.value?.route
             if (routeFound != null && routeFound != routeLineApi.getPrimaryRoute()) {
-                routeLineApi.updateToPrimaryRoute(routeFound)
-                mapboxNavigation.setRoutes(routeLineApi.getRoutes())
+                val reOrderedRoutes = routeLineApi.getRoutes()
+                    .filter { it != routeFound }
+                    .toMutableList()
+                    .also {
+                        it.add(0, routeFound)
+                    }
+                mapboxNavigation.setRoutes(reOrderedRoutes)
             }
         }
         false
