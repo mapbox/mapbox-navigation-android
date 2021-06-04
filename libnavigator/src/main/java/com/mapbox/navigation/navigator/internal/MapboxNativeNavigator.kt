@@ -4,13 +4,13 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.TileStore
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.CacheHandle
+import com.mapbox.navigator.DumpHistoryCallback
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
@@ -33,11 +33,8 @@ import com.mapbox.navigator.VoiceInstruction
  */
 interface MapboxNativeNavigator {
 
-    companion object {
-
+    private companion object {
         private const val INDEX_FIRST_LEG = 0
-        private const val GRID_SIZE = 0.0025f
-        private const val BUFFER_DILATION: Short = 1
     }
 
     /**
@@ -47,6 +44,7 @@ interface MapboxNativeNavigator {
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
+        historyDir: String?,
         logger: Logger
     ): MapboxNativeNavigator
 
@@ -57,6 +55,7 @@ interface MapboxNativeNavigator {
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
+        historyDir: String?,
         logger: Logger
     )
 
@@ -144,22 +143,6 @@ interface MapboxNativeNavigator {
     fun getBannerInstruction(index: Int): BannerInstruction?
 
     /**
-     * Gets a polygon around the currently loaded route. The method uses a bitmap approach
-     * in which you specify a grid size (pixel size) and a dilation (how many pixels) to
-     * expand the initial grid cells that are intersected by the route.
-     *
-     * @param gridSize the size of the individual grid cells
-     * @param bufferDilation the number of pixels to dilate the initial intersection by it can
-     * be thought of as controlling the halo thickness around the route
-     *
-     * @return a geojson as [String] representing the route buffer polygon
-     */
-    fun getRouteGeometryWithBuffer(
-        gridSize: Float = GRID_SIZE,
-        bufferDilation: Short = BUFFER_DILATION
-    ): String?
-
-    /**
      * Follows a new leg of the already loaded directions.
      * Returns an initialized navigation status if no errors occurred
      * otherwise, it returns an invalid navigation status state.
@@ -180,30 +163,6 @@ interface MapboxNativeNavigator {
      */
     suspend fun getRoute(url: String): Expected<RouterError, String>
 
-    /**
-     * Passes in an input path to the tar file and output path.
-     *
-     * @param tarPath The path to the packed tiles.
-     * @param destinationPath The path to the unpacked files.
-     *
-     * @return the number of unpacked tiles
-     */
-    fun unpackTiles(tarPath: String, destinationPath: String): Long
-
-    /**
-     * Removes tiles wholly within the supplied bounding box. If the tile is not
-     * contained completely within the bounding box, it will remain in the cache.
-     * After removing files from the cache, any routers should be reconfigured
-     * to synchronize their in-memory cache with the disk.
-     *
-     * @param tilePath The path to the tiles.
-     * @param southwest The lower left coord of the bounding box.
-     * @param northeast The upper right coord of the bounding box.
-     *
-     * @return the number of tiles removed
-     */
-    fun removeTiles(tilePath: String, southwest: Point, northeast: Point): Long
-
     // History traces
 
     /**
@@ -213,15 +172,7 @@ interface MapboxNativeNavigator {
      * @return a json representing the series of events that happened since the last time
      * the history was toggled on.
      */
-    fun getHistory(): String
-
-    /**
-     * Toggles the recording of history on or off.
-     * Toggling will reset all history calls [getHistory] first before toggling to retain a copy.
-     *
-     * @param isEnabled set this to true to turn on history recording and false to turn it off
-     */
-    fun toggleHistory(isEnabled: Boolean)
+    fun getHistory(result: DumpHistoryCallback)
 
     /**
      * Adds a custom event to the navigator's history. This can be useful to log things that

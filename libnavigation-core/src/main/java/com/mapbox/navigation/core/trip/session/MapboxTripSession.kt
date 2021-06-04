@@ -168,10 +168,10 @@ internal class MapboxTripSession(
                 }
             }
 
-            override fun onCanReturnToLatest() {
+            override fun onCanReturnToLatest(version: String) {
                 mainJobController.scope.launch {
                     fallbackVersionsObservers.forEach {
-                        it.onCanReturnToLatest()
+                        it.onCanReturnToLatest(version)
                     }
                 }
             }
@@ -575,7 +575,6 @@ internal class MapboxTripSession(
             } ?: 0
             val routeProgress = getRouteProgressFrom(
                 status.route,
-                status.routeBufferGeoJson,
                 status.navigationStatus,
                 remainingWaypoints
             )

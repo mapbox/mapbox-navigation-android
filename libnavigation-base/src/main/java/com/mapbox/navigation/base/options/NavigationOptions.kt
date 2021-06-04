@@ -39,6 +39,8 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * @param routeRefreshOptions defines configuration for refreshing routes
  * @param routeAlternativesOptions defines configuration for observing alternatives while navigating
  * @param incidentsOptions defines configuration for live incidents
+ * @param historyDir path to the directory where history files could be stored when [MapboxNavigation.retrieveHistory]
+ * is called. It could be existing directory or new one. This is optional and passing it will enable history recording.
  */
 class NavigationOptions private constructor(
     val applicationContext: Context,
@@ -57,6 +59,7 @@ class NavigationOptions private constructor(
     val routeRefreshOptions: RouteRefreshOptions,
     val routeAlternativesOptions: RouteAlternativesOptions,
     val incidentsOptions: IncidentsOptions,
+    val historyDir: String?,
 ) {
 
     /**
@@ -78,6 +81,7 @@ class NavigationOptions private constructor(
         routeRefreshOptions(routeRefreshOptions)
         routeAlternativesOptions(routeAlternativesOptions)
         incidentsOptions(incidentsOptions)
+        historyDir(historyDir)
     }
 
     /**
@@ -105,6 +109,7 @@ class NavigationOptions private constructor(
         if (routeRefreshOptions != other.routeRefreshOptions) return false
         if (routeAlternativesOptions != other.routeAlternativesOptions) return false
         if (incidentsOptions != other.incidentsOptions) return false
+        if (historyDir != other.historyDir) return false
 
         return true
     }
@@ -129,6 +134,7 @@ class NavigationOptions private constructor(
         result = 31 * result + routeRefreshOptions.hashCode()
         result = 31 * result + routeAlternativesOptions.hashCode()
         result = 31 * result + incidentsOptions.hashCode()
+        result = 31 * result + (historyDir?.hashCode() ?: 0)
         return result
     }
 
@@ -149,10 +155,11 @@ class NavigationOptions private constructor(
             "isFromNavigationUi=$isFromNavigationUi, " +
             "isDebugLoggingEnabled=$isDebugLoggingEnabled, " +
             "deviceProfile=$deviceProfile, " +
-            "eHorizonOptions=$eHorizonOptions " +
-            "routeRefreshOptions=$routeRefreshOptions " +
-            "routeAlternativesOptions=$routeAlternativesOptions " +
-            "incidentsOptions=$incidentsOptions" +
+            "eHorizonOptions=$eHorizonOptions, " +
+            "routeRefreshOptions=$routeRefreshOptions, " +
+            "routeAlternativesOptions=$routeAlternativesOptions, " +
+            "incidentsOptions=$incidentsOptions, " +
+            "historyDir=$historyDir" +
             ")"
     }
 
@@ -185,6 +192,7 @@ class NavigationOptions private constructor(
         private var routeAlternativesOptions: RouteAlternativesOptions =
             RouteAlternativesOptions.Builder().build()
         private var incidentsOptions: IncidentsOptions = IncidentsOptions.Builder().build()
+        private var historyDir: String? = null
 
         /**
          * Defines [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
@@ -279,6 +287,13 @@ class NavigationOptions private constructor(
             apply { this.incidentsOptions = incidentsOptions }
 
         /**
+         * Defines the path to the directory where history files will be stored.
+         * Passing a non-null value will enable history recording
+         */
+        fun historyDir(path: String?): Builder =
+            apply { this.historyDir = path }
+
+        /**
          * Build a new instance of [NavigationOptions]
          * @return NavigationOptions
          */
@@ -301,6 +316,7 @@ class NavigationOptions private constructor(
                 routeRefreshOptions = routeRefreshOptions,
                 routeAlternativesOptions = routeAlternativesOptions,
                 incidentsOptions = incidentsOptions,
+                historyDir = historyDir,
             )
         }
     }

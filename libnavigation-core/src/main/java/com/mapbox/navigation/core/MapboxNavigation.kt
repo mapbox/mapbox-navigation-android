@@ -76,6 +76,7 @@ import com.mapbox.navigation.utils.internal.NetworkStatusService
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
+import com.mapbox.navigator.DumpHistoryCallback
 import com.mapbox.navigator.ElectronicHorizonOptions
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.IncidentsOptions
@@ -257,6 +258,7 @@ class MapboxNavigation(
                 isFallback = false,
                 tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
             ),
+            navigationOptions.historyDir,
             logger
         )
         navigationSession = NavigationComponentProvider.createNavigationSession()
@@ -501,15 +503,11 @@ class MapboxNavigation(
      *
      * @return history trace string
      */
-    fun retrieveHistory(): String {
-        return MapboxNativeNavigatorImpl.getHistory()
-    }
-
-    /**
-     * API used to enable/disable location and route progress samples logs for debug purposes.
-     */
-    fun toggleHistory(isEnabled: Boolean) {
-        MapboxNativeNavigatorImpl.toggleHistory(isEnabled)
+    fun retrieveHistory(observer: HistoryObserver) {
+        val electronicHorizonObserver = DumpHistoryCallback {
+            observer.onHistoryDumped(it)
+        }
+        return MapboxNativeNavigatorImpl.getHistory(electronicHorizonObserver)
     }
 
     /**
@@ -916,7 +914,7 @@ class MapboxNavigation(
             }
         }
 
-        override fun onCanReturnToLatest() {
+        override fun onCanReturnToLatest(version: String) {
             recreateNavigatorInstance(
                 isFallback = false,
                 tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
@@ -943,6 +941,7 @@ class MapboxNavigation(
                 navigationOptions.deviceProfile,
                 navigatorConfig,
                 createTilesConfig(isFallback, tilesVersion),
+                navigationOptions.historyDir,
                 logger
             )
             tripSession.route?.let {
@@ -1065,6 +1064,7 @@ class MapboxNavigation(
                 USER_AGENT,
                 BuildConfig.NAV_NATIVE_SDK_VERSION,
                 isFallback,
+                "",
                 navigationOptions.routingTilesOptions.minDaysBetweenServerAndLocalTilesVersion
             )
         )

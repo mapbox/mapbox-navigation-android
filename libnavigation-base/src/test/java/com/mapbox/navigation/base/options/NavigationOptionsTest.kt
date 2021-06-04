@@ -70,6 +70,7 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
             .routeRefreshOptions(mockk())
             .routeAlternativesOptions(mockk())
             .incidentsOptions(mockk())
+            .historyDir("/history/path")
     }
 
     @Test

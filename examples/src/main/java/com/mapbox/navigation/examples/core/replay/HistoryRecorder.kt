@@ -43,7 +43,6 @@ class HistoryRecorder(
      */
     fun startRecording() {
         startedAt = Date()
-        navigation.toggleHistory(true)
     }
 
     /**
@@ -55,13 +54,12 @@ class HistoryRecorder(
         this.startedAt = null
 
         // retrieveHistory on the main thread before the navigator is reset.
-        val history = navigation.retrieveHistory()
-        navigation.toggleHistory(false)
-        if (history == "{}") {
-            Log.e(TAG, "Your history file is empty")
-        } else {
-            val filename = createFilename(startedAt)
-            writeFile(filename, history)
+        navigation.retrieveHistory { filePath ->
+            if (filePath == null) {
+                Log.e(TAG, "Your history file is empty")
+            } else {
+                Log.e(TAG, "filePath=$filePath")
+            }
         }
     }
 
