@@ -39,6 +39,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * @param routeRefreshOptions defines configuration for refreshing routes
  * @param routeAlternativesOptions defines configuration for observing alternatives while navigating
  * @param incidentsOptions defines configuration for live incidents
+ * @param historyRecorderOptions defines configuration for recording navigation events
  */
 class NavigationOptions private constructor(
     val applicationContext: Context,
@@ -57,6 +58,7 @@ class NavigationOptions private constructor(
     val routeRefreshOptions: RouteRefreshOptions,
     val routeAlternativesOptions: RouteAlternativesOptions,
     val incidentsOptions: IncidentsOptions,
+    val historyRecorderOptions: HistoryRecorderOptions
 ) {
 
     /**
@@ -78,6 +80,7 @@ class NavigationOptions private constructor(
         routeRefreshOptions(routeRefreshOptions)
         routeAlternativesOptions(routeAlternativesOptions)
         incidentsOptions(incidentsOptions)
+        historyRecorderOptions(historyRecorderOptions)
     }
 
     /**
@@ -105,6 +108,7 @@ class NavigationOptions private constructor(
         if (routeRefreshOptions != other.routeRefreshOptions) return false
         if (routeAlternativesOptions != other.routeAlternativesOptions) return false
         if (incidentsOptions != other.incidentsOptions) return false
+        if (historyRecorderOptions != other.historyRecorderOptions) return false
 
         return true
     }
@@ -129,6 +133,7 @@ class NavigationOptions private constructor(
         result = 31 * result + routeRefreshOptions.hashCode()
         result = 31 * result + routeAlternativesOptions.hashCode()
         result = 31 * result + incidentsOptions.hashCode()
+        result = 31 * result + historyRecorderOptions.hashCode()
         return result
     }
 
@@ -152,7 +157,8 @@ class NavigationOptions private constructor(
             "eHorizonOptions=$eHorizonOptions, " +
             "routeRefreshOptions=$routeRefreshOptions, " +
             "routeAlternativesOptions=$routeAlternativesOptions, " +
-            "incidentsOptions=$incidentsOptions" +
+            "incidentsOptions=$incidentsOptions, " +
+            "historyRecorderOptions=$historyRecorderOptions" +
             ")"
     }
 
@@ -185,6 +191,8 @@ class NavigationOptions private constructor(
         private var routeAlternativesOptions: RouteAlternativesOptions =
             RouteAlternativesOptions.Builder().build()
         private var incidentsOptions: IncidentsOptions = IncidentsOptions.Builder().build()
+        private var historyRecorderOptions: HistoryRecorderOptions =
+            HistoryRecorderOptions.Builder().build()
 
         /**
          * Defines [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
@@ -279,6 +287,12 @@ class NavigationOptions private constructor(
             apply { this.incidentsOptions = incidentsOptions }
 
         /**
+         * Defines configuration history recording
+         */
+        fun historyRecorderOptions(historyRecorderOptions: HistoryRecorderOptions): Builder =
+            apply { this.historyRecorderOptions = historyRecorderOptions }
+
+        /**
          * Build a new instance of [NavigationOptions]
          * @return NavigationOptions
          */
@@ -301,6 +315,7 @@ class NavigationOptions private constructor(
                 routeRefreshOptions = routeRefreshOptions,
                 routeAlternativesOptions = routeAlternativesOptions,
                 incidentsOptions = incidentsOptions,
+                historyRecorderOptions = historyRecorderOptions
             )
         }
     }

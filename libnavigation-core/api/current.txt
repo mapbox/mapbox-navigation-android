@@ -3,7 +3,6 @@ package com.mapbox.navigation.core {
 
   @UiThread public final class MapboxNavigation {
     ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
-    method public void addHistoryEvent(String eventType, String eventJsonProperties);
     method public void cancelRouteRequest(long requestId);
     method public com.mapbox.navigation.core.trip.session.eh.GraphAccessor getGraphAccessor();
     method public com.mapbox.navigation.base.options.NavigationOptions getNavigationOptions();
@@ -13,6 +12,7 @@ package com.mapbox.navigation.core {
     method public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
     method public com.mapbox.navigation.core.navigator.TilesetDescriptorFactory getTilesetDescriptorFactory();
     method public com.mapbox.navigation.core.trip.session.TripSessionState getTripSessionState();
+    method public com.mapbox.navigation.core.history.MapboxHistoryRecorder historyRecorder();
     method public boolean navigateNextRouteLeg();
     method public void onDestroy();
     method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray(), com.mapbox.navigation.core.telemetry.events.AppMetadata? appMetadata = null);
@@ -33,7 +33,6 @@ package com.mapbox.navigation.core {
     method public void registerVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
     method public long requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.core.directions.session.RoutesRequestCallback routesRequestCallback);
     method public void resetTripSession();
-    method public String retrieveHistory();
     method public String? retrieveSsmlAnnouncementInstruction(int index);
     method public void setArrivalController(com.mapbox.navigation.core.arrival.ArrivalController? arrivalController = com.mapbox.navigation.core.arrival.AutoArrivalController());
     method public void setArrivalController();
@@ -42,7 +41,6 @@ package com.mapbox.navigation.core {
     method public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession();
     method public void stopTripSession();
-    method public void toggleHistory(boolean isEnabled);
     method public void unregisterArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
     method public void unregisterBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
     method public void unregisterEHorizonObserver(com.mapbox.navigation.core.trip.session.eh.EHorizonObserver eHorizonObserver);
@@ -111,6 +109,66 @@ package com.mapbox.navigation.core.directions.session {
     method public void onRoutesReady(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
     method public void onRoutesRequestCanceled(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
     method public void onRoutesRequestFailure(Throwable throwable, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+  }
+
+}
+
+package com.mapbox.navigation.core.history {
+
+  public final class MapboxHistoryReader implements java.util.Iterator<com.mapbox.navigation.core.history.model.HistoryEvent> kotlin.jvm.internal.markers.KMappedMarker {
+    ctor public MapboxHistoryReader(String filePath);
+    method public String getFilePath();
+    method public boolean hasNext();
+    method public com.mapbox.navigation.core.history.model.HistoryEvent next();
+    property public final String filePath;
+  }
+
+  public final class MapboxHistoryRecorder {
+    method public String? fileDirectory();
+    method public void saveHistory(com.mapbox.navigation.core.history.SaveHistoryCallback result);
+  }
+
+  public fun interface SaveHistoryCallback {
+    method public void onSaved(String? filepath);
+  }
+
+}
+
+package com.mapbox.navigation.core.history.model {
+
+  public interface HistoryEvent {
+  }
+
+  public final class HistoryEventGetStatus implements com.mapbox.navigation.core.history.model.HistoryEvent {
+    method public long getElapsedRealtimeNanos();
+    property public final long elapsedRealtimeNanos;
+  }
+
+  public final class HistoryEventSetRoute implements com.mapbox.navigation.core.history.model.HistoryEvent {
+    method public com.mapbox.api.directions.v5.models.DirectionsRoute getDirectionsRoute();
+    method public String getGeometries();
+    method public int getLegIndex();
+    method public String getProfile();
+    method public int getRouteIndex();
+    method public java.util.List<com.mapbox.navigation.core.history.model.HistoryWaypoint> getWaypoints();
+    property public final com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute;
+    property public final String geometries;
+    property public final int legIndex;
+    property public final String profile;
+    property public final int routeIndex;
+    property public final java.util.List<com.mapbox.navigation.core.history.model.HistoryWaypoint> waypoints;
+  }
+
+  public final class HistoryEventUpdateLocation implements com.mapbox.navigation.core.history.model.HistoryEvent {
+    method public android.location.Location getLocation();
+    property public final android.location.Location location;
+  }
+
+  public final class HistoryWaypoint {
+    method public com.mapbox.geojson.Point getPoint();
+    method public boolean isSilent();
+    property public final boolean isSilent;
+    property public final com.mapbox.geojson.Point point;
   }
 
 }

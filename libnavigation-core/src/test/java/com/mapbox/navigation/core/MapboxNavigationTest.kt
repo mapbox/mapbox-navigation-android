@@ -118,6 +118,7 @@ class MapboxNavigationTest {
         every { packageName } returns "com.mapbox.navigation.core.MapboxNavigationTest"
         every { filesDir } returns File("some/path")
         every { navigator.cache } returns mockk()
+        every { navigator.getHistoryRecorderHandle() } returns null
     }
 
     private lateinit var mapboxNavigation: MapboxNavigation
@@ -170,7 +171,7 @@ class MapboxNavigationTest {
         mockDirectionSession()
         mockNavigationSession()
 
-        every { navigator.create(any(), any(), any(), any()) } returns navigator
+        every { navigator.create(any(), any(), any(), any(), any()) } returns navigator
 
         mapboxNavigation = MapboxNavigation(navigationOptions)
 
@@ -630,7 +631,9 @@ class MapboxNavigationTest {
         ThreadController.cancelAllUICoroutines()
         val slot = slot<TilesConfig>()
         every {
-            NavigationComponentProvider.createNativeNavigator(any(), any(), capture(slot), any())
+            NavigationComponentProvider.createNativeNavigator(
+                any(), any(), capture(slot), any(), any()
+            )
         } returns navigator
         val options = navigationOptions.toBuilder()
             .routingTilesOptions(RoutingTilesOptions.Builder().build())
@@ -648,7 +651,9 @@ class MapboxNavigationTest {
         ThreadController.cancelAllUICoroutines()
         val slot = slot<TilesConfig>()
         every {
-            NavigationComponentProvider.createNativeNavigator(any(), any(), capture(slot), any())
+            NavigationComponentProvider.createNativeNavigator(
+                any(), any(), capture(slot), any(), any()
+            )
         } returns navigator
         val options = navigationOptions.toBuilder()
             .routingTilesOptions(
@@ -671,7 +676,9 @@ class MapboxNavigationTest {
         ThreadController.cancelAllUICoroutines()
         val slot = slot<NavigatorConfig>()
         every {
-            NavigationComponentProvider.createNativeNavigator(any(), capture(slot), any(), any())
+            NavigationComponentProvider.createNativeNavigator(
+                any(), capture(slot), any(), any(), any()
+            )
         } returns navigator
 
         mapboxNavigation = MapboxNavigation(navigationOptions)
@@ -686,7 +693,9 @@ class MapboxNavigationTest {
         ThreadController.cancelAllUICoroutines()
         val slot = slot<NavigatorConfig>()
         every {
-            NavigationComponentProvider.createNativeNavigator(any(), capture(slot), any(), any())
+            NavigationComponentProvider.createNativeNavigator(
+                any(), capture(slot), any(), any(), any()
+            )
         } returns navigator
         val options = navigationOptions.toBuilder()
             .incidentsOptions(
@@ -709,7 +718,9 @@ class MapboxNavigationTest {
         ThreadController.cancelAllUICoroutines()
         val slot = slot<NavigatorConfig>()
         every {
-            NavigationComponentProvider.createNativeNavigator(any(), capture(slot), any(), any())
+            NavigationComponentProvider.createNativeNavigator(
+                any(), capture(slot), any(), any(), any()
+            )
         } returns navigator
         val options = navigationOptions.toBuilder()
             .incidentsOptions(
@@ -805,7 +816,9 @@ class MapboxNavigationTest {
         ThreadController.cancelAllUICoroutines()
         val slot = slot<TilesConfig>()
         every {
-            NavigationComponentProvider.createNativeNavigator(any(), any(), capture(slot), any())
+            NavigationComponentProvider.createNativeNavigator(
+                any(), any(), capture(slot), any(), any()
+            )
         } returns navigator
         val tilesVersion = "tilesVersion"
         val options = navigationOptions.toBuilder()
@@ -843,6 +856,7 @@ class MapboxNavigationTest {
                 any(),
                 any(),
                 capture(tileConfigSlot),
+                any(),
                 any()
             )
         } just Runs
@@ -878,6 +892,7 @@ class MapboxNavigationTest {
                 any(),
                 any(),
                 capture(tileConfigSlot),
+                any(),
                 any()
             )
         } just Runs
@@ -927,7 +942,7 @@ class MapboxNavigationTest {
 
     private fun mockNativeNavigator() {
         every {
-            NavigationComponentProvider.createNativeNavigator(any(), any(), any(), any())
+            NavigationComponentProvider.createNativeNavigator(any(), any(), any(), any(), any())
         } returns navigator
     }
 
