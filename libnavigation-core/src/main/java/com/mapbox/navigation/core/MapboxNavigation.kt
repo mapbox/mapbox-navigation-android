@@ -20,6 +20,7 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
+import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
@@ -36,6 +37,8 @@ import com.mapbox.navigation.core.arrival.AutoArrivalController
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
+import com.mapbox.navigation.core.history.MapboxHistoryReader
+import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
@@ -177,7 +180,7 @@ class MapboxNavigation(
     private val tripService: TripService
     private val tripSession: TripSession
     private val navigationSession: NavigationSession
-    private val logger: Logger
+    private val logger = LoggerProvider.logger
     private val internalRoutesObserver: RoutesObserver
     private val internalOffRouteObserver: OffRouteObserver
     private val internalFallbackVersionsObserver: FallbackVersionsObserver
@@ -199,6 +202,8 @@ class MapboxNavigation(
             null
         }
     }
+
+    private val mapboxHistoryRecorder = MapboxHistoryRecorder(navigationOptions, logger)
 
     private val navigatorConfig = NavigatorConfig(
         null,
@@ -249,7 +254,6 @@ class MapboxNavigation(
 
     init {
         ThreadController.init()
-        logger = LoggerProvider.logger
         navigator = NavigationComponentProvider.createNativeNavigator(
             navigationOptions.deviceProfile,
             navigatorConfig,
@@ -257,8 +261,10 @@ class MapboxNavigation(
                 isFallback = false,
                 tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
             ),
+            mapboxHistoryRecorder.fileDirectory(),
             logger
         )
+        mapboxHistoryRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
         navigationSession = NavigationComponentProvider.createNavigationSession()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
             MapboxModuleProvider.createModule(MapboxModuleType.NavigationRouter, ::paramsProvider),
@@ -497,33 +503,12 @@ class MapboxNavigation(
     }
 
     /**
-     * API used to retrieve logged location and route progress samples for debug purposes.
+     * Use the history recorder to save history files.
      *
-     * Note that this is returning an empty string (no-op) in this release
-     *
-     * @return history trace string
+     * @see [HistoryRecorderOptions] to enable and customize the directory
+     * @see [MapboxHistoryReader] to read the files
      */
-    fun retrieveHistory(): String {
-        return MapboxNativeNavigatorImpl.getHistory()
-    }
-
-    /**
-     * API used to enable/disable location and route progress samples logs for debug purposes.
-     *
-     * Note that this is no-op in this release
-     */
-    fun toggleHistory(isEnabled: Boolean) {
-        MapboxNativeNavigatorImpl.toggleHistory(isEnabled)
-    }
-
-    /**
-     * API used to artificially add debug events to logs.
-     *
-     * Note that this is no-op in this release
-     */
-    fun addHistoryEvent(eventType: String, eventJsonProperties: String) {
-        MapboxNativeNavigatorImpl.addHistoryEvent(eventType, eventJsonProperties)
-    }
+    fun historyRecorder(): MapboxHistoryRecorder = mapboxHistoryRecorder
 
     /**
      * API used to retrieve the SSML announcement for voice instructions.
@@ -946,8 +931,10 @@ class MapboxNavigation(
                 navigationOptions.deviceProfile,
                 navigatorConfig,
                 createTilesConfig(isFallback, tilesVersion),
+                mapboxHistoryRecorder.fileDirectory(),
                 logger
             )
+            mapboxHistoryRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
             tripSession.route?.let {
                 navigator.setRoute(
                     it,

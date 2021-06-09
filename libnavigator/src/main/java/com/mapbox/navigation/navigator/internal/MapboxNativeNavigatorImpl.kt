@@ -83,6 +83,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
+        historyDir: String?,
         logger: Logger
     ): MapboxNativeNavigator {
         navigator?.shutdown()
@@ -90,7 +91,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         val nativeComponents = NavigatorLoader.createNavigator(
             deviceProfile,
             navigatorConfig,
-            tilesConfig
+            tilesConfig,
+            historyDir,
         )
         navigator = nativeComponents.navigator
         nativeRouter = nativeComponents.nativeRouter
@@ -111,9 +113,10 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
+        historyDir: String?,
         logger: Logger
     ) {
-        create(deviceProfile, navigatorConfig, tilesConfig, logger)
+        create(deviceProfile, navigatorConfig, tilesConfig, historyDir, logger)
         nativeNavigatorRecreationObservers.forEach {
             it.onNativeNavigatorRecreated()
         }
@@ -271,34 +274,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     // History traces
 
-    /**
-     * Gets the history of state-changing calls to the navigator. This can be used to
-     * replay a sequence of events for the purpose of bug fixing.
-     *
-     * @return a json representing the series of events that happened since the last time
-     * the history was toggled on.
-     */
-    override fun getHistory(): String = String(byteArrayOf())
-
-    /**
-     * Toggles the recording of history on or off.
-     * Toggling will reset all history calls [getHistory] first before toggling to retain a copy.
-     *
-     * @param isEnabled set this to true to turn on history recording and false to turn it off
-     */
-    override fun toggleHistory(isEnabled: Boolean) {
-        // no op
-    }
-
-    /**
-     * Adds a custom event to the navigator's history. This can be useful to log things that
-     * happen during navigation that are specific to your application.
-     *
-     * @param eventType the event type in the events log for your custom event
-     * @param eventJsonProperties the json to attach to the "properties" key of the event
-     */
-    override fun addHistoryEvent(eventType: String, eventJsonProperties: String) {
-        historyRecorderHandle?.pushHistory(eventType, eventJsonProperties)
+    override fun getHistoryRecorderHandle(): HistoryRecorderHandle? {
+        return historyRecorderHandle
     }
 
     // Other

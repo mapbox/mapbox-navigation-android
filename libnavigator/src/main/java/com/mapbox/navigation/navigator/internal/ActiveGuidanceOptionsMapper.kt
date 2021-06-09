@@ -33,6 +33,14 @@ object ActiveGuidanceOptionsMapper {
         }
     }
 
+    fun mapToActiveGuidanceMode(activeGuidanceMode: ActiveGuidanceMode): String {
+        return when (activeGuidanceMode) {
+            ActiveGuidanceMode.DRIVING -> DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+            ActiveGuidanceMode.WALKING -> DirectionsCriteria.PROFILE_WALKING
+            ActiveGuidanceMode.CYCLING -> DirectionsCriteria.PROFILE_CYCLING
+        }
+    }
+
     fun mapToActiveGuidanceGeometry(geometry: String?): ActiveGuidanceGeometryEncoding {
         return when (geometry) {
             DirectionsCriteria.GEOMETRY_POLYLINE ->
@@ -43,6 +51,16 @@ object ActiveGuidanceOptionsMapper {
                 ActiveGuidanceGeometryEncoding.GEO_JSON
             else ->
                 ActiveGuidanceGeometryEncoding.POLYLINE6
+        }
+    }
+
+    fun mapToGeometriesCriteria(encoding: ActiveGuidanceGeometryEncoding): String {
+        return when (encoding) {
+            ActiveGuidanceGeometryEncoding.POLYLINE5 ->
+                DirectionsCriteria.GEOMETRY_POLYLINE
+            ActiveGuidanceGeometryEncoding.POLYLINE6 ->
+                DirectionsCriteria.GEOMETRY_POLYLINE6
+            ActiveGuidanceGeometryEncoding.GEO_JSON -> GEOJSON
         }
     }
 

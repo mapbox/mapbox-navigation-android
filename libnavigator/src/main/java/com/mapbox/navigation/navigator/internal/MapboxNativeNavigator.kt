@@ -14,6 +14,7 @@ import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessor
+import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.PredictiveCacheController
@@ -43,6 +44,7 @@ interface MapboxNativeNavigator {
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
+        historyDir: String?,
         logger: Logger
     ): MapboxNativeNavigator
 
@@ -53,6 +55,7 @@ interface MapboxNativeNavigator {
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
+        historyDir: String?,
         logger: Logger
     )
 
@@ -163,30 +166,12 @@ interface MapboxNativeNavigator {
     // History traces
 
     /**
-     * Gets the history of state-changing calls to the navigator. This can be used to
-     * replay a sequence of events for the purpose of bug fixing.
+     * Returns the native class that allows the sdk to record native history files.
      *
-     * @return a json representing the series of events that happened since the last time
-     * the history was toggled on.
+     * @return null when there is no directory to write files,
+     *     or when the handle did not [HistoryRecorderHandle.build]
      */
-    fun getHistory(): String
-
-    /**
-     * Toggles the recording of history on or off.
-     * Toggling will reset all history calls [getHistory] first before toggling to retain a copy.
-     *
-     * @param isEnabled set this to true to turn on history recording and false to turn it off
-     */
-    fun toggleHistory(isEnabled: Boolean)
-
-    /**
-     * Adds a custom event to the navigator's history. This can be useful to log things that
-     * happen during navigation that are specific to your application.
-     *
-     * @param eventType the event type in the events log for your custom event
-     * @param eventJsonProperties the json to attach to the "properties" key of the event
-     */
-    fun addHistoryEvent(eventType: String, eventJsonProperties: String)
+    fun getHistoryRecorderHandle(): HistoryRecorderHandle?
 
     // Other
 
