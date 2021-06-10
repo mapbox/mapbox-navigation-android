@@ -216,7 +216,8 @@ internal object ViewportDataSourceProcessor {
      * the first edge's bearing.
      */
     fun slicePointsAtAngle(
-        points: List<Point>, maxAngleDifference: Double
+        points: List<Point>,
+        maxAngleDifference: Double
     ): List<Point> {
         if (points.size < 2) return points
         val outputCoordinates: MutableList<Point> = emptyList<Point>().toMutableList()
