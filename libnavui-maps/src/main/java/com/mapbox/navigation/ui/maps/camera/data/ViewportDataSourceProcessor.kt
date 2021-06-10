@@ -25,6 +25,8 @@ internal object ViewportDataSourceProcessor {
 
     private const val TAG = "MbxViewportDataSource"
 
+    private const val maxAngleDifferenceForGeometrySlicing: Double = 100.0
+
     /**
      * Returns complete route points in nested arrays of points for all steps in all legs arranged as \[legs]\[steps]\[points].
      */
@@ -199,7 +201,10 @@ internal object ViewportDataSourceProcessor {
                 lookaheadDistanceForZoom,
                 TurfConstants.UNIT_KILOMETERS
             ).coordinates()
-            slicePointsAtAngle(lineSliceCoordinatesForLookaheadDistance, 100.0)
+            slicePointsAtAngle(
+                lineSliceCoordinatesForLookaheadDistance,
+                maxAngleDifferenceForGeometrySlicing
+            )
         } catch (e: TurfException) {
             LoggerProvider.logger.e(Tag(TAG), Message(e.message.toString()))
             emptyList()
@@ -207,7 +212,8 @@ internal object ViewportDataSourceProcessor {
     }
 
     /**
-     * Returns route geometry sliced at the point where it exceeds a certain angle difference from the first edge's bearing.
+     * Returns route geometry sliced at the point where it exceeds a certain angle difference from
+     * the first edge's bearing.
      */
     fun slicePointsAtAngle(
         points: List<Point>, maxAngleDifference: Double
@@ -220,9 +226,10 @@ internal object ViewportDataSourceProcessor {
             if (index == 0) {
                 continue
             }
-            val coord = points[index-1]?.let {
+            val coord = points[index - 1]?.let {
                 val thisEdgeBearing = TurfMeasurement.bearing(it, points[index])
-                if (abs(shortestRotationDiff(thisEdgeBearing, firstEdgeBearing)) < maxAngleDifference) {
+                val rotationDiff = shortestRotationDiff(thisEdgeBearing, firstEdgeBearing)
+                if (abs(rotationDiff) < maxAngleDifference) {
                     points[index]
                 } else {
                     null
