@@ -373,6 +373,43 @@ class ViewportDataSourceProcessorTest {
     }
 
     @Test
+    fun `test getPointsToFrameOnCurrentStep, intersections disabled, cloverleaf`() {
+        val stepProgress: RouteStepProgress = mockk {
+            every { distanceTraveled } returns 0f
+            every { distanceRemaining } returns 20000000f
+            every { stepPoints } returns listOf(
+                Point.fromLngLat(20.0, 11.0),
+                Point.fromLngLat(20.0, 12.0),
+                Point.fromLngLat(21.0, 12.0),
+                Point.fromLngLat(21.0, 9.0),
+                Point.fromLngLat(19.0, 9.0),
+                Point.fromLngLat(19.0, 13.0),
+                Point.fromLngLat(22.0, 13.0)
+            )
+            every { stepIndex } returns 0
+        }
+        val legProgress: RouteLegProgress = mockk {
+            every { currentStepProgress } returns stepProgress
+            every { legIndex } returns 0
+        }
+        val expected: List<Point> = listOf(
+            Point.fromLngLat(20.0, 11.0),
+            Point.fromLngLat(20.0, 12.0),
+            Point.fromLngLat(21.0, 12.0)
+        )
+
+        val actual = getPointsToFrameOnCurrentStep(
+            intersectionDensityCalculationEnabled = false,
+            intersectionDensityAverageDistanceMultiplier = 7.0,
+            averageIntersectionDistancesOnRoute = averageIntersectionDistancesOnRoute,
+            currentLegProgress = legProgress,
+            currentStepProgress = stepProgress
+        )
+
+        assertArrays1(expected, actual, pointAdapter)
+    }
+
+    @Test
     fun `test getPitchFallbackFromRouteProgress - pitch near maneuver disabled`() {
         val expected = 45.0
 

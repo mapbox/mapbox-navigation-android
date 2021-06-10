@@ -25,6 +25,8 @@ internal object ViewportDataSourceProcessor {
 
     private const val TAG = "MbxViewportDataSource"
 
+    private const val maxAngleDifferenceForGeometrySlicing: Double = 100.0
+
     /**
      * Returns complete route points in nested arrays of points for all steps in all legs arranged as \[legs]\[steps]\[points].
      */
@@ -193,16 +195,54 @@ internal object ViewportDataSourceProcessor {
         return try {
             val currentStepFullPoints = currentStepProgress.stepPoints ?: emptyList()
             // todo bottom slice might not be needed since we always append the user location
-            TurfMisc.lineSliceAlong(
+            val lineSliceCoordinatesForLookaheadDistance = TurfMisc.lineSliceAlong(
                 LineString.fromLngLats(currentStepFullPoints),
                 distanceTraveledOnStepKM,
                 lookaheadDistanceForZoom,
                 TurfConstants.UNIT_KILOMETERS
             ).coordinates()
+            slicePointsAtAngle(
+                lineSliceCoordinatesForLookaheadDistance,
+                maxAngleDifferenceForGeometrySlicing
+            )
         } catch (e: TurfException) {
             LoggerProvider.logger.e(Tag(TAG), Message(e.message.toString()))
             emptyList()
         }
+    }
+
+    /**
+     * Returns route geometry sliced at the point where it exceeds a certain angle difference from
+     * the first edge's bearing.
+     */
+    fun slicePointsAtAngle(
+        points: List<Point>,
+        maxAngleDifference: Double
+    ): List<Point> {
+        if (points.size < 2) return points
+        val outputCoordinates: MutableList<Point> = emptyList<Point>().toMutableList()
+        val firstEdgeBearing = TurfMeasurement.bearing(points[0], points[1])
+        outputCoordinates.add(points[0])
+        for (index in points.indices) {
+            if (index == 0) {
+                continue
+            }
+            val coord = points[index - 1]?.let {
+                val thisEdgeBearing = TurfMeasurement.bearing(it, points[index])
+                val rotationDiff = shortestRotationDiff(thisEdgeBearing, firstEdgeBearing)
+                if (abs(rotationDiff) < maxAngleDifference) {
+                    points[index]
+                } else {
+                    null
+                }
+            }
+            if (coord != null) {
+                outputCoordinates.add(coord)
+            } else {
+                break
+            }
+        }
+        return outputCoordinates
     }
 
     /**
