@@ -73,12 +73,10 @@ def Main():
   publishResults = os.getenv("CIRCLE_BRANCH") == "main"
   TriggerWorkflow(token, commit, publishResults)
 
-  # These jobs need to be refactored into workflows.
   if publishResults:
     TriggerJob(token, commit, "android-navigation-benchmark")
-    # "android-navigation-code-coverage" and "android-navigation-binary-size" are not no supported yet
-    # TriggerJob(token, commit, "android-navigation-code-coverage")
-    # TriggerJob(token, commit, "android-navigation-binary-size")
+    TriggerJob(token, commit, "android-navigation-code-coverage")
+    TriggerJob(token, commit, "android-navigation-binary-size")
   else:
     TriggerJob(token, commit, "android-navigation-code-coverage-ci")
     TriggerJob(token, commit, "android-navigation-binary-size-ci")
