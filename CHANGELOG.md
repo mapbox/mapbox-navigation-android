@@ -2,6 +2,33 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.14 - June 11, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
+* :warning: Removed `ArrivalOptions` in favor of triggering when the `RouteProgress.currentState` is equal to `RouteProgressState.COMPLETE`. You can use `RouteProgress` to implement custom arrival behavior based on time or distance. [4459](https://github.com/mapbox/mapbox-navigation-android/pull/4459)
+* :warning: Removed `MapboxNavigation#toggleHistory` in favor of `HistoryRecorderOptions` (found in the `NavigationOptions`), `MapboxHistoryRecorder`, `MapboxHistoryReader` for saving and reading native history files. [4488](https://github.com/mapbox/mapbox-navigation-android/pull/4488)
+* When traversing routes that wrap around behind the vehicle (e.g.: cloverleafs and circular on-ramps) the zoom level is now held constant by the `MapboxNavigationViewportDataSource`. [4468](https://github.com/mapbox/mapbox-navigation-android/pull/4468)
+
+#### Known issues
+When using this release, the merged Manifest comes with an unnecessary `WRITE_SETTINGS` permission declaration. You can ignore that permission and not request it or add this to your Manifest file as a workaround:
+```
+<uses-permission android:name="android.permission.WRITE_SETTINGS" tools:node="remove"/>
+```
+This permission declaration will be removed in future releases.
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+
+- Mapbox Maps SDK `v10.0.0-beta.20` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.20))
+- Mapbox Navigation Native `v51.0.0`
+- Mapbox Core Common `v12.0.0`
+- Mapbox Java `5.9.0-alpha.5` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v5.9.0-alpha.5))
+- Mapbox Android Core `v4.0.2`
+- Mapbox Android Telemetry `v7.0.3`
+
 ## Mapbox Navigation SDK 2.0.0-beta.13 - June 4, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
