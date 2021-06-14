@@ -95,6 +95,17 @@ class MapboxRouteOptionsUpdater : RouteOptionsUpdater {
                             }
                         }
                     )
+                    .snappingClosures(
+                        let snappingClosures@{
+                            val snappingClosures = routeOptions.snappingClosuresList()
+                            if (snappingClosures.isNullOrEmpty()) {
+                                return@snappingClosures emptyList<Boolean>()
+                            }
+                            mutableListOf<Boolean>().also {
+                                it.addAll(snappingClosures.subList(index, coordinates.size))
+                            }
+                        }
+                    )
                     .waypointNamesList(
                         getUpdatedWaypointsList(
                             routeOptions.waypointNamesList(),

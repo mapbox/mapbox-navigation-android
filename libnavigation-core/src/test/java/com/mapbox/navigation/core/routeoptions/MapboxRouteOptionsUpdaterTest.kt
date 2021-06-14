@@ -53,6 +53,19 @@ class MapboxRouteOptionsUpdaterTest {
                 )
                 .build()
 
+        private fun provideRouteOptionsWithCoordinatesAndSnappingClosures() =
+            provideRouteOptionsWithCoordinates()
+                .toBuilder()
+                .snappingClosures(
+                    listOf(
+                        true,
+                        false,
+                        true,
+                        false
+                    )
+                )
+                .build()
+
         private fun provideDefaultRouteOptionsBuilder() =
             RouteOptions.builder()
                 .accessToken(accessToken)
@@ -289,6 +302,103 @@ class MapboxRouteOptionsUpdaterTest {
             val actualBearings = newRouteOptions.bearingsList()
 
             assertEquals(expectedBearings, actualBearings)
+            MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(routeOptions, newRouteOptions)
+        }
+
+        private fun mockLocation() {
+            location = mockk(relaxUnitFun = true)
+            every { location.longitude } returns -122.4232
+            every { location.latitude } returns 23.54423
+            every { location.bearing } returns DEFAULT_REROUTE_BEARING_ANGLE
+        }
+    }
+
+    @RunWith(Parameterized::class)
+    class SnappingClosuresOptionsParameterized(
+        val routeOptions: RouteOptions,
+        val remainingWaypointsParameter: Int,
+        val legIndex: Int,
+        val expectedSnappingClosures: String
+    ) {
+
+        private lateinit var routeRefreshAdapter: MapboxRouteOptionsUpdater
+        private lateinit var location: Location
+
+        companion object {
+            @JvmStatic
+            @Parameterized.Parameters
+            fun params() = listOf(
+                arrayOf(
+                    provideRouteOptionsWithCoordinatesAndSnappingClosures(),
+                    3,
+                    0,
+                    "true;false;true;false"
+                ),
+                arrayOf(
+                    provideRouteOptionsWithCoordinates(),
+                    1,
+                    2,
+                    ""
+                ),
+                arrayOf(
+                    provideRouteOptionsWithCoordinates().toBuilder()
+                        .snappingClosures(
+                            listOf(
+                                true,
+                                false,
+                                false,
+                                false
+                            )
+                        )
+                        .build(),
+                    2,
+                    1,
+                    "false;false;false"
+                ),
+                arrayOf(
+                    provideRouteOptionsWithCoordinates().toBuilder()
+                        .snappingClosures(
+                            listOf(
+                                true,
+                                false,
+                                true,
+                                false
+                            )
+                        )
+                        .build(),
+                    1,
+                    2,
+                    "true;false"
+                )
+            )
+        }
+
+        @Before
+        fun setup() {
+            MockKAnnotations.init(this, relaxUnitFun = true, relaxed = true)
+            mockLocation()
+
+            routeRefreshAdapter = MapboxRouteOptionsUpdater()
+        }
+
+        @Test
+        fun snappinClosuresOptions() {
+            val routeProgress: RouteProgress = mockk(relaxed = true) {
+                every { remainingWaypoints } returns remainingWaypointsParameter
+                every { currentLegProgress?.legIndex } returns legIndex
+            }
+
+            val newRouteOptions =
+                routeRefreshAdapter.update(routeOptions, routeProgress, location)
+                    .let {
+                        assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
+                        return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
+                    }
+                    .routeOptions
+
+            val actualSnappingClosures = newRouteOptions.snappingClosures()
+
+            assertEquals(expectedSnappingClosures, actualSnappingClosures)
             MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(routeOptions, newRouteOptions)
         }
 
