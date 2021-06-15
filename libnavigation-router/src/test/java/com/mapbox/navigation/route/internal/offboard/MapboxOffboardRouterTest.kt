@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directionsrefresh.v1.MapboxDirectionsRefresh
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
@@ -65,7 +66,11 @@ class MapboxOffboardRouterTest : BaseTest() {
         every { mapboxDirections.enqueueCall(capture(routeListener)) } answers {
             routeCallback = routeListener.captured
         }
-        every { routeOptions.coordinates().size } returns 2
+        val twoRandomCoordinates = mutableListOf(
+            Point.fromLngLat(0.0, 1.1),
+            Point.fromLngLat(2.2, 3.3)
+        )
+        every { (routeOptions.coordinates()) } returns twoRandomCoordinates
         every { routeCall.isCanceled } returns false
 
         // refresh
