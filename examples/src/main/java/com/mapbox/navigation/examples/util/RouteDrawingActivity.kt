@@ -79,7 +79,7 @@ class RouteDrawingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_route_drawing_activity)
-        val tileStore = TileStore.getInstance()
+        val tileStore = TileStore.create()
         val mapboxMapOptions = MapInitOptions(this)
         val resourceOptions = ResourceOptions.Builder()
             .accessToken(getMapboxAccessTokenFromResources())
