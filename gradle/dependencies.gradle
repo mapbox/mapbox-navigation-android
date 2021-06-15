@@ -49,7 +49,7 @@ ext {
       ktlint                    : '0.41.0',
       kotlinStdLib              : '1.5.0',
       firebaseCrashlytics       : '17.3.1',
-      multidex                  : '2.0.0',
+      multidex                  : '2.0.1',
       json                      : '20180813',
       coroutinesAndroid         : '1.5.0',
       okhttp                    : '4.9.0',
