@@ -18,6 +18,7 @@ import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
 import com.mapbox.navigation.core.history.model.HistoryEventUpdateLocation
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
+import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
@@ -40,6 +41,9 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
 
+    @get:Rule
+    val mapboxHistoryTestRule = MapboxHistoryTestRule()
+
     private lateinit var mapboxNavigation: MapboxNavigation
 
     private lateinit var routeCompleteIdlingResource: RouteProgressStateIdlingResource
@@ -58,6 +62,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
                 )
                 .build()
         )
+        mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder
         routeCompleteIdlingResource = RouteProgressStateIdlingResource(
             mapboxNavigation,
             RouteProgressState.COMPLETE
@@ -113,7 +118,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
 
         runOnMainSync {
             val countDownLatch = CountDownLatch(1)
-            mapboxNavigation.historyRecorder().saveHistory { filePath ->
+            mapboxNavigation.historyRecorder.saveHistory { filePath ->
                 assertNotNull(filePath)
                 verifyHistoryEvents(filePath!!)
                 countDownLatch.countDown()
@@ -128,13 +133,18 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         // Verify hasNext
         assertTrue(historyReader.hasNext())
 
+        // Verify we can read until end of file
+        val historyEvents = historyReader.asSequence().toList()
+        assertTrue(historyEvents.size > 10)
+
         // Verify the first location
-        val firstLocation = historyReader.next() as HistoryEventUpdateLocation
+        val firstLocation = historyEvents
+            .find { it is HistoryEventUpdateLocation } as HistoryEventUpdateLocation
         assertEquals(firstLocation.location.longitude, -77.031991, 0.00001)
         assertEquals(firstLocation.location.latitude, 38.894721, 0.00001)
 
         // Verify the set route event
-        val setRouteEvent = historyReader.asSequence()
+        val setRouteEvent = historyEvents
             .find { it is HistoryEventSetRoute } as HistoryEventSetRoute
         assertEquals(24.001, setRouteEvent.directionsRoute.duration(), 0.001)
         assertEquals(setRouteEvent.legIndex, 0)
@@ -143,12 +153,8 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         assertEquals(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC, setRouteEvent.profile)
 
         // Verify get status event as non-zero timestamp
-        val getStatus = historyReader.asSequence()
+        val getStatus = historyEvents
             .find { it is HistoryEventGetStatus } as HistoryEventGetStatus
         assertTrue(getStatus.elapsedRealtimeNanos > 0)
-
-        // Verify we can read until end of file
-        val historyEvents = historyReader.asSequence().toList()
-        assertTrue(historyEvents.size > 10)
     }
 }

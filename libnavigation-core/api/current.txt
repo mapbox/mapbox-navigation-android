@@ -5,6 +5,7 @@ package com.mapbox.navigation.core {
     ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public void cancelRouteRequest(long requestId);
     method public com.mapbox.navigation.core.trip.session.eh.GraphAccessor getGraphAccessor();
+    method public com.mapbox.navigation.core.history.MapboxHistoryRecorder getHistoryRecorder();
     method public com.mapbox.navigation.base.options.NavigationOptions getNavigationOptions();
     method public com.mapbox.navigation.core.reroute.RerouteController? getRerouteController();
     method public com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcher getRoadObjectMatcher();
@@ -12,7 +13,6 @@ package com.mapbox.navigation.core {
     method public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
     method public com.mapbox.navigation.core.navigator.TilesetDescriptorFactory getTilesetDescriptorFactory();
     method public com.mapbox.navigation.core.trip.session.TripSessionState getTripSessionState();
-    method public com.mapbox.navigation.core.history.MapboxHistoryRecorder historyRecorder();
     method public boolean navigateNextRouteLeg();
     method public void onDestroy();
     method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray(), com.mapbox.navigation.core.telemetry.events.AppMetadata? appMetadata = null);
@@ -56,6 +56,7 @@ package com.mapbox.navigation.core {
     method public void unregisterVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
     method public void updateSensorEvent(android.hardware.SensorEvent sensorEvent);
     property public final com.mapbox.navigation.core.trip.session.eh.GraphAccessor graphAccessor;
+    property public final com.mapbox.navigation.core.history.MapboxHistoryRecorder historyRecorder;
     property public final com.mapbox.navigation.base.options.NavigationOptions navigationOptions;
     property public final com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcher roadObjectMatcher;
     property public final com.mapbox.navigation.core.trip.session.eh.RoadObjectsStore roadObjectsStore;
