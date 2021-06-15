@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.trip.session
 
-import com.mapbox.navigation.base.internal.factory.EHorizonInstanceFactory
+import com.mapbox.navigation.base.internal.factory.EHorizonFactory
 import com.mapbox.navigation.base.trip.model.eh.EHorizonPosition
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
@@ -55,22 +55,22 @@ class EHorizonSubscriptionManagerTest {
         mockkObject(ThreadController)
         every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
 
-        mockkObject(EHorizonInstanceFactory)
+        mockkObject(EHorizonFactory)
         every {
-            EHorizonInstanceFactory.buildRoadObjectDistance(any())
+            EHorizonFactory.buildRoadObjectDistance(any())
         } returns eHorizonObjectDistance
         every {
-            EHorizonInstanceFactory.buildEHorizonPosition(any())
+            EHorizonFactory.buildEHorizonPosition(any())
         } coAnswers { eHorizonPosition }
         every {
-            EHorizonInstanceFactory.buildRoadObjectEnterExitInfo(any())
+            EHorizonFactory.buildRoadObjectEnterExitInfo(any())
         } coAnswers { eHorizonObjectEnterExitInfo }
     }
 
     @After
     fun cleanUp() {
         unmockkObject(ThreadController)
-        unmockkObject(EHorizonInstanceFactory)
+        unmockkObject(EHorizonFactory)
         subscriptionManager.unregisterAllObservers()
     }
 

@@ -3,8 +3,8 @@ package com.mapbox.navigation.core.trip.session.eh
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.factory.EHorizonInstanceFactory
-import com.mapbox.navigation.base.internal.factory.RoadObjectInstanceFactory
+import com.mapbox.navigation.base.internal.factory.EHorizonFactory
+import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
 import com.mapbox.navigation.base.trip.model.eh.OpenLRStandard
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -54,11 +54,11 @@ class RoadObjectMatcher internal constructor(
             val result: Expected<SDKRoadObjectMatcherError, SDKRoadObject> =
                 if (roadObject.isValue) {
                     ExpectedFactory.createValue(
-                        RoadObjectInstanceFactory.buildRoadObject(roadObject.value!!)
+                        RoadObjectFactory.buildRoadObject(roadObject.value!!)
                     )
                 } else {
                     ExpectedFactory.createError(
-                        RoadObjectInstanceFactory.buildRoadObjectMatchingError(roadObject.error!!)
+                        RoadObjectFactory.buildRoadObjectMatchingError(roadObject.error!!)
                     )
                 }
 
@@ -68,7 +68,7 @@ class RoadObjectMatcher internal constructor(
         override fun onMatchingCancelled(id: String) {
             val result: Expected<SDKRoadObjectMatcherError, SDKRoadObject> =
                 ExpectedFactory.createError(
-                    RoadObjectInstanceFactory.buildRoadObjectMatchingError(
+                    RoadObjectFactory.buildRoadObjectMatchingError(
                         RoadObjectMatcherError("Matching cancelled", id)
                     )
                 )
@@ -98,7 +98,7 @@ class RoadObjectMatcher internal constructor(
     ) {
         navigator.roadObjectMatcher?.matchOpenLR(
             openLRLocation,
-            EHorizonInstanceFactory.buildOpenLRStandard(openLRStandard),
+            EHorizonFactory.buildOpenLRStandard(openLRStandard),
             roadObjectId
         )
     }

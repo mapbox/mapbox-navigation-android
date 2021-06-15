@@ -16,7 +16,7 @@ import com.mapbox.navigator.RoadObjectEdgeLocation
 /**
  * Internal factory to build EHorizon objects
  */
-object EHorizonInstanceFactory {
+object EHorizonFactory {
 
     /**
      * Build RoadObjectEnterExitInfo

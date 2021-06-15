@@ -478,7 +478,6 @@ package com.mapbox.navigation.base.trip.model {
     method public int getLegIndex();
     method public com.mapbox.api.directions.v5.models.RouteLeg? getRouteLeg();
     method public com.mapbox.api.directions.v5.models.LegStep? getUpcomingStep();
-    method public com.mapbox.navigation.base.trip.model.RouteLegProgress.Builder toBuilder();
     property public final com.mapbox.navigation.base.trip.model.RouteStepProgress? currentStepProgress;
     property public final float distanceRemaining;
     property public final float distanceTraveled;
@@ -487,19 +486,6 @@ package com.mapbox.navigation.base.trip.model {
     property public final int legIndex;
     property public final com.mapbox.api.directions.v5.models.RouteLeg? routeLeg;
     property public final com.mapbox.api.directions.v5.models.LegStep? upcomingStep;
-  }
-
-  public static final class RouteLegProgress.Builder {
-    ctor public RouteLegProgress.Builder();
-    method public com.mapbox.navigation.base.trip.model.RouteLegProgress build();
-    method public com.mapbox.navigation.base.trip.model.RouteLegProgress.Builder currentStepProgress(com.mapbox.navigation.base.trip.model.RouteStepProgress? currentStepProgress);
-    method public com.mapbox.navigation.base.trip.model.RouteLegProgress.Builder distanceRemaining(float distanceRemaining);
-    method public com.mapbox.navigation.base.trip.model.RouteLegProgress.Builder distanceTraveled(float distanceTraveled);
-    method public com.mapbox.navigation.base.trip.model.RouteLegProgress.Builder durationRemaining(double durationRemaining);
-    method public com.mapbox.navigation.base.trip.model.RouteLegProgress.Builder fractionTraveled(float fractionTraveled);
-    method public com.mapbox.navigation.base.trip.model.RouteLegProgress.Builder legIndex(int legIndex);
-    method public com.mapbox.navigation.base.trip.model.RouteLegProgress.Builder routeLeg(com.mapbox.api.directions.v5.models.RouteLeg? routeLeg);
-    method public com.mapbox.navigation.base.trip.model.RouteLegProgress.Builder upcomingStep(com.mapbox.api.directions.v5.models.LegStep? upcomingStep);
   }
 
   public final class RouteProgress {
@@ -517,7 +503,6 @@ package com.mapbox.navigation.base.trip.model {
     method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> getUpcomingRoadObjects();
     method public java.util.List<com.mapbox.geojson.Point>? getUpcomingStepPoints();
     method public com.mapbox.api.directions.v5.models.VoiceInstructions? getVoiceInstructions();
-    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder toBuilder();
     property public final com.mapbox.api.directions.v5.models.BannerInstructions? bannerInstructions;
     property public final com.mapbox.navigation.base.trip.model.RouteLegProgress? currentLegProgress;
     property public final com.mapbox.navigation.base.trip.model.RouteProgressState currentState;
@@ -532,24 +517,6 @@ package com.mapbox.navigation.base.trip.model {
     property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> upcomingRoadObjects;
     property public final java.util.List<com.mapbox.geojson.Point>? upcomingStepPoints;
     property public final com.mapbox.api.directions.v5.models.VoiceInstructions? voiceInstructions;
-  }
-
-  public static final class RouteProgress.Builder {
-    ctor public RouteProgress.Builder(com.mapbox.api.directions.v5.models.DirectionsRoute route);
-    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder bannerInstructions(com.mapbox.api.directions.v5.models.BannerInstructions? bannerInstructions);
-    method public com.mapbox.navigation.base.trip.model.RouteProgress build();
-    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder currentLegProgress(com.mapbox.navigation.base.trip.model.RouteLegProgress? legProgress);
-    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder currentState(com.mapbox.navigation.base.trip.model.RouteProgressState currentState);
-    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder distanceRemaining(float distanceRemaining);
-    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder distanceTraveled(float distanceTraveled);
-    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder durationRemaining(double durationRemaining);
-    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder fractionTraveled(float fractionTraveled);
-    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder inTunnel(boolean inTunnel);
-    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder remainingWaypoints(int remainingWaypoints);
-    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder stale(boolean stale);
-    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder upcomingRoadObjects(java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> upcomingRoadObjects);
-    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder upcomingStepPoints(java.util.List<com.mapbox.geojson.Point>? upcomingStepPoints);
-    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder voiceInstructions(com.mapbox.api.directions.v5.models.VoiceInstructions? voiceInstructions);
   }
 
   public enum RouteProgressState {
@@ -570,7 +537,6 @@ package com.mapbox.navigation.base.trip.model {
     method public com.mapbox.api.directions.v5.models.LegStep? getStep();
     method public int getStepIndex();
     method public java.util.List<com.mapbox.geojson.Point>? getStepPoints();
-    method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder toBuilder();
     property public final float distanceRemaining;
     property public final float distanceTraveled;
     property public final double durationRemaining;
@@ -580,20 +546,6 @@ package com.mapbox.navigation.base.trip.model {
     property public final com.mapbox.api.directions.v5.models.LegStep? step;
     property public final int stepIndex;
     property public final java.util.List<com.mapbox.geojson.Point>? stepPoints;
-  }
-
-  public static final class RouteStepProgress.Builder {
-    ctor public RouteStepProgress.Builder();
-    method public com.mapbox.navigation.base.trip.model.RouteStepProgress build();
-    method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder distanceRemaining(float distanceRemaining);
-    method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder distanceTraveled(float distanceTraveled);
-    method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder durationRemaining(double durationRemaining);
-    method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder fractionTraveled(float fractionTraveled);
-    method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder instructionIndex(Integer? instructionIndex);
-    method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder intersectionIndex(int intersectionIndex);
-    method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder step(com.mapbox.api.directions.v5.models.LegStep? step);
-    method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder stepIndex(int stepIndex);
-    method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder stepPoints(java.util.List<com.mapbox.geojson.Point>? stepPoints);
   }
 
   public abstract sealed class TripNotificationState {

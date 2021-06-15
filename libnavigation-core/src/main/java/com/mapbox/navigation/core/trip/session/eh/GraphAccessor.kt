@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core.trip.session.eh
 
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.factory.EHorizonInstanceFactory
+import com.mapbox.navigation.base.internal.factory.EHorizonFactory
 import com.mapbox.navigation.base.trip.model.eh.EHorizonEdge
 import com.mapbox.navigation.base.trip.model.eh.EHorizonEdgeMetadata
 import com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPath
@@ -37,7 +37,7 @@ class GraphAccessor internal constructor(
      */
     fun getEdgeMetadata(edgeId: Long): EHorizonEdgeMetadata? {
         return navigator.graphAccessor?.getEdgeMetadata(edgeId)?.let {
-            EHorizonInstanceFactory.buildEHorizonEdgeMetadata(it)
+            EHorizonFactory.buildEHorizonEdgeMetadata(it)
         }
     }
 
@@ -47,7 +47,7 @@ class GraphAccessor internal constructor(
      */
     fun getPathShape(graphPath: EHorizonGraphPath): List<Point>? {
         return navigator.graphAccessor?.getPathShape(
-            EHorizonInstanceFactory.buildNativeGraphPath(graphPath)
+            EHorizonFactory.buildNativeGraphPath(graphPath)
         )
     }
 
@@ -57,7 +57,7 @@ class GraphAccessor internal constructor(
      */
     fun getGraphPositionCoordinate(graphPosition: EHorizonGraphPosition): Point? {
         return navigator.graphAccessor?.getPositionCoordinate(
-            EHorizonInstanceFactory.buildNativeGraphPosition(graphPosition)
+            EHorizonFactory.buildNativeGraphPosition(graphPosition)
         )
     }
 }
