@@ -51,10 +51,7 @@ workflows:
       - static-analysis:
           requires:
             - prepare-and-assemble
-      - unit-tests-core:
-          requires:
-            - prepare-and-assemble
-      - unit-tests-ui:
+      - unit-tests:
           requires:
             - prepare-and-assemble
       - ui-robo-tests:
@@ -452,16 +449,11 @@ jobs:
           module_target: "libnavigation-core"
       - write-workspace
 
-  unit-tests-core:
+  unit-tests:
     executor: ndk-r21e-latest-executor
     steps:
       - read-workspace
-      - unit-tests-ui
-
-  unit-tests-ui:
-    executor: ndk-r21e-latest-executor
-    steps:
-      - read-workspace
+      - unit-tests-core
       - unit-tests-ui
 # Disabling Codecov (for now) due to https://about.codecov.io/security-update/
 #      - codecov
