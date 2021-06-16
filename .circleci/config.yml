@@ -49,25 +49,13 @@ workflows:
             branches:
               ignore: /^(main|release-.*)/
       - static-analysis:
-          requires:
-            - prepare-and-assemble
       - unit-tests:
-          requires:
-            - prepare-and-assemble
       - ui-robo-tests:
-          requires:
-            - prepare-and-assemble
       - internal-instrumentation-tests:
-          requires:
-            - prepare-and-assemble
       - instrumentation-tests:
-          requires:
-            - prepare-and-assemble
       - mobile-metrics-dry-run:
           type: approval
       - mobile-metrics-benchmarks:
-          requires:
-            - mobile-metrics-dry-run
 
 #------------------------------
 #---------- COMMANDS ----------
