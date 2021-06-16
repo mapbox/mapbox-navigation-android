@@ -1,22 +1,12 @@
 package com.mapbox.navigation.instrumentation_tests.ui.routeline
 
-import android.content.Context
-import androidx.test.espresso.Espresso
-import androidx.test.espresso.IdlingRegistry
-import androidx.test.espresso.idling.CountingIdlingResource
-import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.BasicNavigationViewActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
-import com.mapbox.navigation.instrumentation_tests.utils.idling.MapStyleInitIdlingResource
-import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
 import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
@@ -28,9 +18,11 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.CountDownLatch
 
 class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
     BasicNavigationViewActivity::class.java
@@ -42,124 +34,111 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
 
-    private lateinit var initIdlingResource: MapStyleInitIdlingResource
-    private lateinit var routeProgressIdlingResource: RouteProgressStateIdlingResource
-
-    protected lateinit var directionsResponse: DirectionsResponse
-
-    protected lateinit var mapboxNavigation: MapboxNavigation
-
-    protected lateinit var routeLineApi: MapboxRouteLineApi
-    protected lateinit var routeLineView: MapboxRouteLineView
-
-    private val myResourceIdler =
-        CountingIdlingResource("AlternativeRouteSelectionTestResource")
+    private lateinit var mapboxNavigation: MapboxNavigation
+    private lateinit var routeLineApi: MapboxRouteLineApi
+    private lateinit var routeLineView: MapboxRouteLineView
 
     @Before
     fun setUp() {
-        initIdlingResource = MapStyleInitIdlingResource(activity.binding.mapView)
-        initIdlingResource.register()
-        IdlingRegistry.getInstance().register(myResourceIdler)
-        Espresso.onIdle()
-
-        directionsResponse = getRoute(activity)
-        val coordinates = directionsResponse.waypoints()?.mapNotNull { it.location() } ?: listOf()
-        val route = directionsResponse.routes()[0]
-
         mapboxNavigation = MapboxNavigation(
             NavigationOptions.Builder(activity)
                 .accessToken(getMapboxAccessTokenFromResources(activity))
                 .build()
         )
-
-        routeProgressIdlingResource = RouteProgressStateIdlingResource(
-            mapboxNavigation,
-            RouteProgressState.TRACKING
-        )
-
-        runOnMainSync {
-            mockLocationUpdatesRule.pushLocationUpdate {
-                latitude = coordinates.first().latitude()
-                longitude = coordinates.first().longitude()
-            }
-            mockLocationReplayerRule.playRoute(route)
-
-            mapboxNavigation.setRoutes(directionsResponse.routes())
-        }
     }
 
     @After
     fun tearDown() {
-        initIdlingResource.unregister()
+        mapboxNavigation.onDestroy()
     }
 
     @Test
-    fun selectAlternateRoute() {
-        addRouteLine()
-        routeProgressIdlingResource.register()
+    fun expect_route_apis_to_be_updated_with_alternatives() {
+        // Initialize with a set of routes with alternatives. Later we will
+        // update the routes with a new primary route and verify it is all set.
+        setupRouteWithAlternatives()
+        verifyRouteLineIsUpdatedWithAlternatives()
+
+        // Wait for route progress to come back with an alternative set.
+        val routeLineRoutesIsSet = CountDownLatch(1)
+        val routeProgressCount = CountDownLatch(1)
 
         runOnMainSync {
-            myResourceIdler.increment()
-            assertEquals(3, routeLineApi.getRoutes().size)
+            // Create routes where an alternative is set to the primary route position.
+            val updatedRoutes = routeLineApi.getRoutes().toMutableList()
+            val alternative = updatedRoutes[1]
+            updatedRoutes[1] = updatedRoutes[0]
+            updatedRoutes[0] = alternative
 
-            val soonToBePrimaryRoute = routeLineApi.getRoutes()[1]
-            val updatedRoutes = routeLineApi.getRoutes()
-                .filter { it != soonToBePrimaryRoute }
-                .toMutableList()
-                .also {
-                    it.add(0, soonToBePrimaryRoute)
-                }
+            // Update the route line api and MapboxNavigation with an alternative primary.
             val updatedRouteLines = updatedRoutes.map { RouteLine(it, null) }
             routeLineApi.setRoutes(updatedRouteLines) { result ->
+                assertTrue(result.isValue)
+
                 routeLineView.renderRouteDrawData(
                     activity.mapboxMap.getStyle()!!,
                     result
                 )
+                assertEquals(alternative, routeLineApi.getRoutes()[0])
+                assertEquals(alternative, routeLineApi.getPrimaryRoute())
+                routeLineRoutesIsSet.countDown()
+            }
+            mapboxNavigation.setRoutes(updatedRoutes)
+
+            // Observe route progress and verify the alternative is now the primary route.
+            mapboxNavigation.registerRouteProgressObserver { routeProgress ->
+                assertEquals(alternative, routeProgress.route)
+                routeProgressCount.countDown()
             }
 
-            mapboxNavigation.setRoutes(updatedRoutes)
-            mapboxNavigation.registerRouteProgressObserver(
-                object : RouteProgressObserver {
-                    override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-                        // only need one route progress for this test
-                        mapboxNavigation.unregisterRouteProgressObserver(this)
-
-                        assertEquals(routeLineApi.getRoutes()[0], routeProgress.route)
-                        routeProgressIdlingResource.unregister()
-                        myResourceIdler.decrement()
-                    }
-                }
-            )
+            // Start the trip session and expect the route progress observer
+            // above to have an alternative set as the primary route.
             mapboxNavigation.startTripSession()
         }
 
-        Espresso.onIdle()
-        mapboxNavigation.onDestroy()
+        routeLineRoutesIsSet.await()
+        routeProgressCount.await()
     }
 
-    fun addRouteLine() {
+    private fun setupRouteWithAlternatives() {
+        val directionsResponse = MockRoutesProvider
+            .loadDirectionsResponse(activity, R.raw.multiple_routes)
+        val origin = directionsResponse.waypoints()!!.map { it.location()!! }
+            .first()
+        val route = directionsResponse.routes()[0]
+        runOnMainSync {
+            mockLocationUpdatesRule.pushLocationUpdate {
+                latitude = origin.latitude()
+                longitude = origin.longitude()
+            }
+            mapboxNavigation.setRoutes(directionsResponse.routes())
+            mockLocationReplayerRule.playRoute(route)
+        }
+    }
+
+    private fun verifyRouteLineIsUpdatedWithAlternatives() {
+        val countDownLatch = CountDownLatch(1)
         runOnMainSync {
             routeLineView = MapboxRouteLineView(MapboxRouteLineOptions.Builder(activity).build())
             routeLineApi = MapboxRouteLineApi(MapboxRouteLineOptions.Builder(activity).build())
 
             mapboxNavigation.registerRoutesObserver(object : RoutesObserver {
                 override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-                    val routeLines = directionsResponse.routes().map {
-                        RouteLine(it, null)
-                    }
+                    mapboxNavigation.unregisterRoutesObserver(this)
+
+                    val routeLines = routes.map { RouteLine(it, null) }
                     routeLineApi.setRoutes(routeLines) { result ->
                         routeLineView.renderRouteDrawData(
                             activity.mapboxMap.getStyle()!!,
                             result
                         )
                     }
-                    mapboxNavigation.unregisterRoutesObserver(this)
+
+                    assertEquals(3, routes.size)
+                    countDownLatch.countDown()
                 }
             })
         }
-    }
-
-    private fun getRoute(context: Context): DirectionsResponse {
-        return MockRoutesProvider.loadDirectionsResponse(context, R.raw.multiple_routes)
+        countDownLatch.await()
     }
 }
