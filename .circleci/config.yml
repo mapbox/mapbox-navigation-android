@@ -431,6 +431,7 @@ commands:
 jobs:
   prepare-and-assemble:
     executor: ndk-r21e-latest-executor
+    parallelism: 4
     steps:
       - checkout
       - restore-gradle-cache
