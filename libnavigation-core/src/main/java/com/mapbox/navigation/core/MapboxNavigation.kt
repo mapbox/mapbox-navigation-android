@@ -203,8 +203,6 @@ class MapboxNavigation(
         }
     }
 
-    private val mapboxHistoryRecorder = MapboxHistoryRecorder(navigationOptions, logger)
-
     private val navigatorConfig = NavigatorConfig(
         null,
         electronicHorizonOptions,
@@ -252,6 +250,14 @@ class MapboxNavigation(
      */
     val roadObjectMatcher: RoadObjectMatcher
 
+    /**
+     * Use the history recorder to save history files.
+     *
+     * @see [HistoryRecorderOptions] to enable and customize the directory
+     * @see [MapboxHistoryReader] to read the files
+     */
+    val historyRecorder = MapboxHistoryRecorder(navigationOptions, logger)
+
     init {
         ThreadController.init()
         navigator = NavigationComponentProvider.createNativeNavigator(
@@ -261,10 +267,10 @@ class MapboxNavigation(
                 isFallback = false,
                 tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
             ),
-            mapboxHistoryRecorder.fileDirectory(),
+            historyRecorder.fileDirectory(),
             logger
         )
-        mapboxHistoryRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
+        historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
         navigationSession = NavigationComponentProvider.createNavigationSession()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
             MapboxModuleProvider.createModule(MapboxModuleType.NavigationRouter, ::paramsProvider),
@@ -501,14 +507,6 @@ class MapboxNavigation(
         ThreadController.cancelAllNonUICoroutines()
         ThreadController.cancelAllUICoroutines()
     }
-
-    /**
-     * Use the history recorder to save history files.
-     *
-     * @see [HistoryRecorderOptions] to enable and customize the directory
-     * @see [MapboxHistoryReader] to read the files
-     */
-    fun historyRecorder(): MapboxHistoryRecorder = mapboxHistoryRecorder
 
     /**
      * API used to retrieve the SSML announcement for voice instructions.
@@ -931,10 +929,10 @@ class MapboxNavigation(
                 navigationOptions.deviceProfile,
                 navigatorConfig,
                 createTilesConfig(isFallback, tilesVersion),
-                mapboxHistoryRecorder.fileDirectory(),
+                historyRecorder.fileDirectory(),
                 logger
             )
-            mapboxHistoryRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
+            historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
             tripSession.route?.let {
                 navigator.setRoute(
                     it,

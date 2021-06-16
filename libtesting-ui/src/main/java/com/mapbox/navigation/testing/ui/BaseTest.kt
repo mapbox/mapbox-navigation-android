@@ -23,7 +23,9 @@ open class BaseTest<A : AppCompatActivity>(activityClass: Class<A>) {
 
     @get:Rule
     val permissionsRule: GrantPermissionRule = GrantPermissionRule.grant(
-        Manifest.permission.ACCESS_FINE_LOCATION
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
 
     @get:Rule
