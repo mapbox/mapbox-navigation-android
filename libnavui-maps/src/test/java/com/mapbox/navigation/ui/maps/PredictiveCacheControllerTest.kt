@@ -111,7 +111,7 @@ class PredictiveCacheControllerTest {
             PredictiveCache.createNavigationController(any())
         } just Runs
         val mockedTileStore = mockk<TileStore>()
-        every { TileStore.getInstance(any()) } returns mockedTileStore
+        every { TileStore.create(any()) } returns mockedTileStore
         val mockedMapboxMap = mockk<MapboxMap>(relaxed = true) {
             every { getResourceOptions().tileStore } returns mockedTileStore
         }
@@ -187,7 +187,7 @@ class PredictiveCacheControllerTest {
             PredictiveCache.createNavigationController(any())
         } just Runs
         val mockedTileStore = mockk<TileStore>()
-        every { TileStore.getInstance(any()) } returns mockedTileStore
+        every { TileStore.create(any()) } returns mockedTileStore
         val mockedMapboxMap = mockk<MapboxMap>(relaxed = true) {
             every { getResourceOptions().tileStore } returns mockedTileStore
         }
