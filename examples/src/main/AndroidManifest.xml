@@ -24,12 +24,6 @@
     </activity>
 
     <activity
-        android:name="com.mapbox.navigation.examples.internal.MapboxRouteLineActivity"
-        android:label="@string/title_route_line"
-        android:screenOrientation="portrait">
-    </activity>
-
-    <activity
         android:name=".camera.MapboxCameraAnimationsActivity"
         android:label="@string/title_camera"
         android:screenOrientation="portrait">
