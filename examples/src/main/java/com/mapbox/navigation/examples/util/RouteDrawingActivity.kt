@@ -79,13 +79,12 @@ class RouteDrawingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_route_drawing_activity)
-        val tileStore = TileStore.getInstance()
+        val tileStore = TileStore.create()
         val mapboxMapOptions = MapInitOptions(this)
         val resourceOptions = ResourceOptions.Builder()
             .accessToken(getMapboxAccessTokenFromResources())
             .assetPath(filesDir.absolutePath)
-            .cachePath(filesDir.absolutePath + "/mbx.db")
-            .cacheSize(100000000L) // 100 MB
+            .dataPath(filesDir.absolutePath + "/mbx.db")
             .tileStore(tileStore)
             .build()
         mapboxMapOptions.resourceOptions = resourceOptions

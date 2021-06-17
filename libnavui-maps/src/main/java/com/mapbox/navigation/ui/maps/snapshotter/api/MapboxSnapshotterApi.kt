@@ -86,7 +86,7 @@ class MapboxSnapshotterApi(
                         val oldSize = mapInterface.size
                         val cameraOptions = getCameraOptions(mapInterface, position)
                         snapshotter.setCamera(cameraOptions)
-                        snapshotter.setUri(options.styleUri)
+                        snapshotter.setStyleUri(options.styleUri)
                         mapInterface.size = oldSize
                         snapshotter.setStyleListener(object : SnapshotStyleListener {
                             override fun onDidFinishLoadingStyle(style: Style) {

@@ -26,6 +26,7 @@ import com.mapbox.navigator.RoadObjectProvider
 import com.mapbox.navigator.RouteAlertLocation
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Ignore
 import org.junit.Test
 import java.util.Date
 
@@ -35,6 +36,8 @@ private typealias SDKRouteAlertLocation =
 private typealias SDKRoadObjectProvider =
     com.mapbox.navigation.base.trip.model.roadobject.RoadObjectProvider
 
+// https://github.com/mapbox/mapbox-navigation-android/issues/4492
+@Ignore
 class RoadObjectMapperTest {
 
     private val shape: Geometry = Point.fromLngLat(LONGITUDE, LATITUDE)
@@ -311,7 +314,8 @@ class RoadObjectMapperTest {
             else -> mockk()
         }
 
-        val location = MatchedRoadObjectLocation.valueOf(RouteAlertLocation(shape))
+        val routeAlertLocation: RouteAlertLocation = mockk()
+        val location = MatchedRoadObjectLocation.valueOf(routeAlertLocation)
 
         return RoadObject(
             ID,
