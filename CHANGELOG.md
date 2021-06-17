@@ -2,6 +2,25 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.15 - June 18, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
+* Fixed a bug in `RouteOptionsUpdater` where `snappingClosures` were not taken into account when making a reroute request. [4503](https://github.com/mapbox/mapbox-navigation-android/pull/4503)
+* Fixed missing `Gantry` objects in `ElectronicHorizon`. [#4518](https://github.com/mapbox/mapbox-navigation-android/pull/4518)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+
+- Mapbox Maps SDK `v10.0.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.1))
+- Mapbox Navigation Native `v53.0.1`
+- Mapbox Core Common `v14.0.1`
+- Mapbox Java `5.9.0-alpha.5` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v5.9.0-alpha.5))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.0.0`
+
 ## Mapbox Navigation SDK 2.0.0-beta.14 - June 11, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
