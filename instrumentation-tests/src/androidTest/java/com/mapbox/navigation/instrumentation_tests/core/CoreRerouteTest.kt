@@ -79,14 +79,15 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRequestHandler(
                 profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
-                jsonResponse = readRawFileText(activity, R.raw.reroute_response_dc_very_short),
+                jsonResponse = readRawFileText(activity, R.raw.offroute_response_dc_very_short),
                 expectedCoordinates = listOf(
                     Point.fromLngLat(
                         offRouteLocationUpdate.longitude,
                         offRouteLocationUpdate.latitude
                     ),
                     mockRoute.routeWaypoints.last()
-                )
+                ),
+                omitCoordinates = true
             )
         )
         locationTrackingIdlingResource.register()
@@ -135,7 +136,179 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         // push off route location and wait for the off route event
         offRouteIdlingResource.register()
         runOnMainSync {
-            mockLocationReplayerRule.loopUpdate(offRouteLocationUpdate, times = 5)
+            var locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.8949721
+                longitude = -77.03195067
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.8949721
+                longitude = -77.03195025
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.8949723
+                longitude = -77.03194909
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.8950173
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89506227
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89510723
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.8951522
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89519716
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89524213
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.8952871
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89533206
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89537703
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.895422
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89546696
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89551193
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89555689
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89560186
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89564683
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89569179
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89573676
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89578172
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89582669
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89587166
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89591662
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89596159
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89600655
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89605152
+                longitude = -77.03195
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89605156
+                longitude = -77.03194945
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
+
+            locationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = 38.89605192
+                longitude = -77.03195069
+            }
+            mockLocationReplayerRule.loopUpdate(locationUpdate, times = 1)
         }
         Espresso.onIdle()
         offRouteIdlingResource.unregister()
