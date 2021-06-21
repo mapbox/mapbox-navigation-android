@@ -148,7 +148,7 @@ class MapboxTripSessionTest {
         every { getRouteProgressFrom(any(), any(), any(), any(), any()) } returns routeProgress
         every { route.isSameUuid(any()) } returns false
         every { route.isSameRoute(any()) } returns false
-        every { route.routeOptions()?.requestUuid() } returns "uuid"
+        every { route.requestUuid() } returns "uuid"
 
         every {
             locationEngine.requestLocationUpdates(

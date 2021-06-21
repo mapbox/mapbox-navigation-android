@@ -1,8 +1,1 @@
 // Signature format: 3.0
-package com.mapbox.navigation.route.offboard.router {
-
-  public final class MapboxDirectionsUtilsKt {
-  }
-
-}
-

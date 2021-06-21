@@ -8,7 +8,6 @@ object MapboxRouteOptionsUpdateCommonTest {
     fun checkImmutableFields(routeOptions: RouteOptions, updated: RouteOptions) {
         assertEquals("Check Overview", routeOptions.overview(), updated.overview())
         assertEquals("Check Annotations", routeOptions.annotations(), updated.annotations())
-        assertEquals("Check Uuid", routeOptions.requestUuid(), updated.requestUuid())
         assertEquals("Check Profile", routeOptions.profile(), updated.profile())
         assertEquals("Check Token", routeOptions.accessToken(), updated.accessToken())
         assertEquals(
@@ -38,7 +37,13 @@ object MapboxRouteOptionsUpdateCommonTest {
             updated.roundaboutExits()
         )
         assertEquals(
-            "Check Walking Options", routeOptions.walkingOptions(), updated.walkingOptions()
+            "Check alleyBias", routeOptions.alleyBias(), updated.alleyBias()
+        )
+        assertEquals(
+            "Check walkingSpeed", routeOptions.walkingSpeed(), updated.walkingSpeed()
+        )
+        assertEquals(
+            "Check walkwayBias", routeOptions.walkwayBias(), updated.walkwayBias()
         )
         assertEquals(
             "Check Voice Instructions",

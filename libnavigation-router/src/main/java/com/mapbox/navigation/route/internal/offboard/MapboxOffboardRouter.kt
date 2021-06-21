@@ -18,7 +18,6 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
 import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
-import com.mapbox.navigation.route.offboard.router.routeOptions
 import com.mapbox.navigation.route.offboard.routerefresh.RouteRefreshCallbackMapper
 import com.mapbox.navigation.utils.internal.RequestMap
 import com.mapbox.navigation.utils.internal.cancelRequest
@@ -64,7 +63,7 @@ class MapboxOffboardRouter(
     ): Long {
         val mapboxDirections = RouteBuilderProvider
             .getBuilder(urlSkuTokenProvider)
-            .routeOptions(routeOptions, refreshEnabled)
+            .routeOptions(routeOptions)
             .build()
         val requestId = directionRequests.put(mapboxDirections)
         mapboxDirections.enqueueCall(
@@ -186,7 +185,7 @@ class MapboxOffboardRouter(
         val mapboxDirectionsRefresh = RouteBuilderProvider.getRefreshBuilder()
             .accessToken(accessToken)
             .baseUrl(routeOptions?.baseUrl())
-            .requestId(routeOptions?.requestUuid())
+            .requestId(route.requestUuid())
             .routeIndex(route.routeIndex()?.toIntOrNull() ?: 0)
             .legIndex(legIndex)
             .interceptor {
