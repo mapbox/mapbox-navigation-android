@@ -39,6 +39,7 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
+import com.mapbox.navigation.core.internal.ReachabilityService
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
@@ -73,9 +74,9 @@ import com.mapbox.navigation.core.trip.session.eh.RoadObjectsStore
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
+import com.mapbox.navigation.utils.internal.ConnectivityHandler
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.LoggerProvider
-import com.mapbox.navigation.utils.internal.NetworkStatusService
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
@@ -85,6 +86,7 @@ import com.mapbox.navigator.IncidentsOptions
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 import java.lang.reflect.Field
@@ -181,6 +183,10 @@ class MapboxNavigation(
     private val tripSession: TripSession
     private val navigationSession: NavigationSession
     private val logger = LoggerProvider.logger
+    private val connectivityHandler: ConnectivityHandler = ConnectivityHandler(
+        logger,
+        Channel(Channel.CONFLATED)
+    )
     private val internalRoutesObserver: RoutesObserver
     private val internalOffRouteObserver: OffRouteObserver
     private val internalFallbackVersionsObserver: FallbackVersionsObserver
@@ -258,6 +264,8 @@ class MapboxNavigation(
      */
     val historyRecorder = MapboxHistoryRecorder(navigationOptions, logger)
 
+    private var reachabilityObserverId: Long? = null
+
     init {
         ThreadController.init()
         navigator = NavigationComponentProvider.createNativeNavigator(
@@ -276,6 +284,11 @@ class MapboxNavigation(
             MapboxModuleProvider.createModule(MapboxModuleType.NavigationRouter, ::paramsProvider),
             logger
         )
+        if (reachabilityObserverId == null) {
+            reachabilityObserverId = ReachabilityService.addReachabilityObserver(
+                connectivityHandler
+            )
+        }
         directionsSession.registerRoutesObserver(navigationSession)
         val notification: TripNotification = MapboxModuleProvider
             .createModule(MapboxModuleType.NavigationTripNotification, ::paramsProvider)
@@ -506,6 +519,10 @@ class MapboxNavigation(
         MapboxNavigationTelemetry.unregisterListeners(this@MapboxNavigation)
         ThreadController.cancelAllNonUICoroutines()
         ThreadController.cancelAllUICoroutines()
+        ifNonNull(reachabilityObserverId) {
+            ReachabilityService.removeReachabilityObserver(it)
+            reachabilityObserverId = null
+        }
     }
 
     /**
@@ -985,10 +1002,7 @@ class MapboxNavigation(
                     MapboxNativeNavigatorImpl
                 ),
                 ModuleProviderArgument(Logger::class.java, logger),
-                ModuleProviderArgument(
-                    NetworkStatusService::class.java,
-                    NetworkStatusService(navigationOptions.applicationContext)
-                ),
+                ModuleProviderArgument(ConnectivityHandler::class.java, connectivityHandler),
                 ModuleProviderArgument(
                     Boolean::class.java,
                     navigationOptions.routeRefreshOptions.enabled

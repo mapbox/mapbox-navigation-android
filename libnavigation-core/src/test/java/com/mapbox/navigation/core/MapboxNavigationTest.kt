@@ -4,12 +4,14 @@ import android.app.AlarmManager
 import android.app.NotificationManager
 import android.content.Context
 import android.location.Location
+import android.net.ConnectivityManager
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.telemetry.MapboxTelemetryConstants.MAPBOX_SHARED_PREFERENCES
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
+import com.mapbox.common.MapboxSDKCommon
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
@@ -72,11 +74,16 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.io.File
 import java.util.Locale
 
+@Config(shadows = [ShadowReachabilityFactory::class])
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
+@RunWith(RobolectricTestRunner::class)
 class MapboxNavigationTest {
 
     @get:Rule
@@ -135,6 +142,10 @@ class MapboxNavigationTest {
 
     @Before
     fun setUp() {
+        mockkObject(MapboxSDKCommon)
+        every {
+            MapboxSDKCommon.getContext().getSystemService(Context.CONNECTIVITY_SERVICE)
+        } returns mockk<ConnectivityManager>()
         mockkObject(MapboxModuleProvider)
 
         val hybridRouter: Router = mockk(relaxUnitFun = true)
@@ -181,6 +192,7 @@ class MapboxNavigationTest {
 
     @After
     fun tearDown() {
+        unmockkObject(MapboxSDKCommon)
         unmockkObject(MapboxModuleProvider)
         unmockkObject(LoggerProvider)
         unmockkObject(NavigationComponentProvider)
