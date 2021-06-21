@@ -219,7 +219,7 @@ class MapboxJunctionActivity : AppCompatActivity(), OnMapLongClickListener {
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
                 .accessToken(getMapboxRouteAccessToken(this))
-                .coordinates(listOf(origin, destination))
+                .coordinatesList(listOf(origin, destination))
                 .alternatives(true)
                 .build(),
             object : RouterCallback {

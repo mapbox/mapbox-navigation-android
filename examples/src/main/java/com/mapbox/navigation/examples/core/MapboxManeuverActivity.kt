@@ -241,12 +241,16 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxReplayer.play()
     }
 
-    private fun findRoute(origin: Point, waypoint: List<Point>?, destination: Point) {
+    private fun findRoute(origin: Point, waypoints: List<Point>?, destination: Point) {
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
             .accessToken(getMapboxAccessTokenFromResources())
-            .coordinates(origin, waypoint, destination)
+            .coordinates(
+                origin = origin,
+                waypoints = waypoints,
+                destination = destination
+            )
             .build()
         mapboxNavigation.requestRoutes(
             routeOptions,

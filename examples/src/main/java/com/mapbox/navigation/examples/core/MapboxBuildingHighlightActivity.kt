@@ -228,7 +228,7 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
             .accessToken(getMapboxAccessTokenFromResources())
-            .coordinates(waypointsController.coordinates(origin))
+            .coordinatesList(waypointsController.coordinates(origin))
             .build()
         mapboxNavigation.requestRoutes(
             routeOptions,

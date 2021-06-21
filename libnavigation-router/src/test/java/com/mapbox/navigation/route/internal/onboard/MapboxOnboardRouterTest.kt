@@ -82,7 +82,7 @@ class MapboxOnboardRouterTest {
         every { isValue } returns false
         every { isError } returns true
         every { value } returns null
-        every { error } returns RouterError(FAILURE_MESSAGE, FAILURE_CODE, REQUEST_ID)
+        every { error } returns RouterError(FAILURE_MESSAGE, FAILURE_CODE)
     }
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
     private val logger: Logger = mockk(relaxUnitFun = true)
@@ -91,6 +91,13 @@ class MapboxOnboardRouterTest {
     private val mapboxDirectionsBuilder = mockk<MapboxDirections.Builder>(relaxed = true)
 
     private var onboardRouter: MapboxOnboardRouter = MapboxOnboardRouter(navigator, context)
+
+    private val url =
+        MapboxDirections.builder()
+            .routeOptions(routerOptions)
+            .build()
+            .httpUrl()
+            .toUrl()
 
     @Before
     fun setUp() {
@@ -102,9 +109,9 @@ class MapboxOnboardRouterTest {
             RouteBuilderProvider.getBuilder(null)
         } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.interceptor(any()) } returns mapboxDirectionsBuilder
-        every { mapboxDirectionsBuilder.enableRefresh(any()) } returns mapboxDirectionsBuilder
+        every { mapboxDirectionsBuilder.routeOptions(any()) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.build() } returns mapboxDirections
-        every { mapboxDirections.httpUrl() } returns URL.toHttpUrlOrNull()!!
+        every { mapboxDirections.httpUrl() } returns url.toHttpUrlOrNull()!!
     }
 
     @After
@@ -126,14 +133,14 @@ class MapboxOnboardRouterTest {
 
         val expected = listOf(
             RouterFailure(
-                url = URL.toHttpUrlOrNull()!!.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM).toUrl(),
+                url = url.toHttpUrlOrNull()!!.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM).toUrl(),
                 message = FAILURE_MESSAGE,
                 code = FAILURE_CODE,
                 throwable = null
             )
         )
 
-        coVerify { navigator.getRoute(URL.toString()) }
+        coVerify { navigator.getRoute(url.toString()) }
         verify { routerCallback.onFailure(expected, routerOptions) }
     }
 
@@ -143,7 +150,7 @@ class MapboxOnboardRouterTest {
 
         onboardRouter.getRoute(routerOptions, routerCallback)
 
-        coVerify { navigator.getRoute(URL.toString()) }
+        coVerify { navigator.getRoute(url.toString()) }
 
         val expected = DirectionsResponse.fromJson(SUCCESS_RESPONSE).routes().map {
             it.toBuilder().routeOptions(routerOptions).build()
@@ -475,18 +482,6 @@ class MapboxOnboardRouterTest {
         private const val COMPONENT_ABBREVIATION_PRIORITY = 1
         private const val COMPONENT_TEXT = "North"
         private const val COMPONENT_TYPE = "text"
-
-        private val URL =
-            MapboxDirections.builder()
-                .accessToken(ACCESS_TOKEN)
-                .origin(origin)
-                .also { builder ->
-                    waypoints.forEach { wp -> builder.addWaypoint(wp) }
-                }
-                .destination(destination)
-                .build()
-                .httpUrl()
-                .toUrl()
 
         private const val ERROR_MESSAGE =
             "Error occurred fetching offline route: No suitable edges near location - Code: 171"

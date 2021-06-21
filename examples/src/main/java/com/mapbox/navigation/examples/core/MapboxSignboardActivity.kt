@@ -225,7 +225,7 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
                 .accessToken(getMapboxRouteAccessToken(this))
-                .coordinates(listOf(origin, destination))
+                .coordinatesList(listOf(origin, destination))
                 .build(),
             object : RouterCallback {
                 override fun onRoutesReady(routes: List<DirectionsRoute>) {
