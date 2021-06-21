@@ -14,7 +14,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
  * @param waypoints the coordinates for this route
  */
 class HistoryEventSetRoute internal constructor(
-    val directionsRoute: DirectionsRoute,
+    val directionsRoute: DirectionsRoute?,
     val routeIndex: Int,
     val legIndex: Int,
     @DirectionsCriteria.ProfileCriteria val profile: String,

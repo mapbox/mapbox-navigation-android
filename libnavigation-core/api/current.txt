@@ -146,13 +146,13 @@ package com.mapbox.navigation.core.history.model {
   }
 
   public final class HistoryEventSetRoute implements com.mapbox.navigation.core.history.model.HistoryEvent {
-    method public com.mapbox.api.directions.v5.models.DirectionsRoute getDirectionsRoute();
+    method public com.mapbox.api.directions.v5.models.DirectionsRoute? getDirectionsRoute();
     method public String getGeometries();
     method public int getLegIndex();
     method public String getProfile();
     method public int getRouteIndex();
     method public java.util.List<com.mapbox.navigation.core.history.model.HistoryWaypoint> getWaypoints();
-    property public final com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute;
+    property public final com.mapbox.api.directions.v5.models.DirectionsRoute? directionsRoute;
     property public final String geometries;
     property public final int legIndex;
     property public final String profile;

@@ -91,8 +91,8 @@ class ReplayHistoryMapperTest {
                 DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
                 it.route!!.routeOptions()?.profile()
             )
-            val origin = it.route!!.routeOptions()?.coordinates()?.get(0)
-            val destination = it.route!!.routeOptions()?.coordinates()?.get(1)
+            val origin = it.route!!.routeOptions()?.coordinatesList()?.get(0)
+            val destination = it.route!!.routeOptions()?.coordinatesList()?.get(1)
             assertEquals(38.5629951, origin!!.latitude(), 0.000001)
             assertEquals(-121.4668578, origin.longitude(), 0.000001)
             assertEquals(38.5572468, destination!!.latitude(), 0.000001)

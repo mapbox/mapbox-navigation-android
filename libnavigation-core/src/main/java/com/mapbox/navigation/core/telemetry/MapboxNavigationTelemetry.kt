@@ -552,7 +552,7 @@ internal object MapboxNavigationTelemetry :
                 routeProgress.route.let {
                     geometry = it.geometry()
                     profile = it.routeOptions()?.profile()
-                    requestIdentifier = it.routeOptions()?.requestUuid()
+                    requestIdentifier = it?.requestUuid()
                     stepCount = obtainStepCount(it)
                     legIndex = it.routeIndex()?.toInt() ?: 0
                     legCount = it.legs()?.size ?: 0
@@ -571,7 +571,7 @@ internal object MapboxNavigationTelemetry :
                 originalStepCount = obtainStepCount(it)
                 originalEstimatedDistance = it.distance().toInt()
                 originalEstimatedDuration = it.duration().toInt()
-                originalRequestIdentifier = it.routeOptions()?.requestUuid()
+                originalRequestIdentifier = it?.requestUuid()
                 originalGeometry = it.geometry()
             }
 

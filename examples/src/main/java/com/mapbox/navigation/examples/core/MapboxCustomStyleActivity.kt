@@ -254,7 +254,7 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
                 .accessToken(Objects.requireNonNull<String>(getMapboxAccessTokenFromResources()))
-                .coordinates(listOf(origin, destination))
+                .coordinatesList(listOf(origin, destination))
                 .alternatives(false)
                 .annotationsList(Collections.singletonList(DirectionsCriteria.ANNOTATION_MAXSPEED))
                 .build(),

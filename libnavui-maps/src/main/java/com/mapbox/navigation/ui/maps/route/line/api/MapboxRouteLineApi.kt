@@ -103,7 +103,7 @@ import kotlin.coroutines.suspendCoroutine
  *      )
  *      .requestUuid("")
  *      .accessToken("mapToken")
- *      .coordinates(listOf(origin, destination))
+ *      .coordinatesList(listOf(origin, destination))
  *      .build()
  * ```
  * A good starting point might be RouteOptions.Builder.applyDefaultNavigationOptions() which will

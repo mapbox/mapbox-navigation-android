@@ -146,7 +146,7 @@ class RouteStateObserverParametrizedTest(
 
     private fun DirectionsRoute.mockMultipleLegs() {
         every { routeOptions() } returns mockk {
-            every { coordinates() } returns listOf(
+            every { coordinatesList() } returns listOf(
                 Point.fromLngLat(-122.444359, 37.736351),
                 Point.fromLngLat(-122.444481, 37.735916),
                 Point.fromLngLat(-122.444275, 37.735595),

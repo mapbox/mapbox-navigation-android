@@ -109,7 +109,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
                     .applyLanguageAndVoiceUnitOptions(activity)
                     .baseUrl(mockWebServerRule.baseUrl)
                     .accessToken(getMapboxAccessTokenFromResources(activity))
-                    .coordinates(mockRoute.routeWaypoints).build(),
+                    .coordinatesList(mockRoute.routeWaypoints).build(),
                 object : RoutesRequestCallback {
                     override fun onRoutesReady(routes: List<DirectionsRoute>) {
                         mapboxNavigation.setRoutes(routes)

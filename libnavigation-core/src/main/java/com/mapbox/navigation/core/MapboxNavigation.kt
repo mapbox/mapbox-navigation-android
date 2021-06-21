@@ -146,7 +146,7 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  *   .applyDefaultNavigationOptions()
  *   .applyLanguageAndVoiceUnitOptions(context)
  *   .accessToken(token)
- *   .coordinates(listOf(origin, destination))
+ *   .coordinatesList(listOf(origin, destination))
  *   .alternatives(true)
  *   .build()
  * mapboxNavigation.requestRoutes(
@@ -1010,11 +1010,7 @@ class MapboxNavigation(
                     MapboxNativeNavigatorImpl
                 ),
                 ModuleProviderArgument(Logger::class.java, logger),
-                ModuleProviderArgument(ConnectivityHandler::class.java, connectivityHandler),
-                ModuleProviderArgument(
-                    Boolean::class.java,
-                    navigationOptions.routeRefreshOptions.enabled
-                )
+                ModuleProviderArgument(ConnectivityHandler::class.java, connectivityHandler)
             )
             MapboxModuleType.NavigationTripNotification -> arrayOf(
                 ModuleProviderArgument(NavigationOptions::class.java, navigationOptions),

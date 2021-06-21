@@ -257,7 +257,11 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
             .accessToken(getMapboxAccessTokenFromResources())
-            .coordinates(origin, null, destination)
+            .coordinates(
+                origin = origin,
+                waypoints = null,
+                destination = destination
+            )
             .build()
         mapboxNavigation.requestRoutes(
             routeOptions,

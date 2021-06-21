@@ -90,6 +90,13 @@ class MapboxOnboardRouterTest {
 
     private var onboardRouter: MapboxOnboardRouter = MapboxOnboardRouter(navigator, context, logger)
 
+    private val url =
+        MapboxDirections.builder()
+            .routeOptions(routerOptions)
+            .build()
+            .httpUrl()
+            .toUrl()
+
     @Before
     fun setUp() {
         mockkObject(ThreadController)
@@ -100,9 +107,9 @@ class MapboxOnboardRouterTest {
             RouteBuilderProvider.getBuilder(null)
         } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.interceptor(any()) } returns mapboxDirectionsBuilder
-        every { mapboxDirectionsBuilder.enableRefresh(any()) } returns mapboxDirectionsBuilder
+        every { mapboxDirectionsBuilder.routeOptions(any()) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.build() } returns mapboxDirections
-        every { mapboxDirections.httpUrl() } returns URL.toHttpUrlOrNull()!!
+        every { mapboxDirections.httpUrl() } returns url.toHttpUrlOrNull()!!
     }
 
     @After
@@ -123,7 +130,7 @@ class MapboxOnboardRouterTest {
 
         onboardRouter.getRoute(routerOptions, routerCallback)
 
-        coVerify { navigator.getRoute(URL.toString()) }
+        coVerify { navigator.getRoute(url.toString()) }
         verify { routerCallback.onFailure(capture(exceptionSlot)) }
         assertEquals(ERROR_MESSAGE, exceptionSlot.captured.message)
     }
@@ -134,7 +141,7 @@ class MapboxOnboardRouterTest {
 
         onboardRouter.getRoute(routerOptions, routerCallback)
 
-        coVerify { navigator.getRoute(URL.toString()) }
+        coVerify { navigator.getRoute(url.toString()) }
         verify { routerCallback.onResponse(DirectionsResponse.fromJson(SUCCESS_RESPONSE).routes()) }
     }
 
@@ -462,18 +469,6 @@ class MapboxOnboardRouterTest {
         private const val COMPONENT_ABBREVIATION_PRIORITY = 1
         private const val COMPONENT_TEXT = "North"
         private const val COMPONENT_TYPE = "text"
-
-        private val URL =
-            MapboxDirections.builder()
-                .accessToken(ACCESS_TOKEN)
-                .origin(origin)
-                .also { builder ->
-                    waypoints.forEach { wp -> builder.addWaypoint(wp) }
-                }
-                .destination(destination)
-                .build()
-                .httpUrl()
-                .toUrl()
 
         private const val ERROR_MESSAGE =
             "Error occurred fetching offline route: No suitable edges near location - Code: 171"
