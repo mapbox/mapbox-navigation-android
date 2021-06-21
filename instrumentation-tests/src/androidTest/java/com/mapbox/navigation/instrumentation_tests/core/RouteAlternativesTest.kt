@@ -13,6 +13,7 @@ import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.instrumentation_tests.utils.idling.FirstLocationIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteAlternativesIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteRequestIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
@@ -26,6 +27,10 @@ import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.TimeUnit
 
+/**
+ * This test ensures that alternative route recommendations
+ * are given during active guidance.
+ */
 class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
     @get:Rule
@@ -59,11 +64,17 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         setupMockRequestHandlers(coordinates)
         val routes = requestDirectionsRouteSync(coordinates).reversed()
 
+        // Start playing locations and wait for an enhanced location.
+        runOnMainSync {
+            mockLocationReplayerRule.playRoute(routes.first())
+            mapboxNavigation.startTripSession()
+        }
+        val firstLocationIdlingResource = FirstLocationIdlingResource(mapboxNavigation)
+        firstLocationIdlingResource.firstLocationSync()
+
         // Simulate a driver on the slow route.
         runOnMainSync {
             mapboxNavigation.setRoutes(routes)
-            mapboxNavigation.startTripSession()
-            mockLocationReplayerRule.playRoute(routes.first())
         }
 
         // Wait for route alternatives to be found.
