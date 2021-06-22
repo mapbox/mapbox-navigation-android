@@ -18,6 +18,8 @@ import com.mapbox.navigation.ui.maps.route.line.api.VanishingRouteLine
  * @param routeLineBelowLayerId determines the elevation of the route layers
  * @param vanishingRouteLine an instance of the VanishingRouteLine
  * @param tolerance the tolerance value used when configuring the underlying map source
+ * @param displayRestrictedRoadSections indicates if the route line will display restricted
+ * road sections with a dashed line
  */
 class MapboxRouteLineOptions private constructor(
     val resourceProvider: RouteLineResources,
@@ -26,7 +28,8 @@ class MapboxRouteLineOptions private constructor(
     val destinationIcon: Drawable,
     val routeLineBelowLayerId: String?,
     internal var vanishingRouteLine: VanishingRouteLine? = null,
-    val tolerance: Double
+    val tolerance: Double,
+    val displayRestrictedRoadSections: Boolean = false
 ) {
 
     /**
@@ -42,7 +45,8 @@ class MapboxRouteLineOptions private constructor(
             routeLineBelowLayerId,
             routeLayerProvider.routeStyleDescriptors,
             vanishingRouteLineEnabled,
-            tolerance
+            tolerance,
+            displayRestrictedRoadSections
         )
     }
 
@@ -62,6 +66,7 @@ class MapboxRouteLineOptions private constructor(
         if (routeLineBelowLayerId != other.routeLineBelowLayerId) return false
         if (vanishingRouteLine != other.vanishingRouteLine) return false
         if (tolerance != other.tolerance) return false
+        if (displayRestrictedRoadSections != other.displayRestrictedRoadSections) return false
 
         return true
     }
@@ -77,6 +82,7 @@ class MapboxRouteLineOptions private constructor(
         result = 31 * result + (routeLineBelowLayerId?.hashCode() ?: 0)
         result = 31 * result + (vanishingRouteLine?.hashCode() ?: 0)
         result = 31 * result + (tolerance.hashCode())
+        result = 31 * result + (displayRestrictedRoadSections.hashCode())
         return result
     }
 
@@ -90,7 +96,9 @@ class MapboxRouteLineOptions private constructor(
             "destinationIcon=$destinationIcon, " +
             "routeLineBelowLayerId=$routeLineBelowLayerId, " +
             "vanishingRouteLine=$vanishingRouteLine, " +
-            "tolerance=$tolerance)"
+            "tolerance=$tolerance, " +
+            "displayRestrictedRoadSections=$displayRestrictedRoadSections" +
+            ")"
     }
 
     /**
@@ -101,6 +109,8 @@ class MapboxRouteLineOptions private constructor(
      * @param routeLineBelowLayerId determines the elevation of the route layers
      * @param routeStyleDescriptors a collection of RouteStyleDescriptor objects
      * @param vanishingRouteLineEnabled indicates if the vanishing route line feature is enabled
+     * @param displayRestrictedRoadSections indicates if the route line will display restricted
+     * road sections with a dashed line
      */
     class Builder internal constructor(
         private val context: Context,
@@ -108,7 +118,8 @@ class MapboxRouteLineOptions private constructor(
         private var routeLineBelowLayerId: String?,
         private var routeStyleDescriptors: List<RouteStyleDescriptor>,
         private var vanishingRouteLineEnabled: Boolean,
-        private var tolerance: Double
+        private var tolerance: Double,
+        private var displayRestrictedRoadSections: Boolean
     ) {
 
         /**
@@ -122,7 +133,8 @@ class MapboxRouteLineOptions private constructor(
             null,
             listOf(),
             false,
-            DEFAULT_ROUTE_SOURCES_TOLERANCE
+            DEFAULT_ROUTE_SOURCES_TOLERANCE,
+            false
         )
 
         /**
@@ -179,6 +191,13 @@ class MapboxRouteLineOptions private constructor(
             apply { this.routeStyleDescriptors = routeStyleDescriptors }
 
         /**
+         * Indicates if the route line will display restricted
+         * road sections with a dashed line. False by default.
+         */
+        fun displayRestrictedRoadSections(displayRestrictedRoadSections: Boolean): Builder =
+            apply { this.displayRestrictedRoadSections = displayRestrictedRoadSections }
+
+        /**
          * @return an instance of [MapboxRouteLineOptions]
          */
         fun build(): MapboxRouteLineOptions {
@@ -218,7 +237,8 @@ class MapboxRouteLineOptions private constructor(
                 destinationIcon!!,
                 routeLineBelowLayerId,
                 vanishingRouteLine,
-                tolerance
+                tolerance,
+                displayRestrictedRoadSections
             )
         }
     }
