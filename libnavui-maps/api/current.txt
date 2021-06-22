@@ -2,11 +2,12 @@
 package com.mapbox.navigation.ui.maps {
 
   public final class PredictiveCacheController {
-    ctor public PredictiveCacheController(com.mapbox.navigation.core.MapboxNavigation navigation, com.mapbox.navigation.ui.maps.PredictiveCacheControllerErrorHandler? predictiveCacheControllerErrorHandler = null);
-    ctor public PredictiveCacheController(com.mapbox.navigation.core.MapboxNavigation navigation);
+    ctor public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions = PredictiveCacheLocationOptions.<init>().build(), com.mapbox.navigation.ui.maps.PredictiveCacheControllerErrorHandler? predictiveCacheControllerErrorHandler = null);
+    ctor public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions = PredictiveCacheLocationOptions.<init>().build());
+    method public void createMapControllers(com.mapbox.maps.MapboxMap map, java.util.List<java.lang.String> sourceIdsToCache = emptyList());
+    method public void createMapControllers(com.mapbox.maps.MapboxMap map);
     method public void onDestroy();
-    method public void removeMapInstance();
-    method public void setMapInstance(com.mapbox.maps.MapboxMap map);
+    method public void removeMapControllers(com.mapbox.maps.MapboxMap map);
   }
 
   public fun interface PredictiveCacheControllerErrorHandler {
