@@ -186,6 +186,7 @@ class MapboxRouteLineApiTest {
         every { options.routeLayerProvider } returns realOptions.routeLayerProvider
         every { options.resourceProvider } returns realOptions.resourceProvider
         every { options.vanishingRouteLine } returns vanishingRouteLine
+        every { options.displayRestrictedRoadSections } returns false
 
         val api = MapboxRouteLineApi(options)
         val route = getRoute()
@@ -205,6 +206,7 @@ class MapboxRouteLineApiTest {
             every { options.routeLayerProvider } returns realOptions.routeLayerProvider
             every { options.resourceProvider } returns realOptions.resourceProvider
             every { options.vanishingRouteLine } returns vanishingRouteLine
+            every { options.displayRestrictedRoadSections } returns false
 
             val api = MapboxRouteLineApi(options)
             val route = getRoute()
@@ -225,6 +227,7 @@ class MapboxRouteLineApiTest {
             every { options.routeLayerProvider } returns realOptions.routeLayerProvider
             every { options.resourceProvider } returns realOptions.resourceProvider
             every { options.vanishingRouteLine } returns vanishingRouteLine
+            every { options.displayRestrictedRoadSections } returns false
 
             val api = MapboxRouteLineApi(options)
             val route = getRoute()
@@ -490,6 +493,7 @@ class MapboxRouteLineApiTest {
             every { options.routeLayerProvider } returns realOptions.routeLayerProvider
             every { options.resourceProvider } returns realOptions.resourceProvider
             every { options.vanishingRouteLine } returns vanishingRouteLine
+            every { options.displayRestrictedRoadSections } returns false
 
             val api = MapboxRouteLineApi(options)
             val route = getRoute()
@@ -511,6 +515,7 @@ class MapboxRouteLineApiTest {
             every { options.routeLayerProvider } returns realOptions.routeLayerProvider
             every { options.resourceProvider } returns realOptions.resourceProvider
             every { options.vanishingRouteLine } returns vanishingRouteLine
+            every { options.displayRestrictedRoadSections } returns false
 
             val api = MapboxRouteLineApi(options)
             val route = getRoute()
@@ -626,6 +631,7 @@ class MapboxRouteLineApiTest {
         val options = mockk<MapboxRouteLineOptions> {
             every { vanishingRouteLine } returns mockVanishingRouteLine
             every { resourceProvider } returns realOptions.resourceProvider
+            every { displayRestrictedRoadSections } returns false
         }
         val api = MapboxRouteLineApi(options)
         val routeProgress = mockk<RouteProgress> {
@@ -665,6 +671,7 @@ class MapboxRouteLineApiTest {
             val options = mockk<MapboxRouteLineOptions> {
                 every { vanishingRouteLine } returns mockVanishingRouteLine
                 every { resourceProvider } returns realOptions.resourceProvider
+                every { displayRestrictedRoadSections } returns false
             }
             val api = MapboxRouteLineApi(options)
             val routeProgress = mockk<RouteProgress> {
@@ -704,6 +711,7 @@ class MapboxRouteLineApiTest {
             val options = mockk<MapboxRouteLineOptions> {
                 every { vanishingRouteLine } returns mockVanishingRouteLine
                 every { resourceProvider } returns realOptions.resourceProvider
+                every { displayRestrictedRoadSections } returns false
             }
             val api = MapboxRouteLineApi(options)
             val routeProgress = mockk<RouteProgress> {
@@ -733,6 +741,7 @@ class MapboxRouteLineApiTest {
             val options = mockk<MapboxRouteLineOptions> {
                 every { vanishingRouteLine } returns mockVanishingRouteLine
                 every { resourceProvider } returns realOptions.resourceProvider
+                every { displayRestrictedRoadSections } returns false
             }
             val api = MapboxRouteLineApi(options)
             val routeProgress = mockk<RouteProgress> {
@@ -758,6 +767,7 @@ class MapboxRouteLineApiTest {
         val options = mockk<MapboxRouteLineOptions> {
             every { vanishingRouteLine } returns mockVanishingRouteLine
             every { resourceProvider } returns realOptions.resourceProvider
+            every { displayRestrictedRoadSections } returns false
         }
         val api = MapboxRouteLineApi(options)
         val routeProgress = mockk<RouteProgress> {

@@ -104,21 +104,23 @@ class MapboxRouteLineUtilsTest {
     @Test
     fun getTrafficLineExpressionWithRouteRestrictions() {
         val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
-            "[rgba, 255.0, 255.0, 247.0, 1.0], 0.2940753606969524, [rgba, 255.0, 255.0, 255.0, " +
-            "1.0], 0.39813638288860653, [rgba, 255.0, 255.0, 247.0, 1.0], 0.44865144220494346," +
-            " [rgba, 0.0, 8.0, 73.0, 0.0], 0.45642298979207224, [rgba, 0.0, 0.0, 0.0, 0.0]," +
-            " 0.464194537379201, [rgba, 0.0, 8.0, 73.0, 0.0], 0.4719660849663298, [rgba, 0.0, " +
-            "0.0, 0.0, 0.0], 0.4797376325534585, [rgba, 0.0, 8.0, 73.0, 0.0], 0.4875091801405873," +
-            " [rgba, 0.0, 0.0, 0.0, 0.0], 0.4952807277277161, [rgba, 0.0, 8.0, 73.0, 0.0], " +
-            "0.5030522753148449, [rgba, 0.0, 0.0, 0.0, 0.0], 0.5108238229019736, [rgba, 0.0, " +
-            "8.0, 73.0, 0.0], 0.5185953704891023, [rgba, 0.0, 0.0, 0.0, 0.0], 0.5263669180762311," +
-            " [rgba, 0.0, 8.0, 73.0, 0.0], 0.5341384656633599, [rgba, 0.0, 0.0, 0.0, 0.0], " +
-            "0.5419100132504886, [rgba, 0.0, 8.0, 73.0, 0.0], 0.5429203144368153, [rgba, 255.0," +
-            " 255.0, 247.0, 1.0], 0.5502255691687163, [rgba, 255.0, 255.0, 255.0, 1.0], " +
-            "0.8240949061391339, [rgba, 255.0, 255.0, 247.0, 1.0], 0.8610097571779957, [rgba, " +
-            "0.0, 0.0, 33.0, 0.0], 0.8921736630023819, [rgba, 255.0, 255.0, 255.0, 1.0], " +
-            "0.9126128331565305, [rgba, 255.0, 255.0, 247.0, 1.0], 0.9451756175466001, [rgba, " +
-            "255.0, 255.0, 255.0, 1.0]]"
+            "[rgba, 255.0, 255.0, 247.0, 1.0], 0.2940753606969524, " +
+            "[rgba, 255.0, 255.0, 255.0, 1.0], 0.39813638288860653, " +
+            "[rgba, 255.0, 255.0, 247.0, 1.0], 0.44865144220494346, " +
+            "[rgba, 0.0, 8.0, 73.0, 0.0], 0.45642298979207224, [rgba, 0.0, 0.0, 0.0, 0.0], " +
+            "0.464194537379201, [rgba, 0.0, 8.0, 73.0, 0.0], 0.4765512980427357, " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.4843228456298645, [rgba, 0.0, 8.0, 73.0, 0.0], " +
+            "0.4920943932169933, [rgba, 0.0, 0.0, 0.0, 0.0], 0.499865940804122, " +
+            "[rgba, 0.0, 8.0, 73.0, 0.0], 0.5110569693295874, [rgba, 0.0, 0.0, 0.0, 0.0], " +
+            "0.5188285169167162, [rgba, 0.0, 8.0, 73.0, 0.0], 0.526600064503845, " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.5343716120909737, [rgba, 0.0, 8.0, 73.0, 0.0], " +
+            "0.5421431596781024, [rgba, 0.0, 0.0, 0.0, 0.0], 0.5429203144368153, " +
+            "[rgba, 255.0, 255.0, 247.0, 1.0], 0.5502255691687163, " +
+            "[rgba, 255.0, 255.0, 255.0, 1.0], 0.8240949061391339, " +
+            "[rgba, 255.0, 255.0, 247.0, 1.0], 0.8610097571779957, [rgba, 0.0, 0.0, 33.0, 0.0]," +
+            " 0.8921736630023819, [rgba, 255.0, 255.0, 255.0, 1.0], 0.9126128331565305, " +
+            "[rgba, 255.0, 255.0, 247.0, 1.0], 0.9451756175466001, " +
+            "[rgba, 255.0, 255.0, 255.0, 1.0]]"
         val colorResources = RouteLineColorResources.Builder()
             .routeUnknownTrafficColor(-9)
             .routeLowCongestionColor(-1)
@@ -137,7 +139,8 @@ class MapboxRouteLineUtilsTest {
             listOf(),
             true,
             colorResources,
-            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            true
         )
 
         val result = MapboxRouteLineUtils.getTrafficLineExpression(
@@ -690,6 +693,27 @@ class MapboxRouteLineUtilsTest {
         assertEquals("service", result.last().roadClass)
     }
 
+    // The route used here for testing produced an erroneous edge case. The
+    // getRouteLineTrafficExpressionData method was always producing a distanceFromOrigin value
+    // of 0.0 for the beginning of each route leg. This could cause an error when creating the
+    // traffic expression because the distanceFromOrigin value is used to determine the
+    // percentage of distance traveled. These values need to be in ascending order to create a
+    // valid line gradient expression. This error won't occur in single leg routes and will
+    // only occur in multileg routes when there is a traffic congestion change at the first point in
+    // the leg. This is because duplicate traffic congestion values are dropped. The route
+    // used in the test below has a traffic change at the first point in the second leg and
+    // the distance annotation is 0.0 which would have caused an error prior to the fix this
+    // test is checking for.
+    @Test
+    fun getRouteLineTrafficExpressionDataMultiLegRouteWithTrafficChangeAtWaypoint() {
+        val route = loadRoute("multileg-route-two-legs.json")
+
+        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
+
+        assertEquals(1, trafficExpressionData.count { it.distanceFromOrigin == 0.0 })
+        assertEquals(0.0, trafficExpressionData[0].distanceFromOrigin, 0.0)
+    }
+
     @Test
     fun getRouteLineTrafficExpressionWithRoadClassesDuplicatesRemoved() {
         val routeAsJsonJson = loadJsonFixture("route-with-road-classes.txt")
@@ -753,7 +777,8 @@ class MapboxRouteLineUtilsTest {
             colorResources,
             true,
             listOf("motorway"),
-            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            false
         )
 
         assertTrue(result.all { it.segmentColor == -1 })
@@ -785,7 +810,8 @@ class MapboxRouteLineUtilsTest {
             colorResources,
             true,
             listOf("motorway"),
-            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            false
         )
 
         assertEquals(5, result.size)
@@ -826,7 +852,8 @@ class MapboxRouteLineUtilsTest {
             colorResources,
             true,
             listOf("tertiary"),
-            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            true
         )
 
         assertEquals(0.0, result[0].offset, 0.0)
@@ -884,7 +911,8 @@ class MapboxRouteLineUtilsTest {
             colorResources,
             true,
             listOf("street"),
-            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            false
         )
 
         assertEquals(-9, result[0].segmentColor)
@@ -917,7 +945,8 @@ class MapboxRouteLineUtilsTest {
             colorResources,
             true,
             listOf(),
-            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            false
         )
 
         assertEquals(5, result.size)
@@ -951,7 +980,8 @@ class MapboxRouteLineUtilsTest {
             colorResources,
             true,
             listOf("motorway"),
-            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            false
         )
 
         assertEquals(-2, result[0].segmentColor)
@@ -1019,33 +1049,12 @@ class MapboxRouteLineUtilsTest {
             colorResources,
             true,
             listOf("motorway"),
-            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            false
         )
 
         assertTrue(result.all { it.segmentColor == -1 })
         assertEquals(1, result.size)
-    }
-
-    // The route used here for testing produced an erroneous edge case. The
-    // getRouteLineTrafficExpressionData method was always producing a distanceFromOrigin value
-    // of 0.0 for the beginning of each route leg. This could cause an error when creating the
-    // traffic expression because the distanceFromOrigin value is used to determine the
-    // percentage of distance traveled. These values need to be in ascending order to create a
-    // valid line gradient expression. This error won't occur in single leg routes and will
-    // only occur in multileg routes when there is a traffic congestion change at the first point in
-    // the leg. This is because duplicate traffic congestion values are dropped. The route
-    // used in the test below happens to have restricted section overlapping at the first point
-    // of a leg. Since a restriction overrides a traffic congestion value, there is
-    // no duplication so no values are dropped which exposes the bug that this test is intended
-    // to guard against.
-    @Test
-    fun getRouteLineTrafficExpressionDataMultiLegRouteWithTrafficChangeAtWaypoint() {
-        val route = loadRoute("long-multi-leg-route-with-restrictions.json")
-
-        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
-
-        assertEquals(276, trafficExpressionData.size)
-        assertEquals(360468.8999999996, trafficExpressionData[194].distanceFromOrigin, 0.0)
     }
 
     @Test
@@ -1071,39 +1080,40 @@ class MapboxRouteLineUtilsTest {
             colorResources,
             true,
             listOf(),
-            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            true
         )
 
         assertEquals(result[2].segmentColor, -9)
-        assertEquals(result[2].offset, 0.39813638288860653, 0.0)
-        assertEquals(result[3].segmentColor, 2121)
-        assertEquals(result[3].offset, 0.44865144220494346, 0.0)
-        assertEquals(result[4].segmentColor, 0)
-        assertEquals(result[4].offset, 0.45642298979207224, 0.0)
-        assertEquals(result[5].segmentColor, 2121)
-        assertEquals(result[5].offset, 0.464194537379201, 0.0)
-        assertEquals(result[6].segmentColor, 0)
-        assertEquals(result[6].offset, 0.4719660849663298, 0.0)
-        assertEquals(result[7].segmentColor, 2121)
-        assertEquals(result[7].offset, 0.4797376325534585, 0.0)
-        assertEquals(result[8].segmentColor, 0)
-        assertEquals(result[8].offset, 0.4875091801405873, 0.0)
-        assertEquals(result[9].segmentColor, 2121)
-        assertEquals(result[9].offset, 0.4952807277277161, 0.0)
-        assertEquals(result[10].segmentColor, 0)
-        assertEquals(result[10].offset, 0.5030522753148449, 0.0)
-        assertEquals(result[11].segmentColor, 2121)
-        assertEquals(result[11].offset, 0.5108238229019736, 0.0)
-        assertEquals(result[12].segmentColor, 0)
-        assertEquals(result[12].offset, 0.5185953704891023, 0.0)
-        assertEquals(result[13].segmentColor, 2121)
-        assertEquals(result[13].offset, 0.5263669180762311, 0.0)
-        assertEquals(result[14].segmentColor, 0)
-        assertEquals(result[14].offset, 0.5341384656633599, 0.0)
-        assertEquals(result[15].segmentColor, 2121)
-        assertEquals(result[15].offset, 0.5419100132504886, 0.0)
-        assertEquals(result[16].segmentColor, -9)
-        assertEquals(result[16].offset, 0.5429203144368153, 0.0)
+        assertEquals(0.39813638288860653, result[2].offset, 0.0)
+        assertEquals(2121, result[3].segmentColor)
+        assertEquals(0.44865144220494346, result[3].offset, 0.0)
+        assertEquals(0, result[4].segmentColor)
+        assertEquals(0.45642298979207224, result[4].offset, 0.0)
+        assertEquals(2121, result[5].segmentColor)
+        assertEquals(0.464194537379201, result[5].offset, 0.0)
+        assertEquals(0, result[6].segmentColor)
+        assertEquals(0.4765512980427357, result[6].offset, 0.0)
+        assertEquals(2121, result[7].segmentColor)
+        assertEquals(0.4843228456298645, result[7].offset, 0.0)
+        assertEquals(0, result[8].segmentColor)
+        assertEquals(0.4920943932169933, result[8].offset, 0.0)
+        assertEquals(2121, result[9].segmentColor)
+        assertEquals(0.499865940804122, result[9].offset, 0.0)
+        assertEquals(0, result[10].segmentColor)
+        assertEquals(0.5110569693295874, result[10].offset, 0.0)
+        assertEquals(2121, result[11].segmentColor)
+        assertEquals(0.5188285169167162, result[11].offset, 0.0)
+        assertEquals(0, result[12].segmentColor)
+        assertEquals(0.526600064503845, result[12].offset, 0.0)
+        assertEquals(2121, result[13].segmentColor)
+        assertEquals(0.5343716120909737, result[13].offset, 0.0)
+        assertEquals(0, result[14].segmentColor)
+        assertEquals(0.5421431596781024, result[14].offset, 0.0)
+        assertEquals(-9, result[15].segmentColor)
+        assertEquals(0.5429203144368153, result[15].offset, 0.0)
+        assertEquals(-1, result[16].segmentColor)
+        assertEquals(0.5502255691687163, result[16].offset, 0.0)
     }
 
     @Test
@@ -1119,22 +1129,26 @@ class MapboxRouteLineUtilsTest {
             RouteLineTrafficExpressionData(
                 0.0,
                 RouteConstants.LOW_CONGESTION_VALUE,
-                null
+                null,
+                false
             ),
             RouteLineTrafficExpressionData(
                 500.0,
                 RouteConstants.MODERATE_CONGESTION_VALUE,
-                null
+                null,
+                false
             ),
             RouteLineTrafficExpressionData(
                 1000.0,
                 RouteConstants.HEAVY_CONGESTION_VALUE,
-                null
+                null,
+                false
             ),
             RouteLineTrafficExpressionData(
                 1500.0,
-                RouteConstants.RESTRICTED_CONGESTION_VALUE,
-                null
+                RouteConstants.HEAVY_CONGESTION_VALUE,
+                null,
+                true
             )
         )
         val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
@@ -1143,7 +1157,8 @@ class MapboxRouteLineUtilsTest {
             colorResources,
             true,
             listOf(),
-            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            true
         )
 
         assertEquals(53, result.size)
@@ -1181,10 +1196,15 @@ class MapboxRouteLineUtilsTest {
         assertEquals(0.0, trafficExpressionData[0].distanceFromOrigin, 0.0)
         assertEquals(512.3, trafficExpressionData[3].distanceFromOrigin, 0.0)
         assertEquals("unknown", trafficExpressionData[3].trafficCongestionIdentifier)
+        assertEquals(false, trafficExpressionData[3].isInRestrictedSection)
         assertEquals(577.3, trafficExpressionData[4].distanceFromOrigin, 0.0)
-        assertEquals("restricted", trafficExpressionData[4].trafficCongestionIdentifier)
-        assertEquals(698.5999999999999, trafficExpressionData[5].distanceFromOrigin, 0.0)
-        assertEquals("unknown", trafficExpressionData[5].trafficCongestionIdentifier)
+        assertEquals("low", trafficExpressionData[4].trafficCongestionIdentifier)
+        assertEquals(true, trafficExpressionData[4].isInRestrictedSection)
+        assertEquals(true, trafficExpressionData[5].isInRestrictedSection)
+        assertEquals(true, trafficExpressionData[6].isInRestrictedSection)
+        assertEquals(698.5999999999999, trafficExpressionData[7].distanceFromOrigin, 0.0)
+        assertEquals("unknown", trafficExpressionData[7].trafficCongestionIdentifier)
+        assertEquals(false, trafficExpressionData[7].isInRestrictedSection)
     }
 
     @Test
@@ -1208,7 +1228,8 @@ class MapboxRouteLineUtilsTest {
             listOf(),
             true,
             colorResources,
-            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            true
         )
 
         assertEquals(2121, result[3].segmentColor)
@@ -1235,7 +1256,8 @@ class MapboxRouteLineUtilsTest {
             listOf(),
             true,
             colorResources,
-            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            false
         )
 
         assertEquals(19, result.size)
@@ -1263,7 +1285,8 @@ class MapboxRouteLineUtilsTest {
             listOf(),
             true,
             colorResources,
-            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            false
         )
 
         assertTrue(result[1].offset > .001f)
@@ -1281,7 +1304,8 @@ class MapboxRouteLineUtilsTest {
             listOf(),
             true,
             colorResources,
-            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            false
         )
 
         assertEquals(1, result.size)
