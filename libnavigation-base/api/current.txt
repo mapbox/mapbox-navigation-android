@@ -200,7 +200,6 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.android.core.location.LocationEngine getLocationEngine();
     method public com.mapbox.android.core.location.LocationEngineRequest getLocationEngineRequest();
     method public long getNavigatorPredictionMillis();
-    method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions getPredictiveCacheLocationOptions();
     method public com.mapbox.navigation.base.route.RouteAlternativesOptions getRouteAlternativesOptions();
     method public com.mapbox.navigation.base.route.RouteRefreshOptions getRouteRefreshOptions();
     method public com.mapbox.navigation.base.options.RoutingTilesOptions getRoutingTilesOptions();
@@ -220,7 +219,6 @@ package com.mapbox.navigation.base.options {
     property public final com.mapbox.android.core.location.LocationEngine locationEngine;
     property public final com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest;
     property public final long navigatorPredictionMillis;
-    property public final com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions;
     property public final com.mapbox.navigation.base.route.RouteAlternativesOptions routeAlternativesOptions;
     property public final com.mapbox.navigation.base.route.RouteRefreshOptions routeRefreshOptions;
     property public final com.mapbox.navigation.base.options.RoutingTilesOptions routingTilesOptions;
@@ -241,7 +239,6 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngine(com.mapbox.android.core.location.LocationEngine locationEngine);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngineRequest(com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder navigatorPredictionMillis(long predictionMillis);
-    method public com.mapbox.navigation.base.options.NavigationOptions.Builder predictiveCacheLocationOptions(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder routeAlternativesOptions(com.mapbox.navigation.base.route.RouteAlternativesOptions routeAlternativesOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder routeRefreshOptions(com.mapbox.navigation.base.route.RouteRefreshOptions routeRefreshOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder routingTilesOptions(com.mapbox.navigation.base.options.RoutingTilesOptions routingTilesOptions);
