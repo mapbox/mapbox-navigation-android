@@ -5,6 +5,7 @@ import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -61,6 +62,15 @@ class MapboxRouteLineOptionsTest {
     }
 
     @Test
+    fun displayRestrictedRoadSections() {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .displayRestrictedRoadSections(true)
+            .build()
+
+        assertTrue(options.displayRestrictedRoadSections)
+    }
+
+    @Test
     fun toBuilder() {
         val routeLineResources = RouteLineResources.Builder().build()
         val routeStyleDescriptors =
@@ -72,6 +82,7 @@ class MapboxRouteLineOptionsTest {
             .withRouteLineBelowLayerId("someLayerId")
             .withTolerance(.111)
             .withRouteStyleDescriptors(routeStyleDescriptors)
+            .displayRestrictedRoadSections(true)
             .build()
             .toBuilder(ctx)
             .build()
@@ -81,5 +92,6 @@ class MapboxRouteLineOptionsTest {
         assertNotNull(options.vanishingRouteLine)
         assertEquals(.111, options.tolerance, 0.0)
         assertEquals(routeStyleDescriptors, options.routeLayerProvider.routeStyleDescriptors)
+        assertTrue(options.displayRestrictedRoadSections)
     }
 }

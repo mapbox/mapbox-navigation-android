@@ -163,7 +163,8 @@ class VanishingRouteLineTest {
                 listOf(),
                 true,
                 colorResources,
-                RouteConstants.RESTRICTED_ROAD_SECTION_SCALE
+                RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+                false
             )
 
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(

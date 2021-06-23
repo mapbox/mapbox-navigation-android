@@ -636,7 +636,8 @@ class MapboxRouteLineApi(
                         routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
                         true,
                         routeLineOptions.resourceProvider.routeLineColorResources,
-                        routeLineOptions.resourceProvider.restrictedRoadSectionScale
+                        routeLineOptions.resourceProvider.restrictedRoadSectionScale,
+                        routeLineOptions.displayRestrictedRoadSections
                     )
                 } ?: listOf()
             routeLineExpressionData.clear()
@@ -676,7 +677,8 @@ class MapboxRouteLineApi(
                             routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
                             false,
                             routeLineOptions.resourceProvider.routeLineColorResources,
-                            routeLineOptions.resourceProvider.restrictedRoadSectionScale
+                            routeLineOptions.resourceProvider.restrictedRoadSectionScale,
+                            routeLineOptions.displayRestrictedRoadSections
                         )
                     } ?: listOf()
                 MapboxRouteLineUtils.getTrafficLineExpression(
@@ -699,7 +701,8 @@ class MapboxRouteLineApi(
                                 routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
                                 false,
                                 routeLineOptions.resourceProvider.routeLineColorResources,
-                                routeLineOptions.resourceProvider.restrictedRoadSectionScale
+                                routeLineOptions.resourceProvider.restrictedRoadSectionScale,
+                                routeLineOptions.displayRestrictedRoadSections
                             )
                         }
                     } else {

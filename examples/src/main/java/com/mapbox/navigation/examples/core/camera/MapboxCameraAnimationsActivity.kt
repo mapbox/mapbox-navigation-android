@@ -110,10 +110,10 @@ class MapboxCameraAnimationsActivity :
     }
 
     private val paddedFollowingEdgeInsets = EdgeInsets(
-        0.0 * pixelDensity,
-        40.0 * pixelDensity,
+        0.0,
+        0.0,
         120.0 * pixelDensity,
-        40.0 * pixelDensity
+        0.0
     )
 
     private val notPaddedEdgeInsets: EdgeInsets by lazy {

@@ -13,8 +13,7 @@ import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.route.internal.offboard.MapboxOffboardRouter
 import com.mapbox.navigation.route.internal.onboard.MapboxOnboardRouter
-import com.mapbox.navigation.utils.internal.NetworkStatus
-import com.mapbox.navigation.utils.internal.NetworkStatusService
+import com.mapbox.navigation.utils.internal.ConnectivityHandler
 import com.mapbox.navigation.utils.internal.RequestMap
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
@@ -31,7 +30,7 @@ import kotlinx.coroutines.Job
 class MapboxHybridRouter(
     private val onboardRouter: Router,
     private val offboardRouter: Router,
-    networkStatusService: NetworkStatusService,
+    networkStatusService: ConnectivityHandler,
     private val logger: Logger
 ) : Router {
 
@@ -44,7 +43,7 @@ class MapboxHybridRouter(
         urlSkuTokenProvider: UrlSkuTokenProvider,
         navigatorNative: MapboxNativeNavigator,
         logger: Logger,
-        networkStatusService: NetworkStatusService,
+        networkStatusService: ConnectivityHandler,
         refreshEnabled: Boolean
     ) : this(
         onboardRouter = MapboxOnboardRouter(
@@ -74,13 +73,12 @@ class MapboxHybridRouter(
     init {
         networkStatusJob = jobControl.scope.monitorChannelWithException(
             networkStatusService.getNetworkStatusChannel(),
-            ::onNetworkStatusChanged,
-            networkStatusService::cleanup
+            ::onNetworkStatusChanged
         )
     }
 
-    internal suspend fun onNetworkStatusChanged(networkStatus: NetworkStatus) {
-        isNetworkAvailable = networkStatus.isNetworkAvailable
+    internal suspend fun onNetworkStatusChanged(status: Boolean) {
+        isNetworkAvailable = status
     }
 
     /**

@@ -230,7 +230,8 @@ object MapboxRouteLineUtils {
         trafficBackfillRoadClasses: List<String>,
         isPrimaryRoute: Boolean,
         routeLineColorResources: RouteLineColorResources,
-        restrictedRoadSectionScale: Double
+        restrictedRoadSectionScale: Double,
+        displayRestrictedRoadSections: Boolean
     ): List<RouteLineExpressionData> {
         val trafficExpressionData = getRouteLineTrafficExpressionDataFromCache(route)
         return when (trafficExpressionData.isEmpty()) {
@@ -240,7 +241,8 @@ object MapboxRouteLineUtils {
                 routeLineColorResources,
                 isPrimaryRoute,
                 trafficBackfillRoadClasses,
-                restrictedRoadSectionScale
+                restrictedRoadSectionScale,
+                displayRestrictedRoadSections
             )
             true -> listOf(
                 RouteLineExpressionData(
@@ -303,7 +305,6 @@ object MapboxRouteLineUtils {
                     val isInAClosure = closureRanges.any { it.contains(index) }
                     val isInRestrictedRange = restrictedRanges.any { it.contains(index) }
                     val congestionValue: String = when {
-                        isInRestrictedRange -> RouteConstants.RESTRICTED_CONGESTION_VALUE
                         isInAClosure -> RouteConstants.CLOSURE_CONGESTION_VALUE
                         else -> congestion
                     }
@@ -321,7 +322,8 @@ object MapboxRouteLineUtils {
                             RouteLineTrafficExpressionData(
                                 distanceFromOrigin,
                                 congestionValue,
-                                roadClass
+                                roadClass,
+                                isInRestrictedRange
                             )
                         )
                     } else {
@@ -340,7 +342,8 @@ object MapboxRouteLineUtils {
                                 RouteLineTrafficExpressionData(
                                     runningDistance,
                                     congestionValue,
-                                    roadClass
+                                    roadClass,
+                                    isInRestrictedRange
                                 )
                             )
                         }
@@ -416,7 +419,8 @@ object MapboxRouteLineUtils {
         routeLineColorResources: RouteLineColorResources,
         isPrimaryRoute: Boolean,
         trafficOverrideRoadClasses: List<String>,
-        restrictedRoadSectionScale: Double
+        restrictedRoadSectionScale: Double,
+        displayRestrictedRoadSections: Boolean
     ): List<RouteLineExpressionData> {
         val expressionDataToReturn = mutableListOf<RouteLineExpressionData>()
         trafficExpressionData.forEachIndexed { index, trafficExpData ->
@@ -428,6 +432,8 @@ object MapboxRouteLineUtils {
                     trafficOverrideRoadClasses.contains(trafficExpData.roadClass)
                 ) {
                     RouteConstants.LOW_CONGESTION_VALUE
+                } else if (displayRestrictedRoadSections && trafficExpData.isInRestrictedSection) {
+                    RouteConstants.RESTRICTED_CONGESTION_VALUE
                 } else {
                     trafficExpData.trafficCongestionIdentifier
                 }
@@ -453,10 +459,7 @@ object MapboxRouteLineUtils {
                 )
             }
 
-            if (
-                trafficExpData.trafficCongestionIdentifier ==
-                RouteConstants.RESTRICTED_CONGESTION_VALUE
-            ) {
+            if (trafficIdentifier == RouteConstants.RESTRICTED_CONGESTION_VALUE) {
                 val hardStop = if (index < (trafficExpressionData.lastIndex)) {
                     trafficExpressionData[index + 1].distanceFromOrigin
                 } else {

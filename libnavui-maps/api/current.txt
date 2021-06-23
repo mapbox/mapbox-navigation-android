@@ -538,7 +538,7 @@ package com.mapbox.navigation.ui.maps.internal.route.line {
   }
 
   public final class MapboxRouteLineUtils {
-    method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData> calculateRouteLineSegments(com.mapbox.api.directions.v5.models.DirectionsRoute route, java.util.List<java.lang.String> trafficBackfillRoadClasses, boolean isPrimaryRoute, com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources routeLineColorResources, double restrictedRoadSectionScale);
+    method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData> calculateRouteLineSegments(com.mapbox.api.directions.v5.models.DirectionsRoute route, java.util.List<java.lang.String> trafficBackfillRoadClasses, boolean isPrimaryRoute, com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources routeLineColorResources, double restrictedRoadSectionScale, boolean displayRestrictedRoadSections);
     method public static String? getBelowLayerIdToUse(String? belowLayerId, com.mapbox.maps.Style style);
     method @ColorInt public int getRouteColorForCongestion(String congestionValue, boolean isPrimaryRoute, com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources routeLineColorResources);
     method public kotlin.jvm.functions.Function0<java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData>> getRouteFeatureDataProvider(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> directionsRoutes);
@@ -717,12 +717,14 @@ package com.mapbox.navigation.ui.maps.route.line.model {
 
   public final class MapboxRouteLineOptions {
     method public android.graphics.drawable.Drawable getDestinationIcon();
+    method public boolean getDisplayRestrictedRoadSections();
     method public android.graphics.drawable.Drawable getOriginIcon();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources getResourceProvider();
     method public String? getRouteLineBelowLayerId();
     method public double getTolerance();
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder toBuilder(android.content.Context context);
     property public final android.graphics.drawable.Drawable destinationIcon;
+    property public final boolean displayRestrictedRoadSections;
     property public final android.graphics.drawable.Drawable originIcon;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources resourceProvider;
     property public final String? routeLineBelowLayerId;
@@ -732,6 +734,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
   public static final class MapboxRouteLineOptions.Builder {
     ctor public MapboxRouteLineOptions.Builder(android.content.Context context);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions build();
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder displayRestrictedRoadSections(boolean displayRestrictedRoadSections);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteLineBelowLayerId(String layerId);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteLineResources(com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources resourceProvider);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions.Builder withRouteStyleDescriptors(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor> routeStyleDescriptors);

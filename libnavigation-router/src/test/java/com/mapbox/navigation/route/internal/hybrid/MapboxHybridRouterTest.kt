@@ -11,8 +11,7 @@ import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.utils.internal.NetworkStatus
-import com.mapbox.navigation.utils.internal.NetworkStatusService
+import com.mapbox.navigation.utils.internal.ConnectivityHandler
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -38,8 +37,8 @@ class MapboxHybridRouterTest {
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
     private val internalOffboardCallback = slot<Router.Callback>()
     private val internalOnboardCallback = slot<Router.Callback>()
-    private val networkStatusService: NetworkStatusService = mockk(relaxUnitFun = true)
-    private val channel = Channel<NetworkStatus>(Channel.CONFLATED)
+    private val networkStatusService: ConnectivityHandler = mockk(relaxUnitFun = true)
+    private val channel = Channel<Boolean>(Channel.CONFLATED)
     private val internalOffboardRefreshCallback = slot<RouteRefreshCallback>()
     private val internalOnboardRefreshCallback = slot<RouteRefreshCallback>()
 
@@ -234,15 +233,6 @@ class MapboxHybridRouterTest {
     }
 
     @Test
-    fun networkStatusService_cleanup_calledOnChannelClose() = runBlocking {
-        channel.close()
-
-        hybridRouter.networkStatusJob.join()
-
-        verify(exactly = 1) { networkStatusService.cleanup() }
-    }
-
-    @Test
     fun `route request failure and request list is clear`() = runBlocking {
         enableNetworkConnection()
 
@@ -412,7 +402,7 @@ class MapboxHybridRouterTest {
     private suspend fun disableNetworkConnection() = networkConnected(false)
 
     private suspend fun networkConnected(networkConnected: Boolean) {
-        hybridRouter.onNetworkStatusChanged(NetworkStatus(networkConnected))
+        hybridRouter.onNetworkStatusChanged(networkConnected)
     }
 
     private fun provideDefaultRouteOptions(): RouteOptions {
