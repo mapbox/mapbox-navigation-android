@@ -1027,7 +1027,7 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 ===========================================================================
 
 Mapbox Navigation uses portions of the Android Support Library Annotations (The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs.).
-URL: [http://developer.android.com/tools/extras/support-library.html](http://developer.android.com/tools/extras/support-library.html)
+URL: [https://developer.android.com/jetpack/androidx/releases/annotation#1.2.0](https://developer.android.com/jetpack/androidx/releases/annotation#1.2.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
@@ -1039,7 +1039,7 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 ===========================================================================
 
 Mapbox Navigation uses portions of the Android Support Library compat (The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs. Compatible on devices running API 14 or later.).
-URL: [https://developer.android.com/jetpack/androidx](https://developer.android.com/jetpack/androidx)
+URL: [https://developer.android.com/jetpack/androidx/releases/core#1.5.0](https://developer.android.com/jetpack/androidx/releases/core#1.5.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
@@ -1348,6 +1348,12 @@ License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 ===========================================================================
 
 Mapbox Navigation uses portions of the The logo module for the Mapbox Maps SDK for Android.
+URL: [https://github.com/mapbox/mapbox-maps-android](https://github.com/mapbox/mapbox-maps-android)
+License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the The map localization module for the Mapbox Maps SDK for Android.
 URL: [https://github.com/mapbox/mapbox-maps-android](https://github.com/mapbox/mapbox-maps-android)
 License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 
