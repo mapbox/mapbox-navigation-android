@@ -4,6 +4,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.None
 import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Feature
+import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.QueriedFeature
 import com.mapbox.maps.Style
 import com.mapbox.navigation.testing.FileUtils
@@ -13,6 +14,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Test
 
+@OptIn(MapboxExperimental::class)
 class MapboxBuildingViewTest {
 
     @Test
@@ -29,7 +31,7 @@ class MapboxBuildingViewTest {
         }
         val style: Style = mockk {
             every { styleLayerExists(any()) } returns false
-            every { addStyleLayer(any(), any()) } returns expected
+            every { addPersistentStyleLayer(any(), any()) } returns expected
             every { removeStyleLayer(any()) } returns mockk()
         }
         val propertySlot = CapturingSlot<Value>()
@@ -37,7 +39,7 @@ class MapboxBuildingViewTest {
 
         buildingView.highlightBuilding(style, buildings)
 
-        verify { style.addStyleLayer(capture(propertySlot), any()) }
+        verify { style.addPersistentStyleLayer(capture(propertySlot), any()) }
     }
 
     private fun loadFeature() = Feature.fromJson(
