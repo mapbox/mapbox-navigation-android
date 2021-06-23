@@ -6,6 +6,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.generated.Expression
+import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
@@ -33,6 +34,10 @@ import kotlinx.coroutines.sync.withLock
  * by calling the appropriate map related commands so that the map can have an appearance that is
  * consistent with the state of the navigation SDK and the application.
  *
+ * Each [Layer] added to the map by this class is a persistent layer - it will survive style changes.
+ * This means that if the data has not changed, it does not have to be manually redrawn after a style change.
+ * See [Style.addPersistentStyleLayer].
+ *
  * @param options resource options used rendering the route line on the map
  */
 class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
@@ -48,6 +53,10 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * Will initialize the route line related layers. Other calls in this class will initialize
      * the layers if they have not yet been initialized. If you have a use case for initializing
      * the layers in advance of any API calls this method may be used.
+     *
+     * Each [Layer] added to the map by this class is a persistent layer - it will survive style changes.
+     * This means that if the data has not changed, it does not have to be manually redrawn after a style change.
+     * See [Style.addPersistentStyleLayer].
      *
      * @param style a valid [Style] instance
      */
