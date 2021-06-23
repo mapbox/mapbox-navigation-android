@@ -14,6 +14,7 @@ import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Style
+import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPluginImpl
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -94,6 +95,10 @@ import kotlin.coroutines.suspendCoroutine
  * [Style] object as an argument. It is important to ensure the [Style] object is always current.
  * If the application changes the map style at runtime the new [Style] should be passed as an
  * argument to the render method following the style change.
+ *
+ * Each [Layer] added to the map by this [MapboxRouteLineView] is a persistent layer - it will survive style changes.
+ * This means that if the data has not changed, it does not have to be manually redrawn after a style change.
+ * See [Style.addPersistentStyleLayer].
  *
  * In order to display traffic congestion indications on the route line it is necessary to
  * request routes with specific [RouteOptions].  At a minimum the following options are necessary:

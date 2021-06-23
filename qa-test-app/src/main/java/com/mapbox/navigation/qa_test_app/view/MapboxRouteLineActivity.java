@@ -222,10 +222,6 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
             mapboxRouteLineView.showAlternativeRoutes(style1);
           }
 
-          mapboxRouteLineApi.getRouteDrawData(
-              redrawData -> mapboxRouteLineView.renderRouteDrawData(style1, redrawData)
-          );
-
           ArrowVisibilityChangeValue arrowVisibilityState;
           if (arrowVisibility == Visibility.NONE) {
             arrowVisibilityState = routeArrow.hideManeuverArrow();

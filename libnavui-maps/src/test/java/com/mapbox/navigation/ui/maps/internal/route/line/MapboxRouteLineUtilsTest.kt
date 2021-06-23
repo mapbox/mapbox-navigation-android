@@ -16,6 +16,7 @@ import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.LayerPosition
+import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.layers.Layer
@@ -368,6 +369,7 @@ class MapboxRouteLineUtilsTest {
         verify(exactly = 0) { style.addStyleSource(any(), any()) }
     }
 
+    @OptIn(MapboxExperimental::class)
     @Test
     fun initializeLayers() {
         GeoJsonSource.workerThread =
@@ -446,7 +448,7 @@ class MapboxRouteLineUtilsTest {
             every {
                 addStyleSource(RouteConstants.TOP_LEVEL_ROUTE_LAYER_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
-            every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
+            every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
                 addImage(RouteConstants.ORIGIN_MARKER_NAME, any<Bitmap>())
             } returns ExpectedFactory.createNone()
@@ -597,7 +599,10 @@ class MapboxRouteLineUtilsTest {
         )
 
         verify {
-            style.addStyleLayer(capture(addStyleLayerSlots), capture(addStyleLayerPositionSlots))
+            style.addPersistentStyleLayer(
+                capture(addStyleLayerSlots),
+                capture(addStyleLayerPositionSlots)
+            )
         }
         assertEquals(
             "mapbox-navigation-alt-route1-casing-layer",

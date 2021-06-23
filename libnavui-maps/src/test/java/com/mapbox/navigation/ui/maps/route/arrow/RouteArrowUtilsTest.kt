@@ -10,6 +10,7 @@ import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
 import com.mapbox.maps.Image
 import com.mapbox.maps.LayerPosition
+import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
@@ -33,6 +34,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@OptIn(MapboxExperimental::class)
 @RunWith(RobolectricTestRunner::class)
 class RouteArrowUtilsTest {
 
@@ -226,7 +228,7 @@ class RouteArrowUtilsTest {
             every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
             every { styleLayerExists(options.aboveLayerId) } returns true
-            every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
+            every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
                 addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
@@ -297,7 +299,10 @@ class RouteArrowUtilsTest {
         verify { style.removeStyleLayer(RouteLayerConstants.ARROW_HEAD_LAYER_ID) }
 
         verify {
-            style.addStyleLayer(capture(addStyleLayerSlots), capture(addStyleLayerPositionSlots))
+            style.addPersistentStyleLayer(
+                capture(addStyleLayerSlots),
+                capture(addStyleLayerPositionSlots)
+            )
         }
         assertEquals(
             "mapbox-navigation-arrow-shaft-casing-layer",
@@ -364,7 +369,7 @@ class RouteArrowUtilsTest {
             every { styleLayerExists(PRIMARY_ROUTE_TRAFFIC_LAYER_ID) } returns true
             every { styleLayerExists(RESTRICTED_ROAD_LAYER_ID) } returns true
             every { styleLayerExists(options.aboveLayerId) } returns true
-            every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
+            every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
                 addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
@@ -384,7 +389,10 @@ class RouteArrowUtilsTest {
             )
         }
         verify {
-            style.addStyleLayer(capture(addStyleLayerSlots), capture(addStyleLayerPositionSlots))
+            style.addPersistentStyleLayer(
+                capture(addStyleLayerSlots),
+                capture(addStyleLayerPositionSlots)
+            )
         }
         assertEquals(
             "foobar",
@@ -433,7 +441,7 @@ class RouteArrowUtilsTest {
             every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
             every { styleLayerExists(options.aboveLayerId) } returns false
-            every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
+            every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
                 addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
@@ -503,7 +511,10 @@ class RouteArrowUtilsTest {
         verify { style.removeStyleLayer(RouteLayerConstants.ARROW_HEAD_LAYER_ID) }
 
         verify {
-            style.addStyleLayer(capture(addStyleLayerSlots), capture(addStyleLayerPositionSlots))
+            style.addPersistentStyleLayer(
+                capture(addStyleLayerSlots),
+                capture(addStyleLayerPositionSlots)
+            )
         }
         assertEquals(
             "mapbox-navigation-arrow-shaft-casing-layer",
@@ -575,7 +586,7 @@ class RouteArrowUtilsTest {
             every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
             every { styleLayerExists(options.aboveLayerId) } returns true
-            every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
+            every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
                 addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
@@ -626,7 +637,7 @@ class RouteArrowUtilsTest {
             every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
             every { styleLayerExists(options.aboveLayerId) } returns true
-            every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
+            every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
                 addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
@@ -677,7 +688,7 @@ class RouteArrowUtilsTest {
             every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
             every { styleLayerExists(options.aboveLayerId) } returns true
-            every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
+            every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
                 addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
@@ -728,7 +739,7 @@ class RouteArrowUtilsTest {
             every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
             every { styleLayerExists(options.aboveLayerId) } returns true
-            every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
+            every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
                 addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()

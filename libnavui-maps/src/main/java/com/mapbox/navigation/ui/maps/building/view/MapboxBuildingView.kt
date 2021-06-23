@@ -1,11 +1,13 @@
 package com.mapbox.navigation.ui.maps.building.view
 
+import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.QueriedFeature
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.maps.extension.style.expressions.generated.Expression
-import com.mapbox.maps.extension.style.layers.addLayer
+import com.mapbox.maps.extension.style.layers.Layer
+import com.mapbox.maps.extension.style.layers.addPersistentLayer
 import com.mapbox.maps.extension.style.layers.generated.FillExtrusionLayer
 import com.mapbox.maps.extension.style.layers.getLayerAs
 import com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions
@@ -14,6 +16,10 @@ import com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptio
  * Mapbox default view that adds/updates/removes building layer and building highlight
  * for a specific feature geometry and applies appropriate properties to the building layer
  * on top of [MapboxMap] using [MapboxBuildingHighlightOptions]
+ *
+ * Each [Layer] added to the map by this class is a persistent layer - it will survive style changes.
+ * This means that if the data has not changed, it does not have to be manually redrawn after a style change.
+ * See [Style.addPersistentStyleLayer].
  */
 class MapboxBuildingView {
 
@@ -65,6 +71,7 @@ class MapboxBuildingView {
         style.removeStyleLayer(HIGHLIGHT_BUILDING_LAYER_ID)
     }
 
+    @OptIn(MapboxExperimental::class)
     private fun updateBuildingLayer(
         style: Style,
         buildings: List<QueriedFeature>,
@@ -73,7 +80,7 @@ class MapboxBuildingView {
         val ids = buildings.mapNotNull { it.feature.id()?.toLong() }
         val selectedBuilding = Expression.inExpression(Expression.id(), literal(ids))
         if (!style.styleLayerExists(HIGHLIGHT_BUILDING_LAYER_ID)) {
-            style.addLayer(
+            style.addPersistentLayer(
                 FillExtrusionLayer(HIGHLIGHT_BUILDING_LAYER_ID, COMPOSITE_SOURCE_ID)
                     .sourceLayer(BUILDING_LAYER_ID)
                     .filter(selectedBuilding)
