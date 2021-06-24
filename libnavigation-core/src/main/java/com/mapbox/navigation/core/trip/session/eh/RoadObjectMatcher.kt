@@ -62,9 +62,26 @@ class RoadObjectMatcher internal constructor(
                     )
                 }
 
-            roadObjectMatcherObservers.forEach {
-                it.onRoadObjectMatched(result)
-            }
+            notifyMatchingObservers(result)
+        }
+
+        override fun onMatchingCancelled(id: String) {
+            val result: Expected<SDKRoadObjectMatcherError, SDKRoadObject> =
+                ExpectedFactory.createError(
+                    RoadObjectInstanceFactory.buildRoadObjectMatchingError(
+                        RoadObjectMatcherError("Matching cancelled", id)
+                    )
+                )
+
+            notifyMatchingObservers(result)
+        }
+    }
+
+    private fun notifyMatchingObservers(
+        result: Expected<SDKRoadObjectMatcherError, SDKRoadObject>
+    ) {
+        roadObjectMatcherObservers.forEach {
+            it.onRoadObjectMatched(result)
         }
     }
 
@@ -141,11 +158,18 @@ class RoadObjectMatcher internal constructor(
     }
 
     /**
-     * Cancel road object matching
+     * Cancel road objects matching
      *
-     * @param roadObjectId unique id of the object
+     * @param roadObjectIds list of object ids to cancel matching
      */
-    fun cancel(roadObjectId: String) {
-        navigator.roadObjectMatcher?.cancel(roadObjectId)
+    fun cancel(roadObjectIds: List<String>) {
+        navigator.roadObjectMatcher?.cancel(roadObjectIds)
+    }
+
+    /**
+     * Cancel all road objects matching
+     */
+    fun cancelAll() {
+        navigator.roadObjectMatcher?.cancelAll()
     }
 }

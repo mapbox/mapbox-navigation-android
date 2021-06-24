@@ -679,7 +679,8 @@ package com.mapbox.navigation.core.trip.session.eh {
   }
 
   public final class RoadObjectMatcher {
-    method public void cancel(String roadObjectId);
+    method public void cancel(java.util.List<java.lang.String> roadObjectIds);
+    method public void cancelAll();
     method public void matchGantryObject(String roadObjectId, java.util.List<com.mapbox.geojson.Point> gantry);
     method public void matchOpenLRObject(String roadObjectId, String openLRLocation, @com.mapbox.navigation.base.trip.model.eh.OpenLRStandard.Type String openLRStandard);
     method public void matchPointObject(String roadObjectId, com.mapbox.geojson.Point point);
