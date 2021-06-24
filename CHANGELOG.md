@@ -11,7 +11,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Fixed onboard router issue not supporting multiple exclude parameters. [#4534](https://github.com/mapbox/mapbox-navigation-android/pull/4534)
 - When traversing routes that wrap around behind the vehicle (e.g.: cloverleafs and circular on-ramps) the zoom level is now held constant. [#4468](https://github.com/mapbox/mapbox-navigation-android/pull/4468)
 - Restored an option to display restricted sections of a route on the route line.  The option is included in the `MapboxRouteLineOptions` as `displayRestrictedRoadSections()`. The option is false by default indicating the restricted section will not be visible on the route line. [#4501](https://github.com/mapbox/mapbox-navigation-android/pull/4501)
-- Navigation SDK now respects the `OfflineSwitch` and will not make resource request if the `setMapboxStackConnected` is set to `false`, it will use cached resources and immediately fallback to local generation of routes, even if connectivity is available. [#4529](https://github.com/mapbox/mapbox-navigation-android/pull/4529)
+- Navigation SDK now respects the `NetworkConnectivity` settings and will not make resource request if the `setMapboxStackConnected` is set to `false`, it will use cached resources and immediately fallback to local generation of routes, even if connectivity is available. [#4529](https://github.com/mapbox/mapbox-navigation-android/pull/4529)
 
 ### Mapbox dependencies
 This release depends, and has been tested with, the following Mapbox dependencies:
