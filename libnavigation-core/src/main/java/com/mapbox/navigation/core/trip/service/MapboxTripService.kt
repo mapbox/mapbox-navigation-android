@@ -6,7 +6,7 @@ import android.content.Intent
 import android.os.Build
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
-import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.TripNotificationState
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.utils.internal.ifChannelException
 import kotlinx.coroutines.channels.Channel
@@ -130,8 +130,8 @@ internal class MapboxTripService(
     /**
      * Update the trip's information in the notification bar
      */
-    override fun updateNotification(routeProgress: RouteProgress?) {
-        tripNotification.updateNotification(routeProgress)
+    override fun updateNotification(tripNotificationState: TripNotificationState) {
+        tripNotification.updateNotification(tripNotificationState)
     }
 
     /**

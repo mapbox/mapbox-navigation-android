@@ -1,7 +1,7 @@
 package com.mapbox.navigation.base.trip.notification
 
 import android.app.Notification
-import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.TripNotificationState
 
 /**
  * Defines a contract for [Notification] instance provider and manager.
@@ -28,15 +28,12 @@ interface TripNotification {
     fun getNotificationId(): Int
 
     /**
-     * If enabled, this method will be called every time a
-     * new [RouteProgress] is generated.
-     *
      * This method can serve as a cue to update a [Notification]
      * with a specific notification id.
      *
-     * @param routeProgress with the latest progress data
+     * @param state with the latest progress data
      */
-    fun updateNotification(routeProgress: RouteProgress?)
+    fun updateNotification(state: TripNotificationState)
 
     /**
      * Callback for when trip session is started via [TripSession.start].
