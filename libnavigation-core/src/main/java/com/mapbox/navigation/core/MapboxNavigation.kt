@@ -42,6 +42,7 @@ import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.ReachabilityService
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
+import com.mapbox.navigation.core.internal.utils.InternalUtils
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
@@ -84,6 +85,7 @@ import com.mapbox.navigator.ElectronicHorizonOptions
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.IncidentsOptions
 import com.mapbox.navigator.NavigatorConfig
+import com.mapbox.navigator.PollingConfig
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.channels.Channel
@@ -209,12 +211,18 @@ class MapboxNavigation(
         }
     }
 
+    private val pollingConfig = PollingConfig(
+        navigationOptions.navigatorPredictionMillis / ONE_SECOND_IN_MILLIS,
+        InternalUtils.UNCONDITIONAL_POLLING_PATIENCE_MILLISECONDS / ONE_SECOND_IN_MILLIS,
+        InternalUtils.UNCONDITIONAL_POLLING_INTERVAL_MILLISECONDS / ONE_SECOND_IN_MILLIS
+    )
+
     private val navigatorConfig = NavigatorConfig(
         null,
         electronicHorizonOptions,
-        null,
+        pollingConfig,
         incidentsOptions,
-        false
+        null
     )
 
     private var notificationChannelField: Field? = null
@@ -1071,5 +1079,6 @@ class MapboxNavigation(
         private val TAG = Tag("MbxNavigation")
         private const val USER_AGENT: String = "MapboxNavigationNative"
         private const val THREADS_COUNT = 2
+        private const val ONE_SECOND_IN_MILLIS = 1000.0
     }
 }

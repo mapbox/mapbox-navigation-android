@@ -11,7 +11,6 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
-import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_PREDICTION_MILLIS
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
@@ -21,6 +20,7 @@ import com.mapbox.navigation.core.navigator.RouteInitInfo
 import com.mapbox.navigation.core.navigator.getMapMatcherResult
 import com.mapbox.navigation.core.navigator.getRouteInitInfo
 import com.mapbox.navigation.core.navigator.getRouteProgressFrom
+import com.mapbox.navigation.core.navigator.getTripStatusFrom
 import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
@@ -28,24 +28,25 @@ import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.NavigationStatus
+import com.mapbox.navigator.NavigationStatusOrigin
+import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteState
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
-import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
@@ -59,7 +60,6 @@ import kotlinx.coroutines.cancelAndJoin
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -93,6 +93,7 @@ class MapboxTripSessionTest {
 
     private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     private val tripStatus: TripStatus = mockk(relaxUnitFun = true)
+    private val navigationStatusOrigin: NavigationStatusOrigin = mockk()
     private val navigationStatus: NavigationStatus = mockk(relaxed = true)
     private val logger: Logger = mockk(relaxUnitFun = true)
 
@@ -105,9 +106,11 @@ class MapboxTripSessionTest {
 
     private val mapMatcherResult: MapMatcherResult = mockk(relaxUnitFun = true)
     private val eHorizonSubscriptionManager: EHorizonSubscriptionManager = mockk(relaxed = true)
+    private val navigatorObserverImplSlot = slot<NavigatorObserver>()
 
     @Before
     fun setUp() {
+        mockkObject(MapboxNativeNavigatorImpl)
         mockkObject(ThreadController)
         mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         mockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
@@ -122,10 +125,10 @@ class MapboxTripSessionTest {
             .build()
         tripSession = buildTripSession()
 
-        coEvery { navigator.getStatus(any()) } returns tripStatus
         coEvery { navigator.updateLocation(any()) } returns false
         coEvery { navigator.setRoute(any()) } returns null
         coEvery { navigator.updateAnnotations(any()) } returns Unit
+        every { navigationStatus.getTripStatusFrom(any()) } returns tripStatus
 
         every { navigationStatus.location } returns fixLocation
         every { navigationStatus.keyPoints } returns keyFixPoints
@@ -137,6 +140,7 @@ class MapboxTripSessionTest {
         every { tripStatus.getMapMatcherResult(any(), any()) } returns mapMatcherResult
         every { routeProgress.bannerInstructions } returns null
         every { routeProgress.voiceInstructions } returns null
+        every { routeProgress.currentLegProgress } returns mockk(relaxed = true)
         every { getRouteProgressFrom(any(), any(), any()) } returns routeProgress
         every { route.isSameUuid(any()) } returns false
         every { route.isSameRoute(any()) } returns false
@@ -150,6 +154,9 @@ class MapboxTripSessionTest {
             )
         } answers {}
         every { locationEngineResult.locations } returns listOf(location)
+        every {
+            navigator.addNavigatorObserver(capture(navigatorObserverImplSlot))
+        } answers {}
     }
 
     private fun buildTripSession(): TripSession {
@@ -215,7 +222,9 @@ class MapboxTripSessionTest {
         tripSession.route = null
         tripSession.stop()
 
-        coVerify(exactly = 1) { navigator.getStatus(any()) }
+        coVerify(exactly = 1) {
+            navigator.removeNavigatorObserver(navigatorObserverImplSlot.captured)
+        }
     }
 
     @Test
@@ -297,57 +306,6 @@ class MapboxTripSessionTest {
         tripSession.start()
         updateLocationAndJoin()
         coVerify { navigator.updateLocation(fixLocation) }
-        tripSession.stop()
-    }
-
-    @Test
-    fun getStatusImmediatelyAfterUpdateLocation() = coroutineRule.runBlockingTest {
-        tripSession.start()
-
-        updateLocationAndJoin()
-        val slot = slot<Long>()
-        coVerify { navigator.getStatus(capture(slot)) }
-
-        assertTrue("${slot.captured}", slot.captured == DEFAULT_NAVIGATOR_PREDICTION_MILLIS)
-    }
-
-    @Test
-    fun noLocationUpdateLongerThanAPatienceUnconditionallyGetStatus() =
-        coroutineRule.runBlockingTest {
-            tripSession.start()
-
-            locationCallbackSlot.captured.onSuccess(locationEngineResult)
-            advanceTimeBy(MapboxTripSession.UNCONDITIONAL_STATUS_POLLING_PATIENCE)
-            parentJob.cancelAndJoin()
-
-            coVerify(exactly = 2) { navigator.getStatus(any()) }
-            tripSession.stop()
-        }
-
-    @Test
-    fun unconditionalGetStatusRepeated() = coroutineRule.runBlockingTest {
-        tripSession.start()
-
-        locationCallbackSlot.captured.onSuccess(locationEngineResult)
-        advanceTimeBy(MapboxTripSession.UNCONDITIONAL_STATUS_POLLING_PATIENCE)
-        advanceTimeBy(MapboxTripSession.UNCONDITIONAL_STATUS_POLLING_INTERVAL)
-        parentJob.cancelAndJoin()
-
-        coVerify(exactly = 3) { navigator.getStatus(any()) }
-        tripSession.stop()
-    }
-
-    @Test
-    fun rawLocationCancelsUnconditionalGetStatusRepetition() = coroutineRule.runBlockingTest {
-        tripSession.start()
-
-        locationCallbackSlot.captured.onSuccess(locationEngineResult)
-        advanceTimeBy(MapboxTripSession.UNCONDITIONAL_STATUS_POLLING_PATIENCE - 100)
-        locationCallbackSlot.captured.onSuccess(locationEngineResult)
-        advanceTimeBy(MapboxTripSession.UNCONDITIONAL_STATUS_POLLING_INTERVAL - 100)
-        parentJob.cancelAndJoin()
-
-        coVerify(exactly = 2) { navigator.getStatus(any()) }
         tripSession.stop()
     }
 
@@ -479,6 +437,7 @@ class MapboxTripSessionTest {
         tripSession.registerOffRouteObserver(offRouteObserver)
         every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
         locationCallbackSlot.captured.onSuccess(locationEngineResult)
+        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
 
         tripSession.route = route
 
@@ -503,6 +462,7 @@ class MapboxTripSessionTest {
         tripSession.registerOffRouteObserver(offRouteObserver)
         every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
         locationCallbackSlot.captured.onSuccess(locationEngineResult)
+        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
 
         tripSession.route = null
 
@@ -582,20 +542,6 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun checksGetNavigatorStatusIsCalledAfterSettingARouteWhenTripSessionHasStarted() {
-        tripSession.start()
-
-        tripSession.route = route
-
-        coVerify(exactly = 1) { navigator.setRoute(route) }
-        coVerify(exactly = 1) { navigator.getStatus(any()) }
-        coVerifyOrder {
-            navigator.setRoute(route)
-            navigator.getStatus(any())
-        }
-    }
-
-    @Test
     fun checkNavigatorUpdateAnnotationsWhenRouteIsTheSame() {
         tripSession.start()
         every { route.isSameRoute(any()) } returns true
@@ -605,11 +551,6 @@ class MapboxTripSessionTest {
 
         coVerify(exactly = 1) { navigator.updateAnnotations(route) }
         coVerify(exactly = 0) { navigator.setRoute(any()) }
-        coVerify(exactly = 1) { navigator.getStatus(any()) }
-        coVerifyOrder {
-            navigator.updateAnnotations(route)
-            navigator.getStatus(any())
-        }
     }
 
     @Test
@@ -622,31 +563,6 @@ class MapboxTripSessionTest {
 
         coVerify(exactly = 1) { navigator.setRoute(route) }
         coVerify(exactly = 0) { navigator.updateAnnotations(any()) }
-        coVerify(exactly = 1) { navigator.getStatus(any()) }
-        coVerifyOrder {
-            navigator.setRoute(route)
-            navigator.getStatus(any())
-        }
-    }
-
-    @Test
-    fun checksGetNavigatorStatusIsNotCalledAfterSettingARouteIfTripSessionHasNotStarted() {
-        tripSession.route = route
-
-        coVerify(exactly = 1) { navigator.setRoute(route) }
-        coVerify(exactly = 0) { navigator.getStatus(any()) }
-    }
-
-    @Test
-    fun checksCancelOngoingUpdateNavigatorStatusDataJobsAreCalledWhenARouteIsSet() {
-        tripSession = spyk(
-            buildTripSession(),
-            recordPrivateCalls = true
-        )
-
-        tripSession.route = null
-
-        verify(exactly = 1) { tripSession["cancelOngoingUpdateNavigatorStatusDataJobs"]() }
     }
 
     @Test
@@ -1021,6 +937,7 @@ class MapboxTripSessionTest {
 
     @After
     fun cleanUp() {
+        unmockkObject(MapboxNativeNavigatorImpl)
         unmockkObject(ThreadController)
         unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         unmockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
@@ -1029,6 +946,7 @@ class MapboxTripSessionTest {
 
     private suspend fun updateLocationAndJoin() {
         locationCallbackSlot.captured.onSuccess(locationEngineResult)
+        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
         parentJob.cancelAndJoin()
     }
 }

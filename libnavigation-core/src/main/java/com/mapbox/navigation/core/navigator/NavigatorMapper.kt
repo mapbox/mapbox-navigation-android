@@ -62,6 +62,14 @@ internal fun getRouteProgressFrom(
     return status.getRouteProgress(directionsRoute, remainingWaypoints)
 }
 
+internal fun NavigationStatus.getTripStatusFrom(
+    route: DirectionsRoute?,
+): TripStatus =
+    TripStatus(
+        route,
+        this
+    )
+
 private fun NavigationStatus.getRouteProgress(
     route: DirectionsRoute?,
     remainingWaypoints: Int

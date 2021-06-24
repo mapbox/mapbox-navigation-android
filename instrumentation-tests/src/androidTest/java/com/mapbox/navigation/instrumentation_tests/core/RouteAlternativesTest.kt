@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit
  * This test ensures that alternative route recommendations
  * are given during active guidance.
  */
+// TODO: Refactor https://github.com/mapbox/mapbox-navigation-android/issues/4429
 class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
     @get:Rule
