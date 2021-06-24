@@ -2,6 +2,28 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.16 - June 24, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
+- Navigation SDK now respects the `OfflineSwitch` and will not make resource request if the `setMapboxStackConnected` is set to `false`, it will use cached resources and immediately fallback to local generation of routes, even if connectivity is available. [#4529](https://github.com/mapbox/mapbox-navigation-android/pull/4529)
+- `RoadObjectMatcher` API changed. Added `cancelAll()` func, added `onMatchingCancelled(id: String)` callback to a `RoadObjectMatcherListener`, `cancel(roadObjectIds: List<String>)` handles a list of ids, not a single one. [#4542](https://github.com/mapbox/mapbox-navigation-android/pull/4542)
+- Migrated to callback-based native getStatus approach. [#4419](https://github.com/mapbox/mapbox-navigation-android/pull/4419)
+- Removed `routeGeometryWithBuffer` from `RouteProgress`. [#4419](https://github.com/mapbox/mapbox-navigation-android/pull/4419)
+- :warning: Internal `setUnconditionalPollingPatience` and `setUnconditionalPollingInterval` have been moved to `InternalUtils` `object` and have to be called _before_ `MapboxNavigation` is instantiated to actually take effect. [#4419](https://github.com/mapbox/mapbox-navigation-android/pull/4419)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+
+- Mapbox Maps SDK `v10.0.0-rc.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.2))
+- Mapbox Navigation Native `v54.0.0`
+- Mapbox Core Common `v14.0.1`
+- Mapbox Java `5.9.0-alpha.5` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v5.9.0-alpha.5))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.0.0`
+
 ## Mapbox Navigation SDK 2.0.0-beta.9.3 - Jun 23, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
