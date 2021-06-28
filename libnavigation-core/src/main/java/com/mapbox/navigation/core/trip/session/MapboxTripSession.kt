@@ -161,6 +161,9 @@ internal class MapboxTripSession(
             if (fallbackVersionsObservers.isNotEmpty()) {
                 navigator.setFallbackVersionsObserver(nativeFallbackVersionsObserver)
             }
+            if (state == TripSessionState.STARTED) {
+                navigator.addNavigatorObserver(navigatorObserver)
+            }
         }
     }
 
