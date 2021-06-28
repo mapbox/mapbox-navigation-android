@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
+import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
 
@@ -17,6 +18,10 @@ import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.PRIMARY_ROU
  * @param arrowHeadIconCasing the drawable to represent the arrow head border
  * @param aboveLayerId indicates the maneuver arrow map layers appear above this layer on the map
  * @param tolerance the tolerance value used when configuring the underlying map source
+ * @param arrowShaftScaleExpression an [Expression] governing the scaling of the maneuver arrow shaft
+ * @param arrowShaftCasingScaleExpression an [Expression] governing the scaling of the maneuver arrow shaft casing
+ * @param arrowHeadScaleExpression an [Expression] governing the scaling of the maneuver arrow head
+ * @param arrowHeadCasingScaleExpression an [Expression] governing the scaling of the maneuver arrow head casing
  */
 class RouteArrowOptions private constructor(
     @ColorInt val arrowColor: Int,
@@ -26,7 +31,11 @@ class RouteArrowOptions private constructor(
     val arrowHeadIcon: Drawable,
     val arrowHeadIconCasing: Drawable,
     val aboveLayerId: String,
-    val tolerance: Double
+    val tolerance: Double,
+    val arrowShaftScaleExpression: Expression,
+    val arrowShaftCasingScaleExpression: Expression,
+    val arrowHeadScaleExpression: Expression,
+    val arrowHeadCasingScaleExpression: Expression
 ) {
 
     /**
@@ -42,7 +51,11 @@ class RouteArrowOptions private constructor(
             arrowHeadIconDrawable,
             arrowHeadIconCasingDrawable,
             aboveLayerId,
-            tolerance
+            tolerance,
+            arrowShaftScaleExpression,
+            arrowShaftCasingScaleExpression,
+            arrowHeadScaleExpression,
+            arrowHeadCasingScaleExpression
         )
     }
 
@@ -63,6 +76,10 @@ class RouteArrowOptions private constructor(
         if (arrowHeadIconCasing != other.arrowHeadIconCasing) return false
         if (aboveLayerId != other.aboveLayerId) return false
         if (tolerance != other.tolerance) return false
+        if (arrowShaftScaleExpression != other.arrowShaftScaleExpression) return false
+        if (arrowShaftCasingScaleExpression != other.arrowShaftCasingScaleExpression) return false
+        if (arrowHeadScaleExpression != other.arrowHeadScaleExpression) return false
+        if (arrowHeadCasingScaleExpression != other.arrowHeadCasingScaleExpression) return false
 
         return true
     }
@@ -79,6 +96,10 @@ class RouteArrowOptions private constructor(
         result = 31 * result + arrowHeadIconCasing.hashCode()
         result = 31 * result + aboveLayerId.hashCode()
         result = 31 * result + (tolerance.hashCode())
+        result = 31 * result + arrowShaftScaleExpression.hashCode()
+        result = 31 * result + arrowShaftCasingScaleExpression.hashCode()
+        result = 31 * result + arrowHeadScaleExpression.hashCode()
+        result = 31 * result + arrowHeadCasingScaleExpression.hashCode()
         return result
     }
 
@@ -93,7 +114,12 @@ class RouteArrowOptions private constructor(
             "arrowHeadIcon=$arrowHeadIcon, " +
             "arrowHeadIconCasing=$arrowHeadIconCasing, " +
             "aboveLayerId='$aboveLayerId', " +
-            "tolerance=$tolerance)"
+            "tolerance=$tolerance, " +
+            "arrowShaftScaleExpression=$arrowShaftScaleExpression, " +
+            "arrowShaftCasingScaleExpression=$arrowShaftCasingScaleExpression, " +
+            "arrowHeadScaleExpression=$arrowHeadScaleExpression, " +
+            "arrowHeadCasingScaleExpression=$arrowHeadCasingScaleExpression" +
+            ")"
     }
 
     /**
@@ -106,7 +132,11 @@ class RouteArrowOptions private constructor(
         private var arrowHeadIconDrawable: Int,
         private var arrowHeadIconCasingDrawable: Int,
         private var aboveLayerId: String?,
-        private var tolerance: Double
+        private var tolerance: Double,
+        private var arrowShaftScaleExpression: Expression?,
+        private var arrowShaftCasingScaleExpression: Expression?,
+        private var arrowHeadScaleExpression: Expression?,
+        private var arrowHeadCasingScaleExpression: Expression?
     ) {
 
         /**
@@ -119,7 +149,11 @@ class RouteArrowOptions private constructor(
             RouteConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE,
             RouteConstants.MANEUVER_ARROWHEAD_ICON_CASING_DRAWABLE,
             null,
-            RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
+            RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
+            null,
+            null,
+            null,
+            null
         )
 
         /**
@@ -178,6 +212,46 @@ class RouteArrowOptions private constructor(
         }
 
         /**
+         * An expression that will define the scaling behavior of the maneuver arrow shafts.
+         *
+         * @param expression the expression governing the scaling of the maneuver arrow shafts
+         *
+         * @return the builder
+         */
+        fun withArrowShaftScalingExpression(expression: Expression): Builder =
+            apply { this.arrowShaftScaleExpression = expression }
+
+        /**
+         * An expression that will define the scaling behavior of the maneuver arrow shaft casing.
+         *
+         * @param expression the expression governing the scaling of the maneuver arrow shaft casing
+         *
+         * @return the builder
+         */
+        fun withArrowShaftCasingScalingExpression(expression: Expression): Builder =
+            apply { this.arrowShaftCasingScaleExpression = expression }
+
+        /**
+         * An expression that will define the scaling behavior of the maneuver arrow head.
+         *
+         * @param expression the expression governing the scaling of the maneuver arrow head
+         *
+         * @return the builder
+         */
+        fun withArrowheadScalingExpression(expression: Expression): Builder =
+            apply { this.arrowHeadScaleExpression = expression }
+
+        /**
+         * An expression that will define the scaling behavior of the maneuver arrow head casing.
+         *
+         * @param expression the expression governing the scaling of the maneuver arrow head casing
+         *
+         * @return the builder
+         */
+        fun withArrowheadCasingScalingExpression(expression: Expression): Builder =
+            apply { this.arrowHeadCasingScaleExpression = expression }
+
+        /**
          * Applies the supplied parameters and instantiates a RouteArrowOptions
          *
          * @return a RouteArrowOptions object
@@ -193,6 +267,62 @@ class RouteArrowOptions private constructor(
             )
             val routeArrowAboveLayerId: String = aboveLayerId ?: PRIMARY_ROUTE_TRAFFIC_LAYER_ID
 
+            val arrowShaftScalingExpression: Expression = arrowShaftScaleExpression
+                ?: Expression.interpolate {
+                    linear()
+                    zoom()
+                    stop {
+                        literal(RouteConstants.MIN_ARROW_ZOOM)
+                        literal(RouteConstants.MIN_ZOOM_ARROW_SHAFT_SCALE)
+                    }
+                    stop {
+                        literal(RouteConstants.MAX_ARROW_ZOOM)
+                        literal(RouteConstants.MAX_ZOOM_ARROW_SHAFT_SCALE)
+                    }
+                }
+
+            val arrowShaftCasingScaleExpression: Expression = arrowShaftCasingScaleExpression
+                ?: Expression.interpolate {
+                    linear()
+                    zoom()
+                    stop {
+                        literal(RouteConstants.MIN_ARROW_ZOOM)
+                        literal(RouteConstants.MIN_ZOOM_ARROW_SHAFT_CASING_SCALE)
+                    }
+                    stop {
+                        literal(RouteConstants.MAX_ARROW_ZOOM)
+                        literal(RouteConstants.MAX_ZOOM_ARROW_SHAFT_CASING_SCALE)
+                    }
+                }
+
+            val arrowHeadScalingExpression: Expression = arrowHeadScaleExpression
+                ?: Expression.interpolate {
+                    linear()
+                    zoom()
+                    stop {
+                        literal(RouteConstants.MIN_ARROW_ZOOM)
+                        literal(RouteConstants.MIN_ZOOM_ARROW_HEAD_SCALE)
+                    }
+                    stop {
+                        literal(RouteConstants.MAX_ARROW_ZOOM)
+                        literal(RouteConstants.MAX_ZOOM_ARROW_HEAD_SCALE)
+                    }
+                }
+
+            val arrowHeadCasingScalingExpression: Expression = arrowHeadCasingScaleExpression
+                ?: Expression.interpolate {
+                    linear()
+                    zoom()
+                    stop {
+                        literal(RouteConstants.MIN_ARROW_ZOOM)
+                        literal(RouteConstants.MIN_ZOOM_ARROW_HEAD_CASING_SCALE)
+                    }
+                    stop {
+                        literal(RouteConstants.MAX_ARROW_ZOOM)
+                        literal(RouteConstants.MAX_ZOOM_ARROW_HEAD_CASING_SCALE)
+                    }
+                }
+
             return RouteArrowOptions(
                 arrowColor,
                 arrowCasingColor,
@@ -201,7 +331,11 @@ class RouteArrowOptions private constructor(
                 arrowHeadIcon!!,
                 arrowHeadCasingIcon!!,
                 routeArrowAboveLayerId,
-                tolerance
+                tolerance,
+                arrowShaftScalingExpression,
+                arrowShaftCasingScaleExpression,
+                arrowHeadScalingExpression,
+                arrowHeadCasingScalingExpression
             )
         }
     }

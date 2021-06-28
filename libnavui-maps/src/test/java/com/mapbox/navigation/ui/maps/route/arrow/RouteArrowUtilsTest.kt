@@ -416,6 +416,14 @@ class RouteArrowUtilsTest {
                 every { intrinsicHeight } returns 0
                 every { intrinsicWidth } returns 1
             }
+            every {
+                arrowShaftCasingScaleExpression
+            } returns options.arrowShaftCasingScaleExpression
+            every {
+                arrowHeadCasingScaleExpression
+            } returns options.arrowHeadCasingScaleExpression
+            every { arrowShaftScaleExpression } returns options.arrowShaftScaleExpression
+            every { arrowHeadScaleExpression } returns options.arrowHeadScaleExpression
         }
         val style = getFullMockedStyle()
 
@@ -438,6 +446,14 @@ class RouteArrowUtilsTest {
                 every { intrinsicHeight } returns 1
                 every { intrinsicWidth } returns 0
             }
+            every {
+                arrowShaftCasingScaleExpression
+            } returns options.arrowShaftCasingScaleExpression
+            every {
+                arrowHeadCasingScaleExpression
+            } returns options.arrowHeadCasingScaleExpression
+            every { arrowShaftScaleExpression } returns options.arrowShaftScaleExpression
+            every { arrowHeadScaleExpression } returns options.arrowHeadScaleExpression
         }
         val style = getFullMockedStyle()
 
@@ -460,6 +476,14 @@ class RouteArrowUtilsTest {
                 every { intrinsicHeight } returns 0
                 every { intrinsicWidth } returns 1
             }
+            every {
+                arrowShaftCasingScaleExpression
+            } returns options.arrowShaftCasingScaleExpression
+            every {
+                arrowHeadCasingScaleExpression
+            } returns options.arrowHeadCasingScaleExpression
+            every { arrowShaftScaleExpression } returns options.arrowShaftScaleExpression
+            every { arrowHeadScaleExpression } returns options.arrowHeadScaleExpression
         }
         val style = getFullMockedStyle()
 
@@ -482,6 +506,14 @@ class RouteArrowUtilsTest {
                 every { intrinsicHeight } returns 0
                 every { intrinsicWidth } returns 1
             }
+            every {
+                arrowShaftCasingScaleExpression
+            } returns options.arrowShaftCasingScaleExpression
+            every {
+                arrowHeadCasingScaleExpression
+            } returns options.arrowHeadCasingScaleExpression
+            every { arrowShaftScaleExpression } returns options.arrowShaftScaleExpression
+            every { arrowHeadScaleExpression } returns options.arrowHeadScaleExpression
         }
         val style = getFullMockedStyle()
 

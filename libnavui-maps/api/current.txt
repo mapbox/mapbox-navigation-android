@@ -647,15 +647,23 @@ package com.mapbox.navigation.ui.maps.route.arrow.model {
     method public String getAboveLayerId();
     method public int getArrowCasingColor();
     method public int getArrowColor();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getArrowHeadCasingScaleExpression();
     method public android.graphics.drawable.Drawable getArrowHeadIcon();
     method public android.graphics.drawable.Drawable getArrowHeadIconCasing();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getArrowHeadScaleExpression();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getArrowShaftCasingScaleExpression();
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getArrowShaftScaleExpression();
     method public double getTolerance();
     method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder toBuilder(android.content.Context context);
     property public final String aboveLayerId;
     property public final int arrowCasingColor;
     property public final int arrowColor;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression arrowHeadCasingScaleExpression;
     property public final android.graphics.drawable.Drawable arrowHeadIcon;
     property public final android.graphics.drawable.Drawable arrowHeadIconCasing;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression arrowHeadScaleExpression;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression arrowShaftCasingScaleExpression;
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression arrowShaftScaleExpression;
     property public final double tolerance;
   }
 
@@ -667,6 +675,10 @@ package com.mapbox.navigation.ui.maps.route.arrow.model {
     method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withArrowColor(@ColorInt int color);
     method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withArrowHeadIconCasingDrawable(@DrawableRes int drawable);
     method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withArrowHeadIconDrawable(@DrawableRes int drawable);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withArrowShaftCasingScalingExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withArrowShaftScalingExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withArrowheadCasingScalingExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
+    method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withArrowheadScalingExpression(com.mapbox.maps.extension.style.expressions.generated.Expression expression);
     method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder withTolerance(double tolerance);
   }
 

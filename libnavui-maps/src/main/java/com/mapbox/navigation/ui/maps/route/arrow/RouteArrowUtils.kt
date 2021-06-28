@@ -130,20 +130,7 @@ internal object RouteArrowUtils {
                     options.arrowCasingColor
                 )
             )
-            .lineWidth(
-                Expression.interpolate {
-                    linear()
-                    zoom()
-                    stop {
-                        literal(RouteConstants.MIN_ARROW_ZOOM)
-                        literal(RouteConstants.MIN_ZOOM_ARROW_SHAFT_CASING_SCALE)
-                    }
-                    stop {
-                        literal(RouteConstants.MAX_ARROW_ZOOM)
-                        literal(RouteConstants.MAX_ZOOM_ARROW_SHAFT_CASING_SCALE)
-                    }
-                }
-            )
+            .lineWidth(options.arrowShaftCasingScaleExpression)
             .lineCap(LineCap.ROUND)
             .lineJoin(LineJoin.ROUND)
             .visibility(Visibility.VISIBLE)
@@ -169,20 +156,7 @@ internal object RouteArrowUtils {
             .iconImage(RouteConstants.ARROW_HEAD_ICON_CASING)
             .iconAllowOverlap(true)
             .iconIgnorePlacement(true)
-            .iconSize(
-                Expression.interpolate {
-                    linear()
-                    zoom()
-                    stop {
-                        literal(RouteConstants.MIN_ARROW_ZOOM)
-                        literal(RouteConstants.MIN_ZOOM_ARROW_HEAD_CASING_SCALE)
-                    }
-                    stop {
-                        literal(RouteConstants.MAX_ARROW_ZOOM)
-                        literal(RouteConstants.MAX_ZOOM_ARROW_HEAD_CASING_SCALE)
-                    }
-                }
-            )
+            .iconSize(options.arrowHeadCasingScaleExpression)
             .iconOffset(RouteConstants.ARROW_HEAD_OFFSET.toList())
             .iconRotationAlignment(IconRotationAlignment.MAP)
             .iconRotate(
@@ -215,20 +189,7 @@ internal object RouteArrowUtils {
             .lineColor(
                 Expression.color(options.arrowColor)
             )
-            .lineWidth(
-                Expression.interpolate {
-                    linear()
-                    zoom()
-                    stop {
-                        literal(RouteConstants.MIN_ARROW_ZOOM)
-                        literal(RouteConstants.MIN_ZOOM_ARROW_SHAFT_SCALE)
-                    }
-                    stop {
-                        literal(RouteConstants.MAX_ARROW_ZOOM)
-                        literal(RouteConstants.MAX_ZOOM_ARROW_SHAFT_SCALE)
-                    }
-                }
-            )
+            .lineWidth(options.arrowShaftScaleExpression)
             .lineCap(LineCap.ROUND)
             .lineJoin(LineJoin.ROUND)
             .visibility(Visibility.VISIBLE)
@@ -254,20 +215,7 @@ internal object RouteArrowUtils {
             .iconImage(RouteConstants.ARROW_HEAD_ICON)
             .iconAllowOverlap(true)
             .iconIgnorePlacement(true)
-            .iconSize(
-                Expression.interpolate {
-                    linear()
-                    zoom()
-                    stop {
-                        literal(RouteConstants.MIN_ARROW_ZOOM)
-                        literal(RouteConstants.MIN_ZOOM_ARROW_HEAD_SCALE)
-                    }
-                    stop {
-                        literal(RouteConstants.MAX_ARROW_ZOOM)
-                        literal(RouteConstants.MAX_ZOOM_ARROW_HEAD_SCALE)
-                    }
-                }
-            )
+            .iconSize(options.arrowHeadScaleExpression)
             .iconOffset(RouteConstants.ARROW_HEAD_CASING_OFFSET.toList())
             .iconRotationAlignment(IconRotationAlignment.MAP)
             .iconRotate(
