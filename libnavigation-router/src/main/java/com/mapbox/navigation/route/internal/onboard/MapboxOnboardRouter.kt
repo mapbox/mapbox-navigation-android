@@ -84,7 +84,10 @@ class MapboxOnboardRouter(
                 callback.onCanceled()
             }
         }
-        requests.put(requestId, retrieveRoute(offlineRoute.buildUrl(), internalCallback))
+        requests.put(
+            requestId,
+            retrieveRoute(routeOptions, offlineRoute.buildUrl(), internalCallback)
+        )
         return requestId
     }
 
@@ -133,12 +136,18 @@ class MapboxOnboardRouter(
         // Do nothing
     }
 
-    private fun retrieveRoute(url: String, callback: Router.Callback): Job {
+    private fun retrieveRoute(
+        routeOptions: RouteOptions,
+        url: String,
+        callback: Router.Callback
+    ): Job {
         return mainJobControl.scope.launch {
             try {
                 val routerResult = getRoute(url)
                 if (routerResult.isValue) {
-                    val routes: List<DirectionsRoute> = parseDirectionsRoutes(routerResult.value!!)
+                    val routes = parseDirectionsRoutes(routerResult.value!!).map {
+                        it.toBuilder().routeOptions(routeOptions).build()
+                    }
                     callback.onResponse(routes)
                 } else {
                     callback
