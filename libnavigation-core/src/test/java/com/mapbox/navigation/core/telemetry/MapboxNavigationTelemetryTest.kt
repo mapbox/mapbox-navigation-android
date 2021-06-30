@@ -979,7 +979,7 @@ class MapboxNavigationTelemetryTest {
             ORIGINAL_STEP_MANEUVER_LOCATION_LATITUDE
         every { originalStepManeuverLocation.longitude() } returns
             ORIGINAL_STEP_MANEUVER_LOCATION_LONGITUDE
-        every { originalRouteOptions.requestUuid() } returns
+        every { originalRoute.requestUuid() } returns
             ORIGINAL_ROUTE_OPTIONS_REQUEST_UUID
     }
 
@@ -991,7 +991,7 @@ class MapboxNavigationTelemetryTest {
         every { anotherRoute.routeIndex() } returns ANOTHER_ROUTE_ROUTE_INDEX
         every { anotherRoute.routeOptions() } returns anotherRouteOptions
         every { anotherRouteOptions.profile() } returns ANOTHER_ROUTE_OPTIONS_PROFILE
-        every { anotherRouteOptions.requestUuid() } returns ANOTHER_ROUTE_OPTIONS_REQUEST_UUID
+        every { anotherRoute.requestUuid() } returns ANOTHER_ROUTE_OPTIONS_REQUEST_UUID
         every { anotherRouteLeg.steps() } returns progressRouteSteps
         every { anotherRouteStep.maneuver() } returns anotherStepManeuver
         every { anotherStepManeuver.location() } returns anotherStepManeuverLocation
@@ -1165,7 +1165,7 @@ class MapboxNavigationTelemetryTest {
         assertEquals(obtainStepCount(originalRoute), event.originalStepCount)
         assertEquals(originalRoute.distance().toInt(), event.originalEstimatedDistance)
         assertEquals(originalRoute.duration().toInt(), event.originalEstimatedDuration)
-        assertEquals(originalRoute.routeOptions()?.requestUuid(), event.originalRequestIdentifier)
+        assertEquals(originalRoute.requestUuid(), event.originalRequestIdentifier)
         assertEquals(originalRoute.geometry(), event.originalGeometry)
         assertEquals(locationsCollector.lastLocation?.latitude, event.lat)
         assertEquals(locationsCollector.lastLocation?.longitude, event.lng)

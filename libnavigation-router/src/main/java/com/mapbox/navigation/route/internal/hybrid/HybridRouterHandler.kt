@@ -151,7 +151,7 @@ internal sealed class HybridRouterHandler(
                     Message(
                         """
                             Route refresh for $primaryRouterName failed for
-                            UUID = ${route.routeOptions()?.requestUuid()}
+                            UUID = ${route.requestUuid()}
                             legIndex = $legIndex
                             
                             message = ${error.message}
@@ -194,7 +194,7 @@ internal sealed class HybridRouterHandler(
                     Message(
                         """
                             Fallback route refresh for $fallbackRouterName failed with:
-                            UUID = ${route.routeOptions()?.requestUuid()}
+                            UUID = ${route.requestUuid()}
                             legIndex = $legIndex
                             
                             message = ${error.message}

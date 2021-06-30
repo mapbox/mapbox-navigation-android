@@ -1,7 +1,6 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
@@ -67,7 +66,7 @@ internal class RouteRefreshController(
     private fun refreshRoute() {
         val route = tripSession.route
             ?.takeIf { it.routeOptions().supportsRouteRefresh() }
-            ?.takeIf { it.routeOptions().isUuidValidForRefresh() }
+            ?.takeIf { it.isUuidValidForRefresh() }
         if (route != null) {
             val legIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0
             currentRequestId?.let { directionsSession.cancelRouteRefreshRequest(it) }
@@ -115,12 +114,12 @@ internal class RouteRefreshController(
 
     /**
      * Check if uuid is valid:
-     * - [RouteOptions] is not **null**;
+     * - [DirectionsRoute] is not **null**;
      * - uuid is not empty;
      * - uuid is not equal to [MapboxNativeNavigatorImpl.OFFLINE_UUID].
      */
-    private fun RouteOptions?.isUuidValidForRefresh(): Boolean =
-        this != null &&
-            requestUuid().isNotEmpty() &&
-            requestUuid() != MapboxNativeNavigatorImpl.OFFLINE_UUID
+    private fun DirectionsRoute?.isUuidValidForRefresh(): Boolean =
+        this?.requestUuid()
+            ?.let { uuid -> uuid.isNotEmpty() && uuid != MapboxNativeNavigatorImpl.OFFLINE_UUID }
+            ?: false
 }

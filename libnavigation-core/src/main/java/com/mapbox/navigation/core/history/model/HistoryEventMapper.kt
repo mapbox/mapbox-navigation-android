@@ -36,7 +36,7 @@ internal object HistoryEventMapper {
     private fun mapSetRoute(
         setRoute: SetRouteHistoryRecord
     ) = HistoryEventSetRoute(
-        directionsRoute = DirectionsRoute.fromJson(setRoute.routeResponse),
+        directionsRoute = setRoute.routeResponse?.let { DirectionsRoute.fromJson(it) },
         routeIndex = setRoute.routeIndex,
         legIndex = setRoute.legIndex,
         profile = mapToActiveGuidanceMode(setRoute.options.mode),

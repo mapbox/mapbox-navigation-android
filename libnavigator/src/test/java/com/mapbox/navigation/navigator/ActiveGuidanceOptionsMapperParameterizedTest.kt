@@ -19,7 +19,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 class ActiveGuidanceOptionsMapperParameterizedTest(
     private val profile: String,
-    private val geometries: String?,
+    private val geometries: String,
     private val waypointIndicesList: List<Int>?,
     private val coordinates: List<Point>,
     private val activeGuidanceMode: ActiveGuidanceMode,
@@ -348,7 +348,7 @@ class ActiveGuidanceOptionsMapperParameterizedTest(
         val routeOptions: RouteOptions = mockk()
         every { routeOptions.profile() } returns profile
         every { routeOptions.geometries() } returns geometries
-        every { routeOptions.coordinates() } returns coordinates
+        every { routeOptions.coordinatesList() } returns coordinates
         every { routeOptions.waypointIndicesList() } returns waypointIndicesList
         val directionsRoute: DirectionsRoute = mockk()
         every { directionsRoute.routeOptions() } returns routeOptions

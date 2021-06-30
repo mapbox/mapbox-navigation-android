@@ -211,7 +211,7 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
             .accessToken(Utils.getMapboxAccessToken(this))
-            .coordinates(listOf(origin, destination))
+            .coordinatesList(listOf(origin, destination))
             .alternatives(false)
             .build()
         routeRequestId = mapboxNavigation.requestRoutes(

@@ -13,7 +13,7 @@ class RouteRefreshExTest {
 
     private val defaultOptionsBuilder = RouteOptions.builder()
         .accessToken("test_access_token")
-        .coordinates(
+        .coordinatesList(
             listOf(
                 Point.fromLngLat(-121.470162, 38.563121),
                 Point.fromLngLat(-121.483304, 38.583313)

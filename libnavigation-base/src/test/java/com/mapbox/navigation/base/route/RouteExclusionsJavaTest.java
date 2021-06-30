@@ -29,7 +29,7 @@ public class RouteExclusionsJavaTest {
     RouteOptions.Builder routeOptionsBuilder =
         RouteOptionsExtensions.applyDefaultNavigationOptions(
             RouteOptions.builder()
-                .coordinates(coordinates)
+                .coordinatesList(coordinates)
                 .accessToken("pk.123")
         );
 
@@ -52,7 +52,7 @@ public class RouteExclusionsJavaTest {
     RouteOptions routeOptionsWithoutExclusions =
         RouteOptionsExtensions.applyDefaultNavigationOptions(
             RouteOptions.builder()
-                .coordinates(coordinates)
+                .coordinatesList(coordinates)
                 .accessToken("pk.123")
         ).build();
     DirectionsRoute directionsRoute = DirectionsRoute.builder()
