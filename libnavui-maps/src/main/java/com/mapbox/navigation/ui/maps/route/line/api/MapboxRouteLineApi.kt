@@ -11,6 +11,7 @@ import com.mapbox.maps.QueriedFeature
 import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
+import com.mapbox.navigation.base.internal.compatibility.verifyCompatibility
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.internal.utils.isSameRoute
@@ -31,6 +32,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
@@ -200,6 +202,11 @@ class MapboxRouteLineApi(
     ) {
         jobControl.scope.launch {
             mutex.withLock {
+                newRoutes.map { it.route }.verifyCompatibility(
+                    LoggerProvider.logger
+                ) {
+                    this.trafficRendering.enabled = true
+                }
                 val routes = newRoutes.map(RouteLine::route)
                 val featureDataProvider: () -> List<RouteFeatureData> =
                     MapboxRouteLineUtils.getRouteLineFeatureDataProvider(newRoutes)

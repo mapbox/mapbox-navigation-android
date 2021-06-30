@@ -19,6 +19,7 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
+import com.mapbox.navigation.base.internal.compatibility.verifyCompatibility
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -480,6 +481,10 @@ class MapboxNavigation(
      * @see [requestRoutes]
      */
     fun setRoutes(routes: List<DirectionsRoute>) {
+        routes.verifyCompatibility(LoggerProvider.logger) {
+            routeOptionsAndGeometry.enabled = true
+            preciseEta.enabled = true
+        }
         rerouteController?.interrupt()
         routeAlternativesController.interrupt()
         routeRefreshController.restart()
