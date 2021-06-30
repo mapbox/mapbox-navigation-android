@@ -129,13 +129,17 @@ class MapboxOnboardRouterTest {
     }
 
     @Test
-    fun checkCallbackCalledOnSuccess() = coroutineRule.runBlockingTest {
+    fun checkCallbackCalledOnSuccess_andContainsOriginalOptions() = coroutineRule.runBlockingTest {
         coEvery { navigator.getRoute(any()) } returns routerResultSuccess
 
         onboardRouter.getRoute(routerOptions, routerCallback)
 
         coVerify { navigator.getRoute(URL.toString()) }
-        verify { routerCallback.onResponse(DirectionsResponse.fromJson(SUCCESS_RESPONSE).routes()) }
+
+        val expected = DirectionsResponse.fromJson(SUCCESS_RESPONSE).routes().map {
+            it.toBuilder().routeOptions(routerOptions).build()
+        }
+        verify(exactly = 1) { routerCallback.onResponse(expected) }
     }
 
     @Test
@@ -479,162 +483,157 @@ class MapboxOnboardRouterTest {
             "Error occurred fetching offline route: No suitable edges near location - Code: 171"
         private const val FAILURE_MESSAGE = "No suitable edges near location"
         private const val FAILURE_CODE = 171
-        private const val SUCCESS_RESPONSE = "{\n" +
-            "  \"routes\": [\n" +
-            "    {\n" +
-            "      \"geometry\": \"\",\n" +
-            "      \"legs\": [\n" +
-            "        {\n" +
-            "          \"summary\": \"PA 283 West, Fishburn Road\",\n" +
-            "          \"weight\": 2383.1,\n" +
-            "          \"duration\": 2248.5,\n" +
-            "          \"steps\": [\n" +
-            "            {\n" +
-            "              \"intersections\": [\n" +
-            "                {\n" +
-            "                  \"out\": 0,\n" +
-            "                  \"entry\": [\n" +
-            "                    true\n" +
-            "                  ],\n" +
-            "                  \"bearings\": [\n" +
-            "                    82\n" +
-            "                  ],\n" +
-            "                  \"location\": [\n" +
-            "                    -76.299169,\n" +
-            "                    40.042522\n" +
-            "                  ]\n" +
-            "                },\n" +
-            "                {\n" +
-            "                  \"out\": 0,\n" +
-            "                  \"in\": 1,\n" +
-            "                  \"entry\": [\n" +
-            "                    true,\n" +
-            "                    false,\n" +
-            "                    true\n" +
-            "                  ],\n" +
-            "                  \"bearings\": [\n" +
-            "                    75,\n" +
-            "                    255,\n" +
-            "                    345\n" +
-            "                  ],\n" +
-            "                  \"location\": [\n" +
-            "                    -76.298855,\n" +
-            "                    40.042556\n" +
-            "                  ]\n" +
-            "                },\n" +
-            "                {\n" +
-            "                  \"out\": 0,\n" +
-            "                  \"in\": 2,\n" +
-            "                  \"entry\": [\n" +
-            "                    true,\n" +
-            "                    true,\n" +
-            "                    false,\n" +
-            "                    true\n" +
-            "                  ],\n" +
-            "                  \"bearings\": [\n" +
-            "                    75,\n" +
-            "                    165,\n" +
-            "                    255,\n" +
-            "                    345\n" +
-            "                  ],\n" +
-            "                  \"location\": [\n" +
-            "                    -76.297812,\n" +
-            "                    40.042673\n" +
-            "                  ]\n" +
-            "                }\n" +
-            "              ],\n" +
-            "              \"driving_side\": \"right\",\n" +
-            "              \"geometry\": \"s`_kkA`y|opCcAsReEcy@Eq@]oDa@gEEu@uKgwB\",\n" +
-            "              \"mode\": \"driving\",\n" +
-            "              \"maneuver\": {\n" +
-            "                \"bearing_after\": 82,\n" +
-            "                \"bearing_before\": 0,\n" +
-            "                \"location\": [\n" +
-            "                  -76.299169,\n" +
-            "                  40.042522\n" +
-            "                ],\n" +
-            "                \"modifier\": \"left\",\n" +
-            "                \"type\": \"depart\",\n" +
-            "                \"instruction\": \"Head east on East Fulton Street\"\n" +
-            "              },\n" +
-            "              \"weight\": 63.8,\n" +
-            "              \"duration\": 50.8,\n" +
-            "              \"name\": \"East Fulton Street\",\n" +
-            "              \"distance\": 293.2,\n" +
-            "              \"voiceInstructions\": [\n" +
-            "                {\n" +
-            "                  \"distanceAlongGeometry\": 293.2,\n" +
-            "                  \"announcement\": \"Head east on East Fulton Street, then turn " +
-            "right onto North Ann Street\",\n" +
-            "                  \"ssmlAnnouncement\": \"<speak><amazon:effect name=\\\"drc\\\">" +
-            "<prosody rate=\\\"1.08\\\">Head east on East Fulton Street, then turn right onto " +
-            "North Ann Street</prosody></amazon:effect></speak>\"\n" +
-            "                },\n" +
-            "                {\n" +
-            "                  \"distanceAlongGeometry\": 86.6,\n" +
-            "                  \"announcement\": \"Turn right onto North Ann Street, then turn " +
-            "left onto East Chestnut Street (PA 23 East)\",\n" +
-            "                  \"ssmlAnnouncement\": \"<speak><amazon:effect name=\\\"drc\\\">" +
-            "<prosody rate=\\\"1.08\\\">Turn right onto North Ann Street, then turn left onto " +
-            "East Chestnut Street (PA <say-as interpret-as=\\\"address\\\">23</say-as> " +
-            "East)</prosody></amazon:effect></speak>\"\n" +
-            "                }\n" +
-            "              ],\n" +
-            "              \"bannerInstructions\": [\n" +
-            "                {\n" +
-            "                  \"distanceAlongGeometry\": 293.2,\n" +
-            "                  \"primary\": {\n" +
-            "                    \"type\": \"turn\",\n" +
-            "                    \"modifier\": \"right\",\n" +
-            "                    \"components\": [\n" +
-            "                      {\n" +
-            "                        \"text\": \"North\",\n" +
-            "                        \"type\": \"text\",\n" +
-            "                        \"abbr\": \"N\",\n" +
-            "                        \"abbr_priority\": 1\n" +
-            "                      },\n" +
-            "                      {\n" +
-            "                        \"text\": \"Ann Street\",\n" +
-            "                        \"type\": \"text\",\n" +
-            "                        \"abbr\": \"Ann St\",\n" +
-            "                        \"abbr_priority\": 0\n" +
-            "                      }\n" +
-            "                    ],\n" +
-            "                    \"text\": \"North Ann Street\"\n" +
-            "                  },\n" +
-            "                  \"secondary\": null\n" +
-            "                }\n" +
-            "              ]\n" +
-            "            }\n" +
-            "          ],\n" +
-            "          \"distance\": 50369.7\n" +
-            "        }\n" +
-            "      ],\n" +
-            "      \"weight_name\": \"routability\",\n" +
-            "      \"weight\": 2383.1,\n" +
-            "      \"duration\": 2248.5,\n" +
-            "      \"distance\": 50369.7,\n" +
-            "      \"voiceLocale\": \"en-US\"\n" +
-            "    }\n" +
-            "  ],\n" +
-            "  \"waypoints\": [\n" +
-            "    {\n" +
-            "      \"name\": \"East Fulton Street\",\n" +
-            "      \"location\": [\n" +
-            "        -76.299169,\n" +
-            "        40.042522\n" +
-            "      ]\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"name\": \"West Chocolate Avenue\",\n" +
-            "      \"location\": [\n" +
-            "        -76.654634,\n" +
-            "        40.283943\n" +
-            "      ]\n" +
-            "    }\n" +
-            "  ],\n" +
-            "  \"code\": \"Ok\",\n" +
-            "  \"uuid\": \"cjeacbr8s21bk47lggcvce7lv\"\n" +
-            "}"
+        private const val SUCCESS_RESPONSE = """
+            {
+              "routes": [
+                {
+                  "geometry": "",
+                  "legs": [
+                    {
+                      "summary": "PA 283 West, Fishburn Road",
+                      "weight": 2383.1,
+                      "duration": 2248.5,
+                      "steps": [
+                        {
+                          "intersections": [
+                            {
+                              "out": 0,
+                              "entry": [
+                                true
+                              ],
+                              "bearings": [
+                                82
+                              ],
+                              "location": [
+                                -76.299169,
+                                40.042522
+                              ]
+                            },
+                            {
+                              "out": 0,
+                              "in": 1,
+                              "entry": [
+                                true,
+                                false,
+                                true
+                              ],
+                              "bearings": [
+                                75,
+                                255,
+                                345
+                              ],
+                              "location": [
+                                -76.298855,
+                                40.042556
+                              ]
+                            },
+                            {
+                              "out": 0,
+                              "in": 2,
+                              "entry": [
+                                true,
+                                true,
+                                false,
+                                true
+                              ],
+                              "bearings": [
+                                75,
+                                165,
+                                255,
+                                345
+                              ],
+                              "location": [
+                                -76.297812,
+                                40.042673
+                              ]
+                            }
+                          ],
+                          "driving_side": "right",
+                          "geometry": "s`_kkA`y|opCcAsReEcy@Eq@]oDa@gEEu@uKgwB",
+                          "mode": "driving",
+                          "maneuver": {
+                            "bearing_after": 82,
+                            "bearing_before": 0,
+                            "location": [
+                              -76.299169,
+                              40.042522
+                            ],
+                            "modifier": "left",
+                            "type": "depart",
+                            "instruction": "Head east on East Fulton Street"
+                          },
+                          "weight": 63.8,
+                          "duration": 50.8,
+                          "name": "East Fulton Street",
+                          "distance": 293.2,
+                          "voiceInstructions": [
+                            {
+                              "distanceAlongGeometry": 293.2,
+                              "announcement": "Head east on East Fulton Street, then turn right onto North Ann Street",
+                              "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Head east on East Fulton Street, then turn right onto North Ann Street</prosody></amazon:effect></speak>"
+                            },
+                            {
+                              "distanceAlongGeometry": 86.6,
+                              "announcement": "Turn right onto North Ann Street, then turn left onto East Chestnut Street (PA 23 East)",
+                              "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Turn right onto North Ann Street, then turn left onto East Chestnut Street (PA <say-as interpret-as=\"address\">23</say-as> East)</prosody></amazon:effect></speak>"
+                            }
+                          ],
+                          "bannerInstructions": [
+                            {
+                              "distanceAlongGeometry": 293.2,
+                              "primary": {
+                                "type": "turn",
+                                "modifier": "right",
+                                "components": [
+                                  {
+                                    "text": "North",
+                                    "type": "text",
+                                    "abbr": "N",
+                                    "abbr_priority": 1
+                                  },
+                                  {
+                                    "text": "Ann Street",
+                                    "type": "text",
+                                    "abbr": "Ann St",
+                                    "abbr_priority": 0
+                                  }
+                                ],
+                                "text": "North Ann Street"
+                              },
+                              "secondary": null
+                            }
+                          ]
+                        }
+                      ],
+                      "distance": 50369.7
+                    }
+                  ],
+                  "weight_name": "routability",
+                  "weight": 2383.1,
+                  "duration": 2248.5,
+                  "distance": 50369.7,
+                  "voiceLocale": "en-US"
+                }
+              ],
+              "waypoints": [
+                {
+                  "name": "East Fulton Street",
+                  "location": [
+                    -76.299169,
+                    40.042522
+                  ]
+                },
+                {
+                  "name": "West Chocolate Avenue",
+                  "location": [
+                    -76.654634,
+                    40.283943
+                  ]
+                }
+              ],
+              "code": "Ok",
+              "uuid": "cjeacbr8s21bk47lggcvce7lv"
+            }
+        """
     }
 }
