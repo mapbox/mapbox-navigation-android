@@ -80,7 +80,7 @@ class MapboxOnboardRouterTest {
         every { isValue } returns false
         every { isError } returns true
         every { value } returns null
-        every { error } returns RouterError(FAILURE_MESSAGE, FAILURE_CODE)
+        every { error } returns RouterError(FAILURE_MESSAGE, FAILURE_CODE, REQUEST_ID)
     }
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
     private val logger: Logger = mockk(relaxUnitFun = true)
@@ -483,6 +483,7 @@ class MapboxOnboardRouterTest {
             "Error occurred fetching offline route: No suitable edges near location - Code: 171"
         private const val FAILURE_MESSAGE = "No suitable edges near location"
         private const val FAILURE_CODE = 171
+        private const val REQUEST_ID = 19L
         private const val SUCCESS_RESPONSE = """
             {
               "routes": [

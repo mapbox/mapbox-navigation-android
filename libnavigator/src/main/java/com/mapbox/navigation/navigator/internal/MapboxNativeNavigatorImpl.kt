@@ -58,6 +58,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private val NavigatorDispatcher: CoroutineDispatcher =
         Executors.newFixedThreadPool(SINGLE_THREAD).asCoroutineDispatcher()
     private var navigator: Navigator? = null
+    // TODO migrate to RouterInterface
     private var nativeRouter: Router? = null
     private var historyRecorderHandle: HistoryRecorderHandle? = null
     private var route: DirectionsRoute? = null
@@ -245,8 +246,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      */
     override suspend fun getRoute(url: String): Expected<RouterError, String> {
         return suspendCoroutine { continuation ->
-            nativeRouter!!.getRoute(url) {
-                continuation.resume(it)
+            nativeRouter!!.getRoute(url) { expected, _ ->
+                continuation.resume(expected)
             }
         }
     }

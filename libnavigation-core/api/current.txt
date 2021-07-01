@@ -145,6 +145,13 @@ package com.mapbox.navigation.core.history.model {
     property public final long elapsedRealtimeNanos;
   }
 
+  public final class HistoryEventPushHistoryRecord implements com.mapbox.navigation.core.history.model.HistoryEvent {
+    method public String getProperties();
+    method public String getType();
+    property public final String properties;
+    property public final String type;
+  }
+
   public final class HistoryEventSetRoute implements com.mapbox.navigation.core.history.model.HistoryEvent {
     method public com.mapbox.api.directions.v5.models.DirectionsRoute getDirectionsRoute();
     method public String getGeometries();
