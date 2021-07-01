@@ -7,10 +7,13 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.navigation.base.internal.factory.RouteWrapperFactory
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
+import com.mapbox.navigation.base.route.RouteWrapper
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.mapToRouterOrigin
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.route.internal.util.httpUrl
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
@@ -69,9 +72,9 @@ class MapboxOnboardRouter(
 
         val requestId = requests.generateNextRequestId()
         val internalCallback = object : Router.Callback {
-            override fun onResponse(routes: List<DirectionsRoute>) {
+            override fun onResponse(routeWrapper: RouteWrapper) {
                 requests.remove(requestId)
-                callback.onResponse(routes)
+                callback.onResponse(routeWrapper)
             }
 
             override fun onFailure(throwable: Throwable) {
@@ -143,12 +146,14 @@ class MapboxOnboardRouter(
     ): Job {
         return mainJobControl.scope.launch {
             try {
-                val routerResult = getRoute(url)
+                val (routerResult, origin) = getRoute(url)
                 if (routerResult.isValue) {
                     val routes = parseDirectionsRoutes(routerResult.value!!).map {
                         it.toBuilder().routeOptions(routeOptions).build()
                     }
-                    callback.onResponse(routes)
+                    callback.onResponse(
+                        RouteWrapperFactory.buildRouteWrapper(routes, origin.mapToRouterOrigin())
+                    )
                 } else {
                     callback
                         .onFailure(NavigationException(generateErrorMessage(routerResult.error!!)))

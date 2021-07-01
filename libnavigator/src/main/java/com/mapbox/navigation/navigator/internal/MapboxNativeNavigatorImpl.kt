@@ -31,6 +31,7 @@ import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.Router
 import com.mapbox.navigator.RouterError
+import com.mapbox.navigator.RouterOrigin
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.TilesConfig
@@ -243,10 +244,10 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @param url the directions-based uri used when hitting the http service
      * @return a [RouterResult] object with the json and a success/fail boolean
      */
-    override suspend fun getRoute(url: String): Expected<RouterError, String> {
+    override suspend fun getRoute(url: String): RouteResult {
         return suspendCoroutine { continuation ->
-            nativeRouter!!.getRoute(url) {
-                continuation.resume(it)
+            nativeRouter!!.getRoute(url) { expected, origin ->
+                continuation.resume(RouteResult(expected, origin))
             }
         }
     }

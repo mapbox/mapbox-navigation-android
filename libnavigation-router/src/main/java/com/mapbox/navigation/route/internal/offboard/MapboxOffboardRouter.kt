@@ -10,8 +10,10 @@ import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
+import com.mapbox.navigation.base.internal.factory.RouteWrapperFactory
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
+import com.mapbox.navigation.base.route.RouteVariants
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
 import com.mapbox.navigation.route.offboard.router.routeOptions
@@ -74,7 +76,10 @@ class MapboxOffboardRouter(
                     when {
                         call.isCanceled -> callback.onCanceled()
                         response.isSuccessful && !routes.isNullOrEmpty() -> {
-                            callback.onResponse(routes)
+                            callback.onResponse(
+                                RouteWrapperFactory
+                                    .buildRouteWrapper(routes, RouteVariants.OFF_BOARD)
+                            )
                         }
                         else -> callback.onFailure(NavigationException(response.message()))
                     }

@@ -7,6 +7,7 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
+import com.mapbox.navigation.base.route.RouteWrapper
 import com.mapbox.navigation.base.route.Router
 
 internal sealed class HybridRouterHandler(
@@ -51,8 +52,8 @@ internal sealed class HybridRouterHandler(
             private val clientCallback: Router.Callback,
             private val routeOptions: RouteOptions
         ) : Router.Callback {
-            override fun onResponse(routes: List<DirectionsRoute>) {
-                clientCallback.onResponse(routes)
+            override fun onResponse(routeWrapper: RouteWrapper) {
+                clientCallback.onResponse(routeWrapper)
             }
 
             override fun onFailure(throwable: Throwable) {
@@ -82,8 +83,8 @@ internal sealed class HybridRouterHandler(
             private val clientCallback: Router.Callback,
             private val primaryThrowable: Throwable
         ) : Router.Callback {
-            override fun onResponse(routes: List<DirectionsRoute>) {
-                clientCallback.onResponse(routes)
+            override fun onResponse(routeWrapper: RouteWrapper) {
+                clientCallback.onResponse(routeWrapper)
             }
 
             override fun onFailure(throwable: Throwable) {

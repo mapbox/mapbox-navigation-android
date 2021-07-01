@@ -232,7 +232,8 @@ class RoadObjectMapperTest {
             Date(60),
             Date(80),
             Date(40),
-            null,
+            null, // TODO country codes
+            null, // TODO country codes
             emptyList(),
             true,
             com.mapbox.navigator.IncidentCongestion(4, IncidentCongestionDescription.LIGHT),

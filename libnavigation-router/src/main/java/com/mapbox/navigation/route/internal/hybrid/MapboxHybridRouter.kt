@@ -9,6 +9,7 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
+import com.mapbox.navigation.base.route.RouteWrapper
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.route.internal.offboard.MapboxOffboardRouter
@@ -96,9 +97,9 @@ class MapboxHybridRouter(
         routerHandler.getRoute(
             routeOptions,
             object : Router.Callback {
-                override fun onResponse(routes: List<DirectionsRoute>) {
+                override fun onResponse(routeWrapper: RouteWrapper) {
                     directionRequests.remove(id)
-                    callback.onResponse(routes)
+                    callback.onResponse(routeWrapper)
                 }
 
                 override fun onFailure(throwable: Throwable) {

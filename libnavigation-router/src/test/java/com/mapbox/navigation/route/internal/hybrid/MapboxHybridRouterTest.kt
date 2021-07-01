@@ -10,6 +10,8 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
+import com.mapbox.navigation.base.route.RouteVariants
+import com.mapbox.navigation.base.route.RouteWrapper
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.utils.internal.ConnectivityHandler
 import io.mockk.every
@@ -129,7 +131,7 @@ class MapboxHybridRouterTest {
         val id = hybridRouter.getRoute(routerOptions, routerCallback)
 
         internalOffboardCallback.captured.onFailure(Throwable())
-        internalOnboardCallback.captured.onResponse(emptyList())
+        internalOnboardCallback.captured.onResponse(RouteWrapper(emptyList(), RouteVariants.OFF_BOARD))
 
         verify(exactly = 1) { offboardRouter.getRoute(routerOptions, any()) }
         verify(exactly = 1) { onboardRouter.getRoute(routerOptions, any()) }
@@ -147,7 +149,7 @@ class MapboxHybridRouterTest {
         val id = hybridRouter.getRoute(routerOptions, routerCallback)
 
         internalOnboardCallback.captured.onFailure(Throwable())
-        internalOffboardCallback.captured.onResponse(emptyList())
+        internalOffboardCallback.captured.onResponse(RouteWrapper(emptyList(), RouteVariants.ON_BOARD))
 
         verify(exactly = 1) {
             onboardRouter.getRoute(
@@ -175,11 +177,11 @@ class MapboxHybridRouterTest {
         hybridRouter.getRoute(routerOptions, routerCallback)
 
         internalOffboardCallback.captured.onFailure(Throwable())
-        internalOnboardCallback.captured.onResponse(emptyList())
+        internalOnboardCallback.captured.onResponse(RouteWrapper(emptyList(), RouteVariants.OFF_BOARD))
 
         hybridRouter.getRoute(routerOptions, routerCallback)
 
-        internalOffboardCallback.captured.onResponse(emptyList())
+        internalOffboardCallback.captured.onResponse(RouteWrapper(emptyList(), RouteVariants.OFF_BOARD))
 
         verify(exactly = 2) { offboardRouter.getRoute(routerOptions, any()) }
         verify(exactly = 1) { onboardRouter.getRoute(routerOptions, any()) }
@@ -193,11 +195,11 @@ class MapboxHybridRouterTest {
         hybridRouter.getRoute(routerOptions, routerCallback)
 
         internalOnboardCallback.captured.onFailure(Throwable())
-        internalOffboardCallback.captured.onResponse(emptyList())
+        internalOffboardCallback.captured.onResponse(RouteWrapper(emptyList(), RouteVariants.ON_BOARD))
 
         hybridRouter.getRoute(routerOptions, routerCallback)
 
-        internalOnboardCallback.captured.onResponse(emptyList())
+        internalOnboardCallback.captured.onResponse(RouteWrapper(emptyList(), RouteVariants.ON_BOARD))
 
         verify(exactly = 2) { onboardRouter.getRoute(routerOptions, any()) }
         verify(exactly = 1) { offboardRouter.getRoute(routerOptions, any()) }

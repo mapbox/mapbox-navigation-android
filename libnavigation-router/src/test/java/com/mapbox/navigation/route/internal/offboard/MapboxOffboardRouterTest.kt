@@ -11,6 +11,8 @@ import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
+import com.mapbox.navigation.base.route.RouteVariants
+import com.mapbox.navigation.base.route.RouteWrapper
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
 import com.mapbox.navigation.route.offboard.base.BaseTest
@@ -21,6 +23,7 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
+import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Request
 import org.junit.After
@@ -98,7 +101,10 @@ class MapboxOffboardRouterTest : BaseTest() {
         offboardRouter =
             MapboxOffboardRouter(accessToken, context, mockSkuTokenProvider, true, mockk())
 
-        every { (refreshCall.request() as Request).url } returns "https://test.com".toHttpUrl()
+        every {
+            hint(okhttp3.HttpUrl::class)
+            (refreshCall.request() as Request).url
+        } returns "https://test.com".toHttpUrl()
     }
 
     @After
@@ -167,10 +173,13 @@ class MapboxOffboardRouterTest : BaseTest() {
         val route = buildMultipleLegRoute()
         val response = buildRouteResponse(listOf(route), true)
         offboardRouter.getRoute(routeOptions, routerCallback)
+        val slot = slot<RouteWrapper>()
+        every { routerCallback.onResponse(capture(slot)) } returns Unit
 
         routeCallback.onResponse(routeCall, response)
 
-        verify { routerCallback.onResponse(listOf(route)) }
+        assertEquals(slot.captured.routes, listOf(route))
+        assertEquals(slot.captured.origin, RouteVariants.OFF_BOARD)
     }
 
     @Test

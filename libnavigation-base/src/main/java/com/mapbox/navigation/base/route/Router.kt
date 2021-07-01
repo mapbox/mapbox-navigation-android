@@ -66,12 +66,13 @@ interface Router {
     interface Callback {
 
         /**
-         * Non-empty list of [DirectionsRoute]
+         * [RouteWrapper]: non-empty list of [DirectionsRoute] and [RouteVariants.RouterOrigin]
          *
-         * @param routes List<DirectionsRoute> the most relevant has index 0. If requested, alternative routes are available on higher indices.
+         * @param routeWrapper has List<DirectionsRoute> the most relevant has index 0.
+         * If requested, alternative routes are available on higher indices.
          * Has at least one Route
          */
-        fun onResponse(routes: List<DirectionsRoute>)
+        fun onResponse(routeWrapper: RouteWrapper)
 
         /**
          * @param throwable Throwable safety error.
