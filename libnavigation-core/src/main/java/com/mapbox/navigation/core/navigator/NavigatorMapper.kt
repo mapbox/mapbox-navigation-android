@@ -10,13 +10,15 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.internal.factory.RoadObjectInstanceFactory
+import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory.buildRouteLegProgressObject
+import com.mapbox.navigation.base.internal.factory.RouteProgressInstanceFactory.buildRouteProgressObject
+import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buildRouteStepProgressObject
 import com.mapbox.navigation.base.speed.model.SpeedLimit
-import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
-import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
@@ -80,124 +82,136 @@ private fun NavigationStatus.getRouteProgress(
     route?.let {
         val upcomingStepIndex = stepIndex + ONE_INDEX
 
-        val routeProgressBuilder = RouteProgress.Builder(route)
-        val legProgressBuilder = RouteLegProgress.Builder()
-        val stepProgressBuilder = RouteStepProgress.Builder()
+        var currentLegStep: LegStep? = null
+        var stepPoints: List<Point>? = null
+        var stepDistanceRemaining = 0f
+        var stepDistanceTraveled = 0f
+        var stepFractionTraveled = 0f
+        var stepDurationRemaining = 0.0
+
+        var currentLeg: RouteLeg? = null
+        var routeLegProgressDistanceRemaining: Float = 0f
+        var routeLegProgressDurationRemaining: Double = 0.0
+        var routeLegProgressFractionTraveled: Float = 0f
+        var routeLegProgressUpcomingStep: LegStep? = null
+
+        var routeProgressBannerInstructions: BannerInstructions? = null
+        var routeProgressCurrentState: RouteProgressState = RouteProgressState.INITIALIZED
+        var routeProgressUpcomingStepPoints: List<Point>? = null
+        var routeProgressDistanceRemaining: Float = 0f
+        var routeProgressDistanceTraveled: Float = 0f
+        var routeProgressDurationRemaining: Double = 0.0
+        var routeProgressFractionTraveled: Float = 0f
 
         ifNonNull(route.legs(), activeGuidanceInfo) { legs, activeGuidanceInfo ->
-            var currentLeg: RouteLeg? = null
             if (legIndex < legs.size) {
                 currentLeg = legs[legIndex]
-                legProgressBuilder.legIndex(legIndex)
-                legProgressBuilder.routeLeg(currentLeg)
 
-                val distanceTraveled = activeGuidanceInfo.legProgress.distanceTraveled
-                legProgressBuilder.distanceTraveled(distanceTraveled.toFloat())
-                legProgressBuilder.fractionTraveled(
+                routeProgressDistanceTraveled =
+                    activeGuidanceInfo.legProgress.distanceTraveled.toFloat()
+                routeLegProgressFractionTraveled =
                     activeGuidanceInfo.legProgress.fractionTraveled.toFloat()
-                )
 
-                val legDistanceRemaining = activeGuidanceInfo.legProgress.remainingDistance
-                val legDurationRemaining =
-                    activeGuidanceInfo.legProgress.remainingDuration /
-                        ONE_SECOND_IN_MILLISECONDS
-                legProgressBuilder.distanceRemaining(legDistanceRemaining.toFloat())
-                legProgressBuilder.durationRemaining(legDurationRemaining)
+                routeLegProgressDistanceRemaining =
+                    activeGuidanceInfo.legProgress.remainingDistance.toFloat()
+                routeLegProgressDurationRemaining =
+                    activeGuidanceInfo.legProgress.remainingDuration / ONE_SECOND_IN_MILLISECONDS
 
-                val routeDistanceRemaining = activeGuidanceInfo.routeProgress.remainingDistance
-                val routeDurationRemaining =
-                    activeGuidanceInfo.routeProgress.remainingDuration /
-                        ONE_SECOND_IN_MILLISECONDS
-                routeProgressBuilder.distanceRemaining(routeDistanceRemaining.toFloat())
-                routeProgressBuilder.durationRemaining(routeDurationRemaining)
-
-                val routeDistanceTraveled = activeGuidanceInfo.routeProgress.distanceTraveled
-                routeProgressBuilder.distanceTraveled(routeDistanceTraveled.toFloat())
-                routeProgressBuilder.fractionTraveled(
+                routeProgressDistanceRemaining =
+                    activeGuidanceInfo.routeProgress.remainingDistance.toFloat()
+                routeProgressDurationRemaining =
+                    activeGuidanceInfo.routeProgress.remainingDuration / ONE_SECOND_IN_MILLISECONDS
+                routeProgressFractionTraveled =
                     activeGuidanceInfo.routeProgress.fractionTraveled.toFloat()
-                )
-
-                routeProgressBuilder.remainingWaypoints(remainingWaypoints)
             }
 
             ifNonNull(currentLeg?.steps()) { steps ->
-                val currentStep: LegStep?
                 if (stepIndex < steps.size) {
-                    currentStep = steps[stepIndex]
-                    stepProgressBuilder.stepIndex(stepIndex)
-                    stepProgressBuilder.step(currentStep)
-                    stepProgressBuilder.intersectionIndex(intersectionIndex)
-
-                    val stepGeometry = currentStep.geometry()
-                    stepGeometry?.let {
-                        stepProgressBuilder.stepPoints(
+                    currentLegStep = steps[stepIndex].also { legStep ->
+                        stepPoints = ifNonNull(legStep.geometry()) { geometry ->
                             PolylineUtils.decode(
-                                stepGeometry, /* todo add core dependency PRECISION_6*/
+                                geometry, /* todo add core dependency PRECISION_6*/
                                 6
                             )
-                        )
-                    }
-
-                    val distanceTraveled = activeGuidanceInfo.stepProgress.distanceTraveled
-                    stepProgressBuilder.distanceTraveled(distanceTraveled.toFloat())
-                    stepProgressBuilder.fractionTraveled(
-                        activeGuidanceInfo.stepProgress.fractionTraveled.toFloat()
-                    )
-
-                    routeState.convertState().let {
-                        routeProgressBuilder.currentState(it)
-
-                        var bannerInstructions =
-                            bannerInstruction?.mapToDirectionsApi(currentStep)
-                        if (it == RouteProgressState.INITIALIZED) {
-                            bannerInstructions =
-                                MapboxNativeNavigatorImpl.getBannerInstruction(
-                                    FIRST_BANNER_INSTRUCTION
-                                )
-                                    ?.mapToDirectionsApi(currentStep)
                         }
-                        routeProgressBuilder.bannerInstructions(bannerInstructions)
+
+                        routeState.convertState().let {
+                            routeProgressCurrentState = it
+
+                            routeProgressBannerInstructions =
+                                if (it == RouteProgressState.INITIALIZED) {
+                                    MapboxNativeNavigatorImpl.getBannerInstruction(
+                                        FIRST_BANNER_INSTRUCTION
+                                    )?.mapToDirectionsApi(legStep)
+                                } else {
+                                    bannerInstruction?.mapToDirectionsApi(legStep)
+                                }
+                        }
                     }
+
+                    stepDistanceTraveled =
+                        activeGuidanceInfo.stepProgress.distanceTraveled.toFloat()
+                    stepFractionTraveled =
+                        activeGuidanceInfo.stepProgress.fractionTraveled.toFloat()
                 }
 
                 if (upcomingStepIndex < steps.size) {
                     val upcomingStep = steps[upcomingStepIndex]
-                    legProgressBuilder.upcomingStep(upcomingStep)
+                    routeLegProgressUpcomingStep = upcomingStep
 
                     val stepGeometry = upcomingStep.geometry()
                     stepGeometry?.let {
-                        routeProgressBuilder.upcomingStepPoints(
-                            PolylineUtils.decode(
-                                stepGeometry, /* todo add core dependency PRECISION_6*/
-                                6
-                            )
+                        routeProgressUpcomingStepPoints = PolylineUtils.decode(
+                            stepGeometry, /* todo add core dependency PRECISION_6*/
+                            6
                         )
                     }
                 }
 
-                val stepDistanceRemaining = activeGuidanceInfo.stepProgress.remainingDistance
-                val stepDurationRemaining =
-                    activeGuidanceInfo.stepProgress.remainingDuration /
-                        ONE_SECOND_IN_MILLISECONDS
-
-                stepProgressBuilder.distanceRemaining(stepDistanceRemaining.toFloat())
-                stepProgressBuilder.durationRemaining(stepDurationRemaining)
+                stepDistanceRemaining = activeGuidanceInfo.stepProgress.remainingDistance.toFloat()
+                stepDurationRemaining =
+                    activeGuidanceInfo.stepProgress.remainingDuration / ONE_SECOND_IN_MILLISECONDS
             }
         }
 
-        legProgressBuilder.currentStepProgress(stepProgressBuilder.build())
+        val routeStepProgress = buildRouteStepProgressObject(
+            stepIndex,
+            intersectionIndex,
+            currentLegStep,
+            stepPoints,
+            stepDistanceRemaining,
+            stepDistanceTraveled,
+            stepFractionTraveled,
+            stepDurationRemaining
+        )
 
-        routeProgressBuilder.currentLegProgress(legProgressBuilder.build())
+        val routeLegProgress = buildRouteLegProgressObject(
+            legIndex,
+            currentLeg,
+            routeProgressDistanceTraveled,
+            routeLegProgressDistanceRemaining,
+            routeLegProgressDurationRemaining,
+            routeLegProgressFractionTraveled,
+            routeStepProgress,
+            routeLegProgressUpcomingStep
+        )
 
-        routeProgressBuilder.inTunnel(inTunnel)
-
-        routeProgressBuilder.voiceInstructions(voiceInstruction?.mapToDirectionsApi())
-
-        routeProgressBuilder.upcomingRoadObjects(upcomingRouteAlerts.toUpcomingRoadObjects())
-
-        routeProgressBuilder.stale(stale)
-
-        return routeProgressBuilder.build()
+        return buildRouteProgressObject(
+            route,
+            routeProgressBannerInstructions,
+            voiceInstruction?.mapToDirectionsApi(),
+            routeProgressCurrentState,
+            routeLegProgress,
+            routeProgressUpcomingStepPoints,
+            inTunnel,
+            routeProgressDistanceRemaining,
+            routeProgressDistanceTraveled,
+            routeProgressDurationRemaining,
+            routeProgressFractionTraveled,
+            remainingWaypoints,
+            upcomingRouteAlerts.toUpcomingRoadObjects(),
+            stale
+        )
     }
     return null
 }

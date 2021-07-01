@@ -20,7 +20,7 @@ import com.mapbox.geojson.Point
  * next step (if another step exist in route)
  * @param durationRemaining [Double] The duration remaining in seconds until the user reaches the end of the current step
  */
-class RouteStepProgress private constructor(
+class RouteStepProgress internal constructor(
     val stepIndex: Int,
     val intersectionIndex: Int,
     val step: LegStep?,
@@ -30,19 +30,6 @@ class RouteStepProgress private constructor(
     val fractionTraveled: Float,
     val durationRemaining: Double
 ) {
-
-    /**
-     * @return builder matching the one used to create this instance
-     */
-    fun toBuilder(): Builder = Builder()
-        .stepIndex(stepIndex)
-        .intersectionIndex(intersectionIndex)
-        .step(step)
-        .stepPoints(stepPoints)
-        .distanceRemaining(distanceRemaining)
-        .distanceTraveled(distanceTraveled)
-        .fractionTraveled(fractionTraveled)
-        .durationRemaining(durationRemaining)
 
     /**
      * Regenerate whenever a change is made
@@ -94,102 +81,5 @@ class RouteStepProgress private constructor(
             "fractionTraveled=$fractionTraveled, " +
             "durationRemaining=$durationRemaining" +
             ")"
-    }
-
-    /**
-     * Builder of [RouteStepProgress]
-     */
-    class Builder {
-        private var stepIndex: Int = 0
-        private var intersectionIndex: Int = 0
-        private var step: LegStep? = null
-        private var stepPoints: List<Point>? = null
-        private var distanceRemaining: Float = 0f
-        private var distanceTraveled: Float = 0f
-        private var fractionTraveled: Float = 0f
-        private var durationRemaining: Double = 0.0
-
-        /**
-         * Index representing the current step the user is on
-         *
-         * @return Builder
-         */
-        fun stepIndex(stepIndex: Int): Builder =
-            apply { this.stepIndex = stepIndex }
-
-        /**
-         * Index representing the current intersection the user is on
-         *
-         * @return Builder
-         */
-        fun intersectionIndex(intersectionIndex: Int): Builder =
-            apply { this.intersectionIndex = intersectionIndex }
-
-        /**
-         * Returns the current step the user is traversing along
-         *
-         * @return Builder
-         */
-        fun step(step: LegStep?): Builder =
-            apply { this.step = step }
-
-        /**
-         * A list of points that represent the current step geometry
-         *
-         * @return Builder
-         */
-        fun stepPoints(stepPoints: List<Point>?): Builder =
-            apply { this.stepPoints = stepPoints }
-
-        /**
-         * Total distance in meters from user to end of step
-         *
-         * @return Builder
-         */
-        fun distanceRemaining(distanceRemaining: Float): Builder =
-            apply { this.distanceRemaining = distanceRemaining }
-
-        /**
-         * Returns distance user has traveled along current step in unit meters
-         *
-         * @return Builder
-         */
-        fun distanceTraveled(distanceTraveled: Float): Builder =
-            apply { this.distanceTraveled = distanceTraveled }
-
-        /**
-         * The fraction traveled along the current step. This is a float value between 0 and 1 and
-         * isn't guaranteed to reach 1 before the user reaches the next step (if another step exist in route)
-         *
-         * @return Builder
-         */
-        fun fractionTraveled(fractionTraveled: Float): Builder =
-            apply { this.fractionTraveled = fractionTraveled }
-
-        /**
-         * The duration remaining in seconds until the user reaches the end of the current step
-         *
-         * @return Builder
-         */
-        fun durationRemaining(durationRemaining: Double): Builder =
-            apply { this.durationRemaining = durationRemaining }
-
-        /**
-         * Build new instance of [RouteStepProgress]
-         *
-         * @return RouteStepProgress
-         */
-        fun build(): RouteStepProgress {
-            return RouteStepProgress(
-                stepIndex,
-                intersectionIndex,
-                step,
-                stepPoints,
-                distanceRemaining,
-                distanceTraveled,
-                fractionTraveled,
-                durationRemaining
-            )
-        }
     }
 }

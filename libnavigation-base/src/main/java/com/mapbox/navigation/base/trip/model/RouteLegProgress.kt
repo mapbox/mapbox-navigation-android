@@ -25,7 +25,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg
  * @param upcomingStep Next/upcoming step immediately after the current step. If the user is on the last step
  * on the last leg, this will return null since a next step doesn't exist
  */
-class RouteLegProgress private constructor(
+class RouteLegProgress internal constructor(
     val legIndex: Int,
     val routeLeg: RouteLeg?,
     val distanceTraveled: Float,
@@ -35,19 +35,6 @@ class RouteLegProgress private constructor(
     val currentStepProgress: RouteStepProgress?,
     val upcomingStep: LegStep?
 ) {
-
-    /**
-     * @return builder matching the one used to create this instance
-     */
-    fun toBuilder(): Builder = Builder()
-        .legIndex(legIndex)
-        .routeLeg(routeLeg)
-        .distanceTraveled(distanceTraveled)
-        .distanceRemaining(distanceRemaining)
-        .durationRemaining(durationRemaining)
-        .fractionTraveled(fractionTraveled)
-        .currentStepProgress(currentStepProgress)
-        .upcomingStep(upcomingStep)
 
     /**
      * Regenerate whenever a change is made
@@ -99,104 +86,5 @@ class RouteLegProgress private constructor(
             "currentStepProgress=$currentStepProgress, " +
             "upcomingStep=$upcomingStep" +
             ")"
-    }
-
-    /**
-     * Builder of [RouteLegProgress].
-     */
-    class Builder {
-        private var legIndex: Int = 0
-        private var routeLeg: RouteLeg? = null
-        private var distanceTraveled: Float = 0f
-        private var distanceRemaining: Float = 0f
-        private var durationRemaining: Double = 0.0
-        private var fractionTraveled: Float = 0f
-        private var currentStepProgress: RouteStepProgress? = null
-        private var upcomingStep: LegStep? = null
-
-        /**
-         * Index representing the current leg the user is on. If the directions route currently in use
-         * contains more then two waypoints, the route is likely to have multiple legs representing the
-         * distance between the two points.
-         *
-         * @return Builder
-         */
-        fun legIndex(legIndex: Int): Builder = apply { this.legIndex = legIndex }
-
-        /**
-         * [RouteLeg] geometry
-         *
-         * @return Builder
-         */
-        fun routeLeg(routeLeg: RouteLeg?): Builder = apply { this.routeLeg = routeLeg }
-
-        /**
-         * Total distance traveled in meters along current leg
-         *
-         * @return Builder
-         */
-        fun distanceTraveled(distanceTraveled: Float): Builder =
-            apply { this.distanceTraveled = distanceTraveled }
-
-        /**
-         * The distance remaining in meters until the user reaches the end of the leg
-         *
-         * @return Builder
-         */
-        fun distanceRemaining(distanceRemaining: Float): Builder =
-            apply { this.distanceRemaining = distanceRemaining }
-
-        /**
-         * The duration remaining in seconds until the user reaches the end of the current step
-         *
-         * @return Builder
-         */
-        fun durationRemaining(durationRemaining: Double): Builder =
-            apply { this.durationRemaining = durationRemaining }
-
-        /**
-         * The fraction traveled along the current leg, this is a float value between 0 and 1 and
-         * isn't guaranteed to reach 1 before the user reaches the next waypoint
-         *
-         * @return Builder
-         */
-        fun fractionTraveled(fractionTraveled: Float): Builder =
-            apply { this.fractionTraveled = fractionTraveled }
-
-        /**
-         * [RouteStepProgress] object with information about the particular step the user
-         * is currently on
-         *
-         * @return Builder
-         */
-        fun currentStepProgress(currentStepProgress: RouteStepProgress?): Builder =
-            apply { this.currentStepProgress = currentStepProgress }
-
-        /**
-         * Next/upcoming step immediately after the current step. If the user is on the last step
-         * on the last leg, this will return null since a next step doesn't exist
-         *
-         * @return Builder
-         */
-        fun upcomingStep(upcomingStep: LegStep?): Builder =
-            apply { this.upcomingStep = upcomingStep }
-
-        /**
-         * Build new instance of [RouteLegProgress]
-         *
-         * @return RouteLegProgress
-         */
-        fun build(): RouteLegProgress {
-            return RouteLegProgress(
-                legIndex,
-                routeLeg,
-                distanceTraveled,
-                distanceRemaining,
-                durationRemaining,
-                fractionTraveled,
-                currentStepProgress,
-                upcomingStep
-            )
-        }
     }
 }

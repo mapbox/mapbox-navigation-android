@@ -5,8 +5,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buildRouteStepProgressObject
 import com.mapbox.navigation.base.speed.model.SpeedLimit
-import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
 import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.navigator.internal.TripStatus
@@ -287,16 +287,16 @@ class NavigatorMapperTest {
 
     @Test
     fun `step progress correctly created`() {
-        val stepProgress = RouteStepProgress.Builder()
-            .step(directionsRoute.legs()!![0].steps()!![1])
-            .stepIndex(1)
-            .stepPoints(PolylineUtils.decode("sla~hA|didrCoDvx@", 6))
-            .distanceRemaining(15f)
-            .durationRemaining(300.0 / 1000.0)
-            .distanceTraveled(10f)
-            .fractionTraveled(50f)
-            .intersectionIndex(1)
-            .build()
+        val stepProgress = buildRouteStepProgressObject(
+            1,
+            1,
+            directionsRoute.legs()!![0].steps()!![1],
+            PolylineUtils.decode("sla~hA|didrCoDvx@", 6),
+            15f,
+            10f,
+            50f,
+            300.0 / 1000.0
+        )
 
         val routeProgress = getRouteProgressFrom(
             directionsRoute,
