@@ -7,6 +7,7 @@ import com.mapbox.navigation.navigator.internal.ActiveGuidanceOptionsMapper.mapT
 import com.mapbox.navigator.GetStatusHistoryRecord
 import com.mapbox.navigator.HistoryRecord
 import com.mapbox.navigator.HistoryRecordType
+import com.mapbox.navigator.PushHistoryRecord
 import com.mapbox.navigator.SetRouteHistoryRecord
 import com.mapbox.navigator.UpdateLocationHistoryRecord
 import com.mapbox.navigator.Waypoint
@@ -18,6 +19,7 @@ internal object HistoryEventMapper {
             HistoryRecordType.UPDATE_LOCATION -> mapUpdateLocation(historyRecord.updateLocation!!)
             HistoryRecordType.GET_STATUS -> mapGetStatus(historyRecord.getStatus!!)
             HistoryRecordType.SET_ROUTE -> mapSetRoute(historyRecord.setRoute!!)
+            HistoryRecordType.PUSH_HISTORY -> mapPushHistoryRecord(historyRecord.pushHistory!!)
         }
     }
 
@@ -54,4 +56,11 @@ internal object HistoryEventMapper {
             )
         }
     }
+
+    private fun mapPushHistoryRecord(
+        pushHistoryRecord: PushHistoryRecord
+    ): HistoryEventPushHistoryRecord = HistoryEventPushHistoryRecord(
+        pushHistoryRecord.type,
+        pushHistoryRecord.properties
+    )
 }
