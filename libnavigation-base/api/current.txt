@@ -943,11 +943,17 @@ package com.mapbox.navigation.base.trip.model.roadobject.incident {
   public final class IncidentInfo {
     method public java.util.List<java.lang.Integer>? getAlertcCodes();
     method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongestion? getCongestion();
+    method public String? getCountryCodeAlpha2();
+    method public String? getCountryCodeAlpha3();
     method public java.util.Date? getCreationTime();
     method public String? getDescription();
     method public java.util.Date? getEndTime();
     method public String getId();
     method public String getImpact();
+    method public java.util.List<java.lang.String> getLanesBlocked();
+    method public String? getLanesClearDesc();
+    method public String? getLongDescription();
+    method public Long? getNumLanesBlocked();
     method public java.util.Date? getStartTime();
     method public String? getSubType();
     method public String? getSubTypeDescription();
@@ -955,12 +961,18 @@ package com.mapbox.navigation.base.trip.model.roadobject.incident {
     method public boolean isClosed();
     property public final java.util.List<java.lang.Integer>? alertcCodes;
     property public final com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongestion? congestion;
+    property public final String? countryCodeAlpha2;
+    property public final String? countryCodeAlpha3;
     property public final java.util.Date? creationTime;
     property public final String? description;
     property public final java.util.Date? endTime;
     property public final String id;
     property public final String impact;
     property public final boolean isClosed;
+    property public final java.util.List<java.lang.String> lanesBlocked;
+    property public final String? lanesClearDesc;
+    property public final String? longDescription;
+    property public final Long? numLanesBlocked;
     property public final java.util.Date? startTime;
     property public final String? subType;
     property public final String? subTypeDescription;

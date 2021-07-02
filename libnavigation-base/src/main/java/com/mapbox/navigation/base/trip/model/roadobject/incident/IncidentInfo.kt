@@ -21,6 +21,17 @@ import java.util.Date
  * @param subType sub-type of the incident.
  * @param subTypeDescription sub-type-specific description.
  * @param alertcCodes alertC codes.
+ * @param countryCodeAlpha2 ISO 3166-1, 2 letter country code.
+ * @param countryCodeAlpha3 ISO 3166-1, 3 letter country code.
+ * @param lanesBlocked lanes which are blocked. Might be: LEFT, LEFT CENTER, LEFT TURN LANE, CENTER,
+ * RIGHT, RIGHT CENTER, RIGHT TURN LANE, HOV, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, SIDE, SHOULDER, MEDIAN.
+ * @param longDescription detailed description of the incident.
+ * @param lanesClearDesc describes which lanes are clear.
+ *  For Example:
+ *  - one lane gets by
+ *  - only shoulder gets by
+ *  - two left lanes get by
+ * @param numLanesBlocked number of lanes blocked.
  */
 class IncidentInfo internal constructor(
     val id: String,
@@ -34,7 +45,13 @@ class IncidentInfo internal constructor(
     val description: String?,
     val subType: String?,
     val subTypeDescription: String?,
-    val alertcCodes: List<Int>?
+    val alertcCodes: List<Int>?,
+    val countryCodeAlpha2: String?,
+    val countryCodeAlpha3: String?,
+    val lanesBlocked: List<String>,
+    val longDescription: String?,
+    val lanesClearDesc: String?,
+    val numLanesBlocked: Long?,
 ) {
 
     /**
@@ -58,6 +75,12 @@ class IncidentInfo internal constructor(
         if (subType != other.subType) return false
         if (subTypeDescription != other.subTypeDescription) return false
         if (alertcCodes != other.alertcCodes) return false
+        if (countryCodeAlpha2 != other.countryCodeAlpha2) return false
+        if (countryCodeAlpha3 != other.countryCodeAlpha3) return false
+        if (lanesBlocked != other.lanesBlocked) return false
+        if (longDescription != other.longDescription) return false
+        if (lanesClearDesc != other.lanesClearDesc) return false
+        if (numLanesBlocked != other.numLanesBlocked) return false
 
         return true
     }
@@ -78,6 +101,12 @@ class IncidentInfo internal constructor(
         result = 31 * result + subType.hashCode()
         result = 31 * result + subTypeDescription.hashCode()
         result = 31 * result + alertcCodes.hashCode()
+        result = 31 * result + countryCodeAlpha2.hashCode()
+        result = 31 * result + countryCodeAlpha3.hashCode()
+        result = 31 * result + lanesBlocked.hashCode()
+        result = 31 * result + longDescription.hashCode()
+        result = 31 * result + lanesClearDesc.hashCode()
+        result = 31 * result + numLanesBlocked.hashCode()
         return result
     }
 
@@ -86,18 +115,24 @@ class IncidentInfo internal constructor(
      */
     override fun toString(): String {
         return "IncidentInfo(" +
-            "id=$id" +
-            "type=$type" +
-            "impact=$impact" +
-            "congestion=$congestion" +
-            "isClosed=$isClosed" +
-            "creationTime=$creationTime" +
-            "startTime=$startTime" +
-            "endTime=$endTime" +
-            "description=$description" +
-            "subType=$subType" +
-            "subTypeDescription=$subTypeDescription" +
-            "alertcCodes=$alertcCodes" +
+            "id='$id', " +
+            "type=$type, " +
+            "impact='$impact', " +
+            "congestion=$congestion, " +
+            "isClosed=$isClosed, " +
+            "creationTime=$creationTime, " +
+            "startTime=$startTime, " +
+            "endTime=$endTime, " +
+            "description=$description, " +
+            "subType=$subType, " +
+            "subTypeDescription=$subTypeDescription, " +
+            "alertcCodes=$alertcCodes, " +
+            "countryCodeAlpha2=$countryCodeAlpha2, " +
+            "countryCodeAlpha3=$countryCodeAlpha3, " +
+            "lanesBlocked=$lanesBlocked, " +
+            "longDescription=$longDescription, " +
+            "lanesClearDesc=$lanesClearDesc, " +
+            "numLanesBlocked=$numLanesBlocked" +
             ")"
     }
 }

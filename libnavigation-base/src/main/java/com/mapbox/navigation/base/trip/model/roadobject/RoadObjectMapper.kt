@@ -136,7 +136,13 @@ private fun IncidentInfo.toIncidentInfo() =
         description,
         subType,
         subTypeDescription,
-        alertcCodes
+        alertcCodes,
+        iso_3166_1_alpha2,
+        iso_3166_1_alpha3,
+        lanesBlocked,
+        longDescription,
+        lanesClearDesc,
+        numLanesBlocked
     )
 
 private fun IncidentType.toIncidentType(): Int =
