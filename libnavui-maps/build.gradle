@@ -39,7 +39,7 @@ android {
 
 dependencies {
     api project(":libnavui-base")
-    api project(":libnavui-resources")
+    implementation project(":libnavui-resources")
 
     api dependenciesList.mapboxMapSdk
     api dependenciesList.mapboxSdkTurf
