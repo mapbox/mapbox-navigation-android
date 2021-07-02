@@ -2,6 +2,36 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.17 - July 2, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Features
+- Added missing `IncidentInfo` properties: `countryCodeAlpha2`, `countryCodeAlpha3`, `lanesBlocked`, `longDescription`, `lanesClearDesc`, `numLanesBlocked`. [#4569](https://github.com/mapbox/mapbox-navigation-android/pull/4569)
+- :warning: Refactored `MapboxManeuverApi` to return a list of maneuvers asynchronously without the road shields and either for a raw route reference or for route progress. See `MapboxManeuverApi#getManeuvers` and `MapboxManeuverView#renderManeuvers` for details. [#4482](https://github.com/mapbox/mapbox-navigation-android/pull/4482)
+- Refactored road shield downloader to make it more efficient. [#4482](https://github.com/mapbox/mapbox-navigation-android/pull/4482)
+- Added options to the `RouteArrowOptions` class for customizing the scaling expressions used for maneuver arrows. [#4551](https://github.com/mapbox/mapbox-navigation-android/pull/4551)
+- Added new `HistoryEvent`: `HistoryEventPushHistoryRecord` allows read events set with **type**-**properties** structure. [#4567](https://github.com/mapbox/mapbox-navigation-android/pull/4567)
+- :warning: Added new APIs to request and render road shields asynchronously, see `MapboxManeuverApi#getRoadShields` and `MapboxManeuverView#renderManeuverShields` for details. Shields are not automatically downloaded anymore to allow for more granular and faster initial updates. [#4482](https://github.com/mapbox/mapbox-navigation-android/pull/4482)
+- Exposed `RouteStepProgress#instructionIndex` that indicates which instruction out of the list of instructions for a step is the currently active one. [#4482](https://github.com/mapbox/mapbox-navigation-android/pull/4482)
+
+#### Bug fixes and improvements
+- Fixed a bug where in some cases status updates were not generated after switching between offline and online states. [#4558](https://github.com/mapbox/mapbox-navigation-android/pull/4558)
+- Fixed an issue where `RouteOptions` weren't appended to onboard router results which could've caused incorrect reroutes that missed silent waypoints or other waypoint modifiers. [#4563](https://github.com/mapbox/mapbox-navigation-android/pull/4563)
+- Refactored dependency of `libnavui-resources` by changing from api to implementation. [#4568](https://github.com/mapbox/mapbox-navigation-android/pull/4568)
+- :warning: `RouteProgress#bannerInstructions` does not become `null` and keeps its reference for as long as a step is active. Listen to `BannerInstructionsObserver` if you need a specific timing event when the banner first appears. [#4482](https://github.com/mapbox/mapbox-navigation-android/pull/4482)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+
+- Mapbox Maps SDK `v10.0.0-rc.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.2))
+- Mapbox Navigation Native `v55.0.0`
+- Mapbox Core Common `v14.0.1`
+- Mapbox Java `5.9.0-alpha.5` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v5.9.0-alpha.5))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.0.0-beta.16 - June 24, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
