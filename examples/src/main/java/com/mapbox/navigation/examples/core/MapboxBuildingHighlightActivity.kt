@@ -22,7 +22,6 @@ import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
@@ -109,11 +108,9 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
 
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
-    private val routeProgressObserver = object : RouteProgressObserver {
-        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
-                routeArrowView.renderManeuverUpdate(mapboxMap.getStyle()!!, this)
-            }
+    private val routeProgressObserver = RouteProgressObserver { routeProgress ->
+        routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
+            routeArrowView.renderManeuverUpdate(mapboxMap.getStyle()!!, this)
         }
     }
 
@@ -131,18 +128,16 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
         }
     }
 
-    private val routesObserver = object : RoutesObserver {
-        override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            if (routes.isNotEmpty()) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    routeLineApi.setRoutes(
-                        listOf(RouteLine(routes[0], null))
-                    ).apply {
-                        routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
-                    }
+    private val routesObserver = RoutesObserver { routes ->
+        if (routes.isNotEmpty()) {
+            CoroutineScope(Dispatchers.Main).launch {
+                routeLineApi.setRoutes(
+                    listOf(RouteLine(routes[0], null))
+                ).apply {
+                    routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
                 }
-                startSimulation(routes[0])
             }
+            startSimulation(routes[0])
         }
     }
 
@@ -274,6 +269,14 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
          * building arrival api. It will select a building upon arrival
          */
         buildingsArrivalApi.buildingHighlightApi(buildingHighlightApi)
+
+        /**
+         * Showing all buildings is disabled by default. But this function
+         * allows you to show all buildings in 3D with the highlighted one.
+         */
+        binding.toggleBuildings.setOnCheckedChangeListener { _, isChecked ->
+            buildingHighlightApi.extrudeBuildings(isChecked)
+        }
 
         locationComponent = binding.mapView.location.apply {
             setLocationProvider(navigationLocationProvider)
