@@ -10,7 +10,6 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.common.TilesetDescriptor
@@ -25,6 +24,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.eh.EHorizonEdge
 import com.mapbox.navigation.base.trip.model.eh.EHorizonEdgeMetadata
@@ -36,7 +36,6 @@ import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.arrival.AutoArrivalController
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.ReachabilityService
@@ -151,12 +150,12 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  *   .build()
  * mapboxNavigation.requestRoutes(
  *     routeOptions,
- *     object : RoutesRequestCallback {
+ *     object : RouterCallback {
  *         override fun onRoutesReady(routes: List<DirectionsRoute>) {
  *             mapboxNavigation.setRoutes(routes)
  *         }
- *         override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) { }
- *         override fun onRoutesRequestCanceled(routeOptions: RouteOptions) { }
+ *         override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) { }
+ *         override fun onCanceled(routeOptions: RouteOptions) { }
  *     }
  * )
  * ```
@@ -289,8 +288,7 @@ class MapboxNavigation(
         historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
         navigationSession = NavigationComponentProvider.createNavigationSession()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
-            MapboxModuleProvider.createModule(MapboxModuleType.NavigationRouter, ::paramsProvider),
-            logger
+            MapboxModuleProvider.createModule(MapboxModuleType.NavigationRouter, ::paramsProvider)
         )
         if (reachabilityObserverId == null) {
             reachabilityObserverId = ReachabilityService.addReachabilityObserver(
@@ -434,7 +432,7 @@ class MapboxNavigation(
      *
      * Example:
      * ```
-     * mapboxNavigation.requestRoutes(routeOptions, object : RoutesRequestCallback {
+     * mapboxNavigation.requestRoutes(routeOptions, object : RouterCallback {
      *     override fun onRoutesReady(routes: List<DirectionsRoute>) {
      *         ...
      *         mapboxNavigation.setRoutes(routes)
@@ -456,7 +454,7 @@ class MapboxNavigation(
      */
     fun requestRoutes(
         routeOptions: RouteOptions,
-        routesRequestCallback: RoutesRequestCallback
+        routesRequestCallback: RouterCallback
     ): Long {
         return directionsSession.requestRoutes(routeOptions, routesRequestCallback)
     }
@@ -1009,7 +1007,6 @@ class MapboxNavigation(
                     MapboxNativeNavigator::class.java,
                     MapboxNativeNavigatorImpl
                 ),
-                ModuleProviderArgument(Logger::class.java, logger),
                 ModuleProviderArgument(ConnectivityHandler::class.java, connectivityHandler),
                 ModuleProviderArgument(
                     Boolean::class.java,

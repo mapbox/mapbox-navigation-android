@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.RouterCallback
 
 internal interface DirectionsSession {
 
@@ -24,13 +25,13 @@ internal interface DirectionsSession {
      * Fetch route based on [RouteOptions]
      *
      * @param routeOptions RouteOptions
-     * @param routesRequestCallback Callback that gets notified with the results of the request
+     * @param routerCallback Callback that gets notified with the results of the request
      *
      * @return requestID, see [cancelRouteRequest]
      */
     fun requestRoutes(
         routeOptions: RouteOptions,
-        routesRequestCallback: RoutesRequestCallback
+        routerCallback: RouterCallback
     ): Long
 
     /**

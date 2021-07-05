@@ -29,10 +29,11 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -487,19 +488,19 @@ class MapboxNavigationActivity : AppCompatActivity() {
                 .accessToken(getMapboxAccessTokenFromResources())
                 .coordinates(listOf(origin, destination))
                 .build(),
-            object : RoutesRequestCallback {
+            object : RouterCallback {
                 override fun onRoutesReady(routes: List<DirectionsRoute>) {
                     setRouteAndStartNavigation(routes.first())
                 }
 
-                override fun onRoutesRequestFailure(
-                    throwable: Throwable,
+                override fun onFailure(
+                    reasons: List<RouterFailure>,
                     routeOptions: RouteOptions
                 ) {
                     // no impl
                 }
 
-                override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
+                override fun onCanceled(routeOptions: RouteOptions) {
                     // no impl
                 }
             }

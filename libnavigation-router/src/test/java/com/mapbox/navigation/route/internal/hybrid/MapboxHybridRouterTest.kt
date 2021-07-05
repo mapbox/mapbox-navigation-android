@@ -11,18 +11,25 @@ import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.utils.internal.ConnectivityHandler
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.slot
+import io.mockk.unmockkObject
 import io.mockk.verify
 import io.mockk.verifySequence
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import java.net.URL
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
@@ -33,10 +40,10 @@ class MapboxHybridRouterTest {
     private val offboardRouter: Router = mockk(relaxUnitFun = true)
     private val context: Context = mockk(relaxUnitFun = true)
     private val connectivityManager: ConnectivityManager = mockk(relaxUnitFun = true)
-    private val routerCallback: Router.Callback = mockk(relaxUnitFun = true)
+    private val routerCallback: RouterCallback = mockk(relaxUnitFun = true)
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
-    private val internalOffboardCallback = slot<Router.Callback>()
-    private val internalOnboardCallback = slot<Router.Callback>()
+    private val internalOffboardCallback = slot<RouterCallback>()
+    private val internalOnboardCallback = slot<RouterCallback>()
     private val networkStatusService: ConnectivityHandler = mockk(relaxUnitFun = true)
     private val channel = Channel<Boolean>(Channel.CONFLATED)
     private val internalOffboardRefreshCallback = slot<RouteRefreshCallback>()
@@ -44,6 +51,8 @@ class MapboxHybridRouterTest {
 
     @Before
     fun setUp() {
+        mockkObject(LoggerProvider)
+        every { LoggerProvider.logger } returns mockk(relaxed = true)
         every { context.getSystemService(Context.CONNECTIVITY_SERVICE) } returns connectivityManager
         every { context.registerReceiver(any(), any()) } returns Intent()
         every { onboardRouter.getRoute(routerOptions, capture(internalOnboardCallback)) } returns 1L
@@ -73,8 +82,7 @@ class MapboxHybridRouterTest {
         hybridRouter = MapboxHybridRouter(
             onboardRouter,
             offboardRouter,
-            networkStatusService,
-            mockk(relaxed = true)
+            networkStatusService
         )
     }
 
@@ -92,9 +100,9 @@ class MapboxHybridRouterTest {
         enableNetworkConnection()
 
         val id = hybridRouter.getRoute(routerOptions, routerCallback)
-        internalOffboardCallback.captured.onCanceled()
+        internalOffboardCallback.captured.onCanceled(routerOptions)
 
-        verify(exactly = 1) { routerCallback.onCanceled() }
+        verify(exactly = 1) { routerCallback.onCanceled(routerOptions) }
 
         hybridRouter.cancelRouteRequest(id)
         verify(exactly = 0) { offboardRouter.cancelRouteRequest(any()) }
@@ -114,9 +122,9 @@ class MapboxHybridRouterTest {
         disableNetworkConnection()
 
         val id = hybridRouter.getRoute(routerOptions, routerCallback)
-        internalOnboardCallback.captured.onCanceled()
+        internalOnboardCallback.captured.onCanceled(routerOptions)
 
-        verify(exactly = 1) { routerCallback.onCanceled() }
+        verify(exactly = 1) { routerCallback.onCanceled(routerOptions) }
 
         hybridRouter.cancelRouteRequest(id)
         verify(exactly = 0) { onboardRouter.cancelRouteRequest(any()) }
@@ -128,12 +136,12 @@ class MapboxHybridRouterTest {
 
         val id = hybridRouter.getRoute(routerOptions, routerCallback)
 
-        internalOffboardCallback.captured.onFailure(Throwable())
-        internalOnboardCallback.captured.onResponse(emptyList())
+        internalOffboardCallback.captured.onFailure(listOf(mockk(relaxed = true)), routerOptions)
+        internalOnboardCallback.captured.onRoutesReady(emptyList())
 
         verify(exactly = 1) { offboardRouter.getRoute(routerOptions, any()) }
         verify(exactly = 1) { onboardRouter.getRoute(routerOptions, any()) }
-        verify(exactly = 1) { routerCallback.onResponse(any()) }
+        verify(exactly = 1) { routerCallback.onRoutesReady(any()) }
 
         hybridRouter.cancelRouteRequest(id)
         verify(exactly = 0) { offboardRouter.cancelRouteRequest(any()) }
@@ -146,8 +154,8 @@ class MapboxHybridRouterTest {
 
         val id = hybridRouter.getRoute(routerOptions, routerCallback)
 
-        internalOnboardCallback.captured.onFailure(Throwable())
-        internalOffboardCallback.captured.onResponse(emptyList())
+        internalOnboardCallback.captured.onFailure(listOf(mockk(relaxed = true)), routerOptions)
+        internalOffboardCallback.captured.onRoutesReady(emptyList())
 
         verify(exactly = 1) {
             onboardRouter.getRoute(
@@ -161,7 +169,7 @@ class MapboxHybridRouterTest {
                 internalOffboardCallback.captured
             )
         }
-        verify(exactly = 1) { routerCallback.onResponse(any()) }
+        verify(exactly = 1) { routerCallback.onRoutesReady(any()) }
 
         hybridRouter.cancelRouteRequest(id)
         verify(exactly = 0) { offboardRouter.cancelRouteRequest(any()) }
@@ -174,16 +182,16 @@ class MapboxHybridRouterTest {
 
         hybridRouter.getRoute(routerOptions, routerCallback)
 
-        internalOffboardCallback.captured.onFailure(Throwable())
-        internalOnboardCallback.captured.onResponse(emptyList())
+        internalOffboardCallback.captured.onFailure(listOf(mockk(relaxed = true)), routerOptions)
+        internalOnboardCallback.captured.onRoutesReady(emptyList())
 
         hybridRouter.getRoute(routerOptions, routerCallback)
 
-        internalOffboardCallback.captured.onResponse(emptyList())
+        internalOffboardCallback.captured.onRoutesReady(emptyList())
 
         verify(exactly = 2) { offboardRouter.getRoute(routerOptions, any()) }
         verify(exactly = 1) { onboardRouter.getRoute(routerOptions, any()) }
-        verify(exactly = 2) { routerCallback.onResponse(any()) }
+        verify(exactly = 2) { routerCallback.onRoutesReady(any()) }
     }
 
     @Test
@@ -192,16 +200,16 @@ class MapboxHybridRouterTest {
 
         hybridRouter.getRoute(routerOptions, routerCallback)
 
-        internalOnboardCallback.captured.onFailure(Throwable())
-        internalOffboardCallback.captured.onResponse(emptyList())
+        internalOnboardCallback.captured.onFailure(listOf(mockk(relaxed = true)), routerOptions)
+        internalOffboardCallback.captured.onRoutesReady(emptyList())
 
         hybridRouter.getRoute(routerOptions, routerCallback)
 
-        internalOnboardCallback.captured.onResponse(emptyList())
+        internalOnboardCallback.captured.onRoutesReady(emptyList())
 
         verify(exactly = 2) { onboardRouter.getRoute(routerOptions, any()) }
         verify(exactly = 1) { offboardRouter.getRoute(routerOptions, any()) }
-        verify(exactly = 2) { routerCallback.onResponse(any()) }
+        verify(exactly = 2) { routerCallback.onRoutesReady(any()) }
     }
 
     @Test
@@ -238,10 +246,46 @@ class MapboxHybridRouterTest {
 
         val id = hybridRouter.getRoute(routerOptions, routerCallback)
 
-        internalOffboardCallback.captured.onFailure(Throwable())
-        internalOnboardCallback.captured.onFailure(Throwable())
+        val url1 = mockk<URL>()
+        val throwable1 = mockk<Throwable>()
+        val routerFailurePrimary = RouterFailure(
+            url = url1,
+            message = "message1",
+            code = 1,
+            throwable = throwable1
+        )
 
-        verify(exactly = 1) { routerCallback.onFailure(any()) }
+        val url2 = mockk<URL>()
+        val throwable2 = mockk<Throwable>()
+        val routerFailureFallback = RouterFailure(
+            url = url2,
+            message = "message2",
+            code = 2,
+            throwable = throwable2
+        )
+
+        internalOffboardCallback.captured.onFailure(listOf(routerFailurePrimary), routerOptions)
+        internalOnboardCallback.captured.onFailure(listOf(routerFailureFallback), routerOptions)
+
+        val expected = listOf(
+            RouterFailure(
+                url = url1,
+                message = "Primary router " +
+                    "(${offboardRouter::class.java.canonicalName}) " +
+                    "failed with: message1",
+                code = 1,
+                throwable = throwable1
+            ),
+            RouterFailure(
+                url = url2,
+                message = "Fallback router " +
+                    "(${onboardRouter::class.java.canonicalName}) " +
+                    "failed with: message2",
+                code = 2,
+                throwable = throwable2
+            )
+        )
+        verify(exactly = 1) { routerCallback.onFailure(expected, routerOptions) }
 
         hybridRouter.cancelRouteRequest(id)
         verify(exactly = 0) { offboardRouter.cancelRouteRequest(any()) }
@@ -395,6 +439,11 @@ class MapboxHybridRouterTest {
 
         verify { offboardRouter.cancelAll() }
         verify { onboardRouter.cancelAll() }
+    }
+
+    @After
+    fun cleanUp() {
+        unmockkObject(LoggerProvider)
     }
 
     private suspend fun enableNetworkConnection() = networkConnected(true)

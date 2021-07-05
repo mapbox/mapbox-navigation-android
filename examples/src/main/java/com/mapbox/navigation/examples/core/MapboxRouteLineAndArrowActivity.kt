@@ -34,9 +34,10 @@ import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
@@ -378,7 +379,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
         )
     }
 
-    private val routesReqCallback: RoutesRequestCallback = object : RoutesRequestCallback {
+    private val routesReqCallback: RouterCallback = object : RouterCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             mapboxNavigation.setRoutes(routes)
             if (routes.isNotEmpty()) {
@@ -387,11 +388,11 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
             }
         }
 
-        override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
+        override fun onCanceled(routeOptions: RouteOptions) {
             viewBinding.routeLoadingProgressBar.visibility = View.INVISIBLE
         }
 
-        override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
+        override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
             viewBinding.routeLoadingProgressBar.visibility = View.INVISIBLE
         }
     }

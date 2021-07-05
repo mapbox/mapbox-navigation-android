@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 /**
  * Callback for refresh route
  */
+// todo move to core and make internal
 interface RouteRefreshCallback {
     /**
      * Called when the [DirectionsRoute] has been refreshed

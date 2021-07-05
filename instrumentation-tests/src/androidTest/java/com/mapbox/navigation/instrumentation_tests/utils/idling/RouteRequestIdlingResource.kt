@@ -5,10 +5,11 @@ import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.IdlingResource
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.testing.ui.http.MockWebServerRule
-import org.junit.Assert
+import org.junit.Assert.fail
 
 /**
  * Idling resource for testing route requests with MapboxNavigation.
@@ -60,18 +61,18 @@ class RouteRequestIdlingResource(
     }
 
     /** Used to communicate with [MapboxNavigation.requestRoutes] **/
-    private val routesRequestCallback = object : RoutesRequestCallback {
+    private val routesRequestCallback = object : RouterCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             directionsRoutes = routes
             callback.onTransitionToIdle()
         }
 
-        override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
-            Assert.fail(throwable.message)
+        override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
+            fail()
         }
 
-        override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
-            Assert.fail("onRoutesRequestCanceled")
+        override fun onCanceled(routeOptions: RouteOptions) {
+            fail("onRoutesRequestCanceled")
         }
     }
 }

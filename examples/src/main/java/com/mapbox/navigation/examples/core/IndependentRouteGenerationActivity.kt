@@ -3,7 +3,6 @@ package com.mapbox.navigation.examples.core
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -32,9 +31,10 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
@@ -216,7 +216,7 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
             .build()
         routeRequestId = mapboxNavigation.requestRoutes(
             routeOptions,
-            object : RoutesRequestCallback {
+            object : RouterCallback {
                 override fun onRoutesReady(routes: List<DirectionsRoute>) {
                     lineManager.create(
                         PolylineAnnotationOptions.fromFeature(
@@ -240,14 +240,7 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
                     updateCamera(destination)
                 }
 
-                override fun onRoutesRequestFailure(
-                    throwable: Throwable,
-                    routeOptions: RouteOptions
-                ) {
-                    Log.e(
-                        "RouteGenerationActivity",
-                        "route request failed:\n" + throwable.message
-                    )
+                override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
                     Toast.makeText(
                         this@IndependentRouteGenerationActivity,
                         "Route request failed.",
@@ -257,7 +250,7 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
                     clearRouteSelectionUi()
                 }
 
-                override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
+                override fun onCanceled(routeOptions: RouteOptions) {
                     Toast.makeText(
                         this@IndependentRouteGenerationActivity,
                         """Route request "$routeRequestId" canceled.""",

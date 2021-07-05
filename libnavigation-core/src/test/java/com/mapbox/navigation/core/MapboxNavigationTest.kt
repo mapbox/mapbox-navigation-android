@@ -21,6 +21,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.TripNotification
@@ -28,7 +29,6 @@ import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
@@ -762,7 +762,7 @@ class MapboxNavigationTest {
     @Test
     fun `requestRoutes pushes the request to the directions session`() {
         val options = mockk<RouteOptions>()
-        val callback = mockk<RoutesRequestCallback>()
+        val callback = mockk<RouterCallback>()
         every { directionsSession.requestRoutes(options, callback) } returns 1L
 
         mapboxNavigation.requestRoutes(options, callback)
@@ -773,7 +773,7 @@ class MapboxNavigationTest {
     fun `requestRoutes passes back the request id`() {
         val expected = 1L
         val options = mockk<RouteOptions>()
-        val callback = mockk<RoutesRequestCallback>()
+        val callback = mockk<RouterCallback>()
         every { directionsSession.requestRoutes(options, callback) } returns expected
 
         val actual = mapboxNavigation.requestRoutes(options, callback)
@@ -785,7 +785,7 @@ class MapboxNavigationTest {
     fun `requestRoutes doesn't pushes the route to the directions session automatically`() {
         val routes = listOf(mockk<DirectionsRoute>())
         val options = mockk<RouteOptions>()
-        val possibleInternalCallbackSlot = slot<RoutesRequestCallback>()
+        val possibleInternalCallbackSlot = slot<RouterCallback>()
         every { directionsSession.requestRoutes(options, any()) } returns 1L
 
         mapboxNavigation.requestRoutes(options, mockk(relaxUnitFun = true))
@@ -983,7 +983,7 @@ class MapboxNavigationTest {
     }
 
     private fun mockDirectionSession() {
-        every { NavigationComponentProvider.createDirectionsSession(any(), any()) } answers {
+        every { NavigationComponentProvider.createDirectionsSession(any()) } answers {
             directionsSession
         }
         // TODO Needed for telemetry - Free Drive (empty list) for now

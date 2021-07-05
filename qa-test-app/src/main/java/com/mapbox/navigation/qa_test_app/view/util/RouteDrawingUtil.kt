@@ -22,7 +22,7 @@ import com.mapbox.maps.extension.style.sources.getSourceAs
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.addOnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.removeOnMapLongClickListener
-import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
+import com.mapbox.navigation.base.route.RouterCallback
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -45,7 +45,7 @@ import retrofit2.Response
  * Call disable() to deactivate the long press listener.
  *
  * When finished establishing points for the route you want to create call fetchRoute(). If a route
- * was received successfully it will be passed to the [RoutesRequestCallback] else a toast will appear
+ * was received successfully it will be passed to the [RouterCallback] else a toast will appear
  * with some error information, also the error information will be logged.
  *
  * When a route is received call clear() this utility's line.
@@ -174,7 +174,7 @@ class RouteDrawingUtil(private val mapView: MapView) {
         }
     }
 
-    fun fetchRoute(routeReadyCallback: RoutesRequestCallback) {
+    fun fetchRoute(routeReadyCallback: RouterCallback) {
         if (touchPoints.size < 2) {
             return
         }

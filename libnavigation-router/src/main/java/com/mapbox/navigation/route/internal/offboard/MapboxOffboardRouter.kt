@@ -7,16 +7,18 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directionsrefresh.v1.MapboxDirectionsRefresh
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
+import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
 import com.mapbox.navigation.route.offboard.router.routeOptions
 import com.mapbox.navigation.route.offboard.routerefresh.RouteRefreshCallbackMapper
-import com.mapbox.navigation.utils.NavigationException
 import com.mapbox.navigation.utils.internal.RequestMap
 import com.mapbox.navigation.utils.internal.cancelRequest
 import okhttp3.Request
@@ -35,12 +37,13 @@ class MapboxOffboardRouter(
     private val accessToken: String,
     private val context: Context,
     private val urlSkuTokenProvider: UrlSkuTokenProvider,
-    private val refreshEnabled: Boolean,
-    private val logger: Logger
+    private val refreshEnabled: Boolean
 ) : Router {
 
     private companion object {
         private val TAG = Tag("MbxOffboardRouter")
+        private const val ROUTES_LIST_EMPTY = "routes list is empty"
+        private const val UNKNOWN = "unknown"
     }
 
     private val directionRequests = RequestMap<MapboxDirections>()
@@ -56,7 +59,7 @@ class MapboxOffboardRouter(
      */
     override fun getRoute(
         routeOptions: RouteOptions,
-        callback: Router.Callback
+        callback: RouterCallback
     ): Long {
         val mapboxDirections = RouteBuilderProvider
             .getBuilder(urlSkuTokenProvider)
@@ -70,22 +73,56 @@ class MapboxOffboardRouter(
                     response: Response<DirectionsResponse>
                 ) {
                     directionRequests.remove(requestId)
+                    val urlWithoutToken = call.request().url.redactQueryParam(
+                        ACCESS_TOKEN_QUERY_PARAM
+                    ).toUrl()
                     val routes = response.body()?.routes()
+                    val code = response.code()
                     when {
-                        call.isCanceled -> callback.onCanceled()
-                        response.isSuccessful && !routes.isNullOrEmpty() -> {
-                            callback.onResponse(routes)
+                        call.isCanceled -> callback.onCanceled(routeOptions)
+                        response.isSuccessful -> {
+                            if (!routes.isNullOrEmpty()) {
+                                callback.onRoutesReady(routes)
+                            } else {
+                                callback.onFailure(
+                                    listOf(
+                                        RouterFailure(urlWithoutToken, ROUTES_LIST_EMPTY, code)
+                                    ),
+                                    routeOptions
+                                )
+                            }
                         }
-                        else -> callback.onFailure(NavigationException(response.message()))
+                        else -> callback.onFailure(
+                            listOf(
+                                RouterFailure(
+                                    urlWithoutToken,
+                                    response.errorBody()?.string().toString(),
+                                    code
+                                )
+                            ),
+                            routeOptions
+                        )
                     }
                 }
 
                 override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
                     directionRequests.remove(requestId)
                     if (call.isCanceled) {
-                        callback.onCanceled()
+                        callback.onCanceled(routeOptions)
                     } else {
-                        callback.onFailure(t)
+                        callback.onFailure(
+                            listOf(
+                                RouterFailure(
+                                    url = call.request().url.redactQueryParam(
+                                        ACCESS_TOKEN_QUERY_PARAM
+                                    ).toUrl(),
+                                    message = t.message ?: UNKNOWN,
+                                    code = null,
+                                    throwable = t
+                                )
+                            ),
+                            routeOptions
+                        )
                     }
                 }
             }
@@ -99,7 +136,7 @@ class MapboxOffboardRouter(
      * @see [getRoute]
      */
     override fun cancelRouteRequest(requestId: Long) {
-        directionRequests.cancelRequest(requestId, logger, TAG) {
+        directionRequests.cancelRequest(requestId, TAG) {
             it.cancelCall()
         }
     }
@@ -215,7 +252,7 @@ class MapboxOffboardRouter(
      * @see [getRouteRefresh]
      */
     override fun cancelRouteRefreshRequest(requestId: Long) {
-        refreshRequests.cancelRequest(requestId, logger, TAG) {
+        refreshRequests.cancelRequest(requestId, TAG) {
             it.cancelCall()
         }
     }
