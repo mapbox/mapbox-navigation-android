@@ -11,7 +11,10 @@ import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
-import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
+import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
 import com.mapbox.navigation.route.offboard.base.BaseTest
 import com.mapbox.navigation.route.offboard.routerefresh.RouteRefreshCallbackMapper
@@ -21,8 +24,10 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
+import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Request
+import okhttp3.ResponseBody
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -48,6 +53,12 @@ class MapboxOffboardRouterTest : BaseTest() {
     private val mockSkuTokenProvider = mockk<UrlSkuTokenProvider>(relaxed = true)
     private val routeCall: Call<DirectionsResponse> = mockk()
     private val refreshCall: Call<DirectionsRefreshResponse> = mockk()
+    private val url = HttpUrl.Builder()
+        .scheme("https")
+        .host("api.mapbox.com")
+        .addPathSegment("test")
+        .addQueryParameter(ACCESS_TOKEN_QUERY_PARAM, "pk.123")
+        .build()
 
     @Before
     fun setUp() {
@@ -67,6 +78,7 @@ class MapboxOffboardRouterTest : BaseTest() {
         }
         every { routeOptions.coordinates().size } returns 2
         every { routeCall.isCanceled } returns false
+        every { routeCall.request().url } returns url
 
         // refresh
         mockkObject(RouteRefreshCallbackMapper)
@@ -96,7 +108,7 @@ class MapboxOffboardRouterTest : BaseTest() {
         }
 
         offboardRouter =
-            MapboxOffboardRouter(accessToken, context, mockSkuTokenProvider, true, mockk())
+            MapboxOffboardRouter(accessToken, context, mockSkuTokenProvider, true)
 
         every { (refreshCall.request() as Request).url } returns "https://test.com".toHttpUrl()
     }
@@ -163,64 +175,75 @@ class MapboxOffboardRouterTest : BaseTest() {
 
     @Test
     fun onSuccessfulResponseAndHasRoutes_onRouteReadyCalled() {
-        val routerCallback = mockk<Router.Callback>(relaxed = true)
+        val routerCallback = mockk<RouterCallback>(relaxed = true)
         val route = buildMultipleLegRoute()
         val response = buildRouteResponse(listOf(route), true)
         offboardRouter.getRoute(routeOptions, routerCallback)
 
         routeCallback.onResponse(routeCall, response)
 
-        verify { routerCallback.onResponse(listOf(route)) }
+        verify { routerCallback.onRoutesReady(listOf(route)) }
     }
 
     @Test
     fun onUnsuccessfulResponseAndHasRoutes_errorIsProvided() {
-        val routerCallback = mockk<Router.Callback>(relaxed = true)
+        val routerCallback = mockk<RouterCallback>(relaxed = true)
         val route = buildMultipleLegRoute()
         val response = buildRouteResponse(listOf(route), false)
         offboardRouter.getRoute(routeOptions, routerCallback)
 
         routeCallback.onResponse(routeCall, response)
 
-        verify { routerCallback.onFailure(any()) }
+        verify { routerCallback.onFailure(any(), routeOptions) }
     }
 
     @Test
     fun onSuccessfulResponseAndNoRoutes_errorIsProvided() {
-        val routerCallback = mockk<Router.Callback>(relaxed = true)
+        val routerCallback = mockk<RouterCallback>(relaxed = true)
         val response = buildRouteResponse(listOf(), true)
         offboardRouter.getRoute(routeOptions, routerCallback)
 
         routeCallback.onResponse(routeCall, response)
 
-        verify { routerCallback.onFailure(any()) }
+        verify { routerCallback.onFailure(any(), routeOptions) }
     }
 
     @Test
     fun onUnsuccessfulResponseAndNoRoutes_errorIsProvided() {
-        val routerCallback = mockk<Router.Callback>(relaxed = true)
+        val routerCallback = mockk<RouterCallback>(relaxed = true)
         val response = buildRouteResponse(listOf(), false)
         offboardRouter.getRoute(routeOptions, routerCallback)
 
         routeCallback.onResponse(routeCall, response)
 
-        verify { routerCallback.onFailure(any()) }
+        verify { routerCallback.onFailure(any(), routeOptions) }
     }
 
     @Test
     fun onFailure_errorIsProvided() {
-        val routerCallback = mockk<Router.Callback>(relaxed = true)
-        val throwable = mockk<Throwable>()
+        val routerCallback = mockk<RouterCallback>(relaxed = true)
+        val throwable = mockk<Throwable> {
+            every { message } returns "msg"
+        }
+        every { routeCall.request().url } returns url
         offboardRouter.getRoute(routeOptions, routerCallback)
 
         routeCallback.onFailure(routeCall, throwable)
 
-        verify { routerCallback.onFailure(throwable) }
+        val expected = listOf(
+            RouterFailure(
+                url = url.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM).toUrl(),
+                message = "msg",
+                code = null,
+                throwable = throwable
+            )
+        )
+        verify { routerCallback.onFailure(expected, routeOptions) }
     }
 
     @Test
     fun onFailure_canceled_onCanceledIsCalled() {
-        val routerCallback = mockk<Router.Callback>(relaxed = true)
+        val routerCallback = mockk<RouterCallback>(relaxed = true)
         val throwable = mockk<Throwable>()
         offboardRouter.getRoute(routeOptions, routerCallback)
 
@@ -229,12 +252,12 @@ class MapboxOffboardRouterTest : BaseTest() {
 
         routeCallback.onFailure(call, throwable)
 
-        verify { routerCallback.onCanceled() }
+        verify { routerCallback.onCanceled(routeOptions) }
     }
 
     @Test
     fun onSuccess_canceled_onCanceledIsCalled() {
-        val routerCallback = mockk<Router.Callback>(relaxed = true)
+        val routerCallback = mockk<RouterCallback>(relaxed = true)
         val route = buildMultipleLegRoute()
         val response = buildRouteResponse(listOf(route), true)
         offboardRouter.getRoute(routeOptions, routerCallback)
@@ -243,7 +266,7 @@ class MapboxOffboardRouterTest : BaseTest() {
 
         routeCallback.onResponse(routeCall, response)
 
-        verify { routerCallback.onCanceled() }
+        verify { routerCallback.onCanceled(routeOptions) }
     }
 
     @Test
@@ -261,7 +284,7 @@ class MapboxOffboardRouterTest : BaseTest() {
     @Test
     fun `route request list cleared on failure`() {
         offboardRouter.getRoute(routeOptions, mockk(relaxUnitFun = true))
-        val throwable = mockk<Throwable>()
+        val throwable = RuntimeException("msg")
 
         routeCallback.onFailure(routeCall, throwable)
         offboardRouter.cancelAll()
@@ -467,7 +490,9 @@ class MapboxOffboardRouterTest : BaseTest() {
 
     private fun buildRouteResponse(
         routeList: List<DirectionsRoute>,
-        isSuccessful: Boolean
+        isSuccessful: Boolean,
+        code: Int = 200,
+        errorBody: ResponseBody? = null
     ): Response<DirectionsResponse> {
         val response = mockk<Response<DirectionsResponse>>()
         val directionsResponse = mockk<DirectionsResponse>()
@@ -475,6 +500,8 @@ class MapboxOffboardRouterTest : BaseTest() {
         every { response.body() } returns directionsResponse
         every { response.isSuccessful } returns isSuccessful
         every { response.message() } returns "mock"
+        every { response.code() } returns code
+        every { response.errorBody() } returns errorBody
 
         return response
     }

@@ -12,12 +12,14 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
-import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
 import com.mapbox.navigation.route.internal.util.httpUrl
+import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.utils.NavigationException
 import com.mapbox.navigation.utils.internal.RequestMap
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouterError
@@ -69,7 +71,7 @@ class MapboxOnboardRouterTest {
     var coroutineRule = MainCoroutineRule()
 
     private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
-    private val routerCallback: Router.Callback = mockk(relaxUnitFun = true)
+    private val routerCallback: RouterCallback = mockk(relaxUnitFun = true)
     private val routerResultSuccess: Expected<RouterError, String> = mockk {
         every { isValue } returns true
         every { isError } returns false
@@ -88,7 +90,7 @@ class MapboxOnboardRouterTest {
     private val mapboxDirections = mockk<MapboxDirections>(relaxed = true)
     private val mapboxDirectionsBuilder = mockk<MapboxDirections.Builder>(relaxed = true)
 
-    private var onboardRouter: MapboxOnboardRouter = MapboxOnboardRouter(navigator, context, logger)
+    private var onboardRouter: MapboxOnboardRouter = MapboxOnboardRouter(navigator, context)
 
     @Before
     fun setUp() {
@@ -117,15 +119,22 @@ class MapboxOnboardRouterTest {
     }
 
     @Test
-    fun checkCallbackCalledOnFailure() = coroutineRule.runBlockingTest {
-        val exceptionSlot = slot<NavigationException>()
+    fun checkCallbackCalledOnFailureWithRedactedToken() = coroutineRule.runBlockingTest {
         coEvery { navigator.getRoute(any()) } returns routerResultFailure
 
         onboardRouter.getRoute(routerOptions, routerCallback)
 
+        val expected = listOf(
+            RouterFailure(
+                url = URL.toHttpUrlOrNull()!!.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM).toUrl(),
+                message = FAILURE_MESSAGE,
+                code = FAILURE_CODE,
+                throwable = null
+            )
+        )
+
         coVerify { navigator.getRoute(URL.toString()) }
-        verify { routerCallback.onFailure(capture(exceptionSlot)) }
-        assertEquals(ERROR_MESSAGE, exceptionSlot.captured.message)
+        verify { routerCallback.onFailure(expected, routerOptions) }
     }
 
     @Test
@@ -139,7 +148,7 @@ class MapboxOnboardRouterTest {
         val expected = DirectionsResponse.fromJson(SUCCESS_RESPONSE).routes().map {
             it.toBuilder().routeOptions(routerOptions).build()
         }
-        verify(exactly = 1) { routerCallback.onResponse(expected) }
+        verify(exactly = 1) { routerCallback.onRoutesReady(expected) }
     }
 
     @Test
@@ -149,16 +158,16 @@ class MapboxOnboardRouterTest {
         }
 
         val latch = CountDownLatch(1)
-        val callback: Router.Callback = object : Router.Callback {
-            override fun onResponse(routes: List<DirectionsRoute>) {
+        val callback: RouterCallback = object : RouterCallback {
+            override fun onRoutesReady(routes: List<DirectionsRoute>) {
                 fail()
             }
 
-            override fun onFailure(throwable: Throwable) {
+            override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
                 fail()
             }
 
-            override fun onCanceled() {
+            override fun onCanceled(routeOptions: RouteOptions) {
                 latch.countDown()
             }
         }
@@ -176,7 +185,7 @@ class MapboxOnboardRouterTest {
 
         onboardRouter.getRoute(routerOptions, routerCallback)
 
-        verify { routerCallback.onCanceled() }
+        verify { routerCallback.onCanceled(routerOptions) }
     }
 
     @Test
@@ -210,31 +219,31 @@ class MapboxOnboardRouterTest {
         }
 
         val firstLatch = CountDownLatch(1)
-        val firstCallback: Router.Callback = object : Router.Callback {
-            override fun onResponse(routes: List<DirectionsRoute>) {
+        val firstCallback: RouterCallback = object : RouterCallback {
+            override fun onRoutesReady(routes: List<DirectionsRoute>) {
                 fail()
             }
 
-            override fun onFailure(throwable: Throwable) {
+            override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
                 fail()
             }
 
-            override fun onCanceled() {
+            override fun onCanceled(routeOptions: RouteOptions) {
                 firstLatch.countDown()
             }
         }
 
         val secondLatch = CountDownLatch(1)
-        val secondCallback: Router.Callback = object : Router.Callback {
-            override fun onResponse(routes: List<DirectionsRoute>) {
+        val secondCallback: RouterCallback = object : RouterCallback {
+            override fun onRoutesReady(routes: List<DirectionsRoute>) {
                 fail()
             }
 
-            override fun onFailure(throwable: Throwable) {
+            override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
                 fail()
             }
 
-            override fun onCanceled() {
+            override fun onCanceled(routeOptions: RouteOptions) {
                 secondLatch.countDown()
             }
         }
@@ -261,7 +270,7 @@ class MapboxOnboardRouterTest {
         mockkConstructor(RequestMap::class)
         val idSlot = slot<Long>()
         every { anyConstructed<RequestMap<Job>>().put(capture(idSlot), any()) } just Runs
-        onboardRouter = MapboxOnboardRouter(navigator, context, logger)
+        onboardRouter = MapboxOnboardRouter(navigator, context)
         coEvery { navigator.getRoute(any()) } returns routerResultSuccess
 
         onboardRouter.getRoute(routerOptions, routerCallback)
@@ -275,7 +284,7 @@ class MapboxOnboardRouterTest {
         mockkConstructor(RequestMap::class)
         val idSlot = slot<Long>()
         every { anyConstructed<RequestMap<Job>>().put(capture(idSlot), any()) } just Runs
-        onboardRouter = MapboxOnboardRouter(navigator, context, logger)
+        onboardRouter = MapboxOnboardRouter(navigator, context)
         coEvery { navigator.getRoute(any()) } returns routerResultFailure
 
         onboardRouter.getRoute(routerOptions, routerCallback)
@@ -289,7 +298,7 @@ class MapboxOnboardRouterTest {
         mockkConstructor(RequestMap::class)
         val idSlot = slot<Long>()
         every { anyConstructed<RequestMap<Job>>().put(capture(idSlot), any()) } just Runs
-        onboardRouter = MapboxOnboardRouter(navigator, context, logger)
+        onboardRouter = MapboxOnboardRouter(navigator, context)
         coEvery { navigator.getRoute(any()) } coAnswers { throw CancellationException() }
 
         onboardRouter.getRoute(routerOptions, routerCallback)
@@ -305,7 +314,7 @@ class MapboxOnboardRouterTest {
 
         onboardRouter.getRoute(routerOptions, routerCallback)
 
-        verify { routerCallback.onResponse(capture(routesSlot)) }
+        verify { routerCallback.onRoutesReady(capture(routesSlot)) }
 
         val delta = 0.000001
         // route

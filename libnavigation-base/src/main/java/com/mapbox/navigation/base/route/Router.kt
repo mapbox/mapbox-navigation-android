@@ -2,6 +2,7 @@ package com.mapbox.navigation.base.route
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import java.net.URL
 
 /**
  * Router provides API to fetch route and cancel route-fetching request.
@@ -18,7 +19,7 @@ interface Router {
      */
     fun getRoute(
         routeOptions: RouteOptions,
-        callback: Callback
+        callback: RouterCallback
     ): Long
 
     /**
@@ -59,29 +60,20 @@ interface Router {
      * Release used resources.
      */
     fun shutdown()
-
-    /**
-     * Callback for Router fetching
-     */
-    interface Callback {
-
-        /**
-         * Non-empty list of [DirectionsRoute]
-         *
-         * @param routes List<DirectionsRoute> the most relevant has index 0. If requested, alternative routes are available on higher indices.
-         * Has at least one Route
-         */
-        fun onResponse(routes: List<DirectionsRoute>)
-
-        /**
-         * @param throwable Throwable safety error.
-         * Called when I/O, server-side, network error has been occurred or no one Route has been found.
-         */
-        fun onFailure(throwable: Throwable)
-
-        /**
-         * Called whenever a route request is canceled.
-         */
-        fun onCanceled()
-    }
 }
+
+/**
+ * Describes a reason for a route request failure.
+ *
+ * @param url original request URL
+ * @param message message attached to the error code
+ * @param code if present, can be either be the HTTP code for offboard requests
+ * or an internal error code for onboard requests
+ * @param throwable provided if an unexpected exception occurred when creating the request or processing the response
+ */
+data class RouterFailure @JvmOverloads constructor(
+    val url: URL,
+    val message: String,
+    val code: Int? = null,
+    val throwable: Throwable? = null
+)

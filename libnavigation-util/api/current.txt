@@ -1,9 +1,1 @@
 // Signature format: 3.0
-package com.mapbox.navigation.utils {
-
-  public final class NavigationException extends java.lang.RuntimeException {
-    ctor public NavigationException(String message);
-  }
-
-}
-

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.reroute
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
@@ -98,9 +99,14 @@ sealed class RerouteState {
      * You can [MapboxNavigation.requestRoutes] or [MapboxNavigation.setRoutes] with [MapboxRouteOptionsUpdater] to retry the request.
      *
      * @param message describes error
-     * @param throwable is optional
+     * @param throwable optional throwable
+     * @param reasons optional reasons for the failure
      */
-    data class Failed(val message: String, val throwable: Throwable? = null) : RerouteState()
+    data class Failed @JvmOverloads constructor(
+        val message: String,
+        val throwable: Throwable? = null,
+        val reasons: List<RouterFailure>? = null
+    ) : RerouteState()
 
     /**
      * Route fetching is in progress.

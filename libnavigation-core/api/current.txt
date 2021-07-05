@@ -31,7 +31,7 @@ package com.mapbox.navigation.core {
     method public void registerRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
     method public void registerTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
     method public void registerVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
-    method public long requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.core.directions.session.RoutesRequestCallback routesRequestCallback);
+    method public long requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterCallback routesRequestCallback);
     method public void resetTripSession();
     method public String? retrieveSsmlAnnouncementInstruction(int index);
     method public void setArrivalController(com.mapbox.navigation.core.arrival.ArrivalController? arrivalController = com.mapbox.navigation.core.arrival.AutoArrivalController());
@@ -104,12 +104,6 @@ package com.mapbox.navigation.core.directions.session {
 
   public fun interface RoutesObserver {
     method public void onRoutesChanged(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
-  }
-
-  public interface RoutesRequestCallback {
-    method public void onRoutesReady(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
-    method public void onRoutesRequestCanceled(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
-    method public void onRoutesRequestFailure(Throwable throwable, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
   }
 
 }
@@ -422,13 +416,18 @@ package com.mapbox.navigation.core.reroute {
   }
 
   public static final class RerouteState.Failed extends com.mapbox.navigation.core.reroute.RerouteState {
+    ctor public RerouteState.Failed(String message, Throwable? throwable = null, java.util.List<com.mapbox.navigation.base.route.RouterFailure>? reasons = null);
     ctor public RerouteState.Failed(String message, Throwable? throwable = null);
+    ctor public RerouteState.Failed(String message);
     method public String component1();
     method public Throwable? component2();
-    method public com.mapbox.navigation.core.reroute.RerouteState.Failed copy(String message, Throwable? throwable);
+    method public java.util.List<com.mapbox.navigation.base.route.RouterFailure>? component3();
+    method public com.mapbox.navigation.core.reroute.RerouteState.Failed copy(String message, Throwable? throwable, java.util.List<com.mapbox.navigation.base.route.RouterFailure>? reasons);
     method public String getMessage();
+    method public java.util.List<com.mapbox.navigation.base.route.RouterFailure>? getReasons();
     method public Throwable? getThrowable();
     property public final String message;
+    property public final java.util.List<com.mapbox.navigation.base.route.RouterFailure>? reasons;
     property public final Throwable? throwable;
   }
 

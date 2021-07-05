@@ -6,8 +6,9 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.core.directions.session.DirectionsSession
-import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.JobControl
@@ -72,8 +73,8 @@ internal class MapboxRerouteController(
                     is RouteOptionsUpdater.RouteOptionsResult.Error -> {
                         mainJobController.scope.launch {
                             state = RerouteState.Failed(
-                                "Cannot combine route options",
-                                routeOptionsResult.error
+                                message = "Cannot combine route options",
+                                throwable = routeOptionsResult.error
                             )
                             state = RerouteState.Idle
                         }
@@ -116,12 +117,8 @@ internal class MapboxRerouteController(
     ) {
         requestId = directionsSession.requestRoutes(
             routeOptions,
-            object : RoutesRequestCallback {
+            object : RouterCallback {
                 override fun onRoutesReady(routes: List<DirectionsRoute>) {
-                    logger.d(
-                        Tag(TAG),
-                        Message("Route fetched")
-                    )
                     mainJobController.scope.launch {
                         state = RerouteState.RouteFetched
                         state = RerouteState.Idle
@@ -129,27 +126,17 @@ internal class MapboxRerouteController(
                     }
                 }
 
-                override fun onRoutesRequestFailure(
-                    throwable: Throwable,
+                override fun onFailure(
+                    reasons: List<RouterFailure>,
                     routeOptions: RouteOptions
                 ) {
-                    logger.e(
-                        Tag(TAG),
-                        Message("Route request failed"),
-                        throwable
-                    )
-
                     mainJobController.scope.launch {
-                        state = RerouteState.Failed("Route request failed", throwable)
+                        state = RerouteState.Failed("Route request failed", reasons = reasons)
                         state = RerouteState.Idle
                     }
                 }
 
-                override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
-                    logger.d(
-                        Tag(TAG),
-                        Message("Route request canceled")
-                    )
+                override fun onCanceled(routeOptions: RouteOptions) {
                     mainJobController.scope.launch {
                         state = RerouteState.Interrupted
                         state = RerouteState.Idle

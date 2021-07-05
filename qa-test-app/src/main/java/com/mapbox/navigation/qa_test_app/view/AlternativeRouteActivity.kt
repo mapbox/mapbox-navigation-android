@@ -28,9 +28,10 @@ import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
@@ -214,19 +215,19 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             .build()
         mapboxNavigation.requestRoutes(
             routeOptions,
-            object : RoutesRequestCallback {
+            object : RouterCallback {
                 override fun onRoutesReady(routes: List<DirectionsRoute>) {
                     mapboxNavigation.setRoutes(routes)
                 }
 
-                override fun onRoutesRequestFailure(
-                    throwable: Throwable,
+                override fun onFailure(
+                    reasons: List<RouterFailure>,
                     routeOptions: RouteOptions
                 ) {
                     // no impl
                 }
 
-                override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
+                override fun onCanceled(routeOptions: RouteOptions) {
                     // no impl
                 }
             }

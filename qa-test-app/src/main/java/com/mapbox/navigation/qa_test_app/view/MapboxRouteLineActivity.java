@@ -44,10 +44,11 @@ import com.mapbox.navigation.base.extensions.RouteOptionsExtensions;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions;
 import com.mapbox.navigation.base.options.RoutingTilesOptions;
+import com.mapbox.navigation.base.route.RouterCallback;
+import com.mapbox.navigation.base.route.RouterFailure;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
-import com.mapbox.navigation.core.directions.session.RoutesRequestCallback;
 import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.core.replay.ReplayLocationEngine;
 import com.mapbox.navigation.core.replay.history.ReplayEventBase;
@@ -172,7 +173,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     predictiveCacheController = new PredictiveCacheController(
         new PredictiveCacheLocationOptions.Builder().build(),
         message -> {
-           Log.e(TAG, "predictive cache error: " + message);
+          Log.e(TAG, "predictive cache error: " + message);
         });
     predictiveCacheController.createMapControllers(mapboxMap);
   }
@@ -336,7 +337,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     );
   }
 
-  private RoutesRequestCallback routesReqCallback = new RoutesRequestCallback() {
+  private RouterCallback routesReqCallback = new RouterCallback() {
     @Override
     public void onRoutesReady(@NotNull List<? extends DirectionsRoute> routes) {
       mapboxNavigation.setRoutes(routes);
@@ -347,15 +348,15 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     }
 
     @Override
-    public void onRoutesRequestFailure(@NotNull Throwable throwable, @NotNull RouteOptions routeOptions) {
-      Log.e(TAG, "route request failure " + throwable.toString());
+    public void onFailure(@NonNull List<RouterFailure> reasons, @NonNull RouteOptions routeOptions) {
       routeLoading.setVisibility(View.INVISIBLE);
     }
 
     @Override
-    public void onRoutesRequestCanceled(@NotNull RouteOptions routeOptions) {
+    public void onCanceled(@NonNull RouteOptions routeOptions) {
       Log.d(TAG, "route request canceled");
       routeLoading.setVisibility(View.INVISIBLE);
+
     }
   };
 

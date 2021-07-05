@@ -1,6 +1,5 @@
 package com.mapbox.navigation.utils.internal
 
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 
@@ -42,7 +41,6 @@ private class RequestIdGenerator {
 
 fun <T> RequestMap<T>.cancelRequest(
     requestId: Long,
-    logger: Logger,
     tag: Tag,
     cancellationFn: (T) -> Unit
 ) {
@@ -50,7 +48,7 @@ fun <T> RequestMap<T>.cancelRequest(
     if (request != null) {
         cancellationFn(request)
     } else {
-        logger.w(
+        LoggerProvider.logger.w(
             tag,
             Message("Trying to cancel non-existing route request with id '$requestId'")
         )

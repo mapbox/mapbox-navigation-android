@@ -4,8 +4,6 @@ import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.RouteOptions
 import java.util.Locale
 
-private val EVENT_LISTENER = NavigationRouteEventListener()
-
 /**
  * Apply [RouteOptions] to [MapboxDirections.Builder]
  *
@@ -122,8 +120,6 @@ internal fun MapboxDirections.Builder.routeOptions(
     options.snappingClosuresList()?.let {
         snappingClosures(it)
     }
-
-    eventListener(EVENT_LISTENER)
 
     return this
 }

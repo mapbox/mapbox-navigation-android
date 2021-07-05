@@ -2,11 +2,10 @@ package com.mapbox.navigation.core.directions.session
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterFailure
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -16,13 +15,8 @@ import java.util.concurrent.CopyOnWriteArraySet
  * @property routes a list of [DirectionsRoute]. Fetched from [Router] or might be set manually
  */
 internal class MapboxDirectionsSession(
-    private val router: Router,
-    private val logger: Logger
+    private val router: Router
 ) : DirectionsSession {
-
-    private companion object {
-        private const val TAG = "MbxDirectionsSession"
-    }
 
     private val routesObservers = CopyOnWriteArraySet<RoutesObserver>()
     private var primaryRouteOptions: RouteOptions? = null
@@ -83,46 +77,28 @@ internal class MapboxDirectionsSession(
      * Fetch route based on [RouteOptions]
      *
      * @param routeOptions RouteOptions
-     * @param routesRequestCallback Callback that gets notified with the results of the request(optional),
+     * @param routerCallback Callback that gets notified with the results of the request(optional),
      * see [registerRoutesObserver]
      *
      * @return requestID, see [cancelRouteRequest]
      */
     override fun requestRoutes(
         routeOptions: RouteOptions,
-        routesRequestCallback: RoutesRequestCallback
+        routerCallback: RouterCallback
     ): Long {
         return router.getRoute(
             routeOptions,
-            object : Router.Callback {
-                override fun onResponse(routes: List<DirectionsRoute>) {
-                    routesRequestCallback.onRoutesReady(routes)
+            object : RouterCallback {
+                override fun onRoutesReady(routes: List<DirectionsRoute>) {
+                    routerCallback.onRoutesReady(routes)
                 }
 
-                override fun onFailure(throwable: Throwable) {
-                    logger.e(
-                        Tag(TAG),
-                        Message(
-                            """
-                                Route request - failure: $throwable
-                                For options: $routeOptions
-                            """.trimIndent()
-                        )
-                    )
-                    routesRequestCallback.onRoutesRequestFailure(throwable, routeOptions)
+                override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
+                    routerCallback.onFailure(reasons, routeOptions)
                 }
 
-                override fun onCanceled() {
-                    logger.d(
-                        Tag(TAG),
-                        Message(
-                            """
-                                Route request - canceled.
-                                For options: $routeOptions
-                            """.trimIndent()
-                        )
-                    )
-                    routesRequestCallback.onRoutesRequestCanceled(routeOptions)
+                override fun onCanceled(routeOptions: RouteOptions) {
+                    routerCallback.onCanceled(routeOptions)
                 }
             }
         )

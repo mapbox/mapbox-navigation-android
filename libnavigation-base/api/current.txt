@@ -382,15 +382,34 @@ package com.mapbox.navigation.base.route {
     method public void cancelAll();
     method public void cancelRouteRefreshRequest(long requestId);
     method public void cancelRouteRequest(long requestId);
-    method public long getRoute(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.Router.Callback callback);
+    method public long getRoute(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterCallback callback);
     method public long getRouteRefresh(com.mapbox.api.directions.v5.models.DirectionsRoute route, int legIndex, com.mapbox.navigation.base.route.RouteRefreshCallback callback);
     method public void shutdown();
   }
 
-  public static interface Router.Callback {
-    method public void onCanceled();
-    method public void onFailure(Throwable throwable);
-    method public void onResponse(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
+  public interface RouterCallback {
+    method public void onCanceled(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public void onFailure(java.util.List<com.mapbox.navigation.base.route.RouterFailure> reasons, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public void onRoutesReady(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
+  }
+
+  public final class RouterFailure {
+    ctor public RouterFailure(java.net.URL url, String message, Integer? code = null, Throwable? throwable = null);
+    ctor public RouterFailure(java.net.URL url, String message, Integer? code = null);
+    ctor public RouterFailure(java.net.URL url, String message);
+    method public java.net.URL component1();
+    method public String component2();
+    method public Integer? component3();
+    method public Throwable? component4();
+    method public com.mapbox.navigation.base.route.RouterFailure copy(java.net.URL url, String message, Integer? code, Throwable? throwable);
+    method public Integer? getCode();
+    method public String getMessage();
+    method public Throwable? getThrowable();
+    method public java.net.URL getUrl();
+    property public final Integer? code;
+    property public final String message;
+    property public final Throwable? throwable;
+    property public final java.net.URL url;
   }
 
 }

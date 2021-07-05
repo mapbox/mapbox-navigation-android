@@ -4,8 +4,9 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
+import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.core.directions.session.DirectionsSession
-import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -99,7 +100,7 @@ internal class RouteAlternativesController(
         }
     }
 
-    private val routesRequestCallback = object : RoutesRequestCallback {
+    private val routesRequestCallback = object : RouterCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             val routeProgress = tripSession.getRouteProgress()
                 ?: return
@@ -113,14 +114,13 @@ internal class RouteAlternativesController(
             }
         }
 
-        override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
+        override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
             logger.e(
-                msg = Message("Route alternatives request failed"),
-                tr = throwable
+                msg = Message("Route alternatives request failed")
             )
         }
 
-        override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
+        override fun onCanceled(routeOptions: RouteOptions) {
             logger.w(msg = Message("Route alternatives request canceled"))
         }
     }

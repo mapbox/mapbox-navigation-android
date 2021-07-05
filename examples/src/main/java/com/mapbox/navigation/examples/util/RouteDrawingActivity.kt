@@ -24,7 +24,8 @@ import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
+import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.clearRouteLine
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
@@ -143,7 +144,7 @@ class RouteDrawingActivity : AppCompatActivity() {
         }
     }
 
-    private val routeRequestCallback: RoutesRequestCallback = object : RoutesRequestCallback {
+    private val routeRequestCallback: RouterCallback = object : RouterCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             val routeLines = routes.map { RouteLine(it, null) }
             CoroutineScope(Dispatchers.Main).launch {
@@ -153,11 +154,15 @@ class RouteDrawingActivity : AppCompatActivity() {
             }
         }
 
-        override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
-            Toast.makeText(this@RouteDrawingActivity, throwable.message, Toast.LENGTH_SHORT).show()
+        override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
+            Toast.makeText(
+                this@RouteDrawingActivity,
+                reasons.firstOrNull()?.message,
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
-        override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
+        override fun onCanceled(routeOptions: RouteOptions) {
             Toast.makeText(
                 this@RouteDrawingActivity,
                 "Fetch Route Cancelled",
