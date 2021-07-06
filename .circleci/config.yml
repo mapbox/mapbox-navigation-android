@@ -20,16 +20,16 @@ executors:
       MBX_CI_DOMAIN: o619qyc20d.execute-api.us-east-1.amazonaws.com
       FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION: << pipeline.parameters.mapbox_navigation_native_snapshot >>
       ALLOW_SNAPSHOT_REPOSITORY: << pipeline.parameters.mapbox_navigation_native_upstream >>
-      
+
 #-------------------------------
 #---------- WORKFLOWS ----------
 #-------------------------------
 workflows:
   version: 2
   release-workflow:
-    when: 
+    when:
       not: << pipeline.parameters.mapbox_navigation_native_upstream >>
-    jobs: 
+    jobs:
       - release-snapshot:
           filters:
             branches:
@@ -292,7 +292,7 @@ commands:
     steps:
       - run:
           name: Generate google services json for the test app
-          command:  |
+          command: |
             echo "${EXAMPLES_GOOGLE_SERVICES_JSON}" > /root/code/examples/google-services.json
 
   download-native-libs:
@@ -333,9 +333,9 @@ commands:
             gcloud firebase test android run --type instrumentation \
               --app << parameters.module_wrapper >>/build/outputs/apk/<< parameters.variant >>/<< parameters.module_wrapper >>-<< parameters.variant >>.apk \
               --test << parameters.module_target >>/build/outputs/apk/androidTest/<< parameters.variant >>/<< parameters.module_target >>-<< parameters.variant >>-androidTest.apk \
-              --device model=athene,version=23,locale=fr,orientation=landscape \
-              --device model=sailfish,version=26,locale=es,orientation=portrait \
-              --device model=walleye,version=28,locale=de,orientation=landscape \
+              --device model=hammerhead,version=23,locale=fr,orientation=portrait \
+              --device model=star2lte,version=28,locale=de,orientation=landscape \
+              --device model=flame,version=30,locale=en,orientation=portrait \
               --use-orchestrator \
               --timeout 10m
 
@@ -353,9 +353,9 @@ commands:
             gcloud firebase test android run --type instrumentation \
               --app instrumentation-tests/build/outputs/apk/<< parameters.variant >>/instrumentation-tests-<< parameters.variant >>.apk \
               --test instrumentation-tests/build/outputs/apk/androidTest/<< parameters.variant >>/instrumentation-tests-<< parameters.variant >>-androidTest.apk \
-              --device model=athene,version=23,locale=fr,orientation=landscape \
-              --device model=sailfish,version=26,locale=es,orientation=portrait \
-              --device model=walleye,version=28,locale=de,orientation=landscape \
+              --device model=hammerhead,version=23,locale=fr,orientation=portrait \
+              --device model=star2lte,version=28,locale=de,orientation=landscape \
+              --device model=flame,version=30,locale=en,orientation=portrait \
               --use-orchestrator \
               --timeout 15m
 
@@ -374,10 +374,10 @@ commands:
           command: |
             gcloud firebase test android run --type robo \
               --app << parameters.module_target >>/build/outputs/apk/<< parameters.variant >>/<< parameters.module_target >>-<< parameters.variant >>.apk \
-              --device model=hammerhead,version=21,locale=en,orientation=portrait  \
-              --device model=athene,version=23,locale=fr,orientation=landscape \
-              --device model=sailfish,version=26,locale=es,orientation=portrait \
-              --device model=walleye,version=28,locale=de,orientation=landscape \
+              --device model=hammerhead,version=21,locale=es,orientation=portrait  \
+              --device model=hammerhead,version=23,locale=fr,orientation=landscape \
+              --device model=star2lte,version=28,locale=de,orientation=landscape \
+              --device model=flame,version=30,locale=en,orientation=portrait \
               --timeout 5m
 
   publish-artifacts:
@@ -462,8 +462,8 @@ jobs:
     steps:
       - read-workspace
       - unit-tests-ui
-# Disabling Codecov (for now) due to https://about.codecov.io/security-update/
-#      - codecov
+  # Disabling Codecov (for now) due to https://about.codecov.io/security-update/
+  #      - codecov
 
   static-analysis:
     executor: ndk-r21e-latest-executor

@@ -314,9 +314,8 @@ class NavigationCamera(
      */
     fun requestNavigationCameraToIdle() {
         if (state != IDLE) {
-            this@NavigationCamera.frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT
             cancelAnimation()
-            state = IDLE
+            setIdleProperties()
         }
     }
 
@@ -379,6 +378,11 @@ class NavigationCamera(
         navigationCameraStateChangedObservers.remove(navigationCameraStateChangedObserver)
     }
 
+    private fun setIdleProperties() {
+        this@NavigationCamera.frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT
+        state = IDLE
+    }
+
     private fun cancelAnimation() {
         runningAnimation?.let { set ->
             set.cancel()
@@ -431,8 +435,7 @@ class NavigationCamera(
 
         override fun onAnimationEnd(animation: Animator?) {
             if (isCanceled) {
-                this@NavigationCamera.frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT
-                state = IDLE
+                setIdleProperties()
             } else {
                 this@NavigationCamera.frameTransitionOptions = frameTransitionOptions
                 state = finalState

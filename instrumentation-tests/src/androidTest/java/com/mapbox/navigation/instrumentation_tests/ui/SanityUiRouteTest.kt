@@ -2,7 +2,6 @@ package com.mapbox.navigation.instrumentation_tests.ui
 
 import androidx.test.espresso.Espresso
 import com.mapbox.navigation.instrumentation_tests.utils.idling.ArrivalIdlingResource
-import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
 import org.junit.Test
 
 class SanityUiRouteTest : SimpleMapViewNavigationTest() {
