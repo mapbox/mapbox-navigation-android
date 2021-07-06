@@ -431,13 +431,11 @@ class NavigationCamera(
 
         override fun onAnimationEnd(animation: Animator?) {
             if (isCanceled) {
-                requestNavigationCameraToIdle()
+                this@NavigationCamera.frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT
+                state = IDLE
             } else {
-                state = finalState
-            }
-
-            if (!isCanceled) {
                 this@NavigationCamera.frameTransitionOptions = frameTransitionOptions
+                state = finalState
             }
 
             finishAnimation(animation as AnimatorSet)
