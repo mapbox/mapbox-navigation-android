@@ -44,9 +44,7 @@ class MapboxSpeedLimitViewTest {
     @Before
     fun setUp() {
         mockkObject(ThreadController)
-        every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
         every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
-        every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
         ctx = ApplicationProvider.getApplicationContext()
     }
 
