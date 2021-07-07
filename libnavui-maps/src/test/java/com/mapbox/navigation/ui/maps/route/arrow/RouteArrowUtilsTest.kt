@@ -18,8 +18,11 @@ import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.unmockkStatic
 import io.mockk.verify
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -35,6 +38,14 @@ class RouteArrowUtilsTest {
     @Before
     fun setUp() {
         ctx = ApplicationProvider.getApplicationContext()
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
     }
 
     @Test
@@ -199,7 +210,7 @@ class RouteArrowUtilsTest {
         val headSourceValueSlot = slot<Value>()
         val addStyleLayerSlots = mutableListOf<Value>()
         val addStyleLayerPositionSlots = mutableListOf<LayerPosition>()
-        val style = getFullMockedStyle()
+        val style = getFullMockedStyle(false, false)
 
         RouteArrowUtils.initializeLayers(style, options)
 
@@ -218,8 +229,8 @@ class RouteArrowUtilsTest {
             (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!.contents
         )
         assertEquals(
-            "null",
-            (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
+            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents.toString()
         )
         assertEquals(
             RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
@@ -239,8 +250,9 @@ class RouteArrowUtilsTest {
             (headSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!.contents
         )
         assertEquals(
-            "null",
-            (headSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
+            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            (headSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!
+                .contents.toString()
         )
         assertEquals(
             RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
@@ -303,7 +315,7 @@ class RouteArrowUtilsTest {
         val headSourceValueSlot = slot<Value>()
         val addStyleLayerSlots = mutableListOf<Value>()
         val addStyleLayerPositionSlots = mutableListOf<LayerPosition>()
-        val style = getFullMockedStyle()
+        val style = getFullMockedStyle(false, true)
         every {
             style.styleLayerExists("mapbox-navigation-route-traffic-layer")
         } returns false
@@ -425,7 +437,7 @@ class RouteArrowUtilsTest {
             every { arrowShaftScaleExpression } returns options.arrowShaftScaleExpression
             every { arrowHeadScaleExpression } returns options.arrowHeadScaleExpression
         }
-        val style = getFullMockedStyle()
+        val style = getFullMockedStyle(true, true)
 
         RouteArrowUtils.initializeLayers(style, mockOptions)
 
@@ -455,7 +467,7 @@ class RouteArrowUtilsTest {
             every { arrowShaftScaleExpression } returns options.arrowShaftScaleExpression
             every { arrowHeadScaleExpression } returns options.arrowHeadScaleExpression
         }
-        val style = getFullMockedStyle()
+        val style = getFullMockedStyle(false, false)
 
         RouteArrowUtils.initializeLayers(style, mockOptions)
 
@@ -485,7 +497,7 @@ class RouteArrowUtilsTest {
             every { arrowShaftScaleExpression } returns options.arrowShaftScaleExpression
             every { arrowHeadScaleExpression } returns options.arrowHeadScaleExpression
         }
-        val style = getFullMockedStyle()
+        val style = getFullMockedStyle(true, true)
 
         RouteArrowUtils.initializeLayers(style, mockOptions)
 
@@ -515,7 +527,7 @@ class RouteArrowUtilsTest {
             every { arrowShaftScaleExpression } returns options.arrowShaftScaleExpression
             every { arrowHeadScaleExpression } returns options.arrowHeadScaleExpression
         }
-        val style = getFullMockedStyle()
+        val style = getFullMockedStyle(true, true)
 
         RouteArrowUtils.initializeLayers(style, mockOptions)
 
@@ -523,12 +535,12 @@ class RouteArrowUtilsTest {
         verify(exactly = 0) { style.addImage(RouteConstants.ARROW_HEAD_ICON_CASING, any<Image>()) }
     }
 
-    private fun getFullMockedStyle(): Style {
-        return mockk<Style> {
+    private fun getFullMockedStyle(shaftSourceExists: Boolean, headSourceExists: Boolean): Style {
+        return mockk<Style>(relaxed = true) {
             every { fullyLoaded } returns true
             every { styleLayers } returns listOf()
-            every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns false
-            every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns false
+            every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns shaftSourceExists
+            every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns headSourceExists
             every {
                 styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
             } returns true
@@ -543,31 +555,31 @@ class RouteArrowUtilsTest {
                 addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
             every { getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) } returns mockk()
-            every {
-                removeStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING)
-            } returns ExpectedFactory.createNone()
+            // every {
+            //     removeStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING)
+            // } returns ExpectedFactory.createNone()
             every {
                 addImage(RouteConstants.ARROW_HEAD_ICON_CASING, any<Bitmap>())
             } returns ExpectedFactory.createNone()
             every { getStyleImage(RouteConstants.ARROW_HEAD_ICON) } returns mockk()
-            every {
-                removeStyleImage(RouteConstants.ARROW_HEAD_ICON)
-            } returns ExpectedFactory.createNone()
+            // every {
+            //     removeStyleImage(RouteConstants.ARROW_HEAD_ICON)
+            // } returns ExpectedFactory.createNone()
             every {
                 addImage(RouteConstants.ARROW_HEAD_ICON, any<Bitmap>())
             } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(RouteLayerConstants.ARROW_HEAD_LAYER_ID)
-            } returns ExpectedFactory.createNone()
+            // every {
+            //     removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+            // } returns ExpectedFactory.createNone()
+            // every {
+            //     removeStyleLayer(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID)
+            // } returns ExpectedFactory.createNone()
+            // every {
+            //     removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID)
+            // } returns ExpectedFactory.createNone()
+            // every {
+            //     removeStyleLayer(RouteLayerConstants.ARROW_HEAD_LAYER_ID)
+            // } returns ExpectedFactory.createNone()
             every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
         }
     }

@@ -69,17 +69,15 @@ internal object RouteArrowUtils {
         if (!style.styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID)) {
             geoJsonSource(RouteConstants.ARROW_SHAFT_SOURCE_ID) {
                 maxzoom(16)
-                featureCollection(FeatureCollection.fromFeatures(listOf()))
                 tolerance(options.tolerance)
-            }.bindTo(style)
+            }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
         }
 
         if (!style.styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID)) {
             geoJsonSource(RouteConstants.ARROW_HEAD_SOURCE_ID) {
                 maxzoom(16)
-                featureCollection(FeatureCollection.fromFeatures(listOf()))
                 tolerance(options.tolerance)
-            }.bindTo(style)
+            }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
         }
 
         if (style.getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) != null) {

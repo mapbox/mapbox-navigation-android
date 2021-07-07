@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.bindgen.Value
 import com.mapbox.core.constants.Constants
@@ -14,8 +13,8 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
-import com.mapbox.maps.StylePropertyValue
-import com.mapbox.maps.StylePropertyValueKind
+import com.mapbox.maps.extension.style.layers.Layer
+import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.testing.FileUtils
@@ -31,7 +30,9 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrafficExpression
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import org.junit.Assert
 import org.junit.Assert.assertEquals
@@ -291,6 +292,7 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun initializeLayers() {
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
         val options = MapboxRouteLineOptions.Builder(ctx)
             .withRouteLineBelowLayerId(LocationComponentConstants.MODEL_LAYER)
             .build()
@@ -567,6 +569,7 @@ class MapboxRouteLineUtilsTest {
             LocationComponentConstants.MODEL_LAYER,
             addStyleLayerPositionSlots[9].below
         )
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
     }
 
     @Test
@@ -1577,39 +1580,20 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun getLayerVisibility() {
-        val layerTypeValue = mockk<Value> {
-            every { contents } returns "line"
-        }
-        val sourceValue = mockk<Value> {
-            every { contents } returns "mapbox-navigation-route-source"
-        }
-        val layerValue = mockk<Value> {
-            every { contents } returns HashMap<String, Value>().also {
-                it["type"] = layerTypeValue
-                it["source"] = sourceValue
-            }
-        }
-        val layerPropertyExpected = mockk<Expected<String, Value>> {
-            every { value.hint(Value::class) } returns layerValue
-        }
-        val stylePropertyValue = mockk<StylePropertyValue> {
-            every { kind } returns StylePropertyValueKind.CONSTANT
-            every { value } returns Value.valueOf("visible")
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        val layer = mockk<Layer>(relaxed = true) {
+            every { visibility } returns Visibility.VISIBLE
         }
 
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
-            every {
-                getStyleLayerProperties("foobar")
-            } returns layerPropertyExpected
-            every {
-                getStyleLayerProperty("foobar", "visibility")
-            } returns stylePropertyValue
+            every { getLayer("foobar") } returns layer
         }
 
         val result = MapboxRouteLineUtils.getLayerVisibility(style, "foobar")
 
         assertEquals(Visibility.VISIBLE, result)
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
     }
 
     @Test
@@ -1625,19 +1609,16 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun getLayerVisibility_whenLayerNotFound() {
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
-            every {
-                getStyleLayerProperties("foobar")
-            } returns mockk {
-                every { value } returns null
-                every { error } returns null
-            }
+            every { getLayer("foobar") } returns null
         }
 
         val result = MapboxRouteLineUtils.getLayerVisibility(style, "foobar")
 
         assertNull(result)
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
     }
 
     @Test

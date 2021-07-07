@@ -4,12 +4,15 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Image
 import com.mapbox.maps.Style
+import com.mapbox.maps.extension.style.layers.Layer
+import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
+import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.extension.style.sources.getSource
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
@@ -24,8 +27,9 @@ import com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.slot
+import io.mockk.mockkStatic
 import io.mockk.unmockkObject
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -38,33 +42,6 @@ class MapboxRouteArrowViewTest {
 
     lateinit var ctx: Context
 
-    private val layerTypeValue = mockk<Value> {
-        every { contents } returns "line"
-    }
-    private val sourceValue = mockk<Value> {
-        every { contents } returns "mapbox-navigation-route-source"
-    }
-    private val layerValue = mockk<Value> {
-        every { contents } returns HashMap<String, Value>().also {
-            it["type"] = layerTypeValue
-            it["source"] = sourceValue
-        }
-    }
-    private val layerPropertyExpected = mockk<Expected<String, Value>> {
-        every { value.hint(Value::class) } returns layerValue
-    }
-    private val geoJsonSourceTypeValue = mockk<Value> {
-        every { contents } returns "geojson"
-    }
-    private val geoJsonSourceValue = mockk<Value> {
-        every { contents } returns HashMap<String, Value>().also {
-            it["type"] = geoJsonSourceTypeValue
-        }
-    }
-    private val geoJsonSourceExpected = mockk<Expected<String, Value>> {
-        every { value.hint(Value::class) } returns geoJsonSourceValue
-    }
-
     @Before
     fun setUp() {
         ctx = ApplicationProvider.getApplicationContext()
@@ -72,53 +49,38 @@ class MapboxRouteArrowViewTest {
 
     @Test
     fun render_UpdateRouteArrowVisibilityState() {
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
         mockkObject(RouteArrowUtils)
+        val arrowLayer = mockk<Layer>(relaxed = true)
         val options = RouteArrowOptions.Builder(ctx).build()
         val state = ArrowVisibilityChangeValue(
             listOf(Pair(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE))
         )
-        val visibilityValueSlot = slot<Value>()
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
-            every {
-                getStyleLayerProperties(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID)
-            } returns layerPropertyExpected
-            every {
-                setStyleSourceProperty(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
-            } returns ExpectedFactory.createNone()
-            every {
-                setStyleLayerProperty(
-                    RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
-                    "visibility",
-                    any()
-                )
-            } returns ExpectedFactory.createNone()
+            every { getLayer(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns arrowLayer
         }.also {
             mockCheckForLayerInitialization(it)
         }
 
         MapboxRouteArrowView(options).render(style, state)
 
-        verify {
-            style.setStyleLayerProperty(
-                RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
-                "visibility",
-                capture(visibilityValueSlot)
-            )
-        }
-        assertEquals(
-            Visibility.NONE.value.toLowerCase(),
-            visibilityValueSlot.captured.contents.toString().toLowerCase()
-        )
+        verify { arrowLayer.visibility(Visibility.NONE) }
         verify { RouteArrowUtils.initializeLayers(style, options) }
         unmockkObject(RouteArrowUtils)
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
     }
 
     @Test
     fun render_UpdateManeuverArrowValue() {
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
         mockkObject(RouteArrowUtils)
         val options = RouteArrowOptions.Builder(ctx).build()
+        val arrowShaftSource = mockk<GeoJsonSource>(relaxed = true)
+        val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
+        val arrowLayer = mockk<Layer>(relaxed = true)
         val arrowShaftFeature = mockk<Feature> {
             every { toJson() } returns "{}"
         }
@@ -130,38 +92,12 @@ class MapboxRouteArrowViewTest {
             arrowShaftFeature,
             arrowHeadFeature
         )
-        val visibilityValueSlot = slot<Value>()
-        val arrowHeadSourceSlot = slot<Value>()
-        val arrowShaftSourceSlot = slot<Value>()
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
-            every {
-                getStyleLayerProperties(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID)
-            } returns layerPropertyExpected
-            every {
-                setStyleSourceProperty(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
-            } returns ExpectedFactory.createNone()
-            every {
-                setStyleLayerProperty(
-                    RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
-                    "visibility",
-                    any()
-                )
-            } returns ExpectedFactory.createNone()
-
-            every {
-                getStyleSourceProperties(RouteConstants.ARROW_HEAD_SOURCE_ID)
-            } returns geoJsonSourceExpected
-            every {
-                getStyleSourceProperties(RouteConstants.ARROW_SHAFT_SOURCE_ID)
-            } returns geoJsonSourceExpected
-            every {
-                setStyleSourceProperty(RouteConstants.ARROW_HEAD_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createNone()
-            every {
-                setStyleSourceProperty(RouteConstants.ARROW_SHAFT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createNone()
+            every { getSource(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
+            every { getSource(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
+            every { getLayer(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns arrowLayer
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -171,76 +107,27 @@ class MapboxRouteArrowViewTest {
             ExpectedFactory.createValue(state)
         )
 
-        verify {
-            style.setStyleLayerProperty(
-                RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
-                "visibility",
-                capture(visibilityValueSlot)
-            )
-        }
-        assertEquals(
-            Visibility.NONE.value.toLowerCase(),
-            visibilityValueSlot.captured.contents.toString().toLowerCase()
-        )
-        verify {
-            style.setStyleSourceProperty(
-                RouteConstants.ARROW_HEAD_SOURCE_ID,
-                any(),
-                capture(arrowHeadSourceSlot)
-            )
-        }
-        assertEquals(
-            arrowHeadFeature.toJson(),
-            arrowHeadSourceSlot.captured.contents.toString()
-        )
-        verify {
-            style.setStyleSourceProperty(
-                RouteConstants.ARROW_SHAFT_SOURCE_ID,
-                any(),
-                capture(arrowShaftSourceSlot)
-            )
-        }
-        assertEquals(
-            arrowShaftFeature.toJson(),
-            arrowShaftSourceSlot.captured.contents.toString()
-        )
+        verify { arrowShaftSource.feature(state.arrowShaftFeature!!) }
+        verify { arrowHeadSource.feature(state.arrowHeadFeature!!) }
+        verify { arrowLayer.visibility(Visibility.NONE) }
         verify { RouteArrowUtils.initializeLayers(style, options) }
         unmockkObject(RouteArrowUtils)
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
     }
 
     @Test
     fun render_AddArrowState_initializesLayers() {
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
         mockkObject(RouteArrowUtils)
         val options = RouteArrowOptions.Builder(ctx).build()
+        val arrowShaftSource = mockk<GeoJsonSource>(relaxed = true)
+        val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
-            every {
-                getStyleLayerProperties(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID)
-            } returns layerPropertyExpected
-            every {
-                setStyleSourceProperty(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
-            } returns ExpectedFactory.createNone()
-            every {
-                setStyleLayerProperty(
-                    RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
-                    "visibility",
-                    any()
-                )
-            } returns ExpectedFactory.createNone()
-
-            every {
-                getStyleSourceProperties(RouteConstants.ARROW_HEAD_SOURCE_ID)
-            } returns geoJsonSourceExpected
-            every {
-                getStyleSourceProperties(RouteConstants.ARROW_SHAFT_SOURCE_ID)
-            } returns geoJsonSourceExpected
-            every {
-                setStyleSourceProperty(RouteConstants.ARROW_HEAD_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createNone()
-            every {
-                setStyleSourceProperty(RouteConstants.ARROW_SHAFT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createNone()
+            every { getSource(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
+            every { getSource(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -251,48 +138,28 @@ class MapboxRouteArrowViewTest {
 
         MapboxRouteArrowView(options).render(style, state)
 
+        verify { arrowShaftSource.featureCollection(state.arrowShaftFeatureCollection) }
+        verify { arrowHeadSource.featureCollection(state.arrowHeadFeatureCollection) }
         verify { RouteArrowUtils.initializeLayers(style, options) }
         unmockkObject(RouteArrowUtils)
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
     }
 
     @Test
     fun render_AddArrowState() {
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
         mockkObject(RouteArrowUtils)
         val options = RouteArrowOptions.Builder(ctx).build()
+        val arrowShaftSource = mockk<GeoJsonSource>(relaxed = true)
+        val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
-            every {
-                getStyleLayerProperties(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID)
-            } returns layerPropertyExpected
-            every {
-                setStyleSourceProperty(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
-            } returns ExpectedFactory.createNone()
-            every {
-                setStyleLayerProperty(
-                    RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
-                    "visibility",
-                    any()
-                )
-            } returns ExpectedFactory.createNone()
-
-            every {
-                getStyleSourceProperties(RouteConstants.ARROW_HEAD_SOURCE_ID)
-            } returns geoJsonSourceExpected
-            every {
-                getStyleSourceProperties(RouteConstants.ARROW_SHAFT_SOURCE_ID)
-            } returns geoJsonSourceExpected
-            every {
-                setStyleSourceProperty(RouteConstants.ARROW_HEAD_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createNone()
-            every {
-                setStyleSourceProperty(RouteConstants.ARROW_SHAFT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createNone()
+            every { getSource(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
+            every { getSource(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
         }.also {
             mockCheckForLayerInitialization(it)
         }
-        val arrowHeadSourceSlot = slot<Value>()
-        val arrowShaftSourceSlot = slot<Value>()
         val featureJson = "{\"type\":\"Feature\",\"geometry\":{\"type\":\"LineString\"," +
             "\"coordinates\":[[-122.5234885,37.9754331]]}}"
         val arrowShaftFeature = Feature.fromJson(featureJson)
@@ -306,69 +173,27 @@ class MapboxRouteArrowViewTest {
 
         MapboxRouteArrowView(options).render(style, state)
 
-        verify {
-            style.setStyleSourceProperty(
-                RouteConstants.ARROW_HEAD_SOURCE_ID,
-                any(),
-                capture(arrowHeadSourceSlot)
-            )
-        }
-        assertEquals(
-            arrowHeadFeatureCollection.toJson(),
-            arrowHeadSourceSlot.captured.contents.toString()
-        )
-        verify {
-            style.setStyleSourceProperty(
-                RouteConstants.ARROW_SHAFT_SOURCE_ID,
-                any(),
-                capture(arrowShaftSourceSlot)
-            )
-        }
-        assertEquals(
-            arrowShaftFeatureCollection.toJson(),
-            arrowShaftSourceSlot.captured.contents.toString()
-        )
+        verify { arrowShaftSource.featureCollection(arrowShaftFeatureCollection) }
+        verify { arrowHeadSource.featureCollection(arrowHeadFeatureCollection) }
         unmockkObject(RouteArrowUtils)
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
     }
 
     @Test
     fun render_ExpectedAddArrowState() {
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
         mockkObject(RouteArrowUtils)
+        val arrowShaftSource = mockk<GeoJsonSource>(relaxed = true)
+        val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
         val options = RouteArrowOptions.Builder(ctx).build()
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
-            every {
-                getStyleLayerProperties(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID)
-            } returns layerPropertyExpected
-            every {
-                setStyleSourceProperty(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
-            } returns ExpectedFactory.createNone()
-            every {
-                setStyleLayerProperty(
-                    RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
-                    "visibility",
-                    any()
-                )
-            } returns ExpectedFactory.createNone()
-
-            every {
-                getStyleSourceProperties(RouteConstants.ARROW_HEAD_SOURCE_ID)
-            } returns geoJsonSourceExpected
-            every {
-                getStyleSourceProperties(RouteConstants.ARROW_SHAFT_SOURCE_ID)
-            } returns geoJsonSourceExpected
-            every {
-                setStyleSourceProperty(RouteConstants.ARROW_HEAD_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createNone()
-            every {
-                setStyleSourceProperty(RouteConstants.ARROW_SHAFT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createNone()
+            every { getSource(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
+            every { getSource(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
         }.also {
             mockCheckForLayerInitialization(it)
         }
-        val arrowHeadSourceSlot = slot<Value>()
-        val arrowShaftSourceSlot = slot<Value>()
         val featureJson = "{\"type\":\"Feature\",\"geometry\":{\"type\":\"LineString\"," +
             "\"coordinates\":[[-122.5234885,37.9754331]]}}"
         val arrowShaftFeature = Feature.fromJson(featureJson)
@@ -384,70 +209,28 @@ class MapboxRouteArrowViewTest {
 
         MapboxRouteArrowView(options).render(style, state)
 
-        verify {
-            style.setStyleSourceProperty(
-                RouteConstants.ARROW_HEAD_SOURCE_ID,
-                any(),
-                capture(arrowHeadSourceSlot)
-            )
-        }
-        assertEquals(
-            arrowHeadFeatureCollection.toJson(),
-            arrowHeadSourceSlot.captured.contents.toString()
-        )
-        verify {
-            style.setStyleSourceProperty(
-                RouteConstants.ARROW_SHAFT_SOURCE_ID,
-                any(),
-                capture(arrowShaftSourceSlot)
-            )
-        }
-        assertEquals(
-            arrowShaftFeatureCollection.toJson(),
-            arrowShaftSourceSlot.captured.contents.toString()
-        )
+        verify { arrowShaftSource.featureCollection(arrowShaftFeatureCollection) }
+        verify { arrowHeadSource.featureCollection(arrowHeadFeatureCollection) }
         verify { RouteArrowUtils.initializeLayers(style, options) }
         unmockkObject(RouteArrowUtils)
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
     }
 
     @Test
     fun render_RemoveArrowState() {
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
         mockkObject(RouteArrowUtils)
+        val arrowShaftSource = mockk<GeoJsonSource>(relaxed = true)
+        val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
         val options = RouteArrowOptions.Builder(ctx).build()
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
-            every {
-                getStyleLayerProperties(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID)
-            } returns layerPropertyExpected
-            every {
-                setStyleSourceProperty(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
-            } returns ExpectedFactory.createNone()
-            every {
-                setStyleLayerProperty(
-                    RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
-                    "visibility",
-                    any()
-                )
-            } returns ExpectedFactory.createNone()
-
-            every {
-                getStyleSourceProperties(RouteConstants.ARROW_HEAD_SOURCE_ID)
-            } returns geoJsonSourceExpected
-            every {
-                getStyleSourceProperties(RouteConstants.ARROW_SHAFT_SOURCE_ID)
-            } returns geoJsonSourceExpected
-            every {
-                setStyleSourceProperty(RouteConstants.ARROW_HEAD_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createNone()
-            every {
-                setStyleSourceProperty(RouteConstants.ARROW_SHAFT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createNone()
+            every { getSource(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
+            every { getSource(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
         }.also {
             mockCheckForLayerInitialization(it)
         }
-        val arrowHeadSourceSlot = slot<Value>()
-        val arrowShaftSourceSlot = slot<Value>()
         val featureJson = "{\"type\":\"Feature\",\"geometry\":{\"type\":\"LineString\"," +
             "\"coordinates\":[[-122.5234885,37.9754331]]}}"
         val arrowShaftFeature = Feature.fromJson(featureJson)
@@ -461,70 +244,28 @@ class MapboxRouteArrowViewTest {
 
         MapboxRouteArrowView(options).render(style, state)
 
-        verify {
-            style.setStyleSourceProperty(
-                RouteConstants.ARROW_HEAD_SOURCE_ID,
-                any(),
-                capture(arrowHeadSourceSlot)
-            )
-        }
-        assertEquals(
-            arrowHeadFeatureCollection.toJson(),
-            arrowHeadSourceSlot.captured.contents.toString()
-        )
-        verify {
-            style.setStyleSourceProperty(
-                RouteConstants.ARROW_SHAFT_SOURCE_ID,
-                any(),
-                capture(arrowShaftSourceSlot)
-            )
-        }
-        assertEquals(
-            arrowShaftFeatureCollection.toJson(),
-            arrowShaftSourceSlot.captured.contents.toString()
-        )
+        verify { arrowShaftSource.featureCollection(arrowShaftFeatureCollection) }
+        verify { arrowHeadSource.featureCollection(arrowHeadFeatureCollection) }
         verify { RouteArrowUtils.initializeLayers(style, options) }
         unmockkObject(RouteArrowUtils)
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
     }
 
     @Test
     fun render_ClearArrowsState() {
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
         mockkObject(RouteArrowUtils)
         val options = RouteArrowOptions.Builder(ctx).build()
+        val arrowShaftSource = mockk<GeoJsonSource>(relaxed = true)
+        val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
         val style = mockk<Style> {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
-            every {
-                getStyleLayerProperties(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID)
-            } returns layerPropertyExpected
-            every {
-                setStyleSourceProperty(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, any(), any())
-            } returns ExpectedFactory.createNone()
-            every {
-                setStyleLayerProperty(
-                    RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
-                    "visibility",
-                    any()
-                )
-            } returns ExpectedFactory.createNone()
-
-            every {
-                getStyleSourceProperties(RouteConstants.ARROW_HEAD_SOURCE_ID)
-            } returns geoJsonSourceExpected
-            every {
-                getStyleSourceProperties(RouteConstants.ARROW_SHAFT_SOURCE_ID)
-            } returns geoJsonSourceExpected
-            every {
-                setStyleSourceProperty(RouteConstants.ARROW_HEAD_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createNone()
-            every {
-                setStyleSourceProperty(RouteConstants.ARROW_SHAFT_SOURCE_ID, any(), any())
-            } returns ExpectedFactory.createNone()
+            every { getSource(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
+            every { getSource(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
         }.also {
             mockCheckForLayerInitialization(it)
         }
-        val arrowHeadSourceSlot = slot<Value>()
-        val arrowShaftSourceSlot = slot<Value>()
         val featureJson = "{\"type\":\"Feature\",\"geometry\":{\"type\":\"LineString\"," +
             "\"coordinates\":[[-122.5234885,37.9754331]]}}"
         val arrowShaftFeature = Feature.fromJson(featureJson)
@@ -538,30 +279,11 @@ class MapboxRouteArrowViewTest {
 
         MapboxRouteArrowView(options).render(style, state)
 
-        verify {
-            style.setStyleSourceProperty(
-                RouteConstants.ARROW_HEAD_SOURCE_ID,
-                any(),
-                capture(arrowHeadSourceSlot)
-            )
-        }
-        assertEquals(
-            arrowHeadFeatureCollection.toJson(),
-            arrowHeadSourceSlot.captured.contents.toString()
-        )
-        verify {
-            style.setStyleSourceProperty(
-                RouteConstants.ARROW_SHAFT_SOURCE_ID,
-                any(),
-                capture(arrowShaftSourceSlot)
-            )
-        }
-        assertEquals(
-            arrowShaftFeatureCollection.toJson(),
-            arrowShaftSourceSlot.captured.contents.toString()
-        )
+        verify { arrowShaftSource.featureCollection(arrowShaftFeatureCollection) }
+        verify { arrowHeadSource.featureCollection(arrowHeadFeatureCollection) }
         verify { RouteArrowUtils.initializeLayers(style, options) }
         unmockkObject(RouteArrowUtils)
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
     }
 
     @Test
