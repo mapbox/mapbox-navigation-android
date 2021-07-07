@@ -94,7 +94,6 @@ internal class MapboxTripSession(
             invalidateLatestBannerInstructionEvent()
         }
 
-    private val ioJobController: JobControl = threadController.getIOScopeAndRootJob()
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
 
     private val locationObservers = CopyOnWriteArraySet<LocationObserver>()
@@ -288,7 +287,6 @@ internal class MapboxTripSession(
         navigator.removeNavigatorObserver(navigatorObserver)
         tripService.stopService()
         stopLocationUpdates()
-        ioJobController.job.cancelChildren()
         mainJobController.job.cancelChildren()
         reset()
         state = TripSessionState.STOPPED

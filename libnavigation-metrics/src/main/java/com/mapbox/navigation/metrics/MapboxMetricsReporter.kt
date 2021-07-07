@@ -47,7 +47,7 @@ object MapboxMetricsReporter : MetricsReporter {
         threadController: ThreadController
     ) {
         this.mapboxTelemetry = mapboxTelemetry
-        this.ioJobController = threadController.getMainScopeAndRootJob()
+        this.ioJobController = threadController.getIOScopeAndRootJob()
         mapboxTelemetry.enable()
     }
 
