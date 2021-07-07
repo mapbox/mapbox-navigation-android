@@ -15,6 +15,11 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Added new `HistoryEvent`: `HistoryEventPushHistoryRecord` allows read events set with **type**-**properties** structure. [#4567](https://github.com/mapbox/mapbox-navigation-android/pull/4567)
 - :warning: Added new APIs to request and render road shields asynchronously, see `MapboxManeuverApi#getRoadShields` and `MapboxManeuverView#renderManeuverShields` for details. Shields are not automatically downloaded anymore to allow for more granular and faster initial updates. [#4482](https://github.com/mapbox/mapbox-navigation-android/pull/4482)
 - Exposed `RouteStepProgress#instructionIndex` that indicates which instruction out of the list of instructions for a step is the currently active one. [#4482](https://github.com/mapbox/mapbox-navigation-android/pull/4482)
+- :warning: Refactored `PredictiveCacheController` to handle multiple map instances, add the ability to filter sources to cache. [#4539](https://github.com/mapbox/mapbox-navigation-android/pull/4539)
+    - `fun setMapInstance(map: MapboxMap)` is replaced with `fun addMapInstance(map: MapboxMap,  sourceIdsToCache: List<String>)` to allow for more granular caching configuration and support multiple map instances at the same time.
+    - `fun removeMapInstance()` is replaced with `fun removeMapInstance(map: MapboxMap)`.
+    - `predictiveCacheLocationOptions: PredictiveCacheLocationOptions` is moved from `NavigationOptions` to `PredictiveCacheController`. 
+    -  Note: the map instance has to be configured with the same `TileStore` instance that was provided to `RoutingTilesOptions.tileStore` to best support predictive caching and offline features.
 
 #### Bug fixes and improvements
 - Fixed a bug where in some cases status updates were not generated after switching between offline and online states. [#4558](https://github.com/mapbox/mapbox-navigation-android/pull/4558)
