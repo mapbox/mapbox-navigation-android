@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.internal.utils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
+import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -12,6 +13,14 @@ class DirectionsRouteExTest {
 
     @Test
     fun isRouteTheSame() {
+        val mockkRoute = mockk<DirectionsRoute> {
+            every { geometry() } throws AssertionError(
+                "we should check reference first"
+            )
+            every { legs() } throws AssertionError(
+                "we should check reference first"
+            )
+        }
         val comparing = listOf<Triple<DirectionsRoute, DirectionsRoute?, Boolean>>(
             Triple(
                 getDirectionRouteBuilder().geometry("geomery").build(),
@@ -57,6 +66,11 @@ class DirectionsRouteExTest {
                     )
                 ).build(),
                 false
+            ),
+            Triple(
+                mockkRoute,
+                mockkRoute,
+                true
             )
         )
 

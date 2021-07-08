@@ -391,33 +391,35 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun onRouteChanged(route: DirectionsRoute) {
-        clearRouteData()
-        this.route = route
-        completeRoutePoints = processRoutePoints(route)
-        simplifiedCompleteRoutePoints = simplifyCompleteRoutePoints(
-            options.overviewFrameOptions.geometrySimplification.enabled,
-            options.overviewFrameOptions.geometrySimplification.simplificationFactor,
-            completeRoutePoints
-        )
-        simplifiedRemainingPointsOnRoute = simplifiedCompleteRoutePoints.flatten().flatten()
-
-        options.followingFrameOptions.intersectionDensityCalculation.run {
-            averageIntersectionDistancesOnRoute = processRouteIntersections(
-                enabled,
-                minimumDistanceBetweenIntersections,
-                route,
+        if (!route.isSameRoute(this.route)) {
+            clearRouteData()
+            this.route = route
+            completeRoutePoints = processRoutePoints(route)
+            simplifiedCompleteRoutePoints = simplifyCompleteRoutePoints(
+                options.overviewFrameOptions.geometrySimplification.enabled,
+                options.overviewFrameOptions.geometrySimplification.simplificationFactor,
                 completeRoutePoints
             )
-        }
+            simplifiedRemainingPointsOnRoute = simplifiedCompleteRoutePoints.flatten().flatten()
 
-        options.followingFrameOptions.frameGeometryAfterManeuver.run {
-            postManeuverFramingPoints = processRouteForPostManeuverFramingGeometry(
-                enabled,
-                distanceToCoalesceCompoundManeuvers,
-                distanceToFrameAfterManeuver,
-                route,
-                completeRoutePoints
-            )
+            options.followingFrameOptions.intersectionDensityCalculation.run {
+                averageIntersectionDistancesOnRoute = processRouteIntersections(
+                    enabled,
+                    minimumDistanceBetweenIntersections,
+                    route,
+                    completeRoutePoints
+                )
+            }
+
+            options.followingFrameOptions.frameGeometryAfterManeuver.run {
+                postManeuverFramingPoints = processRouteForPostManeuverFramingGeometry(
+                    enabled,
+                    distanceToCoalesceCompoundManeuvers,
+                    distanceToFrameAfterManeuver,
+                    route,
+                    completeRoutePoints
+                )
+            }
         }
     }
 
