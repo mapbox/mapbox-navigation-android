@@ -71,7 +71,6 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
             .incidentsOptions(mockk())
             .historyRecorderOptions(
                 HistoryRecorderOptions.Builder()
-                    .enabled(false)
                     .fileDirectory("history/path")
                     .build()
             )

@@ -160,17 +160,14 @@ package com.mapbox.navigation.base.options {
   }
 
   public final class HistoryRecorderOptions {
-    method public boolean getEnabled();
     method public String? getFileDirectory();
     method public com.mapbox.navigation.base.options.HistoryRecorderOptions.Builder toBuilder();
-    property public final boolean enabled;
     property public final String? fileDirectory;
   }
 
   public static final class HistoryRecorderOptions.Builder {
     ctor public HistoryRecorderOptions.Builder();
     method public com.mapbox.navigation.base.options.HistoryRecorderOptions build();
-    method public com.mapbox.navigation.base.options.HistoryRecorderOptions.Builder enabled(boolean enabled);
     method public com.mapbox.navigation.base.options.HistoryRecorderOptions.Builder fileDirectory(String? filePath);
   }
 

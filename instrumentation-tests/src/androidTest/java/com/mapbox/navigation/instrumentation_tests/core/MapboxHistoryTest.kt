@@ -15,6 +15,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.model.HistoryEventGetStatus
+import com.mapbox.navigation.core.history.model.HistoryEventPushHistoryRecord
 import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
 import com.mapbox.navigation.core.history.model.HistoryEventUpdateLocation
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
@@ -58,7 +59,6 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
                 .accessToken(getMapboxAccessTokenFromResources(activity))
                 .historyRecorderOptions(
                     HistoryRecorderOptions.Builder()
-                        .enabled(true)
                         .build()
                 )
                 .build()
@@ -79,6 +79,9 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
 
         // execute
         runOnMainSync {
+            mapboxNavigation.historyRecorder.startRecording()
+            mapboxNavigation.historyRecorder.pushHistory(CUSTOM_EVENT_TYPE, CUSTOM_EVENT_PROPERTIES)
+
             mockLocationUpdatesRule.pushLocationUpdate {
                 latitude = mockRoute.routeWaypoints.first().latitude()
                 longitude = mockRoute.routeWaypoints.first().longitude()
@@ -119,7 +122,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
 
         runOnMainSync {
             val countDownLatch = CountDownLatch(1)
-            mapboxNavigation.historyRecorder.saveHistory { filePath ->
+            mapboxNavigation.historyRecorder.stopRecording { filePath ->
                 assertNotNull(filePath)
                 verifyHistoryEvents(filePath!!)
                 countDownLatch.countDown()
@@ -137,6 +140,12 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         // Verify we can read until end of file
         val historyEvents = historyReader.asSequence().toList()
         assertTrue(historyEvents.size > 10)
+
+        // Verify the custom event
+        val customEvent = historyEvents
+            .find { it is HistoryEventPushHistoryRecord } as HistoryEventPushHistoryRecord
+        assertEquals(customEvent.type, CUSTOM_EVENT_TYPE)
+        assertEquals(customEvent.properties, CUSTOM_EVENT_PROPERTIES)
 
         // Verify the first location
         val firstLocation = historyEvents
@@ -157,5 +166,10 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         val getStatus = historyEvents
             .find { it is HistoryEventGetStatus } as HistoryEventGetStatus
         assertTrue(getStatus.elapsedRealtimeNanos > 0)
+    }
+
+    private companion object {
+        private const val CUSTOM_EVENT_TYPE = "custom_event_type"
+        private const val CUSTOM_EVENT_PROPERTIES = "custom_event_properties"
     }
 }
