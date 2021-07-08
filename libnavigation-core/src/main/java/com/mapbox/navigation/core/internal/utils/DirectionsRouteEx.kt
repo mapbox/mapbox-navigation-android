@@ -13,7 +13,13 @@ fun DirectionsRoute.isSameUuid(compare: DirectionsRoute?): Boolean =
  * Compare routes as geometries(if exist) or as a names of [LegStep] of the [DirectionsRoute]
  */
 fun DirectionsRoute.isSameRoute(compare: DirectionsRoute?): Boolean {
-    if (compare == null) return false
+    if (this === compare) {
+        return true
+    }
+
+    if (compare == null) {
+        return false
+    }
 
     ifNonNull(this.geometry(), compare.geometry()) { g1, g2 ->
         return g1 == g2
