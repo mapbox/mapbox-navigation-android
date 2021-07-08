@@ -8,7 +8,6 @@ class HistoryRecorderOptionsTest :
     override fun getImplementationClass() = HistoryRecorderOptions::class
 
     override fun getFilledUpBuilder() = HistoryRecorderOptions.Builder()
-        .enabled(true)
         .fileDirectory("/history/path")
 
     @Test

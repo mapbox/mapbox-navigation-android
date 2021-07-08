@@ -1,12 +1,11 @@
 package com.mapbox.navigation.core.history.model
 
 /**
- * Allows to read custom events with **type**-**properties** structure
+ * Custom event from the navigators history.
  *
- * @param type
- * @param properties
+ * @param type the event type in the events log
+ * @param properties the json with properties of the event
  */
-// fixme add docs when expose [HistoryRecorderHandle#pushHistory]
 class HistoryEventPushHistoryRecord internal constructor(
     val type: String,
     val properties: String

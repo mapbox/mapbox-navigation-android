@@ -34,52 +34,65 @@ class MapboxHistoryRecorder internal constructor(
      * @return absolute path to the directory with history files.
      *     returns null when there is no file directory
      */
-    fun fileDirectory(): String? {
-        return if (historyRecorderOptions.enabled) {
-            historyFiles.absolutePath(historyRecorderOptions)
-        } else {
-            null
-        }
+    fun fileDirectory(): String? = historyFiles.absolutePath(historyRecorderOptions)
+
+    /**
+     * Starts history recording session.
+     * If history recording is already started - does nothing.
+     * To save history and get a file path call [MapboxHistoryRecorder.stopRecording].
+     */
+    fun startRecording() {
+        checkRecorderInitialized()
+        historyRecorderHandle?.apply { startRecording() }
     }
 
     /**
-     * When called, history recording will be paused and all records will be added to the file.
+     * When called, history recording will be stopped and all records will be added to the file.
      * The path to the file will be sent to the [SaveHistoryCallback.onSaved] interface.
-     * The next call to to this function will include a new file with new events.
+     * If history recording was not started, [SaveHistoryCallback] is called with a `null` file
+     * path.
+     * [MapboxHistoryRecorder.startRecording] can be called before the [SaveHistoryCallback]
+     * completes.
      *
      * @see [MapboxHistoryReader] to read the events in the file.
      *
      * @param result Callback which shares the history that has been saved
      *
-     * @throws IllegalStateException when [HistoryRecorderOptions.enabled] is false
      */
-    fun saveHistory(result: SaveHistoryCallback) {
-        check(historyRecorderOptions.enabled) {
-            logger.e(
-                Tag("MbxHistoryRecorder"),
-                Message("You must enable HistoryRecorderOptions in order to save history")
-            )
-        }
+    fun stopRecording(result: SaveHistoryCallback) {
+        checkRecorderInitialized()
         historyRecorderHandle?.apply {
-            dumpHistory { filePath: String? ->
+            stopRecording { filePath: String? ->
                 result.onSaved(filePath)
             }
-        } ?: run {
-            logger.w(
-                Tag("MbxHistoryRecorder"),
-                Message("dumpHistory failed - The history recorder is not initialized")
-            )
-            result.onSaved(null)
+        }
+    }
+
+    /**
+     * Adds a custom event to the navigators history. This can be useful to log things that
+     * happen during navigation that are specific to your application.
+     *
+     * @param eventType the event type in the events log for your custom even
+     * @param eventJson the json to attach to the "properties" key of the event
+     */
+    fun pushHistory(eventType: String, eventJson: String) {
+        checkRecorderInitialized()
+        historyRecorderHandle?.apply { pushHistory(eventType, eventJson) }
+    }
+
+    private fun checkRecorderInitialized() {
+        if (historyRecorderHandle == null) {
+            logger.w(Tag("MbxHistoryRecorder"), Message("The history recorder is not initialized"))
         }
     }
 }
 
 /**
- * Callback which called as a result of [MapboxHistoryRecorder.saveHistory]
+ * Callback which called as a result of [MapboxHistoryRecorder.stopRecording]
  */
 fun interface SaveHistoryCallback {
     /**
-     * @param filepath is null if [MapboxHistoryRecorder.saveHistory] called without any
+     * @param filepath is null if [MapboxHistoryRecorder.stopRecording] called without any
      * events received or the navigator is not configured.
      */
     fun onSaved(filepath: String?)

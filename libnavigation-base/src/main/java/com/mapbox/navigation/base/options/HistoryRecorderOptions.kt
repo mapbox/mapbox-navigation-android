@@ -3,18 +3,15 @@ package com.mapbox.navigation.base.options
 /**
  * Defines options for recording history files.
  *
- * @param enabled saves the history files when true, does nothing when false. false by default.
  * @param fileDirectory used for saving history files. Null use a default directory.
  */
 class HistoryRecorderOptions private constructor(
-    val enabled: Boolean,
     val fileDirectory: String?
 ) {
     /**
      * @return the builder that created the [HistoryRecorderOptions]
      */
     fun toBuilder(): Builder = Builder().apply {
-        enabled(enabled)
         fileDirectory(fileDirectory)
     }
 
@@ -27,7 +24,6 @@ class HistoryRecorderOptions private constructor(
 
         other as HistoryRecorderOptions
 
-        if (enabled != other.enabled) return false
         if (fileDirectory != other.fileDirectory) return false
 
         return true
@@ -37,9 +33,7 @@ class HistoryRecorderOptions private constructor(
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        var result = enabled.hashCode()
-        result = 31 * result + (fileDirectory?.hashCode() ?: 0)
-        return result
+        return fileDirectory?.hashCode() ?: 0
     }
 
     /**
@@ -47,7 +41,6 @@ class HistoryRecorderOptions private constructor(
      */
     override fun toString(): String {
         return "HistoryRecorderOptions(" +
-            "enabled=$enabled, " +
             "fileDirectory=$fileDirectory" +
             ")"
     }
@@ -57,14 +50,7 @@ class HistoryRecorderOptions private constructor(
      */
     class Builder {
 
-        private var enabled: Boolean = false
         private var fileDirectory: String? = null
-
-        /**
-         * Enables history recording.
-         */
-        fun enabled(enabled: Boolean): Builder =
-            apply { this.enabled = enabled }
 
         /**
          * Creates a custom file path to store the history files.
@@ -77,7 +63,6 @@ class HistoryRecorderOptions private constructor(
          */
         fun build(): HistoryRecorderOptions {
             return HistoryRecorderOptions(
-                enabled = enabled,
                 fileDirectory = fileDirectory
             )
         }

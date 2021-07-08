@@ -120,7 +120,9 @@ package com.mapbox.navigation.core.history {
 
   public final class MapboxHistoryRecorder {
     method public String? fileDirectory();
-    method public void saveHistory(com.mapbox.navigation.core.history.SaveHistoryCallback result);
+    method public void pushHistory(String eventType, String eventJson);
+    method public void startRecording();
+    method public void stopRecording(com.mapbox.navigation.core.history.SaveHistoryCallback result);
   }
 
   public fun interface SaveHistoryCallback {
