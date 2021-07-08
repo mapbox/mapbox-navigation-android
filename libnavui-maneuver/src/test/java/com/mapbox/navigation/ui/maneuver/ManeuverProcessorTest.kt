@@ -6,6 +6,7 @@ import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.maneuver.model.ManeuverOptions
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,11 +26,13 @@ class ManeuverProcessorTest {
             FileUtils.loadJsonFixture("short_route_invalid_banner_instruction.json")
         )
         val maneuverState = ManeuverState()
+        val maneuverOptions = ManeuverOptions.Builder().build()
         val distanceFormatter = mockk<DistanceFormatter>()
         val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
             route,
             null,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         val expected = ManeuverResult.GetManeuverList.Failure(
@@ -48,10 +51,12 @@ class ManeuverProcessorTest {
         )
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().build()
         val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
             route,
             null,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         val expected = ManeuverResult.GetManeuverList.Failure("RouteLeg should have valid steps")
@@ -68,10 +73,12 @@ class ManeuverProcessorTest {
         )
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().build()
         val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
             route,
             null,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         val expected = ManeuverResult.GetManeuverList.Failure("Route should have valid legs")
@@ -89,10 +96,12 @@ class ManeuverProcessorTest {
         val routeLeg = null
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().build()
         val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
             route,
             routeLeg,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         val expected = ManeuverResult.GetManeuverList.Failure(
@@ -122,10 +131,12 @@ class ManeuverProcessorTest {
         }
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().build()
         val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
             route,
             routeLeg,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         val expected = ManeuverResult.GetManeuverList.Failure(
@@ -138,17 +149,43 @@ class ManeuverProcessorTest {
     }
 
     @Test
-    fun `when maneuver with direction route and is valid`() {
+    fun `when maneuver with direction route is valid and filter duplicate`() {
         val route = DirectionsRoute.fromJson(
             FileUtils.loadJsonFixture("short_route.json")
         )
         val routeLeg = null
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().build()
         val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
             route,
             routeLeg,
             maneuverState,
+            maneuverOptions,
+            distanceFormatter
+        )
+        val expected = 3
+
+        val actual = ManeuverProcessor.process(maneuverAction) as
+            ManeuverResult.GetManeuverList.Success
+
+        assertEquals(expected, actual.maneuvers.size)
+    }
+
+    @Test
+    fun `when maneuver with direction route and is valid and don't filter duplicate`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("short_route.json")
+        )
+        val routeLeg = null
+        val maneuverState = ManeuverState()
+        val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().filterDuplicateManeuvers(false).build()
+        val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
+            route,
+            routeLeg,
+            maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         val expected = 4
@@ -167,10 +204,12 @@ class ManeuverProcessorTest {
         val routeLeg = null
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().build()
         val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
             route,
             routeLeg,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
 
@@ -184,6 +223,7 @@ class ManeuverProcessorTest {
             route1,
             routeLeg1,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
 
@@ -207,9 +247,11 @@ class ManeuverProcessorTest {
         )
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().build()
         val maneuverAction = ManeuverAction.GetManeuverList(
             routeProgress,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         val expected = ManeuverResult.GetManeuverListWithProgress.Failure(
@@ -235,9 +277,11 @@ class ManeuverProcessorTest {
         )
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().build()
         val maneuverAction = ManeuverAction.GetManeuverList(
             routeProgress,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         val expected = ManeuverResult.GetManeuverListWithProgress.Failure(
@@ -263,9 +307,11 @@ class ManeuverProcessorTest {
         )
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().build()
         val maneuverAction = ManeuverAction.GetManeuverList(
             routeProgress,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         val expected = ManeuverResult.GetManeuverListWithProgress.Failure(
@@ -293,9 +339,11 @@ class ManeuverProcessorTest {
         every { legProgress?.routeLeg } returns RouteLeg.builder().build()
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().build()
         val maneuverAction = ManeuverAction.GetManeuverList(
             routeProgress,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         val expected = ManeuverResult.GetManeuverListWithProgress.Failure(
@@ -321,9 +369,11 @@ class ManeuverProcessorTest {
         )
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().build()
         val maneuverAction = ManeuverAction.GetManeuverList(
             routeProgress,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         val expected = ManeuverResult.GetManeuverListWithProgress.Failure(
@@ -336,7 +386,7 @@ class ManeuverProcessorTest {
     }
 
     @Test
-    fun `when maneuver with route progress valid`() {
+    fun `when maneuver with route progress is valid and filter duplicate`() {
         val route = DirectionsRoute.fromJson(
             FileUtils.loadJsonFixture("short_route.json")
         )
@@ -349,9 +399,41 @@ class ManeuverProcessorTest {
         )
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().build()
         val maneuverAction = ManeuverAction.GetManeuverList(
             routeProgress,
             maneuverState,
+            maneuverOptions,
+            distanceFormatter
+        )
+        val expected = 3
+
+        val actual = ManeuverProcessor.process(maneuverAction) as
+            ManeuverResult.GetManeuverListWithProgress.Success
+
+        assertEquals(expected, actual.maneuvers.size)
+        assertEquals(15.0, actual.maneuvers[0].stepDistance.distanceRemaining)
+    }
+
+    @Test
+    fun `when maneuver with route progress is valid and don't filter duplicate`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("short_route.json")
+        )
+        val routeProgress = mockRouteProgress(
+            _route = route,
+            _distanceRemaining = 15f,
+            _routeLegIndex = 0,
+            _stepIndex = 0,
+            _instructionIndex = 0,
+        )
+        val maneuverState = ManeuverState()
+        val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().filterDuplicateManeuvers(false).build()
+        val maneuverAction = ManeuverAction.GetManeuverList(
+            routeProgress,
+            maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         val expected = 4
@@ -377,9 +459,11 @@ class ManeuverProcessorTest {
         )
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().build()
         val maneuverAction = ManeuverAction.GetManeuverList(
             routeProgress,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
 
@@ -395,13 +479,14 @@ class ManeuverProcessorTest {
         val maneuverAction1 = ManeuverAction.GetManeuverList(
             routeProgress1,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
 
         val actual1 = ManeuverProcessor.process(maneuverAction1) as
             ManeuverResult.GetManeuverListWithProgress.Success
 
-        assertEquals(4, actual1.maneuvers.size)
+        assertEquals(3, actual1.maneuvers.size)
         assertEquals(10.0, actual1.maneuvers[0].stepDistance.distanceRemaining)
     }
 

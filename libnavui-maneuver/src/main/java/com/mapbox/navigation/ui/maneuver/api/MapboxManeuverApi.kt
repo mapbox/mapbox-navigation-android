@@ -14,6 +14,7 @@ import com.mapbox.navigation.ui.maneuver.ManeuverState
 import com.mapbox.navigation.ui.maneuver.RoadShieldContentManager
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
+import com.mapbox.navigation.ui.maneuver.model.ManeuverOptions
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.RoadShield
 import com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
  */
 class MapboxManeuverApi internal constructor(
     private val distanceFormatter: DistanceFormatter,
+    private val maneuverOptions: ManeuverOptions,
     private val processor: ManeuverProcessor
 ) {
 
@@ -46,7 +48,22 @@ class MapboxManeuverApi internal constructor(
      * a [DirectionsRoute] (to get all maneuvers for the provided route)
      * or [RouteProgress] (to get remaining maneuvers for the provided route).
      */
-    constructor(formatter: DistanceFormatter) : this(formatter, ManeuverProcessor)
+    constructor(formatter: DistanceFormatter) : this(
+        formatter,
+        ManeuverOptions.Builder().build(),
+        ManeuverProcessor
+    )
+
+    /**
+     * Mapbox Maneuver Api allows you to request [Maneuver] instructions given
+     * a [DirectionsRoute] (to get all maneuvers for the provided route)
+     * or [RouteProgress] (to get remaining maneuvers for the provided route).
+     */
+    constructor(formatter: DistanceFormatter, maneuverOptions: ManeuverOptions) : this(
+        formatter,
+        maneuverOptions,
+        ManeuverProcessor
+    )
 
     /**
      * The function calls [ManeuverCallback] with a list of [Maneuver]s which are wrappers on top of [BannerInstructions] that are in the provided route.
@@ -71,6 +88,7 @@ class MapboxManeuverApi internal constructor(
             route,
             routeLeg,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         when (val result = processor.process(action)) {
@@ -110,7 +128,12 @@ class MapboxManeuverApi internal constructor(
         routeProgress: RouteProgress,
         callback: ManeuverCallback
     ) {
-        val action = ManeuverAction.GetManeuverList(routeProgress, maneuverState, distanceFormatter)
+        val action = ManeuverAction.GetManeuverList(
+            routeProgress,
+            maneuverState,
+            maneuverOptions,
+            distanceFormatter
+        )
         when (
             val result = processor.process(action)
         ) {

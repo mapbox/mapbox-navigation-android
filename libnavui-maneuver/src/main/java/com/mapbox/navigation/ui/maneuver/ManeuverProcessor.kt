@@ -16,6 +16,7 @@ import com.mapbox.navigation.ui.maneuver.model.Lane
 import com.mapbox.navigation.ui.maneuver.model.LaneIndicator
 import com.mapbox.navigation.ui.maneuver.model.LegToManeuvers
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
+import com.mapbox.navigation.ui.maneuver.model.ManeuverOptions
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode
 import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
@@ -35,6 +36,7 @@ internal object ManeuverProcessor {
                     action.route,
                     action.routeLeg,
                     action.maneuverState,
+                    action.maneuverOption,
                     action.distanceFormatter
                 )
             }
@@ -42,6 +44,7 @@ internal object ManeuverProcessor {
                 processManeuverList(
                     action.routeProgress,
                     action.maneuverState,
+                    action.maneuverOption,
                     action.distanceFormatter
                 )
             }
@@ -52,6 +55,7 @@ internal object ManeuverProcessor {
         route: DirectionsRoute,
         routeLeg: RouteLeg? = null,
         maneuverState: ManeuverState,
+        maneuverOptions: ManeuverOptions,
         distanceFormatter: DistanceFormatter,
     ): ManeuverResult.GetManeuverList {
         if (!route.isSameRoute(maneuverState.route)) {
@@ -59,22 +63,76 @@ internal object ManeuverProcessor {
             maneuverState.allManeuvers.clear()
             maneuverState.roadShields.clear()
             try {
-                createManeuverList(route, maneuverState, distanceFormatter)
+                createAllManeuversForRoute(route, maneuverState, distanceFormatter)
             } catch (exception: RuntimeException) {
                 return ManeuverResult.GetManeuverList.Failure(exception.message)
             }
         }
         return try {
-            val allManeuverList = readManeuverListWith(maneuverState.allManeuvers, routeLeg)
-            ManeuverResult.GetManeuverList.Success(allManeuverList)
+            val maneuverList = maneuverState.allManeuvers.getManeuversForRouteLeg(
+                maneuverOptions.filterDuplicateManeuvers, routeLeg
+            )
+            ManeuverResult.GetManeuverList.Success(maneuverList)
         } catch (exception: RuntimeException) {
             ManeuverResult.GetManeuverList.Failure(exception.message)
         }
     }
 
+    private fun List<LegToManeuvers>.getManeuversForRouteLeg(
+        filterManeuvers: Boolean,
+        routeLeg: RouteLeg? = null
+    ): List<Maneuver> {
+        if (isEmpty()) {
+            throw RuntimeException("List cannot be empty")
+        }
+        val maneuverList: List<Maneuver> = when (routeLeg == null) {
+            true -> {
+                if (filterManeuvers) {
+                    this[0].stepIndexToManeuvers.getManeuversForAllStepsAndFilter()
+                } else {
+                    this[0].stepIndexToManeuvers.getManeuversForAllSteps()
+                }
+            }
+            else -> {
+                this.find { item -> item.routeLeg == routeLeg }?.let { legToManeuver ->
+                    if (filterManeuvers) {
+                        legToManeuver.stepIndexToManeuvers.getManeuversForAllStepsAndFilter()
+                    } else {
+                        legToManeuver.stepIndexToManeuvers.getManeuversForAllSteps()
+                    }
+                } ?: throw RuntimeException("$routeLeg passed is different")
+            }
+        }
+        if (maneuverList.isEmpty()) {
+            throw RuntimeException("Maneuver list not found corresponding to $routeLeg")
+        }
+        return maneuverList
+    }
+
+    private fun List<StepIndexToManeuvers>.getManeuversForAllStepsAndFilter(): List<Maneuver> {
+        val maneuverList = mutableListOf<Maneuver>()
+        forEach { stepIndexToManeuver ->
+            if (stepIndexToManeuver.maneuverList.size > 1) {
+                maneuverList.add(stepIndexToManeuver.maneuverList[0])
+            } else {
+                maneuverList.addAll(stepIndexToManeuver.maneuverList)
+            }
+        }
+        return maneuverList
+    }
+
+    private fun List<StepIndexToManeuvers>.getManeuversForAllSteps(): List<Maneuver> {
+        val maneuverList = mutableListOf<Maneuver>()
+        forEach { stepIndexToManeuver ->
+            maneuverList.addAll(stepIndexToManeuver.maneuverList)
+        }
+        return maneuverList
+    }
+
     private fun processManeuverList(
         routeProgress: RouteProgress,
         maneuverState: ManeuverState,
+        maneuverOptions: ManeuverOptions,
         distanceFormatter: DistanceFormatter
     ): ManeuverResult.GetManeuverListWithProgress {
         return try {
@@ -112,7 +170,7 @@ internal object ManeuverProcessor {
                         maneuverState.route = route
                         maneuverState.allManeuvers.clear()
                         maneuverState.roadShields.clear()
-                        createManeuverList(route, maneuverState, distanceFormatter)
+                        createAllManeuversForRoute(route, maneuverState, distanceFormatter)
                     }
 
                     val legToManeuvers = routeLeg.findIn(maneuverState.allManeuvers)
@@ -126,12 +184,19 @@ internal object ManeuverProcessor {
                         stepDistanceRemaining
                     )
 
-                    val filteredList = createFilteredList(
-                        currentInstructionIndex,
-                        indexOfStepToManeuvers,
-                        stepsToManeuvers
-                    )
-                    ManeuverResult.GetManeuverListWithProgress.Success(filteredList)
+                    val maneuverList = if (maneuverOptions.filterDuplicateManeuvers) {
+                        stepsToManeuvers.getManeuversForAllStepsWithProgressAndFilter(
+                            currentInstructionIndex,
+                            indexOfStepToManeuvers
+                        )
+                    } else {
+                        stepsToManeuvers.getManeuversForAllStepsWithProgress(
+                            currentInstructionIndex,
+                            indexOfStepToManeuvers
+                        )
+                    }
+
+                    ManeuverResult.GetManeuverListWithProgress.Success(maneuverList)
                 }
             }
         } catch (exception: Exception) {
@@ -139,7 +204,7 @@ internal object ManeuverProcessor {
         }
     }
 
-    private fun createManeuverList(
+    private fun createAllManeuversForRoute(
         route: DirectionsRoute,
         maneuverState: ManeuverState,
         distanceFormatter: DistanceFormatter
@@ -170,34 +235,6 @@ internal object ManeuverProcessor {
         }
     }
 
-    private fun readManeuverListWith(
-        list: List<LegToManeuvers>,
-        routeLeg: RouteLeg? = null
-    ): List<Maneuver> {
-        if (list.isEmpty()) {
-            throw RuntimeException("List of LegToManeuvers cannot be empty")
-        }
-        val maneuverList = mutableListOf<Maneuver>()
-        when (routeLeg == null) {
-            true -> {
-                list[0].stepIndexToManeuvers.forEach { stepIndexToManeuver ->
-                    maneuverList.addAll(stepIndexToManeuver.maneuverList)
-                }
-            }
-            else -> {
-                list.find { item -> item.routeLeg == routeLeg }?.let { legToManeuver ->
-                    legToManeuver.stepIndexToManeuvers.forEach { stepIndexToManeuver ->
-                        maneuverList.addAll(stepIndexToManeuver.maneuverList)
-                    }
-                } ?: throw RuntimeException("$routeLeg passed is different")
-            }
-        }
-        if (maneuverList.isEmpty()) {
-            throw RuntimeException("Maneuver list not found corresponding to $routeLeg")
-        }
-        return maneuverList
-    }
-
     private fun RouteLeg.findIn(legs: List<LegToManeuvers>): LegToManeuvers {
         return legs.find {
             it.routeLeg == this
@@ -219,24 +256,35 @@ internal object ManeuverProcessor {
             stepDistanceRemaining
     }
 
-    private fun createFilteredList(
+    private fun List<StepIndexToManeuvers>.getManeuversForAllStepsWithProgress(
         currentInstructionIndex: Int,
-        indexOfStepToManeuvers: Int,
-        stepsToManeuvers: List<StepIndexToManeuvers>
+        indexOfStepToManeuvers: Int
     ): List<Maneuver> {
         val list = mutableListOf<Maneuver>()
-        for (i in indexOfStepToManeuvers..stepsToManeuvers.lastIndex) {
-            if (i == indexOfStepToManeuvers &&
-                stepsToManeuvers[i].maneuverList.size > 1
-            ) {
+        for (i in indexOfStepToManeuvers..lastIndex) {
+            if (this[i].maneuverList.size > 1 && i == indexOfStepToManeuvers) {
                 list.addAll(
-                    stepsToManeuvers[i].maneuverList.subList(
-                        currentInstructionIndex,
-                        stepsToManeuvers[i].maneuverList.size
-                    )
+                    this[i].maneuverList.subList(currentInstructionIndex, this[i].maneuverList.size)
                 )
             } else {
-                list.addAll(stepsToManeuvers[i].maneuverList)
+                list.addAll(this[i].maneuverList)
+            }
+        }
+        return list
+    }
+
+    private fun List<StepIndexToManeuvers>.getManeuversForAllStepsWithProgressAndFilter(
+        currentInstructionIndex: Int,
+        indexOfStepToManeuvers: Int
+    ): List<Maneuver> {
+        val list = mutableListOf<Maneuver>()
+        for (i in indexOfStepToManeuvers..lastIndex) {
+            if (this[i].maneuverList.size > 1 && i == indexOfStepToManeuvers) {
+                list.add(this[i].maneuverList[currentInstructionIndex])
+            } else if (this[i].maneuverList.size > 1 && i != indexOfStepToManeuvers) {
+                list.add(this[i].maneuverList[0])
+            } else {
+                list.addAll(this[i].maneuverList)
             }
         }
         return list

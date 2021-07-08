@@ -12,6 +12,7 @@ import com.mapbox.navigation.ui.maneuver.ManeuverState
 import com.mapbox.navigation.ui.maneuver.RoadShieldContentManager
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
+import com.mapbox.navigation.ui.maneuver.model.ManeuverOptions
 import com.mapbox.navigation.ui.maneuver.model.RoadShield
 import com.mapbox.navigation.ui.maneuver.model.RoadShieldError
 import com.mapbox.navigation.ui.maneuver.model.RoadShieldResult
@@ -33,6 +34,7 @@ class MapboxManeuverApiTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
+    private val maneuverOptions = mockk<ManeuverOptions>()
     private val distanceFormatter = mockk<DistanceFormatter>()
     private val mapboxManeuverApi = MapboxManeuverApi(distanceFormatter)
 
@@ -54,6 +56,7 @@ class MapboxManeuverApiTest {
             route,
             null,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         every { ManeuverProcessor.process(action) } returns
@@ -74,6 +77,7 @@ class MapboxManeuverApiTest {
             route,
             null,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         every { ManeuverProcessor.process(action) } returns
@@ -94,6 +98,7 @@ class MapboxManeuverApiTest {
             route,
             null,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         every { ManeuverProcessor.process(action) } returns
@@ -113,6 +118,7 @@ class MapboxManeuverApiTest {
         val action = ManeuverAction.GetManeuverList(
             routeProgress,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         every { ManeuverProcessor.process(action) } returns
@@ -132,6 +138,7 @@ class MapboxManeuverApiTest {
         val action = ManeuverAction.GetManeuverList(
             routeProgress,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         every { ManeuverProcessor.process(action) } returns
@@ -151,6 +158,7 @@ class MapboxManeuverApiTest {
         val action = ManeuverAction.GetManeuverList(
             routeProgress,
             maneuverState,
+            maneuverOptions,
             distanceFormatter
         )
         every { ManeuverProcessor.process(action) } returns
