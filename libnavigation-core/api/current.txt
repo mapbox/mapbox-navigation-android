@@ -145,28 +145,36 @@ package com.mapbox.navigation.core.history {
 package com.mapbox.navigation.core.history.model {
 
   public interface HistoryEvent {
+    method public double getEventTimestamp();
+    property public abstract double eventTimestamp;
   }
 
   public final class HistoryEventGetStatus implements com.mapbox.navigation.core.history.model.HistoryEvent {
     method public long getElapsedRealtimeNanos();
+    method public double getEventTimestamp();
     property public final long elapsedRealtimeNanos;
+    property public double eventTimestamp;
   }
 
   public final class HistoryEventPushHistoryRecord implements com.mapbox.navigation.core.history.model.HistoryEvent {
+    method public double getEventTimestamp();
     method public String getProperties();
     method public String getType();
+    property public double eventTimestamp;
     property public final String properties;
     property public final String type;
   }
 
   public final class HistoryEventSetRoute implements com.mapbox.navigation.core.history.model.HistoryEvent {
     method public com.mapbox.api.directions.v5.models.DirectionsRoute? getDirectionsRoute();
+    method public double getEventTimestamp();
     method public String getGeometries();
     method public int getLegIndex();
     method public String getProfile();
     method public int getRouteIndex();
     method public java.util.List<com.mapbox.navigation.core.history.model.HistoryWaypoint> getWaypoints();
     property public final com.mapbox.api.directions.v5.models.DirectionsRoute? directionsRoute;
+    property public double eventTimestamp;
     property public final String geometries;
     property public final int legIndex;
     property public final String profile;
@@ -175,7 +183,9 @@ package com.mapbox.navigation.core.history.model {
   }
 
   public final class HistoryEventUpdateLocation implements com.mapbox.navigation.core.history.model.HistoryEvent {
+    method public double getEventTimestamp();
     method public android.location.Location getLocation();
+    property public double eventTimestamp;
     property public final android.location.Location location;
   }
 
@@ -248,10 +258,6 @@ package com.mapbox.navigation.core.replay {
 
 package com.mapbox.navigation.core.replay.history {
 
-  public fun interface CustomEventMapper {
-    method public com.mapbox.navigation.core.replay.history.ReplayEventBase? map(String eventType, java.util.Map<?,?> properties);
-  }
-
   public interface ReplayEventBase {
     method public double getEventTimestamp();
     property public abstract double eventTimestamp;
@@ -317,25 +323,22 @@ package com.mapbox.navigation.core.replay.history {
     method public void replayEvents(java.util.List<? extends com.mapbox.navigation.core.replay.history.ReplayEventBase> events);
   }
 
-  public final class ReplayHistoryDTO {
-    ctor public ReplayHistoryDTO(@com.google.gson.annotations.SerializedName("history_version") String historyVersion, @com.google.gson.annotations.SerializedName("version") String version, @com.google.gson.annotations.SerializedName("events") java.util.List<?> events);
-    method public String component1();
-    method public String component2();
-    method public java.util.List<java.lang.Object> component3();
-    method public com.mapbox.navigation.core.replay.history.ReplayHistoryDTO copy(String historyVersion, String version, java.util.List<?> events);
-    method public java.util.List<java.lang.Object> getEvents();
-    method public String getHistoryVersion();
-    method public String getVersion();
-    property public final java.util.List<java.lang.Object> events;
-    property public final String historyVersion;
-    property public final String version;
+  public fun interface ReplayHistoryEventMapper<Event extends com.mapbox.navigation.core.history.model.HistoryEvent> {
+    method public com.mapbox.navigation.core.replay.history.ReplayEventBase? map(Event event);
   }
 
   public final class ReplayHistoryMapper {
-    ctor public ReplayHistoryMapper(com.mapbox.navigation.core.replay.history.CustomEventMapper? customEventMapper = null, com.mapbox.base.common.logger.Logger? logger = null);
-    ctor public ReplayHistoryMapper(com.mapbox.navigation.core.replay.history.CustomEventMapper? customEventMapper = null);
-    method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapToReplayEvents(String historyData);
-    method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapToReplayEvents(com.mapbox.navigation.core.replay.history.ReplayHistoryDTO historyDTO);
+    method public com.mapbox.navigation.core.replay.history.ReplayEventBase? mapToReplayEvent(com.mapbox.navigation.core.history.model.HistoryEvent historyEvent);
+    method public com.mapbox.navigation.core.replay.history.ReplayHistoryMapper.Builder toBuilder();
+  }
+
+  public static final class ReplayHistoryMapper.Builder {
+    ctor public ReplayHistoryMapper.Builder();
+    method public com.mapbox.navigation.core.replay.history.ReplayHistoryMapper build();
+    method public com.mapbox.navigation.core.replay.history.ReplayHistoryMapper.Builder locationMapper(com.mapbox.navigation.core.replay.history.ReplayHistoryEventMapper<com.mapbox.navigation.core.history.model.HistoryEventUpdateLocation>? locationMapper);
+    method public com.mapbox.navigation.core.replay.history.ReplayHistoryMapper.Builder pushEventMappers(java.util.List<? extends com.mapbox.navigation.core.replay.history.ReplayHistoryEventMapper<com.mapbox.navigation.core.history.model.HistoryEventPushHistoryRecord>> pushEventMappers);
+    method public com.mapbox.navigation.core.replay.history.ReplayHistoryMapper.Builder setRouteMapper(com.mapbox.navigation.core.replay.history.ReplayHistoryEventMapper<com.mapbox.navigation.core.history.model.HistoryEventSetRoute>? setRouteMapper);
+    method public com.mapbox.navigation.core.replay.history.ReplayHistoryMapper.Builder statusMapper(com.mapbox.navigation.core.replay.history.ReplayHistoryEventMapper<com.mapbox.navigation.core.history.model.HistoryEventGetStatus>? statusMapper);
   }
 
   public final class ReplaySetRoute implements com.mapbox.navigation.core.replay.history.ReplayEventBase {

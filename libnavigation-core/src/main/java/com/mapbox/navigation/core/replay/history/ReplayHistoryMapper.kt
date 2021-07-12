@@ -1,108 +1,199 @@
 package com.mapbox.navigation.core.replay.history
 
-import com.google.gson.Gson
-import com.google.gson.internal.LinkedTreeMap
-import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
+import com.mapbox.navigation.core.history.MapboxHistoryReader
+import com.mapbox.navigation.core.history.MapboxHistoryRecorder
+import com.mapbox.navigation.core.history.model.HistoryEvent
+import com.mapbox.navigation.core.history.model.HistoryEventGetStatus
+import com.mapbox.navigation.core.history.model.HistoryEventPushHistoryRecord
+import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
+import com.mapbox.navigation.core.history.model.HistoryEventUpdateLocation
 import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 
 /**
- * Additional mapper that can be used with [ReplayHistoryMapper].
+ * Mapper that can be used with [ReplayHistoryMapper].
+ *
+ * This class provides an abstraction for mapping [HistoryEvent] into [ReplayEventBase].
  */
-fun interface CustomEventMapper {
+fun interface ReplayHistoryEventMapper<Event : HistoryEvent> {
 
     /**
-     * Override to map your own custom events from history files,
-     * into [ReplayEventBase] for the [MapboxReplayer]
+     * Override to map your own custom events from history files
+     * into [ReplayEventBase] for the [MapboxReplayer].
      */
-    fun map(eventType: String, properties: Map<*, *>): ReplayEventBase?
+    fun map(event: Event): ReplayEventBase?
 }
 
 /**
- * This class is responsible for creating [ReplayEvents] from history data.
- *
- * @param customEventMapper if you have added custom events to the replay history, include your
- * own [CustomEventMapper] (optional)
- * @param logger interface for logging any events (optional)
+ * Mapper used to convert [MapboxHistoryReader] events into events replayable by
+ * the [MapboxReplayer]. Record navigation history data using the [MapboxHistoryRecorder].
  */
-class ReplayHistoryMapper @JvmOverloads constructor(
-    private val customEventMapper: CustomEventMapper? = null,
-    private val logger: Logger? = null
+class ReplayHistoryMapper private constructor(
+    private val locationMapper: ReplayHistoryEventMapper<HistoryEventUpdateLocation>?,
+    private val setRouteMapper: ReplayHistoryEventMapper<HistoryEventSetRoute>?,
+    private val statusMapper: ReplayHistoryEventMapper<HistoryEventGetStatus>?,
+    private val pushEventMappers: List<ReplayHistoryEventMapper<HistoryEventPushHistoryRecord>>
 ) {
-    private val gson: Gson = Gson()
 
     /**
-     * Given raw json string return [ReplayEvents] that can be given to a [MapboxReplayer]
+     * @return the builder that created the [ReplayHistoryMapper]
      */
-    fun mapToReplayEvents(historyData: String): List<ReplayEventBase> {
-        val exampleHistoryData = gson.fromJson(historyData, ReplayHistoryDTO::class.java)
-        return mapToReplayEvents(exampleHistoryData)
+    fun toBuilder() = Builder().apply {
+        locationMapper(locationMapper)
+        setRouteMapper(setRouteMapper)
+        statusMapper(statusMapper)
+        pushEventMappers(pushEventMappers)
     }
 
     /**
-     * Given [ReplayHistoryDTO] return [ReplayEvents] that can be given to a [MapboxReplayer]
+     * Given [HistoryEvent] map to [ReplayEventBase] that can be replayed using [MapboxReplayer]
+     *
+     * Use the [MapboxHistoryReader] in order to read the event from a file.
      */
-    fun mapToReplayEvents(historyDTO: ReplayHistoryDTO): List<ReplayEventBase> {
-        return historyDTO.events
-            .mapIndexed { index, _ ->
-                val event = historyDTO.events[index] as LinkedTreeMap<*, *>
-                return@mapIndexed try {
-                    val eventType: String = event["type"] as String
-                    mapToEvent(eventType, event)
-                } catch (throwable: Throwable) {
-                    logger?.e(
-                        msg = Message("Failed to read index $index: $event"),
-                        tr = throwable
-                    )
-                    throw throwable
-                }
+    fun mapToReplayEvent(historyEvent: HistoryEvent): ReplayEventBase? {
+        return when (historyEvent) {
+            is HistoryEventUpdateLocation -> locationMapper?.map(historyEvent)
+            is HistoryEventSetRoute -> setRouteMapper?.map(historyEvent)
+            is HistoryEventGetStatus -> statusMapper?.map(historyEvent)
+            is HistoryEventPushHistoryRecord -> mapPushEvent(historyEvent)
+            else -> null
+        }
+    }
+
+    private fun mapPushEvent(historyEvent: HistoryEventPushHistoryRecord): ReplayEventBase? {
+        for (mapper in pushEventMappers) {
+            val mappedEvent = mapper.map(historyEvent)
+            if (mappedEvent != null) {
+                return mappedEvent
             }
-            .filterNotNull()
+        }
+        return null
     }
 
-    private fun mapToEvent(eventType: String, event: LinkedTreeMap<*, *>): ReplayEventBase? {
-        return when (eventType) {
-            "updateLocation" -> gson.fromJson(
-                event.toString(),
-                ReplayEventUpdateLocation::class.java
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ReplayHistoryMapper
+
+        if (locationMapper != other.locationMapper) return false
+        if (setRouteMapper != other.setRouteMapper) return false
+        if (statusMapper != other.statusMapper) return false
+        if (pushEventMappers != other.pushEventMappers) return false
+
+        return true
+    }
+
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun hashCode(): Int {
+        var result = locationMapper?.hashCode() ?: 0
+        result = 31 * result + (setRouteMapper?.hashCode() ?: 0)
+        result = 31 * result + (statusMapper?.hashCode() ?: 0)
+        result = 31 * result + pushEventMappers.hashCode()
+        return result
+    }
+
+    /**
+     * Returns a string representation of the object.
+     */
+    override fun toString(): String {
+        return "ReplayHistoryMapper(" +
+            "locationMapper=$locationMapper, " +
+            "setRouteMapper=$setRouteMapper, " +
+            "statusMapper=$statusMapper, " +
+            "pushEventMappers=$pushEventMappers" +
+            ")"
+    }
+
+    /**
+     * Build a new [ReplayHistoryMapper]
+     */
+    class Builder {
+        private var locationMapper: ReplayHistoryEventMapper<HistoryEventUpdateLocation>? =
+            DefaultLocationMapper
+        private var setRouteMapper: ReplayHistoryEventMapper<HistoryEventSetRoute>? =
+            DefaultSetRouteMapper
+        private var statusMapper: ReplayHistoryEventMapper<HistoryEventGetStatus>? =
+            DefaultStatusMapper
+        private var pushEventMappers =
+            emptyList<ReplayHistoryEventMapper<HistoryEventPushHistoryRecord>>()
+
+        /**
+         * Build your [ReplayHistoryMapper].
+         *
+         * @return [ReplayHistoryMapper]
+         */
+        fun build(): ReplayHistoryMapper {
+            return ReplayHistoryMapper(
+                locationMapper = locationMapper,
+                setRouteMapper = setRouteMapper,
+                statusMapper = statusMapper,
+                pushEventMappers = pushEventMappers
             )
-            "getStatus" -> {
-                val eventTimestamp = if (event.contains("event_timestamp")) {
-                    event["event_timestamp"]
-                } else {
-                    event["timestamp"]
-                } as Double
-                ReplayEventGetStatus(
-                    eventTimestamp = eventTimestamp
-                )
-            }
-            "setRoute" -> {
-                val directionsRoute = try {
-                    if (event["route"] == "{}") {
-                        null
-                    } else {
-                        DirectionsRoute.fromJson(event["route"] as String, "null")
-                    }
-                } catch (throwable: Throwable) {
-                    logger?.w(
-                        msg = Message("Unable to setRoute from history file"),
-                        tr = throwable
+        }
+
+        /**
+         * Override to create a custom event mapper.
+         * Set to `null` to disable the HistoryEventUpdateLocation.
+         */
+        fun locationMapper(
+            locationMapper: ReplayHistoryEventMapper<HistoryEventUpdateLocation>?
+        ): Builder = apply {
+            this.locationMapper = locationMapper
+        }
+
+        /**
+         * Override to create a custom event mapper.
+         * Set to `null` to disable the HistoryEventSetRoute.
+         */
+        fun setRouteMapper(
+            setRouteMapper: ReplayHistoryEventMapper<HistoryEventSetRoute>?
+        ): Builder = apply {
+            this.setRouteMapper = setRouteMapper
+        }
+
+        /**
+         * Override to create a custom event mapper.
+         * Set to `null` to disable the HistoryEventGetStatus.
+         */
+        fun statusMapper(
+            statusMapper: ReplayHistoryEventMapper<HistoryEventGetStatus>?
+        ): Builder = apply {
+            this.statusMapper = statusMapper
+        }
+
+        /**
+         * Add custom push event mappers. This is empty by default.
+         */
+        fun pushEventMappers(
+            pushEventMappers: List<ReplayHistoryEventMapper<HistoryEventPushHistoryRecord>>
+        ): Builder = apply {
+            this.pushEventMappers = pushEventMappers
+        }
+
+        private companion object {
+            private val DefaultLocationMapper =
+                ReplayHistoryEventMapper<HistoryEventUpdateLocation> {
+                    ReplayRouteMapper.mapToUpdateLocation(it.eventTimestamp, it.location)
+                }
+
+            private val DefaultSetRouteMapper =
+                ReplayHistoryEventMapper<HistoryEventSetRoute> {
+                    ReplaySetRoute(
+                        eventTimestamp = it.eventTimestamp,
+                        route = it.directionsRoute
                     )
-                    return null
                 }
-                ReplaySetRoute(
-                    eventTimestamp = event["event_timestamp"] as Double,
-                    route = directionsRoute
-                )
-            }
-            else -> {
-                val replayEvent = customEventMapper?.map(eventType, event.toMap())
-                if (replayEvent == null) {
-                    logger?.e(msg = Message("Replay unsupported event $eventType"))
+
+            private val DefaultStatusMapper =
+                ReplayHistoryEventMapper<HistoryEventGetStatus> {
+                    ReplayEventGetStatus(it.eventTimestamp)
                 }
-                replayEvent
-            }
         }
     }
 }
