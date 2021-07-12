@@ -5,9 +5,11 @@ import android.location.Location
 /**
  * Represents raw locations captured by and saved in history files.
  *
+ * @param eventTimestamp timestamp of event seconds
  * @param location raw location
  */
 class HistoryEventUpdateLocation internal constructor(
+    override val eventTimestamp: Double,
     val location: Location
 ) : HistoryEvent {
 
