@@ -30,7 +30,6 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
-import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.replay.history.ReplaySetRoute
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -84,6 +83,10 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.selectHistoryButton).setOnClickListener {
             val activityIntent = Intent(this, HistoryFilesActivity::class.java)
+                .putExtra(
+                    HistoryFilesActivity.EXTRA_HISTORY_FILE_DIRECTORY,
+                    mapboxNavigation.historyRecorder.fileDirectory()
+                )
             startActivityForResult(activityIntent, HistoryFilesActivity.REQUEST_CODE)
         }
         setupReplayControls()
@@ -321,18 +324,14 @@ class ReplayHistoryActivity : AppCompatActivity() {
             binding.playReplay.visibility = View.GONE
         }
 
-        mapboxReplayer.registerObserver(
-            object : ReplayEventsObserver {
-                override fun replayEvents(events: List<ReplayEventBase>) {
-                    updateReplayStatus(events)
-                    events.forEach {
-                        when (it) {
-                            is ReplaySetRoute -> setRoute(it)
-                        }
-                    }
+        mapboxReplayer.registerObserver { events ->
+            updateReplayStatus(events)
+            events.forEach {
+                when (it) {
+                    is ReplaySetRoute -> setRoute(it)
                 }
             }
-        )
+        }
     }
 
     private fun setRoute(replaySetRoute: ReplaySetRoute) {

@@ -6,7 +6,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 /**
  * Historical event that represents when a route was set.
  *
- * @param directionsRoute the route that was set
+ * @param eventTimestamp timestamp of event seconds
+ * @param directionsRoute the route that was set, `null` when it cleared
  * @param routeIndex the index of this route
  * @param legIndex the current leg index when the route was set
  * @param profile the routing profile to use
@@ -14,6 +15,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
  * @param waypoints the coordinates for this route
  */
 class HistoryEventSetRoute internal constructor(
+    override val eventTimestamp: Double,
     val directionsRoute: DirectionsRoute?,
     val routeIndex: Int,
     val legIndex: Int,

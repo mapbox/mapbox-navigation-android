@@ -1,9 +1,7 @@
 package com.mapbox.navigation.examples.core.replay
 
 import android.content.Context
-import android.util.Log
-import com.google.gson.Gson
-import com.mapbox.navigation.core.replay.history.ReplayHistoryDTO
+import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.examples.core.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -11,37 +9,33 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.nio.charset.Charset
 import java.util.Collections
-import java.util.zip.GZIPInputStream
-import kotlin.text.Charsets.UTF_8
 
-class HistoryFilesViewController {
-
-    private companion object {
-        private const val TAG = "HistoryFilesViewController"
-    }
+class HistoryFilesViewController(
+    private val historyFileDirectory: String?
+) {
 
     private var viewAdapter: HistoryFileAdapter? = null
+    private val historyFilesRepository = HistoryFilesDirectory()
     private val historyFilesApi = HistoryFilesClient()
 
     fun attach(
         context: Context,
         viewAdapter: HistoryFileAdapter,
-        result: (ReplayHistoryDTO?) -> Unit
+        result: (MapboxHistoryReader?) -> Unit
     ) {
         this.viewAdapter = viewAdapter
         viewAdapter.itemClicked = { historyFileItem ->
             when (historyFileItem.dataSource) {
-                ReplayDataSource.ASSETS_DIRECTORY -> requestFromAssets(
-                    context.applicationContext,
-                    historyFileItem,
-                    result
-                )
-                ReplayDataSource.HISTORY_RECORDER -> requestFromFileCache(historyFileItem, result)
-                ReplayDataSource.HTTP_SERVER -> requestFromServer(historyFileItem, result)
+                ReplayDataSource.ASSETS_DIRECTORY -> {
+                    requestFromAssets(context, historyFileItem, result)
+                }
+                ReplayDataSource.FILE_DIRECTORY -> {
+                    requestFromFileCache(historyFileItem, result)
+                }
+                ReplayDataSource.HTTP_SERVER -> {
+                    requestFromServer(context, historyFileItem, result)
+                }
             }
         }
     }
@@ -81,92 +75,56 @@ class HistoryFilesViewController {
     private suspend fun requestHistoryCache(
         context: Context
     ): List<ReplayPath> = withContext(Dispatchers.IO) {
-        val cacheDirectory = context.cacheDir
-        val historyDirectory = File(cacheDirectory, "history-cache")
-            .also { it.mkdirs() }
-        val historyFiles: List<File> = historyDirectory.listFiles()?.toList()
+        val historyFiles = historyFileDirectory?.let { File(it) }
+            ?.listFiles()?.toList()
             ?: Collections.emptyList()
-
         historyFiles.map { file ->
             ReplayPath(
                 title = context.getString(R.string.history_recorded_history_file),
                 description = file.name,
                 path = file.absolutePath,
-                dataSource = ReplayDataSource.HISTORY_RECORDER
+                dataSource = ReplayDataSource.FILE_DIRECTORY
             )
         }
     }
 
     private fun requestFromFileCache(
         historyFileItem: ReplayPath,
-        result: (ReplayHistoryDTO?) -> Unit
+        result: (MapboxHistoryReader) -> Unit
     ) {
         CoroutineScope(Dispatchers.Main).launch {
-            val data = loadFromFileCache(historyFileItem)
+            val data = MapboxHistoryReader(historyFileItem.path)
             result(data)
         }
     }
 
-    private suspend fun loadFromFileCache(
-        historyFileItem: ReplayPath
-    ): ReplayHistoryDTO? = withContext(Dispatchers.IO) {
-        try {
-            val inputStream: InputStream = File(historyFileItem.path).inputStream()
-            val historyData = GZIPInputStream(inputStream)
-                .bufferedReader(UTF_8)
-                .use { it.readText() }
-            val historyDTO = Gson().fromJson(historyData, ReplayHistoryDTO::class.java)
-            if (historyDTO.events.isNullOrEmpty()) {
-                Log.e(TAG, "Your history file is empty ${historyFileItem.path}")
-                null
-            } else {
-                historyDTO
-            }
-        } catch (e: IOException) {
-            Log.e(TAG, "Your history file failed to open ${historyFileItem.path}: $e")
-            throw e
-        }
-    }
-
     private fun requestFromServer(
+        context: Context,
         replayPath: ReplayPath,
-        result: (ReplayHistoryDTO?) -> Unit
+        result: (MapboxHistoryReader?) -> Unit
     ): Job {
         return CoroutineScope(Dispatchers.Main).launch {
-            val replayHistoryDTO = historyFilesApi.requestJsonFile(replayPath.path)
+            val outputFile = historyFilesRepository.outputFile(context, replayPath.path)
+            val replayHistoryDTO = historyFilesApi.requestJsonFile(replayPath.path, outputFile)
             result.invoke(replayHistoryDTO)
         }
     }
 
     private fun requestFromAssets(
         context: Context,
-        historyFileItem: ReplayPath,
-        result: (ReplayHistoryDTO?) -> Unit
+        replayPath: ReplayPath,
+        result: (MapboxHistoryReader?) -> Unit
     ) {
-        CoroutineScope(Dispatchers.Main).launch {
-            val data = loadFromAssets(context, historyFileItem)
-            result(data)
+        CoroutineScope(Dispatchers.IO).launch {
+            val inputStream = context.assets.open(replayPath.path)
+            val outputFile = historyFilesRepository.outputFile(context, replayPath.path)
+            outputFile.outputStream().use { fileOut ->
+                inputStream.copyTo(fileOut)
+            }
+            val reader = MapboxHistoryReader(outputFile.absolutePath)
+            withContext(Dispatchers.Main) {
+                result(reader)
+            }
         }
-    }
-
-    private suspend fun loadFromAssets(
-        context: Context,
-        historyFileItem: ReplayPath
-    ): ReplayHistoryDTO? = withContext(Dispatchers.IO) {
-        // This stores the whole file in memory and causes OutOfMemoryExceptions if the file
-        // is too large. Larger project move the file into something like a Room database
-        // and then read it from there.
-        val historyData = try {
-            val inputStream: InputStream = context.assets.open(historyFileItem.path)
-            val size: Int = inputStream.available()
-            val buffer = ByteArray(size)
-            inputStream.read(buffer)
-            inputStream.close()
-            String(buffer, Charset.forName("UTF-8"))
-        } catch (e: IOException) {
-            Log.e(TAG, "Your history file failed to open ${historyFileItem.path}: $e")
-            throw e
-        }
-        Gson().fromJson(historyData, ReplayHistoryDTO::class.java)
     }
 }
