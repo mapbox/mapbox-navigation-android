@@ -41,7 +41,6 @@ import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityNavigationBinding
 import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
-import com.mapbox.navigation.ui.maneuver.api.ManeuverCallback
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
@@ -151,28 +150,10 @@ class MapboxNavigationActivity : AppCompatActivity() {
     }
 
     private val voiceInstructionsPlayerCallback =
-        object : MapboxNavigationConsumer<SpeechAnnouncement> {
-            override fun accept(value: SpeechAnnouncement) {
-                // remove already consumed file to free-up space
-                speechAPI.clean(value)
-            }
+        MapboxNavigationConsumer<SpeechAnnouncement> { value ->
+            // remove already consumed file to free-up space
+            speechAPI.clean(value)
         }
-
-    private val maneuverCallback = ManeuverCallback { maneuvers ->
-        maneuvers.fold(
-            { error ->
-                Toast.makeText(
-                    this@MapboxNavigationActivity,
-                    error.errorMessage,
-                    Toast.LENGTH_SHORT
-                ).show()
-            },
-            { list ->
-                binding.maneuverView.visibility = VISIBLE
-                binding.maneuverView.renderManeuvers(maneuvers)
-            }
-        )
-    }
 
     private val speechCallback =
         MapboxNavigationConsumer<Expected<SpeechError, SpeechValue>> { expected ->
@@ -230,7 +211,20 @@ class MapboxNavigationActivity : AppCompatActivity() {
             }
 
             // update top maneuver instructions
-            maneuverApi.getManeuvers(routeProgress, maneuverCallback)
+            val maneuvers = maneuverApi.getManeuvers(routeProgress)
+            maneuvers.fold(
+                { error ->
+                    Toast.makeText(
+                        this@MapboxNavigationActivity,
+                        error.errorMessage,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                },
+                {
+                    binding.maneuverView.visibility = VISIBLE
+                    binding.maneuverView.renderManeuvers(maneuvers)
+                }
+            )
 
             // update bottom trip progress summary
             binding.tripProgressView.render(tripProgressApi.getTripProgress(routeProgress))

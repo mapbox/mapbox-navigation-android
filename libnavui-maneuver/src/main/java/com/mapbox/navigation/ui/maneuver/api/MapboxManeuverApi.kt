@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maneuver.api
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
@@ -59,7 +60,7 @@ class MapboxManeuverApi internal constructor(
     )
 
     /**
-     * The function calls [ManeuverCallback] with a list of [Maneuver]s which are wrappers on top of [BannerInstructions] that are in the provided route.
+     * Returns a list of [Maneuver]s which are wrappers on top of [BannerInstructions] that are in the provided route.
      *
      * If a [RouteLeg] param is provided, the returned list will only contain [Maneuver]s for the [RouteLeg] provided as param,
      * otherwise, the returned list will only contain [Maneuver]s for the first [RouteLeg] in a [DirectionsRoute].
@@ -67,16 +68,15 @@ class MapboxManeuverApi internal constructor(
      * @param route route for which to generate maneuver objects
      * @param routeLegIndex specify to inform the API of the index of [RouteLeg] you wish to get the list of [Maneuver].
      * By default the API returns the list of maneuvers for the first [RouteLeg] in a [DirectionsRoute].
-     * @param callback invoked with appropriate result
+     * @return Expected with [Maneuver]s if success and an error if failure.
      * @see MapboxManeuverView.renderManeuvers
      * @see getRoadShields
      */
     @JvmOverloads
     fun getManeuvers(
         route: DirectionsRoute,
-        callback: ManeuverCallback,
         routeLegIndex: Int? = null
-    ) {
+    ): Expected<ManeuverError, List<Maneuver>> {
         val action = ManeuverAction.GetManeuverListWithRoute(
             route,
             routeLegIndex,
@@ -84,28 +84,22 @@ class MapboxManeuverApi internal constructor(
             maneuverOptions,
             distanceFormatter
         )
-        when (val result = processor.process(action)) {
+        return when (val result = processor.process(action)) {
             is ManeuverResult.GetManeuverList.Success -> {
                 val allManeuvers = result.maneuvers
-                callback.onManeuvers(ExpectedFactory.createValue(allManeuvers))
+                ExpectedFactory.createValue(allManeuvers)
             }
             is ManeuverResult.GetManeuverList.Failure -> {
-                callback.onManeuvers(ExpectedFactory.createError(ManeuverError(result.error)))
+                ExpectedFactory.createError(ManeuverError(result.error))
             }
             else -> {
-                callback.onManeuvers(
-                    ExpectedFactory.createError(
-                        ManeuverError(
-                            "Inappropriate  $result emitted for $action.", null
-                        )
-                    )
-                )
+                throw IllegalArgumentException("Inappropriate $result emitted for $action.")
             }
         }
     }
 
     /**
-     * The function calls [ManeuverCallback] with a list of [Maneuver]s which are wrappers on top of [BannerInstructions] that are in the provided route.
+     * Returns a list of [Maneuver]s which are wrappers on top of [BannerInstructions] that are in the provided route.
      *
      * Given [RouteProgress] the function prepares a list of remaining [Maneuver]s on the currently active route leg ([RouteLegProgress]).
      *
@@ -113,38 +107,29 @@ class MapboxManeuverApi internal constructor(
      * from the current user location to the maneuver point, based on [RouteProgress].
      *
      * @param routeProgress current route progress
-     * @param callback invoked with appropriate result
+     * @return Expected with [Maneuver]s if success and an error if failure.
      * @see MapboxManeuverView.renderManeuvers
      * @see getRoadShields
      */
     fun getManeuvers(
-        routeProgress: RouteProgress,
-        callback: ManeuverCallback
-    ) {
+        routeProgress: RouteProgress
+    ): Expected<ManeuverError, List<Maneuver>> {
         val action = ManeuverAction.GetManeuverList(
             routeProgress,
             maneuverState,
             maneuverOptions,
             distanceFormatter
         )
-        when (
-            val result = processor.process(action)
-        ) {
+        return when (val result = processor.process(action)) {
             is ManeuverResult.GetManeuverListWithProgress.Success -> {
                 val allManeuvers = result.maneuvers
-                callback.onManeuvers(ExpectedFactory.createValue(allManeuvers))
+                ExpectedFactory.createValue(allManeuvers)
             }
             is ManeuverResult.GetManeuverListWithProgress.Failure -> {
-                callback.onManeuvers(ExpectedFactory.createError(ManeuverError(result.error)))
+                ExpectedFactory.createError(ManeuverError(result.error))
             }
             else -> {
-                callback.onManeuvers(
-                    ExpectedFactory.createError(
-                        ManeuverError(
-                            "Inappropriate $result emitted for $action.", null
-                        )
-                    )
-                )
+                throw IllegalArgumentException("Inappropriate $result emitted for $action.")
             }
         }
     }

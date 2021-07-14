@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.maneuver.api
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -11,7 +10,6 @@ import com.mapbox.navigation.ui.maneuver.ManeuverResult
 import com.mapbox.navigation.ui.maneuver.ManeuverState
 import com.mapbox.navigation.ui.maneuver.RoadShieldContentManager
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
-import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.maneuver.model.ManeuverOptions
 import com.mapbox.navigation.ui.maneuver.model.RoadShield
 import com.mapbox.navigation.ui.maneuver.model.RoadShieldError
@@ -25,6 +23,7 @@ import io.mockk.unmockkObject
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -36,7 +35,7 @@ class MapboxManeuverApiTest {
     var coroutineRule = MainCoroutineRule()
     private val maneuverOptions = mockk<ManeuverOptions>()
     private val distanceFormatter = mockk<DistanceFormatter>()
-    private val mapboxManeuverApi = MapboxManeuverApi(distanceFormatter)
+    private val mapboxManeuverApi = MapboxManeuverApi(distanceFormatter, maneuverOptions)
 
     @Before
     fun setup() {
@@ -61,16 +60,14 @@ class MapboxManeuverApiTest {
         )
         every { ManeuverProcessor.process(action) } returns
             ManeuverResult.GetManeuverList.Failure("whatever")
-        val callback: ManeuverCallback = mockk(relaxed = true)
-        val slot = slot<Expected<ManeuverError, List<Maneuver>>>()
-        mapboxManeuverApi.getManeuvers(route, callback)
 
-        verify(exactly = 1) { callback.onManeuvers(capture(slot)) }
+        val result = mapboxManeuverApi.getManeuvers(route)
+
+        assertTrue(result.isError)
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException::class)
     fun `when get maneuver invoked and processor returns inappropriate result`() {
-        mockkObject(ManeuverProcessor)
         val route = mockk<DirectionsRoute>()
         val maneuverState = ManeuverState()
         val action = ManeuverAction.GetManeuverListWithRoute(
@@ -82,16 +79,12 @@ class MapboxManeuverApiTest {
         )
         every { ManeuverProcessor.process(action) } returns
             ManeuverResult.GetManeuverListWithProgress.Failure("whatever")
-        val callback: ManeuverCallback = mockk(relaxed = true)
-        val slot = slot<Expected<ManeuverError, List<Maneuver>>>()
-        mapboxManeuverApi.getManeuvers(route, callback)
 
-        verify(exactly = 1) { callback.onManeuvers(capture(slot)) }
+        mapboxManeuverApi.getManeuvers(route)
     }
 
     @Test
     fun `when get maneuver invoked and processor returns success`() {
-        mockkObject(ManeuverProcessor)
         val route = mockk<DirectionsRoute>()
         val maneuverState = ManeuverState()
         val action = ManeuverAction.GetManeuverListWithRoute(
@@ -103,16 +96,14 @@ class MapboxManeuverApiTest {
         )
         every { ManeuverProcessor.process(action) } returns
             ManeuverResult.GetManeuverList.Success(listOf())
-        val callback: ManeuverCallback = mockk(relaxed = true)
-        val slot = slot<Expected<ManeuverError, List<Maneuver>>>()
-        mapboxManeuverApi.getManeuvers(route, callback)
 
-        verify(exactly = 1) { callback.onManeuvers(capture(slot)) }
+        val result = mapboxManeuverApi.getManeuvers(route)
+
+        assertTrue(result.isValue)
     }
 
     @Test
     fun `when get maneuver with progress invoked and processor returns failure`() {
-        mockkObject(ManeuverProcessor)
         val routeProgress = mockk<RouteProgress>()
         val maneuverState = ManeuverState()
         val action = ManeuverAction.GetManeuverList(
@@ -123,16 +114,14 @@ class MapboxManeuverApiTest {
         )
         every { ManeuverProcessor.process(action) } returns
             ManeuverResult.GetManeuverListWithProgress.Failure("whatever")
-        val callback: ManeuverCallback = mockk(relaxed = true)
-        val slot = slot<Expected<ManeuverError, List<Maneuver>>>()
-        mapboxManeuverApi.getManeuvers(routeProgress, callback)
 
-        verify(exactly = 1) { callback.onManeuvers(capture(slot)) }
+        val result = mapboxManeuverApi.getManeuvers(routeProgress)
+
+        assertTrue(result.isError)
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException::class)
     fun `when get maneuver with progress invoked and processor returns inappropriate result`() {
-        mockkObject(ManeuverProcessor)
         val routeProgress = mockk<RouteProgress>()
         val maneuverState = ManeuverState()
         val action = ManeuverAction.GetManeuverList(
@@ -143,16 +132,12 @@ class MapboxManeuverApiTest {
         )
         every { ManeuverProcessor.process(action) } returns
             ManeuverResult.GetManeuverList.Failure("whatever")
-        val callback: ManeuverCallback = mockk(relaxed = true)
-        val slot = slot<Expected<ManeuverError, List<Maneuver>>>()
-        mapboxManeuverApi.getManeuvers(routeProgress, callback)
 
-        verify(exactly = 1) { callback.onManeuvers(capture(slot)) }
+        mapboxManeuverApi.getManeuvers(routeProgress)
     }
 
     @Test
     fun `when get maneuver with progress invoked and processor returns success`() {
-        mockkObject(ManeuverProcessor)
         val routeProgress = mockk<RouteProgress>()
         val maneuverState = ManeuverState()
         val action = ManeuverAction.GetManeuverList(
@@ -163,11 +148,10 @@ class MapboxManeuverApiTest {
         )
         every { ManeuverProcessor.process(action) } returns
             ManeuverResult.GetManeuverListWithProgress.Success(listOf())
-        val callback: ManeuverCallback = mockk(relaxed = true)
-        val slot = slot<Expected<ManeuverError, List<Maneuver>>>()
-        mapboxManeuverApi.getManeuvers(routeProgress, callback)
 
-        verify(exactly = 1) { callback.onManeuvers(capture(slot)) }
+        val result = mapboxManeuverApi.getManeuvers(routeProgress)
+
+        assertTrue(result.isValue)
     }
 
     @Test
