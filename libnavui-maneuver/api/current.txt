@@ -13,6 +13,7 @@ package com.mapbox.navigation.ui.maneuver.api {
   }
 
   public final class MapboxManeuverApi {
+    ctor public MapboxManeuverApi(com.mapbox.navigation.base.formatter.DistanceFormatter formatter, com.mapbox.navigation.ui.maneuver.model.ManeuverOptions maneuverOptions = ManeuverOptions.<init>().build());
     ctor public MapboxManeuverApi(com.mapbox.navigation.base.formatter.DistanceFormatter formatter);
     method public void cancel();
     method public void getManeuvers(com.mapbox.api.directions.v5.models.DirectionsRoute route, com.mapbox.navigation.ui.maneuver.api.ManeuverCallback callback, com.mapbox.api.directions.v5.models.RouteLeg? routeLeg = null);
@@ -127,6 +128,18 @@ package com.mapbox.navigation.ui.maneuver.model {
     method public Throwable? getThrowable();
     property public final String? errorMessage;
     property public final Throwable? throwable;
+  }
+
+  public final class ManeuverOptions {
+    method public boolean getFilterDuplicateManeuvers();
+    method public com.mapbox.navigation.ui.maneuver.model.ManeuverOptions.Builder toBuilder();
+    property public final boolean filterDuplicateManeuvers;
+  }
+
+  public static final class ManeuverOptions.Builder {
+    ctor public ManeuverOptions.Builder();
+    method public com.mapbox.navigation.ui.maneuver.model.ManeuverOptions build();
+    method public com.mapbox.navigation.ui.maneuver.model.ManeuverOptions.Builder filterDuplicateManeuvers(boolean filterDuplicateManeuvers);
   }
 
   public final class PrimaryManeuver {

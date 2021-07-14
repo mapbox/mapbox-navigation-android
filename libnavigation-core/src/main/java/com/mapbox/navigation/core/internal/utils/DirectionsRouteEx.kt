@@ -10,7 +10,9 @@ fun DirectionsRoute.isSameUuid(compare: DirectionsRoute?): Boolean =
     this.routeOptions()?.requestUuid() == compare?.routeOptions()?.requestUuid()
 
 /**
- * Compare routes as geometries(if exist) or as a names of [LegStep] of the [DirectionsRoute]
+ * Compare routes as geometries (if exist) or as a names of [LegStep] of the [DirectionsRoute].
+ *
+ * **This check does not compare route annotations!**
  */
 fun DirectionsRoute.isSameRoute(compare: DirectionsRoute?): Boolean {
     if (this === compare) {
