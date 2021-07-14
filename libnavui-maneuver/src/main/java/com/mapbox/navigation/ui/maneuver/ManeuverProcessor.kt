@@ -4,7 +4,6 @@ import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.internal.utils.isSameRoute
@@ -14,7 +13,7 @@ import com.mapbox.navigation.ui.maneuver.model.ExitComponentNode
 import com.mapbox.navigation.ui.maneuver.model.ExitNumberComponentNode
 import com.mapbox.navigation.ui.maneuver.model.Lane
 import com.mapbox.navigation.ui.maneuver.model.LaneIndicator
-import com.mapbox.navigation.ui.maneuver.model.LegToManeuvers
+import com.mapbox.navigation.ui.maneuver.model.LegIndexToManeuvers
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverOptions
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
@@ -34,7 +33,7 @@ internal object ManeuverProcessor {
             is ManeuverAction.GetManeuverListWithRoute -> {
                 processManeuverList(
                     action.route,
-                    action.routeLeg,
+                    action.routeLegIndex,
                     action.maneuverState,
                     action.maneuverOption,
                     action.distanceFormatter
@@ -53,7 +52,7 @@ internal object ManeuverProcessor {
 
     private fun processManeuverList(
         route: DirectionsRoute,
-        routeLeg: RouteLeg? = null,
+        routeLegIndex: Int? = null,
         maneuverState: ManeuverState,
         maneuverOptions: ManeuverOptions,
         distanceFormatter: DistanceFormatter,
@@ -70,7 +69,7 @@ internal object ManeuverProcessor {
         }
         return try {
             val maneuverList = maneuverState.allManeuvers.getManeuversForRouteLeg(
-                maneuverOptions.filterDuplicateManeuvers, routeLeg
+                maneuverOptions.filterDuplicateManeuvers, routeLegIndex
             )
             ManeuverResult.GetManeuverList.Success(maneuverList)
         } catch (exception: RuntimeException) {
@@ -78,18 +77,18 @@ internal object ManeuverProcessor {
         }
     }
 
-    private fun List<LegToManeuvers>.getManeuversForRouteLeg(
+    private fun List<LegIndexToManeuvers>.getManeuversForRouteLeg(
         filterManeuvers: Boolean,
-        routeLeg: RouteLeg? = null
+        routeLegIndex: Int? = null
     ): List<Maneuver> {
         if (isEmpty()) {
             throw RuntimeException("maneuver list cannot be empty")
         }
 
-        val legToManeuver = if (routeLeg == null) {
+        val legToManeuver = if (routeLegIndex == null) {
             this[0]
         } else {
-            this.find { item -> item.routeLeg == routeLeg } ?: throw RuntimeException(
+            this.find { item -> item.legIndex == routeLegIndex } ?: throw RuntimeException(
                 "provided leg for which maneuvers should be generated is not found in the route"
             )
         }
@@ -113,7 +112,7 @@ internal object ManeuverProcessor {
     ): ManeuverResult.GetManeuverListWithProgress {
         return try {
             val route = routeProgress.route
-            val routeLeg = routeProgress.currentLegProgress?.routeLeg
+            val routeLegIndex = routeProgress.currentLegProgress?.legIndex
             val stepIndex = routeProgress.currentLegProgress?.currentStepProgress?.stepIndex
             val currentInstructionIndex =
                 routeProgress.currentLegProgress?.currentStepProgress?.instructionIndex
@@ -121,9 +120,9 @@ internal object ManeuverProcessor {
                 routeProgress.currentLegProgress?.currentStepProgress?.distanceRemaining?.toDouble()
 
             when {
-                routeLeg == null -> {
+                routeLegIndex == null -> {
                     return ManeuverResult.GetManeuverListWithProgress.Failure(
-                        "routeLeg is null"
+                        "currentLegProgress is null"
                     )
                 }
                 stepIndex == null -> {
@@ -149,7 +148,7 @@ internal object ManeuverProcessor {
                         createAllManeuversForRoute(route, maneuverState, distanceFormatter)
                     }
 
-                    val legToManeuvers = routeLeg.findIn(maneuverState.allManeuvers)
+                    val legToManeuvers = routeLegIndex.findIn(maneuverState.allManeuvers)
                     val stepsToManeuvers = legToManeuvers.stepIndexToManeuvers
                     val stepToManeuvers = stepIndex.findIn(stepsToManeuvers)
                     val indexOfStepToManeuvers = stepsToManeuvers.indexOf(stepToManeuvers)
@@ -186,7 +185,7 @@ internal object ManeuverProcessor {
         distanceFormatter: DistanceFormatter
     ) {
         ifNonNull(route.legs()) { routeLegs ->
-            routeLegs.forEach { routeLeg ->
+            routeLegs.forEachIndexed { index, routeLeg ->
                 ifNonNull(routeLeg?.steps()) { steps ->
                     val stepList = mutableListOf<StepIndexToManeuvers>()
                     for (stepIndex in 0..steps.lastIndex) {
@@ -202,7 +201,7 @@ internal object ManeuverProcessor {
                             stepList.add(stepIndexToManeuvers)
                         } ?: throw RuntimeException("LegStep should have valid banner instructions")
                     }
-                    maneuverState.allManeuvers.add(LegToManeuvers(routeLeg, stepList))
+                    maneuverState.allManeuvers.add(LegIndexToManeuvers(index, stepList))
                 } ?: throw RuntimeException("RouteLeg should have valid steps")
             }
         } ?: throw RuntimeException("Route should have valid legs")
@@ -211,16 +210,16 @@ internal object ManeuverProcessor {
         }
     }
 
-    private fun RouteLeg.findIn(legs: List<LegToManeuvers>): LegToManeuvers {
+    private fun Int.findIn(legs: List<LegIndexToManeuvers>): LegIndexToManeuvers {
         return legs.find {
-            it.routeLeg == this
-        } ?: throw RuntimeException("Could not find the $this")
+            it.legIndex == this
+        } ?: throw RuntimeException("Could not find leg with index $this")
     }
 
     private fun Int.findIn(steps: List<StepIndexToManeuvers>): StepIndexToManeuvers {
         return steps.find {
             it.stepIndex == this
-        } ?: throw RuntimeException("Could not find the $this")
+        } ?: throw RuntimeException("Could not find step with index $this")
     }
 
     private fun updateDistanceRemainingForCurrentManeuver(

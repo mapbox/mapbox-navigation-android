@@ -16,7 +16,7 @@ package com.mapbox.navigation.ui.maneuver.api {
     ctor public MapboxManeuverApi(com.mapbox.navigation.base.formatter.DistanceFormatter formatter, com.mapbox.navigation.ui.maneuver.model.ManeuverOptions maneuverOptions = ManeuverOptions.<init>().build());
     ctor public MapboxManeuverApi(com.mapbox.navigation.base.formatter.DistanceFormatter formatter);
     method public void cancel();
-    method public void getManeuvers(com.mapbox.api.directions.v5.models.DirectionsRoute route, com.mapbox.navigation.ui.maneuver.api.ManeuverCallback callback, com.mapbox.api.directions.v5.models.RouteLeg? routeLeg = null);
+    method public void getManeuvers(com.mapbox.api.directions.v5.models.DirectionsRoute route, com.mapbox.navigation.ui.maneuver.api.ManeuverCallback callback, Integer? routeLegIndex = null);
     method public void getManeuvers(com.mapbox.api.directions.v5.models.DirectionsRoute route, com.mapbox.navigation.ui.maneuver.api.ManeuverCallback callback);
     method public void getManeuvers(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, com.mapbox.navigation.ui.maneuver.api.ManeuverCallback callback);
     method public void getRoadShields(java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver> maneuvers, com.mapbox.navigation.ui.maneuver.api.RoadShieldCallback callback);
