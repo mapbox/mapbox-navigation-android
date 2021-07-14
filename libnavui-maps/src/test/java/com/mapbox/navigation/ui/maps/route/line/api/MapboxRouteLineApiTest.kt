@@ -255,7 +255,7 @@ class MapboxRouteLineApiTest {
         assertEquals(expectedRouteLineExpression, result.value!!.routeLineExpression.toString())
         assertEquals(
             expectedTrafficLineExpression,
-            result.value!!.trafficLineExpression.toString()
+            result.value!!.trafficLineExpressionProvider!!.invoke().toString()
         )
         assertEquals(
             expectedPrimaryRouteSourceGeometry,
@@ -286,12 +286,8 @@ class MapboxRouteLineApiTest {
         val result = api.setRoutes(routes)
 
         assertNotEquals(
-            result.value!!.alternativeRoute1Source,
-            result.value!!.alternativeRoute2Source
-        )
-        assertNotEquals(
-            result.value!!.altRoute1TrafficExpression,
-            result.value!!.altRoute2TrafficExpression
+            result.value!!.altRoute1TrafficExpressionProvider,
+            result.value!!.altRoute2TrafficExpressionProvider
         )
     }
 
@@ -319,9 +315,9 @@ class MapboxRouteLineApiTest {
             "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}"
         val route = getRoute()
         val routes = listOf(RouteLine(route, null))
-        val consumer = MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { t ->
+        val consumer = MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { result ->
             callbackCalled = true
-            val result = t
+
             assertEquals(expectedCasingExpression, result.value!!.casingLineExpression.toString())
             assertEquals(
                 expectedRouteLineExpression,
@@ -329,7 +325,7 @@ class MapboxRouteLineApiTest {
             )
             assertEquals(
                 expectedTrafficLineExpression,
-                result.value!!.trafficLineExpression.toString()
+                result.value!!.trafficLineExpressionProvider!!.invoke().toString()
             )
             assertEquals(
                 expectedPrimaryRouteSourceGeometry,
@@ -385,15 +381,15 @@ class MapboxRouteLineApiTest {
 
         assertEquals(
             expectedPrimaryTrafficLineExpression,
-            result.value!!.trafficLineExpression.toString()
+            result.value!!.trafficLineExpressionProvider!!.invoke().toString()
         )
         assertEquals(
             expectedAlternative1TrafficLineExpression,
-            result.value!!.altRoute1TrafficExpression.toString()
+            result.value!!.altRoute1TrafficExpressionProvider!!.invoke().toString()
         )
         assertEquals(
             expectedAlternative2TrafficLineExpression,
-            result.value!!.altRoute2TrafficExpression.toString()
+            result.value!!.altRoute2TrafficExpressionProvider!!.invoke().toString()
         )
     }
 
@@ -504,7 +500,10 @@ class MapboxRouteLineApiTest {
 
         assertEquals(expectedCasingExpression, result.value!!.casingLineExpression.toString())
         assertEquals(expectedRouteLineExpression, result.value!!.routeLineExpression.toString())
-        assertEquals(expectedTrafficLineExpression, result.value!!.trafficLineExpression.toString())
+        assertEquals(
+            expectedTrafficLineExpression,
+            result.value!!.trafficLineExpressionProvider!!.invoke().toString()
+        )
         assertEquals(
             expectedPrimaryRouteSourceGeometry,
             result.value!!.primaryRouteSource.features()!![0].geometry().toString()
@@ -981,12 +980,14 @@ class MapboxRouteLineApiTest {
 
         val longRouteDef = async {
             val result = api.setRoutes(longRoute)
-            (result.value!!.trafficLineExpression.contents as ArrayList<*>).size
+            (result.value!!.trafficLineExpressionProvider!!.invoke().contents as ArrayList<*>).size
         }
         delay(40)
         val shortRouteDef = async {
             val result = api.setRoutes(shortRoute)
-            (result.value!!.trafficLineExpression.contents as ArrayList<*>).size
+            (
+                result.value!!.trafficLineExpressionProvider!!.invoke().contents as ArrayList<*>
+                ).size
         }
 
         assertEquals(7, shortRouteDef.await())

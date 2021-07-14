@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.content.Context
+import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
@@ -13,6 +14,7 @@ import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
@@ -21,6 +23,8 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue
+import com.mapbox.navigation.utils.internal.JobControl
+import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.mockk
@@ -29,8 +33,12 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -39,12 +47,25 @@ import java.util.UUID
 @RunWith(RobolectricTestRunner::class)
 class MapboxRouteLineViewTest {
 
+    @get:Rule
+    var coroutineRule = MainCoroutineRule()
+    private val parentJob = SupervisorJob()
+    private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
+
     lateinit var ctx: Context
 
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
         ctx = ApplicationProvider.getApplicationContext()
+        mockkObject(ThreadController)
+        every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
+    }
+
+    @After
+    fun cleanUp() {
+        unmockkObject(ThreadController)
     }
 
     private fun mockCheckForLayerInitialization(style: Style) {
@@ -195,7 +216,7 @@ class MapboxRouteLineViewTest {
     }
 
     @Test
-    fun renderDrawRouteState() {
+    fun renderDrawRouteState() = coroutineRule.runBlockingTest {
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
         mockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
         mockkObject(MapboxRouteLineUtils)
@@ -225,17 +246,17 @@ class MapboxRouteLineViewTest {
         val state: Expected<RouteLineError, RouteSetValue> = ExpectedFactory.createValue(
             RouteSetValue(
                 primaryRouteFeatureCollection,
-                trafficLineExp,
+                { trafficLineExp },
                 routeLineExp,
                 casingLineEx,
-                alternativeRoute1Expression,
-                alternativeRoute2Expression,
+                { alternativeRoute1Expression },
+                { alternativeRoute2Expression },
                 alternativeRoute1FeatureCollection,
                 alternativeRoute2FeatureCollection,
                 waypointsFeatureCollection
             )
         )
-        val style = mockk<Style> {
+        val style = mockk<Style>(relaxed = true) {
             every { isFullyLoaded() } returns true
             every { fullyLoaded } returns true
             every {
@@ -263,6 +284,9 @@ class MapboxRouteLineViewTest {
 
         MapboxRouteLineView(options).renderRouteDrawData(style, state)
 
+        verify { primaryRouteTrafficLayer.lineGradient(Expression.color(Color.TRANSPARENT)) }
+        verify { altRouteTrafficLayer1.lineGradient(Expression.color(Color.TRANSPARENT)) }
+        verify { altRouteTrafficLayer2.lineGradient(Expression.color(Color.TRANSPARENT)) }
         verify { primaryRouteTrafficLayer.lineGradient(trafficLineExp) }
         verify { primaryRouteLayer.lineGradient(routeLineExp) }
         verify { primaryRouteCasingLayer.lineGradient(casingLineEx) }

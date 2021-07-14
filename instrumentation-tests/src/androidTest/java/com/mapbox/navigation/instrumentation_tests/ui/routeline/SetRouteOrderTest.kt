@@ -65,7 +65,8 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
             MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { value ->
                 LoggerProvider.logger.e(Tag("SetRouteCancellationTest"), Message("long"))
                 val primaryRoute = routeLineApi.getPrimaryRoute()
-                val contents = value.value!!.trafficLineExpression.contents as ArrayList<*>
+                val contents =
+                    value.value!!.trafficLineExpressionProvider!!.invoke().contents as ArrayList<*>
                 assertEquals(
                     625,
                     contents.size
@@ -78,7 +79,8 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
             MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { value ->
                 LoggerProvider.logger.e(Tag("SetRouteCancellationTest"), Message("short"))
                 val primaryRoute = routeLineApi.getPrimaryRoute()
-                val contents = value.value!!.trafficLineExpression.contents as ArrayList<*>
+                val contents =
+                    value.value!!.trafficLineExpressionProvider!!.invoke().contents as ArrayList<*>
                 assertEquals(shortRoute, primaryRoute)
                 assertEquals(
                     7,
@@ -113,14 +115,20 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
                 val primaryRoute = routeLineApi.getPrimaryRoute()
                 // The long route result should come in first even though it takes longer.
                 if (consumerCallCount == 0) {
-                    val contents = value.value!!.trafficLineExpression.contents as ArrayList<*>
+                    val contents = value.value!!
+                        .trafficLineExpressionProvider!!
+                        .invoke()
+                        .contents as ArrayList<*>
                     assertEquals(
                         625,
                         contents.size
                     )
                     assertEquals(longRoute, primaryRoute)
                 } else {
-                    val contents = value.value!!.trafficLineExpression.contents as ArrayList<*>
+                    val contents = value.value!!
+                        .trafficLineExpressionProvider!!
+                        .invoke()
+                        .contents as ArrayList<*>
                     assertEquals(shortRoute, primaryRoute)
                     assertEquals(
                         7,
@@ -154,7 +162,10 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
         val consumer = MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { value ->
             check(!clearInvoked)
             val primaryRoute = routeLineApi.getPrimaryRoute()
-            val contents = value.value!!.trafficLineExpression.contents as ArrayList<*>
+            val contents = value.value!!
+                .trafficLineExpressionProvider!!
+                .invoke()
+                .contents as ArrayList<*>
             assertEquals(route, primaryRoute)
             assertEquals(
                 625,

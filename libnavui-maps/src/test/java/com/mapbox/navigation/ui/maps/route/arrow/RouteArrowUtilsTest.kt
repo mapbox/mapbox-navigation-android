@@ -27,7 +27,6 @@ import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -334,9 +333,13 @@ class RouteArrowUtilsTest {
         unmockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
     }
 
-    @Ignore
     @Test
     fun initializeLayers_whenAboveLayerNotExists() {
+        GeoJsonSource.workerThread =
+            HandlerThread("STYLE_WORKER").apply {
+                priority = Thread.MAX_PRIORITY
+                start()
+            }
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
         mockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
         val mockImage = mockk<Image>(relaxed = true)
@@ -464,7 +467,7 @@ class RouteArrowUtilsTest {
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
         unmockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
     }
-    //
+
     @Test
     fun initializeLayers_whenArrowHeadHeightZero() {
         val options = RouteArrowOptions.Builder(ctx).build()
