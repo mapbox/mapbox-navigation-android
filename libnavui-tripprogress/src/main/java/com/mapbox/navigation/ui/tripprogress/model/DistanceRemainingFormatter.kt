@@ -2,7 +2,7 @@ package com.mapbox.navigation.ui.tripprogress.model
 
 import android.text.SpannableString
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
-import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
+import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.ui.base.formatter.ValueFormatter
 
 /**
