@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.maneuver
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.testing.FileUtils
@@ -118,23 +117,13 @@ class ManeuverProcessorTest {
         val route = DirectionsRoute.fromJson(
             FileUtils.loadJsonFixture("short_route.json")
         )
-        val routeLeg = mockk<RouteLeg> {
-            every { distance() } returns null
-            every { duration() } returns null
-            every { durationTypical() } returns null
-            every { summary() } returns null
-            every { admins() } returns null
-            every { steps() } returns null
-            every { incidents() } returns null
-            every { annotation() } returns null
-            every { closures() } returns null
-        }
+        val routeLegIndex = 2
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
         val maneuverOptions = ManeuverOptions.Builder().build()
         val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
             route,
-            routeLeg,
+            routeLegIndex,
             maneuverState,
             maneuverOptions,
             distanceFormatter
@@ -153,13 +142,13 @@ class ManeuverProcessorTest {
         val route = DirectionsRoute.fromJson(
             FileUtils.loadJsonFixture("short_route.json")
         )
-        val routeLeg = null
+        val routeLegIndex = null
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
         val maneuverOptions = ManeuverOptions.Builder().build()
         val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
             route,
-            routeLeg,
+            routeLegIndex,
             maneuverState,
             maneuverOptions,
             distanceFormatter
@@ -177,13 +166,13 @@ class ManeuverProcessorTest {
         val route = DirectionsRoute.fromJson(
             FileUtils.loadJsonFixture("short_route.json")
         )
-        val routeLeg = null
+        val routeLegIndex = null
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
         val maneuverOptions = ManeuverOptions.Builder().filterDuplicateManeuvers(false).build()
         val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
             route,
-            routeLeg,
+            routeLegIndex,
             maneuverState,
             maneuverOptions,
             distanceFormatter
@@ -315,7 +304,7 @@ class ManeuverProcessorTest {
             distanceFormatter
         )
         val expected = ManeuverResult.GetManeuverListWithProgress.Failure(
-            "routeLeg is null"
+            "Route should have valid legs"
         )
 
         val actual = ManeuverProcessor.process(maneuverAction)
@@ -324,19 +313,17 @@ class ManeuverProcessorTest {
     }
 
     @Test
-    fun `when maneuver with route progress having different route leg`() {
+    fun `when maneuver with route progress having different route leg index`() {
         val route = DirectionsRoute.fromJson(
             FileUtils.loadJsonFixture("short_route.json")
         )
         val routeProgress = mockRouteProgress(
             _route = route,
             _distanceRemainingOnStep = 45f,
-            _routeLegIndex = 0,
+            _routeLegIndex = 2,
             _stepIndex = 0,
             _instructionIndex = 0,
         )
-        val legProgress = routeProgress.currentLegProgress
-        every { legProgress?.routeLeg } returns RouteLeg.builder().build()
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
         val maneuverOptions = ManeuverOptions.Builder().build()
@@ -347,7 +334,7 @@ class ManeuverProcessorTest {
             distanceFormatter
         )
         val expected = ManeuverResult.GetManeuverListWithProgress.Failure(
-            "Could not find the ${legProgress?.routeLeg}"
+            "Could not find leg with index 2"
         )
 
         val actual = ManeuverProcessor.process(maneuverAction)
@@ -377,7 +364,7 @@ class ManeuverProcessorTest {
             distanceFormatter
         )
         val expected = ManeuverResult.GetManeuverListWithProgress.Failure(
-            "Could not find the -1"
+            "Could not find step with index -1"
         )
 
         val actual = ManeuverProcessor.process(maneuverAction)
@@ -550,6 +537,219 @@ class ManeuverProcessorTest {
         assertEquals(10.0, actual1.maneuvers[0].stepDistance.distanceRemaining)
     }
 
+    @Test
+    fun `when maneuver with route progress and changed annotations is fetched then call again`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("short_route.json")
+        )
+        val routeProgress = mockRouteProgress(
+            _route = route,
+            _distanceRemainingOnStep = 15f,
+            _routeLegIndex = 0,
+            _stepIndex = 0,
+            _instructionIndex = 0,
+        )
+        val maneuverState = ManeuverState()
+        val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().build()
+        val maneuverAction = ManeuverAction.GetManeuverList(
+            routeProgress,
+            maneuverState,
+            maneuverOptions,
+            distanceFormatter
+        )
+
+        ManeuverProcessor.process(maneuverAction)
+
+        val transformedRoute = route.toBuilder().legs(
+            route.legs()?.map { leg ->
+                leg.toBuilder().annotation(
+                    leg.annotation()?.toBuilder()?.congestion(
+                        leg.annotation()?.congestion()?.map {
+                            "moderate"
+                        }
+                    )?.build()
+                ).build()
+            }
+        ).build()
+
+        val routeProgress1 = mockRouteProgress(
+            _route = transformedRoute,
+            _distanceRemainingOnStep = 10f,
+            _routeLegIndex = 0,
+            _stepIndex = 2,
+            _instructionIndex = 0,
+        )
+        val maneuverAction1 = ManeuverAction.GetManeuverList(
+            routeProgress1,
+            maneuverState,
+            maneuverOptions,
+            distanceFormatter
+        )
+
+        val actual1 = ManeuverProcessor.process(maneuverAction1) as
+            ManeuverResult.GetManeuverListWithProgress.Success
+
+        assertEquals(1, actual1.maneuvers.size)
+        assertEquals(10.0, actual1.maneuvers[0].stepDistance.distanceRemaining)
+    }
+
+    @Test
+    fun `multileg with direction route defaults to first leg without duplicates`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("short_multileg_route.json")
+        )
+        val routeLegIndex = null
+        val maneuverState = ManeuverState()
+        val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().build()
+        val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
+            route,
+            routeLegIndex,
+            maneuverState,
+            maneuverOptions,
+            distanceFormatter
+        )
+        val expected = 4
+
+        val actual = ManeuverProcessor.process(maneuverAction) as
+            ManeuverResult.GetManeuverList.Success
+
+        assertEquals(expected, actual.maneuvers.size)
+    }
+
+    @Test
+    fun `multileg with direction route respects leg index without duplicates`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("short_multileg_route.json")
+        )
+        val routeLegIndex = 1
+        val maneuverState = ManeuverState()
+        val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().build()
+        val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
+            route,
+            routeLegIndex,
+            maneuverState,
+            maneuverOptions,
+            distanceFormatter
+        )
+        val expected = 14
+
+        val actual = ManeuverProcessor.process(maneuverAction) as
+            ManeuverResult.GetManeuverList.Success
+
+        assertEquals(expected, actual.maneuvers.size)
+    }
+
+    @Test
+    fun `multileg with direction route defaults to first leg with duplicates`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("short_multileg_route.json")
+        )
+        val routeLegIndex = null
+        val maneuverState = ManeuverState()
+        val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().filterDuplicateManeuvers(false).build()
+        val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
+            route,
+            routeLegIndex,
+            maneuverState,
+            maneuverOptions,
+            distanceFormatter
+        )
+        val expected = 5
+
+        val actual = ManeuverProcessor.process(maneuverAction) as
+            ManeuverResult.GetManeuverList.Success
+
+        assertEquals(expected, actual.maneuvers.size)
+    }
+
+    @Test
+    fun `multileg with direction route respects leg index with duplicates`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("short_multileg_route.json")
+        )
+        val routeLegIndex = 1
+        val maneuverState = ManeuverState()
+        val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().filterDuplicateManeuvers(false).build()
+        val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
+            route,
+            routeLegIndex,
+            maneuverState,
+            maneuverOptions,
+            distanceFormatter
+        )
+        val expected = 16
+
+        val actual = ManeuverProcessor.process(maneuverAction) as
+            ManeuverResult.GetManeuverList.Success
+
+        assertEquals(expected, actual.maneuvers.size)
+    }
+
+    @Test
+    fun `multileg route with leg index with route progress without duplicates`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("short_multileg_route.json")
+        )
+        val routeProgress = mockRouteProgress(
+            _route = route,
+            _distanceRemainingOnStep = 15f,
+            _routeLegIndex = 1,
+            _stepIndex = 1,
+            _instructionIndex = 0,
+        )
+        val maneuverState = ManeuverState()
+        val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().filterDuplicateManeuvers(true).build()
+        val maneuverAction = ManeuverAction.GetManeuverList(
+            routeProgress,
+            maneuverState,
+            maneuverOptions,
+            distanceFormatter
+        )
+        val expected = 13
+
+        val actual = ManeuverProcessor.process(maneuverAction) as
+            ManeuverResult.GetManeuverListWithProgress.Success
+
+        assertEquals(expected, actual.maneuvers.size)
+        assertEquals(15.0, actual.maneuvers[0].stepDistance.distanceRemaining)
+    }
+
+    @Test
+    fun `multileg route with leg and instruction index with route progress with duplicates`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("short_multileg_route.json")
+        )
+        val routeProgress = mockRouteProgress(
+            _route = route,
+            _distanceRemainingOnStep = 15f,
+            _routeLegIndex = 1,
+            _stepIndex = 13,
+            _instructionIndex = 1,
+        )
+        val maneuverState = ManeuverState()
+        val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().filterDuplicateManeuvers(false).build()
+        val maneuverAction = ManeuverAction.GetManeuverList(
+            routeProgress,
+            maneuverState,
+            maneuverOptions,
+            distanceFormatter
+        )
+        val expected = 1
+
+        val actual = ManeuverProcessor.process(maneuverAction) as
+            ManeuverResult.GetManeuverListWithProgress.Success
+
+        assertEquals(expected, actual.maneuvers.size)
+        assertEquals(15.0, actual.maneuvers[0].stepDistance.distanceRemaining)
+    }
+
     private fun mockRouteProgress(
         _route: DirectionsRoute,
         _distanceRemainingOnStep: Float,
@@ -561,6 +761,7 @@ class ManeuverProcessorTest {
             every { route } returns _route
             every { currentLegProgress } returns mockk {
                 every { routeLeg } returns route.legs()?.getOrNull(_routeLegIndex)
+                every { legIndex } returns _routeLegIndex
                 every { currentStepProgress } returns mockk {
                     every { step } returns
                         route.legs()?.getOrNull(_routeLegIndex)?.steps()?.getOrNull(_stepIndex)

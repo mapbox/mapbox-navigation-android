@@ -65,8 +65,8 @@ class MapboxManeuverApi internal constructor(
      * otherwise, the returned list will only contain [Maneuver]s for the first [RouteLeg] in a [DirectionsRoute].
      *
      * @param route route for which to generate maneuver objects
-     * @param routeLeg specify to inform the API of the [RouteLeg] you wish to get the list of [Maneuver].
-     * By default the API returns the list of maneuvers for the first [RouteLeg] in a [DirectionsRoute]
+     * @param routeLegIndex specify to inform the API of the index of [RouteLeg] you wish to get the list of [Maneuver].
+     * By default the API returns the list of maneuvers for the first [RouteLeg] in a [DirectionsRoute].
      * @param callback invoked with appropriate result
      * @see MapboxManeuverView.renderManeuvers
      * @see getRoadShields
@@ -75,11 +75,11 @@ class MapboxManeuverApi internal constructor(
     fun getManeuvers(
         route: DirectionsRoute,
         callback: ManeuverCallback,
-        routeLeg: RouteLeg? = null
+        routeLegIndex: Int? = null
     ) {
         val action = ManeuverAction.GetManeuverListWithRoute(
             route,
-            routeLeg,
+            routeLegIndex,
             maneuverState,
             maneuverOptions,
             distanceFormatter
