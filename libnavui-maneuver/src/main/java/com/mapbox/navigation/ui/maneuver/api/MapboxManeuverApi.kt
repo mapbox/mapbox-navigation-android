@@ -48,18 +48,11 @@ class MapboxManeuverApi internal constructor(
      * a [DirectionsRoute] (to get all maneuvers for the provided route)
      * or [RouteProgress] (to get remaining maneuvers for the provided route).
      */
-    constructor(formatter: DistanceFormatter) : this(
-        formatter,
-        ManeuverOptions.Builder().build(),
-        ManeuverProcessor
-    )
-
-    /**
-     * Mapbox Maneuver Api allows you to request [Maneuver] instructions given
-     * a [DirectionsRoute] (to get all maneuvers for the provided route)
-     * or [RouteProgress] (to get remaining maneuvers for the provided route).
-     */
-    constructor(formatter: DistanceFormatter, maneuverOptions: ManeuverOptions) : this(
+    @JvmOverloads
+    constructor(
+        formatter: DistanceFormatter,
+        maneuverOptions: ManeuverOptions = ManeuverOptions.Builder().build()
+    ) : this(
         formatter,
         maneuverOptions,
         ManeuverProcessor

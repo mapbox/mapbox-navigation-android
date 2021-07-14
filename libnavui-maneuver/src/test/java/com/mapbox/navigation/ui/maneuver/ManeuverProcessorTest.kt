@@ -105,7 +105,7 @@ class ManeuverProcessorTest {
             distanceFormatter
         )
         val expected = ManeuverResult.GetManeuverList.Failure(
-            "Maneuver list not found corresponding to $routeLeg"
+            "no maneuvers available for the current route or its leg"
         )
 
         val actual = ManeuverProcessor.process(maneuverAction)
@@ -140,7 +140,7 @@ class ManeuverProcessorTest {
             distanceFormatter
         )
         val expected = ManeuverResult.GetManeuverList.Failure(
-            "$routeLeg passed is different"
+            "provided leg for which maneuvers should be generated is not found in the route"
         )
 
         val actual = ManeuverProcessor.process(maneuverAction)
@@ -240,7 +240,7 @@ class ManeuverProcessorTest {
         )
         val routeProgress = mockRouteProgress(
             _route = route,
-            _distanceRemaining = 45f,
+            _distanceRemainingOnStep = 45f,
             _routeLegIndex = 0,
             _stepIndex = 0,
             _instructionIndex = null,
@@ -270,7 +270,7 @@ class ManeuverProcessorTest {
         )
         val routeProgress = mockRouteProgress(
             _route = route,
-            _distanceRemaining = 45f,
+            _distanceRemainingOnStep = 45f,
             _routeLegIndex = 0,
             _stepIndex = 0,
             _instructionIndex = 0,
@@ -300,7 +300,7 @@ class ManeuverProcessorTest {
         )
         val routeProgress = mockRouteProgress(
             _route = route,
-            _distanceRemaining = 45f,
+            _distanceRemainingOnStep = 45f,
             _routeLegIndex = 0,
             _stepIndex = 0,
             _instructionIndex = 0,
@@ -330,7 +330,7 @@ class ManeuverProcessorTest {
         )
         val routeProgress = mockRouteProgress(
             _route = route,
-            _distanceRemaining = 45f,
+            _distanceRemainingOnStep = 45f,
             _routeLegIndex = 0,
             _stepIndex = 0,
             _instructionIndex = 0,
@@ -362,7 +362,7 @@ class ManeuverProcessorTest {
         )
         val routeProgress = mockRouteProgress(
             _route = route,
-            _distanceRemaining = 45f,
+            _distanceRemainingOnStep = 45f,
             _routeLegIndex = 0,
             _stepIndex = -1,
             _instructionIndex = 0,
@@ -392,7 +392,7 @@ class ManeuverProcessorTest {
         )
         val routeProgress = mockRouteProgress(
             _route = route,
-            _distanceRemaining = 15f,
+            _distanceRemainingOnStep = 15f,
             _routeLegIndex = 0,
             _stepIndex = 0,
             _instructionIndex = 0,
@@ -416,13 +416,43 @@ class ManeuverProcessorTest {
     }
 
     @Test
+    fun `when maneuver with significant route progress is valid and filter duplicate`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("short_route.json")
+        )
+        val routeProgress = mockRouteProgress(
+            _route = route,
+            _distanceRemainingOnStep = 15f,
+            _routeLegIndex = 0,
+            _stepIndex = 1,
+            _instructionIndex = 0,
+        )
+        val maneuverState = ManeuverState()
+        val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().build()
+        val maneuverAction = ManeuverAction.GetManeuverList(
+            routeProgress,
+            maneuverState,
+            maneuverOptions,
+            distanceFormatter
+        )
+        val expected = 2
+
+        val actual = ManeuverProcessor.process(maneuverAction) as
+            ManeuverResult.GetManeuverListWithProgress.Success
+
+        assertEquals(expected, actual.maneuvers.size)
+        assertEquals(15.0, actual.maneuvers[0].stepDistance.distanceRemaining)
+    }
+
+    @Test
     fun `when maneuver with route progress is valid and don't filter duplicate`() {
         val route = DirectionsRoute.fromJson(
             FileUtils.loadJsonFixture("short_route.json")
         )
         val routeProgress = mockRouteProgress(
             _route = route,
-            _distanceRemaining = 15f,
+            _distanceRemainingOnStep = 15f,
             _routeLegIndex = 0,
             _stepIndex = 0,
             _instructionIndex = 0,
@@ -446,13 +476,43 @@ class ManeuverProcessorTest {
     }
 
     @Test
+    fun `when maneuver with significant route progress is valid and don't filter duplicate`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("short_route.json")
+        )
+        val routeProgress = mockRouteProgress(
+            _route = route,
+            _distanceRemainingOnStep = 15f,
+            _routeLegIndex = 0,
+            _stepIndex = 1,
+            _instructionIndex = 0,
+        )
+        val maneuverState = ManeuverState()
+        val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().filterDuplicateManeuvers(false).build()
+        val maneuverAction = ManeuverAction.GetManeuverList(
+            routeProgress,
+            maneuverState,
+            maneuverOptions,
+            distanceFormatter
+        )
+        val expected = 2
+
+        val actual = ManeuverProcessor.process(maneuverAction) as
+            ManeuverResult.GetManeuverListWithProgress.Success
+
+        assertEquals(expected, actual.maneuvers.size)
+        assertEquals(15.0, actual.maneuvers[0].stepDistance.distanceRemaining)
+    }
+
+    @Test
     fun `when maneuver with route progress is fetched then call again`() {
         val route = DirectionsRoute.fromJson(
             FileUtils.loadJsonFixture("short_route.json")
         )
         val routeProgress = mockRouteProgress(
             _route = route,
-            _distanceRemaining = 15f,
+            _distanceRemainingOnStep = 15f,
             _routeLegIndex = 0,
             _stepIndex = 0,
             _instructionIndex = 0,
@@ -471,7 +531,7 @@ class ManeuverProcessorTest {
 
         val routeProgress1 = mockRouteProgress(
             _route = route,
-            _distanceRemaining = 10f,
+            _distanceRemainingOnStep = 10f,
             _routeLegIndex = 0,
             _stepIndex = 0,
             _instructionIndex = 0,
@@ -492,7 +552,7 @@ class ManeuverProcessorTest {
 
     private fun mockRouteProgress(
         _route: DirectionsRoute,
-        _distanceRemaining: Float,
+        _distanceRemainingOnStep: Float,
         _routeLegIndex: Int,
         _stepIndex: Int,
         _instructionIndex: Int?
@@ -506,7 +566,7 @@ class ManeuverProcessorTest {
                         route.legs()?.getOrNull(_routeLegIndex)?.steps()?.getOrNull(_stepIndex)
                     every { stepIndex } returns _stepIndex
                     every { instructionIndex } returns _instructionIndex
-                    every { distanceRemaining } returns _distanceRemaining
+                    every { distanceRemaining } returns _distanceRemainingOnStep
                 }
             }
         }

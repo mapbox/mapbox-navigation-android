@@ -83,50 +83,26 @@ internal object ManeuverProcessor {
         routeLeg: RouteLeg? = null
     ): List<Maneuver> {
         if (isEmpty()) {
-            throw RuntimeException("List cannot be empty")
+            throw RuntimeException("maneuver list cannot be empty")
         }
-        val maneuverList: List<Maneuver> = when (routeLeg == null) {
-            true -> {
-                if (filterManeuvers) {
-                    this[0].stepIndexToManeuvers.getManeuversForAllStepsAndFilter()
-                } else {
-                    this[0].stepIndexToManeuvers.getManeuversForAllSteps()
-                }
-            }
-            else -> {
-                this.find { item -> item.routeLeg == routeLeg }?.let { legToManeuver ->
-                    if (filterManeuvers) {
-                        legToManeuver.stepIndexToManeuvers.getManeuversForAllStepsAndFilter()
-                    } else {
-                        legToManeuver.stepIndexToManeuvers.getManeuversForAllSteps()
-                    }
-                } ?: throw RuntimeException("$routeLeg passed is different")
-            }
-        }
-        if (maneuverList.isEmpty()) {
-            throw RuntimeException("Maneuver list not found corresponding to $routeLeg")
-        }
-        return maneuverList
-    }
 
-    private fun List<StepIndexToManeuvers>.getManeuversForAllStepsAndFilter(): List<Maneuver> {
-        val maneuverList = mutableListOf<Maneuver>()
-        forEach { stepIndexToManeuver ->
-            if (stepIndexToManeuver.maneuverList.size > 1) {
-                maneuverList.add(stepIndexToManeuver.maneuverList[0])
-            } else {
-                maneuverList.addAll(stepIndexToManeuver.maneuverList)
+        val legToManeuver = if (routeLeg == null) {
+            this[0]
+        } else {
+            this.find { item -> item.routeLeg == routeLeg } ?: throw RuntimeException(
+                "provided leg for which maneuvers should be generated is not found in the route"
+            )
+        }
+
+        return if (filterManeuvers) {
+            legToManeuver.stepIndexToManeuvers.getManeuversForStepsAndFilter()
+        } else {
+            legToManeuver.stepIndexToManeuvers.getManeuversForSteps()
+        }.also {
+            if (it.isEmpty()) {
+                throw RuntimeException("no maneuvers available for the current route or its leg")
             }
         }
-        return maneuverList
-    }
-
-    private fun List<StepIndexToManeuvers>.getManeuversForAllSteps(): List<Maneuver> {
-        val maneuverList = mutableListOf<Maneuver>()
-        forEach { stepIndexToManeuver ->
-            maneuverList.addAll(stepIndexToManeuver.maneuverList)
-        }
-        return maneuverList
     }
 
     private fun processManeuverList(
@@ -185,12 +161,12 @@ internal object ManeuverProcessor {
                     )
 
                     val maneuverList = if (maneuverOptions.filterDuplicateManeuvers) {
-                        stepsToManeuvers.getManeuversForAllStepsWithProgressAndFilter(
+                        stepsToManeuvers.getManeuversForStepsWithProgressAndFilter(
                             currentInstructionIndex,
                             indexOfStepToManeuvers
                         )
                     } else {
-                        stepsToManeuvers.getManeuversForAllStepsWithProgress(
+                        stepsToManeuvers.getManeuversForStepsWithProgress(
                             currentInstructionIndex,
                             indexOfStepToManeuvers
                         )
@@ -256,37 +232,49 @@ internal object ManeuverProcessor {
             stepDistanceRemaining
     }
 
-    private fun List<StepIndexToManeuvers>.getManeuversForAllStepsWithProgress(
+    private fun List<StepIndexToManeuvers>.getManeuversForStepsAndFilter(): List<Maneuver> {
+        val maneuverList = mutableListOf<Maneuver>()
+        forEach { stepIndexToManeuver ->
+            if (stepIndexToManeuver.maneuverList.size > 1) {
+                maneuverList.add(stepIndexToManeuver.maneuverList[0])
+            } else {
+                maneuverList.addAll(stepIndexToManeuver.maneuverList)
+            }
+        }
+        return maneuverList
+    }
+
+    private fun List<StepIndexToManeuvers>.getManeuversForSteps(): List<Maneuver> {
+        val maneuverList = mutableListOf<Maneuver>()
+        forEach { stepIndexToManeuver ->
+            maneuverList.addAll(stepIndexToManeuver.maneuverList)
+        }
+        return maneuverList
+    }
+
+    private fun List<StepIndexToManeuvers>.getManeuversForStepsWithProgress(
         currentInstructionIndex: Int,
         indexOfStepToManeuvers: Int
     ): List<Maneuver> {
         val list = mutableListOf<Maneuver>()
-        for (i in indexOfStepToManeuvers..lastIndex) {
-            if (this[i].maneuverList.size > 1 && i == indexOfStepToManeuvers) {
-                list.addAll(
-                    this[i].maneuverList.subList(currentInstructionIndex, this[i].maneuverList.size)
-                )
-            } else {
-                list.addAll(this[i].maneuverList)
-            }
-        }
+        // only take the current and remaining instructions for the current step
+        list.addAll(
+            this[indexOfStepToManeuvers].maneuverList.drop(currentInstructionIndex)
+        )
+        // add all remaining instructions after the current step
+        list.addAll(this.drop(indexOfStepToManeuvers + 1).getManeuversForSteps())
         return list
     }
 
-    private fun List<StepIndexToManeuvers>.getManeuversForAllStepsWithProgressAndFilter(
+    private fun List<StepIndexToManeuvers>.getManeuversForStepsWithProgressAndFilter(
         currentInstructionIndex: Int,
         indexOfStepToManeuvers: Int
     ): List<Maneuver> {
         val list = mutableListOf<Maneuver>()
-        for (i in indexOfStepToManeuvers..lastIndex) {
-            if (this[i].maneuverList.size > 1 && i == indexOfStepToManeuvers) {
-                list.add(this[i].maneuverList[currentInstructionIndex])
-            } else if (this[i].maneuverList.size > 1 && i != indexOfStepToManeuvers) {
-                list.add(this[i].maneuverList[0])
-            } else {
-                list.addAll(this[i].maneuverList)
-            }
-        }
+        // only take the current instructions for the current step
+        list.add(this[indexOfStepToManeuvers].maneuverList[currentInstructionIndex])
+        // add all remaining instructions after the current step without duplicates
+        list.addAll(this.drop(indexOfStepToManeuvers + 1).getManeuversForStepsAndFilter())
         return list
     }
 

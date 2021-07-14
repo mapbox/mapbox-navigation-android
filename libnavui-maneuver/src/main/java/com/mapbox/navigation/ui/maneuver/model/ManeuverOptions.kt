@@ -1,9 +1,21 @@
 package com.mapbox.navigation.ui.maneuver.model
 
+import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
+
 /**
- * Gives options to filter duplicate maneuvers
+ * Specifies options for parsing [Maneuver] data in the [MapboxManeuverApi].
  *
- * @param filterDuplicateManeuvers filter duplicate maneuvers if true
+ * @param filterDuplicateManeuvers guidance instructions returned by the Mapbox Directions API
+ * often have instructions on a route duplicated to control
+ * the timing of when to notify the user about details of an upcoming maneuver.
+ * For example, there can a "left turn" [BannerInstructions] available 1000m and 300m before a turn, where only the latter also contains lane information.
+ * By setting this flag to `true`, you can filter out those duplicates which improves the presentation in, for example, a scrolling list.
+ *
+ * The [MapboxManeuverApi] will ensure that no information is lost and the current maneuver is always up-to-date.
+ * It's only the upcoming duplicates that are continuously filtered out.
+ *
+ * This option defaults to `true`.
  */
 class ManeuverOptions private constructor(
     val filterDuplicateManeuvers: Boolean
@@ -51,9 +63,18 @@ class ManeuverOptions private constructor(
         private var filterDuplicateManeuvers = true
 
         /**
-         * Set to true/false to filter duplicate maneuvers or not. Default value is true
+         * Guidance instructions returned by the Mapbox Directions API
+         * often have instructions on a route duplicated to control
+         * the timing of when to notify the user about details of an upcoming maneuver.
+         * For example, there can a "left turn" [BannerInstructions] available 1000m and 300m before a turn, where only the latter also contains lane information.
+         * By setting this flag to `true`, you can filter out those duplicates which improves the presentation in, for example, a scrolling list.
          *
-         * @param filterDuplicateManeuvers Boolean
+         * The [MapboxManeuverApi] will ensure that no information is lost and the current maneuver is always up-to-date.
+         * It's only the upcoming duplicates that are continuously filtered out.
+         *
+         * This option defaults to `true`.
+         *
+         * @param filterDuplicateManeuvers true/false to filter duplicate maneuvers or not
          * @return Builder
          */
         fun filterDuplicateManeuvers(filterDuplicateManeuvers: Boolean) = apply {
