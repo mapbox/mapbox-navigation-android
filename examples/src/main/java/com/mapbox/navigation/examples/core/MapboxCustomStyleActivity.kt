@@ -3,7 +3,6 @@ package com.mapbox.navigation.examples.core
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
-import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Toast
@@ -39,7 +38,6 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityStyleBinding
-import com.mapbox.navigation.ui.maneuver.api.ManeuverCallback
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
@@ -132,24 +130,6 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
         MapboxRouteArrowView(RouteArrowOptions.Builder(this).build())
     }
 
-    private val maneuverCallback = ManeuverCallback { maneuvers ->
-        if (binding.maneuverView.visibility != View.VISIBLE) {
-            binding.maneuverView.visibility = View.VISIBLE
-        }
-        maneuvers.fold(
-            { error ->
-                Toast.makeText(
-                    this@MapboxCustomStyleActivity,
-                    error.errorMessage,
-                    Toast.LENGTH_SHORT
-                ).show()
-            },
-            { list ->
-                binding.maneuverView.renderManeuvers(maneuvers)
-            }
-        )
-    }
-
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
     private val locationObserver = object : LocationObserver {
@@ -189,7 +169,20 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
         tripProgressApiApi.getTripProgress(routeProgress).let { update ->
             binding.tripProgressView.render(update)
         }
-        maneuverApi.getManeuvers(routeProgress, maneuverCallback)
+
+        val maneuvers = maneuverApi.getManeuvers(routeProgress)
+
+        if (binding.maneuverView.visibility != VISIBLE) {
+            binding.maneuverView.visibility = VISIBLE
+        }
+        maneuvers.onError { error ->
+            Toast.makeText(
+                this@MapboxCustomStyleActivity,
+                error.errorMessage,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        binding.maneuverView.renderManeuvers(maneuvers)
     }
 
     private val mapMatcherObserver = MapMatcherResultObserver { mapMatcherResult ->

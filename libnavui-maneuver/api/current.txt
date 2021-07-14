@@ -8,17 +8,13 @@ package com.mapbox.navigation.ui.maneuver {
 
 package com.mapbox.navigation.ui.maneuver.api {
 
-  public fun interface ManeuverCallback {
-    method public void onManeuvers(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> maneuvers);
-  }
-
   public final class MapboxManeuverApi {
     ctor public MapboxManeuverApi(com.mapbox.navigation.base.formatter.DistanceFormatter formatter, com.mapbox.navigation.ui.maneuver.model.ManeuverOptions maneuverOptions = ManeuverOptions.<init>().build());
     ctor public MapboxManeuverApi(com.mapbox.navigation.base.formatter.DistanceFormatter formatter);
     method public void cancel();
-    method public void getManeuvers(com.mapbox.api.directions.v5.models.DirectionsRoute route, com.mapbox.navigation.ui.maneuver.api.ManeuverCallback callback, Integer? routeLegIndex = null);
-    method public void getManeuvers(com.mapbox.api.directions.v5.models.DirectionsRoute route, com.mapbox.navigation.ui.maneuver.api.ManeuverCallback callback);
-    method public void getManeuvers(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, com.mapbox.navigation.ui.maneuver.api.ManeuverCallback callback);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> getManeuvers(com.mapbox.api.directions.v5.models.DirectionsRoute route, Integer? routeLegIndex = null);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> getManeuvers(com.mapbox.api.directions.v5.models.DirectionsRoute route);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> getManeuvers(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
     method public void getRoadShields(java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver> maneuvers, com.mapbox.navigation.ui.maneuver.api.RoadShieldCallback callback);
   }
 

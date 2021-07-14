@@ -10,6 +10,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -39,9 +40,10 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityManeuverBinding
-import com.mapbox.navigation.ui.maneuver.api.ManeuverCallback
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.api.RoadShieldCallback
+import com.mapbox.navigation.ui.maneuver.model.Maneuver
+import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
@@ -133,19 +135,6 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
-    private val callback = ManeuverCallback { maneuvers ->
-        maneuvers.onError { error ->
-            LoggerProvider.logger.e(Tag("MbxManeuverActivity"), Message(error.errorMessage!!))
-        }
-        maneuvers.onValue {
-            if (binding.maneuverView.visibility == INVISIBLE) {
-                binding.maneuverView.visibility = VISIBLE
-            }
-            binding.maneuverView.renderManeuvers(maneuvers)
-            maneuverApi.getRoadShields(it, roadShieldCallback)
-        }
-    }
-
     private val mapMatcherResultObserver = MapMatcherResultObserver { mapMatcherResult ->
         navigationLocationProvider.changePosition(
             mapMatcherResult.enhancedLocation,
@@ -157,7 +146,9 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
-        maneuverApi.getManeuvers(routeProgress, callback)
+        val maneuvers = maneuverApi.getManeuvers(routeProgress)
+        renderManeuvers(maneuvers)
+
         routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
             routeArrowView.renderManeuverUpdate(mapboxMap.getStyle()!!, this)
         }
@@ -174,7 +165,22 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
             }
             isNavigating = true
             startSimulation(routes[0])
-            maneuverApi.getManeuvers(routes.first(), callback)
+
+            val maneuvers = maneuverApi.getManeuvers(routes.first())
+            renderManeuvers(maneuvers)
+        }
+    }
+
+    private fun renderManeuvers(maneuvers: Expected<ManeuverError, List<Maneuver>>) {
+        maneuvers.onError { error ->
+            LoggerProvider.logger.e(Tag("MbxManeuverActivity"), Message(error.errorMessage!!))
+        }
+        maneuvers.onValue {
+            if (binding.maneuverView.visibility == INVISIBLE) {
+                binding.maneuverView.visibility = VISIBLE
+            }
+            binding.maneuverView.renderManeuvers(maneuvers)
+            maneuverApi.getRoadShields(it, roadShieldCallback)
         }
     }
 
