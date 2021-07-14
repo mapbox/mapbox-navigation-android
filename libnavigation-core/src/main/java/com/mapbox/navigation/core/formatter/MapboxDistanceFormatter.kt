@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.internal.formatter
+package com.mapbox.navigation.core.formatter
 
 import android.content.Context
 import android.content.res.Configuration
@@ -19,10 +19,8 @@ import java.util.Locale
 import kotlin.math.roundToInt
 
 /**
- * Creates an instance of DistanceFormatter, which can format distances in meters
+ * Implementation of DistanceFormatter, which can format distances in meters
  * based on a language format and unit type.
- *
- * This constructor will infer device language and unit type using the device locale.
  *
  * @param options to build the [MapboxDistanceFormatter]
  */
@@ -40,7 +38,7 @@ class MapboxDistanceFormatter(
         UnitType.METRIC -> TurfConstants.UNIT_KILOMETERS
     }
 
-    companion object {
+    private companion object {
         private const val smallDistanceUpperThresholdInMeters = 400.0
         private const val mediumDistanceUpperThresholdInMeters = 10000.0
     }

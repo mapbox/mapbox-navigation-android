@@ -108,6 +108,17 @@ package com.mapbox.navigation.core.directions.session {
 
 }
 
+package com.mapbox.navigation.core.formatter {
+
+  public final class MapboxDistanceFormatter implements com.mapbox.navigation.base.formatter.DistanceFormatter {
+    ctor public MapboxDistanceFormatter(com.mapbox.navigation.base.formatter.DistanceFormatterOptions options);
+    method public android.text.SpannableString formatDistance(double distance);
+    method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions getOptions();
+    property public final com.mapbox.navigation.base.formatter.DistanceFormatterOptions options;
+  }
+
+}
+
 package com.mapbox.navigation.core.history {
 
   public final class MapboxHistoryReader implements java.util.Iterator<com.mapbox.navigation.core.history.model.HistoryEvent> kotlin.jvm.internal.markers.KMappedMarker {

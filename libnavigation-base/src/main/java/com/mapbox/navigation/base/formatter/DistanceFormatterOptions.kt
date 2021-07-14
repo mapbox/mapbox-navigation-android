@@ -8,6 +8,8 @@ import java.util.Locale
 /**
  * Gives options to format the distance in the trip notification.
  *
+ * If not provided, the object will infer device language and unit type using the device locale from the context.
+ *
  * @param applicationContext from which to get localized strings from
  * @param locale the locale to use for localization of distance resources
  * @param unitType to use for voice and visual information.
