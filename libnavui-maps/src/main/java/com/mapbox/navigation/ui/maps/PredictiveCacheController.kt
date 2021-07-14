@@ -64,6 +64,7 @@ class PredictiveCacheController @JvmOverloads constructor(
     private var mapListeners = mutableMapOf<MapboxMap, OnStyleLoadedListener>()
 
     init {
+        PredictiveCache.init()
         PredictiveCache.createNavigationController(predictiveCacheLocationOptions)
     }
 

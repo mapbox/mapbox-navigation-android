@@ -7,26 +7,28 @@ import com.mapbox.navigator.PredictiveCacheController
 
 object PredictiveCache {
 
-    private val cachedNavigationPredictiveCacheControllers =
-        mutableListOf<PredictiveCacheController>()
-    private val cachedMapsPredictiveCacheControllers =
+    internal val cachedNavigationPredictiveCacheControllers =
+        mutableSetOf<PredictiveCacheController>()
+    internal val cachedMapsPredictiveCacheControllers =
         mutableMapOf<Any, MutableMap<String, PredictiveCacheController>>()
 
-    private val navPredictiveCacheLocationOptions =
-        mutableListOf<PredictiveCacheLocationOptions>()
-    private val mapsPredictiveCacheLocationOptions =
+    internal val navPredictiveCacheLocationOptions =
+        mutableSetOf<PredictiveCacheLocationOptions>()
+    internal val mapsPredictiveCacheLocationOptions =
         mutableMapOf<Any, MutableMap<String, Pair<TileStore, PredictiveCacheLocationOptions>>>()
 
-    init {
+    fun init() {
         // recreate controllers with the same options but with a new navigator instance
         MapboxNativeNavigatorImpl.setNativeNavigatorRecreationObserver {
-            cachedNavigationPredictiveCacheControllers.clear()
-            cachedMapsPredictiveCacheControllers.clear()
+            val navOptions = navPredictiveCacheLocationOptions.toSet()
+            val mapsOptions = mapsPredictiveCacheLocationOptions.toMap()
 
-            navPredictiveCacheLocationOptions.forEach {
+            clean()
+
+            navOptions.forEach {
                 createNavigationController(it)
             }
-            mapsPredictiveCacheLocationOptions.forEach { entry ->
+            mapsOptions.forEach { entry ->
                 entry.value.forEach {
                     createMapsController(
                         mapboxMap = entry.key,
