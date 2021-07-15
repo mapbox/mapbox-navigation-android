@@ -1,4 +1,5 @@
 ext {
+  def kotlinVersion = "1.5.20"
 
   androidVersions = [
       minSdkVersion           : 21,
@@ -47,7 +48,7 @@ ext {
       lifecycleViewModelKtx     : '2.2.0',
       gmsLocation               : '17.0.0',
       ktlint                    : '0.41.0',
-      kotlinStdLib              : '1.5.20',
+      kotlinStdLib              : kotlinVersion,
       firebaseCrashlytics       : '17.3.1',
       multidex                  : '2.0.1',
       json                      : '20180813',
@@ -163,7 +164,7 @@ ext {
       gradle               : '4.0.1',
       dependencyGraph      : '0.5.0',
       dependencyUpdates    : '0.29.0',
-      kotlin               : '1.5.20',
+      kotlin               : kotlinVersion,
       license              : '0.8.5',
       jacoco               : '0.2',
       googleServices       : '4.3.3',
