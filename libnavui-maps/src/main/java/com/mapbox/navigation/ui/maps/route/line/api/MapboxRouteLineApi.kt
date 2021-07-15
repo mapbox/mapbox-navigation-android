@@ -603,6 +603,15 @@ class MapboxRouteLineApi(
             featureDataProvider()
         }
         val routeFeatureDataResult = routeFeatureDataDef.await()
+        if (routeFeatureDataResult.count { it.lineString.coordinates().size < 2 } > 0) {
+            return ExpectedFactory.createError(
+                RouteLineError(
+                    "The route geometry contained less than two coordinates. " +
+                        "At least two coordinates are required to render a route line.",
+                    null
+                )
+            )
+        }
         routeFeatureData.clear()
         routeFeatureData.addAll(routeFeatureDataResult)
 
