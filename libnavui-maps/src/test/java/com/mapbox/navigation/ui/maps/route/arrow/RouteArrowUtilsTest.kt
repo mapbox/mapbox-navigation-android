@@ -153,7 +153,7 @@ class RouteArrowUtilsTest {
         val result = RouteArrowUtils.layersAreInitialized(style)
 
         assertTrue(result)
-        verify { style.fullyLoaded }
+        verify { style.isStyleLoaded }
         verify { style.styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) }
         verify { style.styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) }
         verify { style.styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID) }

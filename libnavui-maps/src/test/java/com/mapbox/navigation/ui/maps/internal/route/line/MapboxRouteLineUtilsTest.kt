@@ -226,7 +226,7 @@ class MapboxRouteLineUtilsTest {
         val result = MapboxRouteLineUtils.layersAreInitialized(style)
 
         assertTrue(result)
-        verify { style.fullyLoaded }
+        verify { style.isStyleLoaded }
         verify { style.styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) }
         verify { style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) }
         verify { style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) }
