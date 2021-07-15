@@ -4,9 +4,11 @@ import androidx.core.graphics.drawable.DrawableCompat
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.maps.LayerPosition
+import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.generated.Expression
-import com.mapbox.maps.extension.style.layers.addLayerAbove
+import com.mapbox.maps.extension.style.layers.addPersistentLayer
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.IconRotationAlignment
@@ -55,6 +57,7 @@ internal object RouteArrowUtils {
         return arrowCurrentSliced.coordinates().reversed().plus(arrowUpcomingSliced.coordinates())
     }
 
+    @OptIn(MapboxExperimental::class)
     fun initializeLayers(style: Style, options: RouteArrowOptions) {
         if (!style.fullyLoaded || layersAreInitialized(style)) {
             return
@@ -235,10 +238,22 @@ internal object RouteArrowUtils {
                 }
             )
 
-        style.addLayerAbove(arrowShaftCasingLayer, aboveLayerIdToUse)
-        style.addLayerAbove(arrowHeadCasingLayer, arrowShaftCasingLayer.layerId)
-        style.addLayerAbove(arrowShaftLayer, arrowHeadCasingLayer.layerId)
-        style.addLayerAbove(arrowHeadLayer, arrowShaftLayer.layerId)
+        style.addPersistentLayer(
+            arrowShaftCasingLayer,
+            LayerPosition(aboveLayerIdToUse, null, null)
+        )
+        style.addPersistentLayer(
+            arrowHeadCasingLayer,
+            LayerPosition(arrowShaftCasingLayer.layerId, null, null)
+        )
+        style.addPersistentLayer(
+            arrowShaftLayer,
+            LayerPosition(arrowHeadCasingLayer.layerId, null, null)
+        )
+        style.addPersistentLayer(
+            arrowHeadLayer,
+            LayerPosition(arrowShaftLayer.layerId, null, null)
+        )
     }
 
     internal fun layersAreInitialized(style: Style): Boolean {

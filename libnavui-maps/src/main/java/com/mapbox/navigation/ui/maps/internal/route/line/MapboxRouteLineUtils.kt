@@ -14,10 +14,12 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.LayerPosition
+import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.dsl.generated.color
 import com.mapbox.maps.extension.style.expressions.dsl.generated.eq
 import com.mapbox.maps.extension.style.expressions.generated.Expression
+import com.mapbox.maps.extension.style.layers.addPersistentLayer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
@@ -733,6 +735,7 @@ object MapboxRouteLineUtils {
         return expressions.plus(color(defaultColor))
     }
 
+    @OptIn(MapboxExperimental::class)
     internal fun initializeLayers(style: Style, options: MapboxRouteLineOptions) {
         if (!style.fullyLoaded || layersAreInitialized(style)) {
             return
@@ -779,7 +782,7 @@ object MapboxRouteLineUtils {
             style,
             options.resourceProvider.routeLineColorResources.alternativeRouteCasingColor
         ).forEach {
-            it.bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
         }
 
         options.routeLayerProvider.buildAlternativeRouteLayers(
@@ -787,7 +790,7 @@ object MapboxRouteLineUtils {
             options.resourceProvider.roundedLineCap,
             options.resourceProvider.routeLineColorResources.alternativeRouteDefaultColor
         ).forEach {
-            it.bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
         }
 
         options.routeLayerProvider.buildAlternativeRouteTrafficLayers(
@@ -795,31 +798,39 @@ object MapboxRouteLineUtils {
             options.resourceProvider.roundedLineCap,
             options.resourceProvider.routeLineColorResources.alternativeRouteDefaultColor
         ).forEach {
-            it.bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
         }
 
         options.routeLayerProvider.buildPrimaryRouteCasingLayer(
             style,
             options.resourceProvider.routeLineColorResources.routeCasingColor
-        ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+        ).let {
+            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
+        }
 
         options.routeLayerProvider.buildPrimaryRouteLayer(
             style,
             options.resourceProvider.roundedLineCap,
             options.resourceProvider.routeLineColorResources.routeDefaultColor
-        ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+        ).let {
+            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
+        }
 
         options.routeLayerProvider.buildPrimaryRouteTrafficLayer(
             style,
             options.resourceProvider.roundedLineCap,
             options.resourceProvider.routeLineColorResources.routeDefaultColor
-        ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+        ).let {
+            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
+        }
 
         options.routeLayerProvider.buildWayPointLayer(
             style,
             options.originIcon,
             options.destinationIcon
-        ).bindTo(style, LayerPosition(null, belowLayerIdToUse, null))
+        ).let {
+            style.addPersistentLayer(it, LayerPosition(null, belowLayerIdToUse, null))
+        }
     }
 
     internal fun layersAreInitialized(style: Style): Boolean {
