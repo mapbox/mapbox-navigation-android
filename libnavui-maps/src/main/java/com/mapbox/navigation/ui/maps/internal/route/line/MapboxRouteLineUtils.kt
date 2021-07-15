@@ -619,7 +619,7 @@ object MapboxRouteLineUtils {
     }
 
     internal fun getLayerVisibility(style: Style, layerId: String): Visibility? {
-        return if (style.isFullyLoaded()) {
+        return if (style.isStyleLoaded) {
             style.getLayer(layerId)?.visibility
         } else {
             null
@@ -734,7 +734,7 @@ object MapboxRouteLineUtils {
     }
 
     internal fun initializeLayers(style: Style, options: MapboxRouteLineOptions) {
-        if (!style.fullyLoaded || layersAreInitialized(style)) {
+        if (!style.isStyleLoaded || layersAreInitialized(style)) {
             return
         }
 
@@ -823,7 +823,7 @@ object MapboxRouteLineUtils {
     }
 
     internal fun layersAreInitialized(style: Style): Boolean {
-        return style.fullyLoaded &&
+        return style.isStyleLoaded &&
             style.styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) &&
             style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) &&
             style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) &&

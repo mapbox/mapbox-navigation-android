@@ -196,7 +196,7 @@ class MapboxRouteLineUtilsTest {
     @Test
     fun layersAreInitialized() {
         val style = mockk<Style> {
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every { styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns true
             every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns true
             every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
@@ -226,7 +226,7 @@ class MapboxRouteLineUtilsTest {
         val result = MapboxRouteLineUtils.layersAreInitialized(style)
 
         assertTrue(result)
-        verify { style.fullyLoaded }
+        verify { style.isStyleLoaded }
         verify { style.styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) }
         verify { style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) }
         verify { style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) }
@@ -245,7 +245,7 @@ class MapboxRouteLineUtilsTest {
     fun initializeLayers_whenStyleNotLoaded() {
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val style = mockk<Style> {
-            every { fullyLoaded } returns false
+            every { isStyleLoaded } returns false
         }
 
         MapboxRouteLineUtils.initializeLayers(style, options)
@@ -258,7 +258,7 @@ class MapboxRouteLineUtilsTest {
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val style = mockk<Style> {
             every { styleLayers } returns listOf()
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every { styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns true
             every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns true
             every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
@@ -299,7 +299,7 @@ class MapboxRouteLineUtilsTest {
                 priority = Thread.MAX_PRIORITY
                 start()
             }
-        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         val options = MapboxRouteLineOptions.Builder(ctx)
             .withRouteLineBelowLayerId(LocationComponentConstants.MODEL_LAYER)
             .build()
@@ -313,7 +313,7 @@ class MapboxRouteLineUtilsTest {
             every { id } returns LocationComponentConstants.MODEL_LAYER
         }
         val style = mockk<Style> {
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every { styleLayers } returns listOf(mockLayer)
             every { styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns false
             every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns false
@@ -576,7 +576,7 @@ class MapboxRouteLineUtilsTest {
             LocationComponentConstants.MODEL_LAYER,
             addStyleLayerPositionSlots[9].below
         )
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
 
     @Test
@@ -1587,26 +1587,26 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun getLayerVisibility() {
-        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         val layer = mockk<Layer>(relaxed = true) {
             every { visibility } returns Visibility.VISIBLE
         }
 
         val style = mockk<Style> {
-            every { isFullyLoaded() } returns true
+            every { isStyleLoaded } returns true
             every { getLayer("foobar") } returns layer
         }
 
         val result = MapboxRouteLineUtils.getLayerVisibility(style, "foobar")
 
         assertEquals(Visibility.VISIBLE, result)
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
 
     @Test
     fun getLayerVisibility_whenStyleNotLoaded() {
         val style = mockk<Style> {
-            every { isFullyLoaded() } returns false
+            every { isStyleLoaded } returns false
         }
 
         val result = MapboxRouteLineUtils.getLayerVisibility(style, "foobar")
@@ -1616,16 +1616,16 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun getLayerVisibility_whenLayerNotFound() {
-        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         val style = mockk<Style> {
-            every { isFullyLoaded() } returns true
+            every { isStyleLoaded } returns true
             every { getLayer("foobar") } returns null
         }
 
         val result = MapboxRouteLineUtils.getLayerVisibility(style, "foobar")
 
         assertNull(result)
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
 
     @Test

@@ -56,7 +56,7 @@ internal object RouteArrowUtils {
     }
 
     fun initializeLayers(style: Style, options: RouteArrowOptions) {
-        if (!style.fullyLoaded || layersAreInitialized(style)) {
+        if (!style.isStyleLoaded || layersAreInitialized(style)) {
             return
         }
 
@@ -242,7 +242,7 @@ internal object RouteArrowUtils {
     }
 
     internal fun layersAreInitialized(style: Style): Boolean {
-        return style.fullyLoaded &&
+        return style.isStyleLoaded &&
             style.styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) &&
             style.styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) &&
             style.styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID) &&

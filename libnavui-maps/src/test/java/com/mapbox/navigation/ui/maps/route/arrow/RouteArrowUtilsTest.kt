@@ -139,7 +139,7 @@ class RouteArrowUtilsTest {
     @Test
     fun layersAreInitialized() {
         val style = mockk<Style> {
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns true
             every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns true
             every {
@@ -153,7 +153,7 @@ class RouteArrowUtilsTest {
         val result = RouteArrowUtils.layersAreInitialized(style)
 
         assertTrue(result)
-        verify { style.fullyLoaded }
+        verify { style.isStyleLoaded }
         verify { style.styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) }
         verify { style.styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) }
         verify { style.styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID) }
@@ -166,7 +166,7 @@ class RouteArrowUtilsTest {
     fun initializeLayers_whenStyleNotLoaded() {
         val options = RouteArrowOptions.Builder(ctx).build()
         val style = mockk<Style> {
-            every { fullyLoaded } returns false
+            every { isStyleLoaded } returns false
         }
 
         RouteArrowUtils.initializeLayers(style, options)
@@ -179,7 +179,7 @@ class RouteArrowUtilsTest {
         val options = RouteArrowOptions.Builder(ctx).build()
         val style = mockk<Style> {
             every { styleLayers } returns listOf()
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns true
             every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns true
             every {
@@ -203,8 +203,8 @@ class RouteArrowUtilsTest {
                 priority = Thread.MAX_PRIORITY
                 start()
             }
-        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
-        mockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
         val options = RouteArrowOptions.Builder(ctx).build()
         val shaftSourceValueSlot = slot<Value>()
         val headSourceValueSlot = slot<Value>()
@@ -213,7 +213,7 @@ class RouteArrowUtilsTest {
         val mockImage = mockk<Image>(relaxed = true)
 
         val style = mockk<Style>(relaxed = true) {
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every { styleLayers } returns listOf()
             every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns false
             every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns false
@@ -329,8 +329,8 @@ class RouteArrowUtilsTest {
             "mapbox-navigation-arrow-shaft-layer",
             addStyleLayerPositionSlots[3].above
         )
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
-        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
     }
 
     @Test
@@ -340,8 +340,8 @@ class RouteArrowUtilsTest {
                 priority = Thread.MAX_PRIORITY
                 start()
             }
-        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
-        mockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
         val mockImage = mockk<Image>(relaxed = true)
         val options = RouteArrowOptions.Builder(ctx).build()
         val shaftSourceValueSlot = slot<Value>()
@@ -349,7 +349,7 @@ class RouteArrowUtilsTest {
         val addStyleLayerSlots = mutableListOf<Value>()
         val addStyleLayerPositionSlots = mutableListOf<LayerPosition>()
         val style = mockk<Style>(relaxed = true) {
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every { styleLayers } returns listOf()
             every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns false
             every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns false
@@ -464,8 +464,8 @@ class RouteArrowUtilsTest {
             "mapbox-navigation-arrow-shaft-layer",
             addStyleLayerPositionSlots[3].above
         )
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
-        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
     }
 
     @Test
@@ -491,7 +491,7 @@ class RouteArrowUtilsTest {
             every { arrowHeadScaleExpression } returns options.arrowHeadScaleExpression
         }
         val style = mockk<Style>(relaxed = true) {
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every { styleLayers } returns listOf()
             every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns true
             every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns true
@@ -542,7 +542,7 @@ class RouteArrowUtilsTest {
             every { arrowHeadScaleExpression } returns options.arrowHeadScaleExpression
         }
         val style = mockk<Style>(relaxed = true) {
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every { styleLayers } returns listOf()
             every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns true
             every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns true
@@ -593,7 +593,7 @@ class RouteArrowUtilsTest {
             every { arrowHeadScaleExpression } returns options.arrowHeadScaleExpression
         }
         val style = mockk<Style>(relaxed = true) {
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every { styleLayers } returns listOf()
             every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns true
             every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns true
@@ -644,7 +644,7 @@ class RouteArrowUtilsTest {
             every { arrowHeadScaleExpression } returns options.arrowHeadScaleExpression
         }
         val style = mockk<Style>(relaxed = true) {
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every { styleLayers } returns listOf()
             every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns true
             every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns true

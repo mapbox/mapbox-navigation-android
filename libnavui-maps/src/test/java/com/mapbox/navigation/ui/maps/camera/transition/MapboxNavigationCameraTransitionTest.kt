@@ -37,7 +37,7 @@ class MapboxNavigationCameraTransitionTest {
         every { animatorSet.constraintDurationTo(any()) } returns constrainedSet
         every { screenDistanceFromMapCenterToTarget(mapboxMap, any(), any()) } returns 1000.0
         every { cameraPlugin.createCenterAnimator(any(), any()) } returns mockk()
-        every { cameraPlugin.createBearingAnimator(any(), any()) } returns mockk()
+        every { cameraPlugin.createBearingAnimator(any(), any(), any()) } returns mockk()
         every { cameraPlugin.createPitchAnimator(any(), any()) } returns mockk()
         every { cameraPlugin.createZoomAnimator(any(), any()) } returns mockk()
         every { cameraPlugin.createPaddingAnimator(any(), any()) } returns mockk()
@@ -53,7 +53,9 @@ class MapboxNavigationCameraTransitionTest {
             .build()
 
         val valueSlot = slot<CameraAnimatorOptions<Double>>()
-        every { cameraPlugin.createBearingAnimator(capture(valueSlot), any()) } returns mockk()
+        every {
+            cameraPlugin.createBearingAnimator(capture(valueSlot), any(), any())
+        } returns mockk()
         transitions.transitionFromLowZoomToHighZoom(cameraOptions, DEFAULT_STATE_TRANSITION_OPT)
 
         assertEquals(-10.0, valueSlot.captured.targets.last(), 0.0000000001)
@@ -71,7 +73,9 @@ class MapboxNavigationCameraTransitionTest {
             .build()
 
         val valueSlot = slot<CameraAnimatorOptions<Double>>()
-        every { cameraPlugin.createBearingAnimator(capture(valueSlot), any()) } returns mockk()
+        every {
+            cameraPlugin.createBearingAnimator(capture(valueSlot), any(), any())
+        } returns mockk()
         transitions.transitionFromHighZoomToLowZoom(cameraOptions, DEFAULT_STATE_TRANSITION_OPT)
 
         assertEquals(-10.0, valueSlot.captured.targets.last(), 0.0000000001)
@@ -88,7 +92,9 @@ class MapboxNavigationCameraTransitionTest {
             .build()
 
         val valueSlot = slot<CameraAnimatorOptions<Double>>()
-        every { cameraPlugin.createBearingAnimator(capture(valueSlot), any()) } returns mockk()
+        every {
+            cameraPlugin.createBearingAnimator(capture(valueSlot), any(), any())
+        } returns mockk()
         transitions.transitionLinear(cameraOptions, DEFAULT_FRAME_TRANSITION_OPT)
 
         assertEquals(-10.0, valueSlot.captured.targets.last(), 0.0000000001)
