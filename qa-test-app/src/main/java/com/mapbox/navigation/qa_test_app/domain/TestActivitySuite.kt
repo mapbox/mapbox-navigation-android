@@ -5,6 +5,8 @@ import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.utils.startActivity
 import com.mapbox.navigation.qa_test_app.view.AlternativeRouteActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxRouteLineActivity
+import com.mapbox.navigation.qa_test_app.view.RouteRestrictionsActivity
+import com.mapbox.navigation.qa_test_app.view.RouteTrafficUpdateActivity
 import com.mapbox.navigation.qa_test_app.view.util.RouteDrawingActivity
 
 typealias LaunchActivityFun = (Activity) -> Unit
@@ -17,6 +19,18 @@ object TestActivitySuite {
             R.string.alternative_route_selection_description
         ) { activity ->
             activity.startActivity<AlternativeRouteActivity>()
+        },
+        TestActivityDescription(
+            "Display Route Restrictions",
+            R.string.route_restriction_activity_description
+        ) { activity ->
+            activity.startActivity<RouteRestrictionsActivity>()
+        },
+        TestActivityDescription(
+            "Dynamic Traffic Update",
+            R.string.dynamic_traffic_update_description
+        ) { activity ->
+            activity.startActivity<RouteTrafficUpdateActivity>()
         },
         TestActivityDescription(
             "Route Line dev. activity",

@@ -4,4 +4,6 @@
     <string name="routeline_activity" translatable="false">Internal Development Activity</string>
     <string name="label_start_navigation" translatable="false">Start Navigation</string>
     <string name="route_drawing_utility" translatable="false">Internal Route Drawing Utility</string>
+    <string name="route_restriction_activity_description" translatable="false">Displays a restricted section of a route. \n\n You should see a section near the middle of the route that has a magenta colored, dashed line appearance.</string>
+    <string name="dynamic_traffic_update_description" translatable="false">Dynamically adjusts the traffic congestion on a route line. \n\nBriefly after the activity starts the traffic congestion on the route line will be randomly updated. \n\nNotice the route line is partially \"vanished\". There should be no redrawing or blinking of the \"vanished\" section of the route line.</string>
 </resources>
