@@ -61,23 +61,6 @@ dependencies {
 }
 ```
 
-##### Pre-`1.0.0` versions of the Navigation SDK:
-
-SNAPSHOTs are available on [Sonatype](https://oss.sonatype.org/content/repositories/snapshots/com/mapbox/mapboxsdk/).
-
-Add the following code snippet to your project-level `build.gradle` file:
-
-```gradle
-repositories {
-    mavenCentral()
-    maven { url "http://oss.sonatype.org/content/repositories/snapshots/" }
-}
-
-dependencies {
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.43.0-SNAPSHOT'
-}
-```
-
 ## <a name="sample-code">Sample code
 
 [We've added several navigation examples to this repo's `examples` module](https://github.com/mapbox/mapbox-navigation-android/tree/main/examples) to help you get started with the Navigation SDK and to inspire you.
