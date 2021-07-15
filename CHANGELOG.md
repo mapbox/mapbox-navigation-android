@@ -2,6 +2,32 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.19 - July 15, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Features
+- Exposed `ManeuverOptions#filterDuplicateManeuvers` which allows to filter out `Maneuver`s that point to the same actual turn from the presented lists. This parameter defaults to `true`. [#4583](https://github.com/mapbox/mapbox-navigation-android/pull/4583)
+
+#### Bug fixes and improvements
+- Fixed an issue where the `MapboxNavigationViewportDataSource` could produce an unexpected update when the same route was provided more than once, for example, during a route refresh update. [#4586](https://github.com/mapbox/mapbox-navigation-android/pull/4586)
+- :warning: Changed `MapboxDistanceFormatter`'s package from `com.mapbox.navigation.core.internal.formatter` to `com.mapbox.navigation.core.formatter`, making it stable. [#4608](https://github.com/mapbox/mapbox-navigation-android/pull/4608)
+- :warning: Changed `MapboxManeuverApi#getManeuvers(route, callback, routeLeg)` to `MapboxManeuverApi#getManeuvers(route, callback, routeLegIndex)` to provide better support for various scenarios. This also fixed a bug where `MapboxManeuverApi` was not producing any more updates after the original route's annotations were refreshed. [#4607](https://github.com/mapbox/mapbox-navigation-android/pull/4607)
+- :warning: Removed `ManevuerCallback` since it was called back synchronously anyway. `MapboxManeuverApi#getManeuvers` returns the results directly now. [#4609](https://github.com/mapbox/mapbox-navigation-android/pull/4609)
+- Minor performance improvements in the drawing of the route line. Laying out traffic on top of the route is now decoupled from drawing the route itself, which decreases the time in which the core of the route line is first visible. [#4292](https://github.com/mapbox/mapbox-navigation-android/pull/4292)
+- Fixed a `ConcurrentModificationException` that could occasionally be thrown when `PredictiveCacheController` was used and the connectivity changed between online/offline. [#4605](https://github.com/mapbox/mapbox-navigation-android/pull/4605)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+
+- Mapbox Maps SDK `v10.0.0-rc.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.3))
+- Mapbox Navigation Native `v57.0.0`
+- Mapbox Core Common `v14.2.0`
+- Mapbox Java `5.9.0-alpha.5` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v5.9.0-alpha.5))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.0.0-beta.9.4 - Jul 14, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
