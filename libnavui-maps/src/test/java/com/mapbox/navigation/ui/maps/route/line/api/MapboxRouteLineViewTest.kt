@@ -102,8 +102,7 @@ class MapboxRouteLineViewTest {
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val style = mockk<Style> {
-            every { isFullyLoaded() } returns true
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every {
                 setStyleSourceProperty(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any(), any())
             } returns ExpectedFactory.createNone()
@@ -128,7 +127,7 @@ class MapboxRouteLineViewTest {
 
     @Test
     fun renderClearRouteDataState() = coroutineRule.runBlockingTest {
-        mockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val primaryRouteFeatureCollection =
@@ -140,8 +139,7 @@ class MapboxRouteLineViewTest {
         val altRoute2Source = mockk<GeoJsonSource>(relaxed = true)
         val wayPointSource = mockk<GeoJsonSource>(relaxed = true)
         val style = mockk<Style> {
-            every { isFullyLoaded() } returns true
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every { getSource(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns primaryRouteSource
             every { getSource(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns altRoute1Source
             every { getSource(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns altRoute2Source
@@ -170,12 +168,12 @@ class MapboxRouteLineViewTest {
         verify { wayPointSource.featureCollection(waypointsFeatureCollection) }
         verify { MapboxRouteLineUtils.initializeLayers(style, options) }
         unmockkObject(MapboxRouteLineUtils)
-        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
     }
 
     @Test
     fun renderTraveledRouteLineUpdate() = coroutineRule.runBlockingTest {
-        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val trafficLineExp = mockk<Expression>()
@@ -193,8 +191,7 @@ class MapboxRouteLineViewTest {
         val primaryRouteLayer = mockk<LineLayer>(relaxed = true)
         val primaryRouteCasingLayer = mockk<LineLayer>(relaxed = true)
         val style = mockk<Style> {
-            every { isFullyLoaded() } returns true
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every {
                 getLayer(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
             } returns primaryRouteTrafficLayer
@@ -217,13 +214,13 @@ class MapboxRouteLineViewTest {
         verify { primaryRouteLayer.lineGradient(routeLineExp) }
         verify { primaryRouteCasingLayer.lineGradient(casingLineEx) }
         unmockkObject(MapboxRouteLineUtils)
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
 
     @Test
     fun renderDrawRouteState() = coroutineRule.runBlockingTest {
-        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
-        mockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val primaryRouteFeatureCollection =
@@ -262,8 +259,7 @@ class MapboxRouteLineViewTest {
             )
         )
         val style = mockk<Style>(relaxed = true) {
-            every { isFullyLoaded() } returns true
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every {
                 getLayer(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
             } returns primaryRouteTrafficLayer
@@ -305,14 +301,14 @@ class MapboxRouteLineViewTest {
         verify { altRoute2Source.featureCollection(alternativeRoute2FeatureCollection) }
         verify { wayPointSource.featureCollection(waypointsFeatureCollection) }
         unmockkObject(MapboxRouteLineUtils)
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
-        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
     }
 
     @Test
     fun showPrimaryRoute() {
-        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
-        mockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val primaryRouteTrafficLayer = mockk<LineLayer>(relaxed = true)
@@ -320,8 +316,7 @@ class MapboxRouteLineViewTest {
         val primaryRouteCasingLayer = mockk<LineLayer>(relaxed = true)
 
         val style = mockk<Style> {
-            every { isFullyLoaded() } returns true
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every {
                 getLayer(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
             } returns primaryRouteTrafficLayer
@@ -339,13 +334,13 @@ class MapboxRouteLineViewTest {
         verify { primaryRouteLayer.visibility(Visibility.VISIBLE) }
         verify { primaryRouteCasingLayer.visibility(Visibility.VISIBLE) }
         unmockkObject(MapboxRouteLineUtils)
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
-        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
     }
 
     @Test
     fun hidePrimaryRoute() {
-        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val trafficLayer = mockk<LineLayer>(relaxed = true)
@@ -353,8 +348,7 @@ class MapboxRouteLineViewTest {
         val casingLayer = mockk<LineLayer>(relaxed = true)
 
         val style = mockk<Style> {
-            every { isFullyLoaded() } returns true
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every {
                 getLayer(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
             } returns trafficLayer
@@ -372,12 +366,12 @@ class MapboxRouteLineViewTest {
         verify { routeLayer.visibility(Visibility.NONE) }
         verify { casingLayer.visibility(Visibility.NONE) }
         unmockkObject(MapboxRouteLineUtils)
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
 
     @Test
     fun showAlternativeRoutes() {
-        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val altRoute1 = mockk<LineLayer>(relaxed = true)
@@ -388,8 +382,7 @@ class MapboxRouteLineViewTest {
         val altRouteTraffic2 = mockk<LineLayer>(relaxed = true)
 
         val style = mockk<Style> {
-            every { isFullyLoaded() } returns true
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every {
                 getLayer(RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID)
             } returns altRoute1
@@ -421,12 +414,12 @@ class MapboxRouteLineViewTest {
         verify { altRouteCasing2.visibility(Visibility.VISIBLE) }
         verify { altRouteTraffic2.visibility(Visibility.VISIBLE) }
         unmockkObject(MapboxRouteLineUtils)
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
 
     @Test
     fun hideAlternativeRoutes() {
-        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val altRoute1 = mockk<LineLayer>(relaxed = true)
@@ -437,8 +430,7 @@ class MapboxRouteLineViewTest {
         val altRouteTraffic2 = mockk<LineLayer>(relaxed = true)
 
         val style = mockk<Style> {
-            every { isFullyLoaded() } returns true
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
 
             every {
                 getLayer(RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID)
@@ -472,18 +464,17 @@ class MapboxRouteLineViewTest {
         verify { altRouteTraffic2.visibility(Visibility.NONE) }
 
         unmockkObject(MapboxRouteLineUtils)
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
 
     @Test
     fun showOriginAndDestinationPoints() {
-        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val waypointLayer = mockk<LineLayer>(relaxed = true)
         val style = mockk<Style> {
-            every { isFullyLoaded() } returns true
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every { getLayer(RouteLayerConstants.WAYPOINT_LAYER_ID) } returns waypointLayer
         }.also {
             mockCheckForLayerInitialization(it)
@@ -493,18 +484,17 @@ class MapboxRouteLineViewTest {
 
         verify { waypointLayer.visibility(Visibility.VISIBLE) }
         unmockkObject(MapboxRouteLineUtils)
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
 
     @Test
     fun hideOriginAndDestinationPoints() {
-        mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkObject(MapboxRouteLineUtils)
         val waypointLayer = mockk<LineLayer>(relaxed = true)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val style = mockk<Style> {
-            every { isFullyLoaded() } returns true
-            every { fullyLoaded } returns true
+            every { isStyleLoaded } returns true
             every { getLayer(RouteLayerConstants.WAYPOINT_LAYER_ID) } returns waypointLayer
         }.also {
             mockCheckForLayerInitialization(it)
@@ -514,7 +504,7 @@ class MapboxRouteLineViewTest {
 
         verify { waypointLayer.visibility(Visibility.NONE) }
         unmockkObject(MapboxRouteLineUtils)
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
 
     @Test

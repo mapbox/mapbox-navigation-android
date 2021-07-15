@@ -192,7 +192,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     ((FloatingActionButton) findViewById(R.id.fabToggleStyle)).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        if (mapboxMap.getStyle() == null || !mapboxMap.getStyle().isFullyLoaded()) {
+        if (mapboxMap.getStyle() == null || !mapboxMap.getStyle().isStyleLoaded) {
           return;
         }
 
@@ -500,7 +500,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   private final OnMapClickListener mapClickListener = new OnMapClickListener() {
     @Override
     public boolean onMapClick(@NotNull Point point) {
-      if (mapboxMap.getStyle() != null && mapboxMap.getStyle().isFullyLoaded()) {
+      if (mapboxMap.getStyle() != null && mapboxMap.getStyle().isStyleLoaded) {
         Visibility primaryLineVisibility = mapboxRouteLineView.getPrimaryRouteVisibility(mapboxMap.getStyle());
         Visibility alternativeRouteLinesVisibility = mapboxRouteLineView.getAlternativeRoutesVisibility(mapboxMap.getStyle());
         if (primaryLineVisibility == Visibility.VISIBLE && alternativeRouteLinesVisibility == Visibility.VISIBLE) {

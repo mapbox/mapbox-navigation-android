@@ -794,7 +794,7 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             mapboxMap.cameraForCoordinates(
                 pointsForInitialFollowingFrame,
-                any(),
+                any<CameraOptions>(),
                 any()
             )
         } returns mockk(relaxed = true)

@@ -172,19 +172,19 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
     }
 
     private fun updateLayerVisibility(style: Style, layerId: String, visibility: Visibility) {
-        if (style.isFullyLoaded()) {
+        if (style.isStyleLoaded) {
             style.getLayer(layerId)?.visibility(visibility)
         }
     }
 
     private fun updateSource(style: Style, sourceId: String, feature: Feature) {
-        if (style.isFullyLoaded() && style.styleSourceExists(sourceId)) {
+        if (style.isStyleLoaded && style.styleSourceExists(sourceId)) {
             style.getSourceAs<GeoJsonSource>(sourceId)?.feature(feature)
         }
     }
 
     private fun updateSource(style: Style, sourceId: String, featureCollection: FeatureCollection) {
-        if (style.isFullyLoaded() && style.styleSourceExists(sourceId)) {
+        if (style.isStyleLoaded && style.styleSourceExists(sourceId)) {
             style.getSourceAs<GeoJsonSource>(sourceId)?.featureCollection(featureCollection)
         }
     }
