@@ -127,7 +127,7 @@ class MapboxRouteLineViewTest {
     }
 
     @Test
-    fun renderClearRouteDataState() {
+    fun renderClearRouteDataState() = coroutineRule.runBlockingTest {
         mockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
@@ -159,7 +159,10 @@ class MapboxRouteLineViewTest {
             )
         )
 
-        MapboxRouteLineView(options).renderClearRouteLineValue(style, state)
+        pauseDispatcher {
+            MapboxRouteLineView(options).renderClearRouteLineValue(style, state)
+            verify { MapboxRouteLineUtils.initializeLayers(style, options) }
+        }
 
         verify { primaryRouteSource.featureCollection(primaryRouteFeatureCollection) }
         verify { altRoute1Source.featureCollection(altRoutesFeatureCollection) }
@@ -171,7 +174,7 @@ class MapboxRouteLineViewTest {
     }
 
     @Test
-    fun renderTraveledRouteLineUpdate() {
+    fun renderTraveledRouteLineUpdate() = coroutineRule.runBlockingTest {
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
@@ -205,12 +208,14 @@ class MapboxRouteLineViewTest {
             mockCheckForLayerInitialization(it)
         }
 
-        MapboxRouteLineView(options).renderVanishingRouteLineUpdateValue(style, state)
+        pauseDispatcher {
+            MapboxRouteLineView(options).renderVanishingRouteLineUpdateValue(style, state)
+            verify { MapboxRouteLineUtils.initializeLayers(style, options) }
+        }
 
         verify { primaryRouteTrafficLayer.lineGradient(trafficLineExp) }
         verify { primaryRouteLayer.lineGradient(routeLineExp) }
         verify { primaryRouteCasingLayer.lineGradient(casingLineEx) }
-        verify { MapboxRouteLineUtils.initializeLayers(style, options) }
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
     }
@@ -282,7 +287,10 @@ class MapboxRouteLineViewTest {
             mockCheckForLayerInitialization(it)
         }
 
-        MapboxRouteLineView(options).renderRouteDrawData(style, state)
+        pauseDispatcher {
+            MapboxRouteLineView(options).renderRouteDrawData(style, state)
+            verify { MapboxRouteLineUtils.initializeLayers(style, options) }
+        }
 
         verify { primaryRouteTrafficLayer.lineGradient(Expression.color(Color.TRANSPARENT)) }
         verify { altRouteTrafficLayer1.lineGradient(Expression.color(Color.TRANSPARENT)) }
@@ -296,7 +304,6 @@ class MapboxRouteLineViewTest {
         verify { altRoute1Source.featureCollection(alternativeRoute1FeatureCollection) }
         verify { altRoute2Source.featureCollection(alternativeRoute2FeatureCollection) }
         verify { wayPointSource.featureCollection(waypointsFeatureCollection) }
-        verify { MapboxRouteLineUtils.initializeLayers(style, options) }
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerKt")
         unmockkStatic("com.mapbox.maps.extension.style.sources.SourceKt")
