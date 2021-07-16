@@ -26,6 +26,9 @@
     <string name="title_custom_style" translatable="false">Custom Style Example</string>
     <string name="description_custom_style" translatable="false">Demonstrates the use of custom styling.</string>
 
+    <string name="title_multileg_route" translatable="false">Hide inactive route legs.</string>
+    <string name="description_multileg_route" translatable="false">Demonstrates hiding inactive route legs.</string>
+
     <string name="title_multiple_arrows" translatable="false">Multiple Arrow Example</string>
     <string name="description_multiple_arrows" translatable="false">Demonstrates adding multiple arrows.</string>
 

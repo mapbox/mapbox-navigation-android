@@ -9,7 +9,7 @@ import com.mapbox.maps.extension.style.expressions.generated.Expression
  * @param routeLineExpression the expression for the primary route line
  * @param casingLineExpression the expression for the primary route casing line
  */
-class VanishingRouteLineUpdateValue internal constructor(
+class RouteLineUpdateValue internal constructor(
     val trafficLineExpression: Expression,
     val routeLineExpression: Expression,
     val casingLineExpression: Expression

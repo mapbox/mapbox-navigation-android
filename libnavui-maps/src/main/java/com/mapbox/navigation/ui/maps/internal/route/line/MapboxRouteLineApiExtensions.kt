@@ -9,6 +9,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import kotlin.coroutines.resume
@@ -84,6 +85,21 @@ object MapboxRouteLineApiExtensions {
     suspend fun MapboxRouteLineApi.clearRouteLine(): Expected<RouteLineError, RouteLineClearValue> {
         return suspendCoroutine { continuation ->
             this.clearRouteLine { value -> continuation.resume(value) }
+        }
+    }
+
+    /**
+     * Adjusts the route line visibility so that only the current route leg is visible. This is
+     * intended to be used with routes that have multiple waypoints.
+     *
+     * @param legIndex the route leg index that should appear most prominent.
+     */
+    suspend fun MapboxRouteLineApi.showRouteWithLegIndexHighlighted(legIndex: Int):
+        Expected<RouteLineError, RouteLineUpdateValue> {
+        return suspendCoroutine { continuation ->
+            this.showRouteWithLegIndexHighlighted(legIndex) { value ->
+                continuation.resume(value)
+            }
         }
     }
 }

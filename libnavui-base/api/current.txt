@@ -22,6 +22,7 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     method public Double![] getARROW_HEAD_CASING_OFFSET();
     method public Double![] getARROW_HEAD_OFFSET();
     method public int getDESTINATION_WAYPOINT_ICON();
+    method public int getIN_ACTIVE_ROUTE_LEG_COLOR();
     method public int getMANEUVER_ARROWHEAD_ICON_CASING_DRAWABLE();
     method public int getMANEUVER_ARROWHEAD_ICON_DRAWABLE();
     method public int getMANEUVER_ARROW_CASING_COLOR();
@@ -39,7 +40,6 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     method public int getROUTE_SEVERE_TRAFFIC_COLOR();
     method public int getROUTE_UNKNOWN_TRAFFIC_COLOR();
     method public java.util.List<java.lang.String> getTRAFFIC_BACKFILL_ROAD_CLASSES();
-    method public int getTRANSPARENT_COLOR();
     property public final int ALTERNATE_RESTRICTED_ROAD_COLOR;
     property public final int ALTERNATE_ROUTE_CASING_COLOR;
     property public final int ALTERNATE_ROUTE_DEFAULT_COLOR;
@@ -52,6 +52,7 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     property public final Double![] ARROW_HEAD_CASING_OFFSET;
     property public final Double![] ARROW_HEAD_OFFSET;
     property public final int DESTINATION_WAYPOINT_ICON;
+    property public final int IN_ACTIVE_ROUTE_LEG_COLOR;
     property public final int MANEUVER_ARROWHEAD_ICON_CASING_DRAWABLE;
     property public final int MANEUVER_ARROWHEAD_ICON_DRAWABLE;
     property public final int MANEUVER_ARROW_CASING_COLOR;
@@ -69,7 +70,6 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     property public final int ROUTE_SEVERE_TRAFFIC_COLOR;
     property public final int ROUTE_UNKNOWN_TRAFFIC_COLOR;
     property public final java.util.List<java.lang.String> TRAFFIC_BACKFILL_ROAD_CLASSES;
-    property public final int TRANSPARENT_COLOR;
     field public static final String ALTERNATIVE_ROUTE1_SOURCE_ID = "mapbox-navigation-alt-route1-source";
     field public static final String ALTERNATIVE_ROUTE2_SOURCE_ID = "mapbox-navigation-alt-route2-source";
     field public static final String ARROW_BEARING = "mapbox-navigation-arrow-bearing";
