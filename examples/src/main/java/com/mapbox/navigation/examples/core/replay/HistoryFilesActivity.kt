@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import com.mapbox.navigation.core.replay.history.ReplayHistoryDTO
+import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.examples.core.R
 
 @SuppressLint("HardwareIds")
@@ -18,7 +18,8 @@ class HistoryFilesActivity : AppCompatActivity() {
 
     companion object {
         const val REQUEST_CODE: Int = 123
-        var selectedHistory: ReplayHistoryDTO? = null
+        const val EXTRA_HISTORY_FILE_DIRECTORY = "EXTRA_HISTORY_FILE_DIRECTORY"
+        var selectedHistory: MapboxHistoryReader? = null
             private set
     }
 
@@ -44,7 +45,8 @@ class HistoryFilesActivity : AppCompatActivity() {
             adapter = viewAdapter
         }
 
-        filesViewController = HistoryFilesViewController()
+        val historyFileDirectory = intent.extras?.getString(EXTRA_HISTORY_FILE_DIRECTORY)
+        filesViewController = HistoryFilesViewController(historyFileDirectory)
         filesViewController.attach(this, viewAdapter) { historyDataResponse ->
             if (historyDataResponse == null) {
                 Snackbar.make(

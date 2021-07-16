@@ -42,5 +42,6 @@
     <string name="history_failed_to_load_item" translatable="false">History failed to load item</string>
     <string name="history_failed_to_load_list" translatable="false">Failed to load list</string>
     <string name="history_local_history_file" translatable="false">Local history file</string>
+    <string name="history_replay_directory" translatable="false">Replay directory</string>
     <string name="history_recorded_history_file" translatable="false">Recorded history file</string>
 </resources>

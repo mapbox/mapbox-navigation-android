@@ -3,10 +3,12 @@ package com.mapbox.navigation.core.history.model
 /**
  * Custom event from the navigators history.
  *
+ * @param eventTimestamp timestamp of event seconds
  * @param type the event type in the events log
  * @param properties the json with properties of the event
  */
 class HistoryEventPushHistoryRecord internal constructor(
+    override val eventTimestamp: Double,
     val type: String,
     val properties: String
 ) : HistoryEvent {

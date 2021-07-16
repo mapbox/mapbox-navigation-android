@@ -73,6 +73,10 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.selectHistoryButton).setOnClickListener {
             val activityIntent = Intent(this, HistoryFilesActivity::class.java)
+                .putExtra(
+                    HistoryFilesActivity.EXTRA_HISTORY_FILE_DIRECTORY,
+                    mapboxNavigation.historyRecorder.fileDirectory()
+                )
             startActivityForResult(activityIntent, HistoryFilesActivity.REQUEST_CODE)
         }
         setupReplayControls()

@@ -2,28 +2,19 @@ package com.mapbox.navigation.examples.core.replay
 
 import android.util.Log
 import androidx.annotation.Keep
-import com.google.gson.annotations.SerializedName
-import com.mapbox.navigation.core.replay.history.ReplayHistoryDTO
+import com.mapbox.navigation.core.history.MapboxHistoryReader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.GET
-import retrofit2.http.Path
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.File
+import java.io.IOException
+import java.net.URL
 
 data class ReplayPath(
-    @SerializedName("title")
     val title: String,
-    @SerializedName("description")
     val description: String,
-    @SerializedName("path")
     val path: String,
-    @SerializedName("data_source")
     val dataSource: ReplayDataSource
 )
 
@@ -31,7 +22,7 @@ data class ReplayPath(
 enum class ReplayDataSource {
     HTTP_SERVER,
     ASSETS_DIRECTORY,
-    HISTORY_RECORDER
+    FILE_DIRECTORY
 }
 
 class HistoryFilesClient {
@@ -39,84 +30,42 @@ class HistoryFilesClient {
     companion object {
         private const val TAG = "HistoryFilesClient"
         private const val BASE_URL = "https://mapbox.github.io/mapbox-navigation-history/"
-        private val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
-    interface LocalhostFiles {
-        @GET("index.json")
-        fun drives(): Call<List<ReplayPath>>
-
-        @GET("navigation-history/{filename}")
-        fun jsonFile(@Path("filename") filename: String): Call<ReplayHistoryDTO>
+        private const val INDEX_JSON_URL = BASE_URL + "index.json"
+        private const val HISTORY_FILE_URL = BASE_URL + "navigation-history/"
     }
 
     suspend fun requestHistory(): List<ReplayPath> =
-        withContext(Dispatchers.IO) { requestHistoryCall() }
-
-    private suspend fun requestHistoryCall(): List<ReplayPath> = suspendCoroutine { cont ->
-        val historyDrives = retrofit.create(LocalhostFiles::class.java)
-
-        historyDrives.drives().enqueue(
-            object : Callback<List<ReplayPath>> {
-                override fun onFailure(call: Call<List<ReplayPath>>, t: Throwable) {
-                    Log.e(TAG, "requestHistory onFailure: $t")
-                    cont.resume(emptyList())
-                }
-
-                override fun onResponse(
-                    call: Call<List<ReplayPath>>,
-                    response: Response<List<ReplayPath>>
-                ) {
-                    Log.i(TAG, "requestHistory onResponse")
-                    val drives = if (response.isSuccessful) {
-                        response.body()?.map(::withHttpDataSource) ?: emptyList()
-                    } else {
-                        emptyList()
+        withContext(Dispatchers.IO) {
+            try {
+                val result = URL(INDEX_JSON_URL).readText()
+                val jsonArray = JSONArray(result)
+                (0 until jsonArray.length()).map {
+                    (jsonArray.get(it) as JSONObject).run {
+                        ReplayPath(
+                            title = getString("title"),
+                            description = getString("description"),
+                            path = getString("path"),
+                            dataSource = ReplayDataSource.HTTP_SERVER
+                        )
                     }
-                    cont.resume(drives)
                 }
+            } catch (exception: IOException) {
+                Log.e(TAG, "requestHistory onFailure: $exception")
+                emptyList()
             }
-        )
-    }
+        }
 
-    private fun withHttpDataSource(replayPath: ReplayPath) = ReplayPath(
-        title = replayPath.title,
-        description = replayPath.description,
-        path = replayPath.path,
-        dataSource = ReplayDataSource.HTTP_SERVER
-    )
-
-    suspend fun requestJsonFile(filename: String): ReplayHistoryDTO? =
-        withContext(Dispatchers.IO) { requestJsonFileCall(filename) }
-
-    private suspend fun requestJsonFileCall(
-        filename: String
-    ): ReplayHistoryDTO? = suspendCoroutine { cont ->
-        val historyDrives = retrofit.create(LocalhostFiles::class.java)
-
-        historyDrives.jsonFile(filename).enqueue(
-            object : Callback<ReplayHistoryDTO> {
-                override fun onFailure(call: Call<ReplayHistoryDTO>, t: Throwable) {
-                    Log.e(TAG, "requestData onFailure: $t")
-                    cont.resume(null)
+    suspend fun requestJsonFile(pathName: String, outputFile: File): MapboxHistoryReader? =
+        withContext(Dispatchers.IO) {
+            try {
+                val inputStream = URL(HISTORY_FILE_URL + pathName).openStream()
+                outputFile.outputStream().use { fileOut ->
+                    inputStream.copyTo(fileOut)
                 }
-
-                override fun onResponse(
-                    call: Call<ReplayHistoryDTO>,
-                    response: Response<ReplayHistoryDTO>
-                ) {
-                    Log.i(TAG, "requestData onResponse")
-                    val data = if (response.isSuccessful) {
-                        response.body()
-                    } else {
-                        null
-                    }
-                    cont.resume(data)
-                }
+                MapboxHistoryReader(outputFile.absolutePath)
+            } catch (exception: IOException) {
+                Log.e(TAG, "requestJsonFile onFailure: $exception")
+                null
             }
-        )
-    }
+        }
 }

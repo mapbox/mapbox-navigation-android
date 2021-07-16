@@ -18,7 +18,7 @@ data class ReplayEvents(
 /**
  * Base interface event for ReplayEvent.
  *
- * @property eventTimestamp timestamp of event milliseconds
+ * @property eventTimestamp timestamp of event seconds
  * @see [ReplayLocationEngine]
  */
 interface ReplayEventBase {

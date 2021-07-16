@@ -4,5 +4,9 @@ import com.mapbox.navigator.HistoryRecord
 
 /**
  * Base interface event for the [HistoryRecord]
+ *
+ * @property eventTimestamp timestamp of event seconds
  */
-interface HistoryEvent
+interface HistoryEvent {
+    val eventTimestamp: Double
+}
