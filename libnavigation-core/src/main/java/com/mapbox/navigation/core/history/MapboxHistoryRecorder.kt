@@ -4,7 +4,6 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
-import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigator.HistoryRecorderHandle
 
@@ -12,29 +11,17 @@ import com.mapbox.navigator.HistoryRecorderHandle
  * Provides a mechanism for saving and retrieving Mapbox navigation history files.
  * Retrieve an instance of this class through [MapboxNavigation.historyRecorder].
  *
- * @see [HistoryRecorderOptions] to enable the recorder.
+ * @param fileDirectory absolute path to the directory with history files.
+ * Use this to purge old history files, upload later, or to use them for replay.
+ *
+ * @see [HistoryRecorderOptions] to set history files directory.
  * @see [MapboxHistoryReader] to read the history files.
  */
 class MapboxHistoryRecorder internal constructor(
-    navigationOptions: NavigationOptions,
-    private val logger: Logger
+    private val logger: Logger,
+    val fileDirectory: String,
 ) {
-    private val historyRecorderOptions = navigationOptions.historyRecorderOptions
-    private val historyFiles = HistoryFiles(navigationOptions.applicationContext, logger)
-
     internal var historyRecorderHandle: HistoryRecorderHandle? = null
-
-    /**
-     * The file directory where the history files are stored.
-     * Use this to purge old history files, upload later, or
-     * to use them for replay.
-     *
-     * @see [HistoryRecorderOptions] to customize this location.
-     *
-     * @return absolute path to the directory with history files.
-     *     returns null when there is no file directory
-     */
-    fun fileDirectory(): String? = historyFiles.absolutePath(historyRecorderOptions)
 
     /**
      * Starts history recording session.
@@ -82,8 +69,13 @@ class MapboxHistoryRecorder internal constructor(
 
     private fun checkRecorderInitialized() {
         if (historyRecorderHandle == null) {
-            logger.w(Tag("MbxHistoryRecorder"), Message("The history recorder is not initialized"))
+            logger.w(Tag(TAG), Message(MESSAGE))
         }
+    }
+
+    internal companion object {
+        internal const val TAG = "MbxHistoryRecorder"
+        internal const val MESSAGE = "The history recorder is not initialized"
     }
 }
 

@@ -53,7 +53,7 @@ class HistoryRecorderOptions private constructor(
         private var fileDirectory: String? = null
 
         /**
-         * Creates a custom file path to store the history files.
+         * Creates a custom file path to store the history files. Null use a default directory.
          */
         fun fileDirectory(filePath: String?): Builder =
             apply { this.fileDirectory = filePath }

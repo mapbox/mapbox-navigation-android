@@ -263,13 +263,15 @@ class MapboxNavigation(
      */
     val roadObjectMatcher: RoadObjectMatcher
 
+    private val navigationFiles = NavigationFiles(navigationOptions.applicationContext, logger)
+
     /**
      * Use the history recorder to save history files.
      *
      * @see [HistoryRecorderOptions] to enable and customize the directory
      * @see [MapboxHistoryReader] to read the files
      */
-    val historyRecorder = MapboxHistoryRecorder(navigationOptions, logger)
+    val historyRecorder = MapboxHistoryRecorder(logger, getHistoryPath())
 
     private var reachabilityObserverId: Long? = null
 
@@ -282,7 +284,7 @@ class MapboxNavigation(
                 isFallback = false,
                 tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
             ),
-            historyRecorder.fileDirectory(),
+            getHistoryPath(),
             logger
         )
         historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
@@ -952,7 +954,7 @@ class MapboxNavigation(
                 navigationOptions.deviceProfile,
                 navigatorConfig,
                 createTilesConfig(isFallback, tilesVersion),
-                historyRecorder.fileDirectory(),
+                getHistoryPath(),
                 logger
             )
             historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
@@ -1043,8 +1045,7 @@ class MapboxNavigation(
         tilesVersion: String
     ): TilesConfig {
         // TODO StrictMode may report a violation as we're creating a File from the Main
-        val offlineFilesPath = RoutingTilesFiles(navigationOptions.applicationContext, logger)
-            .absolutePath(navigationOptions.routingTilesOptions)
+        val offlineFilesPath = navigationFiles.cacheAbsolutePath(navigationOptions)
         val dataset = StringBuilder().apply {
             append(navigationOptions.routingTilesOptions.tilesDataset)
             append("/")
@@ -1071,6 +1072,9 @@ class MapboxNavigation(
             )
         )
     }
+
+    private fun getHistoryPath() =
+        navigationFiles.historyAbsolutePath(navigationOptions)
 
     private companion object {
         private val TAG = Tag("MbxNavigation")

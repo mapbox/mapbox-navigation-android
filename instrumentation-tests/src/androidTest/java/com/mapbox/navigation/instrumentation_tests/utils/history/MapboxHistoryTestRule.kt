@@ -40,7 +40,7 @@ class MapboxHistoryTestRule : TestWatcher() {
     lateinit var historyRecorder: MapboxHistoryRecorder
 
     override fun finished(description: Description) {
-        val filePath = historyRecorder.fileDirectory()!!
+        val filePath = historyRecorder.fileDirectory
         val file = File(filePath)
         file.walk().filterNot { it.isDirectory }.forEach {
             val path = description.methodName + File.separator + it.name

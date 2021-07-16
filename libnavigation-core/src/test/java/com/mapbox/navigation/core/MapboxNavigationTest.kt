@@ -653,7 +653,7 @@ class MapboxNavigationTest {
 
         mapboxNavigation = MapboxNavigation(options)
 
-        assertTrue(slot.captured.tilesPath.endsWith(RoutingTilesFiles.TILES_PATH_SUB_DIR))
+        assertTrue(slot.captured.tilesPath.endsWith(NavigationFiles.CACHE_DEFAULT_PATH))
 
         mapboxNavigation.onDestroy()
     }
