@@ -19,7 +19,7 @@ import java.net.URI
  * @param tilesProfile profile of the dataset.
  * One of (driving|driving-traffic|walking|cycling|truck).
  * @param tilesVersion version of tiles, chosen automatically if empty
- * @param filePath used for persistent configuration and history files storing.
+ * @param filePath used for persistent configuration.
  * @param tileStore tile store instance. It manages downloads and storage for requests to
  * tile-related API endpoints. For offline/predictive-caching use cases this instance should be
  * the same that is passed to map resource options. When creating the [TileStore] make sure to call
@@ -172,7 +172,7 @@ class RoutingTilesOptions private constructor(
 
         /**
          * Creates a custom file path to store the road network tiles.
-         * It is used for persistent configuration and history files storing.
+         * It is used for persistent configuration.
          */
         fun filePath(filePath: String?): Builder =
             apply { this.filePath = filePath }
