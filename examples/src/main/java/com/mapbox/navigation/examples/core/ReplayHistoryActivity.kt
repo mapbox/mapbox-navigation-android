@@ -30,7 +30,6 @@ import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.replay.history.ReplaySetRoute
-import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.examples.core.databinding.ActivityReplayHistoryLayoutBinding
 import com.mapbox.navigation.examples.core.replay.HistoryFileLoader
@@ -52,7 +51,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
     private var loadNavigationJob: Job? = null
     private val mapboxReplayer = MapboxReplayer()
     private val historyFileLoader = HistoryFileLoader()
-    private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
     private val navigationLocationProvider = NavigationLocationProvider()
     private val locationEngineCallback = MyLocationEngineCallback(this)
     private lateinit var mapboxNavigation: MapboxNavigation
@@ -84,7 +82,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
         binding.mapView.onStart()
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.registerLocationObserver(locationObserver)
-            mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
         }
     }
 
@@ -92,7 +89,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
         super.onStop()
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.unregisterLocationObserver(locationObserver)
-            mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         }
         binding.mapView.onStop()
     }
