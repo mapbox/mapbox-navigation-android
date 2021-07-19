@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
+import android.util.Log
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Style
@@ -36,6 +37,10 @@ import kotlinx.coroutines.sync.withLock
  */
 class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
 
+    private companion object {
+        private const val TAG = "MbxRouteLineView"
+    }
+
     private val jobControl = ThreadController.getMainScopeAndRootJob()
     private val mutex = Mutex()
 
@@ -61,97 +66,102 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param routeDrawData a [Expected<RouteLineError, RouteSetValue>]
      */
     fun renderRouteDrawData(style: Style, routeDrawData: Expected<RouteLineError, RouteSetValue>) {
-        routeDrawData.value?.let { value ->
-            jobControl.scope.launch {
-                mutex.withLock {
-                    initializeLayers(style, options)
+        routeDrawData.fold(
+            { error ->
+                Log.e(TAG, error.errorMessage)
+            },
+            { value ->
+                jobControl.scope.launch {
+                    mutex.withLock {
+                        initializeLayers(style, options)
 
-                    updateLineGradient(
-                        style,
-                        RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
-                        Expression.color(Color.TRANSPARENT)
-                    )
-                    updateLineGradient(
-                        style,
-                        RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
-                        Expression.color(Color.TRANSPARENT)
-                    )
-                    updateLineGradient(
-                        style,
-                        RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
-                        Expression.color(Color.TRANSPARENT)
-                    )
-                    updateLineGradient(
-                        style,
-                        RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
-                        value.routeLineExpression
-                    )
-                    updateLineGradient(
-                        style,
-                        RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
-                        value.casingLineExpression
-                    )
-                    updateSource(
-                        style,
-                        RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
-                        value.primaryRouteSource
-                    )
-                    updateSource(
-                        style,
-                        RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
-                        value.alternativeRoute1Source
-                    )
-                    updateSource(
-                        style,
-                        RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
-                        value.alternativeRoute2Source
-                    )
-                    updateSource(
-                        style,
-                        RouteConstants.WAYPOINT_SOURCE_ID,
-                        value.waypointsSource
-                    )
-                    value.trafficLineExpressionProvider?.let {
-                        val trafficExpressionDef = async(ThreadController.IODispatcher) {
-                            it()
-                        }
-                        trafficExpressionDef.await().apply {
-                            updateLineGradient(
-                                style,
-                                RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
-                                this
-                            )
-                        }
-                    }
-                    value.altRoute1TrafficExpressionProvider?.let {
-                        val altRoute1TrafficExpressionDef =
-                            async(ThreadController.IODispatcher) {
+                        updateLineGradient(
+                            style,
+                            RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                            Expression.color(Color.TRANSPARENT)
+                        )
+                        updateLineGradient(
+                            style,
+                            RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
+                            Expression.color(Color.TRANSPARENT)
+                        )
+                        updateLineGradient(
+                            style,
+                            RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
+                            Expression.color(Color.TRANSPARENT)
+                        )
+                        updateLineGradient(
+                            style,
+                            RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
+                            value.routeLineExpression
+                        )
+                        updateLineGradient(
+                            style,
+                            RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+                            value.casingLineExpression
+                        )
+                        updateSource(
+                            style,
+                            RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
+                            value.primaryRouteSource
+                        )
+                        updateSource(
+                            style,
+                            RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
+                            value.alternativeRoute1Source
+                        )
+                        updateSource(
+                            style,
+                            RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                            value.alternativeRoute2Source
+                        )
+                        updateSource(
+                            style,
+                            RouteConstants.WAYPOINT_SOURCE_ID,
+                            value.waypointsSource
+                        )
+                        value.trafficLineExpressionProvider?.let {
+                            val trafficExpressionDef = async(ThreadController.IODispatcher) {
                                 it()
                             }
-                        altRoute1TrafficExpressionDef.await().apply {
-                            updateLineGradient(
-                                style,
-                                RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
-                                this
-                            )
-                        }
-                    }
-                    value.altRoute2TrafficExpressionProvider?.let {
-                        val altRoute2TrafficExpressionDef =
-                            async(ThreadController.IODispatcher) {
-                                it()
+                            trafficExpressionDef.await().apply {
+                                updateLineGradient(
+                                    style,
+                                    RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                                    this
+                                )
                             }
-                        altRoute2TrafficExpressionDef.await().apply {
-                            updateLineGradient(
-                                style,
-                                RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
-                                this
-                            )
+                        }
+                        value.altRoute1TrafficExpressionProvider?.let {
+                            val altRoute1TrafficExpressionDef =
+                                async(ThreadController.IODispatcher) {
+                                    it()
+                                }
+                            altRoute1TrafficExpressionDef.await().apply {
+                                updateLineGradient(
+                                    style,
+                                    RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
+                                    this
+                                )
+                            }
+                        }
+                        value.altRoute2TrafficExpressionProvider?.let {
+                            val altRoute2TrafficExpressionDef =
+                                async(ThreadController.IODispatcher) {
+                                    it()
+                                }
+                            altRoute2TrafficExpressionDef.await().apply {
+                                updateLineGradient(
+                                    style,
+                                    RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
+                                    this
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
+        )
     }
 
     /**

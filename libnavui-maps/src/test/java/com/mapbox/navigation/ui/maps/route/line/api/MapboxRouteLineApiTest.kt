@@ -54,6 +54,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -124,6 +125,24 @@ class MapboxRouteLineApiTest {
 
         assertEquals(result.size, routes.size)
         assertEquals(result[0], routes[0].route)
+    }
+
+    @Test
+    fun setRoutes_whenRouteCoordinatesAreEmpty() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val api = MapboxRouteLineApi(options)
+        val route = getRoute()
+        val augmentedLineString =
+            LineString.fromJson("{\"type\":\"LineString\",\"coordinates\":[]}")
+                .toPolyline(Constants.PRECISION_6)
+        val augmentedRouteJson = route.toJson()
+            .replace("etylgAl`guhFpJrBh@kHbC{[nAZ", augmentedLineString)
+        val augmentedRoute = DirectionsRoute.fromJson(augmentedRouteJson)
+
+        val result = api.setRoutes(listOf(RouteLine(augmentedRoute, null)))
+
+        assertNotNull(result.error)
+        assertNull(result.value)
     }
 
     @Test
