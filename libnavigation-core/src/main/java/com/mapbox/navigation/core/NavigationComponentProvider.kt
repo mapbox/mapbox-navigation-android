@@ -6,6 +6,7 @@ import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.trip.notification.TripNotification
+import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.core.trip.service.MapboxTripService
@@ -62,4 +63,10 @@ internal object NavigationComponentProvider {
     )
 
     fun createNavigationSession(): NavigationSession = NavigationSession()
+
+    fun createBillingController(
+        accessToken: String?,
+        navigationSession: NavigationSession,
+        tripSession: TripSession
+    ): BillingController = BillingController(accessToken.toString(), navigationSession, tripSession)
 }

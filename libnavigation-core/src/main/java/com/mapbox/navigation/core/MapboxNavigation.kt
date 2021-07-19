@@ -1,3 +1,7 @@
+/**
+ * Tampering with any file that contains billing code is a violation of Mapbox Terms of Service and will result in enforcement of the penalties stipulated in the ToS.
+ */
+
 package com.mapbox.navigation.core
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
@@ -31,6 +35,7 @@ import com.mapbox.navigation.base.trip.model.eh.EHorizonEdge
 import com.mapbox.navigation.base.trip.model.eh.EHorizonEdgeMetadata
 import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
+import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
@@ -189,6 +194,7 @@ class MapboxNavigation(
     private val tripService: TripService
     private val tripSession: TripSession
     private val navigationSession: NavigationSession
+    private val billingController: BillingController
     private val logger = LoggerProvider.logger
     private val connectivityHandler: ConnectivityHandler = ConnectivityHandler(
         logger,
@@ -290,7 +296,28 @@ class MapboxNavigation(
 
     private var reachabilityObserverId: Long? = null
 
+    /**
+     * Describes whether this instance of `MapboxNavigation` has been destroyed by calling
+     * [onDestroy]. Once an instance is destroyed, it cannot be used anymore.
+     *
+     * @see [MapboxNavigationProvider]
+     */
+    @Volatile
+    var isDestroyed = false
+        private set
+
     init {
+        if (hasInstance) {
+            throw IllegalStateException(
+                """
+                    A different MapboxNavigation instance already exists.
+                    Make sure to destroy it with #onDestroy before creating a new one.
+                    Also see MapboxNavigationProvider for instance management assistance.
+                """.trimIndent()
+            )
+        }
+        hasInstance = true
+
         ThreadController.init()
         navigator = NavigationComponentProvider.createNativeNavigator(
             navigationOptions.deviceProfile,
@@ -333,6 +360,12 @@ class MapboxNavigation(
             logger = logger,
         )
         tripSession.registerStateObserver(navigationSession)
+
+        billingController = NavigationComponentProvider.createBillingController(
+            navigationOptions.accessToken,
+            navigationSession,
+            tripSession
+        )
 
         arrivalProgressObserver = ArrivalProgressObserver(tripSession)
         setArrivalController()
@@ -402,6 +435,8 @@ class MapboxNavigation(
      * Starts listening for location updates and enters an `Active Guidance` state if there's a primary route available
      * or a `Free Drive` state otherwise.
      *
+     * **Starting a session can have an impact on your usage costs.** Refer to the [pricing documentation](https://docs.mapbox.com/android/beta/navigation/guides/pricing/) to learn more.
+     *
      * @param withForegroundService Boolean if set to false, foreground service will not be started and
      * no notifications will be rendered, and no location updates will be available while the app is in the background.
      * Default value is set to true.
@@ -411,9 +446,11 @@ class MapboxNavigation(
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
     @JvmOverloads
     fun startTripSession(withForegroundService: Boolean = true) {
-        tripSession.start(withForegroundService)
-        notificationChannelField?.let {
-            monitorNotificationActionButton(it.get(null) as ReceiveChannel<NotificationAction>)
+        runIfNotDestroyed {
+            tripSession.start(withForegroundService)
+            notificationChannelField?.let {
+                monitorNotificationActionButton(it.get(null) as ReceiveChannel<NotificationAction>)
+            }
         }
     }
 
@@ -423,7 +460,9 @@ class MapboxNavigation(
      * @see [registerTripSessionStateObserver]
      */
     fun stopTripSession() {
-        tripSession.stop()
+        runIfNotDestroyed {
+            tripSession.stop()
+        }
     }
 
     /**
@@ -520,6 +559,9 @@ class MapboxNavigation(
      */
     @JvmOverloads
     fun setRoutes(routes: List<DirectionsRoute>, initialLegIndex: Int = 0) {
+        if (routes.isNotEmpty()) {
+            billingController.onExternalRouteSet(routes.first())
+        }
         rerouteController?.interrupt()
         routeAlternativesController.interrupt()
         directionsSession.setRoutes(routes, initialLegIndex)
@@ -550,6 +592,7 @@ class MapboxNavigation(
      */
     fun onDestroy() {
         logger.d(MapboxNavigationTelemetry.TAG, Message("MapboxNavigation onDestroy"))
+        billingController.onDestroy()
         directionsSession.shutdown()
         directionsSession.unregisterAllRoutesObservers()
         tripSession.stop()
@@ -578,6 +621,9 @@ class MapboxNavigation(
             ReachabilityService.removeReachabilityObserver(it)
             reachabilityObserverId = null
         }
+
+        isDestroyed = true
+        hasInstance = false
     }
 
     /**
@@ -1118,7 +1164,25 @@ class MapboxNavigation(
         )
     }
 
+    private fun runIfNotDestroyed(block: () -> Any?) {
+        when (isDestroyed) {
+            false -> {
+                block()
+            }
+            true -> {
+                throw IllegalStateException(
+                    """
+                        This instance of MapboxNavigation is destroyed.
+                    """.trimIndent()
+                )
+            }
+        }
+    }
+
     private companion object {
+        @Volatile
+        private var hasInstance = false
+
         private val TAG = Tag("MbxNavigation")
         private const val USER_AGENT: String = "MapboxNavigationNative"
         private const val THREADS_COUNT = 2
