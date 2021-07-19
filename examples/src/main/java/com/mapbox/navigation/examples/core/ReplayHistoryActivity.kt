@@ -22,22 +22,35 @@ import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
 import com.mapbox.maps.plugin.delegates.listeners.eventdata.MapLoadErrorType
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.replay.history.ReplaySetRoute
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.ActivityReplayHistoryLayoutBinding
 import com.mapbox.navigation.examples.core.replay.HistoryFileLoader
 import com.mapbox.navigation.examples.core.replay.HistoryFilesActivity
 import com.mapbox.navigation.examples.util.Utils
+import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
+import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
+import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
+import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -82,6 +95,8 @@ class ReplayHistoryActivity : AppCompatActivity() {
         binding.mapView.onStart()
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.registerLocationObserver(locationObserver)
+            mapboxNavigation.registerRoutesObserver(routesObserver)
+            mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         }
     }
 
@@ -89,6 +104,8 @@ class ReplayHistoryActivity : AppCompatActivity() {
         super.onStop()
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.unregisterLocationObserver(locationObserver)
+            mapboxNavigation.unregisterRoutesObserver(routesObserver)
+            mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         }
         binding.mapView.onStop()
     }
@@ -97,6 +114,9 @@ class ReplayHistoryActivity : AppCompatActivity() {
         super.onDestroy()
         findViewById<MapView>(R.id.mapView).onDestroy()
         mapboxNavigation.onDestroy()
+        if (::locationComponent.isInitialized) {
+            locationComponent.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -120,6 +140,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
                     setLocationProvider(navigationLocationProvider)
                     enabled = true
                 }
+                locationComponent.addOnIndicatorPositionChangedListener(onPositionChangedListener)
                 navigationCamera = NavigationCamera(
                     binding.mapView.getMapboxMap(),
                     binding.mapView.camera,
@@ -163,6 +184,69 @@ class ReplayHistoryActivity : AppCompatActivity() {
                 .build(),
             mapAnimationOptionsBuilder.build()
         )
+    }
+
+    /** Rendering the set route event **/
+
+    private val options: MapboxRouteLineOptions by lazy {
+        MapboxRouteLineOptions.Builder(this)
+            .withRouteLineResources(
+                RouteLineResources.Builder()
+                    .routeLineColorResources(
+                        RouteLineColorResources.Builder().build()
+                    )
+                    .build()
+            )
+            .withRouteLineBelowLayerId("road-label")
+            .withVanishingRouteLineEnabled(true)
+            .build()
+    }
+
+    private val routeLineView by lazy {
+        MapboxRouteLineView(options)
+    }
+
+    private val routeLineApi: MapboxRouteLineApi by lazy {
+        MapboxRouteLineApi(options)
+    }
+
+    private val routeArrowApi: MapboxRouteArrowApi by lazy {
+        MapboxRouteArrowApi()
+    }
+
+    private val routeArrowView: MapboxRouteArrowView by lazy {
+        MapboxRouteArrowView(
+            RouteArrowOptions.Builder(this)
+                .withAboveLayerId(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+                .build()
+        )
+    }
+
+    private val routesObserver: RoutesObserver = RoutesObserver { routes ->
+        val routeLines = routes.map { RouteLine(it, null) }
+        routeLineApi.setRoutes(
+            routeLines
+        ) { value ->
+            binding.mapView.getMapboxMap().getStyle()?.apply {
+                routeLineView.renderRouteDrawData(this, value)
+            }
+        }
+    }
+
+    private val routeProgressObserver = RouteProgressObserver { routeProgress ->
+        routeLineApi.updateWithRouteProgress(routeProgress)
+        val arrowUpdate = routeArrowApi.addUpcomingManeuverArrow(routeProgress)
+        binding.mapView.getMapboxMap().getStyle()?.apply {
+            routeArrowView.renderManeuverUpdate(this, arrowUpdate)
+        }
+    }
+
+    private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
+        val result = routeLineApi.updateTraveledRouteLine(point)
+        binding.mapView.getMapboxMap().getStyle()?.apply {
+            // Render the result to update the map.
+            routeLineView.renderVanishingRouteLineUpdateValue(this, result)
+        }
     }
 
     @SuppressLint("MissingPermission")
