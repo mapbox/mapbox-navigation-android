@@ -283,7 +283,7 @@ class MapboxNavigationTelemetryTest {
         initTelemetry()
 
         val actualEvent = events[0] as NavigationAppUserTurnstileEvent
-        val expectedTurnstileEvent = AppUserTurnstile("mock", "mock").also { it.setSkuId("08") }
+        val expectedTurnstileEvent = AppUserTurnstile("mock", "mock").also { it.setSkuId("09") }
         assertEquals(expectedTurnstileEvent.skuId, actualEvent.event.skuId)
     }
 

@@ -55,6 +55,6 @@ object MapboxNavigationProvider {
      */
     @JvmStatic
     fun isCreated(): Boolean {
-        return mapboxNavigation != null
+        return mapboxNavigation?.isDestroyed == false
     }
 }

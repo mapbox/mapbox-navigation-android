@@ -15,6 +15,7 @@ package com.mapbox.navigation.core {
     method public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
     method public com.mapbox.navigation.core.navigator.TilesetDescriptorFactory getTilesetDescriptorFactory();
     method public com.mapbox.navigation.core.trip.session.TripSessionState getTripSessionState();
+    method public boolean isDestroyed();
     method public boolean isRunningForegroundService();
     method public boolean navigateNextRouteLeg();
     method public void onDestroy();
@@ -65,6 +66,7 @@ package com.mapbox.navigation.core {
     property public final com.mapbox.navigator.Experimental experimental;
     property public final com.mapbox.navigation.core.trip.session.eh.GraphAccessor graphAccessor;
     property public final com.mapbox.navigation.core.history.MapboxHistoryRecorder historyRecorder;
+    property public final boolean isDestroyed;
     property public final com.mapbox.navigation.base.options.NavigationOptions navigationOptions;
     property public final com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcher roadObjectMatcher;
     property public final com.mapbox.navigation.core.trip.session.eh.RoadObjectsStore roadObjectsStore;
@@ -659,7 +661,6 @@ package com.mapbox.navigation.core.trip.session {
     method public String component1();
     method public com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance copy(String sessionId);
     method public String getSessionId();
-    method public void setSessionId(String p);
     property public String sessionId;
   }
 

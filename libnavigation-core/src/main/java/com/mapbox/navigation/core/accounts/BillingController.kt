@@ -1,0 +1,397 @@
+/**
+ * Tampering with any file that contains billing code is a violation of Mapbox Terms of Service and will result in enforcement of the penalties stipulated in the ToS.
+ */
+
+package com.mapbox.navigation.core.accounts
+
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.common.BillingServiceError
+import com.mapbox.common.BillingServiceErrorCode
+import com.mapbox.common.BillingSessionStatus
+import com.mapbox.common.SKUIdentifier
+import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.trip.session.NavigationSession
+import com.mapbox.navigation.core.trip.session.NavigationSessionState
+import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
+import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.turf.TurfConstants.UNIT_METRES
+import com.mapbox.turf.TurfMeasurement
+import java.util.concurrent.TimeUnit
+
+/**
+ * The billing controller take 2 value as an input:
+ * - the current [NavigationSessionState]
+ * - any new route that is set by the developer **before it has a chance to change the above state**
+ *
+ * Given those 2 inputs, the controller trigger the correct billing events.
+ *
+ * Below are diagrams for each of the possible [NavigationSessionState]s.
+ *
+ * [NavigationSessionState.Idle]
+ *                                 ┌──────────┐
+ *                                 │IDLE STATE│
+ *                                 └────┬─────┘
+ *                                      │
+ *                                      │
+ *                                      ▼
+ *                      NO  ┌───────────────────────┐  YES
+ *                    ┌─────┤IS ANY SESSION RUNNING?├─────┐
+ *                    │     └───────────────────────┘     │
+ *                    │                                   │
+ *                    ▼                                   ▼
+ *               ┌──────────┐                       ┌─────────────┐
+ *               │DO NOTHING│                       │PAUSE SESSION│
+ *               └──────────┘                       └─────────────┘
+ *
+ * [NavigationSessionState.FreeDrive]
+ *                             ┌────────────────┐
+ *                             │FREE DRIVE STATE│
+ *                             └───────┬────────┘
+ *                                     │
+ *                                     │
+ *                                     ▼
+ *                      NO    ┌──────────────────┐     YES
+ *                    ┌───────┤  IS ANY SESSION  ├────────┐
+ *                    │       │PAUSED OR RUNNING?│        │
+ *                    │       └──────────────────┘        │
+ *                    ▼                                   ▼
+ *            ┌────────────────┐             NO    ┌─────────────┐    YES
+ *            │START FREE DRIVE│           ┌───────┤IS FREE DRIVE├───────┐
+ *            │BILLING SESSION │           │       │   PAUSED?   │       │
+ *            └────────────────┘           │       └─────────────┘       │
+ *                    ▲                    ▼                             ▼
+ *                    │             ┌───────────────┐               ┌──────────┐
+ *                    │             │     STOP      │               │  RESUME  │
+ *                    │             │ACTIVE GUIDANCE│               │FREE DRIVE│
+ *                    │             └───────┬───────┘               └──────────┘
+ *                    │                     │
+ *                    └─────────────────────┘
+ *
+ * [NavigationSessionState.ActiveGuidance]
+ *                    ┌─────────────────────┐
+ *                    │ACTIVE GUIDANCE STATE│
+ *                    └──────────┬──────────┘
+ *                               │
+ *                               │
+ *                               ▼
+ *                NO    ┌──────────────────┐     YES
+ *              ┌───────┤  IS ANY SESSION  ├────────┐
+ *              │       │PAUSED OR RUNNING?│        │
+ *              │       └──────────────────┘        │
+ *              ▼                                   ▼
+ *   ┌─────────────────────┐           NO    ┌──────────────────┐  YES
+ *   │START ACTIVE GUIDANCE│         ┌───────┤IS ACTIVE GUIDANCE├─────┐
+ *   │   BILLING SESSION   │         │       │      PAUSED?     │     │
+ *   └─────────────────────┘         │       └──────────────────┘     │
+ *              ▲                    ▼                                ▼
+ *              │               ┌──────────┐                   ┌───────────────┐
+ *              │               │   STOP   │                   │     RESUME    │
+ *              │               │FREE DRIVE│                   │ACTIVE GUIDANCE│
+ *              │               └─────┬────┘                   └───────────────┘
+ *              │                     │
+ *              └─────────────────────┘
+ *
+ * Additionally, whenever a [NavigationSessionState] is not [NavigationSessionState.Idle], we'll trigger a new MAU event.
+ * Triggering this event multiple times within the same calendar month has no effect, the events are later de-duplicated.
+ *
+ * The controller implements an automatic pausing system - if the state becomes [NavigationSessionState.Idle],
+ * we do not stop the billing session immediately, we give an opportunity to resume the same session type without incurring additional costs.
+ * If the state changes though, we'll start a new session.
+ *
+ * When a new route is set and we're already in active guidance, the [NavigationSessionStateObserver] will not fire again
+ * but we still might need to start a new billing session if the route is significantly different than the previous one.
+ *               ┌─────────────┐
+ *               │NEW ROUTE SET│
+ *               └──────┬──────┘
+ *                      │
+ *                      ▼
+ *            ┌──────────────────┐  YES
+ *        NO  │IS ACTIVE GUIDANCE├─────┐
+ *      ┌─────┤     RUNNING?     │     │
+ *      │     └──────────────────┘     │
+ *      │                              ▼
+ *      ▼                       ┌───────────────────────────────────────┐
+ * ┌──────────┐             NO  │        IS EVERY NEW WAYPOINT          │  YES
+ * │DO NOTHING│           ┌─────┤WITHIN 100M OF EACH REMAINING WAYPOINT?├─────┐
+ * └──────────┘           │     └───────────────────────────────────────┘     │
+ *                        │                                                   │
+ *                        ▼                                                   ▼
+ *                ┌───────────────┐                                      ┌──────────┐
+ *                │     STOP      │                                      │DO NOTHING│
+ *                │ACTIVE GUIDANCE│                                      └──────────┘
+ *                └───────┬───────┘
+ *                        │
+ *                        ▼
+ *             ┌─────────────────────┐
+ *             │START ACTIVE GUIDANCE│
+ *             │   BILLING SESSION   │
+ *             └─────────────────────┘
+ *
+ * All of the above interactions gives the below possible cycle of a billing session.
+ *                     ┌──────────┐
+ *   ┌────────────────►│NO SESSION│◄───────────────┐
+ *   │                 └──┬────┬──┘                │
+ *   │                    │    │                   │
+ *   │         ┌──────────┘    └──────────┐        │
+ *   │         ▼                          ▼        │
+ *   │  ┌───────────────┐            ┌──────────┐  │
+ *   │  │ACTIVE GUIDANCE│◄──────────►│FREE DRIVE│  │
+ *   ├──┤    ACTIVE     │            │  ACTIVE  ├──┤
+ *   │  │               │◄────┐  ┌──►│          │  │
+ *   │  └──────┬────────┘     │  │   └─────┬────┘  │
+ *   │         │            ┌─┼──┘         │       │
+ *   │         ▼            │ │            ▼       │
+ *   │  ┌───────────────┐   │ │      ┌──────────┐  │
+ *   │  │ACTIVE GUIDANCE├───┘ └──────┤FREE DRIVE│  │
+ *   └──┤    PAUSED     │            │  PAUSED  ├──┘
+ *      └───────────────┘            └──────────┘
+ *
+ * Free drive session is valid for 1 hour and then we trust in the native implementation to start a new session for us automatically.
+ *
+ * Active guidance session is valid for as long as the server allows (currently up to 12 hours).
+ * If we exceed the maximum, we again let the native implementation to start a new session for us automatically.
+ */
+internal class BillingController(
+    private val accessToken: String,
+    navigationSession: NavigationSession,
+    private val tripSession: TripSession
+) {
+
+    private companion object {
+        private val tag = Tag("MbxNavBillingController")
+        private const val MAX_WAYPOINTS_DISTANCE_DIFF_METERS = 100.0
+    }
+
+    private val navigationSessionStateObserver =
+        NavigationSessionStateObserver { navigationSessionState ->
+            if (navigationSessionState != NavigationSessionState.Idle) {
+                // always trigger an MAU event if a session starts
+                BillingServiceWrapper.triggerBillingEvent(
+                    accessToken,
+                    "", // empty string results in default user agent
+                    SKUIdentifier.NAV2_SES_MAU
+                ) {
+                    handlerError(it)
+                }
+            }
+
+            when (navigationSessionState) {
+                is NavigationSessionState.Idle -> {
+                    getRunningOrPausedSessionSkuId()?.let {
+                        BillingServiceWrapper.pauseBillingSession(it)
+                    }
+                }
+                is NavigationSessionState.FreeDrive -> {
+                    resumeOrBeginBillingSession(
+                        SKUIdentifier.NAV2_SES_FDTRIP,
+                        validity = TimeUnit.HOURS.toMillis(1) // validity of 1hr
+                    )
+                }
+                is NavigationSessionState.ActiveGuidance -> {
+                    resumeOrBeginBillingSession(
+                        SKUIdentifier.NAV2_SES_TRIP,
+                        validity = 0 // default validity, 12hrs
+                    )
+                }
+            }
+        }
+
+    init {
+        navigationSession.registerNavigationSessionStateObserver(navigationSessionStateObserver)
+    }
+
+    /**
+     * Has to be called whenever a new route is set by the developer.
+     *
+     * It also **has to be called** before the state changes in the [DirectionsSession].
+     * That's because a route change can also change the state and we first want to evaluate the consequences of the action with the current state,
+     * and only then react to a potential state change. When executed in this order, the logic in this block is always mutually exclusive to the [navigationSessionStateObserver].
+     * If we already are in active guidance and a route is set, [onExternalRouteSet] will take action while [navigationSessionStateObserver] won't be called.
+     * On the other hand if we are not in active guidance and [onExternalRouteSet] is called, it will do nothing, and then [navigationSessionStateObserver] will be called.
+     *
+     * This block evaluates if the newly provided route has waypoints that are different than the ones in the currently active route.
+     * If this is true, it will begin a new billing session.
+     *
+     * A route is considered the same if the waypoints count is the same and each pair of [`old waypoint` and `new waypoint`] are within [MAX_WAYPOINTS_DISTANCE_DIFF_METERS] of each other.
+     * This method is also accounting for progress - if there's a multi-leg route, we'll only compare remaining legs of the current route against the new route.
+     */
+    fun onExternalRouteSet(directionsRoute: DirectionsRoute) {
+        val runningSessionSkuId = getRunningOrPausedSessionSkuId()
+        if (runningSessionSkuId == SKUIdentifier.NAV2_SES_TRIP) {
+            val currentRemainingWaypoints = getRemainingWaypointsOnRoute(
+                tripSession.getRouteProgress()
+            )
+            val newWaypoints = getWaypointsOnRoute(directionsRoute)
+
+            if (!waypointsWithinRange(currentRemainingWaypoints, newWaypoints)) {
+                val wasSessionPaused = BillingServiceWrapper.getSessionStatus(
+                    SKUIdentifier.NAV2_SES_TRIP
+                ) == BillingSessionStatus.SESSION_PAUSED
+                beginBillingSession(
+                    SKUIdentifier.NAV2_SES_TRIP,
+                    validity = 0 // default validity, 12hrs
+                )
+                if (wasSessionPaused) {
+                    BillingServiceWrapper.pauseBillingSession(SKUIdentifier.NAV2_SES_TRIP)
+                }
+            }
+        }
+    }
+
+    fun onDestroy() {
+        getRunningOrPausedSessionSkuId()?.let {
+            BillingServiceWrapper.stopBillingSession(it)
+        }
+    }
+
+    /**
+     * Resumes a paused session if the sku identifiers match, otherwise, starts a new session.
+     */
+    private fun resumeOrBeginBillingSession(
+        skuId: SKUIdentifier,
+        validity: Long
+    ) {
+        val runningSessionSkuId = getRunningOrPausedSessionSkuId()
+        if (runningSessionSkuId == skuId) {
+            BillingServiceWrapper.resumeBillingSession(runningSessionSkuId) {
+                handlerError(it)
+                if (it.code == BillingServiceErrorCode.RESUME_FAILED) {
+                    LoggerProvider.logger.w(
+                        tag,
+                        Message("Session resumption failed, starting a new one instead.")
+                    )
+                    beginBillingSession(skuId, validity)
+                }
+            }
+        } else {
+            beginBillingSession(skuId, validity)
+        }
+    }
+
+    /**
+     * Stops any running session and starts a new one with provided arguments.
+     */
+    private fun beginBillingSession(
+        skuId: SKUIdentifier,
+        validity: Long
+    ) {
+        val runningSessionSkuId = getRunningOrPausedSessionSkuId()
+        if (runningSessionSkuId != null) {
+            BillingServiceWrapper.stopBillingSession(runningSessionSkuId)
+        }
+        BillingServiceWrapper.beginBillingSession(
+            accessToken,
+            "", // empty string result in default user agent
+            skuId,
+            {
+                handlerError(it)
+            },
+            validity
+        )
+    }
+
+    private fun getRunningOrPausedSessionSkuId(): SKUIdentifier? {
+        val possibleSessionIds = listOf(
+            SKUIdentifier.NAV2_SES_TRIP,
+            SKUIdentifier.NAV2_SES_FDTRIP
+        )
+
+        data class SkuSessionStatus(val skuId: SKUIdentifier, val status: BillingSessionStatus)
+
+        val sessionStatuses = possibleSessionIds.map { skuId ->
+            SkuSessionStatus(skuId, BillingServiceWrapper.getSessionStatus(skuId))
+        }
+
+        val activeOrPausedSessions = sessionStatuses.filter {
+            it.status != BillingSessionStatus.NO_SESSION
+        }
+
+        check(
+            activeOrPausedSessions.size <= 1
+        ) {
+            "More than one session is active or paused: $sessionStatuses"
+        }
+
+        return activeOrPausedSessions.firstOrNull()?.skuId
+    }
+
+    /**
+     * Returns a list of remaining [Point]s that mark ends of legs on the route from the current [RouteProgress],
+     * ignoring origin and silent waypoints.
+     */
+    private fun getRemainingWaypointsOnRoute(routeProgress: RouteProgress?): List<Point>? {
+        return routeProgress?.route?.let { route ->
+            routeProgress.remainingWaypoints.let { remainingWaypointsCount ->
+                val coordinates = route.routeOptions()?.coordinatesList()
+                coordinates?.mapIndexed { index, point ->
+                    Waypoint(index, point)
+                }?.filterIndexed { index, _ ->
+                    index >= coordinates.size - remainingWaypointsCount.coerceAtMost(
+                        // ensures that we drop the origin point
+                        coordinates.size - 1
+                    )
+                }?.filter { waypoint ->
+                    val waypointIndices = route.routeOptions()?.waypointIndicesList()
+                    waypointIndices?.contains(waypoint.index) ?: true
+                }?.map { it.point }
+            }
+        }
+    }
+
+    /**
+     * Returns a list of [Point]s that mark ends of legs on the route,
+     * ignoring origin and silent waypoints.
+     */
+    private fun getWaypointsOnRoute(directionsRoute: DirectionsRoute): List<Point>? {
+        val waypointIndices = directionsRoute.routeOptions()?.waypointIndicesList()
+        return directionsRoute.routeOptions()?.coordinatesList()?.filterIndexed { index, _ ->
+            if (index == 0) {
+                false
+            } else {
+                waypointIndices?.contains(index) ?: true
+            }
+        }
+    }
+
+    private fun waypointsWithinRange(
+        first: List<Point>?,
+        second: List<Point>?
+    ): Boolean {
+        if (first == null || second == null || first.size != second.size) {
+            return false
+        }
+
+        first.forEachIndexed { index, firstPoint ->
+            val secondPoint = second[index]
+            val distance = TurfMeasurement.distance(firstPoint, secondPoint, UNIT_METRES)
+            if (distance > MAX_WAYPOINTS_DISTANCE_DIFF_METERS) {
+                return false
+            }
+        }
+
+        return true
+    }
+
+    private fun handlerError(error: BillingServiceError) {
+        when (error.code) {
+            BillingServiceErrorCode.INVALID_SKU_ID,
+            null -> {
+                throw IllegalArgumentException(error.toString())
+            }
+            BillingServiceErrorCode.RESUME_FAILED,
+            BillingServiceErrorCode.TOKEN_VALIDATION_FAILED -> {
+                LoggerProvider.logger.w(
+                    tag,
+                    Message(error.toString())
+                )
+            }
+        }
+    }
+}
+
+private data class Waypoint(val index: Int, val point: Point)
