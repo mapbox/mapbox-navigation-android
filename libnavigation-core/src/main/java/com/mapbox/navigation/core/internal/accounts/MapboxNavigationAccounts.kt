@@ -18,13 +18,16 @@ object MapboxNavigationAccounts : UrlSkuTokenProvider {
         val skuToken = TokenGeneratorProvider.getNavigationTokenGenerator().getSKUToken()
         return URL(
             Uri.parse(resourceUrl.toString())
-                .buildUpon()
-                .appendQueryParameter(SKU_KEY, skuToken)
+                .buildUpon().apply {
+                    if (skuToken.isNotBlank()) {
+                        appendQueryParameter(SKU_KEY, skuToken)
+                    }
+                }
                 .build()
                 .toString()
         )
     }
 
     // fixme workaround for missing the public SKU ID constant
-    internal fun obtainSkuId(): String = "08"
+    internal fun obtainSkuId(): String = "09" // SKUIdentifier::Nav2SesMAU
 }
