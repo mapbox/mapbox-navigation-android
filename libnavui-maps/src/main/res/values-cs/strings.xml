@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_recenter">Znovu vycentrovat</string>
+    <string name="mapbox_route_overview">Přehled</string>
+</resources>
