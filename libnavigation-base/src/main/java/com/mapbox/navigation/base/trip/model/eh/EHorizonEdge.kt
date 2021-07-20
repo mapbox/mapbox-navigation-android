@@ -1,5 +1,7 @@
 package com.mapbox.navigation.base.trip.model.eh
 
+import com.mapbox.navigation.base.internal.extensions.notEquals
+
 /**
  * Basic Edge class
  *
@@ -35,7 +37,7 @@ class EHorizonEdge internal constructor(
 
         if (id != other.id) return false
         if (level != other.level) return false
-        if (probability.compareTo(other.probability)!=0) return false
+        if (probability.notEquals(other.probability)) return false
         if (out != other.out) return false
 
         return true

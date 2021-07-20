@@ -6,7 +6,6 @@ fun Double?.equals(other: Double?): Boolean {
 
 fun Double?.notEquals(other: Double?): Boolean = this.equals(other).not()
 
-
 fun Float?.equals(other: Float?): Boolean {
     return compareValues(this, other) == 0
 }
