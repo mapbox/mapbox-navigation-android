@@ -22,6 +22,7 @@ import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.TripNotification
@@ -786,11 +787,12 @@ class MapboxNavigationTest {
         val routes = listOf(mockk<DirectionsRoute>())
         val options = mockk<RouteOptions>()
         val possibleInternalCallbackSlot = slot<RouterCallback>()
+        val origin = mockk<RouterOrigin>()
         every { directionsSession.requestRoutes(options, any()) } returns 1L
 
         mapboxNavigation.requestRoutes(options, mockk(relaxUnitFun = true))
         verify { directionsSession.requestRoutes(options, capture(possibleInternalCallbackSlot)) }
-        possibleInternalCallbackSlot.captured.onRoutesReady(routes)
+        possibleInternalCallbackSlot.captured.onRoutesReady(routes, origin)
 
         verify(exactly = 0) { directionsSession.routes = routes }
     }

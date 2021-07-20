@@ -33,6 +33,7 @@ import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -217,7 +218,10 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
         routeRequestId = mapboxNavigation.requestRoutes(
             routeOptions,
             object : RouterCallback {
-                override fun onRoutesReady(routes: List<DirectionsRoute>) {
+                override fun onRoutesReady(
+                    routes: List<DirectionsRoute>,
+                    routerOrigin: RouterOrigin
+                ) {
                     lineManager.create(
                         PolylineAnnotationOptions.fromFeature(
                             Feature.fromGeometry(
@@ -250,7 +254,7 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
                     clearRouteSelectionUi()
                 }
 
-                override fun onCanceled(routeOptions: RouteOptions) {
+                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
                     Toast.makeText(
                         this@IndependentRouteGenerationActivity,
                         """Route request "$routeRequestId" canceled.""",

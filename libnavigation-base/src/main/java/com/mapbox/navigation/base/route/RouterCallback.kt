@@ -13,8 +13,9 @@ interface RouterCallback {
      *
      * @param routes the most optimal route has index 0. If requested, alternative routes are available on higher indices.
      * At least one route is always available in a successful response.
+     * @param routerOrigin route origin
      */
-    fun onRoutesReady(routes: List<DirectionsRoute>)
+    fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin)
 
     /**
      * Called whenever router fails.
@@ -31,5 +32,5 @@ interface RouterCallback {
      *
      * @param routeOptions the original request options
      */
-    fun onCanceled(routeOptions: RouteOptions)
+    fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin)
 }

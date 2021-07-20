@@ -14,6 +14,7 @@ import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
 import com.mapbox.navigation.route.internal.util.httpUrl
@@ -89,6 +90,7 @@ class MapboxOnboardRouterTest {
     private val context = mockk<Context>()
     private val mapboxDirections = mockk<MapboxDirections>(relaxed = true)
     private val mapboxDirectionsBuilder = mockk<MapboxDirections.Builder>(relaxed = true)
+    private val routerOrigin = RouterOrigin.Onboard
 
     private var onboardRouter: MapboxOnboardRouter = MapboxOnboardRouter(navigator, context)
 
@@ -127,6 +129,7 @@ class MapboxOnboardRouterTest {
         val expected = listOf(
             RouterFailure(
                 url = URL.toHttpUrlOrNull()!!.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM).toUrl(),
+                routerOrigin = routerOrigin,
                 message = FAILURE_MESSAGE,
                 code = FAILURE_CODE,
                 throwable = null
@@ -148,7 +151,7 @@ class MapboxOnboardRouterTest {
         val expected = DirectionsResponse.fromJson(SUCCESS_RESPONSE).routes().map {
             it.toBuilder().routeOptions(routerOptions).build()
         }
-        verify(exactly = 1) { routerCallback.onRoutesReady(expected) }
+        verify(exactly = 1) { routerCallback.onRoutesReady(expected, routerOrigin) }
     }
 
     @Test
@@ -159,7 +162,7 @@ class MapboxOnboardRouterTest {
 
         val latch = CountDownLatch(1)
         val callback: RouterCallback = object : RouterCallback {
-            override fun onRoutesReady(routes: List<DirectionsRoute>) {
+            override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
                 fail()
             }
 
@@ -167,7 +170,7 @@ class MapboxOnboardRouterTest {
                 fail()
             }
 
-            override fun onCanceled(routeOptions: RouteOptions) {
+            override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
                 latch.countDown()
             }
         }
@@ -185,7 +188,7 @@ class MapboxOnboardRouterTest {
 
         onboardRouter.getRoute(routerOptions, routerCallback)
 
-        verify { routerCallback.onCanceled(routerOptions) }
+        verify { routerCallback.onCanceled(routerOptions, routerOrigin) }
     }
 
     @Test
@@ -220,7 +223,7 @@ class MapboxOnboardRouterTest {
 
         val firstLatch = CountDownLatch(1)
         val firstCallback: RouterCallback = object : RouterCallback {
-            override fun onRoutesReady(routes: List<DirectionsRoute>) {
+            override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
                 fail()
             }
 
@@ -228,14 +231,14 @@ class MapboxOnboardRouterTest {
                 fail()
             }
 
-            override fun onCanceled(routeOptions: RouteOptions) {
+            override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
                 firstLatch.countDown()
             }
         }
 
         val secondLatch = CountDownLatch(1)
         val secondCallback: RouterCallback = object : RouterCallback {
-            override fun onRoutesReady(routes: List<DirectionsRoute>) {
+            override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
                 fail()
             }
 
@@ -243,7 +246,7 @@ class MapboxOnboardRouterTest {
                 fail()
             }
 
-            override fun onCanceled(routeOptions: RouteOptions) {
+            override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
                 secondLatch.countDown()
             }
         }
@@ -314,7 +317,7 @@ class MapboxOnboardRouterTest {
 
         onboardRouter.getRoute(routerOptions, routerCallback)
 
-        verify { routerCallback.onRoutesReady(capture(routesSlot)) }
+        verify { routerCallback.onRoutesReady(capture(routesSlot), routerOrigin) }
 
         val delta = 0.000001
         // route

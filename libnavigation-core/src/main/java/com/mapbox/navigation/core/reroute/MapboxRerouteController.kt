@@ -8,6 +8,7 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
@@ -43,7 +44,7 @@ internal class MapboxRerouteController(
                 RerouteState.Idle,
                 RerouteState.Interrupted,
                 is RerouteState.Failed,
-                RerouteState.RouteFetched -> {
+                is RerouteState.RouteFetched -> {
                     requestId = null
                 }
                 RerouteState.FetchingRoute -> {
@@ -118,9 +119,12 @@ internal class MapboxRerouteController(
         requestId = directionsSession.requestRoutes(
             routeOptions,
             object : RouterCallback {
-                override fun onRoutesReady(routes: List<DirectionsRoute>) {
+                override fun onRoutesReady(
+                    routes: List<DirectionsRoute>,
+                    routerOrigin: RouterOrigin
+                ) {
                     mainJobController.scope.launch {
-                        state = RerouteState.RouteFetched
+                        state = RerouteState.RouteFetched(routerOrigin)
                         state = RerouteState.Idle
                         routesCallback.onNewRoutes(routes)
                     }
@@ -136,7 +140,7 @@ internal class MapboxRerouteController(
                     }
                 }
 
-                override fun onCanceled(routeOptions: RouteOptions) {
+                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
                     mainJobController.scope.launch {
                         state = RerouteState.Interrupted
                         state = RerouteState.Idle

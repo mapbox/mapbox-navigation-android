@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
@@ -36,13 +37,12 @@ class RouteAlternativesControllerTest {
     private val navigator: MapboxNativeNavigator = mockk()
     private val directionsSession: DirectionsSession = mockk() {
         every { cancelRouteRequest(any()) } just Runs
-        every { routes } returns emptyList()
     }
     private val tripSession: TripSession = mockk {
         every { getRouteProgress() } returns mockk()
     }
     private val routeAlternativesObserver: RouteAlternativesObserver = mockk {
-        every { onRouteAlternatives(any(), any()) } returns Unit
+        every { onRouteAlternatives(any(), any(), any()) } returns Unit
     }
     private val routesRequestCallbacks = slot<RouterCallback>()
     private val routeOptionsUpdater: RouteOptionsUpdater = mockk()
@@ -240,10 +240,11 @@ class RouteAlternativesControllerTest {
                 every { routeIndex() } returns "0"
             }
         )
-        routesRequestCallbacks.captured.onRoutesReady(routes)
+        val origin = mockk<RouterOrigin>()
+        routesRequestCallbacks.captured.onRoutesReady(routes, origin)
 
         verify(exactly = 1) {
-            routeAlternativesObserver.onRouteAlternatives(any(), routes)
+            routeAlternativesObserver.onRouteAlternatives(any(), routes, origin)
         }
 
         controller.unregisterAll()
@@ -269,14 +270,15 @@ class RouteAlternativesControllerTest {
                 capture(routesRequestCallbacks)
             )
         } returns 1L
+        val origin = mockk<RouterOrigin>()
 
         val controller = mockController()
         controller.register(routeAlternativesObserver)
         coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
-        routesRequestCallbacks.captured.onRoutesReady(emptyList())
+        routesRequestCallbacks.captured.onRoutesReady(emptyList(), origin)
 
         verify(exactly = 1) {
-            routeAlternativesObserver.onRouteAlternatives(any(), emptyList())
+            routeAlternativesObserver.onRouteAlternatives(any(), emptyList(), origin)
         }
 
         controller.unregisterAll()

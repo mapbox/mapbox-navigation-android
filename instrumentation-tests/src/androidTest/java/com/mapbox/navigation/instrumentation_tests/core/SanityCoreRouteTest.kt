@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
@@ -80,7 +81,10 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
                     .accessToken(getMapboxAccessTokenFromResources(activity))
                     .coordinates(mockRoute.routeWaypoints).build(),
                 object : RouterCallback {
-                    override fun onRoutesReady(routes: List<DirectionsRoute>) {
+                    override fun onRoutesReady(
+                        routes: List<DirectionsRoute>,
+                        routerOrigin: RouterOrigin
+                    ) {
                         mapboxNavigation.setRoutes(routes)
                         mockLocationReplayerRule.playRoute(routes[0])
                     }
@@ -92,7 +96,10 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
                         // no impl
                     }
 
-                    override fun onCanceled(routeOptions: RouteOptions) {
+                    override fun onCanceled(
+                        routeOptions: RouteOptions,
+                        routerOrigin: RouterOrigin
+                    ) {
                         // no impl
                     }
                 }

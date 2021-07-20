@@ -13,6 +13,7 @@ import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
 import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
@@ -50,6 +51,7 @@ class MapboxOffboardRouterTest : BaseTest() {
     private lateinit var routeCallback: Callback<DirectionsResponse>
     private lateinit var refreshCallback: Callback<DirectionsRefreshResponse>
     private val routeOptions: RouteOptions = mockk(relaxed = true)
+    private val routerOrigin = RouterOrigin.Offboard
     private val mockSkuTokenProvider = mockk<UrlSkuTokenProvider>(relaxed = true)
     private val routeCall: Call<DirectionsResponse> = mockk()
     private val refreshCall: Call<DirectionsRefreshResponse> = mockk()
@@ -182,7 +184,7 @@ class MapboxOffboardRouterTest : BaseTest() {
 
         routeCallback.onResponse(routeCall, response)
 
-        verify { routerCallback.onRoutesReady(listOf(route)) }
+        verify { routerCallback.onRoutesReady(listOf(route), routerOrigin) }
     }
 
     @Test
@@ -233,6 +235,7 @@ class MapboxOffboardRouterTest : BaseTest() {
         val expected = listOf(
             RouterFailure(
                 url = url.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM).toUrl(),
+                routerOrigin = routerOrigin,
                 message = "msg",
                 code = null,
                 throwable = throwable
@@ -252,7 +255,7 @@ class MapboxOffboardRouterTest : BaseTest() {
 
         routeCallback.onFailure(call, throwable)
 
-        verify { routerCallback.onCanceled(routeOptions) }
+        verify { routerCallback.onCanceled(routeOptions, routerOrigin) }
     }
 
     @Test
@@ -266,7 +269,7 @@ class MapboxOffboardRouterTest : BaseTest() {
 
         routeCallback.onResponse(routeCall, response)
 
-        verify { routerCallback.onCanceled(routeOptions) }
+        verify { routerCallback.onCanceled(routeOptions, routerOrigin) }
     }
 
     @Test

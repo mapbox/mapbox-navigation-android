@@ -36,6 +36,7 @@ import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -208,6 +209,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
         // to the MapboxRouteLineApi to generate the data necessary to draw the route(s)
         // on the map.
         val routeLines = routes.map { RouteLine(it, null) }
+
         routeLineApi.setRoutes(
             routeLines
         ) { value ->
@@ -380,7 +382,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
     }
 
     private val routesReqCallback: RouterCallback = object : RouterCallback {
-        override fun onRoutesReady(routes: List<DirectionsRoute>) {
+        override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
             mapboxNavigation.setRoutes(routes)
             if (routes.isNotEmpty()) {
                 viewBinding.routeLoadingProgressBar.visibility = View.INVISIBLE
@@ -388,7 +390,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
             }
         }
 
-        override fun onCanceled(routeOptions: RouteOptions) {
+        override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
             viewBinding.routeLoadingProgressBar.visibility = View.INVISIBLE
         }
 

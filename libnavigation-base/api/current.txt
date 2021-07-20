@@ -385,28 +385,50 @@ package com.mapbox.navigation.base.route {
   }
 
   public interface RouterCallback {
-    method public void onCanceled(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public void onCanceled(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
     method public void onFailure(java.util.List<com.mapbox.navigation.base.route.RouterFailure> reasons, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
-    method public void onRoutesReady(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
+    method public void onRoutesReady(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
   }
 
   public final class RouterFailure {
-    ctor public RouterFailure(java.net.URL url, String message, Integer? code = null, Throwable? throwable = null);
-    ctor public RouterFailure(java.net.URL url, String message, Integer? code = null);
-    ctor public RouterFailure(java.net.URL url, String message);
+    ctor public RouterFailure(java.net.URL url, com.mapbox.navigation.base.route.RouterOrigin routerOrigin, String message, Integer? code = null, Throwable? throwable = null);
+    ctor public RouterFailure(java.net.URL url, com.mapbox.navigation.base.route.RouterOrigin routerOrigin, String message, Integer? code = null);
+    ctor public RouterFailure(java.net.URL url, com.mapbox.navigation.base.route.RouterOrigin routerOrigin, String message);
     method public java.net.URL component1();
-    method public String component2();
-    method public Integer? component3();
-    method public Throwable? component4();
-    method public com.mapbox.navigation.base.route.RouterFailure copy(java.net.URL url, String message, Integer? code, Throwable? throwable);
+    method public com.mapbox.navigation.base.route.RouterOrigin component2();
+    method public String component3();
+    method public Integer? component4();
+    method public Throwable? component5();
+    method public com.mapbox.navigation.base.route.RouterFailure copy(java.net.URL url, com.mapbox.navigation.base.route.RouterOrigin routerOrigin, String message, Integer? code, Throwable? throwable);
     method public Integer? getCode();
     method public String getMessage();
+    method public com.mapbox.navigation.base.route.RouterOrigin getRouterOrigin();
     method public Throwable? getThrowable();
     method public java.net.URL getUrl();
     property public final Integer? code;
     property public final String message;
+    property public final com.mapbox.navigation.base.route.RouterOrigin routerOrigin;
     property public final Throwable? throwable;
     property public final java.net.URL url;
+  }
+
+  public abstract sealed class RouterOrigin {
+  }
+
+  public static final class RouterOrigin.Custom extends com.mapbox.navigation.base.route.RouterOrigin {
+    ctor public RouterOrigin.Custom(Object? obj = null);
+    method public Object? component1();
+    method public com.mapbox.navigation.base.route.RouterOrigin.Custom copy(Object? obj);
+    method public Object? getObj();
+    property public final Object? obj;
+  }
+
+  public static final class RouterOrigin.Offboard extends com.mapbox.navigation.base.route.RouterOrigin {
+    field public static final com.mapbox.navigation.base.route.RouterOrigin.Offboard INSTANCE;
+  }
+
+  public static final class RouterOrigin.Onboard extends com.mapbox.navigation.base.route.RouterOrigin {
+    field public static final com.mapbox.navigation.base.route.RouterOrigin.Onboard INSTANCE;
   }
 
 }

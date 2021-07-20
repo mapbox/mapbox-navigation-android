@@ -2,6 +2,7 @@ package com.mapbox.navigation.instrumentation_tests.utils.idling
 
 import androidx.test.espresso.IdlingResource
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver
@@ -43,7 +44,8 @@ class RouteAlternativesIdlingResource(
 
     override fun onRouteAlternatives(
         routeProgress: RouteProgress,
-        alternatives: List<DirectionsRoute>
+        alternatives: List<DirectionsRoute>,
+        routerOrigin: RouterOrigin
     ) {
         mapboxNavigation.unregisterRouteAlternativesObserver(this)
         this.routeProgress = routeProgress
