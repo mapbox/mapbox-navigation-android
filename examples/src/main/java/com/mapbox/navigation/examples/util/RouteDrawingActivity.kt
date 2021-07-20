@@ -26,6 +26,7 @@ import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.clearRouteLine
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
@@ -145,7 +146,7 @@ class RouteDrawingActivity : AppCompatActivity() {
     }
 
     private val routeRequestCallback: RouterCallback = object : RouterCallback {
-        override fun onRoutesReady(routes: List<DirectionsRoute>) {
+        override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
             val routeLines = routes.map { RouteLine(it, null) }
             CoroutineScope(Dispatchers.Main).launch {
                 routeLineApi.setRoutes(routeLines).apply {
@@ -162,7 +163,7 @@ class RouteDrawingActivity : AppCompatActivity() {
             ).show()
         }
 
-        override fun onCanceled(routeOptions: RouteOptions) {
+        override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
             Toast.makeText(
                 this@RouteDrawingActivity,
                 "Fetch Route Cancelled",

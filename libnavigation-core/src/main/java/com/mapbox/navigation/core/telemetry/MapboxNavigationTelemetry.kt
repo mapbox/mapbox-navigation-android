@@ -100,7 +100,7 @@ internal object MapboxNavigationTelemetry {
     private const val MOCK_PROVIDER = "com.mapbox.navigation.core.replay.ReplayLocationEngine"
     private const val EVENT_VERSION = 7
 
-    private lateinit var context: Context // Must be context.getApplicationContext
+    private lateinit var applicationContext: Context // Must be context.getApplicationContext
     private lateinit var metricsReporter: MetricsReporter
     private lateinit var navigationOptions: NavigationOptions
     private var lifecycleMonitor: ApplicationLifecycleMonitor? = null
@@ -220,7 +220,7 @@ internal object MapboxNavigationTelemetry {
         this.logger = logger
         this.locationsCollector = locationsCollector
         navigationOptions = options
-        context = options.applicationContext
+        applicationContext = options.applicationContext
         locationEngineNameExternal = options.locationEngine.javaClass.name
         sdkIdentifier = if (options.isFromNavigationUi) {
             "mapbox-navigation-ui-android"
@@ -321,7 +321,7 @@ internal object MapboxNavigationTelemetry {
         if (dynamicValues.sessionStarted && dataInitialized()) {
             log("collect post event locations for user feedback")
             val feedbackEvent = NavigationFeedbackEvent(
-                PhoneState(context),
+                PhoneState(applicationContext),
                 MetricsRouteProgress(routeProgress)
             ).apply {
                 this.feedbackType = feedbackType
@@ -400,7 +400,7 @@ internal object MapboxNavigationTelemetry {
     ) {
         log("createFreeDriveEvent $type")
         if (sessionId != null && sessionStartTime != null) {
-            val freeDriveEvent = NavigationFreeDriveEvent(PhoneState(context)).apply {
+            val freeDriveEvent = NavigationFreeDriveEvent(PhoneState(applicationContext)).apply {
                 populate(type, sessionId, sessionStartTime)
             }
             sendEvent(freeDriveEvent)
@@ -437,7 +437,8 @@ internal object MapboxNavigationTelemetry {
                 sessionStarted = true
             }
 
-            val departEvent = NavigationDepartEvent(PhoneState(context)).apply { populate() }
+            val departEvent =
+                NavigationDepartEvent(PhoneState(applicationContext)).apply { populate() }
             sendMetricEvent(departEvent)
         }
     }
@@ -480,7 +481,7 @@ internal object MapboxNavigationTelemetry {
             }
 
             val navigationRerouteEvent = NavigationRerouteEvent(
-                PhoneState(context),
+                PhoneState(applicationContext),
                 MetricsRouteProgress(routeProgress)
             ).apply {
                 secondsSinceLastReroute = dynamicValues.timeSinceLastReroute / ONE_SECOND
@@ -506,7 +507,8 @@ internal object MapboxNavigationTelemetry {
             log("handleSessionCanceled")
             locationsCollector.flushBuffers()
 
-            val cancelEvent = NavigationCancelEvent(PhoneState(context)).apply { populate() }
+            val cancelEvent =
+                NavigationCancelEvent(PhoneState(applicationContext)).apply { populate() }
             ifNonNull(dynamicValues.sessionArrivalTime) {
                 cancelEvent.arrivalTimestamp = generateCreateDateFormatted(it)
             }
@@ -528,7 +530,8 @@ internal object MapboxNavigationTelemetry {
             log("you have arrived")
             dynamicValues.sessionArrivalTime = Date()
 
-            val arriveEvent = NavigationArriveEvent(PhoneState(context)).apply { populate() }
+            val arriveEvent =
+                NavigationArriveEvent(PhoneState(applicationContext)).apply { populate() }
             sendMetricEvent(arriveEvent)
         }
     }

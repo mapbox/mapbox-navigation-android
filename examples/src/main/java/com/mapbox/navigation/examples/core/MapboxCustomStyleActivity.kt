@@ -27,6 +27,7 @@ import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
@@ -238,7 +239,10 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
                 .annotationsList(Collections.singletonList(DirectionsCriteria.ANNOTATION_MAXSPEED))
                 .build(),
             object : RouterCallback {
-                override fun onRoutesReady(routes: List<DirectionsRoute>) {
+                override fun onRoutesReady(
+                    routes: List<DirectionsRoute>,
+                    routerOrigin: RouterOrigin
+                ) {
                     mapboxNavigation.setRoutes(routes)
                 }
 
@@ -249,7 +253,7 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
                     // no impl
                 }
 
-                override fun onCanceled(routeOptions: RouteOptions) {
+                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
                     // no impl
                 }
             }

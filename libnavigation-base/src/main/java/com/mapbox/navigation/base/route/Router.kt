@@ -66,6 +66,7 @@ interface Router {
  * Describes a reason for a route request failure.
  *
  * @param url original request URL
+ * @param routerOrigin router that failed to generate a route
  * @param message message attached to the error code
  * @param code if present, can be either be the HTTP code for offboard requests
  * or an internal error code for onboard requests
@@ -73,6 +74,7 @@ interface Router {
  */
 data class RouterFailure @JvmOverloads constructor(
     val url: URL,
+    val routerOrigin: RouterOrigin,
     val message: String,
     val code: Int? = null,
     val throwable: Throwable? = null

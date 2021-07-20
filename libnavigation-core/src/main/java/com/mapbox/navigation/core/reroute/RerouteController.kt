@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.reroute
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
@@ -115,6 +116,8 @@ sealed class RerouteState {
 
     /**
      * Route has been fetched.
+     *
+     * @param routerOrigin which router was used to fetch the route
      */
-    object RouteFetched : RerouteState()
+    data class RouteFetched(val routerOrigin: RouterOrigin) : RerouteState()
 }

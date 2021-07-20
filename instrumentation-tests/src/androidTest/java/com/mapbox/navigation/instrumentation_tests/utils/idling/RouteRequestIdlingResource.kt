@@ -7,6 +7,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.ui.http.MockWebServerRule
 import org.junit.Assert.fail
@@ -62,7 +63,7 @@ class RouteRequestIdlingResource(
 
     /** Used to communicate with [MapboxNavigation.requestRoutes] **/
     private val routesRequestCallback = object : RouterCallback {
-        override fun onRoutesReady(routes: List<DirectionsRoute>) {
+        override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
             directionsRoutes = routes
             callback.onTransitionToIdle()
         }
@@ -71,7 +72,7 @@ class RouteRequestIdlingResource(
             fail()
         }
 
-        override fun onCanceled(routeOptions: RouteOptions) {
+        override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
             fail("onRoutesRequestCanceled")
         }
     }

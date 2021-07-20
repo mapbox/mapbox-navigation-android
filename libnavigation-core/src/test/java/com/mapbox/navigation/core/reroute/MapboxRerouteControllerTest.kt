@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
@@ -108,7 +109,7 @@ class MapboxRerouteControllerTest {
         } returns 1L
 
         rerouteController.reroute(routeCallback)
-        routeRequestCallback.captured.onRoutesReady(mockk())
+        routeRequestCallback.captured.onRoutesReady(mockk(), mockk())
 
         verify(exactly = 1) {
             tripSession.getEnhancedLocation()
@@ -126,6 +127,7 @@ class MapboxRerouteControllerTest {
         mockRouteOptionsResult(successFromResult)
         addRerouteStateObserver()
         val routes = listOf(mockk<DirectionsRoute>())
+        val origin = mockk<RouterOrigin>()
         val routeRequestCallback = slot<RouterCallback>()
         every {
             directionsSession.requestRoutes(
@@ -135,14 +137,14 @@ class MapboxRerouteControllerTest {
         } returns 1L
 
         rerouteController.reroute(routeCallback)
-        routeRequestCallback.captured.onRoutesReady(routes)
+        routeRequestCallback.captured.onRoutesReady(routes, origin)
 
         verify(exactly = 1) { routeCallback.onNewRoutes(routes) }
         verify(exactly = 1) {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
         }
         verify(exactly = 1) {
-            primaryRerouteObserver.onRerouteStateChanged(RerouteState.RouteFetched)
+            primaryRerouteObserver.onRerouteStateChanged(RerouteState.RouteFetched(origin))
         }
         verify(exactly = 2) {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
@@ -150,7 +152,7 @@ class MapboxRerouteControllerTest {
         verifyOrder {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
-            primaryRerouteObserver.onRerouteStateChanged(RerouteState.RouteFetched)
+            primaryRerouteObserver.onRerouteStateChanged(RerouteState.RouteFetched(origin))
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
         }
     }
@@ -200,7 +202,7 @@ class MapboxRerouteControllerTest {
         } returns 1L
 
         rerouteController.reroute(routeCallback)
-        routeRequestCallback.captured.onCanceled(mockk())
+        routeRequestCallback.captured.onCanceled(mockk(), mockk())
 
         verify(exactly = 1) {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
@@ -232,7 +234,7 @@ class MapboxRerouteControllerTest {
         rerouteController.reroute(routeCallback)
 
         rerouteController.reroute(routeCallback)
-        routeRequestCallback.captured.onRoutesReady(mockk())
+        routeRequestCallback.captured.onRoutesReady(mockk(), mockk())
 
         verify(exactly = 1) { directionsSession.cancelRouteRequest(1L) }
     }
@@ -249,7 +251,7 @@ class MapboxRerouteControllerTest {
         } returns 1L
 
         rerouteController.reroute(routeCallback)
-        routeRequestCallback.captured.onRoutesReady(mockk())
+        routeRequestCallback.captured.onRoutesReady(mockk(), mockk())
 
         verify(exactly = 0) { directionsSession.cancelAll() }
         verify(exactly = 0) { directionsSession.cancelRouteRequest(any()) }
@@ -269,7 +271,7 @@ class MapboxRerouteControllerTest {
         every {
             directionsSession.cancelRouteRequest(1L)
         } answers {
-            routeRequestCallback.captured.onCanceled(mockk())
+            routeRequestCallback.captured.onCanceled(mockk(), mockk())
         }
 
         rerouteController.reroute(routeCallback)

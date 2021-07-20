@@ -6,6 +6,7 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
@@ -101,7 +102,7 @@ internal class RouteAlternativesController(
     }
 
     private val routesRequestCallback = object : RouterCallback {
-        override fun onRoutesReady(routes: List<DirectionsRoute>) {
+        override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
             val routeProgress = tripSession.getRouteProgress()
                 ?: return
             jobControl.scope.launch {
@@ -109,7 +110,9 @@ internal class RouteAlternativesController(
                     tripSession.getState() == TripSessionState.STARTED
                 ) {
                     val alternatives = routes.filter { navigator.isDifferentRoute(it) }
-                    observers.forEach { it.onRouteAlternatives(routeProgress, alternatives) }
+                    observers.forEach {
+                        it.onRouteAlternatives(routeProgress, alternatives, routerOrigin)
+                    }
                 }
             }
         }
@@ -120,7 +123,7 @@ internal class RouteAlternativesController(
             )
         }
 
-        override fun onCanceled(routeOptions: RouteOptions) {
+        override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
             logger.w(msg = Message("Route alternatives request canceled"))
         }
     }

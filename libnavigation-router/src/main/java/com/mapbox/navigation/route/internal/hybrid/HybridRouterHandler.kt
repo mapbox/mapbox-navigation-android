@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.utils.internal.LoggerProvider
 
 internal sealed class HybridRouterHandler(
@@ -50,8 +51,8 @@ internal sealed class HybridRouterHandler(
         private inner class PrimaryCallback(
             private val clientCallback: RouterCallback
         ) : RouterCallback {
-            override fun onRoutesReady(routes: List<DirectionsRoute>) {
-                clientCallback.onRoutesReady(routes)
+            override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
+                clientCallback.onRoutesReady(routes, routerOrigin)
             }
 
             override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
@@ -72,8 +73,8 @@ internal sealed class HybridRouterHandler(
                 )
             }
 
-            override fun onCanceled(routeOptions: RouteOptions) {
-                clientCallback.onCanceled(routeOptions)
+            override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
+                clientCallback.onCanceled(routeOptions, routerOrigin)
             }
         }
 
@@ -81,28 +82,34 @@ internal sealed class HybridRouterHandler(
             private val clientCallback: RouterCallback,
             private val primaryFailureReasons: List<RouterFailure>
         ) : RouterCallback {
-            override fun onRoutesReady(routes: List<DirectionsRoute>) {
-                clientCallback.onRoutesReady(routes)
+            override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
+                clientCallback.onRoutesReady(routes, routerOrigin)
             }
 
             override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
                 clientCallback.onFailure(
-                    primaryFailureReasons.map {
+                    primaryFailureReasons.map { failure ->
                         RouterFailure(
-                            url = it.url,
+                            url = failure.url,
+                            routerOrigin = failure.routerOrigin,
                             message =
-                            "Primary router ($primaryRouterName) failed with: ${it.message}",
-                            code = it.code,
-                            throwable = it.throwable
+                            "Primary router ($primaryRouterName), " +
+                                "origin ${failure.routerOrigin}, " +
+                                "failed with: ${failure.message}",
+                            code = failure.code,
+                            throwable = failure.throwable
                         )
                     }.plus(
-                        reasons.map {
+                        reasons.map { failure ->
                             RouterFailure(
-                                url = it.url,
+                                url = failure.url,
+                                routerOrigin = failure.routerOrigin,
                                 message =
-                                "Fallback router ($fallbackRouterName) failed with: ${it.message}",
-                                code = it.code,
-                                throwable = it.throwable
+                                "Fallback router ($fallbackRouterName), " +
+                                    "origin ${failure.routerOrigin}, " +
+                                    "failed with: ${failure.message}",
+                                code = failure.code,
+                                throwable = failure.throwable
                             )
                         }
                     ),
@@ -110,8 +117,8 @@ internal sealed class HybridRouterHandler(
                 )
             }
 
-            override fun onCanceled(routeOptions: RouteOptions) {
-                clientCallback.onCanceled(routeOptions)
+            override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
+                clientCallback.onCanceled(routeOptions, routerOrigin)
             }
         }
 

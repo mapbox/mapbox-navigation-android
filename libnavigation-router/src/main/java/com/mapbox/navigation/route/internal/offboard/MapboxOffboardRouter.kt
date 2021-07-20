@@ -14,6 +14,7 @@ import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
 import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
@@ -79,14 +80,21 @@ class MapboxOffboardRouter(
                     val routes = response.body()?.routes()
                     val code = response.code()
                     when {
-                        call.isCanceled -> callback.onCanceled(routeOptions)
+                        call.isCanceled -> callback.onCanceled(
+                            routeOptions, RouterOrigin.Offboard
+                        )
                         response.isSuccessful -> {
                             if (!routes.isNullOrEmpty()) {
-                                callback.onRoutesReady(routes)
+                                callback.onRoutesReady(routes, RouterOrigin.Offboard)
                             } else {
                                 callback.onFailure(
                                     listOf(
-                                        RouterFailure(urlWithoutToken, ROUTES_LIST_EMPTY, code)
+                                        RouterFailure(
+                                            urlWithoutToken,
+                                            RouterOrigin.Offboard,
+                                            ROUTES_LIST_EMPTY,
+                                            code
+                                        )
                                     ),
                                     routeOptions
                                 )
@@ -96,6 +104,7 @@ class MapboxOffboardRouter(
                             listOf(
                                 RouterFailure(
                                     urlWithoutToken,
+                                    RouterOrigin.Offboard,
                                     response.errorBody()?.string().toString(),
                                     code
                                 )
@@ -108,7 +117,7 @@ class MapboxOffboardRouter(
                 override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
                     directionRequests.remove(requestId)
                     if (call.isCanceled) {
-                        callback.onCanceled(routeOptions)
+                        callback.onCanceled(routeOptions, RouterOrigin.Offboard)
                     } else {
                         callback.onFailure(
                             listOf(
@@ -116,6 +125,7 @@ class MapboxOffboardRouter(
                                     url = call.request().url.redactQueryParam(
                                         ACCESS_TOKEN_QUERY_PARAM
                                     ).toUrl(),
+                                    routerOrigin = RouterOrigin.Offboard,
                                     message = t.message ?: UNKNOWN,
                                     code = null,
                                     throwable = t

@@ -24,6 +24,7 @@ import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -248,7 +249,10 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxNavigation.requestRoutes(
             routeOptions,
             object : RouterCallback {
-                override fun onRoutesReady(routes: List<DirectionsRoute>) {
+                override fun onRoutesReady(
+                    routes: List<DirectionsRoute>,
+                    routerOrigin: RouterOrigin
+                ) {
                     mapboxNavigation.setRoutes(routes)
                 }
 
@@ -259,7 +263,7 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
                     // no impl
                 }
 
-                override fun onCanceled(routeOptions: RouteOptions) {
+                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
                     // no impl
                 }
             }

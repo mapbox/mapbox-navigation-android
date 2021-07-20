@@ -23,6 +23,7 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.addOnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.removeOnMapLongClickListener
 import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterOrigin
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -225,7 +226,7 @@ class RouteDrawingUtil(private val mapView: MapView) {
                         enable()
                     } else {
                         val route = response.body()?.matchings()?.get(0)?.toDirectionRoute()!!
-                        routeReadyCallback.onRoutesReady(listOf(route))
+                        routeReadyCallback.onRoutesReady(listOf(route), RouterOrigin.Offboard)
                     }
                 }
             }

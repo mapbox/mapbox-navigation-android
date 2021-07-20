@@ -11,6 +11,7 @@ import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
 import com.mapbox.navigation.route.internal.util.httpUrl
@@ -68,9 +69,9 @@ class MapboxOnboardRouter(
 
         val requestId = requests.generateNextRequestId()
         val internalCallback = object : RouterCallback {
-            override fun onRoutesReady(routes: List<DirectionsRoute>) {
+            override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
                 requests.remove(requestId)
-                callback.onRoutesReady(routes)
+                callback.onRoutesReady(routes, routerOrigin)
             }
 
             override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
@@ -78,9 +79,9 @@ class MapboxOnboardRouter(
                 callback.onFailure(reasons, routeOptions)
             }
 
-            override fun onCanceled(routeOptions: RouteOptions) {
+            override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
                 requests.remove(requestId)
-                callback.onCanceled(routeOptions)
+                callback.onCanceled(routeOptions, routerOrigin)
             }
         }
         requests.put(
@@ -148,13 +149,14 @@ class MapboxOnboardRouter(
                     val routes = parseDirectionsRoutes(routerResult.value!!).map {
                         it.toBuilder().routeOptions(routeOptions).build()
                     }
-                    callback.onRoutesReady(routes)
+                    callback.onRoutesReady(routes, RouterOrigin.Onboard)
                 } else {
                     val error = routerResult.error!!
                     callback.onFailure(
                         listOf(
                             RouterFailure(
                                 url = javaUrl,
+                                routerOrigin = RouterOrigin.Onboard,
                                 message = error.error,
                                 code = error.code
                             )
@@ -163,7 +165,7 @@ class MapboxOnboardRouter(
                     )
                 }
             } catch (e: CancellationException) {
-                callback.onCanceled(routeOptions)
+                callback.onCanceled(routeOptions, RouterOrigin.Onboard)
             }
         }
     }

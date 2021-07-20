@@ -11,6 +11,7 @@ import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.route.internal.offboard.MapboxOffboardRouter
 import com.mapbox.navigation.route.internal.onboard.MapboxOnboardRouter
@@ -92,9 +93,12 @@ class MapboxHybridRouter(
         routerHandler.getRoute(
             routeOptions,
             object : RouterCallback {
-                override fun onRoutesReady(routes: List<DirectionsRoute>) {
+                override fun onRoutesReady(
+                    routes: List<DirectionsRoute>,
+                    routerOrigin: RouterOrigin
+                ) {
                     directionRequests.remove(id)
-                    callback.onRoutesReady(routes)
+                    callback.onRoutesReady(routes, routerOrigin)
                 }
 
                 override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
@@ -102,9 +106,9 @@ class MapboxHybridRouter(
                     callback.onFailure(reasons, routeOptions)
                 }
 
-                override fun onCanceled(routeOptions: RouteOptions) {
+                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
                     directionRequests.remove(id)
-                    callback.onCanceled(routeOptions)
+                    callback.onCanceled(routeOptions, routerOrigin)
                 }
             }
         )

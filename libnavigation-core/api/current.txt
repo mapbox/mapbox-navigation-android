@@ -457,7 +457,11 @@ package com.mapbox.navigation.core.reroute {
   }
 
   public static final class RerouteState.RouteFetched extends com.mapbox.navigation.core.reroute.RerouteState {
-    field public static final com.mapbox.navigation.core.reroute.RerouteState.RouteFetched INSTANCE;
+    ctor public RerouteState.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
+    method public com.mapbox.navigation.base.route.RouterOrigin component1();
+    method public com.mapbox.navigation.core.reroute.RerouteState.RouteFetched copy(com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
+    method public com.mapbox.navigation.base.route.RouterOrigin getRouterOrigin();
+    property public final com.mapbox.navigation.base.route.RouterOrigin routerOrigin;
   }
 
 }
@@ -465,7 +469,7 @@ package com.mapbox.navigation.core.reroute {
 package com.mapbox.navigation.core.routealternatives {
 
   public interface RouteAlternativesObserver {
-    method public void onRouteAlternatives(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> alternatives);
+    method public void onRouteAlternatives(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> alternatives, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
   }
 
 }

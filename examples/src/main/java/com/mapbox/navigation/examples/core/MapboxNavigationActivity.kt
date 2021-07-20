@@ -31,6 +31,7 @@ import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -483,8 +484,11 @@ class MapboxNavigationActivity : AppCompatActivity() {
                 .coordinates(listOf(origin, destination))
                 .build(),
             object : RouterCallback {
-                override fun onRoutesReady(routes: List<DirectionsRoute>) {
-                    setRouteAndStartNavigation(routes.first())
+                override fun onRoutesReady(
+                    routes: List<DirectionsRoute>,
+                    routerOrigin: RouterOrigin
+                ) {
+                    setRouteAndStartNavigation(routes.first(), routerOrigin)
                 }
 
                 override fun onFailure(
@@ -494,14 +498,14 @@ class MapboxNavigationActivity : AppCompatActivity() {
                     // no impl
                 }
 
-                override fun onCanceled(routeOptions: RouteOptions) {
+                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
                     // no impl
                 }
             }
         )
     }
 
-    private fun setRouteAndStartNavigation(route: DirectionsRoute) {
+    private fun setRouteAndStartNavigation(route: DirectionsRoute, routerOrigin: RouterOrigin) {
         // set route
         mapboxNavigation.setRoutes(listOf(route))
 

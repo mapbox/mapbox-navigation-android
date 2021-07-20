@@ -6,6 +6,7 @@ import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -89,16 +90,19 @@ internal class MapboxDirectionsSession(
         return router.getRoute(
             routeOptions,
             object : RouterCallback {
-                override fun onRoutesReady(routes: List<DirectionsRoute>) {
-                    routerCallback.onRoutesReady(routes)
+                override fun onRoutesReady(
+                    routes: List<DirectionsRoute>,
+                    routerOrigin: RouterOrigin
+                ) {
+                    routerCallback.onRoutesReady(routes, routerOrigin)
                 }
 
                 override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
                     routerCallback.onFailure(reasons, routeOptions)
                 }
 
-                override fun onCanceled(routeOptions: RouteOptions) {
-                    routerCallback.onCanceled(routeOptions)
+                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
+                    routerCallback.onCanceled(routeOptions, routerOrigin)
                 }
             }
         )

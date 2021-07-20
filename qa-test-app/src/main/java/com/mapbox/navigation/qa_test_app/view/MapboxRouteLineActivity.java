@@ -46,6 +46,7 @@ import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions;
 import com.mapbox.navigation.base.options.RoutingTilesOptions;
 import com.mapbox.navigation.base.route.RouterCallback;
 import com.mapbox.navigation.base.route.RouterFailure;
+import com.mapbox.navigation.base.route.RouterOrigin;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
@@ -339,7 +340,9 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
   private RouterCallback routesReqCallback = new RouterCallback() {
     @Override
-    public void onRoutesReady(@NotNull List<? extends DirectionsRoute> routes) {
+    public void onRoutesReady(
+      @NotNull List<? extends DirectionsRoute> routes, @NonNull RouterOrigin routerOrigin
+    ) {
       mapboxNavigation.setRoutes(routes);
       if (!routes.isEmpty()) {
         routeLoading.setVisibility(View.INVISIBLE);
@@ -353,7 +356,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     }
 
     @Override
-    public void onCanceled(@NonNull RouteOptions routeOptions) {
+    public void onCanceled(@NonNull RouteOptions routeOptions, @NonNull RouterOrigin routerOrigin) {
       Log.d(TAG, "route request canceled");
       routeLoading.setVisibility(View.INVISIBLE);
 

@@ -41,6 +41,7 @@ import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -563,7 +564,10 @@ class MapboxCameraAnimationsActivity :
         mapboxNavigation.requestRoutes(
             routeOptions,
             object : RouterCallback {
-                override fun onRoutesReady(routes: List<DirectionsRoute>) {
+                override fun onRoutesReady(
+                    routes: List<DirectionsRoute>,
+                    routerOrigin: RouterOrigin
+                ) {
                     mapboxNavigation.setRoutes(routes)
                 }
 
@@ -574,7 +578,7 @@ class MapboxCameraAnimationsActivity :
                     // no impl
                 }
 
-                override fun onCanceled(routeOptions: RouteOptions) {
+                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
                     // no impl
                 }
             }
