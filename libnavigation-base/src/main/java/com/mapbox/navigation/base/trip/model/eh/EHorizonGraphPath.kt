@@ -1,5 +1,7 @@
 package com.mapbox.navigation.base.trip.model.eh
 
+import com.mapbox.navigation.base.internal.extensions.notEquals
+
 /**
  * [EHorizonGraphPath] defines a path on a map graph.
  *
@@ -25,9 +27,9 @@ class EHorizonGraphPath internal constructor(
         other as EHorizonGraphPath
 
         if (edges != other.edges) return false
-        if (percentAlongBegin != other.percentAlongBegin) return false
-        if (percentAlongEnd != other.percentAlongEnd) return false
-        if (length != other.length) return false
+        if (percentAlongBegin.notEquals(other.percentAlongBegin)) return false
+        if (percentAlongEnd.notEquals(other.percentAlongEnd)) return false
+        if (length.notEquals(other.length)) return false
 
         return true
     }

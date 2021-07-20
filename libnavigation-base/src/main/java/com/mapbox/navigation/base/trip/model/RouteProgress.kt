@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.extensions.notEquals
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 
 /**
@@ -88,10 +89,10 @@ class RouteProgress private constructor(
         if (currentLegProgress != other.currentLegProgress) return false
         if (upcomingStepPoints != other.upcomingStepPoints) return false
         if (inTunnel != other.inTunnel) return false
-        if (distanceRemaining != other.distanceRemaining) return false
-        if (distanceTraveled != other.distanceTraveled) return false
-        if (durationRemaining != other.durationRemaining) return false
-        if (fractionTraveled != other.fractionTraveled) return false
+        if (distanceRemaining.notEquals(other.distanceRemaining)) return false
+        if (distanceTraveled.notEquals(other.distanceTraveled)) return false
+        if (durationRemaining.notEquals(other.durationRemaining)) return false
+        if (fractionTraveled.notEquals(other.fractionTraveled)) return false
         if (remainingWaypoints != other.remainingWaypoints) return false
         if (upcomingRoadObjects != other.upcomingRoadObjects) return false
         if (stale != other.stale) return false

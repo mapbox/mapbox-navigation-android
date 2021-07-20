@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.trip.model.roadobject
 
+import com.mapbox.navigation.base.internal.extensions.notEquals
 import com.mapbox.navigation.base.trip.model.eh.EHorizon
 import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo
 import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfoType
@@ -40,7 +41,7 @@ class UpcomingRoadObject internal constructor(
         other as UpcomingRoadObject
 
         if (roadObject != other.roadObject) return false
-        if (distanceToStart != other.distanceToStart) return false
+        if (distanceToStart.notEquals(other.distanceToStart)) return false
         if (distanceInfo != other.distanceInfo) return false
 
         return true

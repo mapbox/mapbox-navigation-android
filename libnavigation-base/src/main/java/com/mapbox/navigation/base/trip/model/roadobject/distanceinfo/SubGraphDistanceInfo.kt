@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.trip.model.roadobject.distanceinfo
 
+import com.mapbox.navigation.base.internal.extensions.notEquals
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
 
 /**
@@ -33,10 +34,10 @@ class SubGraphDistanceInfo internal constructor(
 
         other as SubGraphDistanceInfo
 
-        if (distanceToNearestEntry != other.distanceToNearestEntry) return false
-        if (distanceToNearestExit != other.distanceToNearestExit) return false
+        if (distanceToNearestEntry.notEquals(other.distanceToNearestEntry)) return false
+        if (distanceToNearestExit.notEquals(other.distanceToNearestExit)) return false
         if (inside != other.inside) return false
-        if (distanceToStart != other.distanceToStart) return false
+        if (distanceToStart.notEquals(other.distanceToStart)) return false
 
         return true
     }

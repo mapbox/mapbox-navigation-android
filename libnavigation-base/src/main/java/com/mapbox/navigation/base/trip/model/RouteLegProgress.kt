@@ -2,6 +2,7 @@ package com.mapbox.navigation.base.trip.model
 
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.navigation.base.internal.extensions.notEquals
 
 /**
  * This is a progress object specific to the current leg the user is on. If there is only one leg
@@ -60,10 +61,10 @@ class RouteLegProgress private constructor(
 
         if (legIndex != other.legIndex) return false
         if (routeLeg != other.routeLeg) return false
-        if (distanceTraveled != other.distanceTraveled) return false
-        if (distanceRemaining != other.distanceRemaining) return false
-        if (durationRemaining != other.durationRemaining) return false
-        if (fractionTraveled != other.fractionTraveled) return false
+        if (distanceTraveled.notEquals(other.distanceTraveled)) return false
+        if (distanceRemaining.notEquals(other.distanceRemaining)) return false
+        if (durationRemaining.notEquals(other.durationRemaining)) return false
+        if (fractionTraveled.notEquals(other.fractionTraveled)) return false
         if (currentStepProgress != other.currentStepProgress) return false
         if (upcomingStep != other.upcomingStep) return false
 

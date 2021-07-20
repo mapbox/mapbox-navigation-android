@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.trip.model.roadobject.distanceinfo
 
+import com.mapbox.navigation.base.internal.extensions.notEquals
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
 
 /**
@@ -36,12 +37,12 @@ class LineDistanceInfo internal constructor(
 
         other as LineDistanceInfo
 
-        if (distanceToEntry != other.distanceToEntry) return false
-        if (distanceToExit != other.distanceToExit) return false
-        if (distanceToEnd != other.distanceToEnd) return false
+        if (distanceToEntry.notEquals(other.distanceToEntry)) return false
+        if (distanceToExit.notEquals(other.distanceToExit)) return false
+        if (distanceToEnd.notEquals(other.distanceToEnd)) return false
         if (entryFromStart != other.entryFromStart) return false
-        if (length != other.length) return false
-        if (distanceToStart != other.distanceToStart) return false
+        if (length.notEquals(other.length)) return false
+        if (distanceToStart.notEquals(other.distanceToStart)) return false
 
         return true
     }

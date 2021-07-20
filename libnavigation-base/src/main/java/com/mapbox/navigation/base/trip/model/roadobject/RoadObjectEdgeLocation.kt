@@ -1,5 +1,7 @@
 package com.mapbox.navigation.base.trip.model.roadobject
 
+import com.mapbox.navigation.base.internal.extensions.notEquals
+
 /**
  * RoadObjectEdgeLocation represents location of road object on the edge
  *
@@ -24,8 +26,8 @@ class RoadObjectEdgeLocation internal constructor(
 
         other as RoadObjectEdgeLocation
 
-        if (percentAlongBegin != other.percentAlongBegin) return false
-        if (percentAlongEnd != other.percentAlongEnd) return false
+        if (percentAlongBegin.notEquals(other.percentAlongBegin)) return false
+        if (percentAlongEnd.notEquals(other.percentAlongEnd)) return false
 
         return true
     }

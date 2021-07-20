@@ -1,5 +1,7 @@
 package com.mapbox.navigation.base.trip.model.eh
 
+import com.mapbox.navigation.base.internal.extensions.notEquals
+
 /**
  * Edge metadata
  *
@@ -57,11 +59,11 @@ class EHorizonEdgeMetadata internal constructor(
 
         other as EHorizonEdgeMetadata
 
-        if (heading != other.heading) return false
-        if (length != other.length) return false
+        if (heading.notEquals(other.heading)) return false
+        if (length.notEquals(other.length)) return false
         if (functionRoadClass != other.functionRoadClass) return false
-        if (speedLimit != other.speedLimit) return false
-        if (speed != other.speed) return false
+        if (speedLimit.notEquals(other.speedLimit)) return false
+        if (speed.notEquals(other.speed)) return false
         if (ramp != other.ramp) return false
         if (motorway != other.motorway) return false
         if (bridge != other.bridge) return false
@@ -69,7 +71,7 @@ class EHorizonEdgeMetadata internal constructor(
         if (toll != other.toll) return false
         if (names != other.names) return false
         if (laneCount != other.laneCount) return false
-        if (meanElevation != other.meanElevation) return false
+        if (meanElevation.notEquals(other.meanElevation)) return false
         if (curvature != other.curvature) return false
         if (countryCodeIso3 != other.countryCodeIso3) return false
         if (countryCodeIso2 != other.countryCodeIso2) return false

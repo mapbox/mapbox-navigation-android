@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.trip.model.roadobject.distanceinfo
 
+import com.mapbox.navigation.base.internal.extensions.notEquals
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
 
 /**
@@ -27,7 +28,7 @@ class GantryDistanceInfo internal constructor(
 
         other as GantryDistanceInfo
 
-        if (distanceToStart != other.distanceToStart) return false
+        if (distanceToStart.notEquals(other.distanceToStart)) return false
 
         return true
     }

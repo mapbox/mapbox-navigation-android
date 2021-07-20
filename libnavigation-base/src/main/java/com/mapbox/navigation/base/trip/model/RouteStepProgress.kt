@@ -2,6 +2,7 @@ package com.mapbox.navigation.base.trip.model
 
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.extensions.notEquals
 
 /**
  * This is a progress object specific to the current step the user is on.
@@ -61,10 +62,10 @@ class RouteStepProgress private constructor(
         if (instructionIndex != other.instructionIndex) return false
         if (step != other.step) return false
         if (stepPoints != other.stepPoints) return false
-        if (distanceRemaining != other.distanceRemaining) return false
-        if (distanceTraveled != other.distanceTraveled) return false
-        if (fractionTraveled != other.fractionTraveled) return false
-        if (durationRemaining != other.durationRemaining) return false
+        if (distanceRemaining.notEquals(other.distanceRemaining)) return false
+        if (distanceTraveled.notEquals(other.distanceTraveled)) return false
+        if (fractionTraveled.notEquals(other.fractionTraveled)) return false
+        if (durationRemaining.notEquals(other.durationRemaining)) return false
 
         return true
     }

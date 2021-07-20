@@ -1,5 +1,7 @@
 package com.mapbox.navigation.base.options
 
+import com.mapbox.navigation.base.internal.extensions.notEquals
+
 /**
  * Defines options for [EHorizon].
  *
@@ -40,10 +42,10 @@ class EHorizonOptions private constructor(
 
         other as EHorizonOptions
 
-        if (length != other.length) return false
+        if (length.notEquals(other.length)) return false
         if (expansion != other.expansion) return false
-        if (branchLength != other.branchLength) return false
-        if (minTimeDeltaBetweenUpdates != other.minTimeDeltaBetweenUpdates) return false
+        if (branchLength.notEquals(other.branchLength)) return false
+        if (minTimeDeltaBetweenUpdates.notEquals(other.minTimeDeltaBetweenUpdates)) return false
 
         return true
     }

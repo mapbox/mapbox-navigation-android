@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.trip.model.roadobject
 
+import com.mapbox.navigation.base.internal.extensions.notEquals
 import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation
 import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType
 
@@ -57,7 +58,7 @@ abstract class RoadObject internal constructor(
 
         if (id != other.id) return false
         if (objectType != other.objectType) return false
-        if (length != other.length) return false
+        if (length.notEquals(other.length)) return false
         if (location != other.location) return false
         if (provider != other.provider) return false
         if (nativeRoadObject != other.nativeRoadObject) return false

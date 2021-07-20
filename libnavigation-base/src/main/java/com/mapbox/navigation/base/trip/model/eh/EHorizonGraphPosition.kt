@@ -21,7 +21,7 @@ class EHorizonGraphPosition internal constructor(
         other as EHorizonGraphPosition
 
         if (edgeId != other.edgeId) return false
-        if (percentAlong != other.percentAlong) return false
+        if (percentAlong.compareTo(other.percentAlong)!=0) return false
 
         return true
     }

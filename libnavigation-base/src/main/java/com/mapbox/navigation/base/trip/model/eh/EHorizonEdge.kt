@@ -35,7 +35,7 @@ class EHorizonEdge internal constructor(
 
         if (id != other.id) return false
         if (level != other.level) return false
-        if (probability != other.probability) return false
+        if (probability.compareTo(other.probability)!=0) return false
         if (out != other.out) return false
 
         return true
