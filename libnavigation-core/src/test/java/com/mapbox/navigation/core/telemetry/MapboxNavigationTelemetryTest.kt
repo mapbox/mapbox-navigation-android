@@ -26,6 +26,9 @@ import com.mapbox.navigation.core.NavigationSession
 import com.mapbox.navigation.core.NavigationSession.State.ACTIVE_GUIDANCE
 import com.mapbox.navigation.core.NavigationSession.State.FREE_DRIVE
 import com.mapbox.navigation.core.NavigationSession.State.IDLE
+import com.mapbox.navigation.core.NavigationSessionStateObserver
+import com.mapbox.navigation.core.arrival.ArrivalObserver
+import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.internal.telemetry.CachedNavigationFeedbackEvent
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.toTelemetryLocation
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
@@ -39,6 +42,8 @@ import com.mapbox.navigation.core.telemetry.events.NavigationEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationFeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationFreeDriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationRerouteEvent
+import com.mapbox.navigation.core.trip.session.OffRouteObserver
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEvent
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -49,6 +54,8 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.runs
+import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
@@ -59,6 +66,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -136,6 +144,35 @@ class MapboxNavigationTelemetryTest {
     private val legProgress = mockk<RouteLegProgress>()
     private val stepProgress = mockk<RouteStepProgress>()
     private val nextRouteLegProgress = mockk<RouteLegProgress>()
+
+    private var routeProgressObserverSlot = slot<RouteProgressObserver>()
+    private var sessionStateObserverSlot = slot<NavigationSessionStateObserver>()
+    private var offRouteObserverSlot = slot<OffRouteObserver>()
+    private var arrivalObserverSlot = slot<ArrivalObserver>()
+    private var routesObserverSlot = slot<RoutesObserver>()
+
+    @Before
+    fun setup() {
+        every {
+            mapboxNavigation.registerRouteProgressObserver(capture(routeProgressObserverSlot))
+        } just runs
+
+        every {
+            mapboxNavigation.registerNavigationSessionObserver(capture(sessionStateObserverSlot))
+        } just runs
+
+        every {
+            mapboxNavigation.registerOffRouteObserver(capture(offRouteObserverSlot))
+        } just runs
+
+        every {
+            mapboxNavigation.registerArrivalObserver(capture(arrivalObserverSlot))
+        } just runs
+
+        every {
+            mapboxNavigation.registerRoutesObserver(capture(routesObserverSlot))
+        } just runs
+    }
 
     @After
     fun cleanUp() {
@@ -911,32 +948,32 @@ class MapboxNavigationTelemetryTest {
     }
 
     private fun updateSessionState(state: NavigationSession.State) {
-        MapboxNavigationTelemetry.onNavigationSessionStateChanged(state)
+        sessionStateObserverSlot.captured.onNavigationSessionStateChanged(state)
     }
 
     private fun updateRoute(route: DirectionsRoute) {
-        MapboxNavigationTelemetry.onRoutesChanged(listOf(route))
+        routesObserverSlot.captured.onRoutesChanged(listOf(route))
     }
 
     private fun updateRouteProgress(count: Int = 10) {
         repeat(count) {
-            MapboxNavigationTelemetry.onRouteProgressChanged(routeProgress)
+            routeProgressObserverSlot.captured.onRouteProgressChanged(routeProgress)
         }
     }
 
     private fun nextWaypoint() {
-        MapboxNavigationTelemetry.onNextRouteLegStart(nextRouteLegProgress)
+        arrivalObserverSlot.captured.onNextRouteLegStart(nextRouteLegProgress)
         // mock locationsCollector to do nothing
         // because buffers will be empty after handleSessionCanceled on nextLeg
         every { locationsCollector.flushBuffers() } just Runs
     }
 
     private fun offRoute() {
-        MapboxNavigationTelemetry.onOffRouteStateChanged(true)
+        offRouteObserverSlot.captured.onOffRouteStateChanged(true)
     }
 
     private fun arrive() {
-        MapboxNavigationTelemetry.onFinalDestinationArrival(routeProgress)
+        arrivalObserverSlot.captured.onFinalDestinationArrival(routeProgress)
     }
 
     private fun captureMetricsReporter(): List<MetricEvent> {
