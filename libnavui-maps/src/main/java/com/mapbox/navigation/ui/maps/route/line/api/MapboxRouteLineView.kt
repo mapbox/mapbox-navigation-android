@@ -52,11 +52,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style a valid [Style] instance
      */
     fun initializeLayers(style: Style) {
-        jobControl.scope.launch {
-            mutex.withLock {
-                initializeLayers(style, options)
-            }
-        }
+        initializeLayers(style, options)
     }
 
     /**
@@ -66,6 +62,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param routeDrawData a [Expected<RouteLineError, RouteSetValue>]
      */
     fun renderRouteDrawData(style: Style, routeDrawData: Expected<RouteLineError, RouteSetValue>) {
+        initializeLayers(style, options)
         routeDrawData.fold(
             { error ->
                 Log.e(TAG, error.errorMessage)
@@ -73,8 +70,6 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
             { value ->
                 jobControl.scope.launch {
                     mutex.withLock {
-                        initializeLayers(style, options)
-
                         updateLineGradient(
                             style,
                             RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
@@ -174,11 +169,10 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         style: Style,
         update: Expected<RouteLineError, VanishingRouteLineUpdateValue>
     ) {
+        initializeLayers(style, options)
         jobControl.scope.launch {
             mutex.withLock {
                 update.onValue {
-                    initializeLayers(style, options)
-
                     updateLineGradient(
                         style,
                         RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
@@ -209,11 +203,10 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         style: Style,
         clearRouteLineValue: Expected<RouteLineError, RouteLineClearValue>
     ) {
+        initializeLayers(style, options)
         jobControl.scope.launch {
             mutex.withLock {
                 clearRouteLineValue.onValue {
-                    initializeLayers(style, options)
-
                     updateSource(
                         style,
                         RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
