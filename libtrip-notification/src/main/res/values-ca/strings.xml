@@ -1,4 +1,8 @@
 <resources>
     <!-- Notification Strings -->
     <string name="mapbox_end_navigation">Aturar navegació</string>
-    </resources>
+    <string name="mapbox_navigation_is_starting">Comença la navegació...</string>
+    <string name="mapbox_stop_session">Aturar sessió</string>
+    <string name="mapbox_free_drive_session">Sessió de conducció gratuïta</string>
+    <string name="mapbox_eta_format">%s ETA</string>
+</resources>

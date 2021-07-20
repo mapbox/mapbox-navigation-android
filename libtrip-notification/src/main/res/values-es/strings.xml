@@ -1,6 +1,7 @@
 <resources>
     <!-- Notification Strings -->
     <string name="mapbox_end_navigation">Salir de la navegación</string>
+    <string name="mapbox_navigation_is_starting">Empezando la navegación…</string>
     <string name="mapbox_stop_session">Parar la sesión</string>
     <string name="mapbox_free_drive_session">Sesión de manejar libremente</string>
     <string name="mapbox_eta_format">%s ETA</string>
