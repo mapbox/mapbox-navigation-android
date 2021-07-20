@@ -7,4 +7,5 @@ dependencies {
     testImplementation dependenciesList.robolectric
     testImplementation dependenciesList.kotlinReflect
     testImplementation dependenciesList.mockwebserver
+    testImplementation dependenciesList.equalsVerifier
 }

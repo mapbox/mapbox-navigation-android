@@ -60,6 +60,7 @@ ext {
       barista                   : '3.2.0',
       svgParser                 : '1.4',
       androidStartup            : '1.0.0',
+      equalsVerifier            : '3.7',
   ]
   dependenciesList = [
       // mapbox
@@ -146,6 +147,7 @@ ext {
       mockwebserver             : "com.squareup.okhttp3:mockwebserver:${version.mockwebserver}",
       json                      : "org.json:json:${version.json}",
       androidxTestCore          : "androidx.test:core:${version.androidxTest}",
+      equalsVerifier            : "nl.jqno.equalsverifier:equalsverifier:${version.equalsVerifier}",
 
       // play services
       gmsLocation               : "com.google.android.gms:play-services-location:${version.gmsLocation}",
