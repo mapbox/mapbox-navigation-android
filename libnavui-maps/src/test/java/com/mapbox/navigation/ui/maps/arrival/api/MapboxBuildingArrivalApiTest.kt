@@ -103,7 +103,7 @@ class MapboxBuildingArrivalApiTest {
     private fun mockFinalDestinationRouteProgress() = mockk<RouteProgress> {
         every { route } returns mockk {
             every { routeOptions() } returns mockk {
-                every { coordinates() } returns listOf(
+                every { coordinatesList() } returns listOf(
                     Point.fromLngLat(-122.431969, 37.777663)
                 )
             }
@@ -113,7 +113,7 @@ class MapboxBuildingArrivalApiTest {
     private fun mockWaypointRouteProgress() = mockk<RouteProgress> {
         every { route } returns mockk {
             every { routeOptions() } returns mockk {
-                every { coordinates() } returns listOf(
+                every { coordinatesList() } returns listOf(
                     Point.fromLngLat(-122.431969, 37.777663),
                     Point.fromLngLat(-122.431423, 37.776434)
                 )
