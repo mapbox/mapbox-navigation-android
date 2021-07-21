@@ -1,10 +1,6 @@
 package com.mapbox.navigation.core.history.model
 
-import com.google.gson.GsonBuilder
-import com.mapbox.api.directions.v5.DirectionsAdapterFactory
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.geojson.Point
-import com.mapbox.geojson.PointAsCoordinatesTypeAdapter
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.navigator.internal.ActiveGuidanceOptionsMapper.mapToActiveGuidanceMode
 import com.mapbox.navigation.navigator.internal.ActiveGuidanceOptionsMapper.mapToGeometriesCriteria
@@ -16,9 +12,12 @@ import com.mapbox.navigator.SetRouteHistoryRecord
 import com.mapbox.navigator.UpdateLocationHistoryRecord
 import com.mapbox.navigator.Waypoint
 
-internal object HistoryEventMapper {
-
-    private const val NANOS_PER_SECOND = 1e-9
+/**
+ * @param accessToken used to inject access tokens into the [SetRouteHistoryRecord]
+ */
+internal class HistoryEventMapper(
+    val accessToken: String
+) {
 
     fun map(historyRecord: HistoryRecord): HistoryEvent {
         val eventTimestamp = historyRecord.timestampNanoseconds * NANOS_PER_SECOND
@@ -75,10 +74,7 @@ internal object HistoryEventMapper {
         return if (routeResponse.isNullOrEmpty() || routeResponse == "{}") {
             null
         } else {
-            val gson = GsonBuilder()
-            gson.registerTypeAdapterFactory(DirectionsAdapterFactory.create())
-            gson.registerTypeAdapter(Point::class.java, PointAsCoordinatesTypeAdapter())
-            return gson.create().fromJson(routeResponse, DirectionsRoute::class.java)
+            return DirectionsRoute.fromJson(routeResponse, accessToken)
         }
     }
 
@@ -101,4 +97,8 @@ internal object HistoryEventMapper {
         pushHistoryRecord.type,
         pushHistoryRecord.properties
     )
+
+    private companion object {
+        private const val NANOS_PER_SECOND = 1e-9
+    }
 }

@@ -15,6 +15,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.history.MapboxHistoryReader
+import com.mapbox.navigation.core.history.model.HistoryEvent
 import com.mapbox.navigation.core.history.model.HistoryEventGetStatus
 import com.mapbox.navigation.core.history.model.HistoryEventPushHistoryRecord
 import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
@@ -29,11 +30,15 @@ import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
+import org.junit.After
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.io.File
+import java.io.InputStream
 import java.util.concurrent.CountDownLatch
 
 class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
@@ -48,8 +53,19 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     val mapboxHistoryTestRule = MapboxHistoryTestRule()
 
     private lateinit var mapboxNavigation: MapboxNavigation
-
     private lateinit var routeCompleteIdlingResource: RouteProgressStateIdlingResource
+    private lateinit var testDirectory: File
+
+    @Before
+    fun createTestDirectory() {
+        testDirectory = File(activity.filesDir, "mapbox_history_test_directory")
+            .also { it.mkdirs() }
+    }
+
+    @After
+    fun deleteTestDirectory() {
+        testDirectory.deleteRecursively()
+    }
 
     @Before
     fun setup() {
@@ -139,7 +155,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     }
 
     private fun verifyHistoryEvents(filePath: String) {
-        val historyReader = MapboxHistoryReader(filePath)
+        val historyReader = MapboxHistoryReader(filePath, TEST_ACCESS_TOKEN)
 
         // Verify hasNext
         assertTrue(historyReader.hasNext())
@@ -175,8 +191,57 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         assertTrue(getStatus.elapsedRealtimeNanos > 0)
     }
 
+    @Test
+    fun legacy_json_verify_set_route_works_for_clearing_a_route() {
+        val historyReader = historyReaderFromAssetFile("set_route_event_cleared.json")
+
+        val events: List<HistoryEvent> = historyReader.asSequence().toList()
+
+        assertEquals(1, events.size)
+        val setRouteEvent = events[0] as HistoryEventSetRoute
+        assertNull(setRouteEvent.directionsRoute)
+        assertEquals(0, setRouteEvent.routeIndex)
+        assertEquals(0, setRouteEvent.legIndex)
+    }
+
+    @Test(expected = Exception::class)
+    fun legacy_json_verify_invalid_json_crashes() {
+        val historyReader = historyReaderFromAssetFile("set_route_event_invalid.json")
+
+        historyReader.asSequence().toList()
+    }
+
+    @Test
+    fun legacy_json_verify_reading_valid_json() {
+        val historyReader = historyReaderFromAssetFile("set_route_event_valid.json")
+
+        val events: List<HistoryEvent> = historyReader.asSequence().toList()
+
+        assertEquals(1, events.size)
+        val setRouteEvent = events[0] as HistoryEventSetRoute
+        assertNotNull(setRouteEvent.directionsRoute)
+        assertEquals(821.8, setRouteEvent.directionsRoute!!.distance(), 0.1)
+        assertEquals(157.0, setRouteEvent.directionsRoute!!.duration(), 0.1)
+        assertEquals(0, setRouteEvent.routeIndex)
+        assertEquals(0, setRouteEvent.legIndex)
+        assertEquals(DirectionsCriteria.GEOMETRY_POLYLINE6, setRouteEvent.geometries)
+        assertEquals(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC, setRouteEvent.profile)
+    }
+
+    private fun historyReaderFromAssetFile(
+        name: String
+    ): MapboxHistoryReader {
+        val inputStream: InputStream = activity.assets.open(name)
+        val outputFile = File(testDirectory, name)
+        outputFile.outputStream().use { fileOut ->
+            inputStream.copyTo(fileOut)
+        }
+        return MapboxHistoryReader(outputFile.absolutePath, TEST_ACCESS_TOKEN)
+    }
+
     private companion object {
         private const val CUSTOM_EVENT_TYPE = "custom_event_type"
         private const val CUSTOM_EVENT_PROPERTIES = "custom_event_properties"
+        private const val TEST_ACCESS_TOKEN = "pk.test-access-token"
     }
 }

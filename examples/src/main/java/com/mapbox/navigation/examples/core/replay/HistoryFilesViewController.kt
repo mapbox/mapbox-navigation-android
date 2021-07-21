@@ -12,12 +12,13 @@ import java.io.File
 import java.util.Collections
 
 class HistoryFilesViewController(
-    private val historyFileDirectory: String?
+    private val historyFileDirectory: String?,
+    private val accessToken: String
 ) {
 
     private var viewAdapter: HistoryFileAdapter? = null
     private val historyFilesRepository = HistoryFilesDirectory()
-    private val historyFilesApi = HistoryFilesClient()
+    private val historyFilesApi = HistoryFilesClient(accessToken)
 
     fun attach(
         context: Context,
@@ -93,7 +94,7 @@ class HistoryFilesViewController(
         result: (MapboxHistoryReader) -> Unit
     ) {
         CoroutineScope(Dispatchers.Main).launch {
-            val data = MapboxHistoryReader(historyFileItem.path)
+            val data = MapboxHistoryReader(historyFileItem.path, accessToken)
             result(data)
         }
     }
@@ -121,7 +122,7 @@ class HistoryFilesViewController(
             outputFile.outputStream().use { fileOut ->
                 inputStream.copyTo(fileOut)
             }
-            val reader = MapboxHistoryReader(outputFile.absolutePath)
+            val reader = MapboxHistoryReader(outputFile.absolutePath, accessToken)
             withContext(Dispatchers.Main) {
                 result(reader)
             }

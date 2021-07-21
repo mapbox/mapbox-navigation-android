@@ -62,9 +62,9 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
     private var loadNavigationJob: Job? = null
     private val mapboxReplayer = MapboxReplayer()
-    private val historyFileLoader = HistoryFileLoader()
     private val navigationLocationProvider = NavigationLocationProvider()
     private val locationEngineCallback = MyLocationEngineCallback(this)
+    private lateinit var historyFileLoader: HistoryFileLoader
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var locationComponent: LocationComponentPlugin
     private lateinit var navigationCamera: NavigationCamera
@@ -254,9 +254,11 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     private fun initNavigation() {
+        val accessToken = Utils.getMapboxAccessToken(this)
+        historyFileLoader = HistoryFileLoader(accessToken)
         mapboxNavigation = MapboxNavigation(
             NavigationOptions.Builder(this)
-                .accessToken(Utils.getMapboxAccessToken(this))
+                .accessToken(accessToken)
                 .locationEngine(ReplayLocationEngine(mapboxReplayer))
                 .build()
         )
