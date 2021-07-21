@@ -10,7 +10,6 @@ import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.trip.session.TripSession
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl.OFFLINE_UUID
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.Runs
 import io.mockk.every
@@ -45,10 +44,9 @@ class RouteRefreshControllerTest {
         every { e(any(), any()) } just Runs
         every { e(any(), any(), any()) } just Runs
     }
-    private val routeOptions: RouteOptions = provideRouteOptions()
+    private val routeOptions: RouteOptions = provideRouteOptions("test_uuid")
     private val validRoute: DirectionsRoute = mockk {
         every { routeOptions() } returns routeOptions
-        every { requestUuid() } returns "test_uuid"
     }
 
     private val routeRefreshOptions = RouteRefreshOptions.Builder().build()
@@ -174,8 +172,7 @@ class RouteRefreshControllerTest {
 
     @Test
     fun `do not send a request when uuid is empty`() {
-        every { validRoute.routeOptions() } returns provideRouteOptions()
-        every { validRoute.requestUuid() } returns ""
+        every { validRoute.routeOptions() } returns provideRouteOptions("")
 
         routeRefreshController.restart()
         coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis * 2)
@@ -186,8 +183,7 @@ class RouteRefreshControllerTest {
 
     @Test
     fun `do not send a request when uuid is offline`() {
-        every { validRoute.routeOptions() } returns provideRouteOptions()
-        every { validRoute.requestUuid() } returns OFFLINE_UUID
+        every { validRoute.routeOptions() } returns provideRouteOptions("offline")
 
         routeRefreshController.restart()
         coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis * 2)
@@ -282,11 +278,12 @@ class RouteRefreshControllerTest {
         verify(exactly = 0) { directionsSession.cancelRouteRefreshRequest(any()) }
     }
 
-    private fun provideRouteOptions(): RouteOptions =
+    private fun provideRouteOptions(uuid: String): RouteOptions =
         RouteOptions.builder()
             .applyDefaultNavigationOptions()
-            .coordinatesList(listOf(Point.fromLngLat(0.0, 0.0), Point.fromLngLat(1.1, 1.1)))
+            .coordinates(listOf(Point.fromLngLat(0.0, 0.0), Point.fromLngLat(1.1, 1.1)))
             .accessToken("pk.**")
+            .requestUuid(uuid)
             .build()
 
     @After

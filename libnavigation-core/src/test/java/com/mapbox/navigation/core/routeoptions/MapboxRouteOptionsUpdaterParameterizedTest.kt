@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.routeoptions
 
 import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
@@ -115,7 +116,8 @@ class MapboxRouteOptionsUpdaterParameterizedTest(
             .user(Constants.MAPBOX_USER)
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
             .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
-            .coordinatesList(
+            .requestUuid("")
+            .coordinates(
                 listOf(
                     Point.fromLngLat(1.0, 1.0),
                     Point.fromLngLat(1.0, 1.0),
@@ -140,6 +142,9 @@ class MapboxRouteOptionsUpdaterParameterizedTest(
             .exclude(DirectionsCriteria.EXCLUDE_TOLL)
             .language("en")
             .roundaboutExits(true)
+            .walkingOptions(
+                WalkingOptions.builder().walkingSpeed(5.0).build()
+            )
             .voiceInstructions(true)
             .build()
 }

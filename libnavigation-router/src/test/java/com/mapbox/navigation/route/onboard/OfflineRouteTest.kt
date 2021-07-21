@@ -2,9 +2,7 @@ package com.mapbox.navigation.route.onboard
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.MapboxDirections
-import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.route.internal.util.httpUrl
 import com.mapbox.navigation.testing.BuilderTest
 import io.mockk.mockk
@@ -127,17 +125,11 @@ internal class OfflineRouteTest : BuilderTest<OfflineRoute, OfflineRoute.Builder
 
     private fun provideOnlineRouteBuilder(): URL =
         MapboxDirections.builder()
-            .routeOptions(
-                RouteOptions.builder()
-                    .accessToken("pk.XXX")
-                    .profile(DirectionsCriteria.PROFILE_CYCLING)
-                    .coordinates(
-                        origin = Point.fromLngLat(1.0, 2.0),
-                        waypoints = listOf(Point.fromLngLat(3.0, 2.0)),
-                        destination = Point.fromLngLat(1.0, 5.0)
-                    )
-                    .build()
-            )
+            .accessToken("pk.XXX")
+            .profile(DirectionsCriteria.PROFILE_CYCLING)
+            .origin(Point.fromLngLat(1.0, 2.0))
+            .addWaypoint(Point.fromLngLat(3.0, 2.0))
+            .destination(Point.fromLngLat(1.0, 5.0))
             .build()
             .httpUrl()
             .toUrl()

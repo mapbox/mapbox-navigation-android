@@ -96,7 +96,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
                     .applyLanguageAndVoiceUnitOptions(activity)
                     .baseUrl(mockWebServerRule.baseUrl)
                     .accessToken(getMapboxAccessTokenFromResources(activity))
-                    .coordinatesList(mockRoute.routeWaypoints).build(),
+                    .coordinates(mockRoute.routeWaypoints).build(),
                 object : RouterCallback {
                     override fun onRoutesReady(
                         routes: List<DirectionsRoute>,
@@ -163,7 +163,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         // Verify the set route event
         val setRouteEvent = historyEvents
             .find { it is HistoryEventSetRoute } as HistoryEventSetRoute
-        assertEquals(24.001, setRouteEvent.directionsRoute!!.duration(), 0.001)
+        assertEquals(24.001, setRouteEvent.directionsRoute.duration(), 0.001)
         assertEquals(setRouteEvent.legIndex, 0)
         assertEquals(setRouteEvent.routeIndex, 0)
         assertEquals(DirectionsCriteria.GEOMETRY_POLYLINE6, setRouteEvent.geometries)

@@ -18,7 +18,7 @@ class RouteExclusionsTest {
         val destination = Point.fromLngLat(12.54071010365584, 55.68521471271404)
         val routeOptionsBuilder = RouteOptions.builder()
             .applyDefaultNavigationOptions()
-            .coordinatesList(listOf(origin, destination))
+            .coordinates(listOf(origin, destination))
             .accessToken("pk.123")
 
         val routeOptionsWithExclusions = routeOptionsBuilder.exclude(
@@ -35,7 +35,7 @@ class RouteExclusionsTest {
         val destination = Point.fromLngLat(12.54071010365584, 55.68521471271404)
         val routeOptionsWithoutExclusions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
-            .coordinatesList(listOf(origin, destination))
+            .coordinates(listOf(origin, destination))
             .accessToken("pk.123")
             .build()
         val directionsRoute = DirectionsRoute.builder()
@@ -52,8 +52,7 @@ class RouteExclusionsTest {
     @Test
     fun `toll and ferry exclusion violations - size`() {
         val directionsRoute = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("toll_and_ferry_directions_route.json"),
-            "token"
+            FileUtils.loadJsonFixture("toll_and_ferry_directions_route.json")
         )
 
         val exclusionViolations = directionsRoute.exclusionViolations()
@@ -64,8 +63,7 @@ class RouteExclusionsTest {
     @Test
     fun `toll and ferry exclusion violations - type`() {
         val directionsRoute = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("toll_and_ferry_directions_route.json"),
-            "token"
+            FileUtils.loadJsonFixture("toll_and_ferry_directions_route.json")
         )
 
         val tollAndFerryExclusionViolations = directionsRoute.exclusionViolations()

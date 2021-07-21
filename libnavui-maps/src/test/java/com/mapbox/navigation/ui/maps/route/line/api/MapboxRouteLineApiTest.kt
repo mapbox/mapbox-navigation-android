@@ -137,7 +137,7 @@ class MapboxRouteLineApiTest {
                 .toPolyline(Constants.PRECISION_6)
         val augmentedRouteJson = route.toJson()
             .replace("etylgAl`guhFpJrBh@kHbC{[nAZ", augmentedLineString)
-        val augmentedRoute = DirectionsRoute.fromJson(augmentedRouteJson, TOKEN)
+        val augmentedRoute = DirectionsRoute.fromJson(augmentedRouteJson)
 
         val result = api.setRoutes(listOf(RouteLine(augmentedRoute, null)))
 
@@ -199,7 +199,7 @@ class MapboxRouteLineApiTest {
             val api = MapboxRouteLineApi(options)
             val route = getRoute()
             val routeAsJson = route.toJson().replace("unknown", "severe")
-            val sameRouteDifferentAnnotations = DirectionsRoute.fromJson(routeAsJson, TOKEN)
+            val sameRouteDifferentAnnotations = DirectionsRoute.fromJson(routeAsJson)
 
             api.setRoutes(listOf(RouteLine(route, null)))
             api.setRoutes(listOf(RouteLine(sameRouteDifferentAnnotations, null)))
@@ -1015,30 +1015,26 @@ class MapboxRouteLineApiTest {
 
     private fun getRoute(): DirectionsRoute {
         val routeAsJson = loadJsonFixture("short_route.json")
-        return DirectionsRoute.fromJson(routeAsJson, TOKEN)
+        return DirectionsRoute.fromJson(routeAsJson)
     }
 
     private fun getMultilegRoute(): DirectionsRoute {
         val routeAsJson = loadJsonFixture("multileg_route.json")
-        return DirectionsRoute.fromJson(routeAsJson, TOKEN)
+        return DirectionsRoute.fromJson(routeAsJson)
     }
 
     private fun getRouteWithRoadClasses(): DirectionsRoute {
         val routeAsJson = loadJsonFixture("route-with-road-classes.txt")
-        return DirectionsRoute.fromJson(routeAsJson, TOKEN)
+        return DirectionsRoute.fromJson(routeAsJson)
     }
 
     private fun getVeryLongRoute(): DirectionsRoute {
         val routeAsJson = loadJsonFixture("cross-country-route.json")
-        return DirectionsRoute.fromJson(routeAsJson, TOKEN)
+        return DirectionsRoute.fromJson(routeAsJson)
     }
 
     private fun getRouteWithNoRoadRestrictions(): DirectionsRoute {
         val routeAsJson = loadJsonFixture("another-route-with-restrictions.json")
-        return DirectionsRoute.fromJson(routeAsJson, TOKEN)
-    }
-
-    private companion object {
-        private const val TOKEN = "token"
+        return DirectionsRoute.fromJson(routeAsJson)
     }
 }

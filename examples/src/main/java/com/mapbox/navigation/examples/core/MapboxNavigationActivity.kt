@@ -481,7 +481,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
                 .accessToken(getMapboxAccessTokenFromResources())
-                .coordinatesList(listOf(origin, destination))
+                .coordinates(listOf(origin, destination))
                 .build(),
             object : RouterCallback {
                 override fun onRoutesReady(

@@ -372,7 +372,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
             .accessToken(getMapboxAccessTokenFromResources())
-            .coordinatesList(listOf(origin, destination))
+            .coordinates(listOf(origin, destination))
             .alternatives(true)
             .build()
         mapboxNavigation.requestRoutes(

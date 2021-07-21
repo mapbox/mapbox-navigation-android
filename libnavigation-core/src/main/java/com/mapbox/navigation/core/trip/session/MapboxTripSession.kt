@@ -213,7 +213,7 @@ internal class MapboxTripSession(
                 tripStatus.getMapMatcherResult(enhancedLocation, keyPoints)
             )
             val remainingWaypoints =
-                ifNonNull(tripStatus.route?.routeOptions()?.coordinatesList()?.size) {
+                ifNonNull(tripStatus.route?.routeOptions()?.coordinates()?.size) {
                     it - tripStatus.navigationStatus.nextWaypointIndex
                 } ?: 0
 

@@ -111,7 +111,7 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
     private fun requestDirectionsRouteSync(coordinates: List<Point>): List<DirectionsRoute> {
         val routeOptions = RouteOptions.builder().applyDefaultNavigationOptions()
             .alternatives(true)
-            .coordinatesList(coordinates)
+            .coordinates(coordinates)
             .baseUrl(mockWebServerRule.baseUrl) // Comment out to test a real server
             .accessToken(getMapboxAccessTokenFromResources(activity))
             .build()

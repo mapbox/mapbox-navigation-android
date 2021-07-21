@@ -145,7 +145,7 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  *   .applyDefaultNavigationOptions()
  *   .applyLanguageAndVoiceUnitOptions(context)
  *   .accessToken(token)
- *   .coordinatesList(listOf(origin, destination))
+ *   .coordinates(listOf(origin, destination))
  *   .alternatives(true)
  *   .build()
  * mapboxNavigation.requestRoutes(

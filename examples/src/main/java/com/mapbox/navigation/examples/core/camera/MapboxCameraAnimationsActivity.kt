@@ -558,7 +558,7 @@ class MapboxCameraAnimationsActivity :
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
             .accessToken(getMapboxAccessTokenFromResources())
-            .coordinatesList(listOf(origin, destination))
+            .coordinates(listOf(origin, destination))
             .build()
 
         mapboxNavigation.requestRoutes(

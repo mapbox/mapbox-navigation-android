@@ -243,7 +243,7 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
             .accessToken(getMapboxAccessTokenFromResources())
-            .coordinatesList(listOf(origin, destination))
+            .coordinates(listOf(origin, destination))
             .alternatives(true)
             .build()
         mapboxNavigation.requestRoutes(

@@ -72,14 +72,13 @@ class MapboxOffboardRouterTest : BaseTest() {
             RouteBuilderProvider.getBuilder(mockSkuTokenProvider)
         } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.interceptor(any()) } returns mapboxDirectionsBuilder
-        every { mapboxDirectionsBuilder.routeOptions(any()) } returns mapboxDirectionsBuilder
-        every { mapboxDirectionsBuilder.eventListener(any()) } returns mapboxDirectionsBuilder
+        every { mapboxDirectionsBuilder.enableRefresh(any()) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.build() } returns mapboxDirections
         val routeListener = slot<Callback<DirectionsResponse>>()
         every { mapboxDirections.enqueueCall(capture(routeListener)) } answers {
             routeCallback = routeListener.captured
         }
-        every { routeOptions.coordinatesList().size } returns 2
+        every { routeOptions.coordinates().size } returns 2
         every { routeCall.isCanceled } returns false
         every { routeCall.request().url } returns url
 
