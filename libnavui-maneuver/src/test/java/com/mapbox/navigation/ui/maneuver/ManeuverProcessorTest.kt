@@ -22,7 +22,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with direction route having invalid banner instruction`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route_invalid_banner_instruction.json")
+            FileUtils.loadJsonFixture("short_route_invalid_banner_instruction.json"),
+            TOKEN
         )
         val maneuverState = ManeuverState()
         val maneuverOptions = ManeuverOptions.Builder().build()
@@ -46,7 +47,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with direction route having invalid steps`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route_invalid_steps.json")
+            FileUtils.loadJsonFixture("short_route_invalid_steps.json"),
+            TOKEN
         )
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
@@ -68,7 +70,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with direction route having invalid legs`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route_invalid_legs.json")
+            FileUtils.loadJsonFixture("short_route_invalid_legs.json"),
+            TOKEN
         )
         val maneuverState = ManeuverState()
         val distanceFormatter = mockk<DistanceFormatter>()
@@ -90,7 +93,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with direction route having empty banner instructions`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route_empty_banner_instructions.json")
+            FileUtils.loadJsonFixture("short_route_empty_banner_instructions.json"),
+            TOKEN
         )
         val routeLeg = null
         val maneuverState = ManeuverState()
@@ -115,7 +119,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with direction route and route leg passed is different`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json")
+            FileUtils.loadJsonFixture("short_route.json"),
+            TOKEN
         )
         val routeLegIndex = 2
         val maneuverState = ManeuverState()
@@ -140,7 +145,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with direction route is valid and filter duplicate`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json")
+            FileUtils.loadJsonFixture("short_route.json"),
+            TOKEN
         )
         val routeLegIndex = null
         val maneuverState = ManeuverState()
@@ -164,7 +170,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with direction route and is valid and don't filter duplicate`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json")
+            FileUtils.loadJsonFixture("short_route.json"),
+            TOKEN
         )
         val routeLegIndex = null
         val maneuverState = ManeuverState()
@@ -188,7 +195,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with direction route is fetched then call again`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json")
+            FileUtils.loadJsonFixture("short_route.json"),
+            TOKEN
         )
         val routeLeg = null
         val maneuverState = ManeuverState()
@@ -205,7 +213,8 @@ class ManeuverProcessorTest {
         ManeuverProcessor.process(maneuverAction)
 
         val route1 = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json")
+            FileUtils.loadJsonFixture("short_route.json"),
+            TOKEN
         )
         val routeLeg1 = null
         val maneuverAction1 = ManeuverAction.GetManeuverListWithRoute(
@@ -225,7 +234,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with route progress having invalid banner instruction`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route_invalid_banner_instruction.json")
+            FileUtils.loadJsonFixture("short_route_invalid_banner_instruction.json"),
+            TOKEN
         )
         val routeProgress = mockRouteProgress(
             _route = route,
@@ -255,7 +265,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with route progress having invalid steps`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route_invalid_steps.json")
+            FileUtils.loadJsonFixture("short_route_invalid_steps.json"),
+            TOKEN
         )
         val routeProgress = mockRouteProgress(
             _route = route,
@@ -285,7 +296,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with route progress having invalid legs`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route_invalid_legs.json")
+            FileUtils.loadJsonFixture("short_route_invalid_legs.json"),
+            TOKEN
         )
         val routeProgress = mockRouteProgress(
             _route = route,
@@ -315,7 +327,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with route progress having different route leg index`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json")
+            FileUtils.loadJsonFixture("short_route.json"),
+            TOKEN
         )
         val routeProgress = mockRouteProgress(
             _route = route,
@@ -345,7 +358,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with route progress having different step index`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json")
+            FileUtils.loadJsonFixture("short_route.json"),
+            TOKEN
         )
         val routeProgress = mockRouteProgress(
             _route = route,
@@ -375,7 +389,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with route progress is valid and filter duplicate`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json")
+            FileUtils.loadJsonFixture("short_route.json"),
+            TOKEN
         )
         val routeProgress = mockRouteProgress(
             _route = route,
@@ -405,7 +420,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with significant route progress is valid and filter duplicate`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json")
+            FileUtils.loadJsonFixture("short_route.json"),
+            TOKEN
         )
         val routeProgress = mockRouteProgress(
             _route = route,
@@ -435,7 +451,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with route progress is valid and don't filter duplicate`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json")
+            FileUtils.loadJsonFixture("short_route.json"),
+            TOKEN
         )
         val routeProgress = mockRouteProgress(
             _route = route,
@@ -465,7 +482,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with significant route progress is valid and don't filter duplicate`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json")
+            FileUtils.loadJsonFixture("short_route.json"),
+            TOKEN
         )
         val routeProgress = mockRouteProgress(
             _route = route,
@@ -495,7 +513,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with route progress is fetched then call again`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json")
+            FileUtils.loadJsonFixture("short_route.json"),
+            TOKEN
         )
         val routeProgress = mockRouteProgress(
             _route = route,
@@ -540,7 +559,8 @@ class ManeuverProcessorTest {
     @Test
     fun `when maneuver with route progress and changed annotations is fetched then call again`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json")
+            FileUtils.loadJsonFixture("short_route.json"),
+            TOKEN
         )
         val routeProgress = mockRouteProgress(
             _route = route,
@@ -597,7 +617,8 @@ class ManeuverProcessorTest {
     @Test
     fun `multileg with direction route defaults to first leg without duplicates`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_multileg_route.json")
+            FileUtils.loadJsonFixture("short_multileg_route.json"),
+            TOKEN
         )
         val routeLegIndex = null
         val maneuverState = ManeuverState()
@@ -621,7 +642,8 @@ class ManeuverProcessorTest {
     @Test
     fun `multileg with direction route respects leg index without duplicates`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_multileg_route.json")
+            FileUtils.loadJsonFixture("short_multileg_route.json"),
+            TOKEN
         )
         val routeLegIndex = 1
         val maneuverState = ManeuverState()
@@ -645,7 +667,8 @@ class ManeuverProcessorTest {
     @Test
     fun `multileg with direction route defaults to first leg with duplicates`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_multileg_route.json")
+            FileUtils.loadJsonFixture("short_multileg_route.json"),
+            TOKEN
         )
         val routeLegIndex = null
         val maneuverState = ManeuverState()
@@ -669,7 +692,8 @@ class ManeuverProcessorTest {
     @Test
     fun `multileg with direction route respects leg index with duplicates`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_multileg_route.json")
+            FileUtils.loadJsonFixture("short_multileg_route.json"),
+            TOKEN
         )
         val routeLegIndex = 1
         val maneuverState = ManeuverState()
@@ -693,7 +717,8 @@ class ManeuverProcessorTest {
     @Test
     fun `multileg route with leg index with route progress without duplicates`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_multileg_route.json")
+            FileUtils.loadJsonFixture("short_multileg_route.json"),
+            TOKEN
         )
         val routeProgress = mockRouteProgress(
             _route = route,
@@ -723,7 +748,8 @@ class ManeuverProcessorTest {
     @Test
     fun `multileg route with leg and instruction index with route progress with duplicates`() {
         val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_multileg_route.json")
+            FileUtils.loadJsonFixture("short_multileg_route.json"),
+            TOKEN
         )
         val routeProgress = mockRouteProgress(
             _route = route,
@@ -771,5 +797,9 @@ class ManeuverProcessorTest {
                 }
             }
         }
+    }
+
+    private companion object {
+        private const val TOKEN = "access_token"
     }
 }
