@@ -196,7 +196,7 @@ class MapboxRouteOptionsUpdaterTest {
             assertTrue(
                 message,
                 routeRefreshAdapter.update(routeOptions, routeProgress, location)
-                    is RouteOptionsUpdater.RouteOptionsResult.Error
+                is RouteOptionsUpdater.RouteOptionsResult.Error
             )
         }
     }

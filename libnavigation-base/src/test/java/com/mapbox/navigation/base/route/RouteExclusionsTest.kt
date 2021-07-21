@@ -52,7 +52,8 @@ class RouteExclusionsTest {
     @Test
     fun `toll and ferry exclusion violations - size`() {
         val directionsRoute = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("toll_and_ferry_directions_route.json")
+            FileUtils.loadJsonFixture("toll_and_ferry_directions_route.json"),
+            "token"
         )
 
         val exclusionViolations = directionsRoute.exclusionViolations()
@@ -63,7 +64,8 @@ class RouteExclusionsTest {
     @Test
     fun `toll and ferry exclusion violations - type`() {
         val directionsRoute = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("toll_and_ferry_directions_route.json")
+            FileUtils.loadJsonFixture("toll_and_ferry_directions_route.json"),
+            "token"
         )
 
         val tollAndFerryExclusionViolations = directionsRoute.exclusionViolations()
