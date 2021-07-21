@@ -1,6 +1,8 @@
 <resources>
     <!-- Notification Strings -->
     <string name="mapbox_end_navigation">Закінчити навігацію</string>
+    <string name="mapbox_navigation_is_starting">Початок навігації…</string>
     <string name="mapbox_stop_session">Призупинити сесію</string>
-    <string name="mapbox_eta_format">До прибуття %s</string>
+    <string name="mapbox_free_drive_session">Вільна драйв-сесія</string>
+    <string name="mapbox_eta_format">Прибуття: %s</string>
 </resources>

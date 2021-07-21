@@ -20,3 +20,21 @@ file_filter = libnavigation-base/src/main/res/values-<lang>/strings.xml
 source_file = libnavigation-base/src/main/res/values/strings.xml
 source_lang = en
 type = ANDROID
+
+[mapbox-navigation-sdk-for-android.libnavui-maps-strings-file]
+file_filter = libnavui-maps/src/main/res/values-<lang>/strings.xml
+source_file = libnavui-maps/src/main/res/values/strings.xml
+source_lang = en
+type = ANDROID
+
+[mapbox-navigation-sdk-for-android.libnavui-speedlimit-strings-file]
+file_filter = libnavui-speedlimit/src/main/res/values-<lang>/strings.xml
+source_file = libnavui-speedlimit/src/main/res/values/strings.xml
+source_lang = en
+type = ANDROID
+
+[mapbox-navigation-sdk-for-android.libnavui-voice-strings-file]
+file_filter = libnavui-voice/src/main/res/values-<lang>/strings.xml
+source_file = libnavui-voice/src/main/res/values/strings.xml
+source_lang = en
+type = ANDROID

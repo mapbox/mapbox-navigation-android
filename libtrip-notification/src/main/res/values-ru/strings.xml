@@ -1,5 +1,8 @@
 <resources>
     <!-- Notification Strings -->
     <string name="mapbox_end_navigation">Завершить</string>
+    <string name="mapbox_navigation_is_starting">Навигация запущена...</string>
+    <string name="mapbox_stop_session">Остановить сессию</string>
+    <string name="mapbox_free_drive_session">Освободить сессию</string>
     <string name="mapbox_eta_format">Ожидаемое прибытие %s</string>
 </resources>
