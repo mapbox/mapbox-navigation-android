@@ -78,8 +78,6 @@ class ReplayHistoryMapperTest {
         }
     }
 
-    // TODO fix the test
-    @Ignore
     @Test
     fun `should map setRoute`() {
         val historyString = resourceAsString("set_route_event_valid.txt")
