@@ -29,7 +29,7 @@ public class RouteExclusionsJavaTest {
     RouteOptions.Builder routeOptionsBuilder =
         RouteOptionsExtensions.applyDefaultNavigationOptions(
             RouteOptions.builder()
-                .coordinates(coordinates)
+                .coordinatesList(coordinates)
                 .accessToken("pk.123")
         );
 
@@ -52,7 +52,7 @@ public class RouteExclusionsJavaTest {
     RouteOptions routeOptionsWithoutExclusions =
         RouteOptionsExtensions.applyDefaultNavigationOptions(
             RouteOptions.builder()
-                .coordinates(coordinates)
+                .coordinatesList(coordinates)
                 .accessToken("pk.123")
         ).build();
     DirectionsRoute directionsRoute = DirectionsRoute.builder()
@@ -70,7 +70,8 @@ public class RouteExclusionsJavaTest {
   @Test
   public void tollAndFerryExclusionViolationsSize() {
     DirectionsRoute directionsRoute = DirectionsRoute.fromJson(
-        FileUtils.INSTANCE.loadJsonFixture("toll_and_ferry_directions_route.json")
+            FileUtils.INSTANCE.loadJsonFixture("toll_and_ferry_directions_route.json"),
+            "token"
     );
 
     List<ExclusionViolation> exclusionViolations =
@@ -82,7 +83,8 @@ public class RouteExclusionsJavaTest {
   @Test
   public void tollAndFerryExclusionViolationsType() {
     DirectionsRoute directionsRoute = DirectionsRoute.fromJson(
-        FileUtils.INSTANCE.loadJsonFixture("toll_and_ferry_directions_route.json")
+            FileUtils.INSTANCE.loadJsonFixture("toll_and_ferry_directions_route.json"),
+            "token"
     );
 
     Map<String, List<ExclusionViolation>> tollAndFerryExclusionViolations =

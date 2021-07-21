@@ -5,7 +5,6 @@ package com.mapbox.navigation.base.extensions
 import android.content.Context
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
@@ -36,6 +35,7 @@ fun RouteOptions?.supportsRouteRefresh(): Boolean {
     val isOverviewFull = overview() == DirectionsCriteria.OVERVIEW_FULL
     val hasCongestionOrMaxSpeed = annotationsList()?.any {
         it == DirectionsCriteria.ANNOTATION_CONGESTION ||
+            it == DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC ||
             it == DirectionsCriteria.ANNOTATION_MAXSPEED ||
             it == DirectionsCriteria.ANNOTATION_SPEED ||
             it == DirectionsCriteria.ANNOTATION_DURATION ||
@@ -50,10 +50,7 @@ fun RouteOptions?.supportsRouteRefresh(): Boolean {
  * or otherwise recommended for the Navigation SDK and all of its features to provide the best car navigation experience.
  */
 fun RouteOptions.Builder.applyDefaultNavigationOptions(): RouteOptions.Builder = apply {
-    baseUrl(Constants.BASE_API_URL)
-    user(Constants.MAPBOX_USER)
     profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-    geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
     overview(DirectionsCriteria.OVERVIEW_FULL)
     steps(true)
     continueStraight(true)
@@ -70,7 +67,7 @@ fun RouteOptions.Builder.applyDefaultNavigationOptions(): RouteOptions.Builder =
     )
     voiceInstructions(true)
     bannerInstructions(true)
-    requestUuid("")
+    enableRefresh(true)
 }
 
 /**
@@ -103,7 +100,7 @@ fun RouteOptions.Builder.coordinates(
         add(destination)
     }
 
-    coordinates(coordinates)
+    coordinatesList(coordinates)
 
     return this
 }

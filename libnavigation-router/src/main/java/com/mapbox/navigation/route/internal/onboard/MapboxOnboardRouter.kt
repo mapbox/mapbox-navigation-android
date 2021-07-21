@@ -17,7 +17,6 @@ import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
 import com.mapbox.navigation.route.internal.util.httpUrl
 import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
-import com.mapbox.navigation.route.offboard.router.routeOptions
 import com.mapbox.navigation.route.onboard.OfflineRoute
 import com.mapbox.navigation.utils.internal.RequestMap
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -61,7 +60,7 @@ class MapboxOnboardRouter(
     ): Long {
         val httpUrl = RouteBuilderProvider
             .getBuilder(null)
-            .routeOptions(routeOptions, false)
+            .routeOptions(routeOptions)
             .build()
             .httpUrl()
 
@@ -174,6 +173,7 @@ class MapboxOnboardRouter(
         navigatorNative.getRoute(url)
     }
 
+    // todo Nav Native serializes route options, it probably shouldn't
     private suspend fun parseDirectionsRoutes(json: String): List<DirectionsRoute> =
         withContext(ThreadController.IODispatcher) {
             DirectionsResponse.fromJson(json).routes()

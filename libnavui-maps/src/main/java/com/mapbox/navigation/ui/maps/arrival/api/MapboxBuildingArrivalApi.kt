@@ -51,7 +51,7 @@ class MapboxBuildingArrivalApi {
             checkMapStyle()
             val routeOptions = routeProgress.route.routeOptions()
             val coordinateIndex = routeProgress.currentLegProgress?.legIndex!! + 1
-            routeOptions?.coordinates()?.get(coordinateIndex)?.let { point ->
+            routeOptions?.coordinatesList()?.get(coordinateIndex)?.let { point ->
                 mapboxBuildingHighlightApi?.highlightBuilding(point)
             }
         }
@@ -59,7 +59,7 @@ class MapboxBuildingArrivalApi {
         override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
             checkMapStyle()
             val finalDestination = routeProgress.route.routeOptions()
-                ?.coordinates()
+                ?.coordinatesList()
                 ?.lastOrNull()
             mapboxBuildingHighlightApi?.highlightBuilding(finalDestination)
         }

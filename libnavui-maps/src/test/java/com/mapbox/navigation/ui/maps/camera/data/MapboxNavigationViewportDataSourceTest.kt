@@ -196,9 +196,7 @@ class MapboxNavigationViewportDataSourceTest {
             )
         } returns remainingPointsOnRoute
 
-        every { route.routeOptions() } returns mockk {
-            every { requestUuid() } returns "mock_uuid"
-        }
+        every { route.routeOptions() } returns mockk()
     }
 
     @Test

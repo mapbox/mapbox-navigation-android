@@ -301,8 +301,14 @@ class MapboxNavigationTest {
                 )
                 .build()
         )
-        val routes = listOf(mockk<DirectionsRoute>())
-        mapboxNavigation.setRoutes(routes)
+        val route: DirectionsRoute = mockk()
+        val routeOptions: RouteOptions = mockk()
+        every { route.routeOptions() } returns routeOptions
+        every { route.geometry() } returns "geometry"
+        every { route.legs() } returns emptyList()
+        every { routeOptions.overview() } returns "full"
+        every { routeOptions.annotationsList() } returns emptyList()
+        mapboxNavigation.setRoutes(listOf(route))
 
         verify(exactly = 2) { routeRefreshController.restart() }
     }
@@ -564,7 +570,7 @@ class MapboxNavigationTest {
 
     @Test
     fun interrupt_reroute_on_set_routes() {
-        mapboxNavigation.setRoutes(mockk())
+        mapboxNavigation.setRoutes(listOf())
 
         verify(exactly = 1) { rerouteController.interrupt() }
 
@@ -583,7 +589,7 @@ class MapboxNavigationTest {
 
     @Test
     fun `interrupt route alternatives on set route`() {
-        mapboxNavigation.setRoutes(mockk())
+        mapboxNavigation.setRoutes(listOf())
 
         verify(exactly = 1) { routeAlternativesController.interrupt() }
 
@@ -753,7 +759,15 @@ class MapboxNavigationTest {
 
     @Test
     fun `setRoute pushes the route to the directions session`() {
-        val routes = listOf(mockk<DirectionsRoute>())
+        val route: DirectionsRoute = mockk()
+        val routeOptions: RouteOptions = mockk()
+        every { route.routeOptions() } returns routeOptions
+        every { route.geometry() } returns "geometry"
+        every { route.legs() } returns emptyList()
+        every { routeOptions.overview() } returns "full"
+        every { routeOptions.annotationsList() } returns emptyList()
+
+        val routes = listOf(route)
 
         mapboxNavigation.setRoutes(routes)
 

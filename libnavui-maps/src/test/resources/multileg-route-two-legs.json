@@ -1783,20 +1783,7 @@
     "baseUrl": "https://api.mapbox.com",
     "user": "mapbox",
     "profile": "driving-traffic",
-    "coordinates": [
-      [
-        -122.523179,
-        37.974972
-      ],
-      [
-        -122.524257,
-        37.970785
-      ],
-      [
-        -122.518925,
-        37.970548
-      ]
-    ],
+    "coordinates": "-122.523179,37.974972;-122.524257,37.970785;-122.518925,37.970548",
     "alternatives": true,
     "language": "en",
     "continue_straight": true,

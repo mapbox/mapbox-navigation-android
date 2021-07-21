@@ -82,7 +82,7 @@ class ReplayHistoryMapper @JvmOverloads constructor(
                     if (event["route"] == "{}") {
                         null
                     } else {
-                        DirectionsRoute.fromJson(event["route"] as String)
+                        DirectionsRoute.fromJson(event["route"] as String, "null")
                     }
                 } catch (throwable: Throwable) {
                     logger?.w(

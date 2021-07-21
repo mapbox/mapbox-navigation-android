@@ -311,7 +311,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
             .accessToken(getMapboxAccessTokenFromResources())
-            .coordinates(listOf(origin, destination))
+            .coordinatesList(listOf(origin, destination))
             .voiceInstructions(true)
             .build()
         mapboxNavigation.requestRoutes(
