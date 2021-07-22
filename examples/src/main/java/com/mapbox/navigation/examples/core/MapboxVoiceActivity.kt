@@ -6,7 +6,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -25,7 +24,6 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -133,11 +131,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
      * containing [SpeechAnnouncement].
      */
     private val voiceInstructionsPlayerCallback =
-        object : MapboxNavigationConsumer<SpeechAnnouncement> {
-            override fun accept(value: SpeechAnnouncement) {
-                speechApi.clean(value)
-            }
-        }
+        MapboxNavigationConsumer<SpeechAnnouncement> { value -> speechApi.clean(value) }
 
     /**
      * The result of invoking [MapboxSpeechApi.generate] is returned as a callback
@@ -194,46 +188,38 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
-    private val routeProgressObserver = object : RouteProgressObserver {
-        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
-                ifNonNull(routeArrowView, mapboxMap.getStyle()) { view, style ->
-                    view.renderManeuverUpdate(style, this)
-                }
+    private val routeProgressObserver = RouteProgressObserver { routeProgress ->
+        routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
+            ifNonNull(routeArrowView, mapboxMap.getStyle()) { view, style ->
+                view.renderManeuverUpdate(style, this)
             }
         }
     }
 
-    private val voiceInstructionsObserver = object : VoiceInstructionsObserver {
-        override fun onNewVoiceInstructions(voiceInstructions: VoiceInstructions) {
-            // The data obtained must be used to generate the synthesized speech mp3 file.
-            speechApi.generate(
-                voiceInstructions,
-                speechCallback
-            )
-        }
+    private val voiceInstructionsObserver = VoiceInstructionsObserver { voiceInstructions -> // The data obtained must be used to generate the synthesized speech mp3 file.
+        speechApi.generate(
+            voiceInstructions,
+            speechCallback
+        )
     }
 
-    private val routesObserver = object : RoutesObserver {
-        override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            // Every time a new route is obtained make sure to cancel the [MapboxSpeechApi] and
-            // clear the [MapboxVoiceInstructionsPlayer]
-            speechApi.cancel()
-            voiceInstructionsPlayer.clear()
-            if (routes.isNotEmpty()) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    routeLineApi.setRoutes(
-                        listOf(RouteLine(routes[0], null))
-                    ).apply {
-                        routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
-                    }
+    private val routesObserver = RoutesObserver { routes -> // Every time a new route is obtained make sure to cancel the [MapboxSpeechApi] and
+        // clear the [MapboxVoiceInstructionsPlayer]
+        speechApi.cancel()
+        voiceInstructionsPlayer.clear()
+        if (routes.isNotEmpty()) {
+            CoroutineScope(Dispatchers.Main).launch {
+                routeLineApi.setRoutes(
+                    listOf(RouteLine(routes[0], null))
+                ).apply {
+                    routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
                 }
-                startSimulation(routes[0])
             }
+            startSimulation(routes[0])
         }
     }
 
-    companion object {
+    private companion object {
         private const val SOUND_BUTTON_TEXT_APPEAR_DURATION = 1000L
     }
 
