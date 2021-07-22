@@ -48,7 +48,6 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 .accessToken(getMapboxAccessTokenFromResources(activity))
                 .routeRefreshOptions(
                     RouteRefreshOptions.Builder()
-                        .enabled(true)
                         .intervalMillis(TimeUnit.SECONDS.toMillis(30))
                         .build()
                 )
@@ -66,14 +65,14 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         setupMockRequestHandlers(coordinates)
         val routes = requestDirectionsRouteSync(coordinates).reversed()
 
+        // Create an observer resource that captures the routes.
+        val initialRouteIdlingResource = RoutesObserverIdlingResource(mapboxNavigation)
+            .register()
+
         // Set navigation with the route.
         runOnMainSync {
             mapboxNavigation.setRoutes(routes)
         }
-
-        // Create an observer resource that captures the routes.
-        val initialRouteIdlingResource = RoutesObserverIdlingResource(mapboxNavigation)
-            .register()
 
         // Wait for the initial route.
         val initialRoutes = initialRouteIdlingResource.next()

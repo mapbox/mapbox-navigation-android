@@ -43,6 +43,9 @@ class RoutesObserverIdlingResource(
      */
     fun next(): List<DirectionsRoute> {
         expected++
+        if (routesObserved.size == expected) {
+            return routesObserved.last()
+        }
         Espresso.onIdle()
         return routesObserved.last()
     }

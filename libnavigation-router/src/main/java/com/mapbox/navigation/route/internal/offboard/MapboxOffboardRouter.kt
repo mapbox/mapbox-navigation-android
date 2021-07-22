@@ -36,8 +36,7 @@ import retrofit2.Response
 class MapboxOffboardRouter(
     private val accessToken: String,
     private val context: Context,
-    private val urlSkuTokenProvider: UrlSkuTokenProvider,
-    private val refreshEnabled: Boolean
+    private val urlSkuTokenProvider: UrlSkuTokenProvider
 ) : Router {
 
     private companion object {

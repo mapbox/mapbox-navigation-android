@@ -4,7 +4,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
-import com.mapbox.navigation.base.extensions.supportsRouteRefresh
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.RouteRefreshOptions
@@ -18,9 +17,6 @@ import com.mapbox.navigation.utils.internal.MapboxTimer
  * This does not support alternative routes.
  *
  * If the route is successfully refreshed, this class will update the [TripSession.route]
- *
- * [attach] and [stop] are attached to the application lifecycle. Observing routes that
- * can be refreshed are handled by this class. Calling [attach] will restart the refresh timer.
  */
 internal class RouteRefreshController(
     private val routeRefreshOptions: RouteRefreshOptions,
@@ -45,10 +41,22 @@ internal class RouteRefreshController(
      */
     fun restart() {
         stop()
-        if (routeRefreshOptions.enabled) {
+        val route = tripSession.route
+        if (route?.routeOptions()?.enableRefresh() == true) {
             routerRefreshTimer.startTimer {
                 refreshRoute()
             }
+        } else if (route != null && route.routeOptions() == null) {
+            logger.w(
+                TAG,
+                Message(
+                    """
+                        Unable to refresh the route because routeOptions are missing.
+                        Use #fromJson(json, routeOptions, requestUuid)
+                        when deserializing the route or route response.
+                    """.trimIndent()
+                )
+            )
         }
     }
 
@@ -65,7 +73,7 @@ internal class RouteRefreshController(
 
     private fun refreshRoute() {
         val route = tripSession.route
-            ?.takeIf { it.routeOptions().supportsRouteRefresh() }
+            ?.takeIf { it.routeOptions()?.enableRefresh() == true }
             ?.takeIf { it.isUuidValidForRefresh() }
         if (route != null) {
             val legIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0

@@ -9,7 +9,6 @@ class RouteRefreshOptionsTest : BuilderTest<RouteRefreshOptions, RouteRefreshOpt
     override fun getImplementationClass() = RouteRefreshOptions::class
 
     override fun getFilledUpBuilder() = RouteRefreshOptions.Builder()
-        .enabled(false)
         .intervalMillis(TimeUnit.SECONDS.toMillis(30))
 
     @Test
