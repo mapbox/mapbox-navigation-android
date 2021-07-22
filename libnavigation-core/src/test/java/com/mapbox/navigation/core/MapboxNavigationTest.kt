@@ -167,6 +167,11 @@ class MapboxNavigationTest {
 
         mockkObject(NavigationComponentProvider)
         mockkObject(RouteRefreshControllerProvider)
+        every {
+            RouteRefreshControllerProvider.createRouteRefreshController(
+                any(), any(), any(), any()
+            )
+        } returns routeRefreshController
         mockkObject(RouteAlternativesControllerProvider)
         every {
             RouteAlternativesControllerProvider.create(any(), any(), any(), any(), any())
@@ -262,41 +267,17 @@ class MapboxNavigationTest {
     @Test
     fun `restart the routeRefreshController during initialization`() {
         ThreadController.cancelAllUICoroutines()
-        every {
-            RouteRefreshControllerProvider.createRouteRefreshController(
-                any(), any(), any(), any()
-            )
-        } returns routeRefreshController
-        every { routeRefreshController.restart() } returns mockk()
-
-        mapboxNavigation = MapboxNavigation(
-            provideNavigationOptions()
-                .routeRefreshOptions(
-                    RouteRefreshOptions.Builder()
-                        .enabled(true)
-                        .build()
-                )
-                .build()
-        )
-
         verify(exactly = 1) { routeRefreshController.restart() }
     }
 
     @Test
     fun `restart the routeRefreshController if new route is set`() {
         ThreadController.cancelAllUICoroutines()
-        every {
-            RouteRefreshControllerProvider.createRouteRefreshController(
-                any(), any(), any(), any()
-            )
-        } returns routeRefreshController
-        every { routeRefreshController.restart() } returns mockk()
 
         mapboxNavigation = MapboxNavigation(
             provideNavigationOptions()
                 .routeRefreshOptions(
                     RouteRefreshOptions.Builder()
-                        .enabled(true)
                         .build()
                 )
                 .build()
@@ -308,9 +289,15 @@ class MapboxNavigationTest {
         every { route.legs() } returns emptyList()
         every { routeOptions.overview() } returns "full"
         every { routeOptions.annotationsList() } returns emptyList()
+        every { routeOptions.enableRefresh() } returns true
         mapboxNavigation.setRoutes(listOf(route))
 
-        verify(exactly = 2) { routeRefreshController.restart() }
+        // the sequence needs to be kept because routeRefreshController uses the route stored
+        // in the trip session, which has to be set first via directionsSession
+        verifyOrder {
+            directionsSession.routes = listOf(route)
+            routeRefreshController.restart()
+        }
     }
 
     @Test

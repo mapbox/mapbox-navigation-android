@@ -111,7 +111,7 @@ class MapboxOffboardRouterTest : BaseTest() {
         }
 
         offboardRouter =
-            MapboxOffboardRouter(accessToken, context, mockSkuTokenProvider, true)
+            MapboxOffboardRouter(accessToken, context, mockSkuTokenProvider)
 
         every { (refreshCall.request() as Request).url } returns "https://test.com".toHttpUrl()
     }

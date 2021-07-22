@@ -482,8 +482,8 @@ class MapboxNavigation(
     fun setRoutes(routes: List<DirectionsRoute>) {
         rerouteController?.interrupt()
         routeAlternativesController.interrupt()
-        routeRefreshController.restart()
         directionsSession.routes = routes
+        routeRefreshController.restart()
     }
 
     /**
@@ -1007,11 +1007,7 @@ class MapboxNavigation(
                     MapboxNativeNavigator::class.java,
                     MapboxNativeNavigatorImpl
                 ),
-                ModuleProviderArgument(ConnectivityHandler::class.java, connectivityHandler),
-                ModuleProviderArgument(
-                    Boolean::class.java,
-                    navigationOptions.routeRefreshOptions.enabled
-                )
+                ModuleProviderArgument(ConnectivityHandler::class.java, connectivityHandler)
             )
             MapboxModuleType.NavigationTripNotification -> arrayOf(
                 ModuleProviderArgument(NavigationOptions::class.java, navigationOptions),
