@@ -2,6 +2,45 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.20 - July 22, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Features
+- Added option to `MapboxRouteLineOptions` to visually differentiate inactive route legs for multi-leg routes. A callback was added to `MapboxRouteLineApi::updateWithRouteProgress`. The result of the callback should be rendered by the `MapboxRouteLineView` class. [#4489](https://github.com/mapbox/mapbox-navigation-android/pull/4489)
+
+#### Bug fixes and improvements
+- :warning: Removed `RouteRefreshOptions#enabled`. To enable the route refresh feature (that updates congestion and other annotations on the currently active route) you need to enable it via `RouteOptions#enableRefresh` when making a route request. [#4655](https://github.com/mapbox/mapbox-navigation-android/pull/4655)
+- Refactored `MapboxSpeechApi`s to make them non-cancelling. [#4646](https://github.com/mapbox/mapbox-navigation-android/pull/4646)
+- Fixed an issue where `Tunnel#length` information was missing for some of the tunnels. [#4656](https://github.com/mapbox/mapbox-navigation-android/pull/4656)
+- Use `HistoryReader` for navigation replay. :warning: `mapbox-java` `v6.0.0-alpha.1` brought new features but also some breaking changes to `DirectionsRoute` and `MapboxDirections` objects that impact replay. Read more about the changes in the [release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0-alpha.1). [#4601](https://github.com/mapbox/mapbox-navigation-android/pull/4601)
+  - Delete `ReplayHistoryDTO` in favor of `MapboxHistoryReader`.
+  - Add `eventTimestamp` to all `HistoryEvent` classes.
+  - Delete `CustomEventMapper` in favor of `ReplayHistoryEventMapper`.
+  - Create new `ReplayHistoryMapper` which is extendable and customizable.
+- :warning: Upgraded `mapbox-java` to `v6.0.0-alpha.1` which brings new features but also some breaking changes to `DirectionsRoute` and `MapboxDirections` objects. Read more about the changes in the [release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0-alpha.1). [#4526](https://github.com/mapbox/mapbox-navigation-android/pull/4526)
+- Added `RouterOrigin` which indicates where a route was fetched from. [#4639](https://github.com/mapbox/mapbox-navigation-android/pull/4639)
+  - Added `RouterOrigin` param to:
+    - `RouterCallback#onRoutesReady` method;
+    - `RouterCallback#onCanceled` method;
+    - `RouterFailure` class;
+    - `RerouteState.RouteFetched` class;
+    - `RouteAlternativesObserver#onRouteAlternatives` method.
+- Updated assets and resources translations. [#4647](https://github.com/mapbox/mapbox-navigation-android/pull/4647)
+- The initialization of the route line related layers is always a synchronous call. [#4631](https://github.com/mapbox/mapbox-navigation-android/pull/4631)
+- Bug fix for invalid `FeatureCollection` objects derived from routes that have less than two coordinates. [#4638](https://github.com/mapbox/mapbox-navigation-android/pull/4638)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+
+- Mapbox Maps SDK `v10.0.0-rc.4` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.4))
+- Mapbox Navigation Native `v59.0.0`
+- Mapbox Core Common `v16.1.0`
+- Mapbox Java `v6.0.0-alpha.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0-alpha.1))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.0.0-beta.19 - July 15, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).

@@ -1752,7 +1752,7 @@ class MapboxRouteLineUtilsTest {
 
     private fun getMultilegWithTwoLegs(): DirectionsRoute {
         val routeAsJson = loadJsonFixture("multileg-route-two-legs.json")
-        return DirectionsRoute.fromJson(routeAsJson)
+        return DirectionsRoute.fromJson(routeAsJson, "someToken")
     }
 
     private fun loadRoute(routeFileName: String): DirectionsRoute {
