@@ -8,7 +8,9 @@ import com.mapbox.navigation.core.replay.history.ReplayHistoryMapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class HistoryFileLoader {
+class HistoryFileLoader(
+    val accessToken: String
+) {
     private val replayHistoryMapper = ReplayHistoryMapper.Builder().build()
     private val historyFilesDirectory = HistoryFilesDirectory()
 
@@ -35,7 +37,7 @@ class HistoryFileLoader {
         outputFile.outputStream().use { fileOut ->
             inputStream.copyTo(fileOut)
         }
-        MapboxHistoryReader(outputFile.absolutePath)
+        MapboxHistoryReader(outputFile.absolutePath, accessToken)
             .asSequence()
             .mapNotNull { replayHistoryMapper.mapToReplayEvent(it) }
             .toList()

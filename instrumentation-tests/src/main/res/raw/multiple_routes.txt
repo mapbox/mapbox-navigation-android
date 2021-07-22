@@ -771,16 +771,7 @@
         "baseUrl": "https://api.mapbox.com",
         "user": "mapbox",
         "profile": "driving-traffic",
-        "coordinates": [
-          [
-            -122.4934801,
-            37.7721532
-          ],
-          [
-            -122.4850055,
-            37.7801765
-          ]
-        ],
+        "coordinates": "-122.4934801,37.7721532;-122.4850055,37.7801765",
         "alternatives": true,
         "language": "en",
         "continue_straight": false,
@@ -1511,16 +1502,7 @@
         "baseUrl": "https://api.mapbox.com",
         "user": "mapbox",
         "profile": "driving-traffic",
-        "coordinates": [
-          [
-            -122.4934801,
-            37.7721532
-          ],
-          [
-            -122.4850055,
-            37.7801765
-          ]
-        ],
+        "coordinates": "-122.4934801,37.7721532;-122.4850055,37.7801765",
         "alternatives": true,
         "language": "en",
         "continue_straight": false,
@@ -2270,16 +2252,7 @@
         "baseUrl": "https://api.mapbox.com",
         "user": "mapbox",
         "profile": "driving-traffic",
-        "coordinates": [
-          [
-            -122.4934801,
-            37.7721532
-          ],
-          [
-            -122.4850055,
-            37.7801765
-          ]
-        ],
+        "coordinates": "-122.4934801,37.7721532;-122.4850055,37.7801765",
         "alternatives": true,
         "language": "en",
         "continue_straight": false,

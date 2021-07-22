@@ -122,10 +122,12 @@ package com.mapbox.navigation.core.formatter {
 package com.mapbox.navigation.core.history {
 
   public final class MapboxHistoryReader implements java.util.Iterator<com.mapbox.navigation.core.history.model.HistoryEvent> kotlin.jvm.internal.markers.KMappedMarker {
-    ctor public MapboxHistoryReader(String filePath);
+    ctor public MapboxHistoryReader(String filePath, String accessToken);
+    method public String getAccessToken();
     method public String getFilePath();
     method public boolean hasNext();
     method public com.mapbox.navigation.core.history.model.HistoryEvent next();
+    property public final String accessToken;
     property public final String filePath;
   }
 

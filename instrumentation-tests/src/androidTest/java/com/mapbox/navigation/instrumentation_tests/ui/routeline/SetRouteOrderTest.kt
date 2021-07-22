@@ -197,6 +197,6 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
 
     private fun getRoute(context: Context, @IntegerRes routeFileResource: Int): DirectionsRoute {
         val routeAsString = readRawFileText(context, routeFileResource)
-        return DirectionsRoute.fromJson(routeAsString)
+        return DirectionsRoute.fromJson(routeAsString, "pk.test-access-token")
     }
 }
