@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.internal.utils.isSameRoute
@@ -189,10 +190,25 @@ internal object ManeuverProcessor {
                 ifNonNull(routeLeg?.steps()) { steps ->
                     val stepList = mutableListOf<StepIndexToManeuvers>()
                     for (stepIndex in 0..steps.lastIndex) {
-                        steps[stepIndex].bannerInstructions()?.let { bannerInstruction ->
+                        val stepIntersections = if (stepIndex == steps.lastIndex) {
+                            steps[stepIndex].intersections()
+                        } else {
+                            steps[stepIndex + 1].intersections()
+                        }
+                        ifNonNull(
+                            steps[stepIndex].bannerInstructions(),
+                            stepIntersections
+                        ) { bannerInstruction, intersections ->
+                            val maneuverPoint = intersections.first().location()
                             val maneuverList = mutableListOf<Maneuver>()
                             bannerInstruction.forEach { banner ->
-                                maneuverList.add(transformToManeuver(banner, distanceFormatter))
+                                maneuverList.add(
+                                    transformToManeuver(
+                                        bannerInstruction = banner,
+                                        maneuverPoint = maneuverPoint,
+                                        distanceFormatter = distanceFormatter,
+                                    )
+                                )
                             }
                             val stepIndexToManeuvers = StepIndexToManeuvers(
                                 stepIndex,
@@ -278,6 +294,7 @@ internal object ManeuverProcessor {
     }
 
     private fun transformToManeuver(
+        maneuverPoint: Point,
         bannerInstruction: BannerInstructions,
         distanceFormatter: DistanceFormatter
     ): Maneuver {
@@ -292,7 +309,8 @@ internal object ManeuverProcessor {
             stepDistance,
             secondaryManeuver,
             subManeuver,
-            laneGuidance
+            laneGuidance,
+            maneuverPoint
         )
     }
 
@@ -300,19 +318,18 @@ internal object ManeuverProcessor {
         val bannerComponentList = bannerText.components()
         return when (!bannerComponentList.isNullOrEmpty()) {
             true -> {
-                PrimaryManeuver
-                    .Builder()
-                    .id(UUID.randomUUID().toString())
-                    .text(bannerText.text())
-                    .type(bannerText.type())
-                    .degrees(bannerText.degrees())
-                    .modifier(bannerText.modifier())
-                    .drivingSide(bannerText.drivingSide())
-                    .componentList(createComponents(bannerComponentList))
-                    .build()
+                PrimaryManeuver(
+                    UUID.randomUUID().toString(),
+                    bannerText.text(),
+                    bannerText.type(),
+                    bannerText.degrees(),
+                    bannerText.modifier(),
+                    bannerText.drivingSide(),
+                    createComponents(bannerComponentList)
+                )
             }
             else -> {
-                PrimaryManeuver.Builder().build()
+                PrimaryManeuver()
             }
         }
     }
@@ -321,16 +338,15 @@ internal object ManeuverProcessor {
         val bannerComponentList = bannerText?.components()
         return when (!bannerComponentList.isNullOrEmpty()) {
             true -> {
-                SecondaryManeuver
-                    .Builder()
-                    .id(UUID.randomUUID().toString())
-                    .text(bannerText.text())
-                    .type(bannerText.type())
-                    .degrees(bannerText.degrees())
-                    .modifier(bannerText.modifier())
-                    .drivingSide(bannerText.drivingSide())
-                    .componentList(createComponents(bannerComponentList))
-                    .build()
+                SecondaryManeuver(
+                    UUID.randomUUID().toString(),
+                    bannerText.text(),
+                    bannerText.type(),
+                    bannerText.degrees(),
+                    bannerText.modifier(),
+                    bannerText.drivingSide(),
+                    createComponents(bannerComponentList)
+                )
             }
             else -> {
                 null
@@ -344,16 +360,15 @@ internal object ManeuverProcessor {
                 val bannerComponentList = subBanner.components()
                 return when (!bannerComponentList.isNullOrEmpty()) {
                     true -> {
-                        SubManeuver
-                            .Builder()
-                            .id(UUID.randomUUID().toString())
-                            .text(bannerText.text())
-                            .type(bannerText.type())
-                            .degrees(bannerText.degrees())
-                            .modifier(bannerText.modifier())
-                            .drivingSide(bannerText.drivingSide())
-                            .componentList(createComponents(bannerComponentList))
-                            .build()
+                        SubManeuver(
+                            UUID.randomUUID().toString(),
+                            bannerText.text(),
+                            bannerText.type(),
+                            bannerText.degrees(),
+                            bannerText.modifier(),
+                            bannerText.drivingSide(),
+                            createComponents(bannerComponentList)
+                        )
                     }
                     else -> {
                         null
@@ -387,11 +402,7 @@ internal object ManeuverProcessor {
                     }
                     // TODO: This is a fallback solution. Remove this and add all active_directions
                     //  to LaneIndicator() once directions have migrated all customers to valhalla
-                    Lane
-                        .Builder()
-                        .allLanes(laneIndicatorList)
-                        .activeDirection(primaryBannerText.modifier())
-                        .build()
+                    Lane(laneIndicatorList, primaryBannerText.modifier())
                 }
             }
             null

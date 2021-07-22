@@ -79,16 +79,13 @@ package com.mapbox.navigation.ui.maneuver.model {
   public final class Lane {
     method public String? getActiveDirection();
     method public java.util.List<com.mapbox.navigation.ui.maneuver.model.LaneIndicator> getAllLanes();
-    method public com.mapbox.navigation.ui.maneuver.model.Lane.Builder toBuilder();
     property public final String? activeDirection;
     property public final java.util.List<com.mapbox.navigation.ui.maneuver.model.LaneIndicator> allLanes;
   }
 
-  public static final class Lane.Builder {
-    ctor public Lane.Builder();
-    method public com.mapbox.navigation.ui.maneuver.model.Lane.Builder activeDirection(String? activeDirection);
-    method public com.mapbox.navigation.ui.maneuver.model.Lane.Builder allLanes(java.util.List<com.mapbox.navigation.ui.maneuver.model.LaneIndicator> allLanes);
-    method public com.mapbox.navigation.ui.maneuver.model.Lane build();
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class LaneFactory {
+    method public static com.mapbox.navigation.ui.maneuver.model.Lane buildLane(java.util.List<com.mapbox.navigation.ui.maneuver.model.LaneIndicator> allLanes, String? activeDirection = null);
+    field public static final com.mapbox.navigation.ui.maneuver.model.LaneFactory INSTANCE;
   }
 
   public final class LaneIndicator {
@@ -108,11 +105,13 @@ package com.mapbox.navigation.ui.maneuver.model {
 
   public final class Maneuver {
     method public com.mapbox.navigation.ui.maneuver.model.Lane? getLaneGuidance();
+    method public com.mapbox.geojson.Point getManeuverPoint();
     method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver getPrimary();
     method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? getSecondary();
     method public com.mapbox.navigation.ui.maneuver.model.StepDistance getStepDistance();
     method public com.mapbox.navigation.ui.maneuver.model.SubManeuver? getSub();
     property public final com.mapbox.navigation.ui.maneuver.model.Lane? laneGuidance;
+    property public final com.mapbox.geojson.Point maneuverPoint;
     property public final com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver primary;
     property public final com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? secondary;
     property public final com.mapbox.navigation.ui.maneuver.model.StepDistance stepDistance;
@@ -124,6 +123,11 @@ package com.mapbox.navigation.ui.maneuver.model {
     method public Throwable? getThrowable();
     property public final String? errorMessage;
     property public final Throwable? throwable;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class ManeuverFactory {
+    method public static com.mapbox.navigation.ui.maneuver.model.Maneuver buildManeuver(com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver primary, com.mapbox.navigation.ui.maneuver.model.StepDistance stepDistance, com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? secondary, com.mapbox.navigation.ui.maneuver.model.SubManeuver? sub, com.mapbox.navigation.ui.maneuver.model.Lane? lane, com.mapbox.geojson.Point point);
+    field public static final com.mapbox.navigation.ui.maneuver.model.ManeuverFactory INSTANCE;
   }
 
   public final class ManeuverOptions {
@@ -146,7 +150,6 @@ package com.mapbox.navigation.ui.maneuver.model {
     method public String? getModifier();
     method public String getText();
     method public String? getType();
-    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver.Builder toBuilder();
     property public final java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList;
     property public final Double? degrees;
     property public final String? drivingSide;
@@ -156,16 +159,9 @@ package com.mapbox.navigation.ui.maneuver.model {
     property public final String? type;
   }
 
-  public static final class PrimaryManeuver.Builder {
-    ctor public PrimaryManeuver.Builder();
-    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver build();
-    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver.Builder componentList(java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList);
-    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver.Builder degrees(Double? degrees);
-    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver.Builder drivingSide(String? drivingSide);
-    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver.Builder id(String id);
-    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver.Builder modifier(String? modifier);
-    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver.Builder text(String text);
-    method public com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver.Builder type(String? type);
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class PrimaryManeuverFactory {
+    method public static com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver buildPrimaryManeuver(String id, String text, String type, double degrees, String modifier, String drivingSide, java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList);
+    field public static final com.mapbox.navigation.ui.maneuver.model.PrimaryManeuverFactory INSTANCE;
   }
 
   public final class RoadShield {
@@ -213,7 +209,6 @@ package com.mapbox.navigation.ui.maneuver.model {
     method public String? getModifier();
     method public String getText();
     method public String? getType();
-    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver.Builder toBuilder();
     property public final java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList;
     property public final Double? degrees;
     property public final String? drivingSide;
@@ -223,16 +218,9 @@ package com.mapbox.navigation.ui.maneuver.model {
     property public final String? type;
   }
 
-  public static final class SecondaryManeuver.Builder {
-    ctor public SecondaryManeuver.Builder();
-    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver build();
-    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver.Builder componentList(java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList);
-    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver.Builder degrees(Double? degrees);
-    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver.Builder drivingSide(String? drivingSide);
-    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver.Builder id(String id);
-    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver.Builder modifier(String? modifier);
-    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver.Builder text(String text);
-    method public com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver.Builder type(String? type);
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class SecondaryManeuverFactory {
+    method public static com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver buildSecondaryManeuver(String id, String text, String type, double degrees, String modifier, String drivingSide, java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList);
+    field public static final com.mapbox.navigation.ui.maneuver.model.SecondaryManeuverFactory INSTANCE;
   }
 
   public final class StepDistance {
@@ -245,6 +233,11 @@ package com.mapbox.navigation.ui.maneuver.model {
     property public final double totalDistance;
   }
 
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class StepDistanceFactory {
+    method public static com.mapbox.navigation.ui.maneuver.model.StepDistance buildStepDistance(com.mapbox.navigation.base.formatter.DistanceFormatter formatter, double totalDistance, Double? distanceRemaining);
+    field public static final com.mapbox.navigation.ui.maneuver.model.StepDistanceFactory INSTANCE;
+  }
+
   public final class SubManeuver {
     method public java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> getComponentList();
     method public Double? getDegrees();
@@ -253,7 +246,6 @@ package com.mapbox.navigation.ui.maneuver.model {
     method public String? getModifier();
     method public String getText();
     method public String? getType();
-    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver.Builder toBuilder();
     property public final java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList;
     property public final Double? degrees;
     property public final String? drivingSide;
@@ -263,16 +255,9 @@ package com.mapbox.navigation.ui.maneuver.model {
     property public final String? type;
   }
 
-  public static final class SubManeuver.Builder {
-    ctor public SubManeuver.Builder();
-    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver build();
-    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver.Builder componentList(java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList);
-    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver.Builder degrees(Double? degrees);
-    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver.Builder drivingSide(String? drivingSide);
-    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver.Builder id(String id);
-    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver.Builder modifier(String? modifier);
-    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver.Builder text(String text);
-    method public com.mapbox.navigation.ui.maneuver.model.SubManeuver.Builder type(String? type);
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class SubManeuverFactory {
+    method public static com.mapbox.navigation.ui.maneuver.model.SubManeuver buildSubManeuver(String id, String text, String type, double degrees, String modifier, String drivingSide, java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> componentList);
+    field public static final com.mapbox.navigation.ui.maneuver.model.SubManeuverFactory INSTANCE;
   }
 
   public final class TextComponentNode implements com.mapbox.navigation.ui.maneuver.model.ComponentNode {

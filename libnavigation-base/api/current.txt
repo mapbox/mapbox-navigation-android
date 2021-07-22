@@ -4,6 +4,9 @@ package com.mapbox.navigation.base {
   @kotlin.RequiresOptIn(level=kotlin.RequiresOptIn.Level) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) @kotlin.annotation.Target(allowedTargets={kotlin.annotation.AnnotationTarget, kotlin.annotation.AnnotationTarget, kotlin.annotation.AnnotationTarget}) public @interface ExperimentalMapboxNavigationAPI {
   }
 
+  @kotlin.RequiresOptIn(level=kotlin.RequiresOptIn.Level) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) @kotlin.annotation.Target(allowedTargets={kotlin.annotation.AnnotationTarget, kotlin.annotation.AnnotationTarget, kotlin.annotation.AnnotationTarget}) public @interface ExperimentalPreviewMapboxNavigationAPI {
+  }
+
   public final class TimeFormat {
     field public static final com.mapbox.navigation.base.TimeFormat INSTANCE;
     field public static final int NONE_SPECIFIED = -1; // 0xffffffff

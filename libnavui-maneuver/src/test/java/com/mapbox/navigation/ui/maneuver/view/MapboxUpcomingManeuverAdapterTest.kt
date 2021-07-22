@@ -8,6 +8,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.ui.maneuver.model.Component
@@ -160,7 +161,8 @@ class MapboxUpcomingManeuverAdapterTest {
             stepDistance,
             secondaryManeuver,
             null,
-            null
+            null,
+            Point.fromLngLat(-122.345234, 37.899765)
         )
         return listOf(maneuver)
     }

@@ -9,9 +9,9 @@ import com.mapbox.api.directions.v5.models.ManeuverModifier
  * @property activeDirection String? One of [ManeuverModifier]
  */
 
-class Lane private constructor(
-    val allLanes: List<LaneIndicator>,
-    val activeDirection: String?
+class Lane internal constructor(
+    val allLanes: List<LaneIndicator> = listOf(),
+    val activeDirection: String? = null
 ) {
 
     /**
@@ -43,51 +43,5 @@ class Lane private constructor(
      */
     override fun toString(): String {
         return "Lane(allLanes=$allLanes, activeDirection=$activeDirection)"
-    }
-
-    /**
-     * @return builder matching the one used to create this instance
-     */
-    fun toBuilder(): Builder {
-        return Builder()
-            .allLanes(allLanes)
-            .activeDirection(activeDirection)
-    }
-
-    /**
-     * Build a new [Lane]
-     * @property allLanes List<LaneIndicator>
-     * @property activeDirection String?
-     */
-    class Builder {
-        private var allLanes: List<LaneIndicator> = listOf()
-        private var activeDirection: String? = null
-
-        /**
-         * apply allLanes to the Builder.
-         * @param allLanes List<LaneIndicator>
-         * @return Builder
-         */
-        fun allLanes(allLanes: List<LaneIndicator>): Builder =
-            apply { this.allLanes = allLanes }
-
-        /**
-         * apply activeDirection to the Builder.
-         * @param activeDirection String?
-         * @return Builder
-         */
-        fun activeDirection(activeDirection: String?): Builder =
-            apply { this.activeDirection = activeDirection }
-
-        /**
-         * Build the [Lane]
-         * @return Lane
-         */
-        fun build(): Lane {
-            return Lane(
-                allLanes,
-                activeDirection
-            )
-        }
     }
 }

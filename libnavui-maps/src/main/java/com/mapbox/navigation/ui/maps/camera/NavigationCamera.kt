@@ -9,7 +9,7 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.animator.CameraAnimator
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.ViewportData
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource
@@ -146,7 +146,7 @@ class NavigationCamera(
     /**
      * Set a [MapboxNavigationViewportDataSourceDebugger].
      */
-    @ExperimentalMapboxNavigationAPI
+    @ExperimentalPreviewMapboxNavigationAPI
     var debugger: MapboxNavigationViewportDataSourceDebugger? = null
 
     private val sourceUpdateObserver = object : ViewportDataSourceUpdateObserver {
@@ -477,7 +477,7 @@ class NavigationCamera(
         }
     }
 
-    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun updateDebugger() {
         debugger?.cameraState = state
     }
