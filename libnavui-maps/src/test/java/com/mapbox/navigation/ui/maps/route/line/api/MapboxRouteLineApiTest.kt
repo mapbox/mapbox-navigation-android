@@ -1262,7 +1262,7 @@ class MapboxRouteLineApiTest {
     }
 
     @Test
-    fun deEmphasizeSegmentsNotInLeg() = coroutineRule.runBlockingTest {
+    fun alternativelyStyleSegmentsNotInLeg() = coroutineRule.runBlockingTest {
         val colorOptions = RouteLineColorResources.Builder()
             .inActiveRouteLegsColor(Color.YELLOW)
             .build()
@@ -1312,7 +1312,7 @@ class MapboxRouteLineApiTest {
 
     private fun getMultilegWithTwoLegs(): DirectionsRoute {
         val routeAsJson = loadJsonFixture("multileg-route-two-legs.json")
-        return DirectionsRoute.fromJson(routeAsJson)
+        return DirectionsRoute.fromJson(routeAsJson, "someToken")
     }
 
     private fun getRouteWithNoRoadRestrictions(): DirectionsRoute {

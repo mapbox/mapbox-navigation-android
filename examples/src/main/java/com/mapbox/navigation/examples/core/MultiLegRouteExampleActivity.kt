@@ -26,6 +26,7 @@ import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -261,7 +262,7 @@ class MultiLegRouteExampleActivity : AppCompatActivity() {
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
             .accessToken(getMapboxAccessTokenFromResources())
-            .coordinates(
+            .coordinatesList(
                 listOf(
                     Point.fromLngLat(-122.523179, 37.974972),
                     Point.fromLngLat(-122.524257, 37.970785),
@@ -277,7 +278,7 @@ class MultiLegRouteExampleActivity : AppCompatActivity() {
     }
 
     private val routesReqCallback: RouterCallback = object : RouterCallback {
-        override fun onRoutesReady(routes: List<DirectionsRoute>) {
+        override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
             mapboxNavigation.setRoutes(routes)
             if (routes.isNotEmpty()) {
                 viewBinding.routeLoadingProgressBar.visibility = View.INVISIBLE
@@ -285,7 +286,7 @@ class MultiLegRouteExampleActivity : AppCompatActivity() {
             }
         }
 
-        override fun onCanceled(routeOptions: RouteOptions) {
+        override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
             viewBinding.routeLoadingProgressBar.visibility = View.INVISIBLE
         }
 
