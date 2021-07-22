@@ -183,7 +183,11 @@ class MapboxCameraAnimationsActivity :
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.evaluate()
 
-        routeLineAPI?.updateWithRouteProgress(routeProgress)
+        routeLineAPI?.updateWithRouteProgress(routeProgress) { result ->
+            mapboxMap.getStyle()?.apply {
+                routeLineView?.renderRouteLineUpdate(this, result)
+            }
+        }
 
         routeArrowAPI.addUpcomingManeuverArrow(routeProgress).apply {
             ifNonNull(routeArrowView, mapboxMap.getStyle()) { view, style ->
@@ -228,7 +232,7 @@ class MapboxCameraAnimationsActivity :
         OnIndicatorPositionChangedListener { point ->
             routeLineAPI?.updateTraveledRouteLine(point)?.apply {
                 ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
-                    view.renderVanishingRouteLineUpdateValue(style, this)
+                    view.renderRouteLineUpdate(style, this)
                 }
             }
         }

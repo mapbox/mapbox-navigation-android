@@ -237,7 +237,11 @@ class ReplayHistoryActivity : AppCompatActivity() {
     }
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
-        routeLineApi.updateWithRouteProgress(routeProgress)
+        routeLineApi.updateWithRouteProgress(routeProgress) { result ->
+            binding.mapView.getMapboxMap().getStyle()?.apply {
+                routeLineView.renderRouteLineUpdate(this, result)
+            }
+        }
         val arrowUpdate = routeArrowApi.addUpcomingManeuverArrow(routeProgress)
         binding.mapView.getMapboxMap().getStyle()?.apply {
             routeArrowView.renderManeuverUpdate(this, arrowUpdate)
@@ -248,7 +252,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
         val result = routeLineApi.updateTraveledRouteLine(point)
         binding.mapView.getMapboxMap().getStyle()?.apply {
             // Render the result to update the map.
-            routeLineView.renderVanishingRouteLineUpdateValue(this, result)
+            routeLineView.renderRouteLineUpdate(this, result)
         }
     }
 

@@ -71,6 +71,15 @@ class MapboxRouteLineOptionsTest {
     }
 
     @Test
+    fun styleInactiveRouteLegsIndependently() {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .styleInactiveRouteLegsIndependently(true)
+            .build()
+
+        assertTrue(options.styleInactiveRouteLegsIndependently)
+    }
+
+    @Test
     fun toBuilder() {
         val routeLineResources = RouteLineResources.Builder().build()
         val routeStyleDescriptors =
@@ -83,6 +92,7 @@ class MapboxRouteLineOptionsTest {
             .withTolerance(.111)
             .withRouteStyleDescriptors(routeStyleDescriptors)
             .displayRestrictedRoadSections(true)
+            .styleInactiveRouteLegsIndependently(true)
             .build()
             .toBuilder(ctx)
             .build()
@@ -93,5 +103,6 @@ class MapboxRouteLineOptionsTest {
         assertEquals(.111, options.tolerance, 0.0)
         assertEquals(routeStyleDescriptors, options.routeLayerProvider.routeStyleDescriptors)
         assertTrue(options.displayRestrictedRoadSections)
+        assertTrue(options.styleInactiveRouteLegsIndependently)
     }
 }

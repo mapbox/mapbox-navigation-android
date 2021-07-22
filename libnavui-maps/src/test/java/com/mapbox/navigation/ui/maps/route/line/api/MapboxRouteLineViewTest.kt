@@ -21,8 +21,8 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
-import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineUpdateValue
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.MockKAnnotations
@@ -179,9 +179,9 @@ class MapboxRouteLineViewTest {
         val trafficLineExp = mockk<Expression>()
         val routeLineExp = mockk<Expression>()
         val casingLineEx = mockk<Expression>()
-        val state: Expected<RouteLineError, VanishingRouteLineUpdateValue> =
+        val state: Expected<RouteLineError, RouteLineUpdateValue> =
             ExpectedFactory.createValue(
-                VanishingRouteLineUpdateValue(
+                RouteLineUpdateValue(
                     trafficLineExp,
                     routeLineExp,
                     casingLineEx
@@ -206,7 +206,7 @@ class MapboxRouteLineViewTest {
         }
 
         pauseDispatcher {
-            MapboxRouteLineView(options).renderVanishingRouteLineUpdateValue(style, state)
+            MapboxRouteLineView(options).renderRouteLineUpdate(style, state)
             verify { MapboxRouteLineUtils.initializeLayers(style, options) }
         }
 
