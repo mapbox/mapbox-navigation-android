@@ -1,5 +1,7 @@
 package com.mapbox.navigation.ui.maneuver.model
 
+import com.mapbox.geojson.Point
+
 /**
  * Data structure that holds information about a maneuver.
  * @property primary PrimaryManeuver
@@ -7,13 +9,15 @@ package com.mapbox.navigation.ui.maneuver.model
  * @property secondary SecondaryManeuver
  * @property sub SubManeuver
  * @property laneGuidance Lane
+ * @property maneuverPoint Point
  */
 class Maneuver internal constructor(
     val primary: PrimaryManeuver,
     val stepDistance: StepDistance,
-    val secondary: SecondaryManeuver?,
-    val sub: SubManeuver?,
-    val laneGuidance: Lane?
+    val secondary: SecondaryManeuver? = null,
+    val sub: SubManeuver? = null,
+    val laneGuidance: Lane? = null,
+    val maneuverPoint: Point
 ) {
 
     /**
@@ -30,6 +34,7 @@ class Maneuver internal constructor(
         if (sub != other.sub) return false
         if (laneGuidance != other.laneGuidance) return false
         if (stepDistance != other.stepDistance) return false
+        if (maneuverPoint != other.maneuverPoint) return false
 
         return true
     }
@@ -42,6 +47,7 @@ class Maneuver internal constructor(
         result = 31 * result + (secondary?.hashCode() ?: 0)
         result = 31 * result + (sub?.hashCode() ?: 0)
         result = 31 * result + (laneGuidance?.hashCode() ?: 0)
+        result = 31 * result + (maneuverPoint?.hashCode() ?: 0)
         return result
     }
 }

@@ -273,7 +273,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
 
 package com.mapbox.navigation.ui.maps.camera.data.debugger {
 
-  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class MapboxNavigationViewportDataSourceDebugger {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxNavigationViewportDataSourceDebugger {
     ctor public MapboxNavigationViewportDataSourceDebugger(android.content.Context context, com.mapbox.maps.MapView mapView, String? layerAbove = null);
     ctor public MapboxNavigationViewportDataSourceDebugger(android.content.Context context, com.mapbox.maps.MapView mapView);
     method public boolean getEnabled();

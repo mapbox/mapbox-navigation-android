@@ -15,6 +15,7 @@ import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.model.Component
 import com.mapbox.navigation.ui.maneuver.model.DelimiterComponentNode
@@ -181,11 +182,12 @@ class MapboxManeuverViewTest {
             totalDistance,
             stepDistanceRemaining
         )
-        val laneGuidance = null
+        val lane = null
+        val point = Point.fromLngLat(-122.345234, 37.899765)
         val list: Expected<ManeuverError, List<Maneuver>> = ExpectedFactory.createValue(
             listOf(
-                Maneuver(primary, stepDistance, secondaryManeuver, subManeuver, laneGuidance),
-                Maneuver(primary, stepDistance, secondaryManeuver, subManeuver, laneGuidance)
+                Maneuver(primary, stepDistance, secondaryManeuver, subManeuver, lane, point),
+                Maneuver(primary, stepDistance, secondaryManeuver, subManeuver, lane, point)
             )
         )
         val expected = list.value?.subList(1, list.value!!.size)!!.size
@@ -213,9 +215,10 @@ class MapboxManeuverViewTest {
             stepDistanceRemaining
         )
         val laneGuidance = null
+        val point = Point.fromLngLat(-122.345234, 37.899765)
         val list: Expected<ManeuverError, List<Maneuver>> = ExpectedFactory.createValue(
             listOf(
-                Maneuver(primary, stepDistance, secondaryManeuver, subManeuver, laneGuidance)
+                Maneuver(primary, stepDistance, secondaryManeuver, subManeuver, laneGuidance, point)
             )
         )
         val expected = list.value?.subList(1, list.value!!.size)!!.size
@@ -521,9 +524,11 @@ class MapboxManeuverViewTest {
             stepDistanceRemaining
         )
         val laneGuidance = null
+
+        val point = Point.fromLngLat(-122.345234, 37.899765)
         val mockExpected: Expected<ManeuverError, List<Maneuver>> = ExpectedFactory.createValue(
             listOf(
-                Maneuver(primary, stepDistance, secondaryManeuver, subManeuver, laneGuidance)
+                Maneuver(primary, stepDistance, secondaryManeuver, subManeuver, laneGuidance, point)
             )
         )
 
@@ -661,61 +666,5 @@ class MapboxManeuverViewTest {
             every { activeDirection } returns ManeuverModifier.LEFT
             every { allLanes } returns listOf(laneIndicator1, laneIndicator2)
         }
-    }
-
-    private fun getManeuverList(): List<Maneuver> {
-        val stepDistance1 = mockk<StepDistance>()
-        val primaryManeuver1 = mockk<PrimaryManeuver> {
-            every { text } returns "Central Fremont"
-            every { type } returns StepManeuver.TURN
-            every { degrees } returns null
-            every { modifier } returns ManeuverModifier.RIGHT
-            every { drivingSide } returns null
-            every { componentList } returns listOf(
-                Component(
-                    BannerComponents.TEXT,
-                    TextComponentNode
-                        .Builder()
-                        .text("Central Fremont")
-                        .abbr(null)
-                        .abbrPriority(null)
-                        .build()
-                )
-            )
-        }
-        val maneuver1 = Maneuver(
-            primaryManeuver1,
-            stepDistance1,
-            null,
-            null,
-            null
-        )
-        val stepDistance2 = mockk<StepDistance>()
-        val primaryManeuver2 = mockk<PrimaryManeuver> {
-            every { text } returns "Besco Drive"
-            every { type } returns StepManeuver.TURN
-            every { degrees } returns null
-            every { modifier } returns ManeuverModifier.LEFT
-            every { drivingSide } returns null
-            every { componentList } returns listOf(
-                Component(
-                    BannerComponents.TEXT,
-                    TextComponentNode
-                        .Builder()
-                        .text("Besco Drive")
-                        .abbr(null)
-                        .abbrPriority(null)
-                        .build()
-                )
-            )
-        }
-        val maneuver2 = Maneuver(
-            primaryManeuver2,
-            stepDistance2,
-            null,
-            null,
-            null
-        )
-        return listOf(maneuver1, maneuver2)
     }
 }

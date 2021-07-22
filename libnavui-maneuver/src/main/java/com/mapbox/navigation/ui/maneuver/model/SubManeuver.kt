@@ -37,14 +37,14 @@ import java.util.UUID
  * @property componentList List<Component> a part or element of [BannerComponents]
  * @constructor
  */
-class SubManeuver private constructor(
-    val id: String,
-    val text: String,
+class SubManeuver internal constructor(
+    val id: String = UUID.randomUUID().toString(),
+    val text: String = "",
     val type: String? = null,
     val degrees: Double? = null,
     val modifier: String? = null,
     val drivingSide: String? = null,
-    val componentList: List<Component>
+    val componentList: List<Component> = listOf()
 ) {
 
     /**
@@ -93,111 +93,5 @@ class SubManeuver private constructor(
             "drivingSide=$drivingSide, " +
             "componentList=$componentList" +
             ")"
-    }
-
-    /**
-     * @return Builder matching the one used to create this instance
-     */
-    fun toBuilder(): Builder {
-        return Builder()
-            .id(id)
-            .text(text)
-            .type(type)
-            .degrees(degrees)
-            .modifier(modifier)
-            .drivingSide(drivingSide)
-            .componentList(componentList)
-    }
-
-    /**
-     * Build a new [SubManeuver]
-     * @property id String
-     * @property text String
-     * @property type String?
-     * @property degrees Double?
-     * @property modifier String?
-     * @property drivingSide String?
-     * @property componentList List<Component>
-     */
-    class Builder {
-        private var id: String = UUID.randomUUID().toString()
-        private var text: String = ""
-        private var type: String? = null
-        private var degrees: Double? = null
-        private var modifier: String? = null
-        private var drivingSide: String? = null
-        private var componentList: List<Component> = listOf()
-
-        /**
-         * apply id to the Builder.
-         * @param id Long
-         * @return Builder
-         */
-        fun id(id: String): Builder =
-            apply { this.id = id }
-
-        /**
-         * apply text to the Builder.
-         * @param text String
-         * @return Builder
-         */
-        fun text(text: String): Builder =
-            apply { this.text = text }
-
-        /**
-         * apply type to the Builder.
-         * @param type String?
-         * @return Builder
-         */
-        fun type(type: String?): Builder =
-            apply { this.type = type }
-
-        /**
-         * apply degrees to the Builder.
-         * @param degrees Double?
-         * @return Builder
-         */
-        fun degrees(degrees: Double?): Builder =
-            apply { this.degrees = degrees }
-
-        /**
-         * apply modifier to the Builder.
-         * @param modifier String?
-         * @return Builder
-         */
-        fun modifier(modifier: String?): Builder =
-            apply { this.modifier = modifier }
-
-        /**
-         * apply drivingSide to the Builder.
-         * @param drivingSide String?
-         * @return Builder
-         */
-        fun drivingSide(drivingSide: String?): Builder =
-            apply { this.drivingSide = drivingSide }
-
-        /**
-         * apply componentList to the Builder.
-         * @param componentList List<Component>
-         * @return Builder
-         */
-        fun componentList(componentList: List<Component>): Builder =
-            apply { this.componentList = componentList }
-
-        /**
-         * Build the [SecondaryManeuver]
-         * @return SecondaryManeuver
-         */
-        fun build(): SubManeuver {
-            return SubManeuver(
-                id,
-                text,
-                type,
-                degrees,
-                modifier,
-                drivingSide,
-                componentList
-            )
-        }
     }
 }

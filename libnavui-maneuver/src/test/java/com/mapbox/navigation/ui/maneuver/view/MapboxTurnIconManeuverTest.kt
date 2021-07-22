@@ -30,15 +30,14 @@ class MapboxTurnIconManeuverTest {
 
     @Test
     fun `when primary driving side and degrees not null then rotationY should not be zero`() {
-        val maneuver = PrimaryManeuver
-            .Builder()
-            .text("I-880")
-            .type(StepManeuver.ROUNDABOUT)
-            .degrees(23.0)
-            .modifier(ManeuverModifier.LEFT)
-            .drivingSide("left")
-            .componentList(listOf())
-            .build()
+        val maneuver = PrimaryManeuver(
+            text = "I-880",
+            type = StepManeuver.ROUNDABOUT,
+            degrees = 23.0,
+            modifier = ManeuverModifier.LEFT,
+            drivingSide = "left",
+            componentList = listOf()
+        )
         val turnIcon = getRoundaboutWithPrimary(maneuver)
         val view = MapboxTurnIconManeuver(ctx)
         val expectedFlip = 180f
@@ -56,15 +55,14 @@ class MapboxTurnIconManeuverTest {
 
     @Test
     fun `when primary driving side and degrees null then rotationY should be zero`() {
-        val maneuver = PrimaryManeuver
-            .Builder()
-            .text("I-880")
-            .type(StepManeuver.TURN)
-            .degrees(null)
-            .modifier(ManeuverModifier.LEFT)
-            .drivingSide(null)
-            .componentList(listOf())
-            .build()
+        val maneuver = PrimaryManeuver(
+            text = "I-880",
+            type = StepManeuver.TURN,
+            degrees = null,
+            modifier = ManeuverModifier.LEFT,
+            drivingSide = null,
+            componentList = listOf()
+        )
         val turnIcon = getTurnIcon()
         val view = MapboxTurnIconManeuver(ctx)
         val expectedFlip = 0f
@@ -82,15 +80,14 @@ class MapboxTurnIconManeuverTest {
 
     @Test
     fun `when sub driving side and degrees not null then rotationY should not be zero`() {
-        val maneuver = SubManeuver
-            .Builder()
-            .text("I-880")
-            .type(StepManeuver.ROUNDABOUT)
-            .degrees(23.0)
-            .modifier(ManeuverModifier.LEFT)
-            .drivingSide("left")
-            .componentList(listOf())
-            .build()
+        val maneuver = SubManeuver(
+            text = "I-880",
+            type = StepManeuver.ROUNDABOUT,
+            degrees = 23.0,
+            modifier = ManeuverModifier.LEFT,
+            drivingSide = "left",
+            componentList = listOf()
+        )
         val turnIcon = getRoundaboutWithSub(maneuver)
         val view = MapboxTurnIconManeuver(ctx)
         val expectedFlip = 180f
@@ -108,15 +105,14 @@ class MapboxTurnIconManeuverTest {
 
     @Test
     fun `when sub driving side and degrees null then rotationY should be zero`() {
-        val maneuver = SubManeuver
-            .Builder()
-            .text("I-880")
-            .type(StepManeuver.TURN)
-            .degrees(null)
-            .modifier(ManeuverModifier.LEFT)
-            .drivingSide(null)
-            .componentList(listOf())
-            .build()
+        val maneuver = SubManeuver(
+            text = "I-880",
+            type = StepManeuver.TURN,
+            degrees = null,
+            modifier = ManeuverModifier.LEFT,
+            drivingSide = null,
+            componentList = listOf()
+        )
         val turnIcon = getTurnIcon()
         val view = MapboxTurnIconManeuver(ctx)
         val expectedFlip = 0f
@@ -136,24 +132,22 @@ class MapboxTurnIconManeuverTest {
     fun `when maneuver roundabout followed by normal turn then rotation angle is zero`() {
         val view = MapboxTurnIconManeuver(ctx)
         val expectedFlip = 0f
-        val roundaboutManeuver = PrimaryManeuver
-            .Builder()
-            .text("I-880")
-            .type(StepManeuver.ROUNDABOUT)
-            .degrees(23.0)
-            .modifier(ManeuverModifier.LEFT)
-            .drivingSide("left")
-            .componentList(listOf())
-            .build()
-        val turnManeuver = PrimaryManeuver
-            .Builder()
-            .text("I-880")
-            .type(StepManeuver.TURN)
-            .degrees(null)
-            .modifier(ManeuverModifier.LEFT)
-            .drivingSide(null)
-            .componentList(listOf())
-            .build()
+        val roundaboutManeuver = PrimaryManeuver(
+            text = "I-880",
+            type = StepManeuver.ROUNDABOUT,
+            degrees = 23.0,
+            modifier = ManeuverModifier.LEFT,
+            drivingSide = "left",
+            componentList = listOf()
+        )
+        val turnManeuver = PrimaryManeuver(
+            text = "I-880",
+            type = StepManeuver.TURN,
+            degrees = null,
+            modifier = ManeuverModifier.LEFT,
+            drivingSide = null,
+            componentList = listOf()
+        )
         val roundaboutTurnIcon = getRoundaboutWithPrimary(roundaboutManeuver)
         val turnIcon = getTurnIcon()
         every {

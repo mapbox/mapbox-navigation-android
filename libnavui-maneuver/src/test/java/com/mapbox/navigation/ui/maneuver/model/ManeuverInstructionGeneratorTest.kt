@@ -38,15 +38,14 @@ class ManeuverInstructionGeneratorTest {
     @Test
     fun `when generate primary instructions return spannable`() {
         val componentList = createComponentList()
-        val mockManeuver = PrimaryManeuver
-            .Builder()
-            .text("I-880/Central Avenue")
-            .type(StepManeuver.TURN)
-            .degrees(null)
-            .modifier(ManeuverModifier.SLIGHT_LEFT)
-            .drivingSide(null)
-            .componentList(componentList)
-            .build()
+        val mockManeuver = PrimaryManeuver(
+            text = "I-880/Central Avenue",
+            type = StepManeuver.TURN,
+            degrees = null,
+            modifier = ManeuverModifier.SLIGHT_LEFT,
+            drivingSide = null,
+            componentList = componentList
+        )
         val mockDesiredHeight = 50
         val mockExitView = mockk<MapboxExitText>(relaxed = true)
         every {
@@ -85,15 +84,14 @@ class ManeuverInstructionGeneratorTest {
     @Test
     fun `when generate secondary instructions return spannable`() {
         val componentList = createComponentList()
-        val mockManeuver = SecondaryManeuver
-            .Builder()
-            .text("I-880/Central Avenue")
-            .type(StepManeuver.TURN)
-            .degrees(null)
-            .modifier(ManeuverModifier.SLIGHT_LEFT)
-            .drivingSide(null)
-            .componentList(componentList)
-            .build()
+        val mockManeuver = SecondaryManeuver(
+            text = "I-880/Central Avenue",
+            type = StepManeuver.TURN,
+            degrees = null,
+            modifier = ManeuverModifier.SLIGHT_LEFT,
+            drivingSide = null,
+            componentList = componentList
+        )
         val mockDesiredHeight = 50
         val mockExitView = mockk<MapboxExitText>(relaxed = true)
         every {
@@ -132,15 +130,14 @@ class ManeuverInstructionGeneratorTest {
     @Test
     fun `when generate sub instructions return spannable`() {
         val componentList = createComponentList()
-        val mockManeuver = SubManeuver
-            .Builder()
-            .text("I-880/Central Avenue")
-            .type(StepManeuver.TURN)
-            .degrees(null)
-            .modifier(ManeuverModifier.SLIGHT_LEFT)
-            .drivingSide(null)
-            .componentList(componentList)
-            .build()
+        val mockManeuver = SubManeuver(
+            text = "I-880/Central Avenue",
+            type = StepManeuver.TURN,
+            degrees = null,
+            modifier = ManeuverModifier.SLIGHT_LEFT,
+            drivingSide = null,
+            componentList = componentList
+        )
         val mockDesiredHeight = 50
         val mockExitView = mockk<MapboxExitText>(relaxed = true)
         every {

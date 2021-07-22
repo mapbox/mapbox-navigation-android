@@ -19,7 +19,7 @@ import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
 import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
@@ -60,7 +60,7 @@ import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
  *
  * @param layerAbove layer in the current map style above which the debug layer with framed geometries should be placed
  */
-@ExperimentalMapboxNavigationAPI
+@ExperimentalPreviewMapboxNavigationAPI
 class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
     private val context: Context,
     private val mapView: MapView,

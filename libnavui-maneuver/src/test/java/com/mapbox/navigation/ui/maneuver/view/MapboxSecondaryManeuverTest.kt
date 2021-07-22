@@ -32,16 +32,15 @@ class MapboxSecondaryManeuverTest {
     @Test
     fun `render secondary maneuver text`() {
         val componentList = createComponentList()
-        val state = SecondaryManeuver
-            .Builder()
-            .id("1234abcd")
-            .text("Exit 23 I-880/Central")
-            .type(StepManeuver.TURN)
-            .degrees(null)
-            .modifier(ManeuverModifier.SLIGHT_LEFT)
-            .drivingSide(null)
-            .componentList(componentList)
-            .build()
+        val state = SecondaryManeuver(
+            "1234abcd",
+            "Exit 23 I-880/Central",
+            StepManeuver.TURN,
+            null,
+            ManeuverModifier.SLIGHT_LEFT,
+            null,
+            componentList
+        )
         val expected = SpannableString("23 I-880 / Central ")
         val view = MapboxSecondaryManeuver(ctx)
 

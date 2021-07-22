@@ -12,7 +12,7 @@ import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.toCameraOptions
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.utils.isSameRoute
@@ -210,7 +210,7 @@ class MapboxNavigationViewportDataSource(
     /**
      * Set a [MapboxNavigationViewportDataSourceDebugger].
      */
-    @ExperimentalMapboxNavigationAPI
+    @ExperimentalPreviewMapboxNavigationAPI
     var debugger: MapboxNavigationViewportDataSourceDebugger? = null
 
     /**
@@ -810,13 +810,13 @@ class MapboxNavigationViewportDataSource(
         updateDebuggerForOverview(pointsForOverview)
     }
 
-    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun updateDebuggerForFollowing(pointsForFollowing: List<Point>) {
         debugger?.followingPoints = pointsForFollowing
         debugger?.followingUserPadding = followingPadding
     }
 
-    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun updateDebuggerForOverview(pointsForOverview: List<Point>) {
         debugger?.overviewPoints = pointsForOverview
         debugger?.overviewUserPadding = overviewPadding
