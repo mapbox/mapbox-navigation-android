@@ -3,9 +3,11 @@ package com.mapbox.navigation.trip.notification
 import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.text.SpannableString
 import android.view.View
 import android.widget.RemoteViews
+import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import com.mapbox.navigation.utils.internal.SET_BACKGROUND_COLOR
 
@@ -119,6 +121,10 @@ internal class MapboxTripNotificationView(
     fun updateImage(bitmap: Bitmap) {
         collapsedView?.setImageViewBitmap(R.id.maneuverImage, bitmap)
         expandedView?.setImageViewBitmap(R.id.maneuverImage, bitmap)
+    }
+
+    internal fun getImageDrawable(@DrawableRes image: Int): Drawable? {
+        return ContextCompat.getDrawable(context, image)
     }
 
     /**

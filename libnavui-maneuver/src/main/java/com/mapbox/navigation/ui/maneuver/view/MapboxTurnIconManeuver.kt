@@ -5,11 +5,11 @@ import android.util.AttributeSet
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
+import com.mapbox.navigation.base.internal.maneuver.ManeuverTurnIcon
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.TurnIconHelper
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.SubManeuver
-import com.mapbox.navigation.ui.maneuver.model.TurnIcon
 import com.mapbox.navigation.ui.maneuver.model.TurnIconResources
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 
@@ -72,7 +72,7 @@ class MapboxTurnIconManeuver @JvmOverloads constructor(
         } ?: setImageDrawable(null)
     }
 
-    private fun renderIcon(turnIcon: TurnIcon?) {
+    private fun renderIcon(turnIcon: ManeuverTurnIcon?) {
         turnIcon?.let {
             ifNonNull(it.icon) { icon ->
                 rotationY = if (it.shouldFlipIcon) {

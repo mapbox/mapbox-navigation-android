@@ -21,8 +21,8 @@ import com.mapbox.api.directions.v5.models.StepManeuver.ROTARY
 import com.mapbox.api.directions.v5.models.StepManeuver.ROUNDABOUT
 import com.mapbox.api.directions.v5.models.StepManeuver.ROUNDABOUT_TURN
 import com.mapbox.api.directions.v5.models.StepManeuver.TURN
-import com.mapbox.navigation.ui.maneuver.model.TurnIcon
-import com.mapbox.navigation.ui.maneuver.model.TurnIconPair
+import com.mapbox.navigation.base.internal.maneuver.ManeuverTurnIcon
+import com.mapbox.navigation.base.internal.maneuver.ManeuverTypeModifierPair
 import com.mapbox.navigation.ui.maneuver.model.TurnIconResources
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import kotlin.math.roundToInt
@@ -45,118 +45,144 @@ internal class TurnIconHelper(
         const val ROTATION_ANGLE_360 = 360f
     }
 
-    // TurnIconPair<Type, Modifier>
-    private val turnIconMap: Map<TurnIconPair, Int> = mapOf(
+    // ManeuverTypeModifierPair<Type, Modifier>
+    private val turnIconMap: Map<ManeuverTypeModifierPair, Int> = mapOf(
         // When type == null and modifier == null
-        TurnIconPair(null, null) to turnIconResources.turnIconTurnStraight,
-        TurnIconPair("", "") to turnIconResources.turnIconTurnStraight,
+        ManeuverTypeModifierPair(null, null) to turnIconResources.turnIconTurnStraight,
+        ManeuverTypeModifierPair("", "") to turnIconResources.turnIconTurnStraight,
 
         // When type != null and modifier == null
-        TurnIconPair(ARRIVE, null) to turnIconResources.turnIconArrive,
-        TurnIconPair(DEPART, null) to turnIconResources.turnIconDepart,
-        TurnIconPair(ON_RAMP, null) to turnIconResources.turnIconOnRamp,
-        TurnIconPair(OFF_RAMP, null) to turnIconResources.turnIconOffRamp,
-        TurnIconPair(FORK, null) to turnIconResources.turnIconFork,
-        TurnIconPair(TURN, null) to turnIconResources.turnIconTurnStraight,
-        TurnIconPair(MERGE, null) to turnIconResources.turnIconMergeStraight,
-        TurnIconPair(END_OF_ROAD, null) to turnIconResources.turnIconEndRoadLeft,
+        ManeuverTypeModifierPair(ARRIVE, null) to turnIconResources.turnIconArrive,
+        ManeuverTypeModifierPair(DEPART, null) to turnIconResources.turnIconDepart,
+        ManeuverTypeModifierPair(ON_RAMP, null) to turnIconResources.turnIconOnRamp,
+        ManeuverTypeModifierPair(OFF_RAMP, null) to turnIconResources.turnIconOffRamp,
+        ManeuverTypeModifierPair(FORK, null) to turnIconResources.turnIconFork,
+        ManeuverTypeModifierPair(TURN, null) to turnIconResources.turnIconTurnStraight,
+        ManeuverTypeModifierPair(MERGE, null) to turnIconResources.turnIconMergeStraight,
+        ManeuverTypeModifierPair(END_OF_ROAD, null) to
+            turnIconResources.turnIconEndRoadLeft,
 
         // When type = null and modifier != null
-        TurnIconPair(null, LEFT) to turnIconResources.turnIconTurnLeft,
-        TurnIconPair(null, RIGHT) to turnIconResources.turnIconTurnRight,
-        TurnIconPair(null, STRAIGHT) to turnIconResources.turnIconTurnStraight,
-        TurnIconPair(null, UTURN) to turnIconResources.turnIconUturn,
-        TurnIconPair(null, SLIGHT_LEFT) to turnIconResources.turnIconTurnSlightLeft,
-        TurnIconPair(null, SLIGHT_RIGHT) to turnIconResources.turnIconTurnSlightRight,
-        TurnIconPair(null, SHARP_LEFT) to turnIconResources.turnIconTurnSharpLeft,
-        TurnIconPair(null, SHARP_RIGHT) to turnIconResources.turnIconTurnSharpRight,
+        ManeuverTypeModifierPair(null, LEFT) to turnIconResources.turnIconTurnLeft,
+        ManeuverTypeModifierPair(null, RIGHT) to turnIconResources.turnIconTurnRight,
+        ManeuverTypeModifierPair(null, STRAIGHT) to turnIconResources.turnIconTurnStraight,
+        ManeuverTypeModifierPair(null, UTURN) to turnIconResources.turnIconUturn,
+        ManeuverTypeModifierPair(null, SLIGHT_LEFT) to
+            turnIconResources.turnIconTurnSlightLeft,
+        ManeuverTypeModifierPair(null, SLIGHT_RIGHT) to
+            turnIconResources.turnIconTurnSlightRight,
+        ManeuverTypeModifierPair(null, SHARP_LEFT) to turnIconResources.turnIconTurnSharpLeft,
+        ManeuverTypeModifierPair(null, SHARP_RIGHT) to
+            turnIconResources.turnIconTurnSharpRight,
 
         // When type != null and modifier != null
-        TurnIconPair(ARRIVE, LEFT) to turnIconResources.turnIconArriveLeft,
-        TurnIconPair(ARRIVE, RIGHT) to turnIconResources.turnIconArriveRight,
-        TurnIconPair(ARRIVE, STRAIGHT) to turnIconResources.turnIconArriveStraight,
-        TurnIconPair(DEPART, LEFT) to turnIconResources.turnIconDepartLeft,
-        TurnIconPair(DEPART, RIGHT) to turnIconResources.turnIconDepartRight,
-        TurnIconPair(DEPART, STRAIGHT) to turnIconResources.turnIconDepartStraight,
-        TurnIconPair(END_OF_ROAD, LEFT) to turnIconResources.turnIconEndRoadLeft,
-        TurnIconPair(END_OF_ROAD, RIGHT) to turnIconResources.turnIconEndRoadRight,
-        TurnIconPair(FORK, LEFT) to turnIconResources.turnIconForkLeft,
-        TurnIconPair(FORK, RIGHT) to turnIconResources.turnIconForkRight,
-        TurnIconPair(FORK, STRAIGHT) to turnIconResources.turnIconForkStraight,
-        TurnIconPair(FORK, SLIGHT_LEFT) to turnIconResources.turnIconForkSlightLeft,
-        TurnIconPair(FORK, SLIGHT_RIGHT) to turnIconResources.turnIconForkSlightRight,
-        TurnIconPair(MERGE, LEFT) to turnIconResources.turnIconMergeLeft,
-        TurnIconPair(MERGE, RIGHT) to turnIconResources.turnIconMergeRight,
-        TurnIconPair(MERGE, STRAIGHT) to turnIconResources.turnIconMergeStraight,
-        TurnIconPair(MERGE, SLIGHT_LEFT) to turnIconResources.turnIconMergeSlightLeft,
-        TurnIconPair(MERGE, SLIGHT_RIGHT) to turnIconResources.turnIconMergeSlightRight,
-        TurnIconPair(OFF_RAMP, LEFT) to turnIconResources.turnIconOffRampLeft,
-        TurnIconPair(OFF_RAMP, RIGHT) to turnIconResources.turnIconOffRampRight,
-        TurnIconPair(OFF_RAMP, SLIGHT_LEFT) to turnIconResources.turnIconOffRampSlightLeft,
-        TurnIconPair(OFF_RAMP, SLIGHT_RIGHT) to turnIconResources.turnIconOffRampSlightRight,
-        TurnIconPair(ON_RAMP, LEFT) to turnIconResources.turnIconOnRampLeft,
-        TurnIconPair(ON_RAMP, RIGHT) to turnIconResources.turnIconOnRampRight,
-        TurnIconPair(ON_RAMP, STRAIGHT) to turnIconResources.turnIconOnRampStraight,
-        TurnIconPair(ON_RAMP, SLIGHT_LEFT) to turnIconResources.turnIconOnRampSlightLeft,
-        TurnIconPair(ON_RAMP, SLIGHT_RIGHT) to turnIconResources.turnIconOnRampSlightRight,
-        TurnIconPair(ON_RAMP, SHARP_LEFT) to turnIconResources.turnIconOnRampSharpLeft,
-        TurnIconPair(ON_RAMP, SHARP_RIGHT) to turnIconResources.turnIconOnRampSharpRight,
-        TurnIconPair(TURN, LEFT) to turnIconResources.turnIconTurnLeft,
-        TurnIconPair(TURN, RIGHT) to turnIconResources.turnIconTurnRight,
-        TurnIconPair(TURN, UTURN) to turnIconResources.turnIconUturn,
-        TurnIconPair(TURN, STRAIGHT) to turnIconResources.turnIconTurnStraight,
-        TurnIconPair(TURN, SLIGHT_LEFT) to turnIconResources.turnIconTurnSlightLeft,
-        TurnIconPair(TURN, SLIGHT_RIGHT) to turnIconResources.turnIconTurnSlightRight,
-        TurnIconPair(TURN, SHARP_LEFT) to turnIconResources.turnIconTurnSharpLeft,
-        TurnIconPair(TURN, SHARP_RIGHT) to turnIconResources.turnIconTurnSharpRight
+        ManeuverTypeModifierPair(ARRIVE, LEFT) to turnIconResources.turnIconArriveLeft,
+        ManeuverTypeModifierPair(ARRIVE, RIGHT) to turnIconResources.turnIconArriveRight,
+        ManeuverTypeModifierPair(ARRIVE, STRAIGHT) to turnIconResources.turnIconArriveStraight,
+        ManeuverTypeModifierPair(DEPART, LEFT) to turnIconResources.turnIconDepartLeft,
+        ManeuverTypeModifierPair(DEPART, RIGHT) to turnIconResources.turnIconDepartRight,
+        ManeuverTypeModifierPair(DEPART, STRAIGHT) to turnIconResources.turnIconDepartStraight,
+        ManeuverTypeModifierPair(END_OF_ROAD, LEFT) to turnIconResources.turnIconEndRoadLeft,
+        ManeuverTypeModifierPair(END_OF_ROAD, RIGHT) to turnIconResources.turnIconEndRoadRight,
+        ManeuverTypeModifierPair(FORK, LEFT) to turnIconResources.turnIconForkLeft,
+        ManeuverTypeModifierPair(FORK, RIGHT) to turnIconResources.turnIconForkRight,
+        ManeuverTypeModifierPair(FORK, STRAIGHT) to turnIconResources.turnIconForkStraight,
+        ManeuverTypeModifierPair(FORK, SLIGHT_LEFT) to turnIconResources.turnIconForkSlightLeft,
+        ManeuverTypeModifierPair(FORK, SLIGHT_RIGHT) to turnIconResources.turnIconForkSlightRight,
+        ManeuverTypeModifierPair(MERGE, LEFT) to turnIconResources.turnIconMergeLeft,
+        ManeuverTypeModifierPair(MERGE, RIGHT) to turnIconResources.turnIconMergeRight,
+        ManeuverTypeModifierPair(MERGE, STRAIGHT) to turnIconResources.turnIconMergeStraight,
+        ManeuverTypeModifierPair(MERGE, SLIGHT_LEFT) to turnIconResources.turnIconMergeSlightLeft,
+        ManeuverTypeModifierPair(MERGE, SLIGHT_RIGHT) to turnIconResources.turnIconMergeSlightRight,
+        ManeuverTypeModifierPair(OFF_RAMP, LEFT) to turnIconResources.turnIconOffRampLeft,
+        ManeuverTypeModifierPair(OFF_RAMP, RIGHT) to turnIconResources.turnIconOffRampRight,
+        ManeuverTypeModifierPair(OFF_RAMP, SLIGHT_LEFT) to
+            turnIconResources.turnIconOffRampSlightLeft,
+        ManeuverTypeModifierPair(OFF_RAMP, SLIGHT_RIGHT) to
+            turnIconResources.turnIconOffRampSlightRight,
+        ManeuverTypeModifierPair(ON_RAMP, LEFT) to turnIconResources.turnIconOnRampLeft,
+        ManeuverTypeModifierPair(ON_RAMP, RIGHT) to turnIconResources.turnIconOnRampRight,
+        ManeuverTypeModifierPair(ON_RAMP, STRAIGHT) to turnIconResources.turnIconOnRampStraight,
+        ManeuverTypeModifierPair(ON_RAMP, SLIGHT_LEFT) to
+            turnIconResources.turnIconOnRampSlightLeft,
+        ManeuverTypeModifierPair(ON_RAMP, SLIGHT_RIGHT) to
+            turnIconResources.turnIconOnRampSlightRight,
+        ManeuverTypeModifierPair(ON_RAMP, SHARP_LEFT) to turnIconResources.turnIconOnRampSharpLeft,
+        ManeuverTypeModifierPair(ON_RAMP, SHARP_RIGHT) to
+            turnIconResources.turnIconOnRampSharpRight,
+        ManeuverTypeModifierPair(TURN, LEFT) to turnIconResources.turnIconTurnLeft,
+        ManeuverTypeModifierPair(TURN, RIGHT) to turnIconResources.turnIconTurnRight,
+        ManeuverTypeModifierPair(TURN, UTURN) to turnIconResources.turnIconUturn,
+        ManeuverTypeModifierPair(TURN, STRAIGHT) to turnIconResources.turnIconTurnStraight,
+        ManeuverTypeModifierPair(TURN, SLIGHT_LEFT) to turnIconResources.turnIconTurnSlightLeft,
+        ManeuverTypeModifierPair(TURN, SLIGHT_RIGHT) to turnIconResources.turnIconTurnSlightRight,
+        ManeuverTypeModifierPair(TURN, SHARP_LEFT) to turnIconResources.turnIconTurnSharpLeft,
+        ManeuverTypeModifierPair(TURN, SHARP_RIGHT) to turnIconResources.turnIconTurnSharpRight
     )
 
-    private val roundaboutIconMap: Map<TurnIconPair, Int> = mapOf(
-        TurnIconPair(null, null) to turnIconResources.turnIconRoundabout,
-        TurnIconPair(ROUNDABOUT, LEFT) to turnIconResources.turnIconRoundaboutLeft,
-        TurnIconPair(ROUNDABOUT, RIGHT) to turnIconResources.turnIconRoundaboutRight,
-        TurnIconPair(ROUNDABOUT, STRAIGHT) to turnIconResources.turnIconRoundaboutStraight,
-        TurnIconPair(ROUNDABOUT, SHARP_LEFT) to turnIconResources.turnIconRoundaboutSharpLeft,
-        TurnIconPair(ROUNDABOUT, SHARP_RIGHT) to turnIconResources.turnIconRoundaboutSharpRight,
-        TurnIconPair(ROUNDABOUT, SLIGHT_LEFT) to turnIconResources.turnIconRoundaboutSlightLeft,
-        TurnIconPair(ROUNDABOUT, SLIGHT_RIGHT) to turnIconResources.turnIconRoundaboutSlightRight,
-        TurnIconPair(ROUNDABOUT_TURN, LEFT) to turnIconResources.turnIconRoundaboutLeft,
-        TurnIconPair(ROUNDABOUT_TURN, RIGHT) to turnIconResources.turnIconRoundaboutRight,
-        TurnIconPair(ROUNDABOUT_TURN, STRAIGHT) to
+    private val roundaboutIconMap: Map<ManeuverTypeModifierPair, Int> = mapOf(
+        ManeuverTypeModifierPair(null, null) to turnIconResources.turnIconRoundabout,
+        ManeuverTypeModifierPair(ROUNDABOUT, LEFT) to turnIconResources.turnIconRoundaboutLeft,
+        ManeuverTypeModifierPair(ROUNDABOUT, RIGHT) to turnIconResources.turnIconRoundaboutRight,
+        ManeuverTypeModifierPair(ROUNDABOUT, STRAIGHT) to
             turnIconResources.turnIconRoundaboutStraight,
-        TurnIconPair(ROUNDABOUT_TURN, SHARP_LEFT) to
+        ManeuverTypeModifierPair(ROUNDABOUT, SHARP_LEFT) to
             turnIconResources.turnIconRoundaboutSharpLeft,
-        TurnIconPair(ROUNDABOUT_TURN, SHARP_RIGHT) to
+        ManeuverTypeModifierPair(ROUNDABOUT, SHARP_RIGHT) to
             turnIconResources.turnIconRoundaboutSharpRight,
-        TurnIconPair(ROUNDABOUT_TURN, SLIGHT_LEFT) to
+        ManeuverTypeModifierPair(ROUNDABOUT, SLIGHT_LEFT) to
             turnIconResources.turnIconRoundaboutSlightLeft,
-        TurnIconPair(ROUNDABOUT_TURN, SLIGHT_RIGHT) to
+        ManeuverTypeModifierPair(ROUNDABOUT, SLIGHT_RIGHT) to
             turnIconResources.turnIconRoundaboutSlightRight,
-        TurnIconPair(EXIT_ROUNDABOUT, LEFT) to turnIconResources.turnIconRoundaboutLeft,
-        TurnIconPair(EXIT_ROUNDABOUT, RIGHT) to turnIconResources.turnIconRoundaboutRight,
-        TurnIconPair(EXIT_ROUNDABOUT, STRAIGHT) to turnIconResources.turnIconRoundaboutStraight,
-        TurnIconPair(EXIT_ROUNDABOUT, SHARP_LEFT) to
+        ManeuverTypeModifierPair(ROUNDABOUT_TURN, LEFT) to turnIconResources.turnIconRoundaboutLeft,
+        ManeuverTypeModifierPair(ROUNDABOUT_TURN, RIGHT) to
+            turnIconResources.turnIconRoundaboutRight,
+        ManeuverTypeModifierPair(ROUNDABOUT_TURN, STRAIGHT) to
+            turnIconResources.turnIconRoundaboutStraight,
+        ManeuverTypeModifierPair(ROUNDABOUT_TURN, SHARP_LEFT) to
             turnIconResources.turnIconRoundaboutSharpLeft,
-        TurnIconPair(EXIT_ROUNDABOUT, SHARP_RIGHT) to
+        ManeuverTypeModifierPair(ROUNDABOUT_TURN, SHARP_RIGHT) to
             turnIconResources.turnIconRoundaboutSharpRight,
-        TurnIconPair(EXIT_ROUNDABOUT, SLIGHT_LEFT) to
+        ManeuverTypeModifierPair(ROUNDABOUT_TURN, SLIGHT_LEFT) to
             turnIconResources.turnIconRoundaboutSlightLeft,
-        TurnIconPair(EXIT_ROUNDABOUT, SLIGHT_RIGHT) to
+        ManeuverTypeModifierPair(ROUNDABOUT_TURN, SLIGHT_RIGHT) to
             turnIconResources.turnIconRoundaboutSlightRight,
-        TurnIconPair(ROTARY, LEFT) to turnIconResources.turnIconRoundaboutLeft,
-        TurnIconPair(ROTARY, RIGHT) to turnIconResources.turnIconRoundaboutRight,
-        TurnIconPair(ROTARY, STRAIGHT) to turnIconResources.turnIconRoundaboutStraight,
-        TurnIconPair(ROTARY, SHARP_LEFT) to turnIconResources.turnIconRoundaboutSharpLeft,
-        TurnIconPair(ROTARY, SHARP_RIGHT) to turnIconResources.turnIconRoundaboutSharpRight,
-        TurnIconPair(ROTARY, SLIGHT_LEFT) to turnIconResources.turnIconRoundaboutSlightLeft,
-        TurnIconPair(ROTARY, SLIGHT_RIGHT) to turnIconResources.turnIconRoundaboutSlightRight,
-        TurnIconPair(EXIT_ROTARY, LEFT) to turnIconResources.turnIconRoundaboutLeft,
-        TurnIconPair(EXIT_ROTARY, RIGHT) to turnIconResources.turnIconRoundaboutRight,
-        TurnIconPair(EXIT_ROTARY, STRAIGHT) to turnIconResources.turnIconRoundaboutStraight,
-        TurnIconPair(EXIT_ROTARY, SHARP_LEFT) to turnIconResources.turnIconRoundaboutSharpLeft,
-        TurnIconPair(EXIT_ROTARY, SHARP_RIGHT) to turnIconResources.turnIconRoundaboutSharpRight,
-        TurnIconPair(EXIT_ROTARY, SLIGHT_LEFT) to turnIconResources.turnIconRoundaboutSlightLeft,
-        TurnIconPair(EXIT_ROTARY, SLIGHT_RIGHT) to turnIconResources.turnIconRoundaboutSlightRight
+        ManeuverTypeModifierPair(EXIT_ROUNDABOUT, LEFT) to turnIconResources.turnIconRoundaboutLeft,
+        ManeuverTypeModifierPair(EXIT_ROUNDABOUT, RIGHT) to
+            turnIconResources.turnIconRoundaboutRight,
+        ManeuverTypeModifierPair(EXIT_ROUNDABOUT, STRAIGHT) to
+            turnIconResources.turnIconRoundaboutStraight,
+        ManeuverTypeModifierPair(EXIT_ROUNDABOUT, SHARP_LEFT) to
+            turnIconResources.turnIconRoundaboutSharpLeft,
+        ManeuverTypeModifierPair(EXIT_ROUNDABOUT, SHARP_RIGHT) to
+            turnIconResources.turnIconRoundaboutSharpRight,
+        ManeuverTypeModifierPair(EXIT_ROUNDABOUT, SLIGHT_LEFT) to
+            turnIconResources.turnIconRoundaboutSlightLeft,
+        ManeuverTypeModifierPair(EXIT_ROUNDABOUT, SLIGHT_RIGHT) to
+            turnIconResources.turnIconRoundaboutSlightRight,
+        ManeuverTypeModifierPair(ROTARY, LEFT) to turnIconResources.turnIconRoundaboutLeft,
+        ManeuverTypeModifierPair(ROTARY, RIGHT) to turnIconResources.turnIconRoundaboutRight,
+        ManeuverTypeModifierPair(ROTARY, STRAIGHT) to turnIconResources.turnIconRoundaboutStraight,
+        ManeuverTypeModifierPair(ROTARY, SHARP_LEFT) to
+            turnIconResources.turnIconRoundaboutSharpLeft,
+        ManeuverTypeModifierPair(ROTARY, SHARP_RIGHT) to
+            turnIconResources.turnIconRoundaboutSharpRight,
+        ManeuverTypeModifierPair(ROTARY, SLIGHT_LEFT) to
+            turnIconResources.turnIconRoundaboutSlightLeft,
+        ManeuverTypeModifierPair(ROTARY, SLIGHT_RIGHT) to
+            turnIconResources.turnIconRoundaboutSlightRight,
+        ManeuverTypeModifierPair(EXIT_ROTARY, LEFT) to turnIconResources.turnIconRoundaboutLeft,
+        ManeuverTypeModifierPair(EXIT_ROTARY, RIGHT) to turnIconResources.turnIconRoundaboutRight,
+        ManeuverTypeModifierPair(EXIT_ROTARY, STRAIGHT) to
+            turnIconResources.turnIconRoundaboutStraight,
+        ManeuverTypeModifierPair(EXIT_ROTARY, SHARP_LEFT) to
+            turnIconResources.turnIconRoundaboutSharpLeft,
+        ManeuverTypeModifierPair(EXIT_ROTARY, SHARP_RIGHT) to
+            turnIconResources.turnIconRoundaboutSharpRight,
+        ManeuverTypeModifierPair(EXIT_ROTARY, SLIGHT_LEFT) to
+            turnIconResources.turnIconRoundaboutSlightLeft,
+        ManeuverTypeModifierPair(EXIT_ROTARY, SLIGHT_RIGHT) to
+            turnIconResources.turnIconRoundaboutSlightRight
     )
 
     fun retrieveTurnIcon(
@@ -164,7 +190,7 @@ internal class TurnIconHelper(
         degrees: Float?,
         modifier: String?,
         drivingSide: String?,
-    ): TurnIcon? {
+    ): ManeuverTurnIcon? {
         val isRoundabout = isManeuverRoundabout(type)
         return when {
             isRoundabout -> {
@@ -180,82 +206,82 @@ internal class TurnIconHelper(
         type: String?,
         degrees: Float?,
         drivingSide: String?,
-    ): TurnIcon? {
+    ): ManeuverTurnIcon {
         return ifNonNull(degrees) { rotateBy ->
             val angleAfterRounding =
                 ((rotateBy / ROTATION_ANGLE_45).roundToInt()) * ROTATION_ANGLE_45
             val shouldFlip = shouldFlipIcon(drivingSide)
             when (angleAfterRounding) {
                 ROTATION_ANGLE_0, ROTATION_ANGLE_45 -> {
-                    TurnIcon(
+                    ManeuverTurnIcon(
                         degrees,
                         drivingSide,
                         shouldFlip,
-                        roundaboutIconMap[TurnIconPair(type, SHARP_RIGHT)]
+                        roundaboutIconMap[ManeuverTypeModifierPair(type, SHARP_RIGHT)]
                     )
                 }
                 ROTATION_ANGLE_90 -> {
-                    TurnIcon(
+                    ManeuverTurnIcon(
                         degrees,
                         drivingSide,
                         shouldFlip,
-                        roundaboutIconMap[TurnIconPair(type, RIGHT)]
+                        roundaboutIconMap[ManeuverTypeModifierPair(type, RIGHT)]
                     )
                 }
                 ROTATION_ANGLE_135 -> {
-                    TurnIcon(
+                    ManeuverTurnIcon(
                         degrees,
                         drivingSide,
                         shouldFlip,
-                        roundaboutIconMap[TurnIconPair(type, SLIGHT_RIGHT)]
+                        roundaboutIconMap[ManeuverTypeModifierPair(type, SLIGHT_RIGHT)]
                     )
                 }
                 ROTATION_ANGLE_180 -> {
-                    TurnIcon(
+                    ManeuverTurnIcon(
                         degrees,
                         drivingSide,
                         shouldFlip,
-                        roundaboutIconMap[TurnIconPair(type, STRAIGHT)]
+                        roundaboutIconMap[ManeuverTypeModifierPair(type, STRAIGHT)]
                     )
                 }
                 ROTATION_ANGLE_225 -> {
-                    TurnIcon(
+                    ManeuverTurnIcon(
                         degrees,
                         drivingSide,
                         shouldFlip,
-                        roundaboutIconMap[TurnIconPair(type, SLIGHT_LEFT)]
+                        roundaboutIconMap[ManeuverTypeModifierPair(type, SLIGHT_LEFT)]
                     )
                 }
                 ROTATION_ANGLE_270 -> {
-                    TurnIcon(
+                    ManeuverTurnIcon(
                         degrees,
                         drivingSide,
                         shouldFlip,
-                        roundaboutIconMap[TurnIconPair(type, LEFT)]
+                        roundaboutIconMap[ManeuverTypeModifierPair(type, LEFT)]
                     )
                 }
                 ROTATION_ANGLE_315, ROTATION_ANGLE_360 -> {
-                    TurnIcon(
+                    ManeuverTurnIcon(
                         degrees,
                         drivingSide,
                         shouldFlip,
-                        roundaboutIconMap[TurnIconPair(type, SHARP_LEFT)]
+                        roundaboutIconMap[ManeuverTypeModifierPair(type, SHARP_LEFT)]
                     )
                 }
                 else -> {
-                    TurnIcon(
+                    ManeuverTurnIcon(
                         degrees,
                         drivingSide,
                         shouldFlip,
-                        roundaboutIconMap[TurnIconPair(null, null)]
+                        roundaboutIconMap[ManeuverTypeModifierPair(null, null)]
                     )
                 }
             }
-        } ?: TurnIcon(
+        } ?: ManeuverTurnIcon(
             degrees,
             drivingSide,
             shouldFlipIcon(drivingSide),
-            roundaboutIconMap[TurnIconPair(null, null)]
+            roundaboutIconMap[ManeuverTypeModifierPair(null, null)]
         )
     }
 
@@ -264,19 +290,19 @@ internal class TurnIconHelper(
         degrees: Float?,
         modifier: String?,
         drivingSide: String?
-    ): TurnIcon? {
+    ): ManeuverTurnIcon? {
         return when {
             type.isNullOrEmpty() && modifier.isNullOrEmpty() -> {
-                TurnIcon(
+                ManeuverTurnIcon(
                     degrees,
                     drivingSide,
                     false,
-                    turnIconMap[TurnIconPair(null, null)]
+                    turnIconMap[ManeuverTypeModifierPair(null, null)]
                 )
             }
             type.isNullOrEmpty() && !modifier.isNullOrEmpty() -> {
                 val shouldFlip = shouldFlipUturn(modifier, drivingSide)
-                TurnIcon(
+                ManeuverTurnIcon(
                     degrees,
                     drivingSide,
                     shouldFlip,
@@ -284,7 +310,7 @@ internal class TurnIconHelper(
                 )
             }
             !type.isNullOrEmpty() && modifier.isNullOrEmpty() -> {
-                TurnIcon(
+                ManeuverTurnIcon(
                     degrees,
                     drivingSide,
                     false,
@@ -293,7 +319,7 @@ internal class TurnIconHelper(
             }
             !type.isNullOrEmpty() && !modifier.isNullOrEmpty() -> {
                 val shouldFlip = shouldFlipUturn(modifier, drivingSide)
-                TurnIcon(
+                ManeuverTurnIcon(
                     degrees,
                     drivingSide,
                     shouldFlip,
@@ -307,10 +333,10 @@ internal class TurnIconHelper(
     private fun getTurnIconWithNullType(modifier: String): Int? {
         return when (modifier) {
             LEFT, RIGHT, STRAIGHT, UTURN, SLIGHT_RIGHT, SLIGHT_LEFT, SHARP_RIGHT, SHARP_LEFT -> {
-                turnIconMap[TurnIconPair(null, modifier)]
+                turnIconMap[ManeuverTypeModifierPair(null, modifier)]
             }
             else -> {
-                turnIconMap[TurnIconPair(null, null)]
+                turnIconMap[ManeuverTypeModifierPair(null, null)]
             }
         }
     }
@@ -318,10 +344,10 @@ internal class TurnIconHelper(
     private fun getTurnIconWithNullModifier(type: String): Int? {
         return when (type) {
             ARRIVE, DEPART, ON_RAMP, OFF_RAMP, FORK, TURN, MERGE, END_OF_ROAD -> {
-                turnIconMap[TurnIconPair(type, null)]
+                turnIconMap[ManeuverTypeModifierPair(type, null)]
             }
             else -> {
-                turnIconMap[TurnIconPair(null, null)]
+                turnIconMap[ManeuverTypeModifierPair(null, null)]
             }
         }
     }
@@ -364,9 +390,10 @@ internal class TurnIconHelper(
                 type == TURN && modifier == SLIGHT_LEFT ||
                 type == TURN && modifier == SLIGHT_RIGHT ||
                 type == TURN && modifier == SHARP_LEFT ||
-                type == TURN && modifier == SHARP_RIGHT -> turnIconMap[TurnIconPair(type, modifier)]
+                type == TURN && modifier == SHARP_RIGHT
+            -> turnIconMap[ManeuverTypeModifierPair(type, modifier)]
             else -> {
-                turnIconMap[TurnIconPair(null, null)]
+                turnIconMap[ManeuverTypeModifierPair(null, null)]
             }
         }
     }
