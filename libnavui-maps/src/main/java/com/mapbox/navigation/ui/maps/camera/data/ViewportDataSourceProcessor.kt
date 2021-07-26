@@ -25,6 +25,7 @@ internal object ViewportDataSourceProcessor {
 
     private const val TAG = "MbxViewportDataSource"
 
+    private const val maxAngleDifferenceForCloverleafDetection: Double = 200.0
     private const val maxAngleDifferenceForGeometrySlicing: Double = 100.0
 
     /**
@@ -201,10 +202,19 @@ internal object ViewportDataSourceProcessor {
                 lookaheadDistanceForZoom,
                 TurfConstants.UNIT_KILOMETERS
             ).coordinates()
-            slicePointsAtAngle(
+
+            val routeThatMightBeCloverleaf = slicePointsAtAngle(
                 lineSliceCoordinatesForLookaheadDistance,
-                maxAngleDifferenceForGeometrySlicing
+                maxAngleDifferenceForCloverleafDetection
             )
+            if (routeThatMightBeCloverleaf.size < lineSliceCoordinatesForLookaheadDistance.size) {
+                slicePointsAtAngle(
+                    routeThatMightBeCloverleaf,
+                    maxAngleDifferenceForGeometrySlicing
+                )
+            } else {
+                lineSliceCoordinatesForLookaheadDistance
+            }
         } catch (e: TurfException) {
             LoggerProvider.logger.e(Tag(TAG), Message(e.message.toString()))
             emptyList()
@@ -217,30 +227,40 @@ internal object ViewportDataSourceProcessor {
      */
     fun slicePointsAtAngle(
         points: List<Point>,
-        maxAngleDifference: Double
+        maxAngleDifference: Double,
+        findLast: Boolean = false
     ): List<Point> {
         if (points.size < 2) return points
-        val outputCoordinates: MutableList<Point> = emptyList<Point>().toMutableList()
-        val firstEdgeBearing = TurfMeasurement.bearing(points[0], points[1])
+        var outputCoordinates: MutableList<Point> = emptyList<Point>().toMutableList()
+        var lastEdgeBearing = TurfMeasurement.bearing(points[0], points[1])
         outputCoordinates.add(points[0])
+        var aggregateAngleDeflection = 0.0
+        var indicesOfEdgesThatExceedAngleDeflection = emptyList<Int>().toMutableList()
         for (index in points.indices) {
             if (index == 0) {
                 continue
             }
-            val coord = points[index - 1]?.let {
-                val thisEdgeBearing = TurfMeasurement.bearing(it, points[index])
-                val rotationDiff = shortestRotationDiff(thisEdgeBearing, firstEdgeBearing)
-                if (abs(rotationDiff) < maxAngleDifference) {
-                    points[index]
+            var thisEdgeBearing = lastEdgeBearing
+            val indexOfEdgeThatExceedsAngleDeflection = points[index - 1]?.let {
+                thisEdgeBearing = TurfMeasurement.bearing(it, points[index])
+                val rotationDiff = shortestRotationDiff(thisEdgeBearing, lastEdgeBearing)
+                aggregateAngleDeflection += rotationDiff
+                if (abs(aggregateAngleDeflection) > maxAngleDifference) {
+                    index
                 } else {
                     null
                 }
             }
-            if (coord != null) {
-                outputCoordinates.add(coord)
-            } else {
-                break
+            lastEdgeBearing = thisEdgeBearing
+            if (indexOfEdgeThatExceedsAngleDeflection != null) {
+                indicesOfEdgesThatExceedAngleDeflection.add(indexOfEdgeThatExceedsAngleDeflection)
+                aggregateAngleDeflection = 0.0
             }
+        }
+        if (indicesOfEdgesThatExceedAngleDeflection.size > 0) {
+            outputCoordinates = points.subList(0, indicesOfEdgesThatExceedAngleDeflection.last()).toMutableList()
+        } else {
+            outputCoordinates = points.toMutableList()
         }
         return outputCoordinates
     }
