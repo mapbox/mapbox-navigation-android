@@ -5,9 +5,11 @@ import com.mapbox.navigation.core.history.model.HistoryEventPushHistoryRecord
 import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
 import com.mapbox.navigation.core.history.model.HistoryEventUpdateLocation
 import com.mapbox.navigation.testing.BuilderTest
+import com.mapbox.navigation.testing.FileUtils
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -70,16 +72,24 @@ class ReplayHistoryMapperTest : BuilderTest<ReplayHistoryMapper, ReplayHistoryMa
 
     @Test
     fun `should map HistoryEventSetRoute`() {
+        val validDirectionsRouteJson = FileUtils.loadJsonFixture("multileg_route.json")
         val event: HistoryEventSetRoute = mockk {
             every { eventTimestamp } returns 1580744198.879556
-            every { directionsRoute } returns mockk(relaxed = true)
+            every { directionsRoute } returns validDirectionsRouteJson
         }
 
-        val replayHistoryMapper = ReplayHistoryMapper.Builder().build()
-        val replayEvent = replayHistoryMapper.mapToReplayEvent(event)!!
+        val replayHistoryMapper = ReplayHistoryMapper.Builder()
+            .setRouteMapper(ReplayHistorySetRouteMapper("pk.test-token"))
+            .build()
+        val replayEvent = replayHistoryMapper.mapToReplayEvent(event)!! as ReplaySetRoute
 
-        assertTrue(replayEvent is ReplaySetRoute)
+        assertNotNull(replayEvent.route)
         assertEquals(1580744198.879556, replayEvent.eventTimestamp, 0.0001)
+        assertEquals(
+            "-77.1576396,38.7830304;-77.1670888,38.7756155;-77.1534183,38.7708948",
+            replayEvent.route!!.routeOptions()!!.coordinates()
+        )
+        assertEquals(451.2, replayEvent.route!!.duration(), 0.01)
     }
 
     @Test

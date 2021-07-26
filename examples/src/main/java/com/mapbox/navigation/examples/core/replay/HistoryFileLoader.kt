@@ -9,9 +9,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class HistoryFileLoader(
-    val accessToken: String
+    private val replayHistoryMapper: ReplayHistoryMapper
 ) {
-    private val replayHistoryMapper = ReplayHistoryMapper.Builder().build()
     private val historyFilesDirectory = HistoryFilesDirectory()
 
     @SuppressLint("MissingPermission")
@@ -37,7 +36,7 @@ class HistoryFileLoader(
         outputFile.outputStream().use { fileOut ->
             inputStream.copyTo(fileOut)
         }
-        MapboxHistoryReader(outputFile.absolutePath, accessToken)
+        MapboxHistoryReader(outputFile.absolutePath)
             .asSequence()
             .mapNotNull { replayHistoryMapper.mapToReplayEvent(it) }
             .toList()
