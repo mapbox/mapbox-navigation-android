@@ -12,7 +12,9 @@ import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Style
 import com.mapbox.navigation.testing.FileUtils
 import io.mockk.CapturingSlot
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Assert.assertTrue
@@ -45,11 +47,17 @@ class MapboxBuildingHighlightApiTest {
         }
     }
 
+    private val buildings = mutableListOf<List<QueriedFeature>>()
+    private val buildingHighlightObserver = mockk<BuildingHighlightObserver> {
+        every { onBuildingHighlight(capture(buildings)) } just Runs
+    }
     private val buildingHighlightApi = MapboxBuildingHighlightApi(mapboxMap)
 
     @Test
     fun `highlight null point is a no-op`() {
-        buildingHighlightApi.highlightBuilding(null)
+        buildingHighlightApi.highlightBuilding(null, buildingHighlightObserver)
+
+        verify(exactly = 0) { buildingHighlightObserver.onBuildingHighlight(any()) }
     }
 
     @Test
@@ -63,7 +71,7 @@ class MapboxBuildingHighlightApiTest {
         }
 
         val testPoint = Point.fromLngLat(-122.431969, 37.777663)
-        buildingHighlightApi.highlightBuilding(testPoint)
+        buildingHighlightApi.highlightBuilding(testPoint, buildingHighlightObserver)
         onStyleLoadedSlot.captured.onStyleLoaded(style)
 
         val propertySlot = CapturingSlot<Value>()

@@ -21,17 +21,35 @@ package com.mapbox.navigation.ui.maps {
 
 package com.mapbox.navigation.ui.maps.arrival.api {
 
+  public fun interface BuildingHighlightObserver {
+    method public void onBuildingHighlight(java.util.List<com.mapbox.maps.QueriedFeature> features);
+  }
+
   public final class MapboxBuildingArrivalApi {
     ctor public MapboxBuildingArrivalApi();
     method public com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingArrivalApi buildingHighlightApi(com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingHighlightApi? mapboxBuildingHighlightApi);
+    method public void clearBuildingHighlightObservers();
     method public void disable();
     method public void enable(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingArrivalApi registerBuildingHighlightObserver(com.mapbox.navigation.ui.maps.arrival.api.BuildingHighlightObserver observer);
+    method public void unregisterBuildingHighlightObserver(com.mapbox.navigation.ui.maps.arrival.api.BuildingHighlightObserver observer);
   }
 
   public final class MapboxBuildingHighlightApi {
     ctor public MapboxBuildingHighlightApi(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.navigation.ui.maps.arrival.model.MapboxBuildingHighlightOptions options = MapboxBuildingHighlightOptions.default);
     method public void clear();
-    method public void highlightBuilding(com.mapbox.geojson.Point? point);
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression getBuildingHeightExpression();
+    method public java.util.List<com.mapbox.maps.QueriedFeature> getHighlightedBuildings();
+    method public void highlightBuilding(com.mapbox.geojson.Point? point, com.mapbox.navigation.ui.maps.arrival.api.BuildingHighlightObserver callback);
+    property public final com.mapbox.maps.extension.style.expressions.generated.Expression buildingHeightExpression;
+    property public final java.util.List<com.mapbox.maps.QueriedFeature> highlightedBuildings;
+    field public static final String BUILDING_LAYER_ID = "building";
+    field public static final String COMPOSITE_SOURCE_ID = "composite";
+    field public static final com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingHighlightApi.Companion Companion;
+    field public static final String HIGHLIGHT_BUILDING_LAYER_ID = "mapbox-building-highlight-layer";
+  }
+
+  public static final class MapboxBuildingHighlightApi.Companion {
   }
 
 }

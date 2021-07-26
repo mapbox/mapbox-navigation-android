@@ -23,7 +23,7 @@ class MapboxBuildingArrivalApiTest {
     }
 
     private val buildingHighlightApi = mockk<MapboxBuildingHighlightApi> {
-        every { highlightBuilding(any()) } returns Unit
+        every { highlightBuilding(any(), any()) } returns Unit
     }
     private val buildingArrivalApi = MapboxBuildingArrivalApi()
 
@@ -72,7 +72,7 @@ class MapboxBuildingArrivalApiTest {
         buildingArrivalApi.enable(mapboxNavigation)
         arrivalSlot.captured.onFinalDestinationArrival(mockFinalDestinationRouteProgress())
 
-        verify { buildingHighlightApi.highlightBuilding(any()) }
+        verify { buildingHighlightApi.highlightBuilding(any(), any()) }
     }
 
     @Test
@@ -84,7 +84,7 @@ class MapboxBuildingArrivalApiTest {
         buildingArrivalApi.enable(mapboxNavigation)
         arrivalSlot.captured.onWaypointArrival(mockWaypointRouteProgress())
 
-        verify { buildingHighlightApi.highlightBuilding(any()) }
+        verify { buildingHighlightApi.highlightBuilding(any(), any()) }
     }
 
     @Test
@@ -97,7 +97,7 @@ class MapboxBuildingArrivalApiTest {
         arrivalSlot.captured.onWaypointArrival(mockWaypointRouteProgress())
         arrivalSlot.captured.onNextRouteLegStart(mockk())
 
-        verify { buildingHighlightApi.highlightBuilding(null) }
+        verify { buildingHighlightApi.highlightBuilding(null, any()) }
     }
 
     private fun mockFinalDestinationRouteProgress() = mockk<RouteProgress> {

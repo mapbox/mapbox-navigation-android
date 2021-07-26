@@ -5,6 +5,7 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
+import java.util.concurrent.CopyOnWriteArraySet
 
 /**
  * When approaching a waypoint or the final destination, this api is used to
@@ -14,6 +15,7 @@ import com.mapbox.navigation.core.arrival.ArrivalObserver
 class MapboxBuildingArrivalApi {
     private var mapboxNavigation: MapboxNavigation? = null
     private var mapboxBuildingHighlightApi: MapboxBuildingHighlightApi? = null
+    private val observers = CopyOnWriteArraySet<BuildingHighlightObserver>()
 
     /**
      * Bind a [MapboxBuildingHighlightApi] to arrival.
@@ -41,10 +43,37 @@ class MapboxBuildingArrivalApi {
         mapboxBuildingHighlightApi?.clear()
     }
 
+    /**
+     * Register an observer that will be notified when a building is highlighted upon arrival.
+     */
+    fun registerBuildingHighlightObserver(observer: BuildingHighlightObserver) = apply {
+        val highlightedBuildings = mapboxBuildingHighlightApi?.highlightedBuildings ?: emptyList()
+        observer.onBuildingHighlight(highlightedBuildings)
+        observers.add(observer)
+    }
+
+    /**
+     * Unregister the observer from [registerBuildingHighlightObserver]
+     */
+    fun unregisterBuildingHighlightObserver(observer: BuildingHighlightObserver) {
+        observers.remove(observer)
+    }
+
+    /**
+     * Clear all observers from [registerBuildingHighlightObserver]
+     */
+    fun clearBuildingHighlightObservers() {
+        observers.clear()
+    }
+
+    private val notifyObservers = BuildingHighlightObserver { features ->
+        observers.forEach { it.onBuildingHighlight(features) }
+    }
+
     private val arrivalObserver = object : ArrivalObserver {
         override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
             checkMapStyle()
-            mapboxBuildingHighlightApi?.highlightBuilding(null)
+            mapboxBuildingHighlightApi?.highlightBuilding(null, notifyObservers)
         }
 
         override fun onWaypointArrival(routeProgress: RouteProgress) {
@@ -52,7 +81,7 @@ class MapboxBuildingArrivalApi {
             val routeOptions = routeProgress.route.routeOptions()
             val coordinateIndex = routeProgress.currentLegProgress?.legIndex!! + 1
             routeOptions?.coordinatesList()?.get(coordinateIndex)?.let { point ->
-                mapboxBuildingHighlightApi?.highlightBuilding(point)
+                mapboxBuildingHighlightApi?.highlightBuilding(point, notifyObservers)
             }
         }
 
@@ -61,7 +90,7 @@ class MapboxBuildingArrivalApi {
             val finalDestination = routeProgress.route.routeOptions()
                 ?.coordinatesList()
                 ?.lastOrNull()
-            mapboxBuildingHighlightApi?.highlightBuilding(finalDestination)
+            mapboxBuildingHighlightApi?.highlightBuilding(finalDestination, notifyObservers)
         }
     }
 

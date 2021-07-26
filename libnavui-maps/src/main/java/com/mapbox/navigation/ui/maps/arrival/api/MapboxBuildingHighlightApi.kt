@@ -1,7 +1,5 @@
 package com.mapbox.navigation.ui.maps.arrival.api
 
-import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.QueriedFeature
@@ -14,15 +12,11 @@ import com.mapbox.maps.extension.style.expressions.generated.Expression.Companio
 import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.inExpression
 import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.interpolate
 import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.linear
-import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.not
 import com.mapbox.maps.extension.style.expressions.generated.Expression.Companion.zoom
 import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.FillExtrusionLayer
-import com.mapbox.maps.extension.style.layers.generated.FillLayer
-import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.getLayerAs
 import com.mapbox.navigation.ui.maps.arrival.model.MapboxBuildingHighlightOptions
-import com.mapbox.navigation.utils.internal.LoggerProvider.logger
 
 /**
  * Map layer to highlight a single building.
@@ -39,10 +33,14 @@ class MapboxBuildingHighlightApi(
         private set
 
     /**
-     * Access the current state of the extruded buildings layer.
+     * Access the expression used to create the building's height.
      */
-    var extrudeBuildings: Boolean = false
-        private set
+    val buildingHeightExpression: Expression =
+        interpolate(
+            linear(), zoom(),
+            literal(15.0), literal(0),
+            literal(15.05), get("height")
+        )
 
     /**
      * Highlight a building whose feature geometry that contains the [point]. If
@@ -54,13 +52,13 @@ class MapboxBuildingHighlightApi(
      */
     fun highlightBuilding(
         point: Point?,
-        callback: (List<QueriedFeature>) -> Unit = { }
+        callback: BuildingHighlightObserver
     ) {
         mapboxMap.getStyle { style ->
             if (point == null) {
                 highlightedBuildings = emptyList()
-                updateBuildingsLayer(style)
-                callback(highlightedBuildings)
+                updateHighlightBuildingLayer(style)
+                callback.onBuildingHighlight(highlightedBuildings)
                 return@getStyle
             }
 
@@ -69,19 +67,9 @@ class MapboxBuildingHighlightApi(
             val queryOptions = RenderedQueryOptions(listOf(BUILDING_LAYER_ID), null)
             mapboxMap.queryRenderedFeatures(screenCoordinate, queryOptions) { expected ->
                 highlightedBuildings = expected.value ?: emptyList()
-                updateBuildingsLayer(style)
-                callback(highlightedBuildings)
+                updateHighlightBuildingLayer(style)
+                callback.onBuildingHighlight(highlightedBuildings)
             }
-        }
-    }
-
-    /**
-     * Show all buildings on the map.
-     */
-    fun extrudeBuildings(extrudeBuildings: Boolean) = also {
-        this.extrudeBuildings = extrudeBuildings
-        mapboxMap.getStyle { style ->
-            updateBuildingsLayer(style)
         }
     }
 
@@ -92,11 +80,6 @@ class MapboxBuildingHighlightApi(
         mapboxMap.getStyle { style ->
             style.removeStyleLayer(HIGHLIGHT_BUILDING_LAYER_ID)
         }
-    }
-
-    private fun updateBuildingsLayer(style: Style) {
-        updateHighlightBuildingLayer(style)
-        updateFillBuildingsLayer(style)
     }
 
     private fun updateHighlightBuildingLayer(style: Style) {
@@ -111,7 +94,7 @@ class MapboxBuildingHighlightApi(
                     .fillExtrusionColor(options.fillExtrusionColor)
                     .fillExtrusionOpacity(options.fillExtrusionOpacity)
                     .fillExtrusionBase(get("min-height"))
-                    .fillExtrusionHeight(heightExpression())
+                    .fillExtrusionHeight(buildingHeightExpression)
             )
         } else {
             style.getLayerAs<FillExtrusionLayer>(layerId)
@@ -119,58 +102,18 @@ class MapboxBuildingHighlightApi(
         }
     }
 
-    private fun updateFillBuildingsLayer(style: Style) {
-        val layerId = EXTRUDE_BUILDING_LAYER_ID
-        if (!extrudeBuildings) {
-            style.removeStyleLayer(layerId)
-            return
-        }
-        val buildingFillColorExpression = buildingFillColor(style) ?: return
-
-        val ids = highlightedBuildings.mapNotNull { it.feature.id()?.toLong() }
-        val notSelectedBuildings = not(inExpression(id(), literal(ids)))
-        if (!style.styleLayerExists(layerId)) {
-            style.addLayer(
-                FillExtrusionLayer(layerId, COMPOSITE_SOURCE_ID)
-                    .sourceLayer(BUILDING_LAYER_ID)
-                    .filter(notSelectedBuildings)
-                    .fillExtrusionColor(buildingFillColorExpression)
-                    .fillExtrusionOpacity(literal(0.6))
-                    .fillExtrusionBase(get("min-height"))
-                    .fillExtrusionHeight(heightExpression())
-            )
-        } else {
-            style.getLayerAs<FillExtrusionLayer>(layerId)
-                .filter(notSelectedBuildings)
-        }
-    }
-
-    private fun buildingFillColor(style: Style): Expression? {
-        return when (val buildingLayer = style.getLayer(BUILDING_LAYER_ID)) {
-            is FillLayer -> buildingLayer.fillColorAsExpression
-            else -> {
-                logger.e(
-                    tag = TAG,
-                    msg = Message("$BUILDING_LAYER_ID has unsupported type $buildingLayer")
-                )
-                null
-            }
-        }
-    }
-
-    private fun heightExpression(): Expression =
-        interpolate(
-            linear(), zoom(),
-            literal(15.0), literal(0),
-            literal(15.05), get("height")
-        )
-
-    private companion object {
-        private val TAG = Tag("MapboxBuildingHighlightApi")
-
-        private const val HIGHLIGHT_BUILDING_LAYER_ID = "mapbox-building-highlight-layer"
-        private const val EXTRUDE_BUILDING_LAYER_ID = "mapbox-building-extrude-layer"
-        private const val BUILDING_LAYER_ID = "building"
-        private const val COMPOSITE_SOURCE_ID = "composite"
+    companion object {
+        /**
+         * Layer_id used for highlighting a building.
+         */
+        const val HIGHLIGHT_BUILDING_LAYER_ID = "mapbox-building-highlight-layer"
+        /**
+         * Source_id used for highlighting a building.
+         */
+        const val COMPOSITE_SOURCE_ID = "composite"
+        /**
+         * Source layer that includes building height.
+         */
+        const val BUILDING_LAYER_ID = "building"
     }
 }
