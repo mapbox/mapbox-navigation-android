@@ -155,7 +155,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     }
 
     private fun verifyHistoryEvents(filePath: String) {
-        val historyReader = MapboxHistoryReader(filePath, TEST_ACCESS_TOKEN)
+        val historyReader = MapboxHistoryReader(filePath)
 
         // Verify hasNext
         assertTrue(historyReader.hasNext())
@@ -179,7 +179,9 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         // Verify the set route event
         val setRouteEvent = historyEvents
             .find { it is HistoryEventSetRoute } as HistoryEventSetRoute
-        assertEquals(24.001, setRouteEvent.directionsRoute!!.duration(), 0.001)
+        val directionsRoute = DirectionsRoute
+            .fromJson(setRouteEvent.directionsRoute!!, TEST_ACCESS_TOKEN)
+        assertEquals(24.001, directionsRoute.duration(), 0.001)
         assertEquals(setRouteEvent.legIndex, 0)
         assertEquals(setRouteEvent.routeIndex, 0)
         assertEquals(DirectionsCriteria.GEOMETRY_POLYLINE6, setRouteEvent.geometries)
@@ -208,7 +210,12 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     fun legacy_json_verify_invalid_json_crashes() {
         val historyReader = historyReaderFromAssetFile("set_route_event_invalid.json")
 
-        historyReader.asSequence().toList()
+        val events: List<HistoryEvent> = historyReader.asSequence().toList()
+
+        assertEquals(1, events.size)
+        val setRouteEvent = events[0] as HistoryEventSetRoute
+        assertNotNull(setRouteEvent.directionsRoute)
+        DirectionsRoute.fromJson(setRouteEvent.directionsRoute!!, TEST_ACCESS_TOKEN)
     }
 
     @Test
@@ -220,8 +227,10 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         assertEquals(1, events.size)
         val setRouteEvent = events[0] as HistoryEventSetRoute
         assertNotNull(setRouteEvent.directionsRoute)
-        assertEquals(821.8, setRouteEvent.directionsRoute!!.distance(), 0.1)
-        assertEquals(157.0, setRouteEvent.directionsRoute!!.duration(), 0.1)
+        val directionsRoute = DirectionsRoute
+            .fromJson(setRouteEvent.directionsRoute!!, TEST_ACCESS_TOKEN)
+        assertEquals(821.8, directionsRoute.distance(), 0.1)
+        assertEquals(157.0, directionsRoute.duration(), 0.1)
         assertEquals(0, setRouteEvent.routeIndex)
         assertEquals(0, setRouteEvent.legIndex)
         assertEquals(DirectionsCriteria.GEOMETRY_POLYLINE6, setRouteEvent.geometries)
@@ -236,7 +245,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         outputFile.outputStream().use { fileOut ->
             inputStream.copyTo(fileOut)
         }
-        return MapboxHistoryReader(outputFile.absolutePath, TEST_ACCESS_TOKEN)
+        return MapboxHistoryReader(outputFile.absolutePath)
     }
 
     private companion object {

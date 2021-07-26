@@ -116,8 +116,7 @@ class ReplayHistoryMapper private constructor(
     class Builder {
         private var locationMapper: ReplayHistoryEventMapper<HistoryEventUpdateLocation>? =
             DefaultLocationMapper
-        private var setRouteMapper: ReplayHistoryEventMapper<HistoryEventSetRoute>? =
-            DefaultSetRouteMapper
+        private var setRouteMapper: ReplayHistoryEventMapper<HistoryEventSetRoute>? = null
         private var statusMapper: ReplayHistoryEventMapper<HistoryEventGetStatus>? =
             DefaultStatusMapper
         private var pushEventMappers =
@@ -149,7 +148,8 @@ class ReplayHistoryMapper private constructor(
 
         /**
          * Override to create a custom event mapper.
-         * Set to `null` to disable the HistoryEventSetRoute.
+         * This is `null` by default. Create an instance of [ReplayHistorySetRouteMapper]
+         * to enable the set route events in replay.
          */
         fun setRouteMapper(
             setRouteMapper: ReplayHistoryEventMapper<HistoryEventSetRoute>?
@@ -180,14 +180,6 @@ class ReplayHistoryMapper private constructor(
             private val DefaultLocationMapper =
                 ReplayHistoryEventMapper<HistoryEventUpdateLocation> {
                     ReplayRouteMapper.mapToUpdateLocation(it.eventTimestamp, it.location)
-                }
-
-            private val DefaultSetRouteMapper =
-                ReplayHistoryEventMapper<HistoryEventSetRoute> {
-                    ReplaySetRoute(
-                        eventTimestamp = it.eventTimestamp,
-                        route = it.directionsRoute
-                    )
                 }
 
             private val DefaultStatusMapper =

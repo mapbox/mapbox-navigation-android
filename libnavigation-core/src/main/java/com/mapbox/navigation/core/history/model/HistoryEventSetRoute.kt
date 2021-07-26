@@ -1,7 +1,6 @@
 package com.mapbox.navigation.core.history.model
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 
 /**
  * Historical event that represents when a route was set.
@@ -16,7 +15,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
  */
 class HistoryEventSetRoute internal constructor(
     override val eventTimestamp: Double,
-    val directionsRoute: DirectionsRoute?,
+    val directionsRoute: String?,
     val routeIndex: Int,
     val legIndex: Int,
     @DirectionsCriteria.ProfileCriteria val profile: String,
