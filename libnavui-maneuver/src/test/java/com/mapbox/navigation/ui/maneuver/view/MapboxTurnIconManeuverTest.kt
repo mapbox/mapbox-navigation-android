@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
+import com.mapbox.navigation.base.internal.maneuver.ManeuverTurnIcon
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.TurnIconHelper
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.SubManeuver
-import com.mapbox.navigation.ui.maneuver.model.TurnIcon
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -174,21 +174,21 @@ class MapboxTurnIconManeuverTest {
         assertEquals(expectedFlip, actualFlip)
     }
 
-    private fun getTurnIcon() = TurnIcon(
+    private fun getTurnIcon() = ManeuverTurnIcon(
         null,
         null,
         false,
         R.drawable.mapbox_ic_turn_left
     )
 
-    private fun getRoundaboutWithPrimary(maneuver: PrimaryManeuver) = TurnIcon(
+    private fun getRoundaboutWithPrimary(maneuver: PrimaryManeuver) = ManeuverTurnIcon(
         maneuver.degrees?.toFloat(),
         maneuver.drivingSide,
         true,
         R.drawable.mapbox_ic_roundabout_left
     )
 
-    private fun getRoundaboutWithSub(maneuver: SubManeuver) = TurnIcon(
+    private fun getRoundaboutWithSub(maneuver: SubManeuver) = ManeuverTurnIcon(
         maneuver.degrees?.toFloat(),
         maneuver.drivingSide,
         false,

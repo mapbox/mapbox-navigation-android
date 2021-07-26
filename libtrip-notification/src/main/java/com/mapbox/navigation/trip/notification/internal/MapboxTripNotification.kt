@@ -1,5 +1,6 @@
 package com.mapbox.navigation.trip.notification.internal
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -11,22 +12,18 @@ import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
-import android.graphics.PointF
+import android.graphics.drawable.Drawable
 import android.os.Build
-import android.text.SpannableString
 import android.text.TextUtils
 import android.text.format.DateFormat
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
-import androidx.core.util.Pair
 import com.mapbox.annotation.module.MapboxModule
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.api.directions.v5.models.ManeuverModifier
-import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.api.directions.v5.models.StepManeuver.StepManeuverType
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.internal.time.TimeFormatter.formatTime
@@ -43,12 +40,7 @@ import com.mapbox.navigation.utils.internal.NAVIGATION_NOTIFICATION_CHANNEL
 import com.mapbox.navigation.utils.internal.NOTIFICATION_CHANNEL
 import com.mapbox.navigation.utils.internal.NOTIFICATION_ID
 import com.mapbox.navigation.utils.internal.ifChannelException
-import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper
-import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.MANEUVER_ICON_DRAWER_MAP
-import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS
-import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.ROUNDABOUT_MANEUVER_TYPES
-import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.adjustRoundaboutAngle
-import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.isManeuverIconNeedFlip
+import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ClosedSendChannelException
@@ -85,13 +77,16 @@ class MapboxTripNotification constructor(
     private var currentRoundaboutAngle: Float? = null
 
     private var currentInstructionText: String? = null
-    private var currentDistanceText: SpannableString? = null
+    private var currentDistanceText: Double? = null
     private var pendingOpenIntent: PendingIntent? = null
     private var pendingCloseIntent: PendingIntent? = null
     private val etaFormat: String = applicationContext.getString(R.string.mapbox_eta_format)
     private val notificationReceiver = NotificationActionReceiver()
     private lateinit var notification: Notification
     private lateinit var notificationManager: NotificationManager
+    private val turnIconHelper = NotificationTurnIconHelper(
+        NotificationTurnIconResources.Builder().build()
+    )
 
     private var notificationView: MapboxTripNotificationView
     init {
@@ -110,7 +105,7 @@ class MapboxTripNotification constructor(
 
     /**
      * Provides a custom [Notification] to launch
-     * with the [TripSession], specifically
+     * with the trip session, specifically
      * [android.app.Service.startForeground].
      *
      * @return a custom notification
@@ -124,7 +119,7 @@ class MapboxTripNotification constructor(
     }
 
     /**
-     * An integer id that will be used to start this notification from [TripSession] with
+     * An integer id that will be used to start this notification from trip session with
      * [android.app.Service.startForeground].
      *
      * @return an int id specific to the notification
@@ -151,7 +146,7 @@ class MapboxTripNotification constructor(
     }
 
     /**
-     * Called when TripSession starts via [TripSession.start]
+     * Called when TripSession starts
      *
      * This callback may be used to perform any actions after the trip session is initialized.
      */
@@ -163,7 +158,7 @@ class MapboxTripNotification constructor(
     }
 
     /**
-     * Called when TripSession spos via [TripSession.stop]
+     * Called when TripSession stops
      *
      * This callback may be used to clean up any listeners or receivers, preventing leaks.
      */
@@ -217,6 +212,7 @@ class MapboxTripNotification constructor(
      * @param applicationContext the application's [Context]
      * @return [PendingIntent] to opening application
      */
+    @SuppressLint("UnspecifiedImmutableFlag")
     private fun createPendingOpenIntent(applicationContext: Context): PendingIntent? {
         val pm = applicationContext.packageManager
         val intent = pm.getLaunchIntentForPackage(applicationContext.packageName) ?: return null
@@ -225,12 +221,13 @@ class MapboxTripNotification constructor(
     }
 
     /**
-     * Creates [PendingIntent] for stopping [TripSession] when
+     * Creates [PendingIntent] for stopping trip session when
      * proper button is clicked in the notification view
      *
      * @param applicationContext the application's [Context]
-     * @return [PendingIntent] for stopping [TripSession]
+     * @return [PendingIntent] for stopping trip session
      */
+    @SuppressLint("UnspecifiedImmutableFlag")
     private fun createPendingCloseIntent(applicationContext: Context): PendingIntent? {
         val endNavigationBtn = Intent(END_NAVIGATION_ACTION)
         return PendingIntent.getBroadcast(applicationContext, 0, endNavigationBtn, 0)
@@ -253,12 +250,17 @@ class MapboxTripNotification constructor(
         when (state) {
             is TripNotificationState.TripNotificationFreeState -> setFreeDriveMode(true)
             is TripNotificationState.TripNotificationData -> {
-                updateInstructionText(state.bannerInstructions)
-                updateDistanceText(state.distanceRemaining)
+                if (isDistanceTextChanged(state.distanceRemaining)) {
+                    updateDistanceText(state.distanceRemaining)
+                }
                 generateArrivalTime(state.durationRemaining)?.let { formattedTime ->
                     updateViewsWithArrival(formattedTime)
                 }
                 state.bannerInstructions?.let { bannerInstructions ->
+                    val primary = bannerInstructions.primary().text()
+                    if (isInstructionTextChanged(primary)) {
+                        updateInstructionText(primary)
+                    }
                     if (isManeuverStateChanged(bannerInstructions)) {
                         updateManeuverImage(state.drivingSide ?: ManeuverModifier.RIGHT)
                     }
@@ -273,25 +275,24 @@ class MapboxTripNotification constructor(
         updateCurrentManeuverToDefault(isFreeDriveMode)
     }
 
-    private fun updateInstructionText(bannerInstruction: BannerInstructions?) {
-        bannerInstruction?.let { bannerIns ->
-            val primaryText = bannerIns.primary().text()
-            if (currentInstructionText.isNullOrEmpty() || currentInstructionText != primaryText) {
-                notificationView.updateInstructionText(primaryText)
-                currentInstructionText = primaryText
-            }
+    private fun updateCurrentManeuverToDefault(isFreeDriveMode: Boolean) {
+        if (isFreeDriveMode) {
+            currentManeuverType = null
+            currentManeuverModifier = null
+            currentRoundaboutAngle = null
         }
+    }
+
+    private fun isDistanceTextChanged(distanceRemaining: Double?): Boolean {
+        return currentDistanceText != distanceRemaining
     }
 
     private fun updateDistanceText(distanceRemaining: Double?) {
         val formattedDistance = distanceRemaining?.let {
             distanceFormatter.formatDistance(distanceRemaining)
         } ?: return
-
-        if (currentDistanceText != formattedDistance) {
-            currentDistanceText = formattedDistance
-            notificationView.updateDistanceText(currentDistanceText)
-        }
+        currentDistanceText = distanceRemaining
+        notificationView.updateDistanceText(formattedDistance)
     }
 
     private fun generateArrivalTime(
@@ -314,23 +315,13 @@ class MapboxTripNotification constructor(
         notificationView.updateArrivalTime(time)
     }
 
-    private fun updateCurrentManeuverToDefault(isFreeDriveMode: Boolean) {
-        if (isFreeDriveMode) {
-            currentManeuverType = null
-            currentManeuverModifier = null
-            currentRoundaboutAngle = null
-        }
+    private fun isInstructionTextChanged(primaryText: String): Boolean {
+        return currentInstructionText.isNullOrEmpty() || currentInstructionText != primaryText
     }
 
-    private fun updateManeuverImage(drivingSide: String) {
-        getManeuverBitmap(
-            currentManeuverType ?: "",
-            currentManeuverModifier,
-            drivingSide,
-            currentRoundaboutAngle
-        )?.let { bitmap ->
-            notificationView.updateImage(bitmap)
-        }
+    private fun updateInstructionText(primaryText: String) {
+        notificationView.updateInstructionText(primaryText)
+        currentInstructionText = primaryText
     }
 
     private fun isManeuverStateChanged(bannerInstruction: BannerInstructions): Boolean {
@@ -338,101 +329,62 @@ class MapboxTripNotification constructor(
         val previousManeuverModifier = currentManeuverModifier
         val previousRoundaboutAngle = currentRoundaboutAngle
 
-        updateManeuverState(bannerInstruction)
+        currentManeuverType = bannerInstruction.primary().type()
+        currentManeuverModifier = bannerInstruction.primary().modifier()
+        currentRoundaboutAngle = bannerInstruction.primary().degrees()?.toFloat()
 
         return !TextUtils.equals(currentManeuverType, previousManeuverType) ||
             !TextUtils.equals(currentManeuverModifier, previousManeuverModifier) ||
             currentRoundaboutAngle != previousRoundaboutAngle
     }
 
-    private fun updateManeuverState(bannerInstruction: BannerInstructions) {
-        currentManeuverType = bannerInstruction.primary().type()
-        currentManeuverModifier = bannerInstruction.primary().modifier()
-
-        currentRoundaboutAngle = if (ROUNDABOUT_MANEUVER_TYPES.contains(currentManeuverType)) {
-            bannerInstruction.primary().degrees()?.toFloat()?.let {
-                adjustRoundaboutAngle(it)
+    private fun updateManeuverImage(drivingSide: String) {
+        val notificationTurnIcon = turnIconHelper.retrieveTurnIcon(
+            currentManeuverType,
+            currentRoundaboutAngle,
+            currentManeuverModifier,
+            drivingSide
+        )
+        ifNonNull(notificationTurnIcon) { turnIcon ->
+            ifNonNull(turnIcon.icon) { image ->
+                val originalDrawable = notificationView.getImageDrawable(image)
+                ifNonNull(originalDrawable) { drawable ->
+                    ifNonNull(getManeuverBitmap(drawable, turnIcon.shouldFlipIcon)) { bitmap ->
+                        notificationView.updateImage(bitmap)
+                    }
+                }
             }
-        } else {
-            null
         }
     }
 
-    private fun getManeuverBitmap(
-        maneuverType: String,
-        maneuverModifier: String?,
-        drivingSide: String,
-        roundaboutAngle: Float?
-    ): Bitmap? {
-        val maneuver = when {
-            MANEUVER_TYPES_WITH_NULL_MODIFIERS.contains(maneuverType) -> Pair(maneuverType, null)
-            !StepManeuver.ARRIVE.contentEquals(maneuverType) && maneuverModifier != null -> Pair(
-                null,
-                maneuverModifier
-            )
-            else -> Pair(maneuverType, maneuverModifier)
-        }
-
-        val width =
-            applicationContext
-                .resources
-                .getDimensionPixelSize(R.dimen.mapbox_notification_maneuver_image_width)
-        val height =
-            applicationContext
-                .resources
-                .getDimensionPixelSize(R.dimen.mapbox_notification_maneuver_image_height)
-
-        val maneuverImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val maneuverCanvas = Canvas(maneuverImage)
-
-        // FIXME temp solution, data issue: roundabout turn 360 degree are set with null angle
-        if (maneuverType == StepManeuver.ROUNDABOUT && roundaboutAngle == null) {
-            val drawable =
-                ContextCompat.getDrawable(
-                    applicationContext,
-                    ManeuverIconHelper.provideGenericRoundabout(drivingSide)
-                )
-            drawable?.setBounds(0, 0, maneuverCanvas.width, maneuverCanvas.height)
-            drawable?.draw(maneuverCanvas)
-            return maneuverImage
-        }
-
-        MANEUVER_ICON_DRAWER_MAP[maneuver]?.drawManeuverIcon(
-            maneuverCanvas,
-            ContextCompat.getColor(
-                applicationContext,
-                R.color.mapbox_navigation_view_color_banner_maneuver_primary
-            ),
-            ContextCompat.getColor(
-                applicationContext,
-                R.color.mapbox_navigation_view_color_banner_maneuver_secondary
-            ),
-            PointF(width.toFloat(), height.toFloat()),
-            roundaboutAngle ?: 0f
+    private fun getManeuverBitmap(drawable: Drawable, shouldFlipIcon: Boolean): Bitmap? {
+        val maneuverImageBitmap = Bitmap.createBitmap(
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888
         )
-
+        val maneuverCanvas = Canvas(maneuverImageBitmap)
+        drawable.setBounds(0, 0, maneuverCanvas.width, maneuverCanvas.height)
+        drawable.draw(maneuverCanvas)
         maneuverCanvas.restoreToCount(maneuverCanvas.saveCount)
-
-        return if (
-            isManeuverIconNeedFlip(currentManeuverType, currentManeuverModifier, drivingSide)
-        ) {
+        return if (shouldFlipIcon) {
             Bitmap.createBitmap(
-                maneuverImage,
+                maneuverImageBitmap,
                 0,
                 0,
-                width,
-                height,
+                drawable.intrinsicWidth,
+                drawable.intrinsicHeight,
                 Matrix().apply { preScale(-1f, 1f) },
                 false
             )
         } else {
-            maneuverImage
+            maneuverImageBitmap
         }
     }
 
     private fun onEndNavigationBtnClick() {
         try {
-            notificationActionButtonChannel.offer(NotificationAction.END_NAVIGATION)
+            notificationActionButtonChannel.trySend(NotificationAction.END_NAVIGATION)
         } catch (e: Exception) {
             when (e) {
                 is ClosedReceiveChannelException,

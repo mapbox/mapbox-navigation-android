@@ -1,99 +1,9 @@
-package com.mapbox.navigation.ui.maneuver.model
+package com.mapbox.navigation.trip.notification.internal
 
 import androidx.annotation.DrawableRes
-import com.mapbox.navigation.ui.maneuver.R
+import com.mapbox.navigation.trip.notification.R
 
-/**
- * A class that allows you to define your own maneuver icons to be rendered.
- * @property turnIconArrive Int
- * @property turnIconArriveLeft Int
- * @property turnIconArriveRight Int
- * @property turnIconArriveStraight Int
- * @property turnIconContinue Int
- * @property turnIconContinueLeft Int
- * @property turnIconContinueRight Int
- * @property turnIconContinueStraight Int
- * @property turnIconContinueUturn Int
- * @property turnIconContinueSlightLeft Int
- * @property turnIconContinueSlightRight Int
- * @property turnIconDepart Int
- * @property turnIconDepartLeft Int
- * @property turnIconDepartRight Int
- * @property turnIconDepartStraight Int
- * @property turnIconEndRoadLeft Int
- * @property turnIconEndRoadRight Int
- * @property turnIconFork Int
- * @property turnIconForkLeft Int
- * @property turnIconForkRight Int
- * @property turnIconForkStraight Int
- * @property turnIconForkSlightLeft Int
- * @property turnIconForkSlightRight Int
- * @property turnIconInvalid Int
- * @property turnIconInvalidLeft Int
- * @property turnIconInvalidRight Int
- * @property turnIconInvalidStraight Int
- * @property turnIconInvalidSlightLeft Int
- * @property turnIconInvalidSlightRight Int
- * @property turnIconInvalidUturn Int
- * @property turnIconMergeLeft Int
- * @property turnIconMergeRight Int
- * @property turnIconMergeStraight Int
- * @property turnIconMergeSlightLeft Int
- * @property turnIconMergeSlightRight Int
- * @property turnIconNewNameLeft Int
- * @property turnIconNewNameRight Int
- * @property turnIconNewNameStraight Int
- * @property turnIconNewNameSharpLeft Int
- * @property turnIconNewNameSharpRight Int
- * @property turnIconNewNameSlightLeft Int
- * @property turnIconNewNameSlightRight Int
- * @property turnIconNotificationLeft Int
- * @property turnIconNotificationRight Int
- * @property turnIconNotificationStraight Int
- * @property turnIconNotificationSharpLeft Int
- * @property turnIconNotificationSharpRight Int
- * @property turnIconNotificationSlightLeft Int
- * @property turnIconNotificationSlightRight Int
- * @property turnIconOffRamp Int
- * @property turnIconOffRampLeft Int
- * @property turnIconOffRampRight Int
- * @property turnIconOffRampSlightLeft Int
- * @property turnIconOffRampSlightRight Int
- * @property turnIconOnRamp Int
- * @property turnIconOnRampLeft Int
- * @property turnIconOnRampRight Int
- * @property turnIconOnRampStraight Int
- * @property turnIconOnRampSlightLeft Int
- * @property turnIconOnRampSlightRight Int
- * @property turnIconOnRampSharpLeft Int
- * @property turnIconOnRampSharpRight Int
- * @property turnIconRamp Int
- * @property turnIconRotary Int
- * @property turnIconRotaryLeft Int
- * @property turnIconRotaryRight Int
- * @property turnIconRotaryStraight Int
- * @property turnIconRotarySlightLeft Int
- * @property turnIconRotarySlightRight Int
- * @property turnIconRotarySharpLeft Int
- * @property turnIconRotarySharpRight Int
- * @property turnIconRoundabout Int
- * @property turnIconRoundaboutLeft Int
- * @property turnIconRoundaboutRight Int
- * @property turnIconRoundaboutStraight Int
- * @property turnIconRoundaboutSlightLeft Int
- * @property turnIconRoundaboutSlightRight Int
- * @property turnIconRoundaboutSharpLeft Int
- * @property turnIconRoundaboutSharpRight Int
- * @property turnIconTurnLeft Int
- * @property turnIconTurnRight Int
- * @property turnIconTurnStraight Int
- * @property turnIconTurnSlightLeft Int
- * @property turnIconTurnSlightRight Int
- * @property turnIconTurnSharpLeft Int
- * @property turnIconTurnSharpRight Int
- * @property turnIconUturn Int
- */
-class TurnIconResources private constructor(
+class NotificationTurnIconResources private constructor(
     @DrawableRes val turnIconArrive: Int,
     @DrawableRes val turnIconArriveLeft: Int,
     @DrawableRes val turnIconArriveRight: Int,
@@ -281,7 +191,7 @@ class TurnIconResources private constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "TurnIconResources(" +
+        return "NotificationTurnIconResources(" +
             "turnIconArrive=$turnIconArrive, " +
             "turnIconArriveLeft=$turnIconArriveLeft, " +
             "turnIconArriveRight=$turnIconArriveRight, " +
@@ -378,7 +288,7 @@ class TurnIconResources private constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as TurnIconResources
+        other as NotificationTurnIconResources
 
         if (turnIconArrive != other.turnIconArrive) return false
         if (turnIconArriveLeft != other.turnIconArriveLeft) return false
@@ -567,7 +477,7 @@ class TurnIconResources private constructor(
     }
 
     /**
-     * Build a new [TurnIconResources]
+     * Build a new [NotificationTurnIconResources]
      * @property turnIconArrive Int
      * @property turnIconArriveLeft Int
      * @property turnIconArriveRight Int
@@ -657,94 +567,126 @@ class TurnIconResources private constructor(
      * @property turnIconUturn Int
      */
     class Builder {
-        private var turnIconArrive: Int = R.drawable.mapbox_ic_arrive
-        private var turnIconArriveLeft: Int = R.drawable.mapbox_ic_arrive_left
-        private var turnIconArriveRight: Int = R.drawable.mapbox_ic_arrive_right
-        private var turnIconArriveStraight: Int = R.drawable.mapbox_ic_arrive_straight
-        private var turnIconContinue: Int = R.drawable.mapbox_ic_turn_straight
-        private var turnIconContinueLeft: Int = R.drawable.mapbox_ic_turn_left
-        private var turnIconContinueRight: Int = R.drawable.mapbox_ic_turn_right
-        private var turnIconContinueStraight: Int = R.drawable.mapbox_ic_turn_straight
-        private var turnIconContinueUturn: Int = R.drawable.mapbox_ic_uturn
-        private var turnIconContinueSlightLeft: Int = R.drawable.mapbox_ic_turn_slight_left
-        private var turnIconContinueSlightRight: Int = R.drawable.mapbox_ic_turn_slight_right
-        private var turnIconDepart: Int = R.drawable.mapbox_ic_depart
-        private var turnIconDepartLeft: Int = R.drawable.mapbox_ic_depart_left
-        private var turnIconDepartRight: Int = R.drawable.mapbox_ic_depart_right
-        private var turnIconDepartStraight: Int = R.drawable.mapbox_ic_depart_straight
-        private var turnIconEndRoadLeft: Int = R.drawable.mapbox_ic_end_of_road_left
-        private var turnIconEndRoadRight: Int = R.drawable.mapbox_ic_end_of_road_right
-        private var turnIconFork: Int = R.drawable.mapbox_ic_fork
-        private var turnIconForkLeft: Int = R.drawable.mapbox_ic_fork_left
-        private var turnIconForkRight: Int = R.drawable.mapbox_ic_fork_right
-        private var turnIconForkStraight: Int = R.drawable.mapbox_ic_fork_straight
-        private var turnIconForkSlightLeft: Int = R.drawable.mapbox_ic_fork_slight_left
-        private var turnIconForkSlightRight: Int = R.drawable.mapbox_ic_fork_slight_right
-        private var turnIconInvalid: Int = R.drawable.mapbox_ic_turn_straight
-        private var turnIconInvalidLeft: Int = R.drawable.mapbox_ic_turn_left
-        private var turnIconInvalidRight: Int = R.drawable.mapbox_ic_turn_right
-        private var turnIconInvalidStraight: Int = R.drawable.mapbox_ic_turn_straight
-        private var turnIconInvalidSlightLeft: Int = R.drawable.mapbox_ic_turn_slight_left
-        private var turnIconInvalidSlightRight: Int = R.drawable.mapbox_ic_turn_slight_right
-        private var turnIconInvalidUturn: Int = R.drawable.mapbox_ic_uturn
-        private var turnIconMergeLeft: Int = R.drawable.mapbox_ic_merge_left
-        private var turnIconMergeRight: Int = R.drawable.mapbox_ic_merge_right
-        private var turnIconMergeStraight: Int = R.drawable.mapbox_ic_turn_straight
-        private var turnIconMergeSlightLeft: Int = R.drawable.mapbox_ic_merge_slight_left
-        private var turnIconMergeSlightRight: Int = R.drawable.mapbox_ic_merge_slight_right
-        private var turnIconNewNameLeft: Int = R.drawable.mapbox_ic_turn_left
-        private var turnIconNewNameRight: Int = R.drawable.mapbox_ic_turn_right
-        private var turnIconNewNameStraight: Int = R.drawable.mapbox_ic_turn_straight
-        private var turnIconNewNameSharpLeft: Int = R.drawable.mapbox_ic_turn_sharp_left
-        private var turnIconNewNameSharpRight: Int = R.drawable.mapbox_ic_turn_sharp_right
-        private var turnIconNewNameSlightLeft: Int = R.drawable.mapbox_ic_turn_slight_left
-        private var turnIconNewNameSlightRight: Int = R.drawable.mapbox_ic_turn_slight_right
-        private var turnIconNotificationLeft: Int = R.drawable.mapbox_ic_turn_left
-        private var turnIconNotificationRight: Int = R.drawable.mapbox_ic_turn_right
-        private var turnIconNotificationStraight: Int = R.drawable.mapbox_ic_turn_straight
-        private var turnIconNotificationSharpLeft: Int = R.drawable.mapbox_ic_turn_sharp_left
-        private var turnIconNotificationSharpRight: Int = R.drawable.mapbox_ic_turn_sharp_right
-        private var turnIconNotificationSlightLeft: Int = R.drawable.mapbox_ic_turn_slight_left
-        private var turnIconNotificationSlightRight: Int = R.drawable.mapbox_ic_turn_slight_right
-        private var turnIconOffRamp: Int = R.drawable.mapbox_ic_off_ramp
-        private var turnIconOffRampLeft: Int = R.drawable.mapbox_ic_off_ramp_left
-        private var turnIconOffRampRight: Int = R.drawable.mapbox_ic_off_ramp_right
-        private var turnIconOffRampSlightLeft: Int = R.drawable.mapbox_ic_off_ramp_slight_left
-        private var turnIconOffRampSlightRight: Int = R.drawable.mapbox_ic_off_ramp_slight_right
-        private var turnIconOnRamp: Int = R.drawable.mapbox_ic_on_ramp
-        private var turnIconOnRampLeft: Int = R.drawable.mapbox_ic_turn_left
-        private var turnIconOnRampRight: Int = R.drawable.mapbox_ic_turn_right
-        private var turnIconOnRampStraight: Int = R.drawable.mapbox_ic_turn_straight
-        private var turnIconOnRampSlightLeft: Int = R.drawable.mapbox_ic_turn_slight_left
-        private var turnIconOnRampSlightRight: Int = R.drawable.mapbox_ic_turn_slight_right
-        private var turnIconOnRampSharpLeft: Int = R.drawable.mapbox_ic_turn_sharp_left
-        private var turnIconOnRampSharpRight: Int = R.drawable.mapbox_ic_turn_sharp_right
-        private var turnIconRamp: Int = R.drawable.mapbox_ic_ramp
-        private var turnIconRotary: Int = R.drawable.mapbox_ic_rotary
-        private var turnIconRotaryLeft: Int = R.drawable.mapbox_ic_rotary_left
-        private var turnIconRotaryRight: Int = R.drawable.mapbox_ic_rotary_right
-        private var turnIconRotaryStraight: Int = R.drawable.mapbox_ic_rotary_straight
-        private var turnIconRotarySlightLeft: Int = R.drawable.mapbox_ic_rotary_slight_left
-        private var turnIconRotarySlightRight: Int = R.drawable.mapbox_ic_rotary_slight_right
-        private var turnIconRotarySharpLeft: Int = R.drawable.mapbox_ic_rotary_sharp_left
-        private var turnIconRotarySharpRight: Int = R.drawable.mapbox_ic_rotary_sharp_right
-        private var turnIconRoundabout: Int = R.drawable.mapbox_ic_roundabout
-        private var turnIconRoundaboutLeft: Int = R.drawable.mapbox_ic_roundabout_left
-        private var turnIconRoundaboutRight: Int = R.drawable.mapbox_ic_roundabout_right
-        private var turnIconRoundaboutStraight: Int = R.drawable.mapbox_ic_roundabout_straight
-        private var turnIconRoundaboutSlightLeft: Int = R.drawable.mapbox_ic_roundabout_slight_left
+        private var turnIconArrive: Int = R.drawable.mapbox_ic_notification_arrive
+        private var turnIconArriveLeft: Int = R.drawable.mapbox_ic_notification_arrive_left
+        private var turnIconArriveRight: Int = R.drawable.mapbox_ic_notification_arrive_right
+        private var turnIconArriveStraight: Int = R.drawable.mapbox_ic_notification_arrive_straight
+        private var turnIconContinue: Int = R.drawable.mapbox_ic_notification_turn_straight
+        private var turnIconContinueLeft: Int = R.drawable.mapbox_ic_notification_turn_left
+        private var turnIconContinueRight: Int = R.drawable.mapbox_ic_notification_turn_right
+        private var turnIconContinueStraight: Int = R.drawable.mapbox_ic_notification_turn_straight
+        private var turnIconContinueUturn: Int = R.drawable.mapbox_ic_notification_uturn
+        private var turnIconContinueSlightLeft: Int =
+            R.drawable.mapbox_ic_notification_turn_slight_left
+        private var turnIconContinueSlightRight: Int =
+            R.drawable.mapbox_ic_notification_turn_slight_right
+        private var turnIconDepart: Int = R.drawable.mapbox_ic_notification_depart
+        private var turnIconDepartLeft: Int = R.drawable.mapbox_ic_notification_depart_left
+        private var turnIconDepartRight: Int = R.drawable.mapbox_ic_notification_depart_right
+        private var turnIconDepartStraight: Int = R.drawable.mapbox_ic_notification_depart_straight
+        private var turnIconEndRoadLeft: Int = R.drawable.mapbox_ic_notification_end_of_road_left
+        private var turnIconEndRoadRight: Int = R.drawable.mapbox_ic_notification_end_of_road_right
+        private var turnIconFork: Int = R.drawable.mapbox_ic_notification_fork
+        private var turnIconForkLeft: Int = R.drawable.mapbox_ic_notification_fork_left
+        private var turnIconForkRight: Int = R.drawable.mapbox_ic_notification_fork_right
+        private var turnIconForkStraight: Int = R.drawable.mapbox_ic_notification_fork_straight
+        private var turnIconForkSlightLeft: Int = R.drawable.mapbox_ic_notification_fork_slight_left
+        private var turnIconForkSlightRight: Int =
+            R.drawable.mapbox_ic_notification_fork_slight_right
+        private var turnIconInvalid: Int = R.drawable.mapbox_ic_notification_turn_straight
+        private var turnIconInvalidLeft: Int = R.drawable.mapbox_ic_notification_turn_left
+        private var turnIconInvalidRight: Int = R.drawable.mapbox_ic_notification_turn_right
+        private var turnIconInvalidStraight: Int = R.drawable.mapbox_ic_notification_turn_straight
+        private var turnIconInvalidSlightLeft: Int =
+            R.drawable.mapbox_ic_notification_turn_slight_left
+        private var turnIconInvalidSlightRight: Int =
+            R.drawable.mapbox_ic_notification_turn_slight_right
+        private var turnIconInvalidUturn: Int = R.drawable.mapbox_ic_notification_uturn
+        private var turnIconMergeLeft: Int = R.drawable.mapbox_ic_notification_merge_left
+        private var turnIconMergeRight: Int = R.drawable.mapbox_ic_notification_merge_right
+        private var turnIconMergeStraight: Int = R.drawable.mapbox_ic_notification_turn_straight
+        private var turnIconMergeSlightLeft: Int =
+            R.drawable.mapbox_ic_notification_merge_slight_left
+        private var turnIconMergeSlightRight: Int =
+            R.drawable.mapbox_ic_notification_merge_slight_right
+        private var turnIconNewNameLeft: Int = R.drawable.mapbox_ic_notification_turn_left
+        private var turnIconNewNameRight: Int = R.drawable.mapbox_ic_notification_turn_right
+        private var turnIconNewNameStraight: Int = R.drawable.mapbox_ic_notification_turn_straight
+        private var turnIconNewNameSharpLeft: Int =
+            R.drawable.mapbox_ic_notification_turn_sharp_left
+        private var turnIconNewNameSharpRight: Int =
+            R.drawable.mapbox_ic_notification_turn_sharp_right
+        private var turnIconNewNameSlightLeft: Int =
+            R.drawable.mapbox_ic_notification_turn_slight_left
+        private var turnIconNewNameSlightRight: Int =
+            R.drawable.mapbox_ic_notification_turn_slight_right
+        private var turnIconNotificationLeft: Int = R.drawable.mapbox_ic_notification_turn_left
+        private var turnIconNotificationRight: Int = R.drawable.mapbox_ic_notification_turn_right
+        private var turnIconNotificationStraight: Int =
+            R.drawable.mapbox_ic_notification_turn_straight
+        private var turnIconNotificationSharpLeft: Int =
+            R.drawable.mapbox_ic_notification_turn_sharp_left
+        private var turnIconNotificationSharpRight: Int =
+            R.drawable.mapbox_ic_notification_turn_sharp_right
+        private var turnIconNotificationSlightLeft: Int =
+            R.drawable.mapbox_ic_notification_turn_slight_left
+        private var turnIconNotificationSlightRight: Int =
+            R.drawable.mapbox_ic_notification_turn_slight_right
+        private var turnIconOffRamp: Int = R.drawable.mapbox_ic_notification_off_ramp
+        private var turnIconOffRampLeft: Int = R.drawable.mapbox_ic_notification_off_ramp_left
+        private var turnIconOffRampRight: Int = R.drawable.mapbox_ic_notification_off_ramp_right
+        private var turnIconOffRampSlightLeft: Int =
+            R.drawable.mapbox_ic_notification_off_ramp_slight_left
+        private var turnIconOffRampSlightRight: Int =
+            R.drawable.mapbox_ic_notification_off_ramp_slight_right
+        private var turnIconOnRamp: Int = R.drawable.mapbox_ic_notification_on_ramp
+        private var turnIconOnRampLeft: Int = R.drawable.mapbox_ic_notification_turn_left
+        private var turnIconOnRampRight: Int = R.drawable.mapbox_ic_notification_turn_right
+        private var turnIconOnRampStraight: Int = R.drawable.mapbox_ic_notification_turn_straight
+        private var turnIconOnRampSlightLeft: Int =
+            R.drawable.mapbox_ic_notification_turn_slight_left
+        private var turnIconOnRampSlightRight: Int =
+            R.drawable.mapbox_ic_notification_turn_slight_right
+        private var turnIconOnRampSharpLeft: Int =
+            R.drawable.mapbox_ic_notification_turn_sharp_left
+        private var turnIconOnRampSharpRight: Int =
+            R.drawable.mapbox_ic_notification_turn_sharp_right
+        private var turnIconRamp: Int = R.drawable.mapbox_ic_notification_ramp
+        private var turnIconRotary: Int = R.drawable.mapbox_ic_notification_rotary
+        private var turnIconRotaryLeft: Int = R.drawable.mapbox_ic_notification_rotary_left
+        private var turnIconRotaryRight: Int = R.drawable.mapbox_ic_notification_rotary_right
+        private var turnIconRotaryStraight: Int = R.drawable.mapbox_ic_notification_rotary_straight
+        private var turnIconRotarySlightLeft: Int =
+            R.drawable.mapbox_ic_notification_rotary_slight_left
+        private var turnIconRotarySlightRight: Int =
+            R.drawable.mapbox_ic_notification_rotary_slight_right
+        private var turnIconRotarySharpLeft: Int =
+            R.drawable.mapbox_ic_notification_rotary_sharp_left
+        private var turnIconRotarySharpRight: Int =
+            R.drawable.mapbox_ic_notification_rotary_sharp_right
+        private var turnIconRoundabout: Int = R.drawable.mapbox_ic_notification_roundabout
+        private var turnIconRoundaboutLeft: Int = R.drawable.mapbox_ic_notification_roundabout_left
+        private var turnIconRoundaboutRight: Int =
+            R.drawable.mapbox_ic_notification_roundabout_right
+        private var turnIconRoundaboutStraight: Int =
+            R.drawable.mapbox_ic_notification_roundabout_straight
+        private var turnIconRoundaboutSlightLeft: Int =
+            R.drawable.mapbox_ic_notification_roundabout_slight_left
         private var turnIconRoundaboutSlightRight: Int =
-            R.drawable.mapbox_ic_roundabout_slight_right
-        private var turnIconRoundaboutSharpLeft: Int = R.drawable.mapbox_ic_roundabout_sharp_left
-        private var turnIconRoundaboutSharpRight: Int = R.drawable.mapbox_ic_roundabout_sharp_right
-        private var turnIconTurnLeft: Int = R.drawable.mapbox_ic_turn_left
-        private var turnIconTurnRight: Int = R.drawable.mapbox_ic_turn_right
-        private var turnIconTurnStraight: Int = R.drawable.mapbox_ic_turn_straight
-        private var turnIconTurnSlightLeft: Int = R.drawable.mapbox_ic_turn_slight_left
-        private var turnIconTurnSlightRight: Int = R.drawable.mapbox_ic_turn_slight_right
-        private var turnIconTurnSharpLeft: Int = R.drawable.mapbox_ic_turn_sharp_left
-        private var turnIconTurnSharpRight: Int = R.drawable.mapbox_ic_turn_sharp_right
-        private var turnIconUturn: Int = R.drawable.mapbox_ic_uturn
+            R.drawable.mapbox_ic_notification_roundabout_slight_right
+        private var turnIconRoundaboutSharpLeft: Int =
+            R.drawable.mapbox_ic_notification_roundabout_sharp_left
+        private var turnIconRoundaboutSharpRight: Int =
+            R.drawable.mapbox_ic_notification_roundabout_sharp_right
+        private var turnIconTurnLeft: Int = R.drawable.mapbox_ic_notification_turn_left
+        private var turnIconTurnRight: Int = R.drawable.mapbox_ic_notification_turn_right
+        private var turnIconTurnStraight: Int = R.drawable.mapbox_ic_notification_turn_straight
+        private var turnIconTurnSlightLeft: Int = R.drawable.mapbox_ic_notification_turn_slight_left
+        private var turnIconTurnSlightRight: Int =
+            R.drawable.mapbox_ic_notification_turn_slight_right
+        private var turnIconTurnSharpLeft: Int = R.drawable.mapbox_ic_notification_turn_sharp_left
+        private var turnIconTurnSharpRight: Int = R.drawable.mapbox_ic_notification_turn_sharp_right
+        private var turnIconUturn: Int = R.drawable.mapbox_ic_notification_uturn
 
         /**
          * apply arrive icon to the builder.
@@ -1459,11 +1401,11 @@ class TurnIconResources private constructor(
             apply { this.turnIconUturn = turnIconUturn }
 
         /**
-         * Build the [TurnIconResources].
-         * @return TurnIconResources
+         * Build the [NotificationTurnIconResources].
+         * @return NotificationTurnIconResources
          */
-        fun build(): TurnIconResources {
-            return TurnIconResources(
+        fun build(): NotificationTurnIconResources {
+            return NotificationTurnIconResources(
                 turnIconArrive,
                 turnIconArriveLeft,
                 turnIconArriveRight,

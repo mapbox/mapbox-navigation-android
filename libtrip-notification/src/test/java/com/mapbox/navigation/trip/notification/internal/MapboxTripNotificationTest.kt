@@ -466,6 +466,7 @@ class MapboxTripNotificationTest {
         val bannerInstructions = mockk<BannerInstructions>()
         every { state.bannerInstructions } returns bannerInstructions
         every { bannerInstructions.primary() } returns bannerText
+        every { bannerText.degrees() } answers { null }
         every { bannerText.text() } answers { primaryText() }
         every { bannerText.type() } answers { primaryType() }
         every { bannerText.modifier() } answers { primaryModifier() }
