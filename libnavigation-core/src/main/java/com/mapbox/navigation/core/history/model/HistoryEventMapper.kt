@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.history.model
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.navigator.internal.ActiveGuidanceOptionsMapper.mapToActiveGuidanceMode
 import com.mapbox.navigation.navigator.internal.ActiveGuidanceOptionsMapper.mapToGeometriesCriteria
@@ -11,7 +12,12 @@ import com.mapbox.navigator.SetRouteHistoryRecord
 import com.mapbox.navigator.UpdateLocationHistoryRecord
 import com.mapbox.navigator.Waypoint
 
-internal class HistoryEventMapper {
+/**
+ * @param accessToken used to inject access tokens into the [SetRouteHistoryRecord]
+ */
+internal class HistoryEventMapper(
+    val accessToken: String
+) {
 
     fun map(historyRecord: HistoryRecord): HistoryEvent {
         val eventTimestamp = historyRecord.timestampNanoseconds * NANOS_PER_SECOND
@@ -64,11 +70,11 @@ internal class HistoryEventMapper {
         waypoints = mapToWaypoints(setRoute.options.waypoints)
     )
 
-    private fun mapDirectionsRoute(routeResponse: String?): String? {
+    private fun mapDirectionsRoute(routeResponse: String?): DirectionsRoute? {
         return if (routeResponse.isNullOrEmpty() || routeResponse == "{}") {
             null
         } else {
-            routeResponse
+            return DirectionsRoute.fromJson(routeResponse, accessToken)
         }
     }
 

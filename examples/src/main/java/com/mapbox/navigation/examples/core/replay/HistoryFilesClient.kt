@@ -25,7 +25,9 @@ enum class ReplayDataSource {
     FILE_DIRECTORY
 }
 
-class HistoryFilesClient {
+class HistoryFilesClient(
+    val accessToken: String
+) {
 
     companion object {
         private const val TAG = "HistoryFilesClient"
@@ -62,7 +64,7 @@ class HistoryFilesClient {
                 outputFile.outputStream().use { fileOut ->
                     inputStream.copyTo(fileOut)
                 }
-                MapboxHistoryReader(outputFile.absolutePath)
+                MapboxHistoryReader(outputFile.absolutePath, accessToken)
             } catch (exception: IOException) {
                 Log.e(TAG, "requestJsonFile onFailure: $exception")
                 null

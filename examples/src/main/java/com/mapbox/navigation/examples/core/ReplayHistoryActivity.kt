@@ -30,8 +30,6 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
-import com.mapbox.navigation.core.replay.history.ReplayHistoryMapper
-import com.mapbox.navigation.core.replay.history.ReplayHistorySetRouteMapper
 import com.mapbox.navigation.core.replay.history.ReplaySetRoute
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -261,10 +259,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun initNavigation() {
         val accessToken = Utils.getMapboxAccessToken(this)
-        val replayHistoryMapper = ReplayHistoryMapper.Builder()
-            .setRouteMapper(ReplayHistorySetRouteMapper(accessToken))
-            .build()
-        historyFileLoader = HistoryFileLoader(replayHistoryMapper)
+        historyFileLoader = HistoryFileLoader(accessToken)
         mapboxNavigation = MapboxNavigation(
             NavigationOptions.Builder(this)
                 .accessToken(accessToken)
