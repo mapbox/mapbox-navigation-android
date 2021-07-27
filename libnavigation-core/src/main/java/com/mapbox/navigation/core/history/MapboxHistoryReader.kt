@@ -3,19 +3,22 @@ package com.mapbox.navigation.core.history
 import com.mapbox.navigation.core.history.model.HistoryEvent
 import com.mapbox.navigation.core.history.model.HistoryEventMapper
 import com.mapbox.navigator.HistoryReader
+import com.mapbox.navigator.SetRouteHistoryRecord
 
 /**
  * Allows you to read history files previously saved by [MapboxHistoryRecorder].
  * All files in the [MapboxHistoryRecorder.fileDirectory] can be read with this reader.
  *
  * @param filePath absolute path to a file containing the native history file.
+ * @param accessToken used to inject access tokens into the [SetRouteHistoryRecord]
  */
 class MapboxHistoryReader(
-    val filePath: String
+    val filePath: String,
+    val accessToken: String
 ) : Iterator<HistoryEvent> {
 
     private val nativeHistoryReader = HistoryReader(filePath)
-    private val historyEventMapper = HistoryEventMapper()
+    private val historyEventMapper = HistoryEventMapper(accessToken)
 
     private var hasNext: Boolean = false
     private var next: HistoryEvent? = null
