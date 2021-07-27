@@ -15,6 +15,7 @@ import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.common.module.provider.ModuleProviderArgument
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatter
@@ -270,6 +271,17 @@ class MapboxNavigation(
      * @see [MapboxHistoryReader] to read the files
      */
     val historyRecorder = MapboxHistoryRecorder(navigationOptions, logger)
+
+    /**
+     * **THIS IS AN EXPERIMENTAL API, DO NOT USE IN A PRODUCTION ENVIRONMENT.**
+     *
+     * Navigation native experimental API. Do not store a reference to [Experimental] object,
+     * always access the object via `mapboxNavigation.experimental` because [MapboxNavigation] is
+     * responsible for it's lifecycle.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    val experimental: com.mapbox.navigator.Experimental
+        get() = navigator.experimental
 
     private var reachabilityObserverId: Long? = null
 

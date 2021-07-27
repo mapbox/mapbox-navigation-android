@@ -11,6 +11,7 @@ import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
+import com.mapbox.navigator.Experimental
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessor
@@ -251,4 +252,6 @@ interface MapboxNativeNavigator {
     val cache: CacheHandle
 
     val roadObjectMatcher: RoadObjectMatcher?
+
+    val experimental: Experimental
 }

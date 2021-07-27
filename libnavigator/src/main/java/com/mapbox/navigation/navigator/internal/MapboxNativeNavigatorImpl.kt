@@ -14,6 +14,7 @@ import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
+import com.mapbox.navigator.Experimental
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessor
@@ -65,6 +66,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override var graphAccessor: GraphAccessor? = null
     override var roadObjectMatcher: RoadObjectMatcher? = null
     override var roadObjectsStore: RoadObjectsStore? = null
+    override lateinit var experimental: Experimental
     override lateinit var cache: CacheHandle
     private var logger: Logger? = null
     private val nativeNavigatorRecreationObservers =
@@ -100,6 +102,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         graphAccessor = nativeComponents.graphAccessor
         roadObjectMatcher = nativeComponents.roadObjectMatcher
         roadObjectsStore = nativeComponents.navigator.roadObjectStore()
+        experimental = nativeComponents.navigator.experimental
         cache = nativeComponents.cache
         route = null
         this.logger = logger

@@ -127,6 +127,7 @@ class MapboxNavigationTest {
         every { filesDir } returns File("some/path")
         every { navigator.cache } returns mockk()
         every { navigator.getHistoryRecorderHandle() } returns null
+        every { navigator.experimental } returns mockk()
     }
 
     private lateinit var mapboxNavigation: MapboxNavigation
