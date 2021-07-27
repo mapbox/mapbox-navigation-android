@@ -241,7 +241,7 @@ class FollowingFrameOptions internal constructor() {
          *
          * Defaults to `45.0` degrees.
          */
-        var maxBearingAngleDiff = 45.0
+        var maxBearingAngleDiff = 85.0
     }
 }
 

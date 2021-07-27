@@ -25,8 +25,8 @@ internal object ViewportDataSourceProcessor {
 
     private const val TAG = "MbxViewportDataSource"
 
-    private const val maxAngleDifferenceForCloverleafDetection: Double = 200.0
-    private const val maxAngleDifferenceForGeometrySlicing: Double = 100.0
+    private const val maxAngleDifferenceForCloverleafDetection: Double = 215.0
+    private const val maxAngleDifferenceForGeometrySlicing: Double = 180.0
 
     /**
      * Returns complete route points in nested arrays of points for all steps in all legs arranged as \[legs]\[steps]\[points].
@@ -227,8 +227,7 @@ internal object ViewportDataSourceProcessor {
      */
     fun slicePointsAtAngle(
         points: List<Point>,
-        maxAngleDifference: Double,
-        findLast: Boolean = false
+        maxAngleDifference: Double
     ): List<Point> {
         if (points.size < 2) return points
         var outputCoordinates: MutableList<Point> = emptyList<Point>().toMutableList()
