@@ -78,7 +78,6 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
                     .applyDefaultNavigationOptions()
                     .applyLanguageAndVoiceUnitOptions(activity)
                     .baseUrl(mockWebServerRule.baseUrl)
-                    .accessToken(getMapboxAccessTokenFromResources(activity))
                     .coordinatesList(mockRoute.routeWaypoints).build(),
                 object : RouterCallback {
                     override fun onRoutesReady(

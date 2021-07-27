@@ -258,11 +258,10 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     private fun initNavigation() {
-        val accessToken = Utils.getMapboxAccessToken(this)
-        historyFileLoader = HistoryFileLoader(accessToken)
+        historyFileLoader = HistoryFileLoader()
         mapboxNavigation = MapboxNavigation(
             NavigationOptions.Builder(this)
-                .accessToken(accessToken)
+                .accessToken(Utils.getMapboxAccessToken(this))
                 .locationEngine(ReplayLocationEngine(mapboxReplayer))
                 .build()
         )

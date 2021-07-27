@@ -62,8 +62,7 @@ class ViewportDataSourceProcessorTest {
     }
 
     private val multiLegRoute = DirectionsRoute.fromJson(
-        FileUtils.loadJsonFixture("multileg_route.json"),
-        "token"
+        FileUtils.loadJsonFixture("multileg_route.json")
     )
 
     private val completeRoutePoints = decodeArrays3(

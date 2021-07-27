@@ -113,7 +113,6 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
             .alternatives(true)
             .coordinatesList(coordinates)
             .baseUrl(mockWebServerRule.baseUrl) // Comment out to test a real server
-            .accessToken(getMapboxAccessTokenFromResources(activity))
             .build()
         val routeRequestIdlingResource = RouteRequestIdlingResource(mapboxNavigation, routeOptions)
         return routeRequestIdlingResource.requestRoutesSync()

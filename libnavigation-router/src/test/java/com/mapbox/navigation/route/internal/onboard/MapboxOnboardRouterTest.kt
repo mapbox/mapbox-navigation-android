@@ -89,11 +89,17 @@ class MapboxOnboardRouterTest {
     private val mapboxDirections = mockk<MapboxDirections>(relaxed = true)
     private val mapboxDirectionsBuilder = mockk<MapboxDirections.Builder>(relaxed = true)
     private val routerOrigin = RouterOrigin.Onboard
+    private val accessToken = "pk.123"
 
-    private var onboardRouter: MapboxOnboardRouter = MapboxOnboardRouter(navigator, context)
+    private var onboardRouter: MapboxOnboardRouter = MapboxOnboardRouter(
+        accessToken,
+        navigator,
+        context
+    )
 
     private val url =
         MapboxDirections.builder()
+            .accessToken(accessToken)
             .routeOptions(routerOptions)
             .build()
             .httpUrl()
@@ -110,6 +116,7 @@ class MapboxOnboardRouterTest {
         } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.interceptor(any()) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.routeOptions(any()) } returns mapboxDirectionsBuilder
+        every { mapboxDirectionsBuilder.accessToken(any()) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.build() } returns mapboxDirections
         every { mapboxDirections.httpUrl() } returns url.toHttpUrlOrNull()!!
     }
@@ -278,7 +285,7 @@ class MapboxOnboardRouterTest {
         mockkConstructor(RequestMap::class)
         val idSlot = slot<Long>()
         every { anyConstructed<RequestMap<Job>>().put(capture(idSlot), any()) } just Runs
-        onboardRouter = MapboxOnboardRouter(navigator, context)
+        onboardRouter = MapboxOnboardRouter(accessToken, navigator, context)
         coEvery { navigator.getRoute(any()) } returns routerResultSuccess
 
         onboardRouter.getRoute(routerOptions, routerCallback)
@@ -292,7 +299,7 @@ class MapboxOnboardRouterTest {
         mockkConstructor(RequestMap::class)
         val idSlot = slot<Long>()
         every { anyConstructed<RequestMap<Job>>().put(capture(idSlot), any()) } just Runs
-        onboardRouter = MapboxOnboardRouter(navigator, context)
+        onboardRouter = MapboxOnboardRouter(accessToken, navigator, context)
         coEvery { navigator.getRoute(any()) } returns routerResultFailure
 
         onboardRouter.getRoute(routerOptions, routerCallback)
@@ -306,7 +313,7 @@ class MapboxOnboardRouterTest {
         mockkConstructor(RequestMap::class)
         val idSlot = slot<Long>()
         every { anyConstructed<RequestMap<Job>>().put(capture(idSlot), any()) } just Runs
-        onboardRouter = MapboxOnboardRouter(navigator, context)
+        onboardRouter = MapboxOnboardRouter(accessToken, navigator, context)
         coEvery { navigator.getRoute(any()) } coAnswers { throw CancellationException() }
 
         onboardRouter.getRoute(routerOptions, routerCallback)
@@ -412,7 +419,6 @@ class MapboxOnboardRouterTest {
         return RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .apply {
-                accessToken(ACCESS_TOKEN)
                 coordinates(origin, waypoints, destination)
             }.build()
     }

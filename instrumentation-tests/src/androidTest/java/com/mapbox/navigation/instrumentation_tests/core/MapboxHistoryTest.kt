@@ -111,7 +111,6 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
                     .applyDefaultNavigationOptions()
                     .applyLanguageAndVoiceUnitOptions(activity)
                     .baseUrl(mockWebServerRule.baseUrl)
-                    .accessToken(getMapboxAccessTokenFromResources(activity))
                     .coordinatesList(mockRoute.routeWaypoints).build(),
                 object : RouterCallback {
                     override fun onRoutesReady(
@@ -155,7 +154,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     }
 
     private fun verifyHistoryEvents(filePath: String) {
-        val historyReader = MapboxHistoryReader(filePath, TEST_ACCESS_TOKEN)
+        val historyReader = MapboxHistoryReader(filePath)
 
         // Verify hasNext
         assertTrue(historyReader.hasNext())
@@ -236,12 +235,11 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         outputFile.outputStream().use { fileOut ->
             inputStream.copyTo(fileOut)
         }
-        return MapboxHistoryReader(outputFile.absolutePath, TEST_ACCESS_TOKEN)
+        return MapboxHistoryReader(outputFile.absolutePath)
     }
 
     private companion object {
         private const val CUSTOM_EVENT_TYPE = "custom_event_type"
         private const val CUSTOM_EVENT_PROPERTIES = "custom_event_properties"
-        private const val TEST_ACCESS_TOKEN = "pk.test-access-token"
     }
 }

@@ -127,9 +127,9 @@ internal class OfflineRouteTest : BuilderTest<OfflineRoute, OfflineRoute.Builder
 
     private fun provideOnlineRouteBuilder(): URL =
         MapboxDirections.builder()
+            .accessToken("pk.XXX")
             .routeOptions(
                 RouteOptions.builder()
-                    .accessToken("pk.XXX")
                     .profile(DirectionsCriteria.PROFILE_CYCLING)
                     .coordinates(
                         origin = Point.fromLngLat(1.0, 2.0),

@@ -480,7 +480,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
             RouteOptions.builder()
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
-                .accessToken(getMapboxAccessTokenFromResources())
                 .coordinatesList(listOf(origin, destination))
                 .build(),
             object : RouterCallback {

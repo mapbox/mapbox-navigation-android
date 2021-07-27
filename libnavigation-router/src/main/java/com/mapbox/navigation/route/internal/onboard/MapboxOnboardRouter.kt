@@ -37,6 +37,7 @@ import java.net.URL
  * @param context application [Context]
  */
 class MapboxOnboardRouter(
+    private val accessToken: String,
     private val navigatorNative: MapboxNativeNavigator,
     private val context: Context
 ) : Router {
@@ -60,6 +61,7 @@ class MapboxOnboardRouter(
     ): Long {
         val httpUrl = RouteBuilderProvider
             .getBuilder(null)
+            .accessToken(accessToken)
             .routeOptions(routeOptions)
             .build()
             .httpUrl()

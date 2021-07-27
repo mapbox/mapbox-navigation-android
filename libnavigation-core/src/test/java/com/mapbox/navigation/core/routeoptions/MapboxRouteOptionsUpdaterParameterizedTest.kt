@@ -110,7 +110,6 @@ class MapboxRouteOptionsUpdaterParameterizedTest(
 
     private fun provideRouteOptionsWithCoordinates() =
         RouteOptions.builder()
-            .accessToken(accessToken)
             .baseUrl(Constants.BASE_API_URL)
             .user(Constants.MAPBOX_USER)
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)

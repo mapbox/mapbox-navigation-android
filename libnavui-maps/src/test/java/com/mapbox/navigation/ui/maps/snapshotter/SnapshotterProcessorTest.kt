@@ -323,7 +323,7 @@ class SnapshotterProcessorTest {
 
     private fun getDirectionsRoute(): DirectionsRoute {
         val asJson = FileUtils.loadJsonFixture("snapshotter-here-based-junctions.json")
-        return DirectionsRoute.fromJson(asJson, "token")
+        return DirectionsRoute.fromJson(asJson)
     }
 
     private fun getComponentGuidanceViewType(): BannerComponents {

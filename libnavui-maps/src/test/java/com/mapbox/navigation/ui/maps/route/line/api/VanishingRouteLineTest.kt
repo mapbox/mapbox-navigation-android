@@ -225,12 +225,12 @@ class VanishingRouteLineTest {
 
     private fun getRoute(): DirectionsRoute {
         val routeAsJson = loadJsonFixture("short_route.json")
-        return DirectionsRoute.fromJson(routeAsJson, "token")
+        return DirectionsRoute.fromJson(routeAsJson)
     }
 
     private fun getVeryLongRoute(): DirectionsRoute {
         val routeAsJson = loadJsonFixture("cross-country-route.json")
-        return DirectionsRoute.fromJson(routeAsJson, "token")
+        return DirectionsRoute.fromJson(routeAsJson)
     }
 
     private val genericMockResourceProvider = mockk<RouteLineResources> {
@@ -252,6 +252,6 @@ class VanishingRouteLineTest {
 
     private fun getMultilegWithTwoLegs(): DirectionsRoute {
         val routeAsJson = loadJsonFixture("multileg-route-two-legs.json")
-        return DirectionsRoute.fromJson(routeAsJson, "someToken")
+        return DirectionsRoute.fromJson(routeAsJson)
     }
 }

@@ -242,7 +242,6 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
-            .accessToken(getMapboxAccessTokenFromResources())
             .coordinatesList(listOf(origin, destination))
             .alternatives(true)
             .build()
