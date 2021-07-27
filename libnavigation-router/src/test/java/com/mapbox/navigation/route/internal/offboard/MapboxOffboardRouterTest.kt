@@ -74,6 +74,7 @@ class MapboxOffboardRouterTest : BaseTest() {
         every { mapboxDirectionsBuilder.interceptor(any()) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.routeOptions(any()) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.eventListener(any()) } returns mapboxDirectionsBuilder
+        every { mapboxDirectionsBuilder.accessToken(any()) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.build() } returns mapboxDirections
         val routeListener = slot<Callback<DirectionsResponse>>()
         every { mapboxDirections.enqueueCall(capture(routeListener)) } answers {

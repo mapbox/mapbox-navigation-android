@@ -211,7 +211,6 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
-            .accessToken(Utils.getMapboxAccessToken(this))
             .coordinatesList(listOf(origin, destination))
             .alternatives(false)
             .build()

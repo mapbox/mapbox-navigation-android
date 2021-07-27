@@ -12,12 +12,7 @@ import com.mapbox.navigator.SetRouteHistoryRecord
 import com.mapbox.navigator.UpdateLocationHistoryRecord
 import com.mapbox.navigator.Waypoint
 
-/**
- * @param accessToken used to inject access tokens into the [SetRouteHistoryRecord]
- */
-internal class HistoryEventMapper(
-    val accessToken: String
-) {
+internal class HistoryEventMapper {
 
     fun map(historyRecord: HistoryRecord): HistoryEvent {
         val eventTimestamp = historyRecord.timestampNanoseconds * NANOS_PER_SECOND
@@ -74,7 +69,7 @@ internal class HistoryEventMapper(
         return if (routeResponse.isNullOrEmpty() || routeResponse == "{}") {
             null
         } else {
-            return DirectionsRoute.fromJson(routeResponse, accessToken)
+            return DirectionsRoute.fromJson(routeResponse)
         }
     }
 

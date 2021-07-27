@@ -246,7 +246,6 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
-            .accessToken(getMapboxAccessTokenFromResources())
             .coordinates(
                 origin = origin,
                 waypoints = waypoints,

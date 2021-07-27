@@ -13,7 +13,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.examples.core.R
-import com.mapbox.navigation.examples.util.Utils
 
 @SuppressLint("HardwareIds")
 class HistoryFilesActivity : AppCompatActivity() {
@@ -53,8 +52,7 @@ class HistoryFilesActivity : AppCompatActivity() {
         }
 
         val historyFileDirectory = intent.extras?.getString(EXTRA_HISTORY_FILE_DIRECTORY)
-        val accessToken = Utils.getMapboxAccessToken(this)
-        filesViewController = HistoryFilesViewController(historyFileDirectory, accessToken)
+        filesViewController = HistoryFilesViewController(historyFileDirectory)
         filesViewController.attach(this, viewAdapter) { historyDataResponse ->
             if (historyDataResponse == null) {
                 Snackbar.make(

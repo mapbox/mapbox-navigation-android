@@ -296,7 +296,6 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         val routeOptions: RouteOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
-            .accessToken(getMapboxAccessTokenFromResources())
             .coordinatesList(listOf(origin, destination))
             .voiceInstructions(true)
             .build()

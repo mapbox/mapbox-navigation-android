@@ -110,7 +110,6 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
                     .applyDefaultNavigationOptions()
                     .applyLanguageAndVoiceUnitOptions(activity)
                     .baseUrl(mockWebServerRule.baseUrl)
-                    .accessToken(getMapboxAccessTokenFromResources(activity))
                     .coordinatesList(mockRoute.routeWaypoints).build(),
                 object : RouterCallback {
                     override fun onRoutesReady(

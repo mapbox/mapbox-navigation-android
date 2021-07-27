@@ -48,7 +48,6 @@ class RouteRefreshControllerTest {
         every {
             coordinatesList()
         } returns listOf(Point.fromLngLat(0.0, 0.0), Point.fromLngLat(1.1, 1.1))
-        every { accessToken() } returns "pk.**"
     }
     private val validRoute: DirectionsRoute = mockk {
         every { routeOptions() } returns routeOptions

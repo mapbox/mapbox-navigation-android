@@ -474,7 +474,6 @@ class MapboxHybridRouterTest {
         return RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .apply {
-                accessToken("")
                 coordinates(Point.fromLngLat(.0, .0), null, Point.fromLngLat(.0, .0))
             }.build()
     }

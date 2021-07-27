@@ -9,7 +9,6 @@ object MapboxRouteOptionsUpdateCommonTest {
         assertEquals("Check Overview", routeOptions.overview(), updated.overview())
         assertEquals("Check Annotations", routeOptions.annotations(), updated.annotations())
         assertEquals("Check Profile", routeOptions.profile(), updated.profile())
-        assertEquals("Check Token", routeOptions.accessToken(), updated.accessToken())
         assertEquals(
             "Check Alternatives",
             routeOptions.alternatives(),

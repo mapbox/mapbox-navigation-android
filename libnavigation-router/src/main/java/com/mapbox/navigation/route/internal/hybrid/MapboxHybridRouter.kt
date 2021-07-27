@@ -46,6 +46,7 @@ class MapboxHybridRouter(
         networkStatusService: ConnectivityHandler
     ) : this(
         onboardRouter = MapboxOnboardRouter(
+            accessToken,
             navigatorNative,
             context
         ),

@@ -228,7 +228,6 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
-            .accessToken(getMapboxAccessTokenFromResources())
             .coordinatesList(waypointsController.coordinates(origin))
             .build()
         mapboxNavigation.requestRoutes(

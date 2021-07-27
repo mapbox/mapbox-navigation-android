@@ -261,7 +261,6 @@ class MultiLegRouteExampleActivity : AppCompatActivity() {
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
-            .accessToken(getMapboxAccessTokenFromResources())
             .coordinatesList(
                 listOf(
                     Point.fromLngLat(-122.523179, 37.974972),

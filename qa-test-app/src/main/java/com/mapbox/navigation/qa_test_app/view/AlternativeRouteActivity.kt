@@ -210,7 +210,6 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
-            .accessToken(getMapboxAccessToken(this))
             .coordinatesList(listOf(origin, destination))
             .alternatives(true)
             .build()

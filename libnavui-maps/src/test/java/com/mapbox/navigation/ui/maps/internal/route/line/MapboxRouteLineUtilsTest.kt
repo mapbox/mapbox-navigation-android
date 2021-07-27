@@ -19,7 +19,6 @@ import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
-import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
@@ -600,7 +599,7 @@ class MapboxRouteLineUtilsTest {
     @Test
     fun calculateRouteGranularDistances() {
         val routeAsJsonJson = loadJsonFixture("short_route.json")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson, TOKEN)
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
         val lineString = LineString.fromPolyline(
             route.geometry() ?: "",
             Constants.PRECISION_6
@@ -692,8 +691,8 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun getRouteLineTrafficExpressionDataWhenUniqueStreetClassDataExists() {
-        val routeAsJsonJson = FileUtils.loadJsonFixture("route-unique-road-classes.json")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson, TOKEN)
+        val routeAsJsonJson = loadJsonFixture("route-unique-road-classes.json")
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
         val distances = route.legs()!!.mapNotNull { it.annotation()!!.distance() }.flatten()
         val distancesSum = distances.subList(0, distances.lastIndex).sum()
         val roadClasses = route.legs()?.asSequence()
@@ -742,7 +741,7 @@ class MapboxRouteLineUtilsTest {
     @Test
     fun getRouteLineTrafficExpressionWithRoadClassesDuplicatesRemoved() {
         val routeAsJsonJson = loadJsonFixture("route-with-road-classes.txt")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson, TOKEN)
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
 
         val result = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
 
@@ -756,7 +755,7 @@ class MapboxRouteLineUtilsTest {
     fun getRouteLineTrafficExpressionDataWithSomeRoadClassesDuplicatesRemoved() {
         val routeAsJsonJson =
             loadJsonFixture("motorway-route-with-road-classes-mixed.json")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson, TOKEN)
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
 
         val result = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
 
@@ -793,7 +792,7 @@ class MapboxRouteLineUtilsTest {
             .build()
 
         val routeAsJsonJson = loadJsonFixture("motorway-route-with-road-classes.json")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson, TOKEN)
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
 
         val trafficExpressionData = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
         val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
@@ -826,7 +825,7 @@ class MapboxRouteLineUtilsTest {
 
         val routeAsJsonJson =
             loadJsonFixture("motorway-route-with-road-classes-mixed.json")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson, TOKEN)
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
 
         val trafficExpressionData = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
         val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
@@ -892,7 +891,7 @@ class MapboxRouteLineUtilsTest {
     @Test
     fun getRouteLineTrafficExpressionDataWithOutStreetClassesDuplicatesRemoved() {
         val routeAsJsonJson = loadJsonFixture("route-with-traffic-no-street-classes.txt")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson, TOKEN)
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
 
         val result = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
 
@@ -917,7 +916,7 @@ class MapboxRouteLineUtilsTest {
             .build()
 
         val routeAsJsonJson = loadJsonFixture("route-with-road-classes.txt")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson, TOKEN)
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
         val trafficExpressionData = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
         assertEquals("service", trafficExpressionData[0].roadClass)
         assertEquals("street", trafficExpressionData[1].roadClass)
@@ -961,7 +960,7 @@ class MapboxRouteLineUtilsTest {
             .build()
 
         val routeAsJsonJson = loadJsonFixture("route-with-traffic-no-street-classes.txt")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson, TOKEN)
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
         val trafficExpressionData = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
 
         val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
@@ -996,7 +995,7 @@ class MapboxRouteLineUtilsTest {
         val routeAsJsonJson = loadJsonFixture(
             "motorway-route-with-road-classes-unknown-not-on-intersection.json"
         )
-        val route = DirectionsRoute.fromJson(routeAsJsonJson, TOKEN)
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
 
         val trafficExpressionData = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
         val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
@@ -1020,7 +1019,7 @@ class MapboxRouteLineUtilsTest {
         val routeAsJsonJson = loadJsonFixture(
             "route-with-missing-road-classes.json"
         )
-        val route = DirectionsRoute.fromJson(routeAsJsonJson, TOKEN)
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
 
         val result = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
 
@@ -1065,7 +1064,7 @@ class MapboxRouteLineUtilsTest {
         val routeAsJsonJson = loadJsonFixture(
             "motorway-with-road-classes-multi-leg.json"
         )
-        val route = DirectionsRoute.fromJson(routeAsJsonJson, TOKEN)
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
 
         val trafficExpressionData = MapboxRouteLineUtils.getRouteLineTrafficExpressionData(route)
         val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
@@ -1752,15 +1751,11 @@ class MapboxRouteLineUtilsTest {
 
     private fun getMultilegWithTwoLegs(): DirectionsRoute {
         val routeAsJson = loadJsonFixture("multileg-route-two-legs.json")
-        return DirectionsRoute.fromJson(routeAsJson, "someToken")
+        return DirectionsRoute.fromJson(routeAsJson)
     }
 
     private fun loadRoute(routeFileName: String): DirectionsRoute {
         val routeAsJson = loadJsonFixture(routeFileName)
-        return DirectionsRoute.fromJson(routeAsJson, TOKEN)
-    }
-
-    private companion object {
-        private const val TOKEN = "token"
+        return DirectionsRoute.fromJson(routeAsJson)
     }
 }

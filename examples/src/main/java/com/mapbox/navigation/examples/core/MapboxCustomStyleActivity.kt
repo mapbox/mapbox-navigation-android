@@ -62,7 +62,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Collections
-import java.util.Objects
 
 class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
 
@@ -233,7 +232,6 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
             RouteOptions.builder()
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
-                .accessToken(Objects.requireNonNull<String>(getMapboxAccessTokenFromResources()))
                 .coordinatesList(listOf(origin, destination))
                 .alternatives(false)
                 .annotationsList(Collections.singletonList(DirectionsCriteria.ANNOTATION_MAXSPEED))

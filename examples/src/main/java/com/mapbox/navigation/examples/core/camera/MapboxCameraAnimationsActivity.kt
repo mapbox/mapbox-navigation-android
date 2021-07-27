@@ -561,7 +561,6 @@ class MapboxCameraAnimationsActivity :
         val routeOptions: RouteOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
-            .accessToken(getMapboxAccessTokenFromResources())
             .coordinatesList(listOf(origin, destination))
             .build()
 
