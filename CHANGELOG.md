@@ -2,6 +2,30 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.21 - July 28, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
+- Added `BuildingHighlightObserver` for exposing map data used to highlight a building. Add example showing extrude all building along with a highlighted one. [#4420](https://github.com/mapbox/mapbox-navigation-android/pull/4420)
+- :warning: Removed `accessToken` from `RouteOptions`, the token provided via `NaivgationOptions` is now always used for route requests. This also simplifies serialization and deserialization of route objects. Refs [`mapbox-java` `v6.0.0-alpha2`](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0-alpha.2). [#4670](https://github.com/mapbox/mapbox-navigation-android/pull/4670)
+- Added geometry to `Maneuver` object. [#4653](https://github.com/mapbox/mapbox-navigation-android/pull/4653)
+  - Exposed `Factory` to allow developers to create `Maneuver` object.
+  - Added `Point` as another argument to `Maneuver`
+- Removed access token from `MapboxHistoryReader`. [#4667](https://github.com/mapbox/mapbox-navigation-android/pull/4667), [#4670](https://github.com/mapbox/mapbox-navigation-android/pull/4670)
+
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+
+- Mapbox Maps SDK `v10.0.0-rc.4` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.4))
+- Mapbox Navigation Native `v59.0.0`
+- Mapbox Core Common `v16.1.0`
+- Mapbox Java `v6.0.0-alpha.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0-alpha.2))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.0.0-beta.20 - July 22, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
