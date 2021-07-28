@@ -534,7 +534,7 @@ class MapboxNavigation(
         navigationVersionSwitchObservers.clear()
 
         navigationSession.unregisterAllNavigationSessionStateObservers()
-        MapboxNavigationTelemetry.unregisterListeners(this@MapboxNavigation)
+        MapboxNavigationTelemetry.destroy(this@MapboxNavigation)
         ThreadController.cancelAllNonUICoroutines()
         ThreadController.cancelAllUICoroutines()
         ifNonNull(reachabilityObserverId) {

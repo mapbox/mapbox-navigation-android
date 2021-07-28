@@ -762,7 +762,7 @@ class MapboxNavigationTelemetryTest {
         updateSessionState(FREE_DRIVE)
         updateSessionState(IDLE)
 
-        val events = captureAndVerifyMetricsReporter(exactly = 3)
+        val events = captureAndVerifyMetricsReporter(exactly = 4)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
         assertTrue(events[1] is NavigationFreeDriveEvent) // start free drive
         assertTrue(events[2] is NavigationFreeDriveEvent) // stop free drive
@@ -1123,7 +1123,7 @@ class MapboxNavigationTelemetryTest {
     }
 
     private fun resetTelemetry() {
-        MapboxNavigationTelemetry.unregisterListeners(mapboxNavigation)
+        MapboxNavigationTelemetry.destroy(mapboxNavigation)
     }
 
     private fun onInit(block: () -> Unit) {

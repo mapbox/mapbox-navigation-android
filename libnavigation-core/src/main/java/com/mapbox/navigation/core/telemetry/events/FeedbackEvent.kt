@@ -236,6 +236,16 @@ object FeedbackEvent {
     const val ARRIVAL_FEEDBACK_THIS_PLACE_IS_CLOSED = "arrival_feedback_this_place_is_closed"
 
     /**
+     * Feedback driver mode `trip`
+     */
+    const val DRIVER_MODE_TRIP = "trip"
+
+    /**
+     * Feedback driver mode `free drive`
+     */
+    const val DRIVER_MODE_FREE_DRIVE = "freeDrive"
+
+    /**
      * Type of feedback mean WHAT happen
      */
     @Retention(AnnotationRetention.BINARY)
@@ -302,4 +312,14 @@ object FeedbackEvent {
         ARRIVAL_FEEDBACK_THIS_PLACE_IS_CLOSED
     )
     annotation class Description
+
+    /**
+     * Driver mode
+     */
+    @Retention(AnnotationRetention.BINARY)
+    @StringDef(
+        DRIVER_MODE_TRIP,
+        DRIVER_MODE_FREE_DRIVE,
+    )
+    annotation class DriverMode
 }
