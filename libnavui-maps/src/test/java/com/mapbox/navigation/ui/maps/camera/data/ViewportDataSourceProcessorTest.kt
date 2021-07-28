@@ -396,7 +396,8 @@ class ViewportDataSourceProcessorTest {
         val expected: List<Point> = listOf(
             Point.fromLngLat(20.0, 11.0),
             Point.fromLngLat(20.0, 12.0),
-            Point.fromLngLat(21.0, 12.0)
+            Point.fromLngLat(21.0, 12.0),
+            Point.fromLngLat(21.0, 9.0)
         )
 
         val actual = getPointsToFrameOnCurrentStep(
@@ -433,7 +434,8 @@ class ViewportDataSourceProcessorTest {
         val expected: List<Point> = listOf(
             Point.fromLngLat(20.0, 11.0),
             Point.fromLngLat(20.0, 12.0),
-            Point.fromLngLat(19.0, 12.0)
+            Point.fromLngLat(19.0, 12.0),
+            Point.fromLngLat(19.0, 9.0)
         )
 
         val actual = getPointsToFrameOnCurrentStep(
