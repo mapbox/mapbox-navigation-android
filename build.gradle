@@ -73,32 +73,7 @@ allprojects {
           password = project.hasProperty('SDK_REGISTRY_TOKEN') ? project.property('SDK_REGISTRY_TOKEN') : System.getenv('SDK_REGISTRY_TOKEN')
         }
       }
-    } 
-
-    /*maven {
-      url 'https://mapbox.bintray.com/mapbox_internal'
-      credentials {
-        username = project.hasProperty('BINTRAY_USER') ? project.property('BINTRAY_USER') : System.getenv('BINTRAY_USER')
-        password = project.hasProperty('BINTRAY_API_KEY') ? project.property('BINTRAY_API_KEY') : System.getenv('BINTRAY_API_KEY')
-      }
-    }*/
-    /*maven {
-      url 'https://mapbox.bintray.com/mapbox_collab'
-      credentials {
-        username = project.hasProperty('BINTRAY_USER') ? project.property('BINTRAY_USER') : System.getenv('BINTRAY_USER')
-        password = project.hasProperty('BINTRAY_API_KEY') ? project.property('BINTRAY_API_KEY') : System.getenv('BINTRAY_API_KEY')
-      }
-    }*/
-    /*maven {
-      url 'https://mapbox.bintray.com/mapbox_private'
-      credentials {
-        username = project.hasProperty('BINTRAY_USER') ? project.property('BINTRAY_USER') : System.getenv('BINTRAY_USER')
-        password = project.hasProperty('BINTRAY_API_KEY') ? project.property('BINTRAY_API_KEY') : System.getenv('BINTRAY_API_KEY')
-      }
-    }*/
-    maven { url 'https://mapbox.bintray.com/mapbox' }
-    // uncomment if snapshots access is needed
-    // maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' }
+    }
   }
 }
 
