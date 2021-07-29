@@ -8,7 +8,6 @@ import com.mapbox.api.directions.v5.models.ManeuverModifier
  * @property allLanes List<LaneIndicator>
  * @property activeDirection String? One of [ManeuverModifier]
  */
-
 class Lane internal constructor(
     val allLanes: List<LaneIndicator> = listOf(),
     val activeDirection: String? = null
