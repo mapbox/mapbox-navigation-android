@@ -13,6 +13,11 @@
       android:theme="@style/AppTheme">
 
     <activity
+        android:name=".MapboxTurfKmmActivity"
+        android:label="@string/title_turf_kmm">
+    </activity>
+
+    <activity
         android:name=".MapboxNavigationActivity"
         android:label="@string/title_navigation">
     </activity>

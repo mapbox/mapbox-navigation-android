@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name" translatable="false">2.0 Navigation SDK</string>
 
-    <string name="title_navigation" translatable="false">Turn By Turn </string>
+    <string name="title_turf_kmm" translatable="false">Turf KMM</string>
+    <string name="description_turf_kmm" translatable="false">Demonstrates Turf KMM integration.</string>
+    <string name="title_navigation" translatable="false">Turn By Turn</string>
     <string name="description_navigation" translatable="false">Demonstrates basic turn by turn navigation.</string>
     <string name="title_route_line" translatable="false">Routeline and Route Arrow Example</string>
     <string name="description_route_line" translatable="false">Demonstrates the use of the route line API.</string>

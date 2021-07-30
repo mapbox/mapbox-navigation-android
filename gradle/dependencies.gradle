@@ -26,6 +26,7 @@ ext {
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxBaseAndroid         : '0.5.0',
+      mapboxTurfKMM             : '1.0.0-SNAPSHOT',
       androidXCoreVersion       : '1.2.0',
       androidXAppCompatVersion  : '1.1.0',
       androidXAnnotationVersion : '1.1.0',
@@ -79,6 +80,7 @@ ext {
       mapboxAnnotationsProcessor: "com.mapbox.base:annotations-processor:${version.mapboxBaseAndroid}",
       mapboxAndroidCommon       : "com.mapbox.base:common:${version.mapboxBaseAndroid}",
       mapboxLogger              : "com.mapbox.common:logger:${version.mapboxBaseAndroid}",
+      mapboxTurfKMM             : "com.mapbox:turfkmm:${version.mapboxTurfKMM}",
 
       // Kotlin
       kotlinStdLib              : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${version.kotlinStdLib}",

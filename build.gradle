@@ -1,36 +1,37 @@
 buildscript {
   apply from: "${rootDir}/gradle/dependencies.gradle"
     repositories {
-    google()
-    mavenCentral()
-    jcenter()
-    maven { url 'https://plugins.gradle.org/m2' }
-    maven {
-      url 'https://api.mapbox.com/downloads/v2/releases/maven'
-      authentication {
-        basic(BasicAuthentication)
-      }
-      credentials {
-        username = "mapbox"
-        password = project.hasProperty('SDK_REGISTRY_TOKEN') ? project.property('SDK_REGISTRY_TOKEN') : System.getenv('SDK_REGISTRY_TOKEN')
+      mavenLocal()
+      google()
+      mavenCentral()
+      jcenter()
+      maven { url 'https://plugins.gradle.org/m2' }
+      maven {
+        url 'https://api.mapbox.com/downloads/v2/releases/maven'
+        authentication {
+          basic(BasicAuthentication)
+        }
+        credentials {
+          username = "mapbox"
+          password = project.hasProperty('SDK_REGISTRY_TOKEN') ? project.property('SDK_REGISTRY_TOKEN') : System.getenv('SDK_REGISTRY_TOKEN')
+        }
       }
     }
-  }
-  dependencies {
-    classpath pluginDependencies.gradle
-    classpath pluginDependencies.kotlin
-    classpath pluginDependencies.dependencyUpdates
-    classpath pluginDependencies.jacoco
-    classpath pluginDependencies.googleServices
-    classpath pluginDependencies.license
-    classpath pluginDependencies.mapboxSdkVersions
-    classpath pluginDependencies.mapboxSdkRegistry
-    classpath pluginDependencies.mapboxAccessToken
-    classpath pluginDependencies.mapboxNativeDownload
-    classpath pluginDependencies.dokka
-    classpath pluginDependencies.firebaseCrashlytics
-    classpath pluginDependencies.googleServices
-  }
+    dependencies {
+      classpath pluginDependencies.gradle
+      classpath pluginDependencies.kotlin
+      classpath pluginDependencies.dependencyUpdates
+      classpath pluginDependencies.jacoco
+      classpath pluginDependencies.googleServices
+      classpath pluginDependencies.license
+      classpath pluginDependencies.mapboxSdkVersions
+      classpath pluginDependencies.mapboxSdkRegistry
+      classpath pluginDependencies.mapboxAccessToken
+      classpath pluginDependencies.mapboxNativeDownload
+      classpath pluginDependencies.dokka
+      classpath pluginDependencies.firebaseCrashlytics
+      classpath pluginDependencies.googleServices
+    }
 }
 
 apply plugin: 'jacoco'
@@ -43,6 +44,7 @@ task testReport(type: TestReport, group: 'Build') {
 
 allprojects {
   repositories {
+    mavenLocal()
     google()
     mavenCentral()
     jcenter()
@@ -57,7 +59,7 @@ allprojects {
         password = project.hasProperty('SDK_REGISTRY_TOKEN') ? project.property('SDK_REGISTRY_TOKEN') : System.getenv('SDK_REGISTRY_TOKEN')
       }
     }
-    // we allow access to snapshots repo if ALLOW_SNAPSHOT_REPOSITORY is set, what means we are running on CI 
+    // we allow access to snapshots repo if ALLOW_SNAPSHOT_REPOSITORY is set, what means we are running on CI
     // with Navigation Native forced to be some snapshot version
     // if you need to use snapshots while development, just set `addSnapshotsRepo` to true manually
     def addSnapshotsRepo = System.getenv("ALLOW_SNAPSHOT_REPOSITORY")?.toBoolean() ?: false
