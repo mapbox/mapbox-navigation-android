@@ -13,19 +13,16 @@ class MapboxTurfKmmActivity : AppCompatActivity() {
         setContentView(R.layout.activity_turf_kmm)
 
         val bearing: TextView = findViewById(R.id.bearing)
-        val pt1: Point = Point.fromLngLat(-75.4, 39.4)
-        val pt2: Point = Point.fromLngLat(-75.534, 39.123)
-        bearing.text = "Bearing: ${TurfMeasurement.bearing(pt1, pt2)}"
+        val origin: Point = Point.fromLngLat(-121.435678, 37.899657)
+        val destination: Point = Point.fromLngLat(-121.123678, 37.544657)
+        bearing.text = "Bearing:\n${TurfMeasurement.bearing(origin, destination)}"
 
         val distance: TextView = findViewById(R.id.distance)
-        val whiteHouse: Point = Point.fromLngLat(-77.03601539811076, 38.90003848157448)
-        val goldenGateBridge: Point = Point.fromLngLat(-122.47827, 37.82009)
-        distance.text = "Distance White House -> Golden Gate Bridge: ${
+        distance.text = "Distance:\n${
             TurfMeasurement.distance(
-                whiteHouse,
-                goldenGateBridge,
-                TurfConstants.UNIT_KILOMETERS
+                origin,
+                destination
             )
-        } km"
+        }"
     }
 }
