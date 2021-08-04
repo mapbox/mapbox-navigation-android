@@ -180,6 +180,38 @@ class MapboxNavigationTelemetryTest {
         unmockkObject(ThreadController)
     }
 
+    fun `telemetry idle before call initialize`(){
+        baseMock()
+
+        updateSessionState(ACTIVE_GUIDANCE)
+        updateRouteProgress()
+        updateSessionState(FREE_DRIVE)
+        updateRoute(originalRoute)
+        updateRouteProgress()
+        updateRoute(anotherRoute)
+        arrive()
+
+        captureAndVerifyMetricsReporter(0)
+    }
+
+    fun `telemetry idle after call destroy`(){
+        baseMock()
+
+        initTelemetry()
+        resetTelemetry()
+        updateSessionState(ACTIVE_GUIDANCE)
+        updateRouteProgress()
+        updateSessionState(FREE_DRIVE)
+        updateSessionState(IDLE)
+        updateRoute(originalRoute)
+        updateRouteProgress()
+        updateRoute(anotherRoute)
+        arrive()
+
+        val events = captureAndVerifyMetricsReporter(1)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+    }
+
     @Test
     fun turnstileEvent_sent_on_telemetry_init() {
         baseMock()
@@ -762,7 +794,7 @@ class MapboxNavigationTelemetryTest {
         updateSessionState(FREE_DRIVE)
         updateSessionState(IDLE)
 
-        val events = captureAndVerifyMetricsReporter(exactly = 4)
+        val events = captureAndVerifyMetricsReporter(exactly = 3)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
         assertTrue(events[1] is NavigationFreeDriveEvent) // start free drive
         assertTrue(events[2] is NavigationFreeDriveEvent) // stop free drive

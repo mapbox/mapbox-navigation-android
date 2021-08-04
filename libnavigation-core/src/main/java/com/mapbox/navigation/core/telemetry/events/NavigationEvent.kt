@@ -32,17 +32,20 @@ internal abstract class NavigationEvent(
     val applicationState: String = phoneState.applicationState // Schema minLength 1
     val event: String = getEventName()
 
-    // Schema pattern TelemetryUtils.obtainCurrentDate() - Timestamp when user started navigation
-    var startTimestamp: String? = null
     var sdkIdentifier: String? = null
-    var sessionIdentifier: String? = null
+    // Schema pattern TelemetryUtils.obtainCurrentDate() - Timestamp when user started navigation
+    var sessionStartTimestamp: String? = null // TODO renamed from `startTimestamp`, need agree from rave/ops teams
+    var sessionIdentifier: String? = null // TODO changed mean: activeGuidance/freeDrive id -> mapboxNavigation session id
+    var driverMode: String? = null
+    var driverModeIdentifier: String? = null
+    var driverModeStartTimestamp: String? = null
     var geometry: String? = null
     var profile: String? = null
     var originalRequestIdentifier: String? = null
     var requestIdentifier: String? = null
     var originalGeometry: String? = null
     var locationEngine: String? = null
-    var tripIdentifier: String? = null
+    var tripIdentifier: String? = null // TODO what is it?
     var lat: Double = 0.toDouble()
     var lng: Double = 0.toDouble()
     var simulation: Boolean = false

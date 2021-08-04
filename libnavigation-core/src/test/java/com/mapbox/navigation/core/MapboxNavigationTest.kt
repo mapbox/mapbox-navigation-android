@@ -428,7 +428,7 @@ class MapboxNavigationTest {
 
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { MapboxNavigationTelemetry.unregisterListeners(eq(mapboxNavigation)) }
+        verify(exactly = 1) { MapboxNavigationTelemetry.destroy(eq(mapboxNavigation)) }
 
         unmockkObject(MapboxNavigationTelemetry)
     }
@@ -441,7 +441,7 @@ class MapboxNavigationTest {
 
         verifyOrder {
             tripSession.stop()
-            MapboxNavigationTelemetry.unregisterListeners(mapboxNavigation)
+            MapboxNavigationTelemetry.destroy(mapboxNavigation)
         }
 
         unmockkObject(MapboxNavigationTelemetry)

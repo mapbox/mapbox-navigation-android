@@ -114,7 +114,9 @@ private const val LOG_TELEMETRY_NO_ROUTE_OR_ROUTE_PROGRESS = "no route or route 
 - navigation.reroute
 - navigation.arrive
 - navigation.cancel
-The class must be initialized before any telemetry events are reported. Attempting to use telemetry before initialization is called will throw an exception. Initialization may be called multiple times, the call is idempotent.
+The class must be initialized before any telemetry events are reported.
+Attempting to use telemetry before initialization is called will throw an exception.
+Initialization may be called multiple times, the call is idempotent.
 The class has two public methods, postUserFeedback() and initialize().
  */
 internal object MapboxNavigationTelemetry {
@@ -232,15 +234,28 @@ internal object MapboxNavigationTelemetry {
         when(sessionState){
             IDLE,
             FREE_DRIVE -> {
-                handleCancelNavigation()
+                if (legacyState == ACTIVE_GUIDANCE) {
+                    handleCancelNavigation()
+                }
                 resetLocalVariables()
                 resetDynamicValues()
             }
             ACTIVE_GUIDANCE -> Unit // do nothing
         }
 
-        handleStateChanged(legacyState, this.sessionState)
-        handleTelemetryState()
+        when(val freeDriveEvent = getFreeDriveEvent(legacyState, this.sessionState)) {
+            START -> {
+                handleTelemetryState()
+                trackFreeDrive(freeDriveEvent)
+            }
+            STOP -> {
+                trackFreeDrive(freeDriveEvent)
+                handleTelemetryState()
+            }
+            null -> {
+                handleTelemetryState()
+            }
+        }
     }
 
     private val offRouteObserver = OffRouteObserver { offRoute ->
@@ -427,8 +442,7 @@ internal object MapboxNavigationTelemetry {
         onEventUpdated: ((NavigationFeedbackEvent) -> Unit)? = null
     ) {
         ifTelemetryRunning(
-            "User Feedback event creation failed. The event can only be created when " +
-                "a session is running"
+            "User Feedback event creation failed: $LOG_TELEMETRY_IS_NOT_RUNNING"
         ) {
             log("collect post event locations for user feedback")
             val feedbackEvent = NavigationFeedbackEvent(
@@ -467,26 +481,23 @@ internal object MapboxNavigationTelemetry {
         )
     }
 
-    private fun handleStateChanged(
+    private fun getFreeDriveEvent(
         oldState: NavigationSession.State,
         newState: NavigationSession.State
-    ) {
-        run {
-            val freeDriveEventType = when {
-                oldState == FREE_DRIVE && newState == IDLE -> STOP
-                oldState == FREE_DRIVE && newState == ACTIVE_GUIDANCE -> STOP
-                oldState != FREE_DRIVE && newState == FREE_DRIVE -> START
-                else -> return@run
-            }
-            trackFreeDrive(freeDriveEventType)
+    ): FreeDriveEventType? {
+        return when {
+            oldState == FREE_DRIVE && newState == IDLE -> STOP
+            oldState == FREE_DRIVE && newState == ACTIVE_GUIDANCE -> STOP
+            oldState != FREE_DRIVE && newState == FREE_DRIVE -> START
+            else -> null
         }
     }
 
     private fun handleTelemetryState() {
-        val legacyTelemetryState = telemetryState
+        val localTelemetryState = telemetryState
         when (sessionState) {
             IDLE -> {
-                if (legacyTelemetryState is NavTelemetryState.Running) {
+                if (localTelemetryState is NavTelemetryState.Running) {
                     telemetryState = NavTelemetryState.Paused(
                         SessionMetadataOnPause(
                             sessionId = navObtainUniversalUniqueIdentifier(),
@@ -496,12 +507,12 @@ internal object MapboxNavigationTelemetry {
                 }
             }
             FREE_DRIVE -> {
-                when (legacyTelemetryState) {
+                when (localTelemetryState) {
                     is NavTelemetryState.Paused -> {
                         telemetryState = NavTelemetryState.Running(
                             SessionMetadata(
-                                sessionId = legacyTelemetryState.sessionMetadataOnPaused.sessionId,
-                                sessionStartTime = legacyTelemetryState.sessionMetadataOnPaused
+                                sessionId = localTelemetryState.sessionMetadataOnPaused.sessionId,
+                                sessionStartTime = localTelemetryState.sessionMetadataOnPaused
                                     .sessionStartTime,
                                 driverModeId = navObtainUniversalUniqueIdentifier(),
                                 telemetryNavSessionState = TelemetryNavSessionState.FREE_DRIVE
@@ -510,7 +521,7 @@ internal object MapboxNavigationTelemetry {
                     }
                     is NavTelemetryState.Running -> {
                         telemetryState = NavTelemetryState.Running(
-                            legacyTelemetryState.sessionMetadata.copy(
+                            localTelemetryState.sessionMetadata.copy(
                                 driverModeId = navObtainUniversalUniqueIdentifier(),
                                 driverModeStartTime = Date(),
                                 telemetryNavSessionState = TelemetryNavSessionState.FREE_DRIVE
@@ -521,7 +532,7 @@ internal object MapboxNavigationTelemetry {
                 }
             }
             ACTIVE_GUIDANCE -> {
-                when (legacyTelemetryState) {
+                when (localTelemetryState) {
                     is NavTelemetryState.Paused -> {
                         telemetryState = NavTelemetryState.Running(
                             SessionMetadata(
@@ -533,7 +544,7 @@ internal object MapboxNavigationTelemetry {
                     }
                     is NavTelemetryState.Running -> {
                         telemetryState = NavTelemetryState.Running(
-                            legacyTelemetryState.sessionMetadata.copy(
+                            localTelemetryState.sessionMetadata.copy(
                                 driverModeId = navObtainUniversalUniqueIdentifier(),
                                 driverModeStartTime = Date(),
                                 telemetryNavSessionState = TelemetryNavSessionState.TRIP
@@ -613,7 +624,7 @@ internal object MapboxNavigationTelemetry {
         ) { sessionMetadata ->
             log("handleReroute")
 
-            getSessionMetadataIfTelemetryRunning()?.dynamicValues?.run {
+            sessionMetadata.dynamicValues.run {
                 val currentTime = Time.SystemImpl.millis()
                 timeSinceLastReroute = (currentTime - timeOfReroute).toInt()
                 timeOfReroute = currentTime
