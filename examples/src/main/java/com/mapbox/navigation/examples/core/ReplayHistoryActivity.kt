@@ -11,13 +11,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
-import com.mapbox.geojson.Point
-import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.LocationPuck2D
-import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
 import com.mapbox.maps.plugin.delegates.listeners.eventdata.MapLoadErrorType
@@ -40,6 +36,7 @@ import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
+import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
@@ -127,6 +124,17 @@ class ReplayHistoryActivity : AppCompatActivity() {
         viewportDataSource = MapboxNavigationViewportDataSource(
             binding.mapView.getMapboxMap()
         )
+        viewportDataSource.evaluate()
+        navigationCamera = NavigationCamera(
+            binding.mapView.getMapboxMap(),
+            binding.mapView.camera,
+            viewportDataSource
+        )
+        navigationCamera.requestNavigationCameraToFollowing()
+        binding.mapView.camera.addCameraAnimationsLifecycleListener(
+            NavigationBasicGesturesHandler(navigationCamera)
+        )
+
         binding.mapView.getMapboxMap().loadStyleUri(
             Style.MAPBOX_STREETS,
             { style: Style ->
@@ -144,13 +152,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
                     enabled = true
                 }
                 locationComponent.addOnIndicatorPositionChangedListener(onPositionChangedListener)
-                navigationCamera = NavigationCamera(
-                    binding.mapView.getMapboxMap(),
-                    binding.mapView.camera,
-                    viewportDataSource
-                )
-
-                viewportDataSource.evaluate()
             },
             object : OnMapLoadErrorListener {
                 override fun onMapLoadError(mapLoadErrorType: MapLoadErrorType, msg: String) {
@@ -170,23 +171,11 @@ class ReplayHistoryActivity : AppCompatActivity() {
                 enhancedLocation,
                 keyPoints,
             )
-            updateCamera(enhancedLocation)
-        }
-    }
 
-    private fun updateCamera(location: Location) {
-        val mapAnimationOptionsBuilder = MapAnimationOptions.Builder()
-            .duration(1500L)
-        binding.mapView.camera.easeTo(
-            CameraOptions.Builder()
-                .center(Point.fromLngLat(location.longitude, location.latitude))
-                .bearing(location.bearing.toDouble())
-                .pitch(45.0)
-                .zoom(17.0)
-                .padding(EdgeInsets(1000.0, 0.0, 0.0, 0.0))
-                .build(),
-            mapAnimationOptionsBuilder.build()
-        )
+            // update camera position to account for new location
+            viewportDataSource.onLocationChanged(enhancedLocation)
+            viewportDataSource.evaluate()
+        }
     }
 
     /** Rendering the set route event **/
@@ -233,6 +222,16 @@ class ReplayHistoryActivity : AppCompatActivity() {
             binding.mapView.getMapboxMap().getStyle()?.apply {
                 routeLineView.renderRouteDrawData(this, value)
             }
+
+            if (routes.isNotEmpty()) {
+                // update the camera position to account for the new route
+                viewportDataSource.onRouteChanged(routes.first())
+                viewportDataSource.evaluate()
+            } else {
+                // remove the route reference to change camera position
+                viewportDataSource.clearRouteData()
+                viewportDataSource.evaluate()
+            }
         }
     }
 
@@ -246,6 +245,9 @@ class ReplayHistoryActivity : AppCompatActivity() {
         binding.mapView.getMapboxMap().getStyle()?.apply {
             routeArrowView.renderManeuverUpdate(this, arrowUpdate)
         }
+
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+        viewportDataSource.evaluate()
     }
 
     private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
@@ -353,14 +355,9 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
         override fun onSuccess(result: LocationEngineResult) {
             ifNonNull(result.lastLocation, activityRef.get()) { loc, act ->
-                val point = Point.fromLngLat(loc.longitude, loc.latitude)
-                val cameraOptions = CameraOptions.Builder()
-                    .center(point)
-                    .zoom(13.0)
-                    .build()
-                act.binding.mapView.getMapboxMap().setCamera(cameraOptions)
+                act.viewportDataSource.onLocationChanged(loc)
+                act.viewportDataSource.evaluate()
                 act.navigationLocationProvider.changePosition(loc)
-                act.updateCamera(loc)
             }
         }
 
