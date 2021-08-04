@@ -42,7 +42,6 @@ package com.mapbox.navigation.ui.tripprogress.model {
     method public android.text.SpannableString getPercentRouteTraveled(double value);
     method public android.text.SpannableString getTimeRemaining(double value);
     method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter.Builder toBuilder(android.content.Context context);
-    field public static final com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter.Companion Companion;
   }
 
   public static final class TripProgressUpdateFormatter.Builder {
@@ -52,9 +51,6 @@ package com.mapbox.navigation.ui.tripprogress.model {
     method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter.Builder estimatedTimeToArrivalFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super java.lang.Long,? extends android.text.SpannableString> formatter);
     method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter.Builder percentRouteTraveledFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super java.lang.Double,? extends android.text.SpannableString> formatter);
     method public com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter.Builder timeRemainingFormatter(com.mapbox.navigation.ui.base.formatter.ValueFormatter<? super java.lang.Double,? extends android.text.SpannableString> formatter);
-  }
-
-  public static final class TripProgressUpdateFormatter.Companion {
   }
 
   public final class TripProgressUpdateValue {

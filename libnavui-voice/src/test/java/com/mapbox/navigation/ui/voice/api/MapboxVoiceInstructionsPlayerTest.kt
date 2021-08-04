@@ -80,7 +80,6 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -140,7 +139,6 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -200,7 +198,6 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -266,7 +263,6 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -316,7 +312,6 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -359,7 +354,6 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -395,7 +389,6 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -431,7 +424,6 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -472,7 +464,6 @@ class MapboxVoiceInstructionsPlayerTest {
             VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
                 aMockedContext,
                 anyAccessToken,
-                anyLanguage,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer

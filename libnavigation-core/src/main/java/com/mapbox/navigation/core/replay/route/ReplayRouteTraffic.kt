@@ -77,7 +77,7 @@ internal class ReplayRouteTraffic {
         return TurfMeasurement.distance(previousPoint, currentPoint, TurfConstants.UNIT_METERS)
     }
 
-    companion object {
-        const val LOCATION_DISTANCE_THRESHOLD = 0.2
+    private companion object {
+        private const val LOCATION_DISTANCE_THRESHOLD = 0.2
     }
 }

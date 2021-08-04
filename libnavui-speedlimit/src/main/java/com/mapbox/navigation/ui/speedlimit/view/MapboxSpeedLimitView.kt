@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 import com.mapbox.navigation.ui.speedlimit.R
+import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi
 import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError
 import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -66,7 +67,7 @@ class MapboxSpeedLimitView : AppCompatTextView {
 
     /**
      * Allows you to change the style of [MapboxSpeedLimitView].
-     * @param style Int
+     * @param styleResource Int
      */
     fun updateStyle(@StyleRes styleResource: Int) {
         val typedArray: TypedArray = context.obtainStyledAttributes(
@@ -295,10 +296,10 @@ class MapboxSpeedLimitView : AppCompatTextView {
     }
 
     private companion object {
-        const val RADIUS = 10f
-        const val OUTER_BACKGROUND_INSET = 3
-        const val BORDER_INSET = 6
-        const val INNER_BACKGROUND_MUTCD_INSET = 9
-        const val INNER_BACKGROUND_VIENNA_INSET = 14
+        private const val RADIUS = 10f
+        private const val OUTER_BACKGROUND_INSET = 3
+        private const val BORDER_INSET = 6
+        private const val INNER_BACKGROUND_MUTCD_INSET = 9
+        private const val INNER_BACKGROUND_VIENNA_INSET = 14
     }
 }

@@ -20,7 +20,7 @@ internal data class PhoneState(val context: Context) {
     val batteryLevel: Int = obtainBatteryLevel(context)
     val screenBrightness: Int = obtainScreenBrightness(context)
     val isBatteryPluggedIn: Boolean = isPluggedIn(context)
-    val connectivity: String? = obtainCellularNetworkType(context)
+    val connectivity: String = obtainCellularNetworkType(context)
     val audioType: String = obtainAudioType(context)
     val applicationState: String = obtainApplicationState(context)
     val created: String = obtainCurrentDate()

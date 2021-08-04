@@ -241,25 +241,19 @@ class NavigationScaleGestureHandler(
         }
     }
 
-    private val onIndicatorPositionChangedListener = object : OnIndicatorPositionChangedListener {
-        override fun onIndicatorPositionChanged(point: Point) {
+    private val onIndicatorPositionChangedListener =
+        OnIndicatorPositionChangedListener {
+            point ->
             puckScreenPosition = point.also { adjustFocalPoint(it) }
         }
-    }
 
-    private val onCameraChangedListener = object : OnCameraChangeListener {
-        override fun onCameraChanged() {
-            puckScreenPosition?.let { adjustFocalPoint(it) }
-        }
+    private val onCameraChangedListener = OnCameraChangeListener {
+        puckScreenPosition?.let { adjustFocalPoint(it) }
     }
 
     private val navigationCameraStateChangedObserver =
-        object : NavigationCameraStateChangedObserver {
-            override fun onNavigationCameraStateChanged(
-                navigationCameraState: NavigationCameraState
-            ) {
-                adjustGesturesThresholds(customGesturesManager.moveGestureDetector)
-            }
+        NavigationCameraStateChangedObserver {
+            adjustGesturesThresholds(customGesturesManager.moveGestureDetector)
         }
 
     private fun adjustGesturesThresholds(moveGestureDetector: MoveGestureDetector) {

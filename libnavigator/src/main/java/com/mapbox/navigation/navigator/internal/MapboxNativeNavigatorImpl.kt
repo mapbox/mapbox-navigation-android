@@ -32,7 +32,6 @@ import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.Router
 import com.mapbox.navigator.RouterError
-import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.TilesConfig
 import com.mapbox.navigator.VoiceInstruction
@@ -168,8 +167,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @param route [DirectionsRoute] to follow.
      * @param legIndex Which leg to follow
      *
-     * @return a [NavigationStatus] route state if no errors occurred.
-     * Otherwise, it returns a invalid route state.
+     * @return a [RouteInfo] route state if no errors occurred.
+     * Otherwise, it returns null.
      */
     override suspend fun setRoute(
         route: DirectionsRoute?,
@@ -191,11 +190,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * Updates annotations so that subsequent calls to getStatus will
      * reflect the most current annotations for the route.
      *
-     * @param legAnnotationJson A string containing the json/pbf annotations
-     * @param routeIndex Which route to apply the annotation update to
-     * @param legIndex Which leg to apply the annotation update to
-     *
-     * @return True if the annotations could be updated false if not (wrong number of annotations)
+     * @param route [DirectionsRoute]
      */
     override suspend fun updateAnnotations(route: DirectionsRoute): Unit =
         withContext(NavigatorDispatcher) {
@@ -245,7 +240,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * Uses valhalla and local tile data to generate mapbox-directions-api-like json.
      *
      * @param url the directions-based uri used when hitting the http service
-     * @return a [RouterResult] object with the json and a success/fail boolean
+     * @return a JSON route object or [RouterError]
      */
     override suspend fun getRoute(url: String): Expected<RouterError, String> {
         return suspendCoroutine { continuation ->

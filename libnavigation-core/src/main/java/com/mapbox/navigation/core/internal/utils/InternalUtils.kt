@@ -1,5 +1,7 @@
 package com.mapbox.navigation.core.internal.utils
 
+import com.mapbox.navigation.core.MapboxNavigation
+
 object InternalUtils {
 
     internal var UNCONDITIONAL_POLLING_PATIENCE_MILLISECONDS = 2000L

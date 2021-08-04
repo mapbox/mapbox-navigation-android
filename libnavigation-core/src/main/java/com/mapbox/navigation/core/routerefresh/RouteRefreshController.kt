@@ -25,7 +25,7 @@ internal class RouteRefreshController(
     private val logger: Logger
 ) {
 
-    companion object {
+    internal companion object {
         internal val TAG = Tag("MbxRouteRefreshController")
     }
 

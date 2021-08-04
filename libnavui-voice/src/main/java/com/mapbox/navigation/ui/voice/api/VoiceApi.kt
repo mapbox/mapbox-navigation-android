@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.voice.api
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.VoiceState
+import java.io.File
 
 /**
  * An Api that allows you to retrieve voice instruction files based on [VoiceInstructions]

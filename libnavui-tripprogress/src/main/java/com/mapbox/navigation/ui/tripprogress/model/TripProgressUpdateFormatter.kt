@@ -23,7 +23,7 @@ class TripProgressUpdateFormatter private constructor(
     private val percentRouteTraveledFormatter: ValueFormatter<Double, SpannableString>
 ) {
 
-    companion object {
+    private companion object {
         private const val DEFAULT_ROUNDING_IMPERIAL = 5
         private const val DEFAULT_ROUNDING_METRIC = 2
     }
@@ -140,7 +140,7 @@ class TripProgressUpdateFormatter private constructor(
             ValueFormatter<Double, SpannableString>? = null
 
         /**
-         * A class that formats a [TripProgressUpdate] to a [SpannableString] representing
+         * A class that formats a [TripProgressUpdateValue] to a [SpannableString] representing
          * the estimated time to arrival.
          *
          * @param formatter a formatter instance
@@ -153,7 +153,7 @@ class TripProgressUpdateFormatter private constructor(
             apply { this.estimatedTimeToArrivalFormatter = formatter }
 
         /**
-         * A class that formats a [TripProgressUpdate] to a [SpannableString] representing
+         * A class that formats a [TripProgressUpdateValue] to a [SpannableString] representing
          * the distance remaining of a route.
          *
          * @param formatter a formatter instance
@@ -166,7 +166,7 @@ class TripProgressUpdateFormatter private constructor(
             apply { this.distanceRemainingFormatter = formatter }
 
         /**
-         * A class that formats a [TripProgressUpdate] to a [SpannableString] representing
+         * A class that formats a [TripProgressUpdateValue] to a [SpannableString] representing
          * the time remaining.
          *
          * @param formatter a formatter instance
@@ -179,7 +179,7 @@ class TripProgressUpdateFormatter private constructor(
             apply { this.timeRemainingFormatter = formatter }
 
         /**
-         * A class that formats a [TripProgressUpdate] to a [SpannableString] representing
+         * A class that formats a [TripProgressUpdateValue] to a [SpannableString] representing
          * the percentage of the route distance traveled.
          *
          * @param formatter a formatter instance

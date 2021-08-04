@@ -31,18 +31,18 @@ internal class TurnIconHelper(
     turnIconResources: TurnIconResources
 ) {
 
-    companion object {
-        const val DRIVING_SIDE_LEFT = "left"
-        const val DRIVING_SIDE_RIGHT = "right"
-        const val ROTATION_ANGLE_0 = 0f
-        const val ROTATION_ANGLE_45 = 45f
-        const val ROTATION_ANGLE_90 = 90f
-        const val ROTATION_ANGLE_135 = 135f
-        const val ROTATION_ANGLE_180 = 180f
-        const val ROTATION_ANGLE_225 = 225f
-        const val ROTATION_ANGLE_270 = 270f
-        const val ROTATION_ANGLE_315 = 315f
-        const val ROTATION_ANGLE_360 = 360f
+    private companion object {
+        private const val DRIVING_SIDE_LEFT = "left"
+        private const val DRIVING_SIDE_RIGHT = "right"
+        private const val ROTATION_ANGLE_0 = 0f
+        private const val ROTATION_ANGLE_45 = 45f
+        private const val ROTATION_ANGLE_90 = 90f
+        private const val ROTATION_ANGLE_135 = 135f
+        private const val ROTATION_ANGLE_180 = 180f
+        private const val ROTATION_ANGLE_225 = 225f
+        private const val ROTATION_ANGLE_270 = 270f
+        private const val ROTATION_ANGLE_315 = 315f
+        private const val ROTATION_ANGLE_360 = 360f
     }
 
     // ManeuverTypeModifierPair<Type, Modifier>

@@ -1,7 +1,6 @@
 package com.mapbox.navigation.core.replay.route
 
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.core.replay.route.ReplayRouteSmoother.Companion.SMOOTH_THRESHOLD_METERS
 import com.mapbox.turf.TurfMeasurement
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -235,5 +234,9 @@ internal class ReplayRouteInterpolator {
             currentVelocity = velocityNext
         } while (distanceToStop < distance)
         return currentVelocity
+    }
+
+    private companion object {
+        private const val SMOOTH_THRESHOLD_METERS = 3.0
     }
 }

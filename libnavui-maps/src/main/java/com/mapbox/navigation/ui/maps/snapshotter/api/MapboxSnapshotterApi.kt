@@ -64,7 +64,7 @@ class MapboxSnapshotterApi(
      * The method takes in [RouteProgress] and generates a snapshot based on the presence of
      * [BannerComponents] of type [BannerComponents.GUIDANCE_VIEW] and subType [BannerComponents.SIGNBOARD]
      * @param progress object representing [RouteProgress]
-     * @param callback informs about the state of the snapshot
+     * @param consumer informs about the state of the snapshot
      */
     fun generateSnapshot(
         progress: RouteProgress,
@@ -73,8 +73,7 @@ class MapboxSnapshotterApi(
         val bannerInstructions = progress.bannerInstructions
         ifNonNull(bannerInstructions) { instruction ->
             val action = SnapshotterAction.GenerateSnapshot(instruction)
-            val result = SnapshotterProcessor.process(action)
-            when (result) {
+            when (val result = SnapshotterProcessor.process(action)) {
                 is SnapshotterResult.SnapshotAvailable -> {
                     val currentGeometry =
                         progress.currentLegProgress?.currentStepProgress?.step?.geometry()
@@ -107,8 +106,7 @@ class MapboxSnapshotterApi(
                         snapshotter.start { snapshot ->
                             val bitmapAction =
                                 SnapshotterAction.GenerateBitmap(options, snapshot)
-                            val bitmapResult = SnapshotterProcessor.process(bitmapAction)
-                            when (bitmapResult) {
+                            when (val bitmapResult = SnapshotterProcessor.process(bitmapAction)) {
                                 is SnapshotterResult.Snapshot.Success -> {
                                     consumer.accept(
                                         ExpectedFactory.createValue(

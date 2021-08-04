@@ -6,7 +6,7 @@ import com.mapbox.navigation.utils.internal.ifNonNull
 import java.net.URL
 
 /**
- * The [OfflineRoute] class wraps the [RouteUrl] class with parameters which
+ * The [OfflineRoute] class wraps the [routeUrl] with parameters which
  * could be set in order for an offline navigation session to successfully begin.
  */
 internal class OfflineRoute private constructor(
@@ -20,7 +20,7 @@ internal class OfflineRoute private constructor(
     private val waypointTypes: List<OfflineCriteria.WaypointType?>?
 ) {
 
-    companion object {
+    private companion object {
         private const val BICYCLE_TYPE_QUERY_PARAMETER = "bicycle_type"
         private const val CYCLING_SPEED_QUERY_PARAMETER = "cycling_speed"
         private const val CYCLEWAY_BIAS_QUERY_PARAMETER = "cycleway_bias"
@@ -56,15 +56,12 @@ internal class OfflineRoute private constructor(
             null
         } else {
             formatWaypointTypes(waypointTypes)
-                ?: throw IllegalStateException(
-                    "All waypoint types values must be one of break, through or null"
-                )
         }
     }
 
     private fun formatWaypointTypes(
         waypointTypesToFormat: List<OfflineCriteria.WaypointType?>
-    ): String? {
+    ): String {
         val waypointTypes = waypointTypesToFormat.map { it?.type ?: "" }.toTypedArray()
         return waypointTypes.joinTo(StringBuilder(), ";").toString()
     }

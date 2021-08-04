@@ -138,7 +138,7 @@ class MapboxRouteOverviewButton : ConstraintLayout {
         binding.routeOverviewText.slideWidth(from, to, SLIDE_DURATION)
 
     private companion object {
-        const val SLIDE_DURATION = 300L
-        const val EXTEND_TO_WIDTH = 165
+        private const val SLIDE_DURATION = 300L
+        private const val EXTEND_TO_WIDTH = 165
     }
 }

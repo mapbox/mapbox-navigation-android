@@ -429,8 +429,6 @@ package com.mapbox.navigation.ui.maps.camera.view {
     ctor public MapboxRecenterButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
     method public void showTextAndExtend(long duration);
     method public void updateStyle(@StyleRes int style);
-    field public static final int EXTEND_TO_WIDTH = 150; // 0x96
-    field public static final long SLIDE_DURATION = 300L; // 0x12cL
   }
 
   public final class MapboxRouteOverviewButton extends androidx.constraintlayout.widget.ConstraintLayout {
@@ -439,8 +437,6 @@ package com.mapbox.navigation.ui.maps.camera.view {
     ctor public MapboxRouteOverviewButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
     method public void showTextAndExtend(long duration);
     method public void updateStyle(@StyleRes int style);
-    field public static final int EXTEND_TO_WIDTH = 165; // 0xa5
-    field public static final long SLIDE_DURATION = 300L; // 0x12cL
   }
 
 }
@@ -451,10 +447,6 @@ package com.mapbox.navigation.ui.maps.guidance.junction.api {
     ctor public MapboxJunctionApi(String accessToken);
     method public void cancelAll();
     method public void generateJunction(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError,com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue>> consumer);
-    field public static final com.mapbox.navigation.ui.maps.guidance.junction.api.MapboxJunctionApi.Companion Companion;
-  }
-
-  public static final class MapboxJunctionApi.Companion {
   }
 
 }
@@ -498,10 +490,6 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.api {
     ctor public MapboxSignboardApi(String accessToken, android.content.Context applicationContext, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options = MapboxSignboardOptions.<init>().build());
     method public void cancelAll();
     method public void generateSignboard(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError,com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue>> consumer);
-    field public static final com.mapbox.navigation.ui.maps.guidance.signboard.api.MapboxSignboardApi.Companion Companion;
-  }
-
-  public static final class MapboxSignboardApi.Companion {
   }
 
   public final class MapboxSvgToBitmapParser implements com.mapbox.navigation.ui.maps.guidance.signboard.api.SvgToBitmapParser {

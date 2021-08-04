@@ -16,7 +16,6 @@ package com.mapbox.navigation.ui.speedlimit.model {
   public final class SpeedLimitFormatter implements com.mapbox.navigation.ui.base.formatter.ValueFormatter<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue,java.lang.String> {
     ctor public SpeedLimitFormatter(android.content.Context context);
     method public String format(com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue update);
-    field public static final double KILO_MILES_FACTOR = 0.621371;
   }
 
   public final class UpdateSpeedLimitError {
@@ -47,11 +46,6 @@ package com.mapbox.navigation.ui.speedlimit.view {
     ctor public MapboxSpeedLimitView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
     method public void render(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError,com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue> expected);
     method public void updateStyle(@StyleRes int styleResource);
-    field public static final int BORDER_INSET = 6; // 0x6
-    field public static final int INNER_BACKGROUND_MUTCD_INSET = 9; // 0x9
-    field public static final int INNER_BACKGROUND_VIENNA_INSET = 14; // 0xe
-    field public static final int OUTER_BACKGROUND_INSET = 3; // 0x3
-    field public static final float RADIUS = 10.0f;
   }
 
 }

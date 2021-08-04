@@ -8,7 +8,7 @@ import com.mapbox.navigation.utils.internal.ifNonNull
 
 internal class MetricsRouteProgress(routeProgress: RouteProgress?) {
 
-    companion object {
+    private companion object {
         private val DEFAULT_POINT = Point.fromLngLat(0.0, 0.0)
     }
 
@@ -101,8 +101,8 @@ internal class MetricsRouteProgress(routeProgress: RouteProgress?) {
     }
 
     private fun obtainRouteData(route: DirectionsRoute) {
-        directionsRouteDistance = route.distance()?.toInt() ?: 0
-        directionsRouteDuration = route.duration()?.toInt() ?: 0
+        directionsRouteDistance = route.distance().toInt()
+        directionsRouteDuration = route.duration().toInt()
         directionsRouteProfile = route.routeOptions()?.profile() ?: ""
         directionsRouteDestination = retrieveRouteDestination(route)
     }

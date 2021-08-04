@@ -149,11 +149,11 @@ class NavigationCamera(
     @ExperimentalPreviewMapboxNavigationAPI
     var debugger: MapboxNavigationViewportDataSourceDebugger? = null
 
-    private val sourceUpdateObserver = object : ViewportDataSourceUpdateObserver {
-        override fun viewportDataSourceUpdated(viewportData: ViewportData) {
+    private val sourceUpdateObserver =
+        ViewportDataSourceUpdateObserver {
+            viewportData ->
             updateFrame(viewportData, instant = false)
         }
-    }
 
     init {
         viewportDataSource.registerUpdateObserver(sourceUpdateObserver)

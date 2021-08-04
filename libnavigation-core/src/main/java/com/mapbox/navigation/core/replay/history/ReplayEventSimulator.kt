@@ -109,7 +109,7 @@ internal class ReplayEventSimulator(
         return elapsedNanos * simulatorTimeScale
     }
 
-    companion object {
+    private companion object {
 
         // The frequency that replay updates will be broad-casted
         private const val REPLAY_UPDATE_SPEED_MILLIS = 100L
