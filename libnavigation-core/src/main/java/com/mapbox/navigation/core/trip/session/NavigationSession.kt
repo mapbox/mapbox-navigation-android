@@ -1,10 +1,10 @@
 package com.mapbox.navigation.core.trip.session
 
-import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
+import com.mapbox.navigation.core.telemetry.navObtainUniversalSessionId
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.FreeDrive
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.Idle
@@ -43,10 +43,10 @@ internal class NavigationSession : RoutesObserver, TripSessionStateObserver {
     private fun updateState() {
         state = when {
             hasRoutes && isDriving -> {
-                ActiveGuidance(TelemetryUtils.obtainUniversalUniqueIdentifier())
+                ActiveGuidance(navObtainUniversalSessionId())
             }
             isDriving -> {
-                FreeDrive(TelemetryUtils.obtainUniversalUniqueIdentifier())
+                FreeDrive(navObtainUniversalSessionId())
             }
             else -> {
                 Idle

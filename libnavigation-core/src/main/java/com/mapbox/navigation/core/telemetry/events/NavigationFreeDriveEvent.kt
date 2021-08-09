@@ -8,6 +8,15 @@ import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 
+/**
+ * Navigation free drive event.
+ *
+ * Note: class doesn't have driverMode property because it's always FreeDrive.
+ *
+ * @property sessionIdentifier unique id of FreeDrive(same for start and stop events)
+ * @property startTimestamp start time FreeDrive event
+ * @property navigatorSessionIdentifier group id of modes(FreeDrive/ActiveGuidance) under one Telemetry session
+ */
 @SuppressLint("ParcelCreator")
 internal class NavigationFreeDriveEvent(
     phoneState: PhoneState
@@ -17,7 +26,7 @@ internal class NavigationFreeDriveEvent(
      * Don't remove any fields, cause they should match with
      * the schema downloaded from S3. Look at {@link SchemaTest}
      */
-    val version = "2.1"
+    val version = "2.2"
     val created: String = TelemetryUtils.obtainCurrentDate() // Schema pattern
     val volumeLevel: Int = phoneState.volumeLevel
     val batteryLevel: Int = phoneState.batteryLevel
@@ -31,11 +40,12 @@ internal class NavigationFreeDriveEvent(
     var locationEngine: String? = null
     var percentTimeInPortrait: Int = 0
     var percentTimeInForeground: Int = 0
-    var sessionIdentifier: String? = null
     var simulation: Boolean = false
 
-    // Schema pattern TelemetryUtils.obtainCurrentDate() - Timestamp when user started navigation
-    var startTimestamp: String? = null
+    var navigatorSessionIdentifier: String? = null // group id of modes under one Telemetry session
+    var startTimestamp: String? = null // mode start time
+    var sessionIdentifier: String? = null // mode id
+
     var location: TelemetryLocation? = null
     var eventType: String? = null
     var appMetadata: AppMetadata? = null

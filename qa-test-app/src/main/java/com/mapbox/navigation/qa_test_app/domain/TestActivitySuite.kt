@@ -4,6 +4,7 @@ import android.app.Activity
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.utils.startActivity
 import com.mapbox.navigation.qa_test_app.view.AlternativeRouteActivity
+import com.mapbox.navigation.qa_test_app.view.FeedbackActivity
 import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxRouteLineActivity
 import com.mapbox.navigation.qa_test_app.view.RouteRestrictionsActivity
@@ -50,6 +51,12 @@ object TestActivitySuite {
             R.string.route_drawing_utility
         ) { activity ->
             activity.startActivity<RouteDrawingActivity>()
-        }
+        },
+        TestActivityDescription(
+            "Feedback test activity",
+            R.string.feedback_activity_description
+        ) { activity ->
+            activity.startActivity<FeedbackActivity>()
+        },
     )
 }

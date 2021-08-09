@@ -5,6 +5,7 @@ import android.location.Location
 import android.media.AudioManager
 import android.provider.Settings
 import android.text.TextUtils
+import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
@@ -14,7 +15,9 @@ import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import kotlin.math.floor
 
+// TODO move to mapbox-java
 private const val PRECISION_6 = 6
+// TODO move to mapbox-java
 private const val PRECISION_5 = 5
 private const val PERCENT_NORMALIZER = 100.0
 private const val SCREEN_BRIGHTNESS_MAX = 255.0
@@ -102,3 +105,15 @@ internal fun obtainAudioType(context: Context): String =
 
 private fun calculateScreenBrightnessPercentage(screenBrightness: Int): Int =
     floor(PERCENT_NORMALIZER * screenBrightness / SCREEN_BRIGHTNESS_MAX).toInt()
+
+internal fun navObtainUniversalSessionId(): String =
+    TelemetryUtils.obtainUniversalUniqueIdentifier()
+
+internal fun navObtainUniversalTelemetryNavigationSessionId(): String =
+    TelemetryUtils.obtainUniversalUniqueIdentifier()
+
+internal fun navObtainUniversalTelemetryNavigationModeId(): String =
+    TelemetryUtils.obtainUniversalUniqueIdentifier()
+
+internal fun navObtainUniversalTelemetryTripId(): String =
+    TelemetryUtils.obtainUniversalUniqueIdentifier()
