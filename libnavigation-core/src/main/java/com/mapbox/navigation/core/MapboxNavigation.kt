@@ -285,6 +285,12 @@ class MapboxNavigation(
 
     private var reachabilityObserverId: Long? = null
 
+    /**
+     * Describes if this instance of [MapboxNavigation] was already destroyed.
+     */
+    var isDestroyed = false
+        private set
+
     init {
         ThreadController.init()
         navigator = NavigationComponentProvider.createNativeNavigator(
@@ -541,6 +547,7 @@ class MapboxNavigation(
             ReachabilityService.removeReachabilityObserver(it)
             reachabilityObserverId = null
         }
+        isDestroyed = true
     }
 
     /**

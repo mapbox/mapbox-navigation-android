@@ -4,7 +4,7 @@ import androidx.annotation.UiThread
 import com.mapbox.navigation.base.options.NavigationOptions
 
 /**
- * Singleton responsible for ensuring there is only one MapboxNavigation instance.
+ * Singleton responsible for ensuring there is only one [MapboxNavigation] instance.
  */
 @UiThread
 object MapboxNavigationProvider {
@@ -55,6 +55,9 @@ object MapboxNavigationProvider {
      */
     @JvmStatic
     fun isCreated(): Boolean {
+        /*if (mapboxNavigation?.isDestroyed == true) {
+            mapboxNavigation = null
+        }*/
         return mapboxNavigation != null
     }
 }
