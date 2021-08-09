@@ -37,7 +37,7 @@ internal class RoutingTilesFiles(
         return File(applicationContext.filesDir, TILES_PATH_SUB_DIR).absolutePath
     }
 
-    companion object {
+    internal companion object {
         private val loggerTag = Tag("MbxRoutingTilesOptions")
         internal const val TILES_PATH_SUB_DIR = "mbx_nav/tiles"
     }

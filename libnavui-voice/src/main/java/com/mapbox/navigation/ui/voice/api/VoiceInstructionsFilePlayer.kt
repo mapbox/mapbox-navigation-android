@@ -11,20 +11,17 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.util.Locale
 
 /**
  * Online implementation of [VoiceInstructionsPlayer].
  * Will retrieve synthesized speech mp3s from Mapbox's API Voice.
  * @property context Context
  * @property accessToken String
- * @property language [Locale] language (ISO 639)
  * @property playerAttributes [VoiceInstructionsPlayerAttributes]
  */
 internal class VoiceInstructionsFilePlayer(
     private val context: Context,
     private val accessToken: String,
-    private val language: String,
     private val playerAttributes: VoiceInstructionsPlayerAttributes,
 ) : VoiceInstructionsPlayer {
 

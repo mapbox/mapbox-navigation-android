@@ -16,8 +16,7 @@ internal object ManeuverInstructionGenerator {
     ): SpannableStringBuilder {
         val instructionBuilder = SpannableStringBuilder()
         maneuver.componentList.forEach { component ->
-            val node = component.node
-            when (node) {
+            when (val node = component.node) {
                 is TextComponentNode -> {
                     addTextToBuilder(node.text, instructionBuilder)
                 }
@@ -57,8 +56,7 @@ internal object ManeuverInstructionGenerator {
     ): SpannableStringBuilder {
         val instructionBuilder = SpannableStringBuilder()
         maneuver?.componentList?.forEach { component ->
-            val node = component.node
-            when (node) {
+            when (val node = component.node) {
                 is TextComponentNode -> {
                     addTextToBuilder(node.text, instructionBuilder)
                 }
@@ -98,8 +96,7 @@ internal object ManeuverInstructionGenerator {
     ): SpannableStringBuilder {
         val instructionBuilder = SpannableStringBuilder()
         maneuver?.componentList?.forEach { component ->
-            val node = component.node
-            when (node) {
+            when (val node = component.node) {
                 is TextComponentNode -> {
                     addTextToBuilder(node.text, instructionBuilder)
                 }

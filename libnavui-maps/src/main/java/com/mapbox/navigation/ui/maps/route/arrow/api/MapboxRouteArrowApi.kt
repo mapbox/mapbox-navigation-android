@@ -7,6 +7,8 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.ARROW_BEARING
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.MAX_DEGREES
@@ -19,13 +21,14 @@ import com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError
 import com.mapbox.navigation.ui.maps.route.arrow.model.ManeuverArrow
 import com.mapbox.navigation.ui.maps.route.arrow.model.RemoveArrowValue
 import com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.turf.TurfMeasurement
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Responsible for displaying a maneuver arrow representing the next maneuver.
  * The maneuver arrow is calculated based on the route progress and the data returned should
- * be rendered on the map using the [MapRouteArrowView] class. Generally this class should be called
+ * be rendered on the map using the [MapboxRouteArrowView] class. Generally this class should be called
  * on each route progress update in order to ensure the arrow displayed is kept consistent
  * with the state of navigation.
  *

@@ -227,7 +227,7 @@ internal object ViewportDataSourceProcessor {
             if (index == 0) {
                 continue
             }
-            val coord = points[index - 1]?.let {
+            val coord = points[index - 1].let {
                 val thisEdgeBearing = TurfMeasurement.bearing(it, points[index])
                 val rotationDiff = shortestRotationDiff(thisEdgeBearing, firstEdgeBearing)
                 if (abs(rotationDiff) < maxAngleDifference) {

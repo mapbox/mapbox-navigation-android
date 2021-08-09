@@ -62,8 +62,7 @@ class DelimiterComponentNode private constructor(val text: String) : ComponentNo
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        var result = text.hashCode()
-        return result
+        return text.hashCode()
     }
 
     /**

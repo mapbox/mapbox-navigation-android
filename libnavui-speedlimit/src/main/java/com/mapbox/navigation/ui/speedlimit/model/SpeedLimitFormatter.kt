@@ -57,6 +57,6 @@ class SpeedLimitFormatter(
     }
 
     private companion object {
-        const val KILO_MILES_FACTOR = 0.621371
+        private const val KILO_MILES_FACTOR = 0.621371
     }
 }

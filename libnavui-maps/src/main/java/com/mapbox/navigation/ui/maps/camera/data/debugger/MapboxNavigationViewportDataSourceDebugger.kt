@@ -141,12 +141,10 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
         setBackgroundColor(Color.RED)
     }
 
-    private val cameraChangeListener = object : OnCameraChangeListener {
-        override fun onCameraChanged() {
-            mapView.post {
-                updateMapCameraCenter()
-                updateMapPadding()
-            }
+    private val cameraChangeListener = OnCameraChangeListener {
+        mapView.post {
+            updateMapCameraCenter()
+            updateMapPadding()
         }
     }
 

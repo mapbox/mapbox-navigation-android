@@ -10,7 +10,6 @@ import kotlin.jvm.Throws
 
 object SvgUtil {
 
-    @JvmStatic
     fun renderAsBitmapWithHeight(
         stream: ByteArrayInputStream,
         desiredHeight: Int,
@@ -33,7 +32,6 @@ object SvgUtil {
         }
     }
 
-    @JvmStatic
     @Throws
     fun renderAsBitmapWithWidth(
         stream: ByteArrayInputStream,

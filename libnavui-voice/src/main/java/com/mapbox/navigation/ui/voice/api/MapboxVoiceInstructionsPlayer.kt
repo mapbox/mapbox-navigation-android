@@ -7,6 +7,7 @@ import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
+import java.util.Locale
 import java.util.Queue
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -36,7 +37,6 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
         VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
             context,
             accessToken,
-            language,
             attributes,
         )
     private val textPlayer: VoiceInstructionsTextPlayer =
@@ -46,15 +46,13 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
             attributes,
         )
     private val localCallback: VoiceInstructionsPlayerCallback =
-        object : VoiceInstructionsPlayerCallback {
-            override fun onDone(announcement: SpeechAnnouncement) {
-                audioFocusDelegate.abandonFocus()
-                val currentPlayCallback = playCallbackQueue.poll()
-                val currentAnnouncement = currentPlayCallback.announcement
-                val currentClientCallback = currentPlayCallback.consumer
-                currentClientCallback.accept(currentAnnouncement)
-                play()
-            }
+        VoiceInstructionsPlayerCallback {
+            audioFocusDelegate.abandonFocus()
+            val currentPlayCallback = playCallbackQueue.poll()
+            val currentAnnouncement = currentPlayCallback.announcement
+            val currentClientCallback = currentPlayCallback.consumer
+            currentClientCallback.accept(currentAnnouncement)
+            play()
         }
 
     /**

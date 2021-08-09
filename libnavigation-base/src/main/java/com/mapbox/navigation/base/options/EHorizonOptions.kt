@@ -1,5 +1,7 @@
 package com.mapbox.navigation.base.options
 
+import com.mapbox.navigation.base.trip.model.eh.EHorizon
+
 /**
  * Defines options for [EHorizon].
  *

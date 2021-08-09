@@ -8,7 +8,7 @@ import com.mapbox.navigation.ui.base.formatter.ValueFormatter
  * Represents a speed limit update to be rendered.
  * @property speedKPH Int speed in kilometers per hour
  * @property speedUnit SpeedLimitUnit speed limit unit.
- * @property signFormat SpeedLimitSign speed limti sign
+ * @property signFormat SpeedLimitSign speed limit sign
  * @property speedLimitFormatter ValueFormatter<UpdateSpeedLimitValue, String>
  * @constructor
  */

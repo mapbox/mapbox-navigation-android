@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.arrival.model
 
 import android.graphics.Color
 import androidx.annotation.ColorInt
+import com.mapbox.navigation.base.options.NavigationOptions
 
 /**
  * The options for highlighting a building upon arrival.

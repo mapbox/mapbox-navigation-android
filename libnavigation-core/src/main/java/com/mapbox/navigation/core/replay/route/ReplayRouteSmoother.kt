@@ -203,9 +203,9 @@ internal class ReplayRouteSmoother {
         )
     }
 
-    companion object {
-        val EARTH_CENTER: DoubleArray = doubleArrayOf(0.0, 0.0, 0.0)
-        const val DISTINCT_POINT_METERS = 0.0001
-        const val SMOOTH_THRESHOLD_METERS = 3.0
+    // private??
+    private companion object {
+        private val EARTH_CENTER: DoubleArray = doubleArrayOf(0.0, 0.0, 0.0)
+        private const val DISTINCT_POINT_METERS = 0.0001
     }
 }

@@ -90,7 +90,7 @@ class RoadShieldComponentNode private constructor(
     /**
      * Build a new [RoadShieldComponentNode]
      * @property text String
-     * @property shieldIcon ByteArray?
+     * @property shieldUrl String?
      */
     class Builder {
         private var text: String = ""
@@ -106,7 +106,7 @@ class RoadShieldComponentNode private constructor(
 
         /**
          * apply text to the Builder.
-         * @param text String
+         * @param shieldUrl String
          * @return Builder
          */
         fun shieldUrl(shieldUrl: String?): Builder =

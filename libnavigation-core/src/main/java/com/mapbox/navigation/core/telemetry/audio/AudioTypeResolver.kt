@@ -6,11 +6,11 @@ import android.os.Build
 
 internal sealed class AudioTypeResolver {
 
-    companion object {
-        const val BLUETOOTH = "bluetooth"
-        const val HEADPHONES = "headphones"
-        const val SPEAKER = "speaker"
-        const val UNKNOWN = "unknown"
+    private companion object {
+        private const val BLUETOOTH = "bluetooth"
+        private const val HEADPHONES = "headphones"
+        private const val SPEAKER = "speaker"
+        private const val UNKNOWN = "unknown"
     }
 
     internal lateinit var chain: AudioTypeResolver

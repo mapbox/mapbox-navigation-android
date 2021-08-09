@@ -41,8 +41,8 @@ internal class HistoryFiles(
         return File(applicationContext.filesDir, TILES_PATH_SUB_DIR).absolutePath
     }
 
-    companion object {
+    private companion object {
         private val loggerTag = Tag("MbxHistoryRecorder")
-        internal const val TILES_PATH_SUB_DIR = "mbx_nav/history"
+        private const val TILES_PATH_SUB_DIR = "mbx_nav/history"
     }
 }

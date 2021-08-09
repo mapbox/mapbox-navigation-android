@@ -4,7 +4,7 @@ import android.app.Notification
 import androidx.core.app.NotificationCompat
 
 /**
- * Provides notification for navigation process launched with a [TripSession]
+ * Provides notification for navigation process launched with a trip session
  */
 internal object NavigationNotificationProvider {
 

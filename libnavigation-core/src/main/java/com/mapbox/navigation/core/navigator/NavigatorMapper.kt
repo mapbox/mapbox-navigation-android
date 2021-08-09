@@ -46,7 +46,6 @@ private val SUPPORTED_ROAD_OBJECTS = arrayOf(
 
 private const val ONE_INDEX = 1
 private const val ONE_SECOND_IN_MILLISECONDS = 1000.0
-private const val FIRST_BANNER_INSTRUCTION = 0
 
 internal fun getRouteInitInfo(routeInfo: RouteInfo?) = routeInfo.toRouteInitInfo()
 

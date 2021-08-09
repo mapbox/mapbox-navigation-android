@@ -6,7 +6,7 @@ import com.mapbox.geojson.Point
 /**
  * This is a progress object specific to the current step the user is on.
  *
- * The latest route step progress object can be obtained through the [com.mapbox.navigation.core.trip.session.RouteProgressObserver].
+ * The latest route step progress object can be obtained through the [RouteProgressObserver].
  * Note that the route step progress object's immutable.
  *
  * @param stepIndex [Int] Index representing the current step the user is on

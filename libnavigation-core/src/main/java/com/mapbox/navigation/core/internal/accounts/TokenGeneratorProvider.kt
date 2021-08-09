@@ -5,8 +5,8 @@ import com.mapbox.common.TokenGenerator
 
 internal object TokenGeneratorProvider {
 
-    private val tokenGenerator = object : NavigationTokenGenerator {
-        override fun getSKUToken() = TokenGenerator.getSKUToken(SKUIdentifier.NAVIGATION_MAUS)
+    private val tokenGenerator = NavigationTokenGenerator {
+        TokenGenerator.getSKUToken(SKUIdentifier.NAVIGATION_MAUS)
     }
 
     fun getNavigationTokenGenerator() = tokenGenerator

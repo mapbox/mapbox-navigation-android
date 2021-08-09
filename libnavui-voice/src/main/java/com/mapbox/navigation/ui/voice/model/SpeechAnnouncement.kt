@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.voice.model
 
+import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.options.DeviceType
 import java.io.File
 

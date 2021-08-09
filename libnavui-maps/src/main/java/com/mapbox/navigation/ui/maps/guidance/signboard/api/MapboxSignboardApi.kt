@@ -41,7 +41,7 @@ class MapboxSignboardApi @JvmOverloads constructor(
         options
     )
 
-    companion object {
+    private companion object {
         private const val ACCESS_TOKEN = "?access_token="
     }
 

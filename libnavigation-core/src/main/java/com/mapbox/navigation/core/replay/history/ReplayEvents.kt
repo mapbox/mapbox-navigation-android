@@ -6,7 +6,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 
 /**
- * Replay event that mapped from [ReplayHistoryDTO] or created on your own. Override this
+ * Replay event that mapped from [ReplayHistoryMapper] or created on your own. Override this
  * to support new or custom events. Each event can be replayed by the [MapboxReplayer].
  *
  * @param events Assumes chronological order, index 0 moves to [List.size] over time

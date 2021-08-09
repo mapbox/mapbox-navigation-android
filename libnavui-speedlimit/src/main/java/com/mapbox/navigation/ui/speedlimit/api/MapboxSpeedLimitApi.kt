@@ -12,7 +12,7 @@ import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue
 import com.mapbox.navigation.utils.internal.ifNonNull
 
 /**
- * A Mapbox implementation of the [SpeedLimitApi] for formatting speed limit view related data.
+ * A Mapbox implementation for formatting speed limit view related data.
  *
  * @param formatter formats the speed limit data into a string for displaying in the UI
  * @param processor an instance of a [SpeedLimitProcessor]

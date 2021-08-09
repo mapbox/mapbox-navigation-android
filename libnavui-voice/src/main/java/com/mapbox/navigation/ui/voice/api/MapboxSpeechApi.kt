@@ -16,6 +16,7 @@ import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 /**
  * Mapbox Speech Api that allows you to generate an announcement based on [VoiceInstructions]

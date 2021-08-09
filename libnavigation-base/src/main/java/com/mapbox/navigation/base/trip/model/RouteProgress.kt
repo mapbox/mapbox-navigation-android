@@ -12,7 +12,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
  * With every new valid location update, a new route progress will be generated using the latest
  * information.
  *
- * The latest route progress object can be obtained through the [com.mapbox.navigation.core.trip.session.RouteProgressObserver].
+ * The latest route progress object can be obtained through the [RouteProgressObserver].
  * Note that the route progress object's immutable.
  *
  * @param route [DirectionsRoute] the navigation session is currently using. When a reroute occurs and a new

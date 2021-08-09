@@ -472,9 +472,8 @@ object MapboxRouteLineUtils {
 
     private fun getClosureRanges(leg: RouteLeg): List<IntRange> {
         return leg.closures()
-            ?.filter { it.geometryIndexStart() != null && it.geometryIndexEnd() != null }
             ?.map {
-                IntRange(it.geometryIndexStart()!!, it.geometryIndexEnd()!!)
+                IntRange(it.geometryIndexStart(), it.geometryIndexEnd())
             } ?: listOf()
     }
 
@@ -826,7 +825,7 @@ object MapboxRouteLineUtils {
         routeStyleDescriptors: List<RouteStyleDescriptor>,
         routeColorProvider: KProperty1<RouteStyleDescriptor, Int>
     ): List<Expression> {
-        val expressions = mutableListOf<Expression>(
+        val expressions = mutableListOf(
             eq {
                 get { literal(RouteConstants.DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER) }
                 literal(true)

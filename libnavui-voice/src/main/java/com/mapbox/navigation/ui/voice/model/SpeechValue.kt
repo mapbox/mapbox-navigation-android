@@ -1,8 +1,11 @@
 package com.mapbox.navigation.ui.voice.model
 
+import com.mapbox.navigation.ui.voice.api.MapboxSpeechApi
+import java.io.File
+
 /**
  * The state is returned when the speech is ready to be played on the UI.
- * It's also returned as a fallback when [SpeechApi.generate] fails.
+ * It's also returned as a fallback when [MapboxSpeechApi.generate] fails.
  * In this case, the [File] from the [SpeechAnnouncement] will be null.
  * @param announcement
  */

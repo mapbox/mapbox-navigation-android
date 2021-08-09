@@ -7,6 +7,7 @@ package com.mapbox.navigation.base.trip.model.eh
  * The value is in degrees in the range [0, 360)
  * @param length the Edge's length in meters
  * @param functionRoadClass the edge's [RoadClass]
+ * @param speedLimit max speed of the edge (speed limit) in m/s
  * @param speed average speed along the edge in m/s
  * @param ramp is the edge a ramp?
  * @param motorway is the edge a motorway?
@@ -14,11 +15,9 @@ package com.mapbox.navigation.base.trip.model.eh
  * @param tunnel is the edge a tunnel?
  * @param toll is the edge a toll road?
  * @param names an array of road names
- * @param curvature binned number denoting the curvature degree of the edge (0-15)
- * @param geometry optional geometry if requested
- * @param speedLimit max speed of the edge (speed limit) in m/s
  * @param laneCount the number of lanes on the edge (does not change mid-edge)
  * @param meanElevation mean elevation along the edge in meters
+ * @param curvature binned number denoting the curvature degree of the edge (0-15)
  * @param countryCodeIso3 ISO 3166-1 alpha-3 country code
  * @param countryCodeIso2 the edge's country code (ISO-2 format)
  * @param stateCode a state inside a country (ISO 3166-2)

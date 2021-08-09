@@ -15,7 +15,7 @@ internal abstract class NavigationEvent(
     phoneState: PhoneState
 ) : Event(), MetricEvent {
 
-    companion object {
+    private companion object {
         private val OPERATING_SYSTEM = "Android - ${Build.VERSION.RELEASE}"
     }
 

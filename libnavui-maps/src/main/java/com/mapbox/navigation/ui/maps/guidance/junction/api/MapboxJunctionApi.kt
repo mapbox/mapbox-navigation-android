@@ -25,7 +25,7 @@ class MapboxJunctionApi(
     private val accessToken: String
 ) {
 
-    companion object {
+    private companion object {
         private const val ACCESS_TOKEN = "&access_token="
     }
 

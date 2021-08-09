@@ -100,7 +100,7 @@ class MapboxSoundButton : ConstraintLayout {
     }
 
     /**
-     * Allows you to change the style of [MapboxRouteOverviewButton].
+     * Allows you to change the style of [MapboxSoundButton].
      * @param style Int
      */
     fun updateStyle(@StyleRes style: Int) {
