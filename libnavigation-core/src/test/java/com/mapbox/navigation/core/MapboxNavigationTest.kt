@@ -59,6 +59,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
@@ -189,6 +190,7 @@ class MapboxNavigationTest {
         mockTripSession()
         mockDirectionSession()
         mockNavigationSession()
+        mockNavTelemetry()
 
         every { navigator.create(any(), any(), any(), any(), any()) } returns navigator
 
@@ -206,6 +208,7 @@ class MapboxNavigationTest {
         unmockkObject(NavigationComponentProvider)
         unmockkObject(RouteRefreshControllerProvider)
         unmockkObject(RouteAlternativesControllerProvider)
+        unmockkObject(MapboxNavigationTelemetry)
 
         ThreadController.cancelAllNonUICoroutines()
         ThreadController.cancelAllUICoroutines()
@@ -236,14 +239,14 @@ class MapboxNavigationTest {
 
     @Test
     fun init_routesObs_internalRouteObs_navigationSession_and_TelemetryLocAndProgressDisptchr() {
-        verify(exactly = 3) { directionsSession.registerRoutesObserver(any()) }
+        verify(exactly = 2) { directionsSession.registerRoutesObserver(any()) }
 
         mapboxNavigation.onDestroy()
     }
 
     @Test
     fun init_registerOffRouteObserver() {
-        verify(exactly = 2) { tripSession.registerOffRouteObserver(any()) }
+        verify(exactly = 1) { tripSession.registerOffRouteObserver(any()) }
 
         mapboxNavigation.onDestroy()
     }
@@ -252,7 +255,7 @@ class MapboxNavigationTest {
     fun destroy_unregisterOffRouteObserver() {
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { tripSession.unregisterOffRouteObserver(any()) }
+        verify(exactly = 1) { tripSession.unregisterAllOffRouteObservers() }
 
         mapboxNavigation.onDestroy()
     }
@@ -264,20 +267,20 @@ class MapboxNavigationTest {
 
         mapboxNavigation = MapboxNavigation(navigationOptions)
 
-        verify(exactly = 4) { tripSession.registerOffRouteObserver(any()) }
+        verify(exactly = 2) { tripSession.registerOffRouteObserver(any()) }
 
         mapboxNavigation.onDestroy()
     }
 
     @Test
-    fun destroy_unregisterOffRouteObserver_MapboxNavigation_recreated() {
+    fun destroy_unregisterAllOffRouteObservers_MapboxNavigation_recreated() {
         ThreadController.cancelAllUICoroutines()
         val navigationOptions = provideNavigationOptions().build()
         mapboxNavigation = MapboxNavigation(navigationOptions)
 
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { tripSession.unregisterOffRouteObserver(any()) }
+        verify(exactly = 1) { tripSession.unregisterAllOffRouteObservers() }
 
         mapboxNavigation.onDestroy()
     }
@@ -337,13 +340,6 @@ class MapboxNavigationTest {
     @Test
     fun init_registerStateObserver_navigationSession() {
         verify(exactly = 1) { tripSession.registerStateObserver(any()) }
-
-        mapboxNavigation.onDestroy()
-    }
-
-    @Test
-    fun init_registerNavigationSessionStateObserver() {
-        verify(exactly = 1) { navigationSession.registerNavigationSessionStateObserver(any()) }
 
         mapboxNavigation.onDestroy()
     }
@@ -441,27 +437,19 @@ class MapboxNavigationTest {
 
     @Test
     fun unregisterAllTelemetryObservers() {
-        mockkObject(MapboxNavigationTelemetry)
-
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { MapboxNavigationTelemetry.unregisterListeners(eq(mapboxNavigation)) }
-
-        unmockkObject(MapboxNavigationTelemetry)
+        verify(exactly = 1) { MapboxNavigationTelemetry.destroy(eq(mapboxNavigation)) }
     }
 
     @Test
     fun unregisterAllTelemetryObserversIsCalledAfterTripSessionStop() {
-        mockkObject(MapboxNavigationTelemetry)
-
         mapboxNavigation.onDestroy()
 
         verifyOrder {
             tripSession.stop()
-            MapboxNavigationTelemetry.unregisterListeners(mapboxNavigation)
+            MapboxNavigationTelemetry.destroy(mapboxNavigation)
         }
-
-        unmockkObject(MapboxNavigationTelemetry)
     }
 
     @Test
@@ -1015,6 +1003,21 @@ class MapboxNavigationTest {
         every { NavigationComponentProvider.createNavigationSession() } answers {
             navigationSession
         }
+    }
+
+    private fun mockNavTelemetry() {
+        mockkObject(MapboxNavigationTelemetry)
+        every { MapboxNavigationTelemetry.initialize(any(), any(), any(), any(), any()) } just runs
+        every { MapboxNavigationTelemetry.destroy(any()) } just runs
+        every {
+            MapboxNavigationTelemetry.cacheUserFeedback(any(), any(), any(), any(), any())
+        } just runs
+        every {
+            MapboxNavigationTelemetry.postUserFeedback(any(), any(), any(), any(), any())
+        } just runs
+        every {
+            MapboxNavigationTelemetry.postCachedUserFeedback(any())
+        } just runs
     }
 
     private fun provideNavigationOptions() =

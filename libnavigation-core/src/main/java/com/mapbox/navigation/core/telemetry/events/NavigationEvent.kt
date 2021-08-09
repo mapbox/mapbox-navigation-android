@@ -10,6 +10,11 @@ import com.mapbox.navigation.core.BuildConfig
 
 /**
  * Base Event class for navigation events, contains common properties.
+ *
+ * @property driverMode one of [FeedbackEvent.DriverMode]
+ * @property sessionIdentifier id of [driverMode]
+ * @property startTimestamp start time of [driverMode]
+ * @property navigatorSessionIdentifier group id of modes under one Telemetry session
  */
 internal abstract class NavigationEvent(
     phoneState: PhoneState
@@ -23,7 +28,7 @@ internal abstract class NavigationEvent(
      * Don't remove any fields, cause they should match with
      * the schema downloaded from S3. Look at {@link SchemaTest}
      */
-    val version = "2.1"
+    val version = "2.2"
     val operatingSystem: String = OPERATING_SYSTEM
     val device: String? = Build.MODEL
     val sdkVersion: String = BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME
@@ -37,9 +42,11 @@ internal abstract class NavigationEvent(
     val applicationState: String = phoneState.applicationState // Schema minLength 1
     val event: String = getEventName()
 
-    // Schema pattern TelemetryUtils.obtainCurrentDate() - Timestamp when user started navigation
-    var startTimestamp: String? = null
     var sdkIdentifier: String? = null
+
+    var navigatorSessionIdentifier: String? = null
+    var startTimestamp: String? = null
+    var driverMode: String? = null
     var sessionIdentifier: String? = null
     var geometry: String? = null
     var profile: String? = null

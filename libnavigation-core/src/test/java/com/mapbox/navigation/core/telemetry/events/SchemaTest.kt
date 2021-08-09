@@ -22,6 +22,10 @@ import java.lang.reflect.Modifier
 import java.util.ArrayList
 import java.util.zip.GZIPInputStream
 
+/**
+ * Note: [NavigationStepData.distanceRemaining] -> stepdistanceRemaining and
+ * [NavigationStepData.durationRemaining] -> stepdurationRemaining to avoid names collision
+ */
 class SchemaTest {
 
     private val eventSchemas: List<EventSchema> = unpackSchemas()
@@ -40,6 +44,7 @@ class SchemaTest {
         val schema = grabEventSchema(NavigationMetrics.ARRIVE)
         val fields = grabSchemaPropertyFields(NavigationArriveEvent::class.java)
         schemaContainsPropertyFields(schema.properties, fields)
+        propertiesFieldsContainsSchemaFields(fields, schema.properties)
     }
 
     @Test
@@ -56,6 +61,7 @@ class SchemaTest {
         val schema = grabEventSchema(NavigationMetrics.CANCEL_SESSION)
         val fields = grabSchemaPropertyFields(NavigationCancelEvent::class.java)
         schemaContainsPropertyFields(schema.properties, fields)
+        propertiesFieldsContainsSchemaFields(fields, schema.properties)
     }
 
     @Test
@@ -72,12 +78,13 @@ class SchemaTest {
         val schema = grabEventSchema(NavigationMetrics.DEPART)
         val fields = grabSchemaPropertyFields(NavigationDepartEvent::class.java)
         schemaContainsPropertyFields(schema.properties, fields)
+        propertiesFieldsContainsSchemaFields(fields, schema.properties)
     }
 
     @Test
     @Throws(Exception::class)
     fun checkNavigationFeedbackEventSize() {
-        val schema = grabEventSchema(NavigationMetrics.FEEDBACK)
+        val schema = grabEventSchema(NavigationMetrics.FEEDBACK, version = "2.2")
         val fields = grabSchemaPropertyFields(NavigationFeedbackEvent::class.java)
         assertEquals(schema.properties.size().toLong(), fields.size.toLong())
     }
@@ -85,9 +92,10 @@ class SchemaTest {
     @Test
     @Throws(Exception::class)
     fun checkNavigationFeedbackEventFields() {
-        val schema = grabEventSchema(NavigationMetrics.FEEDBACK)
+        val schema = grabEventSchema(NavigationMetrics.FEEDBACK, version = "2.2")
         val fields = grabSchemaPropertyFields(NavigationFeedbackEvent::class.java)
         schemaContainsPropertyFields(schema.properties, fields)
+        propertiesFieldsContainsSchemaFields(fields, schema.properties)
     }
 
     @Test
@@ -103,6 +111,7 @@ class SchemaTest {
         val schema = grabEventSchema(NavigationMetrics.REROUTE)
         val fields = grabSchemaPropertyFields(NavigationRerouteEvent::class.java)
         schemaContainsPropertyFields(schema.properties, fields)
+        propertiesFieldsContainsSchemaFields(fields, schema.properties)
     }
 
     @Test
@@ -117,6 +126,7 @@ class SchemaTest {
         val schema = grabEventSchema(NavigationMetrics.FREE_DRIVE)
         val fields = grabSchemaPropertyFields(NavigationFreeDriveEvent::class.java)
         schemaContainsPropertyFields(schema.properties, fields)
+        propertiesFieldsContainsSchemaFields(fields, schema.properties)
     }
 
     private fun schemaContainsPropertyFields(
@@ -155,6 +165,29 @@ class SchemaTest {
             }
             verifyProperty(thisSchema, fields[i].type, fields[i].name)
         }
+    }
+
+    private fun propertiesFieldsContainsSchemaFields(fields: List<Field>, properties: JsonObject) {
+        val missingFields = mutableListOf<String>()
+        var stepdistanceRemainingCatch = false
+        var stepdurationRemainingCatch = false
+        properties.keySet().forEach { jsonProperty ->
+            val exist = fields.any { it.name == jsonProperty }
+            if (!exist) {
+                if (
+                    jsonProperty == "stepdurationRemaining" && !stepdurationRemainingCatch
+                ) {
+                    stepdurationRemainingCatch = true
+                } else if (
+                    jsonProperty == "stepdistanceRemaining" && !stepdistanceRemainingCatch
+                ) {
+                    stepdistanceRemainingCatch = true
+                } else {
+                    missingFields.add(jsonProperty)
+                }
+            }
+        }
+        assertTrue("Missing fields: $missingFields", missingFields.isEmpty())
     }
 
     private fun verifyProperty(property: JsonObject, propertyImpl: Class<*>, fieldName: String) {
@@ -276,7 +309,7 @@ class SchemaTest {
         return fields
     }
 
-    private fun grabEventSchema(eventName: String, version: String = "2.1"): EventSchema =
+    private fun grabEventSchema(eventName: String, version: String = "2.2"): EventSchema =
         eventSchemas.filter { it.name == eventName && it.version == version }.let {
             when {
                 it.isEmpty() -> {

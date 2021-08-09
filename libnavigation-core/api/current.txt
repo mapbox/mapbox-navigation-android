@@ -547,7 +547,10 @@ package com.mapbox.navigation.core.sensors {
 
 package com.mapbox.navigation.core.telemetry {
 
-  public final class TelemetryUtilsKt {
+  public final class MapboxNavigationTelemetryKt {
+  }
+
+  public final class NavTelemetryUtilsKt {
   }
 
 }
