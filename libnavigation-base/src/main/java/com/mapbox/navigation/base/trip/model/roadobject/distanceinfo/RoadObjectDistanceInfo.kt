@@ -24,9 +24,9 @@ abstract class RoadObjectDistanceInfo internal constructor(
 ) {
 
     /**
-     * Distance to start of the object from current location
+     * Distance to start of the object from current location or null if couldn't be determined.
      */
-    abstract val distanceToStart: Double
+    abstract val distanceToStart: Double?
 
     /**
      * Indicates whether some other object is "equal to" this one.

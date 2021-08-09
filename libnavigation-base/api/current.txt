@@ -836,10 +836,10 @@ package com.mapbox.navigation.base.trip.model.roadobject {
 
   public final class UpcomingRoadObject {
     method public com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo? getDistanceInfo();
-    method public double getDistanceToStart();
+    method public Double? getDistanceToStart();
     method public com.mapbox.navigation.base.trip.model.roadobject.RoadObject getRoadObject();
     property public final com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo? distanceInfo;
-    property public final double distanceToStart;
+    property public final Double? distanceToStart;
     property public final com.mapbox.navigation.base.trip.model.roadobject.RoadObject roadObject;
   }
 
@@ -885,48 +885,59 @@ package com.mapbox.navigation.base.trip.model.roadobject.custom {
 package com.mapbox.navigation.base.trip.model.roadobject.distanceinfo {
 
   public final class GantryDistanceInfo extends com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo {
-    method public double getDistanceToStart();
-    property public double distanceToStart;
+    method public Double getDistanceToStart();
+    property public Double distanceToStart;
+  }
+
+  public final class Gate {
+    method public double getDistance();
+    method public int getId();
+    method public com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition getPosition();
+    method public double getProbability();
+    property public final double distance;
+    property public final int id;
+    property public final com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition position;
+    property public final double probability;
   }
 
   public final class LineDistanceInfo extends com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo {
     method public double getDistanceToEnd();
     method public double getDistanceToEntry();
     method public double getDistanceToExit();
-    method public double getDistanceToStart();
+    method public Double getDistanceToStart();
     method public boolean getEntryFromStart();
     method public double getLength();
     property public final double distanceToEnd;
     property public final double distanceToEntry;
     property public final double distanceToExit;
-    property public double distanceToStart;
+    property public Double distanceToStart;
     property public final boolean entryFromStart;
     property public final double length;
   }
 
   public final class PointDistanceInfo extends com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo {
-    method public double getDistanceToStart();
-    property public double distanceToStart;
+    method public Double getDistanceToStart();
+    property public Double distanceToStart;
   }
 
   public final class PolygonDistanceInfo extends com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo {
-    method public double getDistanceToNearestEntry();
-    method public double getDistanceToNearestExit();
-    method public double getDistanceToStart();
+    method public Double? getDistanceToStart();
+    method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.Gate> getEntrances();
+    method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.Gate> getExits();
     method public boolean getInside();
-    property public final double distanceToNearestEntry;
-    property public final double distanceToNearestExit;
-    property public double distanceToStart;
+    property public Double? distanceToStart;
+    property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.Gate> entrances;
+    property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.Gate> exits;
     property public final boolean inside;
   }
 
   public abstract class RoadObjectDistanceInfo {
     method public final int getDistanceInfoType();
-    method public abstract double getDistanceToStart();
+    method public abstract Double? getDistanceToStart();
     method public final String getRoadObjectId();
     method public final int getRoadObjectType();
     property public final int distanceInfoType;
-    property public abstract double distanceToStart;
+    property public abstract Double? distanceToStart;
     property public final String roadObjectId;
     property public final int roadObjectType;
   }
@@ -944,13 +955,13 @@ package com.mapbox.navigation.base.trip.model.roadobject.distanceinfo {
   }
 
   public final class SubGraphDistanceInfo extends com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo {
-    method public double getDistanceToNearestEntry();
-    method public double getDistanceToNearestExit();
-    method public double getDistanceToStart();
+    method public Double? getDistanceToStart();
+    method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.Gate> getEntrances();
+    method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.Gate> getExits();
     method public boolean getInside();
-    property public final double distanceToNearestEntry;
-    property public final double distanceToNearestExit;
-    property public double distanceToStart;
+    property public Double? distanceToStart;
+    property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.Gate> entrances;
+    property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.Gate> exits;
     property public final boolean inside;
   }
 

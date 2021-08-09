@@ -43,7 +43,7 @@ object RoadObjectInstanceFactory {
      */
     fun buildUpcomingRoadObject(
         roadObject: RoadObject,
-        distanceToStart: Double,
+        distanceToStart: Double?,
         distanceInfo: RoadObjectDistanceInfo?
     ) =
         UpcomingRoadObject(roadObject, distanceToStart, distanceInfo)

@@ -19,14 +19,14 @@ import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectD
  * @param distanceToStart remaining distance to the start of the object.
  * This value will be negative after passing the start of the object and until we cross the finish
  * point of the [RoadObject]s geometry for objects that are on the actively navigated route,
- * but it will be zero for [EHorizon] objects.
+ * but it will be zero for [EHorizon] objects. It will be null if couldn't be determined.
  * @param distanceInfo provides extra distance details for the road objects. It will be non-null
  * for objects coming from the electronic horizon and null for objects that are on the current route
  * that we are actively navigating on.
  */
 class UpcomingRoadObject internal constructor(
     val roadObject: RoadObject,
-    val distanceToStart: Double,
+    val distanceToStart: Double?,
     val distanceInfo: RoadObjectDistanceInfo?,
 ) {
 
