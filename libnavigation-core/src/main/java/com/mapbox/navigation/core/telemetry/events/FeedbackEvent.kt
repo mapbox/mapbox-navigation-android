@@ -137,6 +137,11 @@ object FeedbackEvent {
     const val ROAD_KNOW_BY_DIFFERENT_NAME = "road_know_by_different_name"
 
     /**
+     * Feedback description for *looks incorrect*: incorrect speed limit
+     */
+    const val INCORRECT_SPEED_LIMIT = "incorrect_speed_limit"
+
+    /**
      * Feedback description for *incorrect audio guidance*: guidance too early
      */
     const val GUIDANCE_TOO_EARLY = "guidance_too_early"
@@ -281,6 +286,7 @@ object FeedbackEvent {
         EXIT_INFO_INCORRECT,
         LANE_GUIDANCE_INCORRECT,
         ROAD_KNOW_BY_DIFFERENT_NAME,
+        INCORRECT_SPEED_LIMIT,
         GUIDANCE_TOO_EARLY,
         GUIDANCE_TOO_LATE,
         PRONUNCIATION_INCORRECT,
