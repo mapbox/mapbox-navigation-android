@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.maps.arrival.model
+package com.mapbox.navigation.ui.maps.building.model
 
 import android.graphics.Color
 import com.mapbox.navigation.testing.BuilderTest

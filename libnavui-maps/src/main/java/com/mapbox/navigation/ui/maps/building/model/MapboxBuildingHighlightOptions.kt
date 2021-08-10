@@ -1,8 +1,7 @@
-package com.mapbox.navigation.ui.maps.arrival.model
+package com.mapbox.navigation.ui.maps.building.model
 
 import android.graphics.Color
 import androidx.annotation.ColorInt
-import com.mapbox.navigation.base.options.NavigationOptions
 
 /**
  * The options for highlighting a building upon arrival.
@@ -61,23 +60,25 @@ class MapboxBuildingHighlightOptions private constructor(
      * Build a new [MapboxBuildingHighlightOptions]
      */
     class Builder {
-        private var fillExtrusionColor = Color.parseColor("#56A8FB")
+        private var fillExtrusionColor = Color.parseColor("#FC2B14")
         private var fillExtrusionOpacity: Double = 0.6
 
         /**
-         * Fill extrusion color of the 3d building
+         * Fill extrusion color of the 3d building with default set to #FC2B14
          */
         fun fillExtrusionColor(@ColorInt fillExtrusionColor: Int): Builder =
             apply { this.fillExtrusionColor = fillExtrusionColor }
 
         /**
-         * Fill extrusion opacity of the 3d building
+         * Fill extrusion opacity of the 3d building with default set to 0.6
          */
         fun fillExtrusionOpacity(fillExtrusionOpacity: Double): Builder =
             apply { this.fillExtrusionOpacity = fillExtrusionOpacity }
 
         /**
-         * Build a new instance of [NavigationOptions]
+         * Build a new instance of [MapboxBuildingHighlightOptions]
+         * with [fillExtrusionColor] default set to #FC2B14
+         * and [fillExtrusionOpacity] default set to 0.6
          * @return NavigationOptions
          */
         fun build(): MapboxBuildingHighlightOptions {
@@ -86,9 +87,5 @@ class MapboxBuildingHighlightOptions private constructor(
                 fillExtrusionOpacity = fillExtrusionOpacity
             )
         }
-    }
-
-    internal companion object {
-        val default = Builder().build()
     }
 }
