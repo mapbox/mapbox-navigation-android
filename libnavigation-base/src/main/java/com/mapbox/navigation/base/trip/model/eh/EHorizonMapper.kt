@@ -2,6 +2,7 @@ package com.mapbox.navigation.base.trip.model.eh
 
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition
 import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.GantryDistanceInfo
+import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.Gate
 import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.LineDistanceInfo
 import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.PointDistanceInfo
 import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.PolygonDistanceInfo
@@ -128,20 +129,24 @@ internal fun RoadObjectDistanceInfo.mapToRoadObjectDistanceInfo(
             pointDistanceInfo.distance
         )
         isPolygonDistanceInfo -> with(polygonDistanceInfo) {
+            val entrances = mapToGates(entrances)
+            val exits = mapToGates(exits)
             PolygonDistanceInfo(
                 roadObjectId,
                 roadObjectType,
-                distanceToNearestEntry,
-                distanceToNearestExit,
+                entrances,
+                exits,
                 inside,
             )
         }
         isSubGraphDistanceInfo -> with(subGraphDistanceInfo) {
+            val entrances = mapToGates(entrances)
+            val exits = mapToGates(exits)
             SubGraphDistanceInfo(
                 roadObjectId,
                 roadObjectType,
-                distanceToNearestEntry,
-                distanceToNearestExit,
+                entrances,
+                exits,
                 inside,
             )
         }
@@ -397,5 +402,18 @@ private fun GraphPath.mapToEHorizonGraphPath(): EHorizonGraphPath {
         percentAlongBegin,
         percentAlongEnd,
         length
+    )
+}
+
+private fun mapToGates(gates: List<com.mapbox.navigator.Gate>): List<Gate> {
+    return gates.map { it.mapToGate() }.toList()
+}
+
+private fun com.mapbox.navigator.Gate.mapToGate(): Gate {
+    return Gate(
+        id,
+        position.mapToRoadObjectPosition(),
+        probability,
+        distance
     )
 }

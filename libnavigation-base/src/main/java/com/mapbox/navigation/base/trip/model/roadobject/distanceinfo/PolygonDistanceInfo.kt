@@ -6,22 +6,24 @@ import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
  * PolygonDistanceInfo contains information about distance to the road object represented as
  * polygon.
  *
- * @param distanceToNearestEntry distance to the nearest entry
- * @param distanceToNearestExit distance to the nearest exit
+ * @param entrances distances to particular entrances, sorted by probability.
+ * Might be empty in the case when the polygon is very large and no entry could be detected using most likely path.
+ * @param exits distances to particular exits, sorted by probability.
+ * Might be empty in the case when the polygon is very large and no exit could be detected using most probable path.
  * @param inside true if inside the object
  */
 class PolygonDistanceInfo internal constructor(
     roadObjectId: String,
     @RoadObjectType.Type roadObjectType: Int,
-    val distanceToNearestEntry: Double,
-    val distanceToNearestExit: Double,
+    val entrances: List<Gate>,
+    val exits: List<Gate>,
     val inside: Boolean,
 ) : RoadObjectDistanceInfo(roadObjectId, roadObjectType, RoadObjectDistanceInfoType.POLYGON) {
 
     /**
-     * distance to start of the object
+     * distance to start of the object or null if couldn't be determined.
      */
-    override val distanceToStart: Double = distanceToNearestEntry
+    override val distanceToStart: Double? = entrances.firstOrNull()?.distance
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -33,8 +35,8 @@ class PolygonDistanceInfo internal constructor(
 
         other as PolygonDistanceInfo
 
-        if (distanceToNearestEntry != other.distanceToNearestEntry) return false
-        if (distanceToNearestExit != other.distanceToNearestExit) return false
+        if (entrances != other.entrances) return false
+        if (exits != other.exits) return false
         if (inside != other.inside) return false
         if (distanceToStart != other.distanceToStart) return false
 
@@ -46,8 +48,8 @@ class PolygonDistanceInfo internal constructor(
      */
     override fun hashCode(): Int {
         var result = super.hashCode()
-        result = 31 * result + distanceToNearestEntry.hashCode()
-        result = 31 * result + distanceToNearestExit.hashCode()
+        result = 31 * result + entrances.hashCode()
+        result = 31 * result + exits.hashCode()
         result = 31 * result + inside.hashCode()
         result = 31 * result + distanceToStart.hashCode()
         return result
@@ -58,8 +60,8 @@ class PolygonDistanceInfo internal constructor(
      */
     override fun toString(): String {
         return "PolygonDistanceInfo(" +
-            "distanceToNearestEntry=$distanceToNearestEntry, " +
-            "distanceToNearestExit=$distanceToNearestExit, " +
+            "entrances=$entrances, " +
+            "exits=$exits, " +
             "inside=$inside, " +
             "distanceToStart=$distanceToStart" +
             "), ${super.toString()}"

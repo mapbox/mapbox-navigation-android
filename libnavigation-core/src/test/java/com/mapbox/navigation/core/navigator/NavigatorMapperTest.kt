@@ -349,12 +349,12 @@ class NavigatorMapperTest {
 
         assertEquals(
             firstEntrance.distanceToStart,
-            upcomingRouteAlerts[0].distanceToStart,
+            upcomingRouteAlerts[0].distanceToStart!!,
             .0001
         )
         assertEquals(
             secondEntrance.distanceToStart,
-            upcomingRouteAlerts[1].distanceToStart,
+            upcomingRouteAlerts[1].distanceToStart!!,
             .0001
         )
     }
