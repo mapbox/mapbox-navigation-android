@@ -10,5 +10,5 @@
   <color name="mapbox_upcoming_maneuver_background_color">@color/colorSecondaryVariant</color>
   <color name="mapbox_exit_text_color">@android:color/black</color>
   <color name="mapbox_turn_icon_color">@color/colorOnSecondary</color>
-  <color name="mapbox_turn_icon_shadow_color">#969696</color>
+  <color name="mapbox_turn_icon_shadow_color">#A8A8A8</color>
 </resources>
