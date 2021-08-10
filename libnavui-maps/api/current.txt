@@ -19,56 +19,55 @@ package com.mapbox.navigation.ui.maps {
 
 }
 
-package com.mapbox.navigation.ui.maps.arrival.api {
+package com.mapbox.navigation.ui.maps.building.api {
 
-  public fun interface BuildingHighlightObserver {
-    method public void onBuildingHighlight(java.util.List<com.mapbox.maps.QueriedFeature> features);
-  }
-
-  public final class MapboxBuildingArrivalApi {
-    ctor public MapboxBuildingArrivalApi();
-    method public com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingArrivalApi buildingHighlightApi(com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingHighlightApi? mapboxBuildingHighlightApi);
-    method public void clearBuildingHighlightObservers();
-    method public void disable();
-    method public void enable(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
-    method public com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingArrivalApi registerBuildingHighlightObserver(com.mapbox.navigation.ui.maps.arrival.api.BuildingHighlightObserver observer);
-    method public void unregisterBuildingHighlightObserver(com.mapbox.navigation.ui.maps.arrival.api.BuildingHighlightObserver observer);
-  }
-
-  public final class MapboxBuildingHighlightApi {
-    ctor public MapboxBuildingHighlightApi(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.navigation.ui.maps.arrival.model.MapboxBuildingHighlightOptions options = MapboxBuildingHighlightOptions.default);
-    method public void clear();
-    method public com.mapbox.maps.extension.style.expressions.generated.Expression getBuildingHeightExpression();
-    method public java.util.List<com.mapbox.maps.QueriedFeature> getHighlightedBuildings();
-    method public void highlightBuilding(com.mapbox.geojson.Point? point, com.mapbox.navigation.ui.maps.arrival.api.BuildingHighlightObserver callback);
-    property public final com.mapbox.maps.extension.style.expressions.generated.Expression buildingHeightExpression;
-    property public final java.util.List<com.mapbox.maps.QueriedFeature> highlightedBuildings;
-    field public static final String BUILDING_LAYER_ID = "building";
-    field public static final String COMPOSITE_SOURCE_ID = "composite";
-    field public static final com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingHighlightApi.Companion Companion;
-    field public static final String HIGHLIGHT_BUILDING_LAYER_ID = "mapbox-building-highlight-layer";
-  }
-
-  public static final class MapboxBuildingHighlightApi.Companion {
+  public final class MapboxBuildingsApi {
+    ctor public MapboxBuildingsApi(com.mapbox.maps.MapboxMap mapboxMap);
+    method public void queryBuildingOnFinalDestination(com.mapbox.navigation.base.trip.model.RouteProgress progress, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.building.model.BuildingError,com.mapbox.navigation.ui.maps.building.model.BuildingValue>> callback);
+    method public void queryBuildingOnWaypoint(com.mapbox.navigation.base.trip.model.RouteProgress progress, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.building.model.BuildingError,com.mapbox.navigation.ui.maps.building.model.BuildingValue>> callback);
+    method public void queryBuildingToHighlight(com.mapbox.geojson.Point point, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.building.model.BuildingError,com.mapbox.navigation.ui.maps.building.model.BuildingValue>> callback);
   }
 
 }
 
-package com.mapbox.navigation.ui.maps.arrival.model {
+package com.mapbox.navigation.ui.maps.building.model {
+
+  public final class BuildingError {
+    method public String? getErrorMessage();
+    property public final String? errorMessage;
+  }
+
+  public final class BuildingValue {
+    method public java.util.List<com.mapbox.maps.QueriedFeature> getBuildings();
+    property public final java.util.List<com.mapbox.maps.QueriedFeature> buildings;
+  }
 
   public final class MapboxBuildingHighlightOptions {
     method public int getFillExtrusionColor();
     method public double getFillExtrusionOpacity();
-    method public com.mapbox.navigation.ui.maps.arrival.model.MapboxBuildingHighlightOptions.Builder toBuilder();
+    method public com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions.Builder toBuilder();
     property public final int fillExtrusionColor;
     property public final double fillExtrusionOpacity;
   }
 
   public static final class MapboxBuildingHighlightOptions.Builder {
     ctor public MapboxBuildingHighlightOptions.Builder();
-    method public com.mapbox.navigation.ui.maps.arrival.model.MapboxBuildingHighlightOptions build();
-    method public com.mapbox.navigation.ui.maps.arrival.model.MapboxBuildingHighlightOptions.Builder fillExtrusionColor(@ColorInt int fillExtrusionColor);
-    method public com.mapbox.navigation.ui.maps.arrival.model.MapboxBuildingHighlightOptions.Builder fillExtrusionOpacity(double fillExtrusionOpacity);
+    method public com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions build();
+    method public com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions.Builder fillExtrusionColor(@ColorInt int fillExtrusionColor);
+    method public com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions.Builder fillExtrusionOpacity(double fillExtrusionOpacity);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.building.view {
+
+  public final class MapboxBuildingView {
+    ctor public MapboxBuildingView();
+    method public void clear(com.mapbox.maps.Style style);
+    method public void highlightBuilding(com.mapbox.maps.Style style, java.util.List<com.mapbox.maps.QueriedFeature> buildings, com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions options = MapboxBuildingHighlightOptions.<init>().build());
+    method public void highlightBuilding(com.mapbox.maps.Style style, java.util.List<com.mapbox.maps.QueriedFeature> buildings);
+    method public void removeBuildingHighlight(com.mapbox.maps.Style style, com.mapbox.navigation.ui.maps.building.model.MapboxBuildingHighlightOptions options = MapboxBuildingHighlightOptions.<init>().build());
+    method public void removeBuildingHighlight(com.mapbox.maps.Style style);
   }
 
 }

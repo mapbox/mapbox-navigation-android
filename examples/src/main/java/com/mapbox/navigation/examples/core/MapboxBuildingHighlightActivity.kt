@@ -1,27 +1,19 @@
 package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
-import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.QueriedFeature
-import com.mapbox.maps.Style
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
-import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
-import com.mapbox.maps.extension.style.expressions.generated.Expression
-import com.mapbox.maps.extension.style.layers.addLayer
-import com.mapbox.maps.extension.style.layers.generated.FillExtrusionLayer
-import com.mapbox.maps.extension.style.layers.generated.FillLayer
-import com.mapbox.maps.extension.style.layers.getLayer
-import com.mapbox.maps.extension.style.layers.getLayerAs
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
@@ -35,7 +27,10 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.trip.model.RouteLegProgress
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
@@ -45,10 +40,11 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityBuildingHighlightBinding
 import com.mapbox.navigation.examples.core.waypoints.WaypointsController
-import com.mapbox.navigation.ui.maps.arrival.api.BuildingHighlightObserver
-import com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingArrivalApi
-import com.mapbox.navigation.ui.maps.arrival.api.MapboxBuildingHighlightApi
-import com.mapbox.navigation.ui.maps.arrival.model.MapboxBuildingHighlightOptions
+import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
+import com.mapbox.navigation.ui.maps.building.api.MapboxBuildingsApi
+import com.mapbox.navigation.ui.maps.building.model.BuildingError
+import com.mapbox.navigation.ui.maps.building.model.BuildingValue
+import com.mapbox.navigation.ui.maps.building.view.MapboxBuildingView
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
@@ -65,7 +61,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
- * This activity demonstrates the [MapboxBuildingHighlightApi] and the [MapboxBuildingArrivalApi].
+ * This activity demonstrates the [MapboxBuildingsApi] and the [MapboxBuildingView].
  *
  * 1. Tap on map to highlight buildings
  * 2. Arrive at a destination and highlight buildings
@@ -77,26 +73,45 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var binding: LayoutActivityBuildingHighlightBinding
     private lateinit var locationComponent: LocationComponentPlugin
+    private var isNavigating = false
 
     private val mapboxReplayer = MapboxReplayer()
     private val navigationLocationProvider = NavigationLocationProvider()
     private val waypointsController = WaypointsController()
 
     /**
-     * There are two available apis for highlighting buildings. The MapboxBuildingHighlightApi
-     * allows you to select buildings. When running this example, try tapping on a building
-     * to see it highlight.
-     *
-     * The MapboxBuildingArrivalApi will automatically highlight a building when the navigation
-     * has arrived.
+     * This api allows you to query a building feature if it exists on a [MapboxMap]
      */
-    private val buildingsArrivalApi = MapboxBuildingArrivalApi()
-    private lateinit var buildingHighlightApi: MapboxBuildingHighlightApi
+    private val buildingsApi: MapboxBuildingsApi by lazy {
+        MapboxBuildingsApi(mapboxMap)
+    }
 
     /**
-     * Access the current state of the extruded buildings layer.
+     * This view can be used to render building highlight if it obtained as a result from the query
+     * using [MapboxBuildingsApi]
      */
-    private var extrudeBuildings: Boolean = false
+    private val buildingView = MapboxBuildingView()
+
+    /**
+     * The callback contains a list of buildings returned as a result of querying the [MapboxMap].
+     * If no buildings are available, the list is empty
+     */
+    private val callback =
+        MapboxNavigationConsumer<Expected<BuildingError, BuildingValue>> { expected ->
+            expected.fold(
+                {
+                    LoggerProvider.logger.e(
+                        Tag("MbxBuildingHighlightActivity"),
+                        Message("error: ${it.errorMessage}")
+                    )
+                },
+                { value ->
+                    mapboxMap.getStyle { style ->
+                        buildingView.highlightBuilding(style, value.buildings)
+                    }
+                }
+            )
+        }
 
     private val routeLineResources: RouteLineResources by lazy {
         RouteLineResources.Builder().build()
@@ -143,7 +158,9 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
                 enhancedLocation,
                 keyPoints,
             )
-            updateCamera(enhancedLocation)
+            if (isNavigating) {
+                updateCamera(enhancedLocation)
+            }
         }
     }
 
@@ -156,7 +173,24 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
                     routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
                 }
             }
+            isNavigating = true
             startSimulation(routes[0])
+        }
+    }
+
+    private val arrivalObserver = object : ArrivalObserver {
+        override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
+            mapboxMap.getStyle { style ->
+                buildingView.removeBuildingHighlight(style)
+            }
+        }
+
+        override fun onWaypointArrival(routeProgress: RouteProgress) {
+            buildingsApi.queryBuildingOnWaypoint(routeProgress, callback)
+        }
+
+        override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
+            buildingsApi.queryBuildingOnFinalDestination(routeProgress, callback)
         }
     }
 
@@ -173,91 +207,33 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
                 .locationEngine(ReplayLocationEngine(mapboxReplayer))
                 .build()
         )
+        mapboxNavigation.registerLocationObserver(object : LocationObserver {
+            override fun onRawLocationChanged(rawLocation: Location) {
+                updateCamera(rawLocation)
+                navigationLocationProvider.changePosition(
+                    rawLocation,
+                )
+                mapboxNavigation.unregisterLocationObserver(this)
+            }
+
+            override fun onEnhancedLocationChanged(
+                enhancedLocation: Location,
+                keyPoints: List<Location>
+            ) {
+                //
+            }
+        })
         mapboxNavigation.startTripSession()
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.play()
-
-        /**
-         * Try attaching building highlights to the arrival experience.
-         * At any point after constructing MapboxNavigation, enable the building arrival api
-         * It is disabled by default, and should be disabled at some point after enabling.
-         */
-        buildingsArrivalApi.enable(mapboxNavigation)
     }
 
     @SuppressLint("MissingPermission")
     private fun initStyle() {
         mapboxMap.loadStyleUri(
             MAPBOX_STREETS
-        ) { style ->
+        ) {
             binding.mapView.gestures.addOnMapLongClickListener(this)
-
-            /**
-             * Showing all buildings is disabled by default. But this function
-             * allows you to show all buildings in 3D with the highlighted one.
-             */
-            binding.toggleBuildings.setOnCheckedChangeListener { _, isChecked ->
-                extrudeBuildings(isChecked)
-            }
-
-            /**
-             * Try attaching to the map click listener, highlight the building the
-             * user has selected. This observer will not influence the callback from
-             * [MapboxBuildingArrivalApi.registerBuildingHighlightObserver].
-             */
-            binding.mapView.gestures.addOnMapClickListener { point ->
-                buildingHighlightApi.highlightBuilding(point, buildingHighlightObserver)
-                false
-            }
-        }
-    }
-
-    private val buildingHighlightObserver = BuildingHighlightObserver { features ->
-        updateFillBuildingsLayer(features)
-    }
-
-    /**
-     * Example map layer to highlight all buildings.
-     */
-    private fun updateFillBuildingsLayer(features: List<QueriedFeature>) {
-        val style = mapboxMap.getStyle() ?: return
-        val layerId = EXTRUDE_BUILDING_LAYER_ID
-        if (!extrudeBuildings) {
-            style.removeStyleLayer(layerId)
-            return
-        }
-        val buildingFillColorExpression = buildingFillColor(style) ?: return
-
-        val ids = features.mapNotNull { it.feature.id()?.toLong() }
-        val notSelectedBuildings = Expression.not(
-            Expression.inExpression(Expression.id(), literal(ids))
-        )
-        if (!style.styleLayerExists(layerId)) {
-            style.addLayer(
-                FillExtrusionLayer(layerId, MapboxBuildingHighlightApi.COMPOSITE_SOURCE_ID)
-                    .sourceLayer(MapboxBuildingHighlightApi.BUILDING_LAYER_ID)
-                    .filter(notSelectedBuildings)
-                    .fillExtrusionColor(buildingFillColorExpression)
-                    .fillExtrusionOpacity(literal(0.6))
-                    .fillExtrusionBase(Expression.get("min-height"))
-                    .fillExtrusionHeight(buildingHighlightApi.buildingHeightExpression)
-            )
-        } else {
-            style.getLayerAs<FillExtrusionLayer>(layerId)
-                .filter(notSelectedBuildings)
-        }
-    }
-
-    private fun buildingFillColor(style: Style): Expression? {
-        val buildingLayerId = MapboxBuildingHighlightApi.BUILDING_LAYER_ID
-        return when (val buildingLayer = style.getLayer(buildingLayerId)) {
-            is FillLayer -> buildingLayer.fillColorAsExpression
-            else -> {
-                LoggerProvider.logger.e(
-                    msg = Message("$buildingLayerId has unsupported type $buildingLayer")
-                )
-                null
-            }
         }
     }
 
@@ -332,23 +308,6 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
         setContentView(binding.root)
         mapboxMap = binding.mapView.getMapboxMap()
 
-        /**
-         * Initialize the building highlight at any point after retrieving the MapboxMap.
-         * Apply custom options when creating the api.
-         */
-        buildingHighlightApi = MapboxBuildingHighlightApi(
-            mapboxMap,
-            MapboxBuildingHighlightOptions.Builder()
-                .fillExtrusionColor(Color.RED)
-                .build()
-        )
-
-        /**
-         * After initializing an api to highligh buildings, give the handle to the
-         * building arrival api. It will select a building upon arrival
-         */
-        buildingsArrivalApi.buildingHighlightApi(buildingHighlightApi)
-
         locationComponent = binding.mapView.location.apply {
             setLocationProvider(navigationLocationProvider)
             enabled = true
@@ -358,66 +317,29 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
         init()
     }
 
-    /**
-     * Show all buildings on the map.
-     */
-    private fun extrudeBuildings(extrudeBuildings: Boolean) {
-        this.extrudeBuildings = extrudeBuildings
-        updateFillBuildingsLayer(buildingHighlightApi.highlightedBuildings)
-    }
-
     override fun onStart() {
         super.onStart()
-        binding.mapView.onStart()
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.registerRoutesObserver(routesObserver)
+            mapboxNavigation.registerArrivalObserver(arrivalObserver)
             mapboxNavigation.registerLocationObserver(locationObserver)
             mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
             mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
-
-            /**
-             * In order to remove the highlighted building from the extruded
-             * buildings. You can register an observer to update your fill layer.
-             */
-            buildingsArrivalApi.registerBuildingHighlightObserver(buildingHighlightObserver)
-
-            /**
-             * At any point after constructing a MapboxNavigation object, you can enable
-             * the buildings arrival api.
-             */
-            buildingsArrivalApi.enable(mapboxNavigation)
         }
     }
 
     override fun onStop() {
         super.onStop()
-        binding.mapView.onStop()
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
+        mapboxNavigation.unregisterArrivalObserver(arrivalObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
-
-        /**
-         * Removes the observer.
-         */
-        buildingsArrivalApi.unregisterBuildingHighlightObserver(buildingHighlightObserver)
-
-        /**
-         * Pick your lifecycle to disable the arrival api. MapboxNavigation.onDestroy will
-         * automatically unregister the api, but will not clear the style data.
-         */
-        buildingsArrivalApi.disable()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.mapView.onDestroy()
         mapboxNavigation.onDestroy()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        binding.mapView.onLowMemory()
     }
 
     override fun onMapLongClick(point: Point): Boolean {
@@ -428,9 +350,5 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
             findRoute(origin)
         }
         return false
-    }
-
-    private companion object {
-        private const val EXTRUDE_BUILDING_LAYER_ID = "mapbox-building-extrude-layer"
     }
 }

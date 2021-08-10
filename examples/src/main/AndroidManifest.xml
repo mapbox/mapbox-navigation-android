@@ -88,7 +88,7 @@
 
     <activity
         android:name=".MapboxBuildingHighlightActivity"
-        android:label="@string/title_trip_progress">
+        android:label="@string/title_building_highlight">
     </activity>
 
     <activity
