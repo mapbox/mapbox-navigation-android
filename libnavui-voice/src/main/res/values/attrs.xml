@@ -5,5 +5,9 @@
         <attr name="soundButtonMuteDrawable" format="reference" />
         <!-- Defines the drawable representing sound button unmute state. -->
         <attr name="soundButtonUnmuteDrawable" format="reference" />
+        <!-- Defines the background of sound button. -->
+        <attr name="soundButtonBackground" format="reference|color" />
+        <!-- Defines the text color of sound button. -->
+        <attr name="soundButtonTextColor" format="color" />
     </declare-styleable>
 </resources>

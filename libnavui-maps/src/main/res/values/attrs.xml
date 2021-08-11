@@ -3,10 +3,18 @@
     <declare-styleable name="MapboxRouteOverviewButton">
         <!-- Defines the drawable representing route overview. -->
         <attr name="overviewButtonDrawable" format="reference" />
+        <!-- Defines the background of route overview button. -->
+        <attr name="overviewButtonBackground" format="reference|color" />
+        <!-- Defines the text color of route overview button. -->
+        <attr name="overviewButtonTextColor" format="color" />
     </declare-styleable>
 
     <declare-styleable name="MapboxRecenterButton">
         <!-- Defines the drawable representing recenter. -->
         <attr name="recenterButtonDrawable" format="reference" />
+        <!-- Defines the background of recenter button. -->
+        <attr name="recenterButtonBackground" format="reference|color" />
+        <!-- Defines the text color of recenter button. -->
+        <attr name="recenterButtonTextColor" format="color" />
     </declare-styleable>
 </resources>

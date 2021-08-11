@@ -132,6 +132,17 @@ class MapboxRecenterButton : ConstraintLayout {
         typedArray.getDrawable(
             R.styleable.MapboxRecenterButton_recenterButtonDrawable
         ).also { binding.recenterIcon.setImageDrawable(it) }
+
+        typedArray.getDrawable(
+            R.styleable.MapboxRecenterButton_recenterButtonBackground,
+        )?.let { background ->
+            binding.recenterIcon.background = background
+            binding.recenterText.background = background
+        }
+
+        typedArray.getColorStateList(
+            R.styleable.MapboxRecenterButton_recenterButtonTextColor,
+        )?.let { binding.recenterText.setTextColor(it) }
     }
 
     private fun getAnimator(from: Int, to: Int) =

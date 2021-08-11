@@ -132,6 +132,17 @@ class MapboxRouteOverviewButton : ConstraintLayout {
         typedArray.getDrawable(
             R.styleable.MapboxRouteOverviewButton_overviewButtonDrawable
         ).also { binding.routeOverviewIcon.setImageDrawable(it) }
+
+        typedArray.getDrawable(
+            R.styleable.MapboxRouteOverviewButton_overviewButtonBackground,
+        )?.let { background ->
+            binding.routeOverviewIcon.background = background
+            binding.routeOverviewText.background = background
+        }
+
+        typedArray.getColorStateList(
+            R.styleable.MapboxRouteOverviewButton_overviewButtonTextColor,
+        )?.let { binding.routeOverviewText.setTextColor(it) }
     }
 
     private fun getAnimator(from: Int, to: Int) =
