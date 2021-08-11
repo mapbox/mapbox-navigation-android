@@ -90,6 +90,15 @@ class MapboxSoundButton : ConstraintLayout {
                 R.drawable.mapbox_ic_sound_on
             )
         )
+
+        val background = typedArray.getDrawable(R.styleable.MapboxSoundButton_soundButtonBackground)
+        if (background != null) {
+            binding.soundButtonIcon.background = background
+            binding.soundButtonText.background = background
+        }
+
+        typedArray.getColorStateList(R.styleable.MapboxSoundButton_soundButtonTextColor)
+            ?.let { binding.soundButtonText.setTextColor(it) }
     }
 
     override fun onFinishInflate() {
