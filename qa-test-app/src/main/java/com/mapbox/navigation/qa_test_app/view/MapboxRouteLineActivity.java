@@ -31,8 +31,9 @@ import com.mapbox.maps.MapboxMap;
 import com.mapbox.maps.Style;
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility;
 import com.mapbox.maps.plugin.LocationPuck2D;
+import com.mapbox.maps.plugin.Plugin;
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin;
-import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImplKt;
+import com.mapbox.maps.plugin.animation.CameraAnimationsUtils;
 import com.mapbox.maps.plugin.animation.MapAnimationOptions;
 import com.mapbox.maps.plugin.gestures.GesturesPluginImpl;
 import com.mapbox.maps.plugin.gestures.OnMapClickListener;
@@ -78,6 +79,8 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
@@ -428,15 +431,15 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   }
 
   private LocationComponentPluginImpl getLocationComponent() {
-    return mapView.getPlugin(LocationComponentPluginImpl.class);
+    return mapView.getPlugin(Plugin.MAPBOX_LOCATION_COMPONENT_PLUGIN_ID);
   }
 
   private CameraAnimationsPlugin getMapCamera() {
-    return CameraAnimationsPluginImplKt.getCamera(mapView);
+    return CameraAnimationsUtils.getCamera(mapView);
   }
 
   private GesturesPluginImpl getGesturePlugin() {
-    return mapView.getPlugin(GesturesPluginImpl.class);
+    return mapView.getPlugin(Plugin.MAPBOX_GESTURES_PLUGIN_ID);
   }
 
   private ReplayProgressObserver replayProgressObserver = new ReplayProgressObserver(mapboxReplayer);

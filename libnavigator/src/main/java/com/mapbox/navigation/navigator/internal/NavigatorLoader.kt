@@ -18,7 +18,6 @@ import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
 import com.mapbox.navigator.RoadObjectMatcher
 import com.mapbox.navigator.Router
-import com.mapbox.navigator.RunLoopExecutorFactory
 import com.mapbox.navigator.SettingsProfile
 import com.mapbox.navigator.TilesConfig
 
@@ -40,11 +39,9 @@ internal object NavigatorLoader {
             deviceProfile.customConfig
         )
         val historyRecorder = buildHistoryRecorder(historyDir, config)
-        val runLoopExecutor = RunLoopExecutorFactory.build()
         val cache = CacheFactory.build(tilesConfig, config, historyRecorder)
         val navigator = Navigator(
             config,
-            runLoopExecutor,
             cache,
             historyRecorder
         )
