@@ -321,7 +321,7 @@ class NavigatorMapperTest {
 
     @Test
     fun `alerts are present in the route init info is they are delivered from native`() {
-        val routeInfo = RouteInfo(listOf(tunnel.toUpcomingRouteAlert()))
+        val routeInfo = RouteInfo(1, listOf(tunnel.toUpcomingRouteAlert()))
 
         val result = getRouteInitInfo(routeInfo)!!
 
