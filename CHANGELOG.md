@@ -2,6 +2,33 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.22 - August 12, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Features
+- Added feedback event for incorrect speed limit [#4694](https://github.com/mapbox/mapbox-navigation-android/pull/4694)
+- Added option to set custom background and text color for `Recenter`, `Sound`, and `RouteOverview` buttons. [#4697](https://github.com/mapbox/mapbox-navigation-android/pull/4697)
+- Added `Gate` object that represents information about a particular exit or entrance. [#4692](https://github.com/mapbox/mapbox-navigation-android/pull/4692)
+
+#### Bug fixes and improvements
+- Refactored the `MapboxTripNotification` to use same set of turn icons as `ManeuverView` does. [#4683](https://github.com/mapbox/mapbox-navigation-android/pull/4683)
+- :warning: Removed paint code generated files. [#4683](https://github.com/mapbox/mapbox-navigation-android/pull/4683)
+- Changed the roundabout drawables for maneuvers and notifications. [#4700](https://github.com/mapbox/mapbox-navigation-android/pull/4700)
+- Changed `RoadObjectDistanceInfo.distanceToStart` to nullable. [#4692](https://github.com/mapbox/mapbox-navigation-android/pull/4692)
+- Updated `PolygonDistanceInfo` and `SubGraphDistanceInfo` to include `entrances` and `exits`. [#4692](https://github.com/mapbox/mapbox-navigation-android/pull/4692)
+ 
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+
+- Mapbox Maps SDK `v10.0.0-rc.6` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.6))
+- Mapbox Navigation Native `v62.0.0`
+- Mapbox Core Common `v16.2.0`
+- Mapbox Java `v6.0.0-alpha.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0-alpha.2))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.0.0-beta.21 - July 28, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
