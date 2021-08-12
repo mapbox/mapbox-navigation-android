@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.utils.internal.extensions.afterMeasured
 import com.mapbox.navigation.ui.utils.internal.extensions.extend
+import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
 import com.mapbox.navigation.ui.utils.internal.extensions.shrink
 import com.mapbox.navigation.ui.utils.internal.extensions.slideWidth
 import com.mapbox.navigation.ui.voice.R

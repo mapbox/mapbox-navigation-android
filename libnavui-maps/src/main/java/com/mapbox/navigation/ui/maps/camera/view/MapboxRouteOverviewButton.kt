@@ -13,6 +13,7 @@ import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.databinding.MapboxRouteOverviewLayoutBinding
 import com.mapbox.navigation.ui.utils.internal.extensions.afterMeasured
 import com.mapbox.navigation.ui.utils.internal.extensions.extend
+import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
 import com.mapbox.navigation.ui.utils.internal.extensions.shrink
 import com.mapbox.navigation.ui.utils.internal.extensions.slideWidth
 
@@ -88,13 +89,14 @@ class MapboxRouteOverviewButton : ConstraintLayout {
     fun showTextAndExtend(duration: Long) {
         if (!isAnimationRunning) {
             isAnimationRunning = true
-            val extendToWidth = EXTEND_TO_WIDTH * context.resources.displayMetrics.density
+            val text = context.getString(R.string.mapbox_route_overview)
+            val extendToWidth = (binding.routeOverviewText.measureText(text) + textWidth)
+                .coerceAtLeast(EXTEND_TO_WIDTH * context.resources.displayMetrics.density)
             val animator = getAnimator(textWidth, extendToWidth.toInt())
             binding.routeOverviewText.extend(
                 animator,
                 doOnStart = {
-                    binding.routeOverviewText.text =
-                        context.getString(R.string.mapbox_route_overview)
+                    binding.routeOverviewText.text = text
                     binding.routeOverviewText.visibility = View.VISIBLE
                     mainHandler.postDelayed(
                         {

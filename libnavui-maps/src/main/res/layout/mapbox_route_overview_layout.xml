@@ -15,6 +15,8 @@
         android:elevation="0dp"
         android:textSize="@dimen/mapbox_dimen_text_14sp"
         android:textAllCaps="true"
+        android:maxLines="1"
+        android:ellipsize="end"
         android:gravity="start|center_vertical"
         app:layout_constraintEnd_toEndOf="@id/routeOverviewIcon"
         app:layout_constraintTop_toTopOf="@id/routeOverviewIcon"
