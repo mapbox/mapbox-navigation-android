@@ -427,6 +427,7 @@ package com.mapbox.navigation.ui.maps.camera.view {
     ctor public MapboxRecenterButton(android.content.Context context);
     ctor public MapboxRecenterButton(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxRecenterButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void showTextAndExtend(long duration, String text = context.getString(R.string.mapbox_recenter));
     method public void showTextAndExtend(long duration);
     method public void updateStyle(@StyleRes int style);
   }
@@ -435,6 +436,7 @@ package com.mapbox.navigation.ui.maps.camera.view {
     ctor public MapboxRouteOverviewButton(android.content.Context context);
     ctor public MapboxRouteOverviewButton(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxRouteOverviewButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void showTextAndExtend(long duration, String text = context.getString(R.string.mapbox_route_overview));
     method public void showTextAndExtend(long duration);
     method public void updateStyle(@StyleRes int style);
   }

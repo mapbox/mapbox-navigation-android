@@ -20,6 +20,8 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.LooperMode
 import org.robolectric.shadows.ShadowLooper
 
+private const val customText = "custom text"
+
 @LooperMode(LooperMode.Mode.PAUSED)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
@@ -97,6 +99,17 @@ class MapboxSoundButtonTest {
     }
 
     @Test
+    fun `mute and extend with text`() {
+        val view = MapboxSoundButton(ctx)
+        val soundButtonText = view.findViewById<AppCompatTextView>(R.id.soundButtonText)
+
+        view.muteAndExtend(0, customText)
+
+        assertEquals(soundButtonText.text, customText)
+        assertEquals(soundButtonText.visibility, View.VISIBLE)
+    }
+
+    @Test
     fun `mute and unmute and extend multiple times is allowed`() {
         val view = MapboxSoundButton(ctx)
         val soundButtonText = view.findViewById<AppCompatTextView>(R.id.soundButtonText)
@@ -123,5 +136,16 @@ class MapboxSoundButtonTest {
 
         assertTrue(soundButtonText.text.isEmpty())
         assertEquals(soundButtonText.visibility, View.INVISIBLE)
+    }
+
+    @Test
+    fun `unmute and extend with text`() {
+        val view = MapboxSoundButton(ctx)
+        val soundButtonText = view.findViewById<AppCompatTextView>(R.id.soundButtonText)
+
+        view.unmuteAndExtend(0, customText)
+
+        assertEquals(soundButtonText.text, customText)
+        assertEquals(soundButtonText.visibility, View.VISIBLE)
     }
 }
