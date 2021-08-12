@@ -151,9 +151,8 @@ class MapboxSoundButton : ConstraintLayout {
      */
     @JvmOverloads
     fun muteAndExtend(duration: Long, callback: MapboxNavigationConsumer<Boolean>? = null) {
-        showTextWithAnimation(R.string.mapbox_muted, duration) {
-            mute(callback)
-        }
+        mute(callback)
+        showTextWithAnimation(R.string.mapbox_muted, duration)
     }
 
     /**
@@ -164,17 +163,11 @@ class MapboxSoundButton : ConstraintLayout {
      */
     @JvmOverloads
     fun unmuteAndExtend(duration: Long, callback: MapboxNavigationConsumer<Boolean>? = null) {
-        showTextWithAnimation(R.string.mapbox_unmuted, duration) {
-            unmute(callback)
-        }
+        unmute(callback)
+        showTextWithAnimation(R.string.mapbox_unmuted, duration)
     }
 
-    private fun showTextWithAnimation(
-        @StringRes text: Int,
-        duration: Long,
-        beforeAnimation: () -> Unit
-    ) {
-        beforeAnimation()
+    private fun showTextWithAnimation(@StringRes text: Int, duration: Long) {
         val extendToWidth = EXTEND_TEXT_TO_WIDTH * context.resources.displayMetrics.density
         val animator = getAnimator(textWidth, extendToWidth.toInt())
         mainHandler.removeCallbacksAndMessages(null)
