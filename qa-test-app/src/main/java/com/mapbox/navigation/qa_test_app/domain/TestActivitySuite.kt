@@ -9,6 +9,7 @@ import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxRouteLineActivity
 import com.mapbox.navigation.qa_test_app.view.RouteRestrictionsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteTrafficUpdateActivity
+import com.mapbox.navigation.qa_test_app.view.TrafficGradientActivity
 import com.mapbox.navigation.qa_test_app.view.util.RouteDrawingActivity
 
 typealias LaunchActivityFun = (Activity) -> Unit
@@ -39,6 +40,12 @@ object TestActivitySuite {
             R.string.inactive_route_styling_description
         ) { activity ->
             activity.startActivity<InactiveRouteStylingActivity>()
+        },
+        TestActivityDescription(
+            "Traffic Gradient Styling",
+            R.string.traffic_gradient_styling_description
+        ) { activity ->
+            activity.startActivity<TrafficGradientActivity>()
         },
         TestActivityDescription(
             "Route Line dev. activity",

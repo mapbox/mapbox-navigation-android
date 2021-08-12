@@ -107,6 +107,8 @@ internal class VanishingRouteLine {
         routeLineExpressionData: List<RouteLineExpressionData>,
         routeResourceProvider: RouteLineResources,
         activeLegIndex: Int,
+        softGradientTransition: Double,
+        useSoftGradient: Boolean
     ): VanishingRouteLineExpressions? {
         ifNonNull(
             primaryRouteLineGranularDistances,
@@ -173,12 +175,22 @@ internal class VanishingRouteLine {
             }
             vanishPointOffset = offset
 
-            val trafficLineExpression = MapboxRouteLineUtils.getTrafficLineExpression(
-                offset,
-                routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
-                routeResourceProvider.routeLineColorResources.routeUnknownTrafficColor,
-                routeLineExpressionData
-            )
+            val trafficLineExpression = if (useSoftGradient) {
+                MapboxRouteLineUtils.getTrafficLineExpressionSoftGradient(
+                    offset,
+                    routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
+                    routeResourceProvider.routeLineColorResources.routeUnknownTrafficColor,
+                    softGradientTransition,
+                    routeLineExpressionData
+                )
+            } else {
+                MapboxRouteLineUtils.getTrafficLineExpression(
+                    offset,
+                    routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
+                    routeResourceProvider.routeLineColorResources.routeUnknownTrafficColor,
+                    routeLineExpressionData
+                )
+            }
 
             val routeLineExpression = MapboxRouteLineUtils.getRouteLineExpression(
                 offset,

@@ -172,7 +172,52 @@ class VanishingRouteLineTest {
             lineString.coordinates()[0],
             segments,
             genericMockResourceProvider,
-            -1
+            -1,
+            0.0,
+            false
+        )
+
+        assertEquals(expectedTrafficExpression, result!!.trafficLineExpression.toString())
+        assertEquals(expectedRouteLineExpression, result.routeLineExpression.toString())
+        assertEquals(expectedCasingExpression, result.routeLineCasingExpression.toString())
+    }
+
+    @Test
+    fun getTraveledRouteLineExpressions_whenSoftGradientTrue() {
+        val expectedTrafficExpression = "[interpolate, [linear], [line-progress], 0.0, " +
+            "[rgba, 255.0, 255.0, 255.0, 1.0]]"
+        val expectedRouteLineExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0]," +
+            " 0.0, [rgba, 0.0, 0.0, 3.0, 0.0]]"
+        val expectedCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 10.0, 0.0]," +
+            " 0.0, [rgba, 0.0, 0.0, 4.0, 0.0]]"
+
+        val colorResources = RouteLineColorResources.Builder()
+            .routeModerateColor(-1)
+            .routeUnknownTrafficColor(-1)
+            .build()
+
+        val route = getRoute()
+        val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
+        val vanishingRouteLine = VanishingRouteLine()
+        vanishingRouteLine.initWithRoute(route)
+        vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
+        val segments: List<RouteLineExpressionData> =
+            MapboxRouteLineUtils.calculateRouteLineSegments(
+                getRoute(),
+                listOf(),
+                true,
+                colorResources,
+                RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+                true
+            )
+
+        val result = vanishingRouteLine.getTraveledRouteLineExpressions(
+            lineString.coordinates()[0],
+            segments,
+            genericMockResourceProvider,
+            -1,
+            20.0,
+            true
         )
 
         assertEquals(expectedTrafficExpression, result!!.trafficLineExpression.toString())
@@ -215,7 +260,9 @@ class VanishingRouteLineTest {
             Point.fromLngLat(-122.52351984901476, 37.97384101461195),
             segments,
             RouteLineResources.Builder().build(),
-            0
+            0,
+            0.0,
+            false
         )
 
         assertEquals(expectedTrafficExp, result!!.trafficLineExpression.toString())

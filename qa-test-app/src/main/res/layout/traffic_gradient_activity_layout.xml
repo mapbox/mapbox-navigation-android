@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -13,18 +15,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/startNavigation"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:background="@color/colorPrimary"
-        android:text="@string/label_start_navigation"
-        android:textColor="@android:color/white"
-        android:visibility="gone" />
-
     <RadioGroup
         android:id="@+id/optionTrafficGradient"
         android:layout_width="wrap_content"
@@ -32,37 +22,30 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:orientation="horizontal"
-        android:background="#ffffff"
+        android:background="@color/primary"
         android:padding="8dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="Traffic Gradient: "/>
+            android:text="Traffic Gradient: "
+            tools:ignore="HardcodedText" />
 
         <RadioButton
             android:id="@+id/gradientOptionHard"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="Hard"/>
+            android:text="Hard"
+            tools:ignore="HardcodedText" />
 
         <RadioButton
             android:id="@+id/gradientOptionSoft"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Soft"/>
+            android:text="Soft"
+            tools:ignore="HardcodedText" />
     </RadioGroup>
-
-    <ProgressBar
-        android:id="@+id/routeLoadingProgressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:visibility="invisible"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

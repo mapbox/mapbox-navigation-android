@@ -51,6 +51,7 @@ object RouteConstants {
     const val DEFAULT_ROUTE_SOURCES_TOLERANCE = 0.375
     const val ROUNDED_LINE_CAP = true
     const val RESTRICTED_ROAD_SECTION_SCALE = 10.0
+    const val SOFT_GRADIENT_STOP_GAP_METERS: Double = 30.0
     val TRAFFIC_BACKFILL_ROAD_CLASSES = emptyList<String>()
 
     @ColorInt

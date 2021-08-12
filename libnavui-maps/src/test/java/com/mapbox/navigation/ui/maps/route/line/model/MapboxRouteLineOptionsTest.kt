@@ -80,6 +80,31 @@ class MapboxRouteLineOptionsTest {
     }
 
     @Test
+    fun displaySoftGradientForTraffic() {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .displaySoftGradientForTraffic(true)
+            .build()
+
+        assertTrue(options.displaySoftGradientForTraffic)
+    }
+
+    @Test
+    fun softGradientTransition() {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .softGradientTransition(77)
+            .build()
+
+        assertEquals(77.0, options.softGradientTransition, 0.0)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun softGradientTransition_whenValueIsZero() {
+        MapboxRouteLineOptions.Builder(ctx)
+            .softGradientTransition(0)
+            .build()
+    }
+
+    @Test
     fun toBuilder() {
         val routeLineResources = RouteLineResources.Builder().build()
         val routeStyleDescriptors =
@@ -93,6 +118,8 @@ class MapboxRouteLineOptionsTest {
             .withRouteStyleDescriptors(routeStyleDescriptors)
             .displayRestrictedRoadSections(true)
             .styleInactiveRouteLegsIndependently(true)
+            .displaySoftGradientForTraffic(true)
+            .softGradientTransition(77)
             .build()
             .toBuilder(ctx)
             .build()
@@ -104,5 +131,7 @@ class MapboxRouteLineOptionsTest {
         assertEquals(routeStyleDescriptors, options.routeLayerProvider.routeStyleDescriptors)
         assertTrue(options.displayRestrictedRoadSections)
         assertTrue(options.styleInactiveRouteLegsIndependently)
+        assertTrue(options.displaySoftGradientForTraffic)
+        assertEquals(77.0, options.softGradientTransition, 0.0)
     }
 }

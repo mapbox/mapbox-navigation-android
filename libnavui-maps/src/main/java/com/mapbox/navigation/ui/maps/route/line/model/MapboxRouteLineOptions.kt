@@ -4,9 +4,11 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
+import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLayerProvider
 import com.mapbox.navigation.ui.maps.route.line.api.VanishingRouteLine
+import kotlin.math.abs
 
 /**
  * Options for the configuration and appearance of the route line.
@@ -23,6 +25,10 @@ import com.mapbox.navigation.ui.maps.route.line.api.VanishingRouteLine
  * @param styleInactiveRouteLegsIndependently enabling this feature will change the color of the route
  * legs that aren't currently being navigated. See [RouteLineColorResources] to specify the color
  * used.
+ * @param displaySoftGradientForTraffic determines if the color transition between traffic congestion
+ * changes should use a soft gradient appearance or abrupt color change. This is false by default.
+ * @param softGradientTransition influences the length of the color transition when the displaySoftGradientForTraffic
+ * parameter is true.
  */
 class MapboxRouteLineOptions private constructor(
     val resourceProvider: RouteLineResources,
@@ -33,7 +39,9 @@ class MapboxRouteLineOptions private constructor(
     internal var vanishingRouteLine: VanishingRouteLine? = null,
     val tolerance: Double,
     val displayRestrictedRoadSections: Boolean = false,
-    val styleInactiveRouteLegsIndependently: Boolean = false
+    val styleInactiveRouteLegsIndependently: Boolean = false,
+    val displaySoftGradientForTraffic: Boolean = false,
+    val softGradientTransition: Double = RouteConstants.SOFT_GRADIENT_STOP_GAP_METERS
 ) {
 
     /**
@@ -51,7 +59,9 @@ class MapboxRouteLineOptions private constructor(
             vanishingRouteLineEnabled,
             tolerance,
             displayRestrictedRoadSections,
-            styleInactiveRouteLegsIndependently
+            styleInactiveRouteLegsIndependently,
+            displaySoftGradientForTraffic,
+            softGradientTransition
         )
     }
 
@@ -74,6 +84,8 @@ class MapboxRouteLineOptions private constructor(
         if (displayRestrictedRoadSections != other.displayRestrictedRoadSections) return false
         if (styleInactiveRouteLegsIndependently != other.styleInactiveRouteLegsIndependently)
             return false
+        if (displaySoftGradientForTraffic != other.displayRestrictedRoadSections) return false
+        if (softGradientTransition != other.softGradientTransition) return false
 
         return true
     }
@@ -91,6 +103,8 @@ class MapboxRouteLineOptions private constructor(
         result = 31 * result + (tolerance.hashCode())
         result = 31 * result + (displayRestrictedRoadSections.hashCode())
         result = 31 * result + (styleInactiveRouteLegsIndependently.hashCode())
+        result = 31 * result + (displaySoftGradientForTraffic.hashCode())
+        result = 31 * result + (softGradientTransition.hashCode())
         return result
     }
 
@@ -106,7 +120,9 @@ class MapboxRouteLineOptions private constructor(
             "vanishingRouteLine=$vanishingRouteLine, " +
             "tolerance=$tolerance, " +
             "displayRestrictedRoadSections=$displayRestrictedRoadSections, " +
-            "styleInactiveRouteLegsIndependently=$styleInactiveRouteLegsIndependently" +
+            "styleInactiveRouteLegsIndependently=$styleInactiveRouteLegsIndependently," +
+            "displaySoftGradientForTraffic=$displaySoftGradientForTraffic," +
+            "softGradientTransition=$softGradientTransition" +
             ")"
     }
 
@@ -123,6 +139,11 @@ class MapboxRouteLineOptions private constructor(
      * @param styleInactiveRouteLegsIndependently enabling this feature will change the color of the route
      * legs that aren't currently being navigated. See [RouteLineColorResources] to specify the color
      * used.
+     * @param displaySoftGradientForTraffic enabling this will display the traffic color transitions
+     * with a gradual gradient color blend. If false the color transitions will abruptly transition from
+     * one color to the next.
+     * @param softGradientTransition this value influences the length of the color transition when
+     * the displaySoftGradientForTraffic param is set to true
      */
     class Builder internal constructor(
         private val context: Context,
@@ -132,7 +153,9 @@ class MapboxRouteLineOptions private constructor(
         private var vanishingRouteLineEnabled: Boolean,
         private var tolerance: Double,
         private var displayRestrictedRoadSections: Boolean,
-        private var styleInactiveRouteLegsIndependently: Boolean
+        private var styleInactiveRouteLegsIndependently: Boolean,
+        private var displaySoftGradientForTraffic: Boolean,
+        private var softGradientTransition: Double
     ) {
 
         /**
@@ -148,7 +171,9 @@ class MapboxRouteLineOptions private constructor(
             false,
             DEFAULT_ROUTE_SOURCES_TOLERANCE,
             false,
-            false
+            false,
+            false,
+            RouteConstants.SOFT_GRADIENT_STOP_GAP_METERS
         )
 
         /**
@@ -200,6 +225,7 @@ class MapboxRouteLineOptions private constructor(
          * colored according to the values provided in the [RouteStyleDescriptor].
          *
          * @param routeStyleDescriptors a collection of [RouteStyleDescriptor] objects
+         * @return the builder
          */
         fun withRouteStyleDescriptors(routeStyleDescriptors: List<RouteStyleDescriptor>): Builder =
             apply { this.routeStyleDescriptors = routeStyleDescriptors }
@@ -207,6 +233,8 @@ class MapboxRouteLineOptions private constructor(
         /**
          * Indicates if the route line will display restricted
          * road sections with a dashed line. False by default.
+         *
+         * @return the builder
          */
         fun displayRestrictedRoadSections(displayRestrictedRoadSections: Boolean): Builder =
             apply { this.displayRestrictedRoadSections = displayRestrictedRoadSections }
@@ -215,9 +243,39 @@ class MapboxRouteLineOptions private constructor(
          * Enabling this feature will result in route legs that aren't currently being navigated
          * to be color differently than the active leg. See [RouteLineColorResources] for the
          * color option.
+         *
+         * @return the builder
          */
         fun styleInactiveRouteLegsIndependently(enable: Boolean): Builder =
             apply { this.styleInactiveRouteLegsIndependently = enable }
+
+        /**
+         * Influences the appearance of the gradient used for the traffic line. By default
+         * there is an abrupt transition between different colors representing traffic congestion.
+         * If this value is set to true there is a smoother transition between the colors. This
+         * value is false by default.
+         *
+         * @return the builder
+         */
+        fun displaySoftGradientForTraffic(enable: Boolean): Builder =
+            apply { this.displaySoftGradientForTraffic = enable }
+
+        /**
+         * When [displayRestrictedRoadSections] is set to true this value will influence the
+         * length of the gradient transition between traffic congestion colors. Larger values
+         * will result in the color transition occurring over a longer length of the line.
+         * Values between 5 and 75 are recommended. The default value is 30.
+         *
+         * @param transitionDistance a value above zero used for the gradient transition distance
+         * @return the builder
+         */
+        fun softGradientTransition(transitionDistance: Int): Builder {
+            if (transitionDistance == 0) {
+                throw IllegalArgumentException("A value above zero was expected.")
+            }
+            this.softGradientTransition = abs(transitionDistance).toDouble()
+            return this
+        }
 
         /**
          * @return an instance of [MapboxRouteLineOptions]
@@ -261,7 +319,9 @@ class MapboxRouteLineOptions private constructor(
                 vanishingRouteLine,
                 tolerance,
                 displayRestrictedRoadSections,
-                styleInactiveRouteLegsIndependently
+                styleInactiveRouteLegsIndependently,
+                displaySoftGradientForTraffic,
+                softGradientTransition
             )
         }
     }
