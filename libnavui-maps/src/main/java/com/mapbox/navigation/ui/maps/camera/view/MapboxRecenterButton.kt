@@ -85,11 +85,15 @@ class MapboxRecenterButton : ConstraintLayout {
     /**
      * Invoke the function to show optional text associated with the view.
      * @param duration for the view to be in the extended mode before it starts to shrink.
+     * @param text for the view to show in the extended mode.
      */
-    fun showTextAndExtend(duration: Long) {
+    @JvmOverloads
+    fun showTextAndExtend(
+        duration: Long,
+        text: String = context.getString(R.string.mapbox_recenter),
+    ) {
         if (!isAnimationRunning) {
             isAnimationRunning = true
-            val text = context.getString(R.string.mapbox_recenter)
             val extendedWidth = (binding.recenterText.measureTextWidth(text) + shrunkWidth)
                 .coerceAtLeast(MIN_EXTENDED_WIDTH * context.resources.displayMetrics.density)
             getAnimator(shrunkWidth, extendedWidth.toInt()).play(

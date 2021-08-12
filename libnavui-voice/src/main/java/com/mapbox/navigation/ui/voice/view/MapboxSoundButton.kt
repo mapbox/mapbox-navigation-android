@@ -8,7 +8,6 @@ import android.os.Looper
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import androidx.annotation.StringRes
 import androidx.annotation.StyleRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -141,23 +140,32 @@ class MapboxSoundButton : ConstraintLayout {
     /**
      * Invoke the function to mute and show optional text associated with the action.
      * @param duration for the view to be in the extended mode before it starts to shrink.
+     * @param text for the view to show in the extended mode.
      * @return `true` representing that view is in muted state.
      */
-    fun muteAndExtend(duration: Long): Boolean {
-        return mute().also { showTextWithAnimation(R.string.mapbox_muted, duration) }
+    @JvmOverloads
+    fun muteAndExtend(
+        duration: Long,
+        text: String = context.getString(R.string.mapbox_muted),
+    ): Boolean {
+        return mute().also { showTextWithAnimation(text, duration) }
     }
 
     /**
      * Invoke the function to unmute and show optional text associated with the action.
      * @param duration for the view to be in the extended mode before it starts to shrink.
+     * @param text for the view to show in the extended mode.
      * @return `false` representing that view is in unmuted state.
      */
-    fun unmuteAndExtend(duration: Long): Boolean {
-        return unmute().also { showTextWithAnimation(R.string.mapbox_unmuted, duration) }
+    @JvmOverloads
+    fun unmuteAndExtend(
+        duration: Long,
+        text: String = context.getString(R.string.mapbox_unmuted),
+    ): Boolean {
+        return unmute().also { showTextWithAnimation(text, duration) }
     }
 
-    private fun showTextWithAnimation(@StringRes textId: Int, duration: Long) {
-        val text = context.getString(textId)
+    private fun showTextWithAnimation(text: String, duration: Long) {
         val extendedWidth = (binding.soundButtonText.measureTextWidth(text) + shrunkWidth)
             .coerceAtLeast(MIN_EXTENDED_WIDTH * context.resources.displayMetrics.density)
         mainHandler.removeCallbacksAndMessages(null)

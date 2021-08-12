@@ -18,6 +18,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.LooperMode
 import org.robolectric.shadows.ShadowLooper
 
+private const val customText = "custom text"
+
 @LooperMode(LooperMode.Mode.PAUSED)
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -74,5 +76,16 @@ class MapboxRecenterButtonTest {
 
         assertTrue(recenterText.text.isEmpty())
         assertEquals(recenterText.visibility, View.INVISIBLE)
+    }
+
+    @Test
+    fun `recenter and extend with text`() {
+        val view = MapboxRecenterButton(ctx)
+        val recenterText = view.findViewById<AppCompatTextView>(R.id.recenterText)
+
+        view.showTextAndExtend(0, customText)
+
+        assertEquals(recenterText.text, customText)
+        assertEquals(recenterText.visibility, View.VISIBLE)
     }
 }

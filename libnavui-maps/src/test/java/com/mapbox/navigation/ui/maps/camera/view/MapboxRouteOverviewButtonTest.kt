@@ -18,6 +18,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.LooperMode
 import org.robolectric.shadows.ShadowLooper
 
+private const val customText = "custom text"
+
 @LooperMode(LooperMode.Mode.PAUSED)
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -74,5 +76,16 @@ class MapboxRouteOverviewButtonTest {
 
         assertTrue(routeOverviewText.text.isEmpty())
         assertEquals(routeOverviewText.visibility, View.INVISIBLE)
+    }
+
+    @Test
+    fun `overview and extend with text`() {
+        val view = MapboxRouteOverviewButton(ctx)
+        val routeOverviewText = view.findViewById<AppCompatTextView>(R.id.routeOverviewText)
+
+        view.showTextAndExtend(2000L, customText)
+
+        assertEquals(routeOverviewText.text, customText)
+        assertEquals(routeOverviewText.visibility, View.VISIBLE)
     }
 }

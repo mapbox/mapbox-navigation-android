@@ -127,8 +127,10 @@ package com.mapbox.navigation.ui.voice.view {
     ctor public MapboxSoundButton(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxSoundButton(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
     method public boolean mute();
+    method public boolean muteAndExtend(long duration, String text = context.getString(R.string.mapbox_muted));
     method public boolean muteAndExtend(long duration);
     method public boolean unmute();
+    method public boolean unmuteAndExtend(long duration, String text = context.getString(R.string.mapbox_unmuted));
     method public boolean unmuteAndExtend(long duration);
     method public void updateStyle(@StyleRes int style);
   }
