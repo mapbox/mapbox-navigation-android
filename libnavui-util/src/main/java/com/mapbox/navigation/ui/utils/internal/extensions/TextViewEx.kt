@@ -18,3 +18,8 @@ fun TextView.getAsBitmap(): Bitmap {
     draw(canvas)
     return bitmap
 }
+
+fun TextView.measureTextWidth(text: String): Float {
+    val transformedText = transformationMethod?.getTransformation(text, this) ?: text
+    return paint.measureText(transformedText.toString()) + paddingStart + paddingEnd
+}
