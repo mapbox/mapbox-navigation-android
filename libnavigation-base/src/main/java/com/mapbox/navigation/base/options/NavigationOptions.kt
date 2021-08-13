@@ -33,12 +33,13 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L
  * @param routingTilesOptions [RoutingTilesOptions] defines routing tiles endpoint and storage configuration.
  * @param isFromNavigationUi Boolean *true* if is called from UI, otherwise *false*
  * @param isDebugLoggingEnabled Boolean
- * @param deviceProfile [DeviceProfile] defines how navigation data should be interpretation
+ * @param deviceProfile [DeviceProfile] defines how navigation data should be interpreted
  * @param eHorizonOptions [EHorizonOptions] defines configuration for the Electronic Horizon
  * @param routeRefreshOptions defines configuration for refreshing routes
  * @param routeAlternativesOptions defines configuration for observing alternatives while navigating
  * @param incidentsOptions defines configuration for live incidents
  * @param historyRecorderOptions defines configuration for recording navigation events
+ * @param eventsAppMetadata [EventsAppMetadata] information (optional)
  */
 class NavigationOptions private constructor(
     val applicationContext: Context,
@@ -56,7 +57,8 @@ class NavigationOptions private constructor(
     val routeRefreshOptions: RouteRefreshOptions,
     val routeAlternativesOptions: RouteAlternativesOptions,
     val incidentsOptions: IncidentsOptions,
-    val historyRecorderOptions: HistoryRecorderOptions
+    val historyRecorderOptions: HistoryRecorderOptions,
+    val eventsAppMetadata: EventsAppMetadata?,
 ) {
 
     /**
@@ -78,6 +80,7 @@ class NavigationOptions private constructor(
         routeAlternativesOptions(routeAlternativesOptions)
         incidentsOptions(incidentsOptions)
         historyRecorderOptions(historyRecorderOptions)
+        eventsAppMetadata(eventsAppMetadata)
     }
 
     /**
@@ -105,6 +108,7 @@ class NavigationOptions private constructor(
         if (routeAlternativesOptions != other.routeAlternativesOptions) return false
         if (incidentsOptions != other.incidentsOptions) return false
         if (historyRecorderOptions != other.historyRecorderOptions) return false
+        if (eventsAppMetadata != other.eventsAppMetadata) return false
 
         return true
     }
@@ -129,6 +133,7 @@ class NavigationOptions private constructor(
         result = 31 * result + routeAlternativesOptions.hashCode()
         result = 31 * result + incidentsOptions.hashCode()
         result = 31 * result + historyRecorderOptions.hashCode()
+        result = 31 * result + (eventsAppMetadata?.hashCode() ?: 0)
         return result
     }
 
@@ -152,7 +157,8 @@ class NavigationOptions private constructor(
             "routeRefreshOptions=$routeRefreshOptions, " +
             "routeAlternativesOptions=$routeAlternativesOptions, " +
             "incidentsOptions=$incidentsOptions, " +
-            "historyRecorderOptions=$historyRecorderOptions" +
+            "historyRecorderOptions=$historyRecorderOptions, " +
+            "eventsAppMetadata=$eventsAppMetadata" +
             ")"
     }
 
@@ -185,6 +191,7 @@ class NavigationOptions private constructor(
         private var incidentsOptions: IncidentsOptions = IncidentsOptions.Builder().build()
         private var historyRecorderOptions: HistoryRecorderOptions =
             HistoryRecorderOptions.Builder().build()
+        private var eventsAppMetadata: EventsAppMetadata? = null
 
         /**
          * Defines [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
@@ -277,6 +284,12 @@ class NavigationOptions private constructor(
             apply { this.historyRecorderOptions = historyRecorderOptions }
 
         /**
+         * Defines [EventsAppMetadata] information
+         */
+        fun eventsAppMetadata(eventsAppMetadata: EventsAppMetadata?): Builder =
+            apply { this.eventsAppMetadata = eventsAppMetadata }
+
+        /**
          * Build a new instance of [NavigationOptions]
          * @return NavigationOptions
          */
@@ -298,7 +311,8 @@ class NavigationOptions private constructor(
                 routeRefreshOptions = routeRefreshOptions,
                 routeAlternativesOptions = routeAlternativesOptions,
                 incidentsOptions = incidentsOptions,
-                historyRecorderOptions = historyRecorderOptions
+                historyRecorderOptions = historyRecorderOptions,
+                eventsAppMetadata = eventsAppMetadata,
             )
         }
     }

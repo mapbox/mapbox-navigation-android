@@ -161,6 +161,22 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder minTimeDeltaBetweenUpdates(Double? minTimeDeltaBetweenUpdates);
   }
 
+  public final class EventsAppMetadata {
+    method public String getName();
+    method public String? getUserId();
+    method public String getVersion();
+    method public com.mapbox.navigation.base.options.EventsAppMetadata.Builder toBuilder();
+    property public final String name;
+    property public final String? userId;
+    property public final String version;
+  }
+
+  public static final class EventsAppMetadata.Builder {
+    ctor public EventsAppMetadata.Builder(String name, String version);
+    method public com.mapbox.navigation.base.options.EventsAppMetadata build();
+    method public com.mapbox.navigation.base.options.EventsAppMetadata.Builder userId(String? userId);
+  }
+
   public final class HistoryRecorderOptions {
     method public String? getFileDirectory();
     method public com.mapbox.navigation.base.options.HistoryRecorderOptions.Builder toBuilder();
@@ -194,6 +210,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.DeviceProfile getDeviceProfile();
     method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions getDistanceFormatterOptions();
     method public com.mapbox.navigation.base.options.EHorizonOptions getEHorizonOptions();
+    method public com.mapbox.navigation.base.options.EventsAppMetadata? getEventsAppMetadata();
     method public com.mapbox.navigation.base.options.HistoryRecorderOptions getHistoryRecorderOptions();
     method public com.mapbox.navigation.base.options.IncidentsOptions getIncidentsOptions();
     method public com.mapbox.android.core.location.LocationEngine getLocationEngine();
@@ -211,6 +228,7 @@ package com.mapbox.navigation.base.options {
     property public final com.mapbox.navigation.base.options.DeviceProfile deviceProfile;
     property public final com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions;
     property public final com.mapbox.navigation.base.options.EHorizonOptions eHorizonOptions;
+    property public final com.mapbox.navigation.base.options.EventsAppMetadata? eventsAppMetadata;
     property public final com.mapbox.navigation.base.options.HistoryRecorderOptions historyRecorderOptions;
     property public final com.mapbox.navigation.base.options.IncidentsOptions incidentsOptions;
     property public final boolean isDebugLoggingEnabled;
@@ -231,6 +249,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder deviceProfile(com.mapbox.navigation.base.options.DeviceProfile deviceProfile);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder distanceFormatterOptions(com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder eHorizonOptions(com.mapbox.navigation.base.options.EHorizonOptions eHorizonOptions);
+    method public com.mapbox.navigation.base.options.NavigationOptions.Builder eventsAppMetadata(com.mapbox.navigation.base.options.EventsAppMetadata? eventsAppMetadata);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder historyRecorderOptions(com.mapbox.navigation.base.options.HistoryRecorderOptions historyRecorderOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder incidentsOptions(com.mapbox.navigation.base.options.IncidentsOptions incidentsOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder isDebugLoggingEnabled(boolean flag);

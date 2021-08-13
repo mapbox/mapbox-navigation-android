@@ -13,6 +13,11 @@ internal class NavigationFreeDriveEvent(
     phoneState: PhoneState
 ) : Event(), MetricEvent {
 
+    /*
+     * Don't remove any fields, cause they should match with
+     * the schema downloaded from S3. Look at {@link SchemaTest}
+     */
+    val version = "2.1"
     val created: String = TelemetryUtils.obtainCurrentDate() // Schema pattern
     val volumeLevel: Int = phoneState.volumeLevel
     val batteryLevel: Int = phoneState.batteryLevel
@@ -33,6 +38,7 @@ internal class NavigationFreeDriveEvent(
     var startTimestamp: String? = null
     var location: TelemetryLocation? = null
     var eventType: String? = null
+    var appMetadata: AppMetadata? = null
 
     override val metricName: String
         get() = NavigationMetrics.FREE_DRIVE

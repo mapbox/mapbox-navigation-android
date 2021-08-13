@@ -22,16 +22,10 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState.TRACKING
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.NavigationSession
-import com.mapbox.navigation.core.NavigationSession.State.ACTIVE_GUIDANCE
-import com.mapbox.navigation.core.NavigationSession.State.FREE_DRIVE
-import com.mapbox.navigation.core.NavigationSession.State.IDLE
-import com.mapbox.navigation.core.NavigationSessionStateObserver
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.internal.telemetry.CachedNavigationFeedbackEvent
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.toTelemetryLocation
-import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.START
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.STOP
@@ -42,6 +36,11 @@ import com.mapbox.navigation.core.telemetry.events.NavigationEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationFeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationFreeDriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationRerouteEvent
+import com.mapbox.navigation.core.trip.session.NavigationSessionState
+import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance
+import com.mapbox.navigation.core.trip.session.NavigationSessionState.FreeDrive
+import com.mapbox.navigation.core.trip.session.NavigationSessionState.Idle
+import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
@@ -111,6 +110,8 @@ class MapboxNavigationTelemetryTest {
 
         private const val STEP_INDEX = 5
         private const val SDK_IDENTIFIER = "mapbox-navigation-android"
+        private const val ACTIVE_GUIDANCE_SESSION_ID = "active-guidance-session-id"
+        private const val FREE_DRIVE_SESSION_ID = "free-drive-session-id"
     }
 
     @get:Rule
@@ -158,7 +159,9 @@ class MapboxNavigationTelemetryTest {
         } just runs
 
         every {
-            mapboxNavigation.registerNavigationSessionObserver(capture(sessionStateObserverSlot))
+            mapboxNavigation.registerNavigationSessionStateObserver(
+                capture(sessionStateObserverSlot)
+            )
         } just runs
 
         every {
@@ -214,11 +217,25 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
+    fun departEvent_app_metadata_sessionId_is_active_guidance() {
+        baseMock()
+
+        baseInitialization()
+
+        val events = captureAndVerifyMetricsReporter(exactly = 2)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        assertEquals(
+            ACTIVE_GUIDANCE_SESSION_ID,
+            (events[1] as NavigationDepartEvent).appMetadata?.sessionId
+        )
+    }
+
+    @Test
     fun departEvent_not_sent_without_route_and_routeProgress() {
         baseMock()
 
         initTelemetry()
-        updateSessionState(ACTIVE_GUIDANCE)
+        updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
 
         val events = captureAndVerifyMetricsReporter(exactly = 1)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
@@ -229,7 +246,7 @@ class MapboxNavigationTelemetryTest {
         baseMock()
 
         initTelemetry()
-        updateSessionState(ACTIVE_GUIDANCE)
+        updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
         updateRouteProgress()
 
         val events = captureAndVerifyMetricsReporter(exactly = 1)
@@ -241,7 +258,7 @@ class MapboxNavigationTelemetryTest {
         baseMock()
 
         initTelemetry()
-        updateSessionState(ACTIVE_GUIDANCE)
+        updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
         updateRoute(originalRoute)
 
         val events = captureAndVerifyMetricsReporter(exactly = 1)
@@ -253,7 +270,7 @@ class MapboxNavigationTelemetryTest {
         baseMock()
 
         baseInitialization()
-        updateSessionState(FREE_DRIVE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
 
         val events = captureAndVerifyMetricsReporter(exactly = 4)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
@@ -262,6 +279,28 @@ class MapboxNavigationTelemetryTest {
         assertTrue(events[3] is NavigationFreeDriveEvent)
         assertEquals(4, events.size)
         verify { locationsCollector.flushBuffers() }
+    }
+
+    @Test
+    fun cancelEvent_app_metadata_sessionId_is_active_guidance() {
+        baseMock()
+
+        baseInitialization()
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
+
+        val events = captureAndVerifyMetricsReporter(exactly = 4)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        assertTrue(events[1] is NavigationDepartEvent)
+        assertTrue(events[2] is NavigationCancelEvent)
+        assertTrue(events[3] is NavigationFreeDriveEvent)
+        assertEquals(
+            ACTIVE_GUIDANCE_SESSION_ID,
+            (events[2] as NavigationCancelEvent).appMetadata?.sessionId
+        )
+        assertEquals(
+            FREE_DRIVE_SESSION_ID,
+            (events[3] as NavigationFreeDriveEvent).appMetadata?.sessionId
+        )
     }
 
     @Test
@@ -359,7 +398,7 @@ class MapboxNavigationTelemetryTest {
         postUserFeedback()
         postUserFeedback()
         postUserFeedback()
-        updateSessionState(FREE_DRIVE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
 
         val events = captureAndVerifyMetricsReporter(exactly = 10)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
@@ -389,7 +428,7 @@ class MapboxNavigationTelemetryTest {
         offRoute()
         updateRoute(anotherRoute)
         postUserFeedback()
-        updateSessionState(IDLE)
+        updateSessionState(Idle)
 
         val events = captureAndVerifyMetricsReporter(exactly = 10)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
@@ -414,7 +453,7 @@ class MapboxNavigationTelemetryTest {
         cacheUserFeedback(feedbackType = cacheFeedbackType)
         val cacheFeedbackDescription = "cacheFeedbackDescription"
         cacheUserFeedback(description = cacheFeedbackDescription)
-        updateSessionState(FREE_DRIVE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
 
         val cachedFeedbackEvents = MapboxNavigationTelemetry.getCachedUserFeedback()
         assertEquals(cachedFeedbackEvents.size, 2)
@@ -440,7 +479,7 @@ class MapboxNavigationTelemetryTest {
         updateRouteProgress()
         postUserFeedback()
         cacheUserFeedback()
-        updateSessionState(FREE_DRIVE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
 
         val events = captureAndVerifyMetricsReporter(exactly = 6)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
@@ -464,7 +503,7 @@ class MapboxNavigationTelemetryTest {
         updateRouteProgress()
         postUserFeedback()
         cacheUserFeedback()
-        updateSessionState(FREE_DRIVE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
         postCachedUserFeedback()
 
         val events = captureAndVerifyMetricsReporter(exactly = 8)
@@ -493,7 +532,7 @@ class MapboxNavigationTelemetryTest {
         postUserFeedback()
         cacheUserFeedback()
         postCachedUserFeedback()
-        updateSessionState(FREE_DRIVE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
 
         val events = captureAndVerifyMetricsReporter(exactly = 8)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
@@ -522,7 +561,7 @@ class MapboxNavigationTelemetryTest {
         postUserFeedback()
         val cacheFeedbackDescription = "cacheFeedbackDescription"
         cacheUserFeedback(description = cacheFeedbackDescription)
-        updateSessionState(FREE_DRIVE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
         postCachedUserFeedback(
             MapboxNavigationTelemetry
                 .getCachedUserFeedback()
@@ -651,7 +690,7 @@ class MapboxNavigationTelemetryTest {
         postUserFeedback()
         nextWaypoint()
         arrive()
-        updateSessionState(FREE_DRIVE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
 
         val events = captureAndVerifyMetricsReporter(exactly = 14)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
@@ -688,7 +727,7 @@ class MapboxNavigationTelemetryTest {
         mockFlushBuffers()
         offRoute()
         updateRoute(anotherRoute)
-        updateSessionState(FREE_DRIVE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
 
         val events = captureAndVerifyMetricsReporter(exactly = 11)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
@@ -716,7 +755,7 @@ class MapboxNavigationTelemetryTest {
         baseMock()
 
         initTelemetry()
-        updateSessionState(FREE_DRIVE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
 
         val events = captureAndVerifyMetricsReporter(exactly = 2)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
@@ -724,11 +763,25 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
+    fun freeDriveEvent_app_metadata_sessionId_is_free_drive() {
+        baseMock()
+
+        initTelemetry()
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
+
+        val events = captureAndVerifyMetricsReporter(exactly = 2)
+        assertEquals(
+            FREE_DRIVE_SESSION_ID,
+            (events[1] as NavigationFreeDriveEvent).appMetadata?.sessionId
+        )
+    }
+
+    @Test
     fun freeDrive_sent_when_state_changes_from_active_guidance_to_free_drive() {
         baseMock()
 
         baseInitialization()
-        updateSessionState(FREE_DRIVE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
 
         val events = captureAndVerifyMetricsReporter(exactly = 4)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
@@ -738,12 +791,30 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
+    fun freeDriveEvent_app_metadata_sessionId_updated_from_active_guidance_to_free_drive() {
+        baseMock()
+
+        baseInitialization()
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
+
+        val events = captureAndVerifyMetricsReporter(exactly = 4)
+        assertEquals(
+            ACTIVE_GUIDANCE_SESSION_ID,
+            (events[2] as NavigationCancelEvent).appMetadata?.sessionId
+        )
+        assertEquals(
+            FREE_DRIVE_SESSION_ID,
+            (events[3] as NavigationFreeDriveEvent).appMetadata?.sessionId
+        )
+    }
+
+    @Test
     fun freeDrive_sent_when_state_changes_from_free_drive_to_active_guidance() {
         baseMock()
 
         initTelemetry()
-        updateSessionState(FREE_DRIVE)
-        updateSessionState(ACTIVE_GUIDANCE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
+        updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
         updateRoute(originalRoute)
         updateRouteProgress()
 
@@ -755,12 +826,37 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
+    fun freeDriveEvent_app_metadata_sessionId_updated_from_free_drive_to_active_guidance() {
+        baseMock()
+
+        initTelemetry()
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
+        updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
+        updateRoute(originalRoute)
+        updateRouteProgress()
+
+        val events = captureAndVerifyMetricsReporter(exactly = 4)
+        assertEquals(
+            FREE_DRIVE_SESSION_ID,
+            (events[1] as NavigationFreeDriveEvent).appMetadata?.sessionId
+        )
+        assertEquals(
+            FREE_DRIVE_SESSION_ID,
+            (events[2] as NavigationFreeDriveEvent).appMetadata?.sessionId
+        )
+        assertEquals(
+            ACTIVE_GUIDANCE_SESSION_ID,
+            (events[3] as NavigationDepartEvent).appMetadata?.sessionId
+        )
+    }
+
+    @Test
     fun freeDrive_sent_when_state_changes_from_free_drive_to_idle() {
         baseMock()
 
         initTelemetry()
-        updateSessionState(FREE_DRIVE)
-        updateSessionState(IDLE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
+        updateSessionState(Idle)
 
         val events = captureAndVerifyMetricsReporter(exactly = 3)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
@@ -769,13 +865,32 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
+    fun freeDriveEvent_app_metadata_sessionId_updated_from_free_drive_to_idle() {
+        baseMock()
+
+        initTelemetry()
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
+        updateSessionState(Idle)
+
+        val events = captureAndVerifyMetricsReporter(exactly = 3)
+        assertEquals(
+            FREE_DRIVE_SESSION_ID,
+            (events[1] as NavigationFreeDriveEvent).appMetadata?.sessionId
+        )
+        assertEquals(
+            FREE_DRIVE_SESSION_ID,
+            (events[2] as NavigationFreeDriveEvent).appMetadata?.sessionId
+        )
+    }
+
+    @Test
     fun freeDrive_sent_when_location_not_available() {
         baseMock()
         every { locationsCollector.lastLocation } returns null
 
         initTelemetry()
-        updateSessionState(FREE_DRIVE)
-        updateSessionState(IDLE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
+        updateSessionState(Idle)
 
         val events = captureAndVerifyMetricsReporter(exactly = 3)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
@@ -790,9 +905,9 @@ class MapboxNavigationTelemetryTest {
         val events = captureMetricsReporter()
 
         initTelemetry()
-        updateSessionState(FREE_DRIVE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
         every { locationsCollector.lastLocation } returns lastLocation
-        updateSessionState(IDLE)
+        updateSessionState(Idle)
 
         val freeDriveStart = events[1] as NavigationFreeDriveEvent
         val freeDriveStop = events[2] as NavigationFreeDriveEvent
@@ -808,9 +923,9 @@ class MapboxNavigationTelemetryTest {
         val events = captureMetricsReporter()
 
         initTelemetry()
-        updateSessionState(FREE_DRIVE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
         every { locationsCollector.lastLocation } returns lastLocation
-        updateSessionState(ACTIVE_GUIDANCE)
+        updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
 
         val freeDriveStart = events[1] as NavigationFreeDriveEvent
         val freeDriveStop = events[2] as NavigationFreeDriveEvent
@@ -825,8 +940,8 @@ class MapboxNavigationTelemetryTest {
         val events = captureMetricsReporter()
 
         initTelemetry()
-        updateSessionState(FREE_DRIVE)
-        updateSessionState(IDLE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
+        updateSessionState(Idle)
 
         val startFreeDriveEvent = events[1] as NavigationFreeDriveEvent
         val stopFreeDriveEvent = events[2] as NavigationFreeDriveEvent
@@ -840,8 +955,8 @@ class MapboxNavigationTelemetryTest {
         val events = captureMetricsReporter()
 
         initTelemetry()
-        updateSessionState(FREE_DRIVE)
-        updateSessionState(ACTIVE_GUIDANCE)
+        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
+        updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
 
         val startFreeDriveEvent = events[1] as NavigationFreeDriveEvent
         val stopFreeDriveEvent = events[2] as NavigationFreeDriveEvent
@@ -881,7 +996,9 @@ class MapboxNavigationTelemetryTest {
     fun onInit_registerNavigationSessionObserver_called() {
         baseMock()
 
-        onInit { verify(exactly = 1) { mapboxNavigation.registerNavigationSessionObserver(any()) } }
+        onInit {
+            verify(exactly = 1) { mapboxNavigation.registerNavigationSessionStateObserver(any()) }
+        }
     }
 
     @Test
@@ -919,7 +1036,7 @@ class MapboxNavigationTelemetryTest {
         baseMock()
 
         onUnregister {
-            verify(exactly = 1) { mapboxNavigation.unregisterNavigationSessionObserver(any()) }
+            verify(exactly = 1) { mapboxNavigation.unregisterNavigationSessionStateObserver(any()) }
         }
     }
 
@@ -935,19 +1052,19 @@ class MapboxNavigationTelemetryTest {
         verify(exactly = 2) { mapboxNavigation.registerLocationObserver(any()) }
         verify(exactly = 2) { mapboxNavigation.registerRoutesObserver(any()) }
         verify(exactly = 2) { mapboxNavigation.registerOffRouteObserver(any()) }
-        verify(exactly = 2) { mapboxNavigation.registerNavigationSessionObserver(any()) }
+        verify(exactly = 2) { mapboxNavigation.registerNavigationSessionStateObserver(any()) }
 
         resetTelemetry()
     }
 
     private fun baseInitialization() {
         initTelemetry()
-        updateSessionState(ACTIVE_GUIDANCE)
+        updateSessionState(ActiveGuidance(ACTIVE_GUIDANCE_SESSION_ID))
         updateRoute(originalRoute)
         updateRouteProgress()
     }
 
-    private fun updateSessionState(state: NavigationSession.State) {
+    private fun updateSessionState(state: NavigationSessionState) {
         sessionStateObserverSlot.captured.onNavigationSessionStateChanged(state)
     }
 
@@ -1118,7 +1235,7 @@ class MapboxNavigationTelemetryTest {
             navigationOptions,
             MapboxMetricsReporter,
             mockk(relaxed = true),
-            locationsCollector
+            locationsCollector,
         )
     }
 
@@ -1139,7 +1256,7 @@ class MapboxNavigationTelemetryTest {
     }
 
     private fun postUserFeedback() {
-        MapboxNavigationTelemetry.postUserFeedback("", "", "", null, emptyArray(), null)
+        MapboxNavigationTelemetry.postUserFeedback("", "", "", null, emptyArray())
     }
 
     private fun cacheUserFeedback(
@@ -1148,7 +1265,6 @@ class MapboxNavigationTelemetryTest {
         feedbackSource: String = "",
         screenshot: String? = null,
         feedbackSubType: Array<String> = emptyArray(),
-        appMetadata: AppMetadata? = null
     ) {
         MapboxNavigationTelemetry.cacheUserFeedback(
             feedbackType,
@@ -1156,7 +1272,6 @@ class MapboxNavigationTelemetryTest {
             feedbackSource,
             screenshot,
             feedbackSubType,
-            appMetadata
         )
     }
 

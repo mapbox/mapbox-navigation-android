@@ -19,11 +19,6 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.BuildConfig
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.NavigationSession
-import com.mapbox.navigation.core.NavigationSession.State.ACTIVE_GUIDANCE
-import com.mapbox.navigation.core.NavigationSession.State.FREE_DRIVE
-import com.mapbox.navigation.core.NavigationSession.State.IDLE
-import com.mapbox.navigation.core.NavigationSessionStateObserver
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
@@ -43,6 +38,11 @@ import com.mapbox.navigation.core.telemetry.events.NavigationFreeDriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationRerouteEvent
 import com.mapbox.navigation.core.telemetry.events.PhoneState
 import com.mapbox.navigation.core.telemetry.events.TelemetryLocation
+import com.mapbox.navigation.core.trip.session.NavigationSessionState
+import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance
+import com.mapbox.navigation.core.trip.session.NavigationSessionState.FreeDrive
+import com.mapbox.navigation.core.trip.session.NavigationSessionState.Idle
+import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
@@ -50,6 +50,8 @@ import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEv
 import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.ifNonNull
 import java.util.Date
+import kotlin.collections.LinkedHashMap
+import kotlin.collections.set
 
 private data class DynamicSessionValues(
     var rerouteCount: Int = 0,
@@ -125,15 +127,16 @@ internal object MapboxNavigationTelemetry {
     private val feedbackEventCacheMap = LinkedHashMap<String, NavigationFeedbackEvent>()
 
     private var needHandleReroute = false
-    private var sessionState: NavigationSession.State = IDLE
+    private var sessionState: NavigationSessionState = Idle
     private var routeProgress: RouteProgress? = null
     private var originalRoute: DirectionsRoute? = null
     private var needStartSession = false
+    private var eventsSessionId: String = ""
 
     private val routesObserver = RoutesObserver { routes ->
         log("onRoutesChanged. size = ${routes.size}")
         routes.getOrNull(0)?.let {
-            if (sessionState == ACTIVE_GUIDANCE) {
+            if (sessionState is ActiveGuidance) {
                 if (originalRoute != null) {
                     if (needHandleReroute) {
                         needHandleReroute = false
@@ -178,13 +181,15 @@ internal object MapboxNavigationTelemetry {
     private val navigationSessionStateObserver = NavigationSessionStateObserver { sessionState ->
         log("session state is $sessionState")
         when (sessionState) {
-            IDLE, FREE_DRIVE -> {
+            is Idle, is FreeDrive -> {
+                eventsSessionId = this.sessionState.sessionId
                 sessionStop()
                 handleStateChanged(this.sessionState, sessionState)
             }
-            ACTIVE_GUIDANCE -> {
+            is ActiveGuidance -> {
                 locationsCollector.flushBuffers()
                 handleStateChanged(this.sessionState, sessionState)
+                eventsSessionId = sessionState.sessionId
                 needStartSession = true
                 startSessionIfNeedAndCan()
             }
@@ -212,11 +217,11 @@ internal object MapboxNavigationTelemetry {
         options: NavigationOptions,
         reporter: MetricsReporter,
         logger: Logger?,
-        locationsCollector: LocationsCollector = LocationsCollectorImpl(logger)
+        locationsCollector: LocationsCollector = LocationsCollectorImpl(logger),
     ) {
         reset()
         dynamicFreeDriveValues.reset()
-        sessionState = IDLE
+        sessionState = Idle
         this.logger = logger
         this.locationsCollector = locationsCollector
         navigationOptions = options
@@ -245,7 +250,6 @@ internal object MapboxNavigationTelemetry {
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?,
         feedbackSubType: Array<String>?,
-        appMetadata: AppMetadata?
     ) {
         createUserFeedback(
             feedbackType,
@@ -253,7 +257,6 @@ internal object MapboxNavigationTelemetry {
             feedbackSource,
             screenshot,
             feedbackSubType,
-            appMetadata,
             null
         ) {
             sendMetricEvent(it)
@@ -266,7 +269,6 @@ internal object MapboxNavigationTelemetry {
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?,
         feedbackSubType: Array<String>?,
-        appMetadata: AppMetadata?
     ) {
         createUserFeedback(
             feedbackType,
@@ -274,7 +276,6 @@ internal object MapboxNavigationTelemetry {
             feedbackSource,
             screenshot,
             feedbackSubType,
-            appMetadata,
             {
                 feedbackEventCacheMap[it.feedbackId] = it
             },
@@ -314,7 +315,6 @@ internal object MapboxNavigationTelemetry {
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?,
         feedbackSubType: Array<String>?,
-        appMetadata: AppMetadata?,
         onEventCreated: ((NavigationFeedbackEvent) -> Unit)? = null,
         onEventUpdated: ((NavigationFeedbackEvent) -> Unit)? = null
     ) {
@@ -329,7 +329,6 @@ internal object MapboxNavigationTelemetry {
                 this.description = description
                 this.screenshot = screenshot
                 this.feedbackSubType = feedbackSubType
-                this.appMetadata = appMetadata
                 populate()
             }
 
@@ -360,20 +359,29 @@ internal object MapboxNavigationTelemetry {
             unregisterRouteProgressObserver(routeProgressObserver)
             unregisterRoutesObserver(routesObserver)
             unregisterOffRouteObserver(offRouteObserver)
-            unregisterNavigationSessionObserver(navigationSessionStateObserver)
+            unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
             unregisterArrivalObserver(arrivalObserver)
         }
         MapboxMetricsReporter.disable()
     }
 
     private fun handleStateChanged(
-        oldState: NavigationSession.State,
-        newState: NavigationSession.State
+        oldState: NavigationSessionState,
+        newState: NavigationSessionState
     ) {
         when {
-            oldState == FREE_DRIVE && newState == IDLE -> trackFreeDrive(STOP)
-            oldState == FREE_DRIVE && newState == ACTIVE_GUIDANCE -> trackFreeDrive(STOP)
-            oldState != FREE_DRIVE && newState == FREE_DRIVE -> trackFreeDrive(START)
+            oldState is FreeDrive && newState is Idle -> {
+                eventsSessionId = oldState.sessionId
+                trackFreeDrive(STOP)
+            }
+            oldState is FreeDrive && newState is ActiveGuidance -> {
+                eventsSessionId = oldState.sessionId
+                trackFreeDrive(STOP)
+            }
+            oldState !is FreeDrive && newState is FreeDrive -> {
+                eventsSessionId = newState.sessionId
+                trackFreeDrive(START)
+            }
         }
     }
 
@@ -423,7 +431,7 @@ internal object MapboxNavigationTelemetry {
             registerRouteProgressObserver(routeProgressObserver)
             registerRoutesObserver(routesObserver)
             registerOffRouteObserver(offRouteObserver)
-            registerNavigationSessionObserver(navigationSessionStateObserver)
+            registerNavigationSessionStateObserver(navigationSessionStateObserver)
             registerArrivalObserver(arrivalObserver)
         }
     }
@@ -590,6 +598,7 @@ internal object MapboxNavigationTelemetry {
             }
 
             eventVersion = EVENT_VERSION
+            appMetadata = createAppMetadata()
         }
     }
 
@@ -610,7 +619,14 @@ internal object MapboxNavigationTelemetry {
             simulation = locationEngineNameExternal == MOCK_PROVIDER
             sessionIdentifier = sessionId
             startTimestamp = generateCreateDateFormatted(sessionStartTime)
+            appMetadata = createAppMetadata()
         }
+    }
+
+    private fun createAppMetadata(): AppMetadata? {
+        navigationOptions.eventsAppMetadata?.let {
+            return AppMetadata(it.name, it.version, it.userId, eventsSessionId)
+        } ?: return null
     }
 
     private fun reset() {

@@ -77,7 +77,7 @@ class SchemaTest {
     @Test
     @Throws(Exception::class)
     fun checkNavigationFeedbackEventSize() {
-        val schema = grabEventSchema(NavigationMetrics.FEEDBACK, version = "2.1")
+        val schema = grabEventSchema(NavigationMetrics.FEEDBACK)
         val fields = grabSchemaPropertyFields(NavigationFeedbackEvent::class.java)
         assertEquals(schema.properties.size().toLong(), fields.size.toLong())
     }
@@ -85,7 +85,7 @@ class SchemaTest {
     @Test
     @Throws(Exception::class)
     fun checkNavigationFeedbackEventFields() {
-        val schema = grabEventSchema(NavigationMetrics.FEEDBACK, version = "2.1")
+        val schema = grabEventSchema(NavigationMetrics.FEEDBACK)
         val fields = grabSchemaPropertyFields(NavigationFeedbackEvent::class.java)
         schemaContainsPropertyFields(schema.properties, fields)
     }
@@ -276,7 +276,7 @@ class SchemaTest {
         return fields
     }
 
-    private fun grabEventSchema(eventName: String, version: String = "2.0"): EventSchema =
+    private fun grabEventSchema(eventName: String, version: String = "2.1"): EventSchema =
         eventSchemas.filter { it.name == eventName && it.version == version }.let {
             when {
                 it.isEmpty() -> {

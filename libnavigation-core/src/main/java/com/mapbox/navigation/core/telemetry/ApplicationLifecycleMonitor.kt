@@ -20,9 +20,9 @@ internal class ApplicationLifecycleMonitor(
     private val startSessionTime: Long = System.currentTimeMillis()
     private val resumes = arrayListOf<Long>()
     private val pauses = arrayListOf<Long>()
-    private var currentOrientation = AtomicInteger(Configuration.ORIENTATION_UNDEFINED)
-    private var portraitStartTime = AtomicLong(0L)
-    private var portraitTimeInMillis = AtomicReference<Double>(0.0)
+    private val currentOrientation = AtomicInteger(Configuration.ORIENTATION_UNDEFINED)
+    private val portraitStartTime = AtomicLong(0L)
+    private val portraitTimeInMillis = AtomicReference(0.0)
 
     init {
         application.registerActivityLifecycleCallbacks(this)

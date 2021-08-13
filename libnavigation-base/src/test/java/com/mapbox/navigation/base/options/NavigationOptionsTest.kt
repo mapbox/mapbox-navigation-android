@@ -74,6 +74,10 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
                     .fileDirectory("history/path")
                     .build()
             )
+            .eventsAppMetadata(
+                EventsAppMetadata.Builder("name", "version")
+                    .build()
+            )
     }
 
     @Test

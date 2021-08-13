@@ -1,8 +1,10 @@
 package com.mapbox.navigation.core.internal.telemetry
 
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.telemetry.MapboxNavigationFeedbackCache.cacheUserFeedback
+import com.mapbox.navigation.core.internal.telemetry.MapboxNavigationFeedbackCache.getCachedUserFeedback
+import com.mapbox.navigation.core.internal.telemetry.MapboxNavigationFeedbackCache.postCachedUserFeedback
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
-import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 
 /**
@@ -37,7 +39,6 @@ object MapboxNavigationFeedbackCache {
      * @param feedbackSource one of [FeedbackEvent.Source]
      * @param screenshot encoded screenshot (optional)
      * @param feedbackSubType array of [FeedbackEvent.Description] (optional)
-     * @param appMetadata [AppMetadata] information (optional)
      *
      * @see [MapboxNavigation.postUserFeedback]
      * @see [getCachedUserFeedback]
@@ -49,7 +50,6 @@ object MapboxNavigationFeedbackCache {
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?,
         feedbackSubType: Array<String>? = emptyArray(),
-        appMetadata: AppMetadata? = null
     ) {
         MapboxNavigationTelemetry.cacheUserFeedback(
             feedbackType,
@@ -57,7 +57,6 @@ object MapboxNavigationFeedbackCache {
             feedbackSource,
             screenshot,
             feedbackSubType,
-            appMetadata
         )
     }
 
