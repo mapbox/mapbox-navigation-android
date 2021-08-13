@@ -12,6 +12,7 @@ import io.mockk.Ordering
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -128,7 +129,8 @@ class MapboxSoundButtonTest {
 
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
         assertTrue(messageSlot.captured)
-        assertTrue(soundButtonText.visibility == View.INVISIBLE)
+        assertTrue(soundButtonText.text.isEmpty())
+        assertEquals(soundButtonText.visibility, View.INVISIBLE)
     }
 
     @Test
@@ -154,8 +156,8 @@ class MapboxSoundButtonTest {
             consumer.accept(false)
             consumer.accept(false)
         }
-        assertTrue(soundButtonText.visibility == View.INVISIBLE)
-        assertTrue(soundButtonText.visibility == View.INVISIBLE)
+        assertTrue(soundButtonText.text.isEmpty())
+        assertEquals(soundButtonText.visibility, View.INVISIBLE)
     }
 
     @Test
@@ -169,6 +171,7 @@ class MapboxSoundButtonTest {
 
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
         assertFalse(messageSlot.captured)
-        assertTrue(soundButtonText.visibility == View.INVISIBLE)
+        assertTrue(soundButtonText.text.isEmpty())
+        assertEquals(soundButtonText.visibility, View.INVISIBLE)
     }
 }
