@@ -7,8 +7,6 @@
     <string name="description_route_line" translatable="false">Demonstrates the use of the route line API.</string>
     <string name="title_camera" translatable="false">Camera Example</string>
     <string name="description_camera" translatable="false">Demonstrates the use of camera animations API.</string>
-    <string name="title_snapshotter" translatable="false">Snapshotter Example</string>
-    <string name="description_snapshotter" translatable="false">Demonstrates the use of snapshotter API.</string>
     <string name="title_signboard" translatable="false">Signboard Example</string>
     <string name="description_signboard" translatable="false">Demonstrates the use of signboard API.</string>
     <string name="title_junction" translatable="false">Junction Example</string>

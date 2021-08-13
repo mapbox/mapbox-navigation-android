@@ -19,7 +19,6 @@ import com.mapbox.navigation.examples.core.MapboxMultipleArrowActivity
 import com.mapbox.navigation.examples.core.MapboxNavigationActivity
 import com.mapbox.navigation.examples.core.MapboxRouteLineAndArrowActivity
 import com.mapbox.navigation.examples.core.MapboxSignboardActivity
-import com.mapbox.navigation.examples.core.MapboxSnapshotActivity
 import com.mapbox.navigation.examples.core.MapboxTripProgressActivity
 import com.mapbox.navigation.examples.core.MapboxVoiceActivity
 import com.mapbox.navigation.examples.core.MultiLegRouteExampleActivity
@@ -79,11 +78,6 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_camera),
                 getString(R.string.description_camera),
                 MapboxCameraAnimationsActivity::class.java
-            ),
-            SampleItem(
-                getString(R.string.title_snapshotter),
-                getString(R.string.description_snapshotter),
-                MapboxSnapshotActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_signboard),
