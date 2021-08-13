@@ -213,6 +213,30 @@ class RouteAlternativesControllerTest {
     }
 
     @Test
+    fun `should not request when interrupted and there are no observers`() =
+        coroutineRule.runBlockingTest {
+            every { tripSession.getState() } returns TripSessionState.STARTED
+            mockRouteOptionsProvider(routeOptionsResultSuccess)
+            every { directionsSession.routes } returns listOf(
+                mockk {
+                    every { routeIndex() } returns "0"
+                    every { duration() } returns 1727.228
+                }
+            )
+            every { tripSession.getEnhancedLocation() } returns mockk {
+                every { latitude } returns -33.874308
+                every { longitude } returns 151.206087
+            }
+
+            val controller = mockController()
+            controller.interrupt()
+            coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(5))
+
+            verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
+            coroutineRule.testDispatcher.cleanupTestCoroutines()
+        }
+
+    @Test
     fun `should notify observer of an alternative`() = coroutineRule.runBlockingTest {
         every { tripSession.getState() } returns TripSessionState.STARTED
         coEvery { navigator.isDifferentRoute(any()) } returns true

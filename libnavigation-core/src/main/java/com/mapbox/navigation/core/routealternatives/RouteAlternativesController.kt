@@ -28,7 +28,9 @@ internal class RouteAlternativesController(
 ) {
     private val jobControl = ThreadController.getMainScopeAndRootJob()
 
-    private val mapboxTimer = MapboxTimer()
+    private val mapboxTimer = MapboxTimer().apply {
+        restartAfterMillis = options.intervalMillis
+    }
     private val observers = CopyOnWriteArraySet<RouteAlternativesObserver>()
     private var currentRequestId: Long? = null
 
@@ -36,7 +38,6 @@ internal class RouteAlternativesController(
         val needsToStartTimer = observers.isEmpty()
         observers.add(routeAlternativesObserver)
         if (needsToStartTimer) {
-            mapboxTimer.restartAfterMillis = options.intervalMillis
             restartTimer()
         }
     }
@@ -91,7 +92,9 @@ internal class RouteAlternativesController(
 
     fun interrupt() {
         currentRequestId?.let { directionsSession.cancelRouteRequest(it) }
-        restartTimer()
+        if (observers.isNotEmpty()) {
+            restartTimer()
+        }
     }
 
     private fun restartTimer() {
