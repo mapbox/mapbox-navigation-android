@@ -2,5 +2,4 @@
 <resources>
     <color name="mapbox_recenter_drawable_color">@color/colorOnSurface</color>
     <color name="mapbox_route_overview_drawable_color">@color/colorOnSurface</color>
-    <color name="raw_location_uncertain_gray">#858585</color>
 </resources>

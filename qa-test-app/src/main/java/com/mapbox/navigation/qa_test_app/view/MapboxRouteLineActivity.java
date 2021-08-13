@@ -143,7 +143,12 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     navigationLocationProvider = new NavigationLocationProvider();
     locationComponent = getLocationComponent();
     locationComponent.setLocationPuck(
-        new LocationPuck2D(null, ContextCompat.getDrawable(this, R.drawable.mapbox_navigation_puck_icon), null, null)
+        new LocationPuck2D(
+            null,
+            ContextCompat.getDrawable(this, R.drawable.mapbox_navigation_puck_icon),
+            null,
+            null
+        )
     );
     locationComponent.setLocationProvider(navigationLocationProvider);
     locationComponent.setEnabled(true);
