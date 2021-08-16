@@ -9,7 +9,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.mapToRoadObject
 /**
  * Internal factory to build road objects
  */
-object RoadObjectInstanceFactory {
+object RoadObjectFactory {
 
     /**
      * Build road object from native object

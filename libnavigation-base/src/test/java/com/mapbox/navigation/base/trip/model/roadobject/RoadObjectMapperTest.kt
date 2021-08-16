@@ -2,7 +2,7 @@ package com.mapbox.navigation.base.trip.model.roadobject
 
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.factory.RoadObjectInstanceFactory
+import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
 import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossing
 import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingAdminInfo
 import com.mapbox.navigation.base.trip.model.roadobject.border.CountryBorderCrossingInfo
@@ -56,7 +56,7 @@ class RoadObjectMapperTest {
             nativeObject
         )
 
-        val roadObject = RoadObjectInstanceFactory.buildRoadObject(nativeObject)
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
@@ -80,7 +80,7 @@ class RoadObjectMapperTest {
             nativeObject
         )
 
-        val roadObject = RoadObjectInstanceFactory.buildRoadObject(nativeObject)
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
@@ -100,7 +100,7 @@ class RoadObjectMapperTest {
             SDKRoadObjectProvider.MAPBOX,
             nativeObject
         )
-        val roadObject = RoadObjectInstanceFactory.buildRoadObject(nativeObject)
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
@@ -121,7 +121,7 @@ class RoadObjectMapperTest {
             nativeObject
         )
 
-        val roadObject = RoadObjectInstanceFactory.buildRoadObject(nativeObject)
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
@@ -141,7 +141,7 @@ class RoadObjectMapperTest {
             SDKRoadObjectProvider.MAPBOX,
             nativeObject
         )
-        val roadObject = RoadObjectInstanceFactory.buildRoadObject(nativeObject)
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
@@ -161,7 +161,7 @@ class RoadObjectMapperTest {
             SDKRoadObjectProvider.MAPBOX,
             nativeObject
         )
-        val roadObject = RoadObjectInstanceFactory.buildRoadObject(nativeObject)
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
@@ -181,7 +181,7 @@ class RoadObjectMapperTest {
             nativeObject
         )
 
-        val roadObject = RoadObjectInstanceFactory.buildRoadObject(nativeObject)
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())
@@ -221,7 +221,7 @@ class RoadObjectMapperTest {
             nativeObject
         )
 
-        val roadObject = RoadObjectInstanceFactory.buildRoadObject(nativeObject)
+        val roadObject = RoadObjectFactory.buildRoadObject(nativeObject)
 
         assertEquals(expected, roadObject)
         assertEquals(expected.hashCode(), roadObject.hashCode())

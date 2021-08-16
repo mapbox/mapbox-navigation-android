@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.trip.session.eh
 
-import com.mapbox.navigation.base.internal.factory.EHorizonInstanceFactory
+import com.mapbox.navigation.base.internal.factory.EHorizonFactory
 import com.mapbox.navigation.base.trip.model.eh.EHorizonPosition
 import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -26,7 +26,7 @@ internal class EHorizonSubscriptionManagerImpl(
         ) {
             notifyAllObservers {
                 onRoadObjectEnter(
-                    EHorizonInstanceFactory.buildRoadObjectEnterExitInfo(roadObjectInfo)
+                    EHorizonFactory.buildRoadObjectEnterExitInfo(roadObjectInfo)
                 )
             }
         }
@@ -36,7 +36,7 @@ internal class EHorizonSubscriptionManagerImpl(
         ) {
             notifyAllObservers {
                 onRoadObjectExit(
-                    EHorizonInstanceFactory.buildRoadObjectEnterExitInfo(roadObjectInfo)
+                    EHorizonFactory.buildRoadObjectEnterExitInfo(roadObjectInfo)
                 )
             }
         }
@@ -46,10 +46,10 @@ internal class EHorizonSubscriptionManagerImpl(
             distances: MutableList<com.mapbox.navigator.RoadObjectDistance>
         ) {
             mainJobController.scope.launch {
-                val eHorizonPosition = EHorizonInstanceFactory.buildEHorizonPosition(position)
+                val eHorizonPosition = EHorizonFactory.buildEHorizonPosition(position)
                 val eHorizonDistances = mutableListOf<RoadObjectDistanceInfo>()
                 distances.forEach {
-                    eHorizonDistances.add(EHorizonInstanceFactory.buildRoadObjectDistance(it))
+                    eHorizonDistances.add(EHorizonFactory.buildRoadObjectDistance(it))
                 }
 
                 currentPosition = eHorizonPosition
@@ -64,7 +64,7 @@ internal class EHorizonSubscriptionManagerImpl(
         override fun onRoadObjectPassed(info: com.mapbox.navigator.RoadObjectPassInfo) {
             notifyAllObservers {
                 onRoadObjectPassed(
-                    EHorizonInstanceFactory.buildRoadObjectPassInfo(info)
+                    EHorizonFactory.buildRoadObjectPassInfo(info)
                 )
             }
         }

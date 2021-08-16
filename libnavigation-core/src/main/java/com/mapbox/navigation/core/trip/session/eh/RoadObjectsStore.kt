@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core.trip.session.eh
 
-import com.mapbox.navigation.base.internal.factory.EHorizonInstanceFactory
-import com.mapbox.navigation.base.internal.factory.RoadObjectInstanceFactory
+import com.mapbox.navigation.base.internal.factory.EHorizonFactory
+import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObject
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectEdgeLocation
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
@@ -26,7 +26,7 @@ class RoadObjectsStore internal constructor(
         val roadObjects = mutableMapOf<String, RoadObjectEdgeLocation>()
         navigator.roadObjectsStore?.get(edgeId)?.forEach { (objectId, objectEdgeLocation) ->
             roadObjects[objectId] =
-                EHorizonInstanceFactory.buildRoadObjectEdgeLocation(objectEdgeLocation)
+                EHorizonFactory.buildRoadObjectEdgeLocation(objectEdgeLocation)
         }
 
         return roadObjects
@@ -38,7 +38,7 @@ class RoadObjectsStore internal constructor(
      */
     fun getRoadObject(roadObjectId: String): RoadObject? {
         return navigator.roadObjectsStore?.getRoadObject(roadObjectId)?.let {
-            RoadObjectInstanceFactory.buildRoadObject(it)
+            RoadObjectFactory.buildRoadObject(it)
         }
     }
 
@@ -58,7 +58,7 @@ class RoadObjectsStore internal constructor(
      * @param roadObject object to add
      */
     fun addCustomRoadObject(roadObject: RoadObject) {
-        val nativeRoadObject = RoadObjectInstanceFactory.buildNativeRoadObject(roadObject)
+        val nativeRoadObject = RoadObjectFactory.buildNativeRoadObject(roadObject)
         navigator.roadObjectsStore?.addCustomRoadObject(nativeRoadObject)
     }
 
@@ -88,7 +88,7 @@ class RoadObjectsStore internal constructor(
         distances.forEach {
             getRoadObject(it.roadObjectId)?.let { roadObject ->
                 upcomingObjects.add(
-                    RoadObjectInstanceFactory.buildUpcomingRoadObject(
+                    RoadObjectFactory.buildUpcomingRoadObject(
                         roadObject,
                         it.distanceToStart,
                         it
