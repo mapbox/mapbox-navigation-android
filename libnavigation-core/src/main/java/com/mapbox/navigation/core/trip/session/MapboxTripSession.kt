@@ -226,20 +226,10 @@ internal class MapboxTripSession(
                             val currentStep = steps[tripStatus.navigationStatus.stepIndex]
                             val state = tripStatus.navigationStatus.routeState.convertState()
                             val nativeBannerInstruction: BannerInstruction? =
-                                if (state == RouteProgressState.INITIALIZED) {
-                                    MapboxNativeNavigatorImpl.getBannerInstruction(0)
-                                } else {
-                                    tripStatus.navigationStatus.bannerInstruction
-                                }.let {
-                                    // workaround for
-                                    // github.com/mapbox/mapbox-navigation-native/issues/3466
-                                    // there are cases where first status update with a new route
-                                    // does not provide banner instructions so we need to
-                                    // backfill them
-                                    if (
-                                        it == null &&
-                                        bannerInstructionEvent.latestBannerInstructions == null
-                                    ) {
+                                tripStatus.navigationStatus.bannerInstruction.let {
+                                    if (it == null && state == RouteProgressState.INITIALIZED) {
+                                        // workaround for a remaining issue in
+                                        // github.com/mapbox/mapbox-navigation-native/issues/3466
                                         MapboxNativeNavigatorImpl.getBannerInstruction(0)
                                     } else {
                                         it
