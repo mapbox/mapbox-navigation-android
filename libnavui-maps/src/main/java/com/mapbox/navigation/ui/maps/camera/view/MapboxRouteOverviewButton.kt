@@ -12,9 +12,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.databinding.MapboxRouteOverviewLayoutBinding
 import com.mapbox.navigation.ui.utils.internal.extensions.afterMeasured
-import com.mapbox.navigation.ui.utils.internal.extensions.extend
 import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
-import com.mapbox.navigation.ui.utils.internal.extensions.shrink
+import com.mapbox.navigation.ui.utils.internal.extensions.play
 import com.mapbox.navigation.ui.utils.internal.extensions.slideWidth
 
 /**
@@ -22,7 +21,7 @@ import com.mapbox.navigation.ui.utils.internal.extensions.slideWidth
  */
 class MapboxRouteOverviewButton : ConstraintLayout {
 
-    private var textWidth = 0
+    private var shrunkWidth = 0
     private var isAnimationRunning = false
     private val binding = MapboxRouteOverviewLayoutBinding.inflate(
         LayoutInflater.from(context),
@@ -65,7 +64,7 @@ class MapboxRouteOverviewButton : ConstraintLayout {
     override fun onFinishInflate() {
         super.onFinishInflate()
         binding.routeOverviewText.afterMeasured {
-            textWidth = width
+            shrunkWidth = width
         }
     }
 
@@ -90,19 +89,15 @@ class MapboxRouteOverviewButton : ConstraintLayout {
         if (!isAnimationRunning) {
             isAnimationRunning = true
             val text = context.getString(R.string.mapbox_route_overview)
-            val extendToWidth = (binding.routeOverviewText.measureText(text) + textWidth)
-                .coerceAtLeast(EXTEND_TO_WIDTH * context.resources.displayMetrics.density)
-            val animator = getAnimator(textWidth, extendToWidth.toInt())
-            binding.routeOverviewText.extend(
-                animator,
+            val extendedWidth = (binding.routeOverviewText.measureTextWidth(text) + shrunkWidth)
+                .coerceAtLeast(MIN_EXTENDED_WIDTH * context.resources.displayMetrics.density)
+            getAnimator(shrunkWidth, extendedWidth.toInt()).play(
                 doOnStart = {
                     binding.routeOverviewText.text = text
                     binding.routeOverviewText.visibility = View.VISIBLE
                     mainHandler.postDelayed(
                         {
-                            val endAnimator = getAnimator(extendToWidth.toInt(), textWidth)
-                            binding.routeOverviewText.shrink(
-                                endAnimator,
+                            getAnimator(extendedWidth.toInt(), shrunkWidth).play(
                                 doOnStart = {
                                     binding.routeOverviewText.text = null
                                 },
@@ -152,6 +147,6 @@ class MapboxRouteOverviewButton : ConstraintLayout {
 
     private companion object {
         private const val SLIDE_DURATION = 300L
-        private const val EXTEND_TO_WIDTH = 165
+        private const val MIN_EXTENDED_WIDTH = 165
     }
 }
