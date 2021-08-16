@@ -135,8 +135,6 @@ package com.mapbox.navigation.ui.voice.view {
     method public void unmuteAndExtend(long duration, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<java.lang.Boolean>? callback = null);
     method public void unmuteAndExtend(long duration);
     method public void updateStyle(@StyleRes int style);
-    field public static final int EXTEND_TEXT_TO_WIDTH = 165; // 0xa5
-    field public static final long SLIDE_DURATION = 300L; // 0x12cL
   }
 
 }

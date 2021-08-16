@@ -14,9 +14,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.utils.internal.extensions.afterMeasured
-import com.mapbox.navigation.ui.utils.internal.extensions.extend
 import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
-import com.mapbox.navigation.ui.utils.internal.extensions.shrink
+import com.mapbox.navigation.ui.utils.internal.extensions.play
 import com.mapbox.navigation.ui.utils.internal.extensions.slideWidth
 import com.mapbox.navigation.ui.voice.R
 import com.mapbox.navigation.ui.voice.databinding.MapboxSoundButtonLayoutBinding
@@ -26,7 +25,7 @@ import com.mapbox.navigation.ui.voice.databinding.MapboxSoundButtonLayoutBinding
  */
 class MapboxSoundButton : ConstraintLayout {
 
-    private var textWidth = 0
+    private var shrunkWidth = 0
     private var muteDrawable: Drawable? = null
     private var unmuteDrawable: Drawable? = null
     private val binding = MapboxSoundButtonLayoutBinding.inflate(
@@ -105,7 +104,7 @@ class MapboxSoundButton : ConstraintLayout {
     override fun onFinishInflate() {
         super.onFinishInflate()
         binding.soundButtonText.afterMeasured {
-            textWidth = width
+            shrunkWidth = width
         }
     }
 
@@ -168,20 +167,18 @@ class MapboxSoundButton : ConstraintLayout {
         showTextWithAnimation(R.string.mapbox_unmuted, duration)
     }
 
-    private fun showTextWithAnimation(@StringRes text: Int, duration: Long) {
-        val extendToWidth = EXTEND_TEXT_TO_WIDTH * context.resources.displayMetrics.density
-        val animator = getAnimator(textWidth, extendToWidth.toInt())
+    private fun showTextWithAnimation(@StringRes textId: Int, duration: Long) {
+        val text = context.getString(textId)
+        val extendedWidth = (binding.soundButtonText.measureTextWidth(text) + shrunkWidth)
+            .coerceAtLeast(MIN_EXTENDED_WIDTH * context.resources.displayMetrics.density)
         mainHandler.removeCallbacksAndMessages(null)
-        binding.soundButtonText.extend(
-            animator,
+        getAnimator(shrunkWidth, extendedWidth.toInt()).play(
             doOnStart = {
-                binding.soundButtonText.text = context.getString(text)
+                binding.soundButtonText.text = text
                 binding.soundButtonText.visibility = View.VISIBLE
                 mainHandler.postDelayed(
                     {
-                        val endAnimator = getAnimator(extendToWidth.toInt(), textWidth)
-                        binding.soundButtonText.shrink(
-                            endAnimator,
+                        getAnimator(extendedWidth.toInt(), shrunkWidth).play(
                             doOnStart = {
                                 binding.soundButtonText.text = null
                             },
@@ -200,7 +197,7 @@ class MapboxSoundButton : ConstraintLayout {
         binding.soundButtonText.slideWidth(from, to, SLIDE_DURATION)
 
     private companion object {
-        const val SLIDE_DURATION = 300L
-        const val EXTEND_TEXT_TO_WIDTH = 165
+        private const val SLIDE_DURATION = 300L
+        private const val MIN_EXTENDED_WIDTH = 165
     }
 }
