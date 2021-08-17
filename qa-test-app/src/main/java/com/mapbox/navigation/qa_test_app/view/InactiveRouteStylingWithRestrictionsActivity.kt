@@ -15,6 +15,7 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
@@ -25,7 +26,7 @@ import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.qa_test_app.R
-import com.mapbox.navigation.qa_test_app.databinding.InactiveRouteActivityLayoutBinding
+import com.mapbox.navigation.qa_test_app.databinding.InactiveRouteWithRestrictionsLayoutBinding
 import com.mapbox.navigation.qa_test_app.utils.Utils
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
@@ -35,14 +36,21 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 
-class InactiveRouteStylingActivity : AppCompatActivity() {
+class InactiveRouteStylingWithRestrictionsActivity : AppCompatActivity() {
 
     private companion object {
         private const val TAG = "InactiveRouteStylingAct"
     }
 
-    private val binding: InactiveRouteActivityLayoutBinding by lazy {
-        InactiveRouteActivityLayoutBinding.inflate(layoutInflater)
+    private val binding: InactiveRouteWithRestrictionsLayoutBinding by lazy {
+        InactiveRouteWithRestrictionsLayoutBinding.inflate(layoutInflater)
+    }
+
+    private val locationComponent by lazy {
+        binding.mapView.location.apply {
+            setLocationProvider(navigationLocationProvider)
+            enabled = true
+        }
     }
 
     private val navigationLocationProvider = NavigationLocationProvider()
@@ -82,6 +90,7 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
             .withRouteLineBelowLayerId("road-label")
             .styleInactiveRouteLegsIndependently(true)
             .displayRestrictedRoadSections(true)
+            .withVanishingRouteLineEnabled(true)
             .build()
     }
 
@@ -104,6 +113,7 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
+        locationComponent.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
@@ -173,6 +183,7 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
             mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
             mapboxNavigation.startTripSession()
             binding.startNavigation.visibility = View.GONE
+            locationComponent.addOnIndicatorPositionChangedListener(onPositionChangedListener)
             startSimulation(mapboxNavigation.getRoutes()[0])
         }
     }
@@ -188,6 +199,13 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
         }
     }
 
+    private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
+        val result = routeLineApi.updateTraveledRouteLine(point)
+        binding.mapView.getMapboxMap().getStyle()?.apply {
+            routeLineView.renderRouteLineUpdate(this, result)
+        }
+    }
+
     private fun startSimulation(route: DirectionsRoute) {
         mapboxReplayer.stop()
         mapboxReplayer.clearEvents()
@@ -198,7 +216,8 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
     }
 
     private fun getRoute(): DirectionsRoute {
-        val routeAsString = Utils.readRawFileText(this, R.raw.multileg_route_two_legs)
+        val routeAsString =
+            Utils.readRawFileText(this, R.raw.multileg_route_two_legs_with_restrictions)
         return DirectionsRoute.fromJson(routeAsString)
     }
 }

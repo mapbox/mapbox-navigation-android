@@ -88,7 +88,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.mapbox.android.gestures.Utils.dpToPx;
-import static com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID;
+import static com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID;
 
 public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapLongClickListener {
 
@@ -173,7 +173,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     mapboxRouteLineView = new MapboxRouteLineView(mapboxRouteLineOptions);
 
     RouteArrowOptions routeArrowOptions = new RouteArrowOptions.Builder(this)
-        .withAboveLayerId(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+        .withAboveLayerId(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
         .build();
     routeArrowView = new MapboxRouteArrowView(routeArrowOptions);
 

@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.route.line
 
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import androidx.annotation.ColorInt
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
 import com.mapbox.maps.extension.style.expressions.dsl.generated.match
@@ -27,6 +28,24 @@ internal class MapboxRouteLayerProvider(
     private val alternativeRouteCasingLineScaleExpression: Expression,
     private val alternativeRouteTrafficLineScaleExpression: Expression
 ) {
+
+    fun buildAccessRestrictionsLayer(
+        lineDashArray: List<Double>,
+        lineOpacity: Double,
+        @ColorInt color: Int,
+        lineWidth: Double
+    ): LineLayer {
+        return LineLayer(
+            RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
+            RouteConstants.PRIMARY_ROUTE_SOURCE_ID
+        )
+            .lineWidth(lineWidth)
+            .lineJoin(LineJoin.ROUND)
+            .lineOpacity(lineOpacity)
+            .lineColor(color)
+            .lineDasharray(lineDashArray)
+            .lineCap(LineCap.ROUND)
+    }
 
     fun buildPrimaryRouteLayer(
         style: Style,

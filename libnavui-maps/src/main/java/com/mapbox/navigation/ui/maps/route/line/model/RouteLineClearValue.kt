@@ -14,5 +14,5 @@ class RouteLineClearValue internal constructor(
     val primaryRouteSource: FeatureCollection,
     val altRoute1Source: FeatureCollection,
     val altRoute2Source: FeatureCollection,
-    val waypointsSource: FeatureCollection
+    val waypointsSource: FeatureCollection,
 )

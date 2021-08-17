@@ -12,6 +12,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.pa
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineRestrictedSectionData
 import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineExpressions
@@ -105,6 +106,7 @@ internal class VanishingRouteLine {
     internal fun getTraveledRouteLineExpressions(
         point: Point,
         routeLineExpressionData: List<RouteLineExpressionData>,
+        restrictedLineExpressionData: List<RouteLineRestrictedSectionData>?,
         routeResourceProvider: RouteLineResources,
         activeLegIndex: Int,
         softGradientTransition: Double,
@@ -142,10 +144,7 @@ internal class VanishingRouteLine {
                     return null
                 }
             }
-            /**
-             * Take the remaining distance from the upcoming point on the route and extends it
-             * by the exact position of the puck.
-             */
+
             /**
              * Take the remaining distance from the upcoming point on the route and extends it
              * by the exact position of the puck.
@@ -209,10 +208,21 @@ internal class VanishingRouteLine {
                 activeLegIndex
             )
 
+            val restrictedRoadExpression =
+                ifNonNull(restrictedLineExpressionData) { expressionData ->
+                    MapboxRouteLineUtils.getRestrictedLineExpression(
+                        offset,
+                        activeLegIndex,
+                        routeResourceProvider.routeLineColorResources.restrictedRoadColor,
+                        expressionData
+                    )
+                }
+
             return VanishingRouteLineExpressions(
                 trafficLineExpression,
                 routeLineExpression,
-                routeLineCasingExpression
+                routeLineCasingExpression,
+                restrictedRoadExpression
             )
         }
         return null

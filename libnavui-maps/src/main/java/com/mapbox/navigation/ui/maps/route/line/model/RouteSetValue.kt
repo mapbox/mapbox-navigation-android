@@ -7,14 +7,15 @@ import com.mapbox.maps.extension.style.expressions.generated.Expression
  * Represents the side effects for drawing routes on a map.
  *
  * @param primaryRouteSource the feature collection for the primary route line
- * @param trafficLineExpressionProvider the expression for the primary route traffic line
+ * @param trafficLineExpressionProvider the expression for the primary route traffic line (optional)
  * @param routeLineExpression the expression for the primary route line
  * @param casingLineExpression the expression for the primary route casing line
- * @param altRoute1TrafficExpressionProvider the expression for an alternative route traffic line
- * @param altRoute2TrafficExpressionProvider the expression for an alternative route traffic line
+ * @param altRoute1TrafficExpressionProvider the expression for an alternative route traffic line (optional)
+ * @param altRoute2TrafficExpressionProvider the expression for an alternative route traffic line (optional)
  * @param alternativeRoute1Source the feature collection for an alternative route line
  * @param alternativeRoute2Source the feature collection for an alternative route line
  * @param waypointsSource the feature collection for the origin and destination icons
+ * @param restrictedRouteLineExpressionProvider the expression for the restricted road line layer (optional)
  */
 class RouteSetValue internal constructor(
     val primaryRouteSource: FeatureCollection,
@@ -25,7 +26,8 @@ class RouteSetValue internal constructor(
     val altRoute2TrafficExpressionProvider: RouteLineExpressionProvider?,
     val alternativeRoute1Source: FeatureCollection,
     val alternativeRoute2Source: FeatureCollection,
-    val waypointsSource: FeatureCollection
+    val waypointsSource: FeatureCollection,
+    val restrictedRouteLineExpressionProvider: RouteLineExpressionProvider?
 ) {
 
     /**
@@ -40,21 +42,23 @@ class RouteSetValue internal constructor(
         altRoute2TrafficExpressionProvider,
         alternativeRoute1Source,
         alternativeRoute2Source,
-        waypointsSource
+        waypointsSource,
+        restrictedRouteLineExpressionProvider
     )
 
     /**
      * Represents the mutable side effects for drawing routes on a map.
      *
      * @param primaryRouteSource the feature collection for the primary route line
-     * @param trafficLineExpressionProvider the expression for the primary route traffic line
+     * @param trafficLineExpressionProvider the expression for the primary route traffic line (optional)
      * @param routeLineExpression the expression for the primary route line
      * @param casingLineExpression the expression for the primary route casing line
-     * @param altRoute1TrafficExpression the expression for an alternative route traffic line
-     * @param altRoute2TrafficExpression the expression for an alternative route traffic line
+     * @param altRoute1TrafficExpression the expression for an alternative route traffic line (optional)
+     * @param altRoute2TrafficExpression the expression for an alternative route traffic line (optional)
      * @param alternativeRoute1Source the feature collection for an alternative route line
      * @param alternativeRoute2Source the feature collection for an alternative route line
      * @param waypointsSource the feature collection for the origin and destination icons
+     * @param restrictedRouteLineExpression the expression for the restricted road line layer (optional)
      */
     class MutableRouteSetValue internal constructor (
         var primaryRouteSource: FeatureCollection,
@@ -65,7 +69,8 @@ class RouteSetValue internal constructor(
         var altRoute2TrafficExpression: RouteLineExpressionProvider?,
         var alternativeRoute1Source: FeatureCollection,
         var alternativeRoute2Source: FeatureCollection,
-        var waypointsSource: FeatureCollection
+        var waypointsSource: FeatureCollection,
+        var restrictedRouteLineExpression: RouteLineExpressionProvider?
     ) {
 
         /**
@@ -80,7 +85,8 @@ class RouteSetValue internal constructor(
             altRoute2TrafficExpression,
             alternativeRoute1Source,
             alternativeRoute2Source,
-            waypointsSource
+            waypointsSource,
+            restrictedRouteLineExpression
         )
     }
 }

@@ -17,6 +17,8 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
+import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
+import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import io.mockk.every
 import io.mockk.mockk
@@ -223,7 +225,7 @@ class RouteArrowUtilsTest {
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
-            every { styleLayerExists("mapbox-navigation-route-traffic-layer") } returns true
+            every { styleLayerExists(options.aboveLayerId) } returns true
             every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
                 addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
@@ -314,7 +316,78 @@ class RouteArrowUtilsTest {
             (addStyleLayerSlots[3].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-route-traffic-layer",
+            "mapbox-top-level-route-layer",
+            addStyleLayerPositionSlots[0].above
+        )
+        assertEquals(
+            "mapbox-navigation-arrow-shaft-casing-layer",
+            addStyleLayerPositionSlots[1].above
+        )
+        assertEquals(
+            "mapbox-navigation-arrow-head-casing-layer",
+            addStyleLayerPositionSlots[2].above
+        )
+        assertEquals(
+            "mapbox-navigation-arrow-shaft-layer",
+            addStyleLayerPositionSlots[3].above
+        )
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+    }
+
+    @Test
+    fun initializeLayers_whenCustomAboveLayerConfigured() {
+        GeoJsonSource.workerThread =
+            HandlerThread("STYLE_WORKER").apply {
+                priority = Thread.MAX_PRIORITY
+                start()
+            }
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+        val options = RouteArrowOptions.Builder(ctx).withAboveLayerId("foobar").build()
+        val shaftSourceValueSlot = slot<Value>()
+        val addStyleLayerSlots = mutableListOf<Value>()
+        val addStyleLayerPositionSlots = mutableListOf<LayerPosition>()
+        val mockImage = mockk<Image>(relaxed = true)
+
+        val style = mockk<Style>(relaxed = true) {
+            every { isStyleLoaded } returns true
+            every { styleLayers } returns listOf()
+            every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns false
+            every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns false
+            every {
+                styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+            } returns true
+            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
+            every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
+            every { styleLayerExists(PRIMARY_ROUTE_TRAFFIC_LAYER_ID) } returns true
+            every { styleLayerExists(RESTRICTED_ROAD_LAYER_ID) } returns true
+            every { styleLayerExists(options.aboveLayerId) } returns true
+            every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
+            every {
+                addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
+            } returns ExpectedFactory.createNone()
+            every {
+                addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, any())
+            } returns ExpectedFactory.createNone()
+            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) } returns mockImage
+            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON) } returns mockImage
+        }
+
+        RouteArrowUtils.initializeLayers(style, options)
+
+        verify {
+            style.addStyleSource(
+                RouteConstants.ARROW_SHAFT_SOURCE_ID,
+                capture(shaftSourceValueSlot)
+            )
+        }
+        verify {
+            style.addStyleLayer(capture(addStyleLayerSlots), capture(addStyleLayerPositionSlots))
+        }
+        assertEquals(
+            "foobar",
             addStyleLayerPositionSlots[0].above
         )
         assertEquals(
@@ -359,7 +432,7 @@ class RouteArrowUtilsTest {
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
-            every { styleLayerExists("mapbox-navigation-route-traffic-layer") } returns false
+            every { styleLayerExists(options.aboveLayerId) } returns false
             every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
                 addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
@@ -501,7 +574,7 @@ class RouteArrowUtilsTest {
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
-            every { styleLayerExists("mapbox-navigation-route-traffic-layer") } returns true
+            every { styleLayerExists(options.aboveLayerId) } returns true
             every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
                 addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
@@ -552,7 +625,7 @@ class RouteArrowUtilsTest {
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
-            every { styleLayerExists("mapbox-navigation-route-traffic-layer") } returns true
+            every { styleLayerExists(options.aboveLayerId) } returns true
             every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
                 addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
@@ -603,7 +676,7 @@ class RouteArrowUtilsTest {
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
-            every { styleLayerExists("mapbox-navigation-route-traffic-layer") } returns true
+            every { styleLayerExists(options.aboveLayerId) } returns true
             every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
                 addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
@@ -654,7 +727,7 @@ class RouteArrowUtilsTest {
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
-            every { styleLayerExists("mapbox-navigation-route-traffic-layer") } returns true
+            every { styleLayerExists(options.aboveLayerId) } returns true
             every { addStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
                 addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())

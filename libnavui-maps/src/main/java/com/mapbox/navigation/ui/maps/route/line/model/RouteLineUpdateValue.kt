@@ -8,9 +8,11 @@ import com.mapbox.maps.extension.style.expressions.generated.Expression
  * @param trafficLineExpression the expression for the primary route traffic line
  * @param routeLineExpression the expression for the primary route line
  * @param casingLineExpression the expression for the primary route casing line
+ * @param restrictedRouteLineExpression the expression for the restricted road line layer (optional)
  */
 class RouteLineUpdateValue internal constructor(
     val trafficLineExpression: Expression,
     val routeLineExpression: Expression,
-    val casingLineExpression: Expression
+    val casingLineExpression: Expression,
+    val restrictedRouteLineExpression: Expression?
 )

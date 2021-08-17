@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
+import android.graphics.Color
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
@@ -7,7 +8,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
@@ -163,14 +163,13 @@ class VanishingRouteLineTest {
                 getRoute(),
                 listOf(),
                 true,
-                colorResources,
-                RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
-                false
+                colorResources
             )
 
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(
             lineString.coordinates()[0],
             segments,
+            null,
             genericMockResourceProvider,
             -1,
             0.0,
@@ -180,6 +179,45 @@ class VanishingRouteLineTest {
         assertEquals(expectedTrafficExpression, result!!.trafficLineExpression.toString())
         assertEquals(expectedRouteLineExpression, result.routeLineExpression.toString())
         assertEquals(expectedCasingExpression, result.routeLineCasingExpression.toString())
+    }
+
+    @Test
+    fun getTraveledRouteLineExpressions_withRestrictedLineExpressionData() {
+        val expectedRestrictedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0]," +
+            " 0.0, [rgba, 0.0, 0.0, 0.0, 0.0], 0.44865144220494346, [rgba, 0.0, 0.0, 12.0, 0.0]," +
+            " 0.468779750455607, [rgba, 0.0, 0.0, 0.0, 0.0], 0.5032854217424586, " +
+            "[rgba, 0.0, 0.0, 12.0, 0.0], 0.5207714038134984, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+
+        val colorResources = RouteLineColorResources.Builder()
+            .restrictedRoadColor(Color.CYAN)
+            .build()
+
+        val route = loadRoute("route-with-restrictions.json")
+        val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
+        val vanishingRouteLine = VanishingRouteLine()
+        vanishingRouteLine.initWithRoute(route)
+        vanishingRouteLine.primaryRouteRemainingDistancesIndex = 1
+        val segments: List<RouteLineExpressionData> =
+            MapboxRouteLineUtils.calculateRouteLineSegments(
+                getRoute(),
+                listOf(),
+                true,
+                colorResources
+            )
+        val restrictedSegments =
+            MapboxRouteLineUtils.getRouteRestrictedSectionsExpressionData(route)
+
+        val result = vanishingRouteLine.getTraveledRouteLineExpressions(
+            lineString.coordinates()[0],
+            segments,
+            restrictedSegments,
+            genericMockResourceProvider,
+            0,
+            0.0,
+            false
+        )
+
+        assertEquals(expectedRestrictedExpression, result!!.restrictedRoadExpression.toString())
     }
 
     @Test
@@ -206,14 +244,13 @@ class VanishingRouteLineTest {
                 getRoute(),
                 listOf(),
                 true,
-                colorResources,
-                RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
-                true
+                colorResources
             )
 
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(
             lineString.coordinates()[0],
             segments,
+            null,
             genericMockResourceProvider,
             -1,
             20.0,
@@ -259,6 +296,7 @@ class VanishingRouteLineTest {
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(
             Point.fromLngLat(-122.52351984901476, 37.97384101461195),
             segments,
+            null,
             RouteLineResources.Builder().build(),
             0,
             0.0,
@@ -271,12 +309,15 @@ class VanishingRouteLineTest {
     }
 
     private fun getRoute(): DirectionsRoute {
-        val routeAsJson = loadJsonFixture("short_route.json")
-        return DirectionsRoute.fromJson(routeAsJson)
+        return loadRoute("short_route.json")
     }
 
     private fun getVeryLongRoute(): DirectionsRoute {
-        val routeAsJson = loadJsonFixture("cross-country-route.json")
+        return loadRoute("cross-country-route.json")
+    }
+
+    private fun loadRoute(routeFileName: String): DirectionsRoute {
+        val routeAsJson = loadJsonFixture(routeFileName)
         return DirectionsRoute.fromJson(routeAsJson)
     }
 
@@ -293,6 +334,7 @@ class VanishingRouteLineTest {
             every { alternativeRouteUnknownCongestionColor } returns 9
             every { routeLineTraveledCasingColor } returns 10
             every { inActiveRouteLegsColor } returns 11
+            every { restrictedRoadColor } returns 12
         }
         every { trafficBackfillRoadClasses } returns listOf()
     }
