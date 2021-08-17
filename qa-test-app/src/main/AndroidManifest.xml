@@ -24,6 +24,9 @@
         <activity android:name=".view.AlternativeRouteActivity"/>
         <activity android:name=".view.MapboxRouteLineActivity"/>
         <activity android:name=".view.util.RouteDrawingActivity"/>
+        <activity android:name=".view.RouteRestrictionsActivity"/>
+        <activity android:name=".view.RouteTrafficUpdateActivity"/>
+        <activity android:name=".view.InactiveRouteStylingActivity"/>
     </application>
 
 </manifest>

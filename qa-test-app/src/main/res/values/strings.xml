@@ -4,4 +4,7 @@
     <string name="routeline_activity" translatable="false">Internal Development Activity</string>
     <string name="label_start_navigation" translatable="false">Start Navigation</string>
     <string name="route_drawing_utility" translatable="false">Internal Route Drawing Utility</string>
+    <string name="route_restriction_activity_description" translatable="false">Displays a restricted section of a route. \n\nYou should see a section near the middle of the route that has a magenta colored, dashed line appearance.</string>
+    <string name="dynamic_traffic_update_description" translatable="false">Dynamically adjusts the traffic congestion on a route line. \n\nBriefly after the activity starts the traffic congestion on the route line will be randomly updated. \n\nNotice the route line is partially \"vanished\". There should be no redrawing or blinking of the \"vanished\" section of the route line.</string>
+    <string name="inactive_route_styling_description" translatable="false">The inactive leg of the route should be colored differently than the active leg. \n\nWhen the activity starts you should see a route with a waypoint roughly in the middle. Notice the styling of the route which includes traffic congestion. \n\nStart navigation and the second leg of the route should change color. \n\nWhen the puck reaches the waypoint and transitions to the second leg the first leg should take on the coloring of the second leg and the second leg should appear as it did before navigation with the traffic congestion markers.</string>
 </resources>
