@@ -40,11 +40,13 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
 
     @Before
     fun setUp() {
-        mapboxNavigation = MapboxNavigation(
-            NavigationOptions.Builder(activity)
-                .accessToken(getMapboxAccessTokenFromResources(activity))
-                .build()
-        )
+        runOnMainSync {
+            mapboxNavigation = MapboxNavigation(
+                NavigationOptions.Builder(activity)
+                    .accessToken(getMapboxAccessTokenFromResources(activity))
+                    .build()
+            )
+        }
     }
 
     @After

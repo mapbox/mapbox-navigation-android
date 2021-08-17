@@ -357,6 +357,7 @@ commands:
               --device model=star2lte,version=28,locale=de,orientation=landscape \
               --device model=flame,version=30,locale=en,orientation=portrait \
               --use-orchestrator \
+              --directories-to-pull=/sdcard/Download/mapbox_test \
               --timeout 15m
 
   run-firebase-robo:

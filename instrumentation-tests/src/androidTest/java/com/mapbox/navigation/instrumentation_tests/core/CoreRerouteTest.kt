@@ -4,9 +4,12 @@ import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
+import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
@@ -18,6 +21,7 @@ import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.RouteProgressStateTransitionAssertion
+import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
@@ -26,11 +30,12 @@ import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvid
 import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
+import com.mapbox.navigation.utils.internal.logE
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.CountDownLatch
 
-// TODO: Refactor https://github.com/mapbox/mapbox-navigation-android/issues/4429
 class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
     @get:Rule
@@ -38,6 +43,9 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
 
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
+
+    @get:Rule
+    val mapboxHistoryTestRule = MapboxHistoryTestRule()
 
     private lateinit var mapboxNavigation: MapboxNavigation
 
@@ -48,11 +56,18 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
     fun setup() {
         Espresso.onIdle()
 
-        mapboxNavigation = MapboxNavigationProvider.create(
-            NavigationOptions.Builder(activity)
-                .accessToken(getMapboxAccessTokenFromResources(activity))
-                .build()
-        )
+        runOnMainSync {
+            mapboxNavigation = MapboxNavigationProvider.create(
+                NavigationOptions.Builder(activity)
+                    .accessToken(getMapboxAccessTokenFromResources(activity))
+                    .historyRecorderOptions(
+                        HistoryRecorderOptions.Builder()
+                            .build()
+                    )
+                    .build()
+            )
+            mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder
+        }
         locationTrackingIdlingResource = RouteProgressStateIdlingResource(
             mapboxNavigation,
             RouteProgressState.TRACKING
@@ -89,7 +104,8 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
                         offRouteLocationUpdate.latitude
                     ),
                     mockRoute.routeWaypoints.last()
-                )
+                ),
+                relaxedExpectedCoordinates = true
             )
         )
         locationTrackingIdlingResource.register()
@@ -103,6 +119,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
 
         // start a route
         runOnMainSync {
+            mapboxNavigation.historyRecorder.startRecording()
             mockLocationUpdatesRule.pushLocationUpdate(originLocation)
             mapboxNavigation.startTripSession()
             mapboxNavigation.requestRoutes(
@@ -123,21 +140,23 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
                         reasons: List<RouterFailure>,
                         routeOptions: RouteOptions
                     ) {
-                        // no impl
+                        logE(Tag("DEBUG"), Message("onFailure reasons=$reasons"))
                     }
 
                     override fun onCanceled(
                         routeOptions: RouteOptions,
                         routerOrigin: RouterOrigin
                     ) {
-                        // no impl
+                        logE(Tag("DEBUG"), Message("onCanceled"))
                     }
                 }
             )
         }
 
         // wait for tracking to start
-        Espresso.onIdle()
+        mapboxHistoryTestRule.stopRecordingOnCrash("no location tracking") {
+            Espresso.onIdle()
+        }
         locationTrackingIdlingResource.unregister()
 
         // push off route location and wait for the off route event
@@ -145,13 +164,28 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         runOnMainSync {
             mockLocationReplayerRule.loopUpdate(offRouteLocationUpdate, times = 5)
         }
-        Espresso.onIdle()
+
+        mapboxHistoryTestRule.stopRecordingOnCrash("no off route") {
+            Espresso.onIdle()
+        }
         offRouteIdlingResource.unregister()
 
         // wait for tracking to start again
         locationTrackingIdlingResource.register()
-        Espresso.onIdle()
+
+        mapboxHistoryTestRule.stopRecordingOnCrash("no tracking") {
+            Espresso.onIdle()
+        }
         locationTrackingIdlingResource.unregister()
+
+        runOnMainSync {
+            val countDownLatch = CountDownLatch(1)
+            mapboxNavigation.historyRecorder.stopRecording {
+                logE(Tag("DEBUG"), Message("history path=$it"))
+                countDownLatch.countDown()
+            }
+            countDownLatch.await()
+        }
 
         // assert results
         expectedStates.assert()
