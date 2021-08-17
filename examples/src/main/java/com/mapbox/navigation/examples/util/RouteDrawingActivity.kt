@@ -58,7 +58,6 @@ class RouteDrawingActivity : AppCompatActivity() {
 
     private val routeLineResources: RouteLineResources by lazy {
         RouteLineResources.Builder()
-            .restrictedRoadSectionScale(7.0)
             .routeLineColorResources(routeColorResources)
             .build()
     }

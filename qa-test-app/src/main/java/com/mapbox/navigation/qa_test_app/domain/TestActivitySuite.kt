@@ -6,6 +6,7 @@ import com.mapbox.navigation.qa_test_app.utils.startActivity
 import com.mapbox.navigation.qa_test_app.view.AlternativeRouteActivity
 import com.mapbox.navigation.qa_test_app.view.FeedbackActivity
 import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingActivity
+import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingWithRestrictionsActivity
 import com.mapbox.navigation.qa_test_app.view.MapboxRouteLineActivity
 import com.mapbox.navigation.qa_test_app.view.RouteRestrictionsActivity
 import com.mapbox.navigation.qa_test_app.view.RouteTrafficUpdateActivity
@@ -24,7 +25,7 @@ object TestActivitySuite {
             activity.startActivity<AlternativeRouteActivity>()
         },
         TestActivityDescription(
-            "Display Route Restrictions - Needs Update",
+            "Display Route Restrictions",
             R.string.route_restriction_activity_description
         ) { activity ->
             activity.startActivity<RouteRestrictionsActivity>()
@@ -42,11 +43,24 @@ object TestActivitySuite {
             activity.startActivity<InactiveRouteStylingActivity>()
         },
         TestActivityDescription(
+            "Inactive Route Leg Styling With Restrictions",
+            R.string.inactive_route_styling__with_restrictions_description
+        ) { activity ->
+            activity.startActivity<InactiveRouteStylingWithRestrictionsActivity>()
+        },
+        TestActivityDescription(
             "Traffic Gradient Styling",
             R.string.traffic_gradient_styling_description
         ) { activity ->
             activity.startActivity<TrafficGradientActivity>()
         },
+        TestActivityDescription(
+            "Feedback test activity",
+            R.string.feedback_activity_description
+        ) { activity ->
+            activity.startActivity<FeedbackActivity>()
+        },
+        // add activities above this
         TestActivityDescription(
             "Route Line dev. activity",
             R.string.routeline_activity
@@ -58,12 +72,6 @@ object TestActivitySuite {
             R.string.route_drawing_utility
         ) { activity ->
             activity.startActivity<RouteDrawingActivity>()
-        },
-        TestActivityDescription(
-            "Feedback test activity",
-            R.string.feedback_activity_description
-        ) { activity ->
-            activity.startActivity<FeedbackActivity>()
-        },
+        }
     )
 }

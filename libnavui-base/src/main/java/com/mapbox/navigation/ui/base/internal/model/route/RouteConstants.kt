@@ -6,6 +6,7 @@ import androidx.annotation.DrawableRes
 import com.mapbox.navigation.ui.base.R
 
 object RouteConstants {
+    const val TOP_LEVEL_ROUTE_LAYER_SOURCE_ID = "mapbox-navigation-top-level-route-source"
     const val PRIMARY_ROUTE_SOURCE_ID = "mapbox-navigation-route-source"
     const val ALTERNATIVE_ROUTE1_SOURCE_ID = "mapbox-navigation-alt-route1-source"
     const val ALTERNATIVE_ROUTE2_SOURCE_ID = "mapbox-navigation-alt-route2-source"
@@ -53,6 +54,9 @@ object RouteConstants {
     const val RESTRICTED_ROAD_SECTION_SCALE = 10.0
     const val SOFT_GRADIENT_STOP_GAP_METERS: Double = 30.0
     val TRAFFIC_BACKFILL_ROAD_CLASSES = emptyList<String>()
+    const val RESTRICTED_ROAD_LINE_OPACITY = 1.0
+    const val RESTRICTED_ROAD_LINE_WIDTH = 7.0
+    val RESTRICTED_ROAD_DASH_ARRAY = listOf(.5, 2.0)
 
     val LOW_CONGESTION_RANGE = 0..39
 

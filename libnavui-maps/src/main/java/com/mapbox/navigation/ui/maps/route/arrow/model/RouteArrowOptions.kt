@@ -7,7 +7,7 @@ import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
+import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 
 /**
  * Options for determining the appearance of maneuver arrow(s)
@@ -190,7 +190,7 @@ class RouteArrowOptions private constructor(
 
         /**
          * Indicates the maneuver arrow map layers appear above this layer on the map. A good
-         * starting point for this is [PRIMARY_ROUTE_TRAFFIC_LAYER_ID].
+         * starting point for this is [TOP_LEVEL_ROUTE_LINE_LAYER_ID].
          *
          * @param layerId the map layer ID
          */
@@ -265,7 +265,7 @@ class RouteArrowOptions private constructor(
                 context,
                 arrowHeadIconCasingDrawable
             )
-            val routeArrowAboveLayerId: String = aboveLayerId ?: PRIMARY_ROUTE_TRAFFIC_LAYER_ID
+            val routeArrowAboveLayerId: String = aboveLayerId ?: TOP_LEVEL_ROUTE_LINE_LAYER_ID
 
             val arrowShaftScalingExpression: Expression = arrowShaftScaleExpression
                 ?: Expression.interpolate {

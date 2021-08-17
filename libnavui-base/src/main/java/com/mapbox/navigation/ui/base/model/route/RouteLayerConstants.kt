@@ -78,4 +78,9 @@ object RouteLayerConstants {
      * Layer ID for the restricted area layer
      */
     const val RESTRICTED_ROAD_LAYER_ID = "mapbox-restricted-road-layer"
+
+    /**
+     * Layer ID for the top most route line related layer
+     */
+    const val TOP_LEVEL_ROUTE_LINE_LAYER_ID = "mapbox-top-level-route-layer"
 }

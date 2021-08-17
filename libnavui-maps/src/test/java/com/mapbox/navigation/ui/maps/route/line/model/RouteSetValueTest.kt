@@ -19,6 +19,7 @@ class RouteSetValueTest {
         val alternativeRoute1Source = mockk<FeatureCollection>()
         val alternativeRoute2Source = mockk<FeatureCollection>()
         val waypointsSource = mockk<FeatureCollection>()
+        val restrictedRouteLineExpression = mockk<RouteLineExpressionProvider>()
 
         val result = RouteSetValue(
             primaryRouteSource,
@@ -29,7 +30,8 @@ class RouteSetValueTest {
             altRoute2TrafficExpression,
             alternativeRoute1Source,
             alternativeRoute2Source,
-            waypointsSource
+            waypointsSource,
+            restrictedRouteLineExpression
         ).toMutableValue()
 
         assertEquals(primaryRouteSource, result.primaryRouteSource)
@@ -41,6 +43,7 @@ class RouteSetValueTest {
         assertEquals(alternativeRoute1Source, result.alternativeRoute1Source)
         assertEquals(alternativeRoute2Source, result.alternativeRoute2Source)
         assertEquals(waypointsSource, result.waypointsSource)
+        assertEquals(restrictedRouteLineExpression, result.restrictedRouteLineExpression)
     }
 
     @Test
@@ -54,6 +57,7 @@ class RouteSetValueTest {
         val alternativeRoute1Source = mockk<FeatureCollection>()
         val alternativeRoute2Source = mockk<FeatureCollection>()
         val waypointsSource = mockk<FeatureCollection>()
+        val restrictedRouteLineExpression = mockk<RouteLineExpressionProvider>()
 
         val replacedPrimaryRouteSource = mockk<FeatureCollection>()
         val replacedTrafficLineExpressionProvider = mockk<RouteLineExpressionProvider>()
@@ -64,6 +68,8 @@ class RouteSetValueTest {
         val replacedAlternativeRoute1Source = mockk<FeatureCollection>()
         val replacedAlternativeRoute2Source = mockk<FeatureCollection>()
         val replacedWaypointsSource = mockk<FeatureCollection>()
+        val replacedRestrictedRouteLineExpression = mockk<RouteLineExpressionProvider>()
+
         val immutableResult = RouteSetValue(
             primaryRouteSource,
             trafficLineExpressionProvider,
@@ -73,7 +79,8 @@ class RouteSetValueTest {
             altRoute2TrafficExpression,
             alternativeRoute1Source,
             alternativeRoute2Source,
-            waypointsSource
+            waypointsSource,
+            restrictedRouteLineExpression
         ).toMutableValue()
         immutableResult.primaryRouteSource = replacedPrimaryRouteSource
         immutableResult.trafficLineExpressionProvider = replacedTrafficLineExpressionProvider
@@ -84,6 +91,7 @@ class RouteSetValueTest {
         immutableResult.alternativeRoute1Source = replacedAlternativeRoute1Source
         immutableResult.alternativeRoute2Source = replacedAlternativeRoute2Source
         immutableResult.waypointsSource = replacedWaypointsSource
+        immutableResult.restrictedRouteLineExpression = replacedRestrictedRouteLineExpression
 
         val result = immutableResult.toImmutableValue()
 
@@ -96,5 +104,9 @@ class RouteSetValueTest {
         assertEquals(replacedAlternativeRoute1Source, result.alternativeRoute1Source)
         assertEquals(replacedAlternativeRoute2Source, result.alternativeRoute2Source)
         assertEquals(replacedWaypointsSource, result.waypointsSource)
+        assertEquals(
+            replacedRestrictedRouteLineExpression,
+            result.restrictedRouteLineExpressionProvider
+        )
     }
 }

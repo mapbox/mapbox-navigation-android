@@ -95,6 +95,11 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                             RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
                             value.casingLineExpression
                         )
+                        updateLineGradient(
+                            style,
+                            RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
+                            Expression.color(Color.TRANSPARENT)
+                        )
                         updateSource(
                             style,
                             RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
@@ -153,6 +158,20 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                                 )
                             }
                         }
+
+                        value.restrictedRouteLineExpressionProvider?.let {
+                            val restrictedRoadLineExpressionDef =
+                                async(ThreadController.IODispatcher) {
+                                    it()
+                                }
+                            restrictedRoadLineExpressionDef.await().apply {
+                                updateLineGradient(
+                                    style,
+                                    RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
+                                    this
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -188,6 +207,13 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                         RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
                         it.casingLineExpression
                     )
+                    it.restrictedRouteLineExpression?.let { expression ->
+                        updateLineGradient(
+                            style,
+                            RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
+                            expression
+                        )
+                    }
                 }
             }
         }
@@ -252,6 +278,10 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                     style,
                     RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID, Visibility.VISIBLE
                 )
+                updateLayerVisibility(
+                    style,
+                    RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID, Visibility.VISIBLE
+                )
             }
         }
     }
@@ -275,6 +305,10 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                 updateLayerVisibility(
                     style,
                     RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID, Visibility.NONE
+                )
+                updateLayerVisibility(
+                    style,
+                    RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID, Visibility.NONE
                 )
             }
         }

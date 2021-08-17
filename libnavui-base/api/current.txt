@@ -32,6 +32,7 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     method public kotlin.ranges.IntRange getMODERATE_CONGESTION_RANGE();
     method public int getORIGIN_WAYPOINT_ICON();
     method public int getRESTRICTED_ROAD_COLOR();
+    method public java.util.List<java.lang.Double> getRESTRICTED_ROAD_DASH_ARRAY();
     method public int getROUTE_CASING_COLOR();
     method public int getROUTE_CLOSURE_COLOR();
     method public int getROUTE_DEFAULT_COLOR();
@@ -66,6 +67,7 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     property public final kotlin.ranges.IntRange MODERATE_CONGESTION_RANGE;
     property public final int ORIGIN_WAYPOINT_ICON;
     property public final int RESTRICTED_ROAD_COLOR;
+    property public final java.util.List<java.lang.Double> RESTRICTED_ROAD_DASH_ARRAY;
     property public final int ROUTE_CASING_COLOR;
     property public final int ROUTE_CLOSURE_COLOR;
     property public final int ROUTE_DEFAULT_COLOR;
@@ -110,12 +112,15 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     field public static final String ORIGIN_MARKER_NAME = "originMarker";
     field public static final String PRIMARY_ROUTE_SOURCE_ID = "mapbox-navigation-route-source";
     field public static final String RESTRICTED_CONGESTION_VALUE = "restricted";
+    field public static final double RESTRICTED_ROAD_LINE_OPACITY = 1.0;
+    field public static final double RESTRICTED_ROAD_LINE_WIDTH = 7.0;
     field public static final double RESTRICTED_ROAD_SECTION_SCALE = 10.0;
     field public static final boolean ROUNDED_LINE_CAP = true;
     field public static final double ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS = 1.0;
     field public static final String SEVERE_CONGESTION_VALUE = "severe";
     field public static final double SOFT_GRADIENT_STOP_GAP_METERS = 30.0;
     field public static final int THIRTY = 30; // 0x1e
+    field public static final String TOP_LEVEL_ROUTE_LAYER_SOURCE_ID = "mapbox-navigation-top-level-route-source";
     field public static final double TRANSPARENT = 1.0;
     field public static final int TWO_POINTS = 2; // 0x2
     field public static final String UNKNOWN_CONGESTION_VALUE = "unknown";
@@ -145,6 +150,7 @@ package com.mapbox.navigation.ui.base.model.route {
     field public static final String PRIMARY_ROUTE_LAYER_ID = "mapbox-navigation-route-layer";
     field public static final String PRIMARY_ROUTE_TRAFFIC_LAYER_ID = "mapbox-navigation-route-traffic-layer";
     field public static final String RESTRICTED_ROAD_LAYER_ID = "mapbox-restricted-road-layer";
+    field public static final String TOP_LEVEL_ROUTE_LINE_LAYER_ID = "mapbox-top-level-route-layer";
     field public static final String WAYPOINT_LAYER_ID = "mapbox-navigation-waypoint-layer";
   }
 

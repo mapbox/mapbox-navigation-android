@@ -220,7 +220,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
     private val routeArrowView: MapboxRouteArrowView by lazy {
         MapboxRouteArrowView(
             RouteArrowOptions.Builder(this)
-                .withAboveLayerId(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+                .withAboveLayerId(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
                 .build()
         )
     }

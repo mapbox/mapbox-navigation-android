@@ -20,7 +20,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.clearRouteLine
@@ -573,6 +572,7 @@ class MapboxRouteLineApiTest {
     fun updateTraveledRouteLine() = coroutineRule.runBlockingTest {
         val options = MapboxRouteLineOptions.Builder(ctx)
             .withVanishingRouteLineEnabled(true)
+            .displayRestrictedRoadSections(false)
             .build()
         val api = MapboxRouteLineApi(options)
         val expectedCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
@@ -610,7 +610,97 @@ class MapboxRouteLineApiTest {
         assertEquals(expectedCasingExpression, result.value!!.casingLineExpression.toString())
         assertEquals(expectedRouteExpression, result.value!!.routeLineExpression.toString())
         assertEquals(expectedTrafficExpression, result.value!!.trafficLineExpression.toString())
+        assertNull(result.value!!.restrictedRouteLineExpression)
     }
+
+    @Test
+    fun updateTraveledRouteLine_whenRouteHasRestrictions() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withVanishingRouteLineEnabled(true)
+            .displayRestrictedRoadSections(true)
+            .build()
+        val api = MapboxRouteLineApi(options)
+        val expectedRestrictedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0]," +
+            " 0.05416168943228483, [rgba, 0.0, 0.0, 0.0, 0.0], 0.44865144220494346, " +
+            "[rgba, 0.0, 0.0, 0.0, 1.0], 0.468779750455607, [rgba, 0.0, 0.0, 0.0, 0.0]," +
+            " 0.5032854217424586, [rgba, 0.0, 0.0, 0.0, 1.0], 0.5207714038134984," +
+            " [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val route = loadRoute("route-with-restrictions.json")
+        val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
+        val routeProgress = mockk<RouteProgress> {
+            every { currentLegProgress } returns mockk {
+                every { legIndex } returns 0
+                every { currentStepProgress } returns mockk {
+                    every { stepPoints } returns PolylineUtils.decode(
+                        route.legs()!![0].steps()!![2].geometry()!!,
+                        6
+                    )
+                    every { distanceTraveled } returns 0f
+                    every { step } returns mockk {
+                        every { distance() } returns route.legs()!![0].steps()!![2].distance()
+                    }
+                    every { stepIndex } returns 2
+                }
+            }
+        }
+
+        api.updateVanishingPointState(RouteProgressState.TRACKING)
+        api.setRoutes(listOf(RouteLine(route, null)))
+        api.updateUpcomingRoutePointIndex(routeProgress)
+
+        val result = api.updateTraveledRouteLine(lineString.coordinates()[1])
+
+        assertEquals(
+            expectedRestrictedExpression,
+            result.value!!.restrictedRouteLineExpression.toString()
+        )
+    }
+
+    @Test
+    fun updateTraveledRouteLine_whenRouteRestrictionsEnabledButHasNone() =
+        coroutineRule.runBlockingTest {
+            val expectedCasingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
+                "0.3240769449298392, [rgba, 47.0, 122.0, 198.0, 1.0]]"
+            val expectedRouteExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
+                "0.3240769449298392, [rgba, 86.0, 168.0, 251.0, 1.0]]"
+            val expectedTrafficExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], " +
+                "0.3240769449298392, [rgba, 86.0, 168.0, 251.0, 1.0], 0.9429639111009005, " +
+                "[rgba, 255.0, 149.0, 0.0, 1.0]]"
+            val options = MapboxRouteLineOptions.Builder(ctx)
+                .withVanishingRouteLineEnabled(true)
+                .displayRestrictedRoadSections(true)
+                .build()
+            val api = MapboxRouteLineApi(options)
+            val route = getRoute()
+            val lineString = LineString.fromPolyline(route.geometry() ?: "", Constants.PRECISION_6)
+            val routeProgress = mockk<RouteProgress> {
+                every { currentLegProgress } returns mockk {
+                    every { legIndex } returns 0
+                    every { currentStepProgress } returns mockk {
+                        every { stepPoints } returns PolylineUtils.decode(
+                            route.legs()!![0].steps()!![2].geometry()!!,
+                            6
+                        )
+                        every { distanceTraveled } returns 0f
+                        every { step } returns mockk {
+                            every { distance() } returns route.legs()!![0].steps()!![2].distance()
+                        }
+                        every { stepIndex } returns 2
+                    }
+                }
+            }
+
+            api.updateVanishingPointState(RouteProgressState.TRACKING)
+            api.setRoutes(listOf(RouteLine(route, null)))
+            api.updateUpcomingRoutePointIndex(routeProgress)
+
+            val result = api.updateTraveledRouteLine(lineString.coordinates()[1])
+
+            assertEquals(expectedCasingExpression, result.value!!.casingLineExpression.toString())
+            assertEquals(expectedRouteExpression, result.value!!.routeLineExpression.toString())
+            assertEquals(expectedTrafficExpression, result.value!!.trafficLineExpression.toString())
+            assertNull(result.value!!.restrictedRouteLineExpression)
+        }
 
     @Test
     fun updateUpcomingRoutePointIndex() = coroutineRule.runBlockingTest {
@@ -1118,6 +1208,88 @@ class MapboxRouteLineApiTest {
         assertEquals(casingExpression, result.value!!.casingLineExpression.toString())
     }
 
+    @Test
+    fun setVanishingOffset_withRestrictionsEnabledPrimaryRouteNull() {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withVanishingRouteLineEnabled(true)
+            .displayRestrictedRoadSections(true)
+            .build()
+        val trafficExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.5," +
+            " [rgba, 47.0, 122.0, 198.0, 1.0]]"
+        val routeLineExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.5," +
+            " [rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val casingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.5," +
+            " [rgba, 47.0, 122.0, 198.0, 1.0]]"
+
+        val api = MapboxRouteLineApi(
+            options
+        )
+
+        val result = api.setVanishingOffset(.5)
+
+        assertEquals(trafficExpression, result.value!!.casingLineExpression.toString())
+        assertEquals(routeLineExpression, result.value!!.routeLineExpression.toString())
+        assertEquals(casingExpression, result.value!!.casingLineExpression.toString())
+        assertNull(result.value!!.restrictedRouteLineExpression)
+    }
+
+    @Test
+    fun setVanishingOffset_withRestrictionsEnabled() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withVanishingRouteLineEnabled(true)
+            .displayRestrictedRoadSections(true)
+            .build()
+        val trafficExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.5," +
+            " [rgba, 47.0, 122.0, 198.0, 1.0]]"
+        val routeLineExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.5," +
+            " [rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val casingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.5," +
+            " [rgba, 47.0, 122.0, 198.0, 1.0]]"
+        val restrictedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.5," +
+            " [rgba, 0.0, 0.0, 0.0, 0.0], 0.5032854217424586, [rgba, 0.0, 0.0, 0.0, 1.0]," +
+            " 0.5207714038134984, [rgba, 0.0, 0.0, 0.0, 0.0]]"
+        val route = loadRoute("route-with-restrictions.json")
+
+        val api = MapboxRouteLineApi(
+            options
+        )
+        api.setRoutes(listOf(RouteLine(route, null)))
+
+        val result = api.setVanishingOffset(.5)
+
+        assertEquals(trafficExpression, result.value!!.casingLineExpression.toString())
+        assertEquals(routeLineExpression, result.value!!.routeLineExpression.toString())
+        assertEquals(casingExpression, result.value!!.casingLineExpression.toString())
+        assertEquals(restrictedExpression, result.value!!.restrictedRouteLineExpression.toString())
+    }
+
+    @Test
+    fun setVanishingOffset_whenHasRestrictionsButDisabled() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withVanishingRouteLineEnabled(true)
+            .displayRestrictedRoadSections(false)
+            .build()
+        val trafficExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.5," +
+            " [rgba, 47.0, 122.0, 198.0, 1.0]]"
+        val routeLineExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.5," +
+            " [rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val casingExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.5," +
+            " [rgba, 47.0, 122.0, 198.0, 1.0]]"
+        val route = loadRoute("route-with-restrictions.json")
+
+        val api = MapboxRouteLineApi(
+            options
+        )
+        api.setRoutes(listOf(RouteLine(route, null)))
+
+        val result = api.setVanishingOffset(.5)
+
+        assertEquals(trafficExpression, result.value!!.casingLineExpression.toString())
+        assertEquals(routeLineExpression, result.value!!.routeLineExpression.toString())
+        assertEquals(casingExpression, result.value!!.casingLineExpression.toString())
+        assertNull(result.value!!.restrictedRouteLineExpression)
+    }
+
     @ExperimentalCoroutinesApi
     @Test
     fun findClosestRoute_whenClickPoint() = runBlockingTest {
@@ -1299,9 +1471,7 @@ class MapboxRouteLineApiTest {
             route,
             listOf(),
             true,
-            options.resourceProvider.routeLineColorResources,
-            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
-            false
+            options.resourceProvider.routeLineColorResources
         )
         val api = MapboxRouteLineApi(options)
 
@@ -1317,32 +1487,27 @@ class MapboxRouteLineApiTest {
     }
 
     private fun getRoute(): DirectionsRoute {
-        val routeAsJson = loadJsonFixture("short_route.json")
-        return DirectionsRoute.fromJson(routeAsJson)
+        return loadRoute("short_route.json")
     }
 
     private fun getMultilegRoute(): DirectionsRoute {
-        val routeAsJson = loadJsonFixture("multileg_route.json")
-        return DirectionsRoute.fromJson(routeAsJson)
+        return loadRoute("multileg_route.json")
     }
 
     private fun getRouteWithRoadClasses(): DirectionsRoute {
-        val routeAsJson = loadJsonFixture("route-with-road-classes.txt")
-        return DirectionsRoute.fromJson(routeAsJson)
+        return loadRoute("route-with-road-classes.txt")
     }
 
     private fun getVeryLongRoute(): DirectionsRoute {
-        val routeAsJson = loadJsonFixture("cross-country-route.json")
-        return DirectionsRoute.fromJson(routeAsJson)
+        return loadRoute("cross-country-route.json")
     }
 
     private fun getMultiLegWithTwoLegs(): DirectionsRoute {
-        val routeAsJson = loadJsonFixture("multileg-route-two-legs.json")
-        return DirectionsRoute.fromJson(routeAsJson)
+        return loadRoute("multileg-route-two-legs.json")
     }
 
-    private fun getRouteWithNoRoadRestrictions(): DirectionsRoute {
-        val routeAsJson = loadJsonFixture("another-route-with-restrictions.json")
+    private fun loadRoute(routeFileName: String): DirectionsRoute {
+        val routeAsJson = loadJsonFixture(routeFileName)
         return DirectionsRoute.fromJson(routeAsJson)
     }
 }

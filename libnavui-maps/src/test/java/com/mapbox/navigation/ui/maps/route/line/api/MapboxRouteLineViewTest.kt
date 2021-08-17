@@ -70,12 +70,16 @@ class MapboxRouteLineViewTest {
 
     private fun mockCheckForLayerInitialization(style: Style) {
         with(style) {
+            every { styleSourceExists(RouteConstants.TOP_LEVEL_ROUTE_LAYER_SOURCE_ID) } returns true
             every { styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns true
             every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns true
             every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
             every { styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID) } returns true
             every {
                 styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+            } returns true
+            every {
+                styleLayerExists(RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID)
             } returns true
             every {
                 styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID)
@@ -93,6 +97,9 @@ class MapboxRouteLineViewTest {
             } returns true
             every {
                 styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+            } returns true
+            every {
+                styleLayerExists(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
             } returns true
         }
     }
@@ -114,6 +121,9 @@ class MapboxRouteLineViewTest {
             } returns ExpectedFactory.createNone()
             every {
                 setStyleSourceProperty(RouteConstants.WAYPOINT_SOURCE_ID, any(), any())
+            } returns ExpectedFactory.createNone()
+            every {
+                setStyleSourceProperty(RouteConstants.TOP_LEVEL_ROUTE_LAYER_SOURCE_ID, any(), any())
             } returns ExpectedFactory.createNone()
         }.also {
             mockCheckForLayerInitialization(it)
@@ -138,12 +148,16 @@ class MapboxRouteLineViewTest {
         val altRoute1Source = mockk<GeoJsonSource>(relaxed = true)
         val altRoute2Source = mockk<GeoJsonSource>(relaxed = true)
         val wayPointSource = mockk<GeoJsonSource>(relaxed = true)
+        val topLevelSource = mockk<GeoJsonSource>(relaxed = true)
         val style = mockk<Style> {
             every { isStyleLoaded } returns true
             every { getSource(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns primaryRouteSource
             every { getSource(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns altRoute1Source
             every { getSource(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns altRoute2Source
             every { getSource(RouteConstants.WAYPOINT_SOURCE_ID) } returns wayPointSource
+            every {
+                getSource(RouteConstants.TOP_LEVEL_ROUTE_LAYER_SOURCE_ID)
+            } returns topLevelSource
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -179,17 +193,21 @@ class MapboxRouteLineViewTest {
         val trafficLineExp = mockk<Expression>()
         val routeLineExp = mockk<Expression>()
         val casingLineEx = mockk<Expression>()
+        val restrictedRoadExp = mockk<Expression>()
         val state: Expected<RouteLineError, RouteLineUpdateValue> =
             ExpectedFactory.createValue(
                 RouteLineUpdateValue(
                     trafficLineExp,
                     routeLineExp,
-                    casingLineEx
+                    casingLineEx,
+                    restrictedRoadExp
                 )
             )
         val primaryRouteTrafficLayer = mockk<LineLayer>(relaxed = true)
         val primaryRouteLayer = mockk<LineLayer>(relaxed = true)
         val primaryRouteCasingLayer = mockk<LineLayer>(relaxed = true)
+        val restrictedLineLayer = mockk<LineLayer>(relaxed = true)
+        val topLevelLayer = mockk<LineLayer>(relaxed = true)
         val style = mockk<Style> {
             every { isStyleLoaded } returns true
             every {
@@ -201,6 +219,12 @@ class MapboxRouteLineViewTest {
             every {
                 getLayer(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID)
             } returns primaryRouteCasingLayer
+            every {
+                getLayer(RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID)
+            } returns restrictedLineLayer
+            every {
+                getLayer(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+            } returns topLevelLayer
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -213,6 +237,7 @@ class MapboxRouteLineViewTest {
         verify { primaryRouteTrafficLayer.lineGradient(trafficLineExp) }
         verify { primaryRouteLayer.lineGradient(routeLineExp) }
         verify { primaryRouteCasingLayer.lineGradient(casingLineEx) }
+        verify { restrictedLineLayer.lineGradient(restrictedRoadExp) }
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
@@ -235,15 +260,19 @@ class MapboxRouteLineViewTest {
         val casingLineEx = mockk<Expression>()
         val alternativeRoute1Expression = mockk<Expression>()
         val alternativeRoute2Expression = mockk<Expression>()
+        val restrictedRouteExpression = mockk<Expression>()
         val primaryRouteTrafficLayer = mockk<LineLayer>(relaxed = true)
         val primaryRouteLayer = mockk<LineLayer>(relaxed = true)
         val primaryRouteCasingLayer = mockk<LineLayer>(relaxed = true)
         val altRouteTrafficLayer1 = mockk<LineLayer>(relaxed = true)
         val altRouteTrafficLayer2 = mockk<LineLayer>(relaxed = true)
+        val restrictedRouteLayer = mockk<LineLayer>(relaxed = true)
+        val topLevelLayer = mockk<LineLayer>(relaxed = true)
         val primaryRouteSource = mockk<GeoJsonSource>(relaxed = true)
         val altRoute1Source = mockk<GeoJsonSource>(relaxed = true)
         val altRoute2Source = mockk<GeoJsonSource>(relaxed = true)
         val wayPointSource = mockk<GeoJsonSource>(relaxed = true)
+        val topLevelSource = mockk<GeoJsonSource>(relaxed = true)
 
         val state: Expected<RouteLineError, RouteSetValue> = ExpectedFactory.createValue(
             RouteSetValue(
@@ -255,7 +284,8 @@ class MapboxRouteLineViewTest {
                 { alternativeRoute2Expression },
                 alternativeRoute1FeatureCollection,
                 alternativeRoute2FeatureCollection,
-                waypointsFeatureCollection
+                waypointsFeatureCollection,
+                { restrictedRouteExpression }
             )
         )
         val style = mockk<Style>(relaxed = true) {
@@ -275,10 +305,19 @@ class MapboxRouteLineViewTest {
             every {
                 getLayer(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
             } returns altRouteTrafficLayer2
+            every {
+                getLayer(RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID)
+            } returns restrictedRouteLayer
+            every {
+                getLayer(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+            } returns topLevelLayer
             every { getSource(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns primaryRouteSource
             every { getSource(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns altRoute1Source
             every { getSource(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns altRoute2Source
             every { getSource(RouteConstants.WAYPOINT_SOURCE_ID) } returns wayPointSource
+            every {
+                getSource(RouteConstants.TOP_LEVEL_ROUTE_LAYER_SOURCE_ID)
+            } returns topLevelSource
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -300,6 +339,7 @@ class MapboxRouteLineViewTest {
         verify { altRoute1Source.featureCollection(alternativeRoute1FeatureCollection) }
         verify { altRoute2Source.featureCollection(alternativeRoute2FeatureCollection) }
         verify { wayPointSource.featureCollection(waypointsFeatureCollection) }
+        verify { restrictedRouteLayer.lineGradient(restrictedRouteExpression) }
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")

@@ -33,6 +33,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineRestrictedSectionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
@@ -171,6 +172,7 @@ class MapboxRouteLineApi(
     private val routeLineOptions: MapboxRouteLineOptions
 ) {
     private var primaryRoute: DirectionsRoute? = null
+    private var routeHasRestrictions = false
     private val directionsRoutes: MutableList<DirectionsRoute> = mutableListOf()
     private var routeLineExpressionData: List<RouteLineExpressionData> = emptyList()
     private var lastIndexUpdateTimeNano: Long = 0
@@ -279,10 +281,21 @@ class MapboxRouteLineApi(
         val stopGap: Double = ifNonNull(primaryRoute) { route ->
             RouteConstants.SOFT_GRADIENT_STOP_GAP_METERS / route.distance()
         } ?: .00000000001 // an arbitrarily small value so Expression values are in ascending order
+
+        val restrictedExpressionData: List<RouteLineRestrictedSectionData>? =
+            ifNonNull(primaryRoute) { route ->
+                if (routeLineOptions.displayRestrictedRoadSections && routeHasRestrictions) {
+                    MapboxRouteLineUtils.getRouteRestrictedSectionsExpressionData(route)
+                } else {
+                    null
+                }
+            }
+
         val routeLineExpressions =
             routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(
                 point,
                 workingRouteLineExpressionData,
+                restrictedExpressionData,
                 routeLineOptions.resourceProvider,
                 activeLegIndex,
                 stopGap,
@@ -302,7 +315,8 @@ class MapboxRouteLineApi(
                 RouteLineUpdateValue(
                     routeLineExpressions.trafficLineExpression,
                     routeLineExpressions.routeLineExpression,
-                    routeLineExpressions.routeLineCasingExpression
+                    routeLineExpressions.routeLineCasingExpression,
+                    routeLineExpressions.restrictedRoadExpression
                 )
             )
         }
@@ -326,6 +340,7 @@ class MapboxRouteLineApi(
                 directionsRoutes.clear()
                 routeFeatureData.clear()
                 routeLineExpressionData = emptyList()
+                routeHasRestrictions = false
 
                 consumer.accept(
                     ExpectedFactory.createValue(
@@ -387,11 +402,30 @@ class MapboxRouteLineApi(
                     routeLineOptions.resourceProvider.routeLineColorResources.routeCasingColor
                 )
 
+            val restrictedLineExpression = ifNonNull(primaryRoute) { route ->
+                if (routeLineOptions.displayRestrictedRoadSections && routeHasRestrictions) {
+                    val expressionData =
+                        MapboxRouteLineUtils.getRouteRestrictedSectionsExpressionData(route)
+                    MapboxRouteLineUtils.getRestrictedLineExpression(
+                        offset,
+                        activeLegIndex,
+                        routeLineOptions
+                            .resourceProvider
+                            .routeLineColorResources
+                            .restrictedRoadColor,
+                        expressionData
+                    )
+                } else {
+                    null
+                }
+            }
+
             ExpectedFactory.createValue(
                 RouteLineUpdateValue(
                     trafficLineExpression,
                     routeLineExpression,
-                    routeLineCasingExpression
+                    routeLineCasingExpression,
+                    restrictedLineExpression
                 )
             )
         } else {
@@ -546,11 +580,34 @@ class MapboxRouteLineApi(
                             updatedRouteData
                         )
 
+                        val restrictedLineExpression = if (
+                            routeLineOptions.displayRestrictedRoadSections && routeHasRestrictions
+                        ) {
+                            ifNonNull(primaryRoute) { route ->
+                                val expressionData =
+                                    MapboxRouteLineUtils.getRouteRestrictedSectionsExpressionData(
+                                        route
+                                    )
+                                MapboxRouteLineUtils.getRestrictedLineExpression(
+                                    0.0,
+                                    legIndexToHighlight,
+                                    routeLineOptions
+                                        .resourceProvider
+                                        .routeLineColorResources
+                                        .restrictedRoadColor,
+                                    expressionData
+                                )
+                            }
+                        } else {
+                            null
+                        }
+
                         ExpectedFactory.createValue<RouteLineError, RouteLineUpdateValue>(
                             RouteLineUpdateValue(
                                 trafficLineExpression,
                                 routeLineExpression,
-                                casingLineExpression
+                                casingLineExpression,
+                                restrictedLineExpression
                             )
                         )
                     } else {
@@ -820,7 +877,6 @@ class MapboxRouteLineApi(
                 Color.TRANSPARENT,
                 routeLineOptions.resourceProvider.routeLineColorResources
                     .routeUnknownCongestionColor,
-                routeLineOptions.resourceProvider.restrictedRoadSectionScale,
                 routeLineOptions.displaySoftGradientForTraffic,
                 routeLineOptions.softGradientTransition
             )
@@ -854,7 +910,6 @@ class MapboxRouteLineApi(
                         .resourceProvider
                         .routeLineColorResources
                         .alternativeRouteUnknownCongestionColor,
-                    routeLineOptions.resourceProvider.restrictedRoadSectionScale,
                     routeLineOptions.displaySoftGradientForTraffic,
                     routeLineOptions.softGradientTransition
                 )
@@ -872,12 +927,31 @@ class MapboxRouteLineApi(
                     .resourceProvider
                     .routeLineColorResources
                     .alternativeRouteUnknownCongestionColor,
-                routeLineOptions.resourceProvider.restrictedRoadSectionScale,
                 routeLineOptions.displaySoftGradientForTraffic,
                 routeLineOptions.softGradientTransition
             )
         } else {
             null
+        }
+
+        // If the displayRestrictedRoadSections is true then produce a gradient that is transparent
+        // except for the restricted sections. If false produce a gradient for the restricted
+        // line layer that is completely transparent.
+        val restrictedRouteExpressionProducer = partitionedRoutes.first.firstOrNull()?.route?.run {
+            if (routeLineOptions.displayRestrictedRoadSections) {
+                MapboxRouteLineUtils.getRestrictedLineExpressionProducer(
+                    this,
+                    0.0,
+                    0,
+                    routeLineOptions.resourceProvider.routeLineColorResources
+                )
+            } else {
+                MapboxRouteLineUtils.getDisabledRestrictedLineExpressionProducer(
+                    0.0,
+                    activeLegIndex,
+                    routeLineOptions.resourceProvider.routeLineColorResources.restrictedRoadColor
+                )
+            }
         }
 
         val wayPointsFeatureCollectionDef = jobControl.scope.async(ThreadController.IODispatcher) {
@@ -901,6 +975,18 @@ class MapboxRouteLineApi(
 
         val wayPointsFeatureCollection = wayPointsFeatureCollectionDef.await()
 
+        if (routeLineOptions.displayRestrictedRoadSections) {
+            jobControl.scope.launch {
+                val routeHasRestrictionsDef =
+                    jobControl.scope.async(ThreadController.IODispatcher) {
+                        partitionedRoutes.first.firstOrNull()?.route?.run {
+                            MapboxRouteLineUtils.routeHasRestrictions(this)
+                        } ?: false
+                    }
+                routeHasRestrictions = routeHasRestrictionsDef.await()
+            }
+        }
+
         // The RouteLineExpressionData is only needed if the vanishing route line feature
         // or styleInactiveRouteLegsIndependently feature are enabled.
         if (
@@ -914,9 +1000,7 @@ class MapboxRouteLineApi(
                             this,
                             routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
                             true,
-                            routeLineOptions.resourceProvider.routeLineColorResources,
-                            routeLineOptions.resourceProvider.restrictedRoadSectionScale,
-                            routeLineOptions.displayRestrictedRoadSections
+                            routeLineOptions.resourceProvider.routeLineColorResources
                         )
                     } ?: listOf()
                 }
@@ -948,7 +1032,8 @@ class MapboxRouteLineApi(
                 alternateRoute2TrafficExpressionProducer,
                 alternativeRoute1FeatureCollection,
                 alternativeRoute2FeatureCollection,
-                wayPointsFeatureCollection
+                wayPointsFeatureCollection,
+                restrictedRouteExpressionProducer
             )
         )
     }
