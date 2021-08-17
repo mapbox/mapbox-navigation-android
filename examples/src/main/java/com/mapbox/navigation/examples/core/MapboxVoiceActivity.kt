@@ -162,18 +162,6 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
-    private val soundButtonCallback = MapboxNavigationConsumer<Boolean> { value ->
-        isMuted = value.also {
-            if (it) {
-                // This is used to set the speech volume to mute.
-                voiceInstructionsPlayer.volume(SpeechVolume(0.0f))
-            } else {
-                // This is used to set the speech volume to max
-                voiceInstructionsPlayer.volume(SpeechVolume(1.0f))
-            }
-        }
-    }
-
     private val locationObserver = object : LocationObserver {
         override fun onRawLocationChanged(rawLocation: Location) {}
         override fun onEnhancedLocationChanged(
@@ -269,13 +257,23 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private fun soundButtonMake(mute: Boolean) {
-        if (mute) {
-            binding.soundButton
-                .muteAndExtend(SOUND_BUTTON_TEXT_APPEAR_DURATION, soundButtonCallback)
+        val muted = if (mute) {
+            binding.soundButton.muteAndExtend(SOUND_BUTTON_TEXT_APPEAR_DURATION)
         } else {
-            binding.soundButton
-                .unmuteAndExtend(SOUND_BUTTON_TEXT_APPEAR_DURATION, soundButtonCallback)
+            binding.soundButton.unmuteAndExtend(SOUND_BUTTON_TEXT_APPEAR_DURATION)
         }
+        handleSoundState(muted)
+    }
+
+    private fun handleSoundState(value: Boolean) {
+        if (value) {
+            // This is used to set the speech volume to mute.
+            voiceInstructionsPlayer.volume(SpeechVolume(0.0f))
+        } else {
+            // This is used to set the speech volume to max
+            voiceInstructionsPlayer.volume(SpeechVolume(1.0f))
+        }
+        isMuted = value
     }
 
     private fun getMapboxAccessTokenFromResources(): String {

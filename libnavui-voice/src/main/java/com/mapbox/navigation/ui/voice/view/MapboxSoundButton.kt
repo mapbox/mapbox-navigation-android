@@ -12,7 +12,6 @@ import androidx.annotation.StringRes
 import androidx.annotation.StyleRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.utils.internal.extensions.afterMeasured
 import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
 import com.mapbox.navigation.ui.utils.internal.extensions.play
@@ -123,48 +122,38 @@ class MapboxSoundButton : ConstraintLayout {
 
     /**
      * Invoke the function to mute.
-     * @param callback MapboxNavigationConsumer<Boolean> invoked after the drawable has been set and
-     * returns true representing that view is in muted state.
+     * @return `true` representing that view is in muted state.
      */
-    @JvmOverloads
-    fun mute(callback: MapboxNavigationConsumer<Boolean>? = null) {
+    fun mute(): Boolean {
         binding.soundButtonIcon.setImageDrawable(muteDrawable)
-        callback?.accept(true)
+        return true
     }
 
     /**
      * Invoke the function to unmute.
-     * @param callback MapboxNavigationConsumer<Boolean> invoked after the drawable has been set and
-     * returns false representing that view is in unmuted state.
+     * @return `false` representing that view is in unmuted state.
      */
-    @JvmOverloads
-    fun unmute(callback: MapboxNavigationConsumer<Boolean>? = null) {
+    fun unmute(): Boolean {
         binding.soundButtonIcon.setImageDrawable(unmuteDrawable)
-        callback?.accept(false)
+        return false
     }
 
     /**
      * Invoke the function to mute and show optional text associated with the action.
      * @param duration for the view to be in the extended mode before it starts to shrink.
-     * @param callback MapboxNavigationConsumer<Boolean> invoked after the animation is finished and
-     * returns true representing that view is in muted state.
+     * @return `true` representing that view is in muted state.
      */
-    @JvmOverloads
-    fun muteAndExtend(duration: Long, callback: MapboxNavigationConsumer<Boolean>? = null) {
-        mute(callback)
-        showTextWithAnimation(R.string.mapbox_muted, duration)
+    fun muteAndExtend(duration: Long): Boolean {
+        return mute().also { showTextWithAnimation(R.string.mapbox_muted, duration) }
     }
 
     /**
      * Invoke the function to unmute and show optional text associated with the action.
      * @param duration for the view to be in the extended mode before it starts to shrink.
-     * @param callback MapboxNavigationConsumer<Boolean> invoked after the animation is finished and
-     * returns false representing that view is in unmuted state.
+     * @return `false` representing that view is in unmuted state.
      */
-    @JvmOverloads
-    fun unmuteAndExtend(duration: Long, callback: MapboxNavigationConsumer<Boolean>? = null) {
-        unmute(callback)
-        showTextWithAnimation(R.string.mapbox_unmuted, duration)
+    fun unmuteAndExtend(duration: Long): Boolean {
+        return unmute().also { showTextWithAnimation(R.string.mapbox_unmuted, duration) }
     }
 
     private fun showTextWithAnimation(@StringRes textId: Int, duration: Long) {
