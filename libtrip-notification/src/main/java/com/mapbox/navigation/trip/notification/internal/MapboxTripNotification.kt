@@ -75,9 +75,8 @@ class MapboxTripNotification constructor(
     var currentManeuverModifier: String? = null
         private set
     private var currentRoundaboutAngle: Float? = null
+    private var currentManeuverBitmap: Bitmap? = null
 
-    private var currentInstructionText: String? = null
-    private var currentDistanceText: Double? = null
     private var pendingOpenIntent: PendingIntent? = null
     private var pendingCloseIntent: PendingIntent? = null
     private val etaFormat: String = applicationContext.getString(R.string.mapbox_eta_format)
@@ -165,8 +164,6 @@ class MapboxTripNotification constructor(
     override fun onTripSessionStopped() {
         currentManeuverType = null
         currentManeuverModifier = null
-        currentInstructionText = null
-        currentDistanceText = null
         notificationView.resetView()
         unregisterReceiver()
         try {
@@ -250,19 +247,16 @@ class MapboxTripNotification constructor(
         when (state) {
             is TripNotificationState.TripNotificationFreeState -> setFreeDriveMode(true)
             is TripNotificationState.TripNotificationData -> {
-                if (isDistanceTextChanged(state.distanceRemaining)) {
-                    updateDistanceText(state.distanceRemaining)
-                }
+                updateDistanceText(state.distanceRemaining)
                 generateArrivalTime(state.durationRemaining)?.let { formattedTime ->
                     updateViewsWithArrival(formattedTime)
                 }
                 state.bannerInstructions?.let { bannerInstructions ->
-                    val primary = bannerInstructions.primary().text()
-                    if (isInstructionTextChanged(primary)) {
-                        updateInstructionText(primary)
-                    }
+                    updateInstructionText(bannerInstructions.primary().text())
                     if (isManeuverStateChanged(bannerInstructions)) {
                         updateManeuverImage(state.drivingSide ?: ManeuverModifier.RIGHT)
+                    } else {
+                        currentManeuverBitmap?.let { notificationView.updateImage(it) }
                     }
                 }
                 setFreeDriveMode(false)
@@ -279,19 +273,13 @@ class MapboxTripNotification constructor(
         if (isFreeDriveMode) {
             currentManeuverType = null
             currentManeuverModifier = null
-            currentRoundaboutAngle = null
         }
-    }
-
-    private fun isDistanceTextChanged(distanceRemaining: Double?): Boolean {
-        return currentDistanceText != distanceRemaining
     }
 
     private fun updateDistanceText(distanceRemaining: Double?) {
         val formattedDistance = distanceRemaining?.let {
             distanceFormatter.formatDistance(distanceRemaining)
         } ?: return
-        currentDistanceText = distanceRemaining
         notificationView.updateDistanceText(formattedDistance)
     }
 
@@ -315,13 +303,8 @@ class MapboxTripNotification constructor(
         notificationView.updateArrivalTime(time)
     }
 
-    private fun isInstructionTextChanged(primaryText: String): Boolean {
-        return currentInstructionText.isNullOrEmpty() || currentInstructionText != primaryText
-    }
-
     private fun updateInstructionText(primaryText: String) {
         notificationView.updateInstructionText(primaryText)
-        currentInstructionText = primaryText
     }
 
     private fun isManeuverStateChanged(bannerInstruction: BannerInstructions): Boolean {
@@ -345,16 +328,14 @@ class MapboxTripNotification constructor(
             currentManeuverModifier,
             drivingSide
         )
-        ifNonNull(notificationTurnIcon) { turnIcon ->
+        currentManeuverBitmap = ifNonNull(notificationTurnIcon) { turnIcon ->
             ifNonNull(turnIcon.icon) { image ->
                 val originalDrawable = notificationView.getImageDrawable(image)
                 ifNonNull(originalDrawable) { drawable ->
-                    ifNonNull(getManeuverBitmap(drawable, turnIcon.shouldFlipIcon)) { bitmap ->
-                        notificationView.updateImage(bitmap)
-                    }
+                    getManeuverBitmap(drawable, turnIcon.shouldFlipIcon)
                 }
             }
-        }
+        }?.also { notificationView.updateImage(it) }
     }
 
     private fun getManeuverBitmap(drawable: Drawable, shouldFlipIcon: Boolean): Bitmap? {

@@ -257,7 +257,7 @@ class MapboxTripNotificationTest {
     }
 
     @Test
-    fun whenUpdateNotificationCalledTwiceWithSameDataThenRemoteViewAreNotUpdatedTwice() {
+    fun whenUpdateNotificationCalledTwiceWithSameDataThenRemoteViewAreUpdatedTwice() {
         val state = mockk<TripNotificationState.TripNotificationData>(relaxed = true)
         val primaryText = { "Primary Text" }
         val bannerText = mockBannerText(state, primaryText)
@@ -272,8 +272,8 @@ class MapboxTripNotificationTest {
         notification.updateNotification(state)
 
         verify(exactly = 2) { bannerText.text() }
-        verify(exactly = 1) { collapsedViews.setTextViewText(any(), primaryText()) }
-        verify(exactly = 1) { expandedViews.setTextViewText(any(), primaryText()) }
+        verify(exactly = 2) { collapsedViews.setTextViewText(any(), primaryText()) }
+        verify(exactly = 2) { expandedViews.setTextViewText(any(), primaryText()) }
         assertEquals(notification.currentManeuverType, MANEUVER_TYPE)
         assertEquals(notification.currentManeuverModifier, MANEUVER_MODIFIER)
     }
