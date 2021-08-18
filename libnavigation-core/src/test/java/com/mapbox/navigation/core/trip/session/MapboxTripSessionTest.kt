@@ -23,6 +23,7 @@ import com.mapbox.navigation.core.navigator.getMapMatcherResult
 import com.mapbox.navigation.core.navigator.getRouteInitInfo
 import com.mapbox.navigation.core.navigator.getRouteProgressFrom
 import com.mapbox.navigation.core.navigator.getTripStatusFrom
+import com.mapbox.navigation.core.navigator.mapToDirectionsApi
 import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
@@ -36,6 +37,7 @@ import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
@@ -485,6 +487,40 @@ class MapboxTripSessionTest {
             offRouteObserver.onOffRouteStateChanged(true)
             offRouteObserver.onOffRouteStateChanged(false)
         }
+        tripSession.stop()
+    }
+
+    /**
+     * Test for a workaround for https://github.com/mapbox/mapbox-navigation-android/issues/4727.
+     */
+    @Test
+    fun `banner instruction fallback for missing native events`() = coroutineRule.runBlockingTest {
+        val step = mockk<LegStep>(relaxed = true)
+        val nativeBanner = mockk<BannerInstruction>(relaxed = true)
+        val banner = mockk<BannerInstructions>(relaxed = true)
+        every { navigationStatus.legIndex } returns 0
+        every { navigationStatus.stepIndex } returns 1
+        every { route.legs() } returns listOf(
+            mockk {
+                every { steps() } returns listOf(
+                    mockk(relaxed = true),
+                    step
+                )
+            }
+        )
+        every { nativeBanner.mapToDirectionsApi(step) } returns banner
+        every { MapboxNativeNavigatorImpl.getBannerInstruction(1) } returns nativeBanner
+        val bannerInstructionsObserver: BannerInstructionsObserver = mockk(relaxUnitFun = true)
+
+        tripSession = buildTripSession()
+        tripSession.registerBannerInstructionsObserver(bannerInstructionsObserver)
+        tripSession.route = route
+        tripSession.start()
+        every { navigationStatus.routeState } returns RouteState.TRACKING
+        every { navigationStatus.bannerInstruction } returns null
+        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+
+        verify { getRouteProgressFrom(route, navigationStatus, any(), banner, 0) }
         tripSession.stop()
     }
 
