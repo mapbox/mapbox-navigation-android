@@ -14,11 +14,9 @@ import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.internal.utils.isSameRoute
 import com.mapbox.navigation.core.internal.utils.isSameUuid
-import com.mapbox.navigation.core.navigator.convertState
 import com.mapbox.navigation.core.navigator.getMapMatcherResult
 import com.mapbox.navigation.core.navigator.getRouteInitInfo
 import com.mapbox.navigation.core.navigator.getRouteProgressFrom
@@ -224,13 +222,18 @@ internal class MapboxTripSession(
                         val currentLeg = legs[tripStatus.navigationStatus.legIndex]
                         ifNonNull(currentLeg?.steps()) { steps ->
                             val currentStep = steps[tripStatus.navigationStatus.stepIndex]
-                            val state = tripStatus.navigationStatus.routeState.convertState()
                             val nativeBannerInstruction: BannerInstruction? =
                                 tripStatus.navigationStatus.bannerInstruction.let {
-                                    if (it == null && state == RouteProgressState.INITIALIZED) {
-                                        // workaround for a remaining issue in
+                                    if (it == null &&
+                                        bannerInstructionEvent.latestBannerInstructions == null
+                                    ) {
+                                        // workaround for a remaining issues in
                                         // github.com/mapbox/mapbox-navigation-native/issues/3466
-                                        MapboxNativeNavigatorImpl.getBannerInstruction(0)
+                                        // and
+                                        // github.com/mapbox/mapbox-navigation-android/issues/4727
+                                        MapboxNativeNavigatorImpl.getBannerInstruction(
+                                            status.stepIndex
+                                        )
                                     } else {
                                         it
                                     }
