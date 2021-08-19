@@ -58,6 +58,11 @@ object RoadObjectLocationType {
     const val ROUTE_ALERT = 6
 
     /**
+     * Location of an object represented as a subgraph.
+     */
+    const val SUBGRAPH = 7
+
+    /**
      * Retention policy for the RoadObjectLocationType
      */
     @Retention(AnnotationRetention.BINARY)
@@ -69,6 +74,7 @@ object RoadObjectLocationType {
         POLYGON,
         POLYLINE,
         ROUTE_ALERT,
+        SUBGRAPH,
     )
     annotation class Type
 }
