@@ -402,12 +402,16 @@ class MapboxNavigation(
      * Starts listening for location updates and enters an `Active Guidance` state if there's a primary route available
      * or a `Free Drive` state otherwise.
      *
+     * @param withForegroundService Boolean if set to false, foreground service will not be started and
+     * no notifications will be rendered, and no location updates will be available while the app is in the background.
+     * Default value is set to true.
      * @see [registerTripSessionStateObserver]
      * @see [registerRouteProgressObserver]
      */
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
-    fun startTripSession() {
-        tripSession.start()
+    @JvmOverloads
+    fun startTripSession(withForegroundService: Boolean = true) {
+        tripSession.start(withForegroundService)
         notificationChannelField?.let {
             monitorNotificationActionButton(it.get(null) as ReceiveChannel<NotificationAction>)
         }
@@ -429,6 +433,14 @@ class MapboxNavigation(
      */
     fun resetTripSession() {
         navigator.resetRideSession()
+    }
+
+    /**
+     * Query if the [MapboxNavigation] is running a foreground service
+     * @return true if the [MapboxNavigation] is running a foreground service else false
+     */
+    fun isRunningForegroundService(): Boolean {
+        return tripSession.isRunningWithForegroundService()
     }
 
     /**

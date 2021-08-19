@@ -219,6 +219,22 @@ class MapboxNavigationTest {
     }
 
     @Test
+    fun startSessionWithService() {
+        every { tripSession.isRunningWithForegroundService() } returns true
+        mapboxNavigation.startTripSession()
+
+        assertTrue(mapboxNavigation.isRunningForegroundService())
+    }
+
+    @Test
+    fun startSessionWithoutService() {
+        every { tripSession.isRunningWithForegroundService() } returns false
+        mapboxNavigation.startTripSession(false)
+
+        assertFalse(mapboxNavigation.isRunningForegroundService())
+    }
+
+    @Test
     fun init_routesObs_internalRouteObs_navigationSession_and_TelemetryLocAndProgressDisptchr() {
         verify(exactly = 3) { directionsSession.registerRoutesObserver(any()) }
 
