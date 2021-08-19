@@ -607,6 +607,7 @@ package com.mapbox.navigation.base.trip.model.eh {
     method public boolean getMotorway();
     method public java.util.List<com.mapbox.navigation.base.trip.model.eh.RoadName> getNames();
     method public boolean getRamp();
+    method public String getRoadSurface();
     method public double getSpeed();
     method public Double? getSpeedLimit();
     method public String? getStateCode();
@@ -628,6 +629,7 @@ package com.mapbox.navigation.base.trip.model.eh {
     property public final boolean motorway;
     property public final java.util.List<com.mapbox.navigation.base.trip.model.eh.RoadName> names;
     property public final boolean ramp;
+    property public final String roadSurface;
     property public final double speed;
     property public final Double? speedLimit;
     property public final String? stateCode;
@@ -703,6 +705,21 @@ package com.mapbox.navigation.base.trip.model.eh {
     method public boolean getShielded();
     property public final String name;
     property public final boolean shielded;
+  }
+
+  public final class RoadSurface {
+    field public static final String COMPACTED = "COMPACTED";
+    field public static final String DIRT = "DIRT";
+    field public static final String GRAVEL = "GRAVEL";
+    field public static final String IMPASSABLE = "IMPASSABLE";
+    field public static final com.mapbox.navigation.base.trip.model.eh.RoadSurface INSTANCE;
+    field public static final String PATH = "PATH";
+    field public static final String PAVED = "PAVED";
+    field public static final String PAVED_ROUGH = "PAVED_ROUGH";
+    field public static final String PAVED_SMOOTH = "PAVED_SMOOTH";
+  }
+
+  @StringDef({com.mapbox.navigation.base.trip.model.eh.RoadSurface.PAVED_SMOOTH, com.mapbox.navigation.base.trip.model.eh.RoadSurface.PAVED, com.mapbox.navigation.base.trip.model.eh.RoadSurface.PAVED_ROUGH, com.mapbox.navigation.base.trip.model.eh.RoadSurface.COMPACTED, com.mapbox.navigation.base.trip.model.eh.RoadSurface.DIRT, com.mapbox.navigation.base.trip.model.eh.RoadSurface.GRAVEL, com.mapbox.navigation.base.trip.model.eh.RoadSurface.PATH, com.mapbox.navigation.base.trip.model.eh.RoadSurface.IMPASSABLE}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface RoadSurface.Type {
   }
 
 }

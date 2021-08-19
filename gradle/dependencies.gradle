@@ -12,13 +12,13 @@ ext {
   // version which we should use in this build
   def mapboxNavigatorVersion = System.getenv("FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION")
   if (mapboxNavigatorVersion == null || mapboxNavigatorVersion == '') {
-      mapboxNavigatorVersion = '62.0.0'
+      mapboxNavigatorVersion = '63.0.0'
   }
   println("Navigation Native version: " + mapboxNavigatorVersion)
 
   version = [
       mapboxMapSdk              : '10.0.0-rc.6',
-      mapboxSdkServices         : '6.0.0-alpha.2',
+      mapboxSdkServices         : '6.0.0-alpha.3',
       mapboxEvents              : '8.1.0',
       mapboxCore                : '5.0.0',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
