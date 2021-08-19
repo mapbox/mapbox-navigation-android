@@ -27,6 +27,9 @@ import org.junit.Test
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
+private const val routeDiff1 = "Updated distance, duration, speed, congestion at leg 1"
+private const val routeDiff2 = "Updated duration, speed, maxSpeed, congestion at leg 3"
+
 @ExperimentalCoroutinesApi
 class RouteRefreshControllerTest {
 
@@ -44,6 +47,7 @@ class RouteRefreshControllerTest {
         every { e(any(), any()) } just Runs
         every { e(any(), any(), any()) } just Runs
     }
+    private val routeDiffProvider = mockk<DirectionsRouteDiffProvider>()
     private val routeOptions: RouteOptions = mockk {
         every {
             coordinatesList()
@@ -52,6 +56,7 @@ class RouteRefreshControllerTest {
     private val validRoute: DirectionsRoute = mockk {
         every { routeOptions() } returns routeOptions
         every { requestUuid() } returns "test_uuid"
+        every { legs() } returns null
     }
 
     private val routeRefreshOptions = RouteRefreshOptions.Builder().build()
@@ -60,7 +65,8 @@ class RouteRefreshControllerTest {
         routeRefreshOptions,
         directionsSession,
         tripSession,
-        logger
+        logger,
+        routeDiffProvider,
     )
 
     private val requestId = 1L
@@ -258,10 +264,15 @@ class RouteRefreshControllerTest {
     @Test
     fun `clear the request when there is a successful response`() {
         every { routeOptions.enableRefresh() } returns true
+        every { routeDiffProvider.buildRouteDiffs(validRoute, any(), 0) } returns emptyList()
 
         routeRefreshController.restart()
         coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis)
-        routeRefreshCallbackSlot.captured.onRefresh(mockk())
+        routeRefreshCallbackSlot.captured.onRefresh(
+            mockk {
+                every { legs() } returns null
+            },
+        )
         routeRefreshController.stop()
 
         verify(exactly = 1) { directionsSession.requestRouteRefresh(any(), any(), any()) }
@@ -306,6 +317,42 @@ class RouteRefreshControllerTest {
                     """.trimIndent()
                 )
             )
+        }
+    }
+
+    @Test
+    fun `should log route diffs when there is a successful response`() {
+        val newRoute = mockk<DirectionsRoute>()
+        val routeDiffs = listOf(routeDiff1, routeDiff2)
+
+        every { routeOptions.enableRefresh() } returns true
+        every { routeDiffProvider.buildRouteDiffs(validRoute, newRoute, 0) } returns routeDiffs
+
+        routeRefreshController.restart()
+        coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis)
+        routeRefreshCallbackSlot.captured.onRefresh(newRoute)
+        routeRefreshController.stop()
+
+        verify(exactly = 1) {
+            logger.i(RouteRefreshController.TAG, Message(routeDiff1))
+            logger.i(RouteRefreshController.TAG, Message(routeDiff2))
+        }
+    }
+
+    @Test
+    fun `should log message when there is a successful response without route diffs`() {
+        val newRoute = mockk<DirectionsRoute>()
+
+        every { routeOptions.enableRefresh() } returns true
+        every { routeDiffProvider.buildRouteDiffs(validRoute, newRoute, 0) } returns emptyList()
+
+        routeRefreshController.restart()
+        coroutineRule.testDispatcher.advanceTimeBy(routeRefreshOptions.intervalMillis)
+        routeRefreshCallbackSlot.captured.onRefresh(newRoute)
+        routeRefreshController.stop()
+
+        verify(exactly = 1) {
+            logger.i(RouteRefreshController.TAG, Message("No changes to route annotations"))
         }
     }
 

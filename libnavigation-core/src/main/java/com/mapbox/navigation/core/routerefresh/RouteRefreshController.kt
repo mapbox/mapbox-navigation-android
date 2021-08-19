@@ -22,7 +22,8 @@ internal class RouteRefreshController(
     private val routeRefreshOptions: RouteRefreshOptions,
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession,
-    private val logger: Logger
+    private val logger: Logger,
+    private val routeDiffProvider: DirectionsRouteDiffProvider = DirectionsRouteDiffProvider(),
 ) {
 
     internal companion object {
@@ -81,7 +82,7 @@ internal class RouteRefreshController(
             currentRequestId = directionsSession.requestRouteRefresh(
                 route,
                 legIndex,
-                routeRefreshCallback
+                createRouteRefreshCallback(route, legIndex),
             )
         } else {
             logger.w(
@@ -98,10 +99,25 @@ internal class RouteRefreshController(
         }
     }
 
-    private val routeRefreshCallback = object : RouteRefreshCallback {
+    private fun createRouteRefreshCallback(
+        oldDirectionsRoute: DirectionsRoute,
+        currentLegIndex: Int,
+    ) = object : RouteRefreshCallback {
 
         override fun onRefresh(directionsRoute: DirectionsRoute) {
             logger.i(TAG, msg = Message("Successful route refresh"))
+            val routeDiffs = routeDiffProvider.buildRouteDiffs(
+                oldDirectionsRoute,
+                directionsRoute,
+                currentLegIndex,
+            )
+            if (routeDiffs.isEmpty()) {
+                logger.i(TAG, msg = Message("No changes to route annotations"))
+            } else {
+                for (diff in routeDiffs) {
+                    logger.i(TAG, msg = Message(diff))
+                }
+            }
             val directionsSessionRoutes = directionsSession.routes.toMutableList()
             if (directionsSessionRoutes.isNotEmpty()) {
                 directionsSessionRoutes[0] = directionsRoute
