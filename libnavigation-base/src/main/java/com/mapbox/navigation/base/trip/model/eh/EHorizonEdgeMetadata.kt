@@ -24,6 +24,7 @@ package com.mapbox.navigation.base.trip.model.eh
  * @param isRightHandTraffic true if in the current place/state right-hand traffic is used
  * @param isOneWay true if current edge is one-way.
  * false if left-hand.
+ * @param roadSurface type of the road surface.
  */
 class EHorizonEdgeMetadata internal constructor(
     val heading: Double,
@@ -45,6 +46,7 @@ class EHorizonEdgeMetadata internal constructor(
     val stateCode: String?,
     val isRightHandTraffic: Boolean,
     val isOneWay: Boolean,
+    @RoadSurface.Type val roadSurface: String
 ) {
 
     /**
@@ -75,6 +77,7 @@ class EHorizonEdgeMetadata internal constructor(
         if (stateCode != other.stateCode) return false
         if (isRightHandTraffic != other.isRightHandTraffic) return false
         if (isOneWay != other.isOneWay) return false
+        if (roadSurface != other.roadSurface) return false
 
         return true
     }
@@ -102,6 +105,7 @@ class EHorizonEdgeMetadata internal constructor(
         result = 31 * result + (stateCode?.hashCode() ?: 0)
         result = 31 * result + isRightHandTraffic.hashCode()
         result = 31 * result + isOneWay.hashCode()
+        result = 31 * result + roadSurface.hashCode()
         return result
     }
 
@@ -128,7 +132,8 @@ class EHorizonEdgeMetadata internal constructor(
             "countryCodeIso2=$countryCodeIso2, " +
             "stateCode=$stateCode, " +
             "isRightHandTraffic=$isRightHandTraffic, " +
-            "isOneWay=$isOneWay" +
+            "isOneWay=$isOneWay, " +
+            "roadSurface=$roadSurface" +
             ")"
     }
 }

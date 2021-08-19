@@ -34,6 +34,7 @@ import com.mapbox.navigator.RoadObjectEnterExitInfo
 import com.mapbox.navigator.RoadObjectPassInfo
 import com.mapbox.navigator.RoadObjectProvider
 import com.mapbox.navigator.RoadObjectType
+import com.mapbox.navigator.RoadSurface
 
 private typealias SDKRoadObjectType =
     com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
@@ -58,6 +59,9 @@ internal typealias SDKOpenLRSideOfRoad =
 
 internal typealias SDKOpenLROrientation =
     com.mapbox.navigation.base.trip.model.roadobject.location.OpenLROrientation
+
+internal typealias SDKRoadSurface =
+    com.mapbox.navigation.base.trip.model.eh.RoadSurface
 
 /**
  * Map the ElectronicHorizonPosition.
@@ -289,6 +293,7 @@ internal fun EdgeMetadata.mapToEHorizonEdgeMetadata(): EHorizonEdgeMetadata {
         stateCode,
         isRightHandTraffic,
         isOneway,
+        surface.mapToRoadSurface()
     )
 }
 
@@ -417,3 +422,15 @@ private fun com.mapbox.navigator.Gate.mapToGate(): Gate {
         distance
     )
 }
+
+private fun RoadSurface.mapToRoadSurface(): String =
+    when (this) {
+        RoadSurface.PAVED_SMOOTH -> SDKRoadSurface.PAVED_SMOOTH
+        RoadSurface.PAVED -> SDKRoadSurface.PAVED
+        RoadSurface.PAVED_ROUGH -> SDKRoadSurface.PAVED_ROUGH
+        RoadSurface.COMPACTED -> SDKRoadSurface.COMPACTED
+        RoadSurface.DIRT -> SDKRoadSurface.DIRT
+        RoadSurface.GRAVEL -> SDKRoadSurface.GRAVEL
+        RoadSurface.PATH -> SDKRoadSurface.PATH
+        RoadSurface.IMPASSABLE -> SDKRoadSurface.IMPASSABLE
+    }
