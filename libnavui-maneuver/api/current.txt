@@ -8,6 +8,11 @@ package com.mapbox.navigation.ui.maneuver {
 
 package com.mapbox.navigation.ui.maneuver.api {
 
+  public final class MapboxLaneIconsApi {
+    ctor public MapboxLaneIconsApi();
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.LaneIconError,com.mapbox.navigation.ui.maneuver.model.LaneIcon> laneIcon(com.mapbox.navigation.ui.maneuver.model.LaneIndicator laneIndicator, String? activeDirection);
+  }
+
   public final class MapboxManeuverApi {
     ctor public MapboxManeuverApi(com.mapbox.navigation.base.formatter.DistanceFormatter formatter, com.mapbox.navigation.ui.maneuver.model.ManeuverOptions maneuverOptions = ManeuverOptions.<init>().build());
     ctor public MapboxManeuverApi(com.mapbox.navigation.base.formatter.DistanceFormatter formatter);
@@ -86,6 +91,20 @@ package com.mapbox.navigation.ui.maneuver.model {
   @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class LaneFactory {
     method public static com.mapbox.navigation.ui.maneuver.model.Lane buildLane(java.util.List<com.mapbox.navigation.ui.maneuver.model.LaneIndicator> allLanes, String? activeDirection = null);
     field public static final com.mapbox.navigation.ui.maneuver.model.LaneFactory INSTANCE;
+  }
+
+  public final class LaneIcon {
+    method public int getDrawableResId();
+    property public final int drawableResId;
+  }
+
+  public final class LaneIconError {
+    method public String? getActiveDirection();
+    method public String getErrorMessage();
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIndicator getLaneIndicator();
+    property public final String? activeDirection;
+    property public final String errorMessage;
+    property public final com.mapbox.navigation.ui.maneuver.model.LaneIndicator laneIndicator;
   }
 
   public final class LaneIndicator {

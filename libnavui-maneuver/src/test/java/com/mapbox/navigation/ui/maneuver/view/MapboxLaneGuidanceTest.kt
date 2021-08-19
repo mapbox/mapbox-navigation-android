@@ -6,8 +6,10 @@ import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.ui.maneuver.LaneIconHelper
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.ui.maneuver.R
+import com.mapbox.navigation.ui.maneuver.api.MapboxLaneIconsApi
+import com.mapbox.navigation.ui.maneuver.model.LaneIcon
 import com.mapbox.navigation.ui.maneuver.model.LaneIndicator
 import io.mockk.every
 import io.mockk.mockk
@@ -22,7 +24,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class MapboxLaneGuidanceTest {
 
-    private val laneIconHelper = mockk<LaneIconHelper>()
+    private val laneIconHelper = mockk<MapboxLaneIconsApi>()
     lateinit var ctx: Context
 
     @Before
@@ -41,8 +43,8 @@ class MapboxLaneGuidanceTest {
             .build()
         val activeDirection = "left"
         every {
-            laneIconHelper.retrieveLaneToDraw(laneIndicator, activeDirection)
-        } returns R.drawable.mapbox_ic_turn_left
+            laneIconHelper.laneIcon(laneIndicator, activeDirection)
+        } returns ExpectedFactory.createValue(LaneIcon(R.drawable.mapbox_ic_turn_left))
 
         view.renderLane(laneIndicator, activeDirection, wrapper)
 
@@ -60,8 +62,8 @@ class MapboxLaneGuidanceTest {
             .build()
         val activeDirection = "left"
         every {
-            laneIconHelper.retrieveLaneToDraw(laneIndicator, activeDirection)
-        } returns R.drawable.mapbox_ic_turn_left
+            laneIconHelper.laneIcon(laneIndicator, activeDirection)
+        } returns ExpectedFactory.createValue(LaneIcon(R.drawable.mapbox_ic_turn_left))
 
         view.renderLane(laneIndicator, activeDirection, wrapper)
 
@@ -79,8 +81,8 @@ class MapboxLaneGuidanceTest {
             .build()
         val activeDirection = "left"
         every {
-            laneIconHelper.retrieveLaneToDraw(laneIndicator, activeDirection)
-        } returns R.drawable.mapbox_ic_turn_left
+            laneIconHelper.laneIcon(laneIndicator, activeDirection)
+        } returns ExpectedFactory.createValue(LaneIcon(R.drawable.mapbox_ic_turn_left))
 
         view.renderLane(laneIndicator, activeDirection, wrapper)
         val actualAlpha = view.alpha
@@ -99,8 +101,8 @@ class MapboxLaneGuidanceTest {
             .build()
         val activeDirection = "left"
         every {
-            laneIconHelper.retrieveLaneToDraw(laneIndicator, activeDirection)
-        } returns R.drawable.mapbox_ic_turn_left
+            laneIconHelper.laneIcon(laneIndicator, activeDirection)
+        } returns ExpectedFactory.createValue(LaneIcon(R.drawable.mapbox_ic_turn_left))
 
         view.renderLane(laneIndicator, activeDirection, wrapper)
         val actualAlpha = view.alpha

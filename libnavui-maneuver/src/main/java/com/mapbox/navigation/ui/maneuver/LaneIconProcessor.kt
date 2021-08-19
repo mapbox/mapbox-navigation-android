@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maneuver
 
+import androidx.annotation.DrawableRes
 import com.mapbox.api.directions.v5.models.ManeuverModifier.LEFT
 import com.mapbox.api.directions.v5.models.ManeuverModifier.RIGHT
 import com.mapbox.api.directions.v5.models.ManeuverModifier.SHARP_LEFT
@@ -11,8 +12,7 @@ import com.mapbox.api.directions.v5.models.ManeuverModifier.UTURN
 import com.mapbox.navigation.ui.maneuver.model.LaneIndicator
 import com.mapbox.navigation.ui.maneuver.model.LaneTurns
 
-internal class LaneIconHelper {
-
+internal object LaneIconProcessor {
     private val laneIcon: Map<LaneTurns, Int> = mapOf(
         LaneTurns.LANE_UTURN to R.drawable.mapbox_ic_uturn,
         LaneTurns.LANE_STRAIGHT to R.drawable.mapbox_ic_turn_straight,
@@ -48,7 +48,8 @@ internal class LaneIconHelper {
             R.drawable.mapbox_ic_lane_sharp_right_straight_straight_only,
     )
 
-    fun retrieveLaneToDraw(laneIndicator: LaneIndicator, activeDirection: String?): Int? {
+    @DrawableRes
+    fun getDrawableFrom(laneIndicator: LaneIndicator, activeDirection: String?): Int? {
         return when {
             laneIndicator.directions.size == 1 && laneIndicator.directions[0] == UTURN -> {
                 laneIcon[LaneTurns.LANE_UTURN]
