@@ -14,6 +14,7 @@ package com.mapbox.navigation.core {
     method public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
     method public com.mapbox.navigation.core.navigator.TilesetDescriptorFactory getTilesetDescriptorFactory();
     method public com.mapbox.navigation.core.trip.session.TripSessionState getTripSessionState();
+    method public boolean isRunningForegroundService();
     method public boolean navigateNextRouteLeg();
     method public void onDestroy();
     method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray(), com.mapbox.navigation.core.telemetry.events.AppMetadata? appMetadata = null);
@@ -40,6 +41,7 @@ package com.mapbox.navigation.core {
     method public void setRerouteController(com.mapbox.navigation.core.reroute.RerouteController? rerouteController = com.mapbox.navigation.core.MapboxNavigation.defaultRerouteController);
     method public void setRerouteController();
     method public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession(boolean withForegroundService = true);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession();
     method public void stopTripSession();
     method public void unregisterArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);

@@ -193,14 +193,23 @@ internal class MapboxTripSession(
     /**
      * Start MapboxTripSession
      */
-    override fun start() {
+    override fun start(withTripService: Boolean) {
         if (state == TripSessionState.STARTED) {
             return
         }
         navigator.addNavigatorObserver(navigatorObserver)
-        tripService.startService()
+        if (withTripService) {
+            tripService.startService()
+        }
         startLocationUpdates()
         state = TripSessionState.STARTED
+    }
+
+    /**
+     * Returns if the MapboxTripSession is running a foreground service
+     */
+    override fun isRunningWithForegroundService(): Boolean {
+        return tripService.hasServiceStarted()
     }
 
     private val navigatorObserver = object : NavigatorObserver() {
@@ -593,7 +602,9 @@ internal class MapboxTripSession(
         shouldTriggerBannerInstructionsObserver: Boolean
     ) {
         routeProgress = progress
-        tripService.updateNotification(buildTripNotificationState(progress))
+        if (tripService.hasServiceStarted()) {
+            tripService.updateNotification(buildTripNotificationState(progress))
+        }
         progress?.let { progress ->
             routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
             if (shouldTriggerBannerInstructionsObserver) {
