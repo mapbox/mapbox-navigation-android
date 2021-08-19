@@ -27,10 +27,9 @@ import com.mapbox.api.directions.v5.models.BannerComponents
  * }
  *
  * A simplified data structure containing [BannerComponents.active] and list of [BannerComponents.directions].
- * @property isActive Boolean informs whether the lane is active.
+ * @property isActive Boolean indicates if that lane can be used to complete the upcoming maneuver.
  * @property directions List<String> informs about all the possible directions a particular lane can take.
  */
-
 class LaneIndicator private constructor(
     val isActive: Boolean,
     val directions: List<String>
