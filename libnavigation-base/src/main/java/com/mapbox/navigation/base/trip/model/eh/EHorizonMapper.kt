@@ -15,6 +15,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.location.PolygonLocation
 import com.mapbox.navigation.base.trip.model.roadobject.location.PolylineLocation
 import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation
 import com.mapbox.navigation.base.trip.model.roadobject.location.RouteAlertLocation
+import com.mapbox.navigation.base.trip.model.roadobject.location.SubgraphLocation
 import com.mapbox.navigator.EdgeMetadata
 import com.mapbox.navigator.ElectronicHorizon
 import com.mapbox.navigator.ElectronicHorizonEdge
@@ -35,6 +36,7 @@ import com.mapbox.navigator.RoadObjectPassInfo
 import com.mapbox.navigator.RoadObjectProvider
 import com.mapbox.navigator.RoadObjectType
 import com.mapbox.navigator.RoadSurface
+import com.mapbox.navigator.SubgraphEdge
 
 private typealias SDKRoadObjectType =
     com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
@@ -62,6 +64,9 @@ internal typealias SDKOpenLROrientation =
 
 internal typealias SDKRoadSurface =
     com.mapbox.navigation.base.trip.model.eh.RoadSurface
+
+internal typealias SDKSubgraphEdge =
+    com.mapbox.navigation.base.trip.model.roadobject.location.SubgraphEdge
 
 /**
  * Map the ElectronicHorizonPosition.
@@ -200,6 +205,14 @@ internal fun MatchedRoadObjectLocation.mapToRoadObjectLocation(): RoadObjectLoca
         isRouteAlertLocation -> {
             RouteAlertLocation(routeAlertLocation.shape)
         }
+        isMatchedSubgraphLocation -> {
+            SubgraphLocation(
+                matchedSubgraphLocation.enters.mapToRoadObjectPositions(),
+                matchedSubgraphLocation.exits.mapToRoadObjectPositions(),
+                matchedSubgraphLocation.edges.mapToSubgraphEdges(),
+                matchedSubgraphLocation.shape
+            )
+        }
         else -> throw IllegalArgumentException("Unsupported object location type.")
     }
 }
@@ -213,6 +226,24 @@ internal fun Position.mapToRoadObjectPosition(): RoadObjectPosition {
         coordinate
     )
 }
+
+internal fun Map<Long, SubgraphEdge>.mapToSubgraphEdges(): Map<Long, SDKSubgraphEdge> {
+    val edges = mutableMapOf<Long, SDKSubgraphEdge>()
+    this.forEach {
+        edges[it.key] = it.value.mapToSubgraphEdge()
+    }
+
+    return edges
+}
+
+internal fun SubgraphEdge.mapToSubgraphEdge() =
+    SDKSubgraphEdge(
+        id,
+        innerEdgeIds,
+        outerEdgeIds,
+        shape,
+        length
+    )
 
 /**
  * Map the RoadObjectType.

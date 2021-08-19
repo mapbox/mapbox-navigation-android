@@ -1097,12 +1097,35 @@ package com.mapbox.navigation.base.trip.model.roadobject.location {
     field public static final int POLYGON = 4; // 0x4
     field public static final int POLYLINE = 5; // 0x5
     field public static final int ROUTE_ALERT = 6; // 0x6
+    field public static final int SUBGRAPH = 7; // 0x7
   }
 
-  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.GANTRY, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.OPEN_LR_LINE, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.OPEN_LR_POINT, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.POINT, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.POLYGON, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.POLYLINE, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.ROUTE_ALERT}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface RoadObjectLocationType.Type {
+  @IntDef({com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.GANTRY, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.OPEN_LR_LINE, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.OPEN_LR_POINT, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.POINT, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.POLYGON, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.POLYLINE, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.ROUTE_ALERT, com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocationType.SUBGRAPH}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface RoadObjectLocationType.Type {
   }
 
   public final class RouteAlertLocation extends com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation {
+  }
+
+  public final class SubgraphEdge {
+    method public long getId();
+    method public java.util.List<java.lang.Long> getInnerEdgeIds();
+    method public double getLength();
+    method public java.util.List<java.lang.Long> getOuterEdgeIds();
+    method public com.mapbox.geojson.Geometry getShape();
+    property public final long id;
+    property public final java.util.List<java.lang.Long> innerEdgeIds;
+    property public final double length;
+    property public final java.util.List<java.lang.Long> outerEdgeIds;
+    property public final com.mapbox.geojson.Geometry shape;
+  }
+
+  public final class SubgraphLocation extends com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation {
+    method public java.util.Map<java.lang.Long,com.mapbox.navigation.base.trip.model.roadobject.location.SubgraphEdge> getEdges();
+    method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition> getEntries();
+    method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition> getExits();
+    property public final java.util.Map<java.lang.Long,com.mapbox.navigation.base.trip.model.roadobject.location.SubgraphEdge> edges;
+    property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition> entries;
+    property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPosition> exits;
   }
 
 }
