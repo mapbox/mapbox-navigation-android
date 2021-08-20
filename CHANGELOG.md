@@ -2,6 +2,28 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.23 - August 20, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Features
+- Added option to set custom text for `Recenter`, `Sound`, and `RouteOverview` buttons. [#4703](https://github.com/mapbox/mapbox-navigation-android/pull/4703)
+- Introduced `MapboxBuildingsApi` and `MapboxBuildingView` that would be responsible to query a building on a map given a point and render it using the view. [#4704](https://github.com/mapbox/mapbox-navigation-android/pull/4704)
+- Added optional `EventsAppMetadata` field to `NavigationOptions`. [#4712](https://github.com/mapbox/mapbox-navigation-android/pull/4712)
+- Exposed `NavigationSessionState` and `NavigationSessionStateObserver`. [#4712](https://github.com/mapbox/mapbox-navigation-android/pull/4712)
+- Exposed lane icon drawables with `MapboxLaneIconsApi`. [#4729](https://github.com/mapbox/mapbox-navigation-android/pull/4729)
+- Added `SubgraphLocation` for `RoadObject`.  [#4731](https://github.com/mapbox/mapbox-navigation-android/pull/4731)
+- Added `roadSurface` property to `EHorizonEdgeMetadata`. [#4733](https://github.com/mapbox/mapbox-navigation-android/pull/4733)
+
+#### Bug fixes and improvements
+- Fixed a bug when after a route is set `RouteAlternativesController` started to request alternative routes with no observers. [#4706](https://github.com/mapbox/mapbox-navigation-android/pull/4706)
+- Fixed an issue with an occasional `ArrayindexOutOfBoundsException` being thrown when setting a new route. [#4714](https://github.com/mapbox/mapbox-navigation-android/pull/4714)
+- Fixed a bug when NavSDK crashed on unknown `RoadObjectLocation`. [#4731](https://github.com/mapbox/mapbox-navigation-android/pull/4731)
+- Removed `MapboxBuildingHighlightApi` and `MapboxBuildingArrivalApi`. [#4704](https://github.com/mapbox/mapbox-navigation-android/pull/4704)
+- Removed `Snapshotter` feature and it's related public facing apis, views and examples. [#4711](https://github.com/mapbox/mapbox-navigation-android/pull/4711)
+- Removed `AppMetadata` from `MapboxNavigation.postUserFeedback`. [#4712](https://github.com/mapbox/mapbox-navigation-android/pull/4712)
+
 ## Mapbox Navigation SDK 2.0.0-beta.22 - August 12, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
