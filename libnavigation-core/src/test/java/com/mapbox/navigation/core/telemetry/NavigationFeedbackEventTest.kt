@@ -18,10 +18,12 @@ class NavigationFeedbackEventTest {
     private val gson = Gson()
     private val phoneState = mockk<PhoneState>()
     private val metricsRouteProgress = mockk<MetricsRouteProgress>()
-    private val metadata = AppMetadata.Builder(APP_METADATA_NAME, APP_METADATA_VERSION)
-        .userId(APP_METADATA_USER_ID)
-        .sessionId(APP_METADATA_SESSION_ID)
-        .build()
+    private val metadata = AppMetadata(
+        APP_METADATA_NAME,
+        APP_METADATA_VERSION,
+        APP_METADATA_USER_ID,
+        APP_METADATA_SESSION_ID
+    )
 
     private val locationBefore = TelemetryLocation(
         LOCATION_BEFORE_LATITUDE,

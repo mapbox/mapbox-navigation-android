@@ -54,13 +54,18 @@ import com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
-import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
+import com.mapbox.navigation.core.trip.session.NavigationSession
+import com.mapbox.navigation.core.trip.session.NavigationSessionState
+import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance
+import com.mapbox.navigation.core.trip.session.NavigationSessionState.FreeDrive
+import com.mapbox.navigation.core.trip.session.NavigationSessionState.Idle
+import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -112,23 +117,23 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  *
  * Feel free to visit our [docs pages and examples](https://docs.mapbox.com/android/beta/navigation/overview/) before diving in!
  *
- * The [MapboxNavigation] implementation can enter into a couple of internal states:
- * - `Idle`
- * - `Free Drive`
- * - `Active Guidance`
+ * The [MapboxNavigation] implementation can enter into the following [NavigationSessionState]s:
+ * - [Idle]
+ * - [FreeDrive]
+ * - [ActiveGuidance]
  *
- * The SDK starts off in an `Idle` state.
+ * The SDK starts off in an [Idle] state.
  *
  * ### Location
- * Whenever the [startTripSession] is called, the SDK will enter the `Free Drive` state starting to request and propagate location updates via the [LocationObserver].
+ * Whenever the [startTripSession] is called, the SDK will enter the [FreeDrive] state starting to request and propagate location updates via the [LocationObserver].
  *
  * This observer provides 2 location update values in mixed intervals - either the raw one received from the provided [LocationEngine]
  * or the enhanced one map-matched internally using SDK's native capabilities.
  *
- * In `Free Drive` mode, the enhanced location is computed using nearby to user location's routing tiles that are continuously updating in the background.
+ * In [FreeDrive] mode, the enhanced location is computed using nearby to user location's routing tiles that are continuously updating in the background.
  * This can be configured using the [RoutingTilesOptions] in the [NavigationOptions].
  *
- * If the session is stopped, the SDK will stop listening for raw location updates and enter the `Idle` state.
+ * If the session is stopped, the SDK will stop listening for raw location updates and enter the [Idle] state.
  *
  * ### Routing
  * A route can be requested with:
@@ -161,12 +166,12 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  * )
  * ```
  *
- * If the SDK is in an `Idle` state, it stays in this same state even when a primary route is available.
+ * If the SDK is in an [Idle] state, it stays in this same state even when a primary route is available.
  *
- * If the SDK is already in the `Free Drive` mode or entering it whenever a primary route is available,
- * the SDK will enter the `Active Guidance` mode instead and propagate meaningful [RouteProgress].
+ * If the SDK is already in the [FreeDrive] mode or entering it whenever a primary route is available,
+ * the SDK will enter the [ActiveGuidance] mode instead and propagate meaningful [RouteProgress].
  *
- * When the routes are manually cleared, the SDK automatically fall back to either `Idle` or `Free Drive` state.
+ * When the routes are manually cleared, the SDK automatically fall back to either [Idle] or [FreeDrive] state.
  *
  * You can use [setRoutes] to provide new routes, clear current ones, or change the route at primary index 0.
  *
@@ -347,7 +352,7 @@ class MapboxNavigation(
                 this,
                 navigationOptions,
                 MapboxMetricsReporter,
-                logger
+                logger,
             )
         }
 
@@ -436,6 +441,15 @@ class MapboxNavigation(
      * @see [registerTripSessionStateObserver]
      */
     fun getTripSessionState(): TripSessionState = tripSession.getState()
+
+    /**
+     * Provides the current navigation session state.
+     *
+     * @return current [NavigationSessionState]
+     * @see NavigationSessionStateObserver
+     * @see [registerNavigationSessionStateObserver]
+     */
+    fun getNavigationSessionState(): NavigationSessionState = navigationSession.state
 
     /**
      * Requests a route using the available [Router] implementation.
@@ -823,7 +837,6 @@ class MapboxNavigation(
      * @param feedbackSource one of [FeedbackEvent.Source]
      * @param screenshot encoded screenshot (optional)
      * @param feedbackSubType array of [FeedbackEvent.Description] (optional)
-     * @param appMetadata [AppMetadata] information (optional)
      */
     @JvmOverloads
     fun postUserFeedback(
@@ -832,7 +845,6 @@ class MapboxNavigation(
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?,
         feedbackSubType: Array<String>? = emptyArray(),
-        appMetadata: AppMetadata? = null
     ) {
         MapboxNavigationTelemetry.postUserFeedback(
             feedbackType,
@@ -840,7 +852,6 @@ class MapboxNavigation(
             feedbackSource,
             screenshot,
             feedbackSubType,
-            appMetadata
         )
     }
 
@@ -856,6 +867,8 @@ class MapboxNavigation(
 
     /**
      * Stop observing the possibility of route alternatives.
+     *
+     * @param routeAlternativesObserver RouteAlternativesObserver
      */
     fun unregisterRouteAlternativesObserver(routeAlternativesObserver: RouteAlternativesObserver) {
         routeAlternativesController.unregister(routeAlternativesObserver)
@@ -866,9 +879,9 @@ class MapboxNavigation(
      * Navigation might switch to a fallback tiles version when target tiles are not available
      * and return back to the target version when tiles are loaded.
      *
-     * @see [NavigationVersionSwitchObserver]
-     *
      * @param observer NavigationVersionSwitchObserver
+     *
+     * @see [NavigationVersionSwitchObserver]
      */
     fun registerNavigationVersionSwitchObserver(observer: NavigationVersionSwitchObserver) {
         navigationVersionSwitchObservers.add(observer)
@@ -879,6 +892,8 @@ class MapboxNavigation(
      * Navigation might switch to a fallback tiles version when target tiles are not available
      * and return back to the target version when tiles are loaded.
      *
+     * @param observer NavigationVersionSwitchObserver
+     *
      * @see [NavigationVersionSwitchObserver]
      */
     fun unregisterNavigationVersionSwitchObserver(observer: NavigationVersionSwitchObserver) {
@@ -886,18 +901,22 @@ class MapboxNavigation(
     }
 
     /**
-     * Register a [NavigationSessionStateObserver] to be notified of the various Session states. Not publicly available
+     * Register a [NavigationSessionStateObserver] to be notified of the various Session states.
+     *
+     * @param navigationSessionStateObserver NavigationSessionStateObserver
      */
-    internal fun registerNavigationSessionObserver(
+    fun registerNavigationSessionStateObserver(
         navigationSessionStateObserver: NavigationSessionStateObserver
     ) {
         navigationSession.registerNavigationSessionStateObserver(navigationSessionStateObserver)
     }
 
     /**
-     * Unregisters a [NavigationSessionStateObserver]. Not publicly available
+     * Unregisters a [NavigationSessionStateObserver].
+     *
+     * @param navigationSessionStateObserver NavigationSessionStateObserver
      */
-    internal fun unregisterNavigationSessionObserver(
+    fun unregisterNavigationSessionStateObserver(
         navigationSessionStateObserver: NavigationSessionStateObserver
     ) {
         navigationSession.unregisterNavigationSessionStateObserver(navigationSessionStateObserver)

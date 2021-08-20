@@ -39,6 +39,7 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
+import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSession
@@ -103,7 +104,7 @@ class MapboxNavigationTest {
     private val routeAlternativesController: RouteAlternativesController =
         mockk(relaxUnitFun = true)
     private val routeProgress: RouteProgress = mockk(relaxed = true)
-    private val navigationSession: NavigationSession = mockk(relaxUnitFun = true)
+    private val navigationSession: NavigationSession = mockk(relaxed = true)
     private val logger: Logger = mockk(relaxUnitFun = true)
     private lateinit var rerouteController: RerouteController
     private lateinit var navigationOptions: NavigationOptions

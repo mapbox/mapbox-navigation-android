@@ -8,6 +8,7 @@ package com.mapbox.navigation.core {
     method public com.mapbox.navigation.core.trip.session.eh.GraphAccessor getGraphAccessor();
     method public com.mapbox.navigation.core.history.MapboxHistoryRecorder getHistoryRecorder();
     method public com.mapbox.navigation.base.options.NavigationOptions getNavigationOptions();
+    method public com.mapbox.navigation.core.trip.session.NavigationSessionState getNavigationSessionState();
     method public com.mapbox.navigation.core.reroute.RerouteController? getRerouteController();
     method public com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcher getRoadObjectMatcher();
     method public com.mapbox.navigation.core.trip.session.eh.RoadObjectsStore getRoadObjectsStore();
@@ -16,7 +17,6 @@ package com.mapbox.navigation.core {
     method public com.mapbox.navigation.core.trip.session.TripSessionState getTripSessionState();
     method public boolean navigateNextRouteLeg();
     method public void onDestroy();
-    method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray(), com.mapbox.navigation.core.telemetry.events.AppMetadata? appMetadata = null);
     method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray());
     method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot);
     method public void registerArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
@@ -24,6 +24,7 @@ package com.mapbox.navigation.core {
     method public void registerEHorizonObserver(com.mapbox.navigation.core.trip.session.eh.EHorizonObserver eHorizonObserver);
     method public void registerLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
     method public void registerMapMatcherResultObserver(com.mapbox.navigation.core.trip.session.MapMatcherResultObserver mapMatcherResultObserver);
+    method public void registerNavigationSessionStateObserver(com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver navigationSessionStateObserver);
     method public void registerNavigationVersionSwitchObserver(com.mapbox.navigation.core.NavigationVersionSwitchObserver observer);
     method public void registerOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
     method public void registerRoadObjectsOnRouteObserver(com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver roadObjectsOnRouteObserver);
@@ -47,6 +48,7 @@ package com.mapbox.navigation.core {
     method public void unregisterEHorizonObserver(com.mapbox.navigation.core.trip.session.eh.EHorizonObserver eHorizonObserver);
     method public void unregisterLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
     method public void unregisterMapMatcherResultObserver(com.mapbox.navigation.core.trip.session.MapMatcherResultObserver mapMatcherResultObserver);
+    method public void unregisterNavigationSessionStateObserver(com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver navigationSessionStateObserver);
     method public void unregisterNavigationVersionSwitchObserver(com.mapbox.navigation.core.NavigationVersionSwitchObserver observer);
     method public void unregisterOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
     method public void unregisterRoadObjectsOnRouteObserver(com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver roadObjectsOnRouteObserver);
@@ -550,25 +552,6 @@ package com.mapbox.navigation.core.telemetry {
 
 package com.mapbox.navigation.core.telemetry.events {
 
-  public final class AppMetadata {
-    method public String getName();
-    method public String? getSessionId();
-    method public String? getUserId();
-    method public String getVersion();
-    method public com.mapbox.navigation.core.telemetry.events.AppMetadata.Builder toBuilder();
-    property public final String name;
-    property public final String? sessionId;
-    property public final String? userId;
-    property public final String version;
-  }
-
-  public static final class AppMetadata.Builder {
-    ctor public AppMetadata.Builder(String name, String version);
-    method public com.mapbox.navigation.core.telemetry.events.AppMetadata build();
-    method public com.mapbox.navigation.core.telemetry.events.AppMetadata.Builder sessionId(String? sessionId);
-    method public com.mapbox.navigation.core.telemetry.events.AppMetadata.Builder userId(String? userId);
-  }
-
   public final class FeedbackEvent {
     field public static final String ACCIDENT = "accident";
     field public static final String ALTERNATIVE_ROUTE_NOT_EXPECTED = "alternative_route_not_expected";
@@ -659,6 +642,36 @@ package com.mapbox.navigation.core.trip.session {
 
   public fun interface MapMatcherResultObserver {
     method public void onNewMapMatcherResult(com.mapbox.navigation.core.trip.session.MapMatcherResult mapMatcherResult);
+  }
+
+  public abstract sealed class NavigationSessionState {
+    method public abstract String getSessionId();
+    property public abstract String sessionId;
+  }
+
+  public static final class NavigationSessionState.ActiveGuidance extends com.mapbox.navigation.core.trip.session.NavigationSessionState {
+    method public String component1();
+    method public com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance copy(String sessionId);
+    method public String getSessionId();
+    method public void setSessionId(String p);
+    property public String sessionId;
+  }
+
+  public static final class NavigationSessionState.FreeDrive extends com.mapbox.navigation.core.trip.session.NavigationSessionState {
+    method public String component1();
+    method public com.mapbox.navigation.core.trip.session.NavigationSessionState.FreeDrive copy(String sessionId);
+    method public String getSessionId();
+    property public String sessionId;
+  }
+
+  public static final class NavigationSessionState.Idle extends com.mapbox.navigation.core.trip.session.NavigationSessionState {
+    method public String getSessionId();
+    property public String sessionId;
+    field public static final com.mapbox.navigation.core.trip.session.NavigationSessionState.Idle INSTANCE;
+  }
+
+  public fun interface NavigationSessionStateObserver {
+    method public void onNavigationSessionStateChanged(com.mapbox.navigation.core.trip.session.NavigationSessionState navigationSession);
   }
 
   public fun interface OffRouteObserver {

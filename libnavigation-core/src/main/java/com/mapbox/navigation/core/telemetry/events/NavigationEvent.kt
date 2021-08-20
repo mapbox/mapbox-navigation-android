@@ -19,6 +19,11 @@ internal abstract class NavigationEvent(
         private val OPERATING_SYSTEM = "Android - ${Build.VERSION.RELEASE}"
     }
 
+    /*
+     * Don't remove any fields, cause they should match with
+     * the schema downloaded from S3. Look at {@link SchemaTest}
+     */
+    val version = "2.1"
     val operatingSystem: String = OPERATING_SYSTEM
     val device: String? = Build.MODEL
     val sdkVersion: String = BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME
@@ -27,7 +32,7 @@ internal abstract class NavigationEvent(
     val batteryLevel: Int = phoneState.batteryLevel
     val screenBrightness: Int = phoneState.screenBrightness
     val batteryPluggedIn: Boolean = phoneState.isBatteryPluggedIn
-    val connectivity: String? = phoneState.connectivity
+    val connectivity: String = phoneState.connectivity
     val audioType: String = phoneState.audioType
     val applicationState: String = phoneState.applicationState // Schema minLength 1
     val event: String = getEventName()
@@ -66,6 +71,7 @@ internal abstract class NavigationEvent(
     var voiceIndex: Int = 0
     var bannerIndex: Int = 0
     var totalStepCount: Int = 0
+    var appMetadata: AppMetadata? = null
 
     internal abstract fun getEventName(): String
 

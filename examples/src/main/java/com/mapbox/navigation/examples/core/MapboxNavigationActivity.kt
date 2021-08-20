@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.base.common.logger.model.Message
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -21,22 +21,22 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
-import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.options.EventsAppMetadata
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityNavigationBinding
@@ -47,7 +47,6 @@ import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
-import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
@@ -69,6 +68,7 @@ import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -141,14 +141,13 @@ class MapboxNavigationActivity : AppCompatActivity() {
     private val routeArrowAPI: MapboxRouteArrowApi = MapboxRouteArrowApi()
 
     /* ----- Voice instruction callbacks ----- */
-    private val voiceInstructionsObserver = object : VoiceInstructionsObserver {
-        override fun onNewVoiceInstructions(voiceInstructions: VoiceInstructions) {
+    private val voiceInstructionsObserver =
+        VoiceInstructionsObserver { voiceInstructions ->
             speechAPI.generate(
                 voiceInstructions,
                 speechCallback
             )
         }
-    }
 
     private val voiceInstructionsPlayerCallback =
         MapboxNavigationConsumer<SpeechAnnouncement> { value ->
@@ -198,8 +197,8 @@ class MapboxNavigationActivity : AppCompatActivity() {
         }
     }
 
-    private val routeProgressObserver = object : RouteProgressObserver {
-        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+    private val routeProgressObserver =
+        RouteProgressObserver { routeProgress ->
             // update the camera position to account for the progressed fragment of the route
             viewportDataSource.onRouteProgressChanged(routeProgress)
             viewportDataSource.evaluate()
@@ -230,7 +229,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
             // update bottom trip progress summary
             binding.tripProgressView.render(tripProgressApi.getTripProgress(routeProgress))
         }
-    }
 
     private val routesObserver = RoutesObserver { routes ->
         if (routes.isNotEmpty()) {
@@ -267,6 +265,19 @@ class MapboxNavigationActivity : AppCompatActivity() {
         }
     }
 
+    private val navigationSessionStateObserver = NavigationSessionStateObserver {
+        LoggerProvider.logger.d(
+            msg = Message(
+                "NavigationSessionState=$it"
+            )
+        )
+        LoggerProvider.logger.d(
+            msg = Message(
+                "sessionId=${mapboxNavigation.getNavigationSessionState().sessionId}"
+            )
+        )
+    }
+
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -290,6 +301,11 @@ class MapboxNavigationActivity : AppCompatActivity() {
         mapboxNavigation = MapboxNavigation(
             NavigationOptions.Builder(this)
                 .accessToken(getMapboxAccessTokenFromResources())
+                .eventsAppMetadata(
+                    EventsAppMetadata.Builder(
+                        BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME
+                    ).build()
+                )
                 .build()
         )
         // move the camera to current location on the first update
@@ -324,23 +340,17 @@ class MapboxNavigationActivity : AppCompatActivity() {
         binding.mapView.camera.addCameraAnimationsLifecycleListener(
             NavigationBasicGesturesHandler(navigationCamera)
         )
-        navigationCamera.registerNavigationCameraStateChangeObserver(
-            object : NavigationCameraStateChangedObserver {
-                override fun onNavigationCameraStateChanged(
-                    navigationCameraState: NavigationCameraState
-                ) {
-                    // shows/hide the recenter button depending on the camera state
-                    when (navigationCameraState) {
-                        NavigationCameraState.TRANSITION_TO_FOLLOWING,
-                        NavigationCameraState.FOLLOWING -> binding.recenter.visibility = INVISIBLE
+        navigationCamera.registerNavigationCameraStateChangeObserver { navigationCameraState ->
+            // shows/hide the recenter button depending on the camera state
+            when (navigationCameraState) {
+                NavigationCameraState.TRANSITION_TO_FOLLOWING,
+                NavigationCameraState.FOLLOWING -> binding.recenter.visibility = INVISIBLE
 
-                        NavigationCameraState.TRANSITION_TO_OVERVIEW,
-                        NavigationCameraState.OVERVIEW,
-                        NavigationCameraState.IDLE -> binding.recenter.visibility = VISIBLE
-                    }
-                }
+                NavigationCameraState.TRANSITION_TO_OVERVIEW,
+                NavigationCameraState.OVERVIEW,
+                NavigationCameraState.IDLE -> binding.recenter.visibility = VISIBLE
             }
-        )
+        }
         if (this.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             viewportDataSource.overviewPadding = landscapeOverviewPadding
         } else {
@@ -396,21 +406,14 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
         // load map style
         mapboxMap.loadStyleUri(
-            Style.MAPBOX_STREETS,
-            object : Style.OnStyleLoaded {
-                override fun onStyleLoaded(style: Style) {
-                    // add long click listener that search for a route to the clicked destination
-                    binding.mapView.gestures.addOnMapLongClickListener(
-                        object : OnMapLongClickListener {
-                            override fun onMapLongClick(point: Point): Boolean {
-                                findRoute(point)
-                                return true
-                            }
-                        }
-                    )
-                }
+            Style.MAPBOX_STREETS
+        ) {
+            // add long click listener that search for a route to the clicked destination
+            binding.mapView.gestures.addOnMapLongClickListener { point ->
+                findRoute(point)
+                true
             }
-        )
+        }
 
         // initialize view interactions
         binding.stop.setOnClickListener {
@@ -444,6 +447,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         super.onStart()
         binding.mapView.onStart()
         mapboxNavigation.registerRoutesObserver(routesObserver)
+        mapboxNavigation.registerNavigationSessionStateObserver(navigationSessionStateObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
@@ -453,6 +457,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         super.onStop()
         binding.mapView.onStop()
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
+        mapboxNavigation.unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
