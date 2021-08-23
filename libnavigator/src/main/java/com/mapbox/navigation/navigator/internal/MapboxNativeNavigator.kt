@@ -34,10 +34,6 @@ import com.mapbox.navigator.VoiceInstruction
  */
 interface MapboxNativeNavigator {
 
-    private companion object {
-        private const val INDEX_FIRST_LEG = 0
-    }
-
     /**
      * Initialize the navigator with a device profile
      */
@@ -104,10 +100,7 @@ interface MapboxNativeNavigator {
      * @return a [RouteInfo] route state if no errors occurred.
      * Otherwise, it returns null.
      */
-    suspend fun setRoute(
-        route: DirectionsRoute?,
-        legIndex: Int = INDEX_FIRST_LEG
-    ): RouteInfo?
+    suspend fun setRoute(route: DirectionsRoute?, legIndex: Int): RouteInfo?
 
     /**
      * Updates annotations so that subsequent calls to getStatus will

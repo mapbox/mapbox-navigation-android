@@ -121,7 +121,7 @@ internal class RouteRefreshController(
             val directionsSessionRoutes = directionsSession.routes.toMutableList()
             if (directionsSessionRoutes.isNotEmpty()) {
                 directionsSessionRoutes[0] = directionsRoute
-                directionsSession.routes = directionsSessionRoutes
+                directionsSession.setRoutes(directionsSessionRoutes)
             }
             currentRequestId = null
         }

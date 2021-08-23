@@ -41,6 +41,7 @@ package com.mapbox.navigation.core {
     method public void setArrivalController();
     method public void setRerouteController(com.mapbox.navigation.core.reroute.RerouteController? rerouteController = com.mapbox.navigation.core.MapboxNavigation.defaultRerouteController);
     method public void setRerouteController();
+    method public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes, int initialLegIndex = 0);
     method public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession(boolean withForegroundService = true);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession();
