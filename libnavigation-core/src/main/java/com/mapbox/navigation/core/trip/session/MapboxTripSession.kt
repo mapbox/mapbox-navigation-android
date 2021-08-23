@@ -68,32 +68,34 @@ internal class MapboxTripSession(
     private var updateRouteJob: Job? = null
 
     override var route: DirectionsRoute? = null
-        set(value) {
-            val isSameUuid = value?.isSameUuid(field) ?: false
-            val isSameRoute = value?.isSameRoute(field) ?: false
-            if (value == null) {
-                roadObjects = emptyList()
-                routeProgress = null
-            }
-            updateRouteJob = threadController.getMainScopeAndRootJob().scope.launch {
-                when {
-                    isSameUuid && isSameRoute && value != null -> {
-                        navigator.updateAnnotations(value)
-                    }
-                    else -> {
-                        navigator.setRoute(value)?.let {
-                            roadObjects = getRouteInitInfo(it)?.roadObjects ?: emptyList()
-                        }
+        private set
+
+    override fun setRoute(route: DirectionsRoute?, legIndex: Int) {
+        val isSameUuid = route?.isSameUuid(this.route) ?: false
+        val isSameRoute = route?.isSameRoute(this.route) ?: false
+        if (route == null) {
+            roadObjects = emptyList()
+            routeProgress = null
+        }
+        updateRouteJob = threadController.getMainScopeAndRootJob().scope.launch {
+            when {
+                isSameUuid && isSameRoute && route != null -> {
+                    navigator.updateAnnotations(route)
+                }
+                else -> {
+                    navigator.setRoute(route, legIndex)?.let {
+                        roadObjects = getRouteInitInfo(it)?.roadObjects ?: emptyList()
                     }
                 }
             }
-            mainJobController.scope.launch {
-                updateRouteJob?.join()
-                field = value
-                isOffRoute = false
-                invalidateLatestBannerInstructionEvent()
-            }
         }
+        mainJobController.scope.launch {
+            updateRouteJob?.join()
+            this@MapboxTripSession.route = route
+            isOffRoute = false
+            invalidateLatestBannerInstructionEvent()
+        }
+    }
 
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
 

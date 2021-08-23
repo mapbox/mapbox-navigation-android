@@ -144,8 +144,15 @@ class MapboxDirectionsSessionTest {
 
     @Test
     fun getRouteOptions() {
-        session.routes = routes
+        session.setRoutes(routes)
         assertEquals(routeOptions, session.getPrimaryRouteOptions())
+    }
+
+    @Test
+    fun getInitialLegIndex() {
+        val initialLegIndex = 2
+        session.setRoutes(routes, initialLegIndex)
+        assertEquals(initialLegIndex, session.initialLegIndex)
     }
 
     @Test
@@ -175,32 +182,32 @@ class MapboxDirectionsSessionTest {
     @Test
     fun `when route set, observer notified`() {
         session.registerRoutesObserver(observer)
-        session.routes = routes
+        session.setRoutes(routes)
         verify(exactly = 1) { observer.onRoutesChanged(routes) }
     }
 
     @Test
     fun `when route cleared, observer notified`() {
         session.registerRoutesObserver(observer)
-        session.routes = routes
-        session.routes = emptyList()
+        session.setRoutes(routes)
+        session.setRoutes(emptyList())
         verify(exactly = 1) { observer.onRoutesChanged(emptyList()) }
     }
 
     @Test
     fun `when new route available, observer notified`() {
         session.registerRoutesObserver(observer)
-        session.routes = routes
+        session.setRoutes(routes)
         val newRoutes: List<DirectionsRoute> = listOf(mockk())
         every { newRoutes[0].routeOptions() } returns routeOptions
-        session.routes = newRoutes
+        session.setRoutes(newRoutes)
         verify(exactly = 1) { observer.onRoutesChanged(newRoutes) }
     }
 
     @Test
     fun `setting a route does not impact ongoing route request`() {
         session.requestRoutes(routeOptions, routerCallback)
-        session.routes = routes
+        session.setRoutes(routes)
         verify(exactly = 0) { router.cancelAll() }
     }
 
@@ -208,7 +215,7 @@ class MapboxDirectionsSessionTest {
     fun unregisterAllRouteObservers() {
         session.registerRoutesObserver(observer)
         session.unregisterAllRoutesObservers()
-        session.routes = routes
+        session.setRoutes(routes)
 
         verify(exactly = 0) { observer.onRoutesChanged(any()) }
     }

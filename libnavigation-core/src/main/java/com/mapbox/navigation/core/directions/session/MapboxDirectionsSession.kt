@@ -29,16 +29,22 @@ internal class MapboxDirectionsSession(
      * @see [registerRoutesObserver]
      */
     override var routes: List<DirectionsRoute> = emptyList()
-        set(value) {
-            if (routes.isEmpty() && value.isEmpty()) {
-                return
-            }
-            field = value
-            if (routes.isNotEmpty()) {
-                this.primaryRouteOptions = routes[0].routeOptions()
-            }
-            routesObservers.forEach { it.onRoutesChanged(value) }
+        private set
+
+    override var initialLegIndex = 0
+        private set
+
+    override fun setRoutes(routes: List<DirectionsRoute>, initialLegIndex: Int) {
+        this.initialLegIndex = initialLegIndex
+        if (this.routes.isEmpty() && routes.isEmpty()) {
+            return
         }
+        this.routes = routes
+        if (routes.isNotEmpty()) {
+            primaryRouteOptions = routes[0].routeOptions()
+        }
+        routesObservers.forEach { it.onRoutesChanged(routes) }
+    }
 
     /**
      * Provide route options for current primary route.

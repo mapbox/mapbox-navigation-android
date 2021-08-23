@@ -14,7 +14,11 @@ internal interface DirectionsSession {
      *
      * @see [registerRoutesObserver]
      */
-    var routes: List<DirectionsRoute>
+    val routes: List<DirectionsRoute>
+
+    val initialLegIndex: Int
+
+    fun setRoutes(routes: List<DirectionsRoute>, initialLegIndex: Int = 0)
 
     /**
      * Provide route options for current primary route.

@@ -316,7 +316,7 @@ class MapboxNavigationTest {
         // the sequence needs to be kept because routeRefreshController uses the route stored
         // in the trip session, which has to be set first via directionsSession
         verifyOrder {
-            directionsSession.routes = listOf(route)
+            directionsSession.setRoutes(listOf(route))
             routeRefreshController.restart()
         }
     }
@@ -390,7 +390,7 @@ class MapboxNavigationTest {
     fun onDestroySetsRoutesToEmpty() {
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { directionsSession.routes = emptyList() }
+        verify(exactly = 1) { directionsSession.setRoutes(emptyList()) }
     }
 
     @Test
@@ -525,14 +525,16 @@ class MapboxNavigationTest {
         val primary: DirectionsRoute = mockk()
         val secondary: DirectionsRoute = mockk()
         val routes = listOf(primary, secondary)
+        val initialLegIndex = 2
         val routeObserversSlot = mutableListOf<RoutesObserver>()
+        every { directionsSession.initialLegIndex } returns initialLegIndex
         verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
 
         routeObserversSlot.forEach {
             it.onRoutesChanged(routes)
         }
 
-        verify { tripSession.route = primary }
+        verify { tripSession.setRoute(primary, initialLegIndex) }
 
         mapboxNavigation.onDestroy()
     }
@@ -540,14 +542,16 @@ class MapboxNavigationTest {
     @Test
     fun internalRouteObserver_empty() {
         val routes = emptyList<DirectionsRoute>()
+        val initialLegIndex = 0
         val routeObserversSlot = mutableListOf<RoutesObserver>()
+        every { directionsSession.initialLegIndex } returns initialLegIndex
         verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
 
         routeObserversSlot.forEach {
             it.onRoutesChanged(routes)
         }
 
-        verify { tripSession.route = null }
+        verify { tripSession.setRoute(null, initialLegIndex) }
         mapboxNavigation.onDestroy()
     }
 
@@ -761,10 +765,11 @@ class MapboxNavigationTest {
         every { routeOptions.annotationsList() } returns emptyList()
 
         val routes = listOf(route)
+        val initialLegIndex = 2
 
-        mapboxNavigation.setRoutes(routes)
+        mapboxNavigation.setRoutes(routes, initialLegIndex)
 
-        verify(exactly = 1) { directionsSession.routes = routes }
+        verify(exactly = 1) { directionsSession.setRoutes(routes, initialLegIndex) }
     }
 
     @Test
@@ -801,7 +806,7 @@ class MapboxNavigationTest {
         verify { directionsSession.requestRoutes(options, capture(possibleInternalCallbackSlot)) }
         possibleInternalCallbackSlot.captured.onRoutesReady(routes, origin)
 
-        verify(exactly = 0) { directionsSession.routes = routes }
+        verify(exactly = 0) { directionsSession.setRoutes(routes) }
     }
 
     @Test

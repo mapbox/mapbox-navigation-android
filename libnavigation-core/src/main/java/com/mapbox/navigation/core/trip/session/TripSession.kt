@@ -11,7 +11,8 @@ import com.mapbox.navigator.FallbackVersionsObserver
 internal interface TripSession {
 
     val tripService: TripService
-    var route: DirectionsRoute?
+    val route: DirectionsRoute?
+    fun setRoute(route: DirectionsRoute?, legIndex: Int)
 
     fun getRawLocation(): Location?
     fun getEnhancedLocation(): Location?

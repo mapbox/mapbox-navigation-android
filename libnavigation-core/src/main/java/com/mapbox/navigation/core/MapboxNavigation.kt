@@ -515,12 +515,14 @@ class MapboxNavigation(
      * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the routes list reference managed by the SDK changes, regardless of a source.
      *
      * @param routes a list of [DirectionsRoute]s
+     * @param initialLegIndex starting leg to follow. By default the first leg is used.
      * @see [requestRoutes]
      */
-    fun setRoutes(routes: List<DirectionsRoute>) {
+    @JvmOverloads
+    fun setRoutes(routes: List<DirectionsRoute>, initialLegIndex: Int = 0) {
         rerouteController?.interrupt()
         routeAlternativesController.interrupt()
-        directionsSession.routes = routes
+        directionsSession.setRoutes(routes, initialLegIndex)
         routeRefreshController.restart()
     }
 
@@ -554,7 +556,7 @@ class MapboxNavigation(
         tripSession.unregisterAllFallbackVersionsObservers()
         routeAlternativesController.unregisterAll()
         routeRefreshController.stop()
-        directionsSession.routes = emptyList()
+        directionsSession.setRoutes(emptyList())
         resetTripSession()
         navigator.unregisterAllObservers()
         navigationVersionSwitchObservers.clear()
@@ -935,11 +937,7 @@ class MapboxNavigation(
     }
 
     private fun createInternalRoutesObserver() = RoutesObserver { routes ->
-        if (routes.isNotEmpty()) {
-            tripSession.route = routes[0]
-        } else {
-            tripSession.route = null
-        }
+        tripSession.setRoute(routes.firstOrNull(), directionsSession.initialLegIndex)
     }
 
     private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->
