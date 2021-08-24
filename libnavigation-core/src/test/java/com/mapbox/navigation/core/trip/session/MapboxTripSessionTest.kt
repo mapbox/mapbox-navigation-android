@@ -562,7 +562,7 @@ class MapboxTripSessionTest {
         tripSession = buildTripSession()
         tripSession.registerBannerInstructionsObserver(bannerInstructionsObserver)
         tripSession.route = route
-        tripSession.start()
+        tripSession.start(true)
         every { navigationStatus.routeState } returns RouteState.TRACKING
         every { navigationStatus.bannerInstruction } returns null
         navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
