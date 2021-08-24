@@ -6,6 +6,9 @@ import com.mapbox.common.OnBillingServiceError
 import com.mapbox.common.SKUIdentifier
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.trip.session.NavigationSession
+import com.mapbox.navigation.core.trip.session.NavigationSessionState
+import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import io.mockk.Call
 import io.mockk.MockKAnswerScope
@@ -86,7 +89,7 @@ class BillingControllerTest {
 
     @Test
     fun `when idle, stop billing session`() {
-        sessionStateObserver.onNavigationSessionStateChanged(NavigationSession.State.IDLE)
+        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
 
         verify(exactly = 1) { BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP) }
         verify(exactly = 0) {
@@ -99,8 +102,8 @@ class BillingControllerTest {
 
     @Test
     fun `when not idle, trigger MAU event`() {
-        sessionStateObserver.onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE)
-        sessionStateObserver.onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE)
+        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.FreeDrive("1"))
+        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.ActiveGuidance("2"))
 
         verify(exactly = 2) {
             BillingServiceWrapper.triggerBillingEvent(
@@ -114,7 +117,7 @@ class BillingControllerTest {
 
     @Test
     fun `when free drive, start billing session`() {
-        sessionStateObserver.onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE)
+        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.FreeDrive("1"))
 
         verify(exactly = 1) {
             BillingServiceWrapper.beginBillingSession(
@@ -130,7 +133,7 @@ class BillingControllerTest {
     @Test
     fun `when active guidance, start billing session`() {
         sessionStateObserver.onNavigationSessionStateChanged(
-            NavigationSession.State.ACTIVE_GUIDANCE
+            NavigationSessionState.ActiveGuidance("2")
         )
 
         verify(exactly = 1) {
@@ -162,7 +165,7 @@ class BillingControllerTest {
 
     @Test
     fun `when idle and external route set, do nothing`() {
-        every { navigationSession.state } returns NavigationSession.State.IDLE
+        every { navigationSession.state } returns NavigationSessionState.Idle
         billingController.onExternalRouteSet(mockk())
         verify(exactly = 0) {
             BillingServiceWrapper.beginBillingSession(any(), any(), any(), any(), any())
@@ -171,7 +174,7 @@ class BillingControllerTest {
 
     @Test
     fun `when free drive and external route set, do nothing`() {
-        every { navigationSession.state } returns NavigationSession.State.FREE_DRIVE
+        every { navigationSession.state } returns NavigationSessionState.FreeDrive("1")
         billingController.onExternalRouteSet(mockk())
         verify(exactly = 0) {
             BillingServiceWrapper.beginBillingSession(any(), any(), any(), any(), any())
@@ -180,7 +183,7 @@ class BillingControllerTest {
 
     @Test
     fun `when active guidance and new external route set, start new billing session`() {
-        every { navigationSession.state } returns NavigationSession.State.ACTIVE_GUIDANCE
+        every { navigationSession.state } returns NavigationSessionState.ActiveGuidance("2")
         val originalRouteOptions = mockk<RouteOptions> {
             every { coordinatesList() } returns listOf(
                 Point.fromLngLat(0.0, 0.0),
@@ -224,7 +227,7 @@ class BillingControllerTest {
 
     @Test
     fun `when active guidance and same external route set, do nothing`() {
-        every { navigationSession.state } returns NavigationSession.State.ACTIVE_GUIDANCE
+        every { navigationSession.state } returns NavigationSessionState.ActiveGuidance("2")
         val originalRouteOptions = mockk<RouteOptions> {
             every { coordinatesList() } returns listOf(
                 Point.fromLngLat(0.0, 0.0),
@@ -265,7 +268,7 @@ class BillingControllerTest {
 
     @Test
     fun `when active guidance and external route set with silent waypoints, do nothing`() {
-        every { navigationSession.state } returns NavigationSession.State.ACTIVE_GUIDANCE
+        every { navigationSession.state } returns NavigationSessionState.ActiveGuidance("2")
         val originalRouteOptions = mockk<RouteOptions> {
             every { coordinatesList() } returns listOf(
                 Point.fromLngLat(0.0, 0.0),
@@ -307,7 +310,7 @@ class BillingControllerTest {
 
     @Test
     fun `when active guidance and external route set with original silent waypoints, do nothing`() {
-        every { navigationSession.state } returns NavigationSession.State.ACTIVE_GUIDANCE
+        every { navigationSession.state } returns NavigationSessionState.ActiveGuidance("2")
         val originalRouteOptions = mockk<RouteOptions> {
             every { coordinatesList() } returns listOf(
                 Point.fromLngLat(0.0, 0.0),
@@ -349,7 +352,7 @@ class BillingControllerTest {
 
     @Test
     fun `when active guidance and new external multi-leg route set, start new billing session`() {
-        every { navigationSession.state } returns NavigationSession.State.ACTIVE_GUIDANCE
+        every { navigationSession.state } returns NavigationSessionState.ActiveGuidance("2")
         val originalRouteOptions = mockk<RouteOptions> {
             every { coordinatesList() } returns listOf(
                 Point.fromLngLat(0.0, 0.0),
@@ -394,7 +397,7 @@ class BillingControllerTest {
 
     @Test
     fun `when active guidance and route set with multi-leg destination not matching, restart`() {
-        every { navigationSession.state } returns NavigationSession.State.ACTIVE_GUIDANCE
+        every { navigationSession.state } returns NavigationSessionState.ActiveGuidance("2")
         val originalRouteOptions = mockk<RouteOptions> {
             every { coordinatesList() } returns listOf(
                 Point.fromLngLat(0.0, 0.0),
@@ -439,7 +442,7 @@ class BillingControllerTest {
 
     @Test
     fun `when active guidance and route set with multi-leg destination matching, do nothing`() {
-        every { navigationSession.state } returns NavigationSession.State.ACTIVE_GUIDANCE
+        every { navigationSession.state } returns NavigationSessionState.ActiveGuidance("2")
         val originalRouteOptions = mockk<RouteOptions> {
             every { coordinatesList() } returns listOf(
                 Point.fromLngLat(0.0, 0.0),
@@ -481,7 +484,7 @@ class BillingControllerTest {
 
     @Test
     fun `when active guidance completed and external route set, start new billing session`() {
-        every { navigationSession.state } returns NavigationSession.State.ACTIVE_GUIDANCE
+        every { navigationSession.state } returns NavigationSessionState.ActiveGuidance("2")
         val originalRouteOptions = mockk<RouteOptions> {
             every { coordinatesList() } returns listOf(
                 Point.fromLngLat(0.0, 0.0),
@@ -529,7 +532,7 @@ class BillingControllerTest {
      */
     @Test
     fun `when active guidance not started and external route set, do nothing`() {
-        every { navigationSession.state } returns NavigationSession.State.ACTIVE_GUIDANCE
+        every { navigationSession.state } returns NavigationSessionState.ActiveGuidance("2")
         val originalRouteOptions = mockk<RouteOptions> {
             every { coordinatesList() } returns listOf(
                 Point.fromLngLat(0.0, 0.0),

@@ -40,6 +40,7 @@ import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.NavigationSession
+import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSession
@@ -970,13 +971,13 @@ class MapboxNavigationTest {
         mapboxNavigation = MapboxNavigation(navigationOptions)
         mapboxNavigation.startTripSession()
 
-        var state: NavigationSession.State? = null
+        var state: NavigationSessionState? = null
 
         localNavigationSession.registerNavigationSessionStateObserver {
             state = it
         }
 
-        assertEquals(NavigationSession.State.IDLE, state)
+        assertEquals(NavigationSessionState.Idle, state)
     }
 
     @Test(expected = IllegalStateException::class)

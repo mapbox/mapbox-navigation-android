@@ -9,6 +9,9 @@ import com.mapbox.common.SKUIdentifier
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.trip.session.NavigationSession
+import com.mapbox.navigation.core.trip.session.NavigationSessionState
+import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.turf.TurfConstants.UNIT_METRES
@@ -31,7 +34,7 @@ internal class BillingController(
             // stop any running sessions
             BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
 
-            if (navigationSessionState != NavigationSession.State.IDLE) {
+            if (navigationSessionState != NavigationSessionState.Idle) {
                 // always trigger an MAU event if a session starts
                 BillingServiceWrapper.triggerBillingEvent(
                     accessToken,
@@ -43,16 +46,16 @@ internal class BillingController(
             }
 
             when (navigationSessionState) {
-                NavigationSession.State.IDLE -> {
+                is NavigationSessionState.Idle -> {
                     // do nothing
                 }
-                NavigationSession.State.FREE_DRIVE -> {
+                is NavigationSessionState.FreeDrive -> {
                     BillingServiceWrapper.beginBillingSession(
                         SKUIdentifier.NAV2_SES_TRIP,
                         validity = TimeUnit.HOURS.toMillis(1) // validity of 1hr
                     )
                 }
-                NavigationSession.State.ACTIVE_GUIDANCE -> {
+                is NavigationSessionState.ActiveGuidance -> {
                     BillingServiceWrapper.beginBillingSession(
                         SKUIdentifier.NAV2_SES_TRIP,
                         validity = 0 // default validity, 12hrs
@@ -91,7 +94,7 @@ internal class BillingController(
      * This method is also accounting for progress - if there's a multi-leg route, we'll only compare remaining legs of the current route against the new route.
      */
     fun onExternalRouteSet(directionsRoute: DirectionsRoute) {
-        if (navigationSession.state == NavigationSession.State.ACTIVE_GUIDANCE) {
+        if (navigationSession.state is NavigationSessionState.ActiveGuidance) {
             val currentRemainingWaypoints = getRemainingWaypointsOnRoute(
                 tripSession.getRouteProgress()
             )

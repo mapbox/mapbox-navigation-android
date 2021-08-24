@@ -131,6 +131,6 @@ sealed class NavigationSessionState {
      * Active Guidance state
      */
     data class ActiveGuidance internal constructor(
-        override var sessionId: String
+        override val sessionId: String
     ) : NavigationSessionState()
 }
