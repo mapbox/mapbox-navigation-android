@@ -5,6 +5,7 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.common.BillingServiceError
 import com.mapbox.common.BillingServiceErrorCode
+import com.mapbox.common.BillingSessionStatus
 import com.mapbox.common.SKUIdentifier
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -32,7 +33,7 @@ internal class BillingController(
     private val navigationSessionStateObserver =
         NavigationSessionStateObserver { navigationSessionState ->
             // stop any running sessions
-            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
+            stopBillingSession()
 
             if (navigationSessionState != NavigationSessionState.Idle) {
                 // always trigger an MAU event if a session starts
@@ -50,13 +51,13 @@ internal class BillingController(
                     // do nothing
                 }
                 is NavigationSessionState.FreeDrive -> {
-                    BillingServiceWrapper.beginBillingSession(
-                        SKUIdentifier.NAV2_SES_TRIP,
+                    beginBillingSession(
+                        SKUIdentifier.NAV2_SES_FDTRIP,
                         validity = TimeUnit.HOURS.toMillis(1) // validity of 1hr
                     )
                 }
                 is NavigationSessionState.ActiveGuidance -> {
-                    BillingServiceWrapper.beginBillingSession(
+                    beginBillingSession(
                         SKUIdentifier.NAV2_SES_TRIP,
                         validity = 0 // default validity, 12hrs
                     )
@@ -69,12 +70,16 @@ internal class BillingController(
     }
 
     fun pauseSession() {
-        BillingServiceWrapper.pauseBillingSession(SKUIdentifier.NAV2_SES_TRIP)
+        getRunningOrPausedSessionId()?.let {
+            BillingServiceWrapper.pauseBillingSession(it)
+        }
     }
 
     fun resumeSession() {
-        BillingServiceWrapper.resumeBillingSession(SKUIdentifier.NAV2_SES_TRIP) {
-            handlerError(it)
+        getRunningOrPausedSessionId()?.let { skuId ->
+            BillingServiceWrapper.resumeBillingSession(skuId) {
+                handlerError(it)
+            }
         }
     }
 
@@ -102,9 +107,9 @@ internal class BillingController(
 
             if (!waypointsWithinRange(currentRemainingWaypoints, newWaypoints)) {
                 // stop any running sessions
-                BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
+                stopBillingSession()
 
-                BillingServiceWrapper.beginBillingSession(
+                beginBillingSession(
                     SKUIdentifier.NAV2_SES_TRIP,
                     validity = 0 // default validity, 12hrs
                 )
@@ -112,11 +117,11 @@ internal class BillingController(
         }
     }
 
-    private fun BillingServiceWrapper.beginBillingSession(
+    private fun beginBillingSession(
         identifier: SKUIdentifier,
         validity: Long
     ) {
-        this.beginBillingSession(
+        BillingServiceWrapper.beginBillingSession(
             accessToken,
             "", // empty string result in default user agent
             identifier,
@@ -125,6 +130,37 @@ internal class BillingController(
             },
             validity
         )
+    }
+
+    private fun stopBillingSession() {
+        getRunningOrPausedSessionId()?.let {
+            BillingServiceWrapper.stopBillingSession(it)
+        }
+    }
+
+    private fun getRunningOrPausedSessionId(): SKUIdentifier? {
+        val possibleSessionIds = listOf(
+            SKUIdentifier.NAV2_SES_TRIP,
+            SKUIdentifier.NAV2_SES_FDTRIP
+        )
+
+        data class SkuSessionStatus(val skuId: SKUIdentifier, val status: BillingSessionStatus)
+
+        val sessionStatuses = possibleSessionIds.map { skuId ->
+            SkuSessionStatus(skuId, BillingServiceWrapper.getSessionStatus(skuId))
+        }
+
+        val activeOrPausedSessions = sessionStatuses.filter {
+            it.status != BillingSessionStatus.NO_SESSION
+        }
+
+        check(
+            activeOrPausedSessions.size <= 1
+        ) {
+            "More than one session is active or paused: $sessionStatuses"
+        }
+
+        return activeOrPausedSessions.firstOrNull()?.skuId
     }
 
     /**

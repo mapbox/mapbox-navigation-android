@@ -223,6 +223,7 @@ class MapboxNavigationTest {
 
     @Test
     fun startSessionWithService() {
+        createMapboxNavigation()
         every { tripSession.isRunningWithForegroundService() } returns true
         mapboxNavigation.startTripSession()
 
@@ -231,6 +232,7 @@ class MapboxNavigationTest {
 
     @Test
     fun startSessionWithoutService() {
+        createMapboxNavigation()
         every { tripSession.isRunningWithForegroundService() } returns false
         mapboxNavigation.startTripSession(false)
 
@@ -284,6 +286,7 @@ class MapboxNavigationTest {
 
     @Test
     fun `restart the routeRefreshController during initialization`() {
+        createMapboxNavigation()
         ThreadController.cancelAllUICoroutines()
         verify(exactly = 1) { routeRefreshController.restart() }
     }

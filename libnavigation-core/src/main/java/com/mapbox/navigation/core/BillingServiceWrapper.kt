@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core
 
 import com.mapbox.common.BillingService
+import com.mapbox.common.BillingSessionStatus
 import com.mapbox.common.OnBillingServiceError
 import com.mapbox.common.SKUIdentifier
 
@@ -45,5 +46,9 @@ internal object BillingServiceWrapper {
 
     fun stopBillingSession(skuIdentifier: SKUIdentifier) {
         BillingService.stopBillingSession(skuIdentifier)
+    }
+
+    fun getSessionStatus(skuIdentifier: SKUIdentifier): BillingSessionStatus {
+        return BillingService.getSessionStatus(skuIdentifier)
     }
 }

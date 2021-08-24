@@ -2,6 +2,7 @@ package com.mapbox.navigation.core
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.BillingSessionStatus
 import com.mapbox.common.OnBillingServiceError
 import com.mapbox.common.SKUIdentifier
 import com.mapbox.geojson.Point
@@ -69,6 +70,9 @@ class BillingControllerTest {
                 capture(billingServiceErrorCallbackSlot)
             )
         } answers billingServiceErrorCallbackAnswer
+        every {
+            BillingServiceWrapper.getSessionStatus(any())
+        } returns BillingSessionStatus.NO_SESSION
 
         val sessionStateObserverSlot = slot<NavigationSessionStateObserver>()
         navigationSession = mockk {
@@ -88,10 +92,93 @@ class BillingControllerTest {
     }
 
     @Test
-    fun `when idle, stop billing session`() {
+    fun `when idle, do nothing`() {
         sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
 
-        verify(exactly = 1) { BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP) }
+        verify(exactly = 0) { BillingServiceWrapper.stopBillingSession(any()) }
+        verify(exactly = 0) {
+            BillingServiceWrapper.triggerBillingEvent(any(), any(), any(), any())
+        }
+        verify(exactly = 0) {
+            BillingServiceWrapper.beginBillingSession(any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun `when both free drive and active guidance are active, throw an exception`() {
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_TRIP)
+        } returns BillingSessionStatus.SESSION_ACTIVE
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_FDTRIP)
+        } returns BillingSessionStatus.SESSION_ACTIVE
+        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
+    }
+
+    @Test
+    fun `when active free drive to idle, stop billing session`() {
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_FDTRIP)
+        } returns BillingSessionStatus.SESSION_ACTIVE
+        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
+
+        verify(exactly = 1) {
+            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_FDTRIP)
+        }
+        verify(exactly = 0) {
+            BillingServiceWrapper.triggerBillingEvent(any(), any(), any(), any())
+        }
+        verify(exactly = 0) {
+            BillingServiceWrapper.beginBillingSession(any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `when paused free drive to idle, stop billing session`() {
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_FDTRIP)
+        } returns BillingSessionStatus.SESSION_PAUSED
+        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
+
+        verify(exactly = 1) {
+            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_FDTRIP)
+        }
+        verify(exactly = 0) {
+            BillingServiceWrapper.triggerBillingEvent(any(), any(), any(), any())
+        }
+        verify(exactly = 0) {
+            BillingServiceWrapper.beginBillingSession(any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `when active active guidance to idle, stop billing session`() {
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_TRIP)
+        } returns BillingSessionStatus.SESSION_ACTIVE
+        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
+
+        verify(exactly = 1) {
+            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
+        }
+        verify(exactly = 0) {
+            BillingServiceWrapper.triggerBillingEvent(any(), any(), any(), any())
+        }
+        verify(exactly = 0) {
+            BillingServiceWrapper.beginBillingSession(any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `when paused active guidance to idle, stop billing session`() {
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_TRIP)
+        } returns BillingSessionStatus.SESSION_PAUSED
+        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
+
+        verify(exactly = 1) {
+            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
+        }
         verify(exactly = 0) {
             BillingServiceWrapper.triggerBillingEvent(any(), any(), any(), any())
         }
@@ -116,14 +203,14 @@ class BillingControllerTest {
     }
 
     @Test
-    fun `when free drive, start billing session`() {
+    fun `when idle to free drive, start billing session`() {
         sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.FreeDrive("1"))
 
         verify(exactly = 1) {
             BillingServiceWrapper.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SKUIdentifier.NAV2_SES_FDTRIP,
                 any(),
                 TimeUnit.HOURS.toMillis(1)
             )
@@ -131,7 +218,7 @@ class BillingControllerTest {
     }
 
     @Test
-    fun `when active guidance, start billing session`() {
+    fun `when idle to active guidance, start billing session`() {
         sessionStateObserver.onNavigationSessionStateChanged(
             NavigationSessionState.ActiveGuidance("2")
         )
@@ -148,7 +235,65 @@ class BillingControllerTest {
     }
 
     @Test
-    fun `when pause session, native APIs called`() {
+    fun `when active guidance to free drive, start billing session`() {
+        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.ActiveGuidance("1"))
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_TRIP)
+        } returns BillingSessionStatus.SESSION_ACTIVE
+        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.FreeDrive("1"))
+
+        verify(exactly = 1) {
+            BillingServiceWrapper.beginBillingSession(
+                accessToken,
+                "",
+                SKUIdentifier.NAV2_SES_FDTRIP,
+                any(),
+                TimeUnit.HOURS.toMillis(1)
+            )
+        }
+        verify(exactly = 1) {
+            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
+        }
+    }
+
+    @Test
+    fun `when free drive to active guidance, start billing session`() {
+        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.FreeDrive("1"))
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_FDTRIP)
+        } returns BillingSessionStatus.SESSION_ACTIVE
+        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.ActiveGuidance("1"))
+
+        verify(exactly = 1) {
+            BillingServiceWrapper.beginBillingSession(
+                accessToken,
+                "",
+                SKUIdentifier.NAV2_SES_TRIP,
+                any(),
+                0
+            )
+        }
+        verify(exactly = 1) {
+            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_FDTRIP)
+        }
+    }
+
+    @Test
+    fun `when pause free drive session, native APIs called`() {
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_FDTRIP)
+        } returns BillingSessionStatus.SESSION_ACTIVE
+        billingController.pauseSession()
+        verify(exactly = 1) {
+            BillingServiceWrapper.pauseBillingSession(SKUIdentifier.NAV2_SES_FDTRIP)
+        }
+    }
+
+    @Test
+    fun `when pause active guidance session, native APIs called`() {
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_TRIP)
+        } returns BillingSessionStatus.SESSION_ACTIVE
         billingController.pauseSession()
         verify(exactly = 1) {
             BillingServiceWrapper.pauseBillingSession(SKUIdentifier.NAV2_SES_TRIP)
@@ -156,7 +301,21 @@ class BillingControllerTest {
     }
 
     @Test
-    fun `when resume session, native APIs called`() {
+    fun `when resume free drive session, native APIs called`() {
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_FDTRIP)
+        } returns BillingSessionStatus.SESSION_PAUSED
+        billingController.resumeSession()
+        verify(exactly = 1) {
+            BillingServiceWrapper.resumeBillingSession(SKUIdentifier.NAV2_SES_FDTRIP, any())
+        }
+    }
+
+    @Test
+    fun `when resume active session, native APIs called`() {
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_TRIP)
+        } returns BillingSessionStatus.SESSION_PAUSED
         billingController.resumeSession()
         verify(exactly = 1) {
             BillingServiceWrapper.resumeBillingSession(SKUIdentifier.NAV2_SES_TRIP, any())
@@ -175,6 +334,9 @@ class BillingControllerTest {
     @Test
     fun `when free drive and external route set, do nothing`() {
         every { navigationSession.state } returns NavigationSessionState.FreeDrive("1")
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_FDTRIP)
+        } returns BillingSessionStatus.SESSION_ACTIVE
         billingController.onExternalRouteSet(mockk())
         verify(exactly = 0) {
             BillingServiceWrapper.beginBillingSession(any(), any(), any(), any(), any())
@@ -184,6 +346,9 @@ class BillingControllerTest {
     @Test
     fun `when active guidance and new external route set, start new billing session`() {
         every { navigationSession.state } returns NavigationSessionState.ActiveGuidance("2")
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_TRIP)
+        } returns BillingSessionStatus.SESSION_ACTIVE
         val originalRouteOptions = mockk<RouteOptions> {
             every { coordinatesList() } returns listOf(
                 Point.fromLngLat(0.0, 0.0),
@@ -213,8 +378,10 @@ class BillingControllerTest {
 
         billingController.onExternalRouteSet(newRoute)
 
-        verifySequence {
+        verify(exactly = 1) {
             BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
+        }
+        verify(exactly = 1) {
             BillingServiceWrapper.beginBillingSession(
                 accessToken,
                 "",
@@ -228,6 +395,9 @@ class BillingControllerTest {
     @Test
     fun `when active guidance and same external route set, do nothing`() {
         every { navigationSession.state } returns NavigationSessionState.ActiveGuidance("2")
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_TRIP)
+        } returns BillingSessionStatus.SESSION_ACTIVE
         val originalRouteOptions = mockk<RouteOptions> {
             every { coordinatesList() } returns listOf(
                 Point.fromLngLat(0.0, 0.0),
@@ -269,6 +439,9 @@ class BillingControllerTest {
     @Test
     fun `when active guidance and external route set with silent waypoints, do nothing`() {
         every { navigationSession.state } returns NavigationSessionState.ActiveGuidance("2")
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_TRIP)
+        } returns BillingSessionStatus.SESSION_ACTIVE
         val originalRouteOptions = mockk<RouteOptions> {
             every { coordinatesList() } returns listOf(
                 Point.fromLngLat(0.0, 0.0),
@@ -311,6 +484,9 @@ class BillingControllerTest {
     @Test
     fun `when active guidance and external route set with original silent waypoints, do nothing`() {
         every { navigationSession.state } returns NavigationSessionState.ActiveGuidance("2")
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_TRIP)
+        } returns BillingSessionStatus.SESSION_ACTIVE
         val originalRouteOptions = mockk<RouteOptions> {
             every { coordinatesList() } returns listOf(
                 Point.fromLngLat(0.0, 0.0),
@@ -353,6 +529,9 @@ class BillingControllerTest {
     @Test
     fun `when active guidance and new external multi-leg route set, start new billing session`() {
         every { navigationSession.state } returns NavigationSessionState.ActiveGuidance("2")
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_TRIP)
+        } returns BillingSessionStatus.SESSION_ACTIVE
         val originalRouteOptions = mockk<RouteOptions> {
             every { coordinatesList() } returns listOf(
                 Point.fromLngLat(0.0, 0.0),
@@ -383,8 +562,10 @@ class BillingControllerTest {
 
         billingController.onExternalRouteSet(newRoute)
 
-        verifySequence {
+        verify(exactly = 1) {
             BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
+        }
+        verify(exactly = 1) {
             BillingServiceWrapper.beginBillingSession(
                 accessToken,
                 "",
@@ -398,6 +579,9 @@ class BillingControllerTest {
     @Test
     fun `when active guidance and route set with multi-leg destination not matching, restart`() {
         every { navigationSession.state } returns NavigationSessionState.ActiveGuidance("2")
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_TRIP)
+        } returns BillingSessionStatus.SESSION_ACTIVE
         val originalRouteOptions = mockk<RouteOptions> {
             every { coordinatesList() } returns listOf(
                 Point.fromLngLat(0.0, 0.0),
@@ -428,8 +612,10 @@ class BillingControllerTest {
 
         billingController.onExternalRouteSet(newRoute)
 
-        verifySequence {
+        verify(exactly = 1) {
             BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
+        }
+        verify(exactly = 1) {
             BillingServiceWrapper.beginBillingSession(
                 accessToken,
                 "",
@@ -485,6 +671,9 @@ class BillingControllerTest {
     @Test
     fun `when active guidance completed and external route set, start new billing session`() {
         every { navigationSession.state } returns NavigationSessionState.ActiveGuidance("2")
+        every {
+            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_TRIP)
+        } returns BillingSessionStatus.SESSION_ACTIVE
         val originalRouteOptions = mockk<RouteOptions> {
             every { coordinatesList() } returns listOf(
                 Point.fromLngLat(0.0, 0.0),
@@ -514,8 +703,10 @@ class BillingControllerTest {
 
         billingController.onExternalRouteSet(newRoute)
 
-        verifySequence {
+        verify(exactly = 1) {
             BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
+        }
+        verify(exactly = 1) {
             BillingServiceWrapper.beginBillingSession(
                 accessToken,
                 "",
