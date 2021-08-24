@@ -27,26 +27,26 @@ object RouteStepProgressFactory {
      * @param durationRemaining [Double] The duration remaining in seconds until the user reaches the end of the current step
      */
     fun buildRouteStepProgressObject(
-        stepIndex: Int = 0,
-        intersectionIndex: Int = 0,
-        instructionIndex: Int? = null,
-        step: LegStep? = null,
-        stepPoints: List<Point>? = null,
-        distanceRemaining: Float = 0f,
-        distanceTraveled: Float = 0f,
-        fractionTraveled: Float = 0f,
-        durationRemaining: Double = 0.0
+        stepIndex: Int,
+        intersectionIndex: Int,
+        instructionIndex: Int?,
+        step: LegStep?,
+        stepPoints: List<Point>?,
+        distanceRemaining: Float,
+        distanceTraveled: Float,
+        fractionTraveled: Float,
+        durationRemaining: Double
     ): RouteStepProgress {
         return RouteStepProgress(
-            stepIndex,
-            intersectionIndex,
-            instructionIndex,
-            step,
-            stepPoints,
-            distanceRemaining,
-            distanceTraveled,
-            fractionTraveled,
-            durationRemaining
+            stepIndex = stepIndex,
+            intersectionIndex = intersectionIndex,
+            instructionIndex = instructionIndex,
+            step = step,
+            stepPoints = stepPoints,
+            distanceRemaining = distanceRemaining,
+            distanceTraveled = distanceTraveled,
+            fractionTraveled = fractionTraveled,
+            durationRemaining = durationRemaining
         )
     }
 }

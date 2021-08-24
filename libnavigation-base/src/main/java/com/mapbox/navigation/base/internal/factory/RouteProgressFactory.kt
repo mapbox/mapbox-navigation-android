@@ -43,35 +43,35 @@ object RouteProgressFactory {
      */
     fun buildRouteProgressObject(
         route: DirectionsRoute,
-        bannerInstructions: BannerInstructions? = null,
-        voiceInstructions: VoiceInstructions? = null,
-        currentState: RouteProgressState = RouteProgressState.INITIALIZED,
-        currentLegProgress: RouteLegProgress? = null,
-        upcomingStepPoints: List<Point>? = null,
-        inTunnel: Boolean = false,
-        distanceRemaining: Float = 0f,
-        distanceTraveled: Float = 0f,
-        durationRemaining: Double = 0.0,
-        fractionTraveled: Float = 0f,
-        remainingWaypoints: Int = 0,
-        upcomingRoadObjects: List<UpcomingRoadObject> = emptyList(),
-        stale: Boolean = false
+        bannerInstructions: BannerInstructions?,
+        voiceInstructions: VoiceInstructions?,
+        currentState: RouteProgressState,
+        currentLegProgress: RouteLegProgress?,
+        upcomingStepPoints: List<Point>?,
+        inTunnel: Boolean,
+        distanceRemaining: Float,
+        distanceTraveled: Float,
+        durationRemaining: Double,
+        fractionTraveled: Float,
+        remainingWaypoints: Int,
+        upcomingRoadObjects: List<UpcomingRoadObject>,
+        stale: Boolean
     ): RouteProgress {
         return RouteProgress(
-            route,
-            bannerInstructions,
-            voiceInstructions,
-            currentState,
-            currentLegProgress,
-            upcomingStepPoints,
-            inTunnel,
-            distanceRemaining,
-            distanceTraveled,
-            durationRemaining,
-            fractionTraveled,
-            remainingWaypoints,
-            upcomingRoadObjects,
-            stale
+            route = route,
+            bannerInstructions = bannerInstructions,
+            voiceInstructions = voiceInstructions,
+            currentState = currentState,
+            currentLegProgress = currentLegProgress,
+            upcomingStepPoints = upcomingStepPoints,
+            inTunnel = inTunnel,
+            distanceRemaining = distanceRemaining,
+            distanceTraveled = distanceTraveled,
+            durationRemaining = durationRemaining,
+            fractionTraveled = fractionTraveled,
+            remainingWaypoints = remainingWaypoints,
+            upcomingRoadObjects = upcomingRoadObjects,
+            stale = stale
         )
     }
 }

@@ -30,24 +30,24 @@ object RouteLegProgressFactory {
      * on the last leg, this will return null since a next step doesn't exist
      */
     fun buildRouteLegProgressObject(
-        legIndex: Int = 0,
-        routeLeg: RouteLeg? = null,
-        distanceTraveled: Float = 0f,
-        distanceRemaining: Float = 0f,
-        durationRemaining: Double = 0.0,
-        fractionTraveled: Float = 0f,
-        currentStepProgress: RouteStepProgress? = null,
-        upcomingStep: LegStep? = null
+        legIndex: Int,
+        routeLeg: RouteLeg?,
+        distanceTraveled: Float,
+        distanceRemaining: Float,
+        durationRemaining: Double,
+        fractionTraveled: Float,
+        currentStepProgress: RouteStepProgress?,
+        upcomingStep: LegStep?
     ): RouteLegProgress {
         return RouteLegProgress(
-            legIndex,
-            routeLeg,
-            distanceTraveled,
-            distanceRemaining,
-            durationRemaining,
-            fractionTraveled,
-            currentStepProgress,
-            upcomingStep
+            legIndex = legIndex,
+            routeLeg = routeLeg,
+            distanceTraveled = distanceTraveled,
+            distanceRemaining = distanceRemaining,
+            durationRemaining = durationRemaining,
+            fractionTraveled = fractionTraveled,
+            currentStepProgress = currentStepProgress,
+            upcomingStep = upcomingStep
         )
     }
 }
