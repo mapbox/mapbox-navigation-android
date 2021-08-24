@@ -108,7 +108,9 @@ internal class VoiceInstructionsTextPlayer(
             }
 
             override fun onError(utteranceId: String?) {
-                // Intentionally empty as deprecated
+                // Deprecated, may be called due to https://issuetracker.google.com/issues/138321382
+                LoggerProvider.logger.e(Tag(TAG), Message("Unexpected TextToSpeech error"))
+                donePlaying()
             }
 
             override fun onError(utteranceId: String?, errorCode: Int) {
