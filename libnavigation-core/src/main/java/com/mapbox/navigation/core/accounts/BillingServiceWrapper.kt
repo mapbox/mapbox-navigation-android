@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core
+package com.mapbox.navigation.core.accounts
 
 import com.mapbox.common.BillingService
 import com.mapbox.common.BillingSessionStatus

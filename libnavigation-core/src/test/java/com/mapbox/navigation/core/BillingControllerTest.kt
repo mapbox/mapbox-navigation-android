@@ -7,6 +7,8 @@ import com.mapbox.common.OnBillingServiceError
 import com.mapbox.common.SKUIdentifier
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.accounts.BillingController
+import com.mapbox.navigation.core.accounts.BillingServiceWrapper
 import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
@@ -21,7 +23,6 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
-import io.mockk.verifySequence
 import org.junit.After
 import org.junit.Assert.assertNotNull
 import org.junit.Before
