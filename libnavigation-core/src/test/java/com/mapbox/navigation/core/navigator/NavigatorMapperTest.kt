@@ -6,12 +6,15 @@ import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory
+import com.mapbox.navigation.base.internal.factory.RouteProgressFactory
 import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buildRouteStepProgressObject
 import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
 import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.testing.FileUtils
+import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.MatchedRoadObjectLocation
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.RoadObject
@@ -23,6 +26,7 @@ import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.SpeedLimitSign
 import com.mapbox.navigator.SpeedLimitUnit
 import com.mapbox.navigator.UpcomingRouteAlert
+import com.mapbox.navigator.VoiceInstruction
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -33,14 +37,71 @@ import org.junit.Assert.assertTrue
 import org.junit.Ignore
 import org.junit.Test
 
-// https://github.com/mapbox/mapbox-navigation-android/issues/4492
-@Ignore
 class NavigatorMapperTest {
 
     private val enhancedLocation: Location = mockk(relaxed = true)
     private val keyPoints: List<Location> = mockk(relaxed = true)
     private val route: DirectionsRoute = mockk(relaxed = true)
     private val shape: Geometry = Point.fromLngLat(LONGITUDE, LATITUDE)
+
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @Test
+    fun `route progress result sanity`() {
+        val bannerInstructions = nativeBannerInstructions.mapToDirectionsApi(
+            directionsRoute.legs()!!.first().steps()!![1]
+        )
+        val expected = RouteProgressFactory.buildRouteProgressObject(
+            route = directionsRoute,
+            bannerInstructions = bannerInstructions,
+            voiceInstructions = navigationStatus.voiceInstruction?.mapToDirectionsApi(),
+            currentState = navigationStatus.routeState.convertState(),
+            currentLegProgress = RouteLegProgressFactory.buildRouteLegProgressObject(
+                legIndex = navigationStatus.legIndex,
+                routeLeg = directionsRoute.legs()!!.first(),
+                distanceRemaining = 180f,
+                durationRemaining = 2.0,
+                distanceTraveled = 20f,
+                fractionTraveled = 2f,
+                upcomingStep = directionsRoute.legs()!!.first().steps()!![2],
+                currentStepProgress = buildRouteStepProgressObject(
+                    stepIndex = 1,
+                    intersectionIndex = 1,
+                    instructionIndex = 1,
+                    step = directionsRoute.legs()!!.first().steps()!![1],
+                    stepPoints = PolylineUtils.decode(
+                        directionsRoute.legs()!!.first().steps()!![1].geometry()!!,
+                        6
+                    ),
+                    distanceRemaining = 35f,
+                    distanceTraveled = 30f,
+                    fractionTraveled = 50f,
+                    durationRemaining = 3.0
+                )
+            ),
+            distanceRemaining = 80f,
+            durationRemaining = 1.0,
+            distanceTraveled = 10f,
+            fractionTraveled = 1f,
+            upcomingStepPoints = PolylineUtils.decode(
+                directionsRoute.legs()!!.first().steps()!![2].geometry()!!,
+                6
+            ),
+            inTunnel = true,
+            stale = true,
+            remainingWaypoints = 1,
+            upcomingRoadObjects = listOf()
+        )
+
+        val result = getRouteProgressFrom(
+            directionsRoute,
+            navigationStatus,
+            remainingWaypoints = 1,
+            bannerInstructions,
+            instructionIndex = 1
+        )
+
+        assertEquals(expected, result)
+    }
 
     @Test
     fun `map matcher result sanity`() {
@@ -296,33 +357,8 @@ class NavigatorMapperTest {
         assertNull(getRouteInitInfo(null))
     }
 
-    @OptIn(ExperimentalMapboxNavigationAPI::class)
     @Test
-    fun `step progress correctly created`() {
-        val stepProgress = buildRouteStepProgressObject(
-            1,
-            1,
-            null,
-            directionsRoute.legs()!![0].steps()!![1],
-            PolylineUtils.decode("sla~hA|didrCoDvx@", 6),
-            15f,
-            10f,
-            50f,
-            300.0 / 1000.0
-        )
-
-        val routeProgress = getRouteProgressFrom(
-            directionsRoute,
-            navigationStatus,
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            0
-        )
-
-        assertEquals(stepProgress, routeProgress!!.currentLegProgress!!.currentStepProgress)
-    }
-
-    @Test
+    @Ignore("https://github.com/mapbox/mapbox-navigation-native/issues/3456")
     fun `alerts are present in the route init info is they are delivered from native`() {
         val routeInfo = RouteInfo(1, listOf(tunnel.toUpcomingRouteAlert()))
 
@@ -333,6 +369,7 @@ class NavigatorMapperTest {
     }
 
     @Test
+    @Ignore("https://github.com/mapbox/mapbox-navigation-native/issues/3456")
     fun `parsing multiple tunnel entrances returns multiple alerts`() {
         val firstEntrance = tunnel.toUpcomingRouteAlert(100.0)
         val secondEntrance = tunnel.toUpcomingRouteAlert(200.0)
@@ -374,48 +411,49 @@ class NavigatorMapperTest {
         FileUtils.loadJsonFixture("multileg_route.json")
     )
 
+    private val nativeBannerInstructions = mockk<BannerInstruction> {
+        every { remainingStepDistance } returns 111f
+        every { primary } returns mockk {
+            every { components } returns listOf()
+            every { degrees } returns 45
+            every { drivingSide } returns "drivingSide"
+            every { modifier } returns "modifier"
+            every { text } returns "text"
+            every { type } returns "type"
+        }
+        every { secondary } returns null
+        every { sub } returns null
+        every { index } returns 0
+    }
+    private val nativeVoiceInstructions = mockk<VoiceInstruction> {
+        every { announcement } returns "announcement"
+        every { remainingStepDistance } returns 111f
+        every { ssmlAnnouncement } returns "ssmlAnnouncement"
+    }
     private val navigationStatus: NavigationStatus = mockk {
         every { intersectionIndex } returns 1
         every { stepIndex } returns 1
         every { legIndex } returns 0
         every { activeGuidanceInfo?.routeProgress?.remainingDistance } returns 80.0
-        every { activeGuidanceInfo?.routeProgress?.remainingDuration } returns 10000
+        every { activeGuidanceInfo?.routeProgress?.remainingDuration } returns 1000
         every { activeGuidanceInfo?.routeProgress?.distanceTraveled } returns 10.0
         every { activeGuidanceInfo?.routeProgress?.fractionTraveled } returns 1.0
-        every { activeGuidanceInfo?.legProgress?.remainingDistance } returns 80.0
-        every { activeGuidanceInfo?.legProgress?.remainingDuration } returns 10000
-        every { activeGuidanceInfo?.legProgress?.distanceTraveled } returns 10.0
-        every { activeGuidanceInfo?.legProgress?.fractionTraveled } returns 1.0
-        every { activeGuidanceInfo?.stepProgress?.remainingDistance } returns 15.0
-        every { activeGuidanceInfo?.stepProgress?.remainingDuration } returns 300
-        every { activeGuidanceInfo?.stepProgress?.distanceTraveled } returns 10.0
+        every { activeGuidanceInfo?.legProgress?.remainingDistance } returns 180.0
+        every { activeGuidanceInfo?.legProgress?.remainingDuration } returns 2000
+        every { activeGuidanceInfo?.legProgress?.distanceTraveled } returns 20.0
+        every { activeGuidanceInfo?.legProgress?.fractionTraveled } returns 2.0
+        every { activeGuidanceInfo?.stepProgress?.remainingDistance } returns 35.0
+        every { activeGuidanceInfo?.stepProgress?.remainingDuration } returns 3000
+        every { activeGuidanceInfo?.stepProgress?.distanceTraveled } returns 30.0
         every { activeGuidanceInfo?.stepProgress?.fractionTraveled } returns 50.0
         every { routeState } returns RouteState.TRACKING
-        every { stale } returns false
-        every { bannerInstruction } returns mockk {
-            every { remainingStepDistance } returns 111f
-            every { primary } returns mockk {
-                every { components } returns listOf()
-                every { degrees } returns 45
-                every { drivingSide } returns "drivingSide"
-                every { modifier } returns "modifier"
-                every { text } returns "text"
-                every { type } returns "type"
-            }
-            every { secondary } returns null
-            every { sub } returns null
-            every { index } returns 0
-        }
-        every { voiceInstruction } returns mockk {
-            every { announcement } returns "announcement"
-            every { remainingStepDistance } returns 111f
-            every { ssmlAnnouncement } returns "ssmlAnnouncement"
-        }
+        every { stale } returns true
+        every { bannerInstruction } returns nativeBannerInstructions
+        every { voiceInstruction } returns nativeVoiceInstructions
         every { inTunnel } returns true
         every { upcomingRouteAlerts } returns emptyList()
     }
 
-    // https://github.com/mapbox/mapbox-navigation-android/issues/4492
     val routeAlertLocation: RouteAlertLocation = mockk()
 
     private val tunnel = RoadObject(

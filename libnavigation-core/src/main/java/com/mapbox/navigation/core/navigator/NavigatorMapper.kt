@@ -99,18 +99,18 @@ private fun NavigationStatus.getRouteProgress(
         var stepDurationRemaining = 0.0
 
         var currentLeg: RouteLeg? = null
-        var routeLegProgressDistanceRemaining: Float = 0f
-        var routeLegProgressDistanceTraveled: Float = 0f
-        var routeLegProgressDurationRemaining: Double = 0.0
-        var routeLegProgressFractionTraveled: Float = 0f
+        var routeLegProgressDistanceRemaining = 0f
+        var routeLegProgressDistanceTraveled = 0f
+        var routeLegProgressDurationRemaining = 0.0
+        var routeLegProgressFractionTraveled = 0f
         var routeLegProgressUpcomingStep: LegStep? = null
 
         var routeProgressCurrentState: RouteProgressState = RouteProgressState.INITIALIZED
         var routeProgressUpcomingStepPoints: List<Point>? = null
-        var routeProgressDistanceRemaining: Float = 0f
-        var routeProgressDistanceTraveled: Float = 0f
-        var routeProgressDurationRemaining: Double = 0.0
-        var routeProgressFractionTraveled: Float = 0f
+        var routeProgressDistanceRemaining = 0f
+        var routeProgressDistanceTraveled = 0f
+        var routeProgressDurationRemaining = 0.0
+        var routeProgressFractionTraveled = 0f
 
         ifNonNull(route.legs(), activeGuidanceInfo) { legs, activeGuidanceInfo ->
             if (legIndex < legs.size) {
@@ -254,7 +254,7 @@ private fun MutableList<BannerComponent>.mapToDirectionsApi(): MutableList<Banne
     return components
 }
 
-private fun VoiceInstruction.mapToDirectionsApi(): VoiceInstructions? {
+internal fun VoiceInstruction.mapToDirectionsApi(): VoiceInstructions? {
     return VoiceInstructions.builder()
         .announcement(this.announcement)
         .distanceAlongGeometry(this.remainingStepDistance.toDouble())
