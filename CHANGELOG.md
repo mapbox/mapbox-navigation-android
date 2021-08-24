@@ -2,6 +2,25 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.9.5 - Aug 24, 2021
+This is a patch release on top of `v2.0.0-beta.9.x` which does not include changes introduced in `v2.0.0-beta.10` and later. The `v2.0.0-beta.23` remains the latest and most up-to-date release.
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
+- Reduced memory footprint (both incremental and the peak). [#4740](https://github.com/mapbox/mapbox-navigation-android/pull/4740)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+
+- Mapbox Maps SDK `v10.0.0-beta.19` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.19))
+- Mapbox Navigation Native `v48.0.8`
+- Mapbox Core Common `v11.0.2`
+- Mapbox Java `5.9.0-alpha.5` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v5.9.0-alpha.5))
+- Mapbox Android Core `v3.1.1`
+- Mapbox Android Telemetry `v6.2.2`
+
 ## Mapbox Navigation SDK 2.0.0-beta.23 - August 20, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
