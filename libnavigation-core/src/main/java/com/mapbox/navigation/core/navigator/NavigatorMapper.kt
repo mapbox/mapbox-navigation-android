@@ -100,6 +100,7 @@ private fun NavigationStatus.getRouteProgress(
 
         var currentLeg: RouteLeg? = null
         var routeLegProgressDistanceRemaining: Float = 0f
+        var routeLegProgressDistanceTraveled: Float = 0f
         var routeLegProgressDurationRemaining: Double = 0.0
         var routeLegProgressFractionTraveled: Float = 0f
         var routeLegProgressUpcomingStep: LegStep? = null
@@ -115,16 +116,17 @@ private fun NavigationStatus.getRouteProgress(
             if (legIndex < legs.size) {
                 currentLeg = legs[legIndex]
 
-                routeProgressDistanceTraveled =
+                routeLegProgressDistanceTraveled =
                     activeGuidanceInfo.legProgress.distanceTraveled.toFloat()
                 routeLegProgressFractionTraveled =
                     activeGuidanceInfo.legProgress.fractionTraveled.toFloat()
-
                 routeLegProgressDistanceRemaining =
                     activeGuidanceInfo.legProgress.remainingDistance.toFloat()
                 routeLegProgressDurationRemaining =
                     activeGuidanceInfo.legProgress.remainingDuration / ONE_SECOND_IN_MILLISECONDS
 
+                routeProgressDistanceTraveled =
+                    activeGuidanceInfo.routeProgress.distanceTraveled.toFloat()
                 routeProgressDistanceRemaining =
                     activeGuidanceInfo.routeProgress.remainingDistance.toFloat()
                 routeProgressDurationRemaining =
@@ -185,7 +187,7 @@ private fun NavigationStatus.getRouteProgress(
         val routeLegProgress = buildRouteLegProgressObject(
             legIndex,
             currentLeg,
-            routeProgressDistanceTraveled,
+            routeLegProgressDistanceTraveled,
             routeLegProgressDistanceRemaining,
             routeLegProgressDurationRemaining,
             routeLegProgressFractionTraveled,
