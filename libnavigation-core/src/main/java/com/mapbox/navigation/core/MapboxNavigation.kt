@@ -1040,7 +1040,13 @@ class MapboxNavigation(
     }
 
     private fun reroute() {
-        rerouteController?.reroute { routes -> setRoutes(routes) }
+        rerouteController?.reroute { routes ->
+            setRoutes(routes)
+            LoggerProvider.logger.i(
+                Tag("BillingTest"),
+                Message("reroute successful")
+            )
+        }
     }
 
     private fun obtainUserAgent(isFromNavigationUi: Boolean): String {

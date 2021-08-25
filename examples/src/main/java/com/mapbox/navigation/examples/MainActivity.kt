@@ -24,6 +24,7 @@ import com.mapbox.navigation.examples.core.MapboxVoiceActivity
 import com.mapbox.navigation.examples.core.MultiLegRouteExampleActivity
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.ReplayHistoryActivity
+import com.mapbox.navigation.examples.core.billing.BillingTestActivity
 import com.mapbox.navigation.examples.core.camera.MapboxCameraAnimationsActivity
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityMainBinding
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper
@@ -64,6 +65,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
 
     private fun buildSampleList(): List<SampleItem> {
         return listOf(
+            SampleItem(
+                "billing test",
+                "",
+                BillingTestActivity::class.java
+            ),
             SampleItem(
                 getString(R.string.title_navigation),
                 getString(R.string.description_navigation),

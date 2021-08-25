@@ -59,6 +59,7 @@ class MapboxOnboardRouter(
         routeOptions: RouteOptions,
         callback: RouterCallback
     ): Long {
+        throw RuntimeException()
         val httpUrl = RouteBuilderProvider
             .getBuilder(null)
             .accessToken(accessToken)

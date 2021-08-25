@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.MapboxTimer
 
 /**
@@ -106,6 +107,10 @@ internal class RouteRefreshController(
 
         override fun onRefresh(directionsRoute: DirectionsRoute) {
             logger.i(TAG, msg = Message("Successful route refresh"))
+            LoggerProvider.logger.i(
+                Tag("BillingTest"),
+                Message("Successful route refresh")
+            )
             val routeDiffs = routeDiffProvider.buildRouteDiffs(
                 oldDirectionsRoute,
                 directionsRoute,
