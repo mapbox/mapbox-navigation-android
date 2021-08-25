@@ -1013,17 +1013,10 @@ class MapboxNavigationTest {
     }
 
     @Test(expected = IllegalStateException::class)
-    fun `verify that resumeSession is not called when destroyed`() = runBlocking {
+    fun `verify that stopTripSession is not called when destroyed`() = runBlocking {
         mapboxNavigation = MapboxNavigation(navigationOptions)
         mapboxNavigation.onDestroy()
-        mapboxNavigation.resumeTripSession()
-    }
-
-    @Test(expected = IllegalStateException::class)
-    fun `verify that pauseSession is not called when destroyed`() = runBlocking {
-        mapboxNavigation = MapboxNavigation(navigationOptions)
-        mapboxNavigation.onDestroy()
-        mapboxNavigation.pauseTripSession()
+        mapboxNavigation.stopTripSession()
     }
 
     @Test

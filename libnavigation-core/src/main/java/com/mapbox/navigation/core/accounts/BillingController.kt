@@ -32,9 +32,6 @@ internal class BillingController(
 
     private val navigationSessionStateObserver =
         NavigationSessionStateObserver { navigationSessionState ->
-            // stop any running sessions
-            stopBillingSession()
-
             if (navigationSessionState != NavigationSessionState.Idle) {
                 // always trigger an MAU event if a session starts
                 BillingServiceWrapper.triggerBillingEvent(
@@ -48,16 +45,18 @@ internal class BillingController(
 
             when (navigationSessionState) {
                 is NavigationSessionState.Idle -> {
-                    // do nothing
+                    getRunningOrPausedSessionSkuId()?.let {
+                        BillingServiceWrapper.pauseBillingSession(it)
+                    }
                 }
                 is NavigationSessionState.FreeDrive -> {
-                    beginBillingSession(
+                    resumeOrBeginBillingSession(
                         SKUIdentifier.NAV2_SES_FDTRIP,
                         validity = TimeUnit.HOURS.toMillis(1) // validity of 1hr
                     )
                 }
                 is NavigationSessionState.ActiveGuidance -> {
-                    beginBillingSession(
+                    resumeOrBeginBillingSession(
                         SKUIdentifier.NAV2_SES_TRIP,
                         validity = 0 // default validity, 12hrs
                     )
@@ -67,20 +66,6 @@ internal class BillingController(
 
     init {
         navigationSession.registerNavigationSessionStateObserver(navigationSessionStateObserver)
-    }
-
-    fun pauseSession() {
-        getRunningOrPausedSessionId()?.let {
-            BillingServiceWrapper.pauseBillingSession(it)
-        }
-    }
-
-    fun resumeSession() {
-        getRunningOrPausedSessionId()?.let { skuId ->
-            BillingServiceWrapper.resumeBillingSession(skuId) {
-                handlerError(it)
-            }
-        }
     }
 
     /**
@@ -106,9 +91,6 @@ internal class BillingController(
             val newWaypoints = getWaypointsOnRoute(directionsRoute)
 
             if (!waypointsWithinRange(currentRemainingWaypoints, newWaypoints)) {
-                // stop any running sessions
-                stopBillingSession()
-
                 beginBillingSession(
                     SKUIdentifier.NAV2_SES_TRIP,
                     validity = 0 // default validity, 12hrs
@@ -117,14 +99,45 @@ internal class BillingController(
         }
     }
 
-    private fun beginBillingSession(
-        identifier: SKUIdentifier,
+    /**
+     * Resumes a paused session if the sku identifiers match, otherwise, starts a new one.
+     */
+    private fun resumeOrBeginBillingSession(
+        skuId: SKUIdentifier,
         validity: Long
     ) {
+        val runningSessionSkuId = getRunningOrPausedSessionSkuId()
+        if (runningSessionSkuId == skuId) {
+            BillingServiceWrapper.resumeBillingSession(runningSessionSkuId) {
+                handlerError(it)
+                if (it.code == BillingServiceErrorCode.RESUME_FAILED) {
+                    LoggerProvider.logger.w(
+                        tag,
+                        Message("Session resumption failed, starting a new one instead.")
+                    )
+                    beginBillingSession(skuId, validity)
+                }
+            }
+        } else {
+            beginBillingSession(skuId, validity)
+        }
+    }
+
+    /**
+     * Stops any running session and starts a new one with provided arguments.
+     */
+    private fun beginBillingSession(
+        skuId: SKUIdentifier,
+        validity: Long
+    ) {
+        val runningSessionSkuId = getRunningOrPausedSessionSkuId()
+        if (runningSessionSkuId != null) {
+            BillingServiceWrapper.stopBillingSession(runningSessionSkuId)
+        }
         BillingServiceWrapper.beginBillingSession(
             accessToken,
             "", // empty string result in default user agent
-            identifier,
+            skuId,
             {
                 handlerError(it)
             },
@@ -132,13 +145,7 @@ internal class BillingController(
         )
     }
 
-    private fun stopBillingSession() {
-        getRunningOrPausedSessionId()?.let {
-            BillingServiceWrapper.stopBillingSession(it)
-        }
-    }
-
-    private fun getRunningOrPausedSessionId(): SKUIdentifier? {
+    private fun getRunningOrPausedSessionSkuId(): SKUIdentifier? {
         val possibleSessionIds = listOf(
             SKUIdentifier.NAV2_SES_TRIP,
             SKUIdentifier.NAV2_SES_FDTRIP
@@ -223,12 +230,12 @@ internal class BillingController(
     private fun handlerError(error: BillingServiceError) {
         when (error.code) {
             BillingServiceErrorCode.INVALID_SKU_ID,
-            BillingServiceErrorCode.RESUME_FAILED,
             null -> {
                 throw IllegalArgumentException(error.toString())
             }
+            BillingServiceErrorCode.RESUME_FAILED,
             BillingServiceErrorCode.TOKEN_VALIDATION_FAILED -> {
-                LoggerProvider.logger.e(
+                LoggerProvider.logger.w(
                     tag,
                     Message(error.toString())
                 )

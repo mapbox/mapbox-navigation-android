@@ -446,7 +446,9 @@ class MapboxNavigation(
      * @see [registerTripSessionStateObserver]
      */
     fun stopTripSession() {
-        tripSession.stop()
+        runIfNotDestroyed {
+            tripSession.stop()
+        }
     }
 
     /**
@@ -456,18 +458,6 @@ class MapboxNavigation(
      */
     fun resetTripSession() {
         navigator.resetRideSession()
-    }
-
-    fun pauseTripSession() {
-        runIfNotDestroyed {
-            billingController.pauseSession()
-        }
-    }
-
-    fun resumeTripSession() {
-        runIfNotDestroyed {
-            billingController.resumeSession()
-        }
     }
 
     /**
