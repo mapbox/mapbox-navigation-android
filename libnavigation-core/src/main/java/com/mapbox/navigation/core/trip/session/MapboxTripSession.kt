@@ -68,7 +68,6 @@ internal class MapboxTripSession(
         set(value) {
             val isSameUuid = value?.isSameUuid(field) ?: false
             val isSameRoute = value?.isSameRoute(field) ?: false
-            field = value
             if (value == null) {
                 roadObjects = emptyList()
                 routeProgress = null
@@ -87,9 +86,10 @@ internal class MapboxTripSession(
             }
             mainJobController.scope.launch {
                 updateRouteJob.join()
+                field = value
+                isOffRoute = false
+                invalidateLatestBannerInstructionEvent()
             }
-            isOffRoute = false
-            invalidateLatestBannerInstructionEvent()
         }
 
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
