@@ -4,6 +4,8 @@ import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.RouteRefreshCallback
@@ -18,6 +20,7 @@ import com.mapbox.navigation.route.internal.util.httpUrl
 import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
 import com.mapbox.navigation.route.onboard.OfflineRoute
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.RequestMap
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.cancelRequest
@@ -39,11 +42,12 @@ import java.net.URL
 class MapboxOnboardRouter(
     private val accessToken: String,
     private val navigatorNative: MapboxNativeNavigator,
-    private val context: Context
+    private val context: Context,
+    private val logger: Logger = LoggerProvider.logger,
 ) : Router {
 
-    private companion object {
-        private val loggerTag = Tag("MbxOnboardRouter")
+    internal companion object {
+        internal val loggerTag = Tag("MbxOnboardRouter")
     }
 
     private val mainJobControl by lazy { ThreadController.getMainScopeAndRootJob() }
@@ -147,7 +151,11 @@ class MapboxOnboardRouter(
             try {
                 val routerResult = getRoute(url)
                 if (routerResult.isValue) {
-                    val routes = parseDirectionsRoutes(routerResult.value!!).map {
+                    val directions = parseDirectionsResponse(routerResult.value!!)
+                    val metadata = directions.metadata()?.infoMap()
+                    val message = Message("Successful directions response. Metadata: $metadata")
+                    logger.i(loggerTag, message)
+                    val routes = directions.routes().map {
                         it.toBuilder().routeOptions(routeOptions).build()
                     }
                     callback.onRoutesReady(routes, RouterOrigin.Onboard)
@@ -176,8 +184,8 @@ class MapboxOnboardRouter(
     }
 
     // todo Nav Native serializes route options, it probably shouldn't
-    private suspend fun parseDirectionsRoutes(json: String): List<DirectionsRoute> =
+    private suspend fun parseDirectionsResponse(json: String): DirectionsResponse =
         withContext(ThreadController.IODispatcher) {
-            DirectionsResponse.fromJson(json).routes()
+            DirectionsResponse.fromJson(json)
         }
 }

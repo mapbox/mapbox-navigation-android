@@ -5,6 +5,8 @@ import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
@@ -86,16 +88,13 @@ class MapboxOnboardRouterTest {
     }
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
     private val context = mockk<Context>()
+    private val logger = mockk<Logger>(relaxUnitFun = true)
     private val mapboxDirections = mockk<MapboxDirections>(relaxed = true)
     private val mapboxDirectionsBuilder = mockk<MapboxDirections.Builder>(relaxed = true)
     private val routerOrigin = RouterOrigin.Onboard
     private val accessToken = "pk.123"
 
-    private var onboardRouter: MapboxOnboardRouter = MapboxOnboardRouter(
-        accessToken,
-        navigator,
-        context
-    )
+    private var onboardRouter = MapboxOnboardRouter(accessToken, navigator, context, logger)
 
     private val url =
         MapboxDirections.builder()
@@ -160,10 +159,17 @@ class MapboxOnboardRouterTest {
 
         coVerify { navigator.getRoute(url.toString()) }
 
-        val expected = DirectionsResponse.fromJson(SUCCESS_RESPONSE).routes().map {
+        val fromJson = DirectionsResponse.fromJson(SUCCESS_RESPONSE)
+        val expected = fromJson.routes().map {
             it.toBuilder().routeOptions(routerOptions).build()
         }
-        verify(exactly = 1) { routerCallback.onRoutesReady(expected, routerOrigin) }
+        val message = Message(
+            "Successful directions response. Metadata: {key1=value1, key2=value2, key3=value3}",
+        )
+        verify(exactly = 1) {
+            logger.i(MapboxOnboardRouter.loggerTag, message)
+            routerCallback.onRoutesReady(expected, routerOrigin)
+        }
     }
 
     @Test
@@ -644,7 +650,14 @@ class MapboxOnboardRouterTest {
                 }
               ],
               "code": "Ok",
-              "uuid": "cjeacbr8s21bk47lggcvce7lv"
+              "uuid": "cjeacbr8s21bk47lggcvce7lv",
+              "metadata": {
+                "map": {
+                  "key1": "value1",
+                  "key2": "value2",
+                  "key3": "value3"
+                }
+              }
             }
         """
     }
