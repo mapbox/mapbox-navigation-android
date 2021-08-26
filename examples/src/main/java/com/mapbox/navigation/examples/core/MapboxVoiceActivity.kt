@@ -232,12 +232,9 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private fun initStyle() {
-        mapboxMap.loadStyleUri(
-            MAPBOX_STREETS
-        ) {
-            binding.mapView.gestures.addOnMapLongClickListener(
-                this@MapboxVoiceActivity
-            )
+        mapboxMap.loadStyleUri(MAPBOX_STREETS) { style ->
+            routeLineView.initializeLayers(style)
+            binding.mapView.gestures.addOnMapLongClickListener(this)
         }
     }
 
