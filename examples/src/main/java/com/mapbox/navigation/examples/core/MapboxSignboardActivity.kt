@@ -14,7 +14,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.Style
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
@@ -200,14 +199,10 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
 
     @SuppressLint("MissingPermission")
     private fun initStyle() {
-        mapboxMap.loadStyleUri(
-            MAPBOX_STREETS,
-            object : Style.OnStyleLoaded {
-                override fun onStyleLoaded(style: Style) {
-                    binding.mapView.gestures.addOnMapLongClickListener(this@MapboxSignboardActivity)
-                }
-            }
-        )
+        mapboxMap.loadStyleUri(MAPBOX_STREETS) { style ->
+            routeLineView.initializeLayers(style)
+            binding.mapView.gestures.addOnMapLongClickListener(this)
+        }
     }
 
     private fun startSimulation(route: DirectionsRoute) {

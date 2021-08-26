@@ -202,9 +202,8 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 
     @SuppressLint("MissingPermission")
     private fun initStyle() {
-        mapboxMap.loadStyleUri(
-            MAPBOX_STREETS
-        ) {
+        mapboxMap.loadStyleUri(MAPBOX_STREETS) { style ->
+            routeLineView.initializeLayers(style)
             binding.mapView.gestures.addOnMapLongClickListener(this)
         }
     }
