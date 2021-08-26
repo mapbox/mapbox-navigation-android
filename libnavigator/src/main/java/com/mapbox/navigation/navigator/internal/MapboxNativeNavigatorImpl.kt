@@ -61,7 +61,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     // TODO migrate to RouterInterface
     private var nativeRouter: Router? = null
     private var historyRecorderHandle: HistoryRecorderHandle? = null
-    private var route: DirectionsRoute? = null
     override var graphAccessor: GraphAccessor? = null
     override var roadObjectMatcher: RoadObjectMatcher? = null
     override var roadObjectsStore: RoadObjectsStore? = null
@@ -103,7 +102,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         roadObjectsStore = nativeComponents.navigator.roadObjectStore()
         experimental = nativeComponents.navigator.experimental
         cache = nativeComponents.cache
-        route = null
         this.logger = logger
         return this
     }
@@ -175,7 +173,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         legIndex: Int
     ): RouteInfo? =
         withContext(NavigatorDispatcher) {
-            MapboxNativeNavigatorImpl.route = route
             val result = navigator!!.setRoute(
                 route?.toJson() ?: "{}",
                 PRIMARY_ROUTE_INDEX,
@@ -194,7 +191,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      */
     override suspend fun updateAnnotations(route: DirectionsRoute): Unit =
         withContext(NavigatorDispatcher) {
-            MapboxNativeNavigatorImpl.route = route
             route.legs()?.forEachIndexed { index, routeLeg ->
                 routeLeg.annotation()?.toJson()?.let { annotations ->
                     navigator!!.updateAnnotations(annotations, PRIMARY_ROUTE_INDEX, index)
