@@ -5,7 +5,7 @@ import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.navigator.internal.NavigatorLoader.customConfig
-import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.CacheFactory
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigFactory
@@ -66,7 +66,7 @@ internal object NavigatorLoader {
         return if (historyDir != null) {
             val historyRecorderHandle = HistoryRecorderHandle.build(historyDir, config)
             if (historyRecorderHandle == null) {
-                LoggerProvider.logger.e(
+                logE(
                     Tag("MbxHistoryRecorder"),
                     Message("Could not create directory directory to write events")
                 )
