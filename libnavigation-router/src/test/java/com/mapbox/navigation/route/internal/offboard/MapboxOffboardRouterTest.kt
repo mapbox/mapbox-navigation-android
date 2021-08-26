@@ -4,10 +4,13 @@ import android.content.Context
 import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.Metadata
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directionsrefresh.v1.MapboxDirectionsRefresh
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
@@ -61,6 +64,8 @@ class MapboxOffboardRouterTest : BaseTest() {
         .addPathSegment("test")
         .addQueryParameter(ACCESS_TOKEN_QUERY_PARAM, "pk.123")
         .build()
+    private val metadataInfo = mapOf("key1" to "value1", "key2" to "value2", "key3" to "value3")
+    private val logger = mockk<Logger>(relaxUnitFun = true)
 
     @Before
     fun setUp() {
@@ -112,7 +117,7 @@ class MapboxOffboardRouterTest : BaseTest() {
         }
 
         offboardRouter =
-            MapboxOffboardRouter(accessToken, context, mockSkuTokenProvider)
+            MapboxOffboardRouter(accessToken, context, mockSkuTokenProvider, logger)
 
         every { (refreshCall.request() as Request).url } returns "https://test.com".toHttpUrl()
     }
@@ -187,6 +192,18 @@ class MapboxOffboardRouterTest : BaseTest() {
         routeCallback.onResponse(routeCall, response)
 
         verify { routerCallback.onRoutesReady(listOf(route), routerOrigin) }
+    }
+
+    @Test
+    fun `on successful response metadata is logged`() {
+        val routerCallback = mockk<RouterCallback>(relaxed = true)
+        val response = buildRouteResponse(listOf(), true)
+        offboardRouter.getRoute(routeOptions, routerCallback)
+
+        routeCallback.onResponse(routeCall, response)
+
+        val message = Message("Successful directions response. Metadata: $metadataInfo")
+        verify { logger.i(MapboxOffboardRouter.TAG, message) }
     }
 
     @Test
@@ -501,7 +518,10 @@ class MapboxOffboardRouterTest : BaseTest() {
     ): Response<DirectionsResponse> {
         val response = mockk<Response<DirectionsResponse>>()
         val directionsResponse = mockk<DirectionsResponse>()
+        val metadata = mockk<Metadata>()
+        every { metadata.infoMap() } returns metadataInfo
         every { directionsResponse.routes() } returns routeList
+        every { directionsResponse.metadata() } returns metadata
         every { response.body() } returns directionsResponse
         every { response.isSuccessful } returns isSuccessful
         every { response.message() } returns "mock"

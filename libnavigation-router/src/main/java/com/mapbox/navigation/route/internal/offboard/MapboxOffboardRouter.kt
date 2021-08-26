@@ -7,6 +7,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directionsrefresh.v1.MapboxDirectionsRefresh
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.route.RouteRefreshCallback
@@ -19,6 +21,7 @@ import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
 import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
 import com.mapbox.navigation.route.offboard.routerefresh.RouteRefreshCallbackMapper
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.RequestMap
 import com.mapbox.navigation.utils.internal.cancelRequest
 import okhttp3.Request
@@ -36,11 +39,12 @@ import retrofit2.Response
 class MapboxOffboardRouter(
     private val accessToken: String,
     private val context: Context,
-    private val urlSkuTokenProvider: UrlSkuTokenProvider
+    private val urlSkuTokenProvider: UrlSkuTokenProvider,
+    private val logger: Logger = LoggerProvider.logger,
 ) : Router {
 
-    private companion object {
-        private val TAG = Tag("MbxOffboardRouter")
+    internal companion object {
+        internal val TAG = Tag("MbxOffboardRouter")
         private const val ROUTES_LIST_EMPTY = "routes list is empty"
         private const val UNKNOWN = "unknown"
     }
@@ -76,13 +80,19 @@ class MapboxOffboardRouter(
                     val urlWithoutToken = call.request().url.redactQueryParam(
                         ACCESS_TOKEN_QUERY_PARAM
                     ).toUrl()
-                    val routes = response.body()?.routes()
+                    val body = response.body()
+                    val routes = body?.routes()
+                    val metadata = body?.metadata()?.infoMap()
                     val code = response.code()
                     when {
                         call.isCanceled -> callback.onCanceled(
                             routeOptions, RouterOrigin.Offboard
                         )
                         response.isSuccessful -> {
+                            logger.i(
+                                TAG,
+                                Message("Successful directions response. Metadata: $metadata"),
+                            )
                             if (!routes.isNullOrEmpty()) {
                                 callback.onRoutesReady(routes, RouterOrigin.Offboard)
                             } else {
