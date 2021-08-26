@@ -44,10 +44,12 @@ import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteState
+import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
@@ -62,6 +64,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -1077,6 +1081,55 @@ class MapboxTripSessionTest {
         navigatorRecreationObserverImplSlot.captured.onNativeNavigatorRecreated()
 
         verify(exactly = 0) { navigator.setFallbackVersionsObserver(any()) }
+    }
+
+    @Test
+    fun routeIsSetAfterNativeJobComplete() = runBlockingTest {
+        coEvery { navigator.setRoute(any()) } coAnswers {
+            delay(100)
+            null
+        }
+
+        tripSession.route = route
+
+        assertEquals(tripSession.route, null)
+
+        coroutineRule.testDispatcher.advanceTimeBy(200)
+
+        assertEquals(tripSession.route, route)
+    }
+
+    @Test
+    fun routeProgressProvidedWhenRouteIsSet() = runBlockingTest {
+        coEvery { navigator.setRoute(any()) } coAnswers {
+            delay(100)
+            null
+        }
+
+        val observerOne: RouteProgressObserver = mockk(relaxUnitFun = true)
+        val observerTwo: RouteProgressObserver = mockk(relaxUnitFun = true)
+        every { observerOne.onRouteProgressChanged(any()) } just Runs
+        every { observerTwo.onRouteProgressChanged(any()) } just Runs
+        every { route.legs() } returns null
+
+        tripSession = buildTripSession()
+        tripSession.registerRouteProgressObserver(observerOne)
+        tripSession.registerRouteProgressObserver(observerTwo)
+        tripSession.start(true)
+        tripSession.route = route
+
+        repeat(5) {
+            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+        }
+
+        coroutineRule.testDispatcher.advanceTimeBy(200)
+
+        repeat(2) {
+            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+        }
+
+        verify(exactly = 2) { observerOne.onRouteProgressChanged(any()) }
+        verify(exactly = 2) { observerTwo.onRouteProgressChanged(any()) }
     }
 
     @After

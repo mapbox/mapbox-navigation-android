@@ -40,6 +40,7 @@ import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.RouteState
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
@@ -64,6 +65,8 @@ internal class MapboxTripSession(
     private val eHorizonSubscriptionManager: EHorizonSubscriptionManager,
 ) : TripSession {
 
+    private var updateRouteJob: Job? = null
+
     override var route: DirectionsRoute? = null
         set(value) {
             val isSameUuid = value?.isSameUuid(field) ?: false
@@ -72,7 +75,7 @@ internal class MapboxTripSession(
                 roadObjects = emptyList()
                 routeProgress = null
             }
-            val updateRouteJob = threadController.getMainScopeAndRootJob().scope.launch {
+            updateRouteJob = threadController.getMainScopeAndRootJob().scope.launch {
                 when {
                     isSameUuid && isSameRoute && value != null -> {
                         navigator.updateAnnotations(value)
@@ -85,7 +88,7 @@ internal class MapboxTripSession(
                 }
             }
             mainJobController.scope.launch {
-                updateRouteJob.join()
+                updateRouteJob?.join()
                 field = value
                 isOffRoute = false
                 invalidateLatestBannerInstructionEvent()
@@ -604,6 +607,10 @@ internal class MapboxTripSession(
         progress: RouteProgress?,
         shouldTriggerBannerInstructionsObserver: Boolean
     ) {
+        if (updateRouteJob?.isActive == true) {
+            return
+        }
+
         routeProgress = progress
         if (tripService.hasServiceStarted()) {
             tripService.updateNotification(buildTripNotificationState(progress))
