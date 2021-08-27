@@ -2,6 +2,32 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.24 - August 27, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Features
+- Exposed a `withForegroundService` parameter for `MapboxNavigation#startTripSession` that allows for running a session without a foreground service. [#4730](https://github.com/mapbox/mapbox-navigation-android/pull/4730)
+- Added possibility to push feedback in FreeDrive mode. [#4693](https://github.com/mapbox/mapbox-navigation-android/pull/4693)
+
+#### Bug fixes and improvements
+- Added logging of updated legs for successful route refresh. [#4734](https://github.com/mapbox/mapbox-navigation-android/pull/4734)
+- Fixed an issue where `RouteProgress#distanceTraveled` was reported incorrectly for multi-leg routes. [#4749](https://github.com/mapbox/mapbox-navigation-android/pull/4749)
+- Fixed stuck TTS queue when deprecated onError is called. [#4746](https://github.com/mapbox/mapbox-navigation-android/pull/4746)
+- Fixed an occasional crash when setting a new route while on a non-initial leg of the previous route. [#4755](https://github.com/mapbox/mapbox-navigation-android/pull/4755)
+- Fixed an internal memory leak so RAM consumption should be greatly reduced. [#4759](https://github.com/mapbox/mapbox-navigation-android/pull/4759)
+- Added logging of metadata for successful directions response. [#4761](https://github.com/mapbox/mapbox-navigation-android/pull/4761)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.0.0-rc.7` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.7))
+- Mapbox Navigation Native `v64.0.0`
+- Mapbox Core Common `v17.1.0`
+- Mapbox Java `v6.0.0-alpha.4` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0-alpha.4))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.0.0-beta.9.5 - Aug 24, 2021
 This is a patch release on top of `v2.0.0-beta.9.x` which does not include changes introduced in `v2.0.0-beta.10` and later. The `v2.0.0-beta.23` remains the latest and most up-to-date release.
 
