@@ -4,6 +4,7 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.navigation.ui.maps.building.model.BuildingError
 import com.mapbox.navigation.ui.maps.building.model.BuildingValue
+import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -43,16 +44,24 @@ internal object BuildingProcessor {
         action: BuildingAction.QueryBuildingOnWaypoint
     ): BuildingResult.GetDestination {
         val routeOptions = action.progress.route.routeOptions()
+        val coordinatesList = routeOptions?.coordinatesList()
+        val waypointTargets = routeOptions?.waypointTargetsList()
         val coordinateIndex = action.progress.currentLegProgress?.legIndex!! + 1
-        return routeOptions?.coordinatesList()?.getOrNull(coordinateIndex)?.let { point ->
+        val routablePoint = coordinatesList?.getOrNull(coordinateIndex)
+        val locationPoint = waypointTargets?.getOrNull(coordinateIndex)
+        return ifNonNull(locationPoint) { point ->
             BuildingResult.GetDestination(point)
-        } ?: BuildingResult.GetDestination(null)
+        } ?: BuildingResult.GetDestination(routablePoint)
     }
 
     fun queryBuildingOnFinalDestination(
         action: BuildingAction.QueryBuildingOnFinalDestination
     ): BuildingResult.GetDestination {
-        val point = action.progress.route.routeOptions()?.coordinatesList()?.lastOrNull()
-        return BuildingResult.GetDestination(point)
+        val routeOptions = action.progress.route.routeOptions()
+        val lastCoordinate = routeOptions?.coordinatesList()?.lastOrNull()
+        val lastWaypointTarget = routeOptions?.waypointTargetsList()?.lastOrNull()
+        return ifNonNull(lastWaypointTarget) { point ->
+            BuildingResult.GetDestination(point)
+        } ?: BuildingResult.GetDestination(lastCoordinate)
     }
 }
