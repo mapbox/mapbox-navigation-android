@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.building.api
 
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
@@ -40,13 +41,11 @@ class MapboxBuildingsApi internal constructor(
      * Note:
      *
      * There are two kind of points that can be used here to query a building.
-     * - A point you can obtain that lives on a building also known as location point
-     * - A point you would route to on the road also known as routable point
+     * - A point you can obtain where the actual building is also known as location point
+     * - A point on a road snapped from the address also known as routable point
      *
-     * For this method to work, your route's original request should be a "location point" and not a
-     * "routing point", otherwise, nothing will be returned. If the coordinate is a routing point
-     * (which is the correct way to do it), you should define a "waypoint_targets" in the original
-     * request, for each of the waypoints, and for the final destination.
+     * For this method to work, the [point] passed to this API should be a "location point" and not a
+     * "routing point".
      */
     fun queryBuildingToHighlight(
         point: Point,
@@ -69,13 +68,45 @@ class MapboxBuildingsApi internal constructor(
      * Note:
      *
      * There are two kind of points that can be used here to query a building.
-     * - A point you can obtain that lives on a building also known as location point
-     * - A point you would route to on the road also known as routable point
+     * - A point you can obtain where the actual building is also known as location point
+     * - A point on a road snapped from the address also known as routable point
      *
      * For this method to work, your route's original request should be a "location point" and not a
      * "routing point", otherwise, nothing will be returned. If the coordinate is a routing point
      * (which is the correct way to do it), you should define a "waypoint_targets" in the original
      * request, for each of the waypoints, and for the final destination.
+     *
+     * For example when making a route request, you can specify the [RouteOptions] as follows if you
+     * choose the coordinate to be a routing point:
+     *
+     * ```
+     * val routeOptions = RouteOptions.builder()
+     *   .applyDefaultNavigationOptions()
+     *   .applyLanguageAndVoiceUnitOptions(this)
+     *   .coordinatesList(
+     *     listOf(
+     *       Point.fromLngLat(-122.4192, 37.7627), // origin
+     *       Point.fromLngLat(-122.4182, 37.7651), // waypoint destination
+     *       Point.fromLngLat(-122.4145, 37.7653)  // final destination
+     *     )
+     *   )
+     *   .waypointTargetsList(
+     *     listOf(
+     *       Point.fromLngLat(-122.4192, 37.7627), // origin
+     *       Point.fromLngLat(-122.4183, 37.7653), // waypoint destination
+     *       Point.fromLngLat(-122.4146, 37.7655)  // final destination
+     *     )
+     *   )
+     *   .build()
+     * ```
+     *
+     * In this case the points mentioned in the [RouteOptions.coordinatesList] are routing points
+     * where you would want the router to route you to whereas the points mentioned in the
+     * [RouteOptions.waypointTargetsList] are the location points that would be highlighted when you
+     * reach your waypoint or final destination. In case you don't specify the
+     * [RouteOptions.waypointTargetsList] the logic will fallback to [RouteOptions.coordinatesList]
+     * and would try to highlight these points. However the highlight will only work if they are
+     * location points.
      */
     fun queryBuildingOnWaypoint(
         progress: RouteProgress,
@@ -106,13 +137,42 @@ class MapboxBuildingsApi internal constructor(
      * Note:
      *
      * There are two kind of points that can be used here to query a building.
-     * - A point you can obtain that lives on a building also known as location point
-     * - A point you would route to on the road also known as routable point
+     * - A point you can obtain where the actual building is also known as location point
+     * - A point on a road snapped from the address also known as routable point
      *
      * For this method to work, your route's original request should be a "location point" and not a
      * "routing point", otherwise, nothing will be returned. If the coordinate is a routing point
      * (which is the correct way to do it), you should define a "waypoint_targets" in the original
      * request, for each of the waypoints, and for the final destination.
+     *
+     * For example when making a route request, you can specify the [RouteOptions] as follows if you
+     * choose the coordinate to be a routing point:
+     *
+     * ```
+     * val routeOptions = RouteOptions.builder()
+     *   .applyDefaultNavigationOptions()
+     *   .applyLanguageAndVoiceUnitOptions(this)
+     *   .coordinatesList(
+     *     listOf(
+     *       Point.fromLngLat(-122.4192, 37.7627), // origin
+     *       Point.fromLngLat(-122.4145, 37.7653)  // final destination
+     *     )
+     *   )
+     *   .waypointTargetsList(
+     *     listOf(
+     *       Point.fromLngLat(-122.4192, 37.7627), // origin
+     *       Point.fromLngLat(-122.4146, 37.7655)  // final destination
+     *     )
+     *   )
+     *   .build()
+     * ```
+     *
+     * In this case the points mentioned in the [RouteOptions.coordinatesList] are routing points
+     * where you would want the router to route you to whereas the points mentioned in the
+     * [RouteOptions.waypointTargetsList] are the location points that would be highlighted when you
+     * reach your final destination. In case you don't specify the [RouteOptions.waypointTargetsList]
+     * the logic will fallback to [RouteOptions.coordinatesList] and would try to highlight these
+     * points. However the highlight will only work if they are location points.
      */
     fun queryBuildingOnFinalDestination(
         progress: RouteProgress,
