@@ -34,6 +34,11 @@ internal class RouteAlternativesController(
     private val observers = CopyOnWriteArraySet<RouteAlternativesObserver>()
     private var currentRequestId: Long? = null
 
+    fun triggerAlternativeRequest() {
+        interrupt()
+        requestRouteAlternatives()
+    }
+
     fun register(routeAlternativesObserver: RouteAlternativesObserver) {
         val needsToStartTimer = observers.isEmpty()
         observers.add(routeAlternativesObserver)

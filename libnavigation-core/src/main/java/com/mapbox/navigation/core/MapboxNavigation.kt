@@ -537,6 +537,15 @@ class MapboxNavigation(
     fun getRoutes(): List<DirectionsRoute> = directionsSession.routes
 
     /**
+     * Requests an alternative route using the original [RouteOptions] associated with
+     * [MapboxNavigation.setRoutes()] call and [Router] implementation.
+     * @see [registerRouteAlternativesObserver]
+     */
+    fun requestAlternativeRoutes() {
+        routeAlternativesController.triggerAlternativeRequest()
+    }
+
+    /**
      * Call this method whenever this instance of the [MapboxNavigation] is not going to be used anymore and should release all of its resources.
      */
     fun onDestroy() {

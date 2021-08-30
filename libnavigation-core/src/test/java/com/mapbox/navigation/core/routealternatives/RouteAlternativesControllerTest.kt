@@ -170,6 +170,111 @@ class RouteAlternativesControllerTest {
     }
 
     @Test
+    fun `trigger alternative route request based on user event`() = coroutineRule.runBlockingTest {
+        every { tripSession.getState() } returns TripSessionState.STARTED
+        mockRouteOptionsProvider(routeOptionsResultSuccess)
+        every { directionsSession.routes } returns listOf(
+            mockk {
+                every { routeIndex() } returns "0"
+                every { duration() } returns 1727.228
+            }
+        )
+        every { tripSession.getEnhancedLocation() } returns mockk {
+            every { latitude } returns -33.874308
+            every { longitude } returns 151.206087
+        }
+
+        val controller = mockController(
+            RouteAlternativesOptions.Builder()
+                .intervalMillis(TimeUnit.SECONDS.toMillis(10))
+                .build()
+        )
+
+        controller.register(routeAlternativesObserver)
+        controller.triggerAlternativeRequest()
+        controller.unregister(routeAlternativesObserver)
+
+        coroutineRule.testDispatcher.cleanupTestCoroutines()
+        verify(exactly = 1) { directionsSession.requestRoutes(any(), any()) }
+    }
+
+    @Test
+    fun `trigger alternative restarts timer and invoke api call`() = coroutineRule.runBlockingTest {
+        every { tripSession.getState() } returns TripSessionState.STARTED
+        mockRouteOptionsProvider(routeOptionsResultSuccess)
+        every { directionsSession.routes } returns listOf(
+            mockk {
+                every { routeIndex() } returns "0"
+                every { duration() } returns 1727.228
+            }
+        )
+        every { tripSession.getEnhancedLocation() } returns mockk {
+            every { latitude } returns -33.874308
+            every { longitude } returns 151.206087
+        }
+
+        val controller = mockController(
+            RouteAlternativesOptions.Builder()
+                .intervalMillis(TimeUnit.SECONDS.toMillis(10))
+                .build()
+        )
+
+        // Advance time to almost make a request, but cancel before. Prove that
+        // a new timer is started because there would be 1 call otherwise.
+        controller.register(routeAlternativesObserver)
+        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.SECONDS.toMillis(5))
+        controller.triggerAlternativeRequest()
+        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.SECONDS.toMillis(10))
+        controller.unregister(routeAlternativesObserver)
+
+        coroutineRule.testDispatcher.cleanupTestCoroutines()
+        verify(exactly = 2) { directionsSession.requestRoutes(any(), any()) }
+    }
+
+    @Test
+    fun `trigger alternative interrupts current request`() = coroutineRule.runBlockingTest {
+        every { tripSession.getState() } returns TripSessionState.STARTED
+        mockRouteOptionsProvider(routeOptionsResultSuccess)
+        every { directionsSession.routes } returns listOf(
+            mockk {
+                every { routeIndex() } returns "0"
+                every { duration() } returns 1727.228
+            }
+        )
+        every { tripSession.getEnhancedLocation() } returns mockk {
+            every { latitude } returns -33.874308
+            every { longitude } returns 151.206087
+        }
+
+        val controller = mockController(
+            RouteAlternativesOptions.Builder()
+                .intervalMillis(TimeUnit.SECONDS.toMillis(10))
+                .build()
+        )
+
+        /**
+         * Advance time to make a request. Prove that the current request is canceled if
+         * trigger alternative is invoked.
+         * 1. advance time -> make a request -> success -> the first cancel
+         *    ```
+         *    is RouteOptionsUpdater.RouteOptionsResult.Success -> {
+         *        currentRequestId?.let { directionsSession.cancelRouteRequest(it)
+         *        ...
+         *    }
+         *    ```
+         * 2. triggerAlternativeRequest() -> the second cancel
+         * 3. unregister(routeAlternativesObserver) -> the third cancel
+         */
+        controller.register(routeAlternativesObserver)
+        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.SECONDS.toMillis(10))
+        controller.triggerAlternativeRequest()
+        controller.unregister(routeAlternativesObserver)
+        coroutineRule.testDispatcher.cleanupTestCoroutines()
+
+        verify(exactly = 3) { directionsSession.cancelRouteRequest(any()) }
+    }
+
+    @Test
     fun `should only request with a route`() = coroutineRule.runBlockingTest {
         every { tripSession.getState() } returns TripSessionState.STARTED
         mockRouteOptionsProvider(routeOptionsResultSuccess)
