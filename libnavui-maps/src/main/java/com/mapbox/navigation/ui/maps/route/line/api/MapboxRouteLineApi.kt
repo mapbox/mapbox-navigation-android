@@ -275,12 +275,18 @@ class MapboxRouteLineApi(
             } else {
                 routeLineExpressionData
             }
+
+        val stopGap: Double = ifNonNull(primaryRoute) { route ->
+            RouteConstants.SOFT_GRADIENT_STOP_GAP_METERS / route.distance()
+        } ?: .00000000001 // an arbitrarily small value so Expression values are in ascending order
         val routeLineExpressions =
             routeLineOptions.vanishingRouteLine?.getTraveledRouteLineExpressions(
                 point,
                 workingRouteLineExpressionData,
                 routeLineOptions.resourceProvider,
-                activeLegIndex
+                activeLegIndex,
+                stopGap,
+                routeLineOptions.displaySoftGradientForTraffic
             )
 
         return when (routeLineExpressions) {
@@ -813,7 +819,9 @@ class MapboxRouteLineApi(
                 routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
                 Color.TRANSPARENT,
                 routeLineOptions.resourceProvider.routeLineColorResources.routeUnknownTrafficColor,
-                routeLineOptions.resourceProvider.restrictedRoadSectionScale
+                routeLineOptions.resourceProvider.restrictedRoadSectionScale,
+                routeLineOptions.displaySoftGradientForTraffic,
+                routeLineOptions.softGradientTransition
             )
         }
 
@@ -845,7 +853,9 @@ class MapboxRouteLineApi(
                         .resourceProvider
                         .routeLineColorResources
                         .alternativeRouteUnknownTrafficColor,
-                    routeLineOptions.resourceProvider.restrictedRoadSectionScale
+                    routeLineOptions.resourceProvider.restrictedRoadSectionScale,
+                    routeLineOptions.displaySoftGradientForTraffic,
+                    routeLineOptions.softGradientTransition
                 )
             }
 
@@ -861,7 +871,9 @@ class MapboxRouteLineApi(
                     .resourceProvider
                     .routeLineColorResources
                     .alternativeRouteUnknownTrafficColor,
-                routeLineOptions.resourceProvider.restrictedRoadSectionScale
+                routeLineOptions.resourceProvider.restrictedRoadSectionScale,
+                routeLineOptions.displaySoftGradientForTraffic,
+                routeLineOptions.softGradientTransition
             )
         } else {
             null

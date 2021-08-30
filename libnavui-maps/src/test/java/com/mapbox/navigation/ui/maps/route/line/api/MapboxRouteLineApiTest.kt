@@ -162,6 +162,8 @@ class MapboxRouteLineApiTest {
         every {
             options.styleInactiveRouteLegsIndependently
         } returns realOptions.styleInactiveRouteLegsIndependently
+        every { options.displaySoftGradientForTraffic } returns false
+        every { options.softGradientTransition } returns 30.0
 
         val api = MapboxRouteLineApi(options)
         val route = getRoute()
@@ -185,6 +187,8 @@ class MapboxRouteLineApiTest {
             every {
                 options.styleInactiveRouteLegsIndependently
             } returns realOptions.styleInactiveRouteLegsIndependently
+            every { options.displaySoftGradientForTraffic } returns false
+            every { options.softGradientTransition } returns 30.0
 
             val api = MapboxRouteLineApi(options)
             val route = getRoute()
@@ -206,6 +210,8 @@ class MapboxRouteLineApiTest {
             every { options.resourceProvider } returns realOptions.resourceProvider
             every { options.vanishingRouteLine } returns vanishingRouteLine
             every { options.displayRestrictedRoadSections } returns false
+            every { options.displaySoftGradientForTraffic } returns false
+            every { options.softGradientTransition } returns 30.0
             every {
                 options.styleInactiveRouteLegsIndependently
             } returns realOptions.styleInactiveRouteLegsIndependently
@@ -472,6 +478,8 @@ class MapboxRouteLineApiTest {
             every { options.resourceProvider } returns realOptions.resourceProvider
             every { options.vanishingRouteLine } returns vanishingRouteLine
             every { options.displayRestrictedRoadSections } returns false
+            every { options.displaySoftGradientForTraffic } returns false
+            every { options.softGradientTransition } returns 30.0
             every {
                 options.styleInactiveRouteLegsIndependently
             } returns realOptions.styleInactiveRouteLegsIndependently
@@ -500,6 +508,8 @@ class MapboxRouteLineApiTest {
             every {
                 options.styleInactiveRouteLegsIndependently
             } returns realOptions.styleInactiveRouteLegsIndependently
+            every { options.displaySoftGradientForTraffic } returns false
+            every { options.softGradientTransition } returns 30.0
 
             val api = MapboxRouteLineApi(options)
             val route = getRoute()
@@ -618,6 +628,8 @@ class MapboxRouteLineApiTest {
             every {
                 styleInactiveRouteLegsIndependently
             } returns realOptions.styleInactiveRouteLegsIndependently
+            every { displaySoftGradientForTraffic } returns false
+            every { softGradientTransition } returns 30.0
         }
         val api = MapboxRouteLineApi(options)
         val routeProgress = mockk<RouteProgress> {
@@ -661,6 +673,8 @@ class MapboxRouteLineApiTest {
                 every {
                     styleInactiveRouteLegsIndependently
                 } returns realOptions.styleInactiveRouteLegsIndependently
+                every { displaySoftGradientForTraffic } returns false
+                every { softGradientTransition } returns 30.0
             }
             val api = MapboxRouteLineApi(options)
             val routeProgress = mockk<RouteProgress> {
@@ -704,6 +718,8 @@ class MapboxRouteLineApiTest {
                 every {
                     styleInactiveRouteLegsIndependently
                 } returns realOptions.styleInactiveRouteLegsIndependently
+                every { displaySoftGradientForTraffic } returns false
+                every { softGradientTransition } returns 30.0
             }
             val api = MapboxRouteLineApi(options)
             val routeProgress = mockk<RouteProgress> {
@@ -737,6 +753,8 @@ class MapboxRouteLineApiTest {
                 every {
                     styleInactiveRouteLegsIndependently
                 } returns realOptions.styleInactiveRouteLegsIndependently
+                every { displaySoftGradientForTraffic } returns false
+                every { softGradientTransition } returns 30.0
             }
             val api = MapboxRouteLineApi(options)
             val routeProgress = mockk<RouteProgress> {
@@ -766,6 +784,8 @@ class MapboxRouteLineApiTest {
             every {
                 styleInactiveRouteLegsIndependently
             } returns realOptions.styleInactiveRouteLegsIndependently
+            every { displaySoftGradientForTraffic } returns false
+            every { softGradientTransition } returns 30.0
         }
         val api = MapboxRouteLineApi(options)
         val routeProgress = mockk<RouteProgress> {
@@ -821,6 +841,8 @@ class MapboxRouteLineApiTest {
                     styleInactiveRouteLegsIndependently
                 } returns realOptions.styleInactiveRouteLegsIndependently
                 every { displayRestrictedRoadSections } returns false
+                every { displaySoftGradientForTraffic } returns false
+                every { softGradientTransition } returns 30.0
             }
             val api = MapboxRouteLineApi(options)
             val routeProgress = mockk<RouteProgress> {
@@ -865,6 +887,8 @@ class MapboxRouteLineApiTest {
                     styleInactiveRouteLegsIndependently
                 } returns realOptions.styleInactiveRouteLegsIndependently
                 every { displayRestrictedRoadSections } returns false
+                every { displaySoftGradientForTraffic } returns false
+                every { softGradientTransition } returns 30.0
             }
             val api = MapboxRouteLineApi(options)
             val routeProgress = mockk<RouteProgress> {
@@ -913,6 +937,8 @@ class MapboxRouteLineApiTest {
                     styleInactiveRouteLegsIndependently
                 } returns realOptions.styleInactiveRouteLegsIndependently
                 every { displayRestrictedRoadSections } returns false
+                every { displaySoftGradientForTraffic } returns false
+                every { softGradientTransition } returns 30.0
             }
             val api = MapboxRouteLineApi(options)
             val routeProgress = mockk<RouteProgress> {

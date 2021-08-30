@@ -71,6 +71,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
     private val mapboxReplayer = MapboxReplayer()
     private val replayRouteMapper = ReplayRouteMapper()
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
+    private var trafficGradientSoft = false
 
     private val viewBinding: LayoutActivityRoutelineExampleBinding by lazy {
         LayoutActivityRoutelineExampleBinding.inflate(layoutInflater)
@@ -142,6 +143,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
             .withRouteLineResources(routeLineResources)
             .withRouteLineBelowLayerId("road-label")
             .withVanishingRouteLineEnabled(true)
+            .displaySoftGradientForTraffic(trafficGradientSoft)
             .build()
     }
 
@@ -187,6 +189,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
     }
 
     private fun init() {
+        initGradientSelector()
         initNavigation()
         initStyle()
         initListeners()
@@ -199,6 +202,15 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
             null,
             null
         )
+    }
+
+    private fun initGradientSelector() {
+        viewBinding.gradientOptionHard.setOnClickListener {
+            trafficGradientSoft = false
+        }
+        viewBinding.gradientOptionSoft.setOnClickListener {
+            trafficGradientSoft = true
+        }
     }
 
     // RouteLine: This is one way to keep the route(s) appearing on the map in sync with
@@ -359,6 +371,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
     override fun onMapLongClick(point: Point): Boolean {
         vibrate()
         viewBinding.startNavigation.visibility = View.GONE
+        viewBinding.optionTrafficGradient.visibility = View.GONE
         val currentLocation = navigationLocationProvider.lastLocation
         if (currentLocation != null) {
             val originPoint = Point.fromLngLat(
@@ -455,7 +468,6 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
-        viewBinding.mapView.onStart()
     }
 
     override fun onStop() {
@@ -465,18 +477,11 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
-        viewBinding.mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        viewBinding.mapView.onDestroy()
         mapboxNavigation.onDestroy()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        viewBinding.mapView.onLowMemory()
     }
 
     private val locationEngineCallback = MyLocationEngineCallback(this)

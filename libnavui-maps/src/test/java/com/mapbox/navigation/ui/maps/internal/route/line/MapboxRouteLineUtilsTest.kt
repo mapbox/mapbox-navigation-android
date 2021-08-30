@@ -1706,7 +1706,37 @@ class MapboxRouteLineUtilsTest {
             0.0,
             Color.TRANSPARENT,
             routeLineColorResources.routeUnknownTrafficColor,
+            0.0,
+            false,
             0.0
+        ).invoke()
+
+        assertEquals(
+            expectedPrimaryTrafficLineExpression,
+            result.toString()
+        )
+    }
+
+    @Test
+    fun getTrafficLineExpressionProducer_whenUseSoftGradient() {
+        val routeLineColorResources = RouteLineColorResources.Builder().build()
+        val expectedPrimaryTrafficLineExpression = "[interpolate, [linear], [line-progress], " +
+            "0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            "0.6938979086102405, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            "0.9429639111009005, [rgba, 255.0, 149.0, 0.0, 1.0]]"
+        val route = loadRoute("short_route.json")
+
+        val result = MapboxRouteLineUtils.getTrafficLineExpressionProducer(
+            route,
+            listOf(),
+            routeLineColorResources,
+            true,
+            0.0,
+            Color.TRANSPARENT,
+            routeLineColorResources.routeUnknownTrafficColor,
+            0.0,
+            true,
+            20.0
         ).invoke()
 
         assertEquals(
@@ -1740,6 +1770,153 @@ class MapboxRouteLineUtilsTest {
             colorResources.routeDefaultColor,
             colorResources.inActiveRouteLegsColor,
             0
+        )
+
+        assertEquals(expectedExpression, result.toString())
+    }
+
+    @Test
+    fun getTrafficLineExpressionSoftGradient_multiLegRoute() {
+        val expectedExpression = "[interpolate, [linear], [line-progress], 0.0, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.0829948286268944, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.10338667841237215, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.10338667842237215, [rgba, 255.0, 149.0, 0.0, 1.0]," +
+            " 0.1235746096999951, [rgba, 86.0, 168.0, 251.0, 1.0], 0.250513874614594, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.27090572440007177, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.3010856620825788, [rgba, 255.0, 149.0, 0.0, 1.0]," +
+            " 0.32147751186805656, [rgba, 86.0, 168.0, 251.0, 1.0], 0.467687074829932, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.48807892461540975, " +
+            "[rgba, 143.0, 36.0, 71.0, 1.0], 0.48807892462540975, [rgba, 143.0, 36.0, 71.0, 1.0]," +
+            " 0.48811448630642584, [rgba, 255.0, 149.0, 0.0, 1.0], 0.5199257719717711, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5403176217572488, [rgba, 86.0, 168.0, 251.0, 1.0]," +
+            " 0.5487802394182222, [rgba, 86.0, 168.0, 251.0, 1.0], 0.5691720892036999, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5692740484526273, [rgba, 255.0, 149.0, 0.0, 1.0]," +
+            " 0.589665898238105, [rgba, 86.0, 168.0, 251.0, 1.0], 0.8633245223592163, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.883716372144694, [rgba, 255.0, 149.0, 0.0, 1.0]," +
+            " 0.9186883945267883, [rgba, 255.0, 149.0, 0.0, 1.0], 0.939080244312266, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val colorResources = RouteLineColorResources.Builder().build()
+        val route = getMultilegWithTwoLegs()
+        val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
+            route,
+            listOf(),
+            true,
+            colorResources,
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            false
+        )
+        val stopGap = 20.0 / route.distance()
+
+        val result = MapboxRouteLineUtils.getTrafficLineExpressionSoftGradient(
+            0.0,
+            Color.TRANSPARENT,
+            colorResources.routeDefaultColor,
+            stopGap,
+            segments
+        )
+
+        assertEquals(expectedExpression, result.toString())
+    }
+
+    @Test
+    fun getTrafficLineExpressionSoftGradient() {
+        val expectedExpression = "[interpolate, [linear], [line-progress], " +
+            "0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            "0.4532366552813495, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            // notice this value (below) minus the stopGap value equals the previous value (above)
+            "0.468779750455607, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "0.4877423265682011, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "0.5032854217424586, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            "0.8454666620037381, [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            "0.8610097571779957, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "0.8766305678281243, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "0.8921736630023819, [rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val colorResources = RouteLineColorResources.Builder().build()
+        val route = loadRoute("route-with-restrictions.json")
+        val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
+            route,
+            listOf(),
+            true,
+            colorResources,
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            false
+        )
+        val stopGap = 20.0 / route.distance()
+
+        val result = MapboxRouteLineUtils.getTrafficLineExpressionSoftGradient(
+            0.0,
+            Color.TRANSPARENT,
+            colorResources.routeDefaultColor,
+            stopGap,
+            segments
+        )
+
+        assertEquals(expectedExpression, result.toString())
+    }
+
+    @Test
+    fun getTrafficLineExpressionSoftGradient_offsetGreaterThanZero() {
+        val expectedExpression = "[interpolate, [linear], [line-progress], 0.0, " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.46999999999, " +
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.47, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.4877423265682011, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5032854217424586, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8454666620037381, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8610097571779957, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8766305678281243, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8921736630023819, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val colorResources = RouteLineColorResources.Builder().build()
+        val route = loadRoute("route-with-restrictions.json")
+        val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
+            route,
+            listOf(),
+            true,
+            colorResources,
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            false
+        )
+        val stopGap = 20.0 / route.distance()
+
+        val result = MapboxRouteLineUtils.getTrafficLineExpressionSoftGradient(
+            0.47,
+            Color.TRANSPARENT,
+            colorResources.routeDefaultColor,
+            stopGap,
+            segments
+        )
+
+        assertEquals(expectedExpression, result.toString())
+    }
+
+    @Test
+    fun getTrafficLineExpressionSoftGradient_whenStopGapOffsetGreaterThanItemOffset() {
+        val expectedExpression = "[interpolate, [linear], [line-progress], " +
+            "0.0, [rgba, 0.0, 0.0, 0.0, 0.0], " +
+            "0.8454666619937382, [rgba, 0.0, 0.0, 0.0, 0.0], " +
+            "0.8454666620037382, [rgba, 86.0, 168.0, 251.0, 1.0], " + // this is the value to notice
+            "0.8454666620137382, [rgba, 86.0, 168.0, 251.0, 1.0], " + // this is the value to notice
+            "0.8610097571779957, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "0.8766305678281243, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "0.8921736630023819, [rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val colorResources = RouteLineColorResources.Builder().build()
+        val route = loadRoute("route-with-restrictions.json")
+        val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
+            route,
+            listOf(),
+            true,
+            colorResources,
+            RouteConstants.RESTRICTED_ROAD_SECTION_SCALE,
+            false
+        )
+        val stopGap = 20.0 / route.distance()
+
+        val result = MapboxRouteLineUtils.getTrafficLineExpressionSoftGradient(
+            0.8454666620037382,
+            Color.TRANSPARENT,
+            colorResources.routeDefaultColor,
+            stopGap,
+            segments
         )
 
         assertEquals(expectedExpression, result.toString())

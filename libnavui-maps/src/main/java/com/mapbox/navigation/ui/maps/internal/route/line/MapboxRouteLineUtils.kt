@@ -98,6 +98,73 @@ object MapboxRouteLineUtils {
     }
 
     /**
+     * A linear interpolated gradient will produce a color transition between the stops in the [Expression].
+     * The greater the distance between the stops, the longer the gradient appears. For long route
+     * lines this can mean a very long gradient between changes in traffic congestion. In order
+     * to create a more compact gradient additional [Expression] stops are added. An additional
+     * [Expression] stop is added just before a change in color in order to reduce the distance
+     * between the stops and compact the gradient. The @param softGradientStopGap is used to
+     * represent that distance and should be calculated based on the route distance in order
+     * to create a similar looking gradient regardless of the route length.
+     */
+    internal fun getTrafficLineExpressionSoftGradient(
+        distanceOffset: Double,
+        lineStartColor: Int,
+        lineColor: Int,
+        softGradientStopGap: Double,
+        routeLineExpressionData: List<RouteLineExpressionData>
+    ): Expression {
+        val vanishPointStopGap = .00000000001
+        val expressionBuilder = Expression.InterpolatorBuilder("interpolate")
+        expressionBuilder.linear()
+        expressionBuilder.lineProgress()
+
+        val filteredItems = getFilteredRouteLineExpressionData(
+            distanceOffset,
+            routeLineExpressionData,
+            lineColor
+        )
+        filteredItems.forEachIndexed { index, expressionData ->
+            if (index == 0) {
+                if (expressionData.offset > 0) {
+                    expressionBuilder.stop {
+                        literal(0.0)
+                        color(lineStartColor)
+                    }
+
+                    expressionBuilder.stop {
+                        literal(expressionData.offset - vanishPointStopGap)
+                        color(lineStartColor)
+                    }
+                }
+
+                expressionBuilder.stop {
+                    literal(expressionData.offset)
+                    color(expressionData.segmentColor)
+                }
+            } else {
+                val stopGapOffset = expressionData.offset - softGradientStopGap
+                val stopGapOffsetToUse = if (stopGapOffset > filteredItems[index - 1].offset) {
+                    stopGapOffset
+                } else {
+                    filteredItems[index - 1].offset + vanishPointStopGap
+                }
+
+                expressionBuilder.stop {
+                    literal(stopGapOffsetToUse)
+                    color(filteredItems[index - 1].segmentColor)
+                }
+
+                expressionBuilder.stop {
+                    literal(expressionData.offset)
+                    color(expressionData.segmentColor)
+                }
+            }
+        }
+        return expressionBuilder.build()
+    }
+
+    /**
      * Returns an [Expression] for a gradient line that will start with the @param lineBaseColor,
      * creating the first step at the @param distanceOffset with additional steps
      * according to the items in the @param routeLineExpressionData.
@@ -985,7 +1052,9 @@ object MapboxRouteLineUtils {
         vanishingPointOffset: Double,
         lineStartColor: Int,
         lineColor: Int,
-        restrictedRoadSectionScale: Double
+        restrictedRoadSectionScale: Double,
+        useSoftGradient: Boolean,
+        softGradientTransitionDistance: Double
     ): RouteLineExpressionProvider = {
         val segments: List<RouteLineExpressionData> = calculateRouteLineSegments(
             route,
@@ -995,12 +1064,23 @@ object MapboxRouteLineUtils {
             restrictedRoadSectionScale,
             false
         )
-        getTrafficLineExpression(
-            vanishingPointOffset,
-            lineStartColor,
-            lineColor,
-            segments
-        )
+        if (useSoftGradient) {
+            val stopGap = softGradientTransitionDistance / route.distance()
+            getTrafficLineExpressionSoftGradient(
+                vanishingPointOffset,
+                lineStartColor,
+                lineColor,
+                stopGap,
+                segments
+            )
+        } else {
+            getTrafficLineExpression(
+                vanishingPointOffset,
+                lineStartColor,
+                lineColor,
+                segments
+            )
+        }
     }
 
     private fun projectX(x: Double): Double {

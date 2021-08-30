@@ -27,6 +27,7 @@
         <activity android:name=".view.RouteRestrictionsActivity"/>
         <activity android:name=".view.RouteTrafficUpdateActivity"/>
         <activity android:name=".view.InactiveRouteStylingActivity"/>
+        <activity android:name=".view.TrafficGradientActivity"/>
         <activity android:name=".view.FeedbackActivity"/>
     </application>
 
