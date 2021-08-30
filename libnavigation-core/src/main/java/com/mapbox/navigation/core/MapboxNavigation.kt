@@ -6,7 +6,6 @@ package com.mapbox.navigation.core
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.content.Context
 import androidx.annotation.RequiresPermission
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
@@ -23,7 +22,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatter
-import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -47,7 +45,6 @@ import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.ReachabilityService
-import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.internal.utils.InternalUtils
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -101,6 +98,7 @@ import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.IncidentsOptions
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.PollingConfig
+import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.channels.Channel
@@ -1254,17 +1252,14 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                     String::class.java,
                     accessToken ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER)
                 ),
-                ModuleProviderArgument(Context::class.java, navigationOptions.applicationContext),
                 ModuleProviderArgument(
-                    UrlSkuTokenProvider::class.java,
-                    MapboxNavigationAccounts
+                    RouterInterface::class.java,
+                    MapboxNativeNavigatorImpl.router
                 ),
                 ModuleProviderArgument(
-                    MapboxNativeNavigator::class.java,
-                    MapboxNativeNavigatorImpl
-                ),
-                ModuleProviderArgument(ConnectivityHandler::class.java, connectivityHandler),
-                ModuleProviderArgument(ThreadController::class.java, threadController),
+                    ThreadController::class.java,
+                    threadController
+                )
             )
             MapboxModuleType.NavigationTripNotification -> arrayOf(
                 ModuleProviderArgument(NavigationOptions::class.java, navigationOptions),

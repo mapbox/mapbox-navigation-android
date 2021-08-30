@@ -26,6 +26,7 @@ import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouterError
+import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.TilesConfig
 
 /**
@@ -224,4 +225,6 @@ interface MapboxNativeNavigator {
     val roadObjectMatcher: RoadObjectMatcher?
 
     val experimental: Experimental
+
+    val router: RouterInterface
 }

@@ -7,12 +7,14 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
+import com.mapbox.navigation.instrumentation_tests.utils.http.MockAvailableTilesVersionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.idling.IdlingPolicyTimeoutRule
@@ -27,6 +29,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.net.URI
 import java.util.concurrent.TimeUnit
 
 class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
@@ -59,6 +62,11 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 .routeRefreshOptions(
                     RouteRefreshOptions.Builder()
                         .intervalMillis(TimeUnit.SECONDS.toMillis(30))
+                        .build()
+                )
+                .routingTilesOptions(
+                    RoutingTilesOptions.Builder()
+                        .tilesBaseUri(URI(mockWebServerRule.baseUrl))
                         .build()
                 )
                 .build()
@@ -114,6 +122,11 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             MockDirectionsRefreshHandler(
                 "route_response_route_refresh",
                 readRawFileText(activity, R.raw.route_response_route_refresh_annotations)
+            )
+        )
+        mockWebServerRule.requestHandlers.add(
+            MockAvailableTilesVersionsRequestHandler(
+                readRawFileText(activity, R.raw.nn_response_available_versions)
             )
         )
     }
