@@ -124,6 +124,7 @@ class NavigationCamera(
     }
 
     private var runningAnimation: AnimatorSet? = null
+    private val transitionEndListeners = CopyOnWriteArraySet<TransitionEndListener>()
     private var frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT
 
     private val navigationCameraStateChangedObservers =
@@ -206,10 +207,13 @@ class NavigationCamera(
         transitionEndListener: TransitionEndListener? = null,
     ) {
         when (state) {
-            TRANSITION_TO_FOLLOWING, FOLLOWING -> {
-                // this should invoke animatorListener
-                // https://github.com/mapbox/mapbox-navigation-android/issues/4341
-                return
+            TRANSITION_TO_FOLLOWING -> {
+                if (transitionEndListener != null) {
+                    transitionEndListeners.add(transitionEndListener)
+                }
+            }
+            FOLLOWING -> {
+                transitionEndListener?.onTransitionEnd(isCanceled = false)
             }
             IDLE, TRANSITION_TO_OVERVIEW, OVERVIEW -> {
                 val data = viewportDataSource.getViewportData()
@@ -223,11 +227,11 @@ class NavigationCamera(
                                 TRANSITION_TO_FOLLOWING,
                                 FOLLOWING,
                                 frameTransitionOptions,
-                                transitionEndListener,
                             )
                         )
                     },
-                    instant = false
+                    instant = false,
+                    transitionEndListener,
                 )
             }
         }
@@ -279,10 +283,13 @@ class NavigationCamera(
         transitionEndListener: TransitionEndListener? = null,
     ) {
         when (state) {
-            TRANSITION_TO_OVERVIEW, OVERVIEW -> {
-                // this should invoke animatorListener
-                // https://github.com/mapbox/mapbox-navigation-android/issues/4341
-                return
+            TRANSITION_TO_OVERVIEW -> {
+                if (transitionEndListener != null) {
+                    transitionEndListeners.add(transitionEndListener)
+                }
+            }
+            OVERVIEW -> {
+                transitionEndListener?.onTransitionEnd(isCanceled = false)
             }
             IDLE, TRANSITION_TO_FOLLOWING, FOLLOWING -> {
                 val data = viewportDataSource.getViewportData()
@@ -296,11 +303,11 @@ class NavigationCamera(
                                 TRANSITION_TO_OVERVIEW,
                                 OVERVIEW,
                                 frameTransitionOptions,
-                                transitionEndListener,
                             )
                         )
                     },
-                    instant = false
+                    instant = false,
+                    transitionEndListener,
                 )
             }
         }
@@ -390,8 +397,15 @@ class NavigationCamera(
         runningAnimation = null
     }
 
-    private fun startAnimation(animatorSet: AnimatorSet, instant: Boolean) {
+    private fun startAnimation(
+        animatorSet: AnimatorSet,
+        instant: Boolean,
+        transitionEndListener: TransitionEndListener? = null,
+    ) {
         cancelAnimation()
+        if (transitionEndListener != null) {
+            transitionEndListeners.add(transitionEndListener)
+        }
         animatorSet.childAnimations.forEach {
             cameraPlugin.registerAnimators(it as ValueAnimator)
         }
@@ -419,7 +433,6 @@ class NavigationCamera(
         progressState: NavigationCameraState,
         finalState: NavigationCameraState,
         frameTransitionOptions: NavigationCameraTransitionOptions,
-        transitionEndListener: TransitionEndListener?,
     ) = object : Animator.AnimatorListener {
 
         private var isCanceled = false
@@ -438,7 +451,8 @@ class NavigationCamera(
             }
 
             finishAnimation(animation as AnimatorSet)
-            transitionEndListener?.onTransitionEnd(isCanceled)
+            transitionEndListeners.forEach { it.onTransitionEnd(isCanceled) }
+            transitionEndListeners.clear()
             updateFrame(viewportDataSource.getViewportData(), instant = false)
         }
 
