@@ -237,12 +237,46 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
 
         verify(exactly = 1) { transitionEndListener.onTransitionEnd(isCanceled = false) }
+    }
 
-        internalTransitionListenerSlot.captured.onAnimationRepeat(followingAnimatorSet)
+    @Test
+    fun `when following requested and canceled, listener notified`() {
+        navigationCamera.requestNavigationCameraToFollowing(
+            transitionEndListener = transitionEndListener,
+        )
+
+        internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationCancel(followingAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
 
         verify(exactly = 1) { transitionEndListener.onTransitionEnd(isCanceled = true) }
+    }
+
+    @Test
+    fun `when following requested during animation, listener notified`() {
+        navigationCamera.requestNavigationCameraToFollowing()
+        internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
+
+        navigationCamera.requestNavigationCameraToFollowing(
+            transitionEndListener = transitionEndListener,
+        )
+
+        internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
+
+        verify(exactly = 1) { transitionEndListener.onTransitionEnd(isCanceled = false) }
+    }
+
+    @Test
+    fun `when following requested after animation, listener notified`() {
+        navigationCamera.requestNavigationCameraToFollowing()
+        internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
+        internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
+
+        navigationCamera.requestNavigationCameraToFollowing(
+            transitionEndListener = transitionEndListener,
+        )
+
+        verify(exactly = 1) { transitionEndListener.onTransitionEnd(isCanceled = false) }
     }
 
     @Test
@@ -255,12 +289,46 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
 
         verify(exactly = 1) { transitionEndListener.onTransitionEnd(isCanceled = false) }
+    }
 
-        internalTransitionListenerSlot.captured.onAnimationRepeat(overviewAnimatorSet)
+    @Test
+    fun `when overview requested and canceled, listener notified`() {
+        navigationCamera.requestNavigationCameraToOverview(
+            transitionEndListener = transitionEndListener,
+        )
+
+        internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationCancel(overviewAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
 
         verify(exactly = 1) { transitionEndListener.onTransitionEnd(isCanceled = true) }
+    }
+
+    @Test
+    fun `when overview requested during animation, listener notified`() {
+        navigationCamera.requestNavigationCameraToOverview()
+        internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
+
+        navigationCamera.requestNavigationCameraToOverview(
+            transitionEndListener = transitionEndListener,
+        )
+
+        internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
+
+        verify(exactly = 1) { transitionEndListener.onTransitionEnd(isCanceled = false) }
+    }
+
+    @Test
+    fun `when overview requested after animation, listener notified`() {
+        navigationCamera.requestNavigationCameraToOverview()
+        internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
+        internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
+
+        navigationCamera.requestNavigationCameraToOverview(
+            transitionEndListener = transitionEndListener,
+        )
+
+        verify(exactly = 1) { transitionEndListener.onTransitionEnd(isCanceled = false) }
     }
 
     @Test
