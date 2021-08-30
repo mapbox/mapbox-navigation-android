@@ -15,6 +15,7 @@ import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
+import com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -86,7 +87,7 @@ class NavigationCameraTest {
         every { registerUpdateObserver(capture(internalDataSourceObserverSlot)) } just Runs
     }
 
-    private val animatorListener: Animator.AnimatorListener = mockk(relaxUnitFun = true)
+    private val transitionEndListener = mockk<TransitionEndListener>(relaxUnitFun = true)
 
     private lateinit var navigationCamera: NavigationCamera
 
@@ -228,36 +229,38 @@ class NavigationCameraTest {
 
     @Test
     fun `when following requested, listener notified`() {
-        navigationCamera.requestNavigationCameraToFollowing(animatorListener = animatorListener)
+        navigationCamera.requestNavigationCameraToFollowing(
+            transitionEndListener = transitionEndListener,
+        )
 
         internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
-        verify(exactly = 1) { animatorListener.onAnimationStart(followingAnimatorSet) }
-
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
-        verify(exactly = 1) { animatorListener.onAnimationEnd(followingAnimatorSet) }
 
-        internalTransitionListenerSlot.captured.onAnimationCancel(followingAnimatorSet)
-        verify(exactly = 1) { animatorListener.onAnimationCancel(followingAnimatorSet) }
+        verify(exactly = 1) { transitionEndListener.onTransitionEnd(isCanceled = false) }
 
         internalTransitionListenerSlot.captured.onAnimationRepeat(followingAnimatorSet)
-        verify(exactly = 1) { animatorListener.onAnimationRepeat(followingAnimatorSet) }
+        internalTransitionListenerSlot.captured.onAnimationCancel(followingAnimatorSet)
+        internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
+
+        verify(exactly = 1) { transitionEndListener.onTransitionEnd(isCanceled = true) }
     }
 
     @Test
     fun `when overview requested, listener notified`() {
-        navigationCamera.requestNavigationCameraToOverview(animatorListener = animatorListener)
+        navigationCamera.requestNavigationCameraToOverview(
+            transitionEndListener = transitionEndListener,
+        )
 
         internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
-        verify(exactly = 1) { animatorListener.onAnimationStart(overviewAnimatorSet) }
-
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
-        verify(exactly = 1) { animatorListener.onAnimationEnd(overviewAnimatorSet) }
 
-        internalTransitionListenerSlot.captured.onAnimationCancel(overviewAnimatorSet)
-        verify(exactly = 1) { animatorListener.onAnimationCancel(overviewAnimatorSet) }
+        verify(exactly = 1) { transitionEndListener.onTransitionEnd(isCanceled = false) }
 
         internalTransitionListenerSlot.captured.onAnimationRepeat(overviewAnimatorSet)
-        verify(exactly = 1) { animatorListener.onAnimationRepeat(overviewAnimatorSet) }
+        internalTransitionListenerSlot.captured.onAnimationCancel(overviewAnimatorSet)
+        internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
+
+        verify(exactly = 1) { transitionEndListener.onTransitionEnd(isCanceled = true) }
     }
 
     @Test
@@ -613,7 +616,7 @@ class NavigationCameraTest {
         val listener = mockk<NavigationCameraStateChangedObserver>(relaxUnitFun = true)
         navigationCamera.registerNavigationCameraStateChangeObserver(listener)
 
-        navigationCamera.requestNavigationCameraToFollowing(animatorListener = animatorListener)
+        navigationCamera.requestNavigationCameraToFollowing()
         internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
 
@@ -629,7 +632,7 @@ class NavigationCameraTest {
         val listener = mockk<NavigationCameraStateChangedObserver>(relaxUnitFun = true)
         navigationCamera.registerNavigationCameraStateChangeObserver(listener)
 
-        navigationCamera.requestNavigationCameraToFollowing(animatorListener = animatorListener)
+        navigationCamera.requestNavigationCameraToFollowing()
         internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationCancel(followingAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
@@ -646,7 +649,7 @@ class NavigationCameraTest {
         val listener = mockk<NavigationCameraStateChangedObserver>(relaxUnitFun = true)
         navigationCamera.registerNavigationCameraStateChangeObserver(listener)
 
-        navigationCamera.requestNavigationCameraToOverview(animatorListener = animatorListener)
+        navigationCamera.requestNavigationCameraToOverview()
         internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
 
@@ -662,7 +665,7 @@ class NavigationCameraTest {
         val listener = mockk<NavigationCameraStateChangedObserver>(relaxUnitFun = true)
         navigationCamera.registerNavigationCameraStateChangeObserver(listener)
 
-        navigationCamera.requestNavigationCameraToOverview(animatorListener = animatorListener)
+        navigationCamera.requestNavigationCameraToOverview()
         internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationCancel(overviewAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
@@ -680,7 +683,7 @@ class NavigationCameraTest {
         navigationCamera.registerNavigationCameraStateChangeObserver(listener)
         navigationCamera.unregisterNavigationCameraStateChangeObserver(listener)
 
-        navigationCamera.requestNavigationCameraToOverview(animatorListener = animatorListener)
+        navigationCamera.requestNavigationCameraToOverview()
         internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationCancel(overviewAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
