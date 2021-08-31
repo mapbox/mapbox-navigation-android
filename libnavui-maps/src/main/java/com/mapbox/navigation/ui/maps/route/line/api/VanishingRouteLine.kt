@@ -179,7 +179,7 @@ internal class VanishingRouteLine {
                 MapboxRouteLineUtils.getTrafficLineExpressionSoftGradient(
                     offset,
                     routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
-                    routeResourceProvider.routeLineColorResources.routeUnknownTrafficColor,
+                    routeResourceProvider.routeLineColorResources.routeUnknownCongestionColor,
                     softGradientTransition,
                     routeLineExpressionData
                 )
@@ -187,7 +187,7 @@ internal class VanishingRouteLine {
                 MapboxRouteLineUtils.getTrafficLineExpression(
                     offset,
                     routeResourceProvider.routeLineColorResources.routeLineTraveledColor,
-                    routeResourceProvider.routeLineColorResources.routeUnknownTrafficColor,
+                    routeResourceProvider.routeLineColorResources.routeUnknownCongestionColor,
                     routeLineExpressionData
                 )
             }

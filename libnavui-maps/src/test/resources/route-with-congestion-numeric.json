@@ -1,0 +1,346 @@
+{
+  "weight_typical": 49.666,
+  "duration_typical": 36.767,
+  "weight_name": "auto",
+  "weight": 49.666,
+  "duration": 36.767,
+  "distance": 265.56,
+  "legs": [
+    {
+      "admins": [
+        {
+          "iso_3166_1_alpha3": "USA",
+          "iso_3166_1": "US"
+        }
+      ],
+      "incidents": [
+        {
+          "id": "12887387251066566",
+          "type": "road_closure",
+          "description": "Washington Blvd: road closed from Kobbe Ave to Lincoln Blvd",
+          "long_description": "Road closed due to Slow Streets Program on Washington Blvd both ways from Kobbe Ave to Lincoln Blvd.",
+          "creation_time": "2021-03-29T20:25:39Z",
+          "start_time": "2020-07-02T15:26:14Z",
+          "end_time": "2021-06-14T22:59:00Z",
+          "impact": "low",
+          "sub_type": "CONSTRUCTION",
+          "alertc_codes": [
+            401,
+            703
+          ],
+          "lanes_blocked": [],
+          "closed": true,
+          "congestion": {
+            "value": 101
+          },
+          "geometry_index_start": 13,
+          "geometry_index_end": 19
+        }
+      ],
+      "annotation": {
+        "congestion_numeric": [
+          4,
+          4,
+          4,
+          4,
+          0,
+          0,
+          0,
+          10,
+          10,
+          10,
+          0,
+          0,
+          4,
+          45,
+          88,
+          88,
+          88,
+          88,
+          89,
+          95,
+          95
+        ],
+        "distance": [
+          8.5,
+          28.8,
+          10.6,
+          8.3,
+          8,
+          8.1,
+          8.9,
+          8,
+          10.9,
+          27.4,
+          8.3,
+          2.4,
+          7,
+          5.9,
+          5.7,
+          6.4,
+          12.7,
+          17.1,
+          18.6,
+          19.4,
+          34.9
+        ]
+      },
+      "weight_typical": 49.666,
+      "duration_typical": 36.767,
+      "weight": 49.666,
+      "duration": 36.767,
+      "steps": [
+        {
+          "intersections": [
+            {
+              "entry": [
+                true
+              ],
+              "bearings": [
+                198
+              ],
+              "duration": 3.749,
+              "mapbox_streets_v8": {
+                "class": "secondary"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 0,
+              "weight": 3.562,
+              "geometry_index": 0,
+              "location": [
+                -122.477426,
+                37.801498
+              ]
+            },
+            {
+              "entry": [
+                false,
+                true
+              ],
+              "in": 0,
+              "bearings": [
+                19,
+                204
+              ],
+              "duration": 5.282,
+              "turn_weight": 0.5,
+              "turn_duration": 0.01,
+              "mapbox_streets_v8": {
+                "class": "secondary"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 1,
+              "weight": 5.508,
+              "geometry_index": 3,
+              "location": [
+                -122.477599,
+                37.801089
+              ]
+            },
+            {
+              "entry": [
+                false,
+                true
+              ],
+              "in": 0,
+              "bearings": [
+                29,
+                213
+              ],
+              "duration": 6.3,
+              "turn_weight": 0.5,
+              "mapbox_streets_v8": {
+                "class": "secondary"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 1,
+              "weight": 6.485,
+              "geometry_index": 8,
+              "location": [
+                -122.477809,
+                37.800758
+              ]
+            },
+            {
+              "bearings": [
+                33,
+                210
+              ],
+              "entry": [
+                false,
+                true
+              ],
+              "in": 0,
+              "turn_weight": 2,
+              "lanes": [
+                {
+                  "indications": [
+                    "left",
+                    "straight"
+                  ],
+                  "valid_indication": "left",
+                  "valid": true,
+                  "active": true
+                }
+              ],
+              "turn_duration": 0.021,
+              "mapbox_streets_v8": {
+                "class": "secondary"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 1,
+              "geometry_index": 12,
+              "location": [
+                -122.478115,
+                37.800389
+              ]
+            }
+          ],
+          "maneuver": {
+            "type": "depart",
+            "instruction": "Drive south on Lincoln Boulevard.",
+            "bearing_after": 198,
+            "bearing_before": 0,
+            "location": [
+              -122.477426,
+              37.801498
+            ]
+          },
+          "name": "Lincoln Boulevard",
+          "weight_typical": 18.409,
+          "duration_typical": 16.252,
+          "duration": 16.252,
+          "distance": 144.905,
+          "driving_side": "right",
+          "weight": 18.409,
+          "mode": "driving",
+          "geometry": "s`fbgAbvlrhFpCz@jNjErDpAhCfA`CjA`CpAjC~AzB|AdDbCvK|I|BdBd@ZjBnA"
+        },
+        {
+          "intersections": [
+            {
+              "bearings": [
+                30,
+                161
+              ],
+              "entry": [
+                false,
+                true
+              ],
+              "in": 0,
+              "turn_weight": 12.5,
+              "lanes": [
+                {
+                  "indications": [
+                    "left",
+                    "straight"
+                  ],
+                  "valid_indication": "left",
+                  "valid": true,
+                  "active": true
+                }
+              ],
+              "turn_duration": 0.772,
+              "mapbox_streets_v8": {
+                "class": "tertiary"
+              },
+              "is_urban": false,
+              "admin_index": 0,
+              "out": 1,
+              "geometry_index": 13,
+              "location": [
+                -122.478155,
+                37.800335
+              ]
+            }
+          ],
+          "maneuver": {
+            "type": "turn",
+            "instruction": "Turn left onto Washington Boulevard.",
+            "modifier": "left",
+            "bearing_after": 161,
+            "bearing_before": 210,
+            "location": [
+              -122.478155,
+              37.800335
+            ]
+          },
+          "name": "Washington Boulevard",
+          "weight_typical": 31.256,
+          "duration_typical": 20.516,
+          "duration": 20.516,
+          "distance": 120.655,
+          "driving_side": "right",
+          "weight": 31.256,
+          "mode": "driving",
+          "geometry": "}wcbgAtcnrhFlAyA~Ai@pBUbFLpHShIcArIcBhQ}G"
+        },
+        {
+          "intersections": [
+            {
+              "bearings": [
+                339
+              ],
+              "entry": [
+                true
+              ],
+              "in": 0,
+              "admin_index": 0,
+              "geometry_index": 21,
+              "location": [
+                -122.477848,
+                37.799296
+              ]
+            }
+          ],
+          "maneuver": {
+            "type": "arrive",
+            "instruction": "You have arrived at your destination.",
+            "bearing_after": 0,
+            "bearing_before": 159,
+            "location": [
+              -122.477848,
+              37.799296
+            ]
+          },
+          "name": "Washington Boulevard",
+          "weight_typical": 0,
+          "duration_typical": 0,
+          "duration": 0,
+          "distance": 0,
+          "driving_side": "right",
+          "weight": 0,
+          "mode": "driving",
+          "geometry": "_wabgAnpmrhF??"
+        }
+      ],
+      "distance": 265.56,
+      "summary": "Lincoln Boulevard, Washington Boulevard"
+    }
+  ],
+  "routeOptions": {
+    "baseUrl": "https://api.mapbox.com/",
+    "user": "mapbox",
+    "profile": "driving-traffic",
+    "coordinates": "-122.5237628,37.9754096;-122.5314743,37.9714342",
+    "alternatives": true,
+    "language": "en",
+    "bearings": "147.032028,45;",
+    "continue_straight": false,
+    "roundabout_exits": false,
+    "geometries": "polyline6",
+    "overview": "full",
+    "steps": true,
+    "annotations": "congestion_numeric,distance",
+    "voice_instructions": true,
+    "banner_instructions": true,
+    "voice_units": "imperial",
+    "access_token": "omitted",
+    "uuid": "IpVPAi2-NVeMFql46rqadH7Ag5QrBGPWCRdfz-cUrXHk2e1n7gKjYg=="
+  },
+  "geometry": "s`fbgAbvlrhFpCz@jNjErDpAhCfA`CjA`CpAjC~AzB|AdDbCvK|I|BdBd@ZjBnAlAyA~Ai@pBUbFLpHShIcArIcBhQ}G"
+}

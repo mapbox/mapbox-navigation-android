@@ -117,7 +117,10 @@ import kotlin.coroutines.suspendCoroutine
  *      .build()
  * ```
  * A good starting point might be RouteOptions.Builder.applyDefaultNavigationOptions() which will
- * include the options above.
+ * include the options above. Additionally, instead of specifying
+ * `DirectionCriteria.ANNOTATION_CONGESTION` you can also use
+ * `DirectionCriteria.ANNOTATION_CONGESTION_NUMERIC`. Using any one of these will return the other
+ * as null. You can also request both.
  *
  *
  * Vanishing Route Line:
@@ -368,7 +371,7 @@ class MapboxRouteLineApi(
                 routeLineOptions
                     .resourceProvider
                     .routeLineColorResources
-                    .routeUnknownTrafficColor,
+                    .routeUnknownCongestionColor,
                 workingExpressionData
             )
             val routeLineExpression = MapboxRouteLineUtils.getRouteLineExpression(
@@ -542,7 +545,7 @@ class MapboxRouteLineApi(
                             routeLineOptions
                                 .resourceProvider
                                 .routeLineColorResources
-                                .routeUnknownTrafficColor,
+                                .routeUnknownCongestionColor,
                             updatedRouteData
                         )
 
@@ -813,12 +816,13 @@ class MapboxRouteLineApi(
         val trafficLineExpressionProducer = partitionedRoutes.first.firstOrNull()?.route?.run {
             MapboxRouteLineUtils.getTrafficLineExpressionProducer(
                 this,
-                routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
                 routeLineOptions.resourceProvider.routeLineColorResources,
+                routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
                 true,
                 routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
                 Color.TRANSPARENT,
-                routeLineOptions.resourceProvider.routeLineColorResources.routeUnknownTrafficColor,
+                routeLineOptions.resourceProvider.routeLineColorResources
+                    .routeUnknownCongestionColor,
                 routeLineOptions.resourceProvider.restrictedRoadSectionScale,
                 routeLineOptions.displaySoftGradientForTraffic,
                 routeLineOptions.softGradientTransition
@@ -844,15 +848,15 @@ class MapboxRouteLineApi(
             partitionedRoutes.second.firstOrNull()?.route?.run {
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
                     this,
-                    routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
                     routeLineOptions.resourceProvider.routeLineColorResources,
+                    routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
                     false,
                     0.0,
                     Color.TRANSPARENT,
                     routeLineOptions
                         .resourceProvider
                         .routeLineColorResources
-                        .alternativeRouteUnknownTrafficColor,
+                        .alternativeRouteUnknownCongestionColor,
                     routeLineOptions.resourceProvider.restrictedRoadSectionScale,
                     routeLineOptions.displaySoftGradientForTraffic,
                     routeLineOptions.softGradientTransition
@@ -862,15 +866,15 @@ class MapboxRouteLineApi(
         val alternateRoute2TrafficExpressionProducer = if (partitionedRoutes.second.size > 1) {
             MapboxRouteLineUtils.getTrafficLineExpressionProducer(
                 partitionedRoutes.second[1].route,
-                routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
                 routeLineOptions.resourceProvider.routeLineColorResources,
+                routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
                 false,
                 0.0,
                 Color.TRANSPARENT,
                 routeLineOptions
                     .resourceProvider
                     .routeLineColorResources
-                    .alternativeRouteUnknownTrafficColor,
+                    .alternativeRouteUnknownCongestionColor,
                 routeLineOptions.resourceProvider.restrictedRoadSectionScale,
                 routeLineOptions.displaySoftGradientForTraffic,
                 routeLineOptions.softGradientTransition

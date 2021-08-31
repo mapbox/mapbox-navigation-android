@@ -24,7 +24,7 @@ class TrafficGradientActivity : AppCompatActivity() {
 
     private val routeLineColorResources by lazy {
         RouteLineColorResources.Builder()
-            .routeUnknownTrafficColor(Color.MAGENTA)
+            .routeUnknownCongestionColor(Color.MAGENTA)
             .routeLowCongestionColor(Color.CYAN)
             .build()
     }

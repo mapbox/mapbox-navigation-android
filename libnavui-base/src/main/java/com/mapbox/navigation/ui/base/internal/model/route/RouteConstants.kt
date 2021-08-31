@@ -54,6 +54,14 @@ object RouteConstants {
     const val SOFT_GRADIENT_STOP_GAP_METERS: Double = 30.0
     val TRAFFIC_BACKFILL_ROAD_CLASSES = emptyList<String>()
 
+    val LOW_CONGESTION_RANGE = 0..39
+
+    val MODERATE_CONGESTION_RANGE = 40..59
+
+    val HEAVY_CONGESTION_RANGE = 60..79
+
+    val SEVERE_CONGESTION_RANGE = 80..100
+
     @ColorInt
     val ROUTE_LINE_TRAVELED_COLOR = Color.TRANSPARENT
 

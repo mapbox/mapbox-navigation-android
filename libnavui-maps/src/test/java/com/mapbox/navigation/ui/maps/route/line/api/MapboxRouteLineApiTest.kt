@@ -828,7 +828,7 @@ class MapboxRouteLineApiTest {
             val realOptions = MapboxRouteLineOptions.Builder(ctx)
                 .styleInactiveRouteLegsIndependently(true)
                 .build()
-            val route = getMultilegWithTwoLegs()
+            val route = getMultiLegWithTwoLegs()
             val mockVanishingRouteLine = mockk<VanishingRouteLine>(relaxUnitFun = true) {
                 every { primaryRoutePoints } returns null
                 every { vanishPointOffset } returns 0.0
@@ -879,7 +879,7 @@ class MapboxRouteLineApiTest {
             val realOptions = MapboxRouteLineOptions.Builder(ctx)
                 .styleInactiveRouteLegsIndependently(true)
                 .build()
-            val route = getMultilegWithTwoLegs()
+            val route = getMultiLegWithTwoLegs()
             val options = mockk<MapboxRouteLineOptions> {
                 every { vanishingRouteLine } returns null
                 every { resourceProvider } returns realOptions.resourceProvider
@@ -924,7 +924,7 @@ class MapboxRouteLineApiTest {
             val realOptions = MapboxRouteLineOptions.Builder(ctx)
                 .styleInactiveRouteLegsIndependently(true)
                 .build()
-            val route = getMultilegWithTwoLegs()
+            val route = getMultiLegWithTwoLegs()
             val mockVanishingRouteLine = mockk<VanishingRouteLine>(relaxUnitFun = true) {
                 every { primaryRoutePoints } returns null
                 every { vanishPointOffset } returns 0.0
@@ -979,7 +979,7 @@ class MapboxRouteLineApiTest {
             " [rgba, 0.0, 0.0, 0.0, 0.0], 0.48807892461540975, [rgba, 86.0, 168.0, 251.0, 1.0]]"
         val expectedCasingExp = "[step, [line-progress], [rgba, 47.0, 122.0, 198.0, 1.0], 0.0," +
             " [rgba, 0.0, 0.0, 0.0, 0.0], 0.48807892461540975, [rgba, 47.0, 122.0, 198.0, 1.0]]"
-        val route = getMultilegWithTwoLegs()
+        val route = getMultiLegWithTwoLegs()
         val options = MapboxRouteLineOptions.Builder(ctx)
             .styleInactiveRouteLegsIndependently(true)
             .build()
@@ -1024,7 +1024,7 @@ class MapboxRouteLineApiTest {
             " [rgba, 0.0, 0.0, 0.0, 0.0], 0.48807892461540975, [rgba, 86.0, 168.0, 251.0, 1.0]]"
         val expectedCasingExp = "[step, [line-progress], [rgba, 47.0, 122.0, 198.0, 1.0], 0.0," +
             " [rgba, 0.0, 0.0, 0.0, 0.0], 0.48807892461540975, [rgba, 47.0, 122.0, 198.0, 1.0]]"
-        val route = getMultilegWithTwoLegs()
+        val route = getMultiLegWithTwoLegs()
         val options = MapboxRouteLineOptions.Builder(ctx)
             .styleInactiveRouteLegsIndependently(true)
             .build()
@@ -1137,7 +1137,7 @@ class MapboxRouteLineApiTest {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
         val point = Point.fromLngLat(139.7745686, 35.677573)
-        val mockExpected = mockk<com.mapbox.bindgen.Expected<String, List<QueriedFeature>>> {
+        val mockExpected = mockk<Expected<String, List<QueriedFeature>>> {
             every { value } returns listOf(feature2, feature1)
         }
         val querySlot = slot<QueryFeaturesCallback>()
@@ -1177,10 +1177,10 @@ class MapboxRouteLineApiTest {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
         val point = Point.fromLngLat(139.7745686, 35.677573)
-        val emptyExpected = mockk<com.mapbox.bindgen.Expected<String, List<QueriedFeature>>> {
+        val emptyExpected = mockk<Expected<String, List<QueriedFeature>>> {
             every { value } returns listOf()
         }
-        val mockExpected = mockk<com.mapbox.bindgen.Expected<String, List<QueriedFeature>>> {
+        val mockExpected = mockk<Expected<String, List<QueriedFeature>>> {
             every { value } returns listOf(feature2, feature1)
         }
         val querySlot = slot<QueryFeaturesCallback>()
@@ -1223,10 +1223,10 @@ class MapboxRouteLineApiTest {
             it.setRoutes(listOf(RouteLine(route1, null), RouteLine(route2, null)))
         }
         val point = Point.fromLngLat(139.7745686, 35.677573)
-        val emptyExpected = mockk<com.mapbox.bindgen.Expected<String, List<QueriedFeature>>> {
+        val emptyExpected = mockk<Expected<String, List<QueriedFeature>>> {
             every { value } returns listOf()
         }
-        val mockExpected = mockk<com.mapbox.bindgen.Expected<String, List<QueriedFeature>>> {
+        val mockExpected = mockk<Expected<String, List<QueriedFeature>>> {
             every { value } returns listOf(feature1, feature2)
         }
         val querySlot = slot<QueryFeaturesCallback>()
@@ -1294,7 +1294,7 @@ class MapboxRouteLineApiTest {
             .build()
         val resources = RouteLineResources.Builder().routeLineColorResources(colorOptions).build()
         val options = MapboxRouteLineOptions.Builder(ctx).withRouteLineResources(resources).build()
-        val route = getMultilegWithTwoLegs()
+        val route = getMultiLegWithTwoLegs()
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
             route,
             listOf(),
@@ -1336,7 +1336,7 @@ class MapboxRouteLineApiTest {
         return DirectionsRoute.fromJson(routeAsJson)
     }
 
-    private fun getMultilegWithTwoLegs(): DirectionsRoute {
+    private fun getMultiLegWithTwoLegs(): DirectionsRoute {
         val routeAsJson = loadJsonFixture("multileg-route-two-legs.json")
         return DirectionsRoute.fromJson(routeAsJson)
     }
