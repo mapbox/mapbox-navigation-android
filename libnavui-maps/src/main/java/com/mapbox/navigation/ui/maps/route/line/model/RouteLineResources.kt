@@ -349,7 +349,6 @@ class RouteLineResources private constructor(
         fun build(): RouteLineResources {
             val theRouteLineColorResources: RouteLineColorResources =
                 routeLineColorResources ?: RouteLineColorResources.Builder().build()
-
             return RouteLineResources(
                 theRouteLineColorResources,
                 roundedLineCap,

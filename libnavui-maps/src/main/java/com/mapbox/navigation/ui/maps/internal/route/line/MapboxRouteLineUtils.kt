@@ -5,7 +5,9 @@ import android.util.SparseArray
 import androidx.annotation.ColorInt
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.api.directions.v5.models.StepIntersection
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.core.constants.Constants
@@ -286,6 +288,29 @@ object MapboxRouteLineUtils {
         directionsRoutes.map(::generateFeatureCollection)
     }
 
+    internal fun resolveNumericToValue(
+        congestionValue: Int?,
+        routeLineColorResources: RouteLineColorResources
+    ): String {
+        return when (congestionValue) {
+            in routeLineColorResources.lowCongestionRange -> {
+                RouteConstants.LOW_CONGESTION_VALUE
+            }
+            in routeLineColorResources.heavyCongestionRange -> {
+                RouteConstants.HEAVY_CONGESTION_VALUE
+            }
+            in routeLineColorResources.severeCongestionRange -> {
+                RouteConstants.SEVERE_CONGESTION_VALUE
+            }
+            in routeLineColorResources.moderateCongestionRange -> {
+                RouteConstants.MODERATE_CONGESTION_VALUE
+            }
+            else -> {
+                RouteConstants.UNKNOWN_CONGESTION_VALUE
+            }
+        }
+    }
+
     /**
      * Returns the color that is used to represent traffic congestion.
      *
@@ -305,16 +330,16 @@ object MapboxRouteLineUtils {
                     routeLineColorResources.routeLowCongestionColor
                 }
                 RouteConstants.MODERATE_CONGESTION_VALUE -> {
-                    routeLineColorResources.routeModerateColor
+                    routeLineColorResources.routeModerateCongestionColor
                 }
                 RouteConstants.HEAVY_CONGESTION_VALUE -> {
-                    routeLineColorResources.routeHeavyColor
+                    routeLineColorResources.routeHeavyCongestionColor
                 }
                 RouteConstants.SEVERE_CONGESTION_VALUE -> {
-                    routeLineColorResources.routeSevereColor
+                    routeLineColorResources.routeSevereCongestionColor
                 }
                 RouteConstants.UNKNOWN_CONGESTION_VALUE -> {
-                    routeLineColorResources.routeUnknownTrafficColor
+                    routeLineColorResources.routeUnknownCongestionColor
                 }
                 RouteConstants.CLOSURE_CONGESTION_VALUE -> {
                     routeLineColorResources.routeClosureColor
@@ -326,19 +351,19 @@ object MapboxRouteLineUtils {
             }
             false -> when (congestionValue) {
                 RouteConstants.LOW_CONGESTION_VALUE -> {
-                    routeLineColorResources.alternativeRouteLowColor
+                    routeLineColorResources.alternativeRouteLowCongestionColor
                 }
                 RouteConstants.MODERATE_CONGESTION_VALUE -> {
-                    routeLineColorResources.alternativeRouteModerateColor
+                    routeLineColorResources.alternativeRouteModerateCongestionColor
                 }
                 RouteConstants.HEAVY_CONGESTION_VALUE -> {
-                    routeLineColorResources.alternativeRouteHeavyColor
+                    routeLineColorResources.alternativeRouteHeavyCongestionColor
                 }
                 RouteConstants.SEVERE_CONGESTION_VALUE -> {
-                    routeLineColorResources.alternativeRouteSevereColor
+                    routeLineColorResources.alternativeRouteSevereCongestionColor
                 }
                 RouteConstants.UNKNOWN_CONGESTION_VALUE -> {
-                    routeLineColorResources.alternativeRouteUnknownTrafficColor
+                    routeLineColorResources.alternativeRouteUnknownCongestionColor
                 }
                 RouteConstants.CLOSURE_CONGESTION_VALUE -> {
                     routeLineColorResources.alternativeRouteClosureColor
@@ -383,7 +408,11 @@ object MapboxRouteLineUtils {
         restrictedRoadSectionScale: Double,
         displayRestrictedRoadSections: Boolean
     ): List<RouteLineExpressionData> {
-        val trafficExpressionData = getRouteLineTrafficExpressionDataFromCache(route)
+        val congestionProvider = getAnnotationProvider(route, routeLineColorResources)
+        val trafficExpressionData = getRouteLineTrafficExpressionDataFromCache(
+            route,
+            congestionProvider
+        )
 
         return when (trafficExpressionData.isEmpty()) {
             false -> {
@@ -422,40 +451,21 @@ object MapboxRouteLineUtils {
      *
      * The items returned are ordered from the point closest to the origin to the point
      * farthest from the origin. In other words from the beginning of the route until the end.
-     *
-     * @param route the the calculations should be performed on.
      */
     internal fun getRouteLineTrafficExpressionData(
-        route: DirectionsRoute
+        route: DirectionsRoute,
+        trafficCongestionProvider: (RouteLeg) -> List<String>?
     ): List<RouteLineTrafficExpressionData> {
         var runningDistance = 0.0
         val routeLineTrafficData = mutableListOf<RouteLineTrafficExpressionData>()
-
         route.legs()?.forEachIndexed { legIndex, leg ->
             ifNonNull(leg.annotation()?.distance()) { distanceList ->
                 val closureRanges = getClosureRanges(leg).asSequence()
                 val restrictedRanges = getRestrictedRouteLegRanges(leg).asSequence()
-                val intersectionsWithGeometryIndex = leg.steps()
-                    ?.mapNotNull { it.intersections() }
-                    ?.flatten()
-                    ?.filter {
-                        it.geometryIndex() != null
-                    }?.toList() ?: listOf()
-
-                val roadClassArray = if (intersectionsWithGeometryIndex.isNotEmpty()) {
-                    arrayOfNulls<String>(
-                        intersectionsWithGeometryIndex.last().geometryIndex()!! + 1
-                    ).apply {
-                        intersectionsWithGeometryIndex.forEach {
-                            this[it.geometryIndex()!!] = it.mapboxStreetsV8()?.roadClass()
-                                ?: "intersection_without_class_fallback"
-                        }
-                    }
-                } else {
-                    arrayOfNulls(0)
-                }
-
-                leg.annotation()?.congestion()?.forEachIndexed { index, congestion ->
+                val intersectionsWithGeometryIndex =
+                    getIntersectionsWithGeometryIndex(leg.steps())
+                val roadClassArray = getRoadClassArray(intersectionsWithGeometryIndex)
+                trafficCongestionProvider(leg)?.forEachIndexed { index, congestion ->
                     val isInAClosure = closureRanges.any { it.contains(index) }
                     val isInRestrictedRange = restrictedRanges.any { it.contains(index) }
                     val congestionValue: String = when {
@@ -463,7 +473,6 @@ object MapboxRouteLineUtils {
                         else -> congestion
                     }
                     val roadClass = getRoadClassForIndex(roadClassArray, index)
-
                     if (index == 0) {
                         val distanceFromOrigin = if (legIndex > 0) {
                             runningDistance += distanceList[index]
@@ -528,14 +537,49 @@ object MapboxRouteLineUtils {
                 runningDistance += distanceList.last()
             }
         }
-
         return routeLineTrafficData
     }
 
-    private val getRouteLineTrafficExpressionDataFromCache: (route: DirectionsRoute) ->
-    List<RouteLineTrafficExpressionData> = { route: DirectionsRoute ->
-        getRouteLineTrafficExpressionData(route)
-    }.cacheResult(3)
+    internal val getRouteLegTrafficNumericCongestionProvider: (
+        routeLineColorResources: RouteLineColorResources
+    ) -> (RouteLeg) -> List<String> = { routeLineColorResources: RouteLineColorResources ->
+        { routeLeg: RouteLeg ->
+            routeLeg.annotation()?.congestionNumeric()?.map { v ->
+                resolveNumericToValue(v, routeLineColorResources)
+            } ?: listOf()
+        }
+    }.cacheResult(1)
+
+    internal val getRouteLegTrafficCongestionProvider: (RouteLeg) -> List<String> =
+        { routeLeg: RouteLeg ->
+            routeLeg.annotation()?.congestion() ?: listOf()
+        }.cacheResult(1)
+
+    internal fun getAnnotationProvider(
+        route: DirectionsRoute,
+        routeLineColorResources: RouteLineColorResources
+    ): (RouteLeg) -> List<String>? {
+        return if (
+            route.routeOptions()
+                ?.annotationsList()
+                ?.contains(DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC) == true
+        ) {
+            getRouteLegTrafficNumericCongestionProvider(routeLineColorResources)
+        } else {
+            getRouteLegTrafficCongestionProvider
+        }
+    }
+
+    internal val getRouteLineTrafficExpressionDataFromCache: (
+        route: DirectionsRoute,
+        trafficCongestionProvider: (RouteLeg) -> List<String>?
+    ) -> List<RouteLineTrafficExpressionData> =
+        { route: DirectionsRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
+            getRouteLineTrafficExpressionData(
+                route,
+                trafficCongestionProvider
+            )
+        }.cacheResult(3)
 
     private fun getClosureRanges(leg: RouteLeg): List<IntRange> {
         return leg.closures()
@@ -563,6 +607,32 @@ object MapboxRouteLineUtils {
                 }
             }
         return ranges
+    }
+
+    private fun getIntersectionsWithGeometryIndex(steps: List<LegStep>?): List<StepIntersection> {
+        return steps
+            ?.mapNotNull { it.intersections() }
+            ?.flatten()
+            ?.filter {
+                it.geometryIndex() != null
+            }?.toList() ?: listOf()
+    }
+
+    private fun getRoadClassArray(
+        intersectionsWithGeometryIndex: List<StepIntersection>
+    ): Array<String?> {
+        return if (intersectionsWithGeometryIndex.isNotEmpty()) {
+            arrayOfNulls<String>(
+                intersectionsWithGeometryIndex.last().geometryIndex()!! + 1
+            ).apply {
+                intersectionsWithGeometryIndex.forEach {
+                    this[it.geometryIndex()!!] = it.mapboxStreetsV8()?.roadClass()
+                        ?: "intersection_without_class_fallback"
+                }
+            }
+        } else {
+            arrayOfNulls(0)
+        }
     }
 
     private tailrec fun getRoadClassForIndex(roadClassArray: Array<String?>, index: Int): String? {
@@ -1046,8 +1116,8 @@ object MapboxRouteLineUtils {
 
     internal fun getTrafficLineExpressionProducer(
         route: DirectionsRoute,
-        trafficBackfillRoadClasses: List<String>,
         colorResources: RouteLineColorResources,
+        trafficBackfillRoadClasses: List<String>,
         isPrimaryRoute: Boolean,
         vanishingPointOffset: Double,
         lineStartColor: Int,
