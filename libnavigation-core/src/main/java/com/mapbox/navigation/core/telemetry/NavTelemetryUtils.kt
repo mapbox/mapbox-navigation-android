@@ -52,15 +52,29 @@ internal fun obtainStepCount(directionsRoute: DirectionsRoute?): Int =
 /**
  * Provide the absolute distance between 2 points, not including the geometry
  *
- * @return Int distance unit kilometer
+ * @return Int distance unit meter
  */
 internal fun obtainAbsoluteDistance(
     currentLocation: Location?,
     finalPoint: Point
 ): Int {
-    currentLocation?.let {
-        val currentPoint = Point.fromLngLat(currentLocation.longitude, currentLocation.latitude)
-        return TurfMeasurement.distance(currentPoint, finalPoint, TurfConstants.UNIT_METERS).toInt()
+    val currentPoint = currentLocation?.let {
+        Point.fromLngLat(currentLocation.longitude, currentLocation.latitude)
+    }
+    return obtainAbsoluteDistance(currentPoint, finalPoint)
+}
+
+/**
+ * Provide the absolute distance between 2 points, not including the geometry
+ *
+ * @return Int distance unit meter
+ */
+internal fun obtainAbsoluteDistance(
+    currentPoint: Point?,
+    finalPoint: Point
+): Int {
+    currentPoint?.let {
+        return TurfMeasurement.distance(it, finalPoint, TurfConstants.UNIT_METERS).toInt()
     } ?: return 0
 }
 

@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
 import com.mapbox.navigation.core.telemetry.events.NavigationFeedbackEvent
+import com.mapbox.navigation.core.telemetry.events.NavigationStepData
 import com.mapbox.navigation.core.telemetry.events.PhoneState
 import com.mapbox.navigation.core.telemetry.events.TelemetryLocation
 import io.mockk.every
@@ -101,16 +102,17 @@ class NavigationFeedbackEventTest {
 
     @Test
     fun checkSerialization() {
-        val feedbackEvent = NavigationFeedbackEvent(phoneState, metricsRouteProgress).apply {
-            feedbackType = EVENT_FEEDBACK_TYPE
-            source = EVENT_SOURCE
-            description = EVENT_DESCRIPTION
-            screenshot = EVENT_SCREENSHOT
-            appMetadata = metadata
-            feedbackSubType = arrayOf(EVENT_FEEDBACK_SUB_TYPE)
-            locationsBefore = arrayOf(locationBefore)
-            locationsAfter = arrayOf(locationAfter)
-        }
+        val feedbackEvent =
+            NavigationFeedbackEvent(phoneState, NavigationStepData(metricsRouteProgress)).apply {
+                feedbackType = EVENT_FEEDBACK_TYPE
+                source = EVENT_SOURCE
+                description = EVENT_DESCRIPTION
+                screenshot = EVENT_SCREENSHOT
+                appMetadata = metadata
+                feedbackSubType = arrayOf(EVENT_FEEDBACK_SUB_TYPE)
+                locationsBefore = arrayOf(locationBefore)
+                locationsAfter = arrayOf(locationAfter)
+            }
 
         val feedbackEventJson = gson.toJson(feedbackEvent)
         val deserializedFeedbackEvent =

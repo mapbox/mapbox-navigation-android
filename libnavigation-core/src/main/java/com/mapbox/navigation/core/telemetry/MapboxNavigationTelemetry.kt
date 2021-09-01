@@ -2,8 +2,6 @@ package com.mapbox.navigation.core.telemetry
 
 import android.app.Application
 import android.content.Context
-import android.location.Location
-import android.os.Build
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.TelemetryUtils.generateCreateDateFormatted
@@ -11,6 +9,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -21,9 +20,12 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
-import com.mapbox.navigation.core.internal.telemetry.CachedNavigationFeedbackEvent
+import com.mapbox.navigation.core.internal.utils.toTelemetryLocation
+import com.mapbox.navigation.core.internal.utils.toTelemetryLocations
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
+import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
+import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.START
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.STOP
@@ -35,8 +37,8 @@ import com.mapbox.navigation.core.telemetry.events.NavigationEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationFeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationFreeDriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationRerouteEvent
+import com.mapbox.navigation.core.telemetry.events.NavigationStepData
 import com.mapbox.navigation.core.telemetry.events.PhoneState
-import com.mapbox.navigation.core.telemetry.events.TelemetryLocation
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.FreeDrive
@@ -48,8 +50,8 @@ import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEvent
 import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.toPoint
 import java.util.Date
-import kotlin.collections.set
 
 /**
  * Session metadata when telemetry is on Pause.
@@ -131,10 +133,10 @@ Initialization may be called multiple times, the call is idempotent.
 The class has two public methods, postUserFeedback() and initialize().
  */
 internal object MapboxNavigationTelemetry {
-    internal val TAG = Tag("MbxTelemetry")
+    internal val TAG = Tag("MbxNavigationTelemetry")
 
     private const val ONE_SECOND = 1000
-    private const val MOCK_PROVIDER = "com.mapbox.navigation.core.replay.ReplayLocationEngine"
+    internal const val MOCK_PROVIDER = "com.mapbox.navigation.core.replay.ReplayLocationEngine"
     private const val EVENT_VERSION = 7
 
     private lateinit var applicationContext: Context
@@ -386,12 +388,38 @@ internal object MapboxNavigationTelemetry {
         appInstance = app
     }
 
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun provideFeedbackMetadataWrapper(): FeedbackMetadataWrapper {
+        (telemetryState as? NavTelemetryState.Running)?.sessionMetadata?.let { sessionMetadata ->
+            return FeedbackMetadataWrapper(
+                sessionMetadata.navigatorSessionIdentifier,
+                sessionMetadata.driverModeId,
+                sessionMetadata.telemetryNavSessionState.getModeName(),
+                generateCreateDateFormatted(sessionMetadata.driverModeStartTime),
+                sessionMetadata.dynamicValues.rerouteCount,
+                locationsCollector.lastLocation?.toPoint(),
+                locationEngineNameExternal,
+                lifecycleMonitor?.obtainPortraitPercentage(),
+                lifecycleMonitor?.obtainForegroundPercentage(),
+                EVENT_VERSION,
+                PhoneState.newInstance(applicationContext),
+                NavigationStepData(MetricsRouteProgress(routeData.routeProgress)),
+                createAppMetadata(),
+                locationsCollector
+            )
+        } ?: throw IllegalStateException(
+            "Feedback Metadata might be provided when trip session is started only"
+        )
+    }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun postUserFeedback(
         @FeedbackEvent.Type feedbackType: String,
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?,
         feedbackSubType: Array<@FeedbackEvent.SubType String>?,
+        feedbackMetadata: FeedbackMetadata? = null,
     ) {
         createUserFeedback(
             feedbackType,
@@ -399,99 +427,87 @@ internal object MapboxNavigationTelemetry {
             feedbackSource,
             screenshot,
             feedbackSubType,
-            null
+            feedbackMetadata,
         ) {
             sendMetricEvent(it)
         }
     }
 
-    fun cacheUserFeedback(
-        @FeedbackEvent.Type feedbackType: String,
-        description: String,
-        @FeedbackEvent.Source feedbackSource: String,
-        screenshot: String?,
-        feedbackSubType: Array<String>?,
-    ) {
-        createUserFeedback(
-            feedbackType,
-            description,
-            feedbackSource,
-            screenshot,
-            feedbackSubType,
-            {
-                feedbackEventCacheMap[it.feedbackId] = it
-            },
-            {
-                feedbackEventCacheMap[it.feedbackId]?.let { cachedEvent ->
-                    cachedEvent.locationsAfter = it.locationsAfter
-                    cachedEvent.locationsBefore = it.locationsBefore
-                } ?: feedbackEventCacheMap.put(it.feedbackId, it)
-            }
-        )
-    }
-
-    fun getCachedUserFeedback(): List<CachedNavigationFeedbackEvent> {
-        locationsCollector.flushBuffers()
-        return feedbackEventCacheMap.map {
-            it.value.getCachedNavigationFeedbackEvent()
-        }
-    }
-
-    fun postCachedUserFeedback(cachedFeedbackEventList: List<CachedNavigationFeedbackEvent>) {
-        log("post cached user feedback events")
-        val feedbackEventCache = LinkedHashMap(feedbackEventCacheMap)
-        feedbackEventCacheMap.clear()
-
-        cachedFeedbackEventList.forEach { cachedFeedback ->
-            sendEvent(
-                feedbackEventCache[cachedFeedback.feedbackId]?.apply {
-                    update(cachedFeedback)
-                } ?: return@forEach
-            )
-        }
-    }
-
+    @ExperimentalPreviewMapboxNavigationAPI
     private fun createUserFeedback(
         @FeedbackEvent.Type feedbackType: String,
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?,
         feedbackSubType: Array<@FeedbackEvent.SubType String>?,
-        onEventCreated: ((NavigationFeedbackEvent) -> Unit)? = null,
-        onEventUpdated: ((NavigationFeedbackEvent) -> Unit)? = null
+        feedbackMetadata: FeedbackMetadata?,
+        onEventUpdated: ((NavigationFeedbackEvent) -> Unit)?,
     ) {
-        ifTelemetryRunning(
-            "User Feedback event creation failed: $LOG_TELEMETRY_IS_NOT_RUNNING"
-        ) {
-            log("collect post event locations for user feedback")
+        if (feedbackMetadata == null) {
+            ifTelemetryRunning(
+                "User Feedback event creation failed: $LOG_TELEMETRY_IS_NOT_RUNNING"
+            ) {
+                val feedbackEvent = NavigationFeedbackEvent(
+                    PhoneState.newInstance(applicationContext),
+                    NavigationStepData(MetricsRouteProgress(routeData.routeProgress))
+                ).apply {
+                    this.feedbackType = feedbackType
+                    this.source = feedbackSource
+                    this.description = description
+                    this.screenshot = screenshot
+                    this.feedbackSubType = feedbackSubType
+                    populateWithLocalVars(it)
+                }
+
+                log("collect post event locations for user feedback")
+                locationsCollector.collectLocations { preEventBuffer, postEventBuffer ->
+                    log("locations ready")
+                    feedbackEvent.apply {
+                        locationsBefore = preEventBuffer.toTelemetryLocations()
+                        locationsAfter = postEventBuffer.toTelemetryLocations()
+                    }
+                    onEventUpdated?.invoke(feedbackEvent)
+                }
+            }
+        } else {
+            log("post user feedback with feedback metadata")
             val feedbackEvent = NavigationFeedbackEvent(
-                PhoneState(applicationContext),
-                MetricsRouteProgress(routeData.routeProgress)
+                feedbackMetadata.phoneState,
+                feedbackMetadata.navigationStepData,
             ).apply {
                 this.feedbackType = feedbackType
                 this.source = feedbackSource
                 this.description = description
                 this.screenshot = screenshot
                 this.feedbackSubType = feedbackSubType
-                populate()
+                this.locationsBefore = feedbackMetadata.locationsBeforeEvent
+                this.locationsAfter = feedbackMetadata.locationsAfterEvent
+                populate(
+                    this@MapboxNavigationTelemetry.sdkIdentifier,
+                    null,
+                    null,
+                    feedbackMetadata.lastLocation,
+                    feedbackMetadata.locationEngineNameExternal,
+                    feedbackMetadata.percentTimeInPortrait,
+                    feedbackMetadata.percentTimeInForeground,
+                    feedbackMetadata.sessionIdentifier,
+                    feedbackMetadata.driverModeIdentifier,
+                    feedbackMetadata.driverMode,
+                    feedbackMetadata.driverModeStartTime,
+                    feedbackMetadata.rerouteCount,
+                    feedbackMetadata.eventVersion,
+                    feedbackMetadata.appMetadata,
+                )
             }
-
-            onEventCreated?.let { it(feedbackEvent) }
-
-            locationsCollector.collectLocations { preEventBuffer, postEventBuffer ->
-                log("locations ready")
-                feedbackEvent.apply {
-                    locationsBefore = preEventBuffer.toTelemetryLocations()
-                    locationsAfter = postEventBuffer.toTelemetryLocations()
-                }
-                onEventUpdated?.let { it(feedbackEvent) }
-            }
+            onEventUpdated?.invoke(feedbackEvent)
         }
     }
 
     private fun processDeparture() {
         sendMetricEvent(
-            NavigationDepartEvent(PhoneState(applicationContext)).apply { populate() }
+            NavigationDepartEvent(PhoneState.newInstance(applicationContext)).apply {
+                populateWithLocalVars(getSessionMetadataIfTelemetryRunning())
+            }
         )
     }
 
@@ -591,14 +607,15 @@ internal object MapboxNavigationTelemetry {
         sessionMetadata: SessionMetadata,
     ) {
         log("createFreeDriveEvent $type")
-        val freeDriveEvent = NavigationFreeDriveEvent(PhoneState(applicationContext)).apply {
-            populate(
-                type,
-                sessionMetadata.navigatorSessionIdentifier,
-                sessionMetadata.driverModeId,
-                sessionMetadata.driverModeStartTime
-            )
-        }
+        val freeDriveEvent =
+            NavigationFreeDriveEvent(PhoneState.newInstance(applicationContext)).apply {
+                populate(
+                    type,
+                    sessionMetadata.navigatorSessionIdentifier,
+                    sessionMetadata.driverModeId,
+                    sessionMetadata.driverModeStartTime
+                )
+            }
         sendEvent(freeDriveEvent)
     }
 
@@ -647,7 +664,7 @@ internal object MapboxNavigationTelemetry {
             }
 
             val navigationRerouteEvent = NavigationRerouteEvent(
-                PhoneState(applicationContext),
+                PhoneState.newInstance(applicationContext),
                 MetricsRouteProgress(routeData.routeProgress)
             ).apply {
                 secondsSinceLastReroute =
@@ -658,7 +675,7 @@ internal object MapboxNavigationTelemetry {
                 newDistanceRemaining = route.distance().toInt()
                 newDurationRemaining = route.duration().toInt()
                 newGeometry = obtainGeometry(route)
-                populate()
+                populateWithLocalVars(sessionMetadata)
             }
 
             locationsCollector.collectLocations { preEventBuffer, postEventBuffer ->
@@ -677,7 +694,9 @@ internal object MapboxNavigationTelemetry {
         locationsCollector.flushBuffers()
 
         val cancelEvent =
-            NavigationCancelEvent(PhoneState(applicationContext)).apply { populate() }
+            NavigationCancelEvent(PhoneState.newInstance(applicationContext)).apply {
+                populateWithLocalVars(getSessionMetadataIfTelemetryRunning())
+            }
         cancelEvent.arrivalTimestamp = generateCreateDateFormatted(Date())
         sendMetricEvent(cancelEvent)
     }
@@ -703,71 +722,30 @@ internal object MapboxNavigationTelemetry {
             sessionMetadata.dynamicValues.driverModeArrivalTime = Date()
 
             val arriveEvent =
-                NavigationArriveEvent(PhoneState(applicationContext)).apply { populate() }
+                NavigationArriveEvent(PhoneState.newInstance(applicationContext)).apply {
+                    populateWithLocalVars(sessionMetadata)
+                }
             sendMetricEvent(arriveEvent)
         }
     }
 
-    private fun NavigationEvent.populate() {
-        log("populateNavigationEvent")
-
-        this.apply {
-            sdkIdentifier = this@MapboxNavigationTelemetry.sdkIdentifier
-
-            routeData.routeProgress?.let { routeProgress ->
-                stepIndex = routeProgress.currentLegProgress?.currentStepProgress?.stepIndex ?: 0
-
-                distanceRemaining = routeProgress.distanceRemaining.toInt()
-                durationRemaining = routeProgress.durationRemaining.toInt()
-                distanceCompleted = routeProgress.distanceTraveled.toInt()
-
-                routeProgress.route.let {
-                    geometry = it.geometry()
-                    profile = it.routeOptions()?.profile()
-                    requestIdentifier = it.requestUuid()
-                    stepCount = obtainStepCount(it)
-                    legIndex = it.routeIndex()?.toInt() ?: 0
-                    legCount = it.legs()?.size ?: 0
-
-                    absoluteDistanceToDestination = obtainAbsoluteDistance(
-                        locationsCollector.lastLocation,
-                        obtainRouteDestination(it)
-                    )
-                    estimatedDistance = it.distance().toInt()
-                    estimatedDuration = it.duration().toInt()
-                    totalStepCount = obtainStepCount(it)
-                }
-            }
-
-            routeData.originalRoute?.let {
-                originalStepCount = obtainStepCount(it)
-                originalEstimatedDistance = it.distance().toInt()
-                originalEstimatedDuration = it.duration().toInt()
-                originalRequestIdentifier = it.requestUuid()
-                originalGeometry = it.geometry()
-            }
-
-            locationEngine = locationEngineNameExternal
-            tripIdentifier = navObtainUniversalTelemetryTripId()
-            lat = locationsCollector.lastLocation?.latitude ?: 0.0
-            lng = locationsCollector.lastLocation?.longitude ?: 0.0
-            simulation = locationEngineNameExternal == MOCK_PROVIDER
-            percentTimeInPortrait = lifecycleMonitor?.obtainPortraitPercentage() ?: 100
-            percentTimeInForeground = lifecycleMonitor?.obtainForegroundPercentage() ?: 100
-
-            getSessionMetadataIfTelemetryRunning()?.let { sessionMetadata ->
-                navigatorSessionIdentifier = sessionMetadata.navigatorSessionIdentifier
-
-                sessionIdentifier = sessionMetadata.driverModeId
-                startTimestamp = generateCreateDateFormatted(sessionMetadata.driverModeStartTime)
-                driverMode = sessionMetadata.telemetryNavSessionState.getModeName()
-
-                rerouteCount = sessionMetadata.dynamicValues.rerouteCount
-            }
-
-            eventVersion = EVENT_VERSION
-            appMetadata = createAppMetadata()
-        }
+    private fun NavigationEvent.populateWithLocalVars(sessionMetadata: SessionMetadata?) {
+        this.populate(
+            this@MapboxNavigationTelemetry.sdkIdentifier,
+            routeData.originalRoute,
+            routeData.routeProgress,
+            locationsCollector.lastLocation?.toPoint(),
+            locationEngineNameExternal,
+            lifecycleMonitor?.obtainPortraitPercentage(),
+            lifecycleMonitor?.obtainForegroundPercentage(),
+            sessionMetadata?.navigatorSessionIdentifier,
+            sessionMetadata?.driverModeId,
+            sessionMetadata?.telemetryNavSessionState?.getModeName(),
+            sessionMetadata?.driverModeStartTime?.let { generateCreateDateFormatted(it) },
+            sessionMetadata?.dynamicValues?.rerouteCount,
+            EVENT_VERSION,
+            createAppMetadata()
+        )
     }
 
     private fun NavigationFreeDriveEvent.populate(
@@ -846,32 +824,6 @@ internal object MapboxNavigationTelemetry {
             TelemetryNavSessionState.TRIP -> FeedbackEvent.DRIVER_MODE_TRIP
             TelemetryNavSessionState.FREE_DRIVE -> FeedbackEvent.DRIVER_MODE_FREE_DRIVE
         }
-
-    private fun List<Location>.toTelemetryLocations(): Array<TelemetryLocation> {
-        val feedbackLocations = mutableListOf<TelemetryLocation>()
-        forEach {
-            feedbackLocations.add(it.toTelemetryLocation())
-        }
-
-        return feedbackLocations.toTypedArray()
-    }
-
-    internal fun Location.toTelemetryLocation(): TelemetryLocation {
-        return TelemetryLocation(
-            latitude,
-            longitude,
-            speed,
-            bearing,
-            altitude,
-            time.toString(),
-            accuracy,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                verticalAccuracyMeters
-            } else {
-                0f
-            }
-        )
-    }
 
     private fun log(message: String) {
         logger?.d(TAG, Message(message))

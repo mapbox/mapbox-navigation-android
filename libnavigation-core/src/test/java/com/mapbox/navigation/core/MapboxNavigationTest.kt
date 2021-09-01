@@ -1073,13 +1073,7 @@ class MapboxNavigationTest {
         every { MapboxNavigationTelemetry.initialize(any(), any(), any(), any(), any()) } just runs
         every { MapboxNavigationTelemetry.destroy(any()) } just runs
         every {
-            MapboxNavigationTelemetry.cacheUserFeedback(any(), any(), any(), any(), any())
-        } just runs
-        every {
-            MapboxNavigationTelemetry.postUserFeedback(any(), any(), any(), any(), any())
-        } just runs
-        every {
-            MapboxNavigationTelemetry.postCachedUserFeedback(any())
+            MapboxNavigationTelemetry.postUserFeedback(any(), any(), any(), any(), any(), any())
         } just runs
     }
 

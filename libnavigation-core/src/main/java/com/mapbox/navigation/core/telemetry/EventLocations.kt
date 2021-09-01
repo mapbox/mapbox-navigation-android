@@ -5,10 +5,10 @@ import android.location.Location
 internal class EventLocations(
     private val preEventLocations: List<Location>,
     private val postEventLocations: MutableList<Location>,
-    private val onBufferFull: (List<Location>, List<Location>) -> Unit
+    val locationsCollectorListener: LocationsCollector.LocationsCollectorListener,
 ) {
     fun onBufferFull() {
-        onBufferFull(preEventLocations, postEventLocations)
+        locationsCollectorListener.onBufferFull(preEventLocations, postEventLocations)
     }
 
     fun addPostEventLocation(location: Location) {
