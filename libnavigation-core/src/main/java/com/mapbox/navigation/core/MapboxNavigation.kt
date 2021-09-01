@@ -62,6 +62,8 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
+import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
+import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -931,7 +933,7 @@ class MapboxNavigation(
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?,
-        feedbackSubType: Array<@FeedbackEvent.SubType String>? = emptyArray(),
+        feedbackSubType: Array<@FeedbackEvent.SubType String>? = emptyArray()
     ) {
         MapboxNavigationTelemetry.postUserFeedback(
             feedbackType,
@@ -939,8 +941,58 @@ class MapboxNavigation(
             feedbackSource,
             screenshot,
             feedbackSubType,
+            null,
         )
     }
+
+    /**
+     * Send user feedback about an issue or problem with the Navigation SDK.
+     *
+     * Method can be invoked out of the trip session (whenever until [onDestroy] is called), because
+     * a feedback is attached to passed location and time in the past when [FeedbackMetadata] was
+     * generated (see [provideFeedbackMetadataWrapper]).
+     *
+     * @param feedbackType one of [FeedbackEvent.Type]
+     * @param description description message
+     * @param feedbackSource one of [FeedbackEvent.Source]
+     * @param screenshot encoded screenshot (optional)
+     * @param feedbackSubType array of [FeedbackEvent.SubType] (optional)
+     * @param feedbackMetadata use it to attach feedback to a specific passed location.
+     * See [FeedbackMetadata] and [FeedbackMetadataWrapper]
+     *
+     * @see [FeedbackHelper.getFeedbackSubTypes]
+     * to retrieve possible feedback subtypes for a given [feedbackType]
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun postUserFeedback(
+        @FeedbackEvent.Type feedbackType: String,
+        description: String,
+        @FeedbackEvent.Source feedbackSource: String,
+        screenshot: String?,
+        feedbackSubType: Array<@FeedbackEvent.SubType String>? = emptyArray(),
+        feedbackMetadata: FeedbackMetadata,
+    ) {
+        MapboxNavigationTelemetry.postUserFeedback(
+            feedbackType,
+            description,
+            feedbackSource,
+            screenshot,
+            feedbackSubType,
+            feedbackMetadata,
+        )
+    }
+
+    /**
+     * Provides wrapper of [FeedbackMetadata]. [FeedbackMetadata] is used to send deferred
+     * feedback attached to passed location. It contains data (like location, time) when method is
+     * invoked.
+     *
+     * Note: method throws [IllegalStateException] if trips session is not
+     * started ([startTripSession])
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun provideFeedbackMetadataWrapper(): FeedbackMetadataWrapper =
+        MapboxNavigationTelemetry.provideFeedbackMetadataWrapper()
 
     /**
      * Start observing alternatives routes for a trip session via [RouteAlternativesObserver].

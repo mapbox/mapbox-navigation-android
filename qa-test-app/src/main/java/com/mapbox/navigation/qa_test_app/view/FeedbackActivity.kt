@@ -1,11 +1,13 @@
 package com.mapbox.navigation.qa_test_app.view
 
 import android.annotation.SuppressLint
+import android.content.SharedPreferences
 import android.location.Location
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.gson.Gson
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -19,6 +21,7 @@ import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.addOnMapLongClickListener
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -28,8 +31,11 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
+import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
+import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.qa_test_app.databinding.FeedbackActivityBinding
 import com.mapbox.navigation.qa_test_app.utils.Utils
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
@@ -44,6 +50,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+@ExperimentalPreviewMapboxNavigationAPI
 class FeedbackActivity : AppCompatActivity() {
 
     private val binding: FeedbackActivityBinding by lazy {
@@ -103,6 +110,26 @@ class FeedbackActivity : AppCompatActivity() {
         }
     }
 
+    private val sharedPrefs: SharedPreferences by lazy {
+        getSharedPreferences("qa_feedback_activity", MODE_PRIVATE)
+    }
+
+    private val spListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (key == KEY_SP_FEEDBACK_METADATA) {
+            checkStoredFeedbackMetadata()
+        }
+    }
+
+    private var feedbackMetadataWrapper: FeedbackMetadataWrapper? = null
+        set(value) {
+            field = value
+            enableButtonStoreFeedbackMetadata(value != null)
+        }
+
+    private companion object {
+        private const val KEY_SP_FEEDBACK_METADATA = "KEY_SP_FEEDBACK_METADATA"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -158,6 +185,53 @@ class FeedbackActivity : AppCompatActivity() {
                 null
             )
         }
+        binding.takeFeedbackMetadata.setOnClickListener {
+            if (mapboxNavigation.getTripSessionState() == TripSessionState.STARTED) {
+                feedbackMetadataWrapper = mapboxNavigation.provideFeedbackMetadataWrapper()
+            } else {
+                Toast.makeText(
+                    this,
+                    "FeedbackMetadata is available when trip session is started",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+        binding.saveTakenFeedbackMetadata.setOnClickListener {
+            feedbackMetadataWrapper?.get()?.let { feedbackMetadata ->
+                storeFeedbackMetadata(feedbackMetadata)
+            }
+        }
+        binding.positioningIssueFeedbackWithMetadata.setOnClickListener {
+            sharedPrefs.getString(KEY_SP_FEEDBACK_METADATA, null)?.let { json ->
+                val feedbackMetadata = FeedbackMetadata.fromJson(json) ?: run {
+                    Toast.makeText(
+                        this,
+                        "Cannot deserialize FeedbackMetadata from json",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    return@let
+                }
+                mapboxNavigation.postUserFeedback(
+                    FeedbackEvent.POSITIONING_ISSUE,
+                    "Test feedback",
+                    FeedbackEvent.UI,
+                    null,
+                    emptyArray(),
+                    feedbackMetadata
+                )
+                Toast.makeText(
+                    this,
+                    "Stored feedback has been sent",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+        binding.cleanUpFeedbackMetadata.setOnClickListener {
+            feedbackMetadataWrapper = null
+            cleanUpFeedbackMetadata()
+        }
+        sharedPrefs.registerOnSharedPreferenceChangeListener(spListener)
     }
 
     override fun onDestroy() {
@@ -211,5 +285,26 @@ class FeedbackActivity : AppCompatActivity() {
                 }
             }
         )
+    }
+
+    private fun enableButtonStoreFeedbackMetadata(enable: Boolean) {
+        binding.saveTakenFeedbackMetadata.isEnabled = enable
+    }
+
+    private fun checkStoredFeedbackMetadata() {
+        val hasStoredMetadata = sharedPrefs.getString(KEY_SP_FEEDBACK_METADATA, null) != null
+
+        binding.cleanUpFeedbackMetadata.isEnabled = hasStoredMetadata
+        binding.positioningIssueFeedbackWithMetadata.isEnabled = hasStoredMetadata
+    }
+
+    private fun storeFeedbackMetadata(feedbackMetadata: FeedbackMetadata) {
+        sharedPrefs.edit()
+            .putString(KEY_SP_FEEDBACK_METADATA, feedbackMetadata.toJson(Gson()))
+            .apply()
+    }
+
+    private fun cleanUpFeedbackMetadata() {
+        sharedPrefs.edit().remove(KEY_SP_FEEDBACK_METADATA).apply()
     }
 }
