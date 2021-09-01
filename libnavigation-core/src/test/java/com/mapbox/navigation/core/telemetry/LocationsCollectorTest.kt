@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.telemetry
 
 import android.location.Location
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -122,5 +123,24 @@ class LocationsCollectorTest {
         }
 
         locationsCollector.flushBuffers()
+    }
+
+    @Test
+    fun flushLocationForParticularListener() {
+        val mockLocationsListener1 =
+            mockk<LocationsCollector.LocationsCollectorListener>(relaxUnitFun = true)
+        val mockLocationsListener2 =
+            mockk<LocationsCollector.LocationsCollectorListener>(relaxUnitFun = true)
+        val mockLocationsListener3 =
+            mockk<LocationsCollector.LocationsCollectorListener>(relaxUnitFun = true)
+
+        locationsCollector.collectLocations(mockLocationsListener1)
+        locationsCollector.collectLocations(mockLocationsListener2)
+        locationsCollector.collectLocations(mockLocationsListener3)
+        locationsCollector.flushBufferFor(mockLocationsListener2)
+
+        verify(exactly = 1) {
+            mockLocationsListener2.onBufferFull(any(), any())
+        }
     }
 }

@@ -7,5 +7,10 @@ internal interface LocationsCollector : LocationObserver {
     val lastLocation: Location?
 
     fun flushBuffers()
-    fun collectLocations(onBufferFull: (List<Location>, List<Location>) -> Unit)
+    fun flushBufferFor(locationsCollectorListener: LocationsCollectorListener)
+    fun collectLocations(locationsCollectorListener: LocationsCollectorListener)
+
+    fun interface LocationsCollectorListener {
+        fun onBufferFull(preEventLocations: List<Location>, postEventLocations: List<Location>)
+    }
 }

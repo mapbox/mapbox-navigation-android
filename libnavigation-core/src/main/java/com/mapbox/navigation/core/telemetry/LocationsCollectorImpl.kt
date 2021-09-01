@@ -43,13 +43,13 @@ internal class LocationsCollectorImpl(
     }
 
     override fun collectLocations(
-        onBufferFull: (List<Location>, List<Location>) -> Unit
+        locationsCollectorListener: LocationsCollector.LocationsCollectorListener
     ) {
         eventsLocationsBuffer.add(
             EventLocations(
                 locationsBuffer.getCopy(),
                 mutableListOf(),
-                onBufferFull
+                locationsCollectorListener
             )
         )
     }
@@ -58,6 +58,18 @@ internal class LocationsCollectorImpl(
         logger?.d(TAG, Message("flush buffer. Pending events = ${eventsLocationsBuffer.size}"))
         eventsLocationsBuffer.forEach { it.onBufferFull() }
         eventsLocationsBuffer.clear()
+    }
+
+    override fun flushBufferFor(
+        locationsCollectorListener: LocationsCollector.LocationsCollectorListener
+    ) {
+        logger?.d(TAG, Message("flush buffer for only one observer"))
+        eventsLocationsBuffer.find {
+            it.locationsCollectorListener === locationsCollectorListener
+        }?.also {
+            it.onBufferFull()
+            eventsLocationsBuffer.remove(it)
+        }
     }
 
     override fun onNewRawLocation(rawLocation: Location) {
