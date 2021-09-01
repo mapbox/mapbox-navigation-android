@@ -23,6 +23,8 @@ package com.mapbox.navigation.core {
     method public void onDestroy();
     method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray());
     method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray(), com.mapbox.navigation.core.telemetry.events.FeedbackMetadata feedbackMetadata);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper provideFeedbackMetadataWrapper();
     method public void registerArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
     method public void registerBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
     method public void registerEHorizonObserver(com.mapbox.navigation.core.trip.session.eh.EHorizonObserver eHorizonObserver);
@@ -552,6 +554,9 @@ package com.mapbox.navigation.core.telemetry {
   public final class MapboxNavigationTelemetryKt {
   }
 
+  public final class NavEventsPopulateUtilKt {
+  }
+
   public final class NavTelemetryUtilsKt {
   }
 
@@ -622,6 +627,20 @@ package com.mapbox.navigation.core.telemetry.events {
     method public static String![] getFeedbackSubTypes(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType);
     method public static String![] getFreeDriveFeedbackTypes();
     field public static final com.mapbox.navigation.core.telemetry.events.FeedbackHelper INSTANCE;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class FeedbackMetadata {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.core.telemetry.events.FeedbackMetadata? fromJson(String json);
+    method public String toJson(com.google.gson.Gson gson);
+    field public static final com.mapbox.navigation.core.telemetry.events.FeedbackMetadata.Companion Companion;
+  }
+
+  public static final class FeedbackMetadata.Companion {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.core.telemetry.events.FeedbackMetadata? fromJson(String json);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class FeedbackMetadataWrapper {
+    method public com.mapbox.navigation.core.telemetry.events.FeedbackMetadata get();
   }
 
 }

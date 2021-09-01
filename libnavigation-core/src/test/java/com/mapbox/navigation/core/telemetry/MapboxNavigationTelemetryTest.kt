@@ -16,6 +16,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
@@ -25,11 +26,13 @@ import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.internal.telemetry.CachedNavigationFeedbackEvent
-import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.toTelemetryLocation
+import com.mapbox.navigation.core.internal.utils.toTelemetryLocation
+import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
+import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.START
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.STOP
+import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
 import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationCancelEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationDepartEvent
@@ -37,6 +40,9 @@ import com.mapbox.navigation.core.telemetry.events.NavigationEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationFeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationFreeDriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationRerouteEvent
+import com.mapbox.navigation.core.telemetry.events.NavigationStepData
+import com.mapbox.navigation.core.telemetry.events.PhoneState
+import com.mapbox.navigation.core.telemetry.events.TelemetryLocation
 import com.mapbox.navigation.core.testutil.ifCaptured
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance
@@ -72,6 +78,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
+@ExperimentalPreviewMapboxNavigationAPI
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 class MapboxNavigationTelemetryTest {
@@ -540,167 +547,99 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
-    fun cache_feedback_is_cached() {
-        baseMock()
-
-        baseInitialization()
-        val cacheFeedbackType = FeedbackEvent.POSITIONING_ISSUE
-        cacheUserFeedback(feedbackType = cacheFeedbackType)
-        val cacheFeedbackDescription = "cacheFeedbackDescription"
-        cacheUserFeedback(description = cacheFeedbackDescription)
-        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
-
-        val cachedFeedbackEvents = MapboxNavigationTelemetry.getCachedUserFeedback()
-        assertEquals(cachedFeedbackEvents.size, 2)
-        assertEquals(
-            cacheFeedbackType,
-            cachedFeedbackEvents[0].feedbackType
-        )
-        assertEquals(
-            "cacheFeedbackDescription",
-            cachedFeedbackEvents[1].description
-        )
-    }
-
-    @Test
-    fun cache_feedback_not_send_on_session_stop() {
+    fun cache_feedback_send_on_session_stop() {
         baseMock()
         mockAnotherRoute()
 
         baseInitialization()
-        cacheUserFeedback()
         offRoute()
         updateRoute(anotherRoute)
         updateRouteProgress()
-        postUserFeedback()
-        cacheUserFeedback()
-        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
+        updateSessionState(Idle)
+        postUserFeedbackCached()
 
-        val events = captureAndVerifyMetricsReporter(exactly = 6)
+        val events = captureAndVerifyMetricsReporter(exactly = 5)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
         assertTrue(events[1] is NavigationDepartEvent)
         assertTrue(events[2] is NavigationRerouteEvent)
-        assertTrue(events[3] is NavigationFeedbackEvent)
-        assertTrue(events[4] is NavigationCancelEvent)
-        assertTrue(events[5] is NavigationFreeDriveEvent)
-        assertEquals(6, events.size)
-
-        checkEventsDividedBySessionsInSameNavSession(events.subList(0, 5), events.subList(5, 6))
-    }
-
-    @Test
-    fun cache_feedback_sent_even_after_session_stop() {
-        baseMock()
-        mockAnotherRoute()
-
-        baseInitialization()
-        cacheUserFeedback()
-        offRoute()
-        updateRoute(anotherRoute)
-        updateRouteProgress()
-        postUserFeedback()
-        cacheUserFeedback()
-        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
-        postCachedUserFeedback()
-
-        val events = captureAndVerifyMetricsReporter(exactly = 8)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
-        assertTrue(events[2] is NavigationRerouteEvent)
-        assertTrue(events[3] is NavigationFeedbackEvent)
-        assertTrue(events[4] is NavigationCancelEvent)
-        assertTrue(events[5] is NavigationFreeDriveEvent)
-        assertTrue(events[6] is NavigationFeedbackEvent)
-        assertTrue(events[7] is NavigationFeedbackEvent)
-        assertEquals(8, events.size)
-        // cached feedback is sent with session ids where it was created
-        checkEventsDividedBySessionsInSameNavSession(
-            events.subList(0, 5).plus(events.subList(6, 8)), events.subList(5, 6)
-        )
-    }
-
-    @Test
-    fun cache_feedback_available_before_location_buffers_are_full_or_session_finished() {
-        baseMock()
-        mockAnotherRoute()
-
-        baseInitialization()
-        cacheUserFeedback()
-        offRoute()
-        updateRoute(anotherRoute)
-        updateRouteProgress()
-        postUserFeedback()
-        cacheUserFeedback()
-        postCachedUserFeedback()
-        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
-
-        val events = captureAndVerifyMetricsReporter(exactly = 8)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
-        assertTrue(events[2] is NavigationRerouteEvent)
-        assertTrue(events[3] is NavigationFeedbackEvent)
+        assertTrue(events[3] is NavigationCancelEvent)
         assertTrue(events[4] is NavigationFeedbackEvent)
-        assertTrue(events[5] is NavigationFeedbackEvent)
-        assertTrue(events[6] is NavigationCancelEvent)
-        assertTrue(events[7] is NavigationFreeDriveEvent)
-        assertEquals(8, events.size)
-        checkEventsDividedBySessionsInSameNavSession(events.subList(0, 7), events.subList(7, 8))
+        assertEquals(5, events.size)
     }
 
     @Test
-    fun only_internal_cached_feedback_sent() {
-        baseMock()
-        mockAnotherRoute()
-
-        baseInitialization()
-        val cacheFeedbackType = FeedbackEvent.POSITIONING_ISSUE
-        cacheUserFeedback(feedbackType = cacheFeedbackType)
-        offRoute()
-        updateRoute(anotherRoute)
-        updateRouteProgress()
-        postUserFeedback()
-        val cacheFeedbackDescription = "cacheFeedbackDescription"
-        cacheUserFeedback(description = cacheFeedbackDescription)
-        updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
-        postCachedUserFeedback(
-            MapboxNavigationTelemetry
-                .getCachedUserFeedback()
-                .plus(
-                    listOf(
-                        CachedNavigationFeedbackEvent(
-                            "",
-                            FeedbackEvent.ROAD_CLOSED,
-                            "",
-                            "a feedback that not created by telemetry " +
-                                "will be dropped and not be sent",
-                            HashSet()
-                        )
-                    )
-                )
+    fun cache_feedback_post() {
+        val sessionIdentifier = "SESSION_IDENTIFIER"
+        val driverModeIdentifier = "DRIVER_MODE_IDENTIFIER"
+        val driverMode = FeedbackEvent.DRIVER_MODE_FREE_DRIVE
+        val driverModeStartTime = "DATE_TIME_FORMAT"
+        val rerouteCount = 1
+        val mockLocationsBefore = arrayOf<TelemetryLocation>()
+        val mockLocationsAfter = arrayOf<TelemetryLocation>()
+        val locationEngine = "LOCATION_ENGINE_NAME_EXTERNAL"
+        val percentTimeInPortrait = 50
+        val percentTimeInForeground = 20
+        val eventVersion = 100
+        val lastLocation = Point.fromLngLat(30.0, 40.0)
+        val phoneState = PhoneState(
+            volumeLevel = 5,
+            batteryLevel = 11,
+            screenBrightness = 16,
+            isBatteryPluggedIn = true,
+            connectivity = "CONNECTIVITY_STATE",
+            audioType = "AUDIO_TYPE",
+            applicationState = "APP_STATE",
+            created = "CREATED_DATA",
+            feedbackId = "FEEDBACK_ID",
+            userId = "USER_ID"
         )
+        val appMetadata = AppMetadata(
+            name = "APP_METADATA_NAME",
+            version = "APP_METADATA_VERSION",
+            userId = "APP_METADATA_USER_ID",
+            sessionId = "APP_METADATA_SESSION_ID",
+        )
+        val cachedFeedbackMetadata = FeedbackMetadata(
+            sessionIdentifier = sessionIdentifier,
+            driverModeStartTime = driverModeStartTime,
+            driverModeIdentifier = driverModeIdentifier,
+            driverMode = driverMode,
+            rerouteCount = rerouteCount,
+            locationsBeforeEvent = mockLocationsBefore,
+            locationsAfterEvent = mockLocationsAfter,
+            locationEngineNameExternal = locationEngine,
+            percentTimeInPortrait = percentTimeInPortrait,
+            percentTimeInForeground = percentTimeInForeground,
+            eventVersion = eventVersion,
+            lastLocation = lastLocation,
+            phoneState = phoneState,
+            navigationStepData = NavigationStepData(MetricsRouteProgress(null)),
+            appMetadata = appMetadata,
+        )
+        baseMock()
+        baseInitialization()
 
-        val events = captureAndVerifyMetricsReporter(exactly = 8)
+        postUserFeedbackCached(cachedFeedbackMetadata)
+        val events = captureAndVerifyMetricsReporter(exactly = 3)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
         assertTrue(events[1] is NavigationDepartEvent)
-        assertTrue(events[2] is NavigationRerouteEvent)
-        assertTrue(events[3] is NavigationFeedbackEvent)
-        assertTrue(events[4] is NavigationCancelEvent)
-        assertTrue(events[5] is NavigationFreeDriveEvent)
-        assertTrue(events[6] is NavigationFeedbackEvent)
-        assertEquals(
-            cacheFeedbackType,
-            (events[6] as NavigationFeedbackEvent).feedbackType
-        )
-        assertTrue(events[7] is NavigationFeedbackEvent)
-        assertEquals(
-            "cacheFeedbackDescription",
-            (events[7] as NavigationFeedbackEvent).description
-        )
-        assertEquals(8, events.size)
-        // cached feedback is attached to original session
-        checkEventsDividedBySessionsInSameNavSession(
-            events.subList(0, 5).plus(events.subList(6, 8)), events.subList(5, 6)
-        )
+        assertTrue(events[2] is NavigationFeedbackEvent)
+
+        val feedbackEvent = events[2] as NavigationFeedbackEvent
+        assertEquals(sessionIdentifier, feedbackEvent.navigatorSessionIdentifier)
+        assertEquals(driverModeIdentifier, feedbackEvent.sessionIdentifier)
+        assertEquals(driverMode, feedbackEvent.driverMode)
+        assertEquals(driverModeStartTime, feedbackEvent.startTimestamp)
+        assertEquals(rerouteCount, feedbackEvent.rerouteCount)
+        assertEquals(mockLocationsBefore, feedbackEvent.locationsBefore)
+        assertEquals(mockLocationsAfter, feedbackEvent.locationsAfter)
+        assertEquals(locationEngine, feedbackEvent.locationEngine)
+        assertEquals(percentTimeInPortrait, feedbackEvent.percentTimeInPortrait)
+        assertEquals(percentTimeInForeground, feedbackEvent.percentTimeInForeground)
+        assertEquals(eventVersion, feedbackEvent.eventVersion)
+        assertEquals(lastLocation.latitude(), feedbackEvent.lat)
+        assertEquals(lastLocation.longitude(), feedbackEvent.lng)
+        assertEquals(appMetadata, feedbackEvent.appMetadata)
     }
 
     @Test
@@ -1328,10 +1267,10 @@ class MapboxNavigationTelemetryTest {
     }
 
     private fun mockFlushBuffers() {
-        val onBufferFull = mutableListOf<(List<Location>, List<Location>) -> Unit>()
+        val onBufferFull = mutableListOf<LocationsCollector.LocationsCollectorListener>()
         every { locationsCollector.collectLocations(capture(onBufferFull)) } just Runs
         every { locationsCollector.flushBuffers() } answers {
-            onBufferFull.forEach { it.invoke(listOf(), listOf()) }
+            onBufferFull.forEach { it.onBufferFull(listOf(), listOf()) }
             onBufferFull.clear()
         }
     }
@@ -1389,28 +1328,23 @@ class MapboxNavigationTelemetryTest {
         MapboxNavigationTelemetry.postUserFeedback("", "", "", null, emptyArray())
     }
 
-    private fun cacheUserFeedback(
-        feedbackType: String = "",
-        description: String = "",
-        feedbackSource: String = "",
-        screenshot: String? = null,
-        feedbackSubType: Array<String> = emptyArray(),
-    ) {
-        MapboxNavigationTelemetry.cacheUserFeedback(
-            feedbackType,
-            description,
-            feedbackSource,
-            screenshot,
-            feedbackSubType,
+    private fun postUserFeedbackCached(
+        feedbackMetadata: FeedbackMetadata = FeedbackMetadata(
+            sessionIdentifier = "SESSION_ID",
+            eventVersion = 0,
+            phoneState = PhoneState(
+                1, 2, 3, true, "connectivity", "audioType", "appState", "01-01-2000", "5", "6"
+            ),
+            navigationStepData = NavigationStepData(MetricsRouteProgress(null)),
         )
-    }
-
-    private fun postCachedUserFeedback(
-        cachedFeedbackEventList: List<CachedNavigationFeedbackEvent> =
-            MapboxNavigationTelemetry.getCachedUserFeedback()
     ) {
-        MapboxNavigationTelemetry.postCachedUserFeedback(
-            cachedFeedbackEventList
+        MapboxNavigationTelemetry.postUserFeedback(
+            "",
+            "",
+            "",
+            null,
+            emptyArray(),
+            feedbackMetadata,
         )
     }
 

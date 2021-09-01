@@ -15,15 +15,31 @@ import com.mapbox.navigation.core.telemetry.obtainVolumeLevel
 /**
  * Class that will hold the current states of the device phone.
  */
-internal data class PhoneState(val context: Context) {
-    val volumeLevel: Int = obtainVolumeLevel(context)
-    val batteryLevel: Int = obtainBatteryLevel(context)
-    val screenBrightness: Int = obtainScreenBrightness(context)
-    val isBatteryPluggedIn: Boolean = isPluggedIn(context)
-    val connectivity: String = obtainCellularNetworkType(context)
-    val audioType: String = obtainAudioType(context)
-    val applicationState: String = obtainApplicationState(context)
-    val created: String = obtainCurrentDate()
-    val feedbackId: String = obtainUniversalUniqueIdentifier()
-    val userId: String = retrieveVendorId()
+internal data class PhoneState(
+    val volumeLevel: Int,
+    val batteryLevel: Int,
+    val screenBrightness: Int,
+    val isBatteryPluggedIn: Boolean,
+    val connectivity: String,
+    val audioType: String,
+    val applicationState: String,
+    val created: String,
+    val feedbackId: String,
+    val userId: String,
+) {
+    internal companion object {
+        internal fun newInstance(context: Context): PhoneState =
+            PhoneState(
+                volumeLevel = obtainVolumeLevel(context),
+                batteryLevel = obtainBatteryLevel(context),
+                screenBrightness = obtainScreenBrightness(context),
+                isBatteryPluggedIn = isPluggedIn(context),
+                connectivity = obtainCellularNetworkType(context),
+                audioType = obtainAudioType(context),
+                applicationState = obtainApplicationState(context),
+                created = obtainCurrentDate(),
+                feedbackId = obtainUniversalUniqueIdentifier(),
+                userId = retrieveVendorId(),
+            )
+    }
 }

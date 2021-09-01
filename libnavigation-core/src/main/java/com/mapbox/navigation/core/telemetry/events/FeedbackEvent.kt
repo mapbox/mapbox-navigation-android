@@ -333,7 +333,7 @@ object FeedbackEvent {
     /**
      * Driver mode
      */
-    @Retention(AnnotationRetention.BINARY)
+    @Retention(AnnotationRetention.SOURCE)
     @StringDef(
         DRIVER_MODE_TRIP,
         DRIVER_MODE_FREE_DRIVE,
