@@ -11,6 +11,7 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventLocation
@@ -58,8 +59,9 @@ class ReplayRouteMapper @JvmOverloads constructor(
                 Message("Make sure that the route's geometry is encoded with polyline6'")
             )
         }
-        val geometry = directionsRoute.geometry() ?: return emptyList()
-        return mapGeometry(geometry)
+        directionsRoute.geometry() ?: return emptyList()
+        return replayRouteDriver.drivePointList(options, directionsRoute.completeGeometryToPoints())
+            .map { mapToUpdateLocation(it) }
     }
 
     /**
@@ -89,7 +91,7 @@ class ReplayRouteMapper @JvmOverloads constructor(
      * @return [ReplayEventBase] [List]
      */
     fun mapGeometry(geometry: String): List<ReplayEventBase> {
-        return replayRouteDriver.driveGeometry(options, geometry)
+        return replayRouteDriver.drivePointList(options, PolylineUtils.decode(geometry, 6))
             .map { mapToUpdateLocation(it) }
     }
 

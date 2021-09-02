@@ -3,7 +3,6 @@ package com.mapbox.navigation.core.replay.route
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.RouteLeg
-import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
@@ -16,18 +15,6 @@ internal class ReplayRouteDriver {
     private val replayRouteTraffic = ReplayRouteTraffic()
 
     private var timeMillis = 0L
-
-    /**
-     * Given a geometry polyline, simulate the locations needed to drive the geometry.
-     *
-     * @param options allow you to control the driver and car behavior
-     * @param geometry polyline string at [DirectionsCriteria.GEOMETRY_POLYLINE6]
-     * @return [ReplayRouteLocation] [List]
-     */
-    fun driveGeometry(options: ReplayRouteOptions, geometry: String): List<ReplayRouteLocation> {
-        val coordinates = LineString.fromPolyline(geometry, 6).coordinates()
-        return drivePointList(options, coordinates)
-    }
 
     /**
      * Given a list of location points, simulate the locations needed to drive the points.

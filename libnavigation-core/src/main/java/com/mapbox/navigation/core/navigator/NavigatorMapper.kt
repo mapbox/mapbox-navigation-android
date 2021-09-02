@@ -12,7 +12,6 @@ import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Point
-import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
 import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory.buildRouteLegProgressObject
@@ -22,6 +21,7 @@ import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
+import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
 import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -139,12 +139,7 @@ private fun NavigationStatus.getRouteProgress(
             ifNonNull(currentLeg?.steps()) { steps ->
                 if (stepIndex < steps.size) {
                     currentLegStep = steps[stepIndex].also { legStep ->
-                        stepPoints = ifNonNull(legStep.geometry()) { geometry ->
-                            PolylineUtils.decode(
-                                geometry, /* todo add core dependency PRECISION_6*/
-                                6
-                            )
-                        }
+                        stepPoints = legStep.geometry()?.let { route.stepGeometryToPoints(legStep) }
                         routeProgressCurrentState = routeState.convertState()
                     }
 
@@ -158,12 +153,8 @@ private fun NavigationStatus.getRouteProgress(
                     val upcomingStep = steps[upcomingStepIndex]
                     routeLegProgressUpcomingStep = upcomingStep
 
-                    val stepGeometry = upcomingStep.geometry()
-                    stepGeometry?.let {
-                        routeProgressUpcomingStepPoints = PolylineUtils.decode(
-                            stepGeometry, /* todo add core dependency PRECISION_6*/
-                            6
-                        )
+                    upcomingStep.geometry()?.let {
+                        routeProgressUpcomingStepPoints = route.stepGeometryToPoints(upcomingStep)
                     }
                 }
 

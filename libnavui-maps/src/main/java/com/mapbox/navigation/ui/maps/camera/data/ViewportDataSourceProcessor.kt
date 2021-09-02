@@ -1,19 +1,17 @@
 package com.mapbox.navigation.ui.maps.camera.data
 
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
-import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
-import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
+import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
@@ -31,13 +29,7 @@ internal object ViewportDataSourceProcessor {
      * Returns complete route points in nested arrays of points for all steps in all legs arranged as \[legs]\[steps]\[points].
      */
     fun processRoutePoints(route: DirectionsRoute): List<List<List<Point>>> {
-        return route.legs()?.map { routeLeg ->
-            routeLeg.steps()?.map { legStep ->
-                legStep.geometry()?.let { geometry ->
-                    PolylineUtils.decode(geometry, route.precision()).toList()
-                } ?: emptyList()
-            } ?: emptyList()
-        } ?: emptyList()
+        return route.stepsGeometryToPoints()
     }
 
     /**
@@ -419,13 +411,6 @@ internal object ViewportDataSourceProcessor {
         return ((((angle - min) % d) + d) % d) + min
     }
 }
-
-private fun DirectionsRoute.precision() =
-    if (this.routeOptions()?.geometries() == DirectionsCriteria.GEOMETRY_POLYLINE) {
-        Constants.PRECISION_5
-    } else {
-        Constants.PRECISION_6
-    }
 
 private fun Double.metersToKilometers() = this / 1000.0
 

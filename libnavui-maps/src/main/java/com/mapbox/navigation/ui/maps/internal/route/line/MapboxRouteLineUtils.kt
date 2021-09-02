@@ -10,12 +10,9 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.StepIntersection
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
-import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
-import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
-import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.dsl.generated.color
@@ -25,6 +22,8 @@ import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
+import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToLineString
+import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
@@ -755,7 +754,7 @@ object MapboxRouteLineUtils {
         route: DirectionsRoute,
         identifier: String?
     ) -> RouteFeatureData = { route: DirectionsRoute, identifier: String? ->
-        val routeGeometry = decodeRoute(route)
+        val routeGeometry = route.completeGeometryToLineString()
         val randomId = UUID.randomUUID().toString()
         val routeFeature = when (identifier) {
             null -> Feature.fromGeometry(routeGeometry, null, randomId)
@@ -1061,18 +1060,10 @@ object MapboxRouteLineUtils {
     internal fun parseRoutePoints(
         route: DirectionsRoute,
     ): RoutePoints? {
-        val precision =
-            if (route.routeOptions()?.geometries() == DirectionsCriteria.GEOMETRY_POLYLINE) {
-                Constants.PRECISION_5
-            } else {
-                Constants.PRECISION_6
-            }
-
         val nestedList = route.legs()?.map { routeLeg ->
             routeLeg.steps()?.map { legStep ->
-                legStep.geometry()?.let { geometry ->
-                    PolylineUtils.decode(geometry, precision).toList()
-                } ?: return null
+                legStep.geometry() ?: return null
+                route.stepGeometryToPoints(legStep)
             } ?: return null
         } ?: return null
 
@@ -1208,18 +1199,4 @@ object MapboxRouteLineUtils {
             else -> y2
         }
     }
-
-    private val decodeRoute: (DirectionsRoute) -> LineString = { route: DirectionsRoute ->
-        val precision =
-            if (route.routeOptions()?.geometries() == DirectionsCriteria.GEOMETRY_POLYLINE) {
-                Constants.PRECISION_5
-            } else {
-                Constants.PRECISION_6
-            }
-
-        LineString.fromPolyline(
-            route.geometry() ?: "",
-            precision
-        )
-    }.cacheResult(3)
 }
