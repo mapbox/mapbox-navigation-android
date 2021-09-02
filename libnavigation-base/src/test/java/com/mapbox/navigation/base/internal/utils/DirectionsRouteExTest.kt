@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.internal.utils
+package com.mapbox.navigation.base.internal.utils
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep

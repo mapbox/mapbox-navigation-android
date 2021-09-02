@@ -1,10 +1,10 @@
 @file:JvmName("DirectionsRouteEx")
 
-package com.mapbox.navigation.core.internal.utils
+package com.mapbox.navigation.base.internal.utils
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
-import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.base.utils.ifNonNull
 
 fun DirectionsRoute.isSameUuid(compare: DirectionsRoute?): Boolean =
     this.requestUuid() == compare?.requestUuid()

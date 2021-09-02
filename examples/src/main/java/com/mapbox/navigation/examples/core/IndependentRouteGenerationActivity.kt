@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Feature
-import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapboxMap
@@ -34,6 +33,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToLineString
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -224,7 +224,7 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
                     lineManager.create(
                         PolylineAnnotationOptions.fromFeature(
                             Feature.fromGeometry(
-                                LineString.fromPolyline(routes[0].geometry()!!, 6)
+                                routes[0].completeGeometryToLineString(),
                             )
                         )!!
                     )

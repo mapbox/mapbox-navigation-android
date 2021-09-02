@@ -7,18 +7,16 @@ import android.provider.Settings
 import android.text.TextUtils
 import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.core.telemetry.audio.AudioTypeChain
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import kotlin.math.floor
 
-// TODO move to mapbox-java
-private const val PRECISION_6 = 6
-// TODO move to mapbox-java
-private const val PRECISION_5 = 5
 private const val PERCENT_NORMALIZER = 100.0
 private const val SCREEN_BRIGHTNESS_MAX = 255.0
 private const val BRIGHTNESS_EXCEPTION_VALUE = -1
@@ -27,12 +25,12 @@ private const val BRIGHTNESS_EXCEPTION_VALUE = -1
  * Encode route geometry to *precision 5*
  */
 internal fun obtainGeometry(directionsRoute: DirectionsRoute?): String =
-    ifNonNull(directionsRoute, directionsRoute?.geometry()) { _, geometry ->
+    ifNonNull(directionsRoute, directionsRoute?.geometry()) { route, geometry ->
         if (TextUtils.isEmpty(geometry)) {
             return@ifNonNull ""
         }
-        val positions = PolylineUtils.decode(geometry, PRECISION_6)
-        return@ifNonNull PolylineUtils.encode(positions, PRECISION_5)
+        val positions = route.completeGeometryToPoints()
+        return@ifNonNull PolylineUtils.encode(positions, Constants.PRECISION_5)
     } ?: ""
 
 /**

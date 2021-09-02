@@ -10,10 +10,10 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
+import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
-import com.mapbox.navigation.core.internal.utils.isSameRoute
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.BEARING_NORTH
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.EMPTY_EDGE_INSETS
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.NULL_ISLAND_POINT
@@ -1071,10 +1071,10 @@ class MapboxNavigationViewportDataSourceTest {
         viewportDataSource.onLocationChanged(location)
         viewportDataSource.onRouteChanged(route)
         viewportDataSource.onRouteProgressChanged(routeProgress)
-        mockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
+        mockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
         every { route.isSameRoute(any()) } returns false
         viewportDataSource.onRouteChanged(route)
-        unmockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
+        unmockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
         viewportDataSource.evaluate()
         val data = viewportDataSource.getViewportData()
 
@@ -1147,10 +1147,10 @@ class MapboxNavigationViewportDataSourceTest {
         viewportDataSource.onRouteChanged(route)
         viewportDataSource.onRouteProgressChanged(routeProgress)
 
-        mockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
+        mockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
         every { route.isSameRoute(any()) } returns false
         viewportDataSource.onRouteProgressChanged(routeProgress)
-        unmockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
+        unmockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
 
         viewportDataSource.evaluate()
         val data = viewportDataSource.getViewportData()

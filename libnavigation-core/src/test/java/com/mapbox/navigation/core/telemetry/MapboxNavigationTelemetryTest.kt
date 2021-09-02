@@ -9,6 +9,7 @@ import android.media.AudioManager
 import android.telephony.TelephonyManager
 import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.MapboxTelemetryConstants
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
@@ -1253,6 +1254,7 @@ class MapboxNavigationTelemetryTest {
         every { originalRoute.routeOptions() } returns originalRouteOptions
         every { originalRoute.routeIndex() } returns ORIGINAL_ROUTE_ROUTE_INDEX
         every { originalRouteOptions.profile() } returns ORIGINAL_ROUTE_OPTIONS_PROFILE
+        every { originalRouteOptions.geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE6
         every { originalRouteLeg.steps() } returns originalRouteSteps
         every { originalRouteStep.maneuver() } returns originalStepManeuver
         every { originalStepManeuver.location() } returns originalStepManeuverLocation
@@ -1272,6 +1274,7 @@ class MapboxNavigationTelemetryTest {
         every { anotherRoute.routeIndex() } returns ANOTHER_ROUTE_ROUTE_INDEX
         every { anotherRoute.routeOptions() } returns anotherRouteOptions
         every { anotherRouteOptions.profile() } returns ANOTHER_ROUTE_OPTIONS_PROFILE
+        every { anotherRouteOptions.geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE6
         every { anotherRoute.requestUuid() } returns ANOTHER_ROUTE_OPTIONS_REQUEST_UUID
         every { anotherRouteLeg.steps() } returns progressRouteSteps
         every { anotherRouteStep.maneuver() } returns anotherStepManeuver

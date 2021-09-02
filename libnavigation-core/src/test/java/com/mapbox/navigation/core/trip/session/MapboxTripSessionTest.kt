@@ -13,11 +13,11 @@ import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
+import com.mapbox.navigation.base.internal.utils.isSameRoute
+import com.mapbox.navigation.base.internal.utils.isSameUuid
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
-import com.mapbox.navigation.core.internal.utils.isSameRoute
-import com.mapbox.navigation.core.internal.utils.isSameUuid
 import com.mapbox.navigation.core.navigator.RouteInitInfo
 import com.mapbox.navigation.core.navigator.getMapMatcherResult
 import com.mapbox.navigation.core.navigator.getRouteInitInfo
@@ -128,7 +128,7 @@ class MapboxTripSessionTest {
         mockkObject(MapboxNativeNavigatorImpl)
         mockkObject(ThreadController)
         mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
-        mockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
+        mockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
         mockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
         every { location.toFixLocation() } returns fixLocation
         every { fixLocation.toLocation() } returns location
@@ -1166,7 +1166,7 @@ class MapboxTripSessionTest {
         unmockkObject(MapboxNativeNavigatorImpl)
         unmockkObject(ThreadController)
         unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
-        unmockkStatic("com.mapbox.navigation.core.internal.utils.DirectionsRouteEx")
+        unmockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
         unmockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
     }
 

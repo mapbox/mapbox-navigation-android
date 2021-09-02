@@ -1228,6 +1228,16 @@ package com.mapbox.navigation.base.trip.notification {
 
 package com.mapbox.navigation.base.utils {
 
+  public final class DecodeUtils {
+    method public static com.mapbox.geojson.LineString completeGeometryToLineString(com.mapbox.api.directions.v5.models.DirectionsRoute);
+    method public static java.util.List<com.mapbox.geojson.Point> completeGeometryToPoints(com.mapbox.api.directions.v5.models.DirectionsRoute);
+    method public static com.mapbox.geojson.LineString stepGeometryToLineString(com.mapbox.api.directions.v5.models.DirectionsRoute, com.mapbox.api.directions.v5.models.LegStep legStep);
+    method public static java.util.List<com.mapbox.geojson.Point> stepGeometryToPoints(com.mapbox.api.directions.v5.models.DirectionsRoute, com.mapbox.api.directions.v5.models.LegStep legStep);
+    method public static java.util.List<java.util.List<com.mapbox.geojson.LineString>> stepsGeometryToLineString(com.mapbox.api.directions.v5.models.DirectionsRoute);
+    method public static java.util.List<java.util.List<java.util.List<com.mapbox.geojson.Point>>> stepsGeometryToPoints(com.mapbox.api.directions.v5.models.DirectionsRoute);
+    field public static final com.mapbox.navigation.base.utils.DecodeUtils INSTANCE;
+  }
+
   public final class NullUtilsKt {
   }
 
