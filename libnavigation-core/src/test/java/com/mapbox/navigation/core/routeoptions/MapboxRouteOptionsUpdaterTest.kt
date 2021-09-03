@@ -83,7 +83,7 @@ class MapboxRouteOptionsUpdaterTest {
                 .annotationsList(
                     listOf(
                         DirectionsCriteria.ANNOTATION_SPEED,
-                        DirectionsCriteria.ANNOTATION_CONGESTION
+                        DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC
                     )
                 )
                 .coordinatesList(emptyList())

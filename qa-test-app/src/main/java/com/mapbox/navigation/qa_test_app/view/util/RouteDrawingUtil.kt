@@ -192,7 +192,7 @@ class RouteDrawingUtil(private val mapView: MapView) {
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
             .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
             .annotations(
-                DirectionsCriteria.ANNOTATION_CONGESTION,
+                DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC,
                 DirectionsCriteria.ANNOTATION_DISTANCE
             )
             .overview("full")
