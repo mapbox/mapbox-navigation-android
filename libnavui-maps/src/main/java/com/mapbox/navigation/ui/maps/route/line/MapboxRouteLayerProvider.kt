@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line
 
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
@@ -279,6 +280,23 @@ internal class MapboxRouteLayerProvider(
             .lineWidth(lineWidthExpression)
             .lineColor(
                 switchCase(*colorExpressions.toTypedArray())
-            )
+            ).apply {
+                // fixme workaround
+                // until https://github.com/mapbox/mapbox-gl-native-internal/pull/2180 is available.
+                // We're initializing some of the layers with a non-default gradient value
+                // which was causing a problem (just using transparent).
+                // All of the listed layers will later have gradient updated in
+                // MapboxRouteLineView#renderRouteDrawData so they won't remain transparent forever.
+                val workaroundLayerIds = listOf(
+                    RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                    RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
+                    RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
+                    RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
+                    RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID
+                )
+                if (workaroundLayerIds.contains(layerId)) {
+                    lineGradient(Expression.color(Color.TRANSPARENT))
+                }
+            }
     }
 }
