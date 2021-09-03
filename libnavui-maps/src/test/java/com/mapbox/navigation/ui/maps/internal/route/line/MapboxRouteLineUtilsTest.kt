@@ -1385,7 +1385,9 @@ class MapboxRouteLineUtilsTest {
     fun calculateRouteLineSegments_whenNoTrafficExpressionData() {
         val colorResources = RouteLineColorResources.Builder().build()
         val routeOptions = mockk<RouteOptions>(relaxed = true) {
-            every { annotationsList() } returns listOf(DirectionsCriteria.ANNOTATION_CONGESTION)
+            every {
+                annotationsList()
+            } returns listOf(DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC)
         }
         val route = mockk<DirectionsRoute> {
             every { legs() } returns listOf()

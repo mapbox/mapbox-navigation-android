@@ -106,7 +106,7 @@ import kotlin.coroutines.suspendCoroutine
  *      .steps(true)
  *      .annotationsList(
  *          listOf(
- *              DirectionsCriteria.ANNOTATION_CONGESTION,
+ *              DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC,
  *              DirectionsCriteria.ANNOTATION_DURATION,
  *              DirectionsCriteria.ANNOTATION_DISTANCE,
  *          )
@@ -117,10 +117,7 @@ import kotlin.coroutines.suspendCoroutine
  *      .build()
  * ```
  * A good starting point might be RouteOptions.Builder.applyDefaultNavigationOptions() which will
- * include the options above. Additionally, instead of specifying
- * `DirectionCriteria.ANNOTATION_CONGESTION` you can also use
- * `DirectionCriteria.ANNOTATION_CONGESTION_NUMERIC`. Using any one of these will return the other
- * as null. You can also request both.
+ * include the options above.
  *
  *
  * Vanishing Route Line:
