@@ -2,6 +2,33 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-beta.25 - September 03, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Features
+- Added an option to display a gradient between the colors representing traffic congestion on the route line. See `MapboxRouteLineOptions#displaySoftGradientForTraffic`. [#4752](https://github.com/mapbox/mapbox-navigation-android/pull/4752)
+- Added an option to select the initial leg when setting a route with `MapboxNavigation#setRoutes`. [#4739](https://github.com/mapbox/mapbox-navigation-android/pull/4739)
+- Added `MapboxNavigation#requestAlternativeRoutes` that allows requesting alternative routes on-demand. [#4774](https://github.com/mapbox/mapbox-navigation-android/pull/4774)
+- :warning: Added support for `ANNOTATION_CONGESTION_NUMERIC` to style the congestion on a route line. This also renamed some of the `RouteLineColorResources` methods, for example, `routeModerateColor` has been updated to `routeModerateCongestionColor`. [#4778](https://github.com/mapbox/mapbox-navigation-android/pull/4778)
+
+#### Bug fixes and improvements
+- :warning: Replaced `AnimatorListener` argument of `NavigationCamera#request[state]` functions with `TransitionEndListener`, which is now invoked even if the camera is already in or transitioning to the requested state. [#4771](https://github.com/mapbox/mapbox-navigation-android/pull/4771)
+- Refactored the internal logic in `MapboxBuildingsApi` to read the location point from route's `waypoint_target`s. If not available it falls back to the points in the coordinates list. [#4767](https://github.com/mapbox/mapbox-navigation-android/pull/4767)
+- :warning: `RouteOptions.Builder.applyDefaultNavigationOptions` extension now uses `ANNOTATION_CONGESTION_NUMERIC` by default, instead of `ANNOTATION_CONGESTION`.
+- Fixed an issue where all E-Horizon tunnel names had prepended "1" string. [#4785](https://github.com/mapbox/mapbox-navigation-android/pull/4785)
+- Fixed an issue where traffic line, or the whole route line, could sometimes disappear and required a significant camera zoom level change to show up again. [#4789](https://github.com/mapbox/mapbox-navigation-android/pull/4789)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.0.0-rc.7` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.7))
+- Mapbox Navigation Native `v65.0.1`
+- Mapbox Core Common `v17.1.0`
+- Mapbox Java `v6.0.0-alpha.5` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0-alpha.5))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.0.0-beta.24 - August 27, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
