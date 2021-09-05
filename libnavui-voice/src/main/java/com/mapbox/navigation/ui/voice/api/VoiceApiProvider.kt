@@ -25,7 +25,7 @@ internal object VoiceApiProvider {
             File(
                 context.applicationContext.cacheDir,
                 MAPBOX_INSTRUCTIONS_CACHE
-            ).also { it.mkdirs() }
+            )
         )
     )
 }
