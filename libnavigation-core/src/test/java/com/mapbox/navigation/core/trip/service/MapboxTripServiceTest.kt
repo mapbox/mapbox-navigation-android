@@ -10,14 +10,9 @@ import com.mapbox.navigation.base.trip.notification.TripNotification
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 
@@ -146,33 +141,54 @@ class MapboxTripServiceTest {
     }
 
     @Test
-    fun notificationDataPostToChannelOnServiceStarted() {
-        runBlocking {
-            service.startService()
+    fun notificationDataObserverInvokedIfRegisteredBeforeServiceStart() {
+        val notificationDataObserver = mockk<NotificationDataObserver>(relaxUnitFun = true)
+        MapboxTripService.registerOneTimeNotificationDataObserver(notificationDataObserver)
+        service.startService()
 
-            val notificationData = MapboxTripService.getNotificationDataChannel().receive()
-
-            assertEquals(NOTIFICATION_ID, notificationData.notificationId)
-            assertEquals(notification, notificationData.notification)
+        verify(exactly = 1) {
+            notificationDataObserver.onNotificationUpdated(
+                MapboxNotificationData(NOTIFICATION_ID, notification),
+            )
         }
     }
 
     @Test
-    fun channelClosedOnServiceStopped() {
-        runBlocking {
-            service.startService()
-            service.stopService()
+    fun notificationDataObserverInvokedWithTheLatestDataIfRegisteredAfterServiceStart() {
+        service.startService()
 
-            // channel in MapboxTripService is private and static. Can't be mocked with Mockk.
-            // To check that the channel is closed after stopService we try to receive a new value
-            // and catch an exception.
-            try {
-                MapboxTripService.getNotificationDataChannel().receive()
-                fail()
-            } catch (e: Exception) {
-                assertTrue(e is CancellationException)
-            }
+        val newNotification = mockk<Notification>()
+        every { tripNotification.getNotification() } answers { newNotification }
+
+        val notificationDataObserver = mockk<NotificationDataObserver>(relaxUnitFun = true)
+        MapboxTripService.registerOneTimeNotificationDataObserver(notificationDataObserver)
+
+        verify(exactly = 1) {
+            notificationDataObserver.onNotificationUpdated(
+                MapboxNotificationData(NOTIFICATION_ID, newNotification),
+            )
         }
+    }
+
+    @Test
+    fun notificationDataObserverNotInvokedIfRegisteredAfterServiceStop() {
+        service.startService()
+        service.stopService()
+
+        val notificationDataObserver = mockk<NotificationDataObserver>(relaxUnitFun = true)
+        MapboxTripService.registerOneTimeNotificationDataObserver(notificationDataObserver)
+
+        verify(exactly = 0) { notificationDataObserver.onNotificationUpdated(any()) }
+    }
+
+    @Test
+    fun notificationDataObserverNotInvokedIfUnregisteredBeforeServiceStart() {
+        val notificationDataObserver = mockk<NotificationDataObserver>(relaxUnitFun = true)
+        MapboxTripService.registerOneTimeNotificationDataObserver(notificationDataObserver)
+        MapboxTripService.unregisterOneTimeNotificationDataObserver(notificationDataObserver)
+        service.startService()
+
+        verify(exactly = 0) { notificationDataObserver.onNotificationUpdated(any()) }
     }
 
     companion object {

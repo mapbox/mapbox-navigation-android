@@ -6,16 +6,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
-import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigation.utils.internal.monitorChannelWithException
-import kotlinx.coroutines.cancelChildren
 
 /**
  * Service is updating information about current trip
  */
 internal class NavigationNotificationService : Service() {
-    private val ioJobController by lazy {
-        ThreadController.getIOScopeAndRootJob()
+
+    private val notificationDataObserver = NotificationDataObserver { notificationResponse ->
+        notificationResponse.notification.flags = Notification.FLAG_FOREGROUND_SERVICE
+        startForeground(notificationResponse.notificationId, notificationResponse.notification)
     }
 
     /**
@@ -35,7 +34,7 @@ internal class NavigationNotificationService : Service() {
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         MapboxNavigationTelemetry.setApplicationInstance(application)
-        startForegroundNotification()
+        MapboxTripService.registerOneTimeNotificationDataObserver(notificationDataObserver)
         return START_STICKY
     }
 
@@ -45,19 +44,6 @@ internal class NavigationNotificationService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         stopForeground(true)
-        ioJobController.job.cancelChildren()
-    }
-
-    private fun startForegroundNotification() {
-        ioJobController.scope.monitorChannelWithException(
-            MapboxTripService.getNotificationDataChannel(),
-            { notificationResponse ->
-                notificationResponse.notification.flags = Notification.FLAG_FOREGROUND_SERVICE
-                startForeground(
-                    notificationResponse.notificationId,
-                    notificationResponse.notification
-                )
-            }
-        )
+        MapboxTripService.unregisterOneTimeNotificationDataObserver(notificationDataObserver)
     }
 }
