@@ -8,9 +8,7 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.trip.model.TripNotificationState
 import com.mapbox.navigation.base.trip.notification.TripNotification
-import com.mapbox.navigation.utils.internal.ifChannelException
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
+import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -30,9 +28,25 @@ internal class MapboxTripService(
 
     companion object {
 
-        private var notificationDataChannel = Channel<MapboxNotificationData>(1)
-        internal fun getNotificationDataChannel(): ReceiveChannel<MapboxNotificationData> =
-            notificationDataChannel
+        private var currentTripNotification: TripNotification? = null
+
+        private val notificationDataObservers = CopyOnWriteArraySet<NotificationDataObserver>()
+
+        internal fun registerOneTimeNotificationDataObserver(observer: NotificationDataObserver) {
+            currentTripNotification?.let { tripNotification ->
+                val notificationData = MapboxNotificationData(
+                    tripNotification.getNotificationId(),
+                    tripNotification.getNotification(),
+                )
+                observer.onNotificationUpdated(notificationData)
+                return
+            }
+            notificationDataObservers.add(observer)
+        }
+
+        internal fun unregisterOneTimeNotificationDataObserver(observer: NotificationDataObserver) {
+            notificationDataObservers.remove(observer)
+        }
     }
 
     private constructor(
@@ -79,13 +93,13 @@ internal class MapboxTripService(
 
     private val serviceStarted = AtomicBoolean(false)
 
-    private fun postDataToChannel() {
-        notificationDataChannel.offer(
-            MapboxNotificationData(
-                tripNotification.getNotificationId(),
-                tripNotification.getNotification()
-            )
+    private fun updateNotificationData() {
+        val notificationData = MapboxNotificationData(
+            tripNotification.getNotificationId(),
+            tripNotification.getNotification(),
         )
+        notificationDataObservers.forEach { it.onNotificationUpdated(notificationData) }
+        notificationDataObservers.clear()
     }
 
     /**
@@ -96,14 +110,8 @@ internal class MapboxTripService(
             true -> {
                 tripNotification.onTripSessionStarted()
                 initializeLambda()
-                try {
-                    postDataToChannel()
-                } catch (e: Exception) {
-                    e.ifChannelException {
-                        notificationDataChannel = Channel(1)
-                        postDataToChannel()
-                    }
-                }
+                currentTripNotification = tripNotification
+                updateNotificationData()
             }
             false -> {
                 logger.i(msg = Message("service already started"))
@@ -117,7 +125,7 @@ internal class MapboxTripService(
     override fun stopService() {
         when (serviceStarted.compareAndSet(true, false)) {
             true -> {
-                notificationDataChannel.cancel()
+                currentTripNotification = null
                 terminateLambda()
                 tripNotification.onTripSessionStopped()
             }
