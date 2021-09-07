@@ -560,7 +560,7 @@ class MapboxTripSessionTest {
                 )
             }
         )
-        every { nativeBanner.mapToDirectionsApi(step) } returns banner
+        every { nativeBanner.mapToDirectionsApi() } returns banner
         every { MapboxNativeNavigatorImpl.getBannerInstruction(1) } returns nativeBanner
         val bannerInstructionsObserver: BannerInstructionsObserver = mockk(relaxUnitFun = true)
 

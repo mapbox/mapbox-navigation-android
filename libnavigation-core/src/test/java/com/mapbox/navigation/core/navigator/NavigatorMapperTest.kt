@@ -47,9 +47,7 @@ class NavigatorMapperTest {
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     @Test
     fun `route progress result sanity`() {
-        val bannerInstructions = nativeBannerInstructions.mapToDirectionsApi(
-            directionsRoute.legs()!!.first().steps()!![1]
-        )
+        val bannerInstructions = nativeBannerInstructions.mapToDirectionsApi()
         val expected = RouteProgressFactory.buildRouteProgressObject(
             route = directionsRoute,
             bannerInstructions = bannerInstructions,
@@ -423,6 +421,7 @@ class NavigatorMapperTest {
         }
         every { secondary } returns null
         every { sub } returns null
+        every { view } returns null
         every { index } returns 0
     }
     private val nativeVoiceInstructions = mockk<VoiceInstruction> {
