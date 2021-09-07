@@ -8,30 +8,31 @@ import androidx.annotation.StringDef
  * This event occurs if the user taps a feedback button in the navigation app indicating there was a problem.
  */
 object FeedbackEvent {
-    /**
-     * Feedback type *general*: when no one else is not fit or actually *general* feedback
-     */
-    const val GENERAL_ISSUE = "general"
 
     /**
-     * Feedback type *accident*: crash, uneven surface, etc
+     * Feedback type *incorrect visual*
      */
-    const val ACCIDENT = "accident"
+    const val INCORRECT_VISUAL = "incorrect_visual"
 
     /**
-     * Feedback type *hazard*: such as debris, stopped vehicles, etc
+     * Feedback type *road issue*
      */
-    const val HAZARD = "hazard"
+    const val ROAD_ISSUE = "road_issue"
+
+    /**
+     * Feedback type *traffic issue*: wrong traffic
+     */
+    const val TRAFFIC_ISSUE = "traffic_issue"
+
+    /**
+     * Feedback type *other issue*: for feedback not categorized anywhere else
+     */
+    const val OTHER_ISSUE = "other_issue"
 
     /**
      * Feedback type *road closed*: closed road or one that does not allow vehicles
      */
     const val ROAD_CLOSED = "road_closed"
-
-    /**
-     * Feedback type *not allowed*: a turn/maneuver that isn't allowed
-     */
-    const val NOT_ALLOWED = "not_allowed"
 
     /**
      * Feedback type *routing error*: poor instruction or route choice
@@ -40,24 +41,9 @@ object FeedbackEvent {
     const val ROUTING_ERROR = "routing_error"
 
     /**
-     * Feedback type *missing road*: road doesn't exist
+     * Feedback type *route not allowed*
      */
-    const val MISSING_ROAD = "missing_road"
-
-    /**
-     * Feedback type *missing exit*: dead end
-     */
-    const val MISSING_EXIT = "missing_exit"
-
-    /**
-     * Feedback type *confusing instruction*: wrong voice/text instruction
-     */
-    const val CONFUSING_INSTRUCTION = "confusing_instruction"
-
-    /**
-     * Feedback type *inaccurate gps*: wrong location of navigation puck on the map
-     */
-    const val INACCURATE_GPS = "inaccurate_gps"
+    const val ROUTE_NOT_ALLOWED = "route_not_allowed"
 
     /**
      * Feedback type *looks incorrect*: wrong visual guidance
@@ -132,11 +118,6 @@ object FeedbackEvent {
     const val LANE_GUIDANCE_INCORRECT = "lane_guidance_incorrect"
 
     /**
-     * Feedback description for *looks incorrect*: road known by different name
-     */
-    const val ROAD_KNOW_BY_DIFFERENT_NAME = "road_know_by_different_name"
-
-    /**
      * Feedback description for *looks incorrect*: incorrect speed limit
      */
     const val INCORRECT_SPEED_LIMIT = "incorrect_speed_limit"
@@ -164,7 +145,7 @@ object FeedbackEvent {
     /**
      * Feedback description for *routing error*: route not drive-able
      */
-    const val ROUTE_NOT_DRIVE_ABLE = "route_not_drive_able"
+    const val ROUTE_NOT_DRIVE_ABLE = "route_not_driveable"
 
     /**
      * Feedback description for *routing error*: route not preferred
@@ -204,21 +185,35 @@ object FeedbackEvent {
     const val CARS_NOT_ALLOWED_ON_STREET = "cars_not_allowed_on_street"
 
     /**
-     * Feedback description for *routing error*: turn at intersection was unprotected
-     */
-    const val TURN_AT_INTERSECTION_WAS_UNPROTECTED =
-        "turn_at_intersection_was_unprotected"
-
-    /**
      * Feedback description for *routing error*: street permanently blocked off
      */
     const val STREET_PERMANENTLY_BLOCKED_OFF =
         "street_permanently_blocked_off"
 
     /**
-     * Feedback description for *routing error*: road is missing from map
+     * Feedback description for *road issue*: street temporarily blocked off
      */
-    const val ROAD_IS_MISSING_FROM_MAP = "road_is_missing_from_map"
+    const val STREET_TEMPORARY_BLOCKED_OFF = "street_temporary_blocked_off"
+
+    /**
+     * Feedback description for *road issue*: missing road
+     */
+    const val MISSING_ROAD = "missing_road"
+
+    /**
+     * Feedback description for *wrong traffic*: congestion
+     */
+    const val TRAFFIC_CONGESTION = "traffic_congestion"
+
+    /**
+     * Feedback description for *wrong traffic*: moderate
+     */
+    const val TRAFFIC_MODERATE = "traffic_moderate"
+
+    /**
+     * Feedback description for *wrong traffic*: no traffic
+     */
+    const val TRAFFIC_NO = "traffic_no"
 
     /**
      * Feedback description for *arrival feedback not good*: wrong location
@@ -255,16 +250,13 @@ object FeedbackEvent {
      */
     @Retention(AnnotationRetention.BINARY)
     @StringDef(
-        GENERAL_ISSUE,
-        ACCIDENT,
-        HAZARD,
+        INCORRECT_VISUAL,
+        ROAD_ISSUE,
+        TRAFFIC_ISSUE,
+        OTHER_ISSUE,
         ROAD_CLOSED,
-        NOT_ALLOWED,
         ROUTING_ERROR,
-        MISSING_ROAD,
-        MISSING_EXIT,
-        CONFUSING_INSTRUCTION,
-        INACCURATE_GPS,
+        ROUTE_NOT_ALLOWED,
         INCORRECT_VISUAL_GUIDANCE,
         INCORRECT_AUDIO_GUIDANCE,
         POSITIONING_ISSUE,
@@ -295,7 +287,6 @@ object FeedbackEvent {
         MANEUVER_INCORRECT,
         EXIT_INFO_INCORRECT,
         LANE_GUIDANCE_INCORRECT,
-        ROAD_KNOW_BY_DIFFERENT_NAME,
         INCORRECT_SPEED_LIMIT,
         GUIDANCE_TOO_EARLY,
         GUIDANCE_TOO_LATE,
@@ -309,9 +300,12 @@ object FeedbackEvent {
         ROUTED_DOWN_A_ONE_WAY,
         TURN_WAS_NOT_ALLOWED,
         CARS_NOT_ALLOWED_ON_STREET,
-        TURN_AT_INTERSECTION_WAS_UNPROTECTED,
         STREET_PERMANENTLY_BLOCKED_OFF,
-        ROAD_IS_MISSING_FROM_MAP,
+        STREET_TEMPORARY_BLOCKED_OFF,
+        MISSING_ROAD,
+        TRAFFIC_CONGESTION,
+        TRAFFIC_MODERATE,
+        TRAFFIC_NO,
         ARRIVAL_FEEDBACK_WRONG_LOCATION,
         ARRIVAL_FEEDBACK_WRONG_ENTRANCE,
         ARRIVAL_FEEDBACK_CONFUSING_INSTRUCTIONS,
