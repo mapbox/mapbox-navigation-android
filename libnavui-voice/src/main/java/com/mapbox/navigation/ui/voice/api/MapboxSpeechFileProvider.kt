@@ -13,6 +13,8 @@ internal class MapboxSpeechFileProvider(private val cacheDirectory: File) {
 
     suspend fun generateVoiceFileFrom(data: ResponseBody): File =
         withContext(ThreadController.IODispatcher) {
+            // OS can delete folders and files in the cache even while app is running.
+            cacheDirectory.mkdirs()
             File(cacheDirectory, "${retrieveUniqueId()}$MP3_EXTENSION")
                 .apply { outputStream().use { data.byteStream().copyTo(it) } }
         }
