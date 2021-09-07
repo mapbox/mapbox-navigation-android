@@ -6,6 +6,7 @@ import android.location.Location
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
+import com.mapbox.api.directions.v5.models.BannerView
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
@@ -215,13 +216,13 @@ private fun NavigationStatus.getRouteProgress(
     return null
 }
 
-internal fun BannerInstruction.mapToDirectionsApi(currentStep: LegStep): BannerInstructions {
+internal fun BannerInstruction.mapToDirectionsApi(): BannerInstructions {
     return BannerInstructions.builder()
         .distanceAlongGeometry(this.remainingStepDistance.toDouble())
         .primary(this.primary.mapToDirectionsApi())
         .secondary(this.secondary?.mapToDirectionsApi())
         .sub(this.sub?.mapToDirectionsApi())
-        .view(currentStep.bannerInstructions()?.get(this.index)?.view())
+        .view(this.view?.mapViewToDirectionsApi())
         .build()
 }
 
@@ -236,6 +237,16 @@ private fun BannerSection.mapToDirectionsApi(): BannerText {
         .build()
 }
 
+private fun BannerSection.mapViewToDirectionsApi(): BannerView {
+    val view = BannerView.builder()
+        .components(this.components?.mapToDirectionsApi())
+        .text(this.text)
+        .type(this.type)
+        .modifier(this.modifier)
+        .build()
+    return view
+}
+
 private fun MutableList<BannerComponent>.mapToDirectionsApi(): MutableList<BannerComponents>? {
     val components = mutableListOf<BannerComponents>()
     this.forEach {
@@ -246,8 +257,10 @@ private fun MutableList<BannerComponent>.mapToDirectionsApi(): MutableList<Banne
                 .active(it.active)
                 .directions(it.directions)
                 .imageBaseUrl(it.imageBaseurl)
+                .imageUrl(it.imageURL)
                 .text(it.text)
                 .type(it.type)
+                .subType(it.subType?.name?.lowercase())
                 .build()
         )
     }

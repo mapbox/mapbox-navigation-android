@@ -235,7 +235,6 @@ internal class MapboxTripSession(
                     ifNonNull(route.legs()) { legs ->
                         val currentLeg = legs[tripStatus.navigationStatus.legIndex]
                         ifNonNull(currentLeg?.steps()) { steps ->
-                            val currentStep = steps[tripStatus.navigationStatus.stepIndex]
                             val nativeBannerInstruction: BannerInstruction? =
                                 tripStatus.navigationStatus.bannerInstruction.let {
                                     if (it == null &&
@@ -253,7 +252,7 @@ internal class MapboxTripSession(
                                     }
                                 }
                             val bannerInstructions: BannerInstructions? =
-                                nativeBannerInstruction?.mapToDirectionsApi(currentStep)
+                                nativeBannerInstruction?.mapToDirectionsApi()
                             triggerObserver = bannerInstructionEvent.isOccurring(
                                 bannerInstructions,
                                 nativeBannerInstruction?.index
