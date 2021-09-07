@@ -560,7 +560,6 @@ package com.mapbox.navigation.core.telemetry {
 package com.mapbox.navigation.core.telemetry.events {
 
   public final class FeedbackEvent {
-    field public static final String ACCIDENT = "accident";
     field public static final String ALTERNATIVE_ROUTE_NOT_EXPECTED = "alternative_route_not_expected";
     field public static final String ARRIVAL_FEEDBACK_CONFUSING_INSTRUCTIONS = "arrival_feedback_confusing_instructions";
     field public static final String ARRIVAL_FEEDBACK_GOOD = "arrival_feedback_good";
@@ -569,52 +568,52 @@ package com.mapbox.navigation.core.telemetry.events {
     field public static final String ARRIVAL_FEEDBACK_WRONG_ENTRANCE = "arrival_feedback_wrong_entrance";
     field public static final String ARRIVAL_FEEDBACK_WRONG_LOCATION = "arrival_feedback_wrong_location";
     field public static final String CARS_NOT_ALLOWED_ON_STREET = "cars_not_allowed_on_street";
-    field public static final String CONFUSING_INSTRUCTION = "confusing_instruction";
     field public static final String EXIT_INFO_INCORRECT = "exit_info_incorrect";
-    field public static final String GENERAL_ISSUE = "general";
     field public static final String GUIDANCE_TOO_EARLY = "guidance_too_early";
     field public static final String GUIDANCE_TOO_LATE = "guidance_too_late";
-    field public static final String HAZARD = "hazard";
-    field public static final String INACCURATE_GPS = "inaccurate_gps";
     field public static final String INCORRECT_AUDIO_GUIDANCE = "incorrect_audio_guidance";
     field public static final String INCORRECT_SPEED_LIMIT = "incorrect_speed_limit";
+    field public static final String INCORRECT_VISUAL = "incorrect_visual";
     field public static final String INCORRECT_VISUAL_GUIDANCE = "incorrect_visual_guidance";
     field public static final com.mapbox.navigation.core.telemetry.events.FeedbackEvent INSTANCE;
     field public static final String INSTRUCTION_MISSING = "instruction_missing";
     field public static final String INSTRUCTION_UNNECESSARY = "instruction_unnecessary";
     field public static final String LANE_GUIDANCE_INCORRECT = "lane_guidance_incorrect";
     field public static final String MANEUVER_INCORRECT = "maneuver_incorrect";
-    field public static final String MISSING_EXIT = "missing_exit";
     field public static final String MISSING_ROAD = "missing_road";
-    field public static final String NOT_ALLOWED = "not_allowed";
+    field public static final String OTHER_ISSUE = "other_issue";
     field public static final String POSITIONING_ISSUE = "positioning_issue";
     field public static final String PRONUNCIATION_INCORRECT = "pronunciation_incorrect";
     field public static final String REROUTE = "reroute";
     field public static final String ROAD_CLOSED = "road_closed";
-    field public static final String ROAD_IS_MISSING_FROM_MAP = "road_is_missing_from_map";
-    field public static final String ROAD_KNOW_BY_DIFFERENT_NAME = "road_know_by_different_name";
+    field public static final String ROAD_ISSUE = "road_issue";
     field public static final String ROAD_NAME_REPEATED = "road_name_repeated";
     field public static final String ROUTED_DOWN_A_ONE_WAY = "routed_down_a_one_way";
     field public static final String ROUTE_HAD_ROADS_TOO_NARROW_TO_PASS = "route_had_roads_too_narrow_to_pass";
     field public static final String ROUTE_INCLUDED_MISSING_ROADS = "route_included_missing_roads";
-    field public static final String ROUTE_NOT_DRIVE_ABLE = "route_not_drive_able";
+    field public static final String ROUTE_NOT_ALLOWED = "route_not_allowed";
+    field public static final String ROUTE_NOT_DRIVE_ABLE = "route_not_driveable";
     field public static final String ROUTE_NOT_PREFERRED = "route_not_preferred";
     field public static final String ROUTING_ERROR = "routing_error";
     field public static final String STREET_NAME_INCORRECT = "street_name_incorrect";
     field public static final String STREET_PERMANENTLY_BLOCKED_OFF = "street_permanently_blocked_off";
-    field public static final String TURN_AT_INTERSECTION_WAS_UNPROTECTED = "turn_at_intersection_was_unprotected";
+    field public static final String STREET_TEMPORARY_BLOCKED_OFF = "street_temporary_blocked_off";
+    field public static final String TRAFFIC_CONGESTION = "traffic_congestion";
+    field public static final String TRAFFIC_ISSUE = "traffic_issue";
+    field public static final String TRAFFIC_MODERATE = "traffic_moderate";
+    field public static final String TRAFFIC_NO = "traffic_no";
     field public static final String TURN_ICON_INCORRECT = "turn_icon_incorrect";
     field public static final String TURN_WAS_NOT_ALLOWED = "turn_was_not_allowed";
     field public static final String UI = "user";
   }
 
-  @StringDef({com.mapbox.navigation.core.telemetry.events.FeedbackEvent.TURN_ICON_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.STREET_NAME_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INSTRUCTION_UNNECESSARY, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INSTRUCTION_MISSING, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.MANEUVER_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.EXIT_INFO_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.LANE_GUIDANCE_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROAD_KNOW_BY_DIFFERENT_NAME, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INCORRECT_SPEED_LIMIT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.GUIDANCE_TOO_EARLY, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.GUIDANCE_TOO_LATE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.PRONUNCIATION_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROAD_NAME_REPEATED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTE_NOT_DRIVE_ABLE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTE_NOT_PREFERRED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ALTERNATIVE_ROUTE_NOT_EXPECTED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTE_INCLUDED_MISSING_ROADS, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTE_HAD_ROADS_TOO_NARROW_TO_PASS, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTED_DOWN_A_ONE_WAY, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.TURN_WAS_NOT_ALLOWED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.CARS_NOT_ALLOWED_ON_STREET, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.TURN_AT_INTERSECTION_WAS_UNPROTECTED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.STREET_PERMANENTLY_BLOCKED_OFF, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROAD_IS_MISSING_FROM_MAP, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ARRIVAL_FEEDBACK_WRONG_LOCATION, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ARRIVAL_FEEDBACK_WRONG_ENTRANCE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ARRIVAL_FEEDBACK_CONFUSING_INSTRUCTIONS, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ARRIVAL_FEEDBACK_THIS_PLACE_IS_CLOSED}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface FeedbackEvent.Description {
+  @StringDef({com.mapbox.navigation.core.telemetry.events.FeedbackEvent.TURN_ICON_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.STREET_NAME_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INSTRUCTION_UNNECESSARY, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INSTRUCTION_MISSING, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.MANEUVER_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.EXIT_INFO_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.LANE_GUIDANCE_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INCORRECT_SPEED_LIMIT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.GUIDANCE_TOO_EARLY, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.GUIDANCE_TOO_LATE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.PRONUNCIATION_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROAD_NAME_REPEATED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTE_NOT_DRIVE_ABLE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTE_NOT_PREFERRED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ALTERNATIVE_ROUTE_NOT_EXPECTED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTE_INCLUDED_MISSING_ROADS, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTE_HAD_ROADS_TOO_NARROW_TO_PASS, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTED_DOWN_A_ONE_WAY, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.TURN_WAS_NOT_ALLOWED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.CARS_NOT_ALLOWED_ON_STREET, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.STREET_PERMANENTLY_BLOCKED_OFF, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.STREET_TEMPORARY_BLOCKED_OFF, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.MISSING_ROAD, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.TRAFFIC_CONGESTION, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.TRAFFIC_MODERATE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.TRAFFIC_NO, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ARRIVAL_FEEDBACK_WRONG_LOCATION, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ARRIVAL_FEEDBACK_WRONG_ENTRANCE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ARRIVAL_FEEDBACK_CONFUSING_INSTRUCTIONS, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ARRIVAL_FEEDBACK_THIS_PLACE_IS_CLOSED}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface FeedbackEvent.Description {
   }
 
   @StringDef({com.mapbox.navigation.core.telemetry.events.FeedbackEvent.REROUTE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.UI}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface FeedbackEvent.Source {
   }
 
-  @StringDef({com.mapbox.navigation.core.telemetry.events.FeedbackEvent.GENERAL_ISSUE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ACCIDENT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.HAZARD, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROAD_CLOSED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.NOT_ALLOWED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTING_ERROR, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.MISSING_ROAD, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.MISSING_EXIT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.CONFUSING_INSTRUCTION, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INACCURATE_GPS, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INCORRECT_VISUAL_GUIDANCE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INCORRECT_AUDIO_GUIDANCE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.POSITIONING_ISSUE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ARRIVAL_FEEDBACK_GOOD, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ARRIVAL_FEEDBACK_NOT_GOOD}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface FeedbackEvent.Type {
+  @StringDef({com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INCORRECT_VISUAL, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROAD_ISSUE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.TRAFFIC_ISSUE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.OTHER_ISSUE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROAD_CLOSED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTING_ERROR, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTE_NOT_ALLOWED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INCORRECT_VISUAL_GUIDANCE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INCORRECT_AUDIO_GUIDANCE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.POSITIONING_ISSUE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ARRIVAL_FEEDBACK_GOOD, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ARRIVAL_FEEDBACK_NOT_GOOD}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface FeedbackEvent.Type {
   }
 
 }
