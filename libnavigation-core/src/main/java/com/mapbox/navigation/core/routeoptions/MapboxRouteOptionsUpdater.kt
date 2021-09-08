@@ -127,6 +127,16 @@ class MapboxRouteOptionsUpdater : RouteOptionsUpdater {
                             coordinatesList.size - remainingWaypoints - 1
                         )
                     )
+                    .layersList(
+                        mutableListOf(routeProgress.zLevel).apply {
+                            val legacyLayerList = routeOptions.layersList()
+                            if (legacyLayerList != null) {
+                                addAll(legacyLayerList.takeLast(remainingWaypoints))
+                            } else {
+                                repeat(remainingWaypoints) { add(null) }
+                            }
+                        }
+                    )
             }
 
             optionsBuilder.arriveBy(null)
