@@ -10,53 +10,54 @@ import androidx.annotation.StringDef
 object FeedbackEvent {
 
     /**
-     * Feedback type *incorrect visual*
+     * Feedback type *incorrect visual* during Free Drive
      */
     const val INCORRECT_VISUAL = "incorrect_visual"
 
     /**
-     * Feedback type *road issue*
+     * Feedback type *road issue* during Free Drive
      */
     const val ROAD_ISSUE = "road_issue"
 
     /**
-     * Feedback type *traffic issue*: wrong traffic
+     * Feedback type *wrong traffic* during Free Drive
      */
     const val TRAFFIC_ISSUE = "traffic_issue"
 
     /**
-     * Feedback type *other issue*: for feedback not categorized anywhere else
+     * Feedback type *other* during Free Drive: for feedback not categorized anywhere else
      */
     const val OTHER_ISSUE = "other_issue"
 
     /**
-     * Feedback type *road closed*: closed road or one that does not allow vehicles
+     * Feedback type *road closure* during Active Navigation:
+     * closed road or one that does not allow vehicles
      */
     const val ROAD_CLOSED = "road_closed"
 
     /**
-     * Feedback type *routing error*: poor instruction or route choice
+     * Feedback type *route quality* during Active Navigation: poor instruction or route choice
      * (ambiguous or poorly-timed turn announcement, or a set of confusing turns)
      */
     const val ROUTING_ERROR = "routing_error"
 
     /**
-     * Feedback type *route not allowed*
+     * Feedback type *illegal route* during Active Navigation
      */
     const val ROUTE_NOT_ALLOWED = "route_not_allowed"
 
     /**
-     * Feedback type *looks incorrect*: wrong visual guidance
+     * Feedback type *looks incorrect* during Active Navigation: wrong visual guidance
      */
     const val INCORRECT_VISUAL_GUIDANCE = "incorrect_visual_guidance"
 
     /**
-     * Feedback type *incorrect audio guidance*: wrong audio guidance
+     * Feedback type *confusing audio* during Active Navigation: wrong audio guidance
      */
     const val INCORRECT_AUDIO_GUIDANCE = "incorrect_audio_guidance"
 
     /**
-     * Feedback type *positioning issue*: wrong positioning
+     * Feedback type *positioning issue* during Free Drive or Active Navigation: wrong positioning
      */
     const val POSITIONING_ISSUE = "positioning_issue"
 
@@ -88,7 +89,7 @@ object FeedbackEvent {
     const val TURN_ICON_INCORRECT = "turn_icon_incorrect"
 
     /**
-     * Feedback description for *looks incorrect*: street name incorrect
+     * Feedback description for *incorrect visual* and *looks incorrect*: street name incorrect
      */
     const val STREET_NAME_INCORRECT = "street_name_incorrect"
 
@@ -118,74 +119,74 @@ object FeedbackEvent {
     const val LANE_GUIDANCE_INCORRECT = "lane_guidance_incorrect"
 
     /**
-     * Feedback description for *looks incorrect*: incorrect speed limit
+     * Feedback description for *incorrect visual* and *looks incorrect*: incorrect speed limit
      */
     const val INCORRECT_SPEED_LIMIT = "incorrect_speed_limit"
 
     /**
-     * Feedback description for *incorrect audio guidance*: guidance too early
+     * Feedback description for *confusing audio*: guidance too early
      */
     const val GUIDANCE_TOO_EARLY = "guidance_too_early"
 
     /**
-     * Feedback description for *incorrect audio guidance*: guidance too late
+     * Feedback description for *confusing audio*: guidance too late
      */
     const val GUIDANCE_TOO_LATE = "guidance_too_late"
 
     /**
-     * Feedback description for *incorrect audio guidance*: pronunciation incorrect
+     * Feedback description for *confusing audio*: pronunciation incorrect
      */
     const val PRONUNCIATION_INCORRECT = "pronunciation_incorrect"
 
     /**
-     * Feedback description for *incorrect audio guidance*: road name repeated
+     * Feedback description for *confusing audio*: road name repeated
      */
     const val ROAD_NAME_REPEATED = "road_name_repeated"
 
     /**
-     * Feedback description for *routing error*: route not drive-able
+     * Feedback description for *route quality*: route not driveable
      */
     const val ROUTE_NOT_DRIVE_ABLE = "route_not_driveable"
 
     /**
-     * Feedback description for *routing error*: route not preferred
+     * Feedback description for *route quality*: route not preferred
      */
     const val ROUTE_NOT_PREFERRED = "route_not_preferred"
 
     /**
-     * Feedback description for *routing error*: alternative route not expected
+     * Feedback description for *route quality*: alternative route not expected
      */
     const val ALTERNATIVE_ROUTE_NOT_EXPECTED =
         "alternative_route_not_expected"
 
     /**
-     * Feedback description for *routing error*: route included missing roads
+     * Feedback description for *route quality*: route included missing roads
      */
     const val ROUTE_INCLUDED_MISSING_ROADS = "route_included_missing_roads"
 
     /**
-     * Feedback description for *routing error*: route had roads too narrow to pass
+     * Feedback description for *route quality*: route had roads too narrow to pass
      */
     const val ROUTE_HAD_ROADS_TOO_NARROW_TO_PASS =
         "route_had_roads_too_narrow_to_pass"
 
     /**
-     * Feedback description for *routing error*: routed down a one-way
+     * Feedback description for *illegal route*: routed down a one-way
      */
     const val ROUTED_DOWN_A_ONE_WAY = "routed_down_a_one_way"
 
     /**
-     * Feedback description for *routing error*: turn was not allowed
+     * Feedback description for *illegal route*: turn was not allowed
      */
     const val TURN_WAS_NOT_ALLOWED = "turn_was_not_allowed"
 
     /**
-     * Feedback description for *routing error*: cars not allowed on street
+     * Feedback description for *illegal route*: cars not allowed on street
      */
     const val CARS_NOT_ALLOWED_ON_STREET = "cars_not_allowed_on_street"
 
     /**
-     * Feedback description for *routing error*: street permanently blocked off
+     * Feedback description for *road issue* and *road closure*: street permanently blocked off
      */
     const val STREET_PERMANENTLY_BLOCKED_OFF =
         "street_permanently_blocked_off"
@@ -193,7 +194,7 @@ object FeedbackEvent {
     /**
      * Feedback description for *road issue*: street temporarily blocked off
      */
-    const val STREET_TEMPORARY_BLOCKED_OFF = "street_temporary_blocked_off"
+    const val STREET_TEMPORARILY_BLOCKED_OFF = "street_temporarily_blocked_off"
 
     /**
      * Feedback description for *road issue*: missing road
@@ -301,7 +302,7 @@ object FeedbackEvent {
         TURN_WAS_NOT_ALLOWED,
         CARS_NOT_ALLOWED_ON_STREET,
         STREET_PERMANENTLY_BLOCKED_OFF,
-        STREET_TEMPORARY_BLOCKED_OFF,
+        STREET_TEMPORARILY_BLOCKED_OFF,
         MISSING_ROAD,
         TRAFFIC_CONGESTION,
         TRAFFIC_MODERATE,
