@@ -24,10 +24,10 @@ class MapboxRouteOptionsUpdaterTest {
     private lateinit var location: Location
 
     companion object {
-        private const val accessToken = "pk.1234pplffd"
 
         private const val DEFAULT_REROUTE_BEARING_ANGLE = 11f
         private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
+        private const val DEFAULT_Z_LEVEL = 3
 
         private fun provideRouteOptionsWithCoordinates() =
             provideDefaultRouteOptionsBuilder()
@@ -72,6 +72,12 @@ class MapboxRouteOptionsUpdaterTest {
                 .toBuilder()
                 .arriveBy("2021-01-01'T'01:01")
                 .departAt("2021-02-02'T'02:02")
+                .build()
+
+        private fun provideRouteOptionsWithCoordinatesAndLayers() =
+            provideRouteOptionsWithCoordinates()
+                .toBuilder()
+                .layersList(listOf(0, 1, 2, 4))
                 .build()
 
         private fun provideDefaultRouteOptionsBuilder() =
@@ -164,6 +170,52 @@ class MapboxRouteOptionsUpdaterTest {
         val actualBearings = newRouteOptions.bearingsList()
 
         assertEquals(expectedBearings, actualBearings)
+        MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(routeOptions, newRouteOptions)
+    }
+
+    @Test
+    fun `new options return with current layer and nulls`() {
+        val routeOptions = provideRouteOptionsWithCoordinates()
+        val routeProgress: RouteProgress = mockk(relaxed = true) {
+            every { remainingWaypoints } returns 2
+            every { zLevel } returns DEFAULT_Z_LEVEL
+        }
+
+        val newRouteOptions =
+            routeRefreshAdapter.update(routeOptions, routeProgress, location)
+                .let {
+                    assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
+                    return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
+                }
+                .routeOptions
+
+        val expectedLayers = listOf(DEFAULT_Z_LEVEL, null, null)
+        val actualLayers = newRouteOptions.layersList()
+
+        assertEquals(expectedLayers, actualLayers)
+        MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(routeOptions, newRouteOptions)
+    }
+
+    @Test
+    fun `new options return with current layer and previous layers`() {
+        val routeOptions = provideRouteOptionsWithCoordinatesAndLayers()
+        val routeProgress: RouteProgress = mockk(relaxed = true) {
+            every { remainingWaypoints } returns 2
+            every { zLevel } returns DEFAULT_Z_LEVEL
+        }
+
+        val newRouteOptions =
+            routeRefreshAdapter.update(routeOptions, routeProgress, location)
+                .let {
+                    assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
+                    return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
+                }
+                .routeOptions
+
+        val expectedLayers = listOf(DEFAULT_Z_LEVEL, 2, 4)
+        val actualLayers = newRouteOptions.layersList()
+
+        assertEquals(expectedLayers, actualLayers)
         MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(routeOptions, newRouteOptions)
     }
 

@@ -2,8 +2,6 @@ package com.mapbox.navigation.core.navigator
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.geojson.Geometry
-import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory
@@ -42,7 +40,6 @@ class NavigatorMapperTest {
     private val enhancedLocation: Location = mockk(relaxed = true)
     private val keyPoints: List<Location> = mockk(relaxed = true)
     private val route: DirectionsRoute = mockk(relaxed = true)
-    private val shape: Geometry = Point.fromLngLat(LONGITUDE, LATITUDE)
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     @Test
@@ -87,7 +84,8 @@ class NavigatorMapperTest {
             inTunnel = true,
             stale = true,
             remainingWaypoints = 1,
-            upcomingRoadObjects = listOf()
+            upcomingRoadObjects = listOf(),
+            zLevel = 2,
         )
 
         val result = getRouteProgressFrom(
@@ -451,6 +449,7 @@ class NavigatorMapperTest {
         every { voiceInstruction } returns nativeVoiceInstructions
         every { inTunnel } returns true
         every { upcomingRouteAlerts } returns emptyList()
+        every { layer } returns 2
     }
 
     val routeAlertLocation: RouteAlertLocation = mockk()

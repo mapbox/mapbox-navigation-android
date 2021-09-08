@@ -210,7 +210,8 @@ private fun NavigationStatus.getRouteProgress(
             routeProgressFractionTraveled,
             remainingWaypoints,
             upcomingRouteAlerts.toUpcomingRoadObjects(),
-            stale
+            stale,
+            layer,
         )
     }
     return null
