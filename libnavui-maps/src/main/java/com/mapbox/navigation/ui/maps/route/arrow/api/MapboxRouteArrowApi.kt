@@ -41,7 +41,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * ```java
  * RouteArrowOptions routeArrowOptions = new RouteArrowOptions.Builder(context)
- *  .withAboveLayerId(TOP_LEVEL_ROUTE_LAYER_ID)
+ *  .withAboveLayerId(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
  *  .build()
  * MapboxRouteArrowApi routeArrow = new MapboxRouteArrowApi()
  * MapboxRouteArrowView routeArrowView = new MapboxRouteArrowView(routeArrowOptions)
@@ -51,7 +51,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * ```kotlin
  * val routeArrowOptions = RouteArrowOptions.Builder(context)
- *      .withAboveLayerId(TOP_LEVEL_ROUTE_LAYER_ID)
+ *      .withAboveLayerId(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
  *      .build()
  * val routeArrow = MapboxRouteArrowApi()
  * val routeArrowView = MapboxRouteArrowView(routeArrowOptions)

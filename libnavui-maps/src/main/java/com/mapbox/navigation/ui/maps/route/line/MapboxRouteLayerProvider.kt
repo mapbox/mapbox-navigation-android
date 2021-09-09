@@ -311,7 +311,8 @@ internal class MapboxRouteLayerProvider(
                     RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
                     RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
                     RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
-                    RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID
+                    RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+                    RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID
                 )
                 if (workaroundLayerIds.contains(layerId)) {
                     lineGradient(Expression.color(Color.TRANSPARENT))

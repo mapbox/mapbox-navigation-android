@@ -36,7 +36,7 @@ class MapboxMultipleArrowActivity : AppCompatActivity() {
 
     // One of the more important options is the 'aboveLayerId' option which determines the
     // elevation of layer hosting the arrows. The arrow layer will be placed above the layer ID
-    // specified. By default the RouteLayerConstants.TOP_LEVEL_ROUTE_LAYER_ID is used
+    // specified. By default the RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID is used
     // which is the layer hosting the line representing a route's traffic.
     // This default depends on the MapboxRouteLineView being initialized first. There is no
     // route line being used in this example so a layer ID is being specified.
