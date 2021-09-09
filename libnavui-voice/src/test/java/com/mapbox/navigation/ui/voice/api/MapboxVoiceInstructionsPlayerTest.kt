@@ -450,6 +450,9 @@ class MapboxVoiceInstructionsPlayerTest {
         verify(exactly = 1) {
             mockedTextPlayer.clear()
         }
+        verify(exactly = 1) {
+            mockedAudioFocusDelegate.abandonFocus()
+        }
     }
 
     @Test
@@ -489,6 +492,9 @@ class MapboxVoiceInstructionsPlayerTest {
         }
         verify(exactly = 1) {
             mockedTextPlayer.shutdown()
+        }
+        verify(exactly = 1) {
+            mockedAudioFocusDelegate.abandonFocus()
         }
     }
 
