@@ -16,6 +16,7 @@ internal interface TripSession {
 
     fun getRawLocation(): Location?
     fun getEnhancedLocation(): Location?
+    val zLevel: Int?
     fun getRouteProgress(): RouteProgress?
     fun getState(): TripSessionState
 

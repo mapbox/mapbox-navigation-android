@@ -132,6 +132,8 @@ internal class MapboxTripSession(
 
     private var rawLocation: Location? = null
     private var enhancedLocation: Location? = null
+    override var zLevel: Int? = null
+        private set
     private var routeProgress: RouteProgress? = null
     private var roadObjects: List<UpcomingRoadObject> = emptyList()
         set(value) {
@@ -224,6 +226,7 @@ internal class MapboxTripSession(
             updateMapMatcherResult(
                 tripStatus.getMapMatcherResult(enhancedLocation, keyPoints)
             )
+            zLevel = status.layer
             val remainingWaypoints =
                 ifNonNull(tripStatus.route?.routeOptions()?.coordinatesList()?.size) {
                     it - tripStatus.navigationStatus.nextWaypointIndex
@@ -306,6 +309,7 @@ internal class MapboxTripSession(
         mapMatcherResult = null
         rawLocation = null
         enhancedLocation = null
+        zLevel = null
         routeProgress = null
         isOffRoute = false
         eHorizonSubscriptionManager.reset()
