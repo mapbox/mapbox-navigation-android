@@ -503,6 +503,13 @@ class MapboxNavigation(
     fun getNavigationSessionState(): NavigationSessionState = navigationSession.state
 
     /**
+     * Provides the current Z-Level. Can be used to build a route from a proper level of a road.
+     *
+     * @return current Z-Level.
+     */
+    fun getZLevel(): Int? = tripSession.zLevel
+
+    /**
      * Requests a route using the available [Router] implementation.
      *
      * Use [MapboxNavigation.setRoutes] to supply the returned list of routes, transformed list, or a list from an external source, to be managed by the SDK.

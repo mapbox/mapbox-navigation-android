@@ -243,6 +243,13 @@ class MapboxNavigationTest {
     }
 
     @Test
+    fun `getZLevel returns current z level`() {
+        createMapboxNavigation()
+        every { tripSession.zLevel } returns 3
+        assertEquals(3, mapboxNavigation.getZLevel())
+    }
+
+    @Test
     fun init_routesObs_internalRouteObs_navigationSession_and_TelemetryLocAndProgressDispatcher() {
         createMapboxNavigation()
         verify(exactly = 2) { directionsSession.registerRoutesObserver(any()) }

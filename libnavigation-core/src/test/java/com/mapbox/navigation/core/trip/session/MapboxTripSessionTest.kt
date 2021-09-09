@@ -1133,6 +1133,34 @@ class MapboxTripSessionTest {
         verify(exactly = 2) { observerTwo.onRouteProgressChanged(any()) }
     }
 
+    @Test
+    fun `zLevel is null before session is started`() {
+        assertNull(tripSession.zLevel)
+    }
+
+    @Test
+    fun `zLevel is null after session is started, but before navigator observer is invoked`() {
+        tripSession.start(withTripService = true)
+        assertNull(tripSession.zLevel)
+    }
+
+    @Test
+    fun `zLevel returns layer from navigator status`() {
+        tripSession.start(withTripService = true)
+        every { navigationStatus.layer } returns 3
+        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+        assertEquals(3, tripSession.zLevel)
+    }
+
+    @Test
+    fun `zLevel returns null after session is stopped`() {
+        tripSession.start(withTripService = true)
+        every { navigationStatus.layer } returns 3
+        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+        tripSession.stop()
+        assertNull(tripSession.zLevel)
+    }
+
     @After
     fun cleanUp() {
         unmockkObject(MapboxNativeNavigatorImpl)

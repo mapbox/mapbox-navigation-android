@@ -36,7 +36,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
  * @param upcomingRoadObjects list of upcoming road objects.
  * @param stale `true` if there were no location updates for a significant amount which causes
  * a lack of confidence in the progress updates being sent.
- * @param zLevel [Int] current Z-level. Can be used to to build route from proper level of road.
+ * @param zLevel [Int] current Z-level. Can be used to build a route from a proper level of a road.
  */
 class RouteProgress internal constructor(
     val route: DirectionsRoute,
@@ -124,7 +124,7 @@ class RouteProgress internal constructor(
             "fractionTraveled=$fractionTraveled, " +
             "remainingWaypoints=$remainingWaypoints, " +
             "upcomingRoadObjects=$upcomingRoadObjects, " +
-            "stale=$stale," +
+            "stale=$stale, " +
             "zLevel=$zLevel" +
             ")"
     }
