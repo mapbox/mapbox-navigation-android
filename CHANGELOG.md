@@ -2,6 +2,33 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-rc.1 - September 09, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+- :exclamation: Introduced new pricing options. Integrating this or a later version of the Navigation SDK will impact the way you are billed. Read more in our [Pricing Documentation](https://docs.mapbox.com/android/beta/navigation/guides/pricing/). [#4666](https://github.com/mapbox/mapbox-navigation-android/pull/4666)
+- :warning: `MapboxNavigation` now enforces having only one instance alive in a process, a new instance cannot be created if there's another one that did not have `#onDestroy` called. Use `MapboxNavigationProvider` for assistance with instance management. [#4666](https://github.com/mapbox/mapbox-navigation-android/pull/4666)
+
+#### Features
+- :warning: The implementation for representing restricted roads with a dashed line has been updated to support better scaling at various zoom levels. The customization options for this feature have been updated as well in `MapboxRouteLineOptions`. [#4773](https://github.com/mapbox/mapbox-navigation-android/pull/4773)
+- :warning: There's now a `RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID` string ID which can be used to position other map layers on top of all route line layers produced by the `MapboxRouteLineView`. [#4773](https://github.com/mapbox/mapbox-navigation-android/pull/4773)
+
+#### Bug fixes and improvements
+- Fixed an issue where navigation notification could show partial data with wrong visuals. [#4792](https://github.com/mapbox/mapbox-navigation-android/pull/4792)
+- Updated feedback events for _Free Drive_ and _Active Guidance_. [#4794](https://github.com/mapbox/mapbox-navigation-android/pull/4794)
+- Fixed an occasional crash that occurred when trying to parse `BannerInstructions` by referencing `BannerView` from native implementation rather than doing it from the current step using index from nav native. [#4795](https://github.com/mapbox/mapbox-navigation-android/pull/4795)
+- Fixed a crash in `MapboxSpeechFileProvider` when OS clears the cache directory while an app is running. [#4790](https://github.com/mapbox/mapbox-navigation-android/pull/4790)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.0.0-rc.7` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.7))
+- Mapbox Navigation Native `v65.0.2`
+- Mapbox Core Common `v17.1.0`
+- Mapbox Java `v6.0.0-alpha.5` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0-alpha.5))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.0.0-beta.25 - September 03, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
