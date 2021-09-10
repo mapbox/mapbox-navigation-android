@@ -93,7 +93,7 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
      * Clears any announcements queued.
      */
     fun clear() {
-        clean()
+        finalize()
         filePlayer.clear()
         textPlayer.clear()
     }
@@ -104,7 +104,7 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
      * the announcement should end immediately and any announcements queued should be cleared.
      */
     fun shutdown() {
-        clean()
+        finalize()
         filePlayer.shutdown()
         textPlayer.shutdown()
     }
@@ -123,8 +123,9 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
         }
     }
 
-    private fun clean() {
+    private fun finalize() {
         playCallbackQueue.clear()
+        audioFocusDelegate.abandonFocus()
     }
 
     private companion object {
