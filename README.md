@@ -65,6 +65,8 @@ dependencies {
 
 [We've added several navigation examples to this repo's `examples` module](https://github.com/mapbox/mapbox-navigation-android/tree/main/examples) to help you get started with the Navigation SDK and to inspire you.
 
+[Internal QA application](https://github.com/mapbox/mapbox-navigation-android/tree/main/qa-test-app/README.md)
+
 ## Contributing
 
 We welcome feedback, translations, and code contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
