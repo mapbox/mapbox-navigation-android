@@ -144,7 +144,39 @@ class LaneIconsProcessorTest {
     }
 
     @Test
-    fun `when direction is straight left left only`() {
+    fun `when direction is left right then left only`() {
+        val mockDirectionList = listOf(LEFT, RIGHT)
+        val mockLaneIndicator = LaneIndicator
+            .Builder()
+            .isActive(false)
+            .directions(mockDirectionList)
+            .build()
+        val mockActiveDirections = LEFT
+        val expected = R.drawable.mapbox_ic_lane_left_right_left_only
+
+        val actual = LaneIconProcessor.getDrawableFrom(mockLaneIndicator, mockActiveDirections)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `when direction is left right then right only`() {
+        val mockDirectionList = listOf(LEFT, RIGHT)
+        val mockLaneIndicator = LaneIndicator
+            .Builder()
+            .isActive(false)
+            .directions(mockDirectionList)
+            .build()
+        val mockActiveDirections = RIGHT
+        val expected = R.drawable.mapbox_ic_lane_left_right_right_only
+
+        val actual = LaneIconProcessor.getDrawableFrom(mockLaneIndicator, mockActiveDirections)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `when direction is straight left then left only`() {
         val mockDirectionList = listOf(LEFT, STRAIGHT)
         val mockLaneIndicator = LaneIndicator
             .Builder()
@@ -160,7 +192,7 @@ class LaneIconsProcessorTest {
     }
 
     @Test
-    fun `when direction is straight left straight only`() {
+    fun `when direction is straight left then straight only`() {
         val mockDirectionList = listOf(LEFT, STRAIGHT)
         val mockLaneIndicator = LaneIndicator
             .Builder()
@@ -176,7 +208,7 @@ class LaneIconsProcessorTest {
     }
 
     @Test
-    fun `when direction is straight right right only`() {
+    fun `when direction is straight right then right only`() {
         val mockDirectionList = listOf(RIGHT, STRAIGHT)
         val mockLaneIndicator = LaneIndicator
             .Builder()
@@ -192,7 +224,7 @@ class LaneIconsProcessorTest {
     }
 
     @Test
-    fun `when direction is straight right straight only`() {
+    fun `when direction is straight right then straight only`() {
         val mockDirectionList = listOf(RIGHT, STRAIGHT)
         val mockLaneIndicator = LaneIndicator
             .Builder()
@@ -208,7 +240,87 @@ class LaneIconsProcessorTest {
     }
 
     @Test
-    fun `when direction is straight slight right straight only`() {
+    fun `when direction is slight left slight right then slight right only`() {
+        val mockDirectionList = listOf(SLIGHT_LEFT, SLIGHT_RIGHT)
+        val mockLaneIndicator = LaneIndicator
+            .Builder()
+            .isActive(false)
+            .directions(mockDirectionList)
+            .build()
+        val mockActiveDirections = SLIGHT_RIGHT
+        val expected = R.drawable.mapbox_ic_lane_slight_left_slight_right_slight_right_only
+
+        val actual = LaneIconProcessor.getDrawableFrom(mockLaneIndicator, mockActiveDirections)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `when direction is slight left slight right active right then slight right only`() {
+        val mockDirectionList = listOf(SLIGHT_LEFT, SLIGHT_RIGHT)
+        val mockLaneIndicator = LaneIndicator
+            .Builder()
+            .isActive(false)
+            .directions(mockDirectionList)
+            .build()
+        val mockActiveDirections = RIGHT
+        val expected = R.drawable.mapbox_ic_lane_slight_left_slight_right_slight_right_only
+
+        val actual = LaneIconProcessor.getDrawableFrom(mockLaneIndicator, mockActiveDirections)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `when direction is slight left slight right then slight left only`() {
+        val mockDirectionList = listOf(SLIGHT_LEFT, SLIGHT_RIGHT)
+        val mockLaneIndicator = LaneIndicator
+            .Builder()
+            .isActive(false)
+            .directions(mockDirectionList)
+            .build()
+        val mockActiveDirections = SLIGHT_LEFT
+        val expected = R.drawable.mapbox_ic_lane_slight_left_slight_right_slight_left_only
+
+        val actual = LaneIconProcessor.getDrawableFrom(mockLaneIndicator, mockActiveDirections)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `when direction is slight left slight right active left then slight left only`() {
+        val mockDirectionList = listOf(SLIGHT_LEFT, SLIGHT_RIGHT)
+        val mockLaneIndicator = LaneIndicator
+            .Builder()
+            .isActive(false)
+            .directions(mockDirectionList)
+            .build()
+        val mockActiveDirections = LEFT
+        val expected = R.drawable.mapbox_ic_lane_slight_left_slight_right_slight_left_only
+
+        val actual = LaneIconProcessor.getDrawableFrom(mockLaneIndicator, mockActiveDirections)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `when direction is slight left slight right active uturn then straight only`() {
+        val mockDirectionList = listOf(SLIGHT_LEFT, SLIGHT_RIGHT)
+        val mockLaneIndicator = LaneIndicator
+            .Builder()
+            .isActive(false)
+            .directions(mockDirectionList)
+            .build()
+        val mockActiveDirections = UTURN
+        val expected = R.drawable.mapbox_ic_turn_straight
+
+        val actual = LaneIconProcessor.getDrawableFrom(mockLaneIndicator, mockActiveDirections)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `when direction is straight slight right then straight only`() {
         val mockDirectionList = listOf(SLIGHT_RIGHT, STRAIGHT)
         val mockLaneIndicator = LaneIndicator
             .Builder()
@@ -224,7 +336,7 @@ class LaneIconsProcessorTest {
     }
 
     @Test
-    fun `when direction is straight slight right slight right only`() {
+    fun `when direction is straight slight right then slight right only`() {
         val mockDirectionList = listOf(SLIGHT_RIGHT, STRAIGHT)
         val mockLaneIndicator = LaneIndicator
             .Builder()
@@ -240,7 +352,7 @@ class LaneIconsProcessorTest {
     }
 
     @Test
-    fun `when direction is straight slight left straight only`() {
+    fun `when direction is straight slight left then straight only`() {
         val mockDirectionList = listOf(SLIGHT_LEFT, STRAIGHT)
         val mockLaneIndicator = LaneIndicator
             .Builder()
@@ -256,7 +368,7 @@ class LaneIconsProcessorTest {
     }
 
     @Test
-    fun `when direction is straight slight left slight left only`() {
+    fun `when direction is straight slight left then slight left only`() {
         val mockDirectionList = listOf(SLIGHT_LEFT, STRAIGHT)
         val mockLaneIndicator = LaneIndicator
             .Builder()
@@ -272,7 +384,7 @@ class LaneIconsProcessorTest {
     }
 
     @Test
-    fun `when direction is straight sharp right straight only`() {
+    fun `when direction is straight sharp right then straight only`() {
         val mockDirectionList = listOf(SHARP_RIGHT, STRAIGHT)
         val mockLaneIndicator = LaneIndicator
             .Builder()
@@ -288,7 +400,7 @@ class LaneIconsProcessorTest {
     }
 
     @Test
-    fun `when direction is straight sharp right sharp right only`() {
+    fun `when direction is straight sharp right then sharp right only`() {
         val mockDirectionList = listOf(SHARP_RIGHT, STRAIGHT)
         val mockLaneIndicator = LaneIndicator
             .Builder()
@@ -304,7 +416,7 @@ class LaneIconsProcessorTest {
     }
 
     @Test
-    fun `when direction is straight sharp left straight only`() {
+    fun `when direction is straight sharp left then straight only`() {
         val mockDirectionList = listOf(SHARP_LEFT, STRAIGHT)
         val mockLaneIndicator = LaneIndicator
             .Builder()
@@ -320,7 +432,7 @@ class LaneIconsProcessorTest {
     }
 
     @Test
-    fun `when direction is straight sharp left sharp left only`() {
+    fun `when direction is straight sharp left then sharp left only`() {
         val mockDirectionList = listOf(SHARP_LEFT, STRAIGHT)
         val mockLaneIndicator = LaneIndicator
             .Builder()
@@ -329,6 +441,134 @@ class LaneIconsProcessorTest {
             .build()
         val mockActiveDirections = SHARP_LEFT
         val expected = R.drawable.mapbox_ic_lane_sharp_left_straight_sharp_left_only
+
+        val actual = LaneIconProcessor.getDrawableFrom(mockLaneIndicator, mockActiveDirections)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `when direction is left straight right then left only`() {
+        val mockDirectionList = listOf(LEFT, STRAIGHT, RIGHT)
+        val mockLaneIndicator = LaneIndicator
+            .Builder()
+            .isActive(false)
+            .directions(mockDirectionList)
+            .build()
+        val mockActiveDirections = LEFT
+        val expected = R.drawable.mapbox_ic_turn_left
+
+        val actual = LaneIconProcessor.getDrawableFrom(mockLaneIndicator, mockActiveDirections)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `when direction is left straight right then straight only`() {
+        val mockDirectionList = listOf(LEFT, STRAIGHT, RIGHT)
+        val mockLaneIndicator = LaneIndicator
+            .Builder()
+            .isActive(false)
+            .directions(mockDirectionList)
+            .build()
+        val mockActiveDirections = STRAIGHT
+        val expected = R.drawable.mapbox_ic_turn_straight
+
+        val actual = LaneIconProcessor.getDrawableFrom(mockLaneIndicator, mockActiveDirections)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `when direction is left straight right then right only`() {
+        val mockDirectionList = listOf(LEFT, STRAIGHT, RIGHT)
+        val mockLaneIndicator = LaneIndicator
+            .Builder()
+            .isActive(false)
+            .directions(mockDirectionList)
+            .build()
+        val mockActiveDirections = RIGHT
+        val expected = R.drawable.mapbox_ic_turn_right
+
+        val actual = LaneIconProcessor.getDrawableFrom(mockLaneIndicator, mockActiveDirections)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `when direction is slight left straight slight right then slight left only`() {
+        val mockDirectionList = listOf(SLIGHT_LEFT, STRAIGHT, SLIGHT_RIGHT)
+        val mockLaneIndicator = LaneIndicator
+            .Builder()
+            .isActive(false)
+            .directions(mockDirectionList)
+            .build()
+        val mockActiveDirections = SLIGHT_LEFT
+        val expected = R.drawable.mapbox_ic_turn_slight_left
+
+        val actual = LaneIconProcessor.getDrawableFrom(mockLaneIndicator, mockActiveDirections)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `when direction is slight left straight slight right active left then slight left only`() {
+        val mockDirectionList = listOf(SLIGHT_LEFT, STRAIGHT, SLIGHT_RIGHT)
+        val mockLaneIndicator = LaneIndicator
+            .Builder()
+            .isActive(false)
+            .directions(mockDirectionList)
+            .build()
+        val mockActiveDirections = LEFT
+        val expected = R.drawable.mapbox_ic_turn_slight_left
+
+        val actual = LaneIconProcessor.getDrawableFrom(mockLaneIndicator, mockActiveDirections)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `when direction is slight left straight slight right then straight only`() {
+        val mockDirectionList = listOf(SLIGHT_LEFT, STRAIGHT, SLIGHT_RIGHT)
+        val mockLaneIndicator = LaneIndicator
+            .Builder()
+            .isActive(false)
+            .directions(mockDirectionList)
+            .build()
+        val mockActiveDirections = STRAIGHT
+        val expected = R.drawable.mapbox_ic_turn_straight
+
+        val actual = LaneIconProcessor.getDrawableFrom(mockLaneIndicator, mockActiveDirections)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `when direction is slight left straight slight right then slight right only`() {
+        val mockDirectionList = listOf(SLIGHT_LEFT, STRAIGHT, SLIGHT_RIGHT)
+        val mockLaneIndicator = LaneIndicator
+            .Builder()
+            .isActive(false)
+            .directions(mockDirectionList)
+            .build()
+        val mockActiveDirections = SLIGHT_RIGHT
+        val expected = R.drawable.mapbox_ic_turn_slight_right
+
+        val actual = LaneIconProcessor.getDrawableFrom(mockLaneIndicator, mockActiveDirections)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `when direction is slight left straight slight right active right then slight right only`() {
+        val mockDirectionList = listOf(SLIGHT_LEFT, STRAIGHT, SLIGHT_RIGHT)
+        val mockLaneIndicator = LaneIndicator
+            .Builder()
+            .isActive(false)
+            .directions(mockDirectionList)
+            .build()
+        val mockActiveDirections = RIGHT
+        val expected = R.drawable.mapbox_ic_turn_slight_right
 
         val actual = LaneIconProcessor.getDrawableFrom(mockLaneIndicator, mockActiveDirections)
 
