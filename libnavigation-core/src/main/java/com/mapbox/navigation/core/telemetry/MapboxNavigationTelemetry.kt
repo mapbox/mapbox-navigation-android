@@ -391,7 +391,7 @@ internal object MapboxNavigationTelemetry {
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?,
-        feedbackSubType: Array<String>?,
+        feedbackSubType: Array<@FeedbackEvent.SubType String>?,
     ) {
         createUserFeedback(
             feedbackType,
@@ -456,7 +456,7 @@ internal object MapboxNavigationTelemetry {
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?,
-        feedbackSubType: Array<String>?,
+        feedbackSubType: Array<@FeedbackEvent.SubType String>?,
         onEventCreated: ((NavigationFeedbackEvent) -> Unit)? = null,
         onEventUpdated: ((NavigationFeedbackEvent) -> Unit)? = null
     ) {

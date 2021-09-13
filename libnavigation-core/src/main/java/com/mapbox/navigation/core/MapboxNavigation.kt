@@ -60,6 +60,7 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
+import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -912,7 +913,10 @@ class MapboxNavigation(
      * @param description description message
      * @param feedbackSource one of [FeedbackEvent.Source]
      * @param screenshot encoded screenshot (optional)
-     * @param feedbackSubType array of [FeedbackEvent.Description] (optional)
+     * @param feedbackSubType array of [FeedbackEvent.SubType] (optional)
+     *
+     * @see [FeedbackHelper.getFeedbackSubTypes]
+     * to retrieve possible feedback subtypes for a given [feedbackType]
      */
     @JvmOverloads
     fun postUserFeedback(
@@ -920,7 +924,7 @@ class MapboxNavigation(
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?,
-        feedbackSubType: Array<String>? = emptyArray(),
+        feedbackSubType: Array<@FeedbackEvent.SubType String>? = emptyArray(),
     ) {
         MapboxNavigationTelemetry.postUserFeedback(
             feedbackType,

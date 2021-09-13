@@ -38,7 +38,7 @@ object MapboxNavigationFeedbackCache {
      * @param description description message
      * @param feedbackSource one of [FeedbackEvent.Source]
      * @param screenshot encoded screenshot (optional)
-     * @param feedbackSubType array of [FeedbackEvent.Description] (optional)
+     * @param feedbackSubType array of [FeedbackEvent.SubType] (optional)
      *
      * @see [MapboxNavigation.postUserFeedback]
      * @see [getCachedUserFeedback]
