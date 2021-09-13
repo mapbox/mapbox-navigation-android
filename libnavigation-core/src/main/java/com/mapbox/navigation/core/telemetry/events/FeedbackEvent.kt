@@ -249,6 +249,14 @@ object FeedbackEvent {
     /**
      * Type of feedback mean WHAT happen
      */
+    @Target(
+        AnnotationTarget.PROPERTY,
+        AnnotationTarget.FIELD,
+        AnnotationTarget.LOCAL_VARIABLE,
+        AnnotationTarget.VALUE_PARAMETER,
+        AnnotationTarget.FUNCTION,
+        AnnotationTarget.TYPE,
+    )
     @Retention(AnnotationRetention.BINARY)
     @StringDef(
         INCORRECT_VISUAL,
@@ -279,6 +287,14 @@ object FeedbackEvent {
     /**
      * Detail description for different feedback type
      */
+    @Target(
+        AnnotationTarget.PROPERTY,
+        AnnotationTarget.FIELD,
+        AnnotationTarget.LOCAL_VARIABLE,
+        AnnotationTarget.VALUE_PARAMETER,
+        AnnotationTarget.FUNCTION,
+        AnnotationTarget.TYPE,
+    )
     @Retention(AnnotationRetention.BINARY)
     @StringDef(
         TURN_ICON_INCORRECT,
@@ -312,7 +328,7 @@ object FeedbackEvent {
         ARRIVAL_FEEDBACK_CONFUSING_INSTRUCTIONS,
         ARRIVAL_FEEDBACK_THIS_PLACE_IS_CLOSED
     )
-    annotation class Description
+    annotation class SubType
 
     /**
      * Driver mode
