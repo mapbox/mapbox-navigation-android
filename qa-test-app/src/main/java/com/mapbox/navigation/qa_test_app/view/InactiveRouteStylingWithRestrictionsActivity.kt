@@ -120,6 +120,11 @@ class InactiveRouteStylingWithRestrictionsActivity : AppCompatActivity() {
         mapboxNavigation.stopTripSession()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        mapboxNavigation.onDestroy()
+    }
+
     private fun initNavigation() {
         binding.mapView.location.apply {
             setLocationProvider(navigationLocationProvider)
