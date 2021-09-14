@@ -123,6 +123,7 @@ class InactiveRouteStylingWithRestrictionsActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         mapboxNavigation.onDestroy()
+        routeLineApi.cancel()
     }
 
     private fun initNavigation() {

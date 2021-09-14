@@ -115,6 +115,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        routeLineApi.cancel()
         findViewById<MapView>(R.id.mapView).onDestroy()
         mapboxNavigation.onDestroy()
         if (::locationComponent.isInitialized) {

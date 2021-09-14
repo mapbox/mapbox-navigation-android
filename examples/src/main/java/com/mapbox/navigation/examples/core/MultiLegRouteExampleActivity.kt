@@ -214,6 +214,7 @@ class MultiLegRouteExampleActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        routeLineApi.cancel()
         viewBinding.mapView.onDestroy()
         mapboxNavigation.onDestroy()
     }

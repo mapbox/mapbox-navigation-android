@@ -76,6 +76,7 @@ class RouteTrafficUpdateActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        routeLineApi.cancel()
         binding.mapView.onDestroy()
     }
 

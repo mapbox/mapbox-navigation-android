@@ -710,6 +710,7 @@ package com.mapbox.navigation.ui.maps.route.line.api {
 
   public final class MapboxRouteLineApi {
     ctor public MapboxRouteLineApi(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions routeLineOptions);
+    method public void cancel();
     method public void clearRouteLine(com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue>> consumer);
     method public void findClosestRoute(com.mapbox.geojson.Point target, com.mapbox.maps.MapboxMap mapboxMap, float padding, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound,com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue>> resultConsumer);
     method public com.mapbox.api.directions.v5.models.DirectionsRoute? getPrimaryRoute();

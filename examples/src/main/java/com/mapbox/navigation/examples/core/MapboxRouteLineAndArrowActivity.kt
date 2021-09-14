@@ -481,6 +481,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
 
     override fun onDestroy() {
         super.onDestroy()
+        routeLineApi.cancel()
         mapboxNavigation.onDestroy()
     }
 

@@ -670,6 +670,15 @@ class MapboxRouteLineApi(
         }
     }
 
+    /**
+     * Invoke the function to cancel any job invoked through this API.
+     */
+    fun cancel() {
+        jobControl.job.children.forEach {
+            it.cancel()
+        }
+    }
+
     private suspend fun findClosestRoute(
         target: Point,
         mapboxMap: MapboxMap,
