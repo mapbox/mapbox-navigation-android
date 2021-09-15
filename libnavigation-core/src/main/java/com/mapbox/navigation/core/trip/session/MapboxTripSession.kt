@@ -1,19 +1,13 @@
 package com.mapbox.navigation.core.trip.session
 
-import android.annotation.SuppressLint
 import android.hardware.SensorEvent
 import android.location.Location
-import android.os.Looper
 import androidx.annotation.VisibleForTesting
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
-import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
@@ -46,19 +40,18 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
-
 /**
  * Default implementation of [TripSession]
  *
  * @param tripService TripService
- * @param navigationOptions the navigator options
+ * @param tripSessionLocationEngine the location engine
  * @param navigator Native navigator
  * @param threadController controller for main/io jobs
  * @param logger interface for logging any events
  */
 internal class MapboxTripSession(
     override val tripService: TripService,
-    private val navigationOptions: NavigationOptions,
+    private val tripSessionLocationEngine: TripSessionLocationEngine,
     private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl,
     private val threadController: ThreadController = ThreadController,
     private val logger: Logger,
@@ -193,7 +186,7 @@ internal class MapboxTripSession(
     /**
      * Start MapboxTripSession
      */
-    override fun start(withTripService: Boolean) {
+    override fun start(withTripService: Boolean, withReplayEnabled: Boolean) {
         if (state == TripSessionState.STARTED) {
             return
         }
@@ -201,8 +194,20 @@ internal class MapboxTripSession(
         if (withTripService) {
             tripService.startService()
         }
-        startLocationUpdates()
+        tripSessionLocationEngine.startLocationUpdates(withReplayEnabled) {
+            updateRawLocation(it)
+        }
         state = TripSessionState.STARTED
+    }
+
+    private fun updateRawLocation(rawLocation: Location) {
+        if (state != TripSessionState.STARTED) return
+
+        this.rawLocation = rawLocation
+        locationObservers.forEach { it.onRawLocationChanged(rawLocation) }
+        mainJobController.scope.launch {
+            navigator.updateLocation(rawLocation.toFixLocation())
+        }
     }
 
     /**
@@ -269,16 +274,6 @@ internal class MapboxTripSession(
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private fun startLocationUpdates() {
-        navigationOptions.locationEngine.requestLocationUpdates(
-            navigationOptions.locationEngineRequest,
-            locationEngineCallback,
-            Looper.getMainLooper()
-        )
-        navigationOptions.locationEngine.getLastLocation(locationEngineCallback)
-    }
-
     /**
      * Stop MapboxTripSession
      */
@@ -288,14 +283,10 @@ internal class MapboxTripSession(
         }
         navigator.removeNavigatorObserver(navigatorObserver)
         tripService.stopService()
-        stopLocationUpdates()
+        tripSessionLocationEngine.stopLocationUpdates()
         mainJobController.job.cancelChildren()
         reset()
         state = TripSessionState.STOPPED
-    }
-
-    private fun stopLocationUpdates() {
-        navigationOptions.locationEngine.removeLocationUpdates(locationEngineCallback)
     }
 
     private fun reset() {
@@ -563,31 +554,6 @@ internal class MapboxTripSession(
     override fun unregisterAllFallbackVersionsObservers() {
         fallbackVersionsObservers.clear()
         navigator.setFallbackVersionsObserver(null)
-    }
-
-    private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
-        override fun onSuccess(result: LocationEngineResult?) {
-            result?.locations?.lastOrNull()?.let {
-                updateRawLocation(it)
-            }
-        }
-
-        override fun onFailure(exception: Exception) {
-            logger.d(
-                msg = Message("location on failure"),
-                tr = exception
-            )
-        }
-    }
-
-    private fun updateRawLocation(rawLocation: Location) {
-        if (state != TripSessionState.STARTED) return
-
-        this.rawLocation = rawLocation
-        locationObservers.forEach { it.onRawLocationChanged(rawLocation) }
-        mainJobController.scope.launch {
-            navigator.updateLocation(rawLocation.toFixLocation())
-        }
     }
 
     private fun updateEnhancedLocation(location: Location, keyPoints: List<Location>) {

@@ -9,8 +9,6 @@ import android.widget.Button
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
@@ -28,7 +26,6 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
-import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplaySetRoute
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -50,22 +47,19 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
-import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.lang.ref.WeakReference
 import java.util.Collections
 
 class ReplayHistoryActivity : AppCompatActivity() {
 
     private var loadNavigationJob: Job? = null
-    private val mapboxReplayer = MapboxReplayer()
     private val navigationLocationProvider = NavigationLocationProvider()
-    private val locationEngineCallback = MyLocationEngineCallback(this)
     private lateinit var historyFileLoader: HistoryFileLoader
     private lateinit var mapboxNavigation: MapboxNavigation
+    private lateinit var mapboxReplayer: MapboxReplayer
     private lateinit var locationComponent: LocationComponentPlugin
     private lateinit var navigationCamera: NavigationCamera
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
@@ -77,8 +71,8 @@ class ReplayHistoryActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        handleHistoryFileSelected()
         initNavigation()
+        handleHistoryFileSelected()
         initMapStyle()
 
         findViewById<Button>(R.id.selectHistoryButton).setOnClickListener {
@@ -130,9 +124,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
         binding.mapView.getMapboxMap().loadStyleUri(
             Style.MAPBOX_STREETS,
             { style: Style ->
-                mapboxNavigation.navigationOptions.locationEngine.getLastLocation(
-                    locationEngineCallback
-                )
                 locationComponent = binding.mapView.location.apply {
                     this.locationPuck = LocationPuck2D(
                         bearingImage = ContextCompat.getDrawable(
@@ -262,9 +253,10 @@ class ReplayHistoryActivity : AppCompatActivity() {
         mapboxNavigation = MapboxNavigation(
             NavigationOptions.Builder(this)
                 .accessToken(Utils.getMapboxAccessToken(this))
-                .locationEngine(ReplayLocationEngine(mapboxReplayer))
                 .build()
         )
+        mapboxReplayer = mapboxNavigation.mapboxReplayer
+        mapboxNavigation.startReplayTripSession()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -285,9 +277,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
             binding.playReplay.visibility = View.VISIBLE
             mapboxNavigation.resetTripSession()
             mapboxReplayer.playFirstLocation()
-            mapboxNavigation.navigationOptions.locationEngine.getLastLocation(
-                locationEngineCallback
-            )
         }
     }
 
@@ -325,7 +314,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
         binding.playReplay.setOnClickListener {
             mapboxReplayer.play()
-            mapboxNavigation.startTripSession()
             binding.playReplay.visibility = View.GONE
         }
 
@@ -343,27 +331,5 @@ class ReplayHistoryActivity : AppCompatActivity() {
         replaySetRoute.route?.let { directionRoute ->
             mapboxNavigation.setRoutes(Collections.singletonList(directionRoute))
         }
-    }
-
-    private class MyLocationEngineCallback constructor(
-        activity: ReplayHistoryActivity
-    ) : LocationEngineCallback<LocationEngineResult> {
-
-        private val activityRef: WeakReference<ReplayHistoryActivity> = WeakReference(activity)
-
-        override fun onSuccess(result: LocationEngineResult) {
-            ifNonNull(result.lastLocation, activityRef.get()) { loc, act ->
-                val point = Point.fromLngLat(loc.longitude, loc.latitude)
-                val cameraOptions = CameraOptions.Builder()
-                    .center(point)
-                    .zoom(13.0)
-                    .build()
-                act.binding.mapView.getMapboxMap().setCamera(cameraOptions)
-                act.navigationLocationProvider.changePosition(loc)
-                act.updateCamera(loc)
-            }
-        }
-
-        override fun onFailure(exception: Exception) {}
     }
 }
