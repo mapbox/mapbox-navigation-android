@@ -11,6 +11,8 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.accounts.BillingServiceWrapper
+import com.mapbox.navigation.core.arrival.ArrivalObserver
+import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
@@ -36,6 +38,8 @@ class BillingControllerTest {
     private lateinit var navigationSession: NavigationSession
     private lateinit var tripSession: TripSession
     private lateinit var sessionStateObserver: NavigationSessionStateObserver
+    private lateinit var arrivalProgressObserver: ArrivalProgressObserver
+    private lateinit var arrivalObserver: ArrivalObserver
     private val triggerBillingServiceErrorCallback = slot<OnBillingServiceError>()
     private val beginBillingServiceErrorCallback = slot<OnBillingServiceError>()
     private val resumeBillingServiceErrorCallback = slot<OnBillingServiceError>()
@@ -101,15 +105,29 @@ class BillingControllerTest {
         } returns BillingSessionStatus.NO_SESSION
 
         val sessionStateObserverSlot = slot<NavigationSessionStateObserver>()
-        navigationSession = mockk {
+        navigationSession = mockk(relaxUnitFun = true) {
             every {
                 registerNavigationSessionStateObserver(capture(sessionStateObserverSlot))
             } just Runs
         }
+
+        val arrivalObserverSlot = slot<ArrivalObserver>()
+        arrivalProgressObserver = mockk(relaxUnitFun = true) {
+            every {
+                registerObserver(capture(arrivalObserverSlot))
+            } just Runs
+        }
+
         tripSession = mockk()
 
-        billingController = BillingController(accessToken, navigationSession, tripSession)
+        billingController = BillingController(
+            navigationSession,
+            arrivalProgressObserver,
+            accessToken,
+            tripSession
+        )
         sessionStateObserver = sessionStateObserverSlot.captured
+        arrivalObserver = arrivalObserverSlot.captured
     }
 
     @Test
@@ -941,6 +959,39 @@ class BillingControllerTest {
         }
     }
 
+    @Test(expected = IllegalStateException::class)
+    fun `exception thrown when new route leg started while a session is not running`() {
+        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
+        arrivalObserver.onNextRouteLegStart(mockk())
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun `exception thrown when new route leg started while a free drive session is running`() {
+        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
+        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.FreeDrive("1"))
+        arrivalObserver.onNextRouteLegStart(mockk())
+    }
+
+    @Test
+    fun `new session is started for each route leg`() {
+        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
+        sessionStateObserver.onNavigationSessionStateChanged(
+            NavigationSessionState.ActiveGuidance("2")
+        )
+        arrivalObserver.onNextRouteLegStart(mockk())
+        arrivalObserver.onNextRouteLegStart(mockk())
+
+        verify(exactly = 3) {
+            BillingServiceWrapper.beginBillingSession(
+                accessToken,
+                "",
+                SKUIdentifier.NAV2_SES_TRIP,
+                any(),
+                0
+            )
+        }
+    }
+
     @Test
     fun `on destroy stops running free drive session`() {
         sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
@@ -963,6 +1014,13 @@ class BillingControllerTest {
         verify {
             BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
         }
+    }
+
+    @Test
+    fun `on destroy unregisters observers`() {
+        billingController.onDestroy()
+        verify { navigationSession.unregisterNavigationSessionStateObserver(sessionStateObserver) }
+        verify { arrivalProgressObserver.unregisterObserver(arrivalObserver) }
     }
 
     @After

@@ -97,6 +97,7 @@ class ArrivalProgressObserverTest {
         }
 
         assertFalse(arrivalProgressObserver.navigateNextRouteLeg())
+        verify { arrivalObserver wasNot Called }
     }
 
     @Test
@@ -311,6 +312,7 @@ class ArrivalProgressObserverTest {
         )
 
         assertFalse(onArrivalCalls.isCaptured)
+        verify { arrivalObserver wasNot Called }
     }
 
     @Test
@@ -365,6 +367,7 @@ class ArrivalProgressObserverTest {
         arrivalProgressObserver.attach(customArrivalController)
 
         verify(exactly = 0) { tripSession.updateLegIndex(any()) }
+        verify { arrivalObserver wasNot Called }
     }
 
     @Test
@@ -385,6 +388,7 @@ class ArrivalProgressObserverTest {
         val didNavigate = arrivalProgressObserver.navigateNextRouteLeg()
 
         assertTrue(didNavigate)
+        verify(exactly = 1) { arrivalObserver.onNextRouteLegStart(any()) }
     }
 
     @Test
@@ -405,6 +409,7 @@ class ArrivalProgressObserverTest {
         val didNavigate = arrivalProgressObserver.navigateNextRouteLeg()
 
         assertFalse(didNavigate)
+        verify { arrivalObserver wasNot Called }
     }
 
     @Test

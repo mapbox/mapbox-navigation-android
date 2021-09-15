@@ -362,14 +362,17 @@ class MapboxNavigation(
         )
         tripSession.registerStateObserver(navigationSession)
 
+        arrivalProgressObserver = NavigationComponentProvider.createArrivalProgressObserver(
+            tripSession
+        )
+        setArrivalController()
+
         billingController = NavigationComponentProvider.createBillingController(
             navigationOptions.accessToken,
             navigationSession,
-            tripSession
+            tripSession,
+            arrivalProgressObserver
         )
-
-        arrivalProgressObserver = ArrivalProgressObserver(tripSession)
-        setArrivalController()
 
         ifNonNull(accessToken) { token ->
             logger.d(
@@ -620,6 +623,7 @@ class MapboxNavigation(
         resetTripSession()
         navigator.unregisterAllObservers()
         navigationVersionSwitchObservers.clear()
+        arrivalProgressObserver.unregisterAllObservers()
 
         navigationSession.unregisterAllNavigationSessionStateObservers()
         MapboxNavigationTelemetry.destroy(this@MapboxNavigation)

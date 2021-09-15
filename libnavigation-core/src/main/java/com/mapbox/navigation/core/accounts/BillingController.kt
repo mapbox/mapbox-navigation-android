@@ -12,7 +12,10 @@ import com.mapbox.common.BillingServiceErrorCode
 import com.mapbox.common.BillingSessionStatus
 import com.mapbox.common.SKUIdentifier
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.arrival.ArrivalObserver
+import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
@@ -24,12 +27,14 @@ import com.mapbox.turf.TurfMeasurement
 import java.util.concurrent.TimeUnit
 
 /**
- * The billing controller take 2 value as an input:
+ * The billing controller takes 3 value as an input:
  * - the current [NavigationSessionState]
  * - any new route that is set by the developer **before it has a chance to change the above state**
+ * - a notification when a new leg of a route starts
  *
- * Given those 2 inputs, the controller trigger the correct billing events.
+ * Given those 3 inputs, the controller triggers the correct billing events.
  *
+ * ### [NavigationSessionState]
  * Below are diagrams for each of the possible [NavigationSessionState]s.
  *
  * [NavigationSessionState.Idle]
@@ -103,6 +108,7 @@ import java.util.concurrent.TimeUnit
  * we do not stop the billing session immediately, we give an opportunity to resume the same session type without incurring additional costs.
  * If the state changes though, we'll start a new session.
  *
+ * ### New route
  * When a new route is set and we're already in active guidance, the [NavigationSessionStateObserver] will not fire again
  * but we still might need to start a new billing session if the route is significantly different than the previous one.
  *               ┌─────────────┐
@@ -132,6 +138,25 @@ import java.util.concurrent.TimeUnit
  *             │   BILLING SESSION   │
  *             └─────────────────────┘
  *
+ * ### New route leg started
+ * Whenever a new leg of a route is started, we register a new Active Guidance session.
+ *                 ┌───────────────┐
+ *                 │NEW LEG STARTED│
+ *                 └── ────┬───────┘
+ *                         │
+ *                         ▼
+ *               ┌──────────────────┐
+ *           NO  │IS ACTIVE GUIDANCE│  YES
+ *         ┌─────┤     RUNNING?     ├─────┐
+ *         │     └──────────────────┘     │
+ *         │                              │
+ *         ▼                              ▼
+ * ┌───────────────┐        ┌─────────────────────────┐
+ * │THROW EXCEPTION│        │START NEW ACTIVE GUIDANCE│
+ * └───────────────┘        │      BILLING SESSION    │
+ *                          └─────────────────────────┘
+ *
+ * ### Summary
  * All of the above interactions gives the below possible cycle of a billing session.
  *                     ┌──────────┐
  *   ┌────────────────►│NO SESSION│◄───────────────┐
@@ -157,9 +182,10 @@ import java.util.concurrent.TimeUnit
  * If we exceed the maximum, we again let the native implementation to start a new session for us automatically.
  */
 internal class BillingController(
+    private val navigationSession: NavigationSession,
+    private val arrivalProgressObserver: ArrivalProgressObserver,
     private val accessToken: String,
-    navigationSession: NavigationSession,
-    private val tripSession: TripSession
+    private val tripSession: TripSession,
 ) {
 
     private companion object {
@@ -201,8 +227,33 @@ internal class BillingController(
             }
         }
 
+    private val arrivalObserver = object : ArrivalObserver {
+        override fun onWaypointArrival(routeProgress: RouteProgress) {
+            // no-op
+        }
+
+        override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
+            val runningSessionSkuId = getRunningOrPausedSessionSkuId()
+            check(runningSessionSkuId == SKUIdentifier.NAV2_SES_TRIP) {
+                """
+                    |Next route leg started while an active guidance session is not running.
+                    |Actual active SKU: $runningSessionSkuId
+                """.trimMargin()
+            }
+            beginBillingSession(
+                SKUIdentifier.NAV2_SES_TRIP,
+                validity = 0 // default validity, 12hrs
+            )
+        }
+
+        override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
+            // no-op
+        }
+    }
+
     init {
         navigationSession.registerNavigationSessionStateObserver(navigationSessionStateObserver)
+        arrivalProgressObserver.registerObserver(arrivalObserver)
     }
 
     /**
@@ -244,6 +295,8 @@ internal class BillingController(
     }
 
     fun onDestroy() {
+        navigationSession.unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
+        arrivalProgressObserver.unregisterObserver(arrivalObserver)
         getRunningOrPausedSessionSkuId()?.let {
             BillingServiceWrapper.stopBillingSession(it)
         }
