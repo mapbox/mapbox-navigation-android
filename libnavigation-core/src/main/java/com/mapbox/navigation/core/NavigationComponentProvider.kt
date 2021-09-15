@@ -15,6 +15,7 @@ import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.MapboxTripSession
 import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManagerImpl
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
@@ -50,14 +51,18 @@ internal object NavigationComponentProvider {
         logger
     )
 
+    fun createTripSessionLocationEngine(
+        navigationOptions: NavigationOptions
+    ): TripSessionLocationEngine = TripSessionLocationEngine(navigationOptions)
+
     fun createTripSession(
         tripService: TripService,
-        navigationOptions: NavigationOptions,
+        tripSessionLocationEngine: TripSessionLocationEngine,
         navigator: MapboxNativeNavigator,
         logger: Logger,
     ): TripSession = MapboxTripSession(
         tripService,
-        navigationOptions,
+        tripSessionLocationEngine,
         navigator = navigator,
         logger = logger,
         eHorizonSubscriptionManager = EHorizonSubscriptionManagerImpl(navigator),
