@@ -18,7 +18,7 @@ internal interface TripSession {
     fun getRouteProgress(): RouteProgress?
     fun getState(): TripSessionState
 
-    fun start(withTripService: Boolean)
+    fun start(withTripService: Boolean, withReplayEnabled: Boolean = false)
     fun stop()
     fun isRunningWithForegroundService(): Boolean
 

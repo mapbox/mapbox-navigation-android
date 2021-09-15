@@ -43,6 +43,7 @@ import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.LoggerProvider
@@ -109,6 +110,7 @@ class MapboxNavigationTest {
     private val billingController: BillingController = mockk(relaxUnitFun = true)
     private val logger: Logger = mockk(relaxUnitFun = true)
     private val rerouteController: RerouteController = mockk(relaxUnitFun = true)
+    private val tripSessionLocationEngine: TripSessionLocationEngine = mockk(relaxUnitFun = true)
     private lateinit var navigationOptions: NavigationOptions
     private val arrivalProgressObserver: ArrivalProgressObserver = mockk(relaxUnitFun = true)
 
@@ -948,7 +950,10 @@ class MapboxNavigationTest {
 
             verifyOrder {
                 tripSession.registerStateObserver(navigationSession)
-                tripSession.start(true)
+                tripSession.start(
+                    withTripService = true,
+                    withReplayEnabled = false
+                )
                 tripSession.stop()
                 tripSession.unregisterAllStateObservers()
             }
@@ -1066,9 +1071,15 @@ class MapboxNavigationTest {
 
     private fun mockTripSession() {
         every {
+            NavigationComponentProvider.createTripSessionLocationEngine(
+                navigationOptions = navigationOptions
+            )
+        } returns tripSessionLocationEngine
+
+        every {
             NavigationComponentProvider.createTripSession(
-                tripService,
-                navigationOptions = navigationOptions,
+                tripService = tripService,
+                tripSessionLocationEngine = tripSessionLocationEngine,
                 navigator = navigator,
                 logger = logger,
             )

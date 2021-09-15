@@ -2,11 +2,7 @@ package com.mapbox.navigation.core.trip.session
 
 import android.content.Context
 import android.location.Location
-import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
@@ -93,15 +89,18 @@ class MapboxTripSessionTest {
     private val tripService: TripService = mockk(relaxUnitFun = true) {
         every { hasServiceStarted() } returns false
     }
+    private lateinit var locationUpdateAnswers: (Location) -> Unit
+    private val tripSessionLocationEngine: TripSessionLocationEngine = mockk(relaxUnitFun = true) {
+        every { startLocationUpdates(any(), captureLambda()) } answers {
+            locationUpdateAnswers = secondArg()
+        }
+    }
     private val route: DirectionsRoute = mockk(relaxed = true)
     private val legIndex = 2
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
     private lateinit var navigationOptions: NavigationOptions
-    private val locationCallbackSlot = slot<LocationEngineCallback<LocationEngineResult>>()
-    private val locationEngineResult: LocationEngineResult = mockk(relaxUnitFun = true)
-    private val location: Location = mockk(relaxed = true)
+    private val location: Location = mockLocation()
     private val fixLocation: FixLocation = mockk(relaxed = true)
     private val keyPoints: List<Location> = listOf(mockk(relaxUnitFun = true))
     private val keyFixPoints: List<FixLocation> = listOf(mockk(relaxed = true))
@@ -111,7 +110,6 @@ class MapboxTripSessionTest {
     private val navigationStatusOrigin: NavigationStatusOrigin = mockk()
     private val navigationStatus: NavigationStatus = mockk(relaxed = true)
     private val logger: Logger = mockk(relaxUnitFun = true)
-
     private val routeProgress: RouteProgress = mockk()
 
     private val parentJob = SupervisorJob()
@@ -135,9 +133,7 @@ class MapboxTripSessionTest {
         every { fixLocation.toLocation() } returns location
         every { keyFixPoints.toLocations() } returns keyPoints
         every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
-        navigationOptions = NavigationOptions.Builder(context)
-            .locationEngine(locationEngine)
-            .build()
+        navigationOptions = NavigationOptions.Builder(context).build()
         tripSession = buildTripSession()
 
         coEvery { navigator.updateLocation(any()) } returns false
@@ -163,14 +159,6 @@ class MapboxTripSessionTest {
         every { route.requestUuid() } returns "uuid"
 
         every {
-            locationEngine.requestLocationUpdates(
-                any(),
-                capture(locationCallbackSlot),
-                any()
-            )
-        } answers {}
-        every { locationEngineResult.locations } returns listOf(location)
-        every {
             navigator.addNavigatorObserver(capture(navigatorObserverImplSlot))
         } answers {}
         every {
@@ -183,7 +171,7 @@ class MapboxTripSessionTest {
     private fun buildTripSession(): MapboxTripSession {
         return MapboxTripSession(
             tripService,
-            navigationOptions,
+            tripSessionLocationEngine,
             navigator,
             ThreadController,
             logger,
@@ -199,13 +187,7 @@ class MapboxTripSessionTest {
 
         assertTrue(tripSession.isRunningWithForegroundService())
         verify { tripService.startService() }
-        verify {
-            locationEngine.requestLocationUpdates(
-                any(),
-                any(),
-                Looper.getMainLooper()
-            )
-        }
+        verify { tripSessionLocationEngine.startLocationUpdates(any(), any()) }
 
         tripSession.stop()
     }
@@ -218,13 +200,7 @@ class MapboxTripSessionTest {
 
         assertFalse(tripSession.isRunningWithForegroundService())
         verify(exactly = 0) { tripService.startService() }
-        verify {
-            locationEngine.requestLocationUpdates(
-                any(),
-                any(),
-                Looper.getMainLooper()
-            )
-        }
+        verify { tripSessionLocationEngine.startLocationUpdates(any(), any()) }
 
         tripSession.stop()
     }
@@ -239,13 +215,7 @@ class MapboxTripSessionTest {
 
         assertTrue(tripSession.isRunningWithForegroundService())
         verify(exactly = 1) { tripService.startService() }
-        verify(exactly = 1) {
-            locationEngine.requestLocationUpdates(
-                any(),
-                any(),
-                Looper.getMainLooper()
-            )
-        }
+        verify(exactly = 1) { tripSessionLocationEngine.startLocationUpdates(any(), any()) }
 
         tripSession.stop()
     }
@@ -262,11 +232,11 @@ class MapboxTripSessionTest {
     @Test
     fun stopSessionCallsLocationEngineRemoveLocationUpdates() {
         tripSession.start(true)
-        locationCallbackSlot.captured.onSuccess(locationEngineResult)
+        locationUpdateAnswers.invoke(location)
 
         tripSession.stop()
 
-        verify { locationEngine.removeLocationUpdates(locationCallbackSlot.captured) }
+        verify { tripSessionLocationEngine.stopLocationUpdates() }
     }
 
     @Test
@@ -307,26 +277,13 @@ class MapboxTripSessionTest {
 
     @Test
     fun locationObserverSuccessWhenMultipleSamples() = coroutineRule.runBlockingTest {
-        every { locationEngineResult.locations } returns listOf(mockk(), location)
         tripSession.start(true)
         val observer: LocationObserver = mockk(relaxUnitFun = true)
         tripSession.registerLocationObserver(observer)
-
+        locationUpdateAnswers.invoke(mockLocation())
         updateLocationAndJoin()
-
         verify { observer.onRawLocationChanged(location) }
         assertEquals(location, tripSession.getRawLocation())
-
-        tripSession.stop()
-    }
-
-    @Test
-    fun locationObserverOnFailure() {
-        tripSession.start(true)
-
-        locationCallbackSlot.captured.onFailure(Exception("location failure"))
-
-        verify(exactly = 0) { locationEngine.removeLocationUpdates(locationCallbackSlot.captured) }
 
         tripSession.stop()
     }
@@ -366,8 +323,9 @@ class MapboxTripSessionTest {
 
     @Test
     fun locationPushWhenMultipleSamples() = coroutineRule.runBlockingTest {
-        every { locationEngineResult.locations } returns listOf(mockk(), location)
         tripSession.start(true)
+        locationUpdateAnswers.invoke(mockLocation())
+        locationUpdateAnswers.invoke(mockLocation())
         updateLocationAndJoin()
         coVerify { navigator.updateLocation(fixLocation) }
         tripSession.stop()
@@ -501,7 +459,7 @@ class MapboxTripSessionTest {
         val offRouteObserver: OffRouteObserver = mockk(relaxUnitFun = true)
         tripSession.registerOffRouteObserver(offRouteObserver)
         every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
-        locationCallbackSlot.captured.onSuccess(locationEngineResult)
+        locationUpdateAnswers.invoke(mockLocation())
         navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
 
         tripSession.setRoute(route, legIndex)
@@ -527,7 +485,7 @@ class MapboxTripSessionTest {
         val offRouteObserver: OffRouteObserver = mockk(relaxUnitFun = true)
         tripSession.registerOffRouteObserver(offRouteObserver)
         every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
-        locationCallbackSlot.captured.onSuccess(locationEngineResult)
+        locationUpdateAnswers.invoke(mockLocation())
         navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
 
         tripSession.setRoute(null, 0)
@@ -1273,8 +1231,10 @@ class MapboxTripSessionTest {
         unmockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
     }
 
+    private fun mockLocation(): Location = mockk(relaxed = true)
+
     private suspend fun updateLocationAndJoin() {
-        locationCallbackSlot.captured.onSuccess(locationEngineResult)
+        locationUpdateAnswers.invoke(location)
         navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
         parentJob.cancelAndJoin()
     }
