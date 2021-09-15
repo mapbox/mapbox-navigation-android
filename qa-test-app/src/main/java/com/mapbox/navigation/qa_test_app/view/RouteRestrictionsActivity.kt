@@ -132,6 +132,11 @@ class RouteRestrictionsActivity : AppCompatActivity() {
         mapboxNavigation.unregisterLocationObserver(locationObserver)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        mapboxNavigation.onDestroy()
+    }
+
     private fun initStyle() {
         binding.mapView.getMapboxMap().loadStyleUri(
             Style.MAPBOX_STREETS

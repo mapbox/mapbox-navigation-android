@@ -204,8 +204,10 @@ class VanishingRouteLineTest {
                 true,
                 colorResources
             )
-        val restrictedSegments =
-            MapboxRouteLineUtils.getRouteRestrictedSectionsExpressionData(route)
+        val restrictedSegments = MapboxRouteLineUtils.extractRouteData(
+            route,
+            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        )
 
         val result = vanishingRouteLine.getTraveledRouteLineExpressions(
             lineString.coordinates()[0],

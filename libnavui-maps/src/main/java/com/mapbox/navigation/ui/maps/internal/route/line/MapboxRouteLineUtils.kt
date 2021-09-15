@@ -27,16 +27,15 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineAnnotationExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDistancesIndex
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineRestrictedSectionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
@@ -44,7 +43,6 @@ import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.turf.TurfConstants
-import com.mapbox.turf.TurfMeasurement
 import com.mapbox.turf.TurfMisc
 import java.util.UUID
 import kotlin.math.ln
@@ -278,15 +276,23 @@ object MapboxRouteLineUtils {
         }
     }
 
+    // todo this has a lot in common with the method above by the same name
+    // find a way to reduce the code duplication
     internal fun getFilteredRouteLineExpressionData(
         distanceOffset: Double,
-        routeLineExpressionData: List<RouteLineRestrictedSectionData>
-    ): List<RouteLineRestrictedSectionData> {
+        routeLineExpressionData: List<ExtractedRouteData>
+    ): List<ExtractedRouteData> {
         val filteredItems = routeLineExpressionData
             .filter { it.offset > distanceOffset }.distinctBy { it.offset }
         return when (filteredItems.isEmpty()) {
             true -> when (routeLineExpressionData.isEmpty()) {
-                true -> listOf(RouteLineRestrictedSectionData(distanceOffset))
+                true -> listOf(
+                    ExtractedRouteData(
+                        -1.1,
+                        distanceOffset,
+                        trafficCongestionIdentifier = RouteConstants.UNKNOWN_CONGESTION_VALUE
+                    )
+                )
                 false -> listOf(routeLineExpressionData.last().copy(offset = distanceOffset))
             }
             false -> {
@@ -428,7 +434,7 @@ object MapboxRouteLineUtils {
     ): List<RouteLineExpressionData> {
         val congestionProvider =
             getTrafficCongestionAnnotationProvider(route, routeLineColorResources)
-        val annotationExpressionData = getRouteLineAnnotationExpressionDataFromCache(
+        val annotationExpressionData = extractRouteDataWithTrafficAndRoadClassDeDuped(
             route,
             congestionProvider
         )
@@ -457,128 +463,89 @@ object MapboxRouteLineUtils {
         }
     }
 
-    internal val getRouteRestrictedSectionsExpressionData: (route: DirectionsRoute)
-    -> List<RouteLineRestrictedSectionData> = { route: DirectionsRoute ->
-        var runningDistance = 0.0
-        val itemsToReturn = mutableListOf<RouteLineRestrictedSectionData>()
-        route.legs()?.forEachIndexed { legIndex, leg ->
-            ifNonNull(leg.annotation()?.distance()) { distanceList ->
-                val restrictedRanges = getRestrictedRouteLegRanges(leg).asSequence()
-                distanceList.forEachIndexed { index, distance ->
-                    val isLegOrigin = index == 0
-                    val isInRestrictedRange = restrictedRanges.any { it.contains(index) }
-                    val percentDistanceTraveled = runningDistance / route.distance()
-
-                    itemsToReturn.add(
-                        RouteLineRestrictedSectionData(
-                            percentDistanceTraveled,
-                            isInRestrictedRange,
-                            legIndex,
-                            isLegOrigin
-                        )
-                    )
-                    runningDistance += distance
-                }
-            }
-        }
-        itemsToReturn
-    }.cacheResult(1)
-
     /**
-     * This will extract all of the road classes for the various sections of the route
-     * and determine the distance from the origin point to the starting point for each
-     * road class section and associate that data with a traffic congestion value.
-     *
-     * Each item returned represents a distance from the origin point, the road class
-     * beginning at that distance and the traffic congestion value for that section. The
-     * road class and congestion remain until the next item in the collections.
-     *
-     * The items returned are ordered from the point closest to the origin to the point
-     * farthest from the origin. In other words from the beginning of the route until the end.
+     * Extracts data from the [DirectionsRoute] and removes items that are deemed duplicates based
+     * on factors such as traffic congestion and/or road class. The results are cached for
+     * performance reasons.
      */
-    internal fun getRouteLineAnnotationExpressionData(
+    internal val extractRouteDataWithTrafficAndRoadClassDeDuped: (
         route: DirectionsRoute,
         trafficCongestionProvider: (RouteLeg) -> List<String>?
-    ): List<RouteLineAnnotationExpressionData> {
-        var runningDistance = 0.0
-        val routeLineTrafficData = mutableListOf<RouteLineAnnotationExpressionData>()
-        route.legs()?.forEachIndexed { legIndex, leg ->
-            ifNonNull(leg.annotation()?.distance()) { distanceList ->
-                val closureRanges = getClosureRanges(leg).asSequence()
-                val intersectionsWithGeometryIndex =
-                    getIntersectionsWithGeometryIndex(leg.steps())
-                val roadClassArray = getRoadClassArray(intersectionsWithGeometryIndex)
-                trafficCongestionProvider(leg)?.forEachIndexed { index, congestion ->
-                    val isInAClosure = closureRanges.any { it.contains(index) }
-                    val congestionValue: String = when {
-                        isInAClosure -> RouteConstants.CLOSURE_CONGESTION_VALUE
-                        else -> congestion
-                    }
-                    val roadClass = getRoadClassForIndex(roadClassArray, index)
-                    if (index == 0) {
-                        val distanceFromOrigin = if (legIndex > 0) {
-                            runningDistance += distanceList[index]
-                            runningDistance
-                        } else {
-                            0.0
-                        }
-
-                        val isLegOrigin = if (routeLineTrafficData.isEmpty()) {
-                            true
-                        } else legIndex != routeLineTrafficData.last().legIndex
-
-                        routeLineTrafficData.add(
-                            RouteLineAnnotationExpressionData(
-                                distanceFromOrigin,
-                                congestionValue,
-                                roadClass,
-                                legIndex,
-                                isLegOrigin
-                            )
-                        )
-                    } else {
-                        // The value of distanceList[0] could be 0 for a leg index greater than
-                        // 0. Such a condition would not increment the running distance and could
-                        // result in two items in the collection returned to have duplicate values
-                        // for the distanceFromOrigin. This would be an erroneous condition
-                        // since this collection will be used to create a Maps Expression for
-                        // a gradient line. The Expression requires strictly ascending values.
-                        runningDistance += if (legIndex > 0 && distanceList[index - 1] == 0.0) {
-                            val routeGeometry = decodeRoute(route)
-                            TurfMeasurement.distance(
-                                routeGeometry.coordinates()[routeLineTrafficData.lastIndex],
-                                routeGeometry.coordinates()[routeLineTrafficData.lastIndex + 1]
-                            )
-                        } else {
-                            distanceList[index - 1]
-                        }
-
-                        val last = routeLineTrafficData.lastOrNull()
-                        if (last?.trafficCongestionIdentifier == congestionValue &&
-                            last.roadClass == roadClass
-                        ) {
-                            // continue
-                        } else if (last?.trafficCongestionIdentifier == congestionValue &&
-                            roadClass == null
-                        ) {
-                            // continue
-                        } else {
-                            routeLineTrafficData.add(
-                                RouteLineAnnotationExpressionData(
-                                    runningDistance,
-                                    congestionValue,
-                                    roadClass,
-                                    legIndex
-                                )
-                            )
-                        }
-                    }
+    ) -> List<ExtractedRouteData> =
+        { route: DirectionsRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
+            val extractedRouteDataItems = extractRouteData(
+                route,
+                trafficCongestionProvider
+            )
+            extractedRouteDataItems.filterIndexed { index, extractedRouteData ->
+                when {
+                    index == 0 -> true
+                    extractedRouteDataItems[index].isLegOrigin -> true
+                    extractedRouteDataItems[index - 1].trafficCongestionIdentifier ==
+                        extractedRouteData.trafficCongestionIdentifier &&
+                        extractedRouteDataItems[index - 1].roadClass ==
+                        extractedRouteData.roadClass -> false
+                    extractedRouteDataItems[index - 1].trafficCongestionIdentifier ==
+                        extractedRouteData.trafficCongestionIdentifier &&
+                        extractedRouteData.roadClass == null -> false
+                    else -> true
                 }
-                runningDistance += distanceList.last()
+            }
+        }.cacheResult(3)
+
+    /**
+     * Extracts data from the [DirectionsRoute] in a format more useful to the route line
+     * API. The data returned here is used by several different calculations. The results
+     * are cached for performance reasons.
+     */
+    internal val extractRouteData: (
+        route: DirectionsRoute,
+        trafficCongestionProvider: (RouteLeg) -> List<String>?
+    ) -> List<ExtractedRouteData> = {
+        route: DirectionsRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
+        var runningDistance = 0.0
+        val itemsToReturn = mutableListOf<ExtractedRouteData>()
+        route.legs()?.forEachIndexed { legIndex, leg ->
+            val restrictedRanges = getRestrictedRouteLegRanges(leg).asSequence()
+            val closureRanges = getClosureRanges(leg).asSequence()
+            val intersectionsWithGeometryIndex = getIntersectionsWithGeometryIndex(leg.steps())
+            val roadClassArray = getRoadClassArray(intersectionsWithGeometryIndex)
+            val trafficCongestion = trafficCongestionProvider.invoke(leg)
+
+            // There have been multi-leg routes observed that have the same coordinate twice
+            // which results in a distance of 0.0 in the distance array since.  The duplicated
+            // coordinate seems to occur at the point the next leg begins. This distance item
+            // is filtered out here.
+            leg.annotation()?.distance()?.filter { it > 0.0 }?.forEachIndexed { index, distance ->
+                val percentDistanceTraveled = runningDistance / route.distance()
+                val isLegOrigin = index == 0
+                val isInRestrictedRange = restrictedRanges.any { it.contains(index) }
+                val isInAClosure = closureRanges.any { it.contains(index) }
+                val congestionValue: String = when {
+                    isInAClosure -> RouteConstants.CLOSURE_CONGESTION_VALUE
+                    trafficCongestion?.isEmpty() ?: true -> RouteConstants.UNKNOWN_CONGESTION_VALUE
+                    index > trafficCongestion?.size ?: 0 -> RouteConstants.UNKNOWN_CONGESTION_VALUE
+                    else -> trafficCongestion?.get(index) ?: RouteConstants.UNKNOWN_CONGESTION_VALUE
+                }
+                val roadClass = getRoadClassForIndex(roadClassArray, index)
+
+                itemsToReturn.add(
+                    ExtractedRouteData(
+                        runningDistance,
+                        percentDistanceTraveled,
+                        isInRestrictedRange,
+                        congestionValue,
+                        roadClass,
+                        legIndex,
+                        isLegOrigin
+                    )
+                )
+                runningDistance += distance
             }
         }
-        return routeLineTrafficData
-    }
+
+        itemsToReturn
+    }.cacheResult(3)
 
     internal val getRouteLegTrafficNumericCongestionProvider: (
         routeLineColorResources: RouteLineColorResources
@@ -609,17 +576,6 @@ object MapboxRouteLineUtils {
             getRouteLegTrafficCongestionProvider
         }
     }
-
-    internal val getRouteLineAnnotationExpressionDataFromCache: (
-        route: DirectionsRoute,
-        trafficCongestionProvider: (RouteLeg) -> List<String>?
-    ) -> List<RouteLineAnnotationExpressionData> =
-        { route: DirectionsRoute, trafficCongestionProvider: (RouteLeg) -> List<String>? ->
-            getRouteLineAnnotationExpressionData(
-                route,
-                trafficCongestionProvider
-            )
-        }.cacheResult(3)
 
     private fun getClosureRanges(leg: RouteLeg): List<IntRange> {
         return leg.closures()
@@ -702,7 +658,7 @@ object MapboxRouteLineUtils {
      * substitution should occur.
      */
     internal fun getRouteLineExpressionDataWithStreetClassOverride(
-        annotationExpressionData: List<RouteLineAnnotationExpressionData>,
+        annotationExpressionData: List<ExtractedRouteData>,
         routeDistance: Double,
         routeLineColorResources: RouteLineColorResources,
         isPrimaryRoute: Boolean,
@@ -1161,28 +1117,17 @@ object MapboxRouteLineUtils {
         }
     }
 
-    internal val getRestrictedSectionExpressionData: (DirectionsRoute, RouteLineColorResources)
-    -> List<RouteLineExpressionData> =
-        { route: DirectionsRoute, routeLineColorResources: RouteLineColorResources ->
-            val congestionProvider =
-                getTrafficCongestionAnnotationProvider(route, routeLineColorResources)
-            getRouteLineAnnotationExpressionDataFromCache(route, congestionProvider).map {
-                val percentDistanceTraveled = it.distanceFromOrigin / route.distance()
-                RouteLineExpressionData(
-                    percentDistanceTraveled,
-                    routeLineColorResources.restrictedRoadColor,
-                    it.legIndex
-                )
-            }
-        }.cacheResult(1)
-
     internal fun getRestrictedLineExpressionProducer(
         route: DirectionsRoute,
         vanishingPointOffset: Double,
         activeLegIndex: Int,
         routeLineColorResources: RouteLineColorResources
     ): RouteLineExpressionProvider = {
-        val expData = getRouteRestrictedSectionsExpressionData(route)
+        val expData = extractRouteData(
+            route,
+            getTrafficCongestionAnnotationProvider(route, routeLineColorResources)
+        )
+
         getRestrictedLineExpression(
             vanishingPointOffset,
             activeLegIndex,
@@ -1208,7 +1153,7 @@ object MapboxRouteLineUtils {
         vanishingPointOffset: Double,
         activeLegIndex: Int,
         restrictedSectionColor: Int,
-        routeLineExpressionData: List<RouteLineRestrictedSectionData>
+        routeLineExpressionData: List<ExtractedRouteData>
     ): Expression {
         var lastColor = Int.MAX_VALUE
         val expressionBuilder = Expression.ExpressionBuilder("step")
