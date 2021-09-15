@@ -26,6 +26,7 @@ import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
+import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
@@ -33,7 +34,6 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineRestrictedSectionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
@@ -282,10 +282,16 @@ class MapboxRouteLineApi(
             RouteConstants.SOFT_GRADIENT_STOP_GAP_METERS / route.distance()
         } ?: .00000000001 // an arbitrarily small value so Expression values are in ascending order
 
-        val restrictedExpressionData: List<RouteLineRestrictedSectionData>? =
+        val restrictedExpressionData: List<ExtractedRouteData>? =
             ifNonNull(primaryRoute) { route ->
                 if (routeLineOptions.displayRestrictedRoadSections && routeHasRestrictions) {
-                    MapboxRouteLineUtils.getRouteRestrictedSectionsExpressionData(route)
+                    MapboxRouteLineUtils.extractRouteData(
+                        route,
+                        MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                            route,
+                            routeLineOptions.resourceProvider.routeLineColorResources
+                        )
+                    )
                 } else {
                     null
                 }
@@ -404,8 +410,13 @@ class MapboxRouteLineApi(
 
             val restrictedLineExpression = ifNonNull(primaryRoute) { route ->
                 if (routeLineOptions.displayRestrictedRoadSections && routeHasRestrictions) {
-                    val expressionData =
-                        MapboxRouteLineUtils.getRouteRestrictedSectionsExpressionData(route)
+                    val routeData = MapboxRouteLineUtils.extractRouteData(
+                        route,
+                        MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                            route,
+                            routeLineOptions.resourceProvider.routeLineColorResources
+                        )
+                    )
                     MapboxRouteLineUtils.getRestrictedLineExpression(
                         offset,
                         activeLegIndex,
@@ -413,7 +424,7 @@ class MapboxRouteLineApi(
                             .resourceProvider
                             .routeLineColorResources
                             .restrictedRoadColor,
-                        expressionData
+                        routeData
                     )
                 } else {
                     null
@@ -585,8 +596,14 @@ class MapboxRouteLineApi(
                         ) {
                             ifNonNull(primaryRoute) { route ->
                                 val expressionData =
-                                    MapboxRouteLineUtils.getRouteRestrictedSectionsExpressionData(
-                                        route
+                                    MapboxRouteLineUtils.extractRouteData(
+                                        route,
+                                        MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(
+                                            route,
+                                            routeLineOptions
+                                                .resourceProvider
+                                                .routeLineColorResources
+                                        )
                                     )
                                 MapboxRouteLineUtils.getRestrictedLineExpression(
                                     0.0,

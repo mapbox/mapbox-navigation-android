@@ -28,7 +28,6 @@ import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRestrictedRouteLegRanges
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineAnnotationExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
@@ -125,26 +124,16 @@ class MapboxRouteLineUtilsTest {
     @Test
     fun getRestrictedSectionExpressionData() {
         val route = loadRoute("route-with-restrictions.json")
-        val colorResources = RouteLineColorResources.Builder()
-            .restrictedRoadColor(Color.CYAN)
-            .build()
 
-        val result = MapboxRouteLineUtils.getRestrictedSectionExpressionData(route, colorResources)
+        val result = MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
+            route,
+            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        )
 
         assertEquals(14, result.size)
-    }
-
-    @Test
-    fun getRestrictedSectionExpressionData_resultCached() {
-        val route = loadRoute("route-with-restrictions.json")
-        val colorResources = mockk<RouteLineColorResources> {
-            every { restrictedRoadColor } returns Color.CYAN
-        }
-
-        MapboxRouteLineUtils.getRestrictedSectionExpressionData(route, colorResources)
-        MapboxRouteLineUtils.getRestrictedSectionExpressionData(route, colorResources)
-
-        verify(exactly = 14) { colorResources.restrictedRoadColor }
+        assertTrue(result[4].isInRestrictedSection)
+        assertFalse(result[5].isInRestrictedSection)
+        assertTrue(result[6].isInRestrictedSection)
     }
 
     @Test
@@ -156,7 +145,10 @@ class MapboxRouteLineUtilsTest {
             "[rgba, 0.0, 0.0, 0.0, 0.0]]"
 
         val route = loadRoute("route-with-restrictions.json")
-        val expData = MapboxRouteLineUtils.getRouteRestrictedSectionsExpressionData(route)
+        val expData = MapboxRouteLineUtils.extractRouteData(
+            route,
+            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        )
 
         val expression = MapboxRouteLineUtils.getRestrictedLineExpression(
             0.2,
@@ -209,7 +201,10 @@ class MapboxRouteLineUtilsTest {
         val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.2, " +
             "[rgba, 0.0, 0.0, 0.0, 0.0]]"
         val route = loadRoute("short_route.json")
-        val expData = MapboxRouteLineUtils.getRouteRestrictedSectionsExpressionData(route)
+        val expData = MapboxRouteLineUtils.extractRouteData(
+            route,
+            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        )
 
         val expression = MapboxRouteLineUtils.getRestrictedLineExpression(
             0.2,
@@ -813,7 +808,7 @@ class MapboxRouteLineUtilsTest {
             ?.map { it.mapboxStreetsV8()!!.roadClass() }
             ?.toList()
 
-        val result = MapboxRouteLineUtils.getRouteLineAnnotationExpressionData(
+        val result = MapboxRouteLineUtils.extractRouteData(
             route,
             MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
         )
@@ -842,7 +837,7 @@ class MapboxRouteLineUtilsTest {
     fun getRouteLineTrafficExpressionDataMultiLegRouteWithTrafficChangeAtWaypoint() {
         val route = loadRoute("multileg-route-two-legs.json")
 
-        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineAnnotationExpressionData(
+        val trafficExpressionData = MapboxRouteLineUtils.extractRouteData(
             route,
             MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
         )
@@ -856,7 +851,7 @@ class MapboxRouteLineUtilsTest {
         val routeAsJsonJson = loadJsonFixture("route-with-road-classes.txt")
         val route = DirectionsRoute.fromJson(routeAsJsonJson)
 
-        val result = MapboxRouteLineUtils.getRouteLineAnnotationExpressionData(
+        val result = MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
             route,
             MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
         )
@@ -873,7 +868,7 @@ class MapboxRouteLineUtilsTest {
             loadJsonFixture("motorway-route-with-road-classes-mixed.json")
         val route = DirectionsRoute.fromJson(routeAsJsonJson)
 
-        val result = MapboxRouteLineUtils.getRouteLineAnnotationExpressionData(
+        val result = MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
             route,
             MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
         )
@@ -912,11 +907,12 @@ class MapboxRouteLineUtilsTest {
 
         val routeAsJsonJson = loadJsonFixture("motorway-route-with-road-classes.json")
         val route = DirectionsRoute.fromJson(routeAsJsonJson)
+        val trafficExpressionData =
+            MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
+                route,
+                MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+            )
 
-        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineAnnotationExpressionData(
-            route,
-            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
-        )
         val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
             trafficExpressionData,
             route.distance(),
@@ -946,11 +942,12 @@ class MapboxRouteLineUtilsTest {
         val routeAsJsonJson =
             loadJsonFixture("motorway-route-with-road-classes-mixed.json")
         val route = DirectionsRoute.fromJson(routeAsJsonJson)
+        val trafficExpressionData =
+            MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
+                route,
+                MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+            )
 
-        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineAnnotationExpressionData(
-            route,
-            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
-        )
         val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
             trafficExpressionData,
             route.distance(),
@@ -989,11 +986,12 @@ class MapboxRouteLineUtilsTest {
 
         val routeAsJsonJson = loadJsonFixture("route-with-closure.json")
         val route = DirectionsRoute.fromJson(routeAsJsonJson)
+        val trafficExpressionData =
+            MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
+                route,
+                MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+            )
 
-        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineAnnotationExpressionData(
-            route,
-            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
-        )
         val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
             trafficExpressionData,
             route.distance(),
@@ -1015,7 +1013,7 @@ class MapboxRouteLineUtilsTest {
         val routeAsJsonJson = loadJsonFixture("route-with-traffic-no-street-classes.txt")
         val route = DirectionsRoute.fromJson(routeAsJsonJson)
 
-        val result = MapboxRouteLineUtils.getRouteLineAnnotationExpressionData(
+        val result = MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
             route,
             MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
         )
@@ -1042,10 +1040,12 @@ class MapboxRouteLineUtilsTest {
 
         val routeAsJsonJson = loadJsonFixture("route-with-road-classes.txt")
         val route = DirectionsRoute.fromJson(routeAsJsonJson)
-        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineAnnotationExpressionData(
-            route,
-            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
-        )
+        val trafficExpressionData =
+            MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
+                route,
+                MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+            )
+
         assertEquals("service", trafficExpressionData[0].roadClass)
         assertEquals("street", trafficExpressionData[1].roadClass)
         assertEquals(
@@ -1084,13 +1084,13 @@ class MapboxRouteLineUtilsTest {
             .routeModerateCongestionColor(33)
             .routeSevereCongestionColor(33)
             .build()
-
         val routeAsJsonJson = loadJsonFixture("route-with-traffic-no-street-classes.txt")
         val route = DirectionsRoute.fromJson(routeAsJsonJson)
-        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineAnnotationExpressionData(
-            route,
-            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
-        )
+        val trafficExpressionData =
+            MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
+                route,
+                MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+            )
 
         val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
             trafficExpressionData,
@@ -1124,10 +1124,12 @@ class MapboxRouteLineUtilsTest {
         )
         val route = DirectionsRoute.fromJson(routeAsJsonJson)
 
-        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineAnnotationExpressionData(
-            route,
-            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
-        )
+        val trafficExpressionData =
+            MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
+                route,
+                MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+            )
+
         val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
             trafficExpressionData,
             route.distance(),
@@ -1149,7 +1151,7 @@ class MapboxRouteLineUtilsTest {
         )
         val route = DirectionsRoute.fromJson(routeAsJsonJson)
 
-        val result = MapboxRouteLineUtils.getRouteLineAnnotationExpressionData(
+        val result = MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
             route,
             MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
         )
@@ -1197,10 +1199,12 @@ class MapboxRouteLineUtilsTest {
         )
         val route = DirectionsRoute.fromJson(routeAsJsonJson)
 
-        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineAnnotationExpressionData(
-            route,
-            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
-        )
+        val trafficExpressionData =
+            MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
+                route,
+                MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+            )
+
         val result = MapboxRouteLineUtils.getRouteLineExpressionDataWithStreetClassOverride(
             trafficExpressionData,
             route.distance(),
@@ -1218,10 +1222,11 @@ class MapboxRouteLineUtilsTest {
         val routeAsJsonJson = loadJsonFixture("route-with-closure.json")
         val route = DirectionsRoute.fromJson(routeAsJsonJson)
 
-        val trafficExpressionData = MapboxRouteLineUtils.getRouteLineAnnotationExpressionData(
-            route,
-            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
-        )
+        val trafficExpressionData =
+            MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
+                route,
+                MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+            )
 
         assertEquals(0.0, trafficExpressionData[0].distanceFromOrigin, 0.0)
         assertEquals("low", trafficExpressionData[0].trafficCongestionIdentifier)
@@ -1245,8 +1250,10 @@ class MapboxRouteLineUtilsTest {
         val expectedDistanceFromOriginIndex20 =
             route.legs()!!.first().annotation()!!.distance()!!.subList(0, 20).sum()
 
-        val trafficExpressionData =
-            MapboxRouteLineUtils.getRouteRestrictedSectionsExpressionData(route)
+        val trafficExpressionData = MapboxRouteLineUtils.extractRouteData(
+            route,
+            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        )
 
         assertEquals(0.0, trafficExpressionData[0].offset, 0.0)
         assertEquals(true, trafficExpressionData[0].isLegOrigin)
@@ -1292,14 +1299,21 @@ class MapboxRouteLineUtilsTest {
     @Test
     fun getRouteLineTrafficExpressionData_whenFirstDistanceInSecondLegIsZero() {
         val route = getMultilegWithTwoLegs()
-        val result = MapboxRouteLineUtils.getRouteLineAnnotationExpressionData(
+        val routeGeometry = LineString.fromPolyline(
+            route.geometry() ?: "",
+            Constants.PRECISION_6
+        )
+
+        val result = MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
             route,
             MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
         )
 
-        assertEquals(20, result.size)
+        assertEquals(19, result.size)
         assertEquals(478.70000000000005, result[7].distanceFromOrigin, 0.0)
-        assertEquals(478.73487833756155, result[8].distanceFromOrigin, 0.0)
+        assertTrue(result[7].isLegOrigin)
+        assertEquals(499.50000000000006, result[8].distanceFromOrigin, 0.0)
+        assertFalse(result[8].isLegOrigin)
     }
 
     @Test
@@ -1326,7 +1340,7 @@ class MapboxRouteLineUtilsTest {
 
         assertEquals(20, result.size)
         assertEquals(0.039793906743275334, result[1].offset, 0.0)
-        assertEquals(0.9924011283895643, result.last().offset, 0.0)
+        assertEquals(0.989831291992653, result.last().offset, 0.0)
     }
 
     @Test
@@ -1812,14 +1826,14 @@ class MapboxRouteLineUtilsTest {
             "[rgba, 255.0, 149.0, 0.0, 1.0], 0.3010856620825788, [rgba, 255.0, 149.0, 0.0, 1.0]," +
             " 0.32147751186805656, [rgba, 86.0, 168.0, 251.0, 1.0], 0.467687074829932, " +
             "[rgba, 86.0, 168.0, 251.0, 1.0], 0.48807892461540975, " +
-            "[rgba, 143.0, 36.0, 71.0, 1.0], 0.48807892462540975, [rgba, 143.0, 36.0, 71.0, 1.0]," +
-            " 0.48811448630642584, [rgba, 255.0, 149.0, 0.0, 1.0], 0.5199257719717711, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5403176217572488, [rgba, 86.0, 168.0, 251.0, 1.0]," +
-            " 0.5487802394182222, [rgba, 86.0, 168.0, 251.0, 1.0], 0.5691720892036999, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5692740484526273, [rgba, 255.0, 149.0, 0.0, 1.0]," +
-            " 0.589665898238105, [rgba, 86.0, 168.0, 251.0, 1.0], 0.8633245223592163, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.883716372144694, [rgba, 255.0, 149.0, 0.0, 1.0]," +
-            " 0.9186883945267883, [rgba, 255.0, 149.0, 0.0, 1.0], 0.939080244312266, " +
+            "[rgba, 143.0, 36.0, 71.0, 1.0], 0.4888945986068289, [rgba, 143.0, 36.0, 71.0, 1.0]," +
+            " 0.5092864483923066, [rgba, 255.0, 149.0, 0.0, 1.0], 0.5317174831563323, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.55210933294181, [rgba, 86.0, 168.0, 251.0, 1.0]," +
+            " 0.5692384867616113, [rgba, 86.0, 168.0, 251.0, 1.0], 0.589630336547089, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5904460105385081, [rgba, 255.0, 149.0, 0.0, 1.0]," +
+            " 0.6108378603239858, [rgba, 86.0, 168.0, 251.0, 1.0], 0.8839866882004601, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.9043785379859378, [rgba, 255.0, 149.0, 0.0, 1.0]," +
+            " 0.9329271276856067, [rgba, 255.0, 149.0, 0.0, 1.0], 0.9533189774710844, " +
             "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val colorResources = RouteLineColorResources.Builder().build()
         val route = getMultilegWithTwoLegs()
@@ -2014,15 +2028,16 @@ class MapboxRouteLineUtilsTest {
             MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(route, colorResources)
 
         val trafficExpressionData =
-            MapboxRouteLineUtils.getRouteLineAnnotationExpressionDataFromCache(
+            MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
                 route,
                 annotationProvider
             )
-        MapboxRouteLineUtils.getRouteLineAnnotationExpressionDataFromCache(
+
+        MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
             route,
             MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(route, colorResources)
         )
-        MapboxRouteLineUtils.getRouteLineAnnotationExpressionDataFromCache(
+        MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
             route,
             MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(route, colorResources)
         )
@@ -2043,12 +2058,13 @@ class MapboxRouteLineUtilsTest {
             MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(route, colorResources)
 
         val trafficExpressionData =
-            MapboxRouteLineUtils.getRouteLineAnnotationExpressionDataFromCache(
+            MapboxRouteLineUtils.extractRouteData(
                 route,
                 annotationProvider
             )
 
-        assertEquals(listOf<RouteLineAnnotationExpressionData>(), trafficExpressionData)
+        assertEquals("unknown", trafficExpressionData[0].trafficCongestionIdentifier)
+        assertEquals(21, trafficExpressionData.size)
     }
 
     @Test
@@ -2062,38 +2078,13 @@ class MapboxRouteLineUtilsTest {
             MapboxRouteLineUtils.getTrafficCongestionAnnotationProvider(route, colorResources)
 
         val trafficExpressionData =
-            MapboxRouteLineUtils.getRouteLineAnnotationExpressionDataFromCache(
+            MapboxRouteLineUtils.extractRouteData(
                 route,
                 annotationProvider
             )
 
-        assertEquals(listOf<RouteLineAnnotationExpressionData>(), trafficExpressionData)
-    }
-
-    @Test
-    fun getRouteLineTrafficExpressionDataFromCache_cacheCheck() {
-        var counter = 0
-        val trafficCongestionProvider: (RouteLeg) -> List<String>? = {
-            counter += 1
-            null
-        }
-        val routeAsJsonJson = loadJsonFixture("short_route.json")
-        val route = DirectionsRoute.fromJson(routeAsJsonJson)
-
-        MapboxRouteLineUtils.getRouteLineAnnotationExpressionDataFromCache(
-            route,
-            trafficCongestionProvider
-        )
-        MapboxRouteLineUtils.getRouteLineAnnotationExpressionDataFromCache(
-            route,
-            trafficCongestionProvider
-        )
-        MapboxRouteLineUtils.getRouteLineAnnotationExpressionDataFromCache(
-            route,
-            trafficCongestionProvider
-        )
-
-        assertEquals(1, counter)
+        assertEquals("unknown", trafficExpressionData[0].trafficCongestionIdentifier)
+        assertEquals(21, trafficExpressionData.size)
     }
 
     @Test
@@ -2179,7 +2170,10 @@ class MapboxRouteLineUtilsTest {
     fun getRouteRestrictedSectionsExpressionData() {
         val route = loadRoute("route-with-restrictions.json")
 
-        val result = MapboxRouteLineUtils.getRouteRestrictedSectionsExpressionData(route)
+        val result = MapboxRouteLineUtils.extractRouteData(
+            route,
+            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        )
 
         assertEquals(40, result.size)
         assertTrue(result.first().isLegOrigin)
@@ -2194,9 +2188,12 @@ class MapboxRouteLineUtilsTest {
     fun getRouteRestrictedSectionsExpressionData_multiLegRoute() {
         val route = loadRoute("two-leg-route-with-restrictions.json")
 
-        val result = MapboxRouteLineUtils.getRouteRestrictedSectionsExpressionData(route)
+        val result = MapboxRouteLineUtils.extractRouteData(
+            route,
+            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        )
 
-        assertEquals(46, result.size)
+        assertEquals(45, result.size)
         assertTrue(result.first().isLegOrigin)
         assertFalse(result[1].isInRestrictedSection)
         assertTrue(result[2].isInRestrictedSection)
@@ -2210,13 +2207,13 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
-    fun getRouteRestrictedSectionsExpressionData_cacheCheck() {
+    fun extractRouteData_cacheCheck() {
         val route = mockk<DirectionsRoute> {
             every { legs() } returns null
         }
-
-        MapboxRouteLineUtils.getRouteRestrictedSectionsExpressionData(route)
-        val result = MapboxRouteLineUtils.getRouteRestrictedSectionsExpressionData(route)
+        val trafficCongestionProvider = MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        MapboxRouteLineUtils.extractRouteData(route, trafficCongestionProvider)
+        val result = MapboxRouteLineUtils.extractRouteData(route, trafficCongestionProvider)
 
         assertTrue(result.isEmpty())
         verify(exactly = 1) { route.legs() }
