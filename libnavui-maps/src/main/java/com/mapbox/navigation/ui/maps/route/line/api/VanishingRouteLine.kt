@@ -9,10 +9,10 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.parseRoutePoints
+import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineRestrictedSectionData
 import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineExpressions
@@ -106,7 +106,7 @@ internal class VanishingRouteLine {
     internal fun getTraveledRouteLineExpressions(
         point: Point,
         routeLineExpressionData: List<RouteLineExpressionData>,
-        restrictedLineExpressionData: List<RouteLineRestrictedSectionData>?,
+        restrictedLineExpressionData: List<ExtractedRouteData>?,
         routeResourceProvider: RouteLineResources,
         activeLegIndex: Int,
         softGradientTransition: Double,
