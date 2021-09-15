@@ -7,6 +7,7 @@ package com.mapbox.navigation.core {
     method public com.mapbox.navigator.Experimental getExperimental();
     method public com.mapbox.navigation.core.trip.session.eh.GraphAccessor getGraphAccessor();
     method public com.mapbox.navigation.core.history.MapboxHistoryRecorder getHistoryRecorder();
+    method public com.mapbox.navigation.core.replay.MapboxReplayer getMapboxReplayer();
     method public com.mapbox.navigation.base.options.NavigationOptions getNavigationOptions();
     method public com.mapbox.navigation.core.trip.session.NavigationSessionState getNavigationSessionState();
     method public com.mapbox.navigation.core.reroute.RerouteController? getRerouteController();
@@ -45,6 +46,7 @@ package com.mapbox.navigation.core {
     method public void setRerouteController();
     method public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes, int initialLegIndex = 0);
     method public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
+    method public void startReplayTripSession(boolean withForegroundService = true);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession(boolean withForegroundService = true);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession();
     method public void stopTripSession();
@@ -67,6 +69,7 @@ package com.mapbox.navigation.core {
     property public final com.mapbox.navigation.core.trip.session.eh.GraphAccessor graphAccessor;
     property public final com.mapbox.navigation.core.history.MapboxHistoryRecorder historyRecorder;
     property public final boolean isDestroyed;
+    property public final com.mapbox.navigation.core.replay.MapboxReplayer mapboxReplayer;
     property public final com.mapbox.navigation.base.options.NavigationOptions navigationOptions;
     property public final com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcher roadObjectMatcher;
     property public final com.mapbox.navigation.core.trip.session.eh.RoadObjectsStore roadObjectsStore;

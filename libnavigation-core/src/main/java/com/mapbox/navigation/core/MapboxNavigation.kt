@@ -49,6 +49,7 @@ import com.mapbox.navigation.core.internal.ReachabilityService
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.internal.utils.InternalUtils
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
+import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
@@ -76,6 +77,7 @@ import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
@@ -195,6 +197,7 @@ class MapboxNavigation(
     private val tripService: TripService
     private val tripSession: TripSession
     private val navigationSession: NavigationSession
+    private val tripSessionLocationEngine: TripSessionLocationEngine
     private val billingController: BillingController
     private val logger = LoggerProvider.logger
     private val connectivityHandler: ConnectivityHandler = ConnectivityHandler(
@@ -354,9 +357,12 @@ class MapboxNavigation(
             notification,
             logger
         )
+        tripSessionLocationEngine = NavigationComponentProvider.createTripSessionLocationEngine(
+            navigationOptions = navigationOptions
+        )
         tripSession = NavigationComponentProvider.createTripSession(
             tripService = tripService,
-            navigationOptions = navigationOptions,
+            tripSessionLocationEngine = tripSessionLocationEngine,
             navigator = navigator,
             logger = logger,
         )
@@ -435,6 +441,12 @@ class MapboxNavigation(
     }
 
     /**
+     * Control the location events playback during a replay trip session.
+     * Start a replay trip session with [startReplayTripSession].
+     */
+    val mapboxReplayer: MapboxReplayer by lazy { tripSessionLocationEngine.mapboxReplayer }
+
+    /**
      * Starts listening for location updates and enters an `Active Guidance` state if there's a primary route available
      * or a `Free Drive` state otherwise.
      *
@@ -450,7 +462,10 @@ class MapboxNavigation(
     @JvmOverloads
     fun startTripSession(withForegroundService: Boolean = true) {
         runIfNotDestroyed {
-            tripSession.start(withForegroundService)
+            tripSession.start(
+                withTripService = withForegroundService,
+                withReplayEnabled = false
+            )
             notificationChannelField?.let {
                 monitorNotificationActionButton(it.get(null) as ReceiveChannel<NotificationAction>)
             }
@@ -465,6 +480,21 @@ class MapboxNavigation(
     fun stopTripSession() {
         runIfNotDestroyed {
             tripSession.stop()
+        }
+    }
+
+    /**
+     * Functionally the same as [startTripSession] except the locations do not come from the
+     * [NavigationOptions.locationEngine]. The events are emitted by the [mapboxReplayer].
+     *
+     * This allows you to simulate navigation routes or replay history from the [historyRecorder].
+     */
+    fun startReplayTripSession(withForegroundService: Boolean = true) {
+        runIfNotDestroyed {
+            tripSession.start(
+                withTripService = withForegroundService,
+                withReplayEnabled = true
+            )
         }
     }
 
