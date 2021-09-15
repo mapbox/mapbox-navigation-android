@@ -30,6 +30,10 @@ internal class ArrivalProgressObserver(
         arrivalObservers.remove(arrivalObserver)
     }
 
+    fun unregisterAllObservers() {
+        arrivalObservers.clear()
+    }
+
     fun navigateNextRouteLeg(): Boolean {
         val routeProgress = tripSession.getRouteProgress()
         val numberOfLegs = routeProgress?.route?.legs()?.size

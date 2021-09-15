@@ -111,6 +111,7 @@ class MapboxNavigationTest {
     private val logger: Logger = mockk(relaxUnitFun = true)
     private val rerouteController: RerouteController = mockk(relaxUnitFun = true)
     private lateinit var navigationOptions: NavigationOptions
+    private val arrivalProgressObserver: ArrivalProgressObserver = mockk(relaxUnitFun = true)
 
     private val applicationContext: Context = mockk(relaxed = true) {
         every { inferDeviceLocale() } returns Locale.US
@@ -194,8 +195,11 @@ class MapboxNavigationTest {
         mockNavigationSession()
         mockNavTelemetry()
         every {
-            NavigationComponentProvider.createBillingController(any(), any(), any())
+            NavigationComponentProvider.createBillingController(any(), any(), any(), any())
         } returns billingController
+        every {
+            NavigationComponentProvider.createArrivalProgressObserver(tripSession)
+        } returns arrivalProgressObserver
 
         every { navigator.create(any(), any(), any(), any(), any()) } returns navigator
     }
@@ -469,6 +473,14 @@ class MapboxNavigationTest {
             tripSession.stop()
             MapboxNavigationTelemetry.destroy(mapboxNavigation)
         }
+    }
+
+    @Test
+    fun unregisterAllArrivalObservers() {
+        createMapboxNavigation()
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { arrivalProgressObserver.unregisterAllObservers() }
     }
 
     @Test
