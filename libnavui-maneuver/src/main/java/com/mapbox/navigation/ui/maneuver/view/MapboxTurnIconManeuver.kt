@@ -2,12 +2,13 @@ package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.mapbox.navigation.base.internal.maneuver.ManeuverTurnIcon
 import com.mapbox.navigation.ui.maneuver.R
-import com.mapbox.navigation.ui.maneuver.TurnIconHelper
+import com.mapbox.navigation.ui.maneuver.api.MapboxTurnIconsApi
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.SubManeuver
 import com.mapbox.navigation.ui.maneuver.model.TurnIconResources
@@ -17,7 +18,7 @@ import com.mapbox.navigation.ui.utils.internal.ifNonNull
  * Default view to render the maneuver turn icon onto [MapboxManeuverView].
  * It can be directly used in any other layout.
  * @property turnIconResources TurnIconResources
- * @property turnIconHelper TurnIconHelper
+ * @property turnIconsApi MapboxTurnIconsApi
  * @constructor
  */
 class MapboxTurnIconManeuver @JvmOverloads constructor(
@@ -26,10 +27,14 @@ class MapboxTurnIconManeuver @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : AppCompatImageView(context, attrs, defStyleAttr) {
 
+    companion object {
+        private val TAG = MapboxTurnIconManeuver::class.java.simpleName
+    }
+
     private var contextThemeWrapper: ContextThemeWrapper =
         ContextThemeWrapper(context, R.style.MapboxStyleTurnIconManeuver)
     private var turnIconResources = TurnIconResources.Builder().build()
-    private var turnIconHelper = TurnIconHelper(turnIconResources)
+    private val turnIconsApi = MapboxTurnIconsApi(turnIconResources)
 
     /**
      * Invoke to change the styling of [MapboxTurnIconManeuver]
@@ -47,17 +52,23 @@ class MapboxTurnIconManeuver @JvmOverloads constructor(
      */
     fun updateTurnIconResources(turnIcon: TurnIconResources) {
         this.turnIconResources = turnIcon
-        this.turnIconHelper = TurnIconHelper(turnIconResources)
+        turnIconsApi.updateResources(turnIcon)
     }
 
     /**
      * Invoke to render a turn icon based on a [PrimaryManeuver].
      */
     fun renderPrimaryTurnIcon(maneuver: PrimaryManeuver) {
-        val turnIcon = turnIconHelper.retrieveTurnIcon(
+        turnIconsApi.generateTurnIcon(
             maneuver.type, maneuver.degrees?.toFloat(), maneuver.modifier, maneuver.drivingSide
+        ).fold(
+            {
+                Log.e(TAG, it.errorMessage)
+            },
+            {
+                renderIcon(it)
+            }
         )
-        renderIcon(turnIcon)
     }
 
     /**
@@ -65,10 +76,16 @@ class MapboxTurnIconManeuver @JvmOverloads constructor(
      */
     fun renderSubTurnIcon(maneuver: SubManeuver?) {
         ifNonNull(maneuver) { m ->
-            val turnIcon = turnIconHelper.retrieveTurnIcon(
+            turnIconsApi.generateTurnIcon(
                 m.type, m.degrees?.toFloat(), m.modifier, m.drivingSide
+            ).fold(
+                {
+                    Log.e(TAG, it.errorMessage)
+                },
+                {
+                    renderIcon(it)
+                }
             )
-            renderIcon(turnIcon)
         } ?: setImageDrawable(null)
     }
 
