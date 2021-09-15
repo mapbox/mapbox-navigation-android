@@ -68,6 +68,12 @@ internal object LaneIconProcessor {
             R.drawable.mapbox_ic_turn_slight_right,
     )
 
+    /**
+     * Often the primary banner's modifier property might have a different turn indication than what
+     * is included in the sub banner components directions array. To cover the edge case, the logic
+     * below checks if [activeDirection] contains any string that contains "left" or "right" instead
+     * of checking for string equality.
+     */
     @DrawableRes
     fun getDrawableFrom(laneIndicator: LaneIndicator, activeDirection: String?): Int? {
         return when {
@@ -76,11 +82,11 @@ internal object LaneIconProcessor {
                 laneIndicator.directions.contains(STRAIGHT) &&
                 laneIndicator.directions.contains(RIGHT) -> {
                 activeDirection?.let {
-                    when (it) {
-                        LEFT -> {
+                    when {
+                        it.contains(LEFT, ignoreCase = true) -> {
                             laneIcon[LaneTurns.LANE_LEFT_STRAIGHT_RIGHT_LEFT_ONLY]
                         }
-                        RIGHT -> {
+                        it.contains(RIGHT, ignoreCase = true) -> {
                             laneIcon[LaneTurns.LANE_LEFT_STRAIGHT_RIGHT_RIGHT_ONLY]
                         }
                         else -> {
@@ -94,12 +100,20 @@ internal object LaneIconProcessor {
                 laneIndicator.directions.contains(STRAIGHT) &&
                 laneIndicator.directions.contains(SLIGHT_RIGHT) -> {
                 activeDirection?.let {
-                    if (it == LEFT || it == SLIGHT_LEFT) {
-                        laneIcon[LaneTurns.LANE_SLIGHT_LEFT_STRAIGHT_SLIGHT_RIGHT_SLIGHT_LEFT_ONLY]
-                    } else if (it == RIGHT || it == SLIGHT_RIGHT) {
-                        laneIcon[LaneTurns.LANE_SLIGHT_LEFT_STRAIGHT_SLIGHT_RIGHT_SLIGHT_RIGHT_ONLY]
-                    } else {
-                        laneIcon[LaneTurns.LANE_SLIGHT_LEFT_STRAIGHT_SLIGHT_RIGHT_STRAIGHT_ONLY]
+                    when {
+                        it.contains(LEFT, ignoreCase = true) -> {
+                            laneIcon[
+                                LaneTurns.LANE_SLIGHT_LEFT_STRAIGHT_SLIGHT_RIGHT_SLIGHT_LEFT_ONLY
+                            ]
+                        }
+                        it.contains(RIGHT, ignoreCase = true) -> {
+                            laneIcon[
+                                LaneTurns.LANE_SLIGHT_LEFT_STRAIGHT_SLIGHT_RIGHT_SLIGHT_RIGHT_ONLY
+                            ]
+                        }
+                        else -> {
+                            laneIcon[LaneTurns.LANE_SLIGHT_LEFT_STRAIGHT_SLIGHT_RIGHT_STRAIGHT_ONLY]
+                        }
                     }
                 }
             }
@@ -107,7 +121,7 @@ internal object LaneIconProcessor {
                 laneIndicator.directions.contains(LEFT) &&
                 laneIndicator.directions.contains(RIGHT) -> {
                 activeDirection?.let {
-                    if (it == LEFT) {
+                    if (it.contains(LEFT, ignoreCase = true)) {
                         laneIcon[LaneTurns.LANE_LEFT_RIGHT_LEFT_ONLY]
                     } else {
                         laneIcon[LaneTurns.LANE_LEFT_RIGHT_RIGHT_ONLY]
@@ -162,9 +176,9 @@ internal object LaneIconProcessor {
                 laneIndicator.directions.contains(SLIGHT_LEFT) &&
                 laneIndicator.directions.contains(SLIGHT_RIGHT) -> {
                 activeDirection?.let {
-                    if (it == SLIGHT_LEFT || it == LEFT) {
+                    if (it.contains(LEFT, ignoreCase = true)) {
                         laneIcon[LaneTurns.LANE_SLIGHT_LEFT_SLIGHT_RIGHT_SLIGHT_LEFT_ONLY]
-                    } else if (it == SLIGHT_RIGHT || it == RIGHT) {
+                    } else if (it.contains(RIGHT, ignoreCase = true)) {
                         laneIcon[LaneTurns.LANE_SLIGHT_LEFT_SLIGHT_RIGHT_SLIGHT_RIGHT_ONLY]
                     } else {
                         laneIcon[LaneTurns.LANE_STRAIGHT]
