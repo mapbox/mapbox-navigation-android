@@ -24,6 +24,9 @@ import com.mapbox.navigator.ElectronicHorizonResultType
 import com.mapbox.navigator.FunctionalRoadClass
 import com.mapbox.navigator.GraphPath
 import com.mapbox.navigator.GraphPosition
+import com.mapbox.navigator.MatchableGeometry
+import com.mapbox.navigator.MatchableOpenLr
+import com.mapbox.navigator.MatchablePoint
 import com.mapbox.navigator.MatchedRoadObjectLocation
 import com.mapbox.navigator.OpenLROrientation
 import com.mapbox.navigator.OpenLRSideOfRoad
@@ -67,6 +70,15 @@ internal typealias SDKRoadSurface =
 
 internal typealias SDKSubgraphEdge =
     com.mapbox.navigation.base.trip.model.roadobject.location.SubgraphEdge
+
+internal typealias SDKMatchableOpenLr =
+    com.mapbox.navigation.base.trip.model.eh.MatchableOpenLr
+
+internal typealias SDKMatchableGeometry =
+    com.mapbox.navigation.base.trip.model.eh.MatchableGeometry
+
+internal typealias SDKMatchablePoint =
+    com.mapbox.navigation.base.trip.model.eh.MatchablePoint
 
 /**
  * Map the ElectronicHorizonPosition.
@@ -355,6 +367,29 @@ internal fun EHorizonGraphPosition.mapToNativeGraphPosition(): GraphPosition {
     return GraphPosition(
         edgeId,
         percentAlong
+    )
+}
+
+internal fun SDKMatchableOpenLr.mapToNativeMatchableOpenLr(): MatchableOpenLr {
+    return MatchableOpenLr(
+        openLRLocation,
+        openLRStandard.mapToOpenLRStandard(),
+        roadObjectId
+    )
+}
+
+internal fun SDKMatchableGeometry.mapToNativeMatchableGeometry(): MatchableGeometry {
+    return MatchableGeometry(
+        roadObjectId,
+        coordinates
+    )
+}
+
+internal fun SDKMatchablePoint.mapToNativeMatchablePoint(): MatchablePoint {
+    return MatchablePoint(
+        roadObjectId,
+        point,
+        bearing
     )
 }
 

@@ -34,7 +34,6 @@ import com.mapbox.navigator.Router
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.TilesConfig
-import com.mapbox.navigator.VoiceInstruction
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -208,15 +207,12 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         }
 
     /**
-     * Gets the banner at a specific step index in the route. If there is no
-     * banner at the specified index method return *null*.
-     *
-     * @param index Which step you want to get [BannerInstruction] for
+     * Gets the current banner. If there is no
+     * banner, the method returns *null*.
      *
      * @return [BannerInstruction] for step index you passed
      */
-    override fun getBannerInstruction(index: Int): BannerInstruction? =
-        navigator!!.getBannerInstruction(index)
+    override fun getCurrentBannerInstruction(): BannerInstruction? = navigator!!.bannerInstruction
 
     /**
      * Follows a new leg of the already loaded directions.
@@ -255,17 +251,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     // Other
 
     /**
-     * Gets the voice instruction at a specific step index in the route. If there is no
-     * voice instruction at the specified index, *null* is returned.
-     *
-     * @param index Which step you want to get [VoiceInstruction] for
-     *
-     * @return [VoiceInstruction] for step index you passed
-     */
-    override fun getVoiceInstruction(index: Int): VoiceInstruction? =
-        navigator!!.getVoiceInstruction(index)
-
-    /**
      * Compare given route with current route.
      * Routes are considered the same if one of the routes is a suffix of another
      * without the first and last intersection.
@@ -297,13 +282,14 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         navigator!!.setElectronicHorizonObserver(eHorizonObserver)
     }
 
-    /**
-     * Sets the Road objects store observer
-     *
-     * @param roadObjectsStoreObserver
-     */
-    override fun setRoadObjectsStoreObserver(roadObjectsStoreObserver: RoadObjectsStoreObserver?) {
-        roadObjectsStore?.setObserver(roadObjectsStoreObserver)
+    override fun addRoadObjectsStoreObserver(roadObjectsStoreObserver: RoadObjectsStoreObserver) {
+        roadObjectsStore?.addObserver(roadObjectsStoreObserver)
+    }
+
+    override fun removeRoadObjectsStoreObserver(
+        roadObjectsStoreObserver: RoadObjectsStoreObserver
+    ) {
+        roadObjectsStore?.removeObserver(roadObjectsStoreObserver)
     }
 
     override fun setFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver?) {
@@ -319,7 +305,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override fun unregisterAllObservers() {
         navigator!!.setElectronicHorizonObserver(null)
         navigator!!.setFallbackVersionsObserver(null)
-        roadObjectsStore?.setObserver(null)
+        roadObjectsStore?.removeAllCustomRoadObjects()
         nativeNavigatorRecreationObservers.clear()
     }
 
