@@ -69,6 +69,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -1101,7 +1102,83 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun routeProgressProvidedWhenRouteIsSet() = runBlockingTest {
+    fun `offRoute state is reset when setRoute is called`() = runBlockingTest {
+        coEvery { navigator.setRoute(any(), any()) } coAnswers {
+            delay(100)
+            null
+        }
+
+        every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
+
+        val offRouteObserver: OffRouteObserver = mockk(relaxed = true)
+
+        tripSession = buildTripSession()
+        tripSession.registerOffRouteObserver(offRouteObserver)
+
+        tripSession.start(true)
+
+        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+
+        tripSession.setRoute(route, legIndex)
+
+        verifyOrder {
+            offRouteObserver.onOffRouteStateChanged(false)
+            offRouteObserver.onOffRouteStateChanged(true)
+            offRouteObserver.onOffRouteStateChanged(false)
+        }
+
+        coroutineRule.testDispatcher.advanceTimeBy(200)
+    }
+
+    @Test
+    fun `routeProgress is reset when setRoute is called`() = runBlockingTest {
+        coEvery { navigator.setRoute(any(), any()) } coAnswers {
+            delay(100)
+            null
+        }
+
+        every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
+
+        tripSession = buildTripSession()
+        tripSession.start(true)
+        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+
+        assertNotNull(tripSession.getRouteProgress())
+
+        tripSession.setRoute(route, legIndex)
+
+        assertNull(tripSession.getRouteProgress())
+
+        coroutineRule.testDispatcher.advanceTimeBy(200)
+    }
+
+    @Test
+    fun `roadObjects are reset when setRoute is called`() = runBlockingTest {
+        coEvery { navigator.setRoute(any(), any()) } coAnswers {
+            delay(100)
+            null
+        }
+
+        every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
+
+        val roadObjectsObserver: RoadObjectsOnRouteObserver = mockk(relaxed = true)
+        tripSession = buildTripSession()
+        tripSession.registerRoadObjectsOnRouteObserver(roadObjectsObserver)
+        tripSession.start(true)
+
+        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+
+        tripSession.setRoute(route, legIndex)
+
+        verify(exactly = 1) {
+            roadObjectsObserver.onNewRoadObjectsOnTheRoute(emptyList())
+        }
+
+        coroutineRule.testDispatcher.advanceTimeBy(200)
+    }
+
+    @Test
+    fun `routeProgress updated after route is set`() = runBlockingTest {
         coEvery { navigator.setRoute(any(), any()) } coAnswers {
             delay(100)
             null
@@ -1131,6 +1208,72 @@ class MapboxTripSessionTest {
 
         verify(exactly = 2) { observerOne.onRouteProgressChanged(any()) }
         verify(exactly = 2) { observerTwo.onRouteProgressChanged(any()) }
+    }
+
+    @Test
+    fun `enhancedLocation, mapMatcherResult, zLevel are updating while setting a route, routeProgress, bannerInstructions and offRoute state are skipped`() = runBlockingTest {
+        coEvery { navigator.setRoute(any(), any()) } coAnswers {
+            delay(100)
+            null
+        }
+
+        val routeProgressObserver: RouteProgressObserver = mockk(relaxUnitFun = true)
+        val locationObserver: LocationObserver = mockk(relaxUnitFun = true)
+        val mapMatcherResultObserver: MapMatcherResultObserver = mockk(relaxUnitFun = true)
+        val offRouteObserver: OffRouteObserver = mockk(relaxUnitFun = true)
+        val bannerInstructionsObserver: BannerInstructionsObserver = mockk(relaxUnitFun = true)
+        every { routeProgressObserver.onRouteProgressChanged(any()) } just Runs
+        every { locationObserver.onEnhancedLocationChanged(any(), any()) } just Runs
+        every { mapMatcherResultObserver.onNewMapMatcherResult(any()) } just Runs
+        every { offRouteObserver.onOffRouteStateChanged(any()) } just Runs
+        every { bannerInstructionsObserver.onNewBannerInstructions(any()) } just Runs
+
+        val leg: RouteLeg = mockk(relaxed = true)
+        val legs = listOf(leg)
+        val steps: List<LegStep> = mockk(relaxed = true)
+        every { navigationStatus.legIndex } returns 0
+        every { route.legs() } returns legs
+        every { leg.steps() } returns steps
+
+        tripSession = buildTripSession()
+        tripSession.registerRouteProgressObserver(routeProgressObserver)
+        tripSession.registerLocationObserver(locationObserver)
+        tripSession.registerMapMatcherResultObserver(mapMatcherResultObserver)
+        tripSession.registerOffRouteObserver(offRouteObserver)
+        tripSession.registerBannerInstructionsObserver(bannerInstructionsObserver)
+        tripSession.start(true)
+        tripSession.setRoute(route, legIndex) // it will notify offRouteObserver for the first time
+
+        every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
+
+        // first status update
+        every { navigationStatus.layer } returns 100
+        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+        assertEquals(100, tripSession.zLevel)
+
+        // second status update
+        every { navigationStatus.layer } returns 200
+        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+        assertEquals(200, tripSession.zLevel)
+
+        // finish setRoute
+        coroutineRule.testDispatcher.advanceTimeBy(200)
+
+        // third status update
+        every { navigationStatus.layer } returns 300
+        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+        assertEquals(300, tripSession.zLevel)
+
+        // locationObserver and mapMatcherResultObserver are notified on each status update
+        verify(exactly = 3) { locationObserver.onEnhancedLocationChanged(any(), any()) }
+        verify(exactly = 3) { mapMatcherResultObserver.onNewMapMatcherResult(any()) }
+
+        // routeProgressObserver and bannerInstructionsObserver are notified when setRoute is finished
+        verify(exactly = 1) { routeProgressObserver.onRouteProgressChanged(any()) }
+        verify(exactly = 1) { bannerInstructionsObserver.onNewBannerInstructions(any()) }
+        // offRouteObserver is notified twice:
+        // when setRoute starts, and on a new status when setRoute is finished
+        verify(exactly = 2) { offRouteObserver.onOffRouteStateChanged(any()) }
     }
 
     @Test
