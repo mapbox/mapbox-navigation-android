@@ -493,6 +493,64 @@ class ManeuverProcessorTest {
     }
 
     @Test
+    fun `when maneuver with cycling profile then active direction fallbacks to primary modifier`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("short_route_cycling.json")
+        )
+        val routeProgress = mockRouteProgress(
+            _route = route,
+            _distanceRemainingOnStep = 15f,
+            _routeLegIndex = 0,
+            _stepIndex = 0,
+            _instructionIndex = 0,
+        )
+        val maneuverState = ManeuverState()
+        val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().filterDuplicateManeuvers(false).build()
+        val maneuverAction = ManeuverAction.GetManeuverList(
+            routeProgress,
+            maneuverState,
+            maneuverOptions,
+            distanceFormatter
+        )
+
+        val actual = ManeuverProcessor.process(maneuverAction) as
+            ManeuverResult.GetManeuverListWithProgress.Success
+        val activeDirection = actual.maneuvers[1].laneGuidance!!.allLanes[0].activeDirection
+
+        assertEquals("left", activeDirection)
+    }
+
+    @Test
+    fun `when maneuver with no banner driving side then fallback to step driving side`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("short_route.json")
+        )
+        val routeProgress = mockRouteProgress(
+            _route = route,
+            _distanceRemainingOnStep = 15f,
+            _routeLegIndex = 0,
+            _stepIndex = 0,
+            _instructionIndex = 0,
+        )
+        val maneuverState = ManeuverState()
+        val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().filterDuplicateManeuvers(false).build()
+        val maneuverAction = ManeuverAction.GetManeuverList(
+            routeProgress,
+            maneuverState,
+            maneuverOptions,
+            distanceFormatter
+        )
+
+        val actual = ManeuverProcessor.process(maneuverAction) as
+            ManeuverResult.GetManeuverListWithProgress.Success
+        val primaryDrivingSide = actual.maneuvers[0].primary.drivingSide
+
+        assertEquals("right", primaryDrivingSide)
+    }
+
+    @Test
     fun `when maneuver with route progress is fetched then call again`() {
         val route = DirectionsRoute.fromJson(
             FileUtils.loadJsonFixture("short_route.json")
