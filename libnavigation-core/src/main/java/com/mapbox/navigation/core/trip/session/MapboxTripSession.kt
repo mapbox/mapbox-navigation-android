@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.hardware.SensorEvent
 import android.location.Location
 import android.os.Looper
+import androidx.annotation.VisibleForTesting
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.BannerInstructions
@@ -54,8 +55,6 @@ import java.util.concurrent.CopyOnWriteArraySet
  * @param navigator Native navigator
  * @param threadController controller for main/io jobs
  * @param logger interface for logging any events
- *
- * @property route should be set to start routing
  */
 internal class MapboxTripSession(
     override val tripService: TripService,
@@ -68,8 +67,8 @@ internal class MapboxTripSession(
 
     private var updateRouteJob: Job? = null
 
-    override var route: DirectionsRoute? = null
-        private set
+    @VisibleForTesting
+    internal var route: DirectionsRoute? = null
 
     override fun setRoute(route: DirectionsRoute?, legIndex: Int) {
         val isSameUuid = route?.isSameUuid(this.route) ?: false
