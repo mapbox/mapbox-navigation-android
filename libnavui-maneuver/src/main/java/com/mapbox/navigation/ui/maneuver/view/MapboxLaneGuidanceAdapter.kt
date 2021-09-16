@@ -7,6 +7,7 @@ import androidx.annotation.StyleRes
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.recyclerview.widget.RecyclerView
 import com.mapbox.navigation.ui.maneuver.R
+import com.mapbox.navigation.ui.maneuver.api.MapboxLaneIconsApi
 import com.mapbox.navigation.ui.maneuver.databinding.MapboxItemLaneGuidanceLayoutBinding
 import com.mapbox.navigation.ui.maneuver.model.LaneIndicator
 import com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder
@@ -23,11 +24,9 @@ class MapboxLaneGuidanceAdapter(
     private val context: Context,
 ) : RecyclerView.Adapter<MapboxLaneGuidanceViewHolder>() {
 
-    // TODO: Remove when the migration to valhalla is complete to be able to use
-    //  component.active_directions
-    private var activeDirection: String? = null
     private val inflater = LayoutInflater.from(context)
     private val laneIndicatorList = mutableListOf<LaneIndicator>()
+    private val laneApi = MapboxLaneIconsApi()
     @StyleRes private var laneGuidanceStyle: Int = R.style.MapboxStyleTurnIconManeuver
 
     /**
@@ -65,11 +64,9 @@ class MapboxLaneGuidanceAdapter(
     /**
      * Invoke to add all the lanes to the recycler view.
      * @param laneIndicatorList List<LaneIndicator>
-     * @param activeDirection String?
      */
-    fun addLanes(laneIndicatorList: List<LaneIndicator>, activeDirection: String?) {
+    fun addLanes(laneIndicatorList: List<LaneIndicator>) {
         if (laneIndicatorList.isNotEmpty()) {
-            this.activeDirection = activeDirection
             this.laneIndicatorList.clear()
             this.laneIndicatorList.addAll(laneIndicatorList)
             notifyDataSetChanged()
@@ -81,7 +78,6 @@ class MapboxLaneGuidanceAdapter(
      */
     fun removeLanes() {
         if (this.laneIndicatorList.isNotEmpty()) {
-            this.activeDirection = null
             this.laneIndicatorList.clear()
             notifyDataSetChanged()
         }
@@ -109,9 +105,9 @@ class MapboxLaneGuidanceAdapter(
          * @param laneIndicator LaneIndicator
          */
         fun bindLaneIndicator(laneIndicator: LaneIndicator) {
+            val laneIcon = laneApi.getTurnLane(laneIndicator)
             viewBinding.itemLaneGuidance.renderLane(
-                laneIndicator,
-                activeDirection,
+                laneIcon,
                 ContextThemeWrapper(viewBinding.root.context, laneGuidanceStyle)
             )
         }

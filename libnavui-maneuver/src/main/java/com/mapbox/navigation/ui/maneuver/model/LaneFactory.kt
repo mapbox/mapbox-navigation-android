@@ -13,7 +13,6 @@ object LaneFactory {
      */
     @JvmStatic
     fun buildLane(
-        allLanes: List<LaneIndicator>,
-        activeDirection: String? = null
-    ) = Lane(allLanes, activeDirection)
+        allLanes: List<LaneIndicator>
+    ) = Lane(allLanes)
 }
