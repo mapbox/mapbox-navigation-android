@@ -87,7 +87,7 @@ class MapboxTripSessionTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
-    private lateinit var tripSession: TripSession
+    private lateinit var tripSession: MapboxTripSession
 
     private val tripService: TripService = mockk(relaxUnitFun = true) {
         every { hasServiceStarted() } returns false
@@ -179,7 +179,7 @@ class MapboxTripSessionTest {
         } answers {}
     }
 
-    private fun buildTripSession(): TripSession {
+    private fun buildTripSession(): MapboxTripSession {
         return MapboxTripSession(
             tripService,
             navigationOptions,
@@ -638,12 +638,6 @@ class MapboxTripSessionTest {
     @Test
     fun getTripService() {
         assertEquals(tripService, tripSession.tripService)
-    }
-
-    @Test
-    fun getRoute() {
-        tripSession.setRoute(route, legIndex)
-        assertEquals(route, tripSession.route)
     }
 
     @Test
