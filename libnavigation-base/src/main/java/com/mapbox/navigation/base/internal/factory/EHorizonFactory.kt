@@ -2,11 +2,16 @@ package com.mapbox.navigation.base.internal.factory
 
 import com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPath
 import com.mapbox.navigation.base.trip.model.eh.EHorizonGraphPosition
+import com.mapbox.navigation.base.trip.model.eh.MatchableGeometry
+import com.mapbox.navigation.base.trip.model.eh.MatchableOpenLr
+import com.mapbox.navigation.base.trip.model.eh.MatchablePoint
 import com.mapbox.navigation.base.trip.model.eh.mapToEHorizonEdgeMetadata
 import com.mapbox.navigation.base.trip.model.eh.mapToEHorizonPosition
 import com.mapbox.navigation.base.trip.model.eh.mapToNativeGraphPath
 import com.mapbox.navigation.base.trip.model.eh.mapToNativeGraphPosition
-import com.mapbox.navigation.base.trip.model.eh.mapToOpenLRStandard
+import com.mapbox.navigation.base.trip.model.eh.mapToNativeMatchableGeometry
+import com.mapbox.navigation.base.trip.model.eh.mapToNativeMatchableOpenLr
+import com.mapbox.navigation.base.trip.model.eh.mapToNativeMatchablePoint
 import com.mapbox.navigation.base.trip.model.eh.mapToRoadObjectDistance
 import com.mapbox.navigation.base.trip.model.eh.mapToRoadObjectEdgeLocation
 import com.mapbox.navigation.base.trip.model.eh.mapToRoadObjectEnterExitInfo
@@ -55,11 +60,6 @@ object EHorizonFactory {
         edgeLocation.mapToRoadObjectEdgeLocation()
 
     /**
-     * Build OpenLRStandard
-     */
-    fun buildOpenLRStandard(openLRStandard: String) = openLRStandard.mapToOpenLRStandard()
-
-    /**
      * Build native GraphPath
      */
     fun buildNativeGraphPath(graphPath: EHorizonGraphPath) = graphPath.mapToNativeGraphPath()
@@ -69,4 +69,16 @@ object EHorizonFactory {
      */
     fun buildNativeGraphPosition(graphPosition: EHorizonGraphPosition) =
         graphPosition.mapToNativeGraphPosition()
+
+    fun buildNativeMatchableOpenLr(
+        matchable: MatchableOpenLr
+    ) = matchable.mapToNativeMatchableOpenLr()
+
+    fun buildNativeMatchableGeometry(
+        matchable: MatchableGeometry
+    ) = matchable.mapToNativeMatchableGeometry()
+
+    fun buildNativeMatchablePoint(
+        matchable: MatchablePoint
+    ) = matchable.mapToNativeMatchablePoint()
 }

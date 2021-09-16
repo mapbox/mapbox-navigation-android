@@ -119,7 +119,7 @@ License: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 #### Navigation Base SDK module
 Mapbox Navigation uses portions of the Android App Startup Runtime.
-URL: [https://developer.android.com/jetpack/androidx/releases/startup#1.0.0](https://developer.android.com/jetpack/androidx/releases/startup#1.0.0)
+URL: [https://developer.android.com/jetpack/androidx/releases/startup#1.1.0](https://developer.android.com/jetpack/androidx/releases/startup#1.1.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
@@ -298,7 +298,7 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 #### Navigation Core SDK module
 Mapbox Navigation uses portions of the Android App Startup Runtime.
-URL: [https://developer.android.com/jetpack/androidx/releases/startup#1.0.0](https://developer.android.com/jetpack/androidx/releases/startup#1.0.0)
+URL: [https://developer.android.com/jetpack/androidx/releases/startup#1.1.0](https://developer.android.com/jetpack/androidx/releases/startup#1.1.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
@@ -601,7 +601,7 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 #### Navigator SDK module
 Mapbox Navigation uses portions of the Android App Startup Runtime.
-URL: [https://developer.android.com/jetpack/androidx/releases/startup#1.0.0](https://developer.android.com/jetpack/androidx/releases/startup#1.0.0)
+URL: [https://developer.android.com/jetpack/androidx/releases/startup#1.1.0](https://developer.android.com/jetpack/androidx/releases/startup#1.1.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
@@ -944,7 +944,7 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 ===========================================================================
 
 Mapbox Navigation uses portions of the Android App Startup Runtime.
-URL: [https://developer.android.com/jetpack/androidx/releases/startup#1.0.0](https://developer.android.com/jetpack/androidx/releases/startup#1.0.0)
+URL: [https://developer.android.com/jetpack/androidx/releases/startup#1.1.0](https://developer.android.com/jetpack/androidx/releases/startup#1.1.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
