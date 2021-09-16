@@ -408,7 +408,6 @@ class MapboxNavigation(
             tripSession,
             logger
         )
-        routeRefreshController.restart()
 
         defaultRerouteController = MapboxRerouteController(
             directionsSession,
@@ -576,7 +575,6 @@ class MapboxNavigation(
         rerouteController?.interrupt()
         routeAlternativesController.interrupt()
         directionsSession.setRoutes(routes, initialLegIndex)
-        routeRefreshController.restart()
     }
 
     /**
@@ -1000,6 +998,11 @@ class MapboxNavigation(
 
     private fun createInternalRoutesObserver() = RoutesObserver { routes ->
         tripSession.setRoute(routes.firstOrNull(), directionsSession.initialLegIndex)
+        if (routes.isNotEmpty()) {
+            routeRefreshController.restart(routes.first())
+        } else {
+            routeRefreshController.stop()
+        }
     }
 
     private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->
@@ -1059,7 +1062,7 @@ class MapboxNavigation(
                 logger
             )
             historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
-            tripSession.route?.let {
+            directionsSession.routes.firstOrNull()?.let {
                 navigator.setRoute(
                     it,
                     tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0
