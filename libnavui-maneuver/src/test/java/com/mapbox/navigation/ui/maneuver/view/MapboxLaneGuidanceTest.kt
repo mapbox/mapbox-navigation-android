@@ -1,12 +1,8 @@
 package com.mapbox.navigation.ui.maneuver.view
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.drawable.Drawable
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.api.MapboxLaneIconsApi
 import com.mapbox.navigation.ui.maneuver.model.LaneIcon
@@ -39,14 +35,16 @@ class MapboxLaneGuidanceTest {
         val laneIndicator = LaneIndicator
             .Builder()
             .isActive(false)
-            .directions(listOf("left"))
+            .activeDirection("right")
+            .drivingSide("right")
+            .directions(listOf("right"))
             .build()
-        val activeDirection = "left"
         every {
-            laneIconHelper.laneIcon(laneIndicator, activeDirection)
-        } returns ExpectedFactory.createValue(LaneIcon(R.drawable.mapbox_ic_turn_left))
+            laneIconHelper.getTurnLane(any())
+        } returns(LaneIcon(R.drawable.mapbox_lane_turn, false))
+        val laneIcon = laneIconHelper.getTurnLane(laneIndicator)
 
-        view.renderLane(laneIndicator, activeDirection, wrapper)
+        view.renderLane(laneIcon, wrapper)
 
         assertTrue(view.isLayoutRequested)
     }
@@ -58,66 +56,59 @@ class MapboxLaneGuidanceTest {
         val laneIndicator = LaneIndicator
             .Builder()
             .isActive(false)
-            .directions(listOf("left"))
+            .activeDirection("right")
+            .drivingSide("right")
+            .directions(listOf("right"))
             .build()
-        val activeDirection = "left"
         every {
-            laneIconHelper.laneIcon(laneIndicator, activeDirection)
-        } returns ExpectedFactory.createValue(LaneIcon(R.drawable.mapbox_ic_turn_left))
+            laneIconHelper.getTurnLane(any())
+        } returns(LaneIcon(R.drawable.mapbox_lane_turn, false))
+        val laneIcon = laneIconHelper.getTurnLane(laneIndicator)
 
-        view.renderLane(laneIndicator, activeDirection, wrapper)
+        view.renderLane(laneIcon, wrapper)
 
         assertNotNull(view.drawable)
     }
 
     @Test
-    fun `view image alpha when not active`() {
+    fun `view rotate when flipped`() {
         val wrapper = ContextThemeWrapper(ctx, R.style.MapboxStyleTurnIconManeuver)
         val view = MapboxLaneGuidance(ctx)
         val laneIndicator = LaneIndicator
             .Builder()
             .isActive(false)
+            .activeDirection("right")
+            .drivingSide("right")
             .directions(listOf("left"))
             .build()
-        val activeDirection = "left"
         every {
-            laneIconHelper.laneIcon(laneIndicator, activeDirection)
-        } returns ExpectedFactory.createValue(LaneIcon(R.drawable.mapbox_ic_turn_left))
+            laneIconHelper.getTurnLane(any())
+        } returns(LaneIcon(R.drawable.mapbox_lane_turn, true))
+        val laneIcon = laneIconHelper.getTurnLane(laneIndicator)
 
-        view.renderLane(laneIndicator, activeDirection, wrapper)
-        val actualAlpha = view.alpha
+        view.renderLane(laneIcon, wrapper)
 
-        assertEquals(0.5f, actualAlpha)
+        assertEquals(180f, view.rotationY)
     }
 
     @Test
-    fun `view image alpha when active`() {
+    fun `view not rotate when not flipped`() {
         val wrapper = ContextThemeWrapper(ctx, R.style.MapboxStyleTurnIconManeuver)
         val view = MapboxLaneGuidance(ctx)
         val laneIndicator = LaneIndicator
             .Builder()
-            .isActive(true)
-            .directions(listOf("left"))
+            .isActive(false)
+            .activeDirection("right")
+            .drivingSide("right")
+            .directions(listOf("right"))
             .build()
-        val activeDirection = "left"
         every {
-            laneIconHelper.laneIcon(laneIndicator, activeDirection)
-        } returns ExpectedFactory.createValue(LaneIcon(R.drawable.mapbox_ic_turn_left))
+            laneIconHelper.getTurnLane(any())
+        } returns(LaneIcon(R.drawable.mapbox_lane_turn, false))
+        val laneIcon = laneIconHelper.getTurnLane(laneIndicator)
 
-        view.renderLane(laneIndicator, activeDirection, wrapper)
-        val actualAlpha = view.alpha
+        view.renderLane(laneIcon, wrapper)
 
-        assertEquals(1f, actualAlpha)
-    }
-
-    private fun getBitmap(drawable: Drawable): Bitmap? {
-        val bitmap = Bitmap.createBitmap(
-            drawable.intrinsicWidth,
-            drawable.intrinsicHeight, Bitmap.Config.ARGB_8888
-        )
-        val canvas = Canvas(bitmap)
-        drawable.setBounds(0, 0, canvas.width, canvas.height)
-        drawable.draw(canvas)
-        return bitmap
+        assertEquals(0f, view.rotationY)
     }
 }

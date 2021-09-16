@@ -6,15 +6,15 @@ import androidx.annotation.DrawableRes
  * Data structure that holds a styleable drawable resource.
  *
  * Within your style, specify the attributes to color the resource.
- *   maneuverTurnIconColor. For active lanes
- *   maneuverTurnIconShadowColor. For inactive lanes
+ * maneuverTurnIconColor. For active lanes
+ * maneuverTurnIconShadowColor. For inactive lanes
  *
  * @param drawableResId Int
+ * @param shouldFlip Boolean is true when the icon needs to be flipped to indicate leftward turns
+ * else false for rightward turns.
  */
-class LaneIcon internal constructor(
-    @DrawableRes
-    val drawableResId: Int
-) {
+class LaneIcon internal constructor(@DrawableRes val drawableResId: Int, val shouldFlip: Boolean) {
+
     /**
      * Regenerate whenever a change is made
      */
@@ -25,6 +25,7 @@ class LaneIcon internal constructor(
         other as LaneIcon
 
         if (drawableResId != other.drawableResId) return false
+        if (shouldFlip != other.shouldFlip) return false
 
         return true
     }
@@ -33,13 +34,15 @@ class LaneIcon internal constructor(
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        return drawableResId
+        var result = drawableResId
+        result = 31 * result + shouldFlip.hashCode()
+        return result
     }
 
     /**
      * Regenerate whenever a change is made
      */
     override fun toString(): String {
-        return "LaneIcon(drawableResId=$drawableResId)"
+        return "LaneIcon(drawableResId=$drawableResId, shouldFlip=$shouldFlip)"
     }
 }

@@ -9,8 +9,8 @@ package com.mapbox.navigation.ui.maneuver {
 package com.mapbox.navigation.ui.maneuver.api {
 
   public final class MapboxLaneIconsApi {
-    ctor public MapboxLaneIconsApi();
-    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.LaneIconError,com.mapbox.navigation.ui.maneuver.model.LaneIcon> laneIcon(com.mapbox.navigation.ui.maneuver.model.LaneIndicator laneIndicator, String? activeDirection);
+    ctor public MapboxLaneIconsApi(com.mapbox.navigation.ui.maneuver.model.LaneIconResources laneIconResources = LaneIconResources.<init>().build());
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIcon getTurnLane(com.mapbox.navigation.ui.maneuver.model.LaneIndicator laneIndicator);
   }
 
   public final class MapboxManeuverApi {
@@ -91,20 +91,20 @@ package com.mapbox.navigation.ui.maneuver.model {
   }
 
   public final class Lane {
-    method public String? getActiveDirection();
     method public java.util.List<com.mapbox.navigation.ui.maneuver.model.LaneIndicator> getAllLanes();
-    property public final String? activeDirection;
     property public final java.util.List<com.mapbox.navigation.ui.maneuver.model.LaneIndicator> allLanes;
   }
 
   @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class LaneFactory {
-    method public static com.mapbox.navigation.ui.maneuver.model.Lane buildLane(java.util.List<com.mapbox.navigation.ui.maneuver.model.LaneIndicator> allLanes, String? activeDirection = null);
+    method public static com.mapbox.navigation.ui.maneuver.model.Lane buildLane(java.util.List<com.mapbox.navigation.ui.maneuver.model.LaneIndicator> allLanes);
     field public static final com.mapbox.navigation.ui.maneuver.model.LaneFactory INSTANCE;
   }
 
   public final class LaneIcon {
     method public int getDrawableResId();
+    method public boolean getShouldFlip();
     property public final int drawableResId;
+    property public final boolean shouldFlip;
   }
 
   public final class LaneIconError {
@@ -116,18 +116,228 @@ package com.mapbox.navigation.ui.maneuver.model {
     property public final com.mapbox.navigation.ui.maneuver.model.LaneIndicator laneIndicator;
   }
 
+  public final class LaneIconResources {
+    method public int getLaneOppositeSlightTurnOrSlightTurn();
+    method public int getLaneOppositeSlightTurnOrSlightTurnUsingSlightTurn();
+    method public int getLaneOppositeSlightTurnOrStraightOrSlightTurn();
+    method public int getLaneOppositeSlightTurnOrStraightOrSlightTurnUsingSlightTurn();
+    method public int getLaneOppositeSlightTurnOrStraightOrSlightTurnUsingStraight();
+    method public int getLaneOppositeSlightTurnOrStraightOrTurn();
+    method public int getLaneOppositeSlightTurnOrStraightOrTurnUsingStraight();
+    method public int getLaneOppositeSlightTurnOrStraightOrTurnUsingTurn();
+    method public int getLaneOppositeSlightTurnOrTurn();
+    method public int getLaneOppositeSlightTurnOrTurnUsingTurn();
+    method public int getLaneOppositeTurnOrSlightTurn();
+    method public int getLaneOppositeTurnOrSlightTurnUsingSlightTurn();
+    method public int getLaneOppositeTurnOrStraightOrSlightTurn();
+    method public int getLaneOppositeTurnOrStraightOrSlightTurnUsingSlightTurn();
+    method public int getLaneOppositeTurnOrStraightOrSlightTurnUsingStraight();
+    method public int getLaneOppositeTurnOrStraightOrTurn();
+    method public int getLaneOppositeTurnOrStraightOrTurnUsingStraight();
+    method public int getLaneOppositeTurnOrStraightOrTurnUsingTurn();
+    method public int getLaneOppositeTurnOrTurn();
+    method public int getLaneOppositeTurnOrTurnUsingTurn();
+    method public int getLaneSharpTurn();
+    method public int getLaneSharpTurnUsingSharpTurn();
+    method public int getLaneSlightTurn();
+    method public int getLaneSlightTurnOrSharpTurn();
+    method public int getLaneSlightTurnOrSharpTurnUsingSharpTurn();
+    method public int getLaneSlightTurnOrSharpTurnUsingSlightTurn();
+    method public int getLaneSlightTurnOrTurn();
+    method public int getLaneSlightTurnOrTurnUsingSlightTurn();
+    method public int getLaneSlightTurnOrTurnUsingTurn();
+    method public int getLaneSlightTurnOrUturn();
+    method public int getLaneSlightTurnOrUturnUsingSlightTurn();
+    method public int getLaneSlightTurnOrUturnUsingUturn();
+    method public int getLaneSlightTurnUsingSlightTurn();
+    method public int getLaneStraight();
+    method public int getLaneStraightOrSharpTurn();
+    method public int getLaneStraightOrSharpTurnUsingSharpTurn();
+    method public int getLaneStraightOrSharpTurnUsingStraight();
+    method public int getLaneStraightOrSlightTurn();
+    method public int getLaneStraightOrSlightTurnOrTurn();
+    method public int getLaneStraightOrSlightTurnOrTurnUsingSlightTurn();
+    method public int getLaneStraightOrSlightTurnOrTurnUsingStraight();
+    method public int getLaneStraightOrSlightTurnOrTurnUsingTurn();
+    method public int getLaneStraightOrSlightTurnUsingSlightTurn();
+    method public int getLaneStraightOrSlightTurnUsingStraight();
+    method public int getLaneStraightOrTurn();
+    method public int getLaneStraightOrTurnOrUturn();
+    method public int getLaneStraightOrTurnOrUturnUsingStraight();
+    method public int getLaneStraightOrTurnOrUturnUsingTurn();
+    method public int getLaneStraightOrTurnOrUturnUsingUturn();
+    method public int getLaneStraightOrTurnUsingStraight();
+    method public int getLaneStraightOrTurnUsingTurn();
+    method public int getLaneStraightOrUturn();
+    method public int getLaneStraightOrUturnUsingStraight();
+    method public int getLaneStraightOrUturnUsingUturn();
+    method public int getLaneStraightUsingStraight();
+    method public int getLaneTurn();
+    method public int getLaneTurnOrSharpTurn();
+    method public int getLaneTurnOrSharpTurnUsingSharpTurn();
+    method public int getLaneTurnOrSharpTurnUsingTurn();
+    method public int getLaneTurnOrUturn();
+    method public int getLaneTurnOrUturnUsingTurn();
+    method public int getLaneTurnOrUturnUsingUturn();
+    method public int getLaneTurnUsingTurn();
+    method public int getLaneUturn();
+    method public int getLaneUturnUsingUturn();
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder toBuilder();
+    property public final int laneOppositeSlightTurnOrSlightTurn;
+    property public final int laneOppositeSlightTurnOrSlightTurnUsingSlightTurn;
+    property public final int laneOppositeSlightTurnOrStraightOrSlightTurn;
+    property public final int laneOppositeSlightTurnOrStraightOrSlightTurnUsingSlightTurn;
+    property public final int laneOppositeSlightTurnOrStraightOrSlightTurnUsingStraight;
+    property public final int laneOppositeSlightTurnOrStraightOrTurn;
+    property public final int laneOppositeSlightTurnOrStraightOrTurnUsingStraight;
+    property public final int laneOppositeSlightTurnOrStraightOrTurnUsingTurn;
+    property public final int laneOppositeSlightTurnOrTurn;
+    property public final int laneOppositeSlightTurnOrTurnUsingTurn;
+    property public final int laneOppositeTurnOrSlightTurn;
+    property public final int laneOppositeTurnOrSlightTurnUsingSlightTurn;
+    property public final int laneOppositeTurnOrStraightOrSlightTurn;
+    property public final int laneOppositeTurnOrStraightOrSlightTurnUsingSlightTurn;
+    property public final int laneOppositeTurnOrStraightOrSlightTurnUsingStraight;
+    property public final int laneOppositeTurnOrStraightOrTurn;
+    property public final int laneOppositeTurnOrStraightOrTurnUsingStraight;
+    property public final int laneOppositeTurnOrStraightOrTurnUsingTurn;
+    property public final int laneOppositeTurnOrTurn;
+    property public final int laneOppositeTurnOrTurnUsingTurn;
+    property public final int laneSharpTurn;
+    property public final int laneSharpTurnUsingSharpTurn;
+    property public final int laneSlightTurn;
+    property public final int laneSlightTurnOrSharpTurn;
+    property public final int laneSlightTurnOrSharpTurnUsingSharpTurn;
+    property public final int laneSlightTurnOrSharpTurnUsingSlightTurn;
+    property public final int laneSlightTurnOrTurn;
+    property public final int laneSlightTurnOrTurnUsingSlightTurn;
+    property public final int laneSlightTurnOrTurnUsingTurn;
+    property public final int laneSlightTurnOrUturn;
+    property public final int laneSlightTurnOrUturnUsingSlightTurn;
+    property public final int laneSlightTurnOrUturnUsingUturn;
+    property public final int laneSlightTurnUsingSlightTurn;
+    property public final int laneStraight;
+    property public final int laneStraightOrSharpTurn;
+    property public final int laneStraightOrSharpTurnUsingSharpTurn;
+    property public final int laneStraightOrSharpTurnUsingStraight;
+    property public final int laneStraightOrSlightTurn;
+    property public final int laneStraightOrSlightTurnOrTurn;
+    property public final int laneStraightOrSlightTurnOrTurnUsingSlightTurn;
+    property public final int laneStraightOrSlightTurnOrTurnUsingStraight;
+    property public final int laneStraightOrSlightTurnOrTurnUsingTurn;
+    property public final int laneStraightOrSlightTurnUsingSlightTurn;
+    property public final int laneStraightOrSlightTurnUsingStraight;
+    property public final int laneStraightOrTurn;
+    property public final int laneStraightOrTurnOrUturn;
+    property public final int laneStraightOrTurnOrUturnUsingStraight;
+    property public final int laneStraightOrTurnOrUturnUsingTurn;
+    property public final int laneStraightOrTurnOrUturnUsingUturn;
+    property public final int laneStraightOrTurnUsingStraight;
+    property public final int laneStraightOrTurnUsingTurn;
+    property public final int laneStraightOrUturn;
+    property public final int laneStraightOrUturnUsingStraight;
+    property public final int laneStraightOrUturnUsingUturn;
+    property public final int laneStraightUsingStraight;
+    property public final int laneTurn;
+    property public final int laneTurnOrSharpTurn;
+    property public final int laneTurnOrSharpTurnUsingSharpTurn;
+    property public final int laneTurnOrSharpTurnUsingTurn;
+    property public final int laneTurnOrUturn;
+    property public final int laneTurnOrUturnUsingTurn;
+    property public final int laneTurnOrUturnUsingUturn;
+    property public final int laneTurnUsingTurn;
+    property public final int laneUturn;
+    property public final int laneUturnUsingUturn;
+  }
+
+  public static final class LaneIconResources.Builder {
+    ctor public LaneIconResources.Builder();
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources build();
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeSlightTurnOrSlightTurn(@DrawableRes int laneOppositeSlightTurnOrSlightTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeSlightTurnOrSlightTurnUsingSlightTurn(@DrawableRes int laneOppositeSlightTurnOrSlightTurnUsingSlightTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeSlightTurnOrStraightOrSlightTurn(@DrawableRes int laneOppositeSlightTurnOrStraightOrSlightTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeSlightTurnOrStraightOrSlightTurnUsingSlightTurn(@DrawableRes int laneOppositeSlightTurnOrStraightOrSlightTurnUsingSlightTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeSlightTurnOrStraightOrSlightTurnUsingStraight(@DrawableRes int laneOppositeSlightTurnOrStraightOrSlightTurnUsingStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeSlightTurnOrStraightOrTurn(@DrawableRes int laneOppositeSlightTurnOrStraightOrTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeSlightTurnOrStraightOrTurnUsingStraight(@DrawableRes int laneOppositeSlightTurnOrStraightOrTurnUsingStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeSlightTurnOrStraightOrTurnUsingTurn(@DrawableRes int laneOppositeSlightTurnOrStraightOrTurnUsingTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeSlightTurnOrTurn(@DrawableRes int laneOppositeSlightTurnOrTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeSlightTurnOrTurnUsingTurn(@DrawableRes int laneOppositeSlightTurnOrTurnUsingTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeTurnOrSlightTurn(@DrawableRes int laneOppositeTurnOrSlightTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeTurnOrSlightTurnUsingSlightTurn(@DrawableRes int laneOppositeTurnOrSlightTurnUsingSlightTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeTurnOrStraightOrSlightTurn(@DrawableRes int laneOppositeTurnOrStraightOrSlightTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeTurnOrStraightOrSlightTurnUsingSlightTurn(@DrawableRes int laneOppositeTurnOrStraightOrSlightTurnUsingSlightTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeTurnOrStraightOrSlightTurnUsingStraight(@DrawableRes int laneOppositeTurnOrStraightOrSlightTurnUsingStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeTurnOrStraightOrTurn(@DrawableRes int laneOppositeTurnOrStraightOrTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeTurnOrStraightOrTurnUsingStraight(@DrawableRes int laneOppositeTurnOrStraightOrTurnUsingStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeTurnOrStraightOrTurnUsingTurn(@DrawableRes int laneOppositeTurnOrStraightOrTurnUsingTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeTurnOrTurn(@DrawableRes int laneOppositeTurnOrTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneOppositeTurnOrTurnUsingTurn(@DrawableRes int laneOppositeTurnOrTurnUsingTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneSharpTurn(@DrawableRes int laneSharpTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneSharpTurnUsingSharpTurn(@DrawableRes int laneSharpTurnUsingSharpTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneSlightTurn(@DrawableRes int laneSlightTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneSlightTurnOrSharpTurn(@DrawableRes int laneSlightTurnOrSharpTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneSlightTurnOrSharpTurnUsingSharpTurn(@DrawableRes int laneSlightTurnOrSharpTurnUsingSharpTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneSlightTurnOrSharpTurnUsingSlightTurn(@DrawableRes int laneSlightTurnOrSharpTurnUsingSlightTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneSlightTurnOrTurn(@DrawableRes int laneSlightTurnOrTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneSlightTurnOrTurnUsingSlightTurn(@DrawableRes int laneSlightTurnOrTurnUsingSlightTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneSlightTurnOrTurnUsingTurn(@DrawableRes int laneSlightTurnOrTurnUsingTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneSlightTurnOrUturn(@DrawableRes int laneSlightTurnOrUturn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneSlightTurnOrUturnUsingSlightTurn(@DrawableRes int laneSlightTurnOrUturnUsingSlightTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneSlightTurnOrUturnUsingUturn(@DrawableRes int laneSlightTurnOrUturnUsingUturn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneSlightTurnUsingSlightTurn(@DrawableRes int laneSlightTurnUsingSlightTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraight(@DrawableRes int laneStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrSharpTurn(@DrawableRes int laneStraightOrSharpTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrSharpTurnUsingSharpTurn(@DrawableRes int laneStraightOrSharpTurnUsingSharpTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrSharpTurnUsingStraight(@DrawableRes int laneStraightOrSharpTurnUsingStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrSlightTurn(@DrawableRes int laneStraightOrSlightTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrSlightTurnOrTurn(@DrawableRes int laneStraightOrSlightTurnOrTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrSlightTurnOrTurnUsingSlightTurn(@DrawableRes int laneStraightOrSlightTurnOrTurnUsingSlightTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrSlightTurnOrTurnUsingStraight(@DrawableRes int laneStraightOrSlightTurnOrTurnUsingStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrSlightTurnOrTurnUsingTurn(@DrawableRes int laneStraightOrSlightTurnOrTurnUsingTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrSlightTurnUsingSlightTurn(@DrawableRes int laneStraightOrSlightTurnUsingSlightTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrSlightTurnUsingStraight(@DrawableRes int laneStraightOrSlightTurnUsingStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrTurn(@DrawableRes int laneStraightOrTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrTurnOrUturn(@DrawableRes int laneStraightOrTurnOrUturn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrTurnOrUturnUsingStraight(@DrawableRes int laneStraightOrTurnOrUturnUsingStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrTurnOrUturnUsingTurn(@DrawableRes int laneStraightOrTurnOrUturnUsingTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrTurnOrUturnUsingUturn(@DrawableRes int laneStraightOrTurnOrUturnUsingUturn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrTurnUsingStraight(@DrawableRes int laneStraightOrTurnUsingStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrTurnUsingTurn(@DrawableRes int laneStraightOrTurnUsingTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrUturn(@DrawableRes int laneStraightOrUturn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrUturnUsingStraight(@DrawableRes int laneStraightOrUturnUsingStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightOrUturnUsingUturn(@DrawableRes int laneStraightOrUturnUsingUturn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneStraightUsingStraight(@DrawableRes int laneStraightUsingStraight);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneTurn(@DrawableRes int laneTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneTurnOrSharpTurn(@DrawableRes int laneTurnOrSharpTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneTurnOrSharpTurnUsingSharpTurn(@DrawableRes int laneTurnOrSharpTurnUsingSharpTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneTurnOrSharpTurnUsingTurn(@DrawableRes int laneTurnOrSharpTurnUsingTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneTurnOrUturn(@DrawableRes int laneTurnOrUturn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneTurnOrUturnUsingTurn(@DrawableRes int laneTurnOrUturnUsingTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneTurnOrUturnUsingUturn(@DrawableRes int laneTurnOrUturnUsingUturn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneTurnUsingTurn(@DrawableRes int laneTurnUsingTurn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneUturn(@DrawableRes int laneUturn);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIconResources.Builder laneUturnUsingUturn(@DrawableRes int laneUturnUsingUturn);
+  }
+
   public final class LaneIndicator {
+    method public String? getActiveDirection();
     method public java.util.List<java.lang.String> getDirections();
+    method public String getDrivingSide();
     method public boolean isActive();
     method public com.mapbox.navigation.ui.maneuver.model.LaneIndicator.Builder toBuilder();
+    property public final String? activeDirection;
     property public final java.util.List<java.lang.String> directions;
+    property public final String drivingSide;
     property public final boolean isActive;
   }
 
   public static final class LaneIndicator.Builder {
     ctor public LaneIndicator.Builder();
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIndicator.Builder activeDirection(String? activeDirection);
     method public com.mapbox.navigation.ui.maneuver.model.LaneIndicator build();
     method public com.mapbox.navigation.ui.maneuver.model.LaneIndicator.Builder directions(java.util.List<java.lang.String> directions);
+    method public com.mapbox.navigation.ui.maneuver.model.LaneIndicator.Builder drivingSide(String drivingSide);
     method public com.mapbox.navigation.ui.maneuver.model.LaneIndicator.Builder isActive(boolean isActive);
   }
 
@@ -607,12 +817,12 @@ package com.mapbox.navigation.ui.maneuver.view {
     ctor public MapboxLaneGuidance(android.content.Context context, android.util.AttributeSet? attrs = null, int defStyleAttr = 0);
     ctor public MapboxLaneGuidance(android.content.Context context, android.util.AttributeSet? attrs = null);
     ctor public MapboxLaneGuidance(android.content.Context context);
-    method public void renderLane(com.mapbox.navigation.ui.maneuver.model.LaneIndicator laneIndicator, String? activeDirection, androidx.appcompat.view.ContextThemeWrapper wrapper);
+    method public void renderLane(com.mapbox.navigation.ui.maneuver.model.LaneIcon laneIcon, androidx.appcompat.view.ContextThemeWrapper wrapper);
   }
 
   public final class MapboxLaneGuidanceAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder> {
     ctor public MapboxLaneGuidanceAdapter(android.content.Context context);
-    method public void addLanes(java.util.List<com.mapbox.navigation.ui.maneuver.model.LaneIndicator> laneIndicatorList, String? activeDirection);
+    method public void addLanes(java.util.List<com.mapbox.navigation.ui.maneuver.model.LaneIndicator> laneIndicatorList);
     method public int getItemCount();
     method public void onBindViewHolder(com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder holder, int position);
     method public com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLaneGuidanceViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType);

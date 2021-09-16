@@ -338,7 +338,7 @@ class MapboxManeuverView : ConstraintLayout {
      * @param lane Lane
      */
     fun renderAddLanes(lane: Lane) {
-        laneGuidanceAdapter.addLanes(lane.allLanes, lane.activeDirection)
+        laneGuidanceAdapter.addLanes(lane.allLanes)
     }
 
     /**

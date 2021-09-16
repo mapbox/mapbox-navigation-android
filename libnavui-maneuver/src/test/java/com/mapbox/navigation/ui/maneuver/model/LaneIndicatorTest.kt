@@ -11,6 +11,8 @@ class LaneIndicatorTest : BuilderTest<LaneIndicator, LaneIndicator.Builder>() {
 
     override fun getFilledUpBuilder(): LaneIndicator.Builder {
         return LaneIndicator.Builder()
+            .drivingSide("right")
+            .activeDirection("straight")
             .directions(listOf("straight"))
             .isActive(true)
     }

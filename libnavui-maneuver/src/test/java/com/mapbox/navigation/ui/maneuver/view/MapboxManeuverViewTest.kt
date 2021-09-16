@@ -663,7 +663,6 @@ class MapboxManeuverViewTest {
             every { directions } returns listOf("right")
         }
         return mockk {
-            every { activeDirection } returns ManeuverModifier.LEFT
             every { allLanes } returns listOf(laneIndicator1, laneIndicator2)
         }
     }

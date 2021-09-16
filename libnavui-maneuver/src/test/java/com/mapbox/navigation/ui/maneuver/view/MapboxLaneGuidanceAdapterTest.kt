@@ -23,7 +23,7 @@ class MapboxLaneGuidanceAdapterTest {
     fun `add lanes empty query item count`() {
         val laneAdapter = MapboxLaneGuidanceAdapter(ctx)
 
-        laneAdapter.addLanes(listOf(), null)
+        laneAdapter.addLanes(listOf())
 
         assertEquals(0, laneAdapter.itemCount)
     }
@@ -45,7 +45,7 @@ class MapboxLaneGuidanceAdapterTest {
         val laneAdapter = MapboxLaneGuidanceAdapter(ctx)
         val expected = laneIndicatorList.size
 
-        laneAdapter.addLanes(laneIndicatorList, null)
+        laneAdapter.addLanes(laneIndicatorList)
         val actual = laneAdapter.itemCount
 
         assertEquals(expected, actual)
@@ -68,7 +68,7 @@ class MapboxLaneGuidanceAdapterTest {
         val laneAdapter = MapboxLaneGuidanceAdapter(ctx)
         val expected = 0
 
-        laneAdapter.addLanes(laneIndicatorList, null)
+        laneAdapter.addLanes(laneIndicatorList)
         laneAdapter.removeLanes()
         val actual = laneAdapter.itemCount
 
