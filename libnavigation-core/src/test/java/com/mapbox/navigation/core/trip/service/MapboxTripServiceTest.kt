@@ -7,6 +7,7 @@ import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.TripNotificationState
 import com.mapbox.navigation.base.trip.notification.TripNotification
+import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -14,6 +15,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertNotNull
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
@@ -25,6 +27,9 @@ class MapboxTripServiceTest {
     private val initializeLambda: () -> Unit = mockk(relaxed = true)
     private val terminateLambda: () -> Unit = mockk(relaxed = true)
     private val logger: Logger = mockk(relaxUnitFun = true)
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Before
     fun setUp() {
@@ -189,6 +194,17 @@ class MapboxTripServiceTest {
         service.startService()
 
         verify(exactly = 0) { notificationDataObserver.onNotificationUpdated(any()) }
+    }
+
+    @Test
+    fun notificationUpdateAfterServiceStartIsDelayed() = coroutineRule.runBlockingTest {
+        val notificationState = buildTripNotificationState(null)
+        service.startService()
+        service.updateNotification(notificationState)
+        coroutineRule.testDispatcher.advanceTimeBy(250)
+        verify(exactly = 0) { tripNotification.updateNotification(any()) }
+        coroutineRule.testDispatcher.advanceTimeBy(500)
+        verify(exactly = 1) { tripNotification.updateNotification(notificationState) }
     }
 
     companion object {

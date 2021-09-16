@@ -4,10 +4,15 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.SystemClock
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.trip.model.TripNotificationState
 import com.mapbox.navigation.base.trip.notification.TripNotification
+import com.mapbox.navigation.utils.internal.ThreadController
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -93,6 +98,10 @@ internal class MapboxTripService(
 
     private val serviceStarted = AtomicBoolean(false)
 
+    private val mainJobController = ThreadController.getMainScopeAndRootJob()
+    private var allowedNotificationTime = 0L
+    private var notificationJob: Job? = null
+
     private fun updateNotificationData() {
         val notificationData = MapboxNotificationData(
             tripNotification.getNotificationId(),
@@ -112,6 +121,7 @@ internal class MapboxTripService(
                 initializeLambda()
                 currentTripNotification = tripNotification
                 updateNotificationData()
+                allowedNotificationTime = SystemClock.elapsedRealtime() + 500
             }
             false -> {
                 logger.i(msg = Message("service already started"))
@@ -126,6 +136,7 @@ internal class MapboxTripService(
         when (serviceStarted.compareAndSet(true, false)) {
             true -> {
                 currentTripNotification = null
+                notificationJob?.cancel()
                 terminateLambda()
                 tripNotification.onTripSessionStopped()
             }
@@ -139,7 +150,15 @@ internal class MapboxTripService(
      * Update the trip's information in the notification bar
      */
     override fun updateNotification(tripNotificationState: TripNotificationState) {
-        tripNotification.updateNotification(tripNotificationState)
+        notificationJob?.cancel()
+        if (SystemClock.elapsedRealtime() >= allowedNotificationTime) {
+            tripNotification.updateNotification(tripNotificationState)
+        } else {
+            notificationJob = mainJobController.scope.launch {
+                delay(allowedNotificationTime - SystemClock.elapsedRealtime())
+                tripNotification.updateNotification(tripNotificationState)
+            }
+        }
     }
 
     /**
