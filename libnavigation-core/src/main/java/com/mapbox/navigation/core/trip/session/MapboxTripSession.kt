@@ -73,10 +73,12 @@ internal class MapboxTripSession(
     override fun setRoute(route: DirectionsRoute?, legIndex: Int) {
         val isSameUuid = route?.isSameUuid(this.route) ?: false
         val isSameRoute = route?.isSameRoute(this.route) ?: false
-        if (route == null) {
-            roadObjects = emptyList()
-            routeProgress = null
-        }
+
+        isOffRoute = false
+        invalidateLatestBannerInstructionEvent()
+        roadObjects = emptyList()
+        routeProgress = null
+
         updateRouteJob = threadController.getMainScopeAndRootJob().scope.launch {
             when {
                 isSameUuid && isSameRoute && route != null -> {
@@ -92,8 +94,6 @@ internal class MapboxTripSession(
         mainJobController.scope.launch {
             updateRouteJob?.join()
             this@MapboxTripSession.route = route
-            isOffRoute = false
-            invalidateLatestBannerInstructionEvent()
         }
     }
 
@@ -227,6 +227,13 @@ internal class MapboxTripSession(
                 tripStatus.getMapMatcherResult(enhancedLocation, keyPoints)
             )
             zLevel = status.layer
+
+            // we should skip RouteProgress, BannerInstructions, isOffRoute state updates while
+            // setting a new route
+            if (updateRouteJob?.isActive == true) {
+                return
+            }
+
             val remainingWaypoints =
                 ifNonNull(tripStatus.route?.routeOptions()?.coordinatesList()?.size) {
                     it - tripStatus.navigationStatus.nextWaypointIndex
@@ -604,10 +611,6 @@ internal class MapboxTripSession(
         progress: RouteProgress?,
         shouldTriggerBannerInstructionsObserver: Boolean
     ) {
-        if (updateRouteJob?.isActive == true) {
-            return
-        }
-
         routeProgress = progress
         if (tripService.hasServiceStarted()) {
             tripService.updateNotification(buildTripNotificationState(progress))
