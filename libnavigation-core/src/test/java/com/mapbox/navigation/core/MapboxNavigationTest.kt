@@ -19,7 +19,6 @@ import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.options.IncidentsOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
-import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -299,43 +298,6 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun `restart the routeRefreshController during initialization`() {
-        createMapboxNavigation()
-        ThreadController.cancelAllUICoroutines()
-        verify(exactly = 1) { routeRefreshController.restart() }
-    }
-
-    @Test
-    fun `restart the routeRefreshController if new route is set`() {
-        ThreadController.cancelAllUICoroutines()
-
-        mapboxNavigation = MapboxNavigation(
-            provideNavigationOptions()
-                .routeRefreshOptions(
-                    RouteRefreshOptions.Builder()
-                        .build()
-                )
-                .build()
-        )
-        val route: DirectionsRoute = mockk()
-        val routeOptions: RouteOptions = mockk()
-        every { route.routeOptions() } returns routeOptions
-        every { route.geometry() } returns "geometry"
-        every { route.legs() } returns emptyList()
-        every { routeOptions.overview() } returns "full"
-        every { routeOptions.annotationsList() } returns emptyList()
-        every { routeOptions.enableRefresh() } returns true
-        mapboxNavigation.setRoutes(listOf(route))
-
-        // the sequence needs to be kept because routeRefreshController uses the route stored
-        // in the trip session, which has to be set first via directionsSession
-        verifyOrder {
-            directionsSession.setRoutes(listOf(route))
-            routeRefreshController.restart()
-        }
-    }
-
-    @Test
     fun registerMapMatcherResultObserver() {
         createMapboxNavigation()
         val observer: MapMatcherResultObserver = mockk()
@@ -570,6 +532,7 @@ class MapboxNavigationTest {
         }
 
         verify { tripSession.setRoute(primary, initialLegIndex) }
+        verify { routeRefreshController.restart(primary) }
     }
 
     @Test
@@ -586,6 +549,7 @@ class MapboxNavigationTest {
         }
 
         verify { tripSession.setRoute(null, initialLegIndex) }
+        verify { routeRefreshController.stop() }
     }
 
     @Test

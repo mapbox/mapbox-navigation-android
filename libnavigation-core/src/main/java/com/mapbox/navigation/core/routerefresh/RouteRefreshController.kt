@@ -40,14 +40,13 @@ internal class RouteRefreshController(
      * If route refresh is enabled, attach a refresh poller.
      * Cancel old timers, and cancel pending requests.
      */
-    fun restart() {
+    fun restart(route: DirectionsRoute) {
         stop()
-        val route = tripSession.route
-        if (route?.routeOptions()?.enableRefresh() == true) {
+        if (route.routeOptions()?.enableRefresh() == true) {
             routerRefreshTimer.startTimer {
-                refreshRoute()
+                refreshRoute(route)
             }
-        } else if (route != null && route.routeOptions() == null) {
+        } else if (route.routeOptions() == null) {
             logger.w(
                 TAG,
                 Message(
@@ -72,11 +71,9 @@ internal class RouteRefreshController(
         }
     }
 
-    private fun refreshRoute() {
-        val route = tripSession.route
-            ?.takeIf { it.routeOptions()?.enableRefresh() == true }
-            ?.takeIf { it.isUuidValidForRefresh() }
-        if (route != null) {
+    private fun refreshRoute(route: DirectionsRoute) {
+        val isValid = route.routeOptions()?.enableRefresh() == true && route.isUuidValidForRefresh()
+        if (isValid) {
             val legIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0
             currentRequestId?.let { directionsSession.cancelRouteRefreshRequest(it) }
             currentRequestId = directionsSession.requestRouteRefresh(
@@ -92,7 +89,7 @@ internal class RouteRefreshController(
                         The route is not qualified for route refresh feature.
                         See com.mapbox.navigation.base.extensions.supportsRouteRefresh
                         extension for details.
-                        ${route?.routeOptions()}
+                        ${route.routeOptions()}
                     """.trimIndent()
                 )
             )
