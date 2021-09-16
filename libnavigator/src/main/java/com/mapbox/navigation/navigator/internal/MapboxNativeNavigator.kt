@@ -27,7 +27,6 @@ import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.TilesConfig
-import com.mapbox.navigator.VoiceInstruction
 
 /**
  * Provides API to work with native Navigator class. Exposed for internal usage only.
@@ -111,14 +110,12 @@ interface MapboxNativeNavigator {
     suspend fun updateAnnotations(route: DirectionsRoute)
 
     /**
-     * Gets the banner at a specific step index in the route. If there is no
-     * banner at the specified index method return *null*.
-     *
-     * @param index Which step you want to get [BannerInstruction] for
+     * Gets the current banner. If there is no
+     * banner, the method returns *null*.
      *
      * @return [BannerInstruction] for step index you passed
      */
-    fun getBannerInstruction(index: Int): BannerInstruction?
+    fun getCurrentBannerInstruction(): BannerInstruction?
 
     /**
      * Follows a new leg of the already loaded directions.
@@ -154,16 +151,6 @@ interface MapboxNativeNavigator {
     // Other
 
     /**
-     * Gets the voice instruction at a specific step index in the route. If there is no
-     * voice instruction at the specified index, *null* is returned.
-     *
-     * @param index Which step you want to get [VoiceInstruction] for
-     *
-     * @return [VoiceInstruction] for step index you passed
-     */
-    fun getVoiceInstruction(index: Int): VoiceInstruction?
-
-    /**
      * Compare given route with current route.
      * Routes are considered the same if one of the routes is a suffix of another
      * without the first and last intersection.
@@ -186,12 +173,9 @@ interface MapboxNativeNavigator {
      */
     fun setElectronicHorizonObserver(eHorizonObserver: ElectronicHorizonObserver?)
 
-    /**
-     * Sets the Road objects store observer
-     *
-     * @param roadObjectsStoreObserver
-     */
-    fun setRoadObjectsStoreObserver(roadObjectsStoreObserver: RoadObjectsStoreObserver?)
+    fun addRoadObjectsStoreObserver(roadObjectsStoreObserver: RoadObjectsStoreObserver)
+
+    fun removeRoadObjectsStoreObserver(roadObjectsStoreObserver: RoadObjectsStoreObserver)
 
     fun setFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver?)
 

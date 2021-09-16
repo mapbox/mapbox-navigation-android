@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.trip.session
 
+import android.annotation.SuppressLint
 import android.hardware.SensorEvent
 import android.location.Location
 import android.os.Looper
@@ -234,35 +235,26 @@ internal class MapboxTripSession(
 
             var triggerObserver = false
             if (tripStatus.navigationStatus.routeState != RouteState.INVALID) {
-                route?.let { route ->
-                    ifNonNull(route.legs()) { legs ->
-                        val currentLeg = legs[tripStatus.navigationStatus.legIndex]
-                        ifNonNull(currentLeg?.steps()) { steps ->
-                            val nativeBannerInstruction: BannerInstruction? =
-                                tripStatus.navigationStatus.bannerInstruction.let {
-                                    if (it == null &&
-                                        bannerInstructionEvent.latestBannerInstructions == null
-                                    ) {
-                                        // workaround for a remaining issues in
-                                        // github.com/mapbox/mapbox-navigation-native/issues/3466
-                                        // and
-                                        // github.com/mapbox/mapbox-navigation-android/issues/4727
-                                        MapboxNativeNavigatorImpl.getBannerInstruction(
-                                            status.stepIndex
-                                        )
-                                    } else {
-                                        it
-                                    }
-                                }
-                            val bannerInstructions: BannerInstructions? =
-                                nativeBannerInstruction?.mapToDirectionsApi()
-                            triggerObserver = bannerInstructionEvent.isOccurring(
-                                bannerInstructions,
-                                nativeBannerInstruction?.index
-                            )
+                val nativeBannerInstruction: BannerInstruction? =
+                    tripStatus.navigationStatus.bannerInstruction.let {
+                        if (it == null &&
+                            bannerInstructionEvent.latestBannerInstructions == null
+                        ) {
+                            // workaround for a remaining issues in
+                            // github.com/mapbox/mapbox-navigation-native/issues/3466
+                            // and
+                            // github.com/mapbox/mapbox-navigation-android/issues/4727
+                            MapboxNativeNavigatorImpl.getCurrentBannerInstruction()
+                        } else {
+                            it
                         }
                     }
-                }
+                val bannerInstructions: BannerInstructions? =
+                    nativeBannerInstruction?.mapToDirectionsApi()
+                triggerObserver = bannerInstructionEvent.isOccurring(
+                    bannerInstructions,
+                    nativeBannerInstruction?.index
+                )
             }
             val routeProgress = getRouteProgressFrom(
                 tripStatus.route,
@@ -277,6 +269,7 @@ internal class MapboxTripSession(
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun startLocationUpdates() {
         navigationOptions.locationEngine.requestLocationUpdates(
             navigationOptions.locationEngineRequest,

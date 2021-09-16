@@ -5,6 +5,9 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.factory.EHorizonFactory
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
+import com.mapbox.navigation.base.trip.model.eh.MatchableGeometry
+import com.mapbox.navigation.base.trip.model.eh.MatchableOpenLr
+import com.mapbox.navigation.base.trip.model.eh.MatchablePoint
 import com.mapbox.navigation.base.trip.model.eh.OpenLRStandard
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -91,15 +94,48 @@ class RoadObjectMatcher internal constructor(
      * @param openLRLocation road object location
      * @param openLRStandard standard used to encode openLRLocation
      */
+    @Deprecated(
+        message = "Use matchOpenLRObjects() instead",
+        ReplaceWith(
+            expression = "matchOpenLRObjects(" +
+                "listOf(" +
+                "MatchableOpenLr(roadObjectId, openLRLocation, openLRStandard)))",
+            imports = arrayOf("com.mapbox.navigation.base.trip.model.eh.MatchableOpenLr")
+        )
+    )
     fun matchOpenLRObject(
         roadObjectId: String,
         openLRLocation: String,
         @OpenLRStandard.Type openLRStandard: String
     ) {
-        navigator.roadObjectMatcher?.matchOpenLR(
-            openLRLocation,
-            EHorizonFactory.buildOpenLRStandard(openLRStandard),
-            roadObjectId
+        navigator.roadObjectMatcher?.matchOpenLRs(
+            listOf(
+                EHorizonFactory.buildNativeMatchableOpenLr(
+                    MatchableOpenLr(roadObjectId, openLRLocation, openLRStandard)
+                )
+            ),
+            false
+        )
+    }
+
+    /**
+     * Matches given OpenLR objects to the graph.
+     * @param matchableOpenLrs matchable objects
+     * @param useOnlyPreloadedTiles If there is no data for the specified geometry yet cached on the device,
+     * setting this to `false` will wait (potentially indefinitely) for the data covering this geometry to be loaded
+     * via other means (location updates, predictive ambient caching, offline regions etc.) before attempting to match.
+     * If set to `true` and there is no data on device covering specified geometry, this call will return an error immediately.
+     */
+    @JvmOverloads
+    fun matchOpenLRObjects(
+        matchableOpenLrs: List<MatchableOpenLr>,
+        useOnlyPreloadedTiles: Boolean = false
+    ) {
+        navigator.roadObjectMatcher?.matchOpenLRs(
+            matchableOpenLrs.map {
+                EHorizonFactory.buildNativeMatchableOpenLr(it)
+            },
+            useOnlyPreloadedTiles
         )
     }
 
@@ -113,8 +149,48 @@ class RoadObjectMatcher internal constructor(
      * @param roadObjectId unique id of the object
      * @param polyline polyline representing the object
      */
+    @Deprecated(
+        message = "Use matchPolylineObjects() instead.",
+        ReplaceWith(
+            expression = "matchPolylineObject(listOf(MatchableGeometry(roadObjectId, polyline)))",
+            imports = arrayOf("com.mapbox.navigation.base.trip.model.eh.MatchableGeometry")
+        )
+    )
     fun matchPolylineObject(roadObjectId: String, polyline: List<Point>) {
-        navigator.roadObjectMatcher?.matchPolyline(polyline, roadObjectId)
+        navigator.roadObjectMatcher?.matchPolylines(
+            listOf(
+                EHorizonFactory.buildNativeMatchableGeometry(
+                    MatchableGeometry(roadObjectId, polyline)
+                )
+            ),
+            false
+        )
+    }
+
+    /**
+     * Matches given polylines to graph.
+     * Polyline should define valid path on graph,
+     * i.e. it should be possible to drive this path according to traffic rules.
+     * In case of error (if there are no tiles in cache, decoding failed, etc.)
+     * object won't be matched.
+     *
+     * @param matchableGeometries matchable geometries
+     * @param useOnlyPreloadedTiles If there is no data for the specified geometry yet cached on the device,
+     * setting this to `false` will wait (potentially indefinitely) for the data covering this geometry to be loaded
+     * via other means (location updates, predictive ambient caching, offline regions etc.) before attempting to match.
+     * If set to `true` and there is no data on device covering specified geometry, this call will return an error immediately.
+     */
+    @JvmOverloads
+    fun matchPolylineObjects(
+        matchableGeometries: List<MatchableGeometry>,
+        useOnlyPreloadedTiles: Boolean = false
+    ) {
+        navigator.roadObjectMatcher?.matchPolylines(
+            matchableGeometries.map {
+                EHorizonFactory.buildNativeMatchableGeometry(it)
+            },
+            useOnlyPreloadedTiles
+        )
     }
 
     /**
@@ -127,8 +203,48 @@ class RoadObjectMatcher internal constructor(
      * @param roadObjectId unique id of the object
      * @param polygon polygon representing the object
      */
+    @Deprecated(
+        message = "Use matchPolygonObjects() instead.",
+        ReplaceWith(
+            expression = "matchPolygonObject(listOf(MatchableGeometry(roadObjectId, polygon)))",
+            imports = arrayOf("com.mapbox.navigation.base.trip.model.eh.MatchableGeometry")
+        )
+    )
     fun matchPolygonObject(roadObjectId: String, polygon: List<Point>) {
-        navigator.roadObjectMatcher?.matchPolygon(polygon, roadObjectId)
+        navigator.roadObjectMatcher?.matchPolygons(
+            listOf(
+                EHorizonFactory.buildNativeMatchableGeometry(
+                    MatchableGeometry(roadObjectId, polygon)
+                )
+            ),
+            false
+        )
+    }
+
+    /**
+     * Matches given polygons to graph.
+     * "Matching" here means we try to find all intersections of polygon with the road graph
+     * and track distances to those intersections as distance to polygon.
+     * In case of error (if there are no tiles in cache, decoding failed, etc.)
+     * object won't be matched.
+     *
+     * @param matchableGeometries matchable geometries
+     * @param useOnlyPreloadedTiles If there is no data for the specified geometry yet cached on the device,
+     * setting this to `false` will wait (potentially indefinitely) for the data covering this geometry to be loaded
+     * via other means (location updates, predictive ambient caching, offline regions etc.) before attempting to match.
+     * If set to `true` and there is no data on device covering specified geometry, this call will return an error immediately.
+     */
+    @JvmOverloads
+    fun matchPolygonObjects(
+        matchableGeometries: List<MatchableGeometry>,
+        useOnlyPreloadedTiles: Boolean = false
+    ) {
+        navigator.roadObjectMatcher?.matchPolygons(
+            matchableGeometries.map {
+                EHorizonFactory.buildNativeMatchableGeometry(it)
+            },
+            useOnlyPreloadedTiles
+        )
     }
 
     /**
@@ -141,8 +257,48 @@ class RoadObjectMatcher internal constructor(
      * @param roadObjectId unique id of the object
      * @param gantry gantry representing the object
      */
+    @Deprecated(
+        message = "Use matchGantryObjects() instead.",
+        ReplaceWith(
+            expression = "matchGantryObject(listOf(MatchableGeometry(roadObjectId, gantry)))",
+            imports = arrayOf("com.mapbox.navigation.base.trip.model.eh.MatchableGeometry")
+        )
+    )
     fun matchGantryObject(roadObjectId: String, gantry: List<Point>) {
-        navigator.roadObjectMatcher?.matchGantry(gantry, roadObjectId)
+        navigator.roadObjectMatcher?.matchGantries(
+            listOf(
+                EHorizonFactory.buildNativeMatchableGeometry(
+                    MatchableGeometry(roadObjectId, gantry)
+                )
+            ),
+            false
+        )
+    }
+
+    /**
+     * Matches given gantries (i.e. polyline orthogonal to the road) to the graph.
+     * "Matching" here means we try to find all intersections of gantry with road graph
+     * and track distances to those intersections as distance to gantry.
+     * In case of error (if there are no tiles in cache, decoding failed, etc.)
+     * object won't be matched.
+     *
+     * @param matchableGeometries matchable geometries
+     * @param useOnlyPreloadedTiles If there is no data for the specified geometry yet cached on the device,
+     * setting this to `false` will wait (potentially indefinitely) for the data covering this geometry to be loaded
+     * via other means (location updates, predictive ambient caching, offline regions etc.) before attempting to match.
+     * If set to `true` and there is no data on device covering specified geometry, this call will return an error immediately.
+     */
+    @JvmOverloads
+    fun matchGantryObjects(
+        matchableGeometries: List<MatchableGeometry>,
+        useOnlyPreloadedTiles: Boolean = false
+    ) {
+        navigator.roadObjectMatcher?.matchGantries(
+            matchableGeometries.map {
+                EHorizonFactory.buildNativeMatchableGeometry(it)
+            },
+            useOnlyPreloadedTiles
+        )
     }
 
     /**
@@ -153,8 +309,46 @@ class RoadObjectMatcher internal constructor(
      * @param roadObjectId unique id of the object
      * @param point point representing the object
      */
+    @Deprecated(
+        message = "Use matchPointObjects() instead.",
+        ReplaceWith(
+            expression = "matchPointObject(listOf(MatchablePoint(roadObjectId, point)))",
+            imports = arrayOf("com.mapbox.navigation.base.trip.model.eh.MatchablePoint")
+        )
+    )
     fun matchPointObject(roadObjectId: String, point: Point) {
-        navigator.roadObjectMatcher?.matchPoint(point, roadObjectId)
+        navigator.roadObjectMatcher?.matchPoints(
+            listOf(
+                EHorizonFactory.buildNativeMatchablePoint(
+                    MatchablePoint(roadObjectId, point)
+                )
+            ),
+            false
+        )
+    }
+
+    /**
+     * Matches given points to road graph.
+     * In case of error (if there are no tiles in cache, decoding failed, etc.)
+     * object won't be matched.
+     *
+     * @param matchablePoints matchable points
+     * @param useOnlyPreloadedTiles If there is no data for the specified geometry yet cached on the device,
+     * setting this to `false` will wait (potentially indefinitely) for the data covering this geometry to be loaded
+     * via other means (location updates, predictive ambient caching, offline regions etc.) before attempting to match.
+     * If set to `true` and there is no data on device covering specified geometry, this call will return an error immediately.
+     */
+    @JvmOverloads
+    fun matchPointObjects(
+        matchablePoints: List<MatchablePoint>,
+        useOnlyPreloadedTiles: Boolean = false
+    ) {
+        navigator.roadObjectMatcher?.matchPoints(
+            matchablePoints.map {
+                EHorizonFactory.buildNativeMatchablePoint(it)
+            },
+            useOnlyPreloadedTiles
+        )
     }
 
     /**

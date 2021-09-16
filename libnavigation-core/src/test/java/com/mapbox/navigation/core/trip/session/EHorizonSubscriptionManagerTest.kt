@@ -79,7 +79,7 @@ class EHorizonSubscriptionManagerTest {
         subscriptionManager.registerObserver(mockk())
 
         verify(exactly = 1) { navigator.setElectronicHorizonObserver(any()) }
-        verify(exactly = 1) { navigator.setRoadObjectsStoreObserver(any()) }
+        verify(exactly = 1) { navigator.addRoadObjectsStoreObserver(any()) }
     }
 
     @Test
@@ -88,7 +88,7 @@ class EHorizonSubscriptionManagerTest {
         subscriptionManager.registerObserver(mockk())
 
         verify(exactly = 1) { navigator.setElectronicHorizonObserver(any()) }
-        verify(exactly = 1) { navigator.setRoadObjectsStoreObserver(any()) }
+        verify(exactly = 1) { navigator.addRoadObjectsStoreObserver(any()) }
     }
 
     @Test
@@ -96,7 +96,7 @@ class EHorizonSubscriptionManagerTest {
         subscriptionManager.unregisterAllObservers()
 
         verify(exactly = 1) { navigator.setElectronicHorizonObserver(null) }
-        verify(exactly = 1) { navigator.setRoadObjectsStoreObserver(null) }
+        verify(exactly = 1) { navigator.removeRoadObjectsStoreObserver(any()) }
     }
 
     @Test
@@ -104,7 +104,7 @@ class EHorizonSubscriptionManagerTest {
         val eHorizonObserverSlot = CapturingSlot<ElectronicHorizonObserver>()
         val roadObjectsStoreObserverSlot = CapturingSlot<RoadObjectsStoreObserver>()
         every { navigator.setElectronicHorizonObserver(capture(eHorizonObserverSlot)) } just Runs
-        every { navigator.setRoadObjectsStoreObserver(capture(roadObjectsStoreObserverSlot)) } just
+        every { navigator.addRoadObjectsStoreObserver(capture(roadObjectsStoreObserverSlot)) } just
             Runs
         val observer: EHorizonObserver = mockk(relaxed = true)
 
@@ -115,10 +115,12 @@ class EHorizonSubscriptionManagerTest {
             navigator.setElectronicHorizonObserver(eHorizonObserverSlot.captured)
         }
         verify(exactly = 1) {
-            navigator.setRoadObjectsStoreObserver(roadObjectsStoreObserverSlot.captured)
+            navigator.addRoadObjectsStoreObserver(roadObjectsStoreObserverSlot.captured)
         }
         verify(exactly = 1) { navigator.setElectronicHorizonObserver(null) }
-        verify(exactly = 1) { navigator.setRoadObjectsStoreObserver(null) }
+        verify(exactly = 1) {
+            navigator.removeRoadObjectsStoreObserver(roadObjectsStoreObserverSlot.captured)
+        }
     }
 
     @Test
@@ -183,7 +185,7 @@ class EHorizonSubscriptionManagerTest {
     @Test
     fun `onRoadObjectAdded is called for all observers`() = runBlockingTest {
         val roadObjectsStoreObserver = CapturingSlot<RoadObjectsStoreObserver>()
-        every { navigator.setRoadObjectsStoreObserver(capture(roadObjectsStoreObserver)) } just Runs
+        every { navigator.addRoadObjectsStoreObserver(capture(roadObjectsStoreObserver)) } just Runs
         val firstObserver: EHorizonObserver = mockk(relaxed = true)
         val secondObserver: EHorizonObserver = mockk(relaxed = true)
 
@@ -199,7 +201,7 @@ class EHorizonSubscriptionManagerTest {
     @Test
     fun `onRoadObjectUpdated is called for all observers`() = runBlockingTest {
         val roadObjectsStoreObserver = CapturingSlot<RoadObjectsStoreObserver>()
-        every { navigator.setRoadObjectsStoreObserver(capture(roadObjectsStoreObserver)) } just Runs
+        every { navigator.addRoadObjectsStoreObserver(capture(roadObjectsStoreObserver)) } just Runs
         val firstObserver: EHorizonObserver = mockk(relaxed = true)
         val secondObserver: EHorizonObserver = mockk(relaxed = true)
 
@@ -215,7 +217,7 @@ class EHorizonSubscriptionManagerTest {
     @Test
     fun `onRoadObjectRemoved is called for all observers`() = runBlockingTest {
         val roadObjectsStoreObserver = CapturingSlot<RoadObjectsStoreObserver>()
-        every { navigator.setRoadObjectsStoreObserver(capture(roadObjectsStoreObserver)) } just Runs
+        every { navigator.addRoadObjectsStoreObserver(capture(roadObjectsStoreObserver)) } just Runs
         val firstObserver: EHorizonObserver = mockk(relaxed = true)
         val secondObserver: EHorizonObserver = mockk(relaxed = true)
 
