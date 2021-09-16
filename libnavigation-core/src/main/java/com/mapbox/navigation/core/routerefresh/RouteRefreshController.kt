@@ -16,7 +16,7 @@ import com.mapbox.navigation.utils.internal.MapboxTimer
  * This class is responsible for refreshing the current direction route's traffic.
  * This does not support alternative routes.
  *
- * If the route is successfully refreshed, this class will update the [TripSession.route]
+ * If the route is successfully refreshed, this class will update the [DirectionsSession].
  */
 internal class RouteRefreshController(
     private val routeRefreshOptions: RouteRefreshOptions,

@@ -79,7 +79,6 @@ class RouteRefreshControllerTest {
                 every { legIndex } returns 0
             }
         }
-        every { tripSession.route } returns validRoute
         every {
             directionsSession.requestRouteRefresh(any(), any(), capture(routeRefreshCallbackSlot))
         } returns requestId

@@ -863,7 +863,7 @@ class MapboxNavigationTest {
         every {
             tripSession.registerFallbackVersionsObserver(capture(fallbackObserverSlot))
         } just Runs
-        every { tripSession.route } returns null
+        every { directionsSession.routes } returns emptyList()
         every { tripSession.getRouteProgress() } returns mockk()
 
         mapboxNavigation = MapboxNavigation(navigationOptions)
@@ -897,7 +897,7 @@ class MapboxNavigationTest {
         every {
             tripSession.registerFallbackVersionsObserver(capture(fallbackObserverSlot))
         } just Runs
-        every { tripSession.route } returns null
+        every { directionsSession.routes } returns emptyList()
         every { tripSession.getRouteProgress() } returns mockk()
 
         mapboxNavigation = MapboxNavigation(navigationOptions)
@@ -931,7 +931,7 @@ class MapboxNavigationTest {
         val routeProgress: RouteProgress = mockk()
         val legProgress: RouteLegProgress = mockk()
         val index = 137
-        every { tripSession.route } returns route
+        every { directionsSession.routes } returns listOf(route)
         every { tripSession.getRouteProgress() } returns routeProgress
         every { routeProgress.currentLegProgress } returns legProgress
         every { legProgress.legIndex } returns index

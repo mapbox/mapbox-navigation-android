@@ -1070,7 +1070,7 @@ class MapboxNavigation(
                 logger
             )
             historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
-            tripSession.route?.let {
+            directionsSession.routes.firstOrNull()?.let {
                 navigator.setRoute(
                     it,
                     tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0
