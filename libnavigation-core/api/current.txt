@@ -38,7 +38,6 @@ package com.mapbox.navigation.core {
     method public void requestAlternativeRoutes();
     method public long requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.RouterCallback routesRequestCallback);
     method public void resetTripSession();
-    method public String? retrieveSsmlAnnouncementInstruction(int index);
     method public void setArrivalController(com.mapbox.navigation.core.arrival.ArrivalController? arrivalController = com.mapbox.navigation.core.arrival.AutoArrivalController());
     method public void setArrivalController();
     method public void setRerouteController(com.mapbox.navigation.core.reroute.RerouteController? rerouteController = com.mapbox.navigation.core.MapboxNavigation.defaultRerouteController);
@@ -738,11 +737,21 @@ package com.mapbox.navigation.core.trip.session.eh {
   public final class RoadObjectMatcher {
     method public void cancel(java.util.List<java.lang.String> roadObjectIds);
     method public void cancelAll();
-    method public void matchGantryObject(String roadObjectId, java.util.List<com.mapbox.geojson.Point> gantry);
-    method public void matchOpenLRObject(String roadObjectId, String openLRLocation, @com.mapbox.navigation.base.trip.model.eh.OpenLRStandard.Type String openLRStandard);
-    method public void matchPointObject(String roadObjectId, com.mapbox.geojson.Point point);
-    method public void matchPolygonObject(String roadObjectId, java.util.List<com.mapbox.geojson.Point> polygon);
-    method public void matchPolylineObject(String roadObjectId, java.util.List<com.mapbox.geojson.Point> polyline);
+    method @Deprecated public void matchGantryObject(String roadObjectId, java.util.List<com.mapbox.geojson.Point> gantry);
+    method public void matchGantryObjects(java.util.List<com.mapbox.navigation.base.trip.model.eh.MatchableGeometry> matchableGeometries, boolean useOnlyPreloadedTiles = false);
+    method public void matchGantryObjects(java.util.List<com.mapbox.navigation.base.trip.model.eh.MatchableGeometry> matchableGeometries);
+    method @Deprecated public void matchOpenLRObject(String roadObjectId, String openLRLocation, @com.mapbox.navigation.base.trip.model.eh.OpenLRStandard.Type String openLRStandard);
+    method public void matchOpenLRObjects(java.util.List<com.mapbox.navigation.base.trip.model.eh.MatchableOpenLr> matchableOpenLrs, boolean useOnlyPreloadedTiles = false);
+    method public void matchOpenLRObjects(java.util.List<com.mapbox.navigation.base.trip.model.eh.MatchableOpenLr> matchableOpenLrs);
+    method @Deprecated public void matchPointObject(String roadObjectId, com.mapbox.geojson.Point point);
+    method public void matchPointObjects(java.util.List<com.mapbox.navigation.base.trip.model.eh.MatchablePoint> matchablePoints, boolean useOnlyPreloadedTiles = false);
+    method public void matchPointObjects(java.util.List<com.mapbox.navigation.base.trip.model.eh.MatchablePoint> matchablePoints);
+    method @Deprecated public void matchPolygonObject(String roadObjectId, java.util.List<com.mapbox.geojson.Point> polygon);
+    method public void matchPolygonObjects(java.util.List<com.mapbox.navigation.base.trip.model.eh.MatchableGeometry> matchableGeometries, boolean useOnlyPreloadedTiles = false);
+    method public void matchPolygonObjects(java.util.List<com.mapbox.navigation.base.trip.model.eh.MatchableGeometry> matchableGeometries);
+    method @Deprecated public void matchPolylineObject(String roadObjectId, java.util.List<com.mapbox.geojson.Point> polyline);
+    method public void matchPolylineObjects(java.util.List<com.mapbox.navigation.base.trip.model.eh.MatchableGeometry> matchableGeometries, boolean useOnlyPreloadedTiles = false);
+    method public void matchPolylineObjects(java.util.List<com.mapbox.navigation.base.trip.model.eh.MatchableGeometry> matchableGeometries);
     method public void registerRoadObjectMatcherObserver(com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcherObserver roadObjectMatcherObserver);
   }
 

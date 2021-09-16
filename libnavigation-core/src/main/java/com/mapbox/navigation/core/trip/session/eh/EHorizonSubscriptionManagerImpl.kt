@@ -124,14 +124,14 @@ internal class EHorizonSubscriptionManagerImpl(
     private fun setNavigatorObservers() {
         navigator.run {
             setElectronicHorizonObserver(electronicHorizonObserver)
-            setRoadObjectsStoreObserver(roadObjectsStoreObserver)
+            addRoadObjectsStoreObserver(roadObjectsStoreObserver)
         }
     }
 
     private fun removeNavigatorObservers() {
         navigator.run {
             setElectronicHorizonObserver(null)
-            setRoadObjectsStoreObserver(null)
+            removeRoadObjectsStoreObserver(roadObjectsStoreObserver)
         }
     }
 

@@ -695,6 +695,45 @@ package com.mapbox.navigation.base.trip.model.eh {
   @StringDef({com.mapbox.navigation.base.trip.model.eh.EHorizonResultType.INITIAL, com.mapbox.navigation.base.trip.model.eh.EHorizonResultType.UPDATE}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface EHorizonResultType.Type {
   }
 
+  public final class MatchableGeometry {
+    ctor public MatchableGeometry(String roadObjectId, java.util.List<com.mapbox.geojson.Point> coordinates);
+    method public String component1();
+    method public java.util.List<com.mapbox.geojson.Point> component2();
+    method public com.mapbox.navigation.base.trip.model.eh.MatchableGeometry copy(String roadObjectId, java.util.List<com.mapbox.geojson.Point> coordinates);
+    method public java.util.List<com.mapbox.geojson.Point> getCoordinates();
+    method public String getRoadObjectId();
+    property public final java.util.List<com.mapbox.geojson.Point> coordinates;
+    property public final String roadObjectId;
+  }
+
+  public final class MatchableOpenLr {
+    ctor public MatchableOpenLr(String roadObjectId, String openLRLocation, @com.mapbox.navigation.base.trip.model.eh.OpenLRStandard.Type String openLRStandard);
+    method public String component1();
+    method public String component2();
+    method public String component3();
+    method public com.mapbox.navigation.base.trip.model.eh.MatchableOpenLr copy(String roadObjectId, String openLRLocation, String openLRStandard);
+    method public String getOpenLRLocation();
+    method public String getOpenLRStandard();
+    method public String getRoadObjectId();
+    property public final String openLRLocation;
+    property public final String openLRStandard;
+    property public final String roadObjectId;
+  }
+
+  public final class MatchablePoint {
+    ctor public MatchablePoint(String roadObjectId, com.mapbox.geojson.Point point, Double? bearing = null);
+    method public String component1();
+    method public com.mapbox.geojson.Point component2();
+    method public Double? component3();
+    method public com.mapbox.navigation.base.trip.model.eh.MatchablePoint copy(String roadObjectId, com.mapbox.geojson.Point point, Double? bearing);
+    method public Double? getBearing();
+    method public com.mapbox.geojson.Point getPoint();
+    method public String getRoadObjectId();
+    property public final Double? bearing;
+    property public final com.mapbox.geojson.Point point;
+    property public final String roadObjectId;
+  }
+
   public final class OpenLRStandard {
     field public static final com.mapbox.navigation.base.trip.model.eh.OpenLRStandard INSTANCE;
     field public static final String TOM_TOM = "TOM_TOM";

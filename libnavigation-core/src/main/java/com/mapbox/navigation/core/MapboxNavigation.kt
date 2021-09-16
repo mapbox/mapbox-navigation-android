@@ -632,14 +632,6 @@ class MapboxNavigation(
     }
 
     /**
-     * API used to retrieve the SSML announcement for voice instructions.
-     *
-     * @return SSML voice instruction announcement string
-     */
-    fun retrieveSsmlAnnouncementInstruction(index: Int): String? =
-        MapboxNativeNavigatorImpl.getVoiceInstruction(index)?.ssmlAnnouncement
-
-    /**
      * Registers [LocationObserver]. The updates are available whenever the trip session is started.
      *
      * @see [startTripSession]
