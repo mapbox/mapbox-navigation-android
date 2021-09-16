@@ -42,12 +42,12 @@ internal class RouteRefreshController(
      */
     fun restart() {
         stop()
-        val route = tripSession.route
-        if (route?.routeOptions()?.enableRefresh() == true) {
+        val routeOptions = directionsSession.getPrimaryRouteOptions()
+        if (routeOptions?.enableRefresh() == true) {
             routerRefreshTimer.startTimer {
                 refreshRoute()
             }
-        } else if (route != null && route.routeOptions() == null) {
+        } else if (routeOptions != null) {
             logger.w(
                 TAG,
                 Message(
@@ -73,7 +73,7 @@ internal class RouteRefreshController(
     }
 
     private fun refreshRoute() {
-        val route = tripSession.route
+        val route = directionsSession.routes.firstOrNull()
             ?.takeIf { it.routeOptions()?.enableRefresh() == true }
             ?.takeIf { it.isUuidValidForRefresh() }
         if (route != null) {
