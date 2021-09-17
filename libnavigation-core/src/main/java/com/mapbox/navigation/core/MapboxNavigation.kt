@@ -56,7 +56,7 @@ import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver
-import com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater
+import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
@@ -399,7 +399,7 @@ class MapboxNavigation(
             )
         }
 
-        val routeOptionsProvider = MapboxRouteOptionsUpdater()
+        val routeOptionsProvider = RouteOptionsUpdater()
 
         routeAlternativesController = RouteAlternativesControllerProvider.create(
             navigationOptions.routeAlternativesOptions,

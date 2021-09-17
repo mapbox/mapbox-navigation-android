@@ -6,7 +6,7 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.directions.session.DirectionsSession
-import com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater
+import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -39,19 +39,19 @@ class MapboxRerouteControllerTest {
     private lateinit var tripSession: TripSession
 
     @MockK
-    private lateinit var routeOptionsUpdater: MapboxRouteOptionsUpdater
+    private lateinit var routeOptionsUpdater: RouteOptionsUpdater
 
     @MockK
     private lateinit var logger: Logger
 
     @MockK
-    private lateinit var successFromResult: MapboxRouteOptionsUpdater.RouteOptionsResult.Success
+    private lateinit var successFromResult: RouteOptionsUpdater.RouteOptionsResult.Success
 
     @MockK
     private lateinit var routeOptionsFromSuccessResult: RouteOptions
 
     @MockK
-    private lateinit var errorFromResult: MapboxRouteOptionsUpdater.RouteOptionsResult.Error
+    private lateinit var errorFromResult: RouteOptionsUpdater.RouteOptionsResult.Error
 
     @MockK
     private lateinit var routeCallback: RerouteController.RoutesCallback
@@ -335,7 +335,7 @@ class MapboxRerouteControllerTest {
     }
 
     private fun mockRouteOptionsResult(
-        _routeOptionsResult: MapboxRouteOptionsUpdater.RouteOptionsResult
+        _routeOptionsResult: RouteOptionsUpdater.RouteOptionsResult
     ) {
         assertFalse(
             "routeOptionsResult mustn't be the *RouteOptionsProvider.RouteOptionsResult*, " +
