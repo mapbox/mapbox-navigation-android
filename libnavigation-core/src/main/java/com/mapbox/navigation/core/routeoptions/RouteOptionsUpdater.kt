@@ -22,13 +22,13 @@ private const val TAG = "MbxRouteOptionsProvider"
  * and when route alternatives (see [RouteAlternativesController]) are requested.
  * For example, this is needed in order to filter the waypoints that have been completed.
  */
-class MapboxRouteOptionsUpdater {
+class RouteOptionsUpdater {
 
     /**
      * Provides a new [RouteOptions] instance based on the original request options and the current route progress.
      *
-     * Returns *null* if a new [RouteOptions] instance cannot be combined based on the input given. When *null*
-     * is returned new route is not fetched.
+     * @return `RouteOptionsResult.Error` if a new [RouteOptions] instance cannot be combined based on the input given.
+     * `RouteOptionsResult.Success` with a new [RouteOptions] instance if successfully combined.
      */
     fun update(
         routeOptions: RouteOptions?,
