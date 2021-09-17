@@ -22,6 +22,7 @@ import com.mapbox.maps.plugin.delegates.listeners.eventdata.MapLoadErrorType
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -256,6 +257,14 @@ class ReplayHistoryActivity : AppCompatActivity() {
                 .build()
         )
         mapboxReplayer = mapboxNavigation.mapboxReplayer
+        startReplayTripSession()
+    }
+
+    /**
+     * This is showcasing a new way to replay rides at runtime.
+     */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private fun startReplayTripSession() {
         mapboxNavigation.startReplayTripSession()
     }
 
