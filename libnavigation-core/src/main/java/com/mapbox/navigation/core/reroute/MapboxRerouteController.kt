@@ -10,7 +10,7 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.directions.session.DirectionsSession
-import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
+import com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -23,7 +23,7 @@ import java.util.concurrent.CopyOnWriteArraySet
 internal class MapboxRerouteController(
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession,
-    private val routeOptionsUpdater: RouteOptionsUpdater,
+    private val routeOptionsUpdater: MapboxRouteOptionsUpdater,
     threadController: ThreadController = ThreadController,
     private val logger: Logger
 ) : RerouteController {
@@ -68,10 +68,10 @@ internal class MapboxRerouteController(
         )
             .let { routeOptionsResult ->
                 when (routeOptionsResult) {
-                    is RouteOptionsUpdater.RouteOptionsResult.Success -> {
+                    is MapboxRouteOptionsUpdater.RouteOptionsResult.Success -> {
                         request(routesCallback, routeOptionsResult.routeOptions)
                     }
-                    is RouteOptionsUpdater.RouteOptionsResult.Error -> {
+                    is MapboxRouteOptionsUpdater.RouteOptionsResult.Error -> {
                         mainJobController.scope.launch {
                             state = RerouteState.Failed(
                                 message = "Cannot combine route options",

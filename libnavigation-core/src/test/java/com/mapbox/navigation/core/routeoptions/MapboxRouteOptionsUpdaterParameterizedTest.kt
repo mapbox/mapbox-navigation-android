@@ -61,8 +61,6 @@ class MapboxRouteOptionsUpdaterParameterizedTest(
         )
     }
 
-    private val accessToken = "pk.1234pplffd"
-
     private lateinit var routeRefreshAdapter: MapboxRouteOptionsUpdater
     private lateinit var location: Location
 
@@ -89,8 +87,8 @@ class MapboxRouteOptionsUpdaterParameterizedTest(
         val updatedRouteOptions =
             routeRefreshAdapter.update(routeOptions, routeProgress, location)
                 .let {
-                    assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
-                    return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
+                    assertTrue(it is MapboxRouteOptionsUpdater.RouteOptionsResult.Success)
+                    return@let it as MapboxRouteOptionsUpdater.RouteOptionsResult.Success
                 }
                 .routeOptions
         val updatedWaypointNames = updatedRouteOptions.waypointNames()
