@@ -489,6 +489,7 @@ class MapboxNavigation(
      *
      * This allows you to simulate navigation routes or replay history from the [historyRecorder].
      */
+    @ExperimentalPreviewMapboxNavigationAPI
     fun startReplayTripSession(withForegroundService: Boolean = true) {
         runIfNotDestroyed {
             tripSession.start(
