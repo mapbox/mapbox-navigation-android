@@ -492,35 +492,31 @@ package com.mapbox.navigation.core.routealternatives {
 
 package com.mapbox.navigation.core.routeoptions {
 
-  public final class MapboxRouteOptionsUpdater implements com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater {
+  public final class MapboxRouteOptionsUpdater {
     ctor public MapboxRouteOptionsUpdater();
-    method public com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult update(com.mapbox.api.directions.v5.models.RouteOptions? routeOptions, com.mapbox.navigation.base.trip.model.RouteProgress? routeProgress, android.location.Location? location);
+    method public com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater.RouteOptionsResult update(com.mapbox.api.directions.v5.models.RouteOptions? routeOptions, com.mapbox.navigation.base.trip.model.RouteProgress? routeProgress, android.location.Location? location);
   }
 
-  public final class MapboxRouteOptionsUpdaterKt {
+  public abstract static sealed class MapboxRouteOptionsUpdater.RouteOptionsResult {
   }
 
-  public fun interface RouteOptionsUpdater {
-    method public com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult update(com.mapbox.api.directions.v5.models.RouteOptions? routeOptions, com.mapbox.navigation.base.trip.model.RouteProgress? routeProgress, android.location.Location? location);
-  }
-
-  public abstract static sealed class RouteOptionsUpdater.RouteOptionsResult {
-  }
-
-  public static final class RouteOptionsUpdater.RouteOptionsResult.Error extends com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult {
-    ctor public RouteOptionsUpdater.RouteOptionsResult.Error(Throwable error);
+  public static final class MapboxRouteOptionsUpdater.RouteOptionsResult.Error extends com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater.RouteOptionsResult {
+    ctor public MapboxRouteOptionsUpdater.RouteOptionsResult.Error(Throwable error);
     method public Throwable component1();
-    method public com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult.Error copy(Throwable error);
+    method public com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater.RouteOptionsResult.Error copy(Throwable error);
     method public Throwable getError();
     property public final Throwable error;
   }
 
-  public static final class RouteOptionsUpdater.RouteOptionsResult.Success extends com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult {
-    ctor public RouteOptionsUpdater.RouteOptionsResult.Success(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+  public static final class MapboxRouteOptionsUpdater.RouteOptionsResult.Success extends com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater.RouteOptionsResult {
+    ctor public MapboxRouteOptionsUpdater.RouteOptionsResult.Success(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
     method public com.mapbox.api.directions.v5.models.RouteOptions component1();
-    method public com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult.Success copy(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater.RouteOptionsResult.Success copy(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
     method public com.mapbox.api.directions.v5.models.RouteOptions getRouteOptions();
     property public final com.mapbox.api.directions.v5.models.RouteOptions routeOptions;
+  }
+
+  public final class MapboxRouteOptionsUpdaterKt {
   }
 
 }

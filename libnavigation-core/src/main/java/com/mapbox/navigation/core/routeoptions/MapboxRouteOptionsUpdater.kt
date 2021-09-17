@@ -7,6 +7,8 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
+import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import kotlin.math.min
 
@@ -14,9 +16,13 @@ private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
 private const val TAG = "MbxRouteOptionsProvider"
 
 /**
- * Default implementation of [RouteOptionsUpdater].
+ * Updater is used for *Reroute* and *Route Alternatives* flow.
+ *
+ * It's used when turn-by-turn navigation goes off-route (see [OffRouteObserver])
+ * and when route alternatives (see [RouteAlternativesController]) are requested.
+ * For example, this is needed in order to filter the waypoints that have been completed.
  */
-class MapboxRouteOptionsUpdater : RouteOptionsUpdater {
+class MapboxRouteOptionsUpdater {
 
     /**
      * Provides a new [RouteOptions] instance based on the original request options and the current route progress.
@@ -24,11 +30,11 @@ class MapboxRouteOptionsUpdater : RouteOptionsUpdater {
      * Returns *null* if a new [RouteOptions] instance cannot be combined based on the input given. When *null*
      * is returned new route is not fetched.
      */
-    override fun update(
+    fun update(
         routeOptions: RouteOptions?,
         routeProgress: RouteProgress?,
         location: Location?
-    ): RouteOptionsUpdater.RouteOptionsResult {
+    ): RouteOptionsResult {
         if (routeOptions == null || routeProgress == null || location == null) {
             val msg = "Cannot combine RouteOptions, invalid inputs. routeOptions, " +
                 "routeProgress, and location mustn't be null"
@@ -36,7 +42,7 @@ class MapboxRouteOptionsUpdater : RouteOptionsUpdater {
                 Tag(TAG),
                 Message(msg)
             )
-            return RouteOptionsUpdater.RouteOptionsResult.Error(Throwable(msg))
+            return RouteOptionsResult.Error(Throwable(msg))
         }
 
         val optionsBuilder = routeOptions.toBuilder()
@@ -54,7 +60,7 @@ class MapboxRouteOptionsUpdater : RouteOptionsUpdater {
                 Tag(TAG),
                 Message(msg)
             )
-            return RouteOptionsUpdater.RouteOptionsResult.Error(Throwable(msg))
+            return RouteOptionsResult.Error(Throwable(msg))
         }
 
         try {
@@ -157,7 +163,7 @@ class MapboxRouteOptionsUpdater : RouteOptionsUpdater {
             throw e
         }
 
-        return RouteOptionsUpdater.RouteOptionsResult.Success(optionsBuilder.build())
+        return RouteOptionsResult.Success(optionsBuilder.build())
     }
 
     private fun getUpdatedBearingList(
@@ -243,5 +249,24 @@ class MapboxRouteOptionsUpdater : RouteOptionsUpdater {
             }
         }
         return updatedStartWaypointIndicesIndex
+    }
+
+    /**
+     * Describes a result of generating new options from the original request and the current route progress.
+     */
+    sealed class RouteOptionsResult {
+        /**
+         * Successful operation.
+         *
+         * @param routeOptions the recreated route option from the current route progress
+         */
+        data class Success(val routeOptions: RouteOptions) : RouteOptionsResult()
+
+        /**
+         * Failed operation.
+         *
+         * @param error reason
+         */
+        data class Error(val error: Throwable) : RouteOptionsResult()
     }
 }
