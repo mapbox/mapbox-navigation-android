@@ -18,7 +18,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
-class MapboxRouteOptionsUpdaterParameterizedTest(
+class RouteOptionsUpdaterParameterizedTest(
     private val initWaypointNames: String,
     private val initWaypointIndices: String,
     private val remainingWaypoints: Int,
@@ -61,7 +61,7 @@ class MapboxRouteOptionsUpdaterParameterizedTest(
         )
     }
 
-    private lateinit var routeRefreshAdapter: MapboxRouteOptionsUpdater
+    private lateinit var routeRefreshAdapter: RouteOptionsUpdater
     private lateinit var location: Location
 
     @Before
@@ -69,7 +69,7 @@ class MapboxRouteOptionsUpdaterParameterizedTest(
         MockKAnnotations.init(this, relaxUnitFun = true, relaxed = true)
         mockLocation()
 
-        routeRefreshAdapter = MapboxRouteOptionsUpdater()
+        routeRefreshAdapter = RouteOptionsUpdater()
     }
 
     @Test
@@ -87,8 +87,8 @@ class MapboxRouteOptionsUpdaterParameterizedTest(
         val updatedRouteOptions =
             routeRefreshAdapter.update(routeOptions, routeProgress, location)
                 .let {
-                    assertTrue(it is MapboxRouteOptionsUpdater.RouteOptionsResult.Success)
-                    return@let it as MapboxRouteOptionsUpdater.RouteOptionsResult.Success
+                    assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
+                    return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
                 }
                 .routeOptions
         val updatedWaypointNames = updatedRouteOptions.waypointNames()

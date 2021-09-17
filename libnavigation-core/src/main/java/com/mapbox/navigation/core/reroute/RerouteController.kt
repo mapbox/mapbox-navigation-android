@@ -4,7 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater
+import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 
 /**
@@ -97,7 +97,7 @@ sealed class RerouteState {
     /**
      * Re-route request has failed.
      *
-     * You can [MapboxNavigation.requestRoutes] or [MapboxNavigation.setRoutes] with [MapboxRouteOptionsUpdater] to retry the request.
+     * You can [MapboxNavigation.requestRoutes] or [MapboxNavigation.setRoutes] with [RouteOptionsUpdater] to retry the request.
      *
      * @param message describes error
      * @param throwable optional throwable

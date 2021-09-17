@@ -18,9 +18,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
-class MapboxRouteOptionsUpdaterTest {
+class RouteOptionsUpdaterTest {
 
-    private lateinit var routeRefreshAdapter: MapboxRouteOptionsUpdater
+    private lateinit var routeRefreshAdapter: RouteOptionsUpdater
     private lateinit var location: Location
 
     companion object {
@@ -103,7 +103,7 @@ class MapboxRouteOptionsUpdaterTest {
         MockKAnnotations.init(this, relaxUnitFun = true, relaxed = true)
         mockLocation()
 
-        routeRefreshAdapter = MapboxRouteOptionsUpdater()
+        routeRefreshAdapter = RouteOptionsUpdater()
     }
 
     @Test
@@ -116,8 +116,8 @@ class MapboxRouteOptionsUpdaterTest {
         val newRouteOptions =
             routeRefreshAdapter.update(routeOptions, routeProgress, location)
                 .let {
-                    assertTrue(it is MapboxRouteOptionsUpdater.RouteOptionsResult.Success)
-                    return@let it as MapboxRouteOptionsUpdater.RouteOptionsResult.Success
+                    assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
+                    return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
                 }
                 .routeOptions
 
@@ -144,8 +144,8 @@ class MapboxRouteOptionsUpdaterTest {
         val newRouteOptions =
             routeRefreshAdapter.update(routeOptions, routeProgress, location)
                 .let {
-                    assertTrue(it is MapboxRouteOptionsUpdater.RouteOptionsResult.Success)
-                    return@let it as MapboxRouteOptionsUpdater.RouteOptionsResult.Success
+                    assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
+                    return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
                 }
                 .routeOptions
 
@@ -175,7 +175,7 @@ class MapboxRouteOptionsUpdaterTest {
         val newRouteOptions =
             routeRefreshAdapter.update(routeOptions, routeProgress, location)
 
-        assertTrue(newRouteOptions is MapboxRouteOptionsUpdater.RouteOptionsResult.Error)
+        assertTrue(newRouteOptions is RouteOptionsUpdater.RouteOptionsResult.Error)
     }
 
     @Test
@@ -193,7 +193,7 @@ class MapboxRouteOptionsUpdaterTest {
             assertTrue(
                 message,
                 routeRefreshAdapter.update(routeOptions, routeProgress, location)
-                is MapboxRouteOptionsUpdater.RouteOptionsResult.Error
+                is RouteOptionsUpdater.RouteOptionsResult.Error
             )
         }
     }
@@ -208,8 +208,8 @@ class MapboxRouteOptionsUpdaterTest {
         val newRouteOptions =
             routeRefreshAdapter.update(routeOptions, routeProgress, location)
                 .let {
-                    assertTrue(it is MapboxRouteOptionsUpdater.RouteOptionsResult.Success)
-                    return@let it as MapboxRouteOptionsUpdater.RouteOptionsResult.Success
+                    assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
+                    return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
                 }
                 .routeOptions
 
@@ -232,7 +232,7 @@ class MapboxRouteOptionsUpdaterTest {
         val expectedBearings: List<Bearing?>
     ) {
 
-        private lateinit var routeRefreshAdapter: MapboxRouteOptionsUpdater
+        private lateinit var routeRefreshAdapter: RouteOptionsUpdater
         private lateinit var location: Location
 
         companion object {
@@ -329,7 +329,7 @@ class MapboxRouteOptionsUpdaterTest {
             MockKAnnotations.init(this, relaxUnitFun = true, relaxed = true)
             mockLocation()
 
-            routeRefreshAdapter = MapboxRouteOptionsUpdater()
+            routeRefreshAdapter = RouteOptionsUpdater()
         }
 
         @Test
@@ -341,8 +341,8 @@ class MapboxRouteOptionsUpdaterTest {
             val newRouteOptions =
                 routeRefreshAdapter.update(routeOptions, routeProgress, location)
                     .let {
-                        assertTrue(it is MapboxRouteOptionsUpdater.RouteOptionsResult.Success)
-                        return@let it as MapboxRouteOptionsUpdater.RouteOptionsResult.Success
+                        assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
+                        return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
                     }
                     .routeOptions
 
@@ -368,7 +368,7 @@ class MapboxRouteOptionsUpdaterTest {
         val expectedSnappingClosures: String?
     ) {
 
-        private lateinit var routeRefreshAdapter: MapboxRouteOptionsUpdater
+        private lateinit var routeRefreshAdapter: RouteOptionsUpdater
         private lateinit var location: Location
 
         companion object {
@@ -425,7 +425,7 @@ class MapboxRouteOptionsUpdaterTest {
             MockKAnnotations.init(this, relaxUnitFun = true, relaxed = true)
             mockLocation()
 
-            routeRefreshAdapter = MapboxRouteOptionsUpdater()
+            routeRefreshAdapter = RouteOptionsUpdater()
         }
 
         @Test
@@ -438,8 +438,8 @@ class MapboxRouteOptionsUpdaterTest {
             val newRouteOptions =
                 routeRefreshAdapter.update(routeOptions, routeProgress, location)
                     .let {
-                        assertTrue(it is MapboxRouteOptionsUpdater.RouteOptionsResult.Success)
-                        return@let it as MapboxRouteOptionsUpdater.RouteOptionsResult.Success
+                        assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
+                        return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
                     }
                     .routeOptions
 
