@@ -24,8 +24,6 @@ class MapboxRouteOptionsUpdaterTest {
     private lateinit var location: Location
 
     companion object {
-        private const val accessToken = "pk.1234pplffd"
-
         private const val DEFAULT_REROUTE_BEARING_ANGLE = 11f
         private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
 
@@ -118,8 +116,8 @@ class MapboxRouteOptionsUpdaterTest {
         val newRouteOptions =
             routeRefreshAdapter.update(routeOptions, routeProgress, location)
                 .let {
-                    assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
-                    return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
+                    assertTrue(it is MapboxRouteOptionsUpdater.RouteOptionsResult.Success)
+                    return@let it as MapboxRouteOptionsUpdater.RouteOptionsResult.Success
                 }
                 .routeOptions
 
@@ -146,8 +144,8 @@ class MapboxRouteOptionsUpdaterTest {
         val newRouteOptions =
             routeRefreshAdapter.update(routeOptions, routeProgress, location)
                 .let {
-                    assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
-                    return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
+                    assertTrue(it is MapboxRouteOptionsUpdater.RouteOptionsResult.Success)
+                    return@let it as MapboxRouteOptionsUpdater.RouteOptionsResult.Success
                 }
                 .routeOptions
 
@@ -177,7 +175,7 @@ class MapboxRouteOptionsUpdaterTest {
         val newRouteOptions =
             routeRefreshAdapter.update(routeOptions, routeProgress, location)
 
-        assertTrue(newRouteOptions is RouteOptionsUpdater.RouteOptionsResult.Error)
+        assertTrue(newRouteOptions is MapboxRouteOptionsUpdater.RouteOptionsResult.Error)
     }
 
     @Test
@@ -195,7 +193,7 @@ class MapboxRouteOptionsUpdaterTest {
             assertTrue(
                 message,
                 routeRefreshAdapter.update(routeOptions, routeProgress, location)
-                is RouteOptionsUpdater.RouteOptionsResult.Error
+                is MapboxRouteOptionsUpdater.RouteOptionsResult.Error
             )
         }
     }
@@ -210,8 +208,8 @@ class MapboxRouteOptionsUpdaterTest {
         val newRouteOptions =
             routeRefreshAdapter.update(routeOptions, routeProgress, location)
                 .let {
-                    assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
-                    return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
+                    assertTrue(it is MapboxRouteOptionsUpdater.RouteOptionsResult.Success)
+                    return@let it as MapboxRouteOptionsUpdater.RouteOptionsResult.Success
                 }
                 .routeOptions
 
@@ -343,8 +341,8 @@ class MapboxRouteOptionsUpdaterTest {
             val newRouteOptions =
                 routeRefreshAdapter.update(routeOptions, routeProgress, location)
                     .let {
-                        assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
-                        return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
+                        assertTrue(it is MapboxRouteOptionsUpdater.RouteOptionsResult.Success)
+                        return@let it as MapboxRouteOptionsUpdater.RouteOptionsResult.Success
                     }
                     .routeOptions
 
@@ -440,8 +438,8 @@ class MapboxRouteOptionsUpdaterTest {
             val newRouteOptions =
                 routeRefreshAdapter.update(routeOptions, routeProgress, location)
                     .let {
-                        assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
-                        return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
+                        assertTrue(it is MapboxRouteOptionsUpdater.RouteOptionsResult.Success)
+                        return@let it as MapboxRouteOptionsUpdater.RouteOptionsResult.Success
                     }
                     .routeOptions
 

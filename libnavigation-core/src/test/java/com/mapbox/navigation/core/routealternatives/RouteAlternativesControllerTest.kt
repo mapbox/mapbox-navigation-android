@@ -6,7 +6,7 @@ import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.directions.session.DirectionsSession
-import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
+import com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -45,9 +45,9 @@ class RouteAlternativesControllerTest {
         every { onRouteAlternatives(any(), any(), any()) } returns Unit
     }
     private val routesRequestCallbacks = slot<RouterCallback>()
-    private val routeOptionsUpdater: RouteOptionsUpdater = mockk()
+    private val routeOptionsUpdater: MapboxRouteOptionsUpdater = mockk()
 
-    private val routeOptionsResultSuccess: RouteOptionsUpdater.RouteOptionsResult.Success = mockk()
+    private val routeOptionsResultSuccess: MapboxRouteOptionsUpdater.RouteOptionsResult.Success = mockk()
     private val routeOptionsResultSuccessRouteOptions: RouteOptions = mockk()
 
     private fun mockController(
@@ -415,7 +415,7 @@ class RouteAlternativesControllerTest {
     }
 
     private fun mockRouteOptionsProvider(
-        routeOptionsResult: RouteOptionsUpdater.RouteOptionsResult
+        routeOptionsResult: MapboxRouteOptionsUpdater.RouteOptionsResult
     ) {
         every { routeOptionsUpdater.update(any(), any(), any()) } returns routeOptionsResult
     }
