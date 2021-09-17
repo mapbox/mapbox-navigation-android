@@ -8,7 +8,7 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.directions.session.DirectionsSession
-import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
+import com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -24,7 +24,7 @@ internal class RouteAlternativesController(
     private val navigator: MapboxNativeNavigator,
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession,
-    private val routeOptionsUpdater: RouteOptionsUpdater
+    private val routeOptionsUpdater: MapboxRouteOptionsUpdater
 ) {
     private val jobControl = ThreadController.getMainScopeAndRootJob()
 
@@ -79,14 +79,14 @@ internal class RouteAlternativesController(
         )
 
         when (routeOptionsResult) {
-            is RouteOptionsUpdater.RouteOptionsResult.Success -> {
+            is MapboxRouteOptionsUpdater.RouteOptionsResult.Success -> {
                 currentRequestId?.let { directionsSession.cancelRouteRequest(it) }
                 currentRequestId = directionsSession.requestRoutes(
                     routeOptionsResult.routeOptions,
                     routesRequestCallback
                 )
             }
-            is RouteOptionsUpdater.RouteOptionsResult.Error -> {
+            is MapboxRouteOptionsUpdater.RouteOptionsResult.Error -> {
                 logger.e(
                     msg = Message("Route alternatives options are not available"),
                     tr = routeOptionsResult.error
