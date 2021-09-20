@@ -23,6 +23,15 @@ package com.mapbox.navigation.ui.maneuver.api {
     method public void getRoadShields(java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver> maneuvers, com.mapbox.navigation.ui.maneuver.api.RoadShieldCallback callback);
   }
 
+  public final class MapboxTurnIconsApi {
+    ctor public MapboxTurnIconsApi(com.mapbox.navigation.ui.maneuver.model.TurnIconResources turnIconResources);
+    method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.TurnIconError,com.mapbox.navigation.base.internal.maneuver.ManeuverTurnIcon> generateTurnIcon(String? type, Float? degrees, String? modifier, String? drivingSide);
+    method public com.mapbox.navigation.ui.maneuver.model.TurnIconResources getTurnIconResources();
+    method public void setTurnIconResources(com.mapbox.navigation.ui.maneuver.model.TurnIconResources p);
+    method public void updateResources(com.mapbox.navigation.ui.maneuver.model.TurnIconResources resources);
+    property public final com.mapbox.navigation.ui.maneuver.model.TurnIconResources turnIconResources;
+  }
+
   public fun interface RoadShieldCallback {
     method public void onRoadShields(java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver> maneuvers, java.util.Map<java.lang.String,com.mapbox.navigation.ui.maneuver.model.RoadShield> shields, java.util.Map<java.lang.String,com.mapbox.navigation.ui.maneuver.model.RoadShieldError> errors);
   }
@@ -295,6 +304,19 @@ package com.mapbox.navigation.ui.maneuver.model {
     method public com.mapbox.navigation.ui.maneuver.model.TextComponentNode.Builder abbrPriority(Integer? abbrPriority);
     method public com.mapbox.navigation.ui.maneuver.model.TextComponentNode build();
     method public com.mapbox.navigation.ui.maneuver.model.TextComponentNode.Builder text(String text);
+  }
+
+  public final class TurnIconError {
+    method public Float? getDegrees();
+    method public String? getDrivingSide();
+    method public String getErrorMessage();
+    method public String? getModifier();
+    method public String? getType();
+    property public final Float? degrees;
+    property public final String? drivingSide;
+    property public final String errorMessage;
+    property public final String? modifier;
+    property public final String? type;
   }
 
   public final class TurnIconResources {
@@ -677,6 +699,10 @@ package com.mapbox.navigation.ui.maneuver.view {
     method public void renderSubTurnIcon(com.mapbox.navigation.ui.maneuver.model.SubManeuver? maneuver);
     method public void updateTurnIconResources(com.mapbox.navigation.ui.maneuver.model.TurnIconResources turnIcon);
     method public void updateTurnIconStyle(androidx.appcompat.view.ContextThemeWrapper wrapper);
+    field public static final com.mapbox.navigation.ui.maneuver.view.MapboxTurnIconManeuver.Companion Companion;
+  }
+
+  public static final class MapboxTurnIconManeuver.Companion {
   }
 
   public final class MapboxUpcomingManeuverAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder> {
