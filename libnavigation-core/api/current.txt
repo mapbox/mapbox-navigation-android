@@ -19,7 +19,7 @@ package com.mapbox.navigation.core {
     method public Integer? getZLevel();
     method public boolean isDestroyed();
     method public boolean isRunningForegroundService();
-    method public boolean navigateNextRouteLeg();
+    method public void navigateNextRouteLeg(com.mapbox.navigation.core.trip.session.LegIndexUpdatedCallback callback);
     method public void onDestroy();
     method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray());
     method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot);
@@ -64,7 +64,7 @@ package com.mapbox.navigation.core {
     method public void unregisterRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
     method public void unregisterTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
     method public void unregisterVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
-    method public void updateSensorEvent(android.hardware.SensorEvent sensorEvent);
+    method public void updateSensorEvent(android.hardware.SensorEvent sensorEvent, com.mapbox.navigation.core.trip.session.SensorEventUpdatedCallback callback);
     property public final com.mapbox.navigator.Experimental experimental;
     property public final com.mapbox.navigation.core.trip.session.eh.GraphAccessor graphAccessor;
     property public final com.mapbox.navigation.core.history.MapboxHistoryRecorder historyRecorder;
@@ -651,6 +651,10 @@ package com.mapbox.navigation.core.trip.session {
     method public void onNewBannerInstructions(com.mapbox.api.directions.v5.models.BannerInstructions bannerInstructions);
   }
 
+  public fun interface LegIndexUpdatedCallback {
+    method public void onLegIndexUpdatedCallback(boolean updated);
+  }
+
   public final class LocationMatcherResult {
     method public android.location.Location getEnhancedLocation();
     method public java.util.List<android.location.Location> getKeyPoints();
@@ -714,6 +718,10 @@ package com.mapbox.navigation.core.trip.session {
 
   public fun interface RouteProgressObserver {
     method public void onRouteProgressChanged(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+  }
+
+  public fun interface SensorEventUpdatedCallback {
+    method public void onSensorEventUpdated(boolean updated);
   }
 
   public enum TripSessionState {

@@ -198,7 +198,7 @@ class MapboxNavigationTest {
             NavigationComponentProvider.createArrivalProgressObserver(tripSession)
         } returns arrivalProgressObserver
 
-        every { navigator.create(any(), any(), any(), any(), any()) } returns navigator
+        every { navigator.create(any(), any(), any(), any(), any(), any()) } returns navigator
     }
 
     @After
@@ -670,7 +670,7 @@ class MapboxNavigationTest {
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), any(), capture(slot), any(), any()
+                any(), any(), capture(slot), any(), any(), any()
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -688,7 +688,7 @@ class MapboxNavigationTest {
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), any(), capture(slot), any(), any()
+                any(), any(), capture(slot), any(), any(), any()
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -711,7 +711,7 @@ class MapboxNavigationTest {
         val slot = slot<NavigatorConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), capture(slot), any(), any(), any()
+                any(), capture(slot), any(), any(), any(), any()
             )
         } returns navigator
 
@@ -726,7 +726,7 @@ class MapboxNavigationTest {
         val slot = slot<NavigatorConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), capture(slot), any(), any(), any()
+                any(), capture(slot), any(), any(), any(), any()
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -749,7 +749,7 @@ class MapboxNavigationTest {
         val slot = slot<NavigatorConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), capture(slot), any(), any(), any()
+                any(), capture(slot), any(), any(), any(), any()
             )
         } returns navigator
         val options = navigationOptions.toBuilder()
@@ -861,7 +861,7 @@ class MapboxNavigationTest {
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
-                any(), any(), capture(slot), any(), any()
+                any(), any(), capture(slot), any(), any(), any()
             )
         } returns navigator
         val tilesVersion = "tilesVersion"
@@ -899,7 +899,8 @@ class MapboxNavigationTest {
                 any(),
                 capture(tileConfigSlot),
                 any(),
-                any()
+                any(),
+                any(),
             )
         } just Runs
 
@@ -933,7 +934,8 @@ class MapboxNavigationTest {
                 any(),
                 capture(tileConfigSlot),
                 any(),
-                any()
+                any(),
+                any(),
             )
         } just Runs
 
@@ -1079,7 +1081,14 @@ class MapboxNavigationTest {
 
     private fun mockNativeNavigator() {
         every {
-            NavigationComponentProvider.createNativeNavigator(any(), any(), any(), any(), any())
+            NavigationComponentProvider.createNativeNavigator(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
         } returns navigator
     }
 

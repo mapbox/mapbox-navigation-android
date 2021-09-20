@@ -5,6 +5,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.core.trip.session.LegIndexUpdatedCallback
 import com.mapbox.navigation.core.trip.session.TripSession
 import io.mockk.Called
 import io.mockk.every
@@ -26,6 +27,7 @@ class ArrivalProgressObserverTest {
         every { onFinalDestinationArrival(any()) } returns Unit
     }
     private val arrivalProgressObserver = ArrivalProgressObserver(tripSession)
+    private val legIndexUpdatedCallback: LegIndexUpdatedCallback = mockk(relaxed = true)
 
     @Before
     fun setup() {
@@ -80,7 +82,9 @@ class ArrivalProgressObserverTest {
             }
         }
 
-        assertFalse(arrivalProgressObserver.navigateNextRouteLeg())
+        arrivalProgressObserver.navigateNextRouteLeg(legIndexUpdatedCallback)
+
+        verify(exactly = 1) { legIndexUpdatedCallback.onLegIndexUpdatedCallback(false) }
     }
 
     @Test
@@ -96,7 +100,9 @@ class ArrivalProgressObserverTest {
             }
         }
 
-        assertFalse(arrivalProgressObserver.navigateNextRouteLeg())
+        arrivalProgressObserver.navigateNextRouteLeg(legIndexUpdatedCallback)
+
+        verify(exactly = 1) { legIndexUpdatedCallback.onLegIndexUpdatedCallback(false) }
         verify { arrivalObserver wasNot Called }
     }
 
@@ -336,12 +342,16 @@ class ArrivalProgressObserverTest {
         val customArrivalController: ArrivalController = mockk {
             every { navigateNextRouteLeg(any()) } returns testNavigateNextRouteLeg
         }
-        every { tripSession.updateLegIndex(1) } returns true
+
+        val tripSessionCallbackSlot = slot<LegIndexUpdatedCallback>()
+        every { tripSession.updateLegIndex(1, capture(tripSessionCallbackSlot)) } answers {
+            tripSessionCallbackSlot.captured.onLegIndexUpdatedCallback(true)
+        }
 
         arrivalProgressObserver.attach(customArrivalController)
         arrivalProgressObserver.onRouteProgressChanged(routeProgress)
 
-        verify(exactly = 1) { tripSession.updateLegIndex(1) }
+        verify(exactly = 1) { tripSession.updateLegIndex(1, any()) }
     }
 
     @Test
@@ -366,7 +376,7 @@ class ArrivalProgressObserverTest {
 
         arrivalProgressObserver.attach(customArrivalController)
 
-        verify(exactly = 0) { tripSession.updateLegIndex(any()) }
+        verify(exactly = 0) { tripSession.updateLegIndex(any(), any()) }
         verify { arrivalObserver wasNot Called }
     }
 
@@ -383,11 +393,14 @@ class ArrivalProgressObserverTest {
                 }
             }
         }
-        every { tripSession.updateLegIndex(2) } returns true
+        val tripSessionCallbackSlot = slot<LegIndexUpdatedCallback>()
+        every { tripSession.updateLegIndex(2, capture(tripSessionCallbackSlot)) } answers {
+            tripSessionCallbackSlot.captured.onLegIndexUpdatedCallback(true)
+        }
 
-        val didNavigate = arrivalProgressObserver.navigateNextRouteLeg()
+        arrivalProgressObserver.navigateNextRouteLeg(legIndexUpdatedCallback)
 
-        assertTrue(didNavigate)
+        verify(exactly = 1) { legIndexUpdatedCallback.onLegIndexUpdatedCallback(true) }
         verify(exactly = 1) { arrivalObserver.onNextRouteLegStart(any()) }
     }
 
@@ -404,11 +417,14 @@ class ArrivalProgressObserverTest {
                 }
             }
         }
-        every { tripSession.updateLegIndex(3) } returns false
+        val tripSessionCallbackSlot = slot<LegIndexUpdatedCallback>()
+        every { tripSession.updateLegIndex(3, capture(tripSessionCallbackSlot)) } answers {
+            tripSessionCallbackSlot.captured.onLegIndexUpdatedCallback(false)
+        }
 
-        val didNavigate = arrivalProgressObserver.navigateNextRouteLeg()
+        arrivalProgressObserver.navigateNextRouteLeg(legIndexUpdatedCallback)
 
-        assertFalse(didNavigate)
+        verify(exactly = 1) { legIndexUpdatedCallback.onLegIndexUpdatedCallback(false) }
         verify { arrivalObserver wasNot Called }
     }
 
@@ -433,9 +449,12 @@ class ArrivalProgressObserverTest {
                 }
             }
         }
-        every { tripSession.updateLegIndex(2) } returns true
+        val tripSessionCallbackSlot = slot<LegIndexUpdatedCallback>()
+        every { tripSession.updateLegIndex(2, capture(tripSessionCallbackSlot)) } answers {
+            tripSessionCallbackSlot.captured.onLegIndexUpdatedCallback(true)
+        }
 
-        arrivalProgressObserver.navigateNextRouteLeg()
+        arrivalProgressObserver.navigateNextRouteLeg(mockk(relaxed = true))
 
         assertTrue(onNavigateNextRouteLegCalls.isCaptured)
         assertFalse(onFinalDestinationArrivalCalls.isCaptured)
