@@ -36,11 +36,11 @@ import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.Executors
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 /**
  * Default implementation of [MapboxNativeNavigator] interface.
@@ -68,6 +68,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private var logger: Logger? = null
     private val nativeNavigatorRecreationObservers =
         CopyOnWriteArraySet<NativeNavigatorRecreationObserver>()
+    private lateinit var accessToken: String
 
     // todo move to native
     const val OFFLINE_UUID = "offline"
@@ -83,7 +84,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
         historyDir: String?,
-        logger: Logger
+        logger: Logger,
+        accessToken: String,
     ): MapboxNativeNavigator {
         navigator?.shutdown()
 
@@ -102,6 +104,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         experimental = nativeComponents.navigator.experimental
         cache = nativeComponents.cache
         this.logger = logger
+        this.accessToken = accessToken
         return this
     }
 
@@ -113,9 +116,10 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
         historyDir: String?,
-        logger: Logger
+        logger: Logger,
+        accessToken: String,
     ) {
-        create(deviceProfile, navigatorConfig, tilesConfig, historyDir, logger)
+        create(deviceProfile, navigatorConfig, tilesConfig, historyDir, logger, accessToken)
         nativeNavigatorRecreationObservers.forEach {
             it.onNativeNavigatorRecreated()
         }
@@ -133,8 +137,10 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return true if the raw location was usable, false if not.
      */
     override suspend fun updateLocation(rawLocation: FixLocation): Boolean =
-        withContext(NavigatorDispatcher) {
-            navigator!!.updateLocation(rawLocation)
+        suspendCancellableCoroutine { continuation ->
+            navigator!!.updateLocation(rawLocation) {
+                continuation.resume(it)
+            }
         }
 
     /**
@@ -144,9 +150,12 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      *
      * @return true if the sensor data was usable, false if not.
      */
-    override fun updateSensorData(sensorData: SensorData): Boolean {
-        return navigator!!.updateSensorData(sensorData)
-    }
+    override suspend fun updateSensorData(sensorData: SensorData): Boolean =
+        suspendCancellableCoroutine { continuation ->
+            navigator!!.updateSensorData(sensorData) {
+                continuation.resume(it)
+            }
+        }
 
     override fun addNavigatorObserver(navigatorObserver: NavigatorObserver) =
         navigator!!.addObserver(navigatorObserver)
@@ -167,19 +176,16 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return a [RouteInfo] route state if no errors occurred.
      * Otherwise, it returns null.
      */
-    override suspend fun setRoute(
-        route: DirectionsRoute?,
-        legIndex: Int
-    ): RouteInfo? =
-        withContext(NavigatorDispatcher) {
-            val result = navigator!!.setRoute(
-                route?.toJson() ?: "{}",
+    override suspend fun setRoute(route: DirectionsRoute?, legIndex: Int): RouteInfo? =
+        suspendCancellableCoroutine { continuation ->
+            navigator!!.setRoute(
+                route?.toJson(),
                 PRIMARY_ROUTE_INDEX,
                 legIndex,
-                ActiveGuidanceOptionsMapper.mapFrom(route)
-            ).value
-
-            result
+                route?.routeOptions()?.toUrl(accessToken).toString()
+            ) {
+                continuation.resume(it.value)
+            }
         }
 
     /**
@@ -188,23 +194,25 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      *
      * @param route [DirectionsRoute]
      */
-    override suspend fun updateAnnotations(route: DirectionsRoute): Unit =
-        withContext(NavigatorDispatcher) {
-            route.legs()?.forEachIndexed { index, routeLeg ->
+    override suspend fun updateAnnotations(route: DirectionsRoute) {
+        route.legs()?.forEachIndexed { index, routeLeg ->
+            suspendCancellableCoroutine<Unit> { continuation ->
                 routeLeg.annotation()?.toJson()?.let { annotations ->
-                    navigator!!.updateAnnotations(annotations, PRIMARY_ROUTE_INDEX, index)
-                        .let { success ->
-                            logger?.d(
-                                tag = Tag(TAG),
-                                msg = Message(
-                                    "Annotation updated successfully=$success, for leg " +
-                                        "index $index, annotations: [$annotations]"
-                                )
+                    navigator!!.updateAnnotations(annotations, PRIMARY_ROUTE_INDEX, index) {
+                        logger?.d(
+                            tag = Tag(TAG),
+                            msg = Message(
+                                "Annotation updated successfully=$it, for leg " +
+                                    "index $index, annotations: [$annotations]"
                             )
-                        }
+                        )
+
+                        continuation.resume(Unit)
+                    }
                 }
             }
         }
+    }
 
     /**
      * Gets the current banner. If there is no
@@ -212,7 +220,12 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      *
      * @return [BannerInstruction] for step index you passed
      */
-    override fun getCurrentBannerInstruction(): BannerInstruction? = navigator!!.bannerInstruction
+    override suspend fun getCurrentBannerInstruction(): BannerInstruction? =
+        suspendCancellableCoroutine { continuation ->
+            navigator!!.getBannerInstruction {
+                continuation.resume(it)
+            }
+        }
 
     /**
      * Follows a new leg of the already loaded directions.
@@ -223,8 +236,12 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      *
      * @return an initialized [NavigationStatus] if no errors, invalid otherwise
      */
-    override fun updateLegIndex(legIndex: Int): Boolean =
-        navigator!!.changeRouteLeg(PRIMARY_ROUTE_INDEX, legIndex)
+    override suspend fun updateLegIndex(legIndex: Int): Boolean =
+        suspendCancellableCoroutine { continuation ->
+            navigator!!.changeRouteLeg(PRIMARY_ROUTE_INDEX, legIndex) {
+                continuation.resume(it)
+            }
+        }
 
     // Offline
 
@@ -234,13 +251,12 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @param url the directions-based uri used when hitting the http service
      * @return a JSON route object or [RouterError]
      */
-    override suspend fun getRoute(url: String): Expected<RouterError, String> {
-        return suspendCoroutine { continuation ->
+    override suspend fun getRoute(url: String): Expected<RouterError, String> =
+        suspendCancellableCoroutine { continuation ->
             nativeRouter!!.getRoute(url) { expected, _ ->
                 continuation.resume(expected)
             }
         }
-    }
 
     // History traces
 
@@ -262,6 +278,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      *
      * @return `true` if route is different, `false` otherwise.
      */
+    // TODO make async after https://github.com/mapbox/mapbox-navigation-native/issues/4164
     override suspend fun isDifferentRoute(
         directionsRoute: DirectionsRoute
     ): Boolean = withContext(NavigatorDispatcher) {

@@ -525,7 +525,7 @@ class MapboxTripSessionTest {
             }
         )
         every { nativeBanner.mapToDirectionsApi() } returns banner
-        every { MapboxNativeNavigatorImpl.getCurrentBannerInstruction() } returns nativeBanner
+        coEvery { MapboxNativeNavigatorImpl.getCurrentBannerInstruction() } returns nativeBanner
         val bannerInstructionsObserver: BannerInstructionsObserver = mockk(relaxUnitFun = true)
 
         tripSession = buildTripSession()
@@ -1221,6 +1221,64 @@ class MapboxTripSessionTest {
         navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
         tripSession.stop()
         assertNull(tripSession.zLevel)
+    }
+
+    @Test
+    fun `updateLegIndexJob is cancelled and callback is fired when setRoute is called`() = runBlockingTest {
+        coEvery { navigator.setRoute(any(), any()) } coAnswers {
+            delay(100)
+            null
+        }
+
+        coEvery { navigator.updateLegIndex(any()) } coAnswers {
+            delay(100) // doesn't affect test duration
+            true
+        }
+
+        tripSession = buildTripSession()
+        tripSession.start(true)
+
+        val legIndexUpdatedCallback: LegIndexUpdatedCallback = mockk(relaxed = true)
+        tripSession.updateLegIndex(1, legIndexUpdatedCallback)
+
+        tripSession.setRoute(route, legIndex)
+
+        verify(exactly = 1) {
+            legIndexUpdatedCallback.onLegIndexUpdatedCallback(false)
+        }
+
+        coroutineRule.testDispatcher.advanceTimeBy(200)
+    }
+
+    @Test
+    fun `updateRouteProgressJob is cancelled onStatus update`() = runBlockingTest {
+        coEvery { MapboxNativeNavigatorImpl.getCurrentBannerInstruction() } coAnswers {
+            delay(100) // doesn't affect test duration
+            null
+        }
+
+        val leg: RouteLeg = mockk(relaxed = true)
+        val legs = listOf(leg)
+        val steps: List<LegStep> = mockk(relaxed = true)
+        every { navigationStatus.legIndex } returns 0
+        every { navigationStatus.bannerInstruction } returns null
+        every { route.legs() } returns legs
+        every { leg.steps() } returns steps
+
+        val routeProgressObserver: RouteProgressObserver = mockk(relaxUnitFun = true)
+        tripSession = buildTripSession()
+        tripSession.registerRouteProgressObserver(routeProgressObserver)
+        tripSession.start(true)
+
+        // each status update cancels updateRouteProgressJob,
+        // only the last one will update routeProgress
+        repeat(5) {
+            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+        }
+
+        coroutineRule.testDispatcher.advanceTimeBy(200)
+
+        verify(exactly = 1) { routeProgressObserver.onRouteProgressChanged(any()) }
     }
 
     @After

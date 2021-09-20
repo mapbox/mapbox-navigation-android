@@ -40,6 +40,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
+
 /**
  * Default implementation of [TripSession]
  *
@@ -59,6 +60,8 @@ internal class MapboxTripSession(
 ) : TripSession {
 
     private var updateRouteJob: Job? = null
+    private var updateLegIndexJob: Job? = null
+    private var updateRouteProgressJob: Job? = null
 
     @VisibleForTesting
     internal var route: DirectionsRoute? = null
@@ -66,24 +69,28 @@ internal class MapboxTripSession(
     override fun setRoute(route: DirectionsRoute?, legIndex: Int) {
         val isSameUuid = route?.isSameUuid(this.route) ?: false
         val isSameRoute = route?.isSameRoute(this.route) ?: false
+        val updateAnnotationsOnly = isSameUuid && isSameRoute
 
         isOffRoute = false
         invalidateLatestBannerInstructionEvent()
         roadObjects = emptyList()
         routeProgress = null
 
-        updateRouteJob = threadController.getMainScopeAndRootJob().scope.launch {
-            when {
-                isSameUuid && isSameRoute && route != null -> {
-                    navigator.updateAnnotations(route)
-                }
-                else -> {
-                    navigator.setRoute(route, legIndex)?.let {
-                        roadObjects = getRouteInitInfo(it)?.roadObjects ?: emptyList()
-                    }
-                }
+        updateRouteJob = if (updateAnnotationsOnly && route != null) {
+            threadController.getMainScopeAndRootJob().scope.launch {
+                navigator.updateAnnotations(route)
+                this@MapboxTripSession.route = route
             }
-            this@MapboxTripSession.route = route
+        } else {
+            updateLegIndexJob?.cancel()
+            updateRouteProgressJob?.cancel()
+
+            threadController.getMainScopeAndRootJob().scope.launch {
+                navigator.setRoute(route, legIndex)?.let {
+                    roadObjects = getRouteInitInfo(it)?.roadObjects ?: emptyList()
+                }
+                this@MapboxTripSession.route = route
+            }
         }
     }
 
@@ -235,37 +242,40 @@ internal class MapboxTripSession(
                     it - tripStatus.navigationStatus.nextWaypointIndex
                 } ?: 0
 
-            var triggerObserver = false
-            if (tripStatus.navigationStatus.routeState != RouteState.INVALID) {
-                val nativeBannerInstruction: BannerInstruction? =
-                    tripStatus.navigationStatus.bannerInstruction.let {
-                        if (it == null &&
-                            bannerInstructionEvent.latestBannerInstructions == null
-                        ) {
-                            // workaround for a remaining issues in
-                            // github.com/mapbox/mapbox-navigation-native/issues/3466
-                            MapboxNativeNavigatorImpl.getCurrentBannerInstruction()
-                        } else {
-                            it
+            updateRouteProgressJob?.cancel()
+            updateRouteProgressJob = mainJobController.scope.launch {
+                var triggerObserver = false
+                if (tripStatus.navigationStatus.routeState != RouteState.INVALID) {
+                    val nativeBannerInstruction: BannerInstruction? =
+                        tripStatus.navigationStatus.bannerInstruction.let {
+                            if (it == null &&
+                                bannerInstructionEvent.latestBannerInstructions == null
+                            ) {
+                                // workaround for a remaining issues in
+                                // github.com/mapbox/mapbox-navigation-native/issues/3466
+                                MapboxNativeNavigatorImpl.getCurrentBannerInstruction()
+                            } else {
+                                it
+                            }
                         }
-                    }
-                val bannerInstructions: BannerInstructions? =
-                    nativeBannerInstruction?.mapToDirectionsApi()
-                triggerObserver = bannerInstructionEvent.isOccurring(
-                    bannerInstructions,
-                    nativeBannerInstruction?.index
+                    val bannerInstructions: BannerInstructions? =
+                        nativeBannerInstruction?.mapToDirectionsApi()
+                    triggerObserver = bannerInstructionEvent.isOccurring(
+                        bannerInstructions,
+                        nativeBannerInstruction?.index
+                    )
+                }
+                val routeProgress = getRouteProgressFrom(
+                    tripStatus.route,
+                    tripStatus.navigationStatus,
+                    remainingWaypoints,
+                    bannerInstructionEvent.latestBannerInstructions,
+                    bannerInstructionEvent.latestInstructionIndex
                 )
-            }
-            val routeProgress = getRouteProgressFrom(
-                tripStatus.route,
-                tripStatus.navigationStatus,
-                remainingWaypoints,
-                bannerInstructionEvent.latestBannerInstructions,
-                bannerInstructionEvent.latestInstructionIndex
-            )
-            updateRouteProgress(routeProgress, triggerObserver)
+                updateRouteProgress(routeProgress, triggerObserver)
 
-            isOffRoute = tripStatus.navigationStatus.routeState == RouteState.OFF_ROUTE
+                isOffRoute = tripStatus.navigationStatus.routeState == RouteState.OFF_ROUTE
+            }
         }
     }
 
@@ -285,6 +295,8 @@ internal class MapboxTripSession(
     }
 
     private fun reset() {
+        updateRouteProgressJob?.cancel()
+        updateLegIndexJob?.cancel()
         locationMatcherResult = null
         rawLocation = null
         zLevel = null
@@ -460,9 +472,16 @@ internal class MapboxTripSession(
     /**
      * Sensor event consumed by native
      */
-    override fun updateSensorEvent(sensorEvent: SensorEvent) {
-        SensorMapper.toSensorData(sensorEvent, logger)?.let { sensorData ->
-            navigator.updateSensorData(sensorData)
+    override fun updateSensorEvent(sensorEvent: SensorEvent, callback: SensorEventUpdatedCallback) {
+        mainJobController.scope.launch {
+            var sensorUpdated = false
+            try {
+                SensorMapper.toSensorData(sensorEvent, logger)?.let { it ->
+                    sensorUpdated = navigator.updateSensorData(it)
+                }
+            } finally {
+                callback.onSensorEventUpdated(sensorUpdated)
+            }
         }
     }
 
@@ -475,9 +494,18 @@ internal class MapboxTripSession(
      *
      * @return an initialized [NavigationStatus] if no errors, invalid otherwise
      */
-    override fun updateLegIndex(legIndex: Int): Boolean {
-        invalidateLatestBannerInstructionEvent()
-        return navigator.updateLegIndex(legIndex)
+    override fun updateLegIndex(legIndex: Int, callback: LegIndexUpdatedCallback) {
+        var legIndexUpdated = false
+        updateLegIndexJob = mainJobController.scope.launch {
+            try {
+                legIndexUpdated = navigator.updateLegIndex(legIndex)
+                if (legIndexUpdated) {
+                    invalidateLatestBannerInstructionEvent()
+                }
+            } finally {
+                callback.onLegIndexUpdatedCallback(legIndexUpdated)
+            }
+        }
     }
 
     override fun registerRoadObjectsOnRouteObserver(

@@ -66,6 +66,7 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
+import com.mapbox.navigation.core.trip.session.LegIndexUpdatedCallback
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.NavigationSession
@@ -77,6 +78,7 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.core.trip.session.SensorEventUpdatedCallback
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -334,7 +336,8 @@ class MapboxNavigation(
                 tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
             ),
             historyRecorder.fileDirectory(),
-            logger
+            logger,
+            navigationOptions.accessToken ?: "",
         )
         historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
         navigationSession = NavigationComponentProvider.createNavigationSession()
@@ -867,8 +870,8 @@ class MapboxNavigation(
      *
      * @return true if navigation to next stop could be started, false otherwise
      */
-    fun navigateNextRouteLeg(): Boolean {
-        return arrivalProgressObserver.navigateNextRouteLeg()
+    fun navigateNextRouteLeg(callback: LegIndexUpdatedCallback) {
+        arrivalProgressObserver.navigateNextRouteLeg(callback)
     }
 
     /**
@@ -1139,7 +1142,8 @@ class MapboxNavigation(
                 navigatorConfig,
                 createTilesConfig(isFallback, tilesVersion),
                 historyRecorder.fileDirectory(),
-                logger
+                logger,
+                navigationOptions.accessToken ?: "",
             )
             historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
             directionsSession.routes.firstOrNull()?.let {
@@ -1216,8 +1220,8 @@ class MapboxNavigation(
      *
      * @param sensorEvent the Android sensor event, it will be ignored if it is not recognized
      */
-    fun updateSensorEvent(sensorEvent: SensorEvent) {
-        tripSession.updateSensorEvent(sensorEvent)
+    fun updateSensorEvent(sensorEvent: SensorEvent, callback: SensorEventUpdatedCallback) {
+        tripSession.updateSensorEvent(sensorEvent, callback)
     }
 
     private fun createTilesConfig(
