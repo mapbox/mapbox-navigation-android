@@ -444,6 +444,7 @@ class MapboxNavigation(
      * Control the location events playback during a replay trip session.
      * Start a replay trip session with [startReplayTripSession].
      */
+    @ExperimentalPreviewMapboxNavigationAPI
     val mapboxReplayer: MapboxReplayer by lazy { tripSessionLocationEngine.mapboxReplayer }
 
     /**
