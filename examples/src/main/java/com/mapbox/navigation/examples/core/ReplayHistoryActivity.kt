@@ -256,7 +256,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
                 .accessToken(Utils.getMapboxAccessToken(this))
                 .build()
         )
-        mapboxReplayer = mapboxNavigation.mapboxReplayer
         startReplayTripSession()
     }
 
@@ -265,6 +264,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
      */
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun startReplayTripSession() {
+        mapboxReplayer = mapboxNavigation.mapboxReplayer
         mapboxNavigation.startReplayTripSession()
     }
 
