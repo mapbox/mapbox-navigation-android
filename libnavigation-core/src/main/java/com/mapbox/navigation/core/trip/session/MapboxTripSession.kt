@@ -83,9 +83,6 @@ internal class MapboxTripSession(
                     }
                 }
             }
-        }
-        mainJobController.scope.launch {
-            updateRouteJob?.join()
             this@MapboxTripSession.route = route
         }
     }
