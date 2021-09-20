@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core.routeoptions
 
-import android.location.Location
 import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.model.Message
@@ -8,6 +7,7 @@ import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import kotlin.math.min
@@ -25,7 +25,7 @@ private const val TAG = "MbxRouteOptionsProvider"
 class RouteOptionsUpdater {
 
     /**
-     * Provides a new [RouteOptions] instance based on the original request options and the current route progress.
+     * Provides a new [RouteOptions] instance based on the original request options, the current route progress and location matcher result.
      *
      * @return `RouteOptionsResult.Error` if a new [RouteOptions] instance cannot be combined based on the input given.
      * `RouteOptionsResult.Success` with a new [RouteOptions] instance if successfully combined.
@@ -33,11 +33,11 @@ class RouteOptionsUpdater {
     fun update(
         routeOptions: RouteOptions?,
         routeProgress: RouteProgress?,
-        location: Location?
+        locationMatcherResult: LocationMatcherResult?,
     ): RouteOptionsResult {
-        if (routeOptions == null || routeProgress == null || location == null) {
+        if (routeOptions == null || routeProgress == null || locationMatcherResult == null) {
             val msg = "Cannot combine RouteOptions, invalid inputs. routeOptions, " +
-                "routeProgress, and location mustn't be null"
+                "routeProgress and locationMatcherResult cannot be null"
             LoggerProvider.logger.e(
                 Tag(TAG),
                 Message(msg)
@@ -53,7 +53,7 @@ class RouteOptionsUpdater {
             val msg = """
                 Reroute failed. There are no remaining waypoints on the route.
                 routeOptions=$routeOptions
-                location=$location
+                locationMatcherResult=$locationMatcherResult
                 routeProgress=$routeProgress
             """.trimIndent()
             LoggerProvider.logger.e(
@@ -65,6 +65,7 @@ class RouteOptionsUpdater {
 
         try {
             routeProgress.currentLegProgress?.legIndex?.let { index ->
+                val location = locationMatcherResult.enhancedLocation
                 optionsBuilder
                     .coordinatesList(
                         coordinatesList
@@ -144,7 +145,7 @@ class RouteOptionsUpdater {
             )
             LoggerProvider.logger.e(
                 Tag(TAG),
-                Message("location=[$location]")
+                Message("locationMatcherResult=[$locationMatcherResult]")
             )
             LoggerProvider.logger.e(
                 Tag(TAG),
