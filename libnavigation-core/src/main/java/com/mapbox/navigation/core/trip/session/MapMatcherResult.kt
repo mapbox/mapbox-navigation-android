@@ -21,6 +21,7 @@ import com.mapbox.navigation.base.speed.model.SpeedLimit
  * In order to receive the speed limit make sure you add annotationsList with
  * DirectionsCriteria.ANNOTATION_MAXSPEED annotation to the route request.
  * @param roadEdgeMatchProbability when map matcher snaps to a road, this is the confidence in the chosen edge from all nearest edges.
+ * @param zLevel [Int] current Z-level. Can be used to build a route from a proper level of a road.
  */
 class MapMatcherResult internal constructor(
     val enhancedLocation: Location,
@@ -29,7 +30,8 @@ class MapMatcherResult internal constructor(
     val offRoadProbability: Float,
     val isTeleport: Boolean,
     val speedLimit: SpeedLimit?,
-    val roadEdgeMatchProbability: Float
+    val roadEdgeMatchProbability: Float,
+    val zLevel: Int?,
 ) {
 
     /**

@@ -494,7 +494,8 @@ package com.mapbox.navigation.core.routeoptions {
 
   public final class RouteOptionsUpdater {
     ctor public RouteOptionsUpdater();
-    method public com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult update(com.mapbox.api.directions.v5.models.RouteOptions? routeOptions, com.mapbox.navigation.base.trip.model.RouteProgress? routeProgress, android.location.Location? location);
+    method @Deprecated public com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult update(com.mapbox.api.directions.v5.models.RouteOptions? routeOptions, com.mapbox.navigation.base.trip.model.RouteProgress? routeProgress, android.location.Location? location);
+    method public com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult update(com.mapbox.api.directions.v5.models.RouteOptions? routeOptions, com.mapbox.navigation.base.trip.model.RouteProgress? routeProgress, com.mapbox.navigation.core.trip.session.MapMatcherResult? mapMatcherResult);
   }
 
   public abstract static sealed class RouteOptionsUpdater.RouteOptionsResult {
@@ -644,6 +645,7 @@ package com.mapbox.navigation.core.trip.session {
     method public float getOffRoadProbability();
     method public float getRoadEdgeMatchProbability();
     method public com.mapbox.navigation.base.speed.model.SpeedLimit? getSpeedLimit();
+    method public Integer? getZLevel();
     method public boolean isOffRoad();
     method public boolean isTeleport();
     property public final android.location.Location enhancedLocation;
@@ -653,6 +655,7 @@ package com.mapbox.navigation.core.trip.session {
     property public final float offRoadProbability;
     property public final float roadEdgeMatchProbability;
     property public final com.mapbox.navigation.base.speed.model.SpeedLimit? speedLimit;
+    property public final Integer? zLevel;
   }
 
   public fun interface MapMatcherResultObserver {

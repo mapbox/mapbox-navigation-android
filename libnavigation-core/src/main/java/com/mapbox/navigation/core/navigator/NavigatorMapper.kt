@@ -202,7 +202,6 @@ private fun NavigationStatus.getRouteProgress(
             remainingWaypoints,
             upcomingRouteAlerts.toUpcomingRoadObjects(),
             stale,
-            layer,
         )
     }
     return null
@@ -309,7 +308,8 @@ internal fun TripStatus.getMapMatcherResult(
         navigationStatus.offRoadProba,
         navigationStatus.mapMatcherOutput.isTeleport,
         navigationStatus.prepareSpeedLimit(),
-        navigationStatus.mapMatcherOutput.matches.firstOrNull()?.proba ?: 0f
+        navigationStatus.mapMatcherOutput.matches.firstOrNull()?.proba ?: 0f,
+        navigationStatus.layer,
     )
 }
 

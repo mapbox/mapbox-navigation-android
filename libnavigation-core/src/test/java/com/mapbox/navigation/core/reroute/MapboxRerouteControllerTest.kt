@@ -7,6 +7,7 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
+import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -112,7 +113,7 @@ class MapboxRerouteControllerTest {
         routeRequestCallback.captured.onRoutesReady(mockk(), mockk())
 
         verify(exactly = 1) {
-            tripSession.getEnhancedLocation()
+            tripSession.mapMatcherResult
         }
         verify(exactly = 1) {
             tripSession.getRouteProgress()
@@ -346,7 +347,7 @@ class MapboxRerouteControllerTest {
             routeOptionsUpdater.update(
                 any(),
                 any(),
-                any()
+                any<MapMatcherResult>(),
             )
         } returns _routeOptionsResult
     }

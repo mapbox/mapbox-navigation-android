@@ -8,6 +8,7 @@ import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
+import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import kotlin.math.min
@@ -25,7 +26,25 @@ private const val TAG = "MbxRouteOptionsProvider"
 class RouteOptionsUpdater {
 
     /**
-     * Provides a new [RouteOptions] instance based on the original request options and the current route progress.
+     * Provides a new [RouteOptions] instance based on the original request options, the current route progress and location.
+     *
+     * @return `RouteOptionsResult.Error` if a new [RouteOptions] instance cannot be combined based on the input given.
+     * `RouteOptionsResult.Success` with a new [RouteOptions] instance if successfully combined.
+     */
+    @Deprecated("Use overload with MapMatcherResult instead")
+    fun update(
+        routeOptions: RouteOptions?,
+        routeProgress: RouteProgress?,
+        location: Location?
+    ): RouteOptionsResult {
+        val mapMatcherResult = location?.let { enhancedLocation ->
+            MapMatcherResult(enhancedLocation, emptyList(), false, 0f, false, null, 0f, null)
+        }
+        return update(routeOptions, routeProgress, mapMatcherResult)
+    }
+
+    /**
+     * Provides a new [RouteOptions] instance based on the original request options, the current route progress and map matcher result.
      *
      * @return `RouteOptionsResult.Error` if a new [RouteOptions] instance cannot be combined based on the input given.
      * `RouteOptionsResult.Success` with a new [RouteOptions] instance if successfully combined.
@@ -33,9 +52,9 @@ class RouteOptionsUpdater {
     fun update(
         routeOptions: RouteOptions?,
         routeProgress: RouteProgress?,
-        location: Location?
+        mapMatcherResult: MapMatcherResult?,
     ): RouteOptionsResult {
-        if (routeOptions == null || routeProgress == null || location == null) {
+        if (routeOptions == null || routeProgress == null || mapMatcherResult == null) {
             val msg = "Cannot combine RouteOptions, invalid inputs. routeOptions, " +
                 "routeProgress, and location mustn't be null"
             LoggerProvider.logger.e(
@@ -53,7 +72,7 @@ class RouteOptionsUpdater {
             val msg = """
                 Reroute failed. There are no remaining waypoints on the route.
                 routeOptions=$routeOptions
-                location=$location
+                mapMatcherResult=$mapMatcherResult
                 routeProgress=$routeProgress
             """.trimIndent()
             LoggerProvider.logger.e(
@@ -65,6 +84,7 @@ class RouteOptionsUpdater {
 
         try {
             routeProgress.currentLegProgress?.legIndex?.let { index ->
+                val location = mapMatcherResult.enhancedLocation
                 optionsBuilder
                     .coordinatesList(
                         coordinatesList
@@ -134,7 +154,7 @@ class RouteOptionsUpdater {
                         )
                     )
                     .layersList(
-                        mutableListOf(routeProgress.zLevel).apply {
+                        mutableListOf(mapMatcherResult.zLevel).apply {
                             val legacyLayerList = routeOptions.layersList()
                             if (legacyLayerList != null) {
                                 addAll(legacyLayerList.takeLast(remainingWaypoints))
@@ -154,7 +174,7 @@ class RouteOptionsUpdater {
             )
             LoggerProvider.logger.e(
                 Tag(TAG),
-                Message("location=[$location]")
+                Message("mapMatcherResult=[$mapMatcherResult]")
             )
             LoggerProvider.logger.e(
                 Tag(TAG),

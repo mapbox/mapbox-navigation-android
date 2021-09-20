@@ -7,6 +7,7 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
+import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -94,10 +95,7 @@ class RouteAlternativesControllerTest {
                 every { duration() } returns 1727.228
             }
         )
-        every { tripSession.getEnhancedLocation() } returns mockk {
-            every { latitude } returns -33.874308
-            every { longitude } returns 151.206087
-        }
+        mockLocation()
 
         val controller = mockController()
         controller.register(routeAlternativesObserver)
@@ -118,10 +116,7 @@ class RouteAlternativesControllerTest {
                 every { duration() } returns 1727.228
             }
         )
-        every { tripSession.getEnhancedLocation() } returns mockk {
-            every { latitude } returns -33.874308
-            every { longitude } returns 151.206087
-        }
+        mockLocation()
 
         val controller = mockController(
             RouteAlternativesOptions.Builder()
@@ -146,10 +141,7 @@ class RouteAlternativesControllerTest {
                 every { duration() } returns 1727.228
             }
         )
-        every { tripSession.getEnhancedLocation() } returns mockk {
-            every { latitude } returns -33.874308
-            every { longitude } returns 151.206087
-        }
+        mockLocation()
 
         val controller = mockController(
             RouteAlternativesOptions.Builder()
@@ -179,10 +171,7 @@ class RouteAlternativesControllerTest {
                 every { duration() } returns 1727.228
             }
         )
-        every { tripSession.getEnhancedLocation() } returns mockk {
-            every { latitude } returns -33.874308
-            every { longitude } returns 151.206087
-        }
+        mockLocation()
 
         val controller = mockController(
             RouteAlternativesOptions.Builder()
@@ -208,10 +197,7 @@ class RouteAlternativesControllerTest {
                 every { duration() } returns 1727.228
             }
         )
-        every { tripSession.getEnhancedLocation() } returns mockk {
-            every { latitude } returns -33.874308
-            every { longitude } returns 151.206087
-        }
+        mockLocation()
 
         val controller = mockController(
             RouteAlternativesOptions.Builder()
@@ -241,10 +227,7 @@ class RouteAlternativesControllerTest {
                 every { duration() } returns 1727.228
             }
         )
-        every { tripSession.getEnhancedLocation() } returns mockk {
-            every { latitude } returns -33.874308
-            every { longitude } returns 151.206087
-        }
+        mockLocation()
 
         val controller = mockController(
             RouteAlternativesOptions.Builder()
@@ -279,10 +262,7 @@ class RouteAlternativesControllerTest {
         every { tripSession.getState() } returns TripSessionState.STARTED
         mockRouteOptionsProvider(routeOptionsResultSuccess)
         every { directionsSession.routes } returns emptyList()
-        every { tripSession.getEnhancedLocation() } returns mockk {
-            every { latitude } returns -33.874308
-            every { longitude } returns 151.206087
-        }
+        mockLocation()
 
         val controller = mockController()
         controller.register(routeAlternativesObserver)
@@ -303,10 +283,7 @@ class RouteAlternativesControllerTest {
                 every { duration() } returns 1727.228
             }
         )
-        every { tripSession.getEnhancedLocation() } returns mockk {
-            every { latitude } returns -33.874308
-            every { longitude } returns 151.206087
-        }
+        mockLocation()
 
         val controller = mockController()
         controller.register(routeAlternativesObserver)
@@ -328,10 +305,7 @@ class RouteAlternativesControllerTest {
                     every { duration() } returns 1727.228
                 }
             )
-            every { tripSession.getEnhancedLocation() } returns mockk {
-                every { latitude } returns -33.874308
-                every { longitude } returns 151.206087
-            }
+            mockLocation()
 
             val controller = mockController()
             controller.interrupt()
@@ -350,10 +324,7 @@ class RouteAlternativesControllerTest {
             every { routeIndex() } returns "0"
         }
         every { directionsSession.routes } returns listOf(currentRoute)
-        every { tripSession.getEnhancedLocation() } returns mockk {
-            every { latitude } returns -33.874308
-            every { longitude } returns 151.206087
-        }
+        mockLocation()
         every {
             directionsSession.requestRoutes(
                 any(),
@@ -389,10 +360,7 @@ class RouteAlternativesControllerTest {
             every { routeIndex() } returns "0"
         }
         every { directionsSession.routes } returns listOf(currentRoute)
-        every { tripSession.getEnhancedLocation() } returns mockk {
-            every { latitude } returns -33.874308
-            every { longitude } returns 151.206087
-        }
+        mockLocation()
         every {
             directionsSession.requestRoutes(
                 any(),
@@ -414,9 +382,20 @@ class RouteAlternativesControllerTest {
         coroutineRule.testDispatcher.cleanupTestCoroutines()
     }
 
+    private fun mockLocation() {
+        every { tripSession.mapMatcherResult } returns mockk {
+            every { enhancedLocation } returns mockk {
+                every { latitude } returns -33.874308
+                every { longitude } returns 151.206087
+            }
+        }
+    }
+
     private fun mockRouteOptionsProvider(
         routeOptionsResult: RouteOptionsUpdater.RouteOptionsResult
     ) {
-        every { routeOptionsUpdater.update(any(), any(), any()) } returns routeOptionsResult
+        every {
+            routeOptionsUpdater.update(any(), any(), any<MapMatcherResult>())
+        } returns routeOptionsResult
     }
 }
