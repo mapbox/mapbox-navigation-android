@@ -7,6 +7,7 @@ import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.mockk
@@ -62,7 +63,7 @@ class RouteOptionsUpdaterParameterizedTest(
     }
 
     private lateinit var routeRefreshAdapter: RouteOptionsUpdater
-    private lateinit var location: Location
+    private lateinit var mapMatcherResult: MapMatcherResult
 
     @Before
     fun setup() {
@@ -85,7 +86,7 @@ class RouteOptionsUpdaterParameterizedTest(
         every { routeProgress.remainingWaypoints } returns remainingWaypoints
 
         val updatedRouteOptions =
-            routeRefreshAdapter.update(routeOptions, routeProgress, location)
+            routeRefreshAdapter.update(routeOptions, routeProgress, mapMatcherResult)
                 .let {
                     assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
                     return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
@@ -100,10 +101,14 @@ class RouteOptionsUpdaterParameterizedTest(
     }
 
     private fun mockLocation() {
-        location = mockk(relaxUnitFun = true)
+        val location = mockk<Location>(relaxUnitFun = true)
         every { location.longitude } returns -122.4232
         every { location.latitude } returns 23.54423
         every { location.bearing } returns 11f
+        mapMatcherResult = mockk {
+            every { enhancedLocation } returns location
+            every { zLevel } returns 2
+        }
     }
 
     private fun provideRouteOptionsWithCoordinates() =

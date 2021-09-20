@@ -14,8 +14,8 @@ internal interface TripSession {
     fun setRoute(route: DirectionsRoute?, legIndex: Int)
 
     fun getRawLocation(): Location?
-    fun getEnhancedLocation(): Location?
     val zLevel: Int?
+    val mapMatcherResult: MapMatcherResult?
     fun getRouteProgress(): RouteProgress?
     fun getState(): TripSessionState
 

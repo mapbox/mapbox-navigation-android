@@ -3,7 +3,6 @@ package com.mapbox.navigation.core
 import android.app.AlarmManager
 import android.app.NotificationManager
 import android.content.Context
-import android.location.Location
 import android.net.ConnectivityManager
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.telemetry.MapboxTelemetryConstants.MAPBOX_SHARED_PREFERENCES
@@ -98,7 +97,6 @@ class MapboxNavigationTest {
     private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     private val tripService: TripService = mockk(relaxUnitFun = true)
     private val tripSession: TripSession = mockk(relaxUnitFun = true)
-    private val location: Location = mockk(relaxUnitFun = true)
     private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
     private val distanceFormatterOptions: DistanceFormatterOptions = mockk(relaxed = true)
     private val routingTilesOptions: RoutingTilesOptions = mockk(relaxed = true)
@@ -139,8 +137,6 @@ class MapboxNavigationTest {
     private lateinit var mapboxNavigation: MapboxNavigation
 
     companion object {
-        private const val DEFAULT_REROUTE_BEARING_ANGLE = 11f
-
         @BeforeClass
         @JvmStatic
         fun initialize() {
@@ -188,7 +184,6 @@ class MapboxNavigationTest {
 
         navigationOptions = provideNavigationOptions().build()
 
-        mockLocation()
         mockNativeNavigator()
         mockTripService()
         mockTripSession()
@@ -452,20 +447,6 @@ class MapboxNavigationTest {
         mapboxNavigation.onDestroy()
 
         verify(exactly = 1) { arrivalProgressObserver.unregisterAllObservers() }
-    }
-
-    @Test
-    fun routeAlternatives_noRouteOptions_noRequest() {
-        createMapboxNavigation()
-        every { directionsSession.getPrimaryRouteOptions() } returns null
-        verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
-    }
-
-    @Test
-    fun routeAlternatives_noEnhancedLocation_noRequest() {
-        createMapboxNavigation()
-        every { tripSession.getEnhancedLocation() } returns null
-        verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
     }
 
     @Test
@@ -1054,12 +1035,6 @@ class MapboxNavigationTest {
         mapboxNavigation = MapboxNavigation(navigationOptions)
     }
 
-    private fun mockLocation() {
-        every { location.longitude } returns -122.789876
-        every { location.latitude } returns 37.657483
-        every { location.bearing } returns DEFAULT_REROUTE_BEARING_ANGLE
-    }
-
     private fun mockNativeNavigator() {
         every {
             NavigationComponentProvider.createNativeNavigator(any(), any(), any(), any(), any())
@@ -1091,9 +1066,7 @@ class MapboxNavigationTest {
                 logger = logger,
             )
         } returns tripSession
-        every { tripSession.getEnhancedLocation() } returns location
         every { tripSession.getRouteProgress() } returns routeProgress
-        every { tripSession.getRawLocation() } returns location
     }
 
     private fun mockDirectionSession() {

@@ -117,7 +117,9 @@ class MapboxTripSessionTest {
 
     private val stateObserver: TripSessionStateObserver = mockk(relaxUnitFun = true)
 
-    private val mapMatcherResult: MapMatcherResult = mockk(relaxUnitFun = true)
+    private val mapMatcherResult: MapMatcherResult = mockk(relaxUnitFun = true) {
+        every { enhancedLocation } returns location
+    }
     private val eHorizonSubscriptionManager: EHorizonSubscriptionManager = mockk(relaxed = true)
     private val navigatorObserverImplSlot = slot<NavigatorObserver>()
     private val navigatorRecreationObserverImplSlot = slot<NativeNavigatorRecreationObserver>()
@@ -564,7 +566,7 @@ class MapboxTripSessionTest {
         updateLocationAndJoin()
 
         verify { observer.onEnhancedLocationChanged(location, keyPoints) }
-        assertEquals(location, tripSession.getEnhancedLocation())
+        assertEquals(location, tripSession.mapMatcherResult?.enhancedLocation)
         tripSession.stop()
     }
 
@@ -577,7 +579,7 @@ class MapboxTripSessionTest {
         tripSession.registerLocationObserver(observer)
 
         verify(exactly = 1) { observer.onEnhancedLocationChanged(location, emptyList()) }
-        assertEquals(location, tripSession.getEnhancedLocation())
+        assertEquals(location, tripSession.mapMatcherResult?.enhancedLocation)
         tripSession.stop()
     }
 

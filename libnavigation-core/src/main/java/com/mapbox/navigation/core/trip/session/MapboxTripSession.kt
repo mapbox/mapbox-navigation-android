@@ -121,7 +121,6 @@ internal class MapboxTripSession(
         }
 
     private var rawLocation: Location? = null
-    private var enhancedLocation: Location? = null
     override var zLevel: Int? = null
         private set
     private var routeProgress: RouteProgress? = null
@@ -133,7 +132,9 @@ internal class MapboxTripSession(
             field = value
             roadObjectsOnRouteObservers.forEach { it.onNewRoadObjectsOnTheRoute(value) }
         }
-    private var mapMatcherResult: MapMatcherResult? = null
+
+    override var mapMatcherResult: MapMatcherResult? = null
+        private set
 
     private val nativeFallbackVersionsObserver =
         object : com.mapbox.navigator.FallbackVersionsObserver() {
@@ -169,11 +170,6 @@ internal class MapboxTripSession(
      * Return raw location
      */
     override fun getRawLocation() = rawLocation
-
-    /**
-     * Return enhanced location
-     */
-    override fun getEnhancedLocation() = enhancedLocation
 
     /**
      * Provide route progress
@@ -295,7 +291,6 @@ internal class MapboxTripSession(
     private fun reset() {
         mapMatcherResult = null
         rawLocation = null
-        enhancedLocation = null
         zLevel = null
         routeProgress = null
         isOffRoute = false
@@ -308,7 +303,9 @@ internal class MapboxTripSession(
     override fun registerLocationObserver(locationObserver: LocationObserver) {
         locationObservers.add(locationObserver)
         rawLocation?.let { locationObserver.onRawLocationChanged(it) }
-        enhancedLocation?.let { locationObserver.onEnhancedLocationChanged(it, emptyList()) }
+        mapMatcherResult?.let { matcherResult ->
+            locationObserver.onEnhancedLocationChanged(matcherResult.enhancedLocation, emptyList())
+        }
     }
 
     /**
@@ -561,7 +558,6 @@ internal class MapboxTripSession(
     }
 
     private fun updateEnhancedLocation(location: Location, keyPoints: List<Location>) {
-        enhancedLocation = location
         locationObservers.forEach { it.onEnhancedLocationChanged(location, keyPoints) }
     }
 

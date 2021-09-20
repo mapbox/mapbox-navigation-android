@@ -7,6 +7,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.trip.session.MapMatcherResult
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.mockk
@@ -21,7 +22,7 @@ import org.junit.runners.Parameterized
 class RouteOptionsUpdaterTest {
 
     private lateinit var routeRefreshAdapter: RouteOptionsUpdater
-    private lateinit var location: Location
+    private lateinit var mapMatcherResult: MapMatcherResult
 
     companion object {
 
@@ -122,7 +123,7 @@ class RouteOptionsUpdaterTest {
         }
 
         val newRouteOptions =
-            routeRefreshAdapter.update(routeOptions, routeProgress, location)
+            routeRefreshAdapter.update(routeOptions, routeProgress, mapMatcherResult)
                 .let {
                     assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
                     return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
@@ -150,7 +151,7 @@ class RouteOptionsUpdaterTest {
         }
 
         val newRouteOptions =
-            routeRefreshAdapter.update(routeOptions, routeProgress, location)
+            routeRefreshAdapter.update(routeOptions, routeProgress, mapMatcherResult)
                 .let {
                     assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
                     return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
@@ -178,11 +179,10 @@ class RouteOptionsUpdaterTest {
         val routeOptions = provideRouteOptionsWithCoordinates()
         val routeProgress: RouteProgress = mockk(relaxed = true) {
             every { remainingWaypoints } returns 2
-            every { zLevel } returns DEFAULT_Z_LEVEL
         }
 
         val newRouteOptions =
-            routeRefreshAdapter.update(routeOptions, routeProgress, location)
+            routeRefreshAdapter.update(routeOptions, routeProgress, mapMatcherResult)
                 .let {
                     assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
                     return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
@@ -201,11 +201,10 @@ class RouteOptionsUpdaterTest {
         val routeOptions = provideRouteOptionsWithCoordinatesAndLayers()
         val routeProgress: RouteProgress = mockk(relaxed = true) {
             every { remainingWaypoints } returns 2
-            every { zLevel } returns DEFAULT_Z_LEVEL
         }
 
         val newRouteOptions =
-            routeRefreshAdapter.update(routeOptions, routeProgress, location)
+            routeRefreshAdapter.update(routeOptions, routeProgress, mapMatcherResult)
                 .let {
                     assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
                     return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
@@ -227,26 +226,27 @@ class RouteOptionsUpdaterTest {
         }
 
         val newRouteOptions =
-            routeRefreshAdapter.update(routeOptions, routeProgress, location)
+            routeRefreshAdapter.update(routeOptions, routeProgress, mapMatcherResult)
 
         assertTrue(newRouteOptions is RouteOptionsUpdater.RouteOptionsResult.Error)
     }
 
     @Test
     fun no_options_on_invalid_input() {
-        val invalidInput = mutableListOf<Triple<RouteOptions?, RouteProgress?, Location?>>()
+        val invalidInput = mutableListOf<Triple<RouteOptions?, RouteProgress?, MapMatcherResult?>>()
         invalidInput.add(Triple(null, mockk(), mockk()))
         invalidInput.add(Triple(mockk(), null, null))
         invalidInput.add(Triple(mockk(), mockk(), null))
 
-        invalidInput.forEach { (routeOptions, routeProgress, location) ->
+        invalidInput.forEach { (routeOptions, routeProgress, mapMatcherResult) ->
             val message =
                 "routeOptions is ${routeOptions.isNullToString()}; routeProgress is " +
-                    "${routeProgress.isNullToString()}; location is ${location.isNullToString()}"
+                    "${routeProgress.isNullToString()}; mapMatcherResult is " +
+                    mapMatcherResult.isNullToString()
 
             assertTrue(
                 message,
-                routeRefreshAdapter.update(routeOptions, routeProgress, location)
+                routeRefreshAdapter.update(routeOptions, routeProgress, mapMatcherResult)
                 is RouteOptionsUpdater.RouteOptionsResult.Error
             )
         }
@@ -260,7 +260,7 @@ class RouteOptionsUpdaterTest {
         }
 
         val newRouteOptions =
-            routeRefreshAdapter.update(routeOptions, routeProgress, location)
+            routeRefreshAdapter.update(routeOptions, routeProgress, mapMatcherResult)
                 .let {
                     assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
                     return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
@@ -273,10 +273,14 @@ class RouteOptionsUpdaterTest {
     }
 
     private fun mockLocation() {
-        location = mockk(relaxUnitFun = true)
+        val location = mockk<Location>(relaxUnitFun = true)
         every { location.longitude } returns -122.4232
         every { location.latitude } returns 23.54423
         every { location.bearing } returns DEFAULT_REROUTE_BEARING_ANGLE
+        mapMatcherResult = mockk {
+            every { enhancedLocation } returns location
+            every { zLevel } returns DEFAULT_Z_LEVEL
+        }
     }
 
     @RunWith(Parameterized::class)
@@ -287,7 +291,7 @@ class RouteOptionsUpdaterTest {
     ) {
 
         private lateinit var routeRefreshAdapter: RouteOptionsUpdater
-        private lateinit var location: Location
+        private lateinit var mapMatcherResult: MapMatcherResult
 
         companion object {
             @JvmStatic
@@ -393,7 +397,7 @@ class RouteOptionsUpdaterTest {
             }
 
             val newRouteOptions =
-                routeRefreshAdapter.update(routeOptions, routeProgress, location)
+                routeRefreshAdapter.update(routeOptions, routeProgress, mapMatcherResult)
                     .let {
                         assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
                         return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
@@ -407,10 +411,14 @@ class RouteOptionsUpdaterTest {
         }
 
         private fun mockLocation() {
-            location = mockk(relaxUnitFun = true)
+            val location = mockk<Location>(relaxUnitFun = true)
             every { location.longitude } returns -122.4232
             every { location.latitude } returns 23.54423
             every { location.bearing } returns DEFAULT_REROUTE_BEARING_ANGLE
+            mapMatcherResult = mockk {
+                every { enhancedLocation } returns location
+                every { zLevel } returns DEFAULT_Z_LEVEL
+            }
         }
     }
 
@@ -423,7 +431,7 @@ class RouteOptionsUpdaterTest {
     ) {
 
         private lateinit var routeRefreshAdapter: RouteOptionsUpdater
-        private lateinit var location: Location
+        private lateinit var mapMatcherResult: MapMatcherResult
 
         companion object {
             @JvmStatic
@@ -490,7 +498,7 @@ class RouteOptionsUpdaterTest {
             }
 
             val newRouteOptions =
-                routeRefreshAdapter.update(routeOptions, routeProgress, location)
+                routeRefreshAdapter.update(routeOptions, routeProgress, mapMatcherResult)
                     .let {
                         assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
                         return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
@@ -504,10 +512,14 @@ class RouteOptionsUpdaterTest {
         }
 
         private fun mockLocation() {
-            location = mockk(relaxUnitFun = true)
+            val location = mockk<Location>(relaxUnitFun = true)
             every { location.longitude } returns -122.4232
             every { location.latitude } returns 23.54423
             every { location.bearing } returns DEFAULT_REROUTE_BEARING_ANGLE
+            mapMatcherResult = mockk {
+                every { enhancedLocation } returns location
+                every { zLevel } returns DEFAULT_Z_LEVEL
+            }
         }
     }
 }

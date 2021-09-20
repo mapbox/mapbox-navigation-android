@@ -522,7 +522,6 @@ package com.mapbox.navigation.base.trip.model {
     method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> getUpcomingRoadObjects();
     method public java.util.List<com.mapbox.geojson.Point>? getUpcomingStepPoints();
     method public com.mapbox.api.directions.v5.models.VoiceInstructions? getVoiceInstructions();
-    method public Integer? getZLevel();
     property public final com.mapbox.api.directions.v5.models.BannerInstructions? bannerInstructions;
     property public final com.mapbox.navigation.base.trip.model.RouteLegProgress? currentLegProgress;
     property public final com.mapbox.navigation.base.trip.model.RouteProgressState currentState;
@@ -537,7 +536,6 @@ package com.mapbox.navigation.base.trip.model {
     property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> upcomingRoadObjects;
     property public final java.util.List<com.mapbox.geojson.Point>? upcomingStepPoints;
     property public final com.mapbox.api.directions.v5.models.VoiceInstructions? voiceInstructions;
-    property public final Integer? zLevel;
   }
 
   public enum RouteProgressState {

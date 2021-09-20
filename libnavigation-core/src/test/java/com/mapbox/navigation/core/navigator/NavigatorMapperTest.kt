@@ -85,7 +85,6 @@ class NavigatorMapperTest {
             stale = true,
             remainingWaypoints = 1,
             upcomingRoadObjects = listOf(),
-            zLevel = 2,
         )
 
         val result = getRouteProgressFrom(
@@ -114,6 +113,7 @@ class NavigatorMapperTest {
                         }
                     )
                 }
+                every { layer } returns null
             }
         )
         val expected = MapMatcherResult(
@@ -127,7 +127,8 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
             ),
-            roadEdgeMatchProbability = 1f
+            roadEdgeMatchProbability = 1f,
+            zLevel = null,
         )
 
         val result = tripStatus.getMapMatcherResult(enhancedLocation, keyPoints)
@@ -150,6 +151,7 @@ class NavigatorMapperTest {
                         }
                     )
                 }
+                every { layer } returns null
             }
         )
         val expected = MapMatcherResult(
@@ -163,7 +165,8 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
             ),
-            roadEdgeMatchProbability = 1f
+            roadEdgeMatchProbability = 1f,
+            zLevel = null,
         )
 
         val result = tripStatus.getMapMatcherResult(enhancedLocation, keyPoints)
@@ -186,6 +189,7 @@ class NavigatorMapperTest {
                         }
                     )
                 }
+                every { layer } returns null
             }
         )
         val expected = MapMatcherResult(
@@ -199,7 +203,8 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
             ),
-            roadEdgeMatchProbability = 1f
+            roadEdgeMatchProbability = 1f,
+            zLevel = null,
         )
 
         val result = tripStatus.getMapMatcherResult(enhancedLocation, keyPoints)
@@ -222,6 +227,7 @@ class NavigatorMapperTest {
                         }
                     )
                 }
+                every { layer } returns null
             }
         )
         val expected = MapMatcherResult(
@@ -235,7 +241,8 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
             ),
-            roadEdgeMatchProbability = 1f
+            roadEdgeMatchProbability = 1f,
+            zLevel = null,
         )
 
         val result = tripStatus.getMapMatcherResult(enhancedLocation, keyPoints)
@@ -254,6 +261,7 @@ class NavigatorMapperTest {
                     every { isTeleport } returns false
                     every { matches } returns listOf()
                 }
+                every { layer } returns null
             }
         )
         val expected = MapMatcherResult(
@@ -267,7 +275,46 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
             ),
-            roadEdgeMatchProbability = 0f
+            roadEdgeMatchProbability = 0f,
+            zLevel = null,
+        )
+
+        val result = tripStatus.getMapMatcherResult(enhancedLocation, keyPoints)
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `map matcher result zLevel`() {
+        val tripStatus = TripStatus(
+            route,
+            mockk {
+                every { offRoadProba } returns 1f
+                every { speedLimit } returns createSpeedLimit()
+                every { mapMatcherOutput } returns mockk {
+                    every { isTeleport } returns false
+                    every { matches } returns listOf(
+                        mockk {
+                            every { proba } returns 1f
+                        }
+                    )
+                }
+                every { layer } returns 2
+            }
+        )
+        val expected = MapMatcherResult(
+            enhancedLocation,
+            keyPoints,
+            isOffRoad = true,
+            offRoadProbability = 1f,
+            isTeleport = false,
+            speedLimit = SpeedLimit(
+                10,
+                com.mapbox.navigation.base.speed.model.SpeedLimitUnit.KILOMETRES_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD
+            ),
+            roadEdgeMatchProbability = 1f,
+            zLevel = 2,
         )
 
         val result = tripStatus.getMapMatcherResult(enhancedLocation, keyPoints)
@@ -449,7 +496,6 @@ class NavigatorMapperTest {
         every { voiceInstruction } returns nativeVoiceInstructions
         every { inTunnel } returns true
         every { upcomingRouteAlerts } returns emptyList()
-        every { layer } returns 2
     }
 
     val routeAlertLocation: RouteAlertLocation = mockk()
