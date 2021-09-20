@@ -41,7 +41,8 @@ interface MapboxNativeNavigator {
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
         historyDir: String?,
-        logger: Logger
+        logger: Logger,
+        accessToken: String,
     ): MapboxNativeNavigator
 
     /**
@@ -52,7 +53,8 @@ interface MapboxNativeNavigator {
         navigatorConfig: NavigatorConfig,
         tilesConfig: TilesConfig,
         historyDir: String?,
-        logger: Logger
+        logger: Logger,
+        accessToken: String,
     )
 
     /**
@@ -80,7 +82,7 @@ interface MapboxNativeNavigator {
      *
      * @return true if the sensor data was usable, false if not.
      */
-    fun updateSensorData(sensorData: SensorData): Boolean
+    suspend fun updateSensorData(sensorData: SensorData): Boolean
 
     fun addNavigatorObserver(navigatorObserver: NavigatorObserver)
 
@@ -115,7 +117,7 @@ interface MapboxNativeNavigator {
      *
      * @return [BannerInstruction] for step index you passed
      */
-    fun getCurrentBannerInstruction(): BannerInstruction?
+    suspend fun getCurrentBannerInstruction(): BannerInstruction?
 
     /**
      * Follows a new leg of the already loaded directions.
@@ -126,7 +128,7 @@ interface MapboxNativeNavigator {
      *
      * @return an initialized [NavigationStatus] if no errors, invalid otherwise
      */
-    fun updateLegIndex(legIndex: Int): Boolean
+    suspend fun updateLegIndex(legIndex: Int): Boolean
 
     // Offline
 

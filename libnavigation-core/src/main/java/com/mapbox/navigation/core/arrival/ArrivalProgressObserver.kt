@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.core.trip.session.LegIndexUpdatedCallback
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import java.util.concurrent.CopyOnWriteArraySet
@@ -34,23 +35,33 @@ internal class ArrivalProgressObserver(
         arrivalObservers.clear()
     }
 
-    fun navigateNextRouteLeg(): Boolean {
+    fun navigateNextRouteLeg(callback: LegIndexUpdatedCallback?) {
         val routeProgress = tripSession.getRouteProgress()
         val numberOfLegs = routeProgress?.route?.legs()?.size
-            ?: return false
+
+        if (numberOfLegs == null) {
+            callback?.onLegIndexUpdatedCallback(false)
+            return
+        }
         val legProgress = routeProgress.currentLegProgress
         val legIndex = legProgress?.legIndex
-            ?: return false
+        if (legIndex == null) {
+            callback?.onLegIndexUpdatedCallback(false)
+            return
+        }
+
         val nextLegIndex = legIndex + 1
-        val nextLegStarted = if (nextLegIndex < numberOfLegs) {
-            tripSession.updateLegIndex(nextLegIndex)
-        } else {
-            false
+        if (nextLegIndex >= numberOfLegs) {
+            callback?.onLegIndexUpdatedCallback(false)
+            return
         }
-        if (nextLegStarted) {
-            arrivalObservers.forEach { it.onNextRouteLegStart(legProgress) }
+
+        tripSession.updateLegIndex(nextLegIndex) { indexUpdated ->
+            if (indexUpdated) {
+                arrivalObservers.forEach { it.onNextRouteLegStart(legProgress) }
+            }
+            callback?.onLegIndexUpdatedCallback(indexUpdated)
         }
-        return nextLegStarted
     }
 
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
@@ -85,7 +96,7 @@ internal class ArrivalProgressObserver(
         }
         val moveToNextLeg = arrivalController.navigateNextRouteLeg(routeLegProgress)
         if (moveToNextLeg) {
-            navigateNextRouteLeg()
+            navigateNextRouteLeg(callback = null)
         }
     }
 
