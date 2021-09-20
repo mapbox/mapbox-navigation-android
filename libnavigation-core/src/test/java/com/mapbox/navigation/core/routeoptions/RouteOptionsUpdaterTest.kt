@@ -7,6 +7,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.mockk
@@ -21,7 +22,7 @@ import org.junit.runners.Parameterized
 class RouteOptionsUpdaterTest {
 
     private lateinit var routeRefreshAdapter: RouteOptionsUpdater
-    private lateinit var location: Location
+    private lateinit var locationMatcherResult: LocationMatcherResult
 
     companion object {
         private const val DEFAULT_REROUTE_BEARING_ANGLE = 11f
@@ -114,7 +115,7 @@ class RouteOptionsUpdaterTest {
         }
 
         val newRouteOptions =
-            routeRefreshAdapter.update(routeOptions, routeProgress, location)
+            routeRefreshAdapter.update(routeOptions, routeProgress, locationMatcherResult)
                 .let {
                     assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
                     return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
@@ -142,7 +143,7 @@ class RouteOptionsUpdaterTest {
         }
 
         val newRouteOptions =
-            routeRefreshAdapter.update(routeOptions, routeProgress, location)
+            routeRefreshAdapter.update(routeOptions, routeProgress, locationMatcherResult)
                 .let {
                     assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
                     return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
@@ -173,26 +174,28 @@ class RouteOptionsUpdaterTest {
         }
 
         val newRouteOptions =
-            routeRefreshAdapter.update(routeOptions, routeProgress, location)
+            routeRefreshAdapter.update(routeOptions, routeProgress, locationMatcherResult)
 
         assertTrue(newRouteOptions is RouteOptionsUpdater.RouteOptionsResult.Error)
     }
 
     @Test
     fun no_options_on_invalid_input() {
-        val invalidInput = mutableListOf<Triple<RouteOptions?, RouteProgress?, Location?>>()
-        invalidInput.add(Triple(null, mockk(), mockk()))
-        invalidInput.add(Triple(mockk(), null, null))
-        invalidInput.add(Triple(mockk(), mockk(), null))
+        val invalidInput = listOf<Triple<RouteOptions?, RouteProgress?, LocationMatcherResult?>>(
+            Triple(null, mockk(), mockk()),
+            Triple(mockk(), null, null),
+            Triple(mockk(), mockk(), null),
+        )
 
-        invalidInput.forEach { (routeOptions, routeProgress, location) ->
+        invalidInput.forEach { (routeOptions, routeProgress, locationMatcherResult) ->
             val message =
                 "routeOptions is ${routeOptions.isNullToString()}; routeProgress is " +
-                    "${routeProgress.isNullToString()}; location is ${location.isNullToString()}"
+                    "${routeProgress.isNullToString()}; locationMatcherResult is " +
+                    locationMatcherResult.isNullToString()
 
             assertTrue(
                 message,
-                routeRefreshAdapter.update(routeOptions, routeProgress, location)
+                routeRefreshAdapter.update(routeOptions, routeProgress, locationMatcherResult)
                 is RouteOptionsUpdater.RouteOptionsResult.Error
             )
         }
@@ -206,7 +209,7 @@ class RouteOptionsUpdaterTest {
         }
 
         val newRouteOptions =
-            routeRefreshAdapter.update(routeOptions, routeProgress, location)
+            routeRefreshAdapter.update(routeOptions, routeProgress, locationMatcherResult)
                 .let {
                     assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
                     return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
@@ -219,10 +222,13 @@ class RouteOptionsUpdaterTest {
     }
 
     private fun mockLocation() {
-        location = mockk(relaxUnitFun = true)
+        val location = mockk<Location>(relaxUnitFun = true)
         every { location.longitude } returns -122.4232
         every { location.latitude } returns 23.54423
         every { location.bearing } returns DEFAULT_REROUTE_BEARING_ANGLE
+        locationMatcherResult = mockk {
+            every { enhancedLocation } returns location
+        }
     }
 
     @RunWith(Parameterized::class)
@@ -233,7 +239,7 @@ class RouteOptionsUpdaterTest {
     ) {
 
         private lateinit var routeRefreshAdapter: RouteOptionsUpdater
-        private lateinit var location: Location
+        private lateinit var locationMatcherResult: LocationMatcherResult
 
         companion object {
             @JvmStatic
@@ -339,7 +345,7 @@ class RouteOptionsUpdaterTest {
             }
 
             val newRouteOptions =
-                routeRefreshAdapter.update(routeOptions, routeProgress, location)
+                routeRefreshAdapter.update(routeOptions, routeProgress, locationMatcherResult)
                     .let {
                         assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
                         return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
@@ -353,10 +359,13 @@ class RouteOptionsUpdaterTest {
         }
 
         private fun mockLocation() {
-            location = mockk(relaxUnitFun = true)
+            val location = mockk<Location>(relaxUnitFun = true)
             every { location.longitude } returns -122.4232
             every { location.latitude } returns 23.54423
             every { location.bearing } returns DEFAULT_REROUTE_BEARING_ANGLE
+            locationMatcherResult = mockk {
+                every { enhancedLocation } returns location
+            }
         }
     }
 
@@ -369,7 +378,7 @@ class RouteOptionsUpdaterTest {
     ) {
 
         private lateinit var routeRefreshAdapter: RouteOptionsUpdater
-        private lateinit var location: Location
+        private lateinit var locationMatcherResult: LocationMatcherResult
 
         companion object {
             @JvmStatic
@@ -436,7 +445,7 @@ class RouteOptionsUpdaterTest {
             }
 
             val newRouteOptions =
-                routeRefreshAdapter.update(routeOptions, routeProgress, location)
+                routeRefreshAdapter.update(routeOptions, routeProgress, locationMatcherResult)
                     .let {
                         assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
                         return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
@@ -450,10 +459,13 @@ class RouteOptionsUpdaterTest {
         }
 
         private fun mockLocation() {
-            location = mockk(relaxUnitFun = true)
+            val location = mockk<Location>(relaxUnitFun = true)
             every { location.longitude } returns -122.4232
             every { location.latitude } returns 23.54423
             every { location.bearing } returns DEFAULT_REROUTE_BEARING_ANGLE
+            locationMatcherResult = mockk {
+                every { enhancedLocation } returns location
+            }
         }
     }
 }
