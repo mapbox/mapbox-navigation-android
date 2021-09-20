@@ -932,7 +932,7 @@ object MapboxRouteLineUtils {
 
     @OptIn(MapboxExperimental::class)
     internal fun initializeLayers(style: Style, options: MapboxRouteLineOptions) {
-        if (!style.isStyleLoaded || layersAreInitialized(style)) {
+        if (!style.isStyleLoaded || layersAreInitialized(style, options)) {
             return
         }
         val belowLayerIdToUse: String? =
@@ -1051,7 +1051,7 @@ object MapboxRouteLineUtils {
         }
     }
 
-    internal fun layersAreInitialized(style: Style): Boolean {
+    internal fun layersAreInitialized(style: Style, options: MapboxRouteLineOptions): Boolean {
         return style.isStyleLoaded &&
             style.styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) &&
             style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) &&
@@ -1065,7 +1065,12 @@ object MapboxRouteLineUtils {
             style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID) &&
             style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID) &&
             style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID) &&
-            style.styleLayerExists(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+            style.styleLayerExists(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID) &&
+            if (options.displayRestrictedRoadSections) {
+                style.styleLayerExists(RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID)
+            } else {
+                true
+            }
     }
 
     /**

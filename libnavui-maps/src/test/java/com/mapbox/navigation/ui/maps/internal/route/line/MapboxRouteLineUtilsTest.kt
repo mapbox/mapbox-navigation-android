@@ -260,6 +260,9 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun layersAreInitialized() {
+        val options = mockk<MapboxRouteLineOptions> {
+            every { displayRestrictedRoadSections } returns true
+        }
         val style = mockk<Style> {
             every { isStyleLoaded } returns true
             every { styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns true
@@ -294,7 +297,7 @@ class MapboxRouteLineUtilsTest {
             } returns true
         }
 
-        val result = MapboxRouteLineUtils.layersAreInitialized(style)
+        val result = MapboxRouteLineUtils.layersAreInitialized(style, options)
 
         assertTrue(result)
         verify { style.isStyleLoaded }
@@ -310,6 +313,67 @@ class MapboxRouteLineUtilsTest {
         verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID) }
         verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID) }
         verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID) }
+        verify { style.styleLayerExists(RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID) }
+    }
+
+    @Test
+    fun `layersAreInitialized without restricted roads`() {
+        val options = mockk<MapboxRouteLineOptions> {
+            every { displayRestrictedRoadSections } returns false
+        }
+        val style = mockk<Style> {
+            every { isStyleLoaded } returns true
+            every { styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns true
+            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns true
+            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
+            every { styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID) } returns true
+            every {
+                styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+            } returns true
+            every {
+                styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID)
+            } returns true
+            every { styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID) } returns true
+            every { styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID) } returns true
+            every {
+                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
+            } returns true
+            every {
+                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
+            } returns true
+            every {
+                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
+            } returns true
+            every {
+                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+            } returns true
+            every {
+                styleLayerExists(RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID)
+            } returns false
+            every {
+                styleLayerExists(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+            } returns true
+        }
+
+        val result = MapboxRouteLineUtils.layersAreInitialized(style, options)
+
+        assertTrue(result)
+        verify { style.isStyleLoaded }
+        verify { style.styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) }
+        verify { style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) }
+        verify { style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) }
+        verify { style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID) }
+        verify { style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID) }
+        verify { style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID) }
+        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID) }
+        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID) }
+        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID) }
+        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID) }
+        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID) }
+        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID) }
+        verify(exactly = 0) {
+            style.styleLayerExists(RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID)
+        }
     }
 
     @Test
