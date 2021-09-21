@@ -2,6 +2,25 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-rc.2.1 - September 21, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+
+#### Bug fixes and improvements
+- Fixed `IndexOutOfBoundsException` in `MapboxRouteLineUtils` [4860](https://github.com/mapbox/mapbox-navigation-android/pull/4860)
+- Fixed native out of range crash [4869](https://github.com/mapbox/mapbox-navigation-android/pull/4869)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.0.0-rc.8` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.8))
+- Mapbox Navigation Native `v66.0.3`
+- Mapbox Core Common `v18.0.0`
+- Mapbox Java `v6.0.0-alpha.6` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0-alpha.6))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.0.0-rc.2 - September 16, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
