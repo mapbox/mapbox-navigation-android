@@ -115,8 +115,27 @@ package com.mapbox.navigation.core.arrival {
 
 package com.mapbox.navigation.core.directions.session {
 
+  public final class RoutesExtra {
+    field public static final com.mapbox.navigation.core.directions.session.RoutesExtra INSTANCE;
+    field public static final String ROUTES_UPDATE_REASON_ALTERNATIVE = "ROUTES_UPDATE_REASON_ALTERNATIVE";
+    field public static final String ROUTES_UPDATE_REASON_CLEAN_UP = "ROUTES_UPDATE_REASON_CLEAN_UP";
+    field public static final String ROUTES_UPDATE_REASON_NEW = "ROUTES_UPDATE_REASON_NEW";
+    field public static final String ROUTES_UPDATE_REASON_REFRESH = "ROUTES_UPDATE_REASON_REFRESH";
+    field public static final String ROUTES_UPDATE_REASON_REROUTE = "ROUTES_UPDATE_REASON_REROUTE";
+  }
+
+  @StringDef({com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP, com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_NEW, com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE, com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_REROUTE, com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_REFRESH}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention) public static @interface RoutesExtra.RoutesUpdateReason {
+  }
+
   public fun interface RoutesObserver {
-    method public void onRoutesChanged(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
+    method public void onRoutesChanged(com.mapbox.navigation.core.directions.session.RoutesUpdatedResult result);
+  }
+
+  public final class RoutesUpdatedResult {
+    method public String getReason();
+    method public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
+    property public final String reason;
+    property public final java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> routes;
   }
 
 }
@@ -484,7 +503,7 @@ package com.mapbox.navigation.core.reroute {
 
 package com.mapbox.navigation.core.routealternatives {
 
-  public interface RouteAlternativesObserver {
+  public fun interface RouteAlternativesObserver {
     method public void onRouteAlternatives(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> alternatives, com.mapbox.navigation.base.route.RouterOrigin routerOrigin);
   }
 

@@ -55,6 +55,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.MapboxNavigationProvider;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult;
 import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.core.replay.ReplayLocationEngine;
 import com.mapbox.navigation.core.replay.history.ReplayEventBase;
@@ -362,9 +363,9 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
   private RoutesObserver routesObserver = new RoutesObserver() {
     @Override
-    public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
+    public void onRoutesChanged(@NonNull RoutesUpdatedResult result) {
       List<RouteLine> routeLines = new ArrayList<>();
-      for (DirectionsRoute route : routes) {
+      for (DirectionsRoute route : result.getRoutes()) {
         routeLines.add(new RouteLine(route, null));
       }
       long start = System.currentTimeMillis();

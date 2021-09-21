@@ -318,8 +318,8 @@ class MultiLegRouteExampleActivity : AppCompatActivity() {
         }
     }
 
-    private val routesObserver: RoutesObserver = RoutesObserver { routes ->
-        val routeLines = routes.map { RouteLine(it, null) }
+    private val routesObserver: RoutesObserver = RoutesObserver { result ->
+        val routeLines = result.routes.map { RouteLine(it, null) }
         routeLineApi.setRoutes(
             routeLines
         ) { value ->

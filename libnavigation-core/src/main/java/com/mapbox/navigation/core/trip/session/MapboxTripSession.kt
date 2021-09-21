@@ -7,12 +7,13 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
-import com.mapbox.navigation.base.internal.utils.isSameRoute
-import com.mapbox.navigation.base.internal.utils.isSameUuid
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.navigator.getLocationMatcherResult
 import com.mapbox.navigation.core.navigator.getRouteInitInfo
 import com.mapbox.navigation.core.navigator.getRouteProgressFrom
@@ -30,6 +31,7 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigationStatus
@@ -66,30 +68,53 @@ internal class MapboxTripSession(
     @VisibleForTesting
     internal var route: DirectionsRoute? = null
 
-    override fun setRoute(route: DirectionsRoute?, legIndex: Int) {
-        val isSameUuid = route?.isSameUuid(this.route) ?: false
-        val isSameRoute = route?.isSameRoute(this.route) ?: false
-        val updateAnnotationsOnly = isSameUuid && isSameRoute
+    private companion object {
+        private val TAG = Tag("MbxTripSession")
+    }
 
+    override fun setRoute(
+        route: DirectionsRoute?,
+        legIndex: Int,
+        @RoutesExtra.RoutesUpdateReason reason: String
+    ) {
         isOffRoute = false
         invalidateLatestBannerInstructionEvent()
         roadObjects = emptyList()
         routeProgress = null
 
-        updateRouteJob = if (updateAnnotationsOnly && route != null) {
-            threadController.getMainScopeAndRootJob().scope.launch {
-                navigator.updateAnnotations(route)
-                this@MapboxTripSession.route = route
-            }
-        } else {
-            updateLegIndexJob?.cancel()
-            updateRouteProgressJob?.cancel()
+        updateRouteJob = when (reason) {
+            RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
+            RoutesExtra.ROUTES_UPDATE_REASON_NEW,
+            RoutesExtra.ROUTES_UPDATE_REASON_REROUTE,
+            RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE -> {
+                updateLegIndexJob?.cancel()
+                updateRouteProgressJob?.cancel()
 
-            threadController.getMainScopeAndRootJob().scope.launch {
-                navigator.setRoute(route, legIndex)?.let {
-                    roadObjects = getRouteInitInfo(it)?.roadObjects ?: emptyList()
+                threadController.getMainScopeAndRootJob().scope.launch {
+                    navigator.setRoute(route, legIndex)?.let {
+                        roadObjects = getRouteInitInfo(it)?.roadObjects ?: emptyList()
+                    }
+                    this@MapboxTripSession.route = route
                 }
-                this@MapboxTripSession.route = route
+            }
+            RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
+                threadController.getMainScopeAndRootJob().scope.launch {
+                    if (route != null) {
+                        navigator.updateAnnotations(route)
+                        this@MapboxTripSession.route = route
+                    } else {
+                        logger.w(
+                            TAG,
+                            Message("Cannot refresh route. Route can't be null"),
+                        )
+                    }
+                }
+            }
+            else -> null.also {
+                logW(
+                    TAG,
+                    Message("Unsupported route update reason: $reason")
+                )
             }
         }
     }

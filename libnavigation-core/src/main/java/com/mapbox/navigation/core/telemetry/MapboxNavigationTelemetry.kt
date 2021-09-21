@@ -20,6 +20,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
+import com.mapbox.navigation.core.internal.utils.RoutesUpdateReasonHelper
 import com.mapbox.navigation.core.internal.utils.toTelemetryLocation
 import com.mapbox.navigation.core.internal.utils.toTelemetryLocations
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
@@ -142,6 +143,7 @@ internal object MapboxNavigationTelemetry {
     private lateinit var applicationContext: Context
     private lateinit var metricsReporter: MetricsReporter
     private lateinit var navigationOptions: NavigationOptions
+    private lateinit var routesUpdateReasonHelper: RoutesUpdateReasonHelper
     private var lifecycleMonitor: ApplicationLifecycleMonitor? = null
     private var appInstance: Application? = null
         set(value) {
@@ -198,7 +200,9 @@ internal object MapboxNavigationTelemetry {
     private val isTelemetryOnPause: Boolean
         get() = telemetryState is NavTelemetryState.Paused
 
-    private val routesObserver = RoutesObserver { routes ->
+    // todo migrate to using RoutesUpdatedResult#reason param
+    private val routesObserver = RoutesObserver { result ->
+        val routes = result.routes
         log("onRoutesChanged. size = ${routes.size}")
         routes.getOrNull(0)?.let {
             if (routeData.originalRoute != null) {
@@ -306,6 +310,7 @@ internal object MapboxNavigationTelemetry {
         mapboxNavigation: MapboxNavigation,
         options: NavigationOptions,
         reporter: MetricsReporter,
+        routesUpdateReasonHelper: RoutesUpdateReasonHelper,
         logger: Logger?,
         locationsCollector: LocationsCollector = LocationsCollectorImpl(logger),
     ) {
@@ -315,6 +320,7 @@ internal object MapboxNavigationTelemetry {
         this.locationsCollector = locationsCollector
         navigationOptions = options
         applicationContext = options.applicationContext
+        this.routesUpdateReasonHelper = routesUpdateReasonHelper
         locationEngineNameExternal = options.locationEngine.javaClass.name
         sdkIdentifier = if (options.isFromNavigationUi) {
             "mapbox-navigation-ui-android"

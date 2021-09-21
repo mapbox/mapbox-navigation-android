@@ -47,6 +47,8 @@ class RouteAlternativesControllerTest {
     }
     private val routesRequestCallbacks = slot<RouterCallback>()
     private val routeOptionsUpdater: RouteOptionsUpdater = mockk()
+    private val routeAlternativesCacheManager: RouteAlternativesCacheManager =
+        mockk(relaxUnitFun = true)
 
     private val routeOptionsResultSuccess: RouteOptionsUpdater.RouteOptionsResult.Success = mockk()
     private val routeOptionsResultSuccessRouteOptions: RouteOptions = mockk()
@@ -58,7 +60,8 @@ class RouteAlternativesControllerTest {
         navigator,
         directionsSession,
         tripSession,
-        routeOptionsUpdater
+        routeOptionsUpdater,
+        routeAlternativesCacheManager,
     )
 
     @Before
@@ -316,40 +319,42 @@ class RouteAlternativesControllerTest {
         }
 
     @Test
-    fun `should notify observer of an alternative`() = coroutineRule.runBlockingTest {
-        every { tripSession.getState() } returns TripSessionState.STARTED
-        coEvery { navigator.isDifferentRoute(any()) } returns true
-        mockRouteOptionsProvider(routeOptionsResultSuccess)
-        val currentRoute: DirectionsRoute = mockk {
-            every { routeIndex() } returns "0"
-        }
-        every { directionsSession.routes } returns listOf(currentRoute)
-        mockLocation()
-        every {
-            directionsSession.requestRoutes(
-                any(),
-                capture(routesRequestCallbacks)
-            )
-        } returns 1L
-
-        val controller = mockController()
-        controller.register(routeAlternativesObserver)
-        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
-        val routes = listOf<DirectionsRoute>(
-            mockk {
+    fun `should notify observer and cache manager of an alternative`() =
+        coroutineRule.runBlockingTest {
+            every { tripSession.getState() } returns TripSessionState.STARTED
+            coEvery { navigator.isDifferentRoute(any()) } returns true
+            mockRouteOptionsProvider(routeOptionsResultSuccess)
+            val currentRoute: DirectionsRoute = mockk {
                 every { routeIndex() } returns "0"
             }
-        )
-        val origin = mockk<RouterOrigin>()
-        routesRequestCallbacks.captured.onRoutesReady(routes, origin)
+            every { directionsSession.routes } returns listOf(currentRoute)
+            mockLocation()
+            every {
+                directionsSession.requestRoutes(
+                    any(),
+                    capture(routesRequestCallbacks)
+                )
+            } returns 1L
 
-        verify(exactly = 1) {
-            routeAlternativesObserver.onRouteAlternatives(any(), routes, origin)
+            val controller = mockController()
+            controller.register(routeAlternativesObserver)
+            coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
+            val routes = listOf<DirectionsRoute>(
+                mockk {
+                    every { routeIndex() } returns "0"
+                }
+            )
+            val origin = mockk<RouterOrigin>()
+            routesRequestCallbacks.captured.onRoutesReady(routes, origin)
+
+            verify(exactly = 1) {
+                routeAlternativesObserver.onRouteAlternatives(any(), routes, origin)
+                // routeAlternativesCacheManager.areAlternatives(routes)
+            }
+
+            controller.unregisterAll()
+            coroutineRule.testDispatcher.cleanupTestCoroutines()
         }
-
-        controller.unregisterAll()
-        coroutineRule.testDispatcher.cleanupTestCoroutines()
-    }
 
     @Test
     fun `should filter routes that are not different`() = coroutineRule.runBlockingTest {

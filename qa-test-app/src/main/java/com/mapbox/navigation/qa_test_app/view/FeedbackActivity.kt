@@ -99,8 +99,8 @@ class FeedbackActivity : AppCompatActivity() {
         MapboxRouteLineApi(options)
     }
 
-    private val routesObserver = RoutesObserver { routes ->
-        val routelines = routes.map { RouteLine(it, null) }
+    private val routesObserver = RoutesObserver { result ->
+        val routelines = result.routes.map { RouteLine(it, null) }
         CoroutineScope(Dispatchers.Main).launch {
             routeLineApi.setRoutes(routelines).apply {
                 routeLineView.renderRouteDrawData(

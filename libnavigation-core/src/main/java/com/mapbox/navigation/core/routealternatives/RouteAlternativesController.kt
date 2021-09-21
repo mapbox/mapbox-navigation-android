@@ -24,7 +24,8 @@ internal class RouteAlternativesController(
     private val navigator: MapboxNativeNavigator,
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession,
-    private val routeOptionsUpdater: RouteOptionsUpdater
+    private val routeOptionsUpdater: RouteOptionsUpdater,
+    private val alternativesCacheManager: RouteAlternativesCacheManager,
 ) {
     private val jobControl = ThreadController.getMainScopeAndRootJob()
 
@@ -118,6 +119,7 @@ internal class RouteAlternativesController(
                     tripSession.getState() == TripSessionState.STARTED
                 ) {
                     val alternatives = routes.filter { navigator.isDifferentRoute(it) }
+                    alternativesCacheManager.push(alternatives)
                     observers.forEach {
                         it.onRouteAlternatives(routeProgress, alternatives, routerOrigin)
                     }
