@@ -699,10 +699,6 @@ package com.mapbox.navigation.ui.maneuver.view {
     method public void renderSubTurnIcon(com.mapbox.navigation.ui.maneuver.model.SubManeuver? maneuver);
     method public void updateTurnIconResources(com.mapbox.navigation.ui.maneuver.model.TurnIconResources turnIcon);
     method public void updateTurnIconStyle(androidx.appcompat.view.ContextThemeWrapper wrapper);
-    field public static final com.mapbox.navigation.ui.maneuver.view.MapboxTurnIconManeuver.Companion Companion;
-  }
-
-  public static final class MapboxTurnIconManeuver.Companion {
   }
 
   public final class MapboxUpcomingManeuverAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder> {
