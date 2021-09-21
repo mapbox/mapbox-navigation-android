@@ -13,12 +13,14 @@ internal object RouteAlternativesControllerProvider {
         navigator: MapboxNativeNavigator,
         directionsSession: DirectionsSession,
         tripSession: TripSession,
-        routeOptionsUpdater: RouteOptionsUpdater
+        routeOptionsUpdater: RouteOptionsUpdater,
+        alternativesCacheManager: RouteAlternativesCacheManager,
     ) = RouteAlternativesController(
         options,
         navigator,
         directionsSession,
         tripSession,
-        routeOptionsUpdater
+        routeOptionsUpdater,
+        alternativesCacheManager
     )
 }

@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.utils.internal.MapboxTimer
@@ -118,7 +119,10 @@ internal class RouteRefreshController(
             val directionsSessionRoutes = directionsSession.routes.toMutableList()
             if (directionsSessionRoutes.isNotEmpty()) {
                 directionsSessionRoutes[0] = directionsRoute
-                directionsSession.setRoutes(directionsSessionRoutes)
+                directionsSession.setRoutes(
+                    directionsSessionRoutes,
+                    routesUpdateReason = RoutesExtra.ROUTES_UPDATE_REASON_REFRESH,
+                )
             }
             currentRequestId = null
         }

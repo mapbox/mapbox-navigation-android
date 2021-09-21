@@ -11,7 +11,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
  *
  * @see [RouteAlternativesOptions] to control the callback interval.
  */
-interface RouteAlternativesObserver {
+fun interface RouteAlternativesObserver {
     /**
      * Invoked whenever alternative routes are inspected. There are no available
      * alternatives if the list is empty.

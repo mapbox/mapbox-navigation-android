@@ -72,9 +72,9 @@ class RouteLineUtil(private val activity: AppCompatActivity) : LifecycleObserver
         }
     }
 
-    private val routesObserver: RoutesObserver = RoutesObserver { routes ->
+    private val routesObserver: RoutesObserver = RoutesObserver { result ->
         CoroutineScope(Dispatchers.Main).launch {
-            routeLineApi.setRoutes(listOf(RouteLine(routes[0], null))).apply {
+            routeLineApi.setRoutes(listOf(RouteLine(result.routes[0], null))).apply {
                 routeLineView.renderRouteDrawData(style, this)
             }
         }

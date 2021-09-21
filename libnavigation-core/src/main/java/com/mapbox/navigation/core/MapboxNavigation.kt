@@ -41,6 +41,7 @@ import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.arrival.AutoArrivalController
 import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.history.MapboxHistoryReader
@@ -48,11 +49,14 @@ import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.ReachabilityService
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.internal.utils.InternalUtils
+import com.mapbox.navigation.core.internal.utils.RoutesUpdateReasonHelper
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesCacheManager
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesCacheManagerProvider
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver
@@ -152,6 +156,13 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  * - [setRoutes] sets new routes, clear current ones, or changes the route at primary index 0.
  * The routes are immediately available via the [RoutesObserver] and the first route (at index 0) is going to be chosen as the primary one.
  *
+ * ### Route reason update
+ * When routes are updated via [setRoutes] the reason that is spread via [RoutesObserver.onRoutesChanged] might be:
+ * - [RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP] if list of routes is empty;
+ * - [RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE] if any of the routes received via [RouteAlternativesObserver.onRouteAlternatives] are set. **Order does not matter**.
+ * - [RoutesExtra.ROUTES_UPDATE_REASON_NEW] otherwise.
+ * If current routes are internally refreshed then the reason is [RoutesExtra.ROUTES_UPDATE_REASON_REFRESH]. In case of re-route (see [RerouteController]) the reason is [RoutesExtra.ROUTES_UPDATE_REASON_REROUTE].
+ *
  * **Make sure to use the [applyDefaultNavigationOptions] for the best navigation experience** (and to set required request parameters).
  * You can also use [applyLanguageAndVoiceUnitOptions] get instructions' language and voice unit based on the device's [Locale].
  * It's also worth exploring other available options (like enabling alternative routes, specifying destination approach type, defining waypoint types, etc.).
@@ -220,6 +231,7 @@ class MapboxNavigation(
         true, // doNotRecalculateInUncertainState is not exposed and can't be changed at the moment
         navigationOptions.eHorizonOptions.minTimeDeltaBetweenUpdates
     )
+    private val routeAlternativesCacheManager: RouteAlternativesCacheManager
 
     private val incidentsOptions: IncidentsOptions? = navigationOptions.incidentsOptions.run {
         if (graph.isNotEmpty() || apiUrl.isNotEmpty()) {
@@ -341,15 +353,7 @@ class MapboxNavigation(
         )
         historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
         navigationSession = NavigationComponentProvider.createNavigationSession()
-        directionsSession = NavigationComponentProvider.createDirectionsSession(
-            MapboxModuleProvider.createModule(MapboxModuleType.NavigationRouter, ::paramsProvider)
-        )
-        if (reachabilityObserverId == null) {
-            reachabilityObserverId = ReachabilityService.addReachabilityObserver(
-                connectivityHandler
-            )
-        }
-        directionsSession.registerRoutesObserver(navigationSession)
+
         val notification: TripNotification = MapboxModuleProvider
             .createModule(MapboxModuleType.NavigationTripNotification, ::paramsProvider)
         if (notification.javaClass.name == MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME) {
@@ -372,7 +376,17 @@ class MapboxNavigation(
             navigator = navigator,
             logger = logger,
         )
+
         tripSession.registerStateObserver(navigationSession)
+        directionsSession = NavigationComponentProvider.createDirectionsSession(
+            MapboxModuleProvider.createModule(MapboxModuleType.NavigationRouter, ::paramsProvider),
+        )
+        if (reachabilityObserverId == null) {
+            reachabilityObserverId = ReachabilityService.addReachabilityObserver(
+                connectivityHandler
+            )
+        }
+        directionsSession.registerRoutesObserver(navigationSession)
 
         arrivalProgressObserver = NavigationComponentProvider.createArrivalProgressObserver(
             tripSession
@@ -401,10 +415,13 @@ class MapboxNavigation(
                 this,
                 navigationOptions,
                 MapboxMetricsReporter,
+                RoutesUpdateReasonHelper(tripSession),
                 logger,
             )
         }
 
+        routeAlternativesCacheManager =
+            RouteAlternativesCacheManagerProvider.create(navigationSession)
         val routeOptionsProvider = RouteOptionsUpdater()
 
         routeAlternativesController = RouteAlternativesControllerProvider.create(
@@ -412,7 +429,8 @@ class MapboxNavigation(
             navigator,
             directionsSession,
             tripSession,
-            routeOptionsProvider
+            routeOptionsProvider,
+            routeAlternativesCacheManager
         )
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
             navigationOptions.routeRefreshOptions,
@@ -488,7 +506,11 @@ class MapboxNavigation(
     fun stopTripSession() {
         runIfNotDestroyed {
             latestLegIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex
-            tripSession.setRoute(route = null, legIndex = 0)
+            tripSession.setRoute(
+                route = null,
+                legIndex = 0,
+                reason = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
+            )
             tripSession.stop()
         }
     }
@@ -616,7 +638,23 @@ class MapboxNavigation(
         }
         rerouteController?.interrupt()
         routeAlternativesController.interrupt()
-        directionsSession.setRoutes(routes, initialLegIndex)
+
+        @RoutesExtra.RoutesUpdateReason val reason = when {
+            routes.isEmpty() -> {
+                RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+            }
+            routeAlternativesCacheManager.areAlternatives(routes) -> {
+                RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
+            }
+            else -> {
+                RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            }
+        }
+        directionsSession.setRoutes(
+            routes,
+            initialLegIndex,
+            reason,
+        )
     }
 
     /**
@@ -659,7 +697,10 @@ class MapboxNavigation(
         tripSession.unregisterAllFallbackVersionsObservers()
         routeAlternativesController.unregisterAll()
         routeRefreshController.stop()
-        directionsSession.setRoutes(emptyList())
+        directionsSession.setRoutes(
+            emptyList(),
+            routesUpdateReason = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+        )
         resetTripSession()
         navigator.unregisterAllObservers()
         navigationVersionSwitchObservers.clear()
@@ -1078,16 +1119,24 @@ class MapboxNavigation(
 
     private fun restoreTripSessionRoute() {
         val legIndex = latestLegIndex ?: directionsSession.initialLegIndex
-        tripSession.setRoute(directionsSession.routes.firstOrNull(), legIndex)
+        tripSession.setRoute(
+            directionsSession.routes.firstOrNull(),
+            legIndex,
+            RoutesExtra.ROUTES_UPDATE_REASON_NEW,
+        )
     }
 
-    private fun createInternalRoutesObserver() = RoutesObserver { routes ->
+    private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
         if (tripSession.getState() == TripSessionState.STARTED) {
-            tripSession.setRoute(routes.firstOrNull(), directionsSession.initialLegIndex)
+            tripSession.setRoute(
+                result.routes.firstOrNull(),
+                directionsSession.initialLegIndex,
+                result.reason,
+            )
         }
-        if (routes.isNotEmpty()) {
-            routeRefreshController.restart(routes.first())
+        if (result.routes.isNotEmpty()) {
+            routeRefreshController.restart(result.routes.first())
         } else {
             routeRefreshController.stop()
         }
@@ -1161,7 +1210,12 @@ class MapboxNavigation(
     }
 
     private fun reroute() {
-        rerouteController?.reroute { routes -> setRoutes(routes) }
+        rerouteController?.reroute { routes ->
+            directionsSession.setRoutes(
+                routes,
+                routesUpdateReason = RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+            )
+        }
     }
 
     private fun obtainUserAgent(isFromNavigationUi: Boolean): String {

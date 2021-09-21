@@ -16,7 +16,7 @@ import java.util.concurrent.CopyOnWriteArraySet
  * @property routes a list of [DirectionsRoute]. Fetched from [Router] or might be set manually
  */
 internal class MapboxDirectionsSession(
-    private val router: Router
+    private val router: Router,
 ) : DirectionsSession {
 
     private val routesObservers = CopyOnWriteArraySet<RoutesObserver>()
@@ -31,10 +31,16 @@ internal class MapboxDirectionsSession(
     override var routes: List<DirectionsRoute> = emptyList()
         private set
 
+    private var routesUpdateReason: String = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+
     override var initialLegIndex = 0
         private set
 
-    override fun setRoutes(routes: List<DirectionsRoute>, initialLegIndex: Int) {
+    override fun setRoutes(
+        routes: List<DirectionsRoute>,
+        initialLegIndex: Int,
+        @RoutesExtra.RoutesUpdateReason routesUpdateReason: String,
+    ) {
         this.initialLegIndex = initialLegIndex
         if (this.routes.isEmpty() && routes.isEmpty()) {
             return
@@ -43,7 +49,9 @@ internal class MapboxDirectionsSession(
         if (routes.isNotEmpty()) {
             primaryRouteOptions = routes[0].routeOptions()
         }
-        routesObservers.forEach { it.onRoutesChanged(routes) }
+        routesObservers.forEach {
+            it.onRoutesChanged(RoutesUpdatedResult(routes, routesUpdateReason))
+        }
     }
 
     /**
@@ -124,7 +132,7 @@ internal class MapboxDirectionsSession(
     override fun registerRoutesObserver(routesObserver: RoutesObserver) {
         routesObservers.add(routesObserver)
         if (routes.isNotEmpty()) {
-            routesObserver.onRoutesChanged(routes)
+            routesObserver.onRoutesChanged(RoutesUpdatedResult(routes, routesUpdateReason))
         }
     }
 

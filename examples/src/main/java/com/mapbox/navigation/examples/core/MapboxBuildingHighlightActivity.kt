@@ -163,17 +163,17 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
         }
     }
 
-    private val routesObserver = RoutesObserver { routes ->
-        if (routes.isNotEmpty()) {
+    private val routesObserver = RoutesObserver { result ->
+        if (result.routes.isNotEmpty()) {
             CoroutineScope(Dispatchers.Main).launch {
                 routeLineApi.setRoutes(
-                    listOf(RouteLine(routes[0], null))
+                    listOf(RouteLine(result.routes[0], null))
                 ).apply {
                     routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
                 }
             }
             isNavigating = true
-            startSimulation(routes[0])
+            startSimulation(result.routes[0])
         }
     }
 
