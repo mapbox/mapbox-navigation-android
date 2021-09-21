@@ -2288,6 +2288,38 @@ class MapboxRouteLineUtilsTest {
         verify(exactly = 1) { route.legs() }
     }
 
+    @Test
+    fun `extractRouteData with null congestion provider`() {
+        val route = loadRoute("short_route.json")
+        for (data in MapboxRouteLineUtils.extractRouteData(route) { null }) {
+            assertEquals(RouteConstants.UNKNOWN_CONGESTION_VALUE, data.trafficCongestionIdentifier)
+        }
+    }
+
+    @Test
+    fun `extractRouteData with empty congestion provider`() {
+        val route = loadRoute("short_route.json")
+        for (data in MapboxRouteLineUtils.extractRouteData(route) { emptyList() }) {
+            assertEquals(RouteConstants.UNKNOWN_CONGESTION_VALUE, data.trafficCongestionIdentifier)
+        }
+    }
+
+    @Test
+    fun `extractRouteData with short congestion provider`() {
+        val route = loadRoute("short_route.json")
+        val extractedData = MapboxRouteLineUtils.extractRouteData(route) { leg ->
+            val distance = requireNotNull(leg.annotation()?.distance()?.takeIf { it.size > 1 })
+            List(distance.size - 1) { "low" }
+        }
+        for (index in 0 until extractedData.lastIndex) {
+            assertEquals("low", extractedData[index].trafficCongestionIdentifier)
+        }
+        assertEquals(
+            RouteConstants.UNKNOWN_CONGESTION_VALUE,
+            extractedData.last().trafficCongestionIdentifier,
+        )
+    }
+
     private fun getMultilegRoute(): DirectionsRoute {
         return loadRoute("multileg_route.json")
     }
