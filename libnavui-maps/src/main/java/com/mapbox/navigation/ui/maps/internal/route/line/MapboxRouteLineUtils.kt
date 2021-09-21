@@ -56,6 +56,7 @@ import kotlin.reflect.KProperty1
 object MapboxRouteLineUtils {
 
     private val TAG = "MbxMapboxRouteLineUtils"
+    internal val VANISH_POINT_STOP_GAP = .00000000001
 
     /**
      * Creates an [Expression] that can be applied to the layer style changing the appearance of
@@ -118,7 +119,7 @@ object MapboxRouteLineUtils {
         softGradientStopGap: Double,
         routeLineExpressionData: List<RouteLineExpressionData>
     ): Expression {
-        val vanishPointStopGap = .00000000001
+        val vanishPointStopGap = VANISH_POINT_STOP_GAP
         val expressionBuilder = Expression.InterpolatorBuilder("interpolate")
         expressionBuilder.linear()
         expressionBuilder.lineProgress()
@@ -136,9 +137,11 @@ object MapboxRouteLineUtils {
                         color(lineStartColor)
                     }
 
-                    expressionBuilder.stop {
-                        literal(expressionData.offset - vanishPointStopGap)
-                        color(lineStartColor)
+                    if (expressionData.offset > vanishPointStopGap) {
+                        expressionBuilder.stop {
+                            literal(expressionData.offset - vanishPointStopGap)
+                            color(lineStartColor)
+                        }
                     }
                 }
 
