@@ -9,6 +9,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 ### Changelog
 #### Features
 - Added `FeedbackHelper` with utilities for working with feedback types and subtypes. [4813](https://github.com/mapbox/mapbox-navigation-android/pull/4813)
+- Exposed a reusable route geometry cache via `DecodeUtils`. [#4784](https://github.com/mapbox/mapbox-navigation-android/pull/4784)
 
 #### Bug fixes and improvements
 - Fixed an issue where the route was never refreshed because of an internal timer not starting when a new route was set. [#4831](https://github.com/mapbox/mapbox-navigation-android/pull/4831)
