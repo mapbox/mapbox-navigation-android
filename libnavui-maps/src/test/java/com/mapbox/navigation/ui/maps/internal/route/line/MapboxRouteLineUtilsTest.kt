@@ -2024,6 +2024,76 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
+    fun getTrafficLineExpressionSoftGradient_withExtremelySmallDistanceOffset() {
+        val expectedExpression = "[interpolate, [linear], [line-progress], 0.0, " +
+            // notice no stop added before the vanishing point
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 1.0267342531733E-12, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4532366552813495, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.468779750455607, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.4877423265682011, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5032854217424586, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8454666620037381, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8610097571779957, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8766305678281243, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8921736630023819, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val colorResources = RouteLineColorResources.Builder().build()
+        val route = loadRoute("route-with-restrictions.json")
+        val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
+            route,
+            listOf(),
+            true,
+            colorResources
+        )
+        val stopGap = 20.0 / route.distance()
+
+        val result = MapboxRouteLineUtils.getTrafficLineExpressionSoftGradient(
+            0.0000000000010267342531733,
+            Color.TRANSPARENT,
+            colorResources.routeDefaultColor,
+            stopGap,
+            segments
+        )
+
+        assertEquals(expectedExpression, result.toString())
+    }
+
+    @Test
+    fun getTrafficLineExpressionSoftGradient_withOffsetEqualToVanishPointStopGap() {
+        val expectedExpression = "[interpolate, [linear], [line-progress], 0.0, " +
+            // notice no stop added before the vanishing point
+            "[rgba, 0.0, 0.0, 0.0, 0.0], 1.0E-11, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4532366552813495, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.468779750455607, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.4877423265682011, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5032854217424586, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8454666620037381, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8610097571779957, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8766305678281243, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.8921736630023819, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val colorResources = RouteLineColorResources.Builder().build()
+        val route = loadRoute("route-with-restrictions.json")
+        val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
+            route,
+            listOf(),
+            true,
+            colorResources
+        )
+        val stopGap = 20.0 / route.distance()
+
+        val result = MapboxRouteLineUtils.getTrafficLineExpressionSoftGradient(
+            MapboxRouteLineUtils.VANISH_POINT_STOP_GAP,
+            Color.TRANSPARENT,
+            colorResources.routeDefaultColor,
+            stopGap,
+            segments
+        )
+
+        assertEquals(expectedExpression, result.toString())
+    }
+
+    @Test
     fun whenAnnotationIsCongestionNumericThenResolveLowCongestionNumeric() {
         val lowCongestionNumeric = 4
         val congestionResource = RouteLineColorResources.Builder().build()
