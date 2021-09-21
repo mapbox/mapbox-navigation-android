@@ -522,9 +522,9 @@ object MapboxRouteLineUtils {
                 val isInAClosure = closureRanges.any { it.contains(index) }
                 val congestionValue: String = when {
                     isInAClosure -> RouteConstants.CLOSURE_CONGESTION_VALUE
-                    trafficCongestion?.isEmpty() ?: true -> RouteConstants.UNKNOWN_CONGESTION_VALUE
-                    index > trafficCongestion?.size ?: 0 -> RouteConstants.UNKNOWN_CONGESTION_VALUE
-                    else -> trafficCongestion?.get(index) ?: RouteConstants.UNKNOWN_CONGESTION_VALUE
+                    trafficCongestion.isNullOrEmpty() -> RouteConstants.UNKNOWN_CONGESTION_VALUE
+                    index >= trafficCongestion.size -> RouteConstants.UNKNOWN_CONGESTION_VALUE
+                    else -> trafficCongestion[index]
                 }
                 val roadClass = getRoadClassForIndex(roadClassArray, index)
 
