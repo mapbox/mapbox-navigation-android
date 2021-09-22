@@ -1061,12 +1061,12 @@ class MapboxRouteLineApiTest {
     @Test
     fun highlightActiveLeg() = coroutineRule.runBlockingTest {
         var callbackCalled = false
-        val expectedTrafficExp = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
-            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.48807892461540975, [rgba, 143.0, 36.0, 71.0, 1.0]," +
-            " 0.5092864483923066, [rgba, 255.0, 149.0, 0.0, 1.0], 0.55210933294181, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.589630336547089, [rgba, 255.0, 149.0, 0.0, 1.0]," +
-            " 0.6108378603239858, [rgba, 86.0, 168.0, 251.0, 1.0], 0.9043785379859378, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.9533189774710844, [rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val expectedTrafficExp = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0," +
+            " [rgba, 0.0, 0.0, 0.0, 0.0], 0.48807892461540975, [rgba, 255.0, 149.0, 0.0, 1.0]," +
+            " 0.5402820600662328, [rgba, 86.0, 168.0, 251.0, 1.0], 0.5691365275126837, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.589630336547089, [rgba, 86.0, 168.0, 251.0, 1.0]," +
+            " 0.883680810453678, [rgba, 255.0, 149.0, 0.0, 1.0], 0.93904468262125, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val expectedRouteLineExp = "[step, [line-progress], [rgba, 86.0, 168.0, 251.0, 1.0], 0.0," +
             " [rgba, 0.0, 0.0, 0.0, 0.0], 0.48807892461540975, [rgba, 86.0, 168.0, 251.0, 1.0]]"
         val expectedCasingExp = "[step, [line-progress], [rgba, 47.0, 122.0, 198.0, 1.0], 0.0," +
@@ -1107,11 +1107,11 @@ class MapboxRouteLineApiTest {
     @Test
     fun showRouteWithLegIndexHighlighted() = coroutineRule.runBlockingTest {
         val expectedTrafficExp = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0," +
-            " [rgba, 0.0, 0.0, 0.0, 0.0], 0.48807892461540975, [rgba, 143.0, 36.0, 71.0, 1.0]," +
-            " 0.5092864483923066, [rgba, 255.0, 149.0, 0.0, 1.0], 0.55210933294181, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.589630336547089, [rgba, 255.0, 149.0, 0.0, 1.0]," +
-            " 0.6108378603239858, [rgba, 86.0, 168.0, 251.0, 1.0], 0.9043785379859378, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.9533189774710844, [rgba, 86.0, 168.0, 251.0, 1.0]]"
+            " [rgba, 0.0, 0.0, 0.0, 0.0], 0.48807892461540975, [rgba, 255.0, 149.0, 0.0, 1.0]," +
+            " 0.5402820600662328, [rgba, 86.0, 168.0, 251.0, 1.0], 0.5691365275126837, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.589630336547089, [rgba, 86.0, 168.0, 251.0, 1.0]," +
+            " 0.883680810453678, [rgba, 255.0, 149.0, 0.0, 1.0], 0.93904468262125, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val expectedRouteLineExp = "[step, [line-progress], [rgba, 86.0, 168.0, 251.0, 1.0], 0.0," +
             " [rgba, 0.0, 0.0, 0.0, 0.0], 0.48807892461540975, [rgba, 86.0, 168.0, 251.0, 1.0]]"
         val expectedCasingExp = "[step, [line-progress], [rgba, 47.0, 122.0, 198.0, 1.0], 0.0," +
@@ -1479,12 +1479,12 @@ class MapboxRouteLineApiTest {
 
         val result = api.alternativelyStyleSegmentsNotInLeg(1, segments)
 
-        assertEquals(12, result.size)
+        assertEquals(11, result.size)
         assertEquals(-256, result.first().segmentColor)
         assertEquals(0, result.first().legIndex)
         assertEquals(-256, result[4].segmentColor)
         assertEquals(0, result[4].legIndex)
-        assertEquals(-7396281, result[5].segmentColor)
+        assertEquals(-27392, result[5].segmentColor)
         assertEquals(1, result[5].legIndex)
     }
 

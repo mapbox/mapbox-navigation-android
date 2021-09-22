@@ -1306,7 +1306,7 @@
               "is_urban": true,
               "admin_index": 0,
               "mapbox_streets_v8": {
-                "class": "secondary"
+                "class": "tertiary"
               }
             },
             {

@@ -516,36 +516,40 @@ object MapboxRouteLineUtils {
             val intersectionsWithGeometryIndex = getIntersectionsWithGeometryIndex(leg.steps())
             val roadClassArray = getRoadClassArray(intersectionsWithGeometryIndex)
             val trafficCongestion = trafficCongestionProvider.invoke(leg)
+            var isLegOrigin = true
 
-            // There have been multi-leg routes observed that have the same coordinate twice
-            // which results in a distance of 0.0 in the distance array since.  The duplicated
-            // coordinate seems to occur at the point the next leg begins. This distance item
-            // is filtered out here.
-            leg.annotation()?.distance()?.filter { it > 0.0 }?.forEachIndexed { index, distance ->
-                val percentDistanceTraveled = runningDistance / route.distance()
-                val isLegOrigin = index == 0
-                val isInRestrictedRange = restrictedRanges.any { it.contains(index) }
-                val isInAClosure = closureRanges.any { it.contains(index) }
-                val congestionValue: String = when {
-                    isInAClosure -> RouteConstants.CLOSURE_CONGESTION_VALUE
-                    trafficCongestion.isNullOrEmpty() -> RouteConstants.UNKNOWN_CONGESTION_VALUE
-                    index >= trafficCongestion.size -> RouteConstants.UNKNOWN_CONGESTION_VALUE
-                    else -> trafficCongestion[index]
-                }
-                val roadClass = getRoadClassForIndex(roadClassArray, index)
+            leg.annotation()?.distance()?.forEachIndexed { index, distance ->
+                // If the distance is 0 it offers no value to upstream calculations and in fact
+                // causes problems in creating the traffic expression since the expression
+                // values need to be in strictly ascending order. A value of 0 can be caused
+                // by the first point in a route leg being the same as the last point in the
+                // previous route leg. There may be other causes as well.
+                if (distance > 0.0) {
+                    val percentDistanceTraveled = runningDistance / route.distance()
+                    val isInRestrictedRange = restrictedRanges.any { it.contains(index) }
+                    val isInAClosure = closureRanges.any { it.contains(index) }
+                    val congestionValue: String = when {
+                        isInAClosure -> RouteConstants.CLOSURE_CONGESTION_VALUE
+                        trafficCongestion.isNullOrEmpty() -> RouteConstants.UNKNOWN_CONGESTION_VALUE
+                        index >= trafficCongestion.size -> RouteConstants.UNKNOWN_CONGESTION_VALUE
+                        else -> trafficCongestion[index]
+                    }
+                    val roadClass = getRoadClassForIndex(roadClassArray, index)
 
-                itemsToReturn.add(
-                    ExtractedRouteData(
-                        runningDistance,
-                        percentDistanceTraveled,
-                        isInRestrictedRange,
-                        congestionValue,
-                        roadClass,
-                        legIndex,
-                        isLegOrigin
+                    itemsToReturn.add(
+                        ExtractedRouteData(
+                            runningDistance,
+                            percentDistanceTraveled,
+                            isInRestrictedRange,
+                            congestionValue,
+                            roadClass,
+                            legIndex,
+                            isLegOrigin
+                        )
                     )
-                )
-                runningDistance += distance
+                    isLegOrigin = false
+                    runningDistance += distance
+                }
             }
         }
 
