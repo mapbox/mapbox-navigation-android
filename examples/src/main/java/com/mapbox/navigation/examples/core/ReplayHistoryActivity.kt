@@ -12,7 +12,6 @@ import androidx.core.content.ContextCompat
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
@@ -29,6 +28,7 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplaySetRoute
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.ActivityReplayHistoryLayoutBinding
@@ -150,16 +150,13 @@ class ReplayHistoryActivity : AppCompatActivity() {
     }
 
     private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {}
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
+        override fun onNewRawLocation(rawLocation: Location) {}
+        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             navigationLocationProvider.changePosition(
-                enhancedLocation,
-                keyPoints,
+                locationMatcherResult.enhancedLocation,
+                locationMatcherResult.keyPoints,
             )
-            updateCamera(enhancedLocation)
+            updateCamera(locationMatcherResult.enhancedLocation)
         }
     }
 

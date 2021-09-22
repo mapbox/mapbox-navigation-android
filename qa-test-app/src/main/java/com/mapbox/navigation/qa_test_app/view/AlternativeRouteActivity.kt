@@ -37,6 +37,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.qa_test_app.databinding.AlternativeRouteActivityLayoutBinding
 import com.mapbox.navigation.qa_test_app.utils.Utils.getMapboxAccessToken
@@ -128,20 +129,17 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private val locationObserver: LocationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {
+        override fun onNewRawLocation(rawLocation: Location) {
             Log.d(TAG, "raw location $rawLocation")
         }
 
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
-            navigationLocationProvider.changePosition(enhancedLocation, keyPoints, null, null)
-            updateCamera(enhancedLocation)
+        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+            updateCamera(locationMatcherResult.enhancedLocation, locationMatcherResult.keyPoints)
         }
     }
 
-    private fun updateCamera(location: Location) {
+    private fun updateCamera(location: Location, keyPoints: List<Location>) {
+        navigationLocationProvider.changePosition(location, keyPoints, null, null)
         val mapAnimationOptionsBuilder = MapAnimationOptions.Builder()
         mapAnimationOptionsBuilder.duration(1500L)
         mapCamera.easeTo(
@@ -166,7 +164,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                     LocationEngineCallback<LocationEngineResult> {
                     override fun onSuccess(result: LocationEngineResult) {
                         result.lastLocation?.let {
-                            locationObserver.onEnhancedLocationChanged(it, listOf())
+                            updateCamera(it, emptyList())
                         }
                     }
 
@@ -251,16 +249,14 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxReplayer.play()
     }
 
-    private val routesObserver = object : RoutesObserver {
-        override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            val routelines = routes.map { RouteLine(it, null) }
-            CoroutineScope(Dispatchers.Main).launch {
-                routeLineApi.setRoutes(routelines).apply {
-                    routeLineView.renderRouteDrawData(
-                        binding.mapView.getMapboxMap().getStyle()!!,
-                        this
-                    )
-                }
+    private val routesObserver = RoutesObserver { routes ->
+        val routelines = routes.map { RouteLine(it, null) }
+        CoroutineScope(Dispatchers.Main).launch {
+            routeLineApi.setRoutes(routelines).apply {
+                routeLineView.renderRouteDrawData(
+                    binding.mapView.getMapboxMap().getStyle()!!,
+                    this,
+                )
             }
         }
     }

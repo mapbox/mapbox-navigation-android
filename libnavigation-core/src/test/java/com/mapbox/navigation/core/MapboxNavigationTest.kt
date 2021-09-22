@@ -37,7 +37,7 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.trip.service.TripService
-import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
+import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
@@ -295,21 +295,21 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun registerMapMatcherResultObserver() {
+    fun registerLocationObserver() {
         createMapboxNavigation()
-        val observer: MapMatcherResultObserver = mockk()
-        mapboxNavigation.registerMapMatcherResultObserver(observer)
+        val observer: LocationObserver = mockk()
+        mapboxNavigation.registerLocationObserver(observer)
 
-        verify(exactly = 1) { tripSession.registerMapMatcherResultObserver(observer) }
+        verify(exactly = 1) { tripSession.registerLocationObserver(observer) }
     }
 
     @Test
-    fun unregisterMapMatcherResultObserver() {
+    fun unregisterLocationObserver() {
         createMapboxNavigation()
-        val observer: MapMatcherResultObserver = mockk()
-        mapboxNavigation.unregisterMapMatcherResultObserver(observer)
+        val observer: LocationObserver = mockk()
+        mapboxNavigation.unregisterLocationObserver(observer)
 
-        verify(exactly = 1) { tripSession.unregisterMapMatcherResultObserver(observer) }
+        verify(exactly = 1) { tripSession.unregisterLocationObserver(observer) }
     }
 
     @Test
@@ -412,14 +412,6 @@ class MapboxNavigationTest {
         mapboxNavigation.onDestroy()
 
         verify(exactly = 1) { navigationSession.unregisterAllNavigationSessionStateObservers() }
-    }
-
-    @Test
-    fun unregisterAllMapMatcherResultObservers() {
-        createMapboxNavigation()
-        mapboxNavigation.onDestroy()
-
-        verify(exactly = 1) { tripSession.unregisterAllMapMatcherResultObservers() }
     }
 
     @Test

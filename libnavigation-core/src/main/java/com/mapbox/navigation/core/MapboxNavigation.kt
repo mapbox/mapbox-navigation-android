@@ -64,9 +64,8 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
-import com.mapbox.navigation.core.trip.session.MapMatcherResult
-import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.NavigationSession
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuidance
@@ -645,7 +644,6 @@ class MapboxNavigation(
         tripSession.unregisterAllVoiceInstructionsObservers()
         tripSession.unregisterAllRoadObjectsOnRouteObservers()
         tripSession.unregisterAllEHorizonObservers()
-        tripSession.unregisterAllMapMatcherResultObservers()
         tripSession.unregisterAllFallbackVersionsObservers()
         routeAlternativesController.unregisterAll()
         routeRefreshController.stop()
@@ -671,6 +669,7 @@ class MapboxNavigation(
     /**
      * Registers [LocationObserver]. The updates are available whenever the trip session is started.
      *
+     * @see [LocationMatcherResult]
      * @see [startTripSession]
      */
     fun registerLocationObserver(locationObserver: LocationObserver) {
@@ -679,6 +678,8 @@ class MapboxNavigation(
 
     /**
      * Unregisters [LocationObserver].
+     *
+     * @see [LocationMatcherResult]
      */
     fun unregisterLocationObserver(locationObserver: LocationObserver) {
         tripSession.unregisterLocationObserver(locationObserver)
@@ -910,26 +911,6 @@ class MapboxNavigation(
      */
     fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver) {
         tripSession.unregisterEHorizonObserver(eHorizonObserver)
-    }
-
-    /**
-     * Registers an observer that gets notified whenever a new enhanced location update is available
-     * with details about the status of the enhanced location.
-     *
-     * @see [MapMatcherResult]
-     * @see [startTripSession]
-     */
-    fun registerMapMatcherResultObserver(mapMatcherResultObserver: MapMatcherResultObserver) {
-        tripSession.registerMapMatcherResultObserver(mapMatcherResultObserver)
-    }
-
-    /**
-     * Unregisters a [MapMatcherResultObserver].
-     *
-     * @see [MapMatcherResult]
-     */
-    fun unregisterMapMatcherResultObserver(mapMatcherResultObserver: MapMatcherResultObserver) {
-        tripSession.unregisterMapMatcherResultObserver(mapMatcherResultObserver)
     }
 
     /**

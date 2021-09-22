@@ -1,5 +1,8 @@
 package com.mapbox.navigation.qa_test_app.view;
 
+import static com.mapbox.android.gestures.Utils.dpToPx;
+import static com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Location;
@@ -56,6 +59,7 @@ import com.mapbox.navigation.core.replay.ReplayLocationEngine;
 import com.mapbox.navigation.core.replay.history.ReplayEventBase;
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver;
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper;
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.qa_test_app.R;
@@ -76,8 +80,8 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources;
-import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound;
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue;
+import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -86,9 +90,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import static com.mapbox.android.gestures.Utils.dpToPx;
-import static com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID;
 
 public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapLongClickListener {
 
@@ -392,17 +393,19 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
   private LocationObserver locationObserver = new LocationObserver() {
     @Override
-    public void onRawLocationChanged(@NotNull Location rawLocation) {
+    public void onNewRawLocation(@NotNull Location rawLocation) {
       Log.d(TAG, "raw location " + rawLocation.toString());
     }
 
     @Override
-    public void onEnhancedLocationChanged(
-        @NotNull Location enhancedLocation,
-        @NotNull List<? extends Location> keyPoints
-    ) {
-      navigationLocationProvider.changePosition(enhancedLocation, keyPoints, null, null);
-      updateCamera(enhancedLocation);
+    public void onNewLocationMatcherResult(@NotNull LocationMatcherResult locationMatcherResult) {
+      navigationLocationProvider.changePosition(
+              locationMatcherResult.getEnhancedLocation(),
+              locationMatcherResult.getKeyPoints(),
+              null,
+              null
+              );
+      updateCamera(locationMatcherResult.getEnhancedLocation());
     }
   };
 

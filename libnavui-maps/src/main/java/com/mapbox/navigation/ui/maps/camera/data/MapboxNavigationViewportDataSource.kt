@@ -134,11 +134,11 @@ import kotlin.math.min
  * #### Update current location
  * ```kotlin
  * private val locationObserver = object : LocationObserver {
- *     override fun onRawLocationChanged(rawLocation: Location) {
+ *     override fun onNewRawLocation(rawLocation: Location) {
  *         // no impl
  *     }
- *     override fun onEnhancedLocationChanged(enhancedLocation: Location, keyPoints: List<Location>) {
- *         viewportDataSource.onLocationChanged(enhancedLocation)
+ *     override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+ *         viewportDataSource.onLocationChanged(locationMatcherResult.enhancedLocation)
  *         viewportDataSource.evaluate()
  *     }
  * }
@@ -164,11 +164,12 @@ import kotlin.math.min
  *
  * #### Update current location and reset frame
  * ```kotlin
- * private val mapMatcherResultObserver = object : MapMatcherResultObserver {
- *     override fun onNewMapMatcherResult(mapMatcherResult: MapMatcherResult) {
- *         viewportDataSource.onLocationChanged(mapMatcherResult.enhancedLocation)
+ * private val locationObserver = object : LocationObserver {
+ *     override fun onNewRawLocation(rawLocation: Location) {}
+ *     override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+ *         viewportDataSource.onLocationChanged(locationMatcherResult.enhancedLocation)
  *         viewportDataSource.evaluate()
- *         if (mapMatcherResult.isTeleport) {
+ *         if (locationMatcherResult.isTeleport) {
  *             navigationCamera.resetFrame()
  *         }
  *     }
@@ -513,7 +514,6 @@ class MapboxNavigationViewportDataSource(
      * Call whenever new user location is available.
      *
      * @see [MapboxNavigation.registerLocationObserver]
-     * @see [MapboxNavigation.registerMapMatcherResultObserver]
      * @see [evaluate]
      */
     fun onLocationChanged(location: Location) {

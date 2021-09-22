@@ -35,6 +35,7 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -177,22 +178,19 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     /* ----- Location and route progress callbacks ----- */
     private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {
+        override fun onNewRawLocation(rawLocation: Location) {
             // not handled
         }
 
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
+        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             // update location puck's position on the map
             navigationLocationProvider.changePosition(
-                location = enhancedLocation,
-                keyPoints = keyPoints
+                location = locationMatcherResult.enhancedLocation,
+                keyPoints = locationMatcherResult.keyPoints,
             )
 
             // update camera position to account for new location
-            viewportDataSource.onLocationChanged(enhancedLocation)
+            viewportDataSource.onLocationChanged(locationMatcherResult.enhancedLocation)
             viewportDataSource.evaluate()
         }
     }
@@ -310,7 +308,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         )
         // move the camera to current location on the first update
         mapboxNavigation.registerLocationObserver(object : LocationObserver {
-            override fun onRawLocationChanged(rawLocation: Location) {
+            override fun onNewRawLocation(rawLocation: Location) {
                 val point = Point.fromLngLat(rawLocation.longitude, rawLocation.latitude)
                 val cameraOptions = CameraOptions.Builder()
                     .center(point)
@@ -320,9 +318,8 @@ class MapboxNavigationActivity : AppCompatActivity() {
                 mapboxNavigation.unregisterLocationObserver(this)
             }
 
-            override fun onEnhancedLocationChanged(
-                enhancedLocation: Location,
-                keyPoints: List<Location>
+            override fun onNewLocationMatcherResult(
+                locationMatcherResult: LocationMatcherResult,
             ) {
                 // not handled
             }

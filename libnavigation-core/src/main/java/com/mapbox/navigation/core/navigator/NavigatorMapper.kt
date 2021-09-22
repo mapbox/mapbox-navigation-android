@@ -22,7 +22,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
-import com.mapbox.navigation.core.trip.session.MapMatcherResult
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.BannerComponent
@@ -297,11 +297,11 @@ private fun List<com.mapbox.navigator.UpcomingRouteAlert>.toUpcomingRoadObjects(
         }
 }
 
-internal fun TripStatus.getMapMatcherResult(
+internal fun TripStatus.getLocationMatcherResult(
     enhancedLocation: Location,
     keyPoints: List<Location>
-): MapMatcherResult {
-    return MapMatcherResult(
+): LocationMatcherResult {
+    return LocationMatcherResult(
         enhancedLocation,
         keyPoints,
         navigationStatus.offRoadProba > 0.5,
