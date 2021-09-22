@@ -5,7 +5,6 @@ import android.content.Context
 import android.location.Location
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
@@ -26,7 +25,6 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -34,6 +32,7 @@ import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityJunctionBinding
@@ -128,49 +127,38 @@ class MapboxJunctionActivity : AppCompatActivity(), OnMapLongClickListener {
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
     private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {}
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
+        override fun onNewRawLocation(rawLocation: Location) {}
+        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             navigationLocationProvider.changePosition(
-                enhancedLocation,
-                keyPoints,
+                locationMatcherResult.enhancedLocation,
+                locationMatcherResult.keyPoints,
             )
-            updateCamera(enhancedLocation)
+            updateCamera(locationMatcherResult.enhancedLocation)
         }
     }
 
-    private val routesObserver = object : RoutesObserver {
-        override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            if (routes.isNotEmpty()) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    routeLineApi.setRoutes(
-                        listOf(RouteLine(routes[0], null))
-                    ).apply {
-                        routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
-                    }
+    private val routesObserver = RoutesObserver { routes ->
+        if (routes.isNotEmpty()) {
+            CoroutineScope(Dispatchers.Main).launch {
+                routeLineApi.setRoutes(listOf(RouteLine(routes[0], null))).apply {
+                    routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
                 }
-                startSimulation(routes[0])
             }
+            startSimulation(routes[0])
         }
     }
 
-    private val routeProgressObserver = object : RouteProgressObserver {
-        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
-                routeArrowView.renderManeuverUpdate(mapboxMap.getStyle()!!, this)
-            }
+    private val routeProgressObserver = RouteProgressObserver { routeProgress ->
+        routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
+            routeArrowView.renderManeuverUpdate(mapboxMap.getStyle()!!, this)
         }
     }
 
-    private val bannerInstructionsObserver = object : BannerInstructionsObserver {
-        override fun onNewBannerInstructions(bannerInstructions: BannerInstructions) {
-            // The junction component is driven by banner instructions updates.
-            // Passing the instructions to the MapboxJunctionApi generates the data
-            // for updating the view.
-            junctionApi.generateJunction(bannerInstructions, junctionCallback)
-        }
+    private val bannerInstructionsObserver = BannerInstructionsObserver { bannerInstructions ->
+        // The junction component is driven by banner instructions updates.
+        // Passing the instructions to the MapboxJunctionApi generates the data
+        // for updating the view.
+        junctionApi.generateJunction(bannerInstructions, junctionCallback)
     }
 
     private fun init() {

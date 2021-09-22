@@ -23,6 +23,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.qa_test_app.R
@@ -155,16 +156,16 @@ class InactiveRouteStylingWithRestrictionsActivity : AppCompatActivity() {
     }
 
     private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {
+        override fun onNewRawLocation(rawLocation: Location) {
             Log.d(TAG, "raw location $rawLocation")
         }
 
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
-            navigationLocationProvider.changePosition(enhancedLocation, keyPoints, null, null)
-            updateCamera(enhancedLocation)
+        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+            navigationLocationProvider.changePosition(
+                locationMatcherResult.enhancedLocation,
+                locationMatcherResult.keyPoints,
+            )
+            updateCamera(locationMatcherResult.enhancedLocation)
         }
     }
 

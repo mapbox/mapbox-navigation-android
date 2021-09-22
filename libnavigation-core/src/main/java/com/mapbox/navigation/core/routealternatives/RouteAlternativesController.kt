@@ -75,7 +75,7 @@ internal class RouteAlternativesController(
         val routeOptionsResult = routeOptionsUpdater.update(
             directionsSession.getPrimaryRouteOptions(),
             tripSession.getRouteProgress(),
-            tripSession.getEnhancedLocation()
+            tripSession.locationMatcherResult?.enhancedLocation,
         )
 
         when (routeOptionsResult) {

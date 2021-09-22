@@ -4,6 +4,7 @@ import android.location.Location
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.TAG
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 
 internal class LocationsCollectorImpl(
     private val logger: Logger?
@@ -59,12 +60,12 @@ internal class LocationsCollectorImpl(
         eventsLocationsBuffer.clear()
     }
 
-    override fun onRawLocationChanged(rawLocation: Location) {
+    override fun onNewRawLocation(rawLocation: Location) {
         accumulateLocation(rawLocation)
         accumulatePostEventLocation(rawLocation)
     }
 
-    override fun onEnhancedLocationChanged(enhancedLocation: Location, keyPoints: List<Location>) {
+    override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
         // Do nothing
     }
 

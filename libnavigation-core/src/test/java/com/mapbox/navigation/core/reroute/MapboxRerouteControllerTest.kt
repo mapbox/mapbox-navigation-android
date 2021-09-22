@@ -112,7 +112,7 @@ class MapboxRerouteControllerTest {
         routeRequestCallback.captured.onRoutesReady(mockk(), mockk())
 
         verify(exactly = 1) {
-            tripSession.getEnhancedLocation()
+            tripSession.locationMatcherResult
         }
         verify(exactly = 1) {
             tripSession.getRouteProgress()
