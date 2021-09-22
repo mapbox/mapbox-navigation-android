@@ -28,6 +28,7 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.qa_test_app.databinding.FeedbackActivityBinding
 import com.mapbox.navigation.qa_test_app.utils.Utils
@@ -64,14 +65,10 @@ class FeedbackActivity : AppCompatActivity() {
     }
 
     private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) = Unit
+        override fun onNewRawLocation(rawLocation: Location) = Unit
 
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
-            navigationLocationProvider.changePosition(enhancedLocation, keyPoints, null, null)
-            updateCamera(enhancedLocation)
+        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+            updateCamera(locationMatcherResult.enhancedLocation, locationMatcherResult.keyPoints)
         }
     }
 
@@ -131,7 +128,7 @@ class FeedbackActivity : AppCompatActivity() {
                 object : LocationEngineCallback<LocationEngineResult> {
                     override fun onSuccess(result: LocationEngineResult) {
                         result.lastLocation?.let {
-                            locationObserver.onEnhancedLocationChanged(it, listOf())
+                            updateCamera(it, emptyList())
                         }
                     }
 
@@ -170,7 +167,8 @@ class FeedbackActivity : AppCompatActivity() {
         mapboxNavigation.onDestroy()
     }
 
-    private fun updateCamera(location: Location) {
+    private fun updateCamera(location: Location, keyPoints: List<Location>) {
+        navigationLocationProvider.changePosition(location, keyPoints, null, null)
         val mapAnimationOptionsBuilder = MapAnimationOptions.Builder()
         mapAnimationOptionsBuilder.duration(1500L)
         mapCamera.easeTo(

@@ -40,6 +40,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityIndependentRouteGenerationBinding
@@ -127,11 +128,9 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
     private val locationObserver = object : LocationObserver {
         private var initialUpdateDone = false
 
-        override fun onRawLocationChanged(rawLocation: Location) {}
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
+        override fun onNewRawLocation(rawLocation: Location) {}
+        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+            val enhancedLocation = locationMatcherResult.enhancedLocation
             if (!initialUpdateDone) {
                 updateCamera(
                     Point.fromLngLat(enhancedLocation.longitude, enhancedLocation.latitude)
@@ -141,7 +140,7 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
 
             navigationLocationProvider.changePosition(
                 enhancedLocation,
-                keyPoints,
+                locationMatcherResult.keyPoints,
             )
         }
     }

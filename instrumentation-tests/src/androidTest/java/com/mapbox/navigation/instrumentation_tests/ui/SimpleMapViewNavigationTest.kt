@@ -1,21 +1,18 @@
 package com.mapbox.navigation.instrumentation_tests.ui
 
 import android.content.Context
+import android.location.Location
 import androidx.core.content.ContextCompat
 import androidx.test.espresso.Espresso
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.trip.session.MapMatcherResult
-import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
-import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
+import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.BasicNavigationViewActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
@@ -122,24 +119,25 @@ abstract class SimpleMapViewNavigationTest :
             )
             navigationCamera.requestNavigationCameraToFollowing()
 
-            mapboxNavigation.registerRoutesObserver(object : RoutesObserver {
-                override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-                    mapboxNavigationViewportDataSource.onRouteChanged(routes.first())
-                    mapboxNavigationViewportDataSource.evaluate()
-                }
-            })
+            mapboxNavigation.registerRoutesObserver { routes ->
+                mapboxNavigationViewportDataSource.onRouteChanged(routes.first())
+                mapboxNavigationViewportDataSource.evaluate()
+            }
 
-            mapboxNavigation.registerRouteProgressObserver(object : RouteProgressObserver {
-                override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-                    mapboxNavigationViewportDataSource.onRouteProgressChanged(routeProgress)
-                    mapboxNavigationViewportDataSource.evaluate()
-                }
-            })
+            mapboxNavigation.registerRouteProgressObserver { routeProgress ->
+                mapboxNavigationViewportDataSource.onRouteProgressChanged(routeProgress)
+                mapboxNavigationViewportDataSource.evaluate()
+            }
 
-            mapboxNavigation.registerMapMatcherResultObserver(object : MapMatcherResultObserver {
-                override fun onNewMapMatcherResult(mapMatcherResult: MapMatcherResult) {
+            mapboxNavigation.registerLocationObserver(object : LocationObserver {
+
+                override fun onNewRawLocation(rawLocation: Location) {}
+
+                override fun onNewLocationMatcherResult(
+                    locationMatcherResult: LocationMatcherResult,
+                ) {
                     mapboxNavigationViewportDataSource.onLocationChanged(
-                        mapMatcherResult.enhancedLocation
+                        locationMatcherResult.enhancedLocation,
                     )
                     mapboxNavigationViewportDataSource.evaluate()
                 }
@@ -159,11 +157,16 @@ abstract class SimpleMapViewNavigationTest :
                 )
             )
             locationPlugin.enabled = true
-            mapboxNavigation.registerMapMatcherResultObserver(object : MapMatcherResultObserver {
-                override fun onNewMapMatcherResult(mapMatcherResult: MapMatcherResult) {
+            mapboxNavigation.registerLocationObserver(object : LocationObserver {
+
+                override fun onNewRawLocation(rawLocation: Location) {}
+
+                override fun onNewLocationMatcherResult(
+                    locationMatcherResult: LocationMatcherResult,
+                ) {
                     navigationLocationProvider.changePosition(
-                        mapMatcherResult.enhancedLocation,
-                        mapMatcherResult.keyPoints
+                        locationMatcherResult.enhancedLocation,
+                        locationMatcherResult.keyPoints,
                     )
                 }
             })

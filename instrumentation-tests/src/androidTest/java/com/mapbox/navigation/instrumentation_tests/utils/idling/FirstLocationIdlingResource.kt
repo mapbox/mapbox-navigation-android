@@ -5,6 +5,7 @@ import androidx.test.espresso.Espresso
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.IdlingResource
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 
 /**
@@ -53,16 +54,13 @@ class FirstLocationIdlingResource(
 
     /** Used to communicate with [MapboxNavigation.registerLocationObserver] **/
     private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {
+        override fun onNewRawLocation(rawLocation: Location) {
             // Do nothing
         }
 
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
+        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             if (firstLocation == null) {
-                firstLocation = enhancedLocation
+                firstLocation = locationMatcherResult.enhancedLocation
                 callback.onTransitionToIdle()
             }
         }

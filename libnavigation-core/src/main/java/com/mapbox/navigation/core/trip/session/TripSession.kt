@@ -15,7 +15,7 @@ internal interface TripSession {
 
     fun getRawLocation(): Location?
     val zLevel: Int?
-    val mapMatcherResult: MapMatcherResult?
+    val locationMatcherResult: LocationMatcherResult?
     fun getRouteProgress(): RouteProgress?
     fun getState(): TripSessionState
 
@@ -61,10 +61,6 @@ internal interface TripSession {
     fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver)
     fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver)
     fun unregisterAllEHorizonObservers()
-
-    fun registerMapMatcherResultObserver(mapMatcherResultObserver: MapMatcherResultObserver)
-    fun unregisterMapMatcherResultObserver(mapMatcherResultObserver: MapMatcherResultObserver)
-    fun unregisterAllMapMatcherResultObservers()
 
     fun registerFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver)
     fun unregisterFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver)

@@ -10,14 +10,13 @@ import com.mapbox.maps.plugin.locationcomponent.LocationProvider
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.LocationObserver
-import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.utils.internal.ifNonNull
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
  * This class provides a [LocationProvider] implementation that can be used together with the
- * [LocationComponentPlugin] and provides an easy integration with the [LocationObserver] and the
- * [MapMatcherResultObserver] that produce enhanced location updates.
+ * [LocationComponentPlugin] and provides an easy integration with the
+ * [LocationObserver] that produces enhanced location updates.
  *
  * #### Example usage
  * Initialize the location plugin:
@@ -32,24 +31,9 @@ import java.util.concurrent.CopyOnWriteArraySet
  * Pass location data to transition the puck:
  * ```
  * private val locationObserver = object : LocationObserver {
- *     override fun onRawLocationChanged(rawLocation: Location) {}
- *     override fun onEnhancedLocationChanged(
- *         enhancedLocation: Location,
- *         keyPoints: List<Location>
- *     ) {
- *         navigationLocationProvider.changePosition(
- *             enhancedLocation,
- *             keyPoints,
- *         )
- *         updateCamera(enhancedLocation)
- *     }
- * }
- * ```
- * or:
- * ```
- * private val mapMatcherResultObserver = object : MapMatcherResultObserver {
- *     override fun onNewMapMatcherResult(mapMatcherResult: MapMatcherResult) {
- *         val transitionOptions: (ValueAnimator.() -> Unit)? = if (mapMatcherResult.isTeleport) {
+ *     override fun onNewRawLocation(rawLocation: Location) {}
+ *     override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+ *         val transitionOptions: (ValueAnimator.() -> Unit)? = if (locationMatcherResult.isTeleport) {
  *             {
  *                 duration = 0
  *             }
@@ -59,8 +43,8 @@ import java.util.concurrent.CopyOnWriteArraySet
  *             }
  *         }
  *         navigationLocationProvider.changePosition(
- *             mapMatcherResult.enhancedLocation,
- *             mapMatcherResult.keyPoints,
+ *             locationMatcherResult.enhancedLocation,
+ *             locationMatcherResult.keyPoints,
  *             latLngTransitionOptions = transitionOptions,
  *             bearingTransitionOptions = transitionOptions
  *         )
@@ -134,9 +118,7 @@ class NavigationLocationProvider : LocationProvider {
      * [LocationConsumer.onBearingUpdated].
      *
      * @see LocationObserver
-     * @see MapMatcherResultObserver
      * @see MapboxNavigation.registerLocationObserver
-     * @see MapboxNavigation.registerMapMatcherResultObserver
      */
     fun changePosition(
         location: Location,
@@ -172,7 +154,7 @@ class NavigationLocationProvider : LocationProvider {
         } else {
             doubleArrayOf(location.bearing.toDouble())
         }
-        this.onLocationUpdated(location = *latLngUpdates, options = latLngTransitionOptions)
-        this.onBearingUpdated(bearing = *bearingUpdates, options = bearingTransitionOptions)
+        this.onLocationUpdated(location = latLngUpdates, options = latLngTransitionOptions)
+        this.onBearingUpdated(bearing = bearingUpdates, options = bearingTransitionOptions)
     }
 }

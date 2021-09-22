@@ -64,7 +64,7 @@ internal class MapboxRerouteController(
         routeOptionsUpdater.update(
             directionsSession.getPrimaryRouteOptions(),
             tripSession.getRouteProgress(),
-            tripSession.mapMatcherResult,
+            tripSession.locationMatcherResult,
         )
             .let { routeOptionsResult ->
                 when (routeOptionsResult) {

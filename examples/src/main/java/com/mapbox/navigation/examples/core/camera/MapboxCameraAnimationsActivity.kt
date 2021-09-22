@@ -47,8 +47,8 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
-import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.camera.AnimationAdapter.OnAnimationButtonClicked
@@ -57,7 +57,6 @@ import com.mapbox.navigation.examples.util.Utils
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
-import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandler
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.clearRouteLine
@@ -146,36 +145,42 @@ class MapboxCameraAnimationsActivity :
         .circleRadius(10.0)
     private val poiSource = geoJsonSource("circle_source") { }.data("")
 
-    private val mapMatcherResultObserver = MapMatcherResultObserver { mapMatcherResult ->
-        val transitionOptions: (ValueAnimator.() -> Unit) = if (mapMatcherResult.isTeleport) {
-            {
-                duration = 0
-            }
-        } else {
-            {
-                duration = 1000
-            }
-        }
-        navigationLocationProvider.changePosition(
-            mapMatcherResult.enhancedLocation,
-            mapMatcherResult.keyPoints,
-            latLngTransitionOptions = transitionOptions,
-            bearingTransitionOptions = transitionOptions
-        )
-        viewportDataSource.onLocationChanged(mapMatcherResult.enhancedLocation)
+    private val locationObserver = object : LocationObserver {
 
-        lookAtPoint?.run {
-            val point = Point.fromLngLat(
-                mapMatcherResult.enhancedLocation.longitude,
-                mapMatcherResult.enhancedLocation.latitude,
+        override fun onNewRawLocation(rawLocation: Location) {}
+
+        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+            val transitionOptions: (ValueAnimator.() -> Unit) =
+                if (locationMatcherResult.isTeleport) {
+                    {
+                        duration = 0
+                    }
+                } else {
+                    {
+                        duration = 1000
+                    }
+                }
+            navigationLocationProvider.changePosition(
+                locationMatcherResult.enhancedLocation,
+                locationMatcherResult.keyPoints,
+                latLngTransitionOptions = transitionOptions,
+                bearingTransitionOptions = transitionOptions,
             )
-            val bearing = TurfMeasurement.bearing(point, this)
-            viewportDataSource.followingBearingPropertyOverride(bearing)
-        }
+            viewportDataSource.onLocationChanged(locationMatcherResult.enhancedLocation)
 
-        viewportDataSource.evaluate()
-        if (mapMatcherResult.isTeleport) {
-            navigationCamera.resetFrame()
+            lookAtPoint?.run {
+                val point = Point.fromLngLat(
+                    locationMatcherResult.enhancedLocation.longitude,
+                    locationMatcherResult.enhancedLocation.latitude,
+                )
+                val bearing = TurfMeasurement.bearing(point, this)
+                viewportDataSource.followingBearingPropertyOverride(bearing)
+            }
+
+            viewportDataSource.evaluate()
+            if (locationMatcherResult.isTeleport) {
+                navigationCamera.resetFrame()
+            }
         }
     }
 
@@ -285,13 +290,11 @@ class MapboxCameraAnimationsActivity :
                 mapboxMap,
                 binding.mapView.gestures,
                 locationComponent,
-                object : NavigationScaleGestureActionListener {
-                    override fun onNavigationScaleGestureAction() {
-                        viewportDataSource
-                            .options
-                            .followingFrameOptions
-                            .zoomUpdatesAllowed = false
-                    }
+                {
+                    viewportDataSource
+                        .options
+                        .followingFrameOptions
+                        .zoomUpdatesAllowed = false
                 }
             ).apply { initialize() }
         )
@@ -391,7 +394,7 @@ class MapboxCameraAnimationsActivity :
             registerLocationObserver(
                 object : LocationObserver {
 
-                    override fun onRawLocationChanged(rawLocation: Location) {
+                    override fun onNewRawLocation(rawLocation: Location) {
                         navigationCamera.requestNavigationCameraToIdle()
                         val point = Point.fromLngLat(rawLocation.longitude, rawLocation.latitude)
                         val cameraOptions = CameraOptions.Builder()
@@ -403,9 +406,8 @@ class MapboxCameraAnimationsActivity :
                         mapboxNavigation.unregisterLocationObserver(this)
                     }
 
-                    override fun onEnhancedLocationChanged(
-                        enhancedLocation: Location,
-                        keyPoints: List<Location>
+                    override fun onNewLocationMatcherResult(
+                        locationMatcherResult: LocationMatcherResult,
                     ) {
                         // no impl
                     }
@@ -413,7 +415,7 @@ class MapboxCameraAnimationsActivity :
             )
             registerRouteProgressObserver(routeProgressObserver)
             registerRoutesObserver(routesObserver)
-            registerMapMatcherResultObserver(mapMatcherResultObserver)
+            registerLocationObserver(locationObserver)
         }
 
         mapboxReplayer.pushRealLocation(this, 0.0)

@@ -36,6 +36,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityBuildingHighlightBinding
@@ -149,17 +150,14 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
     }
 
     private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {}
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
+        override fun onNewRawLocation(rawLocation: Location) {}
+        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             navigationLocationProvider.changePosition(
-                enhancedLocation,
-                keyPoints,
+                locationMatcherResult.enhancedLocation,
+                locationMatcherResult.keyPoints,
             )
             if (isNavigating) {
-                updateCamera(enhancedLocation)
+                updateCamera(locationMatcherResult.enhancedLocation)
             }
         }
     }
@@ -208,7 +206,7 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
                 .build()
         )
         mapboxNavigation.registerLocationObserver(object : LocationObserver {
-            override fun onRawLocationChanged(rawLocation: Location) {
+            override fun onNewRawLocation(rawLocation: Location) {
                 updateCamera(rawLocation)
                 navigationLocationProvider.changePosition(
                     rawLocation,
@@ -216,9 +214,8 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
                 mapboxNavigation.unregisterLocationObserver(this)
             }
 
-            override fun onEnhancedLocationChanged(
-                enhancedLocation: Location,
-                keyPoints: List<Location>
+            override fun onNewLocationMatcherResult(
+                locationMatcherResult: LocationMatcherResult,
             ) {
                 //
             }

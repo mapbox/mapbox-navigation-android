@@ -7,7 +7,7 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
-import com.mapbox.navigation.core.trip.session.MapMatcherResult
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -36,7 +36,7 @@ class RouteAlternativesControllerTest {
     val coroutineRule = MainCoroutineRule()
 
     private val navigator: MapboxNativeNavigator = mockk()
-    private val directionsSession: DirectionsSession = mockk() {
+    private val directionsSession: DirectionsSession = mockk {
         every { cancelRouteRequest(any()) } just Runs
     }
     private val tripSession: TripSession = mockk {
@@ -383,7 +383,7 @@ class RouteAlternativesControllerTest {
     }
 
     private fun mockLocation() {
-        every { tripSession.mapMatcherResult } returns mockk {
+        every { tripSession.locationMatcherResult } returns mockk {
             every { enhancedLocation } returns mockk {
                 every { latitude } returns -33.874308
                 every { longitude } returns 151.206087
@@ -395,7 +395,7 @@ class RouteAlternativesControllerTest {
         routeOptionsResult: RouteOptionsUpdater.RouteOptionsResult
     ) {
         every {
-            routeOptionsUpdater.update(any(), any(), any<MapMatcherResult>())
+            routeOptionsUpdater.update(any(), any(), any<LocationMatcherResult>())
         } returns routeOptionsResult
     }
 }

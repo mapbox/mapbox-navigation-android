@@ -8,10 +8,8 @@ import com.mapbox.navigation.base.speed.model.SpeedLimit
  * by the map matching engine of the Navigation SDK.
  *
  * @param enhancedLocation the best possible location update, snapped to the route or map matched to the road if possible.
- * Equal to data from [LocationObserver.onEnhancedLocationChanged].
  * @param keyPoints a list (can be empty) of predicted location points leading up to the target update.
  * The last point on the list (if not empty) is always equal to [enhancedLocation].
- * Equal to data from [LocationObserver.onEnhancedLocationChanged].
  * @param isOffRoad whether the SDK thinks that the user is off road, based on the [offRoadProbability].
  * @param offRoadProbability probability that the user is off road.
  * @param isTeleport returns true if map matcher changed its opinion about most probable path on last update.
@@ -23,7 +21,7 @@ import com.mapbox.navigation.base.speed.model.SpeedLimit
  * @param roadEdgeMatchProbability when map matcher snaps to a road, this is the confidence in the chosen edge from all nearest edges.
  * @param zLevel [Int] current Z-level. Can be used to build a route from a proper level of a road.
  */
-class MapMatcherResult internal constructor(
+class LocationMatcherResult internal constructor(
     val enhancedLocation: Location,
     val keyPoints: List<Location>,
     val isOffRoad: Boolean,
@@ -41,7 +39,7 @@ class MapMatcherResult internal constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as MapMatcherResult
+        other as LocationMatcherResult
 
         if (enhancedLocation != other.enhancedLocation) return false
         if (keyPoints != other.keyPoints) return false
@@ -72,7 +70,7 @@ class MapMatcherResult internal constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "MapMatcherResult(enhancedLocation=$enhancedLocation, " +
+        return "LocationMatcherResult(enhancedLocation=$enhancedLocation, " +
             "keyPoints=$keyPoints, isOffRoad=$isOffRoad, offRoadProbability=$offRoadProbability, " +
             "isTeleport=$isTeleport, speedLimit=$speedLimit, " +
             "roadEdgeMatchProbability=$roadEdgeMatchProbability)"

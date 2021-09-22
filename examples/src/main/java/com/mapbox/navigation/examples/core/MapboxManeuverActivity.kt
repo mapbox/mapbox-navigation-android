@@ -37,8 +37,8 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
-import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityManeuverBinding
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
@@ -136,13 +136,18 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
-    private val mapMatcherResultObserver = MapMatcherResultObserver { mapMatcherResult ->
-        navigationLocationProvider.changePosition(
-            mapMatcherResult.enhancedLocation,
-            mapMatcherResult.keyPoints
-        )
-        if (isNavigating) {
-            updateCamera(mapMatcherResult.enhancedLocation)
+    private val locationObserver = object : LocationObserver {
+
+        override fun onNewRawLocation(rawLocation: Location) {}
+
+        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+            navigationLocationProvider.changePosition(
+                locationMatcherResult.enhancedLocation,
+                locationMatcherResult.keyPoints,
+            )
+            if (isNavigating) {
+                updateCamera(locationMatcherResult.enhancedLocation)
+            }
         }
     }
 
@@ -201,7 +206,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.play()
         mapboxNavigation.registerLocationObserver(object : LocationObserver {
-            override fun onRawLocationChanged(rawLocation: Location) {
+            override fun onNewRawLocation(rawLocation: Location) {
                 updateCamera(rawLocation)
                 navigationLocationProvider.changePosition(
                     rawLocation,
@@ -209,14 +214,13 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
                 mapboxNavigation.unregisterLocationObserver(this)
             }
 
-            override fun onEnhancedLocationChanged(
-                enhancedLocation: Location,
-                keyPoints: List<Location>
+            override fun onNewLocationMatcherResult(
+                locationMatcherResult: LocationMatcherResult,
             ) {
                 //
             }
         })
-        mapboxNavigation.registerMapMatcherResultObserver(mapMatcherResultObserver)
+        mapboxNavigation.registerLocationObserver(locationObserver)
     }
 
     @SuppressLint("MissingPermission")
