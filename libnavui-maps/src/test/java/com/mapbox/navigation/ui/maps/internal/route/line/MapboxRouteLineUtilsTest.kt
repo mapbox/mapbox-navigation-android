@@ -1368,10 +1368,6 @@ class MapboxRouteLineUtilsTest {
     @Test
     fun getRouteLineTrafficExpressionData_whenFirstDistanceInSecondLegIsZero() {
         val route = getMultilegWithTwoLegs()
-        val routeGeometry = LineString.fromPolyline(
-            route.geometry() ?: "",
-            Constants.PRECISION_6
-        )
 
         val result = MapboxRouteLineUtils.extractRouteDataWithTrafficAndRoadClassDeDuped(
             route,
@@ -1381,8 +1377,44 @@ class MapboxRouteLineUtilsTest {
         assertEquals(19, result.size)
         assertEquals(478.70000000000005, result[7].distanceFromOrigin, 0.0)
         assertTrue(result[7].isLegOrigin)
-        assertEquals(499.50000000000006, result[8].distanceFromOrigin, 0.0)
+        assertEquals(529.9000000000001, result[8].distanceFromOrigin, 0.0)
         assertFalse(result[8].isLegOrigin)
+    }
+
+    @Test
+    fun `extractRouteData with multiple distance entries of zero`() {
+        val route = loadRoute("artificially_wrong_two_leg_route.json")
+        val comparisonRoute = getMultilegWithTwoLegs()
+        val expectedResult = MapboxRouteLineUtils.extractRouteData(
+            comparisonRoute,
+            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        )
+
+        val result = MapboxRouteLineUtils.extractRouteData(
+            route,
+            MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
+        )
+
+        // In this case the two routes being used are the same except for an additional
+        // distance value of 0 being added to test the implementation. The result of the
+        // calls should be the same to prove that distance values of 0 in the route
+        // are ignored.
+        val listItemsAreEqual = listElementsAreEqual(expectedResult, result) { item1, item2 ->
+            compareValuesBy(
+                item1,
+                item2,
+                { it.distanceFromOrigin },
+                { it.isInRestrictedSection },
+                { it.isLegOrigin },
+                { it.offset },
+                { it.trafficCongestionIdentifier }
+            ) == 0
+        }
+        assertTrue(listItemsAreEqual)
+        assertFalse(result[16].isLegOrigin)
+        assertTrue(result[17].isLegOrigin)
+        assertFalse(result[18].isLegOrigin)
+        assertEquals(478.70000000000005, result[17].distanceFromOrigin, 0.0)
     }
 
     @Test
@@ -1476,7 +1508,7 @@ class MapboxRouteLineUtilsTest {
 
         result.indexOfFirst { it.legIndex == 1 }
 
-        assertEquals(12, result.size)
+        assertEquals(11, result.size)
         assertEquals(5, result.indexOfFirst { it.legIndex == 1 })
         assertEquals(0.48807892461540975, result[5].offset, 0.0)
     }
@@ -1893,16 +1925,15 @@ class MapboxRouteLineUtilsTest {
             " 0.1235746096999951, [rgba, 86.0, 168.0, 251.0, 1.0], 0.250513874614594, " +
             "[rgba, 86.0, 168.0, 251.0, 1.0], 0.27090572440007177, " +
             "[rgba, 255.0, 149.0, 0.0, 1.0], 0.3010856620825788, [rgba, 255.0, 149.0, 0.0, 1.0]," +
-            " 0.32147751186805656, [rgba, 86.0, 168.0, 251.0, 1.0], 0.467687074829932, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.48807892461540975, " +
-            "[rgba, 143.0, 36.0, 71.0, 1.0], 0.4888945986068289, [rgba, 143.0, 36.0, 71.0, 1.0]," +
-            " 0.5092864483923066, [rgba, 255.0, 149.0, 0.0, 1.0], 0.5317174831563323, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.55210933294181, [rgba, 86.0, 168.0, 251.0, 1.0]," +
-            " 0.5692384867616113, [rgba, 86.0, 168.0, 251.0, 1.0], 0.589630336547089, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5904460105385081, [rgba, 255.0, 149.0, 0.0, 1.0]," +
-            " 0.6108378603239858, [rgba, 86.0, 168.0, 251.0, 1.0], 0.8839866882004601, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.9043785379859378, [rgba, 255.0, 149.0, 0.0, 1.0]," +
-            " 0.9329271276856067, [rgba, 255.0, 149.0, 0.0, 1.0], 0.9533189774710844, " +
+            " 0.32147751186805656, [rgba, 86.0, 168.0, 251.0, 1.0], 0.467687074829932," +
+            " [rgba, 86.0, 168.0, 251.0, 1.0], 0.48807892461540975, " +
+            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5198902102807551, [rgba, 255.0, 149.0, 0.0, 1.0]," +
+            " 0.5402820600662328, [rgba, 86.0, 168.0, 251.0, 1.0], 0.548744677727206, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.5691365275126837, [rgba, 255.0, 149.0, 0.0, 1.0]," +
+            " 0.5692384867616113, [rgba, 255.0, 149.0, 0.0, 1.0], 0.589630336547089, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.8632889606682003, " +
+            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.883680810453678, [rgba, 255.0, 149.0, 0.0, 1.0]," +
+            " 0.9186528328357723, [rgba, 255.0, 149.0, 0.0, 1.0], 0.93904468262125, " +
             "[rgba, 86.0, 168.0, 251.0, 1.0]]"
         val colorResources = RouteLineColorResources.Builder().build()
         val route = getMultilegWithTwoLegs()
@@ -2273,6 +2304,23 @@ class MapboxRouteLineUtilsTest {
     }
 
     @Test
+    fun getAnnotationProvider_whenNumericTrafficSource_matchesDistances() {
+        val colorResources = RouteLineColorResources.Builder().build()
+        val routeAsJson = loadJsonFixture(
+            "route-with-congestion-numeric.json"
+        )
+        val route = DirectionsRoute.fromJson(routeAsJson)
+
+        val result =
+            MapboxRouteLineUtils.getRouteLegTrafficNumericCongestionProvider(colorResources)
+
+        assertEquals(
+            route.legs()!!.first().annotation()!!.distance()!!.size,
+            result(route.legs()!!.first()).size
+        )
+    }
+
+    @Test
     fun getAnnotationProvider_whenNoRouteOptions() {
         val colorResources = RouteLineColorResources.Builder().build()
         val routeAsJson = loadJsonFixture(
@@ -2340,9 +2388,10 @@ class MapboxRouteLineUtilsTest {
         assertTrue(result[4].isInRestrictedSection)
         assertFalse(result[5].isInRestrictedSection)
         assertTrue(result[17].isLegOrigin)
-        assertFalse(result[37].isInRestrictedSection)
-        assertTrue(result[38].isInRestrictedSection)
-        assertFalse(result[39].isInRestrictedSection)
+        assertFalse(result[36].isInRestrictedSection)
+        assertTrue(result[37].isInRestrictedSection)
+        assertEquals(result[37].roadClass, "tertiary")
+        assertFalse(result[38].isInRestrictedSection)
     }
 
     @Test
@@ -2402,5 +2451,19 @@ class MapboxRouteLineUtilsTest {
     private fun loadRoute(routeFileName: String): DirectionsRoute {
         val routeAsJson = loadJsonFixture(routeFileName)
         return DirectionsRoute.fromJson(routeAsJson)
+    }
+
+    private fun <T> listElementsAreEqual(
+        first: List<T>,
+        second: List<T>,
+        equalityFun: (T, T) -> Boolean
+    ): Boolean {
+        if (first.size != second.size) {
+            return false
+        }
+
+        return first.zip(second).all { (x, y) ->
+            equalityFun(x, y)
+        }
     }
 }
