@@ -90,7 +90,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        binding.mapView.onStart()
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.registerLocationObserver(locationObserver)
             mapboxNavigation.registerRoutesObserver(routesObserver)
@@ -105,12 +104,10 @@ class ReplayHistoryActivity : AppCompatActivity() {
             mapboxNavigation.unregisterRoutesObserver(routesObserver)
             mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         }
-        binding.mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        findViewById<MapView>(R.id.mapView).onDestroy()
         mapboxNavigation.onDestroy()
         if (::locationComponent.isInitialized) {
             locationComponent.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
