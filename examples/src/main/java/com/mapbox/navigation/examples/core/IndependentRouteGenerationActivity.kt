@@ -282,7 +282,6 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-        binding.mapView.onStart()
     }
 
     override fun onStop() {
@@ -291,17 +290,10 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        binding.mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.mapView.onDestroy()
         mapboxNavigation.onDestroy()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        binding.mapView.onLowMemory()
     }
 }

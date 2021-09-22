@@ -290,7 +290,6 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onStart() {
         super.onStart()
-        binding.mapView.onStart()
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.registerRoutesObserver(routesObserver)
             mapboxNavigation.registerLocationObserver(locationObserver)
@@ -309,18 +308,11 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
             mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
             mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         }
-        binding.mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.mapView.onDestroy()
         mapboxNavigation.onDestroy()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        binding.mapView.onLowMemory()
     }
 
     override fun onMapLongClick(point: Point): Boolean {

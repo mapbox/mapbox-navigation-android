@@ -602,18 +602,11 @@ class MapboxCameraAnimationsActivity :
 
     override fun onStart() {
         super.onStart()
-        binding.mapView.onStart()
         navigationCamera.resetFrame()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        binding.mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.mapView.onDestroy()
         mapboxNavigation.onDestroy()
     }
 
