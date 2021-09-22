@@ -2,14 +2,17 @@ package com.mapbox.navigation.core.trip.session
 
 import android.hardware.SensorEvent
 import android.location.Location
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
 import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.internal.utils.isSameUuid
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
@@ -64,11 +67,12 @@ internal class MapboxTripSession(
     private var updateRouteProgressJob: Job? = null
 
     @VisibleForTesting
-    internal var route: DirectionsRoute? = null
+    internal var primaryRoute: DirectionsRoute? = null
 
-    override fun setRoute(route: DirectionsRoute?, legIndex: Int) {
-        val isSameUuid = route?.isSameUuid(this.route) ?: false
-        val isSameRoute = route?.isSameRoute(this.route) ?: false
+    override fun setRoutes(route: NavigationRoute?) {
+        val primaryRoute = route?.primaryRoute()
+        val isSameUuid = primaryRoute?.isSameUuid(this.primaryRoute) ?: false
+        val isSameRoute = primaryRoute?.isSameRoute(this.primaryRoute) ?: false
         val updateAnnotationsOnly = isSameUuid && isSameRoute
 
         isOffRoute = false
@@ -76,20 +80,21 @@ internal class MapboxTripSession(
         roadObjects = emptyList()
         routeProgress = null
 
-        updateRouteJob = if (updateAnnotationsOnly && route != null) {
+        updateRouteJob = if (updateAnnotationsOnly && primaryRoute != null) {
             threadController.getMainScopeAndRootJob().scope.launch {
-                navigator.updateAnnotations(route)
-                this@MapboxTripSession.route = route
+                navigator.updateAnnotations(primaryRoute)
+                this@MapboxTripSession.primaryRoute = primaryRoute
             }
         } else {
             updateLegIndexJob?.cancel()
             updateRouteProgressJob?.cancel()
 
             threadController.getMainScopeAndRootJob().scope.launch {
-                navigator.setRoute(route, legIndex)?.let {
+                Log.i("kyle_debug", "setRoutes ${route?.routesResponse?.routes()?.size}")
+                navigator.setRoutes(route)?.let {
                     roadObjects = getRouteInitInfo(it)?.roadObjects ?: emptyList()
                 }
-                this@MapboxTripSession.route = route
+                this@MapboxTripSession.primaryRoute = primaryRoute
             }
         }
     }
@@ -223,7 +228,7 @@ internal class MapboxTripSession(
 
     private val navigatorObserver = object : NavigatorObserver() {
         override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
-            val tripStatus = status.getTripStatusFrom(route)
+            val tripStatus = status.getTripStatusFrom(primaryRoute)
             val enhancedLocation = tripStatus.navigationStatus.location.toLocation()
             val keyPoints = tripStatus.navigationStatus.keyPoints.toLocations()
             updateLocationMatcherResult(

@@ -1,11 +1,13 @@
 package com.mapbox.navigation.core.reroute
 
 import androidx.annotation.MainThread
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -62,7 +64,7 @@ internal class MapboxRerouteController(
             Message("Fetching route")
         )
         routeOptionsUpdater.update(
-            directionsSession.getPrimaryRouteOptions(),
+            directionsSession.getPrimaryRoute()?.routeOptions(),
             tripSession.getRouteProgress(),
             tripSession.locationMatcherResult,
         )
@@ -120,7 +122,7 @@ internal class MapboxRerouteController(
             routeOptions,
             object : RouterCallback {
                 override fun onRoutesReady(
-                    routes: List<DirectionsRoute>,
+                    routes: NavigationRoute,
                     routerOrigin: RouterOrigin
                 ) {
                     mainJobController.scope.launch {

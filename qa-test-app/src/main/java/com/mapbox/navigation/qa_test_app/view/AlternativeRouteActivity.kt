@@ -28,9 +28,11 @@ import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -38,6 +40,9 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.replay.route.ReplayRouteOptions
+import com.mapbox.navigation.core.routealternatives.RouteAlternative
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.qa_test_app.databinding.AlternativeRouteActivityLayoutBinding
@@ -63,6 +68,11 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     private val routeClickPadding = Utils.dpToPx(30f)
     private val navigationLocationProvider = NavigationLocationProvider()
     private val replayRouteMapper = ReplayRouteMapper()
+        .apply {
+            options = ReplayRouteOptions.Builder()
+                .gpsNoiseMeters(5.0)
+                .build()
+        }
     private val mapboxReplayer = MapboxReplayer()
     private val binding: AlternativeRouteActivityLayoutBinding by lazy {
         AlternativeRouteActivityLayoutBinding.inflate(layoutInflater)
@@ -207,8 +217,9 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxNavigation.requestRoutes(
             routeOptions,
             object : RouterCallback {
+
                 override fun onRoutesReady(
-                    routes: List<DirectionsRoute>,
+                    routes: NavigationRoute,
                     routerOrigin: RouterOrigin
                 ) {
                     mapboxNavigation.setRoutes(routes)
@@ -243,7 +254,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         binding.startNavigation.setOnClickListener {
             mapboxNavigation.startTripSession()
             binding.startNavigation.visibility = View.GONE
-            startSimulation(mapboxNavigation.getRoutes()[0])
+            startSimulation(mapboxNavigation.primaryRoute()!!)
         }
 
         binding.mapView.gestures.addOnMapClickListener(mapClickListener)
@@ -259,7 +270,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     private val routesObserver = RoutesObserver { routes ->
-        val routelines = routes.map { RouteLine(it, null) }
+        val routelines = routes?.routes()?.map { RouteLine(it, null) } ?: emptyList()
         CoroutineScope(Dispatchers.Main).launch {
             routeLineApi.setRoutes(routelines).apply {
                 routeLineView.renderRouteDrawData(
@@ -278,16 +289,10 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                 routeClickPadding
             )
 
-            val routeFound = result.value?.route
-            if (routeFound != null && routeFound != routeLineApi.getPrimaryRoute()) {
-                val reOrderedRoutes = routeLineApi.getRoutes()
-                    .filter { it != routeFound }
-                    .toMutableList()
-                    .also {
-                        it.add(0, routeFound)
-                    }
-                mapboxNavigation.setRoutes(reOrderedRoutes)
-            }
+            val routeIndex = result.value?.route?.routeIndex()
+//            if (routeIndex != null && routeIndex != routeLineApi.getPrimaryRoute()?.routeIndex()) {
+//                mapboxNavigation.setRoutes(reOrderedRoutes)
+//            }
         }
         false
     }

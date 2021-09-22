@@ -24,6 +24,7 @@ import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -144,8 +145,8 @@ class RouteDrawingActivity : AppCompatActivity() {
     }
 
     private val routeRequestCallback: RouterCallback = object : RouterCallback {
-        override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
-            val routeLines = routes.map { RouteLine(it, null) }
+        override fun onRoutesReady(routes: NavigationRoute, routerOrigin: RouterOrigin) {
+            val routeLines = routes.routes().map { RouteLine(it, null) } ?: emptyList()
             CoroutineScope(Dispatchers.Main).launch {
                 routeLineApi.setRoutes(routeLines).apply {
                     routeLineView.renderRouteDrawData(mapView.getMapboxMap().getStyle()!!, this)

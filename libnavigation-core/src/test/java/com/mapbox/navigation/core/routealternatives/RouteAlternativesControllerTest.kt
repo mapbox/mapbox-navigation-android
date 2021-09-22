@@ -57,8 +57,7 @@ class RouteAlternativesControllerTest {
         options,
         navigator,
         directionsSession,
-        tripSession,
-        routeOptionsUpdater
+        tripSession
     )
 
     @Before

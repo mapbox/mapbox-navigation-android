@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.CacheHandle
@@ -29,6 +30,7 @@ import com.mapbox.navigator.PredictiveLocationTrackerOptions
 import com.mapbox.navigator.RoadObjectMatcher
 import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
+import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.Router
 import com.mapbox.navigator.RouterError
@@ -176,17 +178,19 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return a [RouteInfo] route state if no errors occurred.
      * Otherwise, it returns null.
      */
-    override suspend fun setRoute(route: DirectionsRoute?, legIndex: Int): RouteInfo? =
-        suspendCancellableCoroutine { continuation ->
-            navigator!!.setRoute(
-                route?.toJson(),
-                PRIMARY_ROUTE_INDEX,
-                legIndex,
-                route?.routeOptions()?.toUrl(accessToken).toString()
-            ) {
-                continuation.resume(it.value)
-            }
+    override suspend fun setRoutes(
+        navigationRoute: NavigationRoute?
+    ): RouteInfo? = suspendCancellableCoroutine { continuation ->
+        val primaryRoute = navigationRoute?.primaryRoute()
+        navigator!!.setRoute(
+            navigationRoute?.routesResponse?.toJson(),
+            navigationRoute?.routeIndex ?: 0,
+            navigationRoute?.initialLegIndex ?: 0,
+            primaryRoute?.routeOptions()?.toUrl(accessToken).toString()
+        ) {
+            continuation.resume(it.value)
         }
+    }
 
     /**
      * Updates annotations so that subsequent calls to getStatus will
@@ -376,4 +380,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS,
             0
         )
+
+    override fun createRouteAlternativesController(): RouteAlternativesControllerInterface {
+        return navigator!!.createRouteAlternativesController()
+    }
 }

@@ -125,7 +125,7 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }
-        mapboxNavigation.setRoutes(listOf(getRoute()))
+//        mapboxNavigation.setRoutes(listOf(getRoute()))
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
         mapboxReplayer.pushRealLocation(this, 0.0)
@@ -183,7 +183,7 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
             mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
             mapboxNavigation.startTripSession()
             binding.startNavigation.visibility = View.GONE
-            startSimulation(mapboxNavigation.getRoutes()[0])
+            startSimulation(mapboxNavigation.primaryRoute()!!)
         }
     }
 

@@ -224,7 +224,8 @@ class RouteDrawingUtil(private val mapView: MapView) {
                         enable()
                     } else {
                         val route = response.body()?.matchings()?.get(0)?.toDirectionRoute()!!
-                        routeReadyCallback.onRoutesReady(listOf(route), RouterOrigin.Offboard)
+                        TODO("Looks like we still need to support individual routes")
+//                        routeReadyCallback.onRoutesReady(listOf(route), RouterOrigin.Offboard)
                     }
                 }
             }

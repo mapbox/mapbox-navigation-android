@@ -15,6 +15,7 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
@@ -98,7 +99,11 @@ class MapboxOffboardRouter(
                                 Message("Successful directions response. Metadata: $metadata"),
                             )
                             if (!routes.isNullOrEmpty()) {
-                                callback.onRoutesReady(routes, RouterOrigin.Offboard)
+                                val routes = body.routes().map {
+                                    it.toBuilder().routeOptions(routeOptions).build()
+                                }
+                                val navigationRoute = NavigationRoute(body, routes)
+                                callback.onRoutesReady(navigationRoute, RouterOrigin.Offboard)
                             } else {
                                 callback.onFailure(
                                     listOf(

@@ -171,7 +171,7 @@ class MultiLegRouteExampleActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun initListeners() {
         viewBinding.startNavigation.setOnClickListener {
-            val route = mapboxNavigation.getRoutes().firstOrNull()
+            val route = mapboxNavigation.primaryRoute().firstOrNull()
             if (route != null) {
                 mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
                 mapboxNavigation.startTripSession()

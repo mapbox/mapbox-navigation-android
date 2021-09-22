@@ -11,13 +11,15 @@ package com.mapbox.navigation.core.replay.route
  * @param uTurnSpeedMps Speed the driver will go when facing a u-turn
  * @param maxAcceleration How fast the driver will accelerate to [maxSpeedMps] in mps^2
  * @param minAcceleration How fast the driver will decelerate in mps^2
+ * @param gpsNoiseMeters Adds a noise filter which makes replay track off-route
  */
 class ReplayRouteOptions private constructor(
     val maxSpeedMps: Double,
     val turnSpeedMps: Double,
     val uTurnSpeedMps: Double,
     val maxAcceleration: Double,
-    val minAcceleration: Double
+    val minAcceleration: Double,
+    val gpsNoiseMeters: Double?
 ) {
     /**
      * @return the builder that created the [ReplayRouteOptions]
@@ -28,6 +30,7 @@ class ReplayRouteOptions private constructor(
         uTurnSpeedMps(uTurnSpeedMps)
         maxAcceleration(maxAcceleration)
         minAcceleration(minAcceleration)
+        gpsNoiseMeters(gpsNoiseMeters)
     }
 
     /**
@@ -44,6 +47,7 @@ class ReplayRouteOptions private constructor(
         if (uTurnSpeedMps != other.uTurnSpeedMps) return false
         if (maxAcceleration != other.maxAcceleration) return false
         if (minAcceleration != other.minAcceleration) return false
+        if (gpsNoiseMeters != other.gpsNoiseMeters) return false
 
         return true
     }
@@ -57,6 +61,7 @@ class ReplayRouteOptions private constructor(
         result = 31 * result + uTurnSpeedMps.hashCode()
         result = 31 * result + maxAcceleration.hashCode()
         result = 31 * result + minAcceleration.hashCode()
+        result = 31 * result + gpsNoiseMeters.hashCode()
         return result
     }
 
@@ -69,7 +74,8 @@ class ReplayRouteOptions private constructor(
             "turnSpeedMps=$turnSpeedMps, " +
             "uTurnSpeedMps=$uTurnSpeedMps, " +
             "maxAcceleration=$maxAcceleration, " +
-            "minAcceleration=$minAcceleration" +
+            "minAcceleration=$minAcceleration, " +
+            "gpsNoiseMeters=$gpsNoiseMeters" +
             ")"
     }
 
@@ -82,6 +88,7 @@ class ReplayRouteOptions private constructor(
         private var uTurnSpeedMps = 1.0
         private var maxAcceleration = 3.0
         private var minAcceleration = -4.0
+        private var gpsNoiseMeters: Double? = null
 
         /**
          * Build your [ReplayRouteOptions].
@@ -94,7 +101,8 @@ class ReplayRouteOptions private constructor(
                 turnSpeedMps = turnSpeedMps,
                 uTurnSpeedMps = uTurnSpeedMps,
                 maxAcceleration = maxAcceleration,
-                minAcceleration = minAcceleration
+                minAcceleration = minAcceleration,
+                gpsNoiseMeters = gpsNoiseMeters
             )
         }
 
@@ -150,6 +158,17 @@ class ReplayRouteOptions private constructor(
          */
         fun minAcceleration(minAcceleration: Double): Builder {
             this.minAcceleration = minAcceleration
+            return this
+        }
+
+        /**
+         * Adds a noise filter which makes replay track off-route
+         *
+         * @param gpsNoiseMeters in meters
+         * @return [Builder]
+         */
+        fun gpsNoiseMeters(gpsNoiseMeters: Double?): Builder {
+            this.gpsNoiseMeters = gpsNoiseMeters
             return this
         }
     }

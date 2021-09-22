@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineResult;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.bindgen.Expected;
@@ -48,6 +49,7 @@ import com.mapbox.navigation.base.extensions.RouteOptionsExtensions;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions;
 import com.mapbox.navigation.base.options.RoutingTilesOptions;
+import com.mapbox.navigation.base.route.NavigationRoute;
 import com.mapbox.navigation.base.route.RouterCallback;
 import com.mapbox.navigation.base.route.RouterFailure;
 import com.mapbox.navigation.base.route.RouterOrigin;
@@ -91,6 +93,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import kotlin.NotImplementedError;
 
 public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapLongClickListener {
 
@@ -193,7 +197,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
       mapboxNavigation.startTripSession();
       startNavigation.setVisibility(View.GONE);
       getLocationComponent().addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener);
-      startSimulation(mapboxNavigation.getRoutes().get(0));
+      startSimulation(mapboxNavigation.primaryRoute());
     });
 
 
@@ -336,12 +340,13 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   }
 
   private RouterCallback routesReqCallback = new RouterCallback() {
+
     @Override
     public void onRoutesReady(
-        @NotNull List<? extends DirectionsRoute> routes, @NonNull RouterOrigin routerOrigin
+          @NotNull NavigationRoute routes, @NonNull RouterOrigin routerOrigin
     ) {
       mapboxNavigation.setRoutes(routes);
-      if (!routes.isEmpty()) {
+      if (!routes.routes().isEmpty()) {
         routeLoading.setVisibility(View.INVISIBLE);
         startNavigation.setVisibility(View.VISIBLE);
       }
@@ -361,8 +366,12 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   };
 
   private RoutesObserver routesObserver = new RoutesObserver() {
+
     @Override
-    public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
+    public void onRoutesChanged(NavigationRoute navigationRoute) {
+      List<DirectionsRoute> routes = navigationRoute != null
+              ? navigationRoute.routes()
+              : Collections.emptyList();
       List<RouteLine> routeLines = new ArrayList<>();
       for (DirectionsRoute route : routes) {
         routeLines.add(new RouteLine(route, null));
@@ -492,7 +501,8 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
               List<DirectionsRoute> updatedRoutes = mapboxRouteLineApi.getRoutes();
               updatedRoutes.remove(selectedRoute);
               updatedRoutes.add(0, selectedRoute);
-              mapboxNavigation.setRoutes(updatedRoutes);
+              throw new NotImplementedError("Removing set routes and broke everything");
+//              mapboxNavigation.setRoutes(updatedRoutes);
             }
           });
         }

@@ -1,12 +1,14 @@
 package com.mapbox.navigation.core.directions.session
 
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.RouterCallback
-import com.mapbox.navigation.base.route.RouterFailure
-import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -20,7 +22,6 @@ internal class MapboxDirectionsSession(
 ) : DirectionsSession {
 
     private val routesObservers = CopyOnWriteArraySet<RoutesObserver>()
-    private var primaryRouteOptions: RouteOptions? = null
 
     /**
      * Routes that were fetched from [Router] or set manually.
@@ -28,28 +29,13 @@ internal class MapboxDirectionsSession(
      *
      * @see [registerRoutesObserver]
      */
-    override var routes: List<DirectionsRoute> = emptyList()
+    override var navigationRoute: NavigationRoute? = null
         private set
 
-    override var initialLegIndex = 0
-        private set
-
-    override fun setRoutes(routes: List<DirectionsRoute>, initialLegIndex: Int) {
-        this.initialLegIndex = initialLegIndex
-        if (this.routes.isEmpty() && routes.isEmpty()) {
-            return
-        }
-        this.routes = routes
-        if (routes.isNotEmpty()) {
-            primaryRouteOptions = routes[0].routeOptions()
-        }
-        routesObservers.forEach { it.onRoutesChanged(routes) }
+    override fun setRoutes(navigationRoute: NavigationRoute?) {
+        this.navigationRoute = navigationRoute
+        routesObservers.forEach { it.onRoutesChanged(navigationRoute) }
     }
-
-    /**
-     * Provide route options for current primary route.
-     */
-    override fun getPrimaryRouteOptions(): RouteOptions? = primaryRouteOptions
 
     /**
      * Interrupts a route-fetching request if one is in progress.
@@ -93,25 +79,20 @@ internal class MapboxDirectionsSession(
         routeOptions: RouteOptions,
         routerCallback: RouterCallback
     ): Long {
-        return router.getRoute(
-            routeOptions,
-            object : RouterCallback {
-                override fun onRoutesReady(
-                    routes: List<DirectionsRoute>,
-                    routerOrigin: RouterOrigin
-                ) {
-                    routerCallback.onRoutesReady(routes, routerOrigin)
-                }
+        return router.getRoute(routeOptions, routerCallback)
+    }
 
-                override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
-                    routerCallback.onFailure(reasons, routeOptions)
-                }
-
-                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
-                    routerCallback.onCanceled(routeOptions, routerOrigin)
-                }
-            }
-        )
+    override fun requestRoutes(
+        routeOptions: RouteOptions,
+        routeAlternativesOptions: RouteAlternativesOptions,
+        routerCallback: RouterCallback
+    ): Long {
+        check(routeOptions.alternatives() == true) {
+            "Enable the alternatives when using `RouteAlternativesOptions`"
+        }
+        val controller = MapboxNativeNavigatorImpl.createRouteAlternativesController()
+        controller.refreshImmediately()
+        return router.getRoute(routeOptions, routerCallback)
     }
 
     override fun cancelRouteRequest(requestId: Long) {
@@ -123,9 +104,7 @@ internal class MapboxDirectionsSession(
      */
     override fun registerRoutesObserver(routesObserver: RoutesObserver) {
         routesObservers.add(routesObserver)
-        if (routes.isNotEmpty()) {
-            routesObserver.onRoutesChanged(routes)
-        }
+        routesObserver.onRoutesChanged(navigationRoute)
     }
 
     /**

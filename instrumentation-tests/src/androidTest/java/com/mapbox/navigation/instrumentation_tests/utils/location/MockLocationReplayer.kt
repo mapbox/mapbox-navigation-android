@@ -10,6 +10,7 @@ import com.mapbox.navigation.core.replay.history.ReplayEventLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.replay.route.ReplayRouteOptions
 import com.mapbox.navigation.testing.ui.MockLocationUpdatesRule
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
@@ -32,7 +33,7 @@ class MockLocationReplayerRule(mockLocationUpdatesRule: MockLocationUpdatesRule)
             }
         }
     }
-    private val mapper = ReplayRouteMapper()
+    val mapper = ReplayRouteMapper()
     private var mapboxReplayer: MapboxReplayer? = null
 
     override fun starting(description: Description?) {

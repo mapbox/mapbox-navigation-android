@@ -85,6 +85,6 @@ class RouteAlternativesOptions private constructor(
     }
 
     private companion object {
-        private val MINIMUM_REQUEST_ALTERNATIVES_INTERVAL = TimeUnit.SECONDS.toMillis(10)
+        private const val MINIMUM_REQUEST_ALTERNATIVES_INTERVAL = 30_000
     }
 }

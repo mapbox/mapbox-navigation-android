@@ -1,9 +1,11 @@
 package com.mapbox.navigation.route.internal.hybrid
 
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
@@ -51,7 +53,7 @@ internal sealed class HybridRouterHandler(
         private inner class PrimaryCallback(
             private val clientCallback: RouterCallback
         ) : RouterCallback {
-            override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
+            override fun onRoutesReady(routes: NavigationRoute, routerOrigin: RouterOrigin) {
                 clientCallback.onRoutesReady(routes, routerOrigin)
             }
 
@@ -82,7 +84,7 @@ internal sealed class HybridRouterHandler(
             private val clientCallback: RouterCallback,
             private val primaryFailureReasons: List<RouterFailure>
         ) : RouterCallback {
-            override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
+            override fun onRoutesReady(routes: NavigationRoute, routerOrigin: RouterOrigin) {
                 clientCallback.onRoutesReady(routes, routerOrigin)
             }
 

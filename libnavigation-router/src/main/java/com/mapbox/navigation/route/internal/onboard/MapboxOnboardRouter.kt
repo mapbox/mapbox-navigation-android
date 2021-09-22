@@ -8,6 +8,7 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
@@ -74,7 +75,7 @@ class MapboxOnboardRouter(
 
         val requestId = requests.generateNextRequestId()
         val internalCallback = object : RouterCallback {
-            override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
+            override fun onRoutesReady(routes: NavigationRoute, routerOrigin: RouterOrigin) {
                 requests.remove(requestId)
                 callback.onRoutesReady(routes, routerOrigin)
             }
@@ -158,7 +159,7 @@ class MapboxOnboardRouter(
                     val routes = directions.routes().map {
                         it.toBuilder().routeOptions(routeOptions).build()
                     }
-                    callback.onRoutesReady(routes, RouterOrigin.Onboard)
+                    callback.onRoutesReady(NavigationRoute(directions, routes), RouterOrigin.Onboard)
                 } else {
                     val error = routerResult.error!!
                     callback.onFailure(

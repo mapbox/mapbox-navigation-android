@@ -1,6 +1,8 @@
 package com.mapbox.navigation.core.reroute
 
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
@@ -56,7 +58,7 @@ interface RerouteController {
          * Called whenever new route(s) has been fetched.
          * @see [MapboxNavigation.setRoutes]
          */
-        fun onNewRoutes(routes: List<DirectionsRoute>)
+        fun onNewRoutes(routes: NavigationRoute)
     }
 
     /**

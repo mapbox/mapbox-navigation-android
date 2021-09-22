@@ -11,6 +11,7 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -130,7 +131,7 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
                     .coordinatesList(mockRoute.routeWaypoints).build(),
                 object : RouterCallback {
                     override fun onRoutesReady(
-                        routes: List<DirectionsRoute>,
+                        routes: NavigationRoute,
                         routerOrigin: RouterOrigin
                     ) {
                         mapboxNavigation.setRoutes(routes)

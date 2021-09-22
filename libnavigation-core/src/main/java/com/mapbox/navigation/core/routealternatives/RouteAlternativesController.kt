@@ -1,138 +1,94 @@
 package com.mapbox.navigation.core.routealternatives
 
+import android.util.Log
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
-import com.mapbox.navigation.base.route.RouterCallback
-import com.mapbox.navigation.base.route.RouterFailure
-import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.directions.session.DirectionsSession
-import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
-import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
-import com.mapbox.navigation.utils.internal.LoggerProvider.logger
-import com.mapbox.navigation.utils.internal.MapboxTimer
-import com.mapbox.navigation.utils.internal.ThreadController
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.launch
+import com.mapbox.navigator.RoutingMode
+import com.mapbox.navigator.RoutingProfile
+import okhttp3.internal.toImmutableList
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
 
-internal class RouteAlternativesController(
+internal class RouteAlternativesController constructor(
     private val options: RouteAlternativesOptions,
     private val navigator: MapboxNativeNavigator,
     private val directionsSession: DirectionsSession,
-    private val tripSession: TripSession,
-    private val routeOptionsUpdater: RouteOptionsUpdater
+    private val tripSession: TripSession
 ) {
-    private val jobControl = ThreadController.getMainScopeAndRootJob()
+    private val nativeRouteAlternativesController = navigator.createRouteAlternativesController()
+        .apply {
+            setRouteProfile(
+                RoutingProfile(
+                    RoutingMode.DRIVING_TRAFFIC,
+                    "What is this account"
+                )
+            )
+            setRouteAlternativesOptions(
+                com.mapbox.navigator.RouteAlternativesOptions(
+                    options.intervalMillis * 0.001,
+                    minTimeBeforeManeuverSeconds,
+                    lookAheadSeconds)
+            )
+            enableEmptyAlternativesRefresh(true)
+        }
 
-    private val mapboxTimer = MapboxTimer().apply {
-        restartAfterMillis = options.intervalMillis
-    }
+    private var alternatives: List<RouteAlternative> = emptyList()
     private val observers = CopyOnWriteArraySet<RouteAlternativesObserver>()
-    private var currentRequestId: Long? = null
-
-    fun triggerAlternativeRequest() {
-        interrupt()
-        requestRouteAlternatives()
-    }
 
     fun register(routeAlternativesObserver: RouteAlternativesObserver) {
-        val needsToStartTimer = observers.isEmpty()
+        val isStopped = observers.isEmpty()
         observers.add(routeAlternativesObserver)
-        if (needsToStartTimer) {
-            restartTimer()
+        if (isStopped) {
+            nativeRouteAlternativesController.addObserver(nativeObserver)
+            nativeRouteAlternativesController.start()
         }
     }
 
     fun unregister(routeAlternativesObserver: RouteAlternativesObserver) {
         observers.remove(routeAlternativesObserver)
         if (observers.isEmpty()) {
-            stop()
+            nativeRouteAlternativesController.stop()
+            nativeRouteAlternativesController.removeObserver(nativeObserver)
         }
+    }
+
+    fun triggerAlternativeRequest() {
+        nativeRouteAlternativesController.refreshImmediately()
     }
 
     fun unregisterAll() {
+        nativeRouteAlternativesController.removeAllObservers()
         observers.clear()
-        stop()
+        nativeRouteAlternativesController.stop()
     }
 
-    private fun stop() {
-        mapboxTimer.stopJobs()
-        jobControl.job.cancelChildren()
-        currentRequestId?.let { directionsSession.cancelRouteRequest(it) }
-    }
-
-    private fun requestRouteAlternatives() {
-        if (directionsSession.routes.isEmpty() ||
-            tripSession.getState() != TripSessionState.STARTED
-        ) {
-            return
-        }
-
-        val routeOptionsResult = routeOptionsUpdater.update(
-            directionsSession.getPrimaryRouteOptions(),
-            tripSession.getRouteProgress(),
-            tripSession.locationMatcherResult,
-        )
-
-        when (routeOptionsResult) {
-            is RouteOptionsUpdater.RouteOptionsResult.Success -> {
-                currentRequestId?.let { directionsSession.cancelRouteRequest(it) }
-                currentRequestId = directionsSession.requestRoutes(
-                    routeOptionsResult.routeOptions,
-                    routesRequestCallback
-                )
-            }
-            is RouteOptionsUpdater.RouteOptionsResult.Error -> {
-                logger.e(
-                    msg = Message("Route alternatives options are not available"),
-                    tr = routeOptionsResult.error
-                )
-            }
-        }
-    }
-
-    fun interrupt() {
-        currentRequestId?.let { directionsSession.cancelRouteRequest(it) }
-        if (observers.isNotEmpty()) {
-            restartTimer()
-        }
-    }
-
-    private fun restartTimer() {
-        mapboxTimer.stopJobs()
-        mapboxTimer.startTimer {
-            requestRouteAlternatives()
-        }
-    }
-
-    private val routesRequestCallback = object : RouterCallback {
-        override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
+    private val nativeObserver = object : com.mapbox.navigator.RouteAlternativesObserver() {
+        override fun onRouteAlternativesChanged(
+            routeAlternatives: List<com.mapbox.navigator.RouteAlternative>
+        ): List<Int> {
+            Log.i("kyle_debug", "nativeObserver onRouteAlternativesChanged ${routeAlternatives.size}")
             val routeProgress = tripSession.getRouteProgress()
-                ?: return
-            jobControl.scope.launch {
-                if (currentRequestId == null ||
-                    tripSession.getState() == TripSessionState.STARTED
-                ) {
-                    val alternatives = routes.filter { navigator.isDifferentRoute(it) }
-                    observers.forEach {
-                        it.onRouteAlternatives(routeProgress, alternatives, routerOrigin)
-                    }
-                }
+            val alternatives = RouteAlternativeMapper.from(routeAlternatives)
+            this@RouteAlternativesController.alternatives = alternatives
+            val navigationRoute = directionsSession.navigationRoute
+            val activeRoutes = mutableListOf<DirectionsRoute>()
+            routeProgress?.route?.let { activeRoutes.add(it) }
+            alternatives.forEach { routeAlternative ->
+                activeRoutes.add(routeAlternative.directionsRoute)
             }
+            directionsSession.setRoutes(navigationRoute?.copy(activeRoutes = activeRoutes))
+            observers.forEach {
+                it.onRouteAlternatives(routeProgress, alternatives)
+            }
+            return emptyList()
         }
+    }
 
-        override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
-            logger.e(
-                msg = Message("Route alternatives request failed")
-            )
-        }
-
-        override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
-            logger.w(msg = Message("Route alternatives request canceled"))
-        }
+    private companion object {
+        private const val minTimeBeforeManeuverSeconds = 1.0
+        private const val lookAheadSeconds = 1.0
     }
 }

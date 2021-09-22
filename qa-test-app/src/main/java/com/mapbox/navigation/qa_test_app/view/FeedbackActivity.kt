@@ -4,12 +4,14 @@ import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.location.Location
 import android.os.Bundle
+import android.text.Layout
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -25,6 +27,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -51,7 +54,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@ExperimentalPreviewMapboxNavigationAPI
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class FeedbackActivity : AppCompatActivity() {
 
     private val binding: FeedbackActivityBinding by lazy {
@@ -100,7 +103,7 @@ class FeedbackActivity : AppCompatActivity() {
     }
 
     private val routesObserver = RoutesObserver { routes ->
-        val routelines = routes.map { RouteLine(it, null) }
+        val routelines = routes?.routes()?.map { RouteLine(it, null) } ?: emptyList()
         CoroutineScope(Dispatchers.Main).launch {
             routeLineApi.setRoutes(routelines).apply {
                 routeLineView.renderRouteDrawData(
@@ -267,7 +270,7 @@ class FeedbackActivity : AppCompatActivity() {
                 .build(),
             object : RouterCallback {
                 override fun onRoutesReady(
-                    routes: List<DirectionsRoute>,
+                    routes: NavigationRoute,
                     routerOrigin: RouterOrigin
                 ) {
                     mapboxNavigation.setRoutes(routes)

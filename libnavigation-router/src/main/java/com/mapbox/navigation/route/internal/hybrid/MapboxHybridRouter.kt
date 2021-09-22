@@ -3,9 +3,11 @@ package com.mapbox.navigation.route.internal.hybrid
 import android.content.Context
 import com.mapbox.annotation.module.MapboxModule
 import com.mapbox.annotation.module.MapboxModuleType
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
@@ -92,10 +94,7 @@ class MapboxHybridRouter(
         routerHandler.getRoute(
             routeOptions,
             object : RouterCallback {
-                override fun onRoutesReady(
-                    routes: List<DirectionsRoute>,
-                    routerOrigin: RouterOrigin
-                ) {
+                override fun onRoutesReady(routes: NavigationRoute, routerOrigin: RouterOrigin) {
                     directionRequests.remove(id)
                     callback.onRoutesReady(routes, routerOrigin)
                 }

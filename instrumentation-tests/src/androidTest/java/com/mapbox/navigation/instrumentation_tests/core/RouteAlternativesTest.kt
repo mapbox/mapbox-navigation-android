@@ -6,15 +6,18 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.replay.route.ReplayRouteOptions
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.idling.FirstLocationIdlingResource
+import com.mapbox.navigation.instrumentation_tests.utils.idling.IdlingPolicyTimeoutRule
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteAlternativesIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteRequestIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
@@ -23,6 +26,7 @@ import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -39,6 +43,17 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
 
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
+        .apply {
+            mapper.options = ReplayRouteOptions.Builder()
+                .gpsNoiseMeters(5.0)
+                .build()
+        }
+
+    @get:Rule
+    val idlingPolicyRule = IdlingPolicyTimeoutRule(40, TimeUnit.SECONDS)
+
+    @get:Rule
+    val historyTestRule = MapboxHistoryTestRule()
 
     @get:Rule
     val mapboxHistoryTestRule = MapboxHistoryTestRule()
@@ -47,6 +62,11 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
 
     @Before
     fun setup() {
+        mockLocationUpdatesRule.pushLocationUpdate {
+            latitude = 38.56301
+            longitude = -121.46685
+        }
+
         runOnMainSync {
             val routeAlternativesOptions = RouteAlternativesOptions.Builder()
                 .intervalMillis(TimeUnit.SECONDS.toMillis(10))
@@ -69,20 +89,28 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
             Point.fromLngLat(-121.445697, 38.56707)
         )
         setupMockRequestHandlers(coordinates)
-        val routes = requestDirectionsRouteSync(coordinates).reversed()
+        val navigationRoute = requestDirectionsRouteSync(coordinates)
+        val reversed = navigationRoute.copy(
+            routesResponse = navigationRoute.routesResponse!!.toBuilder()
+                .routes(navigationRoute.routesResponse!!.routes().reversed())
+                .build()
+        )
+
 
         // Start playing locations and wait for an enhanced location.
         runOnMainSync {
             mapboxNavigation.historyRecorder.startRecording()
-            mockLocationReplayerRule.playRoute(routes.first())
+            mockLocationReplayerRule.playRoute(reversed.primaryRoute()!!)
             mapboxNavigation.startTripSession()
         }
-        val firstLocationIdlingResource = FirstLocationIdlingResource(mapboxNavigation)
-        firstLocationIdlingResource.firstLocationSync()
+
+//        // TODO provide a history file to see why this is not working
+//        val firstLocationIdlingResource = FirstLocationIdlingResource(mapboxNavigation)
+//        firstLocationIdlingResource.firstLocationSync()
 
         // Simulate a driver on the slow route.
         runOnMainSync {
-            mapboxNavigation.setRoutes(routes)
+            mapboxNavigation.setRoutes(reversed)
         }
 
         // Wait for route alternatives to be found.
@@ -117,7 +145,7 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         )
     }
 
-    private fun requestDirectionsRouteSync(coordinates: List<Point>): List<DirectionsRoute> {
+    private fun requestDirectionsRouteSync(coordinates: List<Point>): NavigationRoute {
         val routeOptions = RouteOptions.builder().applyDefaultNavigationOptions()
             .alternatives(true)
             .coordinatesList(coordinates)

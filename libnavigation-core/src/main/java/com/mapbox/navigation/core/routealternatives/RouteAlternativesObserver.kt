@@ -1,8 +1,6 @@
 package com.mapbox.navigation.core.routealternatives
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
-import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 
 /**
@@ -18,10 +16,11 @@ interface RouteAlternativesObserver {
      *
      * @param routeProgress the current route's progress.
      * @param alternatives list of alternative routes, can be empty.
+     *
+     * @return list of indexes that should no longer be considered alternatives.
      */
     fun onRouteAlternatives(
-        routeProgress: RouteProgress,
-        alternatives: List<DirectionsRoute>,
-        routerOrigin: RouterOrigin
+        routeProgress: RouteProgress?,
+        alternatives: List<RouteAlternative>
     )
 }

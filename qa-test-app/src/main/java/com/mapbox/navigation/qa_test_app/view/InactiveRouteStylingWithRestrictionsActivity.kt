@@ -135,7 +135,8 @@ class InactiveRouteStylingWithRestrictionsActivity : AppCompatActivity() {
             setLocationProvider(navigationLocationProvider)
             enabled = true
         }
-        mapboxNavigation.setRoutes(listOf(getRoute()))
+        TODO("You need to update the test to have a server response")
+//        mapboxNavigation.setRoutes(listOf(getRoute()))
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
         mapboxReplayer.pushRealLocation(this, 0.0)
@@ -194,7 +195,7 @@ class InactiveRouteStylingWithRestrictionsActivity : AppCompatActivity() {
             mapboxNavigation.startTripSession()
             binding.startNavigation.visibility = View.GONE
             locationComponent.addOnIndicatorPositionChangedListener(onPositionChangedListener)
-            startSimulation(mapboxNavigation.getRoutes()[0])
+            startSimulation(mapboxNavigation.primaryRoute()!!)
         }
     }
 

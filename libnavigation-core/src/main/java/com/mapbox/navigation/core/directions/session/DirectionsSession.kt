@@ -2,6 +2,8 @@ package com.mapbox.navigation.core.directions.session
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.RouterCallback
@@ -14,16 +16,14 @@ internal interface DirectionsSession {
      *
      * @see [registerRoutesObserver]
      */
-    val routes: List<DirectionsRoute>
+    val navigationRoute: NavigationRoute?
 
-    val initialLegIndex: Int
-
-    fun setRoutes(routes: List<DirectionsRoute>, initialLegIndex: Int = 0)
+    fun setRoutes(navigationRoute: NavigationRoute?)
 
     /**
      * Provide route options for current primary route.
      */
-    fun getPrimaryRouteOptions(): RouteOptions?
+    fun getPrimaryRoute() = navigationRoute?.primaryRoute()
 
     /**
      * Fetch route based on [RouteOptions]
@@ -35,6 +35,20 @@ internal interface DirectionsSession {
      */
     fun requestRoutes(
         routeOptions: RouteOptions,
+        routerCallback: RouterCallback
+    ): Long
+
+    /**
+     * Fetch route based on [RouteOptions]
+     *
+     * @param routeOptions RouteOptions
+     * @param routerCallback Callback that gets notified with the results of the request
+     *
+     * @return requestID, see [cancelRouteRequest]
+     */
+    fun requestRoutes(
+        routeOptions: RouteOptions,
+        routeAlternativesOptions: RouteAlternativesOptions,
         routerCallback: RouterCallback
     ): Long
 

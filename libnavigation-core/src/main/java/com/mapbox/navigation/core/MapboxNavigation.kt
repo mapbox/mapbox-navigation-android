@@ -8,6 +8,7 @@ import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
 import android.hardware.SensorEvent
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.annotation.UiThread
 import com.mapbox.android.core.location.LocationEngine
@@ -27,6 +28,7 @@ import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.RouterCallback
@@ -208,6 +210,7 @@ class MapboxNavigation(
         Channel(Channel.CONFLATED)
     )
     private val internalRoutesObserver: RoutesObserver
+    private val internalStateObserver: TripSessionStateObserver
     private val internalOffRouteObserver: OffRouteObserver
     private val internalFallbackVersionsObserver: FallbackVersionsObserver
     private val routeAlternativesController: RouteAlternativesController
@@ -302,8 +305,6 @@ class MapboxNavigation(
         get() = navigator.experimental
 
     private var reachabilityObserverId: Long? = null
-
-    private var latestLegIndex: Int? = null
 
     /**
      * Describes whether this instance of `MapboxNavigation` has been destroyed by calling
@@ -411,8 +412,7 @@ class MapboxNavigation(
             navigationOptions.routeAlternativesOptions,
             navigator,
             directionsSession,
-            tripSession,
-            routeOptionsProvider
+            tripSession
         )
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
             navigationOptions.routeRefreshOptions,
@@ -431,9 +431,11 @@ class MapboxNavigation(
         rerouteController = defaultRerouteController
 
         internalRoutesObserver = createInternalRoutesObserver()
+        internalStateObserver = createInternalStateObserver()
         internalOffRouteObserver = createInternalOffRouteObserver()
         internalFallbackVersionsObserver = createInternalFallbackVersionsObserver()
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
+        tripSession.registerStateObserver(internalStateObserver)
         tripSession.registerFallbackVersionsObserver(internalFallbackVersionsObserver)
         directionsSession.registerRoutesObserver(internalRoutesObserver)
 
@@ -473,7 +475,6 @@ class MapboxNavigation(
                 withTripService = withForegroundService,
                 withReplayEnabled = false
             )
-            restoreTripSessionRoute()
             notificationChannelField?.let {
                 monitorNotificationActionButton(it.get(null) as ReceiveChannel<NotificationAction>)
             }
@@ -487,8 +488,7 @@ class MapboxNavigation(
      */
     fun stopTripSession() {
         runIfNotDestroyed {
-            latestLegIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex
-            tripSession.setRoute(route = null, legIndex = 0)
+            tripSession.setRoutes(null)
             tripSession.stop()
         }
     }
@@ -506,7 +506,6 @@ class MapboxNavigation(
                 withTripService = withForegroundService,
                 withReplayEnabled = true
             )
-            restoreTripSessionRoute()
         }
     }
 
@@ -610,13 +609,12 @@ class MapboxNavigation(
      * @see [requestRoutes]
      */
     @JvmOverloads
-    fun setRoutes(routes: List<DirectionsRoute>, initialLegIndex: Int = 0) {
-        if (routes.isNotEmpty()) {
-            billingController.onExternalRouteSet(routes.first())
+    fun setRoutes(navigationRoute: NavigationRoute) {
+        navigationRoute.primaryRoute()?.let { primaryRoute ->
+            billingController.onExternalRouteSet(primaryRoute)
         }
         rerouteController?.interrupt()
-        routeAlternativesController.interrupt()
-        directionsSession.setRoutes(routes, initialLegIndex)
+        directionsSession.setRoutes(navigationRoute)
     }
 
     /**
@@ -627,7 +625,7 @@ class MapboxNavigation(
      *
      * @return a list of [DirectionsRoute]s
      */
-    fun getRoutes(): List<DirectionsRoute> = directionsSession.routes
+    fun primaryRoute(): DirectionsRoute? = directionsSession.getPrimaryRoute()
 
     /**
      * Requests an alternative route using the original [RouteOptions] associated with
@@ -659,7 +657,7 @@ class MapboxNavigation(
         tripSession.unregisterAllFallbackVersionsObservers()
         routeAlternativesController.unregisterAll()
         routeRefreshController.stop()
-        directionsSession.setRoutes(emptyList())
+        directionsSession.setRoutes(null)
         resetTripSession()
         navigator.unregisterAllObservers()
         navigationVersionSwitchObservers.clear()
@@ -1005,25 +1003,6 @@ class MapboxNavigation(
         MapboxNavigationTelemetry.provideFeedbackMetadataWrapper()
 
     /**
-     * Start observing alternatives routes for a trip session via [RouteAlternativesObserver].
-     * Route alternatives are requested periodically based on [RouteAlternativesOptions].
-     *
-     * @param routeAlternativesObserver RouteAlternativesObserver
-     */
-    fun registerRouteAlternativesObserver(routeAlternativesObserver: RouteAlternativesObserver) {
-        routeAlternativesController.register(routeAlternativesObserver)
-    }
-
-    /**
-     * Stop observing the possibility of route alternatives.
-     *
-     * @param routeAlternativesObserver RouteAlternativesObserver
-     */
-    fun unregisterRouteAlternativesObserver(routeAlternativesObserver: RouteAlternativesObserver) {
-        routeAlternativesController.unregister(routeAlternativesObserver)
-    }
-
-    /**
      * Start observing navigation tiles version switch via [NavigationVersionSwitchObserver].
      * Navigation might switch to a fallback tiles version when target tiles are not available
      * and return back to the target version when tiles are loaded.
@@ -1071,20 +1050,24 @@ class MapboxNavigation(
         navigationSession.unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
     }
 
-    private fun restoreTripSessionRoute() {
-        val legIndex = latestLegIndex ?: directionsSession.initialLegIndex
-        tripSession.setRoute(directionsSession.routes.firstOrNull(), legIndex)
+    private fun createInternalStateObserver() = TripSessionStateObserver {
+        Log.i("kyle_debug", "TripSessionStateObserver updateTripSessionRoute ${it.name}")
+        updateTripSessionRoute()
     }
-
-    private fun createInternalRoutesObserver() = RoutesObserver { routes ->
-        latestLegIndex = null
-        if (tripSession.getState() == TripSessionState.STARTED) {
-            tripSession.setRoute(routes.firstOrNull(), directionsSession.initialLegIndex)
-        }
-        if (routes.isNotEmpty()) {
-            routeRefreshController.restart(routes.first())
+    private fun createInternalRoutesObserver() = RoutesObserver {
+        Log.i("kyle_debug", "RoutesObserver updateTripSessionRoute ${it?.primaryRoute()?.routeIndex()}")
+        updateTripSessionRoute()
+    }
+    private fun updateTripSessionRoute() {
+        if (getTripSessionState() == TripSessionState.STARTED) {
+            tripSession.setRoutes(directionsSession.navigationRoute)
         } else {
-            routeRefreshController.stop()
+            val primaryRoute = directionsSession.navigationRoute?.primaryRoute()
+            if (primaryRoute != null) {
+                routeRefreshController.restart(primaryRoute)
+            } else {
+                routeRefreshController.stop()
+            }
         }
     }
 
@@ -1146,12 +1129,7 @@ class MapboxNavigation(
                 navigationOptions.accessToken ?: "",
             )
             historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
-            directionsSession.routes.firstOrNull()?.let {
-                navigator.setRoute(
-                    it,
-                    tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0
-                )
-            }
+
         }
     }
 

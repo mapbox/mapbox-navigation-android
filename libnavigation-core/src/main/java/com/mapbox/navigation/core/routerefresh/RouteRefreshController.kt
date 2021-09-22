@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.RouteRefreshOptions
@@ -115,10 +116,21 @@ internal class RouteRefreshController(
                     logger.i(TAG, msg = Message(diff))
                 }
             }
-            val directionsSessionRoutes = directionsSession.routes.toMutableList()
-            if (directionsSessionRoutes.isNotEmpty()) {
-                directionsSessionRoutes[0] = directionsRoute
-                directionsSession.setRoutes(directionsSessionRoutes)
+
+            directionsSession.navigationRoute?.let { navigationRoute ->
+                navigationRoute.routesResponse?.let { routesResponse ->
+                    routesResponse.routes().toMutableList()
+                        .takeIf { it.isNotEmpty() }
+                        ?.let { routes ->
+                            routes[navigationRoute.routeIndex] = directionsRoute
+                            val refreshedResponse = routesResponse.toBuilder()
+                                .routes(routes)
+                                .build()
+                            val refreshedNavigationRoute =
+                                navigationRoute.copy(routesResponse = refreshedResponse)
+                            directionsSession.setRoutes(refreshedNavigationRoute)
+                        }
+                }
             }
             currentRequestId = null
         }

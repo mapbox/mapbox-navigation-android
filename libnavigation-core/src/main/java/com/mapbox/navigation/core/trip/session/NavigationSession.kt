@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.trip.session
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
@@ -71,8 +71,8 @@ internal class NavigationSession : RoutesObserver, TripSessionStateObserver {
         stateObservers.clear()
     }
 
-    override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-        hasRoutes = routes.isNotEmpty()
+    override fun onRoutesChanged(routes: NavigationRoute?) {
+        hasRoutes = routes?.primaryRoute() != null
     }
 
     override fun onSessionStateChanged(tripSessionState: TripSessionState) {

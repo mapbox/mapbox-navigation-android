@@ -5,6 +5,7 @@ import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.IdlingResource
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -26,7 +27,7 @@ class RouteRequestIdlingResource(
     /**
      * Getter helper, stores the results from [requestRoutesSync]
      */
-    var directionsRoutes: List<DirectionsRoute>? = null
+    var navigationRoute: NavigationRoute? = null
         private set
 
     private lateinit var callback: IdlingResource.ResourceCallback
@@ -37,19 +38,19 @@ class RouteRequestIdlingResource(
      *
      * If the request fails, the test will fail.
      */
-    fun requestRoutesSync(): List<DirectionsRoute> {
+    fun requestRoutesSync(): NavigationRoute {
         IdlingRegistry.getInstance().register(idlingResource)
         mapboxNavigation.requestRoutes(routeOptions, routesRequestCallback)
         Espresso.onIdle()
         IdlingRegistry.getInstance().unregister(idlingResource)
-        return directionsRoutes!!
+        return navigationRoute!!
     }
 
     /** Used to communicate with the [IdlingRegistry] **/
     private val idlingResource = object : IdlingResource {
         override fun getName() = "RouteRequestIdlingResource"
 
-        override fun isIdleNow(): Boolean = directionsRoutes != null
+        override fun isIdleNow(): Boolean = navigationRoute != null
 
         override fun registerIdleTransitionCallback(
             resourceCallback: IdlingResource.ResourceCallback
@@ -63,8 +64,8 @@ class RouteRequestIdlingResource(
 
     /** Used to communicate with [MapboxNavigation.requestRoutes] **/
     private val routesRequestCallback = object : RouterCallback {
-        override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
-            directionsRoutes = routes
+        override fun onRoutesReady(routes: NavigationRoute, routerOrigin: RouterOrigin) {
+            navigationRoute = routes
             callback.onTransitionToIdle()
         }
 

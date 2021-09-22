@@ -198,9 +198,9 @@ internal object MapboxNavigationTelemetry {
     private val isTelemetryOnPause: Boolean
         get() = telemetryState is NavTelemetryState.Paused
 
-    private val routesObserver = RoutesObserver { routes ->
-        log("onRoutesChanged. size = ${routes.size}")
-        routes.getOrNull(0)?.let {
+    private val routesObserver = RoutesObserver { routesResponse ->
+        log("onRoutesChanged. size = ${routesResponse?.routes()?.size}")
+        routesResponse?.routes()?.getOrNull(0)?.let {
             if (routeData.originalRoute != null) {
                 if (routeData.needHandleReroute) {
                     routeData.needHandleReroute = false

@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.route
 
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 
@@ -15,7 +16,7 @@ interface RouterCallback {
      * At least one route is always available in a successful response.
      * @param routerOrigin route origin
      */
-    fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin)
+    fun onRoutesReady(routes: NavigationRoute, routerOrigin: RouterOrigin)
 
     /**
      * Called whenever router fails.
