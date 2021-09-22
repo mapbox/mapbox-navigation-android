@@ -200,7 +200,6 @@ class MultiLegRouteExampleActivity : AppCompatActivity() {
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
-        viewBinding.mapView.onStart()
     }
 
     override fun onStop() {
@@ -209,18 +208,11 @@ class MultiLegRouteExampleActivity : AppCompatActivity() {
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
-        viewBinding.mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        viewBinding.mapView.onDestroy()
         mapboxNavigation.onDestroy()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        viewBinding.mapView.onLowMemory()
     }
 
     @SuppressLint("MissingPermission")

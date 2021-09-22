@@ -276,7 +276,6 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
       mapboxNavigation.registerRouteProgressObserver(routeProgressObserver);
       mapboxNavigation.registerRoutesObserver(routesObserver);
     }
-    mapView.onStart();
   }
 
   @Override
@@ -289,7 +288,6 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
       mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver);
       mapboxNavigation.unregisterRoutesObserver(routesObserver);
     }
-    mapView.onStop();
   }
 
   @Override
@@ -298,14 +296,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     if (predictiveCacheController != null) {
       predictiveCacheController.onDestroy();
     }
-    mapView.onDestroy();
     mapboxNavigation.onDestroy();
-  }
-
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    mapView.onLowMemory();
   }
 
   @Override

@@ -298,7 +298,6 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onStart() {
         super.onStart()
-        binding.mapView.onStart()
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.registerRoutesObserver(routesObserver)
             mapboxNavigation.registerLocationObserver(locationObserver)
@@ -317,18 +316,11 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
             mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
             mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver)
         }
-        binding.mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.mapView.onDestroy()
         mapboxNavigation.onDestroy()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        binding.mapView.onLowMemory()
     }
 
     override fun onMapLongClick(point: Point): Boolean {

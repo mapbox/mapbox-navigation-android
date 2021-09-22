@@ -444,7 +444,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        binding.mapView.onStart()
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerNavigationSessionStateObserver(navigationSessionStateObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
@@ -454,7 +453,6 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        binding.mapView.onStop()
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
@@ -464,15 +462,9 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.mapView.onDestroy()
         mapboxNavigation.onDestroy()
         speechAPI.cancel()
         voiceInstructionsPlayer.shutdown()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        binding.mapView.onLowMemory()
     }
 
     private fun findRoute(destination: Point) {
