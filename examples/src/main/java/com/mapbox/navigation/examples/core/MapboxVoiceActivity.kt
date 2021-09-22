@@ -30,6 +30,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
@@ -163,16 +164,13 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
     private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {}
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
+        override fun onNewRawLocation(rawLocation: Location) {}
+        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             navigationLocationProvider.changePosition(
-                enhancedLocation,
-                keyPoints,
+                locationMatcherResult.enhancedLocation,
+                locationMatcherResult.keyPoints,
             )
-            updateCamera(enhancedLocation)
+            updateCamera(locationMatcherResult.enhancedLocation)
         }
     }
 

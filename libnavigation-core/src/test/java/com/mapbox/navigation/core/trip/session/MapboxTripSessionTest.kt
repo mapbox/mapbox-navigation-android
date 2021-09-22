@@ -15,7 +15,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.internal.utils.isSameRoute
 import com.mapbox.navigation.core.internal.utils.isSameUuid
 import com.mapbox.navigation.core.navigator.RouteInitInfo
-import com.mapbox.navigation.core.navigator.getMapMatcherResult
+import com.mapbox.navigation.core.navigator.getLocationMatcherResult
 import com.mapbox.navigation.core.navigator.getRouteInitInfo
 import com.mapbox.navigation.core.navigator.getRouteProgressFrom
 import com.mapbox.navigation.core.navigator.getTripStatusFrom
@@ -117,7 +117,9 @@ class MapboxTripSessionTest {
 
     private val stateObserver: TripSessionStateObserver = mockk(relaxUnitFun = true)
 
-    private val mapMatcherResult: MapMatcherResult = mockk(relaxUnitFun = true)
+    private val locationMatcherResult: LocationMatcherResult = mockk(relaxUnitFun = true) {
+        every { enhancedLocation } returns location
+    }
     private val eHorizonSubscriptionManager: EHorizonSubscriptionManager = mockk(relaxed = true)
     private val navigatorObserverImplSlot = slot<NavigatorObserver>()
     private val navigatorRecreationObserverImplSlot = slot<NativeNavigatorRecreationObserver>()
@@ -149,7 +151,7 @@ class MapboxTripSessionTest {
         every { tripStatus.navigationStatus } returns navigationStatus
         every { tripStatus.route } returns route
 
-        every { tripStatus.getMapMatcherResult(any(), any()) } returns mapMatcherResult
+        every { tripStatus.getLocationMatcherResult(any(), any()) } returns locationMatcherResult
         every { routeProgress.bannerInstructions } returns null
         every { routeProgress.voiceInstructions } returns null
         every { routeProgress.currentLegProgress } returns mockk(relaxed = true)
@@ -269,7 +271,7 @@ class MapboxTripSessionTest {
 
         updateLocationAndJoin()
 
-        verify { observer.onRawLocationChanged(location) }
+        verify { observer.onNewRawLocation(location) }
         assertEquals(location, tripSession.getRawLocation())
 
         tripSession.stop()
@@ -282,7 +284,7 @@ class MapboxTripSessionTest {
         tripSession.registerLocationObserver(observer)
         locationUpdateAnswers.invoke(mockLocation())
         updateLocationAndJoin()
-        verify { observer.onRawLocationChanged(location) }
+        verify { observer.onNewRawLocation(location) }
         assertEquals(location, tripSession.getRawLocation())
 
         tripSession.stop()
@@ -296,7 +298,7 @@ class MapboxTripSessionTest {
 
         tripSession.registerLocationObserver(observer)
 
-        verify { observer.onRawLocationChanged(location) }
+        verify { observer.onNewRawLocation(location) }
 
         tripSession.stop()
     }
@@ -308,7 +310,10 @@ class MapboxTripSessionTest {
         tripSession.registerLocationObserver(observer)
         tripSession.unregisterLocationObserver(observer)
         updateLocationAndJoin()
-        verify(exactly = 0) { observer.onRawLocationChanged(any()) }
+        verify(exactly = 0) {
+            observer.onNewRawLocation(any())
+            observer.onNewLocationMatcherResult(any())
+        }
 
         tripSession.stop()
     }
@@ -556,45 +561,6 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun enhancedLocationObserverSuccess() = coroutineRule.runBlockingTest {
-        tripSession = buildTripSession()
-        tripSession.start(true)
-        val observer: LocationObserver = mockk(relaxUnitFun = true)
-        tripSession.registerLocationObserver(observer)
-        updateLocationAndJoin()
-
-        verify { observer.onEnhancedLocationChanged(location, keyPoints) }
-        assertEquals(location, tripSession.getEnhancedLocation())
-        tripSession.stop()
-    }
-
-    @Test
-    fun enhancedLocationObserverImmediate() = coroutineRule.runBlockingTest {
-        tripSession = buildTripSession()
-        tripSession.start(true)
-        updateLocationAndJoin()
-        val observer: LocationObserver = mockk(relaxUnitFun = true)
-        tripSession.registerLocationObserver(observer)
-
-        verify(exactly = 1) { observer.onEnhancedLocationChanged(location, emptyList()) }
-        assertEquals(location, tripSession.getEnhancedLocation())
-        tripSession.stop()
-    }
-
-    @Test
-    fun enhancedLocationObserverUnregister() = coroutineRule.runBlockingTest {
-        tripSession = buildTripSession()
-        tripSession.start(true)
-        val observer: LocationObserver = mockk(relaxUnitFun = true)
-        tripSession.registerLocationObserver(observer)
-        tripSession.unregisterLocationObserver(observer)
-        updateLocationAndJoin()
-        verify(exactly = 0) { observer.onEnhancedLocationChanged(location, keyPoints) }
-
-        tripSession.stop()
-    }
-
-    @Test
     fun getTripService() {
         assertEquals(tripService, tripSession.tripService)
     }
@@ -704,7 +670,10 @@ class MapboxTripSessionTest {
 
         updateLocationAndJoin()
 
-        verify(exactly = 0) { observer.onRawLocationChanged(location) }
+        verify(exactly = 0) {
+            observer.onNewRawLocation(any())
+            observer.onNewLocationMatcherResult(any())
+        }
         assertEquals(location, tripSession.getRawLocation())
 
         tripSession.stop()
@@ -928,39 +897,41 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun `map matcher result success`() = coroutineRule.runBlockingTest {
+    fun `location matcher result success`() = coroutineRule.runBlockingTest {
         tripSession = buildTripSession()
         tripSession.start(true)
-        val observer: MapMatcherResultObserver = mockk(relaxUnitFun = true)
-        tripSession.registerMapMatcherResultObserver(observer)
+        val observer: LocationObserver = mockk(relaxUnitFun = true)
+        tripSession.registerLocationObserver(observer)
         updateLocationAndJoin()
 
-        verify(exactly = 1) { observer.onNewMapMatcherResult(mapMatcherResult) }
+        verify(exactly = 1) { observer.onNewLocationMatcherResult(locationMatcherResult) }
+        assertEquals(location, tripSession.locationMatcherResult?.enhancedLocation)
         tripSession.stop()
     }
 
     @Test
-    fun `map matcher result immediate`() = coroutineRule.runBlockingTest {
+    fun `location matcher result immediate`() = coroutineRule.runBlockingTest {
         tripSession = buildTripSession()
         tripSession.start(true)
         updateLocationAndJoin()
-        val observer: MapMatcherResultObserver = mockk(relaxUnitFun = true)
-        tripSession.registerMapMatcherResultObserver(observer)
+        val observer: LocationObserver = mockk(relaxUnitFun = true)
+        tripSession.registerLocationObserver(observer)
 
-        verify(exactly = 1) { observer.onNewMapMatcherResult(mapMatcherResult) }
+        verify(exactly = 1) { observer.onNewLocationMatcherResult(locationMatcherResult) }
+        assertEquals(location, tripSession.locationMatcherResult?.enhancedLocation)
         tripSession.stop()
     }
 
     @Test
-    fun `map matcher result cleared on reset`() = coroutineRule.runBlockingTest {
+    fun `location matcher result cleared on reset`() = coroutineRule.runBlockingTest {
         tripSession = buildTripSession()
         tripSession.start(true)
         updateLocationAndJoin()
         tripSession.stop()
-        val observer: MapMatcherResultObserver = mockk(relaxUnitFun = true)
-        tripSession.registerMapMatcherResultObserver(observer)
+        val observer: LocationObserver = mockk(relaxUnitFun = true)
+        tripSession.registerLocationObserver(observer)
 
-        verify(exactly = 0) { observer.onNewMapMatcherResult(any()) }
+        verify(exactly = 0) { observer.onNewLocationMatcherResult(any()) }
     }
 
     @Test
@@ -1163,7 +1134,7 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun `enhancedLocation, mapMatcherResult are updating while setting a route, routeProgress, bannerInstructions and offRoute state are skipped`() = runBlockingTest {
+    fun `enhancedLocation, locationMatcherResult are updating while setting a route, routeProgress, bannerInstructions and offRoute state are skipped`() = runBlockingTest {
         coEvery { navigator.setRoute(any(), any()) } coAnswers {
             delay(100)
             null
@@ -1171,12 +1142,10 @@ class MapboxTripSessionTest {
 
         val routeProgressObserver: RouteProgressObserver = mockk(relaxUnitFun = true)
         val locationObserver: LocationObserver = mockk(relaxUnitFun = true)
-        val mapMatcherResultObserver: MapMatcherResultObserver = mockk(relaxUnitFun = true)
         val offRouteObserver: OffRouteObserver = mockk(relaxUnitFun = true)
         val bannerInstructionsObserver: BannerInstructionsObserver = mockk(relaxUnitFun = true)
         every { routeProgressObserver.onRouteProgressChanged(any()) } just Runs
-        every { locationObserver.onEnhancedLocationChanged(any(), any()) } just Runs
-        every { mapMatcherResultObserver.onNewMapMatcherResult(any()) } just Runs
+        every { locationObserver.onNewLocationMatcherResult(any()) } just Runs
         every { offRouteObserver.onOffRouteStateChanged(any()) } just Runs
         every { bannerInstructionsObserver.onNewBannerInstructions(any()) } just Runs
 
@@ -1190,7 +1159,6 @@ class MapboxTripSessionTest {
         tripSession = buildTripSession()
         tripSession.registerRouteProgressObserver(routeProgressObserver)
         tripSession.registerLocationObserver(locationObserver)
-        tripSession.registerMapMatcherResultObserver(mapMatcherResultObserver)
         tripSession.registerOffRouteObserver(offRouteObserver)
         tripSession.registerBannerInstructionsObserver(bannerInstructionsObserver)
         tripSession.start(true)
@@ -1210,9 +1178,8 @@ class MapboxTripSessionTest {
         // third status update
         navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
 
-        // locationObserver and mapMatcherResultObserver are notified on each status update
-        verify(exactly = 3) { locationObserver.onEnhancedLocationChanged(any(), any()) }
-        verify(exactly = 3) { mapMatcherResultObserver.onNewMapMatcherResult(any()) }
+        // locationObserver is notified on each status update
+        verify(exactly = 3) { locationObserver.onNewLocationMatcherResult(any()) }
 
         // routeProgressObserver and bannerInstructionsObserver are notified when setRoute is finished
         verify(exactly = 1) { routeProgressObserver.onRouteProgressChanged(any()) }

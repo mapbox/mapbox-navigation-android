@@ -35,8 +35,8 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
-import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityStyleBinding
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
@@ -133,16 +133,13 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
     private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {}
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
+        override fun onNewRawLocation(rawLocation: Location) {}
+        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             navigationLocationProvider.changePosition(
-                enhancedLocation,
-                keyPoints,
+                locationMatcherResult.enhancedLocation,
+                locationMatcherResult.keyPoints,
             )
-            updateCamera(enhancedLocation)
+            updateCamera(locationMatcherResult.enhancedLocation)
         }
     }
 
@@ -185,9 +182,14 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
         binding.maneuverView.renderManeuvers(maneuvers)
     }
 
-    private val mapMatcherObserver = MapMatcherResultObserver { mapMatcherResult ->
-        val value = speedLimitApi.updateSpeedLimit(mapMatcherResult.speedLimit)
-        binding.speedLimitView.render(value)
+    private val locationMatcherObserver = object : LocationObserver {
+
+        override fun onNewRawLocation(rawLocation: Location) {}
+
+        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+            val value = speedLimitApi.updateSpeedLimit(locationMatcherResult.speedLimit)
+            binding.speedLimitView.render(value)
+        }
     }
 
     private fun init() {
@@ -293,7 +295,7 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.registerRoutesObserver(routesObserver)
             mapboxNavigation.registerLocationObserver(locationObserver)
-            mapboxNavigation.registerMapMatcherResultObserver(mapMatcherObserver)
+            mapboxNavigation.registerLocationObserver(locationMatcherObserver)
             mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
             mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
         }
@@ -304,7 +306,7 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.unregisterRoutesObserver(routesObserver)
             mapboxNavigation.unregisterLocationObserver(locationObserver)
-            mapboxNavigation.unregisterMapMatcherResultObserver(mapMatcherObserver)
+            mapboxNavigation.unregisterLocationObserver(locationMatcherObserver)
             mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
             mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         }

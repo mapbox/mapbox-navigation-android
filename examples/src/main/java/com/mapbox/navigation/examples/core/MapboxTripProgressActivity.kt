@@ -25,13 +25,13 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityTripprogressBinding
@@ -135,50 +135,41 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
-    private val routeProgressObserver = object : RouteProgressObserver {
-        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            // TripProgress: The trip progress component is driven by route progress updates.
-            // Passing the route progress to the MapboxTripProgressApi generates the data
-            // for updating the view. The result must be rendered by the MapboxTripProgressView.
-            tripProgressApiApi.getTripProgress(routeProgress).let { update ->
-                binding.tripProgressView.render(update)
-            }
+    private val routeProgressObserver = RouteProgressObserver { routeProgress ->
+        // TripProgress: The trip progress component is driven by route progress updates.
+        // Passing the route progress to the MapboxTripProgressApi generates the data
+        // for updating the view. The result must be rendered by the MapboxTripProgressView.
+        tripProgressApiApi.getTripProgress(routeProgress).let { update ->
+            binding.tripProgressView.render(update)
+        }
 
-            routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
-                routeArrowView.renderManeuverUpdate(mapboxMap.getStyle()!!, this)
-            }
+        routeArrowApi.addUpcomingManeuverArrow(routeProgress).apply {
+            routeArrowView.renderManeuverUpdate(mapboxMap.getStyle()!!, this)
         }
     }
 
     private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {}
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
+        override fun onNewRawLocation(rawLocation: Location) {}
+        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             navigationLocationProvider.changePosition(
-                enhancedLocation,
-                keyPoints,
+                locationMatcherResult.enhancedLocation,
+                locationMatcherResult.keyPoints,
             )
-            updateCamera(enhancedLocation)
+            updateCamera(locationMatcherResult.enhancedLocation)
         }
     }
 
-    private val routesObserver = object : RoutesObserver {
-        override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            if (routes.isNotEmpty()) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    routeLineApi.setRoutes(
-                        listOf(RouteLine(routes[0], null))
-                    ).apply {
-                        routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
-                    }
+    private val routesObserver = RoutesObserver { routes ->
+        if (routes.isNotEmpty()) {
+            CoroutineScope(Dispatchers.Main).launch {
+                routeLineApi.setRoutes(listOf(RouteLine(routes[0], null))).apply {
+                    routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
                 }
-                startSimulation(routes[0])
-                binding.tripProgressView.visibility = View.VISIBLE
-            } else {
-                binding.tripProgressView.visibility = View.GONE
             }
+            startSimulation(routes[0])
+            binding.tripProgressView.visibility = View.VISIBLE
+        } else {
+            binding.tripProgressView.visibility = View.GONE
         }
     }
 

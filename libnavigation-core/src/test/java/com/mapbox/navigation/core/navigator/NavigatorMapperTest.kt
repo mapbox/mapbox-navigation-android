@@ -2,8 +2,6 @@ package com.mapbox.navigation.core.navigator
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.geojson.Geometry
-import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory
@@ -11,7 +9,7 @@ import com.mapbox.navigation.base.internal.factory.RouteProgressFactory
 import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buildRouteStepProgressObject
 import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
-import com.mapbox.navigation.core.trip.session.MapMatcherResult
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigator.BannerInstruction
@@ -42,7 +40,6 @@ class NavigatorMapperTest {
     private val enhancedLocation: Location = mockk(relaxed = true)
     private val keyPoints: List<Location> = mockk(relaxed = true)
     private val route: DirectionsRoute = mockk(relaxed = true)
-    private val shape: Geometry = Point.fromLngLat(LONGITUDE, LATITUDE)
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     @Test
@@ -102,7 +99,7 @@ class NavigatorMapperTest {
     }
 
     @Test
-    fun `map matcher result sanity`() {
+    fun `location matcher result sanity`() {
         val tripStatus = TripStatus(
             route,
             mockk {
@@ -118,7 +115,7 @@ class NavigatorMapperTest {
                 }
             }
         )
-        val expected = MapMatcherResult(
+        val expected = LocationMatcherResult(
             enhancedLocation,
             keyPoints,
             isOffRoad = false,
@@ -132,13 +129,13 @@ class NavigatorMapperTest {
             roadEdgeMatchProbability = 1f
         )
 
-        val result = tripStatus.getMapMatcherResult(enhancedLocation, keyPoints)
+        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints)
 
         assertEquals(expected, result)
     }
 
     @Test
-    fun `map matcher result when close to being off road`() {
+    fun `location matcher result when close to being off road`() {
         val tripStatus = TripStatus(
             route,
             mockk {
@@ -154,7 +151,7 @@ class NavigatorMapperTest {
                 }
             }
         )
-        val expected = MapMatcherResult(
+        val expected = LocationMatcherResult(
             enhancedLocation,
             keyPoints,
             isOffRoad = false,
@@ -168,13 +165,13 @@ class NavigatorMapperTest {
             roadEdgeMatchProbability = 1f
         )
 
-        val result = tripStatus.getMapMatcherResult(enhancedLocation, keyPoints)
+        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints)
 
         assertEquals(expected, result)
     }
 
     @Test
-    fun `map matcher result when off road`() {
+    fun `location matcher result when off road`() {
         val tripStatus = TripStatus(
             route,
             mockk {
@@ -190,7 +187,7 @@ class NavigatorMapperTest {
                 }
             }
         )
-        val expected = MapMatcherResult(
+        val expected = LocationMatcherResult(
             enhancedLocation,
             keyPoints,
             isOffRoad = true,
@@ -204,13 +201,13 @@ class NavigatorMapperTest {
             roadEdgeMatchProbability = 1f
         )
 
-        val result = tripStatus.getMapMatcherResult(enhancedLocation, keyPoints)
+        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints)
 
         assertEquals(expected, result)
     }
 
     @Test
-    fun `map matcher result teleport`() {
+    fun `location matcher result teleport`() {
         val tripStatus = TripStatus(
             route,
             mockk {
@@ -226,7 +223,7 @@ class NavigatorMapperTest {
                 }
             }
         )
-        val expected = MapMatcherResult(
+        val expected = LocationMatcherResult(
             enhancedLocation,
             keyPoints,
             isOffRoad = false,
@@ -240,13 +237,13 @@ class NavigatorMapperTest {
             roadEdgeMatchProbability = 1f
         )
 
-        val result = tripStatus.getMapMatcherResult(enhancedLocation, keyPoints)
+        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints)
 
         assertEquals(expected, result)
     }
 
     @Test
-    fun `map matcher result no edge matches`() {
+    fun `location matcher result no edge matches`() {
         val tripStatus = TripStatus(
             route,
             mockk {
@@ -258,7 +255,7 @@ class NavigatorMapperTest {
                 }
             }
         )
-        val expected = MapMatcherResult(
+        val expected = LocationMatcherResult(
             enhancedLocation,
             keyPoints,
             isOffRoad = true,
@@ -272,7 +269,7 @@ class NavigatorMapperTest {
             roadEdgeMatchProbability = 0f
         )
 
-        val result = tripStatus.getMapMatcherResult(enhancedLocation, keyPoints)
+        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints)
 
         assertEquals(expected, result)
     }
@@ -472,7 +469,5 @@ class NavigatorMapperTest {
         private const val ID = "roadObjectId"
         private const val DISTANCE_TO_START = 1234.0
         private const val LENGTH = 456.0
-        private const val LATITUDE = 5353.3
-        private const val LONGITUDE = 2020.20
     }
 }

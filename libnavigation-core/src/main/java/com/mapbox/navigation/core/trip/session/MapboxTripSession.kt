@@ -13,7 +13,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.internal.utils.isSameRoute
 import com.mapbox.navigation.core.internal.utils.isSameUuid
-import com.mapbox.navigation.core.navigator.getMapMatcherResult
+import com.mapbox.navigation.core.navigator.getLocationMatcherResult
 import com.mapbox.navigation.core.navigator.getRouteInitInfo
 import com.mapbox.navigation.core.navigator.getRouteProgressFrom
 import com.mapbox.navigation.core.navigator.getTripStatusFrom
@@ -97,7 +97,6 @@ internal class MapboxTripSession(
     private val voiceInstructionsObservers = CopyOnWriteArraySet<VoiceInstructionsObserver>()
     private val roadObjectsOnRouteObservers =
         CopyOnWriteArraySet<RoadObjectsOnRouteObserver>()
-    private val mapMatcherResultObservers = CopyOnWriteArraySet<MapMatcherResultObserver>()
     private val fallbackVersionsObservers = CopyOnWriteArraySet<FallbackVersionsObserver>()
 
     private val bannerInstructionEvent = BannerInstructionEvent()
@@ -121,7 +120,6 @@ internal class MapboxTripSession(
         }
 
     private var rawLocation: Location? = null
-    private var enhancedLocation: Location? = null
     private var routeProgress: RouteProgress? = null
     private var roadObjects: List<UpcomingRoadObject> = emptyList()
         set(value) {
@@ -131,7 +129,9 @@ internal class MapboxTripSession(
             field = value
             roadObjectsOnRouteObservers.forEach { it.onNewRoadObjectsOnTheRoute(value) }
         }
-    private var mapMatcherResult: MapMatcherResult? = null
+
+    override var locationMatcherResult: LocationMatcherResult? = null
+        private set
 
     private val nativeFallbackVersionsObserver =
         object : com.mapbox.navigator.FallbackVersionsObserver() {
@@ -169,11 +169,6 @@ internal class MapboxTripSession(
     override fun getRawLocation() = rawLocation
 
     /**
-     * Return enhanced location
-     */
-    override fun getEnhancedLocation() = enhancedLocation
-
-    /**
      * Provide route progress
      */
     override fun getRouteProgress() = routeProgress
@@ -204,7 +199,7 @@ internal class MapboxTripSession(
         if (state != TripSessionState.STARTED) return
 
         this.rawLocation = rawLocation
-        locationObservers.forEach { it.onRawLocationChanged(rawLocation) }
+        locationObservers.forEach { it.onNewRawLocation(rawLocation) }
         mainJobController.scope.launch {
             navigator.updateLocation(rawLocation.toFixLocation())
         }
@@ -222,9 +217,8 @@ internal class MapboxTripSession(
             val tripStatus = status.getTripStatusFrom(route)
             val enhancedLocation = tripStatus.navigationStatus.location.toLocation()
             val keyPoints = tripStatus.navigationStatus.keyPoints.toLocations()
-            updateEnhancedLocation(enhancedLocation, keyPoints)
-            updateMapMatcherResult(
-                tripStatus.getMapMatcherResult(enhancedLocation, keyPoints)
+            updateLocationMatcherResult(
+                tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints),
             )
 
             // we should skip RouteProgress, BannerInstructions, isOffRoute state updates while
@@ -290,9 +284,8 @@ internal class MapboxTripSession(
     }
 
     private fun reset() {
-        mapMatcherResult = null
+        locationMatcherResult = null
         rawLocation = null
-        enhancedLocation = null
         routeProgress = null
         isOffRoute = false
         eHorizonSubscriptionManager.reset()
@@ -303,8 +296,8 @@ internal class MapboxTripSession(
      */
     override fun registerLocationObserver(locationObserver: LocationObserver) {
         locationObservers.add(locationObserver)
-        rawLocation?.let { locationObserver.onRawLocationChanged(it) }
-        enhancedLocation?.let { locationObserver.onEnhancedLocationChanged(it, emptyList()) }
+        rawLocation?.let { locationObserver.onNewRawLocation(it) }
+        locationMatcherResult?.let { locationObserver.onNewLocationMatcherResult(it) }
     }
 
     /**
@@ -514,25 +507,6 @@ internal class MapboxTripSession(
         eHorizonSubscriptionManager.unregisterAllObservers()
     }
 
-    override fun registerMapMatcherResultObserver(
-        mapMatcherResultObserver: MapMatcherResultObserver
-    ) {
-        mapMatcherResultObservers.add(mapMatcherResultObserver)
-        mapMatcherResult?.let {
-            mapMatcherResultObserver.onNewMapMatcherResult(it)
-        }
-    }
-
-    override fun unregisterMapMatcherResultObserver(
-        mapMatcherResultObserver: MapMatcherResultObserver
-    ) {
-        mapMatcherResultObservers.remove(mapMatcherResultObserver)
-    }
-
-    override fun unregisterAllMapMatcherResultObservers() {
-        mapMatcherResultObservers.clear()
-    }
-
     override fun registerFallbackVersionsObserver(
         fallbackVersionsObserver: FallbackVersionsObserver
     ) {
@@ -556,14 +530,9 @@ internal class MapboxTripSession(
         navigator.setFallbackVersionsObserver(null)
     }
 
-    private fun updateEnhancedLocation(location: Location, keyPoints: List<Location>) {
-        enhancedLocation = location
-        locationObservers.forEach { it.onEnhancedLocationChanged(location, keyPoints) }
-    }
-
-    private fun updateMapMatcherResult(mapMatcherResult: MapMatcherResult) {
-        this.mapMatcherResult = mapMatcherResult
-        mapMatcherResultObservers.forEach { it.onNewMapMatcherResult(mapMatcherResult) }
+    private fun updateLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+        this.locationMatcherResult = locationMatcherResult
+        locationObservers.forEach { it.onNewLocationMatcherResult(locationMatcherResult) }
     }
 
     private fun updateRouteProgress(

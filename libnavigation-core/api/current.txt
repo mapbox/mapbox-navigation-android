@@ -26,7 +26,6 @@ package com.mapbox.navigation.core {
     method public void registerBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
     method public void registerEHorizonObserver(com.mapbox.navigation.core.trip.session.eh.EHorizonObserver eHorizonObserver);
     method public void registerLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
-    method public void registerMapMatcherResultObserver(com.mapbox.navigation.core.trip.session.MapMatcherResultObserver mapMatcherResultObserver);
     method public void registerNavigationSessionStateObserver(com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver navigationSessionStateObserver);
     method public void registerNavigationVersionSwitchObserver(com.mapbox.navigation.core.NavigationVersionSwitchObserver observer);
     method public void registerOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
@@ -53,7 +52,6 @@ package com.mapbox.navigation.core {
     method public void unregisterBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
     method public void unregisterEHorizonObserver(com.mapbox.navigation.core.trip.session.eh.EHorizonObserver eHorizonObserver);
     method public void unregisterLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
-    method public void unregisterMapMatcherResultObserver(com.mapbox.navigation.core.trip.session.MapMatcherResultObserver mapMatcherResultObserver);
     method public void unregisterNavigationSessionStateObserver(com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver navigationSessionStateObserver);
     method public void unregisterNavigationVersionSwitchObserver(com.mapbox.navigation.core.NavigationVersionSwitchObserver observer);
     method public void unregisterOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
@@ -632,12 +630,7 @@ package com.mapbox.navigation.core.trip.session {
     method public void onNewBannerInstructions(com.mapbox.api.directions.v5.models.BannerInstructions bannerInstructions);
   }
 
-  public interface LocationObserver {
-    method public void onEnhancedLocationChanged(android.location.Location enhancedLocation, java.util.List<? extends android.location.Location> keyPoints);
-    method public void onRawLocationChanged(android.location.Location rawLocation);
-  }
-
-  public final class MapMatcherResult {
+  public final class LocationMatcherResult {
     method public android.location.Location getEnhancedLocation();
     method public java.util.List<android.location.Location> getKeyPoints();
     method public float getOffRoadProbability();
@@ -654,8 +647,9 @@ package com.mapbox.navigation.core.trip.session {
     property public final com.mapbox.navigation.base.speed.model.SpeedLimit? speedLimit;
   }
 
-  public fun interface MapMatcherResultObserver {
-    method public void onNewMapMatcherResult(com.mapbox.navigation.core.trip.session.MapMatcherResult mapMatcherResult);
+  public interface LocationObserver {
+    method public void onNewLocationMatcherResult(com.mapbox.navigation.core.trip.session.LocationMatcherResult locationMatcherResult);
+    method public void onNewRawLocation(android.location.Location rawLocation);
   }
 
   public abstract sealed class NavigationSessionState {
