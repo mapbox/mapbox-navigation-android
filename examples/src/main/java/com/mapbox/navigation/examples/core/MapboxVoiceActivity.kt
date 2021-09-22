@@ -347,7 +347,6 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onStart() {
         super.onStart()
-        binding.mapView.onStart()
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.registerRoutesObserver(routesObserver)
             mapboxNavigation.registerLocationObserver(locationObserver)
@@ -359,7 +358,6 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onStop() {
         super.onStop()
-        binding.mapView.onStop()
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
@@ -369,7 +367,6 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.mapView.onDestroy()
         mapboxNavigation.onDestroy()
         speechApi.cancel()
         voiceInstructionsPlayer.shutdown()

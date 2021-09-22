@@ -288,7 +288,6 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onStart() {
         super.onStart()
-        binding.mapView.onStart()
         if (::mapboxNavigation.isInitialized) {
             mapboxNavigation.registerRoutesObserver(routesObserver)
             mapboxNavigation.registerLocationObserver(locationObserver)
@@ -299,7 +298,6 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onStop() {
         super.onStop()
-        binding.mapView.onStop()
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
@@ -308,13 +306,7 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.mapView.onDestroy()
         mapboxNavigation.onDestroy()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        binding.mapView.onLowMemory()
     }
 
     override fun onMapLongClick(point: Point): Boolean {
