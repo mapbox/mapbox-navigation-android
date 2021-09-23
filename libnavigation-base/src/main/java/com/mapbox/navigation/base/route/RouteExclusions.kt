@@ -7,18 +7,9 @@ import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.StepIntersection
-import com.mapbox.api.directions.v5.utils.FormatUtils
 import com.mapbox.api.directions.v5.utils.ParseUtils
 
 private const val COMMA_DELIMETER = ","
-
-/**
- * Exclude certain road types from routing.
- * See [RouteOptions.Builder.exclude] for possible combinations.
- * @param exclusionCriteria see [RouteOptions.Builder.exclude] for possible types.
- */
-fun RouteOptions.Builder.exclude(vararg exclusionCriteria: String): RouteOptions.Builder =
-    this.exclude(FormatUtils.join(COMMA_DELIMETER, exclusionCriteria.asList()).toString())
 
 /**
  * Violated road type.
