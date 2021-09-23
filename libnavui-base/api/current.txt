@@ -116,7 +116,7 @@ package com.mapbox.navigation.ui.base.internal.model.route {
     field public static final double RESTRICTED_ROAD_LINE_WIDTH = 7.0;
     field public static final double RESTRICTED_ROAD_SECTION_SCALE = 10.0;
     field public static final boolean ROUNDED_LINE_CAP = true;
-    field public static final double ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS = 1.0;
+    field public static final double ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS = 3.0;
     field public static final String SEVERE_CONGESTION_VALUE = "severe";
     field public static final double SOFT_GRADIENT_STOP_GAP_METERS = 30.0;
     field public static final int THIRTY = 30; // 0x1e
