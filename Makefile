@@ -17,6 +17,7 @@ libnavui-resources \
 libnavui-voice \
 libnavigation-android \
 libnavui-speedlimit \
+libnavui-dropin \
 
 APPLICATION_MODULES = \
 qa-test-app \

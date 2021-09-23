@@ -13,6 +13,7 @@ import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.navigation.examples.core.IndependentRouteGenerationActivity
 import com.mapbox.navigation.examples.core.MapboxBuildingHighlightActivity
 import com.mapbox.navigation.examples.core.MapboxCustomStyleActivity
+import com.mapbox.navigation.examples.core.MapboxDropInActivity
 import com.mapbox.navigation.examples.core.MapboxJunctionActivity
 import com.mapbox.navigation.examples.core.MapboxManeuverActivity
 import com.mapbox.navigation.examples.core.MapboxMultipleArrowActivity
@@ -138,6 +139,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_draw_utility),
                 getString(R.string.description_draw_utility),
                 RouteDrawingActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_drop_in),
+                getString(R.string.description_drop_in),
+                MapboxDropInActivity::class.java
             )
         )
     }

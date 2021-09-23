@@ -19,4 +19,5 @@ include ':examples',
         ':libnavui-resources',
         ':libnavui-voice',
         ':libnavui-speedlimit',
+        ':libnavui-dropin',
         ':qa-test-app'
