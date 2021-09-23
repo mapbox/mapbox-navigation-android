@@ -1,12 +1,10 @@
 package com.mapbox.navigation.base.route;
 
-import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigation.base.extensions.RouteOptionsExtensions;
 import com.mapbox.navigation.testing.FileUtils;
-
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -18,28 +16,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class RouteExclusionsJavaTest {
-
-  @Test
-  public void routeOptionsBuilderExcludeParsing() {
-    Point origin = Point.fromLngLat(14.75513115258181, 55.19464648744247);
-    Point destination = Point.fromLngLat(12.54071010365584, 55.68521471271404);
-    List<Point> coordinates = new ArrayList<>();
-    coordinates.add(origin);
-    coordinates.add(destination);
-    RouteOptions.Builder routeOptionsBuilder =
-        RouteOptionsExtensions.applyDefaultNavigationOptions(
-            RouteOptions.builder()
-                .coordinatesList(coordinates)
-        );
-
-    RouteOptions routeOptionsWithExclusions = RouteExclusions.exclude(
-        routeOptionsBuilder,
-        DirectionsCriteria.EXCLUDE_TOLL,
-        DirectionsCriteria.EXCLUDE_FERRY
-    ).build();
-
-    assertEquals("toll,ferry", routeOptionsWithExclusions.exclude());
-  }
 
   @Test
   public void emptyExclusionViolationsIfNoExcludeRouteOptionsAdded() {

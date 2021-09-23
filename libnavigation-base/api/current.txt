@@ -361,7 +361,6 @@ package com.mapbox.navigation.base.route {
   }
 
   public final class RouteExclusions {
-    method public static com.mapbox.api.directions.v5.models.RouteOptions.Builder exclude(com.mapbox.api.directions.v5.models.RouteOptions.Builder, java.lang.String... exclusionCriteria);
     method public static java.util.List<com.mapbox.navigation.base.route.ExclusionViolation> exclusionViolations(com.mapbox.api.directions.v5.models.DirectionsRoute);
   }
 

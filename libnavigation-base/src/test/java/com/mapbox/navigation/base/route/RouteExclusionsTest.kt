@@ -1,6 +1,5 @@
 package com.mapbox.navigation.base.route
 
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -11,22 +10,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class RouteExclusionsTest {
-
-    @Test
-    fun `RouteOptions Builder exclude parsing`() {
-        val origin = Point.fromLngLat(14.75513115258181, 55.19464648744247)
-        val destination = Point.fromLngLat(12.54071010365584, 55.68521471271404)
-        val routeOptionsBuilder = RouteOptions.builder()
-            .applyDefaultNavigationOptions()
-            .coordinatesList(listOf(origin, destination))
-
-        val routeOptionsWithExclusions = routeOptionsBuilder.exclude(
-            DirectionsCriteria.EXCLUDE_TOLL,
-            DirectionsCriteria.EXCLUDE_FERRY
-        ).build()
-
-        assertEquals("toll,ferry", routeOptionsWithExclusions.exclude())
-    }
 
     @Test
     fun `empty exclusion violations if no exclude RouteOptions added`() {
