@@ -96,8 +96,13 @@
     </activity>
 
     <activity
-        android:name="com.mapbox.navigation.examples.MainActivity"
+        android:name=".MapboxDropInActivity"
+        android:label="@string/title_drop_in"
         android:screenOrientation="portrait">
+    </activity>
+
+    <activity
+        android:name="com.mapbox.navigation.examples.MainActivity">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
