@@ -46,7 +46,7 @@ object RouteConstants {
     const val RESTRICTED_CONGESTION_VALUE = "restricted"
     const val ORIGIN_MARKER_NAME = "originMarker"
     const val DESTINATION_MARKER_NAME = "destinationMarker"
-    const val ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS = 1.0
+    const val ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS = 3.0
     const val DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER = "mapboxDescriptorPlaceHolderUnused"
     const val MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO = 1500000000.0 // 1.5s
     const val DEFAULT_ROUTE_SOURCES_TOLERANCE = 0.375
