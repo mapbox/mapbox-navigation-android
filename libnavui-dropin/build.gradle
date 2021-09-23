@@ -1,0 +1,72 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-parcelize'
+apply plugin: 'org.jetbrains.dokka'
+apply plugin: 'com.jaredsburrows.license'
+apply plugin: 'com.mapbox.android.sdk.versions'
+apply from: "${rootDir}/gradle/ktlint.gradle"
+apply from: file("${rootDir}/gradle/artifact-settings.gradle")
+apply from: "${rootDir}/gradle/kdoc-settings.gradle"
+
+version = project.ext.versionName
+group = project.ext.mapboxArtifactGroupId
+
+android {
+    compileSdkVersion androidVersions.compileSdkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    defaultConfig {
+        vectorDrawables.useSupportLibrary = true
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro"
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+        unitTests.includeAndroidResources = true
+    }
+}
+
+dependencies {
+    api project(":libnavui-base")
+    api project(":libnavui-maneuver")
+    api project(":libnavui-maps")
+    api project(":libnavui-resources")
+    api project(":libnavui-speedlimit")
+    api project(":libnavui-tripprogress")
+    api project(":libnavui-util")
+    api project(":libnavui-voice")
+
+    implementation dependenciesList.androidXCardView
+    implementation dependenciesList.androidXRecyclerView
+    implementation dependenciesList.androidXConstraintLayout
+    implementation 'androidx.core:core-ktx:1.6.0'
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.annotation:annotation:1.2.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
+    implementation "androidx.lifecycle:lifecycle-common-java8:2.3.1"
+
+    implementation dependenciesList.kotlinStdLib
+
+    implementation dependenciesList.coroutinesAndroid
+
+    apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
+    testImplementation(project(':libtesting-utils'))
+}
+
+apply from: "${rootDir}/gradle/track-public-apis.gradle"
+apply from: "${rootDir}/gradle/jacoco.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"

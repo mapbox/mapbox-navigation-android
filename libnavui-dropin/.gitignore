@@ -1,0 +1,3 @@
+/build
+src/main/assets/sdk_versions/*
+src/main/res/values/mapbox_access_token.xml
