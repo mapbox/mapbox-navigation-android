@@ -2,7 +2,23 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
-## Mapbox Navigation SDK 2.0.0-rc.3 - September 23, 2021
+## Mapbox Navigation SDK 2.1.0-alpha.1 - September 24, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+- Exposed `MapboxNavigation#getZLevel` that can be used with `RouteOptions#layers` to influence the layer of the road from where the route starts. [#4800](https://github.com/mapbox/mapbox-navigation-android/pull/4800) [#4849](https://github.com/mapbox/mapbox-navigation-android/pull/4849)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.0.0-rc.8` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.8))
+- Mapbox Navigation Native `v66.0.3`
+- Mapbox Core Common `v18.0.0`
+- Mapbox Java `v6.0.0-alpha.7` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0-alpha.7))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
+## Mapbox Navigation SDK 2.0.0-rc.3 - September 24, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
 
