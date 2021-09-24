@@ -433,55 +433,93 @@ jobs:
     executor: ndk-r21e-latest-executor
     steps:
       - checkout
-      - restore-gradle-cache
-      - assemble-core-debug
-      - assemble-ui-debug
-      - assemble-core-release
-      - assemble-ui-release
-      - assemble-module:
-          module_target: "instrumentation-tests"
-          variant: "Debug"
-          inject_token: true
-      - assemble-instrumentation-test:
-          module_target: "instrumentation-tests"
-      - assemble-module:
-          module_target: "app-tests-wrapper"
-          variant: "Debug"
-      - assemble-instrumentation-test:
-          module_target: "libnavigation-core"
-      - write-workspace
+      - when:
+          condition:
+            not:
+              matches:
+                pattern: "^add-changelog.*"
+                value: << pipeline.git.branch >>
+          steps:
+            - restore-gradle-cache
+            - assemble-core-debug
+            - assemble-ui-debug
+            - assemble-core-release
+            - assemble-ui-release
+            - assemble-module:
+                module_target: "instrumentation-tests"
+                variant: "Debug"
+                inject_token: true
+            - assemble-instrumentation-test:
+                module_target: "instrumentation-tests"
+            - assemble-module:
+                module_target: "app-tests-wrapper"
+                variant: "Debug"
+            - assemble-instrumentation-test:
+                module_target: "libnavigation-core"
+            - write-workspace
 
   unit-tests-core:
     executor: ndk-r21e-latest-executor
     steps:
-      - read-workspace
-      - unit-tests-core
+      - when:
+          condition:
+            not:
+              matches:
+                pattern: "^add-changelog.*"
+                value: << pipeline.git.branch >>
+          steps:
+            - read-workspace
+            - unit-tests-core
+      - run: exit 0
 
   unit-tests-ui:
     executor: ndk-r21e-latest-executor
     steps:
-      - read-workspace
-      - unit-tests-ui
+      - when:
+          condition:
+            not:
+              matches:
+                pattern: "^add-changelog.*"
+                value: << pipeline.git.branch >>
+          steps:
+            - read-workspace
+            - unit-tests-ui
+      - run: exit 0
   # Disabling Codecov (for now) due to https://about.codecov.io/security-update/
   #      - codecov
 
   static-analysis:
     executor: ndk-r21e-latest-executor
     steps:
-      - read-workspace
-      - verify-codestyle
-      - verify-license
-      - verify-common-sdk-version
-      - check-api-core
-      - check-api-ui
-      - check-public-documentation
+      - when:
+          condition:
+            not:
+              matches:
+                pattern: "^add-changelog.*"
+                value: << pipeline.git.branch >>
+          steps:
+            - read-workspace
+            - verify-codestyle
+            - verify-license
+            - verify-common-sdk-version
+            - check-api-core
+            - check-api-ui
+            - check-public-documentation
+      - run: exit 0
 
   changelog-verification:
     executor: ndk-r21e-latest-executor
     steps:
       - checkout
-      - prepare-mbx-ci
-      - verify-changelog
+      - when:
+          condition:
+            not:
+              matches:
+                pattern: "^add-changelog.*"
+                value: << pipeline.git.branch >>
+          steps:
+            - prepare-mbx-ci
+            - verify-changelog
 
   ui-robo-tests:
     executor: ndk-r21e-latest-executor
@@ -490,18 +528,26 @@ jobs:
       BUILDTYPE: Debug
       GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
     steps:
-      - read-workspace
-      - download-native-libs
-      - generate-google-services-json
-      - assemble-module:
-          module_target: "examples"
-          variant: "Release"
-          inject_token: true
-      - login-google-cloud-platform
-      - upload-native-libs-to-crashlytics
-      - run-firebase-robo:
-          module_target: "examples"
-          variant: "release"
+      - when:
+          condition:
+            not:
+              matches:
+                pattern: "^add-changelog.*"
+                value: << pipeline.git.branch >>
+          steps:
+            - read-workspace
+            - download-native-libs
+            - generate-google-services-json
+            - assemble-module:
+                module_target: "examples"
+                variant: "Release"
+                inject_token: true
+            - login-google-cloud-platform
+            - upload-native-libs-to-crashlytics
+            - run-firebase-robo:
+                module_target: "examples"
+                variant: "release"
+      - run: exit 0
 
   internal-instrumentation-tests:
     executor: ndk-r21e-latest-executor
@@ -510,12 +556,20 @@ jobs:
       BUILDTYPE: Debug
       GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
     steps:
-      - read-workspace
-      - login-google-cloud-platform
-      - run-internal-firebase-instrumentation:
-          module_target: "libnavigation-core"
-          module_wrapper: "app-tests-wrapper"
-          variant: "debug"
+      - when:
+          condition:
+            not:
+              matches:
+                pattern: "^add-changelog.*"
+                value: << pipeline.git.branch >>
+          steps:
+            - read-workspace
+            - login-google-cloud-platform
+            - run-internal-firebase-instrumentation:
+                module_target: "libnavigation-core"
+                module_wrapper: "app-tests-wrapper"
+                variant: "debug"
+      - run: exit 0
 
   instrumentation-tests:
     executor: ndk-r21e-latest-executor
@@ -524,10 +578,18 @@ jobs:
       BUILDTYPE: Debug
       GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
     steps:
-      - read-workspace
-      - login-google-cloud-platform
-      - run-firebase-instrumentation:
-          variant: "debug"
+      - when:
+          condition:
+            not:
+              matches:
+                pattern: "^add-changelog.*"
+                value: << pipeline.git.branch >>
+          steps:
+            - read-workspace
+            - login-google-cloud-platform
+            - run-firebase-instrumentation:
+                variant: "debug"
+      - run: exit 0
 
   mobile-metrics-benchmarks:
     executor: ndk-r21e-latest-executor
