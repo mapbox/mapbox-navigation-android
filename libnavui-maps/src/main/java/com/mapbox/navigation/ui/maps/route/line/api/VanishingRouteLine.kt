@@ -118,15 +118,9 @@ internal class VanishingRouteLine {
         ) { granularDistances, index ->
             val upcomingIndex = granularDistances.distancesArray[index]
             if (upcomingIndex == null) {
-                LoggerProvider.logger.e(
+                LoggerProvider.logger.d(
                     Tag("MbxVanishingRouteLine"),
-                    Message(
-                        """
-                       Upcoming route line index is null.
-                       primaryRouteLineGranularDistances: $primaryRouteLineGranularDistances
-                       primaryRouteRemainingDistancesIndex: $primaryRouteRemainingDistancesIndex
-                        """.trimIndent()
-                    )
+                    Message("Upcoming route line index is null.")
                 )
                 return null
             }
