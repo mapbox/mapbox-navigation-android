@@ -2,6 +2,43 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-rc.3 - September 23, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+
+#### Bug fixes and improvements
+- :warning: Exposed include-hov/hot parameters in `RouteOptions`. [#4894](https://github.com/mapbox/mapbox-navigation-android/pull/4894)
+- :warning: Added `exclude` list option. [#4894](https://github.com/mapbox/mapbox-navigation-android/pull/4894)
+- :warning: Removed unnecessary `RouteExclusions` `exclude` extension. [#4894](https://github.com/mapbox/mapbox-navigation-android/pull/4894)
+- Increased location tolerance for vanishing route line updates. This resolves rare occasions where the vanishing route line portion would briefly stop updating. [#4888](https://github.com/mapbox/mapbox-navigation-android/pull/4888)
+- Added `MapboxNavigation#provideFeedbackMetadataWrapper`: provides metadata to post a deffered feedback [#4889](https://github.com/mapbox/mapbox-navigation-android/pull/4889)
+- Added `FeedbackMetadata`: holds data that might be used to post a deferred user's feedback. [#4889](https://github.com/mapbox/mapbox-navigation-android/pull/4889)
+- Added `FeedbackMetadataWrapper`: wraps `FeedbackMetadata` and collect additional information to inflate one. [#4889](https://github.com/mapbox/mapbox-navigation-android/pull/4889)
+- Added to overloaded `MapboxNavigation#postUserFeedback` with param `feedbackMetadata: FeedbackMetadata?` [#4889](https://github.com/mapbox/mapbox-navigation-android/pull/4889)
+- :warning: Renamed `MapMatcherResult` to `LocationMatcherResult` [#4886](https://github.com/mapbox/mapbox-navigation-android/pull/4886)
+- :warning: Merged `LocationObserver` and `MapMatcherResultObserver` interfaces into single `LocationObserver` interface [#4886](https://github.com/mapbox/mapbox-navigation-android/pull/4886)
+- :warning: Refactored turn lane api and logic to handle more lane combinations. [#4885](https://github.com/mapbox/mapbox-navigation-android/pull/4885)
+- Bug fix for calculating traffic on route line multi-leg routes. [#4883](https://github.com/mapbox/mapbox-navigation-android/pull/4883)
+- Added `MapboxNavigation.startReplayTripSession` which allows you to use MapboxReplayer after `MapboxNavigation` has been created. [#4843](https://github.com/mapbox/mapbox-navigation-android/pull/4843)
+- Added `MapboxTurnIconsApi` for retrieving turn icon drawables [#4864](https://github.com/mapbox/mapbox-navigation-android/pull/4864)
+- Bug fix for traffic expressions using soft gradients. [#4866](https://github.com/mapbox/mapbox-navigation-android/pull/4866)
+- Fixed an issue where restricted road sections layer was not re-added to the map when drawing data if it was previously manually removed. [#4861](https://github.com/mapbox/mapbox-navigation-android/pull/4861)
+- Made route line, route arrow, and building highlighting layers persistent which means that they will survive style changes automatically, without needing to be manually redrawn. This also removes any sort of flickering of the route line when a map style changes. [#4861](https://github.com/mapbox/mapbox-navigation-android/pull/4861)
+- :warning: Removed `RouteOptionsUpdater` interface, renamed `MapboxRouteOptionsUpdater` to `RouteOptionsUpdater` [#4852](https://github.com/mapbox/mapbox-navigation-android/pull/4852)
+- Fixed an issue where banner instructions were missing after restarting trip session with the same route [#4851](https://github.com/mapbox/mapbox-navigation-android/pull/4851)
+- Fixed the issue with music volume not restored after stopping voice instructions playback [#4899](https://github.com/mapbox/mapbox-navigation-android/pull/4899)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.0.0-rc.8` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.8))
+- Mapbox Navigation Native `v66.0.3`
+- Mapbox Core Common `v18.0.0`
+- Mapbox Java `v6.0.0-alpha.7` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0-alpha.7))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.0.0-rc.2.1 - September 21, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
