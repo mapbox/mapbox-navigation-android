@@ -1101,8 +1101,8 @@ class MapboxNavigation(
                 isFallback = false,
                 tilesVersion = navigationOptions.routingTilesOptions.tilesVersion
             )
-            navigationVersionSwitchObservers.forEach {
-                it.onSwitchToTargetVersion(
+            navigationVersionSwitchObservers.forEach { observer ->
+                observer.onSwitchToTargetVersion(
                     navigationOptions.routingTilesOptions.tilesVersion.takeIf { it.isNotEmpty() }
                 )
             }

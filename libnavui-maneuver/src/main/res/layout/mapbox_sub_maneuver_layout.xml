@@ -20,8 +20,8 @@
         android:layout_weight="22"
         android:gravity="start|center_vertical"
         android:singleLine="true"
-        android:paddingStart="@dimen/mapbox_dimen_4dp"
-        android:paddingEnd="@dimen/mapbox_dimen_4dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
         android:textAppearance="@style/MapboxStyleSubManeuver"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -32,8 +32,8 @@
 
     <com.mapbox.navigation.ui.maneuver.view.MapboxTurnIconManeuver
         android:id="@+id/subManeuverIcon"
-        android:layout_width="@dimen/mapbox_dimen_30dp"
-        android:layout_height="@dimen/mapbox_dimen_30dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         app:layout_constraintEnd_toEndOf="@id/subManeuverGuideline"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

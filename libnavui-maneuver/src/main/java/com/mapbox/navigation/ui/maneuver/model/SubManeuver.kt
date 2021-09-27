@@ -73,10 +73,10 @@ class SubManeuver internal constructor(
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + (text.hashCode())
-        result = 31 * result + (type?.hashCode() ?: 0)
-        result = 31 * result + (degrees?.hashCode() ?: 0)
-        result = 31 * result + (modifier?.hashCode() ?: 0)
-        result = 31 * result + (drivingSide?.hashCode() ?: 0)
+        result = 31 * result + type.hashCode()
+        result = 31 * result + degrees.hashCode()
+        result = 31 * result + modifier.hashCode()
+        result = 31 * result + drivingSide.hashCode()
         result = 31 * result + componentList.hashCode()
         return result
     }

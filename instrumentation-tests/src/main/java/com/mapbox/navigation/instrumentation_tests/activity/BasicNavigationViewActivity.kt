@@ -21,33 +21,13 @@ class BasicNavigationViewActivity : AppCompatActivity() {
         mapboxMap.loadStyleUri(
             "asset://map_style_blank.json",
             onMapLoadErrorListener = object : OnMapLoadErrorListener {
-                override fun onMapLoadError(mapLoadErrorType: MapLoadErrorType, msg: String) {
+                override fun onMapLoadError(mapLoadErrorType: MapLoadErrorType, message: String) {
                     Log.e(
                         "onMapLoadError",
-                        "Error loading map - error type: $mapLoadErrorType, message: $msg"
+                        "Error loading map - error type: $mapLoadErrorType, message: $message"
                     )
                 }
             }
         )
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        binding.mapView.onLowMemory()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        binding.mapView.onStart()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        binding.mapView.onStop()
-    }
-
-    override fun onDestroy() {
-        binding.mapView.onDestroy()
-        super.onDestroy()
     }
 }

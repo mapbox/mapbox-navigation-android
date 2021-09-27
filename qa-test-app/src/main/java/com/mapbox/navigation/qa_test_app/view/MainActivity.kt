@@ -85,6 +85,7 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
         permissions: Array<String>,
         grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == LOCATION_PERMISSIONS_REQUEST_CODE) {
             permissionsHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
         } else {

@@ -59,7 +59,7 @@ class MapboxHybridRouter(
     )
 
     private val jobControl = ThreadController.getIOScopeAndRootJob()
-    internal val networkStatusJob: Job
+    private val networkStatusJob: Job
     private var isNetworkAvailable = true
 
     /**

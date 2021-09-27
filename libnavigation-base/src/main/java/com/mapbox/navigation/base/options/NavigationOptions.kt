@@ -118,7 +118,7 @@ class NavigationOptions private constructor(
      */
     override fun hashCode(): Int {
         var result = applicationContext.hashCode()
-        result = 31 * result + (accessToken?.hashCode() ?: 0)
+        result = 31 * result + accessToken.hashCode()
         result = 31 * result + locationEngine.hashCode()
         result = 31 * result + locationEngineRequest.hashCode()
         result = 31 * result + timeFormatType
@@ -133,7 +133,7 @@ class NavigationOptions private constructor(
         result = 31 * result + routeAlternativesOptions.hashCode()
         result = 31 * result + incidentsOptions.hashCode()
         result = 31 * result + historyRecorderOptions.hashCode()
-        result = 31 * result + (eventsAppMetadata?.hashCode() ?: 0)
+        result = 31 * result + eventsAppMetadata.hashCode()
         return result
     }
 

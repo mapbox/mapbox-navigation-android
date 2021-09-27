@@ -22,7 +22,7 @@ object LocaleEx {
      */
     @JvmStatic
     fun Locale.getUnitTypeForLocale(): UnitType =
-        when (this.country.toUpperCase(this)) {
+        when (this.country.uppercase(this)) {
             "US", // US
             "LR", // Liberia
             "MM" -> // Burma

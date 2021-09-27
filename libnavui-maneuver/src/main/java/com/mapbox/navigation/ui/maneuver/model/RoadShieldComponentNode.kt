@@ -76,7 +76,7 @@ class RoadShieldComponentNode private constructor(
      */
     override fun hashCode(): Int {
         var result = text.hashCode()
-        result = 31 * result + (shieldUrl?.hashCode() ?: 0)
+        result = 31 * result + shieldUrl.hashCode()
         return result
     }
 

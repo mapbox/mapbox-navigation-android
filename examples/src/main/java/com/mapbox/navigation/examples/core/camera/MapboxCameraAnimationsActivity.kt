@@ -7,12 +7,9 @@ import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.mapbox.android.core.permissions.PermissionsListener
-import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.FeatureCollection
@@ -77,11 +74,9 @@ import kotlinx.coroutines.launch
 
 class MapboxCameraAnimationsActivity :
     AppCompatActivity(),
-    PermissionsListener,
     OnAnimationButtonClicked,
     OnMapLongClickListener {
 
-    private val permissionsManager = PermissionsManager(this)
     private val navigationLocationProvider = NavigationLocationProvider()
     private lateinit var locationComponent: LocationComponentPlugin
     private lateinit var mapboxMap: MapboxMap
@@ -299,11 +294,7 @@ class MapboxCameraAnimationsActivity :
             ).apply { initialize() }
         )
 
-        if (PermissionsManager.areLocationPermissionsGranted(this)) {
-            init()
-        } else {
-            permissionsManager.requestLocationPermissions(this)
-        }
+        init()
     }
 
     @SuppressLint("MissingPermission")
@@ -614,34 +605,6 @@ class MapboxCameraAnimationsActivity :
 
     private fun getMapboxAccessTokenFromResources(): String {
         return getString(this.resources.getIdentifier("mapbox_access_token", "string", packageName))
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
-
-    override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {
-        Toast.makeText(
-            this,
-            "This app needs location and storage permissions in order to show its functionality.",
-            Toast.LENGTH_LONG
-        ).show()
-    }
-
-    override fun onPermissionResult(granted: Boolean) {
-        if (granted) {
-            init()
-        } else {
-            Toast.makeText(
-                this,
-                "You didn't grant location permissions.",
-                Toast.LENGTH_LONG
-            ).show()
-        }
     }
 
     private fun Number?.formatNumber() = "%.8f".format(this)

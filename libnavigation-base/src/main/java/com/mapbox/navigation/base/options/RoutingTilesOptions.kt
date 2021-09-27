@@ -82,7 +82,7 @@ class RoutingTilesOptions private constructor(
         result = 31 * result + tilesDataset.hashCode()
         result = 31 * result + tilesProfile.hashCode()
         result = 31 * result + tilesVersion.hashCode()
-        result = 31 * result + (filePath?.hashCode() ?: 0)
+        result = 31 * result + filePath.hashCode()
         result = 31 * result + tileStore.hashCode()
         result = 31 * result + minDaysBetweenServerAndLocalTilesVersion
         return result

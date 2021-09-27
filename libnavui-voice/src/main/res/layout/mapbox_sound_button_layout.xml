@@ -8,12 +8,12 @@
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/soundButtonText"
-        android:layout_height="@dimen/mapbox_dimen_56dp"
-        android:layout_width="@dimen/mapbox_dimen_56dp"
-        android:paddingStart="@dimen/mapbox_dimen_20dp"
-        android:paddingEnd="@dimen/mapbox_dimen_4dp"
+        android:layout_height="56dp"
+        android:layout_width="56dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="4dp"
         android:elevation="0dp"
-        android:textSize="@dimen/mapbox_dimen_text_14sp"
+        android:textSize="14sp"
         android:textAllCaps="true"
         android:maxLines="1"
         android:ellipsize="end"
@@ -26,10 +26,10 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/soundButtonIcon"
-        android:layout_width="@dimen/mapbox_dimen_56dp"
-        android:layout_height="@dimen/mapbox_dimen_56dp"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         app:elevation="0dp"
-        android:padding="@dimen/mapbox_dimen_16dp"
+        android:padding="16dp"
         android:background="@drawable/mapbox_bg_circle"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

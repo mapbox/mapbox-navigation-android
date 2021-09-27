@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maneuver.api
 
+import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.internal.maneuver.ManeuverTurnIcon

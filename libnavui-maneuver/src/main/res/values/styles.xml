@@ -2,7 +2,7 @@
 <resources>
   <style name="MapboxStylePrimaryManeuver">
     <item name="android:textColor">@color/mapbox_primary_maneuver_text_color</item>
-    <item name="android:textSize">@dimen/mapbox_dimen_text_30sp</item>
+    <item name="android:textSize">30sp</item>
     <item name="android:includeFontPadding">false</item>
     <item name="android:textDirection">locale</item>
     <item name="android:ellipsize">end</item>
@@ -10,7 +10,7 @@
 
   <style name="MapboxStyleSecondaryManeuver">
     <item name="android:textColor">@color/mapbox_secondary_maneuver_text_color</item>
-    <item name="android:textSize">@dimen/mapbox_dimen_text_24sp</item>
+    <item name="android:textSize">24sp</item>
     <item name="android:includeFontPadding">false</item>
     <item name="android:textDirection">locale</item>
     <item name="android:ellipsize">end</item>
@@ -18,7 +18,7 @@
 
   <style name="MapboxStyleSubManeuver">
     <item name="android:textColor">@color/mapbox_sub_maneuver_text_color</item>
-    <item name="android:textSize">@dimen/mapbox_dimen_text_18sp</item>
+    <item name="android:textSize">18sp</item>
     <item name="android:includeFontPadding">false</item>
     <item name="android:textDirection">locale</item>
     <item name="android:ellipsize">end</item>
@@ -26,7 +26,7 @@
 
   <style name="MapboxStyleStepDistance">
     <item name="android:textColor">@color/mapbox_step_distance_text_color</item>
-    <item name="android:textSize">@dimen/mapbox_dimen_text_22sp</item>
+    <item name="android:textSize">22sp</item>
     <item name="android:includeFontPadding">false</item>
   </style>
 
