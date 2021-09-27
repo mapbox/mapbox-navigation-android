@@ -203,7 +203,7 @@ class MapboxOffboardRouter(
             .routeIndex(route.routeIndex()?.toIntOrNull() ?: 0)
             .legIndex(legIndex)
             .interceptor {
-                val httpUrl = (it.request() as Request).url
+                val httpUrl = it.request().url
                 val skuUrl = urlSkuTokenProvider.obtainUrlWithSkuToken(httpUrl.toUrl())
                 it.proceed(it.request().newBuilder().url(skuUrl).build())
             }

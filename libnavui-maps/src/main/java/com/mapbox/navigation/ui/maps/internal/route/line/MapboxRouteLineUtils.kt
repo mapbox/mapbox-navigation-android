@@ -55,8 +55,8 @@ import kotlin.reflect.KProperty1
 
 object MapboxRouteLineUtils {
 
-    private val TAG = "MbxMapboxRouteLineUtils"
-    internal val VANISH_POINT_STOP_GAP = .00000000001
+    private const val TAG = "MbxMapboxRouteLineUtils"
+    internal const val VANISH_POINT_STOP_GAP = .00000000001
 
     /**
      * Creates an [Expression] that can be applied to the layer style changing the appearance of

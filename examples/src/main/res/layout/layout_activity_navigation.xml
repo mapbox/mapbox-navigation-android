@@ -18,7 +18,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:visibility="invisible"
-        app:cardElevation="@dimen/mapbox_dimen_8dp"
+        app:cardElevation="8dp"
         app:cardUseCompatPadding="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -31,10 +31,10 @@
 
         <ImageView
             android:id="@+id/stop"
-            android:layout_width="@dimen/mapbox_dimen_48dp"
-            android:layout_height="@dimen/mapbox_dimen_48dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_gravity="end|center_vertical"
-            android:layout_marginEnd="@dimen/mapbox_dimen_12dp"
+            android:layout_marginEnd="12dp"
             app:srcCompat="@drawable/mapbox_ic_end_navigation" />
     </androidx.cardview.widget.CardView>
 
@@ -52,8 +52,8 @@
         android:id="@+id/soundButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/mapbox_dimen_8dp"
-        android:layout_marginEnd="@dimen/mapbox_dimen_16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/maneuverView" />
@@ -62,8 +62,8 @@
         android:id="@+id/routeOverview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/mapbox_dimen_8dp"
-        android:layout_marginEnd="@dimen/mapbox_dimen_16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/soundButton" />
@@ -72,8 +72,8 @@
         android:id="@+id/recenter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/mapbox_dimen_8dp"
-        android:layout_marginEnd="@dimen/mapbox_dimen_16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/routeOverview" />
 

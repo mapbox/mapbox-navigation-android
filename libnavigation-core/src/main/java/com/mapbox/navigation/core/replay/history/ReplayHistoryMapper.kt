@@ -91,9 +91,9 @@ class ReplayHistoryMapper private constructor(
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        var result = locationMapper?.hashCode() ?: 0
-        result = 31 * result + (setRouteMapper?.hashCode() ?: 0)
-        result = 31 * result + (statusMapper?.hashCode() ?: 0)
+        var result = locationMapper.hashCode()
+        result = 31 * result + setRouteMapper.hashCode()
+        result = 31 * result + statusMapper.hashCode()
         result = 31 * result + pushEventMappers.hashCode()
         return result
     }

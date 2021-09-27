@@ -21,8 +21,8 @@ internal sealed class HybridRouterHandler(
         private val TAG = Tag("MbxHybridRouter")
     }
 
-    protected val primaryRouterName = primaryRouter::class.java.canonicalName
-    protected val fallbackRouterName = fallbackRouter::class.java.canonicalName
+    protected val primaryRouterName = primaryRouter::class.qualifiedName
+    protected val fallbackRouterName = fallbackRouter::class.qualifiedName
 
     protected var primaryRouterRequestId: Long? = null
         set(value) {

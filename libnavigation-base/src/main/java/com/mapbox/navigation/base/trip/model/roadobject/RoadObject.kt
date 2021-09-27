@@ -71,7 +71,7 @@ abstract class RoadObject internal constructor(
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + objectType
-        result = 31 * result + (length?.hashCode() ?: 0)
+        result = 31 * result + length.hashCode()
         result = 31 * result + location.hashCode()
         result = 31 * result + provider.hashCode()
         result = 31 * result + nativeRoadObject.hashCode()

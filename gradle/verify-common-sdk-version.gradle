@@ -8,7 +8,7 @@ task verifyCommonSdkVersion {
     doLast {
         def moduleDependencyMap = [:]
         moduleNames.each { moduleName ->
-            String commonDependency = ""
+            String commonDependency
             if (moduleName == navigatorModuleName) {
                 commonDependency = parseNavigatorCommonLibDependency()
             } else {

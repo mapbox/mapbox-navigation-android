@@ -471,11 +471,6 @@ package com.mapbox.navigation.ui.maneuver.model {
     property public final double totalDistance;
   }
 
-  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class StepDistanceFactory {
-    method public static com.mapbox.navigation.ui.maneuver.model.StepDistance buildStepDistance(com.mapbox.navigation.base.formatter.DistanceFormatter formatter, double totalDistance, Double? distanceRemaining);
-    field public static final com.mapbox.navigation.ui.maneuver.model.StepDistanceFactory INSTANCE;
-  }
-
   public final class SubManeuver {
     method public java.util.List<com.mapbox.navigation.ui.maneuver.model.Component> getComponentList();
     method public Double? getDegrees();

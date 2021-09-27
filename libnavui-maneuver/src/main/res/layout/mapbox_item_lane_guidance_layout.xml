@@ -5,14 +5,12 @@
     android:orientation="horizontal"
     android:layout_gravity="center_horizontal"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_marginEnd="@dimen/mapbox_dimen_4dp"
-    android:layout_marginStart="@dimen/mapbox_dimen_4dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    >
+    android:layout_marginEnd="4dp"
+    android:layout_marginStart="4dp">
     
   <com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidance
       android:id="@+id/itemLaneGuidance"
-      android:layout_width="@dimen/mapbox_dimen_30dp"
-      android:layout_height="@dimen/mapbox_dimen_30dp"
+      android:layout_width="30dp"
+      android:layout_height="30dp"
       tools:srcCompat="@drawable/mapbox_ic_turn_left"/>
 </LinearLayout>

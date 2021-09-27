@@ -71,7 +71,7 @@ class NavigationScaleGestureHandlerOptions private constructor(
         var result = context.hashCode()
         result = 31 * result + followingInitialMoveThreshold.hashCode()
         result = 31 * result + followingMultiFingerMoveThreshold.hashCode()
-        result = 31 * result + (followingMultiFingerProtectedMoveArea?.hashCode() ?: 0)
+        result = 31 * result + followingMultiFingerProtectedMoveArea.hashCode()
         return result
     }
 

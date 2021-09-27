@@ -33,7 +33,7 @@ class HistoryRecorderOptions private constructor(
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        return fileDirectory?.hashCode() ?: 0
+        return fileDirectory.hashCode()
     }
 
     /**

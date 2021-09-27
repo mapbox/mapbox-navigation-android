@@ -44,10 +44,10 @@ class Maneuver internal constructor(
      */
     override fun hashCode(): Int {
         var result = primary.hashCode()
-        result = 31 * result + (secondary?.hashCode() ?: 0)
-        result = 31 * result + (sub?.hashCode() ?: 0)
-        result = 31 * result + (laneGuidance?.hashCode() ?: 0)
-        result = 31 * result + (maneuverPoint?.hashCode() ?: 0)
+        result = 31 * result + secondary.hashCode()
+        result = 31 * result + sub.hashCode()
+        result = 31 * result + laneGuidance.hashCode()
+        result = 31 * result + maneuverPoint.hashCode()
         return result
     }
 }

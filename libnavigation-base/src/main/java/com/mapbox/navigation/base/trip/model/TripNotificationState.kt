@@ -24,5 +24,20 @@ sealed class TripNotificationState {
     /**
      * Represents a data-less state.
      */
-    class TripNotificationFreeState internal constructor() : TripNotificationState()
+    class TripNotificationFreeState internal constructor() : TripNotificationState() {
+
+        /**
+         * Indicates whether some other object is "equal to" this one.
+         */
+        override fun equals(other: Any?): Boolean {
+            return this === other
+        }
+
+        /**
+         * Returns a hash code value for the object.
+         */
+        override fun hashCode(): Int {
+            return System.identityHashCode(this)
+        }
+    }
 }

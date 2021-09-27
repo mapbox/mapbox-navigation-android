@@ -15,7 +15,6 @@ import com.mapbox.navigation.ui.maneuver.view.MapboxLaneGuidanceAdapter.MapboxLa
 /**
  * Default recycler adapter to render lanes for the upcoming turn.
  * @property context Context
- * @property activeDirection String?
  * @property inflater (android.view.LayoutInflater..android.view.LayoutInflater?)
  * @property laneIndicatorList MutableList<LaneIndicator>
  * @constructor
