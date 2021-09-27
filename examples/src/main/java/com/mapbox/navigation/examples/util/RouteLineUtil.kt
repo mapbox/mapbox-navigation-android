@@ -131,6 +131,8 @@ class RouteLineUtil(private val activity: AppCompatActivity) : LifecycleObserver
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     private fun onStop() {
+        routeLineApi.cancel()
+        routeLineView.cancel()
         mapView.location.removeOnIndicatorPositionChangedListener(
             onIndicatorPositionChangedListener
         )

@@ -135,6 +135,8 @@ class RouteRestrictionsActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        routeLineApi.cancel()
+        routeLineView.cancel()
         mapboxNavigation.onDestroy()
     }
 

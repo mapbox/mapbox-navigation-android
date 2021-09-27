@@ -335,6 +335,8 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
 
     override fun onDestroy() {
         super.onDestroy()
+        routeLineApi.cancel()
+        routeLineView.cancel()
         mapboxNavigation.onDestroy()
     }
 

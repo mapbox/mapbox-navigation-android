@@ -38,8 +38,8 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
+import com.mapbox.navigation.ui.maps.util.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
-import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -48,10 +48,12 @@ import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
+import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
@@ -81,14 +83,15 @@ class MapboxRouteLineApiTest {
     @Before
     fun setUp() {
         ctx = ApplicationProvider.getApplicationContext()
-        mockkObject(ThreadController)
-        every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
-        every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
+        mockkObject(InternalJobControlFactory)
+        every {
+            InternalJobControlFactory.createJobControl()
+        } returns JobControl(parentJob, testScope)
     }
 
     @After
     fun cleanUp() {
-        unmockkObject(ThreadController)
+        unmockkObject(InternalJobControlFactory)
     }
 
     @Test
@@ -1486,6 +1489,31 @@ class MapboxRouteLineApiTest {
         assertEquals(0, result[4].legIndex)
         assertEquals(-27392, result[5].segmentColor)
         assertEquals(1, result[5].legIndex)
+    }
+
+    @Test
+    fun cancel() {
+        val mockParentJob = mockk<CompletableJob>(relaxed = true)
+        val mockJobControl = mockk<JobControl> {
+            every { job } returns mockParentJob
+        }
+        every { InternalJobControlFactory.createJobControl() } returns mockJobControl
+
+        MapboxRouteLineApi(MapboxRouteLineOptions.Builder(ctx).build()).cancel()
+
+        verify { mockParentJob.cancelChildren() }
+    }
+
+    @Test
+    fun cancel_cancelsVanishingRouteLine() {
+        val mockVanishingRouteLine = mockk<VanishingRouteLine>(relaxed = true)
+        val mockOptions = mockk<MapboxRouteLineOptions> {
+            every { vanishingRouteLine } returns mockVanishingRouteLine
+        }
+
+        MapboxRouteLineApi(mockOptions).cancel()
+
+        verify { mockVanishingRouteLine.cancel() }
     }
 
     private fun getRoute(): DirectionsRoute {

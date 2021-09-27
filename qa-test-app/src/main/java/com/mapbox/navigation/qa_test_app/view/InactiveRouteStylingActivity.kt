@@ -113,6 +113,8 @@ class InactiveRouteStylingActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        routeLineApi.cancel()
+        routeLineView.cancel()
         mapboxNavigation.onDestroy()
     }
 

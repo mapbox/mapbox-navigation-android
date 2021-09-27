@@ -308,6 +308,8 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onDestroy() {
         super.onDestroy()
+        routeLineApi.cancel()
+        routeLineView.cancel()
         mapboxNavigation.onDestroy()
     }
 
