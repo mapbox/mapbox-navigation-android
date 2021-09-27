@@ -86,11 +86,11 @@ class RouteProgress internal constructor(
      */
     override fun hashCode(): Int {
         var result = route.hashCode()
-        result = 31 * result + (bannerInstructions?.hashCode() ?: 0)
-        result = 31 * result + (voiceInstructions?.hashCode() ?: 0)
+        result = 31 * result + bannerInstructions.hashCode()
+        result = 31 * result + voiceInstructions.hashCode()
         result = 31 * result + currentState.hashCode()
-        result = 31 * result + (currentLegProgress?.hashCode() ?: 0)
-        result = 31 * result + (upcomingStepPoints?.hashCode() ?: 0)
+        result = 31 * result + currentLegProgress.hashCode()
+        result = 31 * result + upcomingStepPoints.hashCode()
         result = 31 * result + inTunnel.hashCode()
         result = 31 * result + distanceRemaining.hashCode()
         result = 31 * result + distanceTraveled.hashCode()

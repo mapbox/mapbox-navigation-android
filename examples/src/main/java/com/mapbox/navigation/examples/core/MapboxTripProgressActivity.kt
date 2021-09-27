@@ -50,6 +50,7 @@ import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
 import com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter
 import com.mapbox.navigation.ui.tripprogress.model.TimeRemainingFormatter
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter
+import com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

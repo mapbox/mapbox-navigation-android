@@ -61,9 +61,9 @@ class RouteStepProgress internal constructor(
     override fun hashCode(): Int {
         var result = stepIndex
         result = 31 * result + intersectionIndex
-        result = 31 * result + (instructionIndex ?: 0)
-        result = 31 * result + (step?.hashCode() ?: 0)
-        result = 31 * result + (stepPoints?.hashCode() ?: 0)
+        result = 31 * result + instructionIndex.hashCode()
+        result = 31 * result + step.hashCode()
+        result = 31 * result + stepPoints.hashCode()
         result = 31 * result + distanceRemaining.hashCode()
         result = 31 * result + distanceTraveled.hashCode()
         result = 31 * result + fractionTraveled.hashCode()

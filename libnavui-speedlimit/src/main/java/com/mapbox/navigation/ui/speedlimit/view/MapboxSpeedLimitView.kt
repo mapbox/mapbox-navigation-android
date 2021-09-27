@@ -20,6 +20,7 @@ import com.mapbox.navigation.ui.speedlimit.R
 import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi
 import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError
 import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue
+import com.mapbox.navigation.ui.utils.internal.extensions.spToPixel
 import com.mapbox.navigation.utils.internal.ThreadController
 import kotlinx.coroutines.launch
 
@@ -122,7 +123,7 @@ class MapboxSpeedLimitView : AppCompatTextView {
 
     private fun initAttributes(attrs: AttributeSet?) {
         gravity = Gravity.CENTER
-        textSize = context.resources.getDimension(R.dimen.mapbox_dimen_text_6sp)
+        textSize = context.spToPixel(6f)
         val typedArray: TypedArray = context.obtainStyledAttributes(
             attrs,
             R.styleable.MapboxSpeedLimitView,

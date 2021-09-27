@@ -17,7 +17,7 @@ class MapboxLaneIconsApi private constructor(
 ) {
 
     /**
-     * @param laneIconResources LaneIconResources a [Builder] that allows you to specify your own
+     * @param laneIconResources LaneIconResources a [LaneIconResources.Builder] that allows you to specify your own
      * set of turn lane icons.
      */
     @JvmOverloads constructor(

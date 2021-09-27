@@ -177,7 +177,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 PRIMARY_ROUTE_INDEX,
                 legIndex,
                 ActiveGuidanceOptionsMapper.mapFrom(route)
-            ).let { it.value }
+            ).value
 
             result
         }

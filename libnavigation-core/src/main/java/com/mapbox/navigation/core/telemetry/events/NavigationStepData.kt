@@ -13,7 +13,7 @@ internal class NavigationStepData(metricsRouteProgress: MetricsRouteProgress) {
     val previousInstruction: String? =
         metricsRouteProgress.previousStepInstruction?.ifBlank { null } // Schema minLength 1
     val previousModifier: String? = metricsRouteProgress.previousStepModifier
-    val previousName: String? = metricsRouteProgress.previousStepName
+    val previousName: String = metricsRouteProgress.previousStepName
     val previousType: String? =
         metricsRouteProgress.previousStepType?.ifBlank { null } // Schema minLength 1
     val distance: Int = metricsRouteProgress.currentStepDistance
@@ -44,14 +44,14 @@ internal class NavigationStepData(metricsRouteProgress: MetricsRouteProgress) {
     }
 
     override fun hashCode(): Int {
-        var result = upcomingInstruction?.hashCode() ?: 0
-        result = 31 * result + (upcomingModifier?.hashCode() ?: 0)
-        result = 31 * result + (upcomingName?.hashCode() ?: 0)
-        result = 31 * result + (upcomingType?.hashCode() ?: 0)
-        result = 31 * result + (previousInstruction?.hashCode() ?: 0)
-        result = 31 * result + (previousModifier?.hashCode() ?: 0)
-        result = 31 * result + (previousName?.hashCode() ?: 0)
-        result = 31 * result + (previousType?.hashCode() ?: 0)
+        var result = upcomingInstruction.hashCode()
+        result = 31 * result + upcomingModifier.hashCode()
+        result = 31 * result + upcomingName.hashCode()
+        result = 31 * result + upcomingType.hashCode()
+        result = 31 * result + previousInstruction.hashCode()
+        result = 31 * result + previousModifier.hashCode()
+        result = 31 * result + previousName.hashCode()
+        result = 31 * result + previousType.hashCode()
         result = 31 * result + distance
         result = 31 * result + duration
         result = 31 * result + distanceRemaining

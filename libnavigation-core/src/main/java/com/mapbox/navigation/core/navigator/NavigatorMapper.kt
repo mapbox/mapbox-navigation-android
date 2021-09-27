@@ -238,16 +238,15 @@ private fun BannerSection.mapToDirectionsApi(): BannerText {
 }
 
 private fun BannerSection.mapViewToDirectionsApi(): BannerView {
-    val view = BannerView.builder()
-        .components(this.components?.mapToDirectionsApi())
-        .text(this.text)
-        .type(this.type)
-        .modifier(this.modifier)
+    return BannerView.builder()
+        .components(components?.mapToDirectionsApi())
+        .text(text)
+        .type(type)
+        .modifier(modifier)
         .build()
-    return view
 }
 
-private fun MutableList<BannerComponent>.mapToDirectionsApi(): MutableList<BannerComponents>? {
+private fun MutableList<BannerComponent>.mapToDirectionsApi(): MutableList<BannerComponents> {
     val components = mutableListOf<BannerComponents>()
     this.forEach {
         components.add(

@@ -72,7 +72,7 @@ class TextComponentNode private constructor(
      */
     override fun hashCode(): Int {
         var result = text.hashCode()
-        result = 31 * result + (abbr?.hashCode() ?: 0)
+        result = 31 * result + abbr.hashCode()
         result = 31 * result + (abbrPriority ?: 0)
         return result
     }
