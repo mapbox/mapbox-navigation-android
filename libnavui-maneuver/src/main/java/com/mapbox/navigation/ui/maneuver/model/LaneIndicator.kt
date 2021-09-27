@@ -68,7 +68,7 @@ class LaneIndicator private constructor(
         var result = isActive.hashCode()
         result = 31 * result + directions.hashCode()
         result = 31 * result + drivingSide.hashCode()
-        result = 31 * result + (activeDirection?.hashCode() ?: 0)
+        result = 31 * result + activeDirection.hashCode()
         return result
     }
 

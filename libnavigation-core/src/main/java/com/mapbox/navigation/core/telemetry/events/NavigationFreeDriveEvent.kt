@@ -32,7 +32,7 @@ internal class NavigationFreeDriveEvent(
     val batteryLevel: Int = phoneState.batteryLevel
     val screenBrightness: Int = phoneState.screenBrightness
     val batteryPluggedIn: Boolean = phoneState.isBatteryPluggedIn
-    val connectivity: String? = phoneState.connectivity
+    val connectivity: String = phoneState.connectivity
     val audioType: String = phoneState.audioType
     val applicationState: String = phoneState.applicationState // Schema minLength 1
     val event: String = NavigationMetrics.FREE_DRIVE

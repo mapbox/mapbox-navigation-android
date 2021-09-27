@@ -63,25 +63,9 @@ class RouteTrafficUpdateActivity : AppCompatActivity() {
         initStyle()
     }
 
-    override fun onStart() {
-        super.onStart()
-        binding.mapView.onStart()
-    }
-
     override fun onStop() {
         super.onStop()
         job.cancel()
-        binding.mapView.onStop()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        binding.mapView.onDestroy()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        binding.mapView.onLowMemory()
     }
 
     private fun initStyle() {

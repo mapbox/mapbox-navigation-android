@@ -48,7 +48,7 @@ class CountryBorderCrossing internal constructor(
      */
     override fun hashCode(): Int {
         var result = super.hashCode()
-        result = 31 * result + (countryBorderCrossingInfo?.hashCode() ?: 0)
+        result = 31 * result + countryBorderCrossingInfo.hashCode()
         return result
     }
 

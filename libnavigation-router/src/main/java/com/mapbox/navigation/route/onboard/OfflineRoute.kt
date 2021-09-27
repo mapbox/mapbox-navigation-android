@@ -114,13 +114,13 @@ internal class OfflineRoute private constructor(
 
     override fun hashCode(): Int {
         var result = routeUrl.hashCode()
-        result = 31 * result + (bicycleType?.hashCode() ?: 0)
-        result = 31 * result + (cyclingSpeed?.hashCode() ?: 0)
-        result = 31 * result + (cyclewayBias?.hashCode() ?: 0)
-        result = 31 * result + (hillBias?.hashCode() ?: 0)
-        result = 31 * result + (ferryBias?.hashCode() ?: 0)
-        result = 31 * result + (roughSurfaceBias?.hashCode() ?: 0)
-        result = 31 * result + (waypointTypes?.hashCode() ?: 0)
+        result = 31 * result + bicycleType.hashCode()
+        result = 31 * result + cyclingSpeed.hashCode()
+        result = 31 * result + cyclewayBias.hashCode()
+        result = 31 * result + hillBias.hashCode()
+        result = 31 * result + ferryBias.hashCode()
+        result = 31 * result + roughSurfaceBias.hashCode()
+        result = 31 * result + waypointTypes.hashCode()
         return result
     }
 

@@ -4,12 +4,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -74,18 +72,16 @@ class RouteLineUtil(private val activity: AppCompatActivity) : LifecycleObserver
         }
     }
 
-    private val routesObserver: RoutesObserver = object : RoutesObserver {
-        override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            CoroutineScope(Dispatchers.Main).launch {
-                routeLineApi.setRoutes(listOf(RouteLine(routes[0], null))).apply {
-                    routeLineView.renderRouteDrawData(style, this)
-                }
+    private val routesObserver: RoutesObserver = RoutesObserver { routes ->
+        CoroutineScope(Dispatchers.Main).launch {
+            routeLineApi.setRoutes(listOf(RouteLine(routes[0], null))).apply {
+                routeLineView.renderRouteDrawData(style, this)
             }
         }
     }
 
-    private val routeProgressObserver: RouteProgressObserver = object : RouteProgressObserver {
-        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+    private val routeProgressObserver: RouteProgressObserver =
+        RouteProgressObserver { routeProgress ->
             routeLineApi.updateWithRouteProgress(routeProgress) { result ->
                 routeLineView.renderRouteLineUpdate(style, result)
             }
@@ -120,7 +116,6 @@ class RouteLineUtil(private val activity: AppCompatActivity) : LifecycleObserver
                 }
             }
         }
-    }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     private fun onStart() {

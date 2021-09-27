@@ -62,13 +62,13 @@ class RouteLegProgress internal constructor(
      */
     override fun hashCode(): Int {
         var result = legIndex
-        result = 31 * result + (routeLeg?.hashCode() ?: 0)
+        result = 31 * result + routeLeg.hashCode()
         result = 31 * result + distanceTraveled.hashCode()
         result = 31 * result + distanceRemaining.hashCode()
         result = 31 * result + durationRemaining.hashCode()
         result = 31 * result + fractionTraveled.hashCode()
-        result = 31 * result + (currentStepProgress?.hashCode() ?: 0)
-        result = 31 * result + (upcomingStep?.hashCode() ?: 0)
+        result = 31 * result + currentStepProgress.hashCode()
+        result = 31 * result + upcomingStep.hashCode()
         return result
     }
 

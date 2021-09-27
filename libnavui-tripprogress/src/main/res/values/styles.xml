@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
   <style name="MapboxStyleTripProgressView">
     <item name="tripProgressTextColor">@color/mapbox_trip_progress_text_color</item>

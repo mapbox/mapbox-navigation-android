@@ -36,7 +36,9 @@ import com.mapbox.navigation.utils.internal.LoggerProvider
  */
 class MapboxRouteArrowView(private val options: RouteArrowOptions) {
 
-    private val TAG = "Mbx${MapboxRouteArrowView::class.java.canonicalName}"
+    private companion object {
+        private val TAG = "Mbx${MapboxRouteArrowView::class.simpleName}"
+    }
 
     /**
      * Renders an [ArrowVisibilityChangeValue] applying view side effects based on the data

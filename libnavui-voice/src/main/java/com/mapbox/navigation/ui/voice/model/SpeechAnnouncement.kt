@@ -27,8 +27,7 @@ class SpeechAnnouncement private constructor(
      * Build a new [SpeechAnnouncement]
      * @param announcement normal announcement text retrieved from [VoiceInstructions].
      */
-    class Builder(announcement: String) {
-        private val announcement: String = announcement
+    class Builder(private val announcement: String) {
         private var ssmlAnnouncement: String? = null
         private var file: File? = null
 

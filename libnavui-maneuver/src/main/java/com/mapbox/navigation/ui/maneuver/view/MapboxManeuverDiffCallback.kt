@@ -45,15 +45,4 @@ internal class MapboxManeuverDiffCallback(
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
         return oldList[oldItemPosition] == newList[newItemPosition]
     }
-
-    /**
-     * When [areItemsTheSame] returns true for two items and [areContentsTheSame] returns false
-     * for them, DiffUtil calls this method to get a payload about the change.
-     * @param oldItemPosition Int
-     * @param newItemPosition Int
-     * @return Any?
-     */
-    override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any? {
-        return super.getChangePayload(oldItemPosition, newItemPosition)
-    }
 }

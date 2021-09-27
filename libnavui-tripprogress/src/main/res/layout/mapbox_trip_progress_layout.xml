@@ -15,7 +15,7 @@
       app:layout_constraintEnd_toStartOf="@id/tripProgressDivider"
       app:layout_constraintTop_toTopOf="@+id/tripProgressDivider"
       tools:text="1056 ft"
-      android:textSize="@dimen/mapbox_dimen_text_16sp"/>
+      android:textSize="16sp"/>
 
   <TextView
       android:id="@+id/estimatedTimeToArriveText"
@@ -29,9 +29,9 @@
 
   <View
       android:id="@+id/tripProgressDivider"
-      android:layout_width="@dimen/mapbox_dimen_24dp"
-      android:layout_height="@dimen/mapbox_dimen_1dp"
-      android:layout_marginBottom="@dimen/mapbox_dimen_32dp"
+      android:layout_width="24dp"
+      android:layout_height="1dp"
+      android:layout_marginBottom="32dp"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
@@ -48,5 +48,5 @@
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
       tools:text="10 min"
-      android:textSize="@dimen/mapbox_dimen_text_16sp"/>
+      android:textSize="16sp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

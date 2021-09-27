@@ -9,7 +9,6 @@ import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.ui.voice.VoiceResult
 import com.mapbox.navigation.ui.voice.model.VoiceState
 import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
-import okhttp3.Request
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
@@ -48,7 +47,7 @@ internal class MapboxSpeechProvider(
             .accessToken(accessToken)
             .language(language)
             .interceptor {
-                val httpUrl = (it.request() as Request).url
+                val httpUrl = it.request().url
                 val skuUrl = urlSkuTokenProvider.obtainUrlWithSkuToken(httpUrl.toUrl())
                 it.proceed(it.request().newBuilder().url(skuUrl).build())
             }

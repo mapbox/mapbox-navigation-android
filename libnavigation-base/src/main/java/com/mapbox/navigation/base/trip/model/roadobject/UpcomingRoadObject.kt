@@ -52,7 +52,7 @@ class UpcomingRoadObject internal constructor(
     override fun hashCode(): Int {
         var result = roadObject.hashCode()
         result = 31 * result + distanceToStart.hashCode()
-        result = 31 * result + (distanceInfo?.hashCode() ?: 0)
+        result = 31 * result + distanceInfo.hashCode()
         return result
     }
 
