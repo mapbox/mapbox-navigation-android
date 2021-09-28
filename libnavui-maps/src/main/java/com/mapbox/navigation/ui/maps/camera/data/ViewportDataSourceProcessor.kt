@@ -193,6 +193,7 @@ internal object ViewportDataSourceProcessor {
                 lookaheadDistanceForZoom,
                 TurfConstants.UNIT_KILOMETERS
             ).coordinates()
+//            lineSliceCoordinatesForLookaheadDistance
             slicePointsAtAngle(
                 lineSliceCoordinatesForLookaheadDistance,
                 maxAngleDifferenceForGeometrySlicing
@@ -385,8 +386,7 @@ internal object ViewportDataSourceProcessor {
         }
         var output = vehicleBearing
         if (pointsForBearing.size > 1) {
-            val bearingFromPointsFirstToLast =
-                TurfMeasurement.bearing(pointsForBearing.first(), pointsForBearing.last())
+            val bearingFromPointsFirstToLast = getBearingFromFirstToLastPoints(pointsForBearing) ?: vehicleBearing
             val bearingDiff = shortestRotationDiff(bearingFromPointsFirstToLast, vehicleBearing)
             if (abs(bearingDiff) > bearingDiffMax) {
                 val diffDirection = if (bearingDiff < 0.0) -1.0 else 1.0
@@ -396,6 +396,14 @@ internal object ViewportDataSourceProcessor {
             }
         }
         return currentMapCameraBearing + shortestRotationDiff(output, currentMapCameraBearing)
+    }
+
+    fun getBearingFromFirstToLastPoints(pointsForBearing: List<Point>): Double? {
+        if (pointsForBearing.size > 1) {
+            return TurfMeasurement.bearing(pointsForBearing.first(), pointsForBearing.last())
+        } else {
+            return null
+        }
     }
 
     private fun shortestRotationDiff(angle: Double, anchorAngle: Double): Double {

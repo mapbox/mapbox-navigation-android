@@ -17,6 +17,7 @@ import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
+import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getBearingFromFirstToLastPoints
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getMapAnchoredPaddingFromUserPadding
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPitchFallbackFromRouteProgress
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPointsToFrameAfterCurrentManeuver
@@ -679,7 +680,7 @@ class MapboxNavigationViewportDataSource(
     }
 
     private fun updateFollowingData() {
-        val pointsForFollowing: MutableList<Point> = pointsToFrameOnCurrentStep.toMutableList()
+        var pointsForFollowing: MutableList<Point> = pointsToFrameOnCurrentStep.toMutableList()
         val localTargetLocation = targetLocation
 
         if (localTargetLocation != null) {
@@ -700,6 +701,8 @@ class MapboxNavigationViewportDataSource(
             // nothing to frame
             return
         }
+
+        pointsForFollowing = listOf<Point>(pointsForFollowing.first(), pointsForFollowing.last()).toMutableList()
 
         options.followingFrameOptions.bearingSmoothing.run {
             val locationBearing = localTargetLocation?.bearing?.toDouble() ?: BEARING_NORTH
@@ -727,7 +730,7 @@ class MapboxNavigationViewportDataSource(
                 mapboxMap.cameraForCoordinates(
                     pointsForFollowing,
                     followingPadding,
-                    followingBearingProperty.get(),
+                    getBearingFromFirstToLastPoints(pointsForFollowing) ?: followingBearingProperty.get(),
                     followingPitchProperty.get()
                 )
             } else {
