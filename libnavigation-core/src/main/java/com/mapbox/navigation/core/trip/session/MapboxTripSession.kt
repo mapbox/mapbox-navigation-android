@@ -241,8 +241,6 @@ internal class MapboxTripSession(
                         ) {
                             // workaround for a remaining issues in
                             // github.com/mapbox/mapbox-navigation-native/issues/3466
-                            // and
-                            // github.com/mapbox/mapbox-navigation-android/issues/4727
                             MapboxNativeNavigatorImpl.getCurrentBannerInstruction()
                         } else {
                             it

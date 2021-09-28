@@ -43,6 +43,7 @@ import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
+import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.LoggerProvider
@@ -227,6 +228,7 @@ class MapboxNavigationTest {
     @Test
     fun startSessionWithService() {
         createMapboxNavigation()
+        every { directionsSession.initialLegIndex } returns 0
         every { tripSession.isRunningWithForegroundService() } returns true
         mapboxNavigation.startTripSession()
 
@@ -236,10 +238,32 @@ class MapboxNavigationTest {
     @Test
     fun startSessionWithoutService() {
         createMapboxNavigation()
+        every { directionsSession.initialLegIndex } returns 0
         every { tripSession.isRunningWithForegroundService() } returns false
         mapboxNavigation.startTripSession(false)
 
         assertFalse(mapboxNavigation.isRunningForegroundService())
+    }
+
+    @Test
+    fun `trip session route is restored after trip session is restarted`() {
+        createMapboxNavigation()
+        val primary = mockk<DirectionsRoute>()
+        val currentLegIndex = 3
+        every { directionsSession.routes } returns listOf(primary, mockk())
+        every { directionsSession.initialLegIndex } returns 2
+        every { tripSession.getRouteProgress() } returns mockk {
+            every { currentLegProgress } returns mockk {
+                every { legIndex } returns currentLegIndex
+            }
+        }
+        mapboxNavigation.stopTripSession()
+
+        verify(exactly = 1) { tripSession.setRoute(route = null, legIndex = 0) }
+
+        mapboxNavigation.startTripSession()
+
+        verify(exactly = 1) { tripSession.setRoute(primary, currentLegIndex) }
     }
 
     @Test
@@ -492,6 +516,7 @@ class MapboxNavigationTest {
         val routes = listOf(primary, secondary)
         val initialLegIndex = 2
         val routeObserversSlot = mutableListOf<RoutesObserver>()
+        every { tripSession.getState() } returns TripSessionState.STARTED
         every { directionsSession.initialLegIndex } returns initialLegIndex
         verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
 
@@ -509,6 +534,7 @@ class MapboxNavigationTest {
         val routes = emptyList<DirectionsRoute>()
         val initialLegIndex = 0
         val routeObserversSlot = mutableListOf<RoutesObserver>()
+        every { tripSession.getState() } returns TripSessionState.STARTED
         every { directionsSession.initialLegIndex } returns initialLegIndex
         verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
 
@@ -518,6 +544,29 @@ class MapboxNavigationTest {
 
         verify { tripSession.setRoute(null, initialLegIndex) }
         verify { routeRefreshController.stop() }
+    }
+
+    @Test
+    fun `trip session route is delayed till trip session is started`() {
+        createMapboxNavigation()
+        val primary = mockk<DirectionsRoute>()
+        val routes = listOf(primary, mockk())
+        val initialLegIndex = 2
+        val routeObserversSlot = mutableListOf<RoutesObserver>()
+        every { tripSession.getState() } returns TripSessionState.STOPPED
+        every { directionsSession.routes } returns routes
+        every { directionsSession.initialLegIndex } returns initialLegIndex
+        verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
+
+        for (observer in routeObserversSlot) {
+            observer.onRoutesChanged(routes)
+        }
+
+        verify(exactly = 0) { tripSession.setRoute(any(), any()) }
+
+        mapboxNavigation.startTripSession()
+
+        verify(exactly = 1) { tripSession.setRoute(primary, initialLegIndex) }
     }
 
     @Test
@@ -918,6 +967,7 @@ class MapboxNavigationTest {
     fun `verify that session state callbacks are always delivered to NavigationSession`() =
         runBlocking {
             mapboxNavigation = MapboxNavigation(navigationOptions)
+            every { directionsSession.initialLegIndex } returns 0
             mapboxNavigation.startTripSession()
             mapboxNavigation.onDestroy()
 
