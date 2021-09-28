@@ -301,6 +301,8 @@ class MapboxNavigation(
 
     private var reachabilityObserverId: Long? = null
 
+    private var latestLegIndex: Int? = null
+
     /**
      * Describes whether this instance of `MapboxNavigation` has been destroyed by calling
      * [onDestroy]. Once an instance is destroyed, it cannot be used anymore.
@@ -468,6 +470,7 @@ class MapboxNavigation(
                 withTripService = withForegroundService,
                 withReplayEnabled = false
             )
+            restoreTripSessionRoute()
             notificationChannelField?.let {
                 monitorNotificationActionButton(it.get(null) as ReceiveChannel<NotificationAction>)
             }
@@ -481,6 +484,8 @@ class MapboxNavigation(
      */
     fun stopTripSession() {
         runIfNotDestroyed {
+            latestLegIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex
+            tripSession.setRoute(route = null, legIndex = 0)
             tripSession.stop()
         }
     }
@@ -498,6 +503,7 @@ class MapboxNavigation(
                 withTripService = withForegroundService,
                 withReplayEnabled = true
             )
+            restoreTripSessionRoute()
         }
     }
 
@@ -1062,8 +1068,16 @@ class MapboxNavigation(
         navigationSession.unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
     }
 
+    private fun restoreTripSessionRoute() {
+        val legIndex = latestLegIndex ?: directionsSession.initialLegIndex
+        tripSession.setRoute(directionsSession.routes.firstOrNull(), legIndex)
+    }
+
     private fun createInternalRoutesObserver() = RoutesObserver { routes ->
-        tripSession.setRoute(routes.firstOrNull(), directionsSession.initialLegIndex)
+        latestLegIndex = null
+        if (tripSession.getState() == TripSessionState.STARTED) {
+            tripSession.setRoute(routes.firstOrNull(), directionsSession.initialLegIndex)
+        }
         if (routes.isNotEmpty()) {
             routeRefreshController.restart(routes.first())
         } else {
