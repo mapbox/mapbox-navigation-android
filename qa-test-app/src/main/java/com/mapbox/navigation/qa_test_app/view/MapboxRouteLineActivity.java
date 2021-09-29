@@ -53,6 +53,7 @@ import com.mapbox.navigation.base.route.RouterFailure;
 import com.mapbox.navigation.base.route.RouterOrigin;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.MapboxNavigationProvider;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.core.replay.ReplayLocationEngine;
@@ -242,7 +243,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
   @SuppressLint("MissingPermission")
   private void initNavigation(NavigationOptions navigationOptions) {
-    mapboxNavigation = new MapboxNavigation(navigationOptions);
+    mapboxNavigation = MapboxNavigationProvider.create(navigationOptions);
 
     mapboxReplayer.pushRealLocation(this, 0.0);
     mapboxReplayer.playbackSpeed(1.5);

@@ -29,6 +29,7 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
@@ -64,7 +65,7 @@ class FeedbackActivity : AppCompatActivity() {
     }
 
     private val mapboxNavigation: MapboxNavigation by lazy {
-        MapboxNavigation(
+        MapboxNavigationProvider.create(
             NavigationOptions.Builder(this)
                 .accessToken(Utils.getMapboxAccessToken(this))
                 .build()
