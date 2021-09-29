@@ -19,6 +19,7 @@ import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListen
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
@@ -64,7 +65,7 @@ class InactiveRouteStylingWithRestrictionsActivity : AppCompatActivity() {
     }
 
     private val mapboxNavigation: MapboxNavigation by lazy {
-        MapboxNavigation(
+        MapboxNavigationProvider.create(
             NavigationOptions.Builder(this)
                 .accessToken(Utils.getMapboxAccessToken(this))
                 .locationEngine(ReplayLocationEngine(mapboxReplayer))

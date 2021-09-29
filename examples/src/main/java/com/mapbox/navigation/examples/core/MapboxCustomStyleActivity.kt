@@ -29,6 +29,7 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -199,7 +200,7 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
 
     @SuppressLint("MissingPermission")
     private fun initNavigation() {
-        mapboxNavigation = MapboxNavigation(
+        mapboxNavigation = MapboxNavigationProvider.create(
             NavigationOptions.Builder(this)
                 .accessToken(getMapboxAccessTokenFromResources())
                 .locationEngine(ReplayLocationEngine(mapboxReplayer))
