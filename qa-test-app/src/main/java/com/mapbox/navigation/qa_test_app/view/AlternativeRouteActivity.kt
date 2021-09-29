@@ -116,6 +116,13 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        routeLineApi.cancel()
+        routeLineView.cancel()
+        mapboxNavigation.onDestroy()
+    }
+
     private fun initNavigation() {
         binding.mapView.location.apply {
             setLocationProvider(navigationLocationProvider)

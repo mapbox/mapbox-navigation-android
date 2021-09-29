@@ -68,6 +68,12 @@ class RouteTrafficUpdateActivity : AppCompatActivity() {
         job.cancel()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        routeLineApi.cancel()
+        routeLineView.cancel()
+    }
+
     private fun initStyle() {
         binding.mapView.getMapboxMap().loadStyleUri(
             Style.MAPBOX_STREETS
