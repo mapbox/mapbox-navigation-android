@@ -33,6 +33,7 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -296,7 +297,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         }
 
         // initialize Mapbox Navigation
-        mapboxNavigation = MapboxNavigation(
+        mapboxNavigation = MapboxNavigationProvider.create(
             NavigationOptions.Builder(this)
                 .accessToken(getMapboxAccessTokenFromResources())
                 .eventsAppMetadata(

@@ -24,6 +24,7 @@ import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
@@ -247,7 +248,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun initNavigation() {
         historyFileLoader = HistoryFileLoader()
-        mapboxNavigation = MapboxNavigation(
+        mapboxNavigation = MapboxNavigationProvider.create(
             NavigationOptions.Builder(this)
                 .accessToken(Utils.getMapboxAccessToken(this))
                 .build()
