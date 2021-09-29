@@ -25,6 +25,7 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
@@ -223,7 +224,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
             .accessToken(getMapboxAccessTokenFromResources())
             .locationEngine(ReplayLocationEngine(mapboxReplayer))
             .build()
-        mapboxNavigation = MapboxNavigation(navigationOptions)
+        mapboxNavigation = MapboxNavigationProvider.create(navigationOptions)
         mapboxNavigation.startTripSession()
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.play()

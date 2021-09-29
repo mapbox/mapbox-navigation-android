@@ -37,7 +37,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
@@ -94,7 +94,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
     }
 
     private val mapboxNavigation by lazy {
-        MapboxNavigation(
+        MapboxNavigationProvider.create(
             NavigationOptions.Builder(this)
                 .accessToken(getMapboxAccessTokenFromResources())
                 .locationEngine(ReplayLocationEngine(mapboxReplayer))
