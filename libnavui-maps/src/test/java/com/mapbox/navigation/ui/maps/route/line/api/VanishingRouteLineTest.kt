@@ -13,15 +13,18 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
+import com.mapbox.navigation.ui.maps.util.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
-import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import io.mockk.verify
+import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -40,17 +43,20 @@ class VanishingRouteLineTest {
     var coroutineRule = MainCoroutineRule()
     private val parentJob = SupervisorJob()
     private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
+    private lateinit var testJobControl: JobControl
 
     @Before
     fun setUp() {
-        mockkObject(ThreadController)
-        every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
-        every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
+        mockkObject(InternalJobControlFactory)
+        every {
+            InternalJobControlFactory.createJobControl()
+        } returns JobControl(parentJob, testScope)
+        testJobControl = InternalJobControlFactory.createJobControl()
     }
 
     @After
     fun cleanUp() {
-        unmockkObject(ThreadController)
+        unmockkObject(InternalJobControlFactory)
     }
 
     @Test
@@ -76,17 +82,16 @@ class VanishingRouteLineTest {
     fun initWithRoute_clearState() = coroutineRule.runBlockingTest {
         val route = getRoute()
         val vanishingRouteLine = VanishingRouteLine()
-
+        vanishingRouteLine.setJobControl(testJobControl)
         vanishingRouteLine.initWithRoute(route)
         assertEquals(
             8,
             vanishingRouteLine.primaryRouteLineGranularDistances!!.distancesArray.size()
         )
-        unmockkObject(ThreadController)
-        val jobControl = ThreadController.getMainScopeAndRootJob()
-        mockkObject(ThreadController)
+        unmockkObject(InternalJobControlFactory)
+        val jobControl = InternalJobControlFactory.createJobControl()
+        vanishingRouteLine.setJobControl(jobControl)
 
-        every { ThreadController.getMainScopeAndRootJob() } returns jobControl
         Runnable {
             vanishingRouteLine.initWithRoute(getVeryLongRoute())
         }.run()
@@ -308,6 +313,19 @@ class VanishingRouteLineTest {
         assertEquals(expectedTrafficExp, result!!.trafficLineExpression.toString())
         assertEquals(expectedRouteLineExp, result.routeLineExpression.toString())
         assertEquals(expectedCasingExp, result.routeLineCasingExpression.toString())
+    }
+
+    @Test
+    fun cancel() {
+        val mockParentJob = mockk<CompletableJob>(relaxed = true)
+        val mockJobControl = mockk<JobControl> {
+            every { job } returns mockParentJob
+        }
+        every { InternalJobControlFactory.createJobControl() } returns mockJobControl
+
+        VanishingRouteLine().cancel()
+
+        verify { mockParentJob.cancelChildren() }
     }
 
     private fun getRoute(): DirectionsRoute {

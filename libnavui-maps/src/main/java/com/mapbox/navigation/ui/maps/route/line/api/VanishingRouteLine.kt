@@ -16,13 +16,16 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineExpressions
+import com.mapbox.navigation.ui.maps.util.InternalJobControlFactory
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.LoggerProvider
-import com.mapbox.navigation.utils.internal.ThreadController
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import org.jetbrains.annotations.TestOnly
 
 /**
  * This class implements a feature that can change the appearance of the route line behind the puck.
@@ -36,8 +39,12 @@ import kotlinx.coroutines.launch
  */
 internal class VanishingRouteLine {
 
-    private val jobControl = ThreadController.getMainScopeAndRootJob()
+    private var jobControl: JobControl = InternalJobControlFactory.createJobControl()
 
+    @TestOnly
+    internal fun setJobControl(jobControl: JobControl) {
+        this.jobControl = jobControl
+    }
     /**
      * the route points for the indicated primary route
      */
@@ -69,13 +76,13 @@ internal class VanishingRouteLine {
     fun initWithRoute(route: DirectionsRoute) {
         clear()
         jobControl.job.cancelChildren()
-        jobControl.scope.launch {
-            val parsedRoutePointsDef = async(ThreadController.IODispatcher) {
+        jobControl.scope.launch(Dispatchers.Main) {
+            val parsedRoutePointsDef = jobControl.scope.async {
                 parseRoutePoints(route)
             }
             val parsedRoutePoints = parsedRoutePointsDef.await()
 
-            val granularDistancesDef = async(ThreadController.IODispatcher) {
+            val granularDistancesDef = jobControl.scope.async {
                 MapboxRouteLineUtils.calculateRouteGranularDistances(
                     parsedRoutePoints?.flatList
                         ?: emptyList()
@@ -228,5 +235,12 @@ internal class VanishingRouteLine {
     fun clear() {
         primaryRoutePoints = null
         primaryRouteLineGranularDistances = null
+    }
+
+    /**
+     * Cancels any/all background tasks that may be running.
+     */
+    fun cancel() {
+        jobControl.job.cancelChildren()
     }
 }

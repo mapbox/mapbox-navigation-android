@@ -459,6 +459,8 @@ class MapboxNavigationActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        routeLineAPI.cancel()
+        routeLineView.cancel()
         mapboxNavigation.onDestroy()
         speechAPI.cancel()
         voiceInstructionsPlayer.shutdown()

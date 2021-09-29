@@ -21,8 +21,10 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
-import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.ui.maps.util.InternalJobControlFactory
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -38,6 +40,9 @@ import kotlinx.coroutines.sync.withLock
  * This means that if the data has not changed, it does not have to be manually redrawn after a style change.
  * See [Style.addPersistentStyleLayer].
  *
+ * Many of the method calls execute tasks on a background thread. A cancel method is provided
+ * in this class which will cancel the background tasks.
+ *
  * @param options resource options used rendering the route line on the map
  */
 class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
@@ -46,7 +51,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         private const val TAG = "MbxRouteLineView"
     }
 
-    private val jobControl = ThreadController.getMainScopeAndRootJob()
+    private val jobControl = InternalJobControlFactory.createJobControl()
     private val mutex = Mutex()
 
     /**
@@ -77,7 +82,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                 Log.e(TAG, error.errorMessage)
             },
             { value ->
-                jobControl.scope.launch {
+                jobControl.scope.launch(Dispatchers.Main) {
                     mutex.withLock {
                         updateLineGradient(
                             style,
@@ -130,7 +135,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                             value.waypointsSource
                         )
                         value.trafficLineExpressionProvider?.let {
-                            val trafficExpressionDef = async(ThreadController.IODispatcher) {
+                            val trafficExpressionDef = jobControl.scope.async {
                                 it()
                             }
                             trafficExpressionDef.await().apply {
@@ -143,7 +148,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                         }
                         value.altRoute1TrafficExpressionProvider?.let {
                             val altRoute1TrafficExpressionDef =
-                                async(ThreadController.IODispatcher) {
+                                jobControl.scope.async {
                                     it()
                                 }
                             altRoute1TrafficExpressionDef.await().apply {
@@ -156,7 +161,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                         }
                         value.altRoute2TrafficExpressionProvider?.let {
                             val altRoute2TrafficExpressionDef =
-                                async(ThreadController.IODispatcher) {
+                                jobControl.scope.async {
                                     it()
                                 }
                             altRoute2TrafficExpressionDef.await().apply {
@@ -167,10 +172,9 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                                 )
                             }
                         }
-
                         value.restrictedRouteLineExpressionProvider?.let {
                             val restrictedRoadLineExpressionDef =
-                                async(ThreadController.IODispatcher) {
+                                jobControl.scope.async {
                                     it()
                                 }
                             restrictedRoadLineExpressionDef.await().apply {
@@ -198,7 +202,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         update: Expected<RouteLineError, RouteLineUpdateValue>
     ) {
         initializeLayers(style, options)
-        jobControl.scope.launch {
+        jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 update.onValue {
                     updateLineGradient(
@@ -239,7 +243,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         clearRouteLineValue: Expected<RouteLineError, RouteLineClearValue>
     ) {
         initializeLayers(style, options)
-        jobControl.scope.launch {
+        jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 clearRouteLineValue.onValue {
                     updateSource(
@@ -273,7 +277,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the [Style]
      */
     fun showPrimaryRoute(style: Style) {
-        jobControl.scope.launch {
+        jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 updateLayerVisibility(
                     style,
@@ -301,7 +305,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the [Style]
      */
     fun hidePrimaryRoute(style: Style) {
-        jobControl.scope.launch {
+        jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 updateLayerVisibility(
                     style,
@@ -329,7 +333,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the [Style]
      */
     fun showAlternativeRoutes(style: Style) {
-        jobControl.scope.launch {
+        jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 updateLayerVisibility(
                     style,
@@ -365,7 +369,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the [Style]
      */
     fun hideAlternativeRoutes(style: Style) {
-        jobControl.scope.launch {
+        jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 updateLayerVisibility(
                     style,
@@ -423,7 +427,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the Style
      */
     fun showOriginAndDestinationPoints(style: Style) {
-        jobControl.scope.launch {
+        jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 updateLayerVisibility(
                     style,
@@ -440,11 +444,18 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
      * @param style an instance of the Style
      */
     fun hideOriginAndDestinationPoints(style: Style) {
-        jobControl.scope.launch {
+        jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 updateLayerVisibility(style, RouteLayerConstants.WAYPOINT_LAYER_ID, Visibility.NONE)
             }
         }
+    }
+
+    /**
+     * Cancels any/all background tasks that may be running.
+     */
+    fun cancel() {
+        jobControl.job.cancelChildren()
     }
 
     private fun updateLayerVisibility(style: Style, layerId: String, visibility: Visibility) {
