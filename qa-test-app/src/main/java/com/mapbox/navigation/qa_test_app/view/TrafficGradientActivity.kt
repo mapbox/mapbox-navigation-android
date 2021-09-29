@@ -55,6 +55,12 @@ class TrafficGradientActivity : AppCompatActivity() {
         initStyle()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        routeLineApi.cancel()
+        routeLineView.cancel()
+    }
+
     private fun initGradientSelector() {
         binding.gradientOptionHard.setOnClickListener {
             options = options.toBuilder(this)

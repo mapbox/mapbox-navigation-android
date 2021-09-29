@@ -40,13 +40,15 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
+import com.mapbox.navigation.ui.maps.util.InternalJobControlFactory
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
-import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.parallelMap
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMisc
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -182,7 +184,7 @@ class MapboxRouteLineApi(
     private var routeLineExpressionData: List<RouteLineExpressionData> = emptyList()
     private var lastIndexUpdateTimeNano: Long = 0
     private val routeFeatureData: MutableList<RouteFeatureData> = mutableListOf()
-    private val jobControl = ThreadController.getMainScopeAndRootJob()
+    private val jobControl = InternalJobControlFactory.createJobControl()
     private val mutex = Mutex()
     internal var activeLegIndex = INVALID_ACTIVE_LEG_INDEX
         private set
@@ -212,16 +214,18 @@ class MapboxRouteLineApi(
     /**
      * Sets the routes that will be operated on.
      *
+     * This can be a long running task with long routes.
+     * There is a cancel method which will cancel the background tasks.
+     *
      * @param newRoutes one or more routes. The first route in the collection will be considered
      * the primary route and any additional routes will be alternate routes.
      * @param consumer a method that consumes the result of the operation.
-     *
      */
     fun setRoutes(
         newRoutes: List<RouteLine>,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
-        jobControl.scope.launch {
+        jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 val routes = newRoutes.map(RouteLine::route)
                 val featureDataProvider: () -> List<RouteFeatureData> =
@@ -241,7 +245,7 @@ class MapboxRouteLineApi(
     fun getRouteDrawData(
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>
     ) {
-        jobControl.scope.launch {
+        jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 val featureDataProvider: () -> List<RouteFeatureData> =
                     MapboxRouteLineUtils.getRouteFeatureDataProvider(directionsRoutes)
@@ -336,6 +340,9 @@ class MapboxRouteLineApi(
     /**
      * Clears the route line data.
      *
+     * This method will execute tasks on a background thread.
+     * There is a cancel method which will cancel the background tasks.
+     *
      * @param consumer a callback to consume the result
      * @return a state representing the side effects to be rendered on the map. In this case
      * the map should appear without any route lines.
@@ -343,7 +350,7 @@ class MapboxRouteLineApi(
     fun clearRouteLine(
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineClearValue>>
     ) {
-        jobControl.scope.launch {
+        jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 routeLineOptions.vanishingRouteLine?.clear()
                 routeLineOptions.vanishingRouteLine?.vanishPointOffset = 0.0
@@ -459,6 +466,9 @@ class MapboxRouteLineApi(
      * features were not enabled in [MapboxRouteLineOptions], this method does not need to
      * be called as it won't produce any updates.
      *
+     * This method will execute tasks on a background thread.
+     * There is a cancel method which will cancel the background tasks.
+     *
      * @param routeProgress a route progress object
      * @param consumer a consumer for the result of this call
      */
@@ -484,7 +494,7 @@ class MapboxRouteLineApi(
                 else -> {
                     ifNonNull(routeProgress.currentLegProgress) { routeLegProgress ->
                         if (routeLegProgress.legIndex > activeLegIndex) {
-                            jobControl.scope.launch {
+                            jobControl.scope.launch(Dispatchers.Main) {
                                 mutex.withLock {
                                     alternativelyStyleSegmentsNotInLeg(
                                         routeLegProgress.legIndex,
@@ -503,6 +513,9 @@ class MapboxRouteLineApi(
     /**
      * Adjusts the route line visibility so that only the current route leg is visible. This is
      * intended to be used with routes that have multiple waypoints.
+     *
+     * This method will execute tasks on a background thread.
+     * There is a cancel method which will cancel the background tasks.
      *
      * @param routeProgress a [RouteProgress]
      * @param consumer a consumer to receive the method result
@@ -542,6 +555,9 @@ class MapboxRouteLineApi(
      *
      * This method can be useful for showing a route overview with a specific route leg highlighted.
      *
+     * This method will execute tasks on a background thread.
+     * There is a cancel method which will cancel the background tasks.
+     *
      * @param legIndexToHighlight the route leg index that should appear most prominent.
      * @param consumer a consumer to receive the method result
      */
@@ -549,7 +565,7 @@ class MapboxRouteLineApi(
         legIndexToHighlight: Int,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>
     ) {
-        jobControl.scope.launch {
+        jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 val expected = ifNonNull(primaryRoute?.legs()) { routeLegs ->
                     if (legIndexToHighlight in 0..routeLegs.lastIndex) {
@@ -655,6 +671,9 @@ class MapboxRouteLineApi(
      * feature is found the index of that route in this class's route collection is returned. The
      * primary route is given precedence if more than one route is found.
      *
+     * This method will execute tasks on a background thread.
+     * There is a cancel method which will cancel the background tasks.
+     *
      * @param target a target latitude/longitude serving as the search point
      * @param mapboxMap a reference to the [MapboxMap] that will be queried
      * @param padding a sizing value added to all sides of the target point for creating a bounding
@@ -667,12 +686,20 @@ class MapboxRouteLineApi(
         padding: Float,
         resultConsumer: MapboxNavigationConsumer<Expected<RouteNotFound, ClosestRouteValue>>
     ) {
-        jobControl.scope.launch {
+        jobControl.scope.launch(Dispatchers.Main) {
             mutex.withLock {
                 val state = findClosestRoute(target, mapboxMap, padding)
                 resultConsumer.accept(state)
             }
         }
+    }
+
+    /**
+     * Cancels any/all background tasks that may be running.
+     */
+    fun cancel() {
+        routeLineOptions.vanishingRouteLine?.cancel()
+        jobControl.job.cancelChildren()
     }
 
     private suspend fun findClosestRoute(
@@ -872,7 +899,7 @@ class MapboxRouteLineApi(
     private suspend fun buildDrawRoutesState(
         featureDataProvider: () -> List<RouteFeatureData>
     ): Expected<RouteLineError, RouteSetValue> {
-        val routeFeatureDataDef = jobControl.scope.async(ThreadController.IODispatcher) {
+        val routeFeatureDataDef = jobControl.scope.async {
             featureDataProvider()
         }
         val routeFeatureDataResult = routeFeatureDataDef.await()
@@ -976,7 +1003,7 @@ class MapboxRouteLineApi(
             }
         }
 
-        val wayPointsFeatureCollectionDef = jobControl.scope.async(ThreadController.IODispatcher) {
+        val wayPointsFeatureCollectionDef = jobControl.scope.async {
             partitionedRoutes.first.firstOrNull()?.route?.run {
                 MapboxRouteLineUtils.buildWayPointFeatureCollection(this)
             } ?: FeatureCollection.fromFeatures(listOf())
@@ -998,9 +1025,9 @@ class MapboxRouteLineApi(
         val wayPointsFeatureCollection = wayPointsFeatureCollectionDef.await()
 
         if (routeLineOptions.displayRestrictedRoadSections) {
-            jobControl.scope.launch {
+            jobControl.scope.launch(Dispatchers.Main) {
                 val routeHasRestrictionsDef =
-                    jobControl.scope.async(ThreadController.IODispatcher) {
+                    jobControl.scope.async {
                         partitionedRoutes.first.firstOrNull()?.route?.run {
                             MapboxRouteLineUtils.routeHasRestrictions(this)
                         } ?: false
@@ -1015,8 +1042,8 @@ class MapboxRouteLineApi(
             routeLineOptions.vanishingRouteLine != null ||
             routeLineOptions.styleInactiveRouteLegsIndependently
         ) {
-            jobControl.scope.launch {
-                val segmentsDef = jobControl.scope.async(ThreadController.IODispatcher) {
+            jobControl.scope.launch(Dispatchers.Main) {
+                val segmentsDef = jobControl.scope.async {
                     partitionedRoutes.first.firstOrNull()?.route?.run {
                         MapboxRouteLineUtils.calculateRouteLineSegments(
                             this,
