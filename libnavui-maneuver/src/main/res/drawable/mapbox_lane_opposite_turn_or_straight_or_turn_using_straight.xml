@@ -19,14 +19,14 @@
         <path
             android:name="bezier4"
             android:pathData="M -5.73,-0.41 L -6.75,-0.41 L -6.75,-0.41 C -6.8,-0.41 -6.86,-0.41 -6.91,-0.41 C -7.15,-0.41 -7.34,-0.6 -7.34,-0.9 C -7.34,-0.93 -7.34,-0.96 -7.33,-0.99 L -7.34,-0.99 L -6.53,-3.72 L -6.53,-3.71 C -6.51,-3.77 -6.5,-3.84 -6.5,-3.91 C -6.5,-4.19 -6.69,-4.42 -6.92,-4.42 C -7.04,-4.42 -7.15,-4.36 -7.23,-4.26 L -7.23,-4.26 L -12.97,1.59 L -7.18,7.44 L -7.18,7.43 C -7.1,7.53 -6.99,7.6 -6.87,7.6 C -6.64,7.6 -6.45,7.37 -6.45,7.08 C -6.45,7.01 -6.46,6.95 -6.48,6.89 L -6.48,6.89 L -7.29,4.16 L -7.28,4.16 C -7.29,4.14 -7.29,4.1 -7.29,4.07 C -7.29,3.78 -7.1,3.59 -6.86,3.59 C -6.81,3.59 -6.75,3.58 -6.7,3.58 L -6.7,3.58 L -5.68,3.59 "
-            android:fillColor="#FF9E9E9E"
+            android:fillColor="?attr/maneuverTurnIconShadowColor"
             android:fillType="evenOdd" />
         
         <!-- Bezier 5 -->
         <path
             android:name="bezier5"
             android:pathData="M -0.03,12 L -0.03,7.87 C -0.03,6.23 -0.6,4.65 -1.63,3.61 C -2.63,2.61 -4.01,1.61 -5.56,1.61 L -7.33,1.61 "
-            android:strokeColor="#FF9E9E9E"
+            android:strokeColor="?attr/maneuverTurnIconShadowColor"
             android:strokeWidth="4" />
     </group>
     
@@ -40,14 +40,14 @@
         <path
             android:name="bezier2"
             android:pathData="M 5.73,-0.41 L 6.75,-0.41 L 6.75,-0.41 C 6.8,-0.41 6.86,-0.41 6.91,-0.41 C 7.15,-0.41 7.34,-0.6 7.34,-0.9 C 7.34,-0.93 7.34,-0.96 7.33,-0.99 L 7.34,-0.99 L 6.53,-3.72 L 6.53,-3.71 C 6.51,-3.77 6.5,-3.84 6.5,-3.91 C 6.5,-4.19 6.69,-4.42 6.92,-4.42 C 7.04,-4.42 7.15,-4.36 7.23,-4.26 L 7.23,-4.26 L 12.97,1.59 L 7.18,7.44 L 7.18,7.43 C 7.1,7.53 6.99,7.6 6.87,7.6 C 6.64,7.6 6.45,7.37 6.45,7.08 C 6.45,7.01 6.46,6.95 6.48,6.89 L 6.48,6.89 L 7.29,4.16 L 7.28,4.16 C 7.29,4.14 7.29,4.1 7.29,4.07 C 7.29,3.78 7.1,3.59 6.86,3.59 C 6.81,3.59 6.75,3.58 6.7,3.58 L 6.7,3.58 L 5.68,3.59 "
-            android:fillColor="#FF9E9E9E"
+            android:fillColor="?attr/maneuverTurnIconShadowColor"
             android:fillType="evenOdd" />
         
         <!-- Bezier 3 -->
         <path
             android:name="bezier3"
             android:pathData="M 0.03,12 L 0.03,7.87 C 0.03,6.23 0.6,4.65 1.63,3.61 C 2.63,2.61 4.01,1.61 5.56,1.61 L 7.33,1.61 "
-            android:strokeColor="#FF9E9E9E"
+            android:strokeColor="?attr/maneuverTurnIconShadowColor"
             android:strokeWidth="4" />
     </group>
     
