@@ -2,24 +2,22 @@ package com.mapbox.navigation.ui.maps
 
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
-import com.mapbox.bindgen.Expected
-import com.mapbox.bindgen.Value
 import com.mapbox.common.TileStore
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.OfflineManager
 import com.mapbox.maps.ResourceOptions
+import com.mapbox.maps.TilesetDescriptorOptions
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.PredictiveCache
 import com.mapbox.navigation.utils.internal.LoggerProvider
-import java.util.HashMap
 
 private const val TAG = "MbxPredictiveCache"
-private const val MAPBOX_URL_PREFIX = "mapbox://"
-private const val VECTOR_SOURCE_TYPE = "vector"
-private const val RASTER_SOURCE_TYPE = "raster"
+private const val MIN_ZOOM = 0.toByte()
+private const val MAX_ZOOM = 16.toByte()
 
 /**
  * Predictive caching is a system that downloads necessary visual map and guidance data resources
@@ -73,46 +71,40 @@ class PredictiveCacheController @JvmOverloads constructor(
      * Call when a new map instance is available.
      *
      * @param map an instance of [MapboxMap]
-     * @param sourceIdsToCache a list of sources to cache.
      * Source id's should look like "mapbox://mapbox.satellite", "mapbox://mapbox.mapbox-terrain-v2".
      * The system only supports source hosted on Mapbox Services which URL starts with "mapbox://".
      * If no ids are passed all available style sources will be cached.
      */
-    @JvmOverloads
-    fun createMapControllers(
-        map: MapboxMap,
-        sourceIdsToCache: List<String> = emptyList()
-    ) {
+    fun createMapControllers(map: MapboxMap) {
         val tileStore = map.getResourceOptions().tileStore
         if (tileStore == null) {
             handleError("TileStore instance not configured for the Map.")
             return
         }
 
+        val offlineManager = OfflineManager(map.getResourceOptions())
+
         mapListeners[map]?.let {
             removeMapControllers(map)
         }
 
-        traverseMapSources(map, sourceIdsToCache) { tileVariant ->
-            PredictiveCache.createMapsController(
-                map,
-                tileStore,
-                tileVariant,
-                predictiveCacheLocationOptions
-            )
-        }
-
         val onStyleLoadedListener = OnStyleLoadedListener {
-            val currentMapSources = mutableListOf<String>()
-            traverseMapSources(map, sourceIdsToCache) { tileVariant ->
-                currentMapSources.add(tileVariant)
+            map.getStyle()?.styleURI?.let { styleURI ->
+                val descriptorOptions = TilesetDescriptorOptions.Builder()
+                    .styleURI(styleURI)
+                    .minZoom(MIN_ZOOM)
+                    .maxZoom(MAX_ZOOM)
+                    .build()
+
+                val tilesetDescriptor = offlineManager.createTilesetDescriptor(descriptorOptions)
+
+                PredictiveCache.createMapsController(
+                    map,
+                    tileStore,
+                    tilesetDescriptor,
+                    predictiveCacheLocationOptions
+                )
             }
-            updateMapsControllers(
-                map,
-                currentMapSources,
-                PredictiveCache.currentMapsPredictiveCacheControllers(map),
-                tileStore
-            )
         }
 
         map.addOnStyleLoadedListener(onStyleLoadedListener)
@@ -142,69 +134,6 @@ class PredictiveCacheController @JvmOverloads constructor(
         }
         mapListeners.clear()
         PredictiveCache.clean()
-    }
-
-    private fun traverseMapSources(
-        map: MapboxMap,
-        sourceIdsToCache: List<String>,
-        fn: (String) -> Unit
-    ) {
-        val sourceIds = if (sourceIdsToCache.isEmpty()) {
-            val filteredSources = map.getStyle()?.styleSources
-                ?.filter { it.type == VECTOR_SOURCE_TYPE || it.type == RASTER_SOURCE_TYPE }
-                ?: emptyList()
-
-            filteredSources.map { it.id }
-        } else {
-            sourceIdsToCache
-        }
-
-        for (sourceId in sourceIds) {
-            val properties: Expected<String, Value>? =
-                map.getStyle()?.getStyleSourceProperties(sourceId)
-
-            if (properties != null) {
-                if (properties.isError) {
-                    handleError(properties.error)
-                } else {
-                    val contentsDictionary = properties.value!!.contents as HashMap<String, Value>
-                    val url = contentsDictionary["url"].toString()
-                    if (!url.startsWith(MAPBOX_URL_PREFIX)) {
-                        val message =
-                            """
-                                Source URL: "$url" does not start with "$MAPBOX_URL_PREFIX".
-                                Only sources hosted on Mapbox Services are supported.
-                            """.trimIndent()
-                        handleError(message)
-                        continue
-                    } else {
-                        fn(url.removePrefix(MAPBOX_URL_PREFIX))
-                    }
-                }
-            }
-        }
-    }
-
-    private fun updateMapsControllers(
-        map: MapboxMap,
-        currentMapSources: List<String>,
-        attachedMapSources: List<String>,
-        tileStore: TileStore,
-    ) {
-        attachedMapSources
-            .filterNot { currentMapSources.contains(it) }
-            .forEach { PredictiveCache.removeMapControllers(map, it) }
-
-        currentMapSources
-            .filterNot { attachedMapSources.contains(it) }
-            .forEach {
-                PredictiveCache.createMapsController(
-                    map,
-                    tileStore,
-                    it,
-                    predictiveCacheLocationOptions
-                )
-            }
     }
 
     private fun handleError(error: String?) {

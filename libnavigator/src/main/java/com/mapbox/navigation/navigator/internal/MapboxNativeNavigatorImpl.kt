@@ -6,6 +6,7 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.TileStore
+import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
@@ -313,19 +314,19 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * Creates a Maps [PredictiveCacheController].
      *
      * @param tileStore Maps [TileStore]
-     * @param tileVariant Maps tileset
+     * @param tilesetDescriptor Maps tilesetDescriptor
      * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
      *
      * @return [PredictiveCacheController]
      */
     override fun createMapsPredictiveCacheController(
         tileStore: TileStore,
-        tileVariant: String,
+        tilesetDescriptor: TilesetDescriptor,
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions
     ): PredictiveCacheController =
         navigator!!.createPredictiveCacheController(
             tileStore,
-            createDefaultMapsPredictiveCacheControllerOptions(tileVariant),
+            listOf(tilesetDescriptor),
             predictiveCacheLocationOptions.toPredictiveLocationTrackerOptions()
         )
 
