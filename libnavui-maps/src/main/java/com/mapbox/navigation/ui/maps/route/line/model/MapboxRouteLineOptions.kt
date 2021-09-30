@@ -4,8 +4,8 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLayerProvider
 import com.mapbox.navigation.ui.maps.route.line.api.VanishingRouteLine
 import kotlin.math.abs
@@ -41,7 +41,7 @@ class MapboxRouteLineOptions private constructor(
     val displayRestrictedRoadSections: Boolean = false,
     val styleInactiveRouteLegsIndependently: Boolean = false,
     val displaySoftGradientForTraffic: Boolean = false,
-    val softGradientTransition: Double = RouteConstants.SOFT_GRADIENT_STOP_GAP_METERS
+    val softGradientTransition: Double = RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS
 ) {
 
     /**
@@ -173,7 +173,7 @@ class MapboxRouteLineOptions private constructor(
             false,
             false,
             false,
-            RouteConstants.SOFT_GRADIENT_STOP_GAP_METERS
+            RouteLayerConstants.SOFT_GRADIENT_STOP_GAP_METERS
         )
 
         /**

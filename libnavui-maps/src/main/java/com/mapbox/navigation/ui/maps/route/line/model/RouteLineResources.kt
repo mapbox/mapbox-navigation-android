@@ -2,14 +2,14 @@ package com.mapbox.navigation.ui.maps.route.line.model
 
 import androidx.annotation.DrawableRes
 import com.mapbox.maps.extension.style.expressions.generated.Expression
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.DESTINATION_WAYPOINT_ICON
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.ORIGIN_WAYPOINT_ICON
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.RESTRICTED_ROAD_DASH_ARRAY
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.RESTRICTED_ROAD_LINE_OPACITY
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.RESTRICTED_ROAD_LINE_WIDTH
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.ROUNDED_LINE_CAP
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.TRAFFIC_BACKFILL_ROAD_CLASSES
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.buildScalingExpression
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DESTINATION_WAYPOINT_ICON
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ORIGIN_WAYPOINT_ICON
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_ROAD_DASH_ARRAY
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_ROAD_LINE_OPACITY
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_ROAD_LINE_WIDTH
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ROUNDED_LINE_CAP
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TRAFFIC_BACKFILL_ROAD_CLASSES
 
 /**
  * Contains colors an other values used to determine the appearance of the route line.
