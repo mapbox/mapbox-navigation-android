@@ -338,6 +338,7 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
         super.onDestroy()
         routeLineApi.cancel()
         routeLineView.cancel()
+        mapboxReplayer.finish()
         mapboxNavigation.onDestroy()
     }
 

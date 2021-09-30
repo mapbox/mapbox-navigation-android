@@ -23,7 +23,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
-import com.mapbox.navigation.ui.maps.util.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -62,7 +62,7 @@ class MapboxRouteLineViewTest {
         ctx = ApplicationProvider.getApplicationContext()
         mockkObject(InternalJobControlFactory)
         every {
-            InternalJobControlFactory.createJobControl()
+            InternalJobControlFactory.createDefaultScopeJobControl()
         } returns JobControl(parentJob, testScope)
     }
 
@@ -593,7 +593,7 @@ class MapboxRouteLineViewTest {
         val mockJobControl = mockk<JobControl> {
             every { job } returns mockParentJob
         }
-        every { InternalJobControlFactory.createJobControl() } returns mockJobControl
+        every { InternalJobControlFactory.createDefaultScopeJobControl() } returns mockJobControl
 
         MapboxRouteLineView(options).cancel()
 
