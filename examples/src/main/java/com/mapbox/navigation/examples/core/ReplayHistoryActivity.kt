@@ -111,6 +111,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
         super.onDestroy()
         routeLineApi.cancel()
         routeLineView.cancel()
+        mapboxReplayer.finish()
         mapboxNavigation.onDestroy()
         if (::locationComponent.isInitialized) {
             locationComponent.removeOnIndicatorPositionChangedListener(onPositionChangedListener)

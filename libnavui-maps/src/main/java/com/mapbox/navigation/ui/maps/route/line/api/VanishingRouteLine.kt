@@ -16,8 +16,8 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingRouteLineExpressions
-import com.mapbox.navigation.ui.maps.util.InternalJobControlFactory
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +39,7 @@ import org.jetbrains.annotations.TestOnly
  */
 internal class VanishingRouteLine {
 
-    private var jobControl: JobControl = InternalJobControlFactory.createJobControl()
+    private var jobControl: JobControl = InternalJobControlFactory.createDefaultScopeJobControl()
 
     @TestOnly
     internal fun setJobControl(jobControl: JobControl) {
