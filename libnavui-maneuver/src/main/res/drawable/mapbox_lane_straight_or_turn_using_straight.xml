@@ -19,14 +19,14 @@
         <path
             android:name="bezier2"
             android:pathData="M 3.05,-0.41 L 4.31,-0.41 L 4.31,-0.41 C 4.37,-0.41 4.44,-0.41 4.51,-0.41 C 4.8,-0.41 5.03,-0.6 5.03,-0.9 C 5.03,-0.93 5.03,-0.96 5.03,-0.99 L 5.03,-0.99 L 4.04,-3.72 L 4.04,-3.71 C 4.02,-3.77 4,-3.84 4,-3.91 C 4,-4.19 4.23,-4.42 4.52,-4.42 C 4.67,-4.42 4.8,-4.36 4.9,-4.26 L 4.9,-4.26 L 11.97,1.59 L 4.83,7.44 L 4.84,7.43 C 4.74,7.53 4.6,7.6 4.46,7.6 C 4.17,7.6 3.94,7.37 3.94,7.08 C 3.94,7.01 3.95,6.95 3.98,6.89 L 3.98,6.89 L 4.97,4.16 L 4.97,4.16 C 4.97,4.14 4.97,4.1 4.97,4.07 C 4.97,3.78 4.74,3.59 4.45,3.59 C 4.38,3.59 4.31,3.58 4.25,3.58 L 4.25,3.58 L 2.99,3.59 "
-            android:fillColor="#FF9E9E9E"
+            android:fillColor="?attr/maneuverTurnIconShadowColor"
             android:fillType="evenOdd" />
         
         <!-- Bezier 3 -->
         <path
             android:name="bezier3"
             android:pathData="M -3.97,12 L -3.97,7.87 C -3.97,6.23 -3.27,4.65 -2,3.61 C -0.77,2.61 0.93,1.61 2.84,1.61 L 5.03,1.61 "
-            android:strokeColor="#FF9E9E9E"
+            android:strokeColor="?attr/maneuverTurnIconShadowColor"
             android:strokeWidth="4" />
     </group>
     
