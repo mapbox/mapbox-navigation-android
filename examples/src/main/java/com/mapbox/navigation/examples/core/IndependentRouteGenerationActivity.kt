@@ -294,6 +294,7 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        mapboxReplayer.finish()
         mapboxNavigation.onDestroy()
     }
 }

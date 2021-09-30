@@ -21,7 +21,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
-import com.mapbox.navigation.ui.maps.util.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
@@ -51,7 +51,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         private const val TAG = "MbxRouteLineView"
     }
 
-    private val jobControl = InternalJobControlFactory.createJobControl()
+    private val jobControl = InternalJobControlFactory.createDefaultScopeJobControl()
     private val mutex = Mutex()
 
     /**

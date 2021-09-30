@@ -13,7 +13,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
-import com.mapbox.navigation.ui.maps.util.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
 import io.mockk.every
 import io.mockk.mockk
@@ -49,9 +49,9 @@ class VanishingRouteLineTest {
     fun setUp() {
         mockkObject(InternalJobControlFactory)
         every {
-            InternalJobControlFactory.createJobControl()
+            InternalJobControlFactory.createDefaultScopeJobControl()
         } returns JobControl(parentJob, testScope)
-        testJobControl = InternalJobControlFactory.createJobControl()
+        testJobControl = InternalJobControlFactory.createDefaultScopeJobControl()
     }
 
     @After
@@ -89,7 +89,7 @@ class VanishingRouteLineTest {
             vanishingRouteLine.primaryRouteLineGranularDistances!!.distancesArray.size()
         )
         unmockkObject(InternalJobControlFactory)
-        val jobControl = InternalJobControlFactory.createJobControl()
+        val jobControl = InternalJobControlFactory.createDefaultScopeJobControl()
         vanishingRouteLine.setJobControl(jobControl)
 
         Runnable {
@@ -321,7 +321,7 @@ class VanishingRouteLineTest {
         val mockJobControl = mockk<JobControl> {
             every { job } returns mockParentJob
         }
-        every { InternalJobControlFactory.createJobControl() } returns mockJobControl
+        every { InternalJobControlFactory.createDefaultScopeJobControl() } returns mockJobControl
 
         VanishingRouteLine().cancel()
 

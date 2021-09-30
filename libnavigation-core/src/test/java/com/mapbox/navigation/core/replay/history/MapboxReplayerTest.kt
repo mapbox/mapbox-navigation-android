@@ -3,13 +3,18 @@ package com.mapbox.navigation.core.replay.history
 import android.os.SystemClock
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.JobControl
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkObject
 import io.mockk.verify
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -23,6 +28,8 @@ class MapboxReplayerTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
+    private val parentJob = SupervisorJob()
+    private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
 
     private val replayEventsObserver: ReplayEventsObserver = mockk(relaxed = true)
     private var deviceElapsedTimeNanos = TimeUnit.HOURS.toNanos(11)
@@ -128,13 +135,9 @@ class MapboxReplayerTest {
         val testEvents = List(12) { ReplayEventGetStatus(it.toDouble()) }
         mapboxReplayer.pushEvents(testEvents)
         val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
-        mapboxReplayer.registerObserver(
-            object : ReplayEventsObserver {
-                override fun replayEvents(events: List<ReplayEventBase>) {
-                    events.forEach { timeCapture.add(Pair(it, currentTime)) }
-                }
-            }
-        )
+        mapboxReplayer.registerObserver { events ->
+            events.forEach { timeCapture.add(Pair(it, currentTime)) }
+        }
 
         mapboxReplayer.play()
         advanceTimeMillis(20000)
@@ -160,16 +163,12 @@ class MapboxReplayerTest {
             )
         )
         val timeCapture = mutableListOf<Long>()
-        mapboxReplayer.registerObserver(
-            object : ReplayEventsObserver {
-                override fun replayEvents(events: List<ReplayEventBase>) {
-                    if (events.isNotEmpty()) {
-                        timeCapture.add(currentTime)
-                        advanceTimeMillis(75)
-                    }
-                }
+        mapboxReplayer.registerObserver { events ->
+            if (events.isNotEmpty()) {
+                timeCapture.add(currentTime)
+                advanceTimeMillis(75)
             }
-        )
+        }
 
         mapboxReplayer.play()
         for (i in 0..3000) {
@@ -370,13 +369,9 @@ class MapboxReplayerTest {
             mapboxReplayer.playbackSpeed(1.0)
             mapboxReplayer.play()
             val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
-            mapboxReplayer.registerObserver(
-                object : ReplayEventsObserver {
-                    override fun replayEvents(events: List<ReplayEventBase>) {
-                        events.forEach { timeCapture.add(Pair(it, currentTime)) }
-                    }
-                }
-            )
+            mapboxReplayer.registerObserver { events ->
+                events.forEach { timeCapture.add(Pair(it, currentTime)) }
+            }
             advanceTimeMillis(3000)
             mapboxReplayer.finish()
 
@@ -392,13 +387,9 @@ class MapboxReplayerTest {
             mapboxReplayer.playbackSpeed(4.0)
             mapboxReplayer.play()
             val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
-            mapboxReplayer.registerObserver(
-                object : ReplayEventsObserver {
-                    override fun replayEvents(events: List<ReplayEventBase>) {
-                        events.forEach { timeCapture.add(Pair(it, currentTime)) }
-                    }
-                }
-            )
+            mapboxReplayer.registerObserver { events ->
+                events.forEach { timeCapture.add(Pair(it, currentTime)) }
+            }
             advanceTimeMillis(4000)
             mapboxReplayer.finish()
 
@@ -414,13 +405,9 @@ class MapboxReplayerTest {
             mapboxReplayer.playbackSpeed(0.25)
             mapboxReplayer.play()
             val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
-            mapboxReplayer.registerObserver(
-                object : ReplayEventsObserver {
-                    override fun replayEvents(events: List<ReplayEventBase>) {
-                        events.forEach { timeCapture.add(Pair(it, currentTime)) }
-                    }
-                }
-            )
+            mapboxReplayer.registerObserver { events ->
+                events.forEach { timeCapture.add(Pair(it, currentTime)) }
+            }
             advanceTimeMillis(40000)
             mapboxReplayer.finish()
 
@@ -435,13 +422,9 @@ class MapboxReplayerTest {
         mapboxReplayer.playbackSpeed(1.0)
         mapboxReplayer.play()
         val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
-        mapboxReplayer.registerObserver(
-            object : ReplayEventsObserver {
-                override fun replayEvents(events: List<ReplayEventBase>) {
-                    events.forEach { timeCapture.add(Pair(it, currentTime)) }
-                }
-            }
-        )
+        mapboxReplayer.registerObserver { events ->
+            events.forEach { timeCapture.add(Pair(it, currentTime)) }
+        }
         advanceTimeMillis(2000)
         mapboxReplayer.playbackSpeed(3.0)
         advanceTimeMillis(1999) // advance a fraction to remove the equal events
@@ -460,13 +443,9 @@ class MapboxReplayerTest {
             val testEvents = List(12) { ReplayEventGetStatus(it.toDouble()) }
             mapboxReplayer.pushEvents(testEvents)
             val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
-            mapboxReplayer.registerObserver(
-                object : ReplayEventsObserver {
-                    override fun replayEvents(events: List<ReplayEventBase>) {
-                        events.forEach { timeCapture.add(Pair(it, currentTime)) }
-                    }
-                }
-            )
+            mapboxReplayer.registerObserver { events ->
+                events.forEach { timeCapture.add(Pair(it, currentTime)) }
+            }
 
             mapboxReplayer.play()
             advanceTimeMillis(20000)
@@ -547,13 +526,9 @@ class MapboxReplayerTest {
             val firstRoute = List(20) { ReplayEventGetStatus(it.toDouble()) }
             val secondRoute = List(10) { ReplayEventGetStatus(100.0 + it.toDouble()) }
             val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
-            mapboxReplayer.registerObserver(
-                object : ReplayEventsObserver {
-                    override fun replayEvents(events: List<ReplayEventBase>) {
-                        events.forEach { timeCapture.add(Pair(it, currentTime)) }
-                    }
-                }
-            )
+            mapboxReplayer.registerObserver { events ->
+                events.forEach { timeCapture.add(Pair(it, currentTime)) }
+            }
 
             mapboxReplayer.pushEvents(firstRoute)
             mapboxReplayer.play()
@@ -577,10 +552,15 @@ class MapboxReplayerTest {
     fun setup() {
         mockkStatic(SystemClock::class)
         every { SystemClock.elapsedRealtimeNanos() } returns deviceElapsedTimeNanos
+        mockkObject(InternalJobControlFactory)
+        every {
+            InternalJobControlFactory.createMainScopeJobControl()
+        } returns JobControl(parentJob, testScope)
     }
 
     @After
     fun teardown() {
+        unmockkObject(InternalJobControlFactory)
         unmockkObject(SystemClock.elapsedRealtimeNanos())
     }
 

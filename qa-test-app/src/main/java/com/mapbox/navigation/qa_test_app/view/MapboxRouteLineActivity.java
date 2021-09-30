@@ -297,6 +297,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     super.onDestroy();
     mapboxRouteLineApi.cancel();
     mapboxRouteLineView.cancel();
+    mapboxReplayer.finish();
     if (predictiveCacheController != null) {
       predictiveCacheController.onDestroy();
     }

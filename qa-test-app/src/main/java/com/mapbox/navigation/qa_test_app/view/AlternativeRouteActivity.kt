@@ -120,6 +120,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         super.onDestroy()
         routeLineApi.cancel()
         routeLineView.cancel()
+        mapboxReplayer.finish()
         mapboxNavigation.onDestroy()
     }
 
