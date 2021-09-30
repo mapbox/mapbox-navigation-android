@@ -2,6 +2,27 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-rc.4 - September 30, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
+- Added a cancel method to the `MapboxRouteLineApi` and `MapboxRouteLineView` classes for cancelling the background tasks. [#4911](https://github.com/mapbox/mapbox-navigation-android/pull/4911)
+- Removed logging message that under some conditions could cause an ANR due to the construction of the logging message. [#4900](https://github.com/mapbox/mapbox-navigation-android/pull/4900)
+- Fixed an issue where pausing a free drive session did not extend the session's validity correctly. [#4912](https://github.com/mapbox/mapbox-navigation-android/pull/4912)
+- Fixed an issue where both `navmaus` and `nav2sesmau` SKUs could be counted when using Nav SDK v2. [#4912](https://github.com/mapbox/mapbox-navigation-android/pull/4912)
+- Fixed compatibility issues with 32-bit devices that could've resulted in incorrect location updates. [#4919](https://github.com/mapbox/mapbox-navigation-android/pull/4919)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.0.0-rc.9` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.9))
+- Mapbox Navigation Native `v68.0.0`
+- Mapbox Core Common `v19.0.0`
+- Mapbox Java `v6.0.0-alpha.7` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0-alpha.7))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.1.0-alpha.1 - September 24, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
