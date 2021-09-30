@@ -40,8 +40,8 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils.cacheResult
-import com.mapbox.navigation.ui.maps.util.InternalJobControlFactory
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.parallelMap
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
@@ -184,7 +184,7 @@ class MapboxRouteLineApi(
     private var routeLineExpressionData: List<RouteLineExpressionData> = emptyList()
     private var lastIndexUpdateTimeNano: Long = 0
     private val routeFeatureData: MutableList<RouteFeatureData> = mutableListOf()
-    private val jobControl = InternalJobControlFactory.createJobControl()
+    private val jobControl = InternalJobControlFactory.createDefaultScopeJobControl()
     private val mutex = Mutex()
     internal var activeLegIndex = INVALID_ACTIVE_LEG_INDEX
         private set

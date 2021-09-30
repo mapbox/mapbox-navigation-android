@@ -601,6 +601,7 @@ class MapboxCameraAnimationsActivity :
 
     override fun onDestroy() {
         super.onDestroy()
+        mapboxReplayer.finish()
         mapboxNavigation.onDestroy()
     }
 

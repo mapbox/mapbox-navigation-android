@@ -2,7 +2,7 @@ package com.mapbox.navigation.core.replay.history
 
 import android.os.SystemClock
 import com.mapbox.navigation.core.replay.MapboxReplayer
-import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
@@ -21,7 +21,7 @@ internal class ReplayEventSimulator(
     private val replayEvents: ReplayEvents
 ) {
 
-    private val jobControl = ThreadController.getMainScopeAndRootJob()
+    private val jobControl = InternalJobControlFactory.createMainScopeJobControl()
 
     // The pivot will move forward through the events with time.
     private var historyTimeOffset: Double = 0.0
