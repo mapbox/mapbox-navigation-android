@@ -626,6 +626,7 @@ class MapboxNavigation(
      * Call this method whenever this instance of the [MapboxNavigation] is not going to be used anymore and should release all of its resources.
      */
     fun onDestroy() {
+        if (isDestroyed) return
         logger.d(MapboxNavigationTelemetry.TAG, Message("MapboxNavigation onDestroy"))
         billingController.onDestroy()
         directionsSession.shutdown()
