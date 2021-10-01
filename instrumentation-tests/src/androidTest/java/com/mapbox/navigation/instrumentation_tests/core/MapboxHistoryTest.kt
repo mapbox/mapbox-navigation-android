@@ -71,16 +71,18 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     fun setup() {
         Espresso.onIdle()
 
-        mapboxNavigation = MapboxNavigationProvider.create(
-            NavigationOptions.Builder(activity)
-                .accessToken(getMapboxAccessTokenFromResources(activity))
-                .historyRecorderOptions(
-                    HistoryRecorderOptions.Builder()
-                        .build()
-                )
-                .build()
-        )
-        mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder
+        runOnMainSync {
+            mapboxNavigation = MapboxNavigationProvider.create(
+                NavigationOptions.Builder(activity)
+                    .accessToken(getMapboxAccessTokenFromResources(activity))
+                    .historyRecorderOptions(
+                        HistoryRecorderOptions.Builder()
+                            .build()
+                    )
+                    .build()
+            )
+            mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder
+        }
         routeCompleteIdlingResource = RouteProgressStateIdlingResource(
             mapboxNavigation,
             RouteProgressState.COMPLETE
@@ -139,7 +141,9 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         }
 
         // assert and clean up
-        Espresso.onIdle()
+        mapboxHistoryTestRule.stopRecordingOnCrash("no route complete") {
+            Espresso.onIdle()
+        }
         routeCompleteIdlingResource.unregister()
 
         runOnMainSync {

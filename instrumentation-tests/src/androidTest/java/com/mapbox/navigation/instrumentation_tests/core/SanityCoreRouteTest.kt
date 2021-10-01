@@ -15,6 +15,7 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.RouteProgressStateTransitionAssertion
+import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
@@ -33,6 +34,9 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
 
+    @get:Rule
+    val mapboxHistoryTestRule = MapboxHistoryTestRule()
+
     private lateinit var mapboxNavigation: MapboxNavigation
 
     private lateinit var routeCompleteIdlingResource: RouteProgressStateIdlingResource
@@ -41,11 +45,14 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
     fun setup() {
         Espresso.onIdle()
 
-        mapboxNavigation = MapboxNavigationProvider.create(
-            NavigationOptions.Builder(activity)
-                .accessToken(getMapboxAccessTokenFromResources(activity))
-                .build()
-        )
+        runOnMainSync {
+            mapboxNavigation = MapboxNavigationProvider.create(
+                NavigationOptions.Builder(activity)
+                    .accessToken(getMapboxAccessTokenFromResources(activity))
+                    .build()
+            )
+            mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder
+        }
         routeCompleteIdlingResource = RouteProgressStateIdlingResource(
             mapboxNavigation,
             RouteProgressState.COMPLETE
@@ -66,6 +73,7 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
 
         // execute
         runOnMainSync {
+            mapboxNavigation.historyRecorder.startRecording()
             mockLocationUpdatesRule.pushLocationUpdate {
                 latitude = mockRoute.routeWaypoints.first().latitude()
                 longitude = mockRoute.routeWaypoints.first().longitude()
@@ -106,7 +114,9 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
         }
 
         // assert and clean up
-        Espresso.onIdle()
+        mapboxHistoryTestRule.stopRecordingOnCrash("no route complete") {
+            Espresso.onIdle()
+        }
         expectedStates.assert()
         routeCompleteIdlingResource.unregister()
     }
