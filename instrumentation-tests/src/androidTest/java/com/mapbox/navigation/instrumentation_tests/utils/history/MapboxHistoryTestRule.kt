@@ -1,10 +1,15 @@
 package com.mapbox.navigation.instrumentation_tests.utils.history
 
 import android.os.Environment
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
+import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
+import com.mapbox.navigation.utils.internal.logE
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import java.io.File
+import java.util.concurrent.CountDownLatch
 
 /**
  * Add this TestRule to your test and the directory will be saved
@@ -46,6 +51,22 @@ class MapboxHistoryTestRule : TestWatcher() {
             val path = description.methodName + File.separator + it.name
             val target = File(directory, path)
             it.copyTo(target)
+        }
+    }
+
+    fun stopRecordingOnCrash(message: String, runner: () -> Unit) {
+        try {
+            runner()
+        } catch (t: Throwable) {
+            runOnMainSync {
+                val countDownLatch = CountDownLatch(1)
+                historyRecorder.stopRecording {
+                    logE(Tag("DEBUG"), Message("$message history path=$it"))
+                    countDownLatch.countDown()
+                }
+                countDownLatch.await()
+            }
+            throw t
         }
     }
 }
