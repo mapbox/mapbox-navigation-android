@@ -34,7 +34,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - knn-reroute-logs
       - release:
           filters:
             tags:

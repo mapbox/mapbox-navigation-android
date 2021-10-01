@@ -55,12 +55,13 @@ internal class MapboxRerouteController(
         }
 
     override fun reroute(routesCallback: RerouteController.RoutesCallback) {
+        logger.d(
+            Tag("qwerty"),
+            Message("MapboxRerouteController reroute")
+        )
         interrupt()
         state = RerouteState.FetchingRoute
-        logger.d(
-            Tag(TAG),
-            Message("Fetching route")
-        )
+
         routeOptionsUpdater.update(
             directionsSession.getPrimaryRouteOptions(),
             tripSession.getRouteProgress(),
@@ -69,9 +70,17 @@ internal class MapboxRerouteController(
             .let { routeOptionsResult ->
                 when (routeOptionsResult) {
                     is RouteOptionsUpdater.RouteOptionsResult.Success -> {
+                        logger.d(
+                            Tag("qwerty"),
+                            Message("MapboxRerouteController RouteOptionsUpdate success")
+                        )
                         request(routesCallback, routeOptionsResult.routeOptions)
                     }
                     is RouteOptionsUpdater.RouteOptionsResult.Error -> {
+                        logger.d(
+                            Tag("qwerty"),
+                            Message("MapboxRerouteController RouteOptionsUpdate error")
+                        )
                         mainJobController.scope.launch {
                             state = RerouteState.Failed(
                                 message = "Cannot combine route options",
@@ -116,6 +125,10 @@ internal class MapboxRerouteController(
         routesCallback: RerouteController.RoutesCallback,
         routeOptions: RouteOptions
     ) {
+        logger.d(
+            Tag("qwerty"),
+            Message("MapboxRerouteController requestRoutes")
+        )
         requestId = directionsSession.requestRoutes(
             routeOptions,
             object : RouterCallback {
@@ -123,6 +136,10 @@ internal class MapboxRerouteController(
                     routes: List<DirectionsRoute>,
                     routerOrigin: RouterOrigin
                 ) {
+                    logger.d(
+                        Tag("qwerty"),
+                        Message("MapboxRerouteController onRoutesReady")
+                    )
                     mainJobController.scope.launch {
                         state = RerouteState.RouteFetched(routerOrigin)
                         state = RerouteState.Idle
@@ -134,6 +151,10 @@ internal class MapboxRerouteController(
                     reasons: List<RouterFailure>,
                     routeOptions: RouteOptions
                 ) {
+                    logger.d(
+                        Tag("qwerty"),
+                        Message("MapboxRerouteController onFailure")
+                    )
                     mainJobController.scope.launch {
                         state = RerouteState.Failed("Route request failed", reasons = reasons)
                         state = RerouteState.Idle
@@ -141,6 +162,10 @@ internal class MapboxRerouteController(
                 }
 
                 override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
+                    logger.d(
+                        Tag("qwerty"),
+                        Message("MapboxRerouteController onCanceled")
+                    )
                     mainJobController.scope.launch {
                         state = RerouteState.Interrupted
                         state = RerouteState.Idle

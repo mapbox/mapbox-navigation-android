@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.directions.session
 
+import android.util.Log
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.RouteRefreshCallback
@@ -93,6 +94,8 @@ internal class MapboxDirectionsSession(
         routeOptions: RouteOptions,
         routerCallback: RouterCallback
     ): Long {
+
+        Log.d("qwerty", "MapboxDirectionsSession requestRoutes")
         return router.getRoute(
             routeOptions,
             object : RouterCallback {
@@ -100,14 +103,20 @@ internal class MapboxDirectionsSession(
                     routes: List<DirectionsRoute>,
                     routerOrigin: RouterOrigin
                 ) {
+                    Log.d("qwerty", "MapboxDirectionsSession onRoutesReady")
+
                     routerCallback.onRoutesReady(routes, routerOrigin)
                 }
 
                 override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
+                    Log.d("qwerty", "MapboxDirectionsSession onFailure")
+
                     routerCallback.onFailure(reasons, routeOptions)
                 }
 
                 override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
+                    Log.d("qwerty", "MapboxDirectionsSession onCanceled")
+
                     routerCallback.onCanceled(routeOptions, routerOrigin)
                 }
             }
