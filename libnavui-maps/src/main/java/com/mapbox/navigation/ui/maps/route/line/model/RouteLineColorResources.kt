@@ -2,7 +2,7 @@ package com.mapbox.navigation.ui.maps.route.line.model
 
 import android.util.Log
 import androidx.annotation.ColorInt
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 
 /**
  * Contains colors an other values used to determine the appearance of the route line.
@@ -240,40 +240,45 @@ class RouteLineColorResources private constructor(
      * A builder for instantiating the RouteLineResources class
      */
     class Builder {
-        private var lowCongestionRange: IntRange = RouteConstants.LOW_CONGESTION_RANGE
-        private var moderateCongestionRange: IntRange = RouteConstants.MODERATE_CONGESTION_RANGE
-        private var heavyCongestionRange: IntRange = RouteConstants.HEAVY_CONGESTION_RANGE
-        private var severeCongestionRange: IntRange = RouteConstants.SEVERE_CONGESTION_RANGE
-        private var routeDefaultColor: Int = RouteConstants.ROUTE_DEFAULT_COLOR
-        private var routeLowCongestionColor: Int = RouteConstants.ROUTE_LOW_TRAFFIC_COLOR
-        private var routeModerateCongestionColor: Int = RouteConstants.ROUTE_MODERATE_TRAFFIC_COLOR
-        private var routeHeavyCongestionColor: Int = RouteConstants.ROUTE_HEAVY_TRAFFIC_COLOR
-        private var routeSevereCongestionColor: Int = RouteConstants.ROUTE_SEVERE_TRAFFIC_COLOR
-        private var routeUnknownCongestionColor: Int = RouteConstants.ROUTE_UNKNOWN_TRAFFIC_COLOR
-        private var restrictedRoadColor: Int = RouteConstants.RESTRICTED_ROAD_COLOR
-        private var routeClosureColor: Int = RouteConstants.ROUTE_CLOSURE_COLOR
-        private var alternativeRouteDefaultColor: Int = RouteConstants.ALTERNATE_ROUTE_DEFAULT_COLOR
+        private var lowCongestionRange: IntRange = RouteLayerConstants.LOW_CONGESTION_RANGE
+        private var moderateCongestionRange: IntRange =
+            RouteLayerConstants.MODERATE_CONGESTION_RANGE
+        private var heavyCongestionRange: IntRange = RouteLayerConstants.HEAVY_CONGESTION_RANGE
+        private var severeCongestionRange: IntRange = RouteLayerConstants.SEVERE_CONGESTION_RANGE
+        private var routeDefaultColor: Int = RouteLayerConstants.ROUTE_DEFAULT_COLOR
+        private var routeLowCongestionColor: Int = RouteLayerConstants.ROUTE_LOW_TRAFFIC_COLOR
+        private var routeModerateCongestionColor: Int =
+            RouteLayerConstants.ROUTE_MODERATE_TRAFFIC_COLOR
+        private var routeHeavyCongestionColor: Int = RouteLayerConstants.ROUTE_HEAVY_TRAFFIC_COLOR
+        private var routeSevereCongestionColor: Int = RouteLayerConstants.ROUTE_SEVERE_TRAFFIC_COLOR
+        private var routeUnknownCongestionColor: Int =
+            RouteLayerConstants.ROUTE_UNKNOWN_TRAFFIC_COLOR
+        private var restrictedRoadColor: Int = RouteLayerConstants.RESTRICTED_ROAD_COLOR
+        private var routeClosureColor: Int = RouteLayerConstants.ROUTE_CLOSURE_COLOR
+        private var alternativeRouteDefaultColor: Int =
+            RouteLayerConstants.ALTERNATE_ROUTE_DEFAULT_COLOR
         private var alternativeRouteLowCongestionColor: Int =
-            RouteConstants.ALTERNATE_ROUTE_LOW_TRAFFIC_COLOR
+            RouteLayerConstants.ALTERNATE_ROUTE_LOW_TRAFFIC_COLOR
         private var alternativeRouteModerateCongestionColor: Int =
-            RouteConstants.ALTERNATE_ROUTE_MODERATE_TRAFFIC_COLOR
+            RouteLayerConstants.ALTERNATE_ROUTE_MODERATE_TRAFFIC_COLOR
         private var alternativeRouteHeavyCongestionColor: Int =
-            RouteConstants.ALTERNATE_ROUTE_HEAVY_TRAFFIC_COLOR
+            RouteLayerConstants.ALTERNATE_ROUTE_HEAVY_TRAFFIC_COLOR
         private var alternativeRouteSevereCongestionColor: Int =
-            RouteConstants.ALTERNATE_ROUTE_SEVERE_TRAFFIC_COLOR
+            RouteLayerConstants.ALTERNATE_ROUTE_SEVERE_TRAFFIC_COLOR
         private var alternativeRouteUnknownCongestionColor: Int =
-            RouteConstants.ALTERNATE_ROUTE_UNKNOWN_TRAFFIC_COLOR
+            RouteLayerConstants.ALTERNATE_ROUTE_UNKNOWN_TRAFFIC_COLOR
         private var alternativeRouteRestrictedRoadColor: Int =
-            RouteConstants.ALTERNATE_RESTRICTED_ROAD_COLOR
+            RouteLayerConstants.ALTERNATE_RESTRICTED_ROAD_COLOR
         private var alternativeRouteClosureColor: Int =
-            RouteConstants.ALTERNATIVE_ROUTE_CLOSURE_COLOR
-        private var routeLineTraveledColor: Int = RouteConstants.ROUTE_LINE_TRAVELED_COLOR
+            RouteLayerConstants.ALTERNATIVE_ROUTE_CLOSURE_COLOR
+        private var routeLineTraveledColor: Int = RouteLayerConstants.ROUTE_LINE_TRAVELED_COLOR
         private var routeLineTraveledCasingColor: Int =
-            RouteConstants.ROUTE_LINE_TRAVELED_CASING_COLOR
-        private var routeCasingColor: Int = RouteConstants.ROUTE_CASING_COLOR
-        private var alternativeRouteCasingColor: Int = RouteConstants.ALTERNATE_ROUTE_CASING_COLOR
+            RouteLayerConstants.ROUTE_LINE_TRAVELED_CASING_COLOR
+        private var routeCasingColor: Int = RouteLayerConstants.ROUTE_CASING_COLOR
+        private var alternativeRouteCasingColor: Int =
+            RouteLayerConstants.ALTERNATE_ROUTE_CASING_COLOR
         private var inActiveRouteLegsColor: Int =
-            RouteConstants.IN_ACTIVE_ROUTE_LEG_COLOR
+            RouteLayerConstants.IN_ACTIVE_ROUTE_LEG_COLOR
 
         /**
          * The default range for low traffic congestion

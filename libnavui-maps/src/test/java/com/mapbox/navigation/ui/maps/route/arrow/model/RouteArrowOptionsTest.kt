@@ -3,7 +3,7 @@ package com.mapbox.navigation.ui.maps.route.arrow.model
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.maps.extension.style.expressions.generated.Expression
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -39,7 +39,7 @@ class RouteArrowOptionsTest {
     @Test
     fun withArrowHeadIconDrawableTest() {
         val options = RouteArrowOptions.Builder(ctx)
-            .withArrowHeadIconDrawable(RouteConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE)
+            .withArrowHeadIconDrawable(RouteLayerConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE)
             .build()
 
         assertNotNull(options.arrowHeadIcon)
@@ -48,7 +48,7 @@ class RouteArrowOptionsTest {
     @Test
     fun withArrowHeadIconCasingDrawableTest() {
         val options = RouteArrowOptions.Builder(ctx)
-            .withArrowHeadIconCasingDrawable(RouteConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE)
+            .withArrowHeadIconCasingDrawable(RouteLayerConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE)
             .build()
 
         assertNotNull(options.arrowHeadIconCasing)
@@ -118,12 +118,12 @@ class RouteArrowOptionsTest {
             linear()
             zoom()
             stop {
-                literal(RouteConstants.MIN_ARROW_ZOOM)
-                literal(RouteConstants.MIN_ZOOM_ARROW_SHAFT_SCALE)
+                literal(RouteLayerConstants.MIN_ARROW_ZOOM)
+                literal(RouteLayerConstants.MIN_ZOOM_ARROW_SHAFT_SCALE)
             }
             stop {
-                literal(RouteConstants.MAX_ARROW_ZOOM)
-                literal(RouteConstants.MAX_ZOOM_ARROW_SHAFT_SCALE)
+                literal(RouteLayerConstants.MAX_ARROW_ZOOM)
+                literal(RouteLayerConstants.MAX_ZOOM_ARROW_SHAFT_SCALE)
             }
         }
 
@@ -138,12 +138,12 @@ class RouteArrowOptionsTest {
             linear()
             zoom()
             stop {
-                literal(RouteConstants.MIN_ARROW_ZOOM)
-                literal(RouteConstants.MIN_ZOOM_ARROW_SHAFT_CASING_SCALE)
+                literal(RouteLayerConstants.MIN_ARROW_ZOOM)
+                literal(RouteLayerConstants.MIN_ZOOM_ARROW_SHAFT_CASING_SCALE)
             }
             stop {
-                literal(RouteConstants.MAX_ARROW_ZOOM)
-                literal(RouteConstants.MAX_ZOOM_ARROW_SHAFT_CASING_SCALE)
+                literal(RouteLayerConstants.MAX_ARROW_ZOOM)
+                literal(RouteLayerConstants.MAX_ZOOM_ARROW_SHAFT_CASING_SCALE)
             }
         }
 
@@ -158,12 +158,12 @@ class RouteArrowOptionsTest {
             linear()
             zoom()
             stop {
-                literal(RouteConstants.MIN_ARROW_ZOOM)
-                literal(RouteConstants.MIN_ZOOM_ARROW_HEAD_SCALE)
+                literal(RouteLayerConstants.MIN_ARROW_ZOOM)
+                literal(RouteLayerConstants.MIN_ZOOM_ARROW_HEAD_SCALE)
             }
             stop {
-                literal(RouteConstants.MAX_ARROW_ZOOM)
-                literal(RouteConstants.MAX_ZOOM_ARROW_HEAD_SCALE)
+                literal(RouteLayerConstants.MAX_ARROW_ZOOM)
+                literal(RouteLayerConstants.MAX_ZOOM_ARROW_HEAD_SCALE)
             }
         }
 
@@ -178,12 +178,12 @@ class RouteArrowOptionsTest {
             linear()
             zoom()
             stop {
-                literal(RouteConstants.MIN_ARROW_ZOOM)
-                literal(RouteConstants.MIN_ZOOM_ARROW_HEAD_CASING_SCALE)
+                literal(RouteLayerConstants.MIN_ARROW_ZOOM)
+                literal(RouteLayerConstants.MIN_ZOOM_ARROW_HEAD_CASING_SCALE)
             }
             stop {
-                literal(RouteConstants.MAX_ARROW_ZOOM)
-                literal(RouteConstants.MAX_ZOOM_ARROW_HEAD_CASING_SCALE)
+                literal(RouteLayerConstants.MAX_ARROW_ZOOM)
+                literal(RouteLayerConstants.MAX_ZOOM_ARROW_HEAD_CASING_SCALE)
             }
         }
 
@@ -203,8 +203,8 @@ class RouteArrowOptionsTest {
             .withArrowColor(1)
             .withAboveLayerId("someLayerId")
             .withArrowCasingColor(2)
-            .withArrowHeadIconDrawable(RouteConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE)
-            .withArrowHeadIconCasingDrawable(RouteConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE)
+            .withArrowHeadIconDrawable(RouteLayerConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE)
+            .withArrowHeadIconCasingDrawable(RouteLayerConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE)
             .withTolerance(.111)
             .withArrowShaftScalingExpression(shaftExpression)
             .withArrowShaftCasingScalingExpression(shaftCasingExpression)

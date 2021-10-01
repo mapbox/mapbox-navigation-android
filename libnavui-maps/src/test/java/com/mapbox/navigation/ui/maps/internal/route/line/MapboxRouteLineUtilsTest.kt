@@ -25,9 +25,35 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRestrictedRouteLegRanges
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.CLOSURE_CONGESTION_VALUE
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DESTINATION_MARKER_NAME
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.HEAVY_CONGESTION_VALUE
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LOW_CONGESTION_VALUE
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MODERATE_CONGESTION_VALUE
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ORIGIN_MARKER_NAME
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_CONGESTION_VALUE
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.SEVERE_CONGESTION_VALUE
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_ID
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData
@@ -178,7 +204,7 @@ class MapboxRouteLineUtilsTest {
             0.2,
             0,
             colorResources
-        ).invoke()
+        ).generateExpression()
 
         assertEquals(expectedExpression, expression.toString())
     }
@@ -192,7 +218,7 @@ class MapboxRouteLineUtilsTest {
             0.0,
             0,
             1
-        ).invoke()
+        ).generateExpression()
 
         assertEquals(expectedExpression, expression.toString())
     }
@@ -265,35 +291,35 @@ class MapboxRouteLineUtilsTest {
         }
         val style = mockk<Style> {
             every { isStyleLoaded } returns true
-            every { styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns true
-            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns true
-            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID) } returns true
+            every { styleSourceExists(PRIMARY_ROUTE_SOURCE_ID) } returns true
+            every { styleSourceExists(ALTERNATIVE_ROUTE1_SOURCE_ID) } returns true
+            every { styleSourceExists(ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
+            every { styleLayerExists(PRIMARY_ROUTE_LAYER_ID) } returns true
             every {
-                styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+                styleLayerExists(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
             } returns true
             every {
-                styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID)
+                styleLayerExists(PRIMARY_ROUTE_CASING_LAYER_ID)
             } returns true
-            every { styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID) } returns true
+            every { styleLayerExists(ALTERNATIVE_ROUTE1_LAYER_ID) } returns true
+            every { styleLayerExists(ALTERNATIVE_ROUTE2_LAYER_ID) } returns true
             every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
+                styleLayerExists(ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
             } returns true
             every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
+                styleLayerExists(ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
             } returns true
             every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+                styleLayerExists(ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
             } returns true
             every {
-                styleLayerExists(RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID)
+                styleLayerExists(ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
             } returns true
             every {
-                styleLayerExists(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+                styleLayerExists(RESTRICTED_ROAD_LAYER_ID)
+            } returns true
+            every {
+                styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
             } returns true
         }
 
@@ -301,19 +327,19 @@ class MapboxRouteLineUtilsTest {
 
         assertTrue(result)
         verify { style.isStyleLoaded }
-        verify { style.styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) }
-        verify { style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) }
-        verify { style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID) }
+        verify { style.styleSourceExists(PRIMARY_ROUTE_SOURCE_ID) }
+        verify { style.styleSourceExists(ALTERNATIVE_ROUTE1_SOURCE_ID) }
+        verify { style.styleSourceExists(ALTERNATIVE_ROUTE2_SOURCE_ID) }
+        verify { style.styleLayerExists(PRIMARY_ROUTE_LAYER_ID) }
+        verify { style.styleLayerExists(PRIMARY_ROUTE_TRAFFIC_LAYER_ID) }
+        verify { style.styleLayerExists(PRIMARY_ROUTE_CASING_LAYER_ID) }
+        verify { style.styleLayerExists(ALTERNATIVE_ROUTE1_LAYER_ID) }
+        verify { style.styleLayerExists(ALTERNATIVE_ROUTE2_LAYER_ID) }
+        verify { style.styleLayerExists(ALTERNATIVE_ROUTE1_CASING_LAYER_ID) }
+        verify { style.styleLayerExists(ALTERNATIVE_ROUTE2_CASING_LAYER_ID) }
+        verify { style.styleLayerExists(ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID) }
+        verify { style.styleLayerExists(ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID) }
+        verify { style.styleLayerExists(RESTRICTED_ROAD_LAYER_ID) }
     }
 
     @Test
@@ -323,35 +349,35 @@ class MapboxRouteLineUtilsTest {
         }
         val style = mockk<Style> {
             every { isStyleLoaded } returns true
-            every { styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns true
-            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns true
-            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID) } returns true
+            every { styleSourceExists(PRIMARY_ROUTE_SOURCE_ID) } returns true
+            every { styleSourceExists(ALTERNATIVE_ROUTE1_SOURCE_ID) } returns true
+            every { styleSourceExists(ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
+            every { styleLayerExists(PRIMARY_ROUTE_LAYER_ID) } returns true
             every {
-                styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+                styleLayerExists(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
             } returns true
             every {
-                styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID)
+                styleLayerExists(PRIMARY_ROUTE_CASING_LAYER_ID)
             } returns true
-            every { styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID) } returns true
+            every { styleLayerExists(ALTERNATIVE_ROUTE1_LAYER_ID) } returns true
+            every { styleLayerExists(ALTERNATIVE_ROUTE2_LAYER_ID) } returns true
             every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
+                styleLayerExists(ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
             } returns true
             every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
+                styleLayerExists(ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
             } returns true
             every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+                styleLayerExists(ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
             } returns true
             every {
-                styleLayerExists(RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID)
+                styleLayerExists(ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+            } returns true
+            every {
+                styleLayerExists(RESTRICTED_ROAD_LAYER_ID)
             } returns false
             every {
-                styleLayerExists(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+                styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
             } returns true
         }
 
@@ -359,20 +385,20 @@ class MapboxRouteLineUtilsTest {
 
         assertTrue(result)
         verify { style.isStyleLoaded }
-        verify { style.styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) }
-        verify { style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) }
-        verify { style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID) }
+        verify { style.styleSourceExists(PRIMARY_ROUTE_SOURCE_ID) }
+        verify { style.styleSourceExists(ALTERNATIVE_ROUTE1_SOURCE_ID) }
+        verify { style.styleSourceExists(ALTERNATIVE_ROUTE2_SOURCE_ID) }
+        verify { style.styleLayerExists(PRIMARY_ROUTE_LAYER_ID) }
+        verify { style.styleLayerExists(PRIMARY_ROUTE_TRAFFIC_LAYER_ID) }
+        verify { style.styleLayerExists(PRIMARY_ROUTE_CASING_LAYER_ID) }
+        verify { style.styleLayerExists(ALTERNATIVE_ROUTE1_LAYER_ID) }
+        verify { style.styleLayerExists(ALTERNATIVE_ROUTE2_LAYER_ID) }
+        verify { style.styleLayerExists(ALTERNATIVE_ROUTE1_CASING_LAYER_ID) }
+        verify { style.styleLayerExists(ALTERNATIVE_ROUTE2_CASING_LAYER_ID) }
+        verify { style.styleLayerExists(ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID) }
+        verify { style.styleLayerExists(ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID) }
         verify(exactly = 0) {
-            style.styleLayerExists(RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID)
+            style.styleLayerExists(RESTRICTED_ROAD_LAYER_ID)
         }
     }
 
@@ -394,37 +420,37 @@ class MapboxRouteLineUtilsTest {
         val style = mockk<Style> {
             every { styleLayers } returns listOf()
             every { isStyleLoaded } returns true
-            every { styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns true
-            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns true
-            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID) } returns true
+            every { styleSourceExists(PRIMARY_ROUTE_SOURCE_ID) } returns true
+            every { styleSourceExists(ALTERNATIVE_ROUTE1_SOURCE_ID) } returns true
+            every { styleSourceExists(ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
+            every { styleLayerExists(PRIMARY_ROUTE_LAYER_ID) } returns true
             every {
-                styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+                styleLayerExists(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
             } returns true
             every {
-                styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID)
+                styleLayerExists(PRIMARY_ROUTE_CASING_LAYER_ID)
             } returns true
-            every { styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID) } returns true
+            every { styleLayerExists(ALTERNATIVE_ROUTE1_LAYER_ID) } returns true
+            every { styleLayerExists(ALTERNATIVE_ROUTE2_LAYER_ID) } returns true
             every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
-            } returns true
-            every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
+                styleLayerExists(ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
             } returns true
             every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
+                styleLayerExists(ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
             } returns true
             every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+                styleLayerExists(ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
             } returns true
             every {
-                styleLayerExists(RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID)
+                styleLayerExists(ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
             } returns true
             every {
-                styleLayerExists(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+                styleLayerExists(RESTRICTED_ROAD_LAYER_ID)
             } returns true
-            every { styleSourceExists(RouteConstants.WAYPOINT_SOURCE_ID) } returns false
+            every {
+                styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+            } returns true
+            every { styleSourceExists(WAYPOINT_SOURCE_ID) } returns false
         }
 
         MapboxRouteLineUtils.initializeLayers(style, options)
@@ -450,7 +476,6 @@ class MapboxRouteLineUtilsTest {
         val primaryRouteSourceValueSlot = slot<Value>()
         val alternativeRoute1SourceValueSlot = slot<Value>()
         val alternativeRoute2SourceValueSlot = slot<Value>()
-        val topLevelRouteSourceValueSlot = slot<Value>()
         val addStyleLayerSlots = mutableListOf<Value>()
         val addStyleLayerPositionSlots = mutableListOf<LayerPosition>()
         val mockLayer = mockk<StyleObjectInfo> {
@@ -459,65 +484,59 @@ class MapboxRouteLineUtilsTest {
         val style = mockk<Style> {
             every { isStyleLoaded } returns true
             every { styleLayers } returns listOf(mockLayer)
-            every { styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) } returns false
-            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) } returns false
-            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns false
-            every { styleSourceExists(RouteConstants.WAYPOINT_SOURCE_ID) } returns false
+            every { styleSourceExists(PRIMARY_ROUTE_SOURCE_ID) } returns false
+            every { styleSourceExists(ALTERNATIVE_ROUTE1_SOURCE_ID) } returns false
+            every { styleSourceExists(ALTERNATIVE_ROUTE2_SOURCE_ID) } returns false
+            every { styleSourceExists(WAYPOINT_SOURCE_ID) } returns false
+            every { styleLayerExists(PRIMARY_ROUTE_LAYER_ID) } returns false
             every {
-                styleSourceExists(RouteConstants.TOP_LEVEL_ROUTE_LAYER_SOURCE_ID)
-            } returns false
-            every { styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID) } returns false
-            every {
-                styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+                styleLayerExists(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
             } returns false
             every {
-                styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID)
+                styleLayerExists(PRIMARY_ROUTE_CASING_LAYER_ID)
             } returns false
             every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID)
+                styleLayerExists(ALTERNATIVE_ROUTE1_LAYER_ID)
             } returns false
             every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID)
+                styleLayerExists(ALTERNATIVE_ROUTE2_LAYER_ID)
             } returns false
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON) } returns null
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) } returns null
-            every { getStyleImage(RouteConstants.ORIGIN_MARKER_NAME) } returns null
-            every { getStyleImage(RouteConstants.DESTINATION_MARKER_NAME) } returns null
+            every { getStyleImage(ARROW_HEAD_ICON) } returns null
+            every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns null
+            every { getStyleImage(ORIGIN_MARKER_NAME) } returns null
+            every { getStyleImage(DESTINATION_MARKER_NAME) } returns null
             every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
-            } returns false
-            every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
+                styleLayerExists(ALTERNATIVE_ROUTE1_CASING_LAYER_ID)
             } returns false
             every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
+                styleLayerExists(ALTERNATIVE_ROUTE2_CASING_LAYER_ID)
             } returns false
             every {
-                styleLayerExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+                styleLayerExists(ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
             } returns false
-            every { styleLayerExists(RouteLayerConstants.WAYPOINT_LAYER_ID) } returns false
+            every {
+                styleLayerExists(ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+            } returns false
+            every { styleLayerExists(WAYPOINT_LAYER_ID) } returns false
             every { styleLayerExists(LocationComponentConstants.MODEL_LAYER) } returns true
             every {
-                addStyleSource(RouteConstants.WAYPOINT_SOURCE_ID, any())
+                addStyleSource(WAYPOINT_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any())
+                addStyleSource(PRIMARY_ROUTE_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID, any())
+                addStyleSource(ALTERNATIVE_ROUTE1_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID, any())
-            } returns ExpectedFactory.createNone()
-            every {
-                addStyleSource(RouteConstants.TOP_LEVEL_ROUTE_LAYER_SOURCE_ID, any())
+                addStyleSource(ALTERNATIVE_ROUTE2_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
             every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
-                addImage(RouteConstants.ORIGIN_MARKER_NAME, any<Bitmap>())
+                addImage(ORIGIN_MARKER_NAME, any<Bitmap>())
             } returns ExpectedFactory.createNone()
             every {
-                addImage(RouteConstants.DESTINATION_MARKER_NAME, any<Bitmap>())
+                addImage(DESTINATION_MARKER_NAME, any<Bitmap>())
             } returns ExpectedFactory.createNone()
         }
 
@@ -525,26 +544,7 @@ class MapboxRouteLineUtilsTest {
 
         verify {
             style.addStyleSource(
-                RouteConstants.TOP_LEVEL_ROUTE_LAYER_SOURCE_ID,
-                capture(topLevelRouteSourceValueSlot)
-            )
-        }
-        assertEquals(
-            "geojson",
-            (
-                topLevelRouteSourceValueSlot.captured.contents as HashMap<String, Value>
-                )["type"]!!.contents
-        )
-        assertEquals(
-            "{\"type\":\"FeatureCollection\",\"features\":[]}",
-            (
-                topLevelRouteSourceValueSlot.captured.contents as HashMap<String, Value>
-                )["data"]!!.contents
-        )
-
-        verify {
-            style.addStyleSource(
-                RouteConstants.WAYPOINT_SOURCE_ID, capture(waypointSourceValueSlot)
+                WAYPOINT_SOURCE_ID, capture(waypointSourceValueSlot)
             )
         }
         assertEquals(
@@ -561,14 +561,14 @@ class MapboxRouteLineUtilsTest {
             (waypointSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
         )
         assertEquals(
-            RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
+            DEFAULT_ROUTE_SOURCES_TOLERANCE,
             (waypointSourceValueSlot.captured.contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
         verify {
             style.addStyleSource(
-                RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
+                PRIMARY_ROUTE_SOURCE_ID,
                 capture(primaryRouteSourceValueSlot)
             )
         }
@@ -593,14 +593,14 @@ class MapboxRouteLineUtilsTest {
             !!.contents
         )
         assertEquals(
-            RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
+            DEFAULT_ROUTE_SOURCES_TOLERANCE,
             (primaryRouteSourceValueSlot.captured.contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
         verify {
             style.addStyleSource(
-                RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
+                ALTERNATIVE_ROUTE1_SOURCE_ID,
                 capture(alternativeRoute1SourceValueSlot)
             )
         }
@@ -625,14 +625,14 @@ class MapboxRouteLineUtilsTest {
             ["data"]!!.contents
         )
         assertEquals(
-            RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
+            DEFAULT_ROUTE_SOURCES_TOLERANCE,
             (alternativeRoute1SourceValueSlot.captured.contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
         verify {
             style.addStyleSource(
-                RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                ALTERNATIVE_ROUTE2_SOURCE_ID,
                 capture(alternativeRoute2SourceValueSlot)
             )
         }
@@ -657,7 +657,7 @@ class MapboxRouteLineUtilsTest {
             ["data"]!!.contents
         )
         assertEquals(
-            RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
+            DEFAULT_ROUTE_SOURCES_TOLERANCE,
             (alternativeRoute2SourceValueSlot.captured.contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
@@ -669,52 +669,56 @@ class MapboxRouteLineUtilsTest {
             )
         }
         assertEquals(
-            "mapbox-navigation-alt-route1-casing-layer",
+            "mapbox-bottom-level-route-layer",
             (addStyleLayerSlots[0].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-alt-route2-casing-layer",
+            "mapbox-navigation-alt-route1-casing-layer",
             (addStyleLayerSlots[1].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-alt-route1-layer",
+            "mapbox-navigation-alt-route2-casing-layer",
             (addStyleLayerSlots[2].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-alt-route2-layer",
+            "mapbox-navigation-alt-route1-layer",
             (addStyleLayerSlots[3].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-alt-route1-traffic-layer",
+            "mapbox-navigation-alt-route2-layer",
             (addStyleLayerSlots[4].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-alt-route2-traffic-layer",
+            "mapbox-navigation-alt-route1-traffic-layer",
             (addStyleLayerSlots[5].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-route-casing-layer",
+            "mapbox-navigation-alt-route2-traffic-layer",
             (addStyleLayerSlots[6].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-route-layer",
+            "mapbox-navigation-route-casing-layer",
             (addStyleLayerSlots[7].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-route-traffic-layer",
+            "mapbox-navigation-route-layer",
             (addStyleLayerSlots[8].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-restricted-road-layer",
+            "mapbox-navigation-route-traffic-layer",
             (addStyleLayerSlots[9].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-top-level-route-layer",
+            "mapbox-restricted-road-layer",
             (addStyleLayerSlots[10].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
-            "mapbox-navigation-waypoint-layer",
+            "mapbox-top-level-route-layer",
             (addStyleLayerSlots[11].contents as HashMap<String, Value>)["id"]!!.contents
+        )
+        assertEquals(
+            "mapbox-navigation-waypoint-layer",
+            (addStyleLayerSlots[12].contents as HashMap<String, Value>)["id"]!!.contents
         )
         assertEquals(
             LocationComponentConstants.MODEL_LAYER,
@@ -887,7 +891,7 @@ class MapboxRouteLineUtilsTest {
         assertEquals(result[0].roadClass, roadClasses!!.first())
         assertEquals(result[2].distanceFromOrigin, distances.subList(0, 2).sum(), 0.0)
         assertEquals(distancesSum, result.last().distanceFromOrigin, 0.0)
-        assertEquals(RouteConstants.LOW_CONGESTION_VALUE, result.last().trafficCongestionIdentifier)
+        assertEquals(LOW_CONGESTION_VALUE, result.last().trafficCongestionIdentifier)
         assertEquals("service", result.last().roadClass)
     }
 
@@ -927,7 +931,7 @@ class MapboxRouteLineUtilsTest {
 
         assertEquals(10, result.size)
         assertEquals(1300.0000000000002, result.last().distanceFromOrigin, 0.0)
-        assertEquals(RouteConstants.LOW_CONGESTION_VALUE, result.last().trafficCongestionIdentifier)
+        assertEquals(LOW_CONGESTION_VALUE, result.last().trafficCongestionIdentifier)
         assertEquals("service", result.last().roadClass)
     }
 
@@ -1089,7 +1093,7 @@ class MapboxRouteLineUtilsTest {
 
         assertEquals(5, result.size)
         assertEquals(1188.7000000000003, result.last().distanceFromOrigin, 0.0)
-        assertEquals(RouteConstants.LOW_CONGESTION_VALUE, result.last().trafficCongestionIdentifier)
+        assertEquals(LOW_CONGESTION_VALUE, result.last().trafficCongestionIdentifier)
         assertNull(result.last().roadClass)
     }
 
@@ -1118,11 +1122,11 @@ class MapboxRouteLineUtilsTest {
         assertEquals("service", trafficExpressionData[0].roadClass)
         assertEquals("street", trafficExpressionData[1].roadClass)
         assertEquals(
-            RouteConstants.UNKNOWN_CONGESTION_VALUE,
+            UNKNOWN_CONGESTION_VALUE,
             trafficExpressionData[0].trafficCongestionIdentifier
         )
         assertEquals(
-            RouteConstants.UNKNOWN_CONGESTION_VALUE,
+            UNKNOWN_CONGESTION_VALUE,
             trafficExpressionData[1].trafficCongestionIdentifier
         )
 
@@ -1518,7 +1522,7 @@ class MapboxRouteLineUtilsTest {
         val resources = RouteLineColorResources.Builder().build()
 
         val result = MapboxRouteLineUtils.getRouteColorForCongestion(
-            RouteConstants.LOW_CONGESTION_VALUE,
+            LOW_CONGESTION_VALUE,
             true,
             resources
         )
@@ -1531,7 +1535,7 @@ class MapboxRouteLineUtilsTest {
         val resources = RouteLineColorResources.Builder().build()
 
         val result = MapboxRouteLineUtils.getRouteColorForCongestion(
-            RouteConstants.MODERATE_CONGESTION_VALUE,
+            MODERATE_CONGESTION_VALUE,
             true,
             resources
         )
@@ -1545,7 +1549,7 @@ class MapboxRouteLineUtilsTest {
 
         val result =
             MapboxRouteLineUtils.getRouteColorForCongestion(
-                RouteConstants.HEAVY_CONGESTION_VALUE,
+                HEAVY_CONGESTION_VALUE,
                 true,
                 resources
             )
@@ -1559,7 +1563,7 @@ class MapboxRouteLineUtilsTest {
 
         val result =
             MapboxRouteLineUtils.getRouteColorForCongestion(
-                RouteConstants.SEVERE_CONGESTION_VALUE,
+                SEVERE_CONGESTION_VALUE,
                 true,
                 resources
             )
@@ -1573,7 +1577,7 @@ class MapboxRouteLineUtilsTest {
 
         val result =
             MapboxRouteLineUtils.getRouteColorForCongestion(
-                RouteConstants.UNKNOWN_CONGESTION_VALUE,
+                UNKNOWN_CONGESTION_VALUE,
                 true,
                 resources
             )
@@ -1599,7 +1603,7 @@ class MapboxRouteLineUtilsTest {
         val resources = RouteLineColorResources.Builder().build()
 
         val result = MapboxRouteLineUtils.getRouteColorForCongestion(
-            RouteConstants.CLOSURE_CONGESTION_VALUE,
+            CLOSURE_CONGESTION_VALUE,
             true,
             resources
         )
@@ -1612,7 +1616,7 @@ class MapboxRouteLineUtilsTest {
         val resources = RouteLineColorResources.Builder().build()
 
         val result = MapboxRouteLineUtils.getRouteColorForCongestion(
-            RouteConstants.RESTRICTED_CONGESTION_VALUE,
+            RESTRICTED_CONGESTION_VALUE,
             true,
             resources
         )
@@ -1626,7 +1630,7 @@ class MapboxRouteLineUtilsTest {
 
         val result =
             MapboxRouteLineUtils.getRouteColorForCongestion(
-                RouteConstants.LOW_CONGESTION_VALUE,
+                LOW_CONGESTION_VALUE,
                 false,
                 resources
             )
@@ -1640,7 +1644,7 @@ class MapboxRouteLineUtilsTest {
 
         val result =
             MapboxRouteLineUtils.getRouteColorForCongestion(
-                RouteConstants.MODERATE_CONGESTION_VALUE,
+                MODERATE_CONGESTION_VALUE,
                 false,
                 resources
             )
@@ -1654,7 +1658,7 @@ class MapboxRouteLineUtilsTest {
 
         val result =
             MapboxRouteLineUtils.getRouteColorForCongestion(
-                RouteConstants.HEAVY_CONGESTION_VALUE,
+                HEAVY_CONGESTION_VALUE,
                 false,
                 resources
             )
@@ -1668,7 +1672,7 @@ class MapboxRouteLineUtilsTest {
 
         val result =
             MapboxRouteLineUtils.getRouteColorForCongestion(
-                RouteConstants.SEVERE_CONGESTION_VALUE,
+                SEVERE_CONGESTION_VALUE,
                 false,
                 resources
             )
@@ -1682,7 +1686,7 @@ class MapboxRouteLineUtilsTest {
 
         val result =
             MapboxRouteLineUtils.getRouteColorForCongestion(
-                RouteConstants.UNKNOWN_CONGESTION_VALUE,
+                UNKNOWN_CONGESTION_VALUE,
                 false,
                 resources
             )
@@ -1708,7 +1712,7 @@ class MapboxRouteLineUtilsTest {
         val resources = RouteLineColorResources.Builder().build()
 
         val result = MapboxRouteLineUtils.getRouteColorForCongestion(
-            RouteConstants.RESTRICTED_CONGESTION_VALUE,
+            RESTRICTED_CONGESTION_VALUE,
             false,
             resources
         )
@@ -1745,7 +1749,7 @@ class MapboxRouteLineUtilsTest {
             .build()
 
         val result = MapboxRouteLineUtils.getRouteColorForCongestion(
-            RouteConstants.CLOSURE_CONGESTION_VALUE,
+            CLOSURE_CONGESTION_VALUE,
             false,
             resources
         )
@@ -1853,7 +1857,7 @@ class MapboxRouteLineUtilsTest {
             routeLineColorResources.routeUnknownCongestionColor,
             false,
             0.0
-        ).invoke()
+        ).generateExpression()
 
         assertEquals(
             expectedPrimaryTrafficLineExpression,
@@ -1880,7 +1884,7 @@ class MapboxRouteLineUtilsTest {
             routeLineColorResources.routeUnknownCongestionColor,
             true,
             20.0
-        ).invoke()
+        ).generateExpression()
 
         assertEquals(
             expectedPrimaryTrafficLineExpression,
@@ -2134,7 +2138,7 @@ class MapboxRouteLineUtilsTest {
             congestionResource
         )
 
-        assertEquals(RouteConstants.LOW_CONGESTION_VALUE, result)
+        assertEquals(LOW_CONGESTION_VALUE, result)
     }
 
     @Test
@@ -2147,7 +2151,7 @@ class MapboxRouteLineUtilsTest {
             congestionResource
         )
 
-        assertEquals(RouteConstants.MODERATE_CONGESTION_VALUE, result)
+        assertEquals(MODERATE_CONGESTION_VALUE, result)
     }
 
     @Test
@@ -2160,7 +2164,7 @@ class MapboxRouteLineUtilsTest {
             congestionResource
         )
 
-        assertEquals(RouteConstants.HEAVY_CONGESTION_VALUE, result)
+        assertEquals(HEAVY_CONGESTION_VALUE, result)
     }
 
     @Test
@@ -2173,7 +2177,7 @@ class MapboxRouteLineUtilsTest {
             congestionResource
         )
 
-        assertEquals(RouteConstants.SEVERE_CONGESTION_VALUE, result)
+        assertEquals(SEVERE_CONGESTION_VALUE, result)
     }
 
     @Test
@@ -2186,7 +2190,7 @@ class MapboxRouteLineUtilsTest {
             congestionResource
         )
 
-        assertEquals(RouteConstants.UNKNOWN_CONGESTION_VALUE, result)
+        assertEquals(UNKNOWN_CONGESTION_VALUE, result)
     }
 
     @Test
@@ -2411,7 +2415,7 @@ class MapboxRouteLineUtilsTest {
     fun `extractRouteData with null congestion provider`() {
         val route = loadRoute("short_route.json")
         for (data in MapboxRouteLineUtils.extractRouteData(route) { null }) {
-            assertEquals(RouteConstants.UNKNOWN_CONGESTION_VALUE, data.trafficCongestionIdentifier)
+            assertEquals(UNKNOWN_CONGESTION_VALUE, data.trafficCongestionIdentifier)
         }
     }
 
@@ -2419,7 +2423,7 @@ class MapboxRouteLineUtilsTest {
     fun `extractRouteData with empty congestion provider`() {
         val route = loadRoute("short_route.json")
         for (data in MapboxRouteLineUtils.extractRouteData(route) { emptyList() }) {
-            assertEquals(RouteConstants.UNKNOWN_CONGESTION_VALUE, data.trafficCongestionIdentifier)
+            assertEquals(UNKNOWN_CONGESTION_VALUE, data.trafficCongestionIdentifier)
         }
     }
 
@@ -2434,7 +2438,7 @@ class MapboxRouteLineUtilsTest {
             assertEquals("low", extractedData[index].trafficCongestionIdentifier)
         }
         assertEquals(
-            RouteConstants.UNKNOWN_CONGESTION_VALUE,
+            UNKNOWN_CONGESTION_VALUE,
             extractedData.last().trafficCongestionIdentifier,
         )
     }

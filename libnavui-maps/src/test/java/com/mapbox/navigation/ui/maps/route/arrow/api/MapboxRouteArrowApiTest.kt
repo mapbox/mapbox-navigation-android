@@ -9,7 +9,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.testing.FileUtils
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError
 import com.mapbox.navigation.ui.maps.route.arrow.model.ManeuverArrow
 import io.mockk.every

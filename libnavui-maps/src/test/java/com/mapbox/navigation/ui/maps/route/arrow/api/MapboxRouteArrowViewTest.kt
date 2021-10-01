@@ -13,9 +13,16 @@ import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_SHAFT_SOURCE_ID
 import com.mapbox.navigation.ui.maps.route.arrow.RouteArrowUtils
 import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue
 import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue
@@ -54,11 +61,11 @@ class MapboxRouteArrowViewTest {
         val arrowLayer = mockk<Layer>(relaxed = true)
         val options = RouteArrowOptions.Builder(ctx).build()
         val state = ArrowVisibilityChangeValue(
-            listOf(Pair(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE))
+            listOf(Pair(ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE))
         )
         val style = mockk<Style> {
             every { isStyleLoaded } returns true
-            every { getLayer(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns arrowLayer
+            every { getLayer(ARROW_SHAFT_LINE_LAYER_ID) } returns arrowLayer
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -87,15 +94,15 @@ class MapboxRouteArrowViewTest {
             every { toJson() } returns "{}"
         }
         val state = UpdateManeuverArrowValue(
-            listOf(Pair(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE)),
+            listOf(Pair(ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE)),
             arrowShaftFeature,
             arrowHeadFeature
         )
         val style = mockk<Style> {
             every { isStyleLoaded } returns true
-            every { getSource(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
-            every { getSource(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
-            every { getLayer(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns arrowLayer
+            every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
+            every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
+            every { getLayer(ARROW_SHAFT_LINE_LAYER_ID) } returns arrowLayer
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -123,8 +130,8 @@ class MapboxRouteArrowViewTest {
         val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
         val style = mockk<Style> {
             every { isStyleLoaded } returns true
-            every { getSource(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
-            every { getSource(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
+            every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
+            every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -151,8 +158,8 @@ class MapboxRouteArrowViewTest {
         val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
         val style = mockk<Style> {
             every { isStyleLoaded } returns true
-            every { getSource(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
-            every { getSource(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
+            every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
+            every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -184,8 +191,8 @@ class MapboxRouteArrowViewTest {
         val options = RouteArrowOptions.Builder(ctx).build()
         val style = mockk<Style> {
             every { isStyleLoaded } returns true
-            every { getSource(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
-            every { getSource(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
+            every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
+            every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -220,8 +227,8 @@ class MapboxRouteArrowViewTest {
         val options = RouteArrowOptions.Builder(ctx).build()
         val style = mockk<Style> {
             every { isStyleLoaded } returns true
-            every { getSource(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
-            every { getSource(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
+            every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
+            every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -254,8 +261,8 @@ class MapboxRouteArrowViewTest {
         val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
         val style = mockk<Style> {
             every { isStyleLoaded } returns true
-            every { getSource(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
-            every { getSource(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
+            every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
+            every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
         }.also {
             mockCheckForLayerInitialization(it)
         }
@@ -287,7 +294,7 @@ class MapboxRouteArrowViewTest {
         every {
             MapboxRouteLineUtils.getLayerVisibility(
                 style,
-                RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID
+                ARROW_SHAFT_LINE_LAYER_ID
             )
         } returns Visibility.VISIBLE
 
@@ -301,17 +308,17 @@ class MapboxRouteArrowViewTest {
         val mockImage = mockk<Image>()
 
         with(style) {
-            every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns true
-            every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns true
-            every { styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
+            every { styleSourceExists(ARROW_SHAFT_SOURCE_ID) } returns true
+            every { styleSourceExists(ARROW_HEAD_SOURCE_ID) } returns true
+            every { styleSourceExists(ALTERNATIVE_ROUTE2_SOURCE_ID) } returns true
             every {
-                styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+                styleLayerExists(ARROW_SHAFT_CASING_LINE_LAYER_ID)
             } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON) } returns mockImage
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) } returns mockImage
+            every { styleLayerExists(ARROW_HEAD_CASING_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_SHAFT_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_LAYER_ID) } returns true
+            every { getStyleImage(ARROW_HEAD_ICON) } returns mockImage
+            every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns mockImage
         }
     }
 }
