@@ -12,6 +12,7 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
+import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.instrumentation_tests.utils.idling.FirstLocationIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteAlternativesIdlingResource
@@ -31,7 +32,6 @@ import java.util.concurrent.TimeUnit
  * This test ensures that alternative route recommendations
  * are given during active guidance.
  */
-// TODO: Refactor https://github.com/mapbox/mapbox-navigation-android/issues/4429
 class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
     @get:Rule
@@ -40,19 +40,25 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
 
+    @get:Rule
+    val mapboxHistoryTestRule = MapboxHistoryTestRule()
+
     private lateinit var mapboxNavigation: MapboxNavigation
 
     @Before
     fun setup() {
-        val routeAlternativesOptions = RouteAlternativesOptions.Builder()
-            .intervalMillis(TimeUnit.SECONDS.toMillis(10))
-            .build()
-        mapboxNavigation = MapboxNavigationProvider.create(
-            NavigationOptions.Builder(activity)
-                .accessToken(getMapboxAccessTokenFromResources(activity))
-                .routeAlternativesOptions(routeAlternativesOptions)
+        runOnMainSync {
+            val routeAlternativesOptions = RouteAlternativesOptions.Builder()
+                .intervalMillis(TimeUnit.SECONDS.toMillis(10))
                 .build()
-        )
+            mapboxNavigation = MapboxNavigationProvider.create(
+                NavigationOptions.Builder(activity)
+                    .accessToken(getMapboxAccessTokenFromResources(activity))
+                    .routeAlternativesOptions(routeAlternativesOptions)
+                    .build()
+            )
+            mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder
+        }
     }
 
     @Test
@@ -67,6 +73,7 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
 
         // Start playing locations and wait for an enhanced location.
         runOnMainSync {
+            mapboxNavigation.historyRecorder.startRecording()
             mockLocationReplayerRule.playRoute(routes.first())
             mapboxNavigation.startTripSession()
         }
@@ -81,7 +88,9 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         // Wait for route alternatives to be found.
         val alternativesIdlingResource = RouteAlternativesIdlingResource(mapboxNavigation)
         alternativesIdlingResource.register()
-        Espresso.onIdle()
+        mapboxHistoryTestRule.stopRecordingOnCrash("no route alternatives") {
+            Espresso.onIdle()
+        }
 
         // Verify faster alternatives are found.
         val alternatives = alternativesIdlingResource.alternatives!!
