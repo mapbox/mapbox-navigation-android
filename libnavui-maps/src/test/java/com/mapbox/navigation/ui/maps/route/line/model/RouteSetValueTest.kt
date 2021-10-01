@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
 import com.mapbox.geojson.FeatureCollection
-import com.mapbox.maps.extension.style.expressions.generated.Expression
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -10,103 +9,65 @@ class RouteSetValueTest {
 
     @Test
     fun toMutableValue() {
-        val primaryRouteSource = mockk<FeatureCollection>()
-        val trafficLineExpressionProvider = mockk<RouteLineExpressionProvider>()
-        val routeLineExpression = mockk<Expression>()
-        val casingLineExpression = mockk<Expression>()
-        val altRoute1TrafficExpression = mockk<RouteLineExpressionProvider>()
-        val altRoute2TrafficExpression = mockk<RouteLineExpressionProvider>()
-        val alternativeRoute1Source = mockk<FeatureCollection>()
-        val alternativeRoute2Source = mockk<FeatureCollection>()
-        val waypointsSource = mockk<FeatureCollection>()
-        val restrictedRouteLineExpression = mockk<RouteLineExpressionProvider>()
+        val original = RouteSetValue(
+            RouteLineData(
+                mockk(), RouteLineDynamicData(mockk(), mockk(), mockk(), mockk())
+            ),
+            listOf(
+                RouteLineData(
+                    mockk(), RouteLineDynamicData(mockk(), mockk(), mockk(), mockk())
+                ),
+                RouteLineData(
+                    mockk(), RouteLineDynamicData(mockk(), mockk(), mockk(), mockk())
+                )
+            ),
+            mockk(),
+        )
 
-        val result = RouteSetValue(
-            primaryRouteSource,
-            trafficLineExpressionProvider,
-            routeLineExpression,
-            casingLineExpression,
-            altRoute1TrafficExpression,
-            altRoute2TrafficExpression,
-            alternativeRoute1Source,
-            alternativeRoute2Source,
-            waypointsSource,
-            restrictedRouteLineExpression
-        ).toMutableValue()
+        val result = original.toMutableValue()
 
-        assertEquals(primaryRouteSource, result.primaryRouteSource)
-        assertEquals(trafficLineExpressionProvider, result.trafficLineExpressionProvider)
-        assertEquals(routeLineExpression, result.routeLineExpression)
-        assertEquals(casingLineExpression, result.casingLineExpression)
-        assertEquals(altRoute1TrafficExpression, result.altRoute1TrafficExpression)
-        assertEquals(altRoute2TrafficExpression, result.altRoute2TrafficExpression)
-        assertEquals(alternativeRoute1Source, result.alternativeRoute1Source)
-        assertEquals(alternativeRoute2Source, result.alternativeRoute2Source)
-        assertEquals(waypointsSource, result.waypointsSource)
-        assertEquals(restrictedRouteLineExpression, result.restrictedRouteLineExpression)
+        assertEquals(original.primaryRouteLineData, result.primaryRouteLineData)
+        assertEquals(original.alternativeRouteLinesData, result.alternativeRouteLinesData)
+        assertEquals(original.waypointsSource, result.waypointsSource)
     }
 
     @Test
     fun toImmutableValue() {
-        val primaryRouteSource = mockk<FeatureCollection>()
-        val trafficLineExpressionProvider = mockk<RouteLineExpressionProvider>()
-        val routeLineExpression = mockk<Expression>()
-        val casingLineExpression = mockk<Expression>()
-        val altRoute1TrafficExpression = mockk<RouteLineExpressionProvider>()
-        val altRoute2TrafficExpression = mockk<RouteLineExpressionProvider>()
-        val alternativeRoute1Source = mockk<FeatureCollection>()
-        val alternativeRoute2Source = mockk<FeatureCollection>()
-        val waypointsSource = mockk<FeatureCollection>()
-        val restrictedRouteLineExpression = mockk<RouteLineExpressionProvider>()
-
-        val replacedPrimaryRouteSource = mockk<FeatureCollection>()
-        val replacedTrafficLineExpressionProvider = mockk<RouteLineExpressionProvider>()
-        val replacedRouteLineExpression = mockk<Expression>()
-        val replacedCasingLineExpression = mockk<Expression>()
-        val replacedAltRoute1TrafficExpression = mockk<RouteLineExpressionProvider>()
-        val replacedAltRoute2TrafficExpression = mockk<RouteLineExpressionProvider>()
-        val replacedAlternativeRoute1Source = mockk<FeatureCollection>()
-        val replacedAlternativeRoute2Source = mockk<FeatureCollection>()
-        val replacedWaypointsSource = mockk<FeatureCollection>()
-        val replacedRestrictedRouteLineExpression = mockk<RouteLineExpressionProvider>()
-
-        val immutableResult = RouteSetValue(
-            primaryRouteSource,
-            trafficLineExpressionProvider,
-            routeLineExpression,
-            casingLineExpression,
-            altRoute1TrafficExpression,
-            altRoute2TrafficExpression,
-            alternativeRoute1Source,
-            alternativeRoute2Source,
-            waypointsSource,
-            restrictedRouteLineExpression
-        ).toMutableValue()
-        immutableResult.primaryRouteSource = replacedPrimaryRouteSource
-        immutableResult.trafficLineExpressionProvider = replacedTrafficLineExpressionProvider
-        immutableResult.routeLineExpression = replacedRouteLineExpression
-        immutableResult.casingLineExpression = replacedCasingLineExpression
-        immutableResult.altRoute1TrafficExpression = replacedAltRoute1TrafficExpression
-        immutableResult.altRoute2TrafficExpression = replacedAltRoute2TrafficExpression
-        immutableResult.alternativeRoute1Source = replacedAlternativeRoute1Source
-        immutableResult.alternativeRoute2Source = replacedAlternativeRoute2Source
-        immutableResult.waypointsSource = replacedWaypointsSource
-        immutableResult.restrictedRouteLineExpression = replacedRestrictedRouteLineExpression
-
-        val result = immutableResult.toImmutableValue()
-
-        assertEquals(replacedPrimaryRouteSource, result.primaryRouteSource)
-        assertEquals(replacedTrafficLineExpressionProvider, result.trafficLineExpressionProvider)
-        assertEquals(replacedRouteLineExpression, result.routeLineExpression)
-        assertEquals(replacedCasingLineExpression, result.casingLineExpression)
-        assertEquals(replacedAltRoute1TrafficExpression, result.altRoute1TrafficExpressionProvider)
-        assertEquals(replacedAltRoute2TrafficExpression, result.altRoute2TrafficExpressionProvider)
-        assertEquals(replacedAlternativeRoute1Source, result.alternativeRoute1Source)
-        assertEquals(replacedAlternativeRoute2Source, result.alternativeRoute2Source)
-        assertEquals(replacedWaypointsSource, result.waypointsSource)
-        assertEquals(
-            replacedRestrictedRouteLineExpression,
-            result.restrictedRouteLineExpressionProvider
+        val original = RouteSetValue(
+            RouteLineData(
+                mockk(), RouteLineDynamicData(mockk(), mockk(), mockk(), mockk())
+            ),
+            listOf(
+                RouteLineData(
+                    mockk(), RouteLineDynamicData(mockk(), mockk(), mockk(), mockk())
+                ),
+                RouteLineData(
+                    mockk(), RouteLineDynamicData(mockk(), mockk(), mockk(), mockk())
+                )
+            ),
+            mockk(),
         )
+        val replacedPrimaryRouteData = RouteLineData(
+            mockk(), RouteLineDynamicData(mockk(), mockk(), mockk(), mockk())
+        )
+        val replacedAlternativesRouteData = listOf(
+            RouteLineData(
+                mockk(), RouteLineDynamicData(mockk(), mockk(), mockk(), mockk())
+            ),
+            RouteLineData(
+                mockk(), RouteLineDynamicData(mockk(), mockk(), mockk(), mockk())
+            )
+        )
+        val replacedWaypointsSource = mockk<FeatureCollection>()
+        val mutable = original.toMutableValue()
+
+        mutable.primaryRouteLineData = replacedPrimaryRouteData
+        mutable.alternativeRouteLinesData = replacedAlternativesRouteData
+        mutable.waypointsSource = replacedWaypointsSource
+        val result = mutable.toImmutableValue()
+
+        assertEquals(replacedPrimaryRouteData, result.primaryRouteLineData)
+        assertEquals(replacedAlternativesRouteData, result.alternativeRouteLinesData)
+        assertEquals(replacedWaypointsSource, result.waypointsSource)
     }
 }

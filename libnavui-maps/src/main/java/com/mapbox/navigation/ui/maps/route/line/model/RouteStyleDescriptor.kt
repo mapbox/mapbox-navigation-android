@@ -10,6 +10,7 @@ import androidx.annotation.ColorInt
  * @param lineCasingColor the color of the shield line which appears below the route line
  * and is normally wider providing a visual border for the route line.
  */
+// todo make a builder?
 data class RouteStyleDescriptor(
     val routeIdentifier: String,
     @ColorInt val lineColor: Int,

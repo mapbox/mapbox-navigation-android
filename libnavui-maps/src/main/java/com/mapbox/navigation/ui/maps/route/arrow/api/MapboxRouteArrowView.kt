@@ -11,9 +11,8 @@ import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSourceAs
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.RouteArrowUtils.initializeLayers
 import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue
 import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue
@@ -76,10 +75,10 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
                 updateLayerVisibility(style, it.first, it.second)
             }
             value.arrowHeadFeature?.apply {
-                updateSource(style, RouteConstants.ARROW_HEAD_SOURCE_ID, this)
+                updateSource(style, RouteLayerConstants.ARROW_HEAD_SOURCE_ID, this)
             }
             value.arrowShaftFeature?.apply {
-                updateSource(style, RouteConstants.ARROW_SHAFT_SOURCE_ID, this)
+                updateSource(style, RouteLayerConstants.ARROW_SHAFT_SOURCE_ID, this)
             }
         }
     }
@@ -95,12 +94,12 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
 
         updateSource(
             style,
-            RouteConstants.ARROW_SHAFT_SOURCE_ID,
+            RouteLayerConstants.ARROW_SHAFT_SOURCE_ID,
             arrowAdded.arrowShaftFeatureCollection
         )
         updateSource(
             style,
-            RouteConstants.ARROW_HEAD_SOURCE_ID,
+            RouteLayerConstants.ARROW_HEAD_SOURCE_ID,
             arrowAdded.arrowHeadFeatureCollection
         )
     }
@@ -133,12 +132,12 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
 
         updateSource(
             style,
-            RouteConstants.ARROW_SHAFT_SOURCE_ID,
+            RouteLayerConstants.ARROW_SHAFT_SOURCE_ID,
             state.arrowShaftFeatureCollection
         )
         updateSource(
             style,
-            RouteConstants.ARROW_HEAD_SOURCE_ID,
+            RouteLayerConstants.ARROW_HEAD_SOURCE_ID,
             state.arrowHeadFeatureCollection
         )
     }
@@ -154,12 +153,12 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
 
         updateSource(
             style,
-            RouteConstants.ARROW_SHAFT_SOURCE_ID,
+            RouteLayerConstants.ARROW_SHAFT_SOURCE_ID,
             state.arrowShaftFeatureCollection
         )
         updateSource(
             style,
-            RouteConstants.ARROW_HEAD_SOURCE_ID,
+            RouteLayerConstants.ARROW_HEAD_SOURCE_ID,
             state.arrowHeadFeatureCollection
         )
     }

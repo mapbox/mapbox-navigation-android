@@ -12,16 +12,17 @@ import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getLayerVisibility
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.initializeLayers
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
@@ -101,90 +102,76 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                         )
                         updateLineGradient(
                             style,
-                            RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
-                            value.routeLineExpression
-                        )
-                        updateLineGradient(
-                            style,
-                            RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
-                            value.casingLineExpression
-                        )
-                        updateLineGradient(
-                            style,
                             RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
                             Expression.color(Color.TRANSPARENT)
                         )
+
+                        value.primaryRouteLineData.also {
+                            updateSource(
+                                style,
+                                RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID,
+                                it.featureCollection
+                            )
+                            updateLineGradientAsync(
+                                this,
+                                style,
+                                RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
+                                it.dynamicData.baseExpressionProvider
+                            )
+                            updateLineGradientAsync(
+                                this,
+                                style,
+                                RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
+                                it.dynamicData.casingExpressionProvider
+                            )
+                            updateLineGradientAsync(
+                                this,
+                                style,
+                                RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                                it.dynamicData.trafficExpressionProvider
+                            )
+                            updateLineGradientAsync(
+                                this,
+                                style,
+                                RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
+                                it.dynamicData.restrictedSectionExpressionProvider
+                            )
+                        }
+                        // SBNOTE: In the future let's find a better way to
+                        // match the items in the list with the alt. route layer ID's.
+                        value.alternativeRouteLinesData[0].also {
+                            updateSource(
+                                style,
+                                RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
+                                it.featureCollection
+                            )
+                            updateLineGradientAsync(
+                                this,
+                                style,
+                                RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
+                                it.dynamicData.trafficExpressionProvider
+                            )
+                        }
+
+                        value.alternativeRouteLinesData[1].also {
+                            updateSource(
+                                style,
+                                RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                                it.featureCollection
+                            )
+                            updateLineGradientAsync(
+                                this,
+                                style,
+                                RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
+                                it.dynamicData.trafficExpressionProvider
+                            )
+                        }
+
                         updateSource(
                             style,
-                            RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
-                            value.primaryRouteSource
-                        )
-                        updateSource(
-                            style,
-                            RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
-                            value.alternativeRoute1Source
-                        )
-                        updateSource(
-                            style,
-                            RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
-                            value.alternativeRoute2Source
-                        )
-                        updateSource(
-                            style,
-                            RouteConstants.WAYPOINT_SOURCE_ID,
+                            RouteLayerConstants.WAYPOINT_SOURCE_ID,
                             value.waypointsSource
                         )
-                        value.trafficLineExpressionProvider?.let {
-                            val trafficExpressionDef = jobControl.scope.async {
-                                it()
-                            }
-                            trafficExpressionDef.await().apply {
-                                updateLineGradient(
-                                    style,
-                                    RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
-                                    this
-                                )
-                            }
-                        }
-                        value.altRoute1TrafficExpressionProvider?.let {
-                            val altRoute1TrafficExpressionDef =
-                                jobControl.scope.async {
-                                    it()
-                                }
-                            altRoute1TrafficExpressionDef.await().apply {
-                                updateLineGradient(
-                                    style,
-                                    RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
-                                    this
-                                )
-                            }
-                        }
-                        value.altRoute2TrafficExpressionProvider?.let {
-                            val altRoute2TrafficExpressionDef =
-                                jobControl.scope.async {
-                                    it()
-                                }
-                            altRoute2TrafficExpressionDef.await().apply {
-                                updateLineGradient(
-                                    style,
-                                    RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
-                                    this
-                                )
-                            }
-                        }
-                        value.restrictedRouteLineExpressionProvider?.let {
-                            val restrictedRoadLineExpressionDef =
-                                jobControl.scope.async {
-                                    it()
-                                }
-                            restrictedRoadLineExpressionDef.await().apply {
-                                updateLineGradient(
-                                    style,
-                                    RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
-                                    this
-                                )
-                            }
-                        }
                     }
                 }
             }
@@ -208,25 +195,23 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                     updateLineGradient(
                         style,
                         RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
-                        it.trafficLineExpression
+                        it.primaryRouteLineDynamicData.trafficExpressionProvider
                     )
                     updateLineGradient(
                         style,
                         RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
-                        it.routeLineExpression
+                        it.primaryRouteLineDynamicData.baseExpressionProvider
                     )
                     updateLineGradient(
                         style,
                         RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
-                        it.casingLineExpression
+                        it.primaryRouteLineDynamicData.casingExpressionProvider
                     )
-                    it.restrictedRouteLineExpression?.let { expression ->
-                        updateLineGradient(
-                            style,
-                            RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
-                            expression
-                        )
-                    }
+                    updateLineGradient(
+                        style,
+                        RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
+                        it.primaryRouteLineDynamicData.restrictedSectionExpressionProvider
+                    )
                 }
             }
         }
@@ -248,22 +233,26 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                 clearRouteLineValue.onValue {
                     updateSource(
                         style,
-                        RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
+                        RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID,
                         it.primaryRouteSource
                     )
+                    if (it.alternativeRouteSourceSources.isNotEmpty()) {
+                        updateSource(
+                            style,
+                            RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
+                            it.alternativeRouteSourceSources.first()
+                        )
+                    }
+                    if (it.alternativeRouteSourceSources.size > 1) {
+                        updateSource(
+                            style,
+                            RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                            it.alternativeRouteSourceSources[1]
+                        )
+                    }
                     updateSource(
                         style,
-                        RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
-                        it.altRoute1Source
-                    )
-                    updateSource(
-                        style,
-                        RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
-                        it.altRoute2Source
-                    )
-                    updateSource(
-                        style,
-                        RouteConstants.WAYPOINT_SOURCE_ID,
+                        RouteLayerConstants.WAYPOINT_SOURCE_ID,
                         it.waypointsSource
                     )
                 }
@@ -469,6 +458,36 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
             style.getSource(sourceId)?.let {
                 (it as GeoJsonSource).featureCollection(featureCollection)
             }
+        }
+    }
+
+    private suspend fun updateLineGradientAsync(
+        coroutineScope: CoroutineScope,
+        style: Style,
+        layerId: String,
+        expressionProvider: RouteLineExpressionProvider?
+    ) {
+        if (expressionProvider != null) {
+            val gradientExpression = coroutineScope.async(Dispatchers.IO) {
+                expressionProvider.generateExpression()
+            }
+            gradientExpression.await().apply {
+                updateLineGradient(
+                    style,
+                    layerId,
+                    this
+                )
+            }
+        }
+    }
+
+    private fun updateLineGradient(
+        style: Style,
+        layerId: String,
+        expressionProvider: RouteLineExpressionProvider?
+    ) {
+        if (expressionProvider != null) {
+            updateLineGradient(style, layerId, expressionProvider.generateExpression())
         }
     }
 

@@ -12,9 +12,8 @@ import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
 import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
 import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRouteLineColorExpressions
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.utils.internal.extensions.getBitmap
 
@@ -36,7 +35,7 @@ internal class MapboxRouteLayerProvider(
     ): LineLayer {
         return LineLayer(
             RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
-            RouteConstants.PRIMARY_ROUTE_SOURCE_ID
+            RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID
         )
             .lineWidth(lineWidth)
             .lineJoin(LineJoin.ROUND)
@@ -61,7 +60,7 @@ internal class MapboxRouteLayerProvider(
             style,
             roundedLineCap,
             RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
-            RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
+            RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID,
             routeLineScaleExpression,
             routeLineColorExpressions
         )
@@ -82,7 +81,7 @@ internal class MapboxRouteLayerProvider(
             style,
             roundedLineCap,
             RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
-            RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
+            RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID,
             routeTrafficLineScaleExpression,
             routeLineColorExpressions
         )
@@ -102,7 +101,7 @@ internal class MapboxRouteLayerProvider(
             style,
             true,
             RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
-            RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
+            RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID,
             routeCasingLineScaleExpression,
             routeLineColorExpressions
         )
@@ -125,7 +124,7 @@ internal class MapboxRouteLayerProvider(
                 style,
                 roundedLineCap,
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_LAYER_ID,
-                RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
+                RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
                 alternativeRouteLineScaleExpression,
                 routeLineColorExpressions
             ),
@@ -133,7 +132,7 @@ internal class MapboxRouteLayerProvider(
                 style,
                 roundedLineCap,
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_LAYER_ID,
-                RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
                 alternativeRouteLineScaleExpression,
                 routeLineColorExpressions
             )
@@ -156,7 +155,7 @@ internal class MapboxRouteLayerProvider(
                 style,
                 true,
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_CASING_LAYER_ID,
-                RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
+                RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
                 alternativeRouteCasingLineScaleExpression,
                 routeLineColorExpressions
             ),
@@ -164,7 +163,7 @@ internal class MapboxRouteLayerProvider(
                 style,
                 true,
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_CASING_LAYER_ID,
-                RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
                 alternativeRouteCasingLineScaleExpression,
                 routeLineColorExpressions
             )
@@ -188,7 +187,7 @@ internal class MapboxRouteLayerProvider(
                 style,
                 roundedLineCap,
                 RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
-                RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
+                RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID,
                 alternativeRouteTrafficLineScaleExpression,
                 routeLineColorExpressions
             ),
@@ -196,7 +195,7 @@ internal class MapboxRouteLayerProvider(
                 style,
                 roundedLineCap,
                 RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
-                RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
+                RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID,
                 alternativeRouteTrafficLineScaleExpression,
                 routeLineColorExpressions
             )
@@ -212,37 +211,39 @@ internal class MapboxRouteLayerProvider(
             style.removeStyleLayer(RouteLayerConstants.WAYPOINT_LAYER_ID)
         }
 
-        if (style.getStyleImage(RouteConstants.ORIGIN_MARKER_NAME) != null) {
-            style.removeStyleImage(RouteConstants.ORIGIN_MARKER_NAME)
+        if (style.getStyleImage(RouteLayerConstants.ORIGIN_MARKER_NAME) != null) {
+            style.removeStyleImage(RouteLayerConstants.ORIGIN_MARKER_NAME)
         }
         originIcon.getBitmap().let {
-            style.addImage(RouteConstants.ORIGIN_MARKER_NAME, it)
+            style.addImage(RouteLayerConstants.ORIGIN_MARKER_NAME, it)
         }
 
-        if (style.getStyleImage(RouteConstants.DESTINATION_MARKER_NAME) != null) {
-            style.removeStyleImage(RouteConstants.DESTINATION_MARKER_NAME)
+        if (style.getStyleImage(RouteLayerConstants.DESTINATION_MARKER_NAME) != null) {
+            style.removeStyleImage(RouteLayerConstants.DESTINATION_MARKER_NAME)
         }
         destinationIcon.getBitmap().let {
-            style.addImage(RouteConstants.DESTINATION_MARKER_NAME, it)
+            style.addImage(RouteLayerConstants.DESTINATION_MARKER_NAME, it)
         }
 
-        return SymbolLayer(RouteLayerConstants.WAYPOINT_LAYER_ID, RouteConstants.WAYPOINT_SOURCE_ID)
-            .iconImage(
-                match {
-                    toString {
-                        get { literal(RouteConstants.WAYPOINT_PROPERTY_KEY) }
-                    }
-                    literal(RouteConstants.WAYPOINT_ORIGIN_VALUE)
-                    stop {
-                        RouteConstants.WAYPOINT_ORIGIN_VALUE
-                        literal(RouteConstants.ORIGIN_MARKER_NAME)
-                    }
-                    stop {
-                        RouteConstants.WAYPOINT_DESTINATION_VALUE
-                        literal(RouteConstants.DESTINATION_MARKER_NAME)
-                    }
+        return SymbolLayer(
+            RouteLayerConstants.WAYPOINT_LAYER_ID,
+            RouteLayerConstants.WAYPOINT_SOURCE_ID
+        ).iconImage(
+            match {
+                toString {
+                    get { literal(RouteLayerConstants.WAYPOINT_PROPERTY_KEY) }
                 }
-            )
+                literal(RouteLayerConstants.WAYPOINT_ORIGIN_VALUE)
+                stop {
+                    RouteLayerConstants.WAYPOINT_ORIGIN_VALUE
+                    literal(RouteLayerConstants.ORIGIN_MARKER_NAME)
+                }
+                stop {
+                    RouteLayerConstants.WAYPOINT_DESTINATION_VALUE
+                    literal(RouteLayerConstants.DESTINATION_MARKER_NAME)
+                }
+            }
+        )
             .iconSize(
                 interpolate {
                     exponential { literal(1.5) }

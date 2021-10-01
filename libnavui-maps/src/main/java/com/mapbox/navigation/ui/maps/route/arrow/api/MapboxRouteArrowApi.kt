@@ -9,10 +9,9 @@ import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.ARROW_BEARING
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants.MAX_DEGREES
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_BEARING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MAX_DEGREES
 import com.mapbox.navigation.ui.maps.route.arrow.RouteArrowUtils
 import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowAddedValue
 import com.mapbox.navigation.ui.maps.route.arrow.model.ArrowVisibilityChangeValue
@@ -163,14 +162,14 @@ class MapboxRouteArrowApi {
     private fun getVisibilityChanges(routeProgress: RouteProgress): List<Pair<String, Visibility>> {
         val invalidUpcomingStepPoints = (
             routeProgress.upcomingStepPoints == null ||
-                routeProgress.upcomingStepPoints!!.size < RouteConstants.TWO_POINTS
+                routeProgress.upcomingStepPoints!!.size < RouteLayerConstants.TWO_POINTS
             )
 
         val invalidCurrentStepPoints = routeProgress.currentLegProgress == null ||
             routeProgress.currentLegProgress!!.currentStepProgress == null ||
             routeProgress.currentLegProgress!!.currentStepProgress!!.stepPoints == null ||
             routeProgress.currentLegProgress!!.currentStepProgress!!.stepPoints!!.size <
-            RouteConstants.TWO_POINTS
+            RouteLayerConstants.TWO_POINTS
 
         return if (invalidUpcomingStepPoints || invalidCurrentStepPoints) {
             getHideArrowModifications()
@@ -189,7 +188,7 @@ class MapboxRouteArrowApi {
      * @return an Expected<InvalidPointError, ArrowAddedValue>
      */
     fun addArrow(arrow: ManeuverArrow): Expected<InvalidPointError, ArrowAddedValue> {
-        if (arrow.points.size < RouteConstants.TWO_POINTS) {
+        if (arrow.points.size < RouteLayerConstants.TWO_POINTS) {
             return ExpectedFactory.createError(
                 InvalidPointError(
                     "An arrow must have at least 2 points.",
