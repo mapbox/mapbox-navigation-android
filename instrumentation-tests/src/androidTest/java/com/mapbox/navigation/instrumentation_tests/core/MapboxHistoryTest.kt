@@ -180,8 +180,9 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         assertEquals(firstLocation.location.latitude, 38.894721, 0.00001)
 
         // Verify the set route event
-        val setRouteEvent = historyEvents
-            .find { it is HistoryEventSetRoute } as HistoryEventSetRoute
+        val setRouteEvent = historyEvents.find {
+            it is HistoryEventSetRoute && it.directionsRoute != null
+        } as HistoryEventSetRoute
         assertEquals(24.001, setRouteEvent.directionsRoute!!.duration(), 0.001)
         assertEquals(setRouteEvent.legIndex, 0)
         assertEquals(setRouteEvent.routeIndex, 0)
@@ -244,6 +245,8 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
 
     private companion object {
         private const val CUSTOM_EVENT_TYPE = "custom_event_type"
-        private const val CUSTOM_EVENT_PROPERTIES = "custom_event_properties"
+        private const val CUSTOM_EVENT_PROPERTIES = """
+            {"name":"John", "age":30, "car":null}
+        """
     }
 }
