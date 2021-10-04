@@ -22,7 +22,6 @@ import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
 import com.mapbox.navigation.core.history.model.HistoryEventUpdateLocation
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
-import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
@@ -49,9 +48,6 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
 
-    @get:Rule
-    val mapboxHistoryTestRule = MapboxHistoryTestRule()
-
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var routeCompleteIdlingResource: RouteProgressStateIdlingResource
     private lateinit var testDirectory: File
@@ -69,6 +65,11 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
 
     @Before
     fun setup() {
+        mockLocationUpdatesRule.pushLocationUpdate {
+            latitude = 38.894721
+            longitude = -77.031991
+        }
+
         Espresso.onIdle()
 
         runOnMainSync {
@@ -81,7 +82,6 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
                     )
                     .build()
             )
-            mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder
         }
         routeCompleteIdlingResource = RouteProgressStateIdlingResource(
             mapboxNavigation,
@@ -140,20 +140,20 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
             )
         }
 
-        // assert and clean up
-        mapboxHistoryTestRule.stopRecordingOnCrash("no route complete") {
-            Espresso.onIdle()
-        }
+        Espresso.onIdle()
         routeCompleteIdlingResource.unregister()
 
         runOnMainSync {
             val countDownLatch = CountDownLatch(1)
-            mapboxNavigation.historyRecorder.stopRecording { filePath ->
-                assertNotNull(filePath)
-                verifyHistoryEvents(filePath!!)
+            var filePath: String? = null
+            mapboxNavigation.historyRecorder.stopRecording { filePathFromNative ->
+                filePath = filePathFromNative
                 countDownLatch.countDown()
             }
             countDownLatch.await()
+
+            assertNotNull(filePath)
+            verifyHistoryEvents(filePath!!)
         }
     }
 
@@ -165,7 +165,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
 
         // Verify we can read until end of file
         val historyEvents = historyReader.asSequence().toList()
-        assertTrue(historyEvents.size > 10)
+        assertTrue("${historyEvents.size} > 10", historyEvents.size > 10)
 
         // Verify the custom event
         val customEvent = historyEvents
@@ -176,8 +176,16 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         // Verify the first location
         val firstLocation = historyEvents
             .find { it is HistoryEventUpdateLocation } as HistoryEventUpdateLocation
-        assertEquals(firstLocation.location.longitude, -77.031991, 0.00001)
-        assertEquals(firstLocation.location.latitude, 38.894721, 0.00001)
+        assertEquals(
+            "-77.031991 == ${firstLocation.location.longitude}",
+            -77.031991, firstLocation.location.longitude,
+            0.00001
+        )
+        assertEquals(
+            "38.894721 == ${firstLocation.location.latitude}",
+            38.894721, firstLocation.location.latitude,
+            0.00001
+        )
 
         // Verify the set route event
         val setRouteEvent = historyEvents.find {
