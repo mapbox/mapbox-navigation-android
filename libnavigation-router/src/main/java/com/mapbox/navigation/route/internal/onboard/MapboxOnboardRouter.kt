@@ -1,6 +1,7 @@
 package com.mapbox.navigation.route.internal.onboard
 
 import android.content.Context
+import android.util.Log
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -63,6 +64,8 @@ class MapboxOnboardRouter(
         routeOptions: RouteOptions,
         callback: RouterCallback
     ): Long {
+        Log.d("qwerty", "MapboxOnboardRouter getRoute")
+
         val httpUrl = RouteBuilderProvider
             .getBuilder(null)
             .accessToken(accessToken)
@@ -75,16 +78,22 @@ class MapboxOnboardRouter(
         val requestId = requests.generateNextRequestId()
         val internalCallback = object : RouterCallback {
             override fun onRoutesReady(routes: List<DirectionsRoute>, routerOrigin: RouterOrigin) {
+                Log.d("qwerty", "MapboxOnboardRouter onRoutesReady")
+
                 requests.remove(requestId)
                 callback.onRoutesReady(routes, routerOrigin)
             }
 
             override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
+                Log.d("qwerty", "MapboxOnboardRouter onFailure")
+
                 requests.remove(requestId)
                 callback.onFailure(reasons, routeOptions)
             }
 
             override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
+                Log.d("qwerty", "MapboxOnboardRouter onCanceled")
+
                 requests.remove(requestId)
                 callback.onCanceled(routeOptions, routerOrigin)
             }

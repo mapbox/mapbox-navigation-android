@@ -5,6 +5,7 @@
 package com.mapbox.navigation.route.internal.offboard
 
 import android.content.Context
+import android.util.Log
 import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -68,6 +69,8 @@ class MapboxOffboardRouter(
         routeOptions: RouteOptions,
         callback: RouterCallback
     ): Long {
+        Log.d("qwerty", "MapboxOffboardRouter getRoute")
+
         val mapboxDirections = RouteBuilderProvider
             .getBuilder(urlSkuTokenProvider)
             .accessToken(accessToken)
@@ -80,6 +83,8 @@ class MapboxOffboardRouter(
                     call: Call<DirectionsResponse>,
                     response: Response<DirectionsResponse>
                 ) {
+                    Log.d("qwerty", "MapboxOffboardRouter onResponse")
+
                     directionRequests.remove(requestId)
                     val urlWithoutToken = call.request().url.redactQueryParam(
                         ACCESS_TOKEN_QUERY_PARAM
@@ -128,6 +133,8 @@ class MapboxOffboardRouter(
                 }
 
                 override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
+                    Log.d("qwerty", "MapboxOffboardRouter onFailure")
+
                     directionRequests.remove(requestId)
                     if (call.isCanceled) {
                         callback.onCanceled(routeOptions, RouterOrigin.Offboard)
