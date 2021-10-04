@@ -1707,11 +1707,69 @@ class MapboxRouteLineApiTest {
         val mockVanishingRouteLine = mockk<VanishingRouteLine>(relaxed = true)
         val mockOptions = mockk<MapboxRouteLineOptions> {
             every { vanishingRouteLine } returns mockVanishingRouteLine
+            every { resourceProvider } returns RouteLineResources.Builder().build()
         }
 
         MapboxRouteLineApi(mockOptions).cancel()
 
         verify { mockVanishingRouteLine.cancel() }
+    }
+
+    @Test
+    fun setRoadClasses() = coroutineRule.runBlockingTest {
+        val route = getRouteWithRoadClasses()
+        val colors = RouteLineColorResources.Builder()
+            .routeLowCongestionColor(5)
+            .routeUnknownCongestionColor(1)
+            .build()
+        val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
+        val options = MapboxRouteLineOptions.Builder(ctx).withRouteLineResources(resources).build()
+        val api = MapboxRouteLineApi(options)
+        val defaultResult = api.setRoutes(listOf(RouteLine(route, null))).value!!
+        val defaultTrafficExpression = defaultResult
+            .primaryRouteLineData
+            .dynamicData
+            .trafficExpressionProvider!!
+            .generateExpression()
+        api.setRoadClasses(listOf("service"))
+        val result = api.setRoutes(listOf(RouteLine(route, null))).value!!
+
+        val resultExpression = result
+            .primaryRouteLineData
+            .dynamicData
+            .trafficExpressionProvider!!
+            .generateExpression()
+
+        assertNotEquals(defaultTrafficExpression.toString(), resultExpression.toString())
+    }
+
+    @Test
+    fun setRoadClasses_setVanishingOffset() = coroutineRule.runBlockingTest {
+        val route = getRouteWithRoadClasses()
+        val colors = RouteLineColorResources.Builder()
+            .routeLowCongestionColor(5)
+            .routeUnknownCongestionColor(1)
+            .build()
+        val resources = RouteLineResources.Builder().routeLineColorResources(colors).build()
+        val options = MapboxRouteLineOptions.Builder(ctx)
+            .withRouteLineResources(resources)
+            .withVanishingRouteLineEnabled(true)
+            .build()
+        val api = MapboxRouteLineApi(options)
+        api.setRoutes(listOf(RouteLine(route, null)))
+        val defaultResult = api.setVanishingOffset(0.0).value!!
+            .primaryRouteLineDynamicData
+            .trafficExpressionProvider!!
+            .generateExpression()
+        api.setRoadClasses(listOf("service"))
+        api.setRoutes(listOf(RouteLine(route, null)))
+
+        val result = api.setVanishingOffset(0.0).value!!
+            .primaryRouteLineDynamicData
+            .trafficExpressionProvider!!
+            .generateExpression()
+
+        assertNotEquals(defaultResult.toString(), result.toString())
     }
 
     private fun getRoute(): DirectionsRoute {

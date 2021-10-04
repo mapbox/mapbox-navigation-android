@@ -727,6 +727,7 @@ package com.mapbox.navigation.ui.maps.route.line.api {
     method public void getRouteDrawData(com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> consumer);
     method public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
     method public double getVanishPointOffset();
+    method public void setRoadClasses(java.util.List<java.lang.String> roadClasses);
     method public void setRoutes(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLine> newRoutes, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> consumer);
     method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue> setVanishingOffset(double offset);
     method public void showRouteWithLegIndexHighlighted(int legIndexToHighlight, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue>> consumer);
