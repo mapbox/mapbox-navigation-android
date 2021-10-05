@@ -1,5 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
+import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -40,6 +41,15 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     val idlingPolicyRule = IdlingPolicyTimeoutRule(35, TimeUnit.SECONDS)
 
     private lateinit var mapboxNavigation: MapboxNavigation
+    private val coordinates = listOf(
+        Point.fromLngLat(-121.495975, 38.57774),
+        Point.fromLngLat(-121.480279, 38.57674)
+    )
+
+    override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
+        latitude = coordinates[0].latitude()
+        longitude = coordinates[0].longitude()
+    }
 
     @Before
     fun setup() {
@@ -58,10 +68,6 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     @Test
     fun expect_route_refresh_to_update_traffic_annotations() {
         // Request a route.
-        val coordinates = listOf(
-            Point.fromLngLat(-121.495975, 38.57774),
-            Point.fromLngLat(-121.480279, 38.57674)
-        )
         setupMockRequestHandlers(coordinates)
         val routes = requestDirectionsRouteSync(coordinates).reversed()
 

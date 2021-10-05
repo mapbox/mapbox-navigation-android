@@ -1,5 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
+import android.location.Location
 import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -78,19 +79,22 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         )
     }
 
+    override fun setupMockLocation(): Location {
+        val mockRoute = MockRoutesProvider.dc_very_short(activity)
+        return mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = mockRoute.routeWaypoints.first().latitude()
+            longitude = mockRoute.routeWaypoints.first().longitude()
+        }
+    }
+
     @Test
     fun reroute_completes() {
         // prepare
         val mockRoute = MockRoutesProvider.dc_very_short(activity)
-
-        val originLocation = mockLocationUpdatesRule.generateLocationUpdate {
-            latitude = mockRoute.routeWaypoints.first().latitude()
-            longitude = mockRoute.routeWaypoints.first().longitude()
-        }
-
+        val originLocation = mockRoute.routeWaypoints.first()
         val offRouteLocationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
-            latitude = originLocation.latitude + 0.002
-            longitude = originLocation.longitude
+            latitude = originLocation.latitude() + 0.002
+            longitude = originLocation.longitude()
         }
 
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
@@ -120,7 +124,6 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
         // start a route
         runOnMainSync {
             mapboxNavigation.historyRecorder.startRecording()
-            mockLocationUpdatesRule.pushLocationUpdate(originLocation)
             mapboxNavigation.startTripSession()
             mapboxNavigation.requestRoutes(
                 RouteOptions.builder()

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.testing.ui
 
 import android.graphics.Point
+import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
@@ -54,4 +55,6 @@ open class NotificationTest<A : AppCompatActivity>(activityClass: Class<A>) :
             100
         )
     }
+
+    override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate()
 }

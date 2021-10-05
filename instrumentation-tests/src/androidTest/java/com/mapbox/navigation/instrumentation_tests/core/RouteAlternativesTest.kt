@@ -1,5 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
+import android.location.Location
 import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -48,6 +49,15 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
     val mapboxHistoryTestRule = MapboxHistoryTestRule()
 
     private lateinit var mapboxNavigation: MapboxNavigation
+    private val coordinates = listOf(
+        Point.fromLngLat(-121.46685, 38.56301),
+        Point.fromLngLat(-121.445697, 38.56707)
+    )
+
+    override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
+        latitude = coordinates[0].latitude()
+        longitude = coordinates[0].longitude()
+    }
 
     @Before
     fun setup() {
@@ -68,10 +78,7 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
     @Test
     fun expect_faster_route_alternatives() {
         // Prepare with a slow alternative route.
-        val coordinates = listOf(
-            Point.fromLngLat(-121.46685, 38.56301),
-            Point.fromLngLat(-121.445697, 38.56707)
-        )
+
         setupMockRequestHandlers(coordinates)
         val routes = requestDirectionsRouteSync(coordinates).reversed()
 
