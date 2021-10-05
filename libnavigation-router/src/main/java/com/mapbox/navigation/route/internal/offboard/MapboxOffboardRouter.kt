@@ -49,7 +49,7 @@ class MapboxOffboardRouter(
 ) : Router {
 
     internal companion object {
-        internal val TAG = Tag("MbxOffboardRouter")
+        internal val TAG = Tag("qwerty")
         private const val ROUTES_LIST_EMPTY = "routes list is empty"
         private const val UNKNOWN = "unknown"
     }
@@ -77,6 +77,7 @@ class MapboxOffboardRouter(
             .routeOptions(routeOptions)
             .build()
         val requestId = directionRequests.put(mapboxDirections)
+        Log.d("qwerty", "MapboxOffboardRouter mapboxDirections.enqueueCall")
         mapboxDirections.enqueueCall(
             object : Callback<DirectionsResponse> {
                 override fun onResponse(
@@ -93,12 +94,13 @@ class MapboxOffboardRouter(
                     val routes = body?.routes()
                     val metadata = body?.metadata()?.infoMap()
                     val code = response.code()
+                    Log.d("qwerty", "MapboxOffboardRouter data parsed")
                     when {
                         call.isCanceled -> callback.onCanceled(
                             routeOptions, RouterOrigin.Offboard
                         )
                         response.isSuccessful -> {
-                            logger.i(
+                            logger.d(
                                 TAG,
                                 Message("Successful directions response. Metadata: $metadata"),
                             )
@@ -118,17 +120,20 @@ class MapboxOffboardRouter(
                                 )
                             }
                         }
-                        else -> callback.onFailure(
-                            listOf(
-                                RouterFailure(
-                                    urlWithoutToken,
-                                    RouterOrigin.Offboard,
-                                    response.errorBody()?.string().toString(),
-                                    code
-                                )
-                            ),
-                            routeOptions
-                        )
+                        else -> {
+                            Log.d("qwerty", "MapboxOffboardRouter non-success result")
+                            callback.onFailure(
+                                listOf(
+                                    RouterFailure(
+                                        urlWithoutToken,
+                                        RouterOrigin.Offboard,
+                                        response.errorBody()?.string().toString(),
+                                        code
+                                    )
+                                ),
+                                routeOptions
+                            )
+                        }
                     }
                 }
 
@@ -137,20 +142,24 @@ class MapboxOffboardRouter(
 
                     directionRequests.remove(requestId)
                     if (call.isCanceled) {
+                        Log.d("qwerty", "MapboxOffboardRouter onCanceled")
                         callback.onCanceled(routeOptions, RouterOrigin.Offboard)
                     } else {
+                        val reasons = listOf(
+                            RouterFailure(
+                                url = call.request().url.redactQueryParam(
+                                    ACCESS_TOKEN_QUERY_PARAM
+                                ).toUrl(),
+                                routerOrigin = RouterOrigin.Offboard,
+                                message = t.message ?: UNKNOWN,
+                                code = null,
+                                throwable = t
+                            )
+                        )
+                        Log.d("qwerty", "MapboxOffboardRouter onFailure reasons: $reasons")
+
                         callback.onFailure(
-                            listOf(
-                                RouterFailure(
-                                    url = call.request().url.redactQueryParam(
-                                        ACCESS_TOKEN_QUERY_PARAM
-                                    ).toUrl(),
-                                    routerOrigin = RouterOrigin.Offboard,
-                                    message = t.message ?: UNKNOWN,
-                                    code = null,
-                                    throwable = t
-                                )
-                            ),
+                            reasons,
                             routeOptions
                         )
                     }
@@ -166,6 +175,8 @@ class MapboxOffboardRouter(
      * @see [getRoute]
      */
     override fun cancelRouteRequest(requestId: Long) {
+        Log.d("qwerty", "MapboxOffboardRouter cancelRouteRequest id = $requestId")
+
         directionRequests.cancelRequest(requestId, TAG) {
             it.cancelCall()
         }
@@ -175,6 +186,8 @@ class MapboxOffboardRouter(
      * Interrupts a route-fetching request if one is in progress.
      */
     override fun cancelAll() {
+        Log.d("qwerty", "MapboxOffboardRouter cancelAll")
+
         directionRequests.removeAll().forEach {
             it.cancelCall()
         }

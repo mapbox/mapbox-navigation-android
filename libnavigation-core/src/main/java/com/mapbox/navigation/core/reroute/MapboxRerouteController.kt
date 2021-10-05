@@ -79,7 +79,7 @@ internal class MapboxRerouteController(
                     is RouteOptionsUpdater.RouteOptionsResult.Error -> {
                         logger.d(
                             Tag("qwerty"),
-                            Message("MapboxRerouteController RouteOptionsUpdate error")
+                            Message("MapboxRerouteController RouteOptionsUpdate error: ${routeOptionsResult.error}")
                         )
                         mainJobController.scope.launch {
                             state = RerouteState.Failed(
@@ -138,7 +138,7 @@ internal class MapboxRerouteController(
                 ) {
                     logger.d(
                         Tag("qwerty"),
-                        Message("MapboxRerouteController onRoutesReady")
+                        Message("MapboxRerouteController onRoutesReady. origin $routerOrigin")
                     )
                     mainJobController.scope.launch {
                         state = RerouteState.RouteFetched(routerOrigin)
@@ -153,7 +153,7 @@ internal class MapboxRerouteController(
                 ) {
                     logger.d(
                         Tag("qwerty"),
-                        Message("MapboxRerouteController onFailure")
+                        Message("MapboxRerouteController onFailure reasons $reasons")
                     )
                     mainJobController.scope.launch {
                         state = RerouteState.Failed("Route request failed", reasons = reasons)
@@ -164,7 +164,7 @@ internal class MapboxRerouteController(
                 override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
                     logger.d(
                         Tag("qwerty"),
-                        Message("MapboxRerouteController onCanceled")
+                        Message("MapboxRerouteController onCanceled. origin $routerOrigin")
                     )
                     mainJobController.scope.launch {
                         state = RerouteState.Interrupted
@@ -176,6 +176,6 @@ internal class MapboxRerouteController(
     }
 
     private companion object {
-        private const val TAG = "MbxRerouteController"
+        private const val TAG = "qwerty"
     }
 }

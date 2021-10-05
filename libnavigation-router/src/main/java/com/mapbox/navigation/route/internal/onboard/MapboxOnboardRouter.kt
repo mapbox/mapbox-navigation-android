@@ -155,10 +155,14 @@ class MapboxOnboardRouter(
         url: String,
         callback: RouterCallback
     ): Job {
+        Log.d("qwerty", "MapboxOnboardRouter retrieveRoute")
+
         val javaUrl = URL(url.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM))
         return mainJobControl.scope.launch {
             try {
                 val routerResult = getRoute(url)
+                Log.d("qwerty", "MapboxOnboardRouter routerResult $routerResult")
+
                 if (routerResult.isValue) {
                     val directions = parseDirectionsResponse(routerResult.value!!)
                     val metadata = directions.metadata()?.infoMap()
@@ -167,9 +171,13 @@ class MapboxOnboardRouter(
                     val routes = directions.routes().map {
                         it.toBuilder().routeOptions(routeOptions).build()
                     }
+                    Log.d("qwerty", "MapboxOnboardRouter onRoutesReady")
+
                     callback.onRoutesReady(routes, RouterOrigin.Onboard)
                 } else {
                     val error = routerResult.error!!
+                    Log.d("qwerty", "MapboxOnboardRouter onFailure $error")
+
                     callback.onFailure(
                         listOf(
                             RouterFailure(

@@ -34,7 +34,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - knn-gm-app-snapshot
       - release:
           filters:
             tags:
