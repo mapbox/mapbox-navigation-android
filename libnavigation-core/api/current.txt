@@ -20,9 +20,10 @@ package com.mapbox.navigation.core {
     method public boolean isRunningForegroundService();
     method public void navigateNextRouteLeg(com.mapbox.navigation.core.trip.session.LegIndexUpdatedCallback callback);
     method public void onDestroy();
-    method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray());
-    method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot);
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray(), com.mapbox.navigation.core.telemetry.events.FeedbackMetadata feedbackMetadata);
+    method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String screenshot, String![]? feedbackSubType = emptyArray());
+    method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String screenshot);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String screenshot, String![]? feedbackSubType = emptyArray(), com.mapbox.navigation.core.telemetry.events.FeedbackMetadata feedbackMetadata);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String screenshot, com.mapbox.navigation.core.telemetry.events.FeedbackMetadata feedbackMetadata);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper provideFeedbackMetadataWrapper();
     method public void registerArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
     method public void registerBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
@@ -562,6 +563,24 @@ package com.mapbox.navigation.core.telemetry {
 
 package com.mapbox.navigation.core.telemetry.events {
 
+  public final class BitmapEncodeOptions {
+    method public int getCompressQuality();
+    method public int getWidth();
+    method public com.mapbox.navigation.core.telemetry.events.BitmapEncodeOptions.Builder toBuilder();
+    property public final int compressQuality;
+    property public final int width;
+  }
+
+  public static final class BitmapEncodeOptions.Builder {
+    ctor public BitmapEncodeOptions.Builder();
+    method public com.mapbox.navigation.core.telemetry.events.BitmapEncodeOptions build();
+    method public com.mapbox.navigation.core.telemetry.events.BitmapEncodeOptions.Builder compressQuality(@IntRange(from=0, to=100) int compressQuality);
+    method public com.mapbox.navigation.core.telemetry.events.BitmapEncodeOptions.Builder width(@IntRange(from=1) int width);
+  }
+
+  public final class BitmapEncodeOptionsKt {
+  }
+
   public final class FeedbackEvent {
     field public static final String ALTERNATIVE_ROUTE_NOT_EXPECTED = "alternative_route_not_expected";
     field public static final String ARRIVAL_FEEDBACK_CONFUSING_INSTRUCTIONS = "arrival_feedback_confusing_instructions";
@@ -620,6 +639,8 @@ package com.mapbox.navigation.core.telemetry.events {
   }
 
   public final class FeedbackHelper {
+    method public static String encodeScreenshot(android.graphics.Bitmap screenshot, com.mapbox.navigation.core.telemetry.events.BitmapEncodeOptions options = BitmapEncodeOptions.<init>().build());
+    method public static String encodeScreenshot(android.graphics.Bitmap screenshot);
     method public static String![] getActiveNavigationFeedbackTypes();
     method public static String![] getArrivalFeedbackTypes();
     method public static String![] getFeedbackSubTypes(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType);
