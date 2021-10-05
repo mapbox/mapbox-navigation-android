@@ -1,5 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
+import android.location.Location
 import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -52,6 +53,11 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     private lateinit var routeCompleteIdlingResource: RouteProgressStateIdlingResource
     private lateinit var testDirectory: File
 
+    override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
+        latitude = 38.894721
+        longitude = -77.031991
+    }
+
     @Before
     fun createTestDirectory() {
         testDirectory = File(activity.filesDir, "mapbox_history_test_directory")
@@ -65,11 +71,6 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
 
     @Before
     fun setup() {
-        mockLocationUpdatesRule.pushLocationUpdate {
-            latitude = 38.894721
-            longitude = -77.031991
-        }
-
         Espresso.onIdle()
 
         runOnMainSync {
@@ -100,11 +101,6 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         runOnMainSync {
             mapboxNavigation.historyRecorder.startRecording()
             mapboxNavigation.historyRecorder.pushHistory(CUSTOM_EVENT_TYPE, CUSTOM_EVENT_PROPERTIES)
-
-            mockLocationUpdatesRule.pushLocationUpdate {
-                latitude = mockRoute.routeWaypoints.first().latitude()
-                longitude = mockRoute.routeWaypoints.first().longitude()
-            }
         }
         runOnMainSync {
             mapboxNavigation.startTripSession()

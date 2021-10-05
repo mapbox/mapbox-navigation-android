@@ -28,7 +28,6 @@ internal class TripServiceTest :
             clickOn(it)
         }
         uiDevice.run {
-            mockLocationUpdatesRule.pushLocationUpdate()
             val etaContent =
                 By.res("com.mapbox.navigation.core.test:id/etaContent")
             val freeDriveText =

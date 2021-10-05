@@ -58,6 +58,12 @@ abstract class SimpleMapViewNavigationTest :
     protected lateinit var navigationLocationProvider: NavigationLocationProvider
     protected lateinit var locationPlugin: LocationComponentPlugin
 
+    override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
+        val mockRoute = getRoute(activity)
+        latitude = mockRoute.routeWaypoints.first().latitude()
+        longitude = mockRoute.routeWaypoints.first().longitude()
+    }
+
     @Before
     fun setup() {
         initIdlingResource = MapStyleInitIdlingResource(activity.binding.mapView)
@@ -70,10 +76,6 @@ abstract class SimpleMapViewNavigationTest :
         val route = mockRoute.routeResponse.routes()[0]
 
         runOnMainSync {
-            mockLocationUpdatesRule.pushLocationUpdate {
-                latitude = mockRoute.routeWaypoints.first().latitude()
-                longitude = mockRoute.routeWaypoints.first().longitude()
-            }
             mockLocationReplayerRule.playRoute(route)
 
             mapboxNavigation = MapboxNavigation(
