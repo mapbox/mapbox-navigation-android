@@ -1,5 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.ui.routeline
 
+import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
@@ -37,6 +38,17 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var routeLineApi: MapboxRouteLineApi
     private lateinit var routeLineView: MapboxRouteLineView
+
+    override fun setupMockLocation(): Location {
+        val directionsResponse = MockRoutesProvider
+            .loadDirectionsResponse(activity, R.raw.multiple_routes)
+        val origin = directionsResponse.waypoints()!!.map { it.location()!! }
+            .first()
+        return mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = origin.latitude()
+            longitude = origin.longitude()
+        }
+    }
 
     @Before
     fun setUp() {
@@ -105,14 +117,8 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
     private fun setupRouteWithAlternatives() {
         val directionsResponse = MockRoutesProvider
             .loadDirectionsResponse(activity, R.raw.multiple_routes)
-        val origin = directionsResponse.waypoints()!!.map { it.location()!! }
-            .first()
         val route = directionsResponse.routes()[0]
         runOnMainSync {
-            mockLocationUpdatesRule.pushLocationUpdate {
-                latitude = origin.latitude()
-                longitude = origin.longitude()
-            }
             mapboxNavigation.setRoutes(directionsResponse.routes())
             mockLocationReplayerRule.playRoute(route)
         }
