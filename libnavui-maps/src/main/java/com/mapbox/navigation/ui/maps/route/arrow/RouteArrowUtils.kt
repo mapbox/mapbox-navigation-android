@@ -17,8 +17,7 @@ import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.utils.internal.extensions.getBitmap
 import com.mapbox.turf.TurfConstants
@@ -44,13 +43,13 @@ internal object RouteArrowUtils {
         val arrowCurrentSliced = TurfMisc.lineSliceAlong(
             arrowLineCurrent,
             0.0,
-            RouteConstants.THIRTY.toDouble(),
+            RouteLayerConstants.THIRTY.toDouble(),
             TurfConstants.UNIT_METERS
         )
         val arrowUpcomingSliced = TurfMisc.lineSliceAlong(
             arrowLineUpcoming,
             0.0,
-            RouteConstants.THIRTY.toDouble(),
+            RouteLayerConstants.THIRTY.toDouble(),
             TurfConstants.UNIT_METERS
         )
 
@@ -69,22 +68,22 @@ internal object RouteArrowUtils {
             null
         }
 
-        if (!style.styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID)) {
-            geoJsonSource(RouteConstants.ARROW_SHAFT_SOURCE_ID) {
+        if (!style.styleSourceExists(RouteLayerConstants.ARROW_SHAFT_SOURCE_ID)) {
+            geoJsonSource(RouteLayerConstants.ARROW_SHAFT_SOURCE_ID) {
                 maxzoom(16)
                 tolerance(options.tolerance)
             }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
         }
 
-        if (!style.styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID)) {
-            geoJsonSource(RouteConstants.ARROW_HEAD_SOURCE_ID) {
+        if (!style.styleSourceExists(RouteLayerConstants.ARROW_HEAD_SOURCE_ID)) {
+            geoJsonSource(RouteLayerConstants.ARROW_HEAD_SOURCE_ID) {
                 maxzoom(16)
                 tolerance(options.tolerance)
             }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
         }
 
-        if (style.getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) != null) {
-            style.removeStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING)
+        if (style.getStyleImage(RouteLayerConstants.ARROW_HEAD_ICON_CASING) != null) {
+            style.removeStyleImage(RouteLayerConstants.ARROW_HEAD_ICON_CASING)
         }
 
         if (
@@ -99,11 +98,11 @@ internal object RouteArrowUtils {
                 options.arrowCasingColor
             )
             val arrowHeadCasingBitmap = arrowHeadCasingDrawable.getBitmap()
-            style.addImage(RouteConstants.ARROW_HEAD_ICON_CASING, arrowHeadCasingBitmap)
+            style.addImage(RouteLayerConstants.ARROW_HEAD_ICON_CASING, arrowHeadCasingBitmap)
         }
 
-        if (style.getStyleImage(RouteConstants.ARROW_HEAD_ICON) != null) {
-            style.removeStyleImage(RouteConstants.ARROW_HEAD_ICON)
+        if (style.getStyleImage(RouteLayerConstants.ARROW_HEAD_ICON) != null) {
+            style.removeStyleImage(RouteLayerConstants.ARROW_HEAD_ICON)
         }
 
         if (options.arrowHeadIcon.intrinsicHeight > 0 && options.arrowHeadIcon.intrinsicWidth > 0) {
@@ -115,7 +114,7 @@ internal object RouteArrowUtils {
                 options.arrowColor
             )
             val arrowHeadBitmap = arrowHeadDrawable.getBitmap()
-            style.addImage(RouteConstants.ARROW_HEAD_ICON, arrowHeadBitmap)
+            style.addImage(RouteLayerConstants.ARROW_HEAD_ICON, arrowHeadBitmap)
         }
 
         // arrow shaft casing
@@ -124,7 +123,7 @@ internal object RouteArrowUtils {
         }
         val arrowShaftCasingLayer = LineLayer(
             RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID,
-            RouteConstants.ARROW_SHAFT_SOURCE_ID
+            RouteLayerConstants.ARROW_SHAFT_SOURCE_ID
         )
             .lineColor(
                 Expression.color(
@@ -138,10 +137,10 @@ internal object RouteArrowUtils {
             .lineOpacity(
                 Expression.step {
                     zoom()
-                    literal(RouteConstants.OPAQUE)
+                    literal(RouteLayerConstants.OPAQUE)
                     stop {
-                        literal(RouteConstants.ARROW_HIDDEN_ZOOM_LEVEL)
-                        literal(RouteConstants.TRANSPARENT)
+                        literal(RouteLayerConstants.ARROW_HIDDEN_ZOOM_LEVEL)
+                        literal(RouteLayerConstants.TRANSPARENT)
                     }
                 }
             )
@@ -152,18 +151,18 @@ internal object RouteArrowUtils {
         }
         val arrowHeadCasingLayer = SymbolLayer(
             RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID,
-            RouteConstants.ARROW_HEAD_SOURCE_ID
+            RouteLayerConstants.ARROW_HEAD_SOURCE_ID
         )
-            .iconImage(RouteConstants.ARROW_HEAD_ICON_CASING)
+            .iconImage(RouteLayerConstants.ARROW_HEAD_ICON_CASING)
             .iconAllowOverlap(true)
             .iconIgnorePlacement(true)
             .iconSize(options.arrowHeadCasingScaleExpression)
-            .iconOffset(RouteConstants.ARROW_HEAD_OFFSET.toList())
+            .iconOffset(RouteLayerConstants.ARROW_HEAD_OFFSET.toList())
             .iconRotationAlignment(IconRotationAlignment.MAP)
             .iconRotate(
                 com.mapbox.maps.extension.style.expressions.dsl.generated.get {
                     literal(
-                        RouteConstants.ARROW_BEARING
+                        RouteLayerConstants.ARROW_BEARING
                     )
                 }
             )
@@ -171,10 +170,10 @@ internal object RouteArrowUtils {
             .iconOpacity(
                 Expression.step {
                     zoom()
-                    literal(RouteConstants.OPAQUE)
+                    literal(RouteLayerConstants.OPAQUE)
                     stop {
-                        literal(RouteConstants.ARROW_HIDDEN_ZOOM_LEVEL)
-                        literal(RouteConstants.TRANSPARENT)
+                        literal(RouteLayerConstants.ARROW_HIDDEN_ZOOM_LEVEL)
+                        literal(RouteLayerConstants.TRANSPARENT)
                     }
                 }
             )
@@ -185,7 +184,7 @@ internal object RouteArrowUtils {
         }
         val arrowShaftLayer = LineLayer(
             RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
-            RouteConstants.ARROW_SHAFT_SOURCE_ID
+            RouteLayerConstants.ARROW_SHAFT_SOURCE_ID
         )
             .lineColor(
                 Expression.color(options.arrowColor)
@@ -197,10 +196,10 @@ internal object RouteArrowUtils {
             .lineOpacity(
                 Expression.step {
                     zoom()
-                    literal(RouteConstants.OPAQUE)
+                    literal(RouteLayerConstants.OPAQUE)
                     stop {
-                        literal(RouteConstants.ARROW_HIDDEN_ZOOM_LEVEL)
-                        literal(RouteConstants.TRANSPARENT)
+                        literal(RouteLayerConstants.ARROW_HIDDEN_ZOOM_LEVEL)
+                        literal(RouteLayerConstants.TRANSPARENT)
                     }
                 }
             )
@@ -211,18 +210,18 @@ internal object RouteArrowUtils {
         }
         val arrowHeadLayer = SymbolLayer(
             RouteLayerConstants.ARROW_HEAD_LAYER_ID,
-            RouteConstants.ARROW_HEAD_SOURCE_ID
+            RouteLayerConstants.ARROW_HEAD_SOURCE_ID
         )
-            .iconImage(RouteConstants.ARROW_HEAD_ICON)
+            .iconImage(RouteLayerConstants.ARROW_HEAD_ICON)
             .iconAllowOverlap(true)
             .iconIgnorePlacement(true)
             .iconSize(options.arrowHeadScaleExpression)
-            .iconOffset(RouteConstants.ARROW_HEAD_CASING_OFFSET.toList())
+            .iconOffset(RouteLayerConstants.ARROW_HEAD_CASING_OFFSET.toList())
             .iconRotationAlignment(IconRotationAlignment.MAP)
             .iconRotate(
                 com.mapbox.maps.extension.style.expressions.dsl.generated.get {
                     literal(
-                        RouteConstants.ARROW_BEARING
+                        RouteLayerConstants.ARROW_BEARING
                     )
                 }
             )
@@ -230,10 +229,10 @@ internal object RouteArrowUtils {
             .iconOpacity(
                 Expression.step {
                     zoom()
-                    literal(RouteConstants.OPAQUE)
+                    literal(RouteLayerConstants.OPAQUE)
                     stop {
-                        literal(RouteConstants.ARROW_HIDDEN_ZOOM_LEVEL)
-                        literal(RouteConstants.TRANSPARENT)
+                        literal(RouteLayerConstants.ARROW_HIDDEN_ZOOM_LEVEL)
+                        literal(RouteLayerConstants.TRANSPARENT)
                     }
                 }
             )
@@ -258,8 +257,8 @@ internal object RouteArrowUtils {
 
     internal fun layersAreInitialized(style: Style): Boolean {
         return style.isStyleLoaded &&
-            style.styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) &&
-            style.styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) &&
+            style.styleSourceExists(RouteLayerConstants.ARROW_SHAFT_SOURCE_ID) &&
+            style.styleSourceExists(RouteLayerConstants.ARROW_HEAD_SOURCE_ID) &&
             style.styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID) &&
             style.styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) &&
             style.styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) &&

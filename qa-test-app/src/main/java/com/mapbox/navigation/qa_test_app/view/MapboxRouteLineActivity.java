@@ -1,7 +1,7 @@
 package com.mapbox.navigation.qa_test_app.view;
 
 import static com.mapbox.android.gestures.Utils.dpToPx;
-import static com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID;
+import static com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

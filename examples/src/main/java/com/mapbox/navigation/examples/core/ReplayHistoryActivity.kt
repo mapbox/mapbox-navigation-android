@@ -36,10 +36,10 @@ import com.mapbox.navigation.examples.core.databinding.ActivityReplayHistoryLayo
 import com.mapbox.navigation.examples.core.replay.HistoryFileLoader
 import com.mapbox.navigation.examples.core.replay.HistoryFilesActivity
 import com.mapbox.navigation.examples.util.Utils
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions

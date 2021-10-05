@@ -1,18 +1,47 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
-import com.mapbox.maps.extension.style.expressions.generated.Expression
-
 /**
- * Represents data for updating the appearance of the route line.
+ * Represents data for updating the appearance of the route lines.
  *
- * @param trafficLineExpression the expression for the primary route traffic line
- * @param routeLineExpression the expression for the primary route line
- * @param casingLineExpression the expression for the primary route casing line
- * @param restrictedRouteLineExpression the expression for the restricted road line layer (optional)
+ * @param primaryRouteLineDynamicData the data describing the primary route line
+ * @param alternativeRouteLinesDynamicData the data describing alternative route lines
  */
 class RouteLineUpdateValue internal constructor(
-    val trafficLineExpression: Expression,
-    val routeLineExpression: Expression,
-    val casingLineExpression: Expression,
-    val restrictedRouteLineExpression: Expression?
-)
+    val primaryRouteLineDynamicData: RouteLineDynamicData,
+    val alternativeRouteLinesDynamicData: List<RouteLineDynamicData>
+) {
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as RouteLineUpdateValue
+
+        if (primaryRouteLineDynamicData != other.primaryRouteLineDynamicData) return false
+        if (alternativeRouteLinesDynamicData != other.alternativeRouteLinesDynamicData) return false
+
+        return true
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     */
+    override fun hashCode(): Int {
+        var result = primaryRouteLineDynamicData.hashCode()
+        result = 31 * result + alternativeRouteLinesDynamicData.hashCode()
+        return result
+    }
+
+    /**
+     * Returns a string representation of the object.
+     */
+    override fun toString(): String {
+        return "RouteLineUpdateValue(" +
+            "primaryRouteLineDynamicData=$primaryRouteLineDynamicData, " +
+            "alternativeRouteLinesDynamicData=$alternativeRouteLinesDynamicData" +
+            ")"
+    }
+}

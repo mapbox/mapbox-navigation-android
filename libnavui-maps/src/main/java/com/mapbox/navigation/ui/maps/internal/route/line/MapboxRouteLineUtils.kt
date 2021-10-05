@@ -23,12 +23,11 @@ import com.mapbox.maps.extension.style.expressions.dsl.generated.color
 import com.mapbox.maps.extension.style.expressions.dsl.generated.eq
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.addPersistentLayer
-import com.mapbox.maps.extension.style.layers.generated.LineLayer
+import com.mapbox.maps.extension.style.layers.generated.BackgroundLayer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteData
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteFeatureData
@@ -295,7 +294,7 @@ object MapboxRouteLineUtils {
                     ExtractedRouteData(
                         -1.1,
                         distanceOffset,
-                        trafficCongestionIdentifier = RouteConstants.UNKNOWN_CONGESTION_VALUE
+                        trafficCongestionIdentifier = RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
                     )
                 )
                 false -> listOf(routeLineExpressionData.last().copy(offset = distanceOffset))
@@ -330,19 +329,19 @@ object MapboxRouteLineUtils {
     ): String {
         return when (congestionValue) {
             in routeLineColorResources.lowCongestionRange -> {
-                RouteConstants.LOW_CONGESTION_VALUE
+                RouteLayerConstants.LOW_CONGESTION_VALUE
             }
             in routeLineColorResources.heavyCongestionRange -> {
-                RouteConstants.HEAVY_CONGESTION_VALUE
+                RouteLayerConstants.HEAVY_CONGESTION_VALUE
             }
             in routeLineColorResources.severeCongestionRange -> {
-                RouteConstants.SEVERE_CONGESTION_VALUE
+                RouteLayerConstants.SEVERE_CONGESTION_VALUE
             }
             in routeLineColorResources.moderateCongestionRange -> {
-                RouteConstants.MODERATE_CONGESTION_VALUE
+                RouteLayerConstants.MODERATE_CONGESTION_VALUE
             }
             else -> {
-                RouteConstants.UNKNOWN_CONGESTION_VALUE
+                RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
             }
         }
     }
@@ -362,49 +361,49 @@ object MapboxRouteLineUtils {
     ): Int {
         return when (isPrimaryRoute) {
             true -> when (congestionValue) {
-                RouteConstants.LOW_CONGESTION_VALUE -> {
+                RouteLayerConstants.LOW_CONGESTION_VALUE -> {
                     routeLineColorResources.routeLowCongestionColor
                 }
-                RouteConstants.MODERATE_CONGESTION_VALUE -> {
+                RouteLayerConstants.MODERATE_CONGESTION_VALUE -> {
                     routeLineColorResources.routeModerateCongestionColor
                 }
-                RouteConstants.HEAVY_CONGESTION_VALUE -> {
+                RouteLayerConstants.HEAVY_CONGESTION_VALUE -> {
                     routeLineColorResources.routeHeavyCongestionColor
                 }
-                RouteConstants.SEVERE_CONGESTION_VALUE -> {
+                RouteLayerConstants.SEVERE_CONGESTION_VALUE -> {
                     routeLineColorResources.routeSevereCongestionColor
                 }
-                RouteConstants.UNKNOWN_CONGESTION_VALUE -> {
+                RouteLayerConstants.UNKNOWN_CONGESTION_VALUE -> {
                     routeLineColorResources.routeUnknownCongestionColor
                 }
-                RouteConstants.CLOSURE_CONGESTION_VALUE -> {
+                RouteLayerConstants.CLOSURE_CONGESTION_VALUE -> {
                     routeLineColorResources.routeClosureColor
                 }
-                RouteConstants.RESTRICTED_CONGESTION_VALUE -> {
+                RouteLayerConstants.RESTRICTED_CONGESTION_VALUE -> {
                     routeLineColorResources.restrictedRoadColor
                 }
                 else -> routeLineColorResources.routeDefaultColor
             }
             false -> when (congestionValue) {
-                RouteConstants.LOW_CONGESTION_VALUE -> {
+                RouteLayerConstants.LOW_CONGESTION_VALUE -> {
                     routeLineColorResources.alternativeRouteLowCongestionColor
                 }
-                RouteConstants.MODERATE_CONGESTION_VALUE -> {
+                RouteLayerConstants.MODERATE_CONGESTION_VALUE -> {
                     routeLineColorResources.alternativeRouteModerateCongestionColor
                 }
-                RouteConstants.HEAVY_CONGESTION_VALUE -> {
+                RouteLayerConstants.HEAVY_CONGESTION_VALUE -> {
                     routeLineColorResources.alternativeRouteHeavyCongestionColor
                 }
-                RouteConstants.SEVERE_CONGESTION_VALUE -> {
+                RouteLayerConstants.SEVERE_CONGESTION_VALUE -> {
                     routeLineColorResources.alternativeRouteSevereCongestionColor
                 }
-                RouteConstants.UNKNOWN_CONGESTION_VALUE -> {
+                RouteLayerConstants.UNKNOWN_CONGESTION_VALUE -> {
                     routeLineColorResources.alternativeRouteUnknownCongestionColor
                 }
-                RouteConstants.CLOSURE_CONGESTION_VALUE -> {
+                RouteLayerConstants.CLOSURE_CONGESTION_VALUE -> {
                     routeLineColorResources.alternativeRouteClosureColor
                 }
-                RouteConstants.RESTRICTED_CONGESTION_VALUE -> {
+                RouteLayerConstants.RESTRICTED_CONGESTION_VALUE -> {
                     routeLineColorResources.alternativeRouteRestrictedRoadColor
                 }
                 else -> {
@@ -529,9 +528,11 @@ object MapboxRouteLineUtils {
                     val isInRestrictedRange = restrictedRanges.any { it.contains(index) }
                     val isInAClosure = closureRanges.any { it.contains(index) }
                     val congestionValue: String = when {
-                        isInAClosure -> RouteConstants.CLOSURE_CONGESTION_VALUE
-                        trafficCongestion.isNullOrEmpty() -> RouteConstants.UNKNOWN_CONGESTION_VALUE
-                        index >= trafficCongestion.size -> RouteConstants.UNKNOWN_CONGESTION_VALUE
+                        isInAClosure -> RouteLayerConstants.CLOSURE_CONGESTION_VALUE
+                        trafficCongestion.isNullOrEmpty() ->
+                            RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
+                        index >= trafficCongestion.size ->
+                            RouteLayerConstants.UNKNOWN_CONGESTION_VALUE
                         else -> trafficCongestion[index]
                     }
                     val roadClass = getRoadClassForIndex(roadClassArray, index)
@@ -679,10 +680,10 @@ object MapboxRouteLineUtils {
             val trafficIdentifier =
                 if (
                     annotationExpData.trafficCongestionIdentifier ==
-                    RouteConstants.UNKNOWN_CONGESTION_VALUE &&
+                    RouteLayerConstants.UNKNOWN_CONGESTION_VALUE &&
                     trafficOverrideRoadClasses.contains(annotationExpData.roadClass)
                 ) {
-                    RouteConstants.LOW_CONGESTION_VALUE
+                    RouteLayerConstants.LOW_CONGESTION_VALUE
                 } else {
                     annotationExpData.trafficCongestionIdentifier
                 }
@@ -817,9 +818,9 @@ object MapboxRouteLineUtils {
             Feature.fromGeometry(Point.fromLngLat(this.longitude(), this.latitude()))
         }?.also {
             val propValue =
-                if (index == 0) RouteConstants.WAYPOINT_ORIGIN_VALUE
-                else RouteConstants.WAYPOINT_DESTINATION_VALUE
-            it.addStringProperty(RouteConstants.WAYPOINT_PROPERTY_KEY, propValue)
+                if (index == 0) RouteLayerConstants.WAYPOINT_ORIGIN_VALUE
+                else RouteLayerConstants.WAYPOINT_DESTINATION_VALUE
+            it.addStringProperty(RouteLayerConstants.WAYPOINT_PROPERTY_KEY, propValue)
         }
     }
 
@@ -921,7 +922,7 @@ object MapboxRouteLineUtils {
     ): List<Expression> {
         val expressions = mutableListOf(
             eq {
-                get { literal(RouteConstants.DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER) }
+                get { literal(RouteLayerConstants.DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER) }
                 literal(true)
             },
             color(defaultColor)
@@ -949,41 +950,43 @@ object MapboxRouteLineUtils {
                 style
             )
 
-        if (!style.styleSourceExists(RouteConstants.TOP_LEVEL_ROUTE_LAYER_SOURCE_ID)) {
-            geoJsonSource(RouteConstants.TOP_LEVEL_ROUTE_LAYER_SOURCE_ID) {
-            }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
-        }
-
-        if (!style.styleSourceExists(RouteConstants.WAYPOINT_SOURCE_ID)) {
-            geoJsonSource(RouteConstants.WAYPOINT_SOURCE_ID) {
+        if (!style.styleSourceExists(RouteLayerConstants.WAYPOINT_SOURCE_ID)) {
+            geoJsonSource(RouteLayerConstants.WAYPOINT_SOURCE_ID) {
                 maxzoom(16)
                 tolerance(options.tolerance)
             }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
         }
 
-        if (!style.styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID)) {
-            geoJsonSource(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) {
+        if (!style.styleSourceExists(RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID)) {
+            geoJsonSource(RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID) {
                 maxzoom(16)
                 lineMetrics(true)
                 tolerance(options.tolerance)
             }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
         }
 
-        if (!style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID)) {
-            geoJsonSource(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) {
+        if (!style.styleSourceExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID)) {
+            geoJsonSource(RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) {
                 maxzoom(16)
                 lineMetrics(true)
                 tolerance(options.tolerance)
             }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
         }
 
-        if (!style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID)) {
-            geoJsonSource(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) {
+        if (!style.styleSourceExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID)) {
+            geoJsonSource(RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) {
                 maxzoom(16)
                 lineMetrics(true)
                 tolerance(options.tolerance)
             }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
         }
+
+        style.addPersistentLayer(
+            BackgroundLayer(
+                RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID,
+            ).apply { this.backgroundOpacity(0.0) },
+            LayerPosition(null, belowLayerIdToUse, null)
+        )
 
         options.routeLayerProvider.buildAlternativeRouteCasingLayers(
             style,
@@ -1043,10 +1046,9 @@ object MapboxRouteLineUtils {
         }
 
         style.addPersistentLayer(
-            LineLayer(
-                RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID,
-                RouteConstants.TOP_LEVEL_ROUTE_LAYER_SOURCE_ID
-            ),
+            BackgroundLayer(
+                RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
+            ).apply { this.backgroundOpacity(0.0) },
             LayerPosition(null, belowLayerIdToUse, null)
         )
 
@@ -1061,9 +1063,9 @@ object MapboxRouteLineUtils {
 
     internal fun layersAreInitialized(style: Style, options: MapboxRouteLineOptions): Boolean {
         return style.isStyleLoaded &&
-            style.styleSourceExists(RouteConstants.PRIMARY_ROUTE_SOURCE_ID) &&
-            style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) &&
-            style.styleSourceExists(RouteConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) &&
+            style.styleSourceExists(RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID) &&
+            style.styleSourceExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) &&
+            style.styleSourceExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) &&
             style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID) &&
             style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID) &&
             style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID) &&
@@ -1119,7 +1121,7 @@ object MapboxRouteLineUtils {
         lineColor: Int,
         useSoftGradient: Boolean,
         softGradientTransitionDistance: Double
-    ): RouteLineExpressionProvider = {
+    ) = RouteLineExpressionProvider {
         val segments: List<RouteLineExpressionData> = calculateRouteLineSegments(
             route,
             trafficBackfillRoadClasses,
@@ -1150,7 +1152,7 @@ object MapboxRouteLineUtils {
         vanishingPointOffset: Double,
         activeLegIndex: Int,
         routeLineColorResources: RouteLineColorResources
-    ): RouteLineExpressionProvider = {
+    ) = RouteLineExpressionProvider {
         val expData = extractRouteData(
             route,
             getTrafficCongestionAnnotationProvider(route, routeLineColorResources)
@@ -1168,7 +1170,7 @@ object MapboxRouteLineUtils {
         vanishingPointOffset: Double,
         activeLegIndex: Int,
         restrictedSectionColor: Int,
-    ): RouteLineExpressionProvider = {
+    ) = RouteLineExpressionProvider {
         getRestrictedLineExpression(
             vanishingPointOffset,
             activeLegIndex,

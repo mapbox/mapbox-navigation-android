@@ -587,6 +587,16 @@ package com.mapbox.navigation.ui.maps.location {
 
 }
 
+package com.mapbox.navigation.ui.maps.route {
+
+  public final class RouteLayerConstants {
+    field public static final String BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID = "mapbox-bottom-level-route-layer";
+    field public static final com.mapbox.navigation.ui.maps.route.RouteLayerConstants INSTANCE;
+    field public static final String TOP_LEVEL_ROUTE_LINE_LAYER_ID = "mapbox-top-level-route-layer";
+  }
+
+}
+
 package com.mapbox.navigation.ui.maps.route.arrow.api {
 
   public final class MapboxRouteArrowApi {
@@ -819,12 +829,10 @@ package com.mapbox.navigation.ui.maps.route.line.model {
   }
 
   public final class RouteLineClearValue {
-    method public com.mapbox.geojson.FeatureCollection getAltRoute1Source();
-    method public com.mapbox.geojson.FeatureCollection getAltRoute2Source();
+    method public java.util.List<com.mapbox.geojson.FeatureCollection> getAlternativeRouteSourceSources();
     method public com.mapbox.geojson.FeatureCollection getPrimaryRouteSource();
     method public com.mapbox.geojson.FeatureCollection getWaypointsSource();
-    property public final com.mapbox.geojson.FeatureCollection altRoute1Source;
-    property public final com.mapbox.geojson.FeatureCollection altRoute2Source;
+    property public final java.util.List<com.mapbox.geojson.FeatureCollection> alternativeRouteSourceSources;
     property public final com.mapbox.geojson.FeatureCollection primaryRouteSource;
     property public final com.mapbox.geojson.FeatureCollection waypointsSource;
   }
@@ -913,6 +921,13 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources.Builder severeCongestionRange(kotlin.ranges.IntRange range);
   }
 
+  public final class RouteLineData {
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData getDynamicData();
+    method public com.mapbox.geojson.FeatureCollection getFeatureCollection();
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData dynamicData;
+    property public final com.mapbox.geojson.FeatureCollection featureCollection;
+  }
+
   public final class RouteLineDistancesIndex {
     ctor public RouteLineDistancesIndex(com.mapbox.geojson.Point point, double distanceRemaining);
     method public com.mapbox.geojson.Point component1();
@@ -922,6 +937,17 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.geojson.Point getPoint();
     property public final double distanceRemaining;
     property public final com.mapbox.geojson.Point point;
+  }
+
+  public final class RouteLineDynamicData {
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider getBaseExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider getCasingExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getRestrictedSectionExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrafficExpressionProvider();
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider baseExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider casingExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? restrictedSectionExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trafficExpressionProvider;
   }
 
   public final class RouteLineError {
@@ -943,6 +969,10 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final int legIndex;
     property public final double offset;
     property public final int segmentColor;
+  }
+
+  public fun interface RouteLineExpressionProvider {
+    method public com.mapbox.maps.extension.style.expressions.generated.Expression generateExpression();
   }
 
   public final class RouteLineGranularDistances {
@@ -1022,14 +1052,10 @@ package com.mapbox.navigation.ui.maps.route.line.model {
   }
 
   public final class RouteLineUpdateValue {
-    method public com.mapbox.maps.extension.style.expressions.generated.Expression getCasingLineExpression();
-    method public com.mapbox.maps.extension.style.expressions.generated.Expression? getRestrictedRouteLineExpression();
-    method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteLineExpression();
-    method public com.mapbox.maps.extension.style.expressions.generated.Expression getTrafficLineExpression();
-    property public final com.mapbox.maps.extension.style.expressions.generated.Expression casingLineExpression;
-    property public final com.mapbox.maps.extension.style.expressions.generated.Expression? restrictedRouteLineExpression;
-    property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeLineExpression;
-    property public final com.mapbox.maps.extension.style.expressions.generated.Expression trafficLineExpression;
+    method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData> getAlternativeRouteLinesDynamicData();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData getPrimaryRouteLineDynamicData();
+    property public final java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData> alternativeRouteLinesDynamicData;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData primaryRouteLineDynamicData;
   }
 
   public final class RouteNotFound {
@@ -1051,64 +1077,26 @@ package com.mapbox.navigation.ui.maps.route.line.model {
   }
 
   public final class RouteSetValue {
-    method public kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? getAltRoute1TrafficExpressionProvider();
-    method public kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? getAltRoute2TrafficExpressionProvider();
-    method public com.mapbox.geojson.FeatureCollection getAlternativeRoute1Source();
-    method public com.mapbox.geojson.FeatureCollection getAlternativeRoute2Source();
-    method public com.mapbox.maps.extension.style.expressions.generated.Expression getCasingLineExpression();
-    method public com.mapbox.geojson.FeatureCollection getPrimaryRouteSource();
-    method public kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? getRestrictedRouteLineExpressionProvider();
-    method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteLineExpression();
-    method public kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? getTrafficLineExpressionProvider();
+    method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineData> getAlternativeRouteLinesData();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineData getPrimaryRouteLineData();
     method public com.mapbox.geojson.FeatureCollection getWaypointsSource();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue.MutableRouteSetValue toMutableValue();
-    property public final kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? altRoute1TrafficExpressionProvider;
-    property public final kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? altRoute2TrafficExpressionProvider;
-    property public final com.mapbox.geojson.FeatureCollection alternativeRoute1Source;
-    property public final com.mapbox.geojson.FeatureCollection alternativeRoute2Source;
-    property public final com.mapbox.maps.extension.style.expressions.generated.Expression casingLineExpression;
-    property public final com.mapbox.geojson.FeatureCollection primaryRouteSource;
-    property public final kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? restrictedRouteLineExpressionProvider;
-    property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeLineExpression;
-    property public final kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? trafficLineExpressionProvider;
+    property public final java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineData> alternativeRouteLinesData;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineData primaryRouteLineData;
     property public final com.mapbox.geojson.FeatureCollection waypointsSource;
   }
 
   public static final class RouteSetValue.MutableRouteSetValue {
-    method public kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? getAltRoute1TrafficExpression();
-    method public kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? getAltRoute2TrafficExpression();
-    method public com.mapbox.geojson.FeatureCollection getAlternativeRoute1Source();
-    method public com.mapbox.geojson.FeatureCollection getAlternativeRoute2Source();
-    method public com.mapbox.maps.extension.style.expressions.generated.Expression getCasingLineExpression();
-    method public com.mapbox.geojson.FeatureCollection getPrimaryRouteSource();
-    method public kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? getRestrictedRouteLineExpression();
-    method public com.mapbox.maps.extension.style.expressions.generated.Expression getRouteLineExpression();
-    method public kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? getTrafficLineExpressionProvider();
+    method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineData> getAlternativeRouteLinesData();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineData getPrimaryRouteLineData();
     method public com.mapbox.geojson.FeatureCollection getWaypointsSource();
-    method public void setAltRoute1TrafficExpression(kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? p);
-    method public void setAltRoute2TrafficExpression(kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? p);
-    method public void setAlternativeRoute1Source(com.mapbox.geojson.FeatureCollection p);
-    method public void setAlternativeRoute2Source(com.mapbox.geojson.FeatureCollection p);
-    method public void setCasingLineExpression(com.mapbox.maps.extension.style.expressions.generated.Expression p);
-    method public void setPrimaryRouteSource(com.mapbox.geojson.FeatureCollection p);
-    method public void setRestrictedRouteLineExpression(kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? p);
-    method public void setRouteLineExpression(com.mapbox.maps.extension.style.expressions.generated.Expression p);
-    method public void setTrafficLineExpressionProvider(kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? p);
+    method public void setAlternativeRouteLinesData(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineData> p);
+    method public void setPrimaryRouteLineData(com.mapbox.navigation.ui.maps.route.line.model.RouteLineData p);
     method public void setWaypointsSource(com.mapbox.geojson.FeatureCollection p);
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue toImmutableValue();
-    property public final kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? altRoute1TrafficExpression;
-    property public final kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? altRoute2TrafficExpression;
-    property public final com.mapbox.geojson.FeatureCollection alternativeRoute1Source;
-    property public final com.mapbox.geojson.FeatureCollection alternativeRoute2Source;
-    property public final com.mapbox.maps.extension.style.expressions.generated.Expression casingLineExpression;
-    property public final com.mapbox.geojson.FeatureCollection primaryRouteSource;
-    property public final kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? restrictedRouteLineExpression;
-    property public final com.mapbox.maps.extension.style.expressions.generated.Expression routeLineExpression;
-    property public final kotlin.jvm.functions.Function0<com.mapbox.maps.extension.style.expressions.generated.Expression>? trafficLineExpressionProvider;
+    property public final java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineData> alternativeRouteLinesData;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineData primaryRouteLineData;
     property public final com.mapbox.geojson.FeatureCollection waypointsSource;
-  }
-
-  public final class RouteSetValueKt {
   }
 
   public final class RouteStyleDescriptor {

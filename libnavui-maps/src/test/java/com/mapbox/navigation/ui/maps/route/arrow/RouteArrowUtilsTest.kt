@@ -16,10 +16,17 @@ import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_SHAFT_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import io.mockk.every
 import io.mockk.mockk
@@ -144,26 +151,26 @@ class RouteArrowUtilsTest {
     fun layersAreInitialized() {
         val style = mockk<Style> {
             every { isStyleLoaded } returns true
-            every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns true
-            every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns true
+            every { styleSourceExists(ARROW_SHAFT_SOURCE_ID) } returns true
+            every { styleSourceExists(ARROW_HEAD_SOURCE_ID) } returns true
             every {
-                styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+                styleLayerExists(ARROW_SHAFT_CASING_LINE_LAYER_ID)
             } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_CASING_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_SHAFT_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_LAYER_ID) } returns true
         }
 
         val result = RouteArrowUtils.layersAreInitialized(style)
 
         assertTrue(result)
         verify { style.isStyleLoaded }
-        verify { style.styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) }
-        verify { style.styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) }
-        verify { style.styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) }
+        verify { style.styleSourceExists(ARROW_SHAFT_SOURCE_ID) }
+        verify { style.styleSourceExists(ARROW_HEAD_SOURCE_ID) }
+        verify { style.styleLayerExists(ARROW_SHAFT_CASING_LINE_LAYER_ID) }
+        verify { style.styleLayerExists(ARROW_HEAD_CASING_LAYER_ID) }
+        verify { style.styleLayerExists(ARROW_SHAFT_LINE_LAYER_ID) }
+        verify { style.styleLayerExists(ARROW_HEAD_LAYER_ID) }
     }
 
     @Test
@@ -184,14 +191,14 @@ class RouteArrowUtilsTest {
         val style = mockk<Style> {
             every { styleLayers } returns listOf()
             every { isStyleLoaded } returns true
-            every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns true
-            every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns true
+            every { styleSourceExists(ARROW_SHAFT_SOURCE_ID) } returns true
+            every { styleSourceExists(ARROW_HEAD_SOURCE_ID) } returns true
             every {
-                styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+                styleLayerExists(ARROW_SHAFT_CASING_LINE_LAYER_ID)
             } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_CASING_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_SHAFT_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_LAYER_ID) } returns true
         }
 
         RouteArrowUtils.initializeLayers(style, options)
@@ -219,31 +226,31 @@ class RouteArrowUtilsTest {
         val style = mockk<Style>(relaxed = true) {
             every { isStyleLoaded } returns true
             every { styleLayers } returns listOf()
-            every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns false
-            every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns false
+            every { styleSourceExists(ARROW_SHAFT_SOURCE_ID) } returns false
+            every { styleSourceExists(ARROW_HEAD_SOURCE_ID) } returns false
             every {
-                styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+                styleLayerExists(ARROW_SHAFT_CASING_LINE_LAYER_ID)
             } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_CASING_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_SHAFT_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_LAYER_ID) } returns true
             every { styleLayerExists(options.aboveLayerId) } returns true
             every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
+                addStyleSource(ARROW_SHAFT_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, any())
+                addStyleSource(ARROW_HEAD_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) } returns mockImage
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON) } returns mockImage
+            every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns mockImage
+            every { getStyleImage(ARROW_HEAD_ICON) } returns mockImage
         }
 
         RouteArrowUtils.initializeLayers(style, options)
 
         verify {
             style.addStyleSource(
-                RouteConstants.ARROW_SHAFT_SOURCE_ID,
+                ARROW_SHAFT_SOURCE_ID,
                 capture(shaftSourceValueSlot)
             )
         }
@@ -260,13 +267,13 @@ class RouteArrowUtilsTest {
             (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
         )
         assertEquals(
-            RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
+            DEFAULT_ROUTE_SOURCES_TOLERANCE,
             (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
         verify {
-            style.addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, capture(headSourceValueSlot))
+            style.addStyleSource(ARROW_HEAD_SOURCE_ID, capture(headSourceValueSlot))
         }
         assertEquals(
             "geojson",
@@ -282,21 +289,21 @@ class RouteArrowUtilsTest {
                 .contents.toString()
         )
         assertEquals(
-            RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
+            DEFAULT_ROUTE_SOURCES_TOLERANCE,
             (headSourceValueSlot.captured.contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
-        verify { style.removeStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) }
-        verify { style.addImage(RouteConstants.ARROW_HEAD_ICON_CASING, any<Bitmap>()) }
+        verify { style.removeStyleImage(ARROW_HEAD_ICON_CASING) }
+        verify { style.addImage(ARROW_HEAD_ICON_CASING, any<Bitmap>()) }
 
-        verify { style.removeStyleImage(RouteConstants.ARROW_HEAD_ICON) }
-        verify { style.addImage(RouteConstants.ARROW_HEAD_ICON, any<Bitmap>()) }
+        verify { style.removeStyleImage(ARROW_HEAD_ICON) }
+        verify { style.addImage(ARROW_HEAD_ICON, any<Bitmap>()) }
 
-        verify { style.removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID) }
-        verify { style.removeStyleLayer(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) }
-        verify { style.removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) }
-        verify { style.removeStyleLayer(RouteLayerConstants.ARROW_HEAD_LAYER_ID) }
+        verify { style.removeStyleLayer(ARROW_SHAFT_CASING_LINE_LAYER_ID) }
+        verify { style.removeStyleLayer(ARROW_HEAD_CASING_LAYER_ID) }
+        verify { style.removeStyleLayer(ARROW_SHAFT_LINE_LAYER_ID) }
+        verify { style.removeStyleLayer(ARROW_HEAD_LAYER_ID) }
 
         verify {
             style.addPersistentStyleLayer(
@@ -358,33 +365,33 @@ class RouteArrowUtilsTest {
         val style = mockk<Style>(relaxed = true) {
             every { isStyleLoaded } returns true
             every { styleLayers } returns listOf()
-            every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns false
-            every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns false
+            every { styleSourceExists(ARROW_SHAFT_SOURCE_ID) } returns false
+            every { styleSourceExists(ARROW_HEAD_SOURCE_ID) } returns false
             every {
-                styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+                styleLayerExists(ARROW_SHAFT_CASING_LINE_LAYER_ID)
             } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_CASING_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_SHAFT_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_LAYER_ID) } returns true
             every { styleLayerExists(PRIMARY_ROUTE_TRAFFIC_LAYER_ID) } returns true
             every { styleLayerExists(RESTRICTED_ROAD_LAYER_ID) } returns true
             every { styleLayerExists(options.aboveLayerId) } returns true
             every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
+                addStyleSource(ARROW_SHAFT_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, any())
+                addStyleSource(ARROW_HEAD_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) } returns mockImage
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON) } returns mockImage
+            every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns mockImage
+            every { getStyleImage(ARROW_HEAD_ICON) } returns mockImage
         }
 
         RouteArrowUtils.initializeLayers(style, options)
 
         verify {
             style.addStyleSource(
-                RouteConstants.ARROW_SHAFT_SOURCE_ID,
+                ARROW_SHAFT_SOURCE_ID,
                 capture(shaftSourceValueSlot)
             )
         }
@@ -432,31 +439,31 @@ class RouteArrowUtilsTest {
         val style = mockk<Style>(relaxed = true) {
             every { isStyleLoaded } returns true
             every { styleLayers } returns listOf()
-            every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns false
-            every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns false
+            every { styleSourceExists(ARROW_SHAFT_SOURCE_ID) } returns false
+            every { styleSourceExists(ARROW_HEAD_SOURCE_ID) } returns false
             every {
-                styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+                styleLayerExists(ARROW_SHAFT_CASING_LINE_LAYER_ID)
             } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_CASING_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_SHAFT_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_LAYER_ID) } returns true
             every { styleLayerExists(options.aboveLayerId) } returns false
             every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
+                addStyleSource(ARROW_SHAFT_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, any())
+                addStyleSource(ARROW_HEAD_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) } returns mockImage
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON) } returns mockImage
+            every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns mockImage
+            every { getStyleImage(ARROW_HEAD_ICON) } returns mockImage
         }
 
         RouteArrowUtils.initializeLayers(style, options)
 
         verify {
             style.addStyleSource(
-                RouteConstants.ARROW_SHAFT_SOURCE_ID,
+                ARROW_SHAFT_SOURCE_ID,
                 capture(shaftSourceValueSlot)
             )
         }
@@ -473,13 +480,13 @@ class RouteArrowUtilsTest {
             (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
         )
         assertEquals(
-            RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
+            DEFAULT_ROUTE_SOURCES_TOLERANCE,
             (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
         verify {
-            style.addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, capture(headSourceValueSlot))
+            style.addStyleSource(ARROW_HEAD_SOURCE_ID, capture(headSourceValueSlot))
         }
         assertEquals(
             "geojson",
@@ -494,21 +501,21 @@ class RouteArrowUtilsTest {
             (headSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
         )
         assertEquals(
-            RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
+            DEFAULT_ROUTE_SOURCES_TOLERANCE,
             (headSourceValueSlot.captured.contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
-        verify { style.removeStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) }
-        verify { style.addImage(RouteConstants.ARROW_HEAD_ICON_CASING, any<Bitmap>()) }
+        verify { style.removeStyleImage(ARROW_HEAD_ICON_CASING) }
+        verify { style.addImage(ARROW_HEAD_ICON_CASING, any<Bitmap>()) }
 
-        verify { style.removeStyleImage(RouteConstants.ARROW_HEAD_ICON) }
-        verify { style.addImage(RouteConstants.ARROW_HEAD_ICON, any<Bitmap>()) }
+        verify { style.removeStyleImage(ARROW_HEAD_ICON) }
+        verify { style.addImage(ARROW_HEAD_ICON, any<Bitmap>()) }
 
-        verify { style.removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID) }
-        verify { style.removeStyleLayer(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) }
-        verify { style.removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) }
-        verify { style.removeStyleLayer(RouteLayerConstants.ARROW_HEAD_LAYER_ID) }
+        verify { style.removeStyleLayer(ARROW_SHAFT_CASING_LINE_LAYER_ID) }
+        verify { style.removeStyleLayer(ARROW_HEAD_CASING_LAYER_ID) }
+        verify { style.removeStyleLayer(ARROW_SHAFT_LINE_LAYER_ID) }
+        verify { style.removeStyleLayer(ARROW_HEAD_LAYER_ID) }
 
         verify {
             style.addPersistentStyleLayer(
@@ -577,30 +584,30 @@ class RouteArrowUtilsTest {
         val style = mockk<Style>(relaxed = true) {
             every { isStyleLoaded } returns true
             every { styleLayers } returns listOf()
-            every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns true
-            every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns true
+            every { styleSourceExists(ARROW_SHAFT_SOURCE_ID) } returns true
+            every { styleSourceExists(ARROW_HEAD_SOURCE_ID) } returns true
             every {
-                styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+                styleLayerExists(ARROW_SHAFT_CASING_LINE_LAYER_ID)
             } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_CASING_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_SHAFT_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_LAYER_ID) } returns true
             every { styleLayerExists(options.aboveLayerId) } returns true
             every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
+                addStyleSource(ARROW_SHAFT_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, any())
+                addStyleSource(ARROW_HEAD_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) } returns null
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON) } returns null
+            every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns null
+            every { getStyleImage(ARROW_HEAD_ICON) } returns null
         }
 
         RouteArrowUtils.initializeLayers(style, mockOptions)
 
-        verify(exactly = 0) { style.addImage(RouteConstants.ARROW_HEAD_ICON, any<Bitmap>()) }
-        verify(exactly = 0) { style.addImage(RouteConstants.ARROW_HEAD_ICON, any<Image>()) }
+        verify(exactly = 0) { style.addImage(ARROW_HEAD_ICON, any<Bitmap>()) }
+        verify(exactly = 0) { style.addImage(ARROW_HEAD_ICON, any<Image>()) }
     }
 
     @Test
@@ -628,30 +635,30 @@ class RouteArrowUtilsTest {
         val style = mockk<Style>(relaxed = true) {
             every { isStyleLoaded } returns true
             every { styleLayers } returns listOf()
-            every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns true
-            every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns true
+            every { styleSourceExists(ARROW_SHAFT_SOURCE_ID) } returns true
+            every { styleSourceExists(ARROW_HEAD_SOURCE_ID) } returns true
             every {
-                styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+                styleLayerExists(ARROW_SHAFT_CASING_LINE_LAYER_ID)
             } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_CASING_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_SHAFT_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_LAYER_ID) } returns true
             every { styleLayerExists(options.aboveLayerId) } returns true
             every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
+                addStyleSource(ARROW_SHAFT_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, any())
+                addStyleSource(ARROW_HEAD_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) } returns null
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON) } returns null
+            every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns null
+            every { getStyleImage(ARROW_HEAD_ICON) } returns null
         }
 
         RouteArrowUtils.initializeLayers(style, mockOptions)
 
-        verify(exactly = 0) { style.addImage(RouteConstants.ARROW_HEAD_ICON, any<Bitmap>()) }
-        verify(exactly = 0) { style.addImage(RouteConstants.ARROW_HEAD_ICON, any<Image>()) }
+        verify(exactly = 0) { style.addImage(ARROW_HEAD_ICON, any<Bitmap>()) }
+        verify(exactly = 0) { style.addImage(ARROW_HEAD_ICON, any<Image>()) }
     }
 
     @Test
@@ -679,30 +686,30 @@ class RouteArrowUtilsTest {
         val style = mockk<Style>(relaxed = true) {
             every { isStyleLoaded } returns true
             every { styleLayers } returns listOf()
-            every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns true
-            every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns true
+            every { styleSourceExists(ARROW_SHAFT_SOURCE_ID) } returns true
+            every { styleSourceExists(ARROW_HEAD_SOURCE_ID) } returns true
             every {
-                styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+                styleLayerExists(ARROW_SHAFT_CASING_LINE_LAYER_ID)
             } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_CASING_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_SHAFT_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_LAYER_ID) } returns true
             every { styleLayerExists(options.aboveLayerId) } returns true
             every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
+                addStyleSource(ARROW_SHAFT_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, any())
+                addStyleSource(ARROW_HEAD_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) } returns null
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON) } returns null
+            every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns null
+            every { getStyleImage(ARROW_HEAD_ICON) } returns null
         }
 
         RouteArrowUtils.initializeLayers(style, mockOptions)
 
-        verify(exactly = 0) { style.addImage(RouteConstants.ARROW_HEAD_ICON_CASING, any<Bitmap>()) }
-        verify(exactly = 0) { style.addImage(RouteConstants.ARROW_HEAD_ICON_CASING, any<Image>()) }
+        verify(exactly = 0) { style.addImage(ARROW_HEAD_ICON_CASING, any<Bitmap>()) }
+        verify(exactly = 0) { style.addImage(ARROW_HEAD_ICON_CASING, any<Image>()) }
     }
 
     @Test
@@ -730,29 +737,29 @@ class RouteArrowUtilsTest {
         val style = mockk<Style>(relaxed = true) {
             every { isStyleLoaded } returns true
             every { styleLayers } returns listOf()
-            every { styleSourceExists(RouteConstants.ARROW_SHAFT_SOURCE_ID) } returns true
-            every { styleSourceExists(RouteConstants.ARROW_HEAD_SOURCE_ID) } returns true
+            every { styleSourceExists(ARROW_SHAFT_SOURCE_ID) } returns true
+            every { styleSourceExists(ARROW_HEAD_SOURCE_ID) } returns true
             every {
-                styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+                styleLayerExists(ARROW_SHAFT_CASING_LINE_LAYER_ID)
             } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID) } returns true
-            every { styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_CASING_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_SHAFT_LINE_LAYER_ID) } returns true
+            every { styleLayerExists(ARROW_HEAD_LAYER_ID) } returns true
             every { styleLayerExists(options.aboveLayerId) } returns true
             every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(RouteConstants.ARROW_SHAFT_SOURCE_ID, any())
+                addStyleSource(ARROW_SHAFT_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
             every {
-                addStyleSource(RouteConstants.ARROW_HEAD_SOURCE_ID, any())
+                addStyleSource(ARROW_HEAD_SOURCE_ID, any())
             } returns ExpectedFactory.createNone()
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON_CASING) } returns null
-            every { getStyleImage(RouteConstants.ARROW_HEAD_ICON) } returns null
+            every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns null
+            every { getStyleImage(ARROW_HEAD_ICON) } returns null
         }
 
         RouteArrowUtils.initializeLayers(style, mockOptions)
 
-        verify(exactly = 0) { style.addImage(RouteConstants.ARROW_HEAD_ICON_CASING, any<Bitmap>()) }
-        verify(exactly = 0) { style.addImage(RouteConstants.ARROW_HEAD_ICON_CASING, any<Image>()) }
+        verify(exactly = 0) { style.addImage(ARROW_HEAD_ICON_CASING, any<Bitmap>()) }
+        verify(exactly = 0) { style.addImage(ARROW_HEAD_ICON_CASING, any<Image>()) }
     }
 }

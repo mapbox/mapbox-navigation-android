@@ -181,9 +181,18 @@ class VanishingRouteLineTest {
             false
         )
 
-        assertEquals(expectedTrafficExpression, result!!.trafficLineExpression.toString())
-        assertEquals(expectedRouteLineExpression, result.routeLineExpression.toString())
-        assertEquals(expectedCasingExpression, result.routeLineCasingExpression.toString())
+        assertEquals(
+            expectedTrafficExpression,
+            result!!.trafficLineExpression.generateExpression().toString()
+        )
+        assertEquals(
+            expectedRouteLineExpression,
+            result.routeLineExpression.generateExpression().toString()
+        )
+        assertEquals(
+            expectedCasingExpression,
+            result.routeLineCasingExpression.generateExpression().toString()
+        )
     }
 
     @Test
@@ -224,7 +233,10 @@ class VanishingRouteLineTest {
             false
         )
 
-        assertEquals(expectedRestrictedExpression, result!!.restrictedRoadExpression.toString())
+        assertEquals(
+            expectedRestrictedExpression,
+            result!!.restrictedRoadExpression!!.generateExpression().toString()
+        )
     }
 
     @Test
@@ -264,9 +276,18 @@ class VanishingRouteLineTest {
             true
         )
 
-        assertEquals(expectedTrafficExpression, result!!.trafficLineExpression.toString())
-        assertEquals(expectedRouteLineExpression, result.routeLineExpression.toString())
-        assertEquals(expectedCasingExpression, result.routeLineCasingExpression.toString())
+        assertEquals(
+            expectedTrafficExpression,
+            result!!.trafficLineExpression.generateExpression().toString()
+        )
+        assertEquals(
+            expectedRouteLineExpression,
+            result.routeLineExpression.generateExpression().toString()
+        )
+        assertEquals(
+            expectedCasingExpression,
+            result.routeLineCasingExpression.generateExpression().toString()
+        )
     }
 
     @Test
@@ -310,9 +331,18 @@ class VanishingRouteLineTest {
             false
         )
 
-        assertEquals(expectedTrafficExp, result!!.trafficLineExpression.toString())
-        assertEquals(expectedRouteLineExp, result.routeLineExpression.toString())
-        assertEquals(expectedCasingExp, result.routeLineCasingExpression.toString())
+        assertEquals(
+            expectedTrafficExp,
+            result!!.trafficLineExpression.generateExpression().toString()
+        )
+        assertEquals(
+            expectedRouteLineExp,
+            result.routeLineExpression.generateExpression().toString()
+        )
+        assertEquals(
+            expectedCasingExp,
+            result.routeLineCasingExpression.generateExpression().toString()
+        )
     }
 
     @Test

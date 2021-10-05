@@ -6,8 +6,8 @@ import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.extension.style.expressions.generated.Expression
-import com.mapbox.navigation.ui.base.internal.model.route.RouteConstants
-import com.mapbox.navigation.ui.base.model.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 
 /**
  * Options for determining the appearance of maneuver arrow(s)
@@ -144,12 +144,12 @@ class RouteArrowOptions private constructor(
          */
         constructor(context: Context) : this(
             context,
-            RouteConstants.MANEUVER_ARROW_COLOR,
-            RouteConstants.MANEUVER_ARROW_CASING_COLOR,
-            RouteConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE,
-            RouteConstants.MANEUVER_ARROWHEAD_ICON_CASING_DRAWABLE,
+            RouteLayerConstants.MANEUVER_ARROW_COLOR,
+            RouteLayerConstants.MANEUVER_ARROW_CASING_COLOR,
+            RouteLayerConstants.MANEUVER_ARROWHEAD_ICON_DRAWABLE,
+            RouteLayerConstants.MANEUVER_ARROWHEAD_ICON_CASING_DRAWABLE,
             null,
-            RouteConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
+            RouteLayerConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE,
             null,
             null,
             null,
@@ -272,12 +272,12 @@ class RouteArrowOptions private constructor(
                     linear()
                     zoom()
                     stop {
-                        literal(RouteConstants.MIN_ARROW_ZOOM)
-                        literal(RouteConstants.MIN_ZOOM_ARROW_SHAFT_SCALE)
+                        literal(RouteLayerConstants.MIN_ARROW_ZOOM)
+                        literal(RouteLayerConstants.MIN_ZOOM_ARROW_SHAFT_SCALE)
                     }
                     stop {
-                        literal(RouteConstants.MAX_ARROW_ZOOM)
-                        literal(RouteConstants.MAX_ZOOM_ARROW_SHAFT_SCALE)
+                        literal(RouteLayerConstants.MAX_ARROW_ZOOM)
+                        literal(RouteLayerConstants.MAX_ZOOM_ARROW_SHAFT_SCALE)
                     }
                 }
 
@@ -286,12 +286,12 @@ class RouteArrowOptions private constructor(
                     linear()
                     zoom()
                     stop {
-                        literal(RouteConstants.MIN_ARROW_ZOOM)
-                        literal(RouteConstants.MIN_ZOOM_ARROW_SHAFT_CASING_SCALE)
+                        literal(RouteLayerConstants.MIN_ARROW_ZOOM)
+                        literal(RouteLayerConstants.MIN_ZOOM_ARROW_SHAFT_CASING_SCALE)
                     }
                     stop {
-                        literal(RouteConstants.MAX_ARROW_ZOOM)
-                        literal(RouteConstants.MAX_ZOOM_ARROW_SHAFT_CASING_SCALE)
+                        literal(RouteLayerConstants.MAX_ARROW_ZOOM)
+                        literal(RouteLayerConstants.MAX_ZOOM_ARROW_SHAFT_CASING_SCALE)
                     }
                 }
 
@@ -300,12 +300,12 @@ class RouteArrowOptions private constructor(
                     linear()
                     zoom()
                     stop {
-                        literal(RouteConstants.MIN_ARROW_ZOOM)
-                        literal(RouteConstants.MIN_ZOOM_ARROW_HEAD_SCALE)
+                        literal(RouteLayerConstants.MIN_ARROW_ZOOM)
+                        literal(RouteLayerConstants.MIN_ZOOM_ARROW_HEAD_SCALE)
                     }
                     stop {
-                        literal(RouteConstants.MAX_ARROW_ZOOM)
-                        literal(RouteConstants.MAX_ZOOM_ARROW_HEAD_SCALE)
+                        literal(RouteLayerConstants.MAX_ARROW_ZOOM)
+                        literal(RouteLayerConstants.MAX_ZOOM_ARROW_HEAD_SCALE)
                     }
                 }
 
@@ -314,12 +314,12 @@ class RouteArrowOptions private constructor(
                     linear()
                     zoom()
                     stop {
-                        literal(RouteConstants.MIN_ARROW_ZOOM)
-                        literal(RouteConstants.MIN_ZOOM_ARROW_HEAD_CASING_SCALE)
+                        literal(RouteLayerConstants.MIN_ARROW_ZOOM)
+                        literal(RouteLayerConstants.MIN_ZOOM_ARROW_HEAD_CASING_SCALE)
                     }
                     stop {
-                        literal(RouteConstants.MAX_ARROW_ZOOM)
-                        literal(RouteConstants.MAX_ZOOM_ARROW_HEAD_CASING_SCALE)
+                        literal(RouteLayerConstants.MAX_ARROW_ZOOM)
+                        literal(RouteLayerConstants.MAX_ZOOM_ARROW_HEAD_CASING_SCALE)
                     }
                 }
 
