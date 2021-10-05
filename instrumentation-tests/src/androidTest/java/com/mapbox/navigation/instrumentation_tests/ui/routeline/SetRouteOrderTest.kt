@@ -1,6 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.ui.routeline
 
 import android.content.Context
+import android.location.Location
 import androidx.annotation.IntegerRes
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.IdlingRegistry
@@ -41,6 +42,15 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
     }
     private val myResourceIdler =
         CountingIdlingResource("MultipleRouteSetTestResource")
+
+    override fun setupMockLocation(): Location {
+        val shortRoute = getRoute(activity, R.raw.short_route)
+        val origin = shortRoute.routeOptions()!!.coordinatesList().first()
+        return mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = origin.latitude()
+            longitude = origin.longitude()
+        }
+    }
 
     @Before
     fun setUp() {

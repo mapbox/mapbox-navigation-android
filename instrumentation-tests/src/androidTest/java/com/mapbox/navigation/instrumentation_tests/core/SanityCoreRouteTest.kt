@@ -1,5 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
+import android.location.Location
 import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -38,8 +39,15 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
     val mapboxHistoryTestRule = MapboxHistoryTestRule()
 
     private lateinit var mapboxNavigation: MapboxNavigation
-
     private lateinit var routeCompleteIdlingResource: RouteProgressStateIdlingResource
+
+    override fun setupMockLocation(): Location {
+        val mockRoute = MockRoutesProvider.dc_very_short(activity)
+        return mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = mockRoute.routeWaypoints.first().latitude()
+            longitude = mockRoute.routeWaypoints.first().longitude()
+        }
+    }
 
     @Before
     fun setup() {
@@ -74,10 +82,6 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
         // execute
         runOnMainSync {
             mapboxNavigation.historyRecorder.startRecording()
-            mockLocationUpdatesRule.pushLocationUpdate {
-                latitude = mockRoute.routeWaypoints.first().latitude()
-                longitude = mockRoute.routeWaypoints.first().longitude()
-            }
         }
         runOnMainSync {
             mapboxNavigation.startTripSession()
