@@ -32,6 +32,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
+import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -46,6 +47,7 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.maps.util.ViewUtils.capture
 import com.mapbox.navigation.utils.internal.toPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -116,7 +118,7 @@ class FeedbackActivity : AppCompatActivity() {
     }
 
     private val spListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        if (key == KEY_SP_FEEDBACK_METADATA) {
+        if (key == KEY_SP_FEEDBACK_METADATA || key == KEY_SP_FEEDBACK_SCREENSHOT) {
             checkStoredFeedbackMetadata()
         }
     }
@@ -124,11 +126,18 @@ class FeedbackActivity : AppCompatActivity() {
     private var feedbackMetadataWrapper: FeedbackMetadataWrapper? = null
         set(value) {
             field = value
-            enableButtonStoreFeedbackMetadata(value != null)
+            enableButtonStoreFeedbackMetadata(value != null && feedbackScreenshot != null)
+        }
+
+    private var feedbackScreenshot: String? = null
+        set(value) {
+            field = value
+            enableButtonStoreFeedbackMetadata(feedbackMetadataWrapper != null && value != null)
         }
 
     private companion object {
         private const val KEY_SP_FEEDBACK_METADATA = "KEY_SP_FEEDBACK_METADATA"
+        private const val KEY_SP_FEEDBACK_SCREENSHOT = "KEY_SP_FEEDBACK_SCREENSHOT"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -179,16 +188,21 @@ class FeedbackActivity : AppCompatActivity() {
             binding.startNavigation.visibility = View.GONE
         }
         binding.positioningIssueFeedback.setOnClickListener {
-            mapboxNavigation.postUserFeedback(
-                FeedbackEvent.POSITIONING_ISSUE,
-                "Test feedback",
-                FeedbackEvent.UI,
-                null
-            )
+            binding.mapView.capture { screenshot ->
+                mapboxNavigation.postUserFeedback(
+                    FeedbackEvent.POSITIONING_ISSUE,
+                    "Test feedback",
+                    FeedbackEvent.UI,
+                    FeedbackHelper.encodeScreenshot(screenshot),
+                )
+            }
         }
         binding.takeFeedbackMetadata.setOnClickListener {
             if (mapboxNavigation.getTripSessionState() == TripSessionState.STARTED) {
                 feedbackMetadataWrapper = mapboxNavigation.provideFeedbackMetadataWrapper()
+                binding.mapView.capture { screenshot ->
+                    feedbackScreenshot = FeedbackHelper.encodeScreenshot(screenshot)
+                }
             } else {
                 Toast.makeText(
                     this,
@@ -198,9 +212,9 @@ class FeedbackActivity : AppCompatActivity() {
             }
         }
         binding.saveTakenFeedbackMetadata.setOnClickListener {
-            feedbackMetadataWrapper?.get()?.let { feedbackMetadata ->
-                storeFeedbackMetadata(feedbackMetadata)
-            }
+            val feedbackMetadata = feedbackMetadataWrapper?.get() ?: return@setOnClickListener
+            val screenshot = feedbackScreenshot ?: return@setOnClickListener
+            storeFeedbackMetadata(feedbackMetadata, screenshot)
         }
         binding.positioningIssueFeedbackWithMetadata.setOnClickListener {
             sharedPrefs.getString(KEY_SP_FEEDBACK_METADATA, null)?.let { json ->
@@ -213,11 +227,19 @@ class FeedbackActivity : AppCompatActivity() {
                         .show()
                     return@let
                 }
+                val screenshot = sharedPrefs.getString(KEY_SP_FEEDBACK_SCREENSHOT, null) ?: run {
+                    Toast.makeText(
+                        this,
+                        "Cannot load feedback screenshot from preferences",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@let
+                }
                 mapboxNavigation.postUserFeedback(
                     FeedbackEvent.POSITIONING_ISSUE,
                     "Test feedback",
                     FeedbackEvent.UI,
-                    null,
+                    screenshot,
                     emptyArray(),
                     feedbackMetadata
                 )
@@ -293,19 +315,24 @@ class FeedbackActivity : AppCompatActivity() {
     }
 
     private fun checkStoredFeedbackMetadata() {
-        val hasStoredMetadata = sharedPrefs.getString(KEY_SP_FEEDBACK_METADATA, null) != null
+        val hasStoredMetadata = sharedPrefs.getString(KEY_SP_FEEDBACK_METADATA, null) != null &&
+            sharedPrefs.getString(KEY_SP_FEEDBACK_SCREENSHOT, null) != null
 
         binding.cleanUpFeedbackMetadata.isEnabled = hasStoredMetadata
         binding.positioningIssueFeedbackWithMetadata.isEnabled = hasStoredMetadata
     }
 
-    private fun storeFeedbackMetadata(feedbackMetadata: FeedbackMetadata) {
+    private fun storeFeedbackMetadata(feedbackMetadata: FeedbackMetadata, screenshot: String) {
         sharedPrefs.edit()
             .putString(KEY_SP_FEEDBACK_METADATA, feedbackMetadata.toJson(Gson()))
+            .putString(KEY_SP_FEEDBACK_SCREENSHOT, screenshot)
             .apply()
     }
 
     private fun cleanUpFeedbackMetadata() {
-        sharedPrefs.edit().remove(KEY_SP_FEEDBACK_METADATA).apply()
+        sharedPrefs.edit()
+            .remove(KEY_SP_FEEDBACK_METADATA)
+            .remove(KEY_SP_FEEDBACK_SCREENSHOT)
+            .apply()
     }
 }
