@@ -3,6 +3,8 @@ package com.mapbox.navigation.instrumentation_tests.core
 import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -22,10 +24,12 @@ import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
 import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
+import com.mapbox.navigation.utils.internal.logE
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 /**
@@ -90,6 +94,15 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
         alternativesIdlingResource.register()
         mapboxHistoryTestRule.stopRecordingOnCrash("no route alternatives") {
             Espresso.onIdle()
+        }
+
+        runOnMainSync {
+            val countDownLatch = CountDownLatch(1)
+            mapboxNavigation.historyRecorder.stopRecording {
+                logE(Tag("RouteAlternativesTest"), Message("history path=$it"))
+                countDownLatch.countDown()
+            }
+            countDownLatch.await()
         }
 
         // Verify faster alternatives are found.
