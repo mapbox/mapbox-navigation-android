@@ -53,6 +53,7 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -189,9 +190,31 @@ class MapboxRouteLineApi(
     private val mutex = Mutex()
     internal var activeLegIndex = INVALID_ACTIVE_LEG_INDEX
         private set
+    private val trafficBackfillRoadClasses = CopyOnWriteArrayList<String>()
 
     companion object {
         private const val INVALID_ACTIVE_LEG_INDEX = -1
+    }
+
+    init {
+        trafficBackfillRoadClasses.addAll(
+            routeLineOptions.resourceProvider.trafficBackfillRoadClasses
+        )
+    }
+
+    /**
+     * Replaces the traffic back fill road classes derived from [RouteLineResources].
+     *
+     * @param roadClasses the road class collection that should be used in place of those
+     * from the [RouteLineResources] as part of the [MapboxRouteLineOptions]
+     */
+    fun setRoadClasses(roadClasses: List<String>) {
+        jobControl.scope.launch(Dispatchers.Main) {
+            mutex.withLock {
+                trafficBackfillRoadClasses.clear()
+                trafficBackfillRoadClasses.addAll(roadClasses)
+            }
+        }
     }
 
     /**
@@ -1005,7 +1028,7 @@ class MapboxRouteLineApi(
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
                     this,
                     routeLineOptions.resourceProvider.routeLineColorResources,
-                    routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
+                    trafficBackfillRoadClasses,
                     true,
                     routeLineOptions.vanishingRouteLine?.vanishPointOffset ?: 0.0,
                     Color.TRANSPARENT,
@@ -1061,7 +1084,7 @@ class MapboxRouteLineApi(
                 MapboxRouteLineUtils.getTrafficLineExpressionProducer(
                     this,
                     routeLineOptions.resourceProvider.routeLineColorResources,
-                    routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
+                    trafficBackfillRoadClasses,
                     false,
                     0.0,
                     Color.TRANSPARENT,
@@ -1078,7 +1101,7 @@ class MapboxRouteLineApi(
             MapboxRouteLineUtils.getTrafficLineExpressionProducer(
                 partitionedRoutes.second[1].route,
                 routeLineOptions.resourceProvider.routeLineColorResources,
-                routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
+                trafficBackfillRoadClasses,
                 false,
                 0.0,
                 Color.TRANSPARENT,
@@ -1159,7 +1182,7 @@ class MapboxRouteLineApi(
                     partitionedRoutes.first.firstOrNull()?.route?.run {
                         MapboxRouteLineUtils.calculateRouteLineSegments(
                             this,
-                            routeLineOptions.resourceProvider.trafficBackfillRoadClasses,
+                            trafficBackfillRoadClasses,
                             true,
                             routeLineOptions.resourceProvider.routeLineColorResources
                         )
