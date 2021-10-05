@@ -113,25 +113,25 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                                 it.featureCollection
                             )
                             updateLineGradientAsync(
-                                this,
+                                jobControl.scope,
                                 style,
                                 RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID,
                                 it.dynamicData.baseExpressionProvider
                             )
                             updateLineGradientAsync(
-                                this,
+                                jobControl.scope,
                                 style,
                                 RouteLayerConstants.PRIMARY_ROUTE_CASING_LAYER_ID,
                                 it.dynamicData.casingExpressionProvider
                             )
                             updateLineGradientAsync(
-                                this,
+                                jobControl.scope,
                                 style,
                                 RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
                                 it.dynamicData.trafficExpressionProvider
                             )
                             updateLineGradientAsync(
-                                this,
+                                jobControl.scope,
                                 style,
                                 RouteLayerConstants.RESTRICTED_ROAD_LAYER_ID,
                                 it.dynamicData.restrictedSectionExpressionProvider
@@ -146,7 +146,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                                 it.featureCollection
                             )
                             updateLineGradientAsync(
-                                this,
+                                jobControl.scope,
                                 style,
                                 RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID,
                                 it.dynamicData.trafficExpressionProvider
@@ -160,7 +160,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
                                 it.featureCollection
                             )
                             updateLineGradientAsync(
-                                this,
+                                jobControl.scope,
                                 style,
                                 RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID,
                                 it.dynamicData.trafficExpressionProvider
@@ -468,7 +468,7 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         expressionProvider: RouteLineExpressionProvider?
     ) {
         if (expressionProvider != null) {
-            val gradientExpression = coroutineScope.async(Dispatchers.IO) {
+            val gradientExpression = coroutineScope.async {
                 expressionProvider.generateExpression()
             }
             gradientExpression.await().apply {
