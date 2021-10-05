@@ -924,18 +924,20 @@ class MapboxNavigation(
      * @param feedbackType one of [FeedbackEvent.Type]
      * @param description description message
      * @param feedbackSource one of [FeedbackEvent.Source]
-     * @param screenshot encoded screenshot (optional)
+     * @param screenshot encoded screenshot
      * @param feedbackSubType array of [FeedbackEvent.SubType] (optional)
      *
      * @see [FeedbackHelper.getFeedbackSubTypes]
      * to retrieve possible feedback subtypes for a given [feedbackType]
+     * @see [ViewUtils.capture] to capture screenshots
+     * @see [FeedbackHelper.encodeScreenshot] to encode screenshots
      */
     @JvmOverloads
     fun postUserFeedback(
         @FeedbackEvent.Type feedbackType: String,
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
-        screenshot: String?,
+        screenshot: String,
         feedbackSubType: Array<@FeedbackEvent.SubType String>? = emptyArray()
     ) {
         MapboxNavigationTelemetry.postUserFeedback(
@@ -958,20 +960,23 @@ class MapboxNavigation(
      * @param feedbackType one of [FeedbackEvent.Type]
      * @param description description message
      * @param feedbackSource one of [FeedbackEvent.Source]
-     * @param screenshot encoded screenshot (optional)
+     * @param screenshot encoded screenshot
      * @param feedbackSubType array of [FeedbackEvent.SubType] (optional)
      * @param feedbackMetadata use it to attach feedback to a specific passed location.
      * See [FeedbackMetadata] and [FeedbackMetadataWrapper]
      *
      * @see [FeedbackHelper.getFeedbackSubTypes]
      * to retrieve possible feedback subtypes for a given [feedbackType]
+     * @see [ViewUtils.capture] to capture screenshots
+     * @see [FeedbackHelper.encodeScreenshot] to encode screenshots
      */
     @ExperimentalPreviewMapboxNavigationAPI
+    @JvmOverloads
     fun postUserFeedback(
         @FeedbackEvent.Type feedbackType: String,
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
-        screenshot: String?,
+        screenshot: String,
         feedbackSubType: Array<@FeedbackEvent.SubType String>? = emptyArray(),
         feedbackMetadata: FeedbackMetadata,
     ) {

@@ -1121,3 +1121,16 @@ package com.mapbox.navigation.ui.maps.route.line.model {
 
 }
 
+package com.mapbox.navigation.ui.maps.util {
+
+  public fun interface OnViewScreenshotReady {
+    method public void onViewCaptureReady(android.graphics.Bitmap screenshot);
+  }
+
+  public final class ViewUtils {
+    method public static void capture(android.view.View, com.mapbox.navigation.ui.maps.util.OnViewScreenshotReady callback);
+    field public static final com.mapbox.navigation.ui.maps.util.ViewUtils INSTANCE;
+  }
+
+}
+

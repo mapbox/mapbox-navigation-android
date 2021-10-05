@@ -1,7 +1,14 @@
 package com.mapbox.navigation.core.telemetry.events
 
+import android.graphics.Bitmap
+import android.util.Base64
+import com.mapbox.navigation.core.MapboxNavigation
+import java.io.ByteArrayOutputStream
+import kotlin.math.min
+import kotlin.math.roundToInt
+
 /**
- * Provides utilities for working with feedback types and subtypes
+ * Provides utilities for working with feedback
  */
 object FeedbackHelper {
 
@@ -120,5 +127,25 @@ object FeedbackHelper {
             )
             else -> throw IllegalArgumentException("feedback type $feedbackType is not supported")
         }
+    }
+
+    /**
+     * Scales and compresses a [Bitmap], then encodes the result to a [Base64] string.
+     * Returned [String] can be passed to [MapboxNavigation.postUserFeedback] function.
+     *
+     * @return encoded screenshot as a [Base64] string
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun encodeScreenshot(
+        screenshot: Bitmap,
+        options: BitmapEncodeOptions = BitmapEncodeOptions.Builder().build(),
+    ): String {
+        val newWidth = min(screenshot.width, options.width)
+        val newHeight = (newWidth.toFloat() * screenshot.height / screenshot.width).roundToInt()
+        val scaled = Bitmap.createScaledBitmap(screenshot, newWidth, newHeight, true)
+        val stream = ByteArrayOutputStream()
+        scaled.compress(Bitmap.CompressFormat.JPEG, options.compressQuality, stream)
+        return Base64.encodeToString(stream.toByteArray(), Base64.DEFAULT)
     }
 }
