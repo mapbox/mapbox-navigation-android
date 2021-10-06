@@ -397,7 +397,7 @@ class PredictiveCacheControllerTest {
 
         val mapChangedListenerSlot = slot<OnStyleLoadedListener>()
         verify { mockedMapboxMap.addOnStyleLoadedListener(capture(mapChangedListenerSlot)) }
-        mapChangedListenerSlot.captured.onStyleLoaded()
+        mapChangedListenerSlot.captured.onStyleLoaded(mockk())
 
         assertEquals(listOf("mapbox.satellite"), removeSlotIds)
         assertEquals(listOf("mapbox.mapbox-streets-v9"), addSlotIds)
