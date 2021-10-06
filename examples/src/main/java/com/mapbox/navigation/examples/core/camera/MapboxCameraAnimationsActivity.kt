@@ -18,6 +18,7 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
+import com.mapbox.maps.extension.observable.eventdata.MapLoadingErrorEventData
 import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.CircleLayer
 import com.mapbox.maps.extension.style.sources.addSource
@@ -26,7 +27,6 @@ import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
-import com.mapbox.maps.plugin.delegates.listeners.eventdata.MapLoadErrorType
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
@@ -436,10 +436,11 @@ class MapboxCameraAnimationsActivity :
                 style.addLayer(poiLayer)
             },
             object : OnMapLoadErrorListener {
-                override fun onMapLoadError(mapLoadErrorType: MapLoadErrorType, message: String) {
+                override fun onMapLoadError(eventData: MapLoadingErrorEventData) {
                     Log.e(
-                        "CameraAnimationsAct",
-                        "Error loading map - error type: $mapLoadErrorType, message: $message"
+                        MapboxCameraAnimationsActivity::class.java.simpleName,
+                        "Error loading map - error type: " +
+                            "${eventData.type}, message: ${eventData.message}"
                     )
                 }
             }

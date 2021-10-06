@@ -168,7 +168,7 @@ internal class MapboxTripSession(
         private set
 
     private val nativeFallbackVersionsObserver =
-        object : com.mapbox.navigator.FallbackVersionsObserver() {
+        object : com.mapbox.navigator.FallbackVersionsObserver {
             override fun onFallbackVersionsFound(versions: MutableList<String>) {
                 mainJobController.scope.launch {
                     fallbackVersionsObservers.forEach {
@@ -246,7 +246,7 @@ internal class MapboxTripSession(
         return tripService.hasServiceStarted()
     }
 
-    private val navigatorObserver = object : NavigatorObserver() {
+    private val navigatorObserver = object : NavigatorObserver {
         override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
             val tripStatus = status.getTripStatusFrom(route)
             val enhancedLocation = tripStatus.navigationStatus.location.toLocation()

@@ -50,7 +50,7 @@ class RoadObjectMatcher internal constructor(
         roadObjectMatcherObservers.add(roadObjectMatcherObserver)
     }
 
-    private val roadObjectMatcherListener = object : RoadObjectMatcherListener() {
+    private val roadObjectMatcherListener = object : RoadObjectMatcherListener {
         override fun onRoadObjectMatched(
             roadObject: Expected<RoadObjectMatcherError, RoadObject>
         ) {
