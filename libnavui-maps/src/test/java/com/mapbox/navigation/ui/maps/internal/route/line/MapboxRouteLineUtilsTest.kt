@@ -557,7 +557,7 @@ class MapboxRouteLineUtilsTest {
                 .contents
         )
         assertEquals(
-            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            "",
             (waypointSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
         )
         assertEquals(
@@ -588,7 +588,7 @@ class MapboxRouteLineUtilsTest {
             !!.contents
         )
         assertEquals(
-            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            "",
             (primaryRouteSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]
             !!.contents
         )
@@ -620,7 +620,7 @@ class MapboxRouteLineUtilsTest {
             ["lineMetrics"]!!.contents
         )
         assertEquals(
-            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            "",
             (alternativeRoute1SourceValueSlot.captured.contents as HashMap<String, Value>)
             ["data"]!!.contents
         )
@@ -652,7 +652,7 @@ class MapboxRouteLineUtilsTest {
             ["lineMetrics"]!!.contents
         )
         assertEquals(
-            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            "",
             (alternativeRoute2SourceValueSlot.captured.contents as HashMap<String, Value>)
             ["data"]!!.contents
         )

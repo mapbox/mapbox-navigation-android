@@ -266,7 +266,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     mapboxMap.loadStyleUri(styleId, style -> {
       mapboxNavigation.getNavigationOptions().getLocationEngine().getLastLocation(locationEngineCallback);
       getGesturePlugin().addOnMapLongClickListener(this);
-    }, (mapLoadError, s) -> Log.e(TAG, "Error loading map: " + mapLoadError.name()));
+    }, (mapLoadError) -> Log.e(TAG, "Error loading map: " + mapLoadError.getMessage()));
   }
 
   @Override

@@ -1094,7 +1094,7 @@ class MapboxNavigation(
         }
     }
 
-    private fun createInternalFallbackVersionsObserver() = object : FallbackVersionsObserver() {
+    private fun createInternalFallbackVersionsObserver() = object : FallbackVersionsObserver {
         override fun onFallbackVersionsFound(versions: List<String>) {
             if (versions.isNotEmpty()) {
                 // the last version in the list is the latest one

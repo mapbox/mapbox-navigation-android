@@ -263,7 +263,7 @@ class RouteArrowUtilsTest {
             (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!.contents
         )
         assertEquals(
-            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            "",
             (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
         )
         assertEquals(
@@ -284,7 +284,7 @@ class RouteArrowUtilsTest {
             (headSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!.contents
         )
         assertEquals(
-            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            "",
             (headSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!
                 .contents.toString()
         )
@@ -476,7 +476,7 @@ class RouteArrowUtilsTest {
             (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!.contents
         )
         assertEquals(
-            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            "",
             (shaftSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
         )
         assertEquals(
@@ -497,7 +497,7 @@ class RouteArrowUtilsTest {
             (headSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!.contents
         )
         assertEquals(
-            "{\"type\":\"FeatureCollection\",\"features\":[]}",
+            "",
             (headSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
         )
         assertEquals(

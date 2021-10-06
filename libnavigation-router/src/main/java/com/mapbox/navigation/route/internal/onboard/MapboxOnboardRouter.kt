@@ -166,7 +166,7 @@ class MapboxOnboardRouter(
                             RouterFailure(
                                 url = javaUrl,
                                 routerOrigin = RouterOrigin.Onboard,
-                                message = error.error,
+                                message = error.message,
                                 code = error.code
                             )
                         ),

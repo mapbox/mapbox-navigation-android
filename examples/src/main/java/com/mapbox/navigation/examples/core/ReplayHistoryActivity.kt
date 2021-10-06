@@ -13,11 +13,11 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.Style
+import com.mapbox.maps.extension.observable.eventdata.MapLoadingErrorEventData
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
-import com.mapbox.maps.plugin.delegates.listeners.eventdata.MapLoadErrorType
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
@@ -146,7 +146,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
                 viewportDataSource.evaluate()
             },
             object : OnMapLoadErrorListener {
-                override fun onMapLoadError(mapLoadErrorType: MapLoadErrorType, msg: String) {
+                override fun onMapLoadError(eventData: MapLoadingErrorEventData) {
                     // intentionally blank
                 }
             }
