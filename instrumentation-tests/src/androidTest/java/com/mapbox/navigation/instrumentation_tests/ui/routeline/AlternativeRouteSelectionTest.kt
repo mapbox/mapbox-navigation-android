@@ -1,10 +1,10 @@
 package com.mapbox.navigation.instrumentation_tests.ui.routeline
 
 import android.location.Location
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.BasicNavigationViewActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
@@ -131,10 +131,10 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
             routeLineApi = MapboxRouteLineApi(MapboxRouteLineOptions.Builder(activity).build())
 
             mapboxNavigation.registerRoutesObserver(object : RoutesObserver {
-                override fun onRoutesChanged(routes: List<DirectionsRoute>) {
+                override fun onRoutesChanged(result: RoutesUpdatedResult) {
                     mapboxNavigation.unregisterRoutesObserver(this)
 
-                    val routeLines = routes.map { RouteLine(it, null) }
+                    val routeLines = result.routes.map { RouteLine(it, null) }
                     routeLineApi.setRoutes(routeLines) { result ->
                         routeLineView.renderRouteDrawData(
                             activity.mapboxMap.getStyle()!!,
@@ -142,7 +142,7 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
                         )
                     }
 
-                    assertEquals(3, routes.size)
+                    assertEquals(3, result.routes.size)
                     countDownLatch.countDown()
                 }
             })

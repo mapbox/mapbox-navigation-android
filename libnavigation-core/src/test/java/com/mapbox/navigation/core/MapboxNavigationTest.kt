@@ -28,9 +28,13 @@ import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesCacheManager
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesCacheManagerProvider
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
@@ -136,6 +140,7 @@ class MapboxNavigationTest {
     }
 
     private lateinit var mapboxNavigation: MapboxNavigation
+    private lateinit var routeAlternativesCacheManager: RouteAlternativesCacheManager
 
     companion object {
         @BeforeClass
@@ -178,7 +183,7 @@ class MapboxNavigationTest {
         } returns routeRefreshController
         mockkObject(RouteAlternativesControllerProvider)
         every {
-            RouteAlternativesControllerProvider.create(any(), any(), any(), any(), any())
+            RouteAlternativesControllerProvider.create(any(), any(), any(), any(), any(), any())
         } returns routeAlternativesController
 
         every { applicationContext.applicationContext } returns applicationContext
@@ -199,6 +204,14 @@ class MapboxNavigationTest {
         } returns arrivalProgressObserver
 
         every { navigator.create(any(), any(), any(), any(), any(), any()) } returns navigator
+
+        mockkObject(RouteAlternativesCacheManagerProvider)
+        routeAlternativesCacheManager = mockk {
+            every { areAlternatives(any()) } returns false
+        }
+        every {
+            RouteAlternativesCacheManagerProvider.create(any())
+        } returns routeAlternativesCacheManager
     }
 
     @After
@@ -214,6 +227,7 @@ class MapboxNavigationTest {
         unmockkObject(RouteRefreshControllerProvider)
         unmockkObject(RouteAlternativesControllerProvider)
         unmockkObject(MapboxNavigationTelemetry)
+        unmockkObject(RouteAlternativesCacheManagerProvider)
 
         ThreadController.cancelAllNonUICoroutines()
         ThreadController.cancelAllUICoroutines()
@@ -259,23 +273,31 @@ class MapboxNavigationTest {
         }
         mapboxNavigation.stopTripSession()
 
-        verify(exactly = 1) { tripSession.setRoute(route = null, legIndex = 0) }
+        verify(exactly = 1) {
+            tripSession.setRoute(
+                route = null, legIndex = 0, RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+            )
+        }
 
         mapboxNavigation.startTripSession()
 
-        verify(exactly = 1) { tripSession.setRoute(primary, currentLegIndex) }
+        verify(exactly = 1) {
+            tripSession.setRoute(
+                primary, currentLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            )
+        }
     }
 
     @Test
     fun init_routesObs_internalRouteObs_navigationSession_and_TelemetryLocAndProgressDispatcher() {
         createMapboxNavigation()
-        verify(exactly = 2) { directionsSession.registerRoutesObserver(any()) }
+        verify(exactly = 3) { directionsSession.registerRoutesObserver(any()) }
     }
 
     @Test
     fun init_registerOffRouteObserver() {
         createMapboxNavigation()
-        verify(exactly = 1) { tripSession.registerOffRouteObserver(any()) }
+        verify(exactly = 3) { tripSession.registerOffRouteObserver(any()) }
     }
 
     @Test
@@ -295,7 +317,7 @@ class MapboxNavigationTest {
 
         mapboxNavigation = MapboxNavigation(navigationOptions)
 
-        verify(exactly = 2) { tripSession.registerOffRouteObserver(any()) }
+        verify(exactly = 6) { tripSession.registerOffRouteObserver(any()) }
     }
 
     @Test
@@ -388,7 +410,11 @@ class MapboxNavigationTest {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { directionsSession.setRoutes(emptyList()) }
+        verify(exactly = 1) {
+            directionsSession.setRoutes(
+                emptyList(), 0, RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+            )
+        }
     }
 
     @Test
@@ -514,6 +540,7 @@ class MapboxNavigationTest {
         val primary: DirectionsRoute = mockk()
         val secondary: DirectionsRoute = mockk()
         val routes = listOf(primary, secondary)
+        val reason = RoutesExtra.ROUTES_UPDATE_REASON_NEW
         val initialLegIndex = 2
         val routeObserversSlot = mutableListOf<RoutesObserver>()
         every { tripSession.getState() } returns TripSessionState.STARTED
@@ -521,10 +548,10 @@ class MapboxNavigationTest {
         verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
 
         routeObserversSlot.forEach {
-            it.onRoutesChanged(routes)
+            it.onRoutesChanged(RoutesUpdatedResult(routes, reason))
         }
 
-        verify { tripSession.setRoute(primary, initialLegIndex) }
+        verify { tripSession.setRoute(primary, initialLegIndex, reason) }
         verify { routeRefreshController.restart(primary) }
     }
 
@@ -532,6 +559,7 @@ class MapboxNavigationTest {
     fun internalRouteObserver_empty() {
         createMapboxNavigation()
         val routes = emptyList<DirectionsRoute>()
+        val reason = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
         val initialLegIndex = 0
         val routeObserversSlot = mutableListOf<RoutesObserver>()
         every { tripSession.getState() } returns TripSessionState.STARTED
@@ -539,10 +567,10 @@ class MapboxNavigationTest {
         verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
 
         routeObserversSlot.forEach {
-            it.onRoutesChanged(routes)
+            it.onRoutesChanged(RoutesUpdatedResult(routes, reason))
         }
 
-        verify { tripSession.setRoute(null, initialLegIndex) }
+        verify { tripSession.setRoute(null, initialLegIndex, reason) }
         verify { routeRefreshController.stop() }
     }
 
@@ -559,14 +587,20 @@ class MapboxNavigationTest {
         verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
 
         for (observer in routeObserversSlot) {
-            observer.onRoutesChanged(routes)
+            observer.onRoutesChanged(
+                RoutesUpdatedResult(routes, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+            )
         }
 
-        verify(exactly = 0) { tripSession.setRoute(any(), any()) }
+        verify(exactly = 0) { tripSession.setRoute(any(), any(), any()) }
 
         mapboxNavigation.startTripSession()
 
-        verify(exactly = 1) { tripSession.setRoute(primary, initialLegIndex) }
+        verify(exactly = 1) {
+            tripSession.setRoute(
+                primary, initialLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            )
+        }
     }
 
     @Test
@@ -603,6 +637,20 @@ class MapboxNavigationTest {
         mapboxNavigation.setRoutes(listOf())
 
         verify(exactly = 1) { routeAlternativesController.interrupt() }
+    }
+
+    @Test
+    fun `set alternative routes`() {
+        createMapboxNavigation()
+        every { routeAlternativesCacheManager.areAlternatives(any()) } returns true
+
+        mapboxNavigation.setRoutes(listOf(mockk()))
+
+        verify(exactly = 1) {
+            directionsSession.setRoutes(
+                any(), 0, RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
+            )
+        }
     }
 
     @Test
@@ -775,7 +823,11 @@ class MapboxNavigationTest {
 
         mapboxNavigation.setRoutes(routes, initialLegIndex)
 
-        verify(exactly = 1) { directionsSession.setRoutes(routes, initialLegIndex) }
+        verify(exactly = 1) {
+            directionsSession.setRoutes(
+                routes, initialLegIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            )
+        }
     }
 
     @Test
@@ -815,7 +867,9 @@ class MapboxNavigationTest {
         verify { directionsSession.requestRoutes(options, capture(possibleInternalCallbackSlot)) }
         possibleInternalCallbackSlot.captured.onRoutesReady(routes, origin)
 
-        verify(exactly = 0) { directionsSession.setRoutes(routes) }
+        verify(exactly = 0) {
+            directionsSession.setRoutes(routes, any(), any())
+        }
     }
 
     @Test
@@ -1046,7 +1100,9 @@ class MapboxNavigationTest {
 
         verifyOrder {
             billingController.onExternalRouteSet(routes.first())
-            directionsSession.setRoutes(routes)
+            directionsSession.setRoutes(
+                routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW
+            )
         }
     }
 

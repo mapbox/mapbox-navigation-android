@@ -146,9 +146,9 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
         }
     }
 
-    private val routesObserver = RoutesObserver { routes ->
-        if (routes.isNotEmpty()) {
-            startSimulation(routes[0])
+    private val routesObserver = RoutesObserver { result ->
+        if (result.routes.isNotEmpty()) {
+            startSimulation(result.routes[0])
             binding.tripProgressView.visibility = View.VISIBLE
         } else {
             mapboxReplayer.stop()

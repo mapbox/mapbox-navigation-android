@@ -217,11 +217,11 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
     // RouteLine: This is one way to keep the route(s) appearing on the map in sync with
     // MapboxNavigation. When this observer is called the route data is used to draw route(s)
     // on the map.
-    private val routesObserver: RoutesObserver = RoutesObserver { routes ->
+    private val routesObserver: RoutesObserver = RoutesObserver { result ->
         // RouteLine: wrap the DirectionRoute objects and pass them
         // to the MapboxRouteLineApi to generate the data necessary to draw the route(s)
         // on the map.
-        val routeLines = routes.map { RouteLine(it, null) }
+        val routeLines = result.routes.map { RouteLine(it, null) }
 
         routeLineApi.setRoutes(
             routeLines

@@ -161,14 +161,14 @@ class MapboxTripProgressActivity : AppCompatActivity(), OnMapLongClickListener {
         }
     }
 
-    private val routesObserver = RoutesObserver { routes ->
-        if (routes.isNotEmpty()) {
+    private val routesObserver = RoutesObserver { result ->
+        if (result.routes.isNotEmpty()) {
             CoroutineScope(Dispatchers.Main).launch {
-                routeLineApi.setRoutes(listOf(RouteLine(routes[0], null))).apply {
+                routeLineApi.setRoutes(listOf(RouteLine(result.routes[0], null))).apply {
                     routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
                 }
             }
-            startSimulation(routes[0])
+            startSimulation(result.routes[0])
             binding.tripProgressView.visibility = View.VISIBLE
         } else {
             binding.tripProgressView.visibility = View.GONE
