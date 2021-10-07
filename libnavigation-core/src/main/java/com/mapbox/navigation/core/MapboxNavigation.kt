@@ -486,16 +486,7 @@ class MapboxNavigation(
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
     @JvmOverloads
     fun startTripSession(withForegroundService: Boolean = true) {
-        runIfNotDestroyed {
-            tripSession.start(
-                withTripService = withForegroundService,
-                withReplayEnabled = false
-            )
-            restoreTripSessionRoute()
-            notificationChannelField?.let {
-                monitorNotificationActionButton(it.get(null) as ReceiveChannel<NotificationAction>)
-            }
-        }
+        startSession(withForegroundService, false)
     }
 
     /**
@@ -523,13 +514,7 @@ class MapboxNavigation(
      */
     @ExperimentalPreviewMapboxNavigationAPI
     fun startReplayTripSession(withForegroundService: Boolean = true) {
-        runIfNotDestroyed {
-            tripSession.start(
-                withTripService = withForegroundService,
-                withReplayEnabled = true
-            )
-            restoreTripSessionRoute()
-        }
+        startSession(withForegroundService, true)
     }
 
     /**
@@ -1108,6 +1093,19 @@ class MapboxNavigation(
         navigationSessionStateObserver: NavigationSessionStateObserver
     ) {
         navigationSession.unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
+    }
+
+    private fun startSession(withTripService: Boolean, withReplayEnabled: Boolean) {
+        runIfNotDestroyed {
+            tripSession.start(
+                withTripService = withTripService,
+                withReplayEnabled = withReplayEnabled
+            )
+            restoreTripSessionRoute()
+            notificationChannelField?.let {
+                monitorNotificationActionButton(it.get(null) as ReceiveChannel<NotificationAction>)
+            }
+        }
     }
 
     private fun restoreTripSessionRoute() {
