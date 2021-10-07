@@ -59,8 +59,8 @@ class RoutesObserverIdlingResource(
     }
 
     /** Used to communicate with **/
-    private val routesObserver = RoutesObserver { routes ->
-        mutableRoutesObserved.add(routes)
+    private val routesObserver = RoutesObserver { result ->
+        mutableRoutesObserved.add(result.routes)
         callback?.onTransitionToIdle()
     }
 

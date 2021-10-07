@@ -229,12 +229,12 @@ class MapboxNavigationActivity : AppCompatActivity() {
             binding.tripProgressView.render(tripProgressApi.getTripProgress(routeProgress))
         }
 
-    private val routesObserver = RoutesObserver { routes ->
-        if (routes.isNotEmpty()) {
+    private val routesObserver = RoutesObserver { result ->
+        if (result.routes.isNotEmpty()) {
             // generate route geometries asynchronously and render them
             CoroutineScope(Dispatchers.Main).launch {
                 val result = routeLineAPI.setRoutes(
-                    listOf(RouteLine(routes.first(), null))
+                    listOf(RouteLine(result.routes.first(), null))
                 )
                 val style = mapboxMap.getStyle()
                 if (style != null) {
@@ -243,7 +243,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
             }
 
             // update the camera position to account for the new route
-            viewportDataSource.onRouteChanged(routes.first())
+            viewportDataSource.onRouteChanged(result.routes.first())
             viewportDataSource.evaluate()
         } else {
             // remove the route line and route arrow from the map

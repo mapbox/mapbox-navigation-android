@@ -190,19 +190,19 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
         )
     }
 
-    private val routesObserver = RoutesObserver { routes -> // Every time a new route is obtained make sure to cancel the [MapboxSpeechApi] and
+    private val routesObserver = RoutesObserver { result -> // Every time a new route is obtained make sure to cancel the [MapboxSpeechApi] and
         // clear the [MapboxVoiceInstructionsPlayer]
         speechApi.cancel()
         voiceInstructionsPlayer.clear()
-        if (routes.isNotEmpty()) {
+        if (result.routes.isNotEmpty()) {
             CoroutineScope(Dispatchers.Main).launch {
                 routeLineApi.setRoutes(
-                    listOf(RouteLine(routes[0], null))
+                    listOf(RouteLine(result.routes[0], null))
                 ).apply {
                     routeLineView.renderRouteDrawData(mapboxMap.getStyle()!!, this)
                 }
             }
-            startSimulation(routes[0])
+            startSimulation(result.routes[0])
         }
     }
 

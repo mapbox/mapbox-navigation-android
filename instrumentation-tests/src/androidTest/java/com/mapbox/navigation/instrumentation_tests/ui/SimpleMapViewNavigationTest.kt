@@ -121,8 +121,8 @@ abstract class SimpleMapViewNavigationTest :
             )
             navigationCamera.requestNavigationCameraToFollowing()
 
-            mapboxNavigation.registerRoutesObserver { routes ->
-                mapboxNavigationViewportDataSource.onRouteChanged(routes.first())
+            mapboxNavigation.registerRoutesObserver { result ->
+                mapboxNavigationViewportDataSource.onRouteChanged(result.routes.first())
                 mapboxNavigationViewportDataSource.evaluate()
             }
 

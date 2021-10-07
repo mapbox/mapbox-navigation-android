@@ -197,17 +197,17 @@ class MapboxCameraAnimationsActivity :
         }
     }
 
-    private val routesObserver = RoutesObserver { routes ->
-        if (routes.isNotEmpty()) {
+    private val routesObserver = RoutesObserver { result ->
+        if (result.routes.isNotEmpty()) {
             CoroutineScope(Dispatchers.Main).launch {
-                routeLineAPI?.setRoutes(listOf(RouteLine(routes[0], null)))?.apply {
+                routeLineAPI?.setRoutes(listOf(RouteLine(result.routes[0], null)))?.apply {
                     ifNonNull(routeLineView, mapboxMap.getStyle()) { view, style ->
                         view.renderRouteDrawData(style, this)
                     }
                 }
             }
-            startSimulation(routes[0])
-            viewportDataSource.onRouteChanged(routes.first())
+            startSimulation(result.routes[0])
+            viewportDataSource.onRouteChanged(result.routes.first())
             viewportDataSource.overviewPadding = overviewEdgeInsets
             viewportDataSource.evaluate()
             navigationCamera.requestNavigationCameraToOverview()

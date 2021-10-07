@@ -24,7 +24,9 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState.TRACKING
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.internal.utils.toTelemetryLocation
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
@@ -1128,9 +1130,13 @@ class MapboxNavigationTelemetryTest {
         }
     }
 
-    private fun updateRoute(route: DirectionsRoute) {
+    private fun updateRoute(
+        route: DirectionsRoute,
+        @RoutesExtra.RoutesUpdateReason reason: String =
+            RoutesExtra.ROUTES_UPDATE_REASON_NEW,
+    ) {
         routesObserverSlot.ifCaptured {
-            onRoutesChanged(listOf(route))
+            onRoutesChanged(RoutesUpdatedResult(listOf(route), reason))
         }
     }
 
@@ -1300,6 +1306,7 @@ class MapboxNavigationTelemetryTest {
             mapboxNavigation,
             navigationOptions,
             MapboxMetricsReporter,
+            mockk(),
             mockk(relaxed = true),
             locationsCollector,
         )

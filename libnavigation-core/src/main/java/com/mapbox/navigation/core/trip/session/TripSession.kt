@@ -4,6 +4,7 @@ import android.hardware.SensorEvent
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigator.FallbackVersionsObserver
@@ -11,7 +12,11 @@ import com.mapbox.navigator.FallbackVersionsObserver
 internal interface TripSession {
 
     val tripService: TripService
-    fun setRoute(route: DirectionsRoute?, legIndex: Int)
+    fun setRoute(
+        route: DirectionsRoute?,
+        legIndex: Int,
+        @RoutesExtra.RoutesUpdateReason reason: String
+    )
 
     fun getRawLocation(): Location?
     val locationMatcherResult: LocationMatcherResult?
