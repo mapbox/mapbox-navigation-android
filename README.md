@@ -63,9 +63,11 @@ dependencies {
 
 ## <a name="sample-code">Sample code
 
-[We've added several navigation examples to this repo's `examples` module](https://github.com/mapbox/mapbox-navigation-android/tree/main/examples) to help you get started with the Navigation SDK and to inspire you.
+Examples for Mapbox Navigation Android SDK are now available on their own separate repo, [available here](https://github.com/mapbox/mapbox-navigation-android-examples).
 
-[Internal QA application](https://github.com/mapbox/mapbox-navigation-android/tree/main/qa-test-app/README.md)
+The QA application [is available here](https://github.com/mapbox/mapbox-navigation-android/tree/main/qa-test-app/README.md).
+  
+General documentation for Mapbox Navigation Android SDK is [available here](https://docs.mapbox.com/android/navigation).
 
 ## Contributing
 
