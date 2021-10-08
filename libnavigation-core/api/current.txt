@@ -514,7 +514,6 @@ package com.mapbox.navigation.core.routeoptions {
 
   public final class RouteOptionsUpdater {
     ctor public RouteOptionsUpdater();
-    method @Deprecated public com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult update(com.mapbox.api.directions.v5.models.RouteOptions? routeOptions, com.mapbox.navigation.base.trip.model.RouteProgress? routeProgress, android.location.Location? location);
     method public com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult update(com.mapbox.api.directions.v5.models.RouteOptions? routeOptions, com.mapbox.navigation.base.trip.model.RouteProgress? routeProgress, com.mapbox.navigation.core.trip.session.LocationMatcherResult? locationMatcherResult);
   }
 
