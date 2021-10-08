@@ -2,6 +2,59 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.0-rc.5 - October 8, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
+- Fixed an issue, which led to `MapboxReplayer` using wrong coroutine scope. Warning: when `MapboxPlayer` is no longer in use, its `finish` functions should be called in order to avoid leaks. [#4929](https://github.com/mapbox/mapbox-navigation-android/pull/4929)
+- Removed hardcoded color references from lane drawables. [#4933](https://github.com/mapbox/mapbox-navigation-android/pull/4933)
+- Added callback to MapboxNavigation::navigateNextRouteLeg method. [#4938](https://github.com/mapbox/mapbox-navigation-android/pull/4938)
+- Added callback to MapboxNavigation::updateSensorEvent method. [#4938](https://github.com/mapbox/mapbox-navigation-android/pull/4938)
+- ⚠️ Hidden unnecesarily exposed RouteLayerConstants and added a new RouteLayerConstants#BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID next to RouteLayerConstants#TOP_LEVEL_ROUTE_LINE_LAYER_ID to help position other map layers in reference to the route line layers stack. [#4941](https://github.com/mapbox/mapbox-navigation-android/pull/4941)
+- ⚠️ Changed RouteSetValue to not assume only 2 alternative route lines. The data/expression sources for alternatives are now in a collection form. The API currently only support up to 2 alternative routes but this will be expanded in the future. [#4941](https://github.com/mapbox/mapbox-navigation-android/pull/4941)
+- Added utilities to capture and encode screenshots, which are now required when providing feedback. [#4951](https://github.com/mapbox/mapbox-navigation-android/pull/4951)
+- Changed `RoutesObserver`: `RoutesUpdatedResult` contains `routes` and `reason`, that provides reason why routes are updated. [#4952](https://github.com/mapbox/mapbox-navigation-android/pull/4952)
+- Fixed stop session button no longer working when in Replay mode. [#4954](https://github.com/mapbox/mapbox-navigation-android/pull/4954)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.0.0-rc.9` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.9))
+- Mapbox Navigation Native `v68.0.0`
+- Mapbox Core Common `v19.0.0`
+- Mapbox Java `v6.0.0-alpha.7` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0-alpha.7))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
+## Mapbox Navigation SDK 2.1.0-alpha.2 - October 7, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
+- Changed `RoutesObserver`: `RoutesUpdatedResult` contains `routes` and `reason`, that provides reason why routes are updated. [#4862](https://github.com/mapbox/mapbox-navigation-android/pull/4862)
+- Added callback to MapboxNavigation::navigateNextRouteLeg method. [#4881](https://github.com/mapbox/mapbox-navigation-android/pull/4881)
+- Added callback to MapboxNavigation::updateSensorEvent method. [#4881](https://github.com/mapbox/mapbox-navigation-android/pull/4881)
+- Removed logging message that under some conditions could cause an ANR due to the construction of the logging message. [#4900](https://github.com/mapbox/mapbox-navigation-android/pull/4900)
+- Added a cancel method to the MapboxRouteLineApi and MapboxRouteLineView classes for cancelling the background tasks. [#4911](https://github.com/mapbox/mapbox-navigation-android/pull/4911)
+- :warning: Hidden unnecesarily exposed `RouteLayerConstants` and added a new `RouteLayerConstants#BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID` next to `RouteLayerConstants#TOP_LEVEL_ROUTE_LINE_LAYER_ID` to help position other map layers in reference to the route line layers stack. [#4913](https://github.com/mapbox/mapbox-navigation-android/pull/4913)
+- :warning: Changed `RouteSetValue` to not assume only 2 alternative route lines. The data/expression sources for alternatives are now in a collection form. The API currently only support up to 2 alternative routes but this will be expanded in the future. [#4913](https://github.com/mapbox/mapbox-navigation-android/pull/4913)
+- Fixed an issue, which led to `MapboxReplayer` using wrong coroutine scope. Warning: when `MapboxPlayer` is no longer in use, its `finish` functions should be called in order to avoid leaks. [#4921](https://github.com/mapbox/mapbox-navigation-android/pull/4921)
+- Fixed hard code color references from color drawables. [#4928](https://github.com/mapbox/mapbox-navigation-android/pull/4928)
+- Added method in MapboxRouteLineApi to set the road classes, replacing the road classes in the RouteLineResources. [#4939](https://github.com/mapbox/mapbox-navigation-android/pull/4939)
+- Added utilities to capture and encode screenshots, which are now required when providing feedback. [#4942](https://github.com/mapbox/mapbox-navigation-android/pull/4942)
+- Fixed stop session button no longer working when in Replay mode. [#4953](https://github.com/mapbox/mapbox-navigation-android/pull/4953)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.0.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0))
+- Mapbox Navigation Native `v78.0.0`
+- Mapbox Core Common `v20.0.0`
+- Mapbox Java `v6.0.0-alpha.9` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0-alpha.9))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.0.0-rc.4 - September 30, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
