@@ -25,7 +25,6 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.RequestMap
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouterError
-import com.mapbox.navigator.RouterErrorType
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -86,7 +85,7 @@ class MapboxOnboardRouterTest {
         every { isError } returns true
         every { value } returns null
         every { error } returns
-            RouterError(FAILURE_MESSAGE, FAILURE_CODE, RouterErrorType.UNKNOWN, REQUEST_ID)
+            RouterError(FAILURE_MESSAGE, FAILURE_CODE, REQUEST_ID)
     }
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
     private val context = mockk<Context>()
