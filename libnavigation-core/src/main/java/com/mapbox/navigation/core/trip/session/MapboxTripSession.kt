@@ -10,6 +10,7 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
 import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.internal.utils.isSameUuid
+import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
@@ -226,8 +227,12 @@ internal class MapboxTripSession(
             val tripStatus = status.getTripStatusFrom(route)
             val enhancedLocation = tripStatus.navigationStatus.location.toLocation()
             val keyPoints = tripStatus.navigationStatus.keyPoints.toLocations()
+            val road = Road(
+                tripStatus.navigationStatus.roadName,
+                tripStatus.navigationStatus.shieldName
+            )
             updateLocationMatcherResult(
-                tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints),
+                tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
             )
             zLevel = status.layer
 

@@ -7,6 +7,7 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory
 import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buildRouteStepProgressObject
+import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -40,6 +41,7 @@ class NavigatorMapperTest {
     private val enhancedLocation: Location = mockk(relaxed = true)
     private val keyPoints: List<Location> = mockk(relaxed = true)
     private val route: DirectionsRoute = mockk(relaxed = true)
+    private val road: Road = mockk(relaxed = true)
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     @Test
@@ -129,9 +131,10 @@ class NavigatorMapperTest {
             ),
             roadEdgeMatchProbability = 1f,
             zLevel = null,
+            road = road
         )
 
-        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints)
+        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
 
         assertEquals(expected, result)
     }
@@ -167,9 +170,10 @@ class NavigatorMapperTest {
             ),
             roadEdgeMatchProbability = 1f,
             zLevel = null,
+            road = road
         )
 
-        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints)
+        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
 
         assertEquals(expected, result)
     }
@@ -205,9 +209,10 @@ class NavigatorMapperTest {
             ),
             roadEdgeMatchProbability = 1f,
             zLevel = null,
+            road = road
         )
 
-        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints)
+        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
 
         assertEquals(expected, result)
     }
@@ -243,9 +248,10 @@ class NavigatorMapperTest {
             ),
             roadEdgeMatchProbability = 1f,
             zLevel = null,
+            road = road
         )
 
-        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints)
+        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
 
         assertEquals(expected, result)
     }
@@ -277,9 +283,10 @@ class NavigatorMapperTest {
             ),
             roadEdgeMatchProbability = 0f,
             zLevel = null,
+            road = road
         )
 
-        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints)
+        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
 
         assertEquals(expected, result)
     }
@@ -315,9 +322,10 @@ class NavigatorMapperTest {
             ),
             roadEdgeMatchProbability = 1f,
             zLevel = 2,
+            road = road
         )
 
-        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints)
+        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
 
         assertEquals(expected, result)
     }
