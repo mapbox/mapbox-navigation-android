@@ -17,6 +17,7 @@ import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
 import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory.buildRouteLegProgressObject
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory.buildRouteProgressObject
 import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buildRouteStepProgressObject
+import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.speed.model.SpeedLimit
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -296,9 +297,11 @@ private fun List<com.mapbox.navigator.UpcomingRouteAlert>.toUpcomingRoadObjects(
         }
 }
 
+@OptIn(ExperimentalMapboxNavigationAPI::class)
 internal fun TripStatus.getLocationMatcherResult(
     enhancedLocation: Location,
-    keyPoints: List<Location>
+    keyPoints: List<Location>,
+    road: Road
 ): LocationMatcherResult {
     return LocationMatcherResult(
         enhancedLocation,
@@ -309,6 +312,7 @@ internal fun TripStatus.getLocationMatcherResult(
         navigationStatus.prepareSpeedLimit(),
         navigationStatus.mapMatcherOutput.matches.firstOrNull()?.proba ?: 0f,
         navigationStatus.layer,
+        road
     )
 }
 

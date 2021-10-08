@@ -150,7 +150,9 @@ class MapboxTripSessionTest {
         every { tripStatus.navigationStatus } returns navigationStatus
         every { tripStatus.route } returns route
 
-        every { tripStatus.getLocationMatcherResult(any(), any()) } returns locationMatcherResult
+        every {
+            tripStatus.getLocationMatcherResult(any(), any(), any())
+        } returns locationMatcherResult
         every { routeProgress.bannerInstructions } returns null
         every { routeProgress.voiceInstructions } returns null
         every { routeProgress.currentLegProgress } returns mockk(relaxed = true)

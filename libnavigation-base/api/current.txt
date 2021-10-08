@@ -317,6 +317,19 @@ package com.mapbox.navigation.base.options {
 
 }
 
+package com.mapbox.navigation.base.road.model {
+
+  public final class Road {
+    method public String? getName();
+    method public String? getShieldName();
+    method public String? getShieldUrl();
+    property public final String? name;
+    property public final String? shieldName;
+    property public final String? shieldUrl;
+  }
+
+}
+
 package com.mapbox.navigation.base.route {
 
   public final class ExclusionViolation {

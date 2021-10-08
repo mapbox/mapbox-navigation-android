@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.trip.session
 
 import android.location.Location
+import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.speed.model.SpeedLimit
 
 /**
@@ -20,6 +21,7 @@ import com.mapbox.navigation.base.speed.model.SpeedLimit
  * DirectionsCriteria.ANNOTATION_MAXSPEED annotation to the route request.
  * @param roadEdgeMatchProbability when map matcher snaps to a road, this is the confidence in the chosen edge from all nearest edges.
  * @param zLevel [Int] current Z-level. Can be used to build a route from a proper level of a road.
+ * @param road Road can be used to get information about the [Road] including name, shield name and shield url.
  */
 class LocationMatcherResult internal constructor(
     val enhancedLocation: Location,
@@ -30,6 +32,7 @@ class LocationMatcherResult internal constructor(
     val speedLimit: SpeedLimit?,
     val roadEdgeMatchProbability: Float,
     val zLevel: Int?,
+    val road: Road,
 ) {
 
     /**
@@ -48,6 +51,7 @@ class LocationMatcherResult internal constructor(
         if (isTeleport != other.isTeleport) return false
         if (speedLimit != other.speedLimit) return false
         if (roadEdgeMatchProbability != other.roadEdgeMatchProbability) return false
+        if (road != other.road) return false
 
         return true
     }
@@ -63,6 +67,7 @@ class LocationMatcherResult internal constructor(
         result = 31 * result + isTeleport.hashCode()
         result = 31 * result + speedLimit.hashCode()
         result = 31 * result + roadEdgeMatchProbability.hashCode()
+        result = 31 * result + road.hashCode()
         return result
     }
 
@@ -73,6 +78,6 @@ class LocationMatcherResult internal constructor(
         return "LocationMatcherResult(enhancedLocation=$enhancedLocation, " +
             "keyPoints=$keyPoints, isOffRoad=$isOffRoad, offRoadProbability=$offRoadProbability, " +
             "isTeleport=$isTeleport, speedLimit=$speedLimit, " +
-            "roadEdgeMatchProbability=$roadEdgeMatchProbability)"
+            "roadEdgeMatchProbability=$roadEdgeMatchProbability, road=$road)"
     }
 }

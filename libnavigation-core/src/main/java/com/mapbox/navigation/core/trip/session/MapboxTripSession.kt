@@ -9,6 +9,8 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.factory.RoadFactory
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -246,13 +248,15 @@ internal class MapboxTripSession(
         return tripService.hasServiceStarted()
     }
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     private val navigatorObserver = object : NavigatorObserver {
         override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
             val tripStatus = status.getTripStatusFrom(route)
             val enhancedLocation = tripStatus.navigationStatus.location.toLocation()
             val keyPoints = tripStatus.navigationStatus.keyPoints.toLocations()
+            val road = RoadFactory.buildRoadObject(tripStatus.navigationStatus)
             updateLocationMatcherResult(
-                tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints),
+                tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
             )
             zLevel = status.layer
 
