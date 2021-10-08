@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core.routeoptions
 
-import android.location.Location
 import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.model.Message
@@ -24,24 +23,6 @@ private const val TAG = "MbxRouteOptionsProvider"
  * For example, this is needed in order to filter the waypoints that have been completed.
  */
 class RouteOptionsUpdater {
-
-    /**
-     * Provides a new [RouteOptions] instance based on the original request options, the current route progress and location.
-     *
-     * @return `RouteOptionsResult.Error` if a new [RouteOptions] instance cannot be combined based on the input given.
-     * `RouteOptionsResult.Success` with a new [RouteOptions] instance if successfully combined.
-     */
-    @Deprecated("Use overload with LocationMatcherResult instead")
-    fun update(
-        routeOptions: RouteOptions?,
-        routeProgress: RouteProgress?,
-        location: Location?
-    ): RouteOptionsResult {
-        val locationMatcherResult = location?.let { enhancedLocation ->
-            LocationMatcherResult(enhancedLocation, emptyList(), false, 0f, false, null, 0f, null)
-        }
-        return update(routeOptions, routeProgress, locationMatcherResult)
-    }
 
     /**
      * Provides a new [RouteOptions] instance based on the original request options, the current route progress and map matcher result.
