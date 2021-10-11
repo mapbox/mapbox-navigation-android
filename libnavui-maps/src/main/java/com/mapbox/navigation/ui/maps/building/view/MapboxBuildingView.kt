@@ -90,8 +90,9 @@ class MapboxBuildingView {
                     .fillExtrusionHeight(buildingHeightExpression)
             )
         } else {
-            style.getLayerAs<FillExtrusionLayer>(HIGHLIGHT_BUILDING_LAYER_ID)
-                .filter(selectedBuilding)
+            style
+                .getLayerAs<FillExtrusionLayer>(HIGHLIGHT_BUILDING_LAYER_ID)
+                ?.filter(selectedBuilding)
         }
     }
 

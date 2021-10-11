@@ -84,7 +84,8 @@ class MapboxOnboardRouterTest {
         every { isValue } returns false
         every { isError } returns true
         every { value } returns null
-        every { error } returns RouterError(FAILURE_MESSAGE, FAILURE_CODE, REQUEST_ID)
+        every { error } returns
+            RouterError(FAILURE_MESSAGE, FAILURE_CODE, REQUEST_ID)
     }
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
     private val context = mockk<Context>()

@@ -4,8 +4,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.extension.observable.eventdata.MapLoadingErrorEventData
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
-import com.mapbox.maps.plugin.delegates.listeners.eventdata.MapLoadErrorType
 import com.mapbox.navigation.instrumentation_tests.databinding.ActivityBasicNavigationViewBinding
 
 class BasicNavigationViewActivity : AppCompatActivity() {
@@ -21,10 +21,11 @@ class BasicNavigationViewActivity : AppCompatActivity() {
         mapboxMap.loadStyleUri(
             "asset://map_style_blank.json",
             onMapLoadErrorListener = object : OnMapLoadErrorListener {
-                override fun onMapLoadError(mapLoadErrorType: MapLoadErrorType, message: String) {
+                override fun onMapLoadError(eventData: MapLoadingErrorEventData) {
                     Log.e(
                         "onMapLoadError",
-                        "Error loading map - error type: $mapLoadErrorType, message: $message"
+                        "Error loading map - error type: " +
+                            "${eventData.type}, message: ${eventData.message}"
                     )
                 }
             }

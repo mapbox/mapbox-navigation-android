@@ -20,7 +20,7 @@ internal class EHorizonSubscriptionManagerImpl(
     private var currentPosition: EHorizonPosition? = null
     private var currentDistances: List<RoadObjectDistanceInfo>? = null
 
-    private val electronicHorizonObserver = object : ElectronicHorizonObserver() {
+    private val electronicHorizonObserver = object : ElectronicHorizonObserver {
         override fun onRoadObjectEnter(
             roadObjectInfo: com.mapbox.navigator.RoadObjectEnterExitInfo
         ) {
@@ -71,7 +71,7 @@ internal class EHorizonSubscriptionManagerImpl(
     }
 
     private val roadObjectsStoreObserver =
-        object : com.mapbox.navigator.RoadObjectsStoreObserver() {
+        object : com.mapbox.navigator.RoadObjectsStoreObserver {
             override fun onRoadObjectAdded(roadObjectId: String) {
                 notifyAllObservers { onRoadObjectAdded(roadObjectId) }
             }
