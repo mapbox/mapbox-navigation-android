@@ -587,6 +587,42 @@ package com.mapbox.navigation.ui.maps.location {
 
 }
 
+package com.mapbox.navigation.ui.maps.roadname.api {
+
+  public final class MapboxRoadNameLabelApi {
+    ctor public MapboxRoadNameLabelApi();
+    method public com.mapbox.navigation.ui.maps.roadname.model.RoadLabel getRoadNameLabel(com.mapbox.navigation.base.road.model.Road road);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.roadname.model {
+
+  public final class RoadLabel {
+    method public String? getRoadName();
+    method public byte[]? getShield();
+    method public String? getShieldName();
+    property public final String? roadName;
+    property public final byte[]? shield;
+    property public final String? shieldName;
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.roadname.view {
+
+  public final class MapboxRoadNameLabelView extends android.widget.LinearLayout {
+    ctor public MapboxRoadNameLabelView(android.content.Context context);
+    ctor public MapboxRoadNameLabelView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxRoadNameLabelView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void render(com.mapbox.navigation.ui.maps.roadname.model.RoadLabel roadLabel);
+    method public void showRoadName(boolean show);
+    method public void showShieldIcon(boolean show);
+    method public void updateRoadNameTextAppearance(@StyleRes int style);
+  }
+
+}
+
 package com.mapbox.navigation.ui.maps.route {
 
   public final class RouteLayerConstants {
