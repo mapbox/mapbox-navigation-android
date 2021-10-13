@@ -55,8 +55,6 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
-import com.mapbox.navigation.core.routealternatives.RouteAlternativesCacheManager
-import com.mapbox.navigation.core.routealternatives.RouteAlternativesCacheManagerProvider
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver
@@ -231,7 +229,6 @@ class MapboxNavigation(
         true, // doNotRecalculateInUncertainState is not exposed and can't be changed at the moment
         navigationOptions.eHorizonOptions.minTimeDeltaBetweenUpdates
     )
-    private val routeAlternativesCacheManager: RouteAlternativesCacheManager
 
     private val incidentsOptions: IncidentsOptions? = navigationOptions.incidentsOptions.run {
         if (graph.isNotEmpty() || apiUrl.isNotEmpty()) {
@@ -427,17 +424,13 @@ class MapboxNavigation(
             )
         }
 
-        routeAlternativesCacheManager =
-            RouteAlternativesCacheManagerProvider.create(navigationSession)
         val routeOptionsProvider = RouteOptionsUpdater()
 
         routeAlternativesController = RouteAlternativesControllerProvider.create(
             navigationOptions.routeAlternativesOptions,
             navigator,
             directionsSession,
-            tripSession,
-            routeOptionsProvider,
-            routeAlternativesCacheManager
+            tripSession
         )
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
             navigationOptions.routeRefreshOptions,
@@ -504,8 +497,8 @@ class MapboxNavigation(
     fun stopTripSession() {
         runIfNotDestroyed {
             latestLegIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex
-            tripSession.setRoute(
-                route = null,
+            tripSession.setRoutes(
+                routes = emptyList(),
                 legIndex = 0,
                 reason = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
             )
@@ -629,14 +622,10 @@ class MapboxNavigation(
             billingController.onExternalRouteSet(routes.first())
         }
         rerouteController?.interrupt()
-        routeAlternativesController.interrupt()
 
         @RoutesExtra.RoutesUpdateReason val reason = when {
             routes.isEmpty() -> {
                 RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
-            }
-            routeAlternativesCacheManager.areAlternatives(routes) -> {
-                RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
             }
             else -> {
                 RoutesExtra.ROUTES_UPDATE_REASON_NEW
@@ -1140,8 +1129,8 @@ class MapboxNavigation(
 
     private fun restoreTripSessionRoute() {
         val legIndex = latestLegIndex ?: directionsSession.initialLegIndex
-        tripSession.setRoute(
-            directionsSession.routes.firstOrNull(),
+        tripSession.setRoutes(
+            directionsSession.routes,
             legIndex,
             RoutesExtra.ROUTES_UPDATE_REASON_NEW,
         )
@@ -1150,8 +1139,8 @@ class MapboxNavigation(
     private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
         if (tripSession.getState() == TripSessionState.STARTED) {
-            tripSession.setRoute(
-                result.routes.firstOrNull(),
+            tripSession.setRoutes(
+                result.routes,
                 directionsSession.initialLegIndex,
                 result.reason,
             )
@@ -1221,9 +1210,10 @@ class MapboxNavigation(
                 navigationOptions.accessToken ?: "",
             )
             historyRecorder.historyRecorderHandle = navigator.getHistoryRecorderHandle()
+
             directionsSession.routes.firstOrNull()?.let {
                 navigator.setRoute(
-                    it,
+                    routes = directionsSession.routes,
                     tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0
                 )
             }

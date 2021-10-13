@@ -139,18 +139,16 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         Espresso.onIdle()
         routeCompleteIdlingResource.unregister()
 
-        runOnMainSync {
-            val countDownLatch = CountDownLatch(1)
-            var filePath: String? = null
-            mapboxNavigation.historyRecorder.stopRecording { filePathFromNative ->
-                filePath = filePathFromNative
-                countDownLatch.countDown()
-            }
-            countDownLatch.await()
-
-            assertNotNull(filePath)
-            verifyHistoryEvents(filePath!!)
+        var filePath: String? = null
+        val countDownLatch = CountDownLatch(1)
+        mapboxNavigation.historyRecorder.stopRecording { filePathFromNative ->
+            filePath = filePathFromNative
+            countDownLatch.countDown()
         }
+        countDownLatch.await()
+
+        assertNotNull(filePath)
+        verifyHistoryEvents(filePath!!)
     }
 
     private fun verifyHistoryEvents(filePath: String) {

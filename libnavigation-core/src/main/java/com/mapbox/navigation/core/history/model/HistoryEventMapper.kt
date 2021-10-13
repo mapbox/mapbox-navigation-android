@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.history.model
 
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.navigator.internal.ActiveGuidanceOptionsMapper.mapToActiveGuidanceMode
@@ -69,7 +70,14 @@ internal class HistoryEventMapper {
         return if (routeResponse.isNullOrEmpty() || routeResponse == "{}") {
             null
         } else {
-            return DirectionsRoute.fromJson(routeResponse)
+            return try {
+                // https://github.com/mapbox/mapbox-navigation-native/issues/4296
+                // TODO we may create a data object separate from DirectionsResponse
+                val directionsResponse = DirectionsResponse.fromJson(routeResponse)
+                directionsResponse.routes().firstOrNull()
+            } catch (t: Throwable) {
+                DirectionsRoute.fromJson(routeResponse)
+            }
         }
     }
 

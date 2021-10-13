@@ -14,14 +14,14 @@ import com.mapbox.navigation.testing.ui.idling.NavigationIdlingResource
  * Otherwise, it should be invoked manually with [ArrivalIdlingResource.onFinalDestinationArrival].
  */
 class ArrivalIdlingResource(
-    mapboxNavigation: MapboxNavigation? = null
+    mapboxNavigation: MapboxNavigation
 ) : NavigationIdlingResource(), ArrivalObserver {
 
     private var arrived = false
     private var callback: IdlingResource.ResourceCallback? = null
 
     init {
-        mapboxNavigation?.registerArrivalObserver(
+        mapboxNavigation.registerArrivalObserver(
             object : ArrivalObserver {
                 override fun onWaypointArrival(routeProgress: RouteProgress) {
                     // do nothing

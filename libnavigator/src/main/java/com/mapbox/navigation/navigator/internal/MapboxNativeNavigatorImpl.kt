@@ -1,6 +1,9 @@
 package com.mapbox.navigation.navigator.internal
 
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.DirectionsWaypoint
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
@@ -29,6 +32,7 @@ import com.mapbox.navigator.PredictiveLocationTrackerOptions
 import com.mapbox.navigator.RoadObjectMatcher
 import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
+import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.Router
 import com.mapbox.navigator.RouterError
@@ -47,7 +51,8 @@ import kotlin.coroutines.resume
  */
 object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
-    private const val PRIMARY_ROUTE_INDEX = 0
+    const val PRIMARY_ROUTE_INDEX = 0
+
     private const val SINGLE_THREAD = 1
     private const val TAG = "MbxNativeNavigatorImpl"
 
@@ -170,23 +175,62 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * Returns initialized route state if no errors occurred.
      * Otherwise, it returns a invalid route state.
      *
-     * @param route [DirectionsRoute] to follow.
+     * @param routes [DirectionsRoute]s to follow.
      * @param legIndex Which leg to follow
      *
      * @return a [RouteInfo] route state if no errors occurred.
      * Otherwise, it returns null.
      */
-    override suspend fun setRoute(route: DirectionsRoute?, legIndex: Int): RouteInfo? =
+    override suspend fun setRoute(
+        routes: List<DirectionsRoute>,
+        legIndex: Int
+    ): RouteInfo? =
         suspendCancellableCoroutine { continuation ->
-            navigator!!.setRoute(
-                route?.toJson(),
-                PRIMARY_ROUTE_INDEX,
-                legIndex,
-                route?.routeOptions()?.toUrl(accessToken).toString()
-            ) {
-                continuation.resume(it.value)
+            if (routes.isNotEmpty()) {
+                checkNotNull(routes[PRIMARY_ROUTE_INDEX].routeOptions()) {
+                    "The route set must include RouteOptions"
+                }
+                val routeOptions = routes[PRIMARY_ROUTE_INDEX].routeOptions()!!
+                val directionsResponse = mapToDirectionsResponse(routes, routeOptions)
+                navigator!!.setRoute(
+                    directionsResponse?.toJson(),
+                    PRIMARY_ROUTE_INDEX,
+                    legIndex,
+                    routeOptions.toUrl(accessToken).toString()
+                ) {
+                    continuation.resume(it.value)
+                }
+            } else {
+                navigator!!.setRoute(null, 0, 0, null) {
+                    continuation.resume(it.value)
+                }
             }
         }
+
+    /**
+     * https://github.com/mapbox/mapbox-navigation-native/issues/4296
+     * Nav native requires a DirectionsResponse so we are drafting a fake one.
+     * In order to preserve the original request, will require api changes.
+     */
+    private fun mapToDirectionsResponse(
+        routes: List<DirectionsRoute>,
+        routeOptions: RouteOptions?
+    ): DirectionsResponse? = routeOptions?.run {
+        DirectionsResponse.builder()
+            .routes(routes.toMutableList())
+            .code("Ok")
+            .waypoints(
+                coordinatesList().mapIndexed { index, point ->
+                    val waypointBuilder = DirectionsWaypoint.builder()
+                        .rawLocation(doubleArrayOf(point.longitude(), point.latitude()))
+                    waypointNamesList()?.getOrNull(index)?.let { name ->
+                        waypointBuilder.name(name)
+                    }
+                    waypointBuilder.build()
+                }
+            )
+            .build()
+    }
 
     /**
      * Updates annotations so that subsequent calls to getStatus will
@@ -376,4 +420,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS,
             0
         )
+
+    override fun createRouteAlternativesController(): RouteAlternativesControllerInterface {
+        return navigator!!.createRouteAlternativesController()
+    }
 }

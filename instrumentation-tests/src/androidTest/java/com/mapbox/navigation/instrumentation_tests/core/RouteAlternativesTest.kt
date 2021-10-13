@@ -26,6 +26,8 @@ import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.utils.internal.logE
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -50,8 +52,8 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
 
     private lateinit var mapboxNavigation: MapboxNavigation
     private val coordinates = listOf(
-        Point.fromLngLat(-121.46685, 38.56301),
-        Point.fromLngLat(-121.445697, 38.56707)
+        Point.fromLngLat(-122.2750659, 37.8052036),
+        Point.fromLngLat(-122.2647245, 37.8138895)
     )
 
     override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
@@ -63,7 +65,7 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
     fun setup() {
         runOnMainSync {
             val routeAlternativesOptions = RouteAlternativesOptions.Builder()
-                .intervalMillis(TimeUnit.SECONDS.toMillis(10))
+                .intervalMillis(TimeUnit.SECONDS.toMillis(30))
                 .build()
             mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(activity)
@@ -76,32 +78,32 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
     }
 
     @Test
-    fun expect_faster_route_alternatives() {
-        // Prepare with a slow alternative route.
-
+    fun expect_initial_alternative_route_removed_after_navigating_past() {
+        // Prepare with alternative routes.
         setupMockRequestHandlers(coordinates)
-        val routes = requestDirectionsRouteSync(coordinates).reversed()
+        val routes = requestDirectionsRouteSync(coordinates)
 
-        // Start playing locations and wait for an enhanced location.
+        // Play the slower alternative route.
         runOnMainSync {
             mapboxNavigation.historyRecorder.startRecording()
             mockLocationReplayerRule.playRoute(routes.first())
             mapboxNavigation.startTripSession()
         }
+
+        // Wait for enhanced locations to start and then set the routes.
         val firstLocationIdlingResource = FirstLocationIdlingResource(mapboxNavigation)
         firstLocationIdlingResource.firstLocationSync()
-
-        // Simulate a driver on the slow route.
         runOnMainSync {
             mapboxNavigation.setRoutes(routes)
         }
 
-        // Wait for route alternatives to be found.
-        val alternativesIdlingResource = RouteAlternativesIdlingResource(mapboxNavigation)
-        alternativesIdlingResource.register()
-        mapboxHistoryTestRule.stopRecordingOnCrash("no route alternatives") {
+        // The alternative route is missed, so we expect the route to be removed.
+        val firstAlternative = RouteAlternativesIdlingResource(mapboxNavigation)
+        firstAlternative.register()
+        mapboxHistoryTestRule.stopRecordingOnCrash("alternatives failed") {
             Espresso.onIdle()
         }
+        firstAlternative.unregister()
 
         runOnMainSync {
             val countDownLatch = CountDownLatch(1)
@@ -112,27 +114,21 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
             countDownLatch.await()
         }
 
-        // Verify faster alternatives are found.
-        val alternatives = alternativesIdlingResource.alternatives!!
-        assertTrue(alternatives.isNotEmpty())
-        val durationRemaining = alternativesIdlingResource.routeProgress!!.durationRemaining
-        val alternativeRouteDuration = alternatives.first().duration()
-        assertTrue(alternativeRouteDuration < durationRemaining)
+        // Verify alternative routes events were triggered.
+        assertEquals(2, routes.size)
+        assertTrue(mapboxNavigation.getRoutes().isNotEmpty())
+        assertNotNull(firstAlternative.routeProgress)
+        assertNotNull(firstAlternative.alternatives)
     }
 
     private fun setupMockRequestHandlers(coordinates: List<Point>) {
+        // Nav-native requests alternate routes, so we are only
+        // ensuring the initial route has alternatives.
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRequestHandler(
                 "driving-traffic",
                 readRawFileText(activity, R.raw.route_response_alternative_start),
                 coordinates
-            )
-        )
-        mockWebServerRule.requestHandlers.add(
-            MockDirectionsRequestHandler(
-                "driving-traffic",
-                readRawFileText(activity, R.raw.route_response_alternative_during_navigation),
-                null
             )
         )
     }

@@ -12,8 +12,8 @@ import com.mapbox.navigator.FallbackVersionsObserver
 internal interface TripSession {
 
     val tripService: TripService
-    fun setRoute(
-        route: DirectionsRoute?,
+    fun setRoutes(
+        routes: List<DirectionsRoute>,
         legIndex: Int,
         @RoutesExtra.RoutesUpdateReason reason: String
     )
