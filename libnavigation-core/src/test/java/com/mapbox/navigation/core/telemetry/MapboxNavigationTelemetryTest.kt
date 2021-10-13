@@ -50,7 +50,6 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuid
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.FreeDrive
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.Idle
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
-import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEvent
@@ -159,7 +158,6 @@ class MapboxNavigationTelemetryTest {
 
     private var routeProgressObserverSlot = slot<RouteProgressObserver>()
     private var sessionStateObserverSlot = slot<NavigationSessionStateObserver>()
-    private var offRouteObserverSlot = slot<OffRouteObserver>()
     private var arrivalObserverSlot = slot<ArrivalObserver>()
     private var routesObserverSlot = slot<RoutesObserver>()
 
@@ -173,10 +171,6 @@ class MapboxNavigationTelemetryTest {
             mapboxNavigation.registerNavigationSessionStateObserver(
                 capture(sessionStateObserverSlot)
             )
-        } just runs
-
-        every {
-            mapboxNavigation.registerOffRouteObserver(capture(offRouteObserverSlot))
         } just runs
 
         every {
@@ -462,14 +456,57 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
+    fun alternative_route() {
+        baseMock()
+        mockAnotherRoute()
+
+        baseInitialization()
+        updateRoute(anotherRoute, RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE)
+        updateRouteProgress()
+
+        val events = captureAndVerifyMetricsReporter(exactly = 2)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        assertTrue(events[1] is NavigationDepartEvent)
+    }
+
+    @Test
+    fun refresh_route() {
+        baseMock()
+        mockAnotherRoute()
+
+        baseInitialization()
+        updateRoute(anotherRoute, RoutesExtra.ROUTES_UPDATE_REASON_REFRESH)
+        updateRouteProgress()
+
+        val events = captureAndVerifyMetricsReporter(exactly = 2)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        assertTrue(events[1] is NavigationDepartEvent)
+    }
+
+    @Test
+    fun clean_up_routes() {
+        baseMock()
+        mockAnotherRoute()
+
+        baseInitialization()
+        routesObserverSlot.ifCaptured {
+            onRoutesChanged(RoutesUpdatedResult(emptyList(), ""))
+        }
+        updateRouteProgress()
+
+        val events = captureAndVerifyMetricsReporter(exactly = 2)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        assertTrue(events[1] is NavigationDepartEvent)
+    }
+
+    @Test
     fun feedback_and_reroute_events_not_sent_on_arrival() {
         baseMock()
         mockAnotherRoute()
 
         baseInitialization()
         postUserFeedback()
-        offRoute()
-        updateRoute(anotherRoute)
+        updateRoute(anotherRoute, RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
         postUserFeedback()
         arrive()
 
@@ -488,8 +525,7 @@ class MapboxNavigationTelemetryTest {
 
         baseInitialization()
         postUserFeedback()
-        offRoute()
-        updateRoute(anotherRoute)
+        updateRoute(anotherRoute, RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
         postUserFeedback()
         postUserFeedback()
         postUserFeedback()
@@ -527,8 +563,7 @@ class MapboxNavigationTelemetryTest {
         postUserFeedback()
         postUserFeedback()
         postUserFeedback()
-        offRoute()
-        updateRoute(anotherRoute)
+        updateRoute(anotherRoute, RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
         postUserFeedback()
         updateSessionState(Idle)
 
@@ -553,8 +588,7 @@ class MapboxNavigationTelemetryTest {
         mockAnotherRoute()
 
         baseInitialization()
-        offRoute()
-        updateRoute(anotherRoute)
+        updateRoute(anotherRoute, RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
         updateRouteProgress()
         updateSessionState(Idle)
         postUserFeedbackCached()
@@ -650,8 +684,7 @@ class MapboxNavigationTelemetryTest {
         mockRouteProgress()
 
         baseInitialization()
-        offRoute()
-        updateRoute(anotherRoute)
+        updateRoute(anotherRoute, RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
         locationsCollector.flushBuffers()
 
         val events = captureAndVerifyMetricsReporter(exactly = 3)
@@ -682,8 +715,7 @@ class MapboxNavigationTelemetryTest {
         val events = captureMetricsReporter()
 
         baseInitialization()
-        offRoute()
-        updateRoute(anotherRoute)
+        updateRoute(anotherRoute, RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
         locationsCollector.flushBuffers()
 
         val rerouteEvent = events[2] as NavigationRerouteEvent
@@ -778,8 +810,7 @@ class MapboxNavigationTelemetryTest {
         nextWaypoint()
         updateRouteProgress()
         mockFlushBuffers()
-        offRoute()
-        updateRoute(anotherRoute)
+        updateRoute(anotherRoute, RoutesExtra.ROUTES_UPDATE_REASON_REROUTE)
         updateSessionState(FreeDrive(FREE_DRIVE_SESSION_ID))
 
         val events = captureAndVerifyMetricsReporter(exactly = 11)
@@ -1046,13 +1077,6 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
-    fun onInit_registerOffRouteObserver_called() {
-        baseMock()
-
-        onInit { verify(exactly = 1) { mapboxNavigation.registerOffRouteObserver(any()) } }
-    }
-
-    @Test
     fun onInit_registerNavigationSessionObserver_called() {
         baseMock()
 
@@ -1085,13 +1109,6 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
-    fun onUnregisterListener_unregisterOffRouteObserver_called() {
-        baseMock()
-
-        onUnregister { verify(exactly = 1) { mapboxNavigation.unregisterOffRouteObserver(any()) } }
-    }
-
-    @Test
     fun onUnregisterListener_unregisterNavigationSessionObserver_called() {
         baseMock()
 
@@ -1111,7 +1128,7 @@ class MapboxNavigationTelemetryTest {
         verify(exactly = 2) { mapboxNavigation.registerRouteProgressObserver(any()) }
         verify(exactly = 2) { mapboxNavigation.registerLocationObserver(any()) }
         verify(exactly = 2) { mapboxNavigation.registerRoutesObserver(any()) }
-        verify(exactly = 2) { mapboxNavigation.registerOffRouteObserver(any()) }
+        verify(exactly = 0) { mapboxNavigation.registerOffRouteObserver(any()) }
         verify(exactly = 2) { mapboxNavigation.registerNavigationSessionStateObserver(any()) }
 
         resetTelemetry()
@@ -1153,10 +1170,6 @@ class MapboxNavigationTelemetryTest {
         // mock locationsCollector to do nothing
         // because buffers will be empty after handleSessionCanceled on nextLeg
         every { locationsCollector.flushBuffers() } just Runs
-    }
-
-    private fun offRoute() {
-        offRouteObserverSlot.captured.onOffRouteStateChanged(true)
     }
 
     private fun arrive() {
@@ -1306,7 +1319,6 @@ class MapboxNavigationTelemetryTest {
             mapboxNavigation,
             navigationOptions,
             MapboxMetricsReporter,
-            mockk(),
             mockk(relaxed = true),
             locationsCollector,
         )

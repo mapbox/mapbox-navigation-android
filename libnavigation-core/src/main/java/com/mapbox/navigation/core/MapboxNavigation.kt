@@ -49,7 +49,6 @@ import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.ReachabilityService
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.internal.utils.InternalUtils
-import com.mapbox.navigation.core.internal.utils.RoutesUpdateReasonHelper
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
@@ -422,7 +421,6 @@ class MapboxNavigation(
                 this,
                 navigationOptions,
                 MapboxMetricsReporter,
-                RoutesUpdateReasonHelper(tripSession),
                 logger,
             )
         }
