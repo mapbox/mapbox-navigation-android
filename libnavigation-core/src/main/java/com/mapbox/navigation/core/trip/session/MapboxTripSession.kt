@@ -68,17 +68,18 @@ internal class MapboxTripSession(
     private var updateRouteProgressJob: Job? = null
 
     @VisibleForTesting
-    internal var route: DirectionsRoute? = null
+    internal var routes: List<DirectionsRoute> = emptyList()
 
     private companion object {
         private val TAG = Tag("MbxTripSession")
     }
 
-    override fun setRoute(
-        route: DirectionsRoute?,
+    override fun setRoutes(
+        routes: List<DirectionsRoute>,
         legIndex: Int,
         @RoutesExtra.RoutesUpdateReason reason: String
     ) {
+
         isOffRoute = false
         invalidateLatestBannerInstructionEvent()
         roadObjects = emptyList()
@@ -93,17 +94,19 @@ internal class MapboxTripSession(
                 updateRouteProgressJob?.cancel()
 
                 threadController.getMainScopeAndRootJob().scope.launch {
-                    navigator.setRoute(route, legIndex)?.let {
+                    navigator.setRoute(routes, legIndex)?.let {
                         roadObjects = getRouteInitInfo(it)?.roadObjects ?: emptyList()
                     }
-                    this@MapboxTripSession.route = route
+                    this@MapboxTripSession.routes = routes
                 }
             }
             RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
                 threadController.getMainScopeAndRootJob().scope.launch {
-                    if (route != null) {
-                        navigator.updateAnnotations(route)
-                        this@MapboxTripSession.route = route
+                    if (routes.isNotEmpty()) {
+                        navigator.updateAnnotations(
+                            routes[MapboxNativeNavigatorImpl.PRIMARY_ROUTE_INDEX]
+                        )
+                        this@MapboxTripSession.routes = routes
                     } else {
                         logger.w(
                             TAG,
@@ -251,7 +254,10 @@ internal class MapboxTripSession(
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     private val navigatorObserver = object : NavigatorObserver {
         override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
-            val tripStatus = status.getTripStatusFrom(route)
+            val tripStatus = status.getTripStatusFrom(
+                routes,
+                MapboxNativeNavigatorImpl.PRIMARY_ROUTE_INDEX
+            )
             val enhancedLocation = tripStatus.navigationStatus.location.toLocation()
             val keyPoints = tripStatus.navigationStatus.keyPoints.toLocations()
             val road = RoadFactory.buildRoadObject(tripStatus.navigationStatus)

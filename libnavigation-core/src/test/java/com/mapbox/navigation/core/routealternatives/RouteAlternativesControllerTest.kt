@@ -1,33 +1,26 @@
 package com.mapbox.navigation.core.routealternatives
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
-import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.directions.session.DirectionsSession
-import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
-import com.mapbox.navigation.core.trip.session.LocationMatcherResult
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.trip.session.TripSession
-import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.utils.internal.LoggerProvider
-import io.mockk.Runs
-import io.mockk.coEvery
+import com.mapbox.navigator.RouteAlternativesControllerInterface
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkObject
+import io.mockk.runs
 import io.mockk.slot
-import io.mockk.unmockkObject
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.junit.After
-import org.junit.Before
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
-import java.util.concurrent.TimeUnit
 
 @ExperimentalCoroutinesApi
 class RouteAlternativesControllerTest {
@@ -35,372 +28,218 @@ class RouteAlternativesControllerTest {
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
-    private val navigator: MapboxNativeNavigator = mockk()
-    private val directionsSession: DirectionsSession = mockk {
-        every { cancelRouteRequest(any()) } just Runs
+    private val controllerInterface: RouteAlternativesControllerInterface = mockk(relaxed = true)
+    private val navigator: MapboxNativeNavigator = mockk {
+        every { createRouteAlternativesController() } returns controllerInterface
     }
-    private val tripSession: TripSession = mockk {
-        every { getRouteProgress() } returns mockk()
-    }
-    private val routeAlternativesObserver: RouteAlternativesObserver = mockk {
-        every { onRouteAlternatives(any(), any(), any()) } returns Unit
-    }
-    private val routesRequestCallbacks = slot<RouterCallback>()
-    private val routeOptionsUpdater: RouteOptionsUpdater = mockk()
-    private val routeAlternativesCacheManager: RouteAlternativesCacheManager =
-        mockk(relaxUnitFun = true)
+    private val directionsSession: DirectionsSession = mockk(relaxed = true)
+    private val tripSession: TripSession = mockk(relaxed = true)
 
-    private val routeOptionsResultSuccess: RouteOptionsUpdater.RouteOptionsResult.Success = mockk()
-    private val routeOptionsResultSuccessRouteOptions: RouteOptions = mockk()
-
-    private fun mockController(
+    private fun routeAlternativesController(
         options: RouteAlternativesOptions = RouteAlternativesOptions.Builder().build()
     ) = RouteAlternativesController(
         options,
         navigator,
         directionsSession,
         tripSession,
-        routeOptionsUpdater,
-        routeAlternativesCacheManager,
     )
 
-    @Before
-    fun setup() {
-        every {
-            routeOptionsResultSuccess.routeOptions
-        } returns routeOptionsResultSuccessRouteOptions
+    @Test
+    fun `should set refreshIntervalSeconds from options`() {
+        // Capture the route options set
+        val nativeOptions = slot<com.mapbox.navigator.RouteAlternativesOptions>()
+        every { controllerInterface.setRouteAlternativesOptions(capture(nativeOptions)) } just runs
 
-        every { directionsSession.getPrimaryRouteOptions() } returns mockk()
-        every {
-            directionsSession.requestRoutes(
-                any(),
-                capture(routesRequestCallbacks)
-            )
-        } returns 1L
-        every { tripSession.getRouteProgress() } returns mockk()
-        mockkObject(LoggerProvider) {
-            every { LoggerProvider.logger } returns mockk(relaxed = true)
+        // Construct a native route alternatives interface
+        routeAlternativesController(
+            options = RouteAlternativesOptions.Builder()
+                .intervalMillis(59_135L)
+                .build()
+        )
+
+        // Verify the conversion was accurate
+        assertEquals(
+            59.135,
+            nativeOptions.captured.refreshIntervalSeconds,
+            0.001
+        )
+    }
+
+    @Test
+    fun `should add a single nav-native observer when registering listeners`() {
+        val routeAlternativesController = routeAlternativesController()
+
+        routeAlternativesController.register(mockk(relaxed = true))
+        routeAlternativesController.register(mockk(relaxed = true))
+
+        verify(exactly = 1) { controllerInterface.addObserver(any()) }
+        verify(exactly = 0) { controllerInterface.removeObserver(any()) }
+    }
+
+    @Test
+    fun `should removeObserver from nav-native interface when all observers are removed`() {
+        val routeAlternativesController = routeAlternativesController()
+
+        val firstObserver: RouteAlternativesObserver = mockk(relaxed = true)
+        val secondObserver: RouteAlternativesObserver = mockk(relaxed = true)
+        routeAlternativesController.register(firstObserver)
+        routeAlternativesController.register(secondObserver)
+        routeAlternativesController.unregister(firstObserver)
+        routeAlternativesController.unregister(secondObserver)
+
+        verify(exactly = 1) { controllerInterface.addObserver(any()) }
+        verify(exactly = 1) { controllerInterface.removeObserver(any()) }
+    }
+
+    @Test
+    fun `should removeAllObservers from nav-native interface when unregisterAll is called`() {
+        val routeAlternativesController = routeAlternativesController()
+
+        val firstObserver: RouteAlternativesObserver = mockk(relaxed = true)
+        val secondObserver: RouteAlternativesObserver = mockk(relaxed = true)
+        routeAlternativesController.register(firstObserver)
+        routeAlternativesController.register(secondObserver)
+        routeAlternativesController.unregisterAll()
+
+        verify(exactly = 1) { controllerInterface.addObserver(any()) }
+        verify(exactly = 1) { controllerInterface.removeAllObservers() }
+    }
+
+    @Test
+    fun `should broadcast alternative routes changes from nav-native`() {
+        val routeAlternativesController = routeAlternativesController()
+        val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
+        every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
+        every { tripSession.getRouteProgress() } returns mockk {
+            every { route } returns mockk(relaxed = true)
         }
-    }
 
-    @After
-    fun teardown() {
-        unmockkObject(LoggerProvider)
-    }
-
-    @Test
-    fun `should request every 5 minutes by default`() = coroutineRule.runBlockingTest {
-        every { tripSession.getState() } returns TripSessionState.STARTED
-        mockRouteOptionsProvider(routeOptionsResultSuccess)
-        every { directionsSession.routes } returns listOf(
-            mockk {
-                every { routeIndex() } returns "0"
-                every { duration() } returns 1727.228
-            }
+        val firstObserver: RouteAlternativesObserver = mockk(relaxed = true)
+        val secondObserver: RouteAlternativesObserver = mockk(relaxed = true)
+        routeAlternativesController.register(firstObserver)
+        routeAlternativesController.register(secondObserver)
+        val alternativeRouteJson = FileUtils.loadJsonFixture(
+            "route_alternative_from_native.txt"
         )
-        mockLocation()
-
-        val controller = mockController()
-        controller.register(routeAlternativesObserver)
-        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(25))
-        controller.unregister(routeAlternativesObserver)
-
-        coroutineRule.testDispatcher.cleanupTestCoroutines()
-        verify(exactly = 5) { directionsSession.requestRoutes(any(), any()) }
-    }
-
-    @Test
-    fun `should request every 2 minutes from options`() = coroutineRule.runBlockingTest {
-        every { tripSession.getState() } returns TripSessionState.STARTED
-        mockRouteOptionsProvider(routeOptionsResultSuccess)
-        every { directionsSession.routes } returns listOf(
-            mockk {
-                every { routeIndex() } returns "0"
-                every { duration() } returns 1727.228
-            }
-        )
-        mockLocation()
-
-        val controller = mockController(
-            RouteAlternativesOptions.Builder()
-                .intervalMillis(TimeUnit.MINUTES.toMillis(2))
-                .build()
-        )
-        controller.register(routeAlternativesObserver)
-        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(25))
-        controller.unregister(routeAlternativesObserver)
-
-        coroutineRule.testDispatcher.cleanupTestCoroutines()
-        verify(exactly = 12) { directionsSession.requestRoutes(any(), any()) }
-    }
-
-    @Test
-    fun `interrupting a request will also restart the interval`() = coroutineRule.runBlockingTest {
-        every { tripSession.getState() } returns TripSessionState.STARTED
-        mockRouteOptionsProvider(routeOptionsResultSuccess)
-        every { directionsSession.routes } returns listOf(
-            mockk {
-                every { routeIndex() } returns "0"
-                every { duration() } returns 1727.228
-            }
-        )
-        mockLocation()
-
-        val controller = mockController(
-            RouteAlternativesOptions.Builder()
-                .intervalMillis(TimeUnit.SECONDS.toMillis(10))
-                .build()
-        )
-
-        // Advance time to almost make a request, but cancel before. Prove that
-        // a new timer is started because there would be 2 calls otherwise.
-        controller.register(routeAlternativesObserver)
-        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.SECONDS.toMillis(9))
-        controller.interrupt()
-        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.SECONDS.toMillis(19))
-        controller.unregister(routeAlternativesObserver)
-
-        coroutineRule.testDispatcher.cleanupTestCoroutines()
-        verify(exactly = 1) { directionsSession.requestRoutes(any(), any()) }
-    }
-
-    @Test
-    fun `trigger alternative route request based on user event`() = coroutineRule.runBlockingTest {
-        every { tripSession.getState() } returns TripSessionState.STARTED
-        mockRouteOptionsProvider(routeOptionsResultSuccess)
-        every { directionsSession.routes } returns listOf(
-            mockk {
-                every { routeIndex() } returns "0"
-                every { duration() } returns 1727.228
-            }
-        )
-        mockLocation()
-
-        val controller = mockController(
-            RouteAlternativesOptions.Builder()
-                .intervalMillis(TimeUnit.SECONDS.toMillis(10))
-                .build()
-        )
-
-        controller.register(routeAlternativesObserver)
-        controller.triggerAlternativeRequest()
-        controller.unregister(routeAlternativesObserver)
-
-        coroutineRule.testDispatcher.cleanupTestCoroutines()
-        verify(exactly = 1) { directionsSession.requestRoutes(any(), any()) }
-    }
-
-    @Test
-    fun `trigger alternative restarts timer and invoke api call`() = coroutineRule.runBlockingTest {
-        every { tripSession.getState() } returns TripSessionState.STARTED
-        mockRouteOptionsProvider(routeOptionsResultSuccess)
-        every { directionsSession.routes } returns listOf(
-            mockk {
-                every { routeIndex() } returns "0"
-                every { duration() } returns 1727.228
-            }
-        )
-        mockLocation()
-
-        val controller = mockController(
-            RouteAlternativesOptions.Builder()
-                .intervalMillis(TimeUnit.SECONDS.toMillis(10))
-                .build()
-        )
-
-        // Advance time to almost make a request, but cancel before. Prove that
-        // a new timer is started because there would be 1 call otherwise.
-        controller.register(routeAlternativesObserver)
-        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.SECONDS.toMillis(5))
-        controller.triggerAlternativeRequest()
-        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.SECONDS.toMillis(10))
-        controller.unregister(routeAlternativesObserver)
-
-        coroutineRule.testDispatcher.cleanupTestCoroutines()
-        verify(exactly = 2) { directionsSession.requestRoutes(any(), any()) }
-    }
-
-    @Test
-    fun `trigger alternative interrupts current request`() = coroutineRule.runBlockingTest {
-        every { tripSession.getState() } returns TripSessionState.STARTED
-        mockRouteOptionsProvider(routeOptionsResultSuccess)
-        every { directionsSession.routes } returns listOf(
-            mockk {
-                every { routeIndex() } returns "0"
-                every { duration() } returns 1727.228
-            }
-        )
-        mockLocation()
-
-        val controller = mockController(
-            RouteAlternativesOptions.Builder()
-                .intervalMillis(TimeUnit.SECONDS.toMillis(10))
-                .build()
-        )
-
-        /**
-         * Advance time to make a request. Prove that the current request is canceled if
-         * trigger alternative is invoked.
-         * 1. advance time -> make a request -> success -> the first cancel
-         *    ```
-         *    is RouteOptionsUpdater.RouteOptionsResult.Success -> {
-         *        currentRequestId?.let { directionsSession.cancelRouteRequest(it)
-         *        ...
-         *    }
-         *    ```
-         * 2. triggerAlternativeRequest() -> the second cancel
-         * 3. unregister(routeAlternativesObserver) -> the third cancel
-         */
-        controller.register(routeAlternativesObserver)
-        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.SECONDS.toMillis(10))
-        controller.triggerAlternativeRequest()
-        controller.unregister(routeAlternativesObserver)
-        coroutineRule.testDispatcher.cleanupTestCoroutines()
-
-        verify(exactly = 3) { directionsSession.cancelRouteRequest(any()) }
-    }
-
-    @Test
-    fun `should only request with a route`() = coroutineRule.runBlockingTest {
-        every { tripSession.getState() } returns TripSessionState.STARTED
-        mockRouteOptionsProvider(routeOptionsResultSuccess)
-        every { directionsSession.routes } returns emptyList()
-        mockLocation()
-
-        val controller = mockController()
-        controller.register(routeAlternativesObserver)
-        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(25))
-        controller.unregister(routeAlternativesObserver)
-
-        coroutineRule.testDispatcher.cleanupTestCoroutines()
-        verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
-    }
-
-    @Test
-    fun `should not request when trip session is stopped`() {
-        every { tripSession.getState() } returns TripSessionState.STOPPED
-        mockRouteOptionsProvider(routeOptionsResultSuccess)
-        every { directionsSession.routes } returns listOf(
-            mockk {
-                every { routeIndex() } returns "0"
-                every { duration() } returns 1727.228
-            }
-        )
-        mockLocation()
-
-        val controller = mockController()
-        controller.register(routeAlternativesObserver)
-        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(25))
-        controller.unregister(routeAlternativesObserver)
-
-        coroutineRule.testDispatcher.cleanupTestCoroutines()
-        verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
-    }
-
-    @Test
-    fun `should not request when interrupted and there are no observers`() =
-        coroutineRule.runBlockingTest {
-            every { tripSession.getState() } returns TripSessionState.STARTED
-            mockRouteOptionsProvider(routeOptionsResultSuccess)
-            every { directionsSession.routes } returns listOf(
+        nativeObserver.captured.onRouteAlternativesChanged(
+            listOf(
                 mockk {
-                    every { routeIndex() } returns "0"
-                    every { duration() } returns 1727.228
+                    every { route } returns alternativeRouteJson
                 }
             )
-            mockLocation()
+        )
 
-            val controller = mockController()
-            controller.interrupt()
-            coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(5))
-
-            verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
-            coroutineRule.testDispatcher.cleanupTestCoroutines()
-        }
+        verify(exactly = 1) { firstObserver.onRouteAlternatives(any(), any(), any()) }
+        verify(exactly = 1) { secondObserver.onRouteAlternatives(any(), any(), any()) }
+    }
 
     @Test
-    fun `should notify observer and cache manager of an alternative`() =
-        coroutineRule.runBlockingTest {
-            every { tripSession.getState() } returns TripSessionState.STARTED
-            coEvery { navigator.isDifferentRoute(any()) } returns true
-            mockRouteOptionsProvider(routeOptionsResultSuccess)
-            val currentRoute: DirectionsRoute = mockk {
-                every { routeIndex() } returns "0"
+    fun `should broadcast current route with alternative`() {
+        val routeAlternativesController = routeAlternativesController()
+        val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
+        every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
+        every { tripSession.getRouteProgress() } returns mockk {
+            every { route } returns mockk(relaxed = true) {
+                every { duration() } returns 200.0
             }
-            every { directionsSession.routes } returns listOf(currentRoute)
-            mockLocation()
-            every {
-                directionsSession.requestRoutes(
-                    any(),
-                    capture(routesRequestCallbacks)
-                )
-            } returns 1L
+        }
 
-            val controller = mockController()
-            controller.register(routeAlternativesObserver)
-            coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
-            val routes = listOf<DirectionsRoute>(
+        val firstObserver: RouteAlternativesObserver = mockk(relaxed = true)
+        routeAlternativesController.register(firstObserver)
+        val alternativeRouteJson = FileUtils.loadJsonFixture(
+            "route_alternative_from_native.txt"
+        )
+        nativeObserver.captured.onRouteAlternativesChanged(
+            listOf(
                 mockk {
-                    every { routeIndex() } returns "0"
+                    every { route } returns alternativeRouteJson
                 }
             )
-            val origin = mockk<RouterOrigin>()
-            routesRequestCallbacks.captured.onRoutesReady(routes, origin)
+        )
 
-            verify(exactly = 1) {
-                routeAlternativesObserver.onRouteAlternatives(any(), routes, origin)
-                // routeAlternativesCacheManager.areAlternatives(routes)
-            }
-
-            controller.unregisterAll()
-            coroutineRule.testDispatcher.cleanupTestCoroutines()
-        }
-
-    @Test
-    fun `should filter routes that are not different`() = coroutineRule.runBlockingTest {
-        every { tripSession.getState() } returns TripSessionState.STARTED
-        coEvery { navigator.isDifferentRoute(any()) } returns false
-        mockRouteOptionsProvider(routeOptionsResultSuccess)
-        val currentRoute: DirectionsRoute = mockk {
-            every { routeIndex() } returns "0"
-        }
-        every { directionsSession.routes } returns listOf(currentRoute)
-        mockLocation()
-        every {
-            directionsSession.requestRoutes(
-                any(),
-                capture(routesRequestCallbacks)
-            )
-        } returns 1L
-        val origin = mockk<RouterOrigin>()
-
-        val controller = mockController()
-        controller.register(routeAlternativesObserver)
-        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
-        routesRequestCallbacks.captured.onRoutesReady(emptyList(), origin)
-
+        val routeProgressSlot = slot<RouteProgress>()
+        val alternativesSlot = slot<List<DirectionsRoute>>()
+        val routerOriginSlot = slot<RouterOrigin>()
         verify(exactly = 1) {
-            routeAlternativesObserver.onRouteAlternatives(any(), emptyList(), origin)
+            firstObserver.onRouteAlternatives(
+                capture(routeProgressSlot),
+                capture(alternativesSlot),
+                capture(routerOriginSlot)
+            )
         }
-
-        controller.unregisterAll()
-        coroutineRule.testDispatcher.cleanupTestCoroutines()
+        assertEquals(200.0, routeProgressSlot.captured.route.duration(), 0.01)
+        assertEquals(221.796, alternativesSlot.captured[0].duration(), 0.01)
+        assertEquals(RouterOrigin.Onboard, routerOriginSlot.captured)
     }
 
-    private fun mockLocation() {
-        every { tripSession.locationMatcherResult } returns mockk {
-            every { enhancedLocation } returns mockk {
-                every { latitude } returns -33.874308
-                every { longitude } returns 151.206087
+    @Test
+    fun `should set route with the new alternatives`() {
+        val routeAlternativesController = routeAlternativesController()
+        val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
+        every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
+        every { tripSession.getRouteProgress() } returns mockk {
+            every { route } returns mockk(relaxed = true)
+        }
+
+        val firstObserver: RouteAlternativesObserver = mockk(relaxed = true)
+        routeAlternativesController.register(firstObserver)
+        val alternativeRouteJson = FileUtils.loadJsonFixture(
+            "route_alternative_from_native.txt"
+        )
+        nativeObserver.captured.onRouteAlternativesChanged(
+            listOf(
+                mockk {
+                    every { route } returns alternativeRouteJson
+                }
+            )
+        )
+
+        val routesSetCapture = slot<List<DirectionsRoute>>()
+        verify(exactly = 1) {
+            directionsSession.setRoutes(
+                capture(routesSetCapture),
+                0,
+                RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
+            )
+        }
+        assertEquals(2, routesSetCapture.captured.size)
+        assertEquals(221.796, routesSetCapture.captured[1].duration(), 0.001)
+    }
+
+    @Test
+    fun `should set alternative RouteOptions to primary RouteOptions`() {
+        val originalCoordinates = "-122.270375,37.801429;-122.271496, 37.799063"
+        val routeAlternativesController = routeAlternativesController()
+        val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
+        every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
+        every { tripSession.getRouteProgress() } returns mockk {
+            every { route } returns mockk {
+                every { routeOptions() } returns mockk {
+                    every { coordinates() } returns originalCoordinates
+                }
             }
         }
-    }
+        val routesSetCapture = slot<List<DirectionsRoute>>()
+        every { directionsSession.setRoutes(capture(routesSetCapture), any(), any()) } just runs
 
-    private fun mockRouteOptionsProvider(
-        routeOptionsResult: RouteOptionsUpdater.RouteOptionsResult
-    ) {
-        every {
-            routeOptionsUpdater.update(any(), any(), any<LocationMatcherResult>())
-        } returns routeOptionsResult
+        val firstObserver: RouteAlternativesObserver = mockk(relaxed = true)
+        routeAlternativesController.register(firstObserver)
+        val alternativeRouteJson = FileUtils.loadJsonFixture(
+            "route_alternative_from_native.txt"
+        )
+        nativeObserver.captured.onRouteAlternativesChanged(
+            listOf(
+                mockk {
+                    every { route } returns alternativeRouteJson
+                }
+            )
+        )
+
+        assertEquals(
+            originalCoordinates, routesSetCapture.captured[0].routeOptions()?.coordinates()
+        )
+        assertEquals(
+            originalCoordinates, routesSetCapture.captured[1].routeOptions()?.coordinates()
+        )
     }
 }

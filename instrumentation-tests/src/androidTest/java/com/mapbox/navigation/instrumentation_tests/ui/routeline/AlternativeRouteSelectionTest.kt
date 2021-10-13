@@ -101,7 +101,8 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
 
             // Observe route progress and verify the alternative is now the primary route.
             mapboxNavigation.registerRouteProgressObserver { routeProgress ->
-                assertEquals(alternative, routeProgress.route)
+                // The route index has been changed, so only compare the geometry
+                assertEquals(alternative.geometry(), routeProgress.route.geometry())
                 routeProgressCount.countDown()
             }
 

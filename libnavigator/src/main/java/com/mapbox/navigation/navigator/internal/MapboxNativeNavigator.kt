@@ -23,6 +23,7 @@ import com.mapbox.navigator.PredictiveCacheController
 import com.mapbox.navigator.RoadObjectMatcher
 import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
+import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.SensorData
@@ -95,13 +96,16 @@ interface MapboxNativeNavigator {
      * Returns initialized route state if no errors occurred.
      * Otherwise, it returns a invalid route state.
      *
-     * @param route [DirectionsRoute] to follow.
+     * @param routes [DirectionsRoute] list of routes to follow.
      * @param legIndex Which leg to follow
      *
      * @return a [RouteInfo] route state if no errors occurred.
      * Otherwise, it returns null.
      */
-    suspend fun setRoute(route: DirectionsRoute?, legIndex: Int): RouteInfo?
+    suspend fun setRoute(
+        routes: List<DirectionsRoute>,
+        legIndex: Int
+    ): RouteInfo?
 
     /**
      * Updates annotations so that subsequent calls to getStatus will
@@ -218,6 +222,8 @@ interface MapboxNativeNavigator {
     fun createNavigationPredictiveCacheController(
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions
     ): PredictiveCacheController
+
+    fun createRouteAlternativesController(): RouteAlternativesControllerInterface
 
     val graphAccessor: GraphAccessor?
 

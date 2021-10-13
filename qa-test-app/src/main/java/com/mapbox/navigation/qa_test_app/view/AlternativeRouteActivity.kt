@@ -38,6 +38,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.qa_test_app.databinding.AlternativeRouteActivityLayoutBinding
@@ -114,6 +115,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
+        mapboxNavigation.unregisterRouteAlternativesObserver(requestAlternativesObserver)
     }
 
     override fun onDestroy() {
@@ -132,6 +134,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
+        mapboxNavigation.registerRouteAlternativesObserver(requestAlternativesObserver)
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.playbackSpeed(1.5)
         mapboxReplayer.play()
@@ -196,6 +199,14 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         }
         return false
     }
+
+    /**
+     * Whenever alternatives have changed, request a new set of alternatives.
+     */
+    private val requestAlternativesObserver =
+        RouteAlternativesObserver { _, _, _ ->
+            mapboxNavigation.requestAlternativeRoutes()
+        }
 
     private fun findRoute(origin: Point?, destination: Point?) {
         val routeOptions = RouteOptions.builder()
