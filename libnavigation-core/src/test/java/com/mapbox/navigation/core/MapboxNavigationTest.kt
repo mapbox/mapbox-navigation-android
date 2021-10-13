@@ -291,13 +291,13 @@ class MapboxNavigationTest {
     @Test
     fun init_routesObs_internalRouteObs_navigationSession_and_TelemetryLocAndProgressDispatcher() {
         createMapboxNavigation()
-        verify(exactly = 3) { directionsSession.registerRoutesObserver(any()) }
+        verify(exactly = 2) { directionsSession.registerRoutesObserver(any()) }
     }
 
     @Test
     fun init_registerOffRouteObserver() {
         createMapboxNavigation()
-        verify(exactly = 3) { tripSession.registerOffRouteObserver(any()) }
+        verify(exactly = 1) { tripSession.registerOffRouteObserver(any()) }
     }
 
     @Test
@@ -317,7 +317,7 @@ class MapboxNavigationTest {
 
         mapboxNavigation = MapboxNavigation(navigationOptions)
 
-        verify(exactly = 6) { tripSession.registerOffRouteObserver(any()) }
+        verify(exactly = 2) { tripSession.registerOffRouteObserver(any()) }
     }
 
     @Test
