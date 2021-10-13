@@ -18,9 +18,9 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.BuildConfig
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
+import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
-import com.mapbox.navigation.core.internal.utils.RoutesUpdateReasonHelper
 import com.mapbox.navigation.core.internal.utils.toTelemetryLocation
 import com.mapbox.navigation.core.internal.utils.toTelemetryLocations
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
@@ -45,12 +45,12 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionState.ActiveGuid
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.FreeDrive
 import com.mapbox.navigation.core.trip.session.NavigationSessionState.Idle
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
-import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEvent
 import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.toPoint
 import java.util.Date
 
@@ -143,7 +143,6 @@ internal object MapboxNavigationTelemetry {
     private lateinit var applicationContext: Context
     private lateinit var metricsReporter: MetricsReporter
     private lateinit var navigationOptions: NavigationOptions
-    private lateinit var routesUpdateReasonHelper: RoutesUpdateReasonHelper
     private var lifecycleMonitor: ApplicationLifecycleMonitor? = null
     private var appInstance: Application? = null
         set(value) {
@@ -187,7 +186,6 @@ internal object MapboxNavigationTelemetry {
                 field = value
                 onRouteDataChanged.invoke()
             }
-        var needHandleReroute = false
 
         fun hasRouteAndRouteProgress(): Boolean {
             return routeData.originalRoute != null && routeData.routeProgress != null
@@ -200,30 +198,37 @@ internal object MapboxNavigationTelemetry {
     private val isTelemetryOnPause: Boolean
         get() = telemetryState is NavTelemetryState.Paused
 
-    // todo migrate to using RoutesUpdatedResult#reason param
     private val routesObserver = RoutesObserver { result ->
         val routes = result.routes
-        log("onRoutesChanged. size = ${routes.size}")
-        routes.getOrNull(0)?.let {
-            if (routeData.originalRoute != null) {
-                if (routeData.needHandleReroute) {
-                    routeData.needHandleReroute = false
-                    handleReroute(it)
-                } else {
-                    log("handle ExternalRoute")
-                    handleCancelNavigation()
-                    resetLocalVariables()
-                    resetDynamicValues()
-                    routeData.originalRoute = it
-                    routeData.needHandleDeparture = true
-                }
-            } else {
+        val reason = result.reason
+
+        log("onRoutesChanged. Number of routes = ${routes.size}; reason = $reason")
+
+        when {
+            reason == RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP || routes.isEmpty() -> Unit
+            reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW -> {
                 log("handle a new route")
+                if (routeData.originalRoute != null) {
+                    handleCancelNavigation()
+                }
                 resetLocalVariables()
                 resetDynamicValues()
-                routeData.originalRoute = it
+                routeData.originalRoute = routes.first()
                 routeData.needHandleDeparture = true
             }
+            reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE -> {
+                log("alternative routes received")
+            }
+            reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE -> {
+                handleReroute(routes.first())
+            }
+            reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH -> {
+                routeData.originalRoute = routes.first()
+            }
+            else -> logW(
+                TAG,
+                Message("Unknown route update reason: [$reason]"),
+            )
         }
     }
 
@@ -281,13 +286,6 @@ internal object MapboxNavigationTelemetry {
         }
     }
 
-    private val offRouteObserver = OffRouteObserver { offRoute ->
-        log("onOffRouteStateChanged $offRoute")
-        if (offRoute) {
-            routeData.needHandleReroute = true
-        }
-    }
-
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         this.routeData.routeProgress = routeProgress
     }
@@ -310,7 +308,6 @@ internal object MapboxNavigationTelemetry {
         mapboxNavigation: MapboxNavigation,
         options: NavigationOptions,
         reporter: MetricsReporter,
-        routesUpdateReasonHelper: RoutesUpdateReasonHelper,
         logger: Logger?,
         locationsCollector: LocationsCollector = LocationsCollectorImpl(logger),
     ) {
@@ -320,7 +317,6 @@ internal object MapboxNavigationTelemetry {
         this.locationsCollector = locationsCollector
         navigationOptions = options
         applicationContext = options.applicationContext
-        this.routesUpdateReasonHelper = routesUpdateReasonHelper
         locationEngineNameExternal = options.locationEngine.javaClass.name
         sdkIdentifier = if (options.isFromNavigationUi) {
             "mapbox-navigation-ui-android"
@@ -343,7 +339,6 @@ internal object MapboxNavigationTelemetry {
             unregisterLocationObserver(locationsCollector)
             unregisterRouteProgressObserver(routeProgressObserver)
             unregisterRoutesObserver(routesObserver)
-            unregisterOffRouteObserver(offRouteObserver)
             unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
             unregisterArrivalObserver(arrivalObserver)
         }
@@ -635,7 +630,6 @@ internal object MapboxNavigationTelemetry {
             registerLocationObserver(locationsCollector)
             registerRouteProgressObserver(routeProgressObserver)
             registerRoutesObserver(routesObserver)
-            registerOffRouteObserver(offRouteObserver)
             registerNavigationSessionStateObserver(navigationSessionStateObserver)
             registerArrivalObserver(arrivalObserver)
         }
@@ -790,7 +784,6 @@ internal object MapboxNavigationTelemetry {
     private fun resetLocalVariables() {
         resetOriginalRoute()
         resetRouteProgress()
-        routeData.needHandleReroute = false
         routeData.needHandleDeparture = false
     }
 

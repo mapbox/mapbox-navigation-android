@@ -9,7 +9,6 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.NavigationComponentProvider
-import com.mapbox.navigation.core.internal.utils.RoutesUpdateReasonHelper
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -28,7 +27,6 @@ class MapboxDirectionsSessionTest {
     private lateinit var session: MapboxDirectionsSession
 
     private val router: Router = mockk(relaxUnitFun = true)
-    private val reasonHelper: RoutesUpdateReasonHelper = mockk()
     private val routeOptions: RouteOptions = mockk(relaxUnitFun = true)
     private val routerCallback: RouterCallback = mockk(relaxUnitFun = true)
     private val routesRefreshRequestCallback: RouteRefreshCallback = mockk(relaxUnitFun = true)
@@ -73,7 +71,6 @@ class MapboxDirectionsSessionTest {
         every { routerCallback.onRoutesReady(any(), any()) } answers {
             this.value
         }
-        every { reasonHelper.getReason(any(), any()) } returns mockReason
         session = MapboxDirectionsSession(router)
     }
 
