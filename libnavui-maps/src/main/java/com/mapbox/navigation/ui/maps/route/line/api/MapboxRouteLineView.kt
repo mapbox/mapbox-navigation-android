@@ -448,16 +448,12 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
     }
 
     private fun updateLayerVisibility(style: Style, layerId: String, visibility: Visibility) {
-        if (style.isStyleLoaded) {
-            style.getLayer(layerId)?.visibility(visibility)
-        }
+        style.getLayer(layerId)?.visibility(visibility)
     }
 
     private fun updateSource(style: Style, sourceId: String, featureCollection: FeatureCollection) {
-        if (style.isStyleLoaded) {
-            style.getSource(sourceId)?.let {
-                (it as GeoJsonSource).featureCollection(featureCollection)
-            }
+        style.getSource(sourceId)?.let {
+            (it as GeoJsonSource).featureCollection(featureCollection)
         }
     }
 
@@ -492,10 +488,8 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
     }
 
     private fun updateLineGradient(style: Style, layerId: String, expression: Expression) {
-        if (style.isStyleLoaded) {
-            style.getLayer(layerId)?.let {
-                (it as LineLayer).lineGradient(expression)
-            }
+        style.getLayer(layerId)?.let {
+            (it as LineLayer).lineGradient(expression)
         }
     }
 }

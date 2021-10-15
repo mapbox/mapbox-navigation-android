@@ -58,7 +58,7 @@ internal object RouteArrowUtils {
 
     @OptIn(MapboxExperimental::class)
     fun initializeLayers(style: Style, options: RouteArrowOptions) {
-        if (!style.isStyleLoaded || layersAreInitialized(style)) {
+        if (layersAreInitialized(style)) {
             return
         }
 
@@ -256,8 +256,7 @@ internal object RouteArrowUtils {
     }
 
     internal fun layersAreInitialized(style: Style): Boolean {
-        return style.isStyleLoaded &&
-            style.styleSourceExists(RouteLayerConstants.ARROW_SHAFT_SOURCE_ID) &&
+        return style.styleSourceExists(RouteLayerConstants.ARROW_SHAFT_SOURCE_ID) &&
             style.styleSourceExists(RouteLayerConstants.ARROW_HEAD_SOURCE_ID) &&
             style.styleLayerExists(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID) &&
             style.styleLayerExists(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID) &&

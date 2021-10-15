@@ -64,7 +64,6 @@ class MapboxRouteArrowViewTest {
             listOf(Pair(ARROW_SHAFT_LINE_LAYER_ID, Visibility.NONE))
         )
         val style = mockk<Style> {
-            every { isStyleLoaded } returns true
             every { getLayer(ARROW_SHAFT_LINE_LAYER_ID) } returns arrowLayer
         }.also {
             mockCheckForLayerInitialization(it)
@@ -99,7 +98,6 @@ class MapboxRouteArrowViewTest {
             arrowHeadFeature
         )
         val style = mockk<Style> {
-            every { isStyleLoaded } returns true
             every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
             every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
             every { getLayer(ARROW_SHAFT_LINE_LAYER_ID) } returns arrowLayer
@@ -129,7 +127,6 @@ class MapboxRouteArrowViewTest {
         val arrowShaftSource = mockk<GeoJsonSource>(relaxed = true)
         val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
         val style = mockk<Style> {
-            every { isStyleLoaded } returns true
             every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
             every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
         }.also {
@@ -157,7 +154,6 @@ class MapboxRouteArrowViewTest {
         val arrowShaftSource = mockk<GeoJsonSource>(relaxed = true)
         val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
         val style = mockk<Style> {
-            every { isStyleLoaded } returns true
             every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
             every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
         }.also {
@@ -190,7 +186,6 @@ class MapboxRouteArrowViewTest {
         val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
         val options = RouteArrowOptions.Builder(ctx).build()
         val style = mockk<Style> {
-            every { isStyleLoaded } returns true
             every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
             every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
         }.also {
@@ -226,7 +221,6 @@ class MapboxRouteArrowViewTest {
         val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
         val options = RouteArrowOptions.Builder(ctx).build()
         val style = mockk<Style> {
-            every { isStyleLoaded } returns true
             every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
             every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
         }.also {
@@ -260,7 +254,6 @@ class MapboxRouteArrowViewTest {
         val arrowShaftSource = mockk<GeoJsonSource>(relaxed = true)
         val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
         val style = mockk<Style> {
-            every { isStyleLoaded } returns true
             every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
             every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
         }.also {
