@@ -825,11 +825,7 @@ object MapboxRouteLineUtils {
     }
 
     internal fun getLayerVisibility(style: Style, layerId: String): Visibility? {
-        return if (style.isStyleLoaded) {
-            style.getLayer(layerId)?.visibility
-        } else {
-            null
-        }
+        return style.getLayer(layerId)?.visibility
     }
 
     /**
@@ -941,7 +937,7 @@ object MapboxRouteLineUtils {
 
     @OptIn(MapboxExperimental::class)
     internal fun initializeLayers(style: Style, options: MapboxRouteLineOptions) {
-        if (!style.isStyleLoaded || layersAreInitialized(style, options)) {
+        if (layersAreInitialized(style, options)) {
             return
         }
         val belowLayerIdToUse: String? =
@@ -1062,8 +1058,7 @@ object MapboxRouteLineUtils {
     }
 
     internal fun layersAreInitialized(style: Style, options: MapboxRouteLineOptions): Boolean {
-        return style.isStyleLoaded &&
-            style.styleSourceExists(RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID) &&
+        return style.styleSourceExists(RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID) &&
             style.styleSourceExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID) &&
             style.styleSourceExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID) &&
             style.styleLayerExists(RouteLayerConstants.PRIMARY_ROUTE_LAYER_ID) &&
