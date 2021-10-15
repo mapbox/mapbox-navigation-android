@@ -5,6 +5,13 @@ import com.mapbox.navigation.base.trip.model.eh.EHorizon
 /**
  * Defines options for [EHorizon].
  *
+ * **NOTE**: The Mapbox Electronic Horizon feature of the Mapbox Navigation SDK is in public beta
+ * and is subject to changes, including its pricing. Use of the feature is subject to the beta
+ * product restrictions in the Mapbox Terms of Service.
+ * Mapbox reserves the right to eliminate any free tier or free evaluation offers at any time and
+ * require customers to place an order to purchase the Mapbox Electronic Horizon feature,
+ * regardless of the level of use of the feature.
+ *
  * @param length the minimum length of the MPP in meters. This does not include the trailingLength.
  * The actual MPP length may be bigger. Double in range [1.0, 20000.0]. Default value 500.0
  * @param expansion the number of branches to include from the MPP. When set to 0 only the MPP

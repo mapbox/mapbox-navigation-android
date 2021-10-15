@@ -3,6 +3,13 @@ package com.mapbox.navigation.base.trip.model.eh
 /**
  * Basic Edge class
  *
+ * **NOTE**: The Mapbox Electronic Horizon feature of the Mapbox Navigation SDK is in public beta
+ * and is subject to changes, including its pricing. Use of the feature is subject to the beta
+ * product restrictions in the Mapbox Terms of Service.
+ * Mapbox reserves the right to eliminate any free tier or free evaluation offers at any time and
+ * require customers to place an order to purchase the Mapbox Electronic Horizon feature,
+ * regardless of the level of use of the feature.
+ *
  * @param id identifier of the directed edge (it's unique)
  * @param level the level of the Edge (0 being the mpp, 1 branches of the mpp,
  * 2 branches of level 1 branches, etc)
