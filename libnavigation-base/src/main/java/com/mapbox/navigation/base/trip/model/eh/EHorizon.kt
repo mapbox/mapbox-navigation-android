@@ -24,6 +24,13 @@ import java.util.LinkedList
  * their outgoing connections. This can be done by simply looping over the Edges or using a Visitor.
  * For common cases, a number of utilities have been added which are described below.
  *
+ * **NOTE**: The Mapbox Electronic Horizon feature of the Mapbox Navigation SDK is in public beta
+ * and is subject to changes, including its pricing. Use of the feature is subject to the beta
+ * product restrictions in the Mapbox Terms of Service.
+ * Mapbox reserves the right to eliminate any free tier or free evaluation offers at any time and
+ * require customers to place an order to purchase the Mapbox Electronic Horizon feature,
+ * regardless of the level of use of the feature.
+ *
  * @param start [EHorizonEdge]
  */
 class EHorizon internal constructor(

@@ -5,6 +5,13 @@ import com.mapbox.geojson.Point
 /**
  * The record represents a piece of data which is required to match one OpenLR.
  *
+ * **NOTE**: The Mapbox Electronic Horizon feature of the Mapbox Navigation SDK is in public beta
+ * and is subject to changes, including its pricing. Use of the feature is subject to the beta
+ * product restrictions in the Mapbox Terms of Service.
+ * Mapbox reserves the right to eliminate any free tier or free evaluation offers at any time and
+ * require customers to place an order to purchase the Mapbox Electronic Horizon feature,
+ * regardless of the level of use of the feature.
+ *
  * @param roadObjectId unique id of the object
  * @param openLRLocation road object location
  * @param openLRStandard standard used to encode openLRLocation
@@ -22,6 +29,13 @@ data class MatchableOpenLr(
  * - lines, with two or more coordinates
  * - polygons, with three or more coordinates
  *
+ * **NOTE**: The Mapbox Electronic Horizon feature of the Mapbox Navigation SDK is in public beta
+ * and is subject to changes, including its pricing. Use of the feature is subject to the beta
+ * product restrictions in the Mapbox Terms of Service.
+ * Mapbox reserves the right to eliminate any free tier or free evaluation offers at any time and
+ * require customers to place an order to purchase the Mapbox Electronic Horizon feature,
+ * regardless of the level of use of the feature.
+ *
  * @param roadObjectId unique id of the object
  * @param coordinates list of points representing the geometry
  */
@@ -32,6 +46,13 @@ data class MatchableGeometry(
 
 /**
  * The record represents a raw point which could be matched to the road graph.
+ *
+ * **NOTE**: The Mapbox Electronic Horizon feature of the Mapbox Navigation SDK is in public beta
+ * and is subject to changes, including its pricing. Use of the feature is subject to the beta
+ * product restrictions in the Mapbox Terms of Service.
+ * Mapbox reserves the right to eliminate any free tier or free evaluation offers at any time and
+ * require customers to place an order to purchase the Mapbox Electronic Horizon feature,
+ * regardless of the level of use of the feature.
  *
  * @param roadObjectId unique id of the object
  * @param point point representing the object
