@@ -19,7 +19,7 @@ class FirstLocationIdlingResource(
 
     var firstLocation: Location? = null
         private set
-    private lateinit var callback: IdlingResource.ResourceCallback
+    private var callback: IdlingResource.ResourceCallback? = null
 
     /**
      * This will block the execution of a test while waiting for the first
@@ -47,7 +47,7 @@ class FirstLocationIdlingResource(
         ) {
             callback = resourceCallback
             if (isIdleNow) {
-                callback.onTransitionToIdle()
+                callback?.onTransitionToIdle()
             }
         }
     }
@@ -61,7 +61,7 @@ class FirstLocationIdlingResource(
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             if (firstLocation == null) {
                 firstLocation = locationMatcherResult.enhancedLocation
-                callback.onTransitionToIdle()
+                callback?.onTransitionToIdle()
             }
         }
     }
