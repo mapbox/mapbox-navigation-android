@@ -9,7 +9,6 @@ import com.mapbox.common.BillingSessionStatus
 import com.mapbox.common.SKUIdentifier
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.core.accounts.BillingServiceWrapper
-import com.mapbox.navigation.core.accounts.TokenGeneratorWrapper
 import java.net.URL
 
 object MapboxNavigationAccounts : UrlSkuTokenProvider {
@@ -37,7 +36,7 @@ object MapboxNavigationAccounts : UrlSkuTokenProvider {
         )
         val activeGuidanceToken =
             if (activeGuidanceSessionStatus == BillingSessionStatus.SESSION_ACTIVE) {
-                TokenGeneratorWrapper.getSKUTokenIfValid(SKUIdentifier.NAV2_SES_TRIP) ?: ""
+                BillingServiceWrapper.getSessionSKUTokenIfValid(SKUIdentifier.NAV2_SES_TRIP) ?: ""
             } else {
                 ""
             }
@@ -48,7 +47,7 @@ object MapboxNavigationAccounts : UrlSkuTokenProvider {
                 SKUIdentifier.NAV2_SES_FDTRIP
             )
             if (freeDriveSessionStatus == BillingSessionStatus.SESSION_ACTIVE) {
-                TokenGeneratorWrapper.getSKUTokenIfValid(SKUIdentifier.NAV2_SES_FDTRIP) ?: ""
+                BillingServiceWrapper.getSessionSKUTokenIfValid(SKUIdentifier.NAV2_SES_FDTRIP) ?: ""
             } else {
                 ""
             }

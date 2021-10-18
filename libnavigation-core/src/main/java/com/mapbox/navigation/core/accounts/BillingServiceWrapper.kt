@@ -55,4 +55,8 @@ internal object BillingServiceWrapper {
     fun getSessionStatus(skuIdentifier: SKUIdentifier): BillingSessionStatus {
         return BillingService.getSessionStatus(skuIdentifier)
     }
+
+    fun getSessionSKUTokenIfValid(skuIdentifier: SKUIdentifier): String? {
+        return BillingService.getSessionSKUTokenIfValid(skuIdentifier)
+    }
 }
