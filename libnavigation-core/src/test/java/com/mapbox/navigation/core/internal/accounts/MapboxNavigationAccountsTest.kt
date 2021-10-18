@@ -3,7 +3,6 @@ package com.mapbox.navigation.core.internal.accounts
 import com.mapbox.common.BillingSessionStatus
 import com.mapbox.common.SKUIdentifier
 import com.mapbox.navigation.core.accounts.BillingServiceWrapper
-import com.mapbox.navigation.core.accounts.TokenGeneratorWrapper
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
@@ -21,7 +20,6 @@ class MapboxNavigationAccountsTest {
     @Before
     fun setup() {
         mockkObject(BillingServiceWrapper)
-        mockkObject(TokenGeneratorWrapper)
     }
 
     @Test
@@ -30,7 +28,7 @@ class MapboxNavigationAccountsTest {
             BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_TRIP)
         } returns BillingSessionStatus.SESSION_ACTIVE
         every {
-            TokenGeneratorWrapper.getSKUTokenIfValid(SKUIdentifier.NAV2_SES_TRIP)
+            BillingServiceWrapper.getSessionSKUTokenIfValid(SKUIdentifier.NAV2_SES_TRIP)
         } returns "12345"
 
         val result = MapboxNavigationAccounts.obtainUrlWithSkuToken(
@@ -49,7 +47,7 @@ class MapboxNavigationAccountsTest {
             BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_TRIP)
         } returns BillingSessionStatus.SESSION_ACTIVE
         every {
-            TokenGeneratorWrapper.getSKUTokenIfValid(SKUIdentifier.NAV2_SES_TRIP)
+            BillingServiceWrapper.getSessionSKUTokenIfValid(SKUIdentifier.NAV2_SES_TRIP)
         } returns "12345"
 
         val result = MapboxNavigationAccounts.obtainUrlWithSkuToken(
@@ -90,7 +88,7 @@ class MapboxNavigationAccountsTest {
             BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_FDTRIP)
         } returns BillingSessionStatus.SESSION_ACTIVE
         every {
-            TokenGeneratorWrapper.getSKUTokenIfValid(SKUIdentifier.NAV2_SES_FDTRIP)
+            BillingServiceWrapper.getSessionSKUTokenIfValid(SKUIdentifier.NAV2_SES_FDTRIP)
         } returns "12345"
 
         val result = MapboxNavigationAccounts.obtainUrlWithSkuToken(
@@ -149,6 +147,5 @@ class MapboxNavigationAccountsTest {
     @After
     fun tearDown() {
         unmockkObject(BillingServiceWrapper)
-        unmockkObject(TokenGeneratorWrapper)
     }
 }
