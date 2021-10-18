@@ -192,5 +192,14 @@ class CoreRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.jav
 
         // assert results
         expectedStates.assert()
+
+        runOnMainSync {
+            val newWaypoints =
+                mapboxNavigation.getRoutes().first().routeOptions()!!.coordinatesList()
+            check(newWaypoints.size == 2) {
+                "Expected 2 waypoints in the route after reroute but was ${newWaypoints.size}"
+            }
+            check(newWaypoints[1] == mockRoute.routeWaypoints.last())
+        }
     }
 }
