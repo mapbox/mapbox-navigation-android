@@ -106,7 +106,7 @@ core-dependency-graph:
 	$(call run-gradle-tasks,$(CORE_MODULES),generateDependencyGraphMapboxLibraries)
 
 .PHONY: core-check-api
-core-check-api:
+core-check-api: assemble-core-release
 	./gradlew :libnavigation-router:checkApi -PhidePackage=com.mapbox.navigation.route.internal
 	./gradlew :libnavigation-base:checkApi -PhidePackage=com.mapbox.navigation.base.internal
 	./gradlew :libnavigation-metrics:checkApi -PhidePackage=com.mapbox.navigation.metrics.internal
@@ -116,7 +116,7 @@ core-check-api:
 	./gradlew :libnavigation-core:checkApi -PhidePackage=com.mapbox.navigation.core.internal
 
 .PHONY: core-update-api
-core-update-api:
+core-update-api: assemble-core-release
 	./gradlew :libnavigation-router:updateApi -PhidePackage=com.mapbox.navigation.route.internal
 	./gradlew :libnavigation-base:updateApi -PhidePackage=com.mapbox.navigation.base.internal
 	./gradlew :libnavigation-metrics:updateApi -PhidePackage=com.mapbox.navigation.metrics.internal
@@ -146,7 +146,7 @@ ui-upload-to-sdk-registry:
 	$(call run-gradle-tasks,$(UI_MODULES),mapboxSDKRegistryUpload)
 
 .PHONY: ui-check-api
-ui-check-api:
+ui-check-api: assemble-ui-release
 	# TODO Remove -PhideId=ReferencesHidden after fixing errors
 	./gradlew :libnavui-maps:checkApi -PhidePackage=com.mapbox.navigation.ui.maps.internal -PhideId=ReferencesHidden
 	./gradlew :libnavui-base:checkApi -PhidePackage=com.mapbox.navigation.ui.base.internal -PhideId=ReferencesHidden
@@ -157,7 +157,7 @@ ui-check-api:
 	./gradlew :libnavui-speedlimit:checkApi -PhidePackage=com.mapbox.navigation.ui.speedlimit.internal -PhideId=ReferencesHidden
 
 .PHONY: ui-update-api
-ui-update-api:
+ui-update-api: assemble-ui-release
 	./gradlew :libnavui-maps:updateApi -PhidePackage=com.mapbox.navigation.ui.maps.internal
 	./gradlew :libnavui-base:updateApi -PhidePackage=com.mapbox.navigation.ui.base.internal
 	./gradlew :libnavui-util:updateApi -PhidePackage=com.mapbox.navigation.ui.utils.internal
