@@ -552,15 +552,6 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.view {
 
 package com.mapbox.navigation.ui.maps.internal.route.line {
 
-  public final class MapboxRouteLineApiExtensions {
-    method public suspend Object? clearRouteLine(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue>> p);
-    method public suspend Object? findClosestRoute(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, com.mapbox.geojson.Point target, com.mapbox.maps.MapboxMap mapboxMap, float padding, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound,com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue>> p);
-    method public suspend Object? getRouteDrawData(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> p);
-    method public suspend Object? setRoutes(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLine> newRoutes, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> p);
-    method public suspend Object? showRouteWithLegIndexHighlighted(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, int legIndex, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue>> p);
-    field public static final com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions INSTANCE;
-  }
-
   public final class MapboxRouteLineUtils {
     method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionData> calculateRouteLineSegments(com.mapbox.api.directions.v5.models.DirectionsRoute route, java.util.List<java.lang.String> trafficBackfillRoadClasses, boolean isPrimaryRoute, com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources routeLineColorResources);
     method public static String? getBelowLayerIdToUse(String? belowLayerId, com.mapbox.maps.Style style);
@@ -712,6 +703,19 @@ package com.mapbox.navigation.ui.maps.route.arrow.model {
     property public final com.mapbox.geojson.Feature? arrowHeadFeature;
     property public final com.mapbox.geojson.Feature? arrowShaftFeature;
     property public final java.util.List<kotlin.Pair<java.lang.String,com.mapbox.maps.extension.style.layers.properties.generated.Visibility>> layerVisibilityModifications;
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.route.line {
+
+  public final class MapboxRouteLineApiExtensions {
+    method public suspend Object? clearRouteLine(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue>> p);
+    method public suspend Object? findClosestRoute(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, com.mapbox.geojson.Point target, com.mapbox.maps.MapboxMap mapboxMap, float padding, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound,com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue>> p);
+    method public suspend Object? getRouteDrawData(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> p);
+    method public suspend Object? setRoutes(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLine> newRoutes, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>> p);
+    method public suspend Object? showRouteWithLegIndexHighlighted(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, int legIndex, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue>> p);
+    field public static final com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions INSTANCE;
   }
 
 }
