@@ -200,6 +200,19 @@ class MapboxDirectionsSessionTest {
     }
 
     @Test
+    fun `observer notified on subscribe with actual route data`() {
+        session.setRoutes(routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        val slot = slot<RoutesUpdatedResult>()
+        every { observer.onRoutesChanged(capture(slot)) } just runs
+
+        session.registerRoutesObserver(observer)
+
+        verify(exactly = 1) { observer.onRoutesChanged(slot.captured) }
+        assertEquals(slot.captured.reason, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+        assertEquals(slot.captured.routes, routes)
+    }
+
+    @Test
     fun `when route cleared, observer notified`() {
         val slot = mutableListOf<RoutesUpdatedResult>()
         every { observer.onRoutesChanged(capture(slot)) } just runs

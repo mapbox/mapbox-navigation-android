@@ -46,6 +46,7 @@ internal class MapboxDirectionsSession(
             return
         }
         this.routes = routes
+        this.routesUpdateReason = routesUpdateReason
         routesObservers.forEach {
             it.onRoutesChanged(RoutesUpdatedResult(routes, routesUpdateReason))
         }
