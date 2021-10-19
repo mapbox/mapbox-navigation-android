@@ -46,6 +46,7 @@ internal class MapboxDirectionsSession(
             return
         }
         this.routes = routes
+        this.routesUpdateReason = routesUpdateReason
         if (routes.isNotEmpty()) {
             primaryRouteOptions = routes[0].routeOptions()
         }
