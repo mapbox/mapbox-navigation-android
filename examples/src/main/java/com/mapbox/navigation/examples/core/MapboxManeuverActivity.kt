@@ -47,11 +47,11 @@ import com.mapbox.navigation.ui.maneuver.api.RoadShieldCallback
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions

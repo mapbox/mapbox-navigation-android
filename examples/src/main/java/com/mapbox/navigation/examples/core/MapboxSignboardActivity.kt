@@ -43,11 +43,11 @@ import com.mapbox.navigation.ui.maps.guidance.signboard.api.MapboxSignboardApi
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue
 import com.mapbox.navigation.ui.maps.guidance.signboard.view.MapboxSignboardView
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setRoutes
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
