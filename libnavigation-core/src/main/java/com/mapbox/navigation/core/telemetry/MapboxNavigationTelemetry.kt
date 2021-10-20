@@ -118,6 +118,7 @@ private enum class TelemetryNavSessionState {
 
 private const val LOG_TELEMETRY_IS_NOT_RUNNING = "Telemetry is not running"
 private const val LOG_TELEMETRY_NO_ROUTE_OR_ROUTE_PROGRESS = "no route or route progress"
+private const val SDK_IDENTIFIER = "mapbox-navigation-android"
 
 /**
  * The one and only Telemetry class. This class handles all telemetry events.
@@ -318,11 +319,7 @@ internal object MapboxNavigationTelemetry {
         navigationOptions = options
         applicationContext = options.applicationContext
         locationEngineNameExternal = options.locationEngine.javaClass.name
-        sdkIdentifier = if (options.isFromNavigationUi) {
-            "mapbox-navigation-ui-android"
-        } else {
-            "mapbox-navigation-android"
-        }
+        sdkIdentifier = SDK_IDENTIFIER
         metricsReporter = reporter
         feedbackEventCacheMap.clear()
         postTurnstileEvent()
