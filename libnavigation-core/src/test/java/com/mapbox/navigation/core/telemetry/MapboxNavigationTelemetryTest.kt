@@ -294,6 +294,21 @@ class MapboxNavigationTelemetryTest {
     @Test
     fun departEvent_sent_on_active_guidance_when_route_and_routeProgress_available() {
         baseMock()
+        mockAnotherRoute()
+
+        initTelemetry()
+        updateSessionState(Idle)
+        updateRoute(originalRoute)
+        updateRoute(anotherRoute)
+        updateRoute(originalRoute)
+
+        val events = captureAndVerifyMetricsReporter(exactly = 1)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+    }
+
+    @Test
+    fun active_guidance_events_are_not_sent_in_idle() {
+        baseMock()
 
         baseInitialization()
 
