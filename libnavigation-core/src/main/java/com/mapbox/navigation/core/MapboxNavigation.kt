@@ -112,7 +112,6 @@ import java.lang.reflect.Field
 import java.util.Locale
 
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
-private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER =
     "You need to provide an access token in NavigationOptions in order to use the default " +
         "Router."
@@ -411,7 +410,7 @@ class MapboxNavigation(
             MapboxMetricsReporter.init(
                 navigationOptions.applicationContext,
                 token,
-                obtainUserAgent(navigationOptions.isFromNavigationUi)
+                obtainUserAgent()
             )
             MapboxMetricsReporter.toggleLogging(navigationOptions.isDebugLoggingEnabled)
             MapboxNavigationTelemetry.initialize(
@@ -1227,12 +1226,8 @@ class MapboxNavigation(
         }
     }
 
-    private fun obtainUserAgent(isFromNavigationUi: Boolean): String {
-        return if (isFromNavigationUi) {
-            "$MAPBOX_NAVIGATION_UI_USER_AGENT_BASE/${BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME}"
-        } else {
-            "$MAPBOX_NAVIGATION_USER_AGENT_BASE/${BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME}"
-        }
+    private fun obtainUserAgent(): String {
+        return "$MAPBOX_NAVIGATION_USER_AGENT_BASE/${BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME}"
     }
 
     private fun monitorNotificationActionButton(channel: ReceiveChannel<NotificationAction>) {
