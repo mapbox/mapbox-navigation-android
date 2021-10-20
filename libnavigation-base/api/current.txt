@@ -221,7 +221,6 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.RoutingTilesOptions getRoutingTilesOptions();
     method public int getTimeFormatType();
     method public boolean isDebugLoggingEnabled();
-    method public boolean isFromNavigationUi();
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder toBuilder();
     property public final String? accessToken;
     property public final android.content.Context applicationContext;
@@ -232,7 +231,6 @@ package com.mapbox.navigation.base.options {
     property public final com.mapbox.navigation.base.options.HistoryRecorderOptions historyRecorderOptions;
     property public final com.mapbox.navigation.base.options.IncidentsOptions incidentsOptions;
     property public final boolean isDebugLoggingEnabled;
-    property public final boolean isFromNavigationUi;
     property public final com.mapbox.android.core.location.LocationEngine locationEngine;
     property public final com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest;
     property public final long navigatorPredictionMillis;
@@ -253,7 +251,6 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder historyRecorderOptions(com.mapbox.navigation.base.options.HistoryRecorderOptions historyRecorderOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder incidentsOptions(com.mapbox.navigation.base.options.IncidentsOptions incidentsOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder isDebugLoggingEnabled(boolean flag);
-    method public com.mapbox.navigation.base.options.NavigationOptions.Builder isFromNavigationUi(boolean flag);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngine(com.mapbox.android.core.location.LocationEngine locationEngine);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngineRequest(com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder navigatorPredictionMillis(long predictionMillis);

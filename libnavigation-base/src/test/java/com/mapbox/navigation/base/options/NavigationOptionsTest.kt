@@ -52,7 +52,6 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
             .deviceProfile(mockk())
             .distanceFormatterOptions(mockk())
             .isDebugLoggingEnabled(true)
-            .isFromNavigationUi(true)
             .locationEngine(mockk())
             .locationEngineRequest(
                 LocationEngineRequest.Builder(1234L)
