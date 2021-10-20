@@ -65,7 +65,6 @@ package com.mapbox.navigation.core {
     method public void unregisterRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
     method public void unregisterTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
     method public void unregisterVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
-    method public void updateSensorEvent(android.hardware.SensorEvent sensorEvent, com.mapbox.navigation.core.trip.session.SensorEventUpdatedCallback callback);
     property public final com.mapbox.navigator.Experimental experimental;
     property public final com.mapbox.navigation.core.trip.session.eh.GraphAccessor graphAccessor;
     property public final com.mapbox.navigation.core.history.MapboxHistoryRecorder historyRecorder;
@@ -541,33 +540,6 @@ package com.mapbox.navigation.core.routeoptions {
 
 }
 
-package com.mapbox.navigation.core.sensors {
-
-  public final class SensorEventEmitter implements android.hardware.SensorEventListener {
-    ctor public SensorEventEmitter(android.hardware.SensorManager sensorManager);
-    method public void onAccuracyChanged(android.hardware.Sensor? sensor, int accuracy);
-    method public void onSensorChanged(android.hardware.SensorEvent event);
-    method public void start(com.mapbox.navigation.core.sensors.SensorOptions sensorOptions, kotlin.jvm.functions.Function1<? super android.hardware.SensorEvent,kotlin.Unit> eventEmitter);
-    method public void stop();
-  }
-
-  public final class SensorOptions {
-    method public java.util.Set<java.lang.Integer> getEnableSensorTypes();
-    method public int getSignalsPerSecond();
-    method public com.mapbox.navigation.core.sensors.SensorOptions.Builder toBuilder();
-    property public final java.util.Set<java.lang.Integer> enableSensorTypes;
-    property public final int signalsPerSecond;
-  }
-
-  public static final class SensorOptions.Builder {
-    ctor public SensorOptions.Builder();
-    method public com.mapbox.navigation.core.sensors.SensorOptions build();
-    method public com.mapbox.navigation.core.sensors.SensorOptions.Builder enableSensorTypes(java.util.Set<java.lang.Integer> sensorTypes);
-    method public com.mapbox.navigation.core.sensors.SensorOptions.Builder signalsPerSecond(int signalsPerSecond);
-  }
-
-}
-
 package com.mapbox.navigation.core.telemetry {
 
   public final class MapboxNavigationTelemetryKt {
@@ -759,10 +731,6 @@ package com.mapbox.navigation.core.trip.session {
 
   public fun interface RouteProgressObserver {
     method public void onRouteProgressChanged(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
-  }
-
-  public fun interface SensorEventUpdatedCallback {
-    method public void onSensorEventUpdated(boolean updated);
   }
 
   public enum TripSessionState {
