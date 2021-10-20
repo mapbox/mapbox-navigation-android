@@ -1,6 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
+import android.util.Log
 import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -13,6 +14,8 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
+import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.RouteProgressStateTransitionAssertion
@@ -120,6 +123,79 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
         // assert and clean up
         mapboxHistoryTestRule.stopRecordingOnCrash("no route complete") {
             Espresso.onIdle()
+        }
+        expectedStates.assert()
+        routeCompleteIdlingResource.unregister()
+    }
+
+    @Test
+    fun navigation_switches_on_the_next_leg() {
+        // prepare
+        val mockRoute = MockRoutesProvider.dc_very_short_two_legs(activity)
+        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+        //routeCompleteIdlingResource.register()
+
+        val expectedStates = RouteProgressStateTransitionAssertion(mapboxNavigation) {
+            requiredState(RouteProgressState.TRACKING)
+            requiredState(RouteProgressState.COMPLETE)
+            requiredState(RouteProgressState.TRACKING)
+            requiredState(RouteProgressState.COMPLETE)
+        }
+
+        // execute
+        runOnMainSync {
+            mapboxNavigation.historyRecorder.startRecording()
+        }
+        runOnMainSync {
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.registerLocationObserver(object : LocationObserver {
+                override fun onNewRawLocation(rawLocation: Location) {
+                    Log.d("!!", "new location ${rawLocation.longitude} ${rawLocation.latitude}")
+                }
+
+                override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+                    Log.d("!!", "new location matcher ${locationMatcherResult.enhancedLocation.longitude} ${locationMatcherResult.enhancedLocation.latitude}")
+                }
+
+            })
+            mapboxNavigation.registerRouteProgressObserver {
+                Log.d("!!", "${it.currentState} ${it.currentLegProgress?.distanceRemaining}")
+            }
+            mapboxNavigation.requestRoutes(
+                RouteOptions.builder()
+                    .applyDefaultNavigationOptions()
+                    .applyLanguageAndVoiceUnitOptions(activity)
+                    .baseUrl(mockWebServerRule.baseUrl)
+                    .coordinatesList(mockRoute.routeWaypoints).build(),
+                object : RouterCallback {
+                    override fun onRoutesReady(
+                        routes: List<DirectionsRoute>,
+                        routerOrigin: RouterOrigin
+                    ) {
+                        mapboxNavigation.setRoutes(routes)
+                        mockLocationReplayerRule.playRoute(routes.first())
+                    }
+
+                    override fun onFailure(
+                        reasons: List<RouterFailure>,
+                        routeOptions: RouteOptions
+                    ) {
+                        // no impl
+                    }
+
+                    override fun onCanceled(
+                        routeOptions: RouteOptions,
+                        routerOrigin: RouterOrigin
+                    ) {
+                        // no impl
+                    }
+                }
+            )
+        }
+
+        // assert and clean up
+        mapboxHistoryTestRule.stopRecordingOnCrash("no route complete") {
+            Thread.sleep(60000)
         }
         expectedStates.assert()
         routeCompleteIdlingResource.unregister()
