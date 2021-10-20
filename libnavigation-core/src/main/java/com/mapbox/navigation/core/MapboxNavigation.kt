@@ -7,7 +7,6 @@ package com.mapbox.navigation.core
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
-import android.hardware.SensorEvent
 import androidx.annotation.RequiresPermission
 import androidx.annotation.UiThread
 import com.mapbox.android.core.location.LocationEngine
@@ -81,7 +80,6 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RoadObjectsOnRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.core.trip.session.SensorEventUpdatedCallback
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -1284,15 +1282,6 @@ class MapboxNavigation(
                 throw IllegalArgumentException("not supported: $type")
             MapboxModuleType.MapTelemetry -> throw IllegalArgumentException("not supported: $type")
         }
-    }
-
-    /**
-     * Sends an event to improve navigation positioning. See SensorEventEmitter to register
-     *
-     * @param sensorEvent the Android sensor event, it will be ignored if it is not recognized
-     */
-    fun updateSensorEvent(sensorEvent: SensorEvent, callback: SensorEventUpdatedCallback) {
-        tripSession.updateSensorEvent(sensorEvent, callback)
     }
 
     private fun createTilesConfig(

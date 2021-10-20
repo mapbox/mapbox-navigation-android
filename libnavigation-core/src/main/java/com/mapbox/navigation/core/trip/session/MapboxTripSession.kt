@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core.trip.session
 
-import android.hardware.SensorEvent
 import android.location.Location
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.BannerInstructions
@@ -22,7 +21,6 @@ import com.mapbox.navigation.core.navigator.mapToDirectionsApi
 import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
-import com.mapbox.navigation.core.sensors.SensorMapper
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
@@ -488,22 +486,6 @@ internal class MapboxTripSession(
      */
     override fun unregisterAllVoiceInstructionsObservers() {
         voiceInstructionsObservers.clear()
-    }
-
-    /**
-     * Sensor event consumed by native
-     */
-    override fun updateSensorEvent(sensorEvent: SensorEvent, callback: SensorEventUpdatedCallback) {
-        mainJobController.scope.launch {
-            var sensorUpdated = false
-            try {
-                SensorMapper.toSensorData(sensorEvent, logger)?.let { it ->
-                    sensorUpdated = navigator.updateSensorData(it)
-                }
-            } finally {
-                callback.onSensorEventUpdated(sensorUpdated)
-            }
-        }
     }
 
     /**
