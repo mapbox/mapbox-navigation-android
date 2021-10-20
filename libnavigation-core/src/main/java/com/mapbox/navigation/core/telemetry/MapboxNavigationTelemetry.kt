@@ -209,7 +209,7 @@ internal object MapboxNavigationTelemetry {
             reason == RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP || routes.isEmpty() -> Unit
             reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW -> {
                 log("handle a new route")
-                if (routeData.originalRoute != null) {
+                if (routeData.originalRoute != null && sessionState is ActiveGuidance) {
                     handleCancelNavigation()
                 }
                 resetLocalVariables()
