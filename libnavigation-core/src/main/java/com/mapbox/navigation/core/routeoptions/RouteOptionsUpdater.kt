@@ -25,7 +25,7 @@ private const val TAG = "MbxRouteOptionsProvider"
 class RouteOptionsUpdater {
 
     /**
-     * Provides a new [RouteOptions] instance based on the original request options, the current route progress and map matcher result.
+     * Provides a new [RouteOptions] instance based on the original request options, the current route progress and location matcher result.
      *
      * @return `RouteOptionsResult.Error` if a new [RouteOptions] instance cannot be combined based on the input given.
      * `RouteOptionsResult.Success` with a new [RouteOptions] instance if successfully combined.
@@ -37,7 +37,7 @@ class RouteOptionsUpdater {
     ): RouteOptionsResult {
         if (routeOptions == null || routeProgress == null || locationMatcherResult == null) {
             val msg = "Cannot combine RouteOptions, invalid inputs. routeOptions, " +
-                "routeProgress, and location mustn't be null"
+                "routeProgress and locationMatcherResult cannot be null"
             LoggerProvider.logger.e(
                 Tag(TAG),
                 Message(msg)
