@@ -17,6 +17,8 @@ import com.mapbox.navigation.ui.maps.building.BuildingProcessor
 import com.mapbox.navigation.ui.maps.building.BuildingResult
 import com.mapbox.navigation.ui.maps.building.model.BuildingError
 import com.mapbox.navigation.ui.maps.building.model.BuildingValue
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.JobControl
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -24,7 +26,9 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
+import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancelChildren
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -192,6 +196,21 @@ class MapboxBuildingsApiTest {
 
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
         assertEquals(queriedFeaturesExpected.value, messageSlot.captured.value?.buildings)
+    }
+
+    @Test
+    fun cancel() {
+        val mockParentJob = mockk<CompletableJob>(relaxed = true)
+        val mockJobControl = mockk<JobControl> {
+            every { job } returns mockParentJob
+        }
+        mockkObject(InternalJobControlFactory) {
+            every { InternalJobControlFactory.createMainScopeJobControl() } returns mockJobControl
+
+            MapboxBuildingsApi(mockk()).cancel()
+
+            verify { mockParentJob.cancelChildren() }
+        }
     }
 
     private fun mockSuccessQueriedFeature() = mockk<Expected<String, List<QueriedFeature>>> {

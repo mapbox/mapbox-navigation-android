@@ -21,8 +21,6 @@ import com.mapbox.navigation.ui.speedlimit.api.MapboxSpeedLimitApi
 import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError
 import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue
 import com.mapbox.navigation.ui.utils.internal.extensions.spToPixel
-import com.mapbox.navigation.utils.internal.ThreadController
-import kotlinx.coroutines.launch
 
 /**
  * A view component intended to consume data produced by the [MapboxSpeedLimitApi].
@@ -86,39 +84,35 @@ class MapboxSpeedLimitView : AppCompatTextView {
      * @param expected a Expected<UpdateSpeedLimitError, UpdateSpeedLimitValue>
      */
     fun render(expected: Expected<UpdateSpeedLimitError, UpdateSpeedLimitValue>) {
-        ThreadController.getMainScopeAndRootJob().scope.launch {
-            expected.fold(
-                { // error
-                    val sign = speedLimitSign
-                    if (sign != null) {
-                        val speedLimitSpan = when (sign) {
-                            SpeedLimitSign.MUTCD -> {
-                                getSpeedLimitSpannable(
-                                    sign,
-                                    context.getString(R.string.max_speed_no_value)
-                                )
-                            }
-                            SpeedLimitSign.VIENNA -> {
-                                getSpeedLimitSpannable(sign, "--")
-                            }
+        expected.fold(
+            { // error
+                val sign = speedLimitSign
+                if (sign != null) {
+                    val speedLimitSpan = when (sign) {
+                        SpeedLimitSign.MUTCD -> {
+                            getSpeedLimitSpannable(
+                                sign,
+                                context.getString(R.string.max_speed_no_value),
+                            )
                         }
-                        setText(speedLimitSpan, BufferType.SPANNABLE)
+                        SpeedLimitSign.VIENNA -> {
+                            getSpeedLimitSpannable(sign, "--")
+                        }
                     }
-                },
-                { value ->
-                    speedLimitSign = value.signFormat
-                    updateBackgroundSize(value.signFormat)
-                    val drawable = getViewDrawable(value.signFormat)
-                    val formatterSpeedLimit =
-                        value.speedLimitFormatter.format(value)
-                    val speedLimitSpan =
-                        getSpeedLimitSpannable(value.signFormat, formatterSpeedLimit)
-
-                    background = drawable
                     setText(speedLimitSpan, BufferType.SPANNABLE)
                 }
-            )
-        }
+            },
+            { value ->
+                speedLimitSign = value.signFormat
+                updateBackgroundSize(value.signFormat)
+                val drawable = getViewDrawable(value.signFormat)
+                val formatterSpeedLimit = value.speedLimitFormatter.format(value)
+                val speedLimitSpan = getSpeedLimitSpannable(value.signFormat, formatterSpeedLimit)
+
+                background = drawable
+                setText(speedLimitSpan, BufferType.SPANNABLE)
+            },
+        )
     }
 
     private fun initAttributes(attrs: AttributeSet?) {

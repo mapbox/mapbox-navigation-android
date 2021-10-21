@@ -13,9 +13,9 @@ import com.mapbox.navigation.ui.maps.building.BuildingProcessor
 import com.mapbox.navigation.ui.maps.building.model.BuildingError
 import com.mapbox.navigation.ui.maps.building.model.BuildingValue
 import com.mapbox.navigation.ui.maps.building.view.MapboxBuildingView
-import com.mapbox.navigation.utils.internal.JobControl
-import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.ifNonNull
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 
 /**
@@ -30,7 +30,7 @@ class MapboxBuildingsApi internal constructor(
 
     constructor(mapboxMap: MapboxMap) : this(mapboxMap, BuildingProcessor)
 
-    private val mainJobController: JobControl by lazy { ThreadController.getMainScopeAndRootJob() }
+    private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
 
     /**
      * The API can be invoked to query a building on [MapboxMap] using the [point] provided as
@@ -191,5 +191,12 @@ class MapboxBuildingsApi internal constructor(
                 BuildingError("final destination point inside $progress is null")
             )
         )
+    }
+
+    /**
+     * Cancels any/all background tasks that may be running.
+     */
+    fun cancel() {
+        mainJobController.job.cancelChildren()
     }
 }

@@ -8,8 +8,8 @@ import com.mapbox.navigation.ui.maneuver.model.RoadShield
 import com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode
 import com.mapbox.navigation.ui.maneuver.model.RoadShieldError
 import com.mapbox.navigation.ui.maneuver.model.RoadShieldResult
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.LoggerProvider
-import com.mapbox.navigation.utils.internal.ThreadController
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -26,7 +26,7 @@ internal class RoadShieldContentManager {
     private val requestedShields = mutableListOf<String>()
     private val urlsToShieldsMap = hashMapOf<String, ByteArray?>()
 
-    private val mainJob = ThreadController.getMainScopeAndRootJob()
+    private val mainJob = InternalJobControlFactory.createMainScopeJobControl()
     private val awaitingCallbacks = mutableListOf<() -> Boolean>()
 
     suspend fun getShields(

@@ -19,7 +19,6 @@ import com.mapbox.navigation.ui.maps.guidance.junction.JunctionProcessor
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionResult
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue
-import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -52,8 +51,6 @@ class MapboxJunctionApiTest {
 
     @Before
     fun setUp() {
-        mockkObject(ThreadController)
-        every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
         mockkObject(JunctionProcessor)
         mockkObject(CommonSingletonModuleProvider)
     }
@@ -62,7 +59,6 @@ class MapboxJunctionApiTest {
     fun tearDown() {
         unmockkObject(JunctionProcessor)
         unmockkObject(CommonSingletonModuleProvider)
-        unmockkObject(ThreadController)
     }
 
     @Test

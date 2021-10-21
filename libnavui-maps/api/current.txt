@@ -23,6 +23,7 @@ package com.mapbox.navigation.ui.maps.building.api {
 
   public final class MapboxBuildingsApi {
     ctor public MapboxBuildingsApi(com.mapbox.maps.MapboxMap mapboxMap);
+    method public void cancel();
     method public void queryBuildingOnFinalDestination(com.mapbox.navigation.base.trip.model.RouteProgress progress, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.building.model.BuildingError,com.mapbox.navigation.ui.maps.building.model.BuildingValue>> callback);
     method public void queryBuildingOnWaypoint(com.mapbox.navigation.base.trip.model.RouteProgress progress, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.building.model.BuildingError,com.mapbox.navigation.ui.maps.building.model.BuildingValue>> callback);
     method public void queryBuildingToHighlight(com.mapbox.geojson.Point point, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.building.model.BuildingError,com.mapbox.navigation.ui.maps.building.model.BuildingValue>> callback);

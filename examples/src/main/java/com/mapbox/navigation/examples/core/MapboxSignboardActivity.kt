@@ -311,6 +311,7 @@ class MapboxSignboardActivity : AppCompatActivity(), OnMapLongClickListener {
         super.onDestroy()
         routeLineApi.cancel()
         routeLineView.cancel()
+        signboardApi.cancelAll()
         mapboxReplayer.finish()
         mapboxNavigation.onDestroy()
     }

@@ -20,9 +20,10 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
-import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 
 class RouteLineUtil(private val activity: AppCompatActivity) : LifecycleObserver {
@@ -56,6 +57,8 @@ class RouteLineUtil(private val activity: AppCompatActivity) : LifecycleObserver
     private val routeArrowView: MapboxRouteArrowView by lazy {
         MapboxRouteArrowView(RouteArrowOptions.Builder(activity).build())
     }
+
+    private val mainJobControl by lazy { InternalJobControlFactory.createMainScopeJobControl() }
 
     init {
         activity.lifecycle.addObserver(this)
@@ -102,7 +105,7 @@ class RouteLineUtil(private val activity: AppCompatActivity) : LifecycleObserver
             }
 
             if (isNewRoute) {
-                ThreadController.getMainScopeAndRootJob().scope.launch {
+                mainJobControl.scope.launch {
                     routeLineApi.setRoutes(
                         listOf(
                             RouteLine(
@@ -131,6 +134,7 @@ class RouteLineUtil(private val activity: AppCompatActivity) : LifecycleObserver
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     private fun onStop() {
+        mainJobControl.job.cancelChildren()
         routeLineApi.cancel()
         routeLineView.cancel()
         mapView.location.removeOnIndicatorPositionChangedListener(

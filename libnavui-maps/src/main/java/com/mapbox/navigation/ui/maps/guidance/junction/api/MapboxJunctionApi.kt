@@ -13,8 +13,8 @@ import com.mapbox.navigation.ui.maps.guidance.junction.JunctionResult
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue
 import com.mapbox.navigation.ui.maps.guidance.junction.model.MapboxJunctionRequest
-import com.mapbox.navigation.utils.internal.JobControl
-import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 
 /**
@@ -29,7 +29,7 @@ class MapboxJunctionApi(
         private const val ACCESS_TOKEN = "&access_token="
     }
 
-    private val mainJobController: JobControl by lazy { ThreadController.getMainScopeAndRootJob() }
+    private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
     private val requestList: MutableList<MapboxJunctionRequest> = mutableListOf()
 
     /**
@@ -73,6 +73,7 @@ class MapboxJunctionApi(
             }
         }
         requestList.clear()
+        mainJobController.job.cancelChildren()
     }
 
     private fun makeJunctionRequest(

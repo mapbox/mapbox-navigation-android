@@ -306,6 +306,7 @@ class MapboxJunctionActivity : AppCompatActivity(), OnMapLongClickListener {
         super.onDestroy()
         routeLineApi.cancel()
         routeLineView.cancel()
+        junctionApi.cancelAll()
         mapboxReplayer.finish()
         mapboxNavigation.onDestroy()
     }

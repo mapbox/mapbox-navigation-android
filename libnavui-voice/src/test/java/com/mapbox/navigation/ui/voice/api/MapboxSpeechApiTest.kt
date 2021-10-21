@@ -14,8 +14,8 @@ import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.TypeAndAnnouncement
 import com.mapbox.navigation.ui.voice.model.VoiceState
 import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
-import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.every
@@ -56,15 +56,17 @@ class MapboxSpeechApiTest {
 
     @Before
     fun setUp() {
-        mockkObject(ThreadController)
-        every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        mockkObject(InternalJobControlFactory)
+        every {
+            InternalJobControlFactory.createMainScopeJobControl()
+        } returns JobControl(parentJob, testScope)
         mockkObject(VoiceApiProvider)
         mockkObject(VoiceProcessor)
     }
 
     @After
     fun tearDown() {
-        unmockkObject(ThreadController)
+        unmockkObject(InternalJobControlFactory)
         unmockkObject(VoiceApiProvider)
         unmockkObject(VoiceProcessor)
         exceptions.clear()

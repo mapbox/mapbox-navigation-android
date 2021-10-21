@@ -234,4 +234,15 @@ class MapboxVoiceApiTest {
 
         verify(exactly = 0) { fileProvider.delete(any()) }
     }
+
+    @Test
+    fun cancel() {
+        val fileProvider = mockk<MapboxSpeechFileProvider>(relaxed = true)
+        val speechProvider = mockk<MapboxSpeechProvider>()
+        val mapboxVoiceApi = MapboxVoiceApi(speechProvider, fileProvider)
+
+        mapboxVoiceApi.cancel()
+
+        verify(exactly = 1) { fileProvider.cancel() }
+    }
 }

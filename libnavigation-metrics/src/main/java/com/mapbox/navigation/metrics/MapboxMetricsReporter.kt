@@ -7,8 +7,7 @@ import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.metrics.extensions.toTelemetryEvent
-import com.mapbox.navigation.utils.internal.JobControl
-import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 
@@ -22,7 +21,7 @@ object MapboxMetricsReporter : MetricsReporter {
 
     @Volatile
     private var metricsObserver: MetricsObserver? = null
-    private var ioJobController: JobControl = ThreadController.getIOScopeAndRootJob()
+    private var ioJobController = InternalJobControlFactory.createIOScopeJobControl()
 
     /**
      * Initialize [mapboxTelemetry] that need to send event to Mapbox Telemetry server.
@@ -44,10 +43,10 @@ object MapboxMetricsReporter : MetricsReporter {
     // For test purposes only
     internal fun init(
         mapboxTelemetry: MapboxTelemetry,
-        threadController: ThreadController
+        jobControlFactory: InternalJobControlFactory,
     ) {
         this.mapboxTelemetry = mapboxTelemetry
-        this.ioJobController = threadController.getIOScopeAndRootJob()
+        ioJobController = jobControlFactory.createIOScopeJobControl()
         mapboxTelemetry.enable()
     }
 

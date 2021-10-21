@@ -317,6 +317,7 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
         super.onDestroy()
         routeLineApi.cancel()
         routeLineView.cancel()
+        maneuverApi.cancel()
         mapboxReplayer.finish()
         mapboxNavigation.onDestroy()
     }

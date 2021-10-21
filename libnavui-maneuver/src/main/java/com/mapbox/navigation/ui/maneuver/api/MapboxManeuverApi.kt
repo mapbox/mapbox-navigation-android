@@ -23,8 +23,7 @@ import com.mapbox.navigation.ui.maneuver.model.RoadShieldError
 import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.SubManeuver
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
-import com.mapbox.navigation.utils.internal.JobControl
-import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.launch
 
 /**
@@ -40,7 +39,7 @@ class MapboxManeuverApi internal constructor(
     private val processor: ManeuverProcessor
 ) {
 
-    private val mainJobController: JobControl by lazy { ThreadController.getMainScopeAndRootJob() }
+    private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
     private val maneuverState = ManeuverState()
     private val roadShieldContentManager = RoadShieldContentManager()
 

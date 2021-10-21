@@ -15,8 +15,8 @@ import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOpt
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardRequest
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue
-import com.mapbox.navigation.utils.internal.JobControl
-import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 
 /**
@@ -45,7 +45,7 @@ class MapboxSignboardApi @JvmOverloads constructor(
         private const val ACCESS_TOKEN = "?access_token="
     }
 
-    private val mainJobController: JobControl by lazy { ThreadController.getMainScopeAndRootJob() }
+    private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
     private val requestList: MutableList<MapboxSignboardRequest> = mutableListOf()
 
     /**
@@ -101,6 +101,7 @@ class MapboxSignboardApi @JvmOverloads constructor(
             }
         }
         requestList.clear()
+        mainJobController.job.cancelChildren()
     }
 
     private fun onSignboardResponse(

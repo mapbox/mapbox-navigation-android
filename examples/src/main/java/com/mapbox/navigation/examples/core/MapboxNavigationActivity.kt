@@ -463,6 +463,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         routeLineAPI.cancel()
         routeLineView.cancel()
         mapboxNavigation.onDestroy()
+        maneuverApi.cancel()
         speechAPI.cancel()
         voiceInstructionsPlayer.shutdown()
     }
