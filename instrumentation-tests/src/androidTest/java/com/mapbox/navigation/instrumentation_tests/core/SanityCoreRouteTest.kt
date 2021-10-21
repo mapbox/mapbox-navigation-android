@@ -195,7 +195,7 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
 
         // assert and clean up
         mapboxHistoryTestRule.stopRecordingOnCrash("no route complete") {
-            Thread.sleep(60000)
+            Thread.sleep(25000)
         }
         expectedStates.assert()
         routeCompleteIdlingResource.unregister()
