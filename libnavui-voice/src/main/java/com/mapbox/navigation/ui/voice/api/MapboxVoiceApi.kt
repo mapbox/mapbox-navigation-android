@@ -40,6 +40,13 @@ internal class MapboxVoiceApi(
         }
     }
 
+    /**
+     * Cancels any/all background tasks that may be running.
+     */
+    fun cancel() {
+        speechFileProvider.cancel()
+    }
+
     private suspend fun processAction(action: VoiceAction): VoiceState {
         return when (val result = VoiceProcessor.process(action)) {
             is VoiceTypeAndAnnouncement -> {

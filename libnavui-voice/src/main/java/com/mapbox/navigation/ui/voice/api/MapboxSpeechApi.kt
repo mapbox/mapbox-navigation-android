@@ -13,8 +13,7 @@ import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.VoiceState
 import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
-import com.mapbox.navigation.utils.internal.JobControl
-import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -32,7 +31,7 @@ class MapboxSpeechApi @JvmOverloads constructor(
     private val options: MapboxSpeechApiOptions = MapboxSpeechApiOptions.Builder().build()
 ) {
 
-    private val mainJobController: JobControl by lazy { ThreadController.getMainScopeAndRootJob() }
+    private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
     private val voiceAPI = VoiceApiProvider.retrieveMapboxVoiceApi(
         context,
         accessToken,
@@ -68,6 +67,7 @@ class MapboxSpeechApi @JvmOverloads constructor(
         mainJobController.job.children.forEach {
             it.cancel()
         }
+        voiceAPI.cancel()
     }
 
     /**

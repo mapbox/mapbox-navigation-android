@@ -25,4 +25,14 @@ object InternalJobControlFactory {
         val parentJob = SupervisorJob()
         return JobControl(parentJob, CoroutineScope(parentJob + Dispatchers.Main))
     }
+
+    /**
+     * Creates a [JobControl] using the IO dispatcher. This is similar to [ThreadController] but the
+     * resources created here aren't shared. It is your responsibility to cancel child jobs as
+     * necessary.
+     */
+    fun createIOScopeJobControl(): JobControl {
+        val parentJob = SupervisorJob()
+        return JobControl(parentJob, CoroutineScope(parentJob + ThreadController.IODispatcher))
+    }
 }

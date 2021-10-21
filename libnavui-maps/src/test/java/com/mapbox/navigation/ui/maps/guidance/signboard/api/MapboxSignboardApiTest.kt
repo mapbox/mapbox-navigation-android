@@ -19,7 +19,6 @@ import com.mapbox.navigation.ui.maps.guidance.signboard.SignboardResult
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue
-import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -53,8 +52,6 @@ class MapboxSignboardApiTest {
 
     @Before
     fun setUp() {
-        mockkObject(ThreadController)
-        every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
         mockkObject(SignboardProcessor)
         mockkObject(CommonSingletonModuleProvider)
     }
@@ -63,7 +60,6 @@ class MapboxSignboardApiTest {
     fun tearDown() {
         unmockkObject(SignboardProcessor)
         unmockkObject(CommonSingletonModuleProvider)
-        unmockkObject(ThreadController)
     }
 
     @Test

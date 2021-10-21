@@ -3,18 +3,13 @@ package com.mapbox.navigation.core.replay.history
 import android.os.SystemClock
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.utils.internal.InternalJobControlFactory
-import com.mapbox.navigation.utils.internal.JobControl
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkObject
 import io.mockk.verify
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -28,8 +23,6 @@ class MapboxReplayerTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
-    private val parentJob = SupervisorJob()
-    private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
 
     private val replayEventsObserver: ReplayEventsObserver = mockk(relaxed = true)
     private var deviceElapsedTimeNanos = TimeUnit.HOURS.toNanos(11)
@@ -552,15 +545,10 @@ class MapboxReplayerTest {
     fun setup() {
         mockkStatic(SystemClock::class)
         every { SystemClock.elapsedRealtimeNanos() } returns deviceElapsedTimeNanos
-        mockkObject(InternalJobControlFactory)
-        every {
-            InternalJobControlFactory.createMainScopeJobControl()
-        } returns JobControl(parentJob, testScope)
     }
 
     @After
     fun teardown() {
-        unmockkObject(InternalJobControlFactory)
         unmockkObject(SystemClock.elapsedRealtimeNanos())
     }
 
