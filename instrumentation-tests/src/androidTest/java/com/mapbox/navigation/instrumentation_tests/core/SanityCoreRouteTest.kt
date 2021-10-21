@@ -20,6 +20,7 @@ import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.RouteProgressStateTransitionAssertion
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
+import com.mapbox.navigation.instrumentation_tests.utils.idling.ArrivalIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
@@ -133,7 +134,8 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
         // prepare
         val mockRoute = MockRoutesProvider.dc_very_short_two_legs(activity)
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
-        //routeCompleteIdlingResource.register()
+        val arrivalIdlingResource = ArrivalIdlingResource(mapboxNavigation)
+        arrivalIdlingResource.register()
 
         val expectedStates = RouteProgressStateTransitionAssertion(mapboxNavigation) {
             requiredState(RouteProgressState.TRACKING)
@@ -195,9 +197,9 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
 
         // assert and clean up
         mapboxHistoryTestRule.stopRecordingOnCrash("no route complete") {
-            Thread.sleep(25000)
+            Espresso.onIdle()
         }
         expectedStates.assert()
-        routeCompleteIdlingResource.unregister()
+        arrivalIdlingResource.unregister()
     }
 }
