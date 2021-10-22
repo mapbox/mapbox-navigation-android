@@ -17,6 +17,7 @@ import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.assertions.RouteProgressStateTransitionAssertion
 import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
+import com.mapbox.navigation.instrumentation_tests.utils.idling.ArrivalIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
@@ -123,5 +124,66 @@ class SanityCoreRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
         }
         expectedStates.assert()
         routeCompleteIdlingResource.unregister()
+    }
+
+    @Test
+    fun route_with_two_legs_completes() {
+        // prepare
+        val mockRoute = MockRoutesProvider.dc_very_short_two_legs(activity)
+        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+        val arrivalIdlingResource = ArrivalIdlingResource(mapboxNavigation)
+        arrivalIdlingResource.register()
+
+        val expectedStates = RouteProgressStateTransitionAssertion(mapboxNavigation) {
+            requiredState(RouteProgressState.TRACKING)
+            requiredState(RouteProgressState.COMPLETE)
+            requiredState(RouteProgressState.TRACKING)
+            requiredState(RouteProgressState.COMPLETE)
+        }
+
+        // execute
+        runOnMainSync {
+            mapboxNavigation.historyRecorder.startRecording()
+        }
+        runOnMainSync {
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.requestRoutes(
+                RouteOptions.builder()
+                    .applyDefaultNavigationOptions()
+                    .applyLanguageAndVoiceUnitOptions(activity)
+                    .baseUrl(mockWebServerRule.baseUrl)
+                    .coordinatesList(mockRoute.routeWaypoints).build(),
+                object : RouterCallback {
+                    override fun onRoutesReady(
+                        routes: List<DirectionsRoute>,
+                        routerOrigin: RouterOrigin
+                    ) {
+                        mapboxNavigation.setRoutes(routes)
+                        mockLocationReplayerRule.playRoute(routes.first())
+                    }
+
+                    override fun onFailure(
+                        reasons: List<RouterFailure>,
+                        routeOptions: RouteOptions
+                    ) {
+                        // no impl
+                    }
+
+                    override fun onCanceled(
+                        routeOptions: RouteOptions,
+                        routerOrigin: RouterOrigin
+                    ) {
+                        // no impl
+                    }
+                }
+            )
+        }
+
+        // assert and clean up
+        mapboxHistoryTestRule.stopRecordingOnCrash("no route complete") {
+            Espresso.onIdle()
+        }
+        expectedStates.assert()
+        arrivalIdlingResource.unregister()
     }
 }
