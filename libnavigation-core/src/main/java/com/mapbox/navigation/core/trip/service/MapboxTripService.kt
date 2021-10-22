@@ -28,7 +28,8 @@ internal class MapboxTripService(
     private val tripNotification: TripNotification,
     private val initializeLambda: () -> Unit,
     private val terminateLambda: () -> Unit,
-    private val logger: Logger
+    private val logger: Logger,
+    threadController: ThreadController,
 ) : TripService {
 
     companion object {
@@ -58,7 +59,8 @@ internal class MapboxTripService(
         applicationContext: Context,
         tripNotification: TripNotification,
         intent: Intent,
-        logger: Logger
+        logger: Logger,
+        threadController: ThreadController,
     ) : this(
         tripNotification,
         {
@@ -75,7 +77,8 @@ internal class MapboxTripService(
         {
             applicationContext.stopService(intent)
         },
-        logger
+        logger,
+        threadController,
     )
 
     /**
@@ -88,17 +91,19 @@ internal class MapboxTripService(
     constructor(
         applicationContext: Context,
         tripNotification: TripNotification,
-        logger: Logger
+        logger: Logger,
+        threadController: ThreadController,
     ) : this(
         applicationContext,
         tripNotification,
         Intent(applicationContext, NavigationNotificationService::class.java),
-        logger
+        logger,
+        threadController,
     )
 
     private val serviceStarted = AtomicBoolean(false)
 
-    private val mainJobController = ThreadController.getMainScopeAndRootJob()
+    private val mainJobController = threadController.getMainScopeAndRootJob()
     private var allowedNotificationTime = 0L
     private var notificationJob: Job? = null
 

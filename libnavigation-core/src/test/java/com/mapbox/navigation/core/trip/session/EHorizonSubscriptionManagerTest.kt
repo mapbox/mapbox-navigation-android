@@ -47,14 +47,11 @@ class EHorizonSubscriptionManagerTest {
     private val eHorizonObjectDistance: SDKRoadObjectDistanceInfo = mockk(relaxed = true)
     private val subscriptionManager: EHorizonSubscriptionManager =
         EHorizonSubscriptionManagerImpl(
-            navigator
+            navigator, ThreadController(),
         )
 
     @Before
     fun setUp() {
-        mockkObject(ThreadController)
-        every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
-
         mockkObject(EHorizonFactory)
         every {
             EHorizonFactory.buildRoadObjectDistance(any())
@@ -69,7 +66,6 @@ class EHorizonSubscriptionManagerTest {
 
     @After
     fun cleanUp() {
-        unmockkObject(ThreadController)
         unmockkObject(EHorizonFactory)
         subscriptionManager.unregisterAllObservers()
     }

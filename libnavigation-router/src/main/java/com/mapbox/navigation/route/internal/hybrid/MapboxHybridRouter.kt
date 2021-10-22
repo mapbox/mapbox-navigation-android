@@ -33,6 +33,7 @@ class MapboxHybridRouter(
     private val onboardRouter: Router,
     private val offboardRouter: Router,
     networkStatusService: ConnectivityHandler,
+    threadController: ThreadController,
 ) : Router {
 
     private val directionRequests = RequestMap<HybridRouterHandler.Directions>()
@@ -43,22 +44,25 @@ class MapboxHybridRouter(
         context: Context,
         urlSkuTokenProvider: UrlSkuTokenProvider,
         navigatorNative: MapboxNativeNavigator,
-        networkStatusService: ConnectivityHandler
+        networkStatusService: ConnectivityHandler,
+        threadController: ThreadController,
     ) : this(
         onboardRouter = MapboxOnboardRouter(
             accessToken,
             navigatorNative,
-            context
+            context,
+            threadController = threadController,
         ),
         offboardRouter = MapboxOffboardRouter(
             accessToken,
             context,
             urlSkuTokenProvider
         ),
-        networkStatusService = networkStatusService
+        networkStatusService = networkStatusService,
+        threadController,
     )
 
-    private val jobControl = ThreadController.getIOScopeAndRootJob()
+    private val jobControl = threadController.getIOScopeAndRootJob()
     private val networkStatusJob: Job
     private var isNetworkAvailable = true
 

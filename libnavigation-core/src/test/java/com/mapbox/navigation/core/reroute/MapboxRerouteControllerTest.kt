@@ -71,7 +71,7 @@ class MapboxRerouteControllerTest {
                 directionsSession,
                 tripSession,
                 routeOptionsUpdater,
-                ThreadController,
+                ThreadController(),
                 logger
             )
         )

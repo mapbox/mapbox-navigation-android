@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.TripNotificationState
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -33,7 +34,13 @@ class MapboxTripServiceTest {
 
     @Before
     fun setUp() {
-        service = MapboxTripService(tripNotification, initializeLambda, terminateLambda, logger)
+        service = MapboxTripService(
+            tripNotification,
+            initializeLambda,
+            terminateLambda,
+            logger,
+            ThreadController(),
+        )
         every { tripNotification.getNotificationId() } answers { NOTIFICATION_ID }
         every { tripNotification.getNotification() } answers { notification }
     }

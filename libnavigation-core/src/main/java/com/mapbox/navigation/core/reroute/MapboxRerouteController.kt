@@ -24,7 +24,7 @@ internal class MapboxRerouteController(
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession,
     private val routeOptionsUpdater: RouteOptionsUpdater,
-    threadController: ThreadController = ThreadController,
+    threadController: ThreadController,
     private val logger: Logger
 ) : RerouteController {
 

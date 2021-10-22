@@ -19,6 +19,7 @@ import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManagerImpl
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
+import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.TilesConfig
 
@@ -46,11 +47,13 @@ internal object NavigationComponentProvider {
     fun createTripService(
         applicationContext: Context,
         tripNotification: TripNotification,
-        logger: Logger
+        logger: Logger,
+        threadController: ThreadController,
     ): TripService = MapboxTripService(
         applicationContext,
         tripNotification,
-        logger
+        logger,
+        threadController,
     )
 
     fun createTripSessionLocationEngine(
@@ -61,13 +64,15 @@ internal object NavigationComponentProvider {
         tripService: TripService,
         tripSessionLocationEngine: TripSessionLocationEngine,
         navigator: MapboxNativeNavigator,
+        threadController: ThreadController,
         logger: Logger,
     ): TripSession = MapboxTripSession(
         tripService,
         tripSessionLocationEngine,
         navigator = navigator,
+        threadController,
         logger = logger,
-        eHorizonSubscriptionManager = EHorizonSubscriptionManagerImpl(navigator),
+        EHorizonSubscriptionManagerImpl(navigator, threadController),
     )
 
     fun createNavigationSession(): NavigationSession = NavigationSession()

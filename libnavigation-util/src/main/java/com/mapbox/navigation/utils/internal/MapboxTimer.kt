@@ -10,8 +10,8 @@ import java.util.concurrent.TimeUnit
 /**
  * Schedules a delay of [restartAfterMillis] milliseconds and then restarts.
  */
-class MapboxTimer {
-    private val jobControl = ThreadController.getMainScopeAndRootJob()
+class MapboxTimer(threadController: ThreadController) {
+    private val jobControl = threadController.getMainScopeAndRootJob()
 
     /**
      * Time delay until the timer should restart.

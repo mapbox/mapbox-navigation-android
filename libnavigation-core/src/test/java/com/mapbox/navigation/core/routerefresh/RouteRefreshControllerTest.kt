@@ -11,6 +11,7 @@ import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl.OFFLINE_UUID
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -60,12 +61,14 @@ class RouteRefreshControllerTest {
     }
 
     private val routeRefreshOptions = RouteRefreshOptions.Builder().build()
+    private val threadController = ThreadController()
 
     private val routeRefreshController = RouteRefreshController(
         routeRefreshOptions,
         directionsSession,
         tripSession,
         logger,
+        threadController,
         routeDiffProvider,
     )
 
@@ -103,7 +106,8 @@ class RouteRefreshControllerTest {
                 .build(),
             directionsSession,
             tripSession,
-            logger
+            logger,
+            threadController,
         )
         every { routeOptions.enableRefresh() } returns true
 

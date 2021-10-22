@@ -12,10 +12,11 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
 
 internal class EHorizonSubscriptionManagerImpl(
-    private val navigator: MapboxNativeNavigator
+    private val navigator: MapboxNativeNavigator,
+    threadController: ThreadController,
 ) : EHorizonSubscriptionManager {
 
-    private val mainJobController = ThreadController.getMainScopeAndRootJob()
+    private val mainJobController = threadController.getMainScopeAndRootJob()
     private val eHorizonObservers = CopyOnWriteArraySet<EHorizonObserver>()
     private var currentPosition: EHorizonPosition? = null
     private var currentDistances: List<RoadObjectDistanceInfo>? = null

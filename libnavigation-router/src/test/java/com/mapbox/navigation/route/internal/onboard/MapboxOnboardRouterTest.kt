@@ -95,8 +95,10 @@ class MapboxOnboardRouterTest {
     private val mapboxDirectionsBuilder = mockk<MapboxDirections.Builder>(relaxed = true)
     private val routerOrigin = RouterOrigin.Onboard
     private val accessToken = "pk.123"
+    private val threadController = ThreadController()
 
-    private var onboardRouter = MapboxOnboardRouter(accessToken, navigator, context, logger)
+    private var onboardRouter =
+        MapboxOnboardRouter(accessToken, navigator, context, logger, threadController)
 
     private val url =
         MapboxDirections.builder()
@@ -293,7 +295,12 @@ class MapboxOnboardRouterTest {
         mockkConstructor(RequestMap::class)
         val idSlot = slot<Long>()
         every { anyConstructed<RequestMap<Job>>().put(capture(idSlot), any()) } just Runs
-        onboardRouter = MapboxOnboardRouter(accessToken, navigator, context)
+        onboardRouter = MapboxOnboardRouter(
+            accessToken,
+            navigator,
+            context,
+            threadController = threadController,
+        )
         coEvery { navigator.getRoute(any()) } returns routerResultSuccess
 
         onboardRouter.getRoute(routerOptions, routerCallback)
@@ -307,7 +314,12 @@ class MapboxOnboardRouterTest {
         mockkConstructor(RequestMap::class)
         val idSlot = slot<Long>()
         every { anyConstructed<RequestMap<Job>>().put(capture(idSlot), any()) } just Runs
-        onboardRouter = MapboxOnboardRouter(accessToken, navigator, context)
+        onboardRouter = MapboxOnboardRouter(
+            accessToken,
+            navigator,
+            context,
+            threadController = threadController,
+        )
         coEvery { navigator.getRoute(any()) } returns routerResultFailure
 
         onboardRouter.getRoute(routerOptions, routerCallback)
@@ -321,7 +333,12 @@ class MapboxOnboardRouterTest {
         mockkConstructor(RequestMap::class)
         val idSlot = slot<Long>()
         every { anyConstructed<RequestMap<Job>>().put(capture(idSlot), any()) } just Runs
-        onboardRouter = MapboxOnboardRouter(accessToken, navigator, context)
+        onboardRouter = MapboxOnboardRouter(
+            accessToken,
+            navigator,
+            context,
+            threadController = threadController,
+        )
         coEvery { navigator.getRoute(any()) } coAnswers { throw CancellationException() }
 
         onboardRouter.getRoute(routerOptions, routerCallback)

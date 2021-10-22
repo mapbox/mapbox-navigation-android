@@ -16,7 +16,7 @@ class MapboxTimerTest {
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
-    private val mapboxTimer = MapboxTimer()
+    private val mapboxTimer = MapboxTimer(ThreadController())
     private val mockLambda: () -> Unit = mockk(relaxed = true)
 
     @Test
