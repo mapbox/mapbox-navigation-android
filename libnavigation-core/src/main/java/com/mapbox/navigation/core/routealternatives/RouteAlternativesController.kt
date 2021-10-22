@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CopyOnWriteArraySet
@@ -69,7 +70,7 @@ internal class RouteAlternativesController constructor(
             val alternatives: List<DirectionsRoute> = runBlocking {
                 routeAlternatives.map { routeAlternative ->
                     parseDirectionsResponse(
-                        routeAlternative.route,
+                        routeAlternative.routeResponse,
                         routeProgress.route.routeOptions()
                     ) {
                         logI(TAG, Message("Response metadata: $it"))
@@ -88,6 +89,10 @@ internal class RouteAlternativesController constructor(
             // a mechanism to let downstream developers edit the routes - we should remove
             // the call to directionsSession.setRoutes
             return emptyList()
+        }
+
+        override fun onError(message: String) {
+            logE(TAG, Message("Error: $message"))
         }
     }
 

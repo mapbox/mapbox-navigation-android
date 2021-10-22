@@ -4,6 +4,8 @@ package com.mapbox.navigation.core.navigator
 
 import android.location.Location
 import android.os.Build
+import android.os.Bundle
+import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.FixLocation
 import java.util.Date
@@ -24,6 +26,7 @@ internal fun FixLocation.toLocation(): Location = Location(this.provider).also {
         speedAccuracy?.run { it.speedAccuracyMetersPerSecond = this }
         verticalAccuracy?.run { it.verticalAccuracyMeters = this }
     }
+    it.extras = extras.toBundle()
 }
 
 internal fun Location.toFixLocation(): FixLocation {
@@ -48,7 +51,8 @@ internal fun Location.toFixLocation(): FixLocation {
         provider,
         bearingAccuracy,
         speedAccuracy,
-        verticalAccuracy
+        verticalAccuracy,
+        if (extras != null) extras.toMap() else Bundle().toMap()
     )
 }
 
@@ -56,3 +60,23 @@ internal fun List<FixLocation>.toLocations(): List<Location> = this.map { it.toL
 
 private fun isCurrentSdkVersionEqualOrGreaterThan(sdkCode: Int): Boolean =
     Build.VERSION.SDK_INT >= sdkCode
+
+internal fun HashMap<String, Value>.toBundle(): Bundle? {
+    if (this.isEmpty()) return null
+    val bundle = Bundle()
+    for ((key, value) in this.entries) {
+        bundle.putString(key, value.toString())
+    }
+    return bundle
+}
+
+internal fun Bundle.toMap(): HashMap<String, Value> {
+    val map: HashMap<String, Value> = HashMap()
+    val keySet = this.keySet()
+    val iterator: Iterator<String> = keySet.iterator()
+    while (iterator.hasNext()) {
+        val key = iterator.next()
+        map[key] = Value(this.getString(key) ?: "")
+    }
+    return map
+}

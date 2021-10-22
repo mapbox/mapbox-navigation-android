@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.maps.route.arrow
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import android.os.HandlerThread
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.bindgen.Value
@@ -12,7 +11,6 @@ import com.mapbox.maps.Image
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
-import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
@@ -194,11 +192,6 @@ class RouteArrowUtilsTest {
 
     @Test
     fun initializeLayers() {
-        GeoJsonSource.workerThread =
-            HandlerThread("STYLE_WORKER").apply {
-                priority = Thread.MAX_PRIORITY
-                start()
-            }
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
         val options = RouteArrowOptions.Builder(ctx).build()
@@ -333,11 +326,6 @@ class RouteArrowUtilsTest {
 
     @Test
     fun initializeLayers_whenCustomAboveLayerConfigured() {
-        GeoJsonSource.workerThread =
-            HandlerThread("STYLE_WORKER").apply {
-                priority = Thread.MAX_PRIORITY
-                start()
-            }
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
         val options = RouteArrowOptions.Builder(ctx).withAboveLayerId("foobar").build()
@@ -406,11 +394,6 @@ class RouteArrowUtilsTest {
 
     @Test
     fun initializeLayers_whenAboveLayerNotExists() {
-        GeoJsonSource.workerThread =
-            HandlerThread("STYLE_WORKER").apply {
-                priority = Thread.MAX_PRIORITY
-                start()
-            }
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
         val mockImage = mockk<Image>(relaxed = true)

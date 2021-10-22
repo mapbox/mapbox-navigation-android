@@ -1,6 +1,8 @@
 package com.mapbox.navigation.core.navigator
 
 import android.location.Location
+import android.os.Bundle
+import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.FixLocation
 import org.junit.Assert.assertEquals
@@ -27,6 +29,7 @@ class LocationExTest {
             bearingAccuracyDegrees = BEARING_ACCURACY
             speedAccuracyMetersPerSecond = SPEED_ACCURACY
             verticalAccuracyMeters = VERTICAL_ACCURACY
+            extras = Bundle()
         }
 
         location.toFixLocation().run {
@@ -42,6 +45,7 @@ class LocationExTest {
             assertEquals(BEARING_ACCURACY, bearingAccuracy!!, .0f)
             assertEquals(SPEED_ACCURACY, speedAccuracy!!, .0f)
             assertEquals(VERTICAL_ACCURACY, verticalAccuracy!!, .0f)
+            assertEquals(EMPTY_EXTRAS, extras.toMap())
         }
     }
 
@@ -58,7 +62,8 @@ class LocationExTest {
             PROVIDER,
             BEARING_ACCURACY,
             SPEED_ACCURACY,
-            VERTICAL_ACCURACY
+            VERTICAL_ACCURACY,
+            EMPTY_EXTRAS
         )
 
         fixLocation.toLocation().run {
@@ -74,6 +79,7 @@ class LocationExTest {
             assertEquals(BEARING_ACCURACY, bearingAccuracyDegrees, .0f)
             assertEquals(SPEED_ACCURACY, speedAccuracyMetersPerSecond, .0f)
             assertEquals(VERTICAL_ACCURACY, verticalAccuracyMeters, .0f)
+            assertEquals(NULL_VALUE, EMPTY_EXTRAS.toBundle())
         }
     }
 
@@ -90,7 +96,8 @@ class LocationExTest {
             PROVIDER,
             NULL_VALUE,
             NULL_VALUE,
-            NULL_VALUE
+            NULL_VALUE,
+            EMPTY_EXTRAS
         )
 
         fixLocation.toLocation().run {
@@ -109,6 +116,7 @@ class LocationExTest {
             assertEquals(ZERO_VALUE, bearingAccuracyDegrees, .0f)
             assertEquals(ZERO_VALUE, speedAccuracyMetersPerSecond, .0f)
             assertEquals(ZERO_VALUE, verticalAccuracyMeters, .0f)
+            assertEquals(NULL_VALUE, extras)
         }
     }
 
@@ -128,5 +136,6 @@ class LocationExTest {
         private const val BEARING_ACCURACY = 50f
         private const val SPEED_ACCURACY = 60f
         private const val VERTICAL_ACCURACY = 70f
+        private val EMPTY_EXTRAS = HashMap<String, Value>()
     }
 }

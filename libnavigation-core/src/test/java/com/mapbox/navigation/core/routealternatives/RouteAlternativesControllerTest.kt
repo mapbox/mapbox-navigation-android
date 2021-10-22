@@ -120,7 +120,7 @@ class RouteAlternativesControllerTest {
         nativeObserver.captured.onRouteAlternativesChanged(
             listOf(
                 mockk {
-                    every { route } returns alternativeRouteJson
+                    every { routeResponse } returns alternativeRouteJson
                 }
             )
         )
@@ -148,7 +148,7 @@ class RouteAlternativesControllerTest {
         nativeObserver.captured.onRouteAlternativesChanged(
             listOf(
                 mockk {
-                    every { route } returns alternativeRouteJson
+                    every { routeResponse } returns alternativeRouteJson
                 }
             )
         )
@@ -190,7 +190,7 @@ class RouteAlternativesControllerTest {
         nativeObserver.captured.onRouteAlternativesChanged(
             listOf(
                 mockk {
-                    every { route } returns alternativeRouteJson
+                    every { routeResponse } returns alternativeRouteJson
                 }
             )
         )
