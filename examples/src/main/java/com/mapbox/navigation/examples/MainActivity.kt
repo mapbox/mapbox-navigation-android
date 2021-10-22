@@ -22,6 +22,7 @@ import com.mapbox.navigation.examples.core.MapboxSignboardActivity
 import com.mapbox.navigation.examples.core.MapboxTripProgressActivity
 import com.mapbox.navigation.examples.core.MapboxVoiceActivity
 import com.mapbox.navigation.examples.core.MultiLegRouteExampleActivity
+import com.mapbox.navigation.examples.core.NavigationViewActivity
 import com.mapbox.navigation.examples.core.R
 import com.mapbox.navigation.examples.core.ReplayHistoryActivity
 import com.mapbox.navigation.examples.core.camera.MapboxCameraAnimationsActivity
@@ -64,6 +65,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
 
     private fun buildSampleList(): List<SampleItem> {
         return listOf(
+            SampleItem(
+                "Drop in test",
+                "Drop in test",
+                NavigationViewActivity::class.java
+            ),
             SampleItem(
                 getString(R.string.title_navigation),
                 getString(R.string.description_navigation),

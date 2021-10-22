@@ -1,0 +1,5 @@
+<resources>
+    <declare-styleable name="NavigationView">
+        <attr name="accessToken" format="string" />
+    </declare-styleable>
+</resources>

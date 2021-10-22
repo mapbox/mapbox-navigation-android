@@ -18,6 +18,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+    buildFeatures {
+        viewBinding true
+    }
+
     defaultConfig {
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
@@ -27,6 +31,11 @@ android {
 }
 
 dependencies {
+    implementation dependenciesList.androidXAppCompat
+    implementation dependenciesList.androidXConstraintLayout
+    implementation dependenciesList.coroutinesAndroid
+    implementation project(":libnavui-resources")
+
     api project(":libnavigation-core")
     api project(":libnavui-maneuver")
     api project(":libnavui-maps")

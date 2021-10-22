@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".NavigationViewActivity">
+
+    <com.mapbox.navigation.NavigationView
+        android:layout_width="match_parent"
+        app:accessToken="pk.eyJ1IjoibHVrYXNwYWN6b3MiLCJhIjoiY2phMnE0ZTZlMmc3NDJxcG82MWNlcHV6ZCJ9.FAw-i97z7eh61baosyzVxQ"
+        android:layout_height="match_parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
