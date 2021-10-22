@@ -55,6 +55,7 @@ object MockRoutesProvider {
             Point.fromLngLat(-77.031991,38.895433),
             Point.fromLngLat(-77.030923, 38.895433)
         )
+        // TODO: add more data if you need it for your scenarios
         return MockRoute(
             jsonResponse,
             DirectionsResponse.fromJson(jsonResponse),
@@ -63,23 +64,10 @@ object MockRoutesProvider {
                     profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = jsonResponse,
                     expectedCoordinates = coordinates
-                ),
-//                MockVoiceRequestHandler(
-//                    bufferFromRawFile(context, R.raw.route_response_dc_very_short_voice_1),
-//                    readRawFileText(context, R.raw.route_response_dc_very_announcement_1)
-//                ),
-//                MockVoiceRequestHandler(
-//                    bufferFromRawFile(context, R.raw.route_response_dc_very_short_voice_2),
-//                    readRawFileText(context, R.raw.route_response_dc_very_announcement_2)
-//                )
+                )
             ),
             coordinates,
             emptyList()
-//            listOf(
-//                BannerInstructions.fromJson(readRawFileText(context, R.raw.route_response_dc_very_short_banner_instructions_1)),
-//                BannerInstructions.fromJson(readRawFileText(context, R.raw.route_response_dc_very_short_banner_instructions_2)),
-//                BannerInstructions.fromJson(readRawFileText(context, R.raw.route_response_dc_very_short_banner_instructions_3))
-//            )
         )
     }
 
