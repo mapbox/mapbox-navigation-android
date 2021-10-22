@@ -56,7 +56,7 @@ internal class MapboxTripSession(
     override val tripService: TripService,
     private val tripSessionLocationEngine: TripSessionLocationEngine,
     private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl,
-    private val threadController: ThreadController = ThreadController,
+    private val threadController: ThreadController,
     private val logger: Logger,
     private val eHorizonSubscriptionManager: EHorizonSubscriptionManager,
 ) : TripSession {

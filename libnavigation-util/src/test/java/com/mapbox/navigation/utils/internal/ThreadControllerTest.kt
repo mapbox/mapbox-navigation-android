@@ -21,10 +21,12 @@ import kotlin.coroutines.suspendCoroutine
 
 class ThreadControllerTest {
 
+    private val threadController = ThreadController()
+
     @Test
     fun jobCountValidationNonUIScope() {
         val maxCoroutines = 100
-        val jobControl = ThreadController.getIOScopeAndRootJob()
+        val jobControl = threadController.getIOScopeAndRootJob()
         repeat(maxCoroutines) {
             jobControl.scope.launch {
                 suspendCoroutine {
@@ -86,9 +88,9 @@ class ThreadControllerTest {
     @Test
     fun checksCancelAllNonUICoroutines() {
         val mockedIORootJob: CompletableJob = mockk(relaxed = true)
-        ThreadController.ioRootJob = mockedIORootJob
+        threadController.ioRootJob = mockedIORootJob
 
-        ThreadController.cancelAllNonUICoroutines()
+        threadController.cancelAllNonUICoroutines()
 
         verify { mockedIORootJob.cancelChildren() }
     }
@@ -96,9 +98,9 @@ class ThreadControllerTest {
     @Test
     fun checksCancelAllUICoroutines() {
         val mockedMainRootJob: CompletableJob = mockk(relaxed = true)
-        ThreadController.mainRootJob = mockedMainRootJob
+        threadController.mainRootJob = mockedMainRootJob
 
-        ThreadController.cancelAllUICoroutines()
+        threadController.cancelAllUICoroutines()
 
         verify { mockedMainRootJob.cancelChildren() }
     }
@@ -106,9 +108,9 @@ class ThreadControllerTest {
     @Test
     fun checksGetIOScopeAndRootJob() {
         val ioRootJob = SupervisorJob()
-        ThreadController.ioRootJob = ioRootJob
+        threadController.ioRootJob = ioRootJob
 
-        val ioJobController = ThreadController.getIOScopeAndRootJob()
+        val ioJobController = threadController.getIOScopeAndRootJob()
 
         assertEquals(ioRootJob.children.first(), ioJobController.job)
         assertEquals(
@@ -120,9 +122,9 @@ class ThreadControllerTest {
     @Test
     fun checksGetMainScopeAndRootJob() {
         val mainRootJob = SupervisorJob()
-        ThreadController.mainRootJob = mainRootJob
+        threadController.mainRootJob = mainRootJob
 
-        val mainJobController = ThreadController.getMainScopeAndRootJob()
+        val mainJobController = threadController.getMainScopeAndRootJob()
 
         assertEquals(mainRootJob.children.first(), mainJobController.job)
         assertEquals(

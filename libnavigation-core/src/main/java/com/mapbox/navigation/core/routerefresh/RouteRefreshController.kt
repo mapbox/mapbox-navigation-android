@@ -12,6 +12,7 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.utils.internal.MapboxTimer
+import com.mapbox.navigation.utils.internal.ThreadController
 
 /**
  * This class is responsible for refreshing the current direction route's traffic.
@@ -24,6 +25,7 @@ internal class RouteRefreshController(
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession,
     private val logger: Logger,
+    threadController: ThreadController,
     private val routeDiffProvider: DirectionsRouteDiffProvider = DirectionsRouteDiffProvider(),
 ) {
 
@@ -31,7 +33,7 @@ internal class RouteRefreshController(
         internal val TAG = Tag("MbxRouteRefreshController")
     }
 
-    private val routerRefreshTimer = MapboxTimer().apply {
+    private val routerRefreshTimer = MapboxTimer(threadController).apply {
         restartAfterMillis = routeRefreshOptions.intervalMillis
     }
 

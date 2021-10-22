@@ -8,9 +8,6 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue
-import com.mapbox.navigation.utils.internal.ThreadController
-import io.mockk.unmockkObject
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -27,11 +24,6 @@ class MapboxSignboardViewTest {
     @Before
     fun setUp() {
         ctx = ApplicationProvider.getApplicationContext()
-    }
-
-    @After
-    fun tearDown() {
-        unmockkObject(ThreadController)
     }
 
     @Test

@@ -25,7 +25,8 @@ import kotlinx.coroutines.launch
 
 internal class TripServiceActivity : AppCompatActivity() {
 
-    private var mainJobController = ThreadController.getMainScopeAndRootJob()
+    private val threadController = ThreadController()
+    private var mainJobController = threadController.getMainScopeAndRootJob()
     private lateinit var tripNotification: TripNotification
     private lateinit var mapboxTripService: MapboxTripService
     private var textUpdateJob: Job = Job()
@@ -54,7 +55,7 @@ internal class TripServiceActivity : AppCompatActivity() {
         )
 
         mapboxTripService =
-            MapboxTripService(applicationContext, tripNotification, dummyLogger)
+            MapboxTripService(applicationContext, tripNotification, dummyLogger, threadController)
 
         startService.setOnClickListener {
             if (mapboxTripService.hasServiceStarted()) {
@@ -95,8 +96,8 @@ internal class TripServiceActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         stopService()
-        ThreadController.cancelAllNonUICoroutines()
-        ThreadController.cancelAllUICoroutines()
+        threadController.cancelAllNonUICoroutines()
+        threadController.cancelAllUICoroutines()
     }
 
     private fun changeText() {

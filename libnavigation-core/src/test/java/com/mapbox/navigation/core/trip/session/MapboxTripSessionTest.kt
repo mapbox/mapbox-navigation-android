@@ -49,6 +49,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
@@ -111,6 +112,7 @@ class MapboxTripSessionTest {
     private val navigationStatus: NavigationStatus = mockk(relaxed = true)
     private val logger: Logger = mockk(relaxUnitFun = true)
     private val routeProgress: RouteProgress = mockk()
+    private val threadController = spyk<ThreadController>()
 
     private val parentJob = SupervisorJob()
     private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
@@ -127,13 +129,12 @@ class MapboxTripSessionTest {
     @Before
     fun setUp() {
         mockkObject(MapboxNativeNavigatorImpl)
-        mockkObject(ThreadController)
         mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         mockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
         every { location.toFixLocation() } returns fixLocation
         every { fixLocation.toLocation() } returns location
         every { keyFixPoints.toLocations() } returns keyPoints
-        every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { threadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
         navigationOptions = NavigationOptions.Builder(context).build()
         tripSession = buildTripSession()
 
@@ -174,7 +175,7 @@ class MapboxTripSessionTest {
             tripService,
             tripSessionLocationEngine,
             navigator,
-            ThreadController,
+            threadController,
             logger,
             eHorizonSubscriptionManager,
         )
@@ -1324,7 +1325,6 @@ class MapboxTripSessionTest {
     @After
     fun cleanUp() {
         unmockkObject(MapboxNativeNavigatorImpl)
-        unmockkObject(ThreadController)
         unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapper")
         unmockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
     }

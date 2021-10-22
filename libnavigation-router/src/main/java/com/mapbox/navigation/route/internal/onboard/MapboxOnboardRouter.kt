@@ -44,13 +44,14 @@ class MapboxOnboardRouter(
     private val navigatorNative: MapboxNativeNavigator,
     private val context: Context,
     private val logger: Logger = LoggerProvider.logger,
+    threadController: ThreadController,
 ) : Router {
 
     internal companion object {
         internal val loggerTag = Tag("MbxOnboardRouter")
     }
 
-    private val mainJobControl by lazy { ThreadController.getMainScopeAndRootJob() }
+    private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
     private val requests = RequestMap<Job>()
 
     /**

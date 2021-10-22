@@ -4,6 +4,7 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.utils.internal.ThreadController
 
 internal object RouteRefreshControllerProvider {
 
@@ -11,11 +12,13 @@ internal object RouteRefreshControllerProvider {
         routeRefreshOptions: RouteRefreshOptions,
         directionsSession: DirectionsSession,
         tripSession: TripSession,
-        logger: Logger
+        logger: Logger,
+        threadController: ThreadController,
     ) = RouteRefreshController(
         routeRefreshOptions,
         directionsSession,
         tripSession,
-        logger
+        logger,
+        threadController,
     )
 }

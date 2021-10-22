@@ -114,6 +114,7 @@ class MapboxNavigationTest {
     private val tripSessionLocationEngine: TripSessionLocationEngine = mockk(relaxUnitFun = true)
     private lateinit var navigationOptions: NavigationOptions
     private val arrivalProgressObserver: ArrivalProgressObserver = mockk(relaxUnitFun = true)
+    private val threadController = ThreadController()
 
     private val applicationContext: Context = mockk(relaxed = true) {
         every { inferDeviceLocale() } returns Locale.US
@@ -175,7 +176,7 @@ class MapboxNavigationTest {
         mockkObject(RouteRefreshControllerProvider)
         every {
             RouteRefreshControllerProvider.createRouteRefreshController(
-                any(), any(), any(), any()
+                any(), any(), any(), any(), threadController,
             )
         } returns routeRefreshController
         mockkObject(RouteAlternativesControllerProvider)
@@ -217,8 +218,8 @@ class MapboxNavigationTest {
         unmockkObject(RouteAlternativesControllerProvider)
         unmockkObject(MapboxNavigationTelemetry)
 
-        ThreadController.cancelAllNonUICoroutines()
-        ThreadController.cancelAllUICoroutines()
+        threadController.cancelAllNonUICoroutines()
+        threadController.cancelAllUICoroutines()
     }
 
     @Test
@@ -310,10 +311,10 @@ class MapboxNavigationTest {
     fun init_registerOffRouteObserver_MapboxNavigation_recreated() {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
-        ThreadController.cancelAllUICoroutines()
+        threadController.cancelAllUICoroutines()
         val navigationOptions = provideNavigationOptions().build()
 
-        mapboxNavigation = MapboxNavigation(navigationOptions)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
 
         verify(exactly = 2) { tripSession.registerOffRouteObserver(any()) }
     }
@@ -322,9 +323,9 @@ class MapboxNavigationTest {
     fun destroy_unregisterAllOffRouteObservers_MapboxNavigation_recreated() {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
-        ThreadController.cancelAllUICoroutines()
+        threadController.cancelAllUICoroutines()
         val navigationOptions = provideNavigationOptions().build()
-        mapboxNavigation = MapboxNavigation(navigationOptions)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
 
         mapboxNavigation.onDestroy()
 
@@ -674,7 +675,7 @@ class MapboxNavigationTest {
 
     @Test
     fun `verify tile config path`() {
-        ThreadController.cancelAllUICoroutines()
+        threadController.cancelAllUICoroutines()
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
@@ -685,14 +686,14 @@ class MapboxNavigationTest {
             .routingTilesOptions(RoutingTilesOptions.Builder().build())
             .build()
 
-        mapboxNavigation = MapboxNavigation(options)
+        mapboxNavigation = MapboxNavigation(options, threadController)
 
         assertTrue(slot.captured.tilesPath.endsWith(RoutingTilesFiles.TILES_PATH_SUB_DIR))
     }
 
     @Test
     fun `verify tile config dataset`() {
-        ThreadController.cancelAllUICoroutines()
+        threadController.cancelAllUICoroutines()
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
@@ -708,14 +709,14 @@ class MapboxNavigationTest {
             )
             .build()
 
-        mapboxNavigation = MapboxNavigation(options)
+        mapboxNavigation = MapboxNavigation(options, threadController)
 
         assertEquals(slot.captured.endpointConfig!!.dataset, "someUser.osm/truck")
     }
 
     @Test
     fun `verify incidents options null when no params set`() {
-        ThreadController.cancelAllUICoroutines()
+        threadController.cancelAllUICoroutines()
         val slot = slot<NavigatorConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
@@ -730,7 +731,7 @@ class MapboxNavigationTest {
 
     @Test
     fun `verify incidents options non-null when graph set`() {
-        ThreadController.cancelAllUICoroutines()
+        threadController.cancelAllUICoroutines()
         val slot = slot<NavigatorConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
@@ -745,7 +746,7 @@ class MapboxNavigationTest {
             )
             .build()
 
-        mapboxNavigation = MapboxNavigation(options)
+        mapboxNavigation = MapboxNavigation(options, threadController)
 
         assertEquals(slot.captured.incidentsOptions!!.graph, "graph")
         assertEquals(slot.captured.incidentsOptions!!.apiUrl, "")
@@ -753,7 +754,7 @@ class MapboxNavigationTest {
 
     @Test
     fun `verify incidents options non-null when apiUrl set`() {
-        ThreadController.cancelAllUICoroutines()
+        threadController.cancelAllUICoroutines()
         val slot = slot<NavigatorConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
@@ -768,7 +769,7 @@ class MapboxNavigationTest {
             )
             .build()
 
-        mapboxNavigation = MapboxNavigation(options)
+        mapboxNavigation = MapboxNavigation(options, threadController)
 
         assertEquals(slot.captured.incidentsOptions!!.apiUrl, "apiUrl")
         assertEquals(slot.captured.incidentsOptions!!.graph, "")
@@ -871,7 +872,7 @@ class MapboxNavigationTest {
 
     @Test
     fun `verify tile config tilesVersion and isFallback on init`() {
-        ThreadController.cancelAllUICoroutines()
+        threadController.cancelAllUICoroutines()
         val slot = slot<TilesConfig>()
         every {
             NavigationComponentProvider.createNativeNavigator(
@@ -887,7 +888,7 @@ class MapboxNavigationTest {
             )
             .build()
 
-        mapboxNavigation = MapboxNavigation(options)
+        mapboxNavigation = MapboxNavigation(options, threadController)
 
         assertEquals(tilesVersion, slot.captured.endpointConfig?.version)
         assertFalse(slot.captured.endpointConfig?.isFallback!!)
@@ -895,7 +896,7 @@ class MapboxNavigationTest {
 
     @Test
     fun `verify tile config tilesVersion and isFallback on fallback`() {
-        ThreadController.cancelAllUICoroutines()
+        threadController.cancelAllUICoroutines()
 
         val fallbackObserverSlot = slot<FallbackVersionsObserver>()
         every {
@@ -904,7 +905,7 @@ class MapboxNavigationTest {
         every { directionsSession.routes } returns emptyList()
         every { tripSession.getRouteProgress() } returns mockk()
 
-        mapboxNavigation = MapboxNavigation(navigationOptions)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
 
         val tileConfigSlot = slot<TilesConfig>()
         every {
@@ -930,7 +931,7 @@ class MapboxNavigationTest {
 
     @Test
     fun `verify tile config tilesVersion and isFallback on return to latest tiles version`() {
-        ThreadController.cancelAllUICoroutines()
+        threadController.cancelAllUICoroutines()
 
         val fallbackObserverSlot = slot<FallbackVersionsObserver>()
         every {
@@ -939,7 +940,7 @@ class MapboxNavigationTest {
         every { directionsSession.routes } returns emptyList()
         every { tripSession.getRouteProgress() } returns mockk()
 
-        mapboxNavigation = MapboxNavigation(navigationOptions)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
 
         val tileConfigSlot = slot<TilesConfig>()
         every {
@@ -961,7 +962,7 @@ class MapboxNavigationTest {
 
     @Test
     fun `verify route and routeProgress are set after navigator recreation`() = runBlocking {
-        ThreadController.cancelAllUICoroutines()
+        threadController.cancelAllUICoroutines()
 
         val fallbackObserverSlot = slot<FallbackVersionsObserver>()
         every {
@@ -977,7 +978,7 @@ class MapboxNavigationTest {
         every { legProgress.legIndex } returns index
         coEvery { navigator.setRoute(any(), any()) } returns mockk()
 
-        mapboxNavigation = MapboxNavigation(navigationOptions)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
 
         fallbackObserverSlot.captured.onFallbackVersionsFound(listOf("version"))
 
@@ -989,7 +990,7 @@ class MapboxNavigationTest {
     @Test
     fun `verify that session state callbacks are always delivered to NavigationSession`() =
         runBlocking {
-            mapboxNavigation = MapboxNavigation(navigationOptions)
+            mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
             every { directionsSession.initialLegIndex } returns 0
             mapboxNavigation.startTripSession()
             mapboxNavigation.onDestroy()
@@ -1007,8 +1008,8 @@ class MapboxNavigationTest {
 
     @Test(expected = IllegalStateException::class)
     fun `verify that only one instance of MapboxNavigation can be alive`() = runBlocking {
-        mapboxNavigation = MapboxNavigation(navigationOptions)
-        mapboxNavigation = MapboxNavigation(navigationOptions)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
     }
 
     @Test
@@ -1027,7 +1028,7 @@ class MapboxNavigationTest {
     fun `verify that the old instance is not accessible when a new one is created`() = runBlocking {
         val firstInstance = MapboxNavigation(navigationOptions)
         firstInstance.onDestroy()
-        mapboxNavigation = MapboxNavigation(navigationOptions)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
         firstInstance.startTripSession()
     }
 
@@ -1038,14 +1039,14 @@ class MapboxNavigationTest {
             localNavigationSession
         }
 
-        mapboxNavigation = MapboxNavigation(navigationOptions)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
         mapboxNavigation.onDestroy()
         mapboxNavigation.startTripSession()
     }
 
     @Test(expected = IllegalStateException::class)
     fun `verify that stopTripSession is not called when destroyed`() = runBlocking {
-        mapboxNavigation = MapboxNavigation(navigationOptions)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
         mapboxNavigation.onDestroy()
         mapboxNavigation.stopTripSession()
     }
@@ -1092,7 +1093,7 @@ class MapboxNavigationTest {
     }
 
     private fun createMapboxNavigation() {
-        mapboxNavigation = MapboxNavigation(navigationOptions)
+        mapboxNavigation = MapboxNavigation(navigationOptions, threadController)
     }
 
     private fun mockNativeNavigator() {
@@ -1113,7 +1114,8 @@ class MapboxNavigationTest {
             NavigationComponentProvider.createTripService(
                 applicationContext,
                 any(),
-                logger
+                logger,
+                threadController,
             )
         } returns tripService
     }
@@ -1130,6 +1132,7 @@ class MapboxNavigationTest {
                 tripService = tripService,
                 tripSessionLocationEngine = tripSessionLocationEngine,
                 navigator = navigator,
+                threadController,
                 logger = logger,
             )
         } returns tripSession

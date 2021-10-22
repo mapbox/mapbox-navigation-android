@@ -9,6 +9,7 @@ import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
 import androidx.annotation.RequiresPermission
 import androidx.annotation.UiThread
+import androidx.annotation.VisibleForTesting
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -91,7 +92,6 @@ import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.utils.internal.ConnectivityHandler
-import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -194,12 +194,15 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  * @param navigationOptions a set of [NavigationOptions] used to customize various features of the SDK.
  */
 @UiThread
-class MapboxNavigation(
-    val navigationOptions: NavigationOptions
+class MapboxNavigation @VisibleForTesting internal constructor(
+    val navigationOptions: NavigationOptions,
+    private val threadController: ThreadController,
 ) {
 
+    constructor(navigationOptions: NavigationOptions) : this(navigationOptions, ThreadController())
+
     private val accessToken: String? = navigationOptions.accessToken
-    private val mainJobController: JobControl = ThreadController.getMainScopeAndRootJob()
+    private val mainJobController = threadController.getMainScopeAndRootJob()
     private val directionsSession: DirectionsSession
     private var navigator: MapboxNativeNavigator
     private val tripService: TripService
@@ -339,7 +342,6 @@ class MapboxNavigation(
         }
         hasInstance = true
 
-        ThreadController.init()
         navigator = NavigationComponentProvider.createNativeNavigator(
             navigationOptions.deviceProfile,
             navigatorConfig,
@@ -365,7 +367,8 @@ class MapboxNavigation(
         tripService = NavigationComponentProvider.createTripService(
             navigationOptions.applicationContext,
             notification,
-            logger
+            logger,
+            threadController,
         )
         tripSessionLocationEngine = NavigationComponentProvider.createTripSessionLocationEngine(
             navigationOptions = navigationOptions
@@ -374,6 +377,7 @@ class MapboxNavigation(
             tripService = tripService,
             tripSessionLocationEngine = tripSessionLocationEngine,
             navigator = navigator,
+            threadController,
             logger = logger,
         )
 
@@ -431,14 +435,15 @@ class MapboxNavigation(
             navigationOptions.routeRefreshOptions,
             directionsSession,
             tripSession,
-            logger
+            logger,
+            threadController,
         )
 
         defaultRerouteController = MapboxRerouteController(
             directionsSession,
             tripSession,
             routeOptionsProvider,
-            ThreadController,
+            threadController,
             logger
         )
         rerouteController = defaultRerouteController
@@ -684,8 +689,8 @@ class MapboxNavigation(
 
         navigationSession.unregisterAllNavigationSessionStateObservers()
         MapboxNavigationTelemetry.destroy(this@MapboxNavigation)
-        ThreadController.cancelAllNonUICoroutines()
-        ThreadController.cancelAllUICoroutines()
+        threadController.cancelAllNonUICoroutines()
+        threadController.cancelAllUICoroutines()
         ifNonNull(reachabilityObserverId) {
             ReachabilityService.removeReachabilityObserver(it)
             reachabilityObserverId = null
@@ -1258,7 +1263,8 @@ class MapboxNavigation(
                     MapboxNativeNavigator::class.java,
                     MapboxNativeNavigatorImpl
                 ),
-                ModuleProviderArgument(ConnectivityHandler::class.java, connectivityHandler)
+                ModuleProviderArgument(ConnectivityHandler::class.java, connectivityHandler),
+                ModuleProviderArgument(ThreadController::class.java, threadController),
             )
             MapboxModuleType.NavigationTripNotification -> arrayOf(
                 ModuleProviderArgument(NavigationOptions::class.java, navigationOptions),

@@ -49,20 +49,19 @@ data class JobControl(val job: Job, val scope: CoroutineScope)
 
 private const val MAX_THREAD_COUNT = 2
 
-object ThreadController {
-    private val maxCoresUsed = Runtime.getRuntime().availableProcessors().coerceAtMost(
-        MAX_THREAD_COUNT
-    )
-    val IODispatcher: CoroutineDispatcher =
-        Executors.newFixedThreadPool(maxCoresUsed).asCoroutineDispatcher()
+class ThreadController {
+
+    companion object {
+
+        private val maxCoresUsed = Runtime.getRuntime().availableProcessors().coerceAtMost(
+            MAX_THREAD_COUNT,
+        )
+        val IODispatcher: CoroutineDispatcher =
+            Executors.newFixedThreadPool(maxCoresUsed).asCoroutineDispatcher()
+    }
 
     internal var ioRootJob = SupervisorJob()
     internal var mainRootJob = SupervisorJob()
-
-    fun init() {
-        ioRootJob = SupervisorJob()
-        mainRootJob = SupervisorJob()
-    }
 
     /**
      * This method cancels all coroutines that are children of io and navigator jobs.

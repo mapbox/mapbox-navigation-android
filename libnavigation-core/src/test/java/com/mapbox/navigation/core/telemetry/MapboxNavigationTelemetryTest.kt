@@ -55,8 +55,6 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEvent
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.utils.internal.JobControl
-import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -186,7 +184,6 @@ class MapboxNavigationTelemetryTest {
     @After
     fun cleanUp() {
         unmockkObject(MapboxMetricsReporter)
-        unmockkObject(ThreadController)
     }
 
     @Test
@@ -1207,9 +1204,6 @@ class MapboxNavigationTelemetryTest {
     }
 
     private fun baseMock() {
-        mockkObject(ThreadController)
-        every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
-
         mockMetricsReporter()
         mockContext()
         mockTelemetryUtils()

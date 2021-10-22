@@ -16,6 +16,7 @@ import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.utils.internal.ConnectivityHandler
 import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.Ordering
 import io.mockk.every
 import io.mockk.mockk
@@ -84,7 +85,8 @@ class MapboxHybridRouterTest {
         hybridRouter = MapboxHybridRouter(
             onboardRouter,
             offboardRouter,
-            networkStatusService
+            networkStatusService,
+            ThreadController(),
         )
     }
 
