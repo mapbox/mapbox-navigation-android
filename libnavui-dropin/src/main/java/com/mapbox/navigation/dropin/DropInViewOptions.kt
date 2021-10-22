@@ -10,6 +10,8 @@ class DropInViewOptions private constructor(
     val enableVanishingRouteLine: Boolean,
     val mapStyleUrlDarkTheme: String,
     val mapStyleUrlLightTheme: String,
+    val darkTheme: DropInTheme,
+    val lightTheme: DropInTheme,
 ) {
 
     fun toBuilder(): Builder = Builder().apply {
@@ -19,6 +21,8 @@ class DropInViewOptions private constructor(
         enableVanishingRouteLine(enableVanishingRouteLine)
         mapStyleUrlDarkTheme(mapStyleUrlDarkTheme)
         mapStyleUrlLightTheme(mapStyleUrlLightTheme)
+        darkTheme(darkTheme)
+        lightTheme(lightTheme)
     }
 
     class Builder {
@@ -28,6 +32,30 @@ class DropInViewOptions private constructor(
         private var enableVanishingRouteLine: Boolean = true
         private var mapStyleUrlDarkTheme: String = Style.LIGHT
         private var mapStyleUrlLightTheme: String = Style.DARK
+        private val lightColors = Colors(
+            100,
+            100,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        )
+        private val darkColors = Colors(
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        )
+        private var darkTheme: DropInTheme = DropInTheme.DarkTheme(darkColors, Typography())
+        private var lightTheme: DropInTheme = DropInTheme.LightTheme(lightColors, Typography())
 
         fun renderSpeedLimit(renderSpeedLimit: Boolean): Builder = apply  {
             this.renderSpeedLimit = renderSpeedLimit
@@ -61,13 +89,23 @@ class DropInViewOptions private constructor(
             return this
         }
 
+        fun darkTheme(darkTheme: DropInTheme): Builder = apply {
+            this.darkTheme = darkTheme
+        }
+
+        fun lightTheme(lightTheme: DropInTheme): Builder = apply {
+            this.lightTheme = lightTheme
+        }
+
         fun build(): DropInViewOptions = DropInViewOptions(
             renderSpeedLimit,
             renderTripProgress,
             renderManeuvers,
             enableVanishingRouteLine,
             mapStyleUrlDarkTheme,
-            mapStyleUrlLightTheme
+            mapStyleUrlLightTheme,
+            darkTheme,
+            lightTheme
         )
     }
 }

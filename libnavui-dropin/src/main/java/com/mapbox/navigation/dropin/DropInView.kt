@@ -6,12 +6,10 @@ import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.coroutineScope
 import com.mapbox.maps.MapInitOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.ResourceOptions
 import com.mapbox.navigation.dropin.databinding.MapboxLayoutDropInViewBinding
-import kotlinx.coroutines.launch
 
 class DropInView: ConstraintLayout, LifecycleObserver {
 
@@ -52,7 +50,7 @@ class DropInView: ConstraintLayout, LifecycleObserver {
             MapInitOptions(
                 context,
                 ResourceOptions.Builder()
-                    .accessToken(context.resources.getString(R.string.mapbox_access_token))
+                    .accessToken("YOUR_ACCESS_TOKEN")
                     .build()
             )
         )
