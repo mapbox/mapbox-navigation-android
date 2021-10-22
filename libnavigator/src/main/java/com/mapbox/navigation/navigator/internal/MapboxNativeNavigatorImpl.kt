@@ -35,7 +35,6 @@ import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouteInfo
-import com.mapbox.navigator.Router
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterFactory
 import com.mapbox.navigator.RouterInterface
@@ -44,7 +43,6 @@ import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.Executors
 import kotlin.coroutines.resume
@@ -65,8 +63,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private val NavigatorDispatcher: CoroutineDispatcher =
         Executors.newFixedThreadPool(SINGLE_THREAD).asCoroutineDispatcher()
     private var navigator: Navigator? = null
-    // TODO migrate to RouterInterface
-    private var nativeRouter: Router? = null
     private var historyRecorderHandle: HistoryRecorderHandle? = null
     override var graphAccessor: GraphAccessor? = null
     override var roadObjectMatcher: RoadObjectMatcher? = null
@@ -105,7 +101,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             historyDir,
         )
         navigator = nativeComponents.navigator
-        nativeRouter = nativeComponents.nativeRouter
         historyRecorderHandle = nativeComponents.historyRecorderHandle
         graphAccessor = nativeComponents.graphAccessor
         roadObjectMatcher = nativeComponents.roadObjectMatcher
@@ -288,7 +283,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      */
     override suspend fun getRoute(url: String): Expected<RouterError, String> =
         suspendCancellableCoroutine { continuation ->
-            nativeRouter!!.getRoute(url) { expected, _ ->
+            router.getRoute(url) { expected, _ ->
                 continuation.resume(expected)
             }
         }
@@ -297,30 +292,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     override fun getHistoryRecorderHandle(): HistoryRecorderHandle? {
         return historyRecorderHandle
-    }
-
-    // Other
-
-    /**
-     * Compare given route with current route.
-     * Routes are considered the same if one of the routes is a suffix of another
-     * without the first and last intersection.
-     *
-     * If we don't have an active route, return `true`.
-     * If given route has less or equal 2 intersections we consider them different
-     *
-     * @param directionsRoute the route to compare
-     *
-     * @return `true` if route is different, `false` otherwise.
-     */
-    // TODO make async after https://github.com/mapbox/mapbox-navigation-native/issues/4164
-    override suspend fun isDifferentRoute(
-        directionsRoute: DirectionsRoute
-    ): Boolean = withContext(NavigatorDispatcher) {
-        val alternativeJson = directionsRoute.toJson()
-        val guidanceGeometry = ActiveGuidanceOptionsMapper
-            .mapToActiveGuidanceGeometry(directionsRoute.routeOptions()?.geometries())
-        navigator!!.isDifferentRoute(alternativeJson, guidanceGeometry)
     }
 
     // EH

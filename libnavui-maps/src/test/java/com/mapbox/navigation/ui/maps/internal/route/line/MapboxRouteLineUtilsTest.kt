@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.maps.internal.route.line
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.os.HandlerThread
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -22,7 +21,6 @@ import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
-import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRestrictedRouteLegRanges
@@ -445,11 +443,6 @@ class MapboxRouteLineUtilsTest {
     @OptIn(MapboxExperimental::class)
     @Test
     fun initializeLayers() {
-        GeoJsonSource.workerThread =
-            HandlerThread("STYLE_WORKER").apply {
-                priority = Thread.MAX_PRIORITY
-                start()
-            }
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         val options = MapboxRouteLineOptions.Builder(ctx)
             .withRouteLineBelowLayerId(LocationComponentConstants.MODEL_LAYER)

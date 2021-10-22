@@ -17,7 +17,6 @@ import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
 import com.mapbox.navigator.RoadObjectMatcher
-import com.mapbox.navigator.Router
 import com.mapbox.navigator.SettingsProfile
 import com.mapbox.navigator.TilesConfig
 
@@ -45,13 +44,11 @@ internal object NavigatorLoader {
             cache,
             historyRecorder
         )
-        val nativeRouter = Router(cache, historyRecorder)
         val graphAccessor = GraphAccessor(cache)
         val roadObjectMatcher = RoadObjectMatcher(cache)
 
         return NativeComponents(
             navigator,
-            nativeRouter,
             historyRecorder,
             graphAccessor,
             cache,
@@ -95,7 +92,6 @@ internal object NavigatorLoader {
 
     internal data class NativeComponents(
         val navigator: Navigator,
-        val nativeRouter: Router,
         val historyRecorderHandle: HistoryRecorderHandle?,
         val graphAccessor: GraphAccessor,
         val cache: CacheHandle,
