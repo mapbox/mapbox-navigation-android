@@ -2,6 +2,7 @@ package com.mapbox.navigation.examples
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.navigation.dropin.ViewProvider
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityDropInBinding
 
 class DropInActivity: AppCompatActivity() {
@@ -11,5 +12,7 @@ class DropInActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = LayoutActivityDropInBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.navigationView.configure(ViewProvider())
     }
 }

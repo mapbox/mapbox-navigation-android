@@ -16,4 +16,65 @@
         app:layout_constraintBottom_toBottomOf="parent"
         />
 
+    <FrameLayout
+        android:id="@+id/maneuverContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+    <FrameLayout
+        android:id="@+id/speedLimitContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/maneuverContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="8dp"
+        />
+
+    <FrameLayout
+        android:id="@+id/infoPanelContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+    <FrameLayout
+        android:id="@+id/volumeContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/maneuverContainer"
+        app:layout_constraintBottom_toTopOf="@id/routeOverviewContainer"
+        app:layout_constraintVertical_chainStyle="packed"
+        />
+
+    <FrameLayout
+        android:id="@+id/routeOverviewContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/volumeContainer"
+        app:layout_constraintBottom_toTopOf="@id/recenterContainer"
+        app:layout_constraintVertical_chainStyle="packed"
+        />
+
+    <FrameLayout
+        android:id="@+id/recenterContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/routeOverviewContainer"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        />
 </merge>

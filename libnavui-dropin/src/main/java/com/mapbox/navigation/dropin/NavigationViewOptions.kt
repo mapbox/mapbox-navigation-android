@@ -3,10 +3,13 @@ package com.mapbox.navigation.dropin
 import com.mapbox.maps.Style
 import java.lang.IllegalArgumentException
 
-class DropInViewOptions private constructor(
+class NavigationViewOptions private constructor(
+    val renderManeuvers: Boolean,
     val renderSpeedLimit: Boolean,
     val renderTripProgress: Boolean,
-    val renderManeuvers: Boolean,
+    val renderVolumeButton: Boolean,
+    val renderRecenterButton: Boolean,
+    val renderRouteOverviewButton: Boolean,
     val enableVanishingRouteLine: Boolean,
     val mapStyleUrlDarkTheme: String,
     val mapStyleUrlLightTheme: String,
@@ -15,9 +18,12 @@ class DropInViewOptions private constructor(
 ) {
 
     fun toBuilder(): Builder = Builder().apply {
+        renderManeuvers(renderManeuvers)
         renderSpeedLimit(renderSpeedLimit)
         renderTripProgress(renderTripProgress)
-        renderManeuvers(renderManeuvers)
+        renderVolumeButton(renderVolumeButton)
+        renderRecenterButton(renderRecenterButton)
+        renderRouteOverviewButton(renderRouteOverviewButton)
         enableVanishingRouteLine(enableVanishingRouteLine)
         mapStyleUrlDarkTheme(mapStyleUrlDarkTheme)
         mapStyleUrlLightTheme(mapStyleUrlLightTheme)
@@ -26,9 +32,12 @@ class DropInViewOptions private constructor(
     }
 
     class Builder {
+        private var renderManeuvers: Boolean = true
         private var renderSpeedLimit: Boolean = true
         private var renderTripProgress: Boolean = true
-        private var renderManeuvers: Boolean = true
+        private var renderVolumeButton: Boolean = true
+        private var renderRecenterButton: Boolean = true
+        private var renderRouteOverviewButton: Boolean = true
         private var enableVanishingRouteLine: Boolean = true
         private var mapStyleUrlDarkTheme: String = Style.LIGHT
         private var mapStyleUrlLightTheme: String = Style.DARK
@@ -57,6 +66,10 @@ class DropInViewOptions private constructor(
         private var darkTheme: DropInTheme = DropInTheme.DarkTheme(darkColors, Typography())
         private var lightTheme: DropInTheme = DropInTheme.LightTheme(lightColors, Typography())
 
+        fun renderManeuvers(renderManeuvers: Boolean): Builder = apply  {
+            this.renderManeuvers = renderManeuvers
+        }
+
         fun renderSpeedLimit(renderSpeedLimit: Boolean): Builder = apply  {
             this.renderSpeedLimit = renderSpeedLimit
         }
@@ -65,8 +78,16 @@ class DropInViewOptions private constructor(
             this.renderTripProgress = renderTripProgress
         }
 
-        fun renderManeuvers(renderManeuvers: Boolean): Builder = apply  {
-            this.renderManeuvers = renderManeuvers
+        fun renderVolumeButton(renderVolumeButton: Boolean): Builder = apply  {
+            this.renderVolumeButton = renderVolumeButton
+        }
+
+        fun renderRecenterButton(renderRecenterButton: Boolean): Builder = apply  {
+            this.renderRecenterButton = renderRecenterButton
+        }
+
+        fun renderRouteOverviewButton(renderRouteOverviewButton: Boolean): Builder = apply  {
+            this.renderRouteOverviewButton = renderRouteOverviewButton
         }
 
         fun enableVanishingRouteLine(enableVanishingRouteLine: Boolean): Builder = apply  {
@@ -97,10 +118,13 @@ class DropInViewOptions private constructor(
             this.lightTheme = lightTheme
         }
 
-        fun build(): DropInViewOptions = DropInViewOptions(
+        fun build(): NavigationViewOptions = NavigationViewOptions(
+            renderManeuvers,
             renderSpeedLimit,
             renderTripProgress,
-            renderManeuvers,
+            renderVolumeButton,
+            renderRecenterButton,
+            renderRouteOverviewButton,
             enableVanishingRouteLine,
             mapStyleUrlDarkTheme,
             mapStyleUrlLightTheme,

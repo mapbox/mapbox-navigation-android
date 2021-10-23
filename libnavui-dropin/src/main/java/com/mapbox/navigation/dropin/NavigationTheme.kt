@@ -1,10 +1,6 @@
 package com.mapbox.navigation.dropin
 
-sealed interface DropInThemeState {
-    fun isSystemInDarkMode(): Boolean
-}
-
-sealed class DropInTheme: DropInThemeState {
+sealed class DropInTheme {
     open val colors: Colors? = null
     open val typography: Typography? = null
 
@@ -16,7 +12,6 @@ sealed class DropInTheme: DropInThemeState {
         val tripProgressDivider = colors.secondary
         val tripProgressBackground = colors.primary
         // Define values for all the other views here
-        override fun isSystemInDarkMode(): Boolean = false
     }
 
     class DarkTheme(
@@ -27,7 +22,6 @@ sealed class DropInTheme: DropInThemeState {
         val tripProgressDivider = colors.secondary
         val tripProgressBackground = colors.primary
         // Define values for all the other views here
-        override fun isSystemInDarkMode(): Boolean = true
     }
 }
 
