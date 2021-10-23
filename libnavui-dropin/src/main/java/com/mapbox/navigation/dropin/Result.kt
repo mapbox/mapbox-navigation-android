@@ -1,3 +1,3 @@
 package com.mapbox.navigation.dropin
 
-internal interface Action
+internal interface Result

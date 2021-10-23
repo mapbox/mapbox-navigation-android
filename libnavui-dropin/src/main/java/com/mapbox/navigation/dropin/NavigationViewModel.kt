@@ -16,6 +16,25 @@ internal class NavigationViewModel: ViewModel() {
     private val _viewState = MutableStateFlow<NavigationViewState>(NavigationViewState.UponEmpty())
     val viewState: StateFlow<NavigationViewState>
         get() = _viewState
+    val reducer: (NavigationViewState, Result) -> Unit = { _, result ->
+        when (result) {
+            is NavigationStateTransitionResult.ToEmpty -> {
+                _viewState.value = result.state
+            }
+            is NavigationStateTransitionResult.ToFreeDrive -> {
+                _viewState.value = result.state
+            }
+            is NavigationStateTransitionResult.ToRoutePreview -> {
+                _viewState.value = result.state
+            }
+            is NavigationStateTransitionResult.ToActiveNavigation -> {
+                _viewState.value = result.state
+            }
+            is NavigationStateTransitionResult.ToArrival -> {
+                _viewState.value = result.state
+            }
+        }
+    }
 
     init {
         observeUserActions()
@@ -26,16 +45,10 @@ internal class NavigationViewModel: ViewModel() {
             handleAction.consumeAsFlow().collect { action ->
                 when (action) {
                     is NavigationStateTransitionAction.ToEmpty -> {
-                        updateViewStateToEmpty()
+                        reducer(_viewState.value, processTransition(action))
                     }
                 }
             }
-        }
-    }
-
-    private fun updateViewStateToEmpty() {
-        viewModelScope.launch {
-            _viewState.value = NavigationViewState.UponEmpty()
         }
     }
 }
