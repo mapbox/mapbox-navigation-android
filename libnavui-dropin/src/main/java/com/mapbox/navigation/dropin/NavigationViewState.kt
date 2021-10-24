@@ -5,7 +5,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateValue
 
-internal sealed class NavigationViewState: State {
+internal sealed class NavigationViewState {
     data class UponEmpty(
         val navigationState: NavigationState = NavigationState.Empty
     ): NavigationViewState()

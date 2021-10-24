@@ -19,9 +19,14 @@ import com.mapbox.navigation.ui.maps.camera.view.MapboxRouteOverviewButton
 import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
 import com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
 import com.mapbox.navigation.ui.voice.view.MapboxSoundButton
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
+@ExperimentalCoroutinesApi
 class NavigationView: ConstraintLayout, LifecycleObserver {
 
     private val mapView: MapView
@@ -139,19 +144,11 @@ class NavigationView: ConstraintLayout, LifecycleObserver {
                 ?: MapboxRouteOverviewButton(context)
             binding.routeOverviewContainer.addView(routeOverviewButtonView)
         }
-        observeViewState()
-        doAction(NavigationStateTransitionAction.ToEmpty(from = NavigationState.Empty))
-    }
-    
-    fun doAction(action: Action) {
         lifeCycleOwner.lifecycleScope.launch {
-            navigationViewModel.handleAction.send(action)
+            actions().collect { navigationViewModel::processAction }
         }
-    }
-
-    private fun observeViewState() {
         lifeCycleOwner.lifecycleScope.launch {
-            navigationViewModel.viewState.collect { navigationViewState ->
+            navigationViewModel.viewStates().collect { navigationViewState ->
                 when (navigationViewState) {
                     is NavigationViewState.UponEmpty -> {
                         renderUponEmpty(state = navigationViewState)
@@ -172,6 +169,16 @@ class NavigationView: ConstraintLayout, LifecycleObserver {
             }
         }
     }
+
+    @ExperimentalCoroutinesApi
+    private fun actions(): Flow<Action> = merge(
+        // Merge multiple actions if required.
+        initialStateTransition()
+    )
+
+    private fun initialStateTransition() = flowOf(
+        NavigationStateTransitionAction.ToEmpty(from = NavigationState.Empty)
+    )
 
     private fun renderUponEmpty(state: NavigationViewState) {
         binding.volumeContainer.visibility = GONE
