@@ -28,9 +28,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.RESTRICTED_ROAD_L
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.slot
-import io.mockk.unmockkStatic
 import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -192,8 +190,6 @@ class RouteArrowUtilsTest {
 
     @Test
     fun initializeLayers() {
-        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
-        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
         val options = RouteArrowOptions.Builder(ctx).build()
         val shaftSourceValueSlot = slot<Value>()
         val headSourceValueSlot = slot<Value>()
@@ -320,14 +316,10 @@ class RouteArrowUtilsTest {
             "mapbox-navigation-arrow-shaft-layer",
             addStyleLayerPositionSlots[3].above
         )
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
-        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
     }
 
     @Test
     fun initializeLayers_whenCustomAboveLayerConfigured() {
-        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
-        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
         val options = RouteArrowOptions.Builder(ctx).withAboveLayerId("foobar").build()
         val shaftSourceValueSlot = slot<Value>()
         val addStyleLayerSlots = mutableListOf<Value>()
@@ -388,14 +380,10 @@ class RouteArrowUtilsTest {
             "mapbox-navigation-arrow-shaft-layer",
             addStyleLayerPositionSlots[3].above
         )
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
-        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
     }
 
     @Test
     fun initializeLayers_whenAboveLayerNotExists() {
-        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
-        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
         val mockImage = mockk<Image>(relaxed = true)
         val options = RouteArrowOptions.Builder(ctx).build()
         val shaftSourceValueSlot = slot<Value>()
@@ -520,8 +508,6 @@ class RouteArrowUtilsTest {
             "mapbox-navigation-arrow-shaft-layer",
             addStyleLayerPositionSlots[3].above
         )
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
-        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
     }
 
     @Test
