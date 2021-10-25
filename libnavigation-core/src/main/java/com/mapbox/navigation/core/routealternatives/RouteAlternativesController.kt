@@ -6,8 +6,6 @@ import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.core.directions.session.DirectionsSession
-import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.utils.internal.logI
@@ -17,9 +15,9 @@ import java.util.concurrent.CopyOnWriteArraySet
 internal class RouteAlternativesController constructor(
     private val options: RouteAlternativesOptions,
     private val navigator: MapboxNativeNavigator,
-    private val directionsSession: DirectionsSession,
     private val tripSession: TripSession
 ) {
+
     private val nativeRouteAlternativesController = navigator.createRouteAlternativesController()
         .apply {
             setRouteAlternativesOptions(
@@ -65,32 +63,19 @@ internal class RouteAlternativesController constructor(
             val routeProgress = tripSession.getRouteProgress()
                 ?: return emptyList()
 
-            // Create a new list of routes, add the current route at index 0.
-            val changedRoutes = mutableListOf<DirectionsRoute>()
-            val currentRoute = routeProgress.route
-            changedRoutes.add(currentRoute)
-
             // Map the alternatives from nav-native, add the existing RouteOptions.
-            var alternatives: List<DirectionsRoute>
+
             // TODO make async
-            runBlocking {
-                alternatives = routeAlternatives.map { routeAlternative ->
+            val alternatives: List<DirectionsRoute> = runBlocking {
+                routeAlternatives.map { routeAlternative ->
                     parseDirectionsResponse(
                         routeAlternative.route,
-                        currentRoute.routeOptions()
+                        routeProgress.route.routeOptions()
                     ) {
                         logI(TAG, Message("Response metadata: $it"))
                     }.first()
                 }
             }
-
-            changedRoutes.addAll(alternatives)
-
-            directionsSession.setRoutes(
-                routes = changedRoutes,
-                initialLegIndex = 0,
-                ROUTES_UPDATE_REASON_ALTERNATIVE
-            )
 
             // Notify the listeners.
             // TODO https://github.com/mapbox/mapbox-navigation-native/issues/4409

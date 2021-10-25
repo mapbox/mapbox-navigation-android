@@ -4,8 +4,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.core.directions.session.DirectionsSession
-import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.FileUtils
@@ -32,7 +30,6 @@ class RouteAlternativesControllerTest {
     private val navigator: MapboxNativeNavigator = mockk {
         every { createRouteAlternativesController() } returns controllerInterface
     }
-    private val directionsSession: DirectionsSession = mockk(relaxed = true)
     private val tripSession: TripSession = mockk(relaxed = true)
 
     private fun routeAlternativesController(
@@ -40,7 +37,6 @@ class RouteAlternativesControllerTest {
     ) = RouteAlternativesController(
         options,
         navigator,
-        directionsSession,
         tripSession,
     )
 
@@ -173,40 +169,6 @@ class RouteAlternativesControllerTest {
     }
 
     @Test
-    fun `should set route with the new alternatives`() {
-        val routeAlternativesController = routeAlternativesController()
-        val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
-        every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-        every { tripSession.getRouteProgress() } returns mockk {
-            every { route } returns mockk(relaxed = true)
-        }
-
-        val firstObserver: RouteAlternativesObserver = mockk(relaxed = true)
-        routeAlternativesController.register(firstObserver)
-        val alternativeRouteJson = FileUtils.loadJsonFixture(
-            "route_alternative_from_native.txt"
-        )
-        nativeObserver.captured.onRouteAlternativesChanged(
-            listOf(
-                mockk {
-                    every { route } returns alternativeRouteJson
-                }
-            )
-        )
-
-        val routesSetCapture = slot<List<DirectionsRoute>>()
-        verify(exactly = 1) {
-            directionsSession.setRoutes(
-                capture(routesSetCapture),
-                0,
-                RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
-            )
-        }
-        assertEquals(2, routesSetCapture.captured.size)
-        assertEquals(221.796, routesSetCapture.captured[1].duration(), 0.001)
-    }
-
-    @Test
     fun `should set alternative RouteOptions to primary RouteOptions`() {
         val originalCoordinates = "-122.270375,37.801429;-122.271496, 37.799063"
         val routeAlternativesController = routeAlternativesController()
@@ -219,8 +181,6 @@ class RouteAlternativesControllerTest {
                 }
             }
         }
-        val routesSetCapture = slot<List<DirectionsRoute>>()
-        every { directionsSession.setRoutes(capture(routesSetCapture), any(), any()) } just runs
 
         val firstObserver: RouteAlternativesObserver = mockk(relaxed = true)
         routeAlternativesController.register(firstObserver)
@@ -235,11 +195,22 @@ class RouteAlternativesControllerTest {
             )
         )
 
+        val routeProgressSlot = slot<RouteProgress>()
+        val alternativesSlot = slot<List<DirectionsRoute>>()
+        val routerOriginSlot = slot<RouterOrigin>()
+        verify(exactly = 1) {
+            firstObserver.onRouteAlternatives(
+                capture(routeProgressSlot),
+                capture(alternativesSlot),
+                capture(routerOriginSlot)
+            )
+        }
+
         assertEquals(
-            originalCoordinates, routesSetCapture.captured[0].routeOptions()?.coordinates()
+            originalCoordinates, routeProgressSlot.captured.route.routeOptions()?.coordinates()
         )
         assertEquals(
-            originalCoordinates, routesSetCapture.captured[1].routeOptions()?.coordinates()
+            originalCoordinates, alternativesSlot.captured[0].routeOptions()?.coordinates()
         )
     }
 }
