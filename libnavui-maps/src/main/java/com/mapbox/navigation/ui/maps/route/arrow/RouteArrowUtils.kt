@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.arrow
 
 import androidx.core.graphics.drawable.DrawableCompat
-import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.LayerPosition
@@ -72,14 +71,14 @@ internal object RouteArrowUtils {
             geoJsonSource(RouteLayerConstants.ARROW_SHAFT_SOURCE_ID) {
                 maxzoom(16)
                 tolerance(options.tolerance)
-            }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
+            }.bindTo(style)
         }
 
         if (!style.styleSourceExists(RouteLayerConstants.ARROW_HEAD_SOURCE_ID)) {
             geoJsonSource(RouteLayerConstants.ARROW_HEAD_SOURCE_ID) {
                 maxzoom(16)
                 tolerance(options.tolerance)
-            }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
+            }.bindTo(style)
         }
 
         if (style.getStyleImage(RouteLayerConstants.ARROW_HEAD_ICON_CASING) != null) {
