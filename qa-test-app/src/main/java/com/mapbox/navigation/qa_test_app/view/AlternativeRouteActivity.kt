@@ -115,7 +115,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
-        mapboxNavigation.unregisterRouteAlternativesObserver(requestAlternativesObserver)
+        mapboxNavigation.unregisterRouteAlternativesObserver(routeAlternativesObserver)
     }
 
     override fun onDestroy() {
@@ -134,7 +134,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
-        mapboxNavigation.registerRouteAlternativesObserver(requestAlternativesObserver)
+        mapboxNavigation.registerRouteAlternativesObserver(routeAlternativesObserver)
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.playbackSpeed(1.5)
         mapboxReplayer.play()
@@ -201,10 +201,17 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     /**
-     * Whenever alternatives have changed, request a new set of alternatives.
+     * Example of how to handle route alternatives during navigation.
      */
-    private val requestAlternativesObserver =
-        RouteAlternativesObserver { _, _, _ ->
+    private val routeAlternativesObserver =
+        RouteAlternativesObserver { routeProgress, alternatives, _ ->
+            // Set the alternatives suggested
+            val updatedRoutes = mutableListOf<DirectionsRoute>()
+            updatedRoutes.add(routeProgress.route)
+            updatedRoutes.addAll(alternatives)
+            mapboxNavigation.setRoutes(updatedRoutes)
+
+            // Request new alternatives instead of waiting for the interval.
             mapboxNavigation.requestAlternativeRoutes()
         }
 
@@ -222,7 +229,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
                     routes: List<DirectionsRoute>,
                     routerOrigin: RouterOrigin
                 ) {
-                    mapboxNavigation.setRoutes(routes)
+                    mapboxNavigation.setRoutes(routes.reversed())
                 }
 
                 override fun onFailure(

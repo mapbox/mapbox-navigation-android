@@ -426,7 +426,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeAlternativesController = RouteAlternativesControllerProvider.create(
             navigationOptions.routeAlternativesOptions,
             navigator,
-            directionsSession,
             tripSession
         )
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
@@ -621,9 +620,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         }
         rerouteController?.interrupt()
 
+        // Telemetry uses this field to determine what type of event should be triggered.
         @RoutesExtra.RoutesUpdateReason val reason = when {
             routes.isEmpty() -> {
                 RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+            }
+            routes.first() == directionsSession.routes.firstOrNull() -> {
+                RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
             }
             else -> {
                 RoutesExtra.ROUTES_UPDATE_REASON_NEW

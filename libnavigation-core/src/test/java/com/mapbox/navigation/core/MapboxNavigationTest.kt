@@ -104,8 +104,7 @@ class MapboxNavigationTest {
     private val distanceFormatterOptions: DistanceFormatterOptions = mockk(relaxed = true)
     private val routingTilesOptions: RoutingTilesOptions = mockk(relaxed = true)
     private val routeRefreshController: RouteRefreshController = mockk(relaxUnitFun = true)
-    private val routeAlternativesController: RouteAlternativesController =
-        mockk(relaxUnitFun = true)
+    private val routeAlternativesController: RouteAlternativesController = mockk(relaxed = true)
     private val routeProgress: RouteProgress = mockk(relaxed = true)
     private val navigationSession: NavigationSession = mockk(relaxed = true)
     private val billingController: BillingController = mockk(relaxUnitFun = true)
@@ -181,7 +180,7 @@ class MapboxNavigationTest {
         } returns routeRefreshController
         mockkObject(RouteAlternativesControllerProvider)
         every {
-            RouteAlternativesControllerProvider.create(any(), any(), any(), any())
+            RouteAlternativesControllerProvider.create(any(), any(), any())
         } returns routeAlternativesController
 
         every { applicationContext.applicationContext } returns applicationContext
@@ -1071,6 +1070,22 @@ class MapboxNavigationTest {
             directionsSession.setRoutes(
                 routes, 0, RoutesExtra.ROUTES_UPDATE_REASON_NEW
             )
+        }
+    }
+
+    @Test
+    fun `adding or removing alternative routes creates alternative reason`() {
+        createMapboxNavigation()
+        val primaryRoute = mockk<DirectionsRoute>()
+        val alternativeRoute = mockk<DirectionsRoute>()
+        every { directionsSession.routes } returns listOf(primaryRoute)
+
+        mapboxNavigation.setRoutes(listOf(primaryRoute, alternativeRoute))
+        mapboxNavigation.setRoutes(listOf(primaryRoute))
+
+        verifyOrder {
+            directionsSession.setRoutes(any(), any(), RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE)
+            directionsSession.setRoutes(any(), any(), RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE)
         }
     }
 
