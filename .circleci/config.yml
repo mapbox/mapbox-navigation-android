@@ -41,6 +41,9 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
+      - publish-documentation:
+          requires:
+            - release
   default:
     jobs:
       - prepare-and-assemble
@@ -507,6 +510,19 @@ jobs:
             - check-api-ui
             - check-public-documentation
       - run: exit 0
+
+  publish-documentation:
+    executor: ndk-r21e-latest-executor
+    steps:
+      - checkout
+      - prepare-mbx-ci
+      - run:
+          name: Publish API docs Android
+          command: |
+            GITHUB_WRITER_TOKEN=$(./mbx-ci github writer token)
+            git remote set-url origin "https://x-access-token:$GITHUB_WRITER_TOKEN@github.com/mapbox/mapbox-navigation-android"
+            git config --global user.email no-reply@mapbox.com && git config --global user.name mapbox-ci
+            ./scripts/publish_api_docs_android.sh -p $GITHUB_WRITER_TOKEN -t $CIRCLE_TAG
 
   changelog-verification:
     executor: ndk-r21e-latest-executor
