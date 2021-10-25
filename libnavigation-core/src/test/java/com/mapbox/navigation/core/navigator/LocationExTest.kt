@@ -2,7 +2,6 @@ package com.mapbox.navigation.core.navigator
 
 import android.location.Location
 import android.os.Bundle
-import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.FixLocation
 import org.junit.Assert.assertEquals
@@ -79,7 +78,7 @@ class LocationExTest {
             assertEquals(BEARING_ACCURACY, bearingAccuracyDegrees, .0f)
             assertEquals(SPEED_ACCURACY, speedAccuracyMetersPerSecond, .0f)
             assertEquals(VERTICAL_ACCURACY, verticalAccuracyMeters, .0f)
-            assertEquals(NULL_VALUE, EMPTY_EXTRAS.toBundle())
+            assertEquals(EMPTY_BUNDLE.toString(), EMPTY_EXTRAS.toBundle().toString())
         }
     }
 
@@ -116,7 +115,7 @@ class LocationExTest {
             assertEquals(ZERO_VALUE, bearingAccuracyDegrees, .0f)
             assertEquals(ZERO_VALUE, speedAccuracyMetersPerSecond, .0f)
             assertEquals(ZERO_VALUE, verticalAccuracyMeters, .0f)
-            assertEquals(NULL_VALUE, extras)
+            assertEquals(EMPTY_BUNDLE.toString(), extras.toString())
         }
     }
 
@@ -136,6 +135,7 @@ class LocationExTest {
         private const val BEARING_ACCURACY = 50f
         private const val SPEED_ACCURACY = 60f
         private const val VERTICAL_ACCURACY = 70f
-        private val EMPTY_EXTRAS = HashMap<String, Value>()
+        private val EMPTY_EXTRAS = FixLocationExtras()
+        private val EMPTY_BUNDLE = Bundle()
     }
 }

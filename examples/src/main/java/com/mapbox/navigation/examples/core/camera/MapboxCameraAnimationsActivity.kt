@@ -139,7 +139,7 @@ class MapboxCameraAnimationsActivity :
     private val poiLayer = CircleLayer("circle_layer", "circle_source")
         .circleColor(Color.RED)
         .circleRadius(10.0)
-    private val poiSource = geoJsonSource("circle_source") { }.data("")
+    private val poiSource = geoJsonSource("circle_source") {}.data("")
 
     private val locationObserver = object : LocationObserver {
 

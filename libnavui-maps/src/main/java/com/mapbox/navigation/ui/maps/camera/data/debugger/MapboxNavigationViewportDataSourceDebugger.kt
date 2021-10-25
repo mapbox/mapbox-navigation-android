@@ -240,7 +240,7 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
         val style = mapboxMap.getStyle()
         if (enabled && style != null) {
             if (!style.styleSourceExists(pointsSourceId)) {
-                val source = geoJsonSource(pointsSourceId) { }.featureCollection(featureCollection)
+                val source = geoJsonSource(pointsSourceId) {}.featureCollection(featureCollection)
                 style.addSource(source)
             }
 

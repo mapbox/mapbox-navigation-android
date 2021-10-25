@@ -949,7 +949,7 @@ object MapboxRouteLineUtils {
             geoJsonSource(RouteLayerConstants.WAYPOINT_SOURCE_ID) {
                 maxzoom(16)
                 tolerance(options.tolerance)
-            }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
+            }.bindTo(style)
         }
 
         if (!style.styleSourceExists(RouteLayerConstants.PRIMARY_ROUTE_SOURCE_ID)) {
@@ -957,7 +957,7 @@ object MapboxRouteLineUtils {
                 maxzoom(16)
                 lineMetrics(true)
                 tolerance(options.tolerance)
-            }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
+            }.bindTo(style)
         }
 
         if (!style.styleSourceExists(RouteLayerConstants.ALTERNATIVE_ROUTE1_SOURCE_ID)) {
@@ -965,7 +965,7 @@ object MapboxRouteLineUtils {
                 maxzoom(16)
                 lineMetrics(true)
                 tolerance(options.tolerance)
-            }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
+            }.bindTo(style)
         }
 
         if (!style.styleSourceExists(RouteLayerConstants.ALTERNATIVE_ROUTE2_SOURCE_ID)) {
@@ -973,7 +973,7 @@ object MapboxRouteLineUtils {
                 maxzoom(16)
                 lineMetrics(true)
                 tolerance(options.tolerance)
-            }.featureCollection(FeatureCollection.fromFeatures(listOf())).bindTo(style)
+            }.bindTo(style)
         }
 
         style.addPersistentLayer(

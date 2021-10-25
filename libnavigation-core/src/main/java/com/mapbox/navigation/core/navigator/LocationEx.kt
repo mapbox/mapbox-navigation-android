@@ -10,6 +10,8 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigator.FixLocation
 import java.util.Date
 
+internal typealias FixLocationExtras = HashMap<String, Value>
+
 internal fun FixLocation.toLocation(): Location = Location(this.provider).also {
     it.latitude = coordinate.latitude()
     it.longitude = coordinate.longitude()
@@ -52,7 +54,7 @@ internal fun Location.toFixLocation(): FixLocation {
         bearingAccuracy,
         speedAccuracy,
         verticalAccuracy,
-        if (extras != null) extras.toMap() else Bundle().toMap()
+        extras?.toMap() ?: Bundle().toMap()
     )
 }
 
@@ -61,22 +63,35 @@ internal fun List<FixLocation>.toLocations(): List<Location> = this.map { it.toL
 private fun isCurrentSdkVersionEqualOrGreaterThan(sdkCode: Int): Boolean =
     Build.VERSION.SDK_INT >= sdkCode
 
-internal fun HashMap<String, Value>.toBundle(): Bundle? {
-    if (this.isEmpty()) return null
-    val bundle = Bundle()
-    for ((key, value) in this.entries) {
-        bundle.putString(key, value.toString())
+internal fun FixLocationExtras.toBundle(bundle: Bundle = Bundle()): Bundle = bundle.apply {
+    forEach {
+        when (val contents = it.value.contents) {
+            is Double -> putDouble(it.key, contents)
+            is Long -> putLong(it.key, contents)
+            is Boolean -> putBoolean(it.key, contents)
+            is String -> putString(it.key, contents)
+            else -> {
+                // do nothing
+            }
+        }
     }
-    return bundle
 }
 
-internal fun Bundle.toMap(): HashMap<String, Value> {
-    val map: HashMap<String, Value> = HashMap()
+internal fun Bundle.toMap(): FixLocationExtras {
+    val map: FixLocationExtras = HashMap()
     val keySet = this.keySet()
     val iterator: Iterator<String> = keySet.iterator()
     while (iterator.hasNext()) {
         val key = iterator.next()
-        map[key] = Value(this.getString(key) ?: "")
+        when (val value = this.get(key)) {
+            is Double -> map[key] = Value(value)
+            is Long -> map[key] = Value(value)
+            is Boolean -> map[key] = Value(value)
+            is String -> map[key] = Value(value)
+            else -> {
+                // do nothing
+            }
+        }
     }
     return map
 }

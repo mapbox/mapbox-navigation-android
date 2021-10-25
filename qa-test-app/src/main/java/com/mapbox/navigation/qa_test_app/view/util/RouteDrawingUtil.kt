@@ -74,15 +74,11 @@ class RouteDrawingUtil(private val mapView: MapView) {
     init {
         mapView.getMapboxMap().getStyle { style ->
             if (!style.styleSourceExists(LINE_LAYER_SOURCE_ID)) {
-                geoJsonSource(LINE_LAYER_SOURCE_ID) {
-                    featureCollection(FeatureCollection.fromFeatures(listOf()))
-                }.bindTo(style)
+                geoJsonSource(LINE_LAYER_SOURCE_ID) {}.bindTo(style)
             }
 
             if (!style.styleSourceExists(LINE_END_SOURCE_ID)) {
-                geoJsonSource(LINE_END_SOURCE_ID) {
-                    featureCollection(FeatureCollection.fromFeatures(listOf()))
-                }.bindTo(style)
+                geoJsonSource(LINE_END_SOURCE_ID) {}.bindTo(style)
             }
 
             if (!style.styleLayerExists(LINE_LAYER_ID)) {
