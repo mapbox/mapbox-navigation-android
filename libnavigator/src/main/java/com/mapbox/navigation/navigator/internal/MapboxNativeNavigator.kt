@@ -26,7 +26,6 @@ import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouterError
-import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.TilesConfig
 
 /**
@@ -75,15 +74,6 @@ interface MapboxNativeNavigator {
      * @return true if the raw location was usable, false if not.
      */
     suspend fun updateLocation(rawLocation: FixLocation): Boolean
-
-    /**
-     * Passes in the current sensor data of the user.
-     *
-     * @param sensorData The current sensor data of user.
-     *
-     * @return true if the sensor data was usable, false if not.
-     */
-    suspend fun updateSensorData(sensorData: SensorData): Boolean
 
     fun addNavigatorObserver(navigatorObserver: NavigatorObserver)
 
