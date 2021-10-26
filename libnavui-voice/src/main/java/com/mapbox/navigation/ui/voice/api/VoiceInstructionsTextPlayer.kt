@@ -1,9 +1,9 @@
 package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
-import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import androidx.annotation.VisibleForTesting
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
@@ -23,15 +23,22 @@ internal class VoiceInstructionsTextPlayer(
     private val playerAttributes: VoiceInstructionsPlayerAttributes,
 ) : VoiceInstructionsPlayer {
 
-    private var isLanguageSupported: Boolean = false
-    private val textToSpeech = TextToSpeech(context.applicationContext) { status ->
+    @VisibleForTesting
+    internal var isLanguageSupported: Boolean = false
+
+    @VisibleForTesting
+    internal var textToSpeech = TextToSpeech(context.applicationContext) { status ->
         if (status == TextToSpeech.SUCCESS) {
             initializeWithLanguage(Locale(language))
         }
     }
-    private var volumeLevel: Float = DEFAULT_VOLUME_LEVEL
+
+    @VisibleForTesting
+    internal var volumeLevel: Float = DEFAULT_VOLUME_LEVEL
     private var clientCallback: VoiceInstructionsPlayerCallback? = null
-    private var currentPlay: SpeechAnnouncement? = null
+
+    @VisibleForTesting
+    internal var currentPlay: SpeechAnnouncement? = null
 
     /**
      * Given [SpeechAnnouncement] the method will play the voice instruction.
@@ -91,6 +98,7 @@ internal class VoiceInstructionsTextPlayer(
     override fun shutdown() {
         textToSpeech.setOnUtteranceProgressListener(null)
         textToSpeech.shutdown()
+        currentPlay = null
         volumeLevel = DEFAULT_VOLUME_LEVEL
     }
 
@@ -136,7 +144,8 @@ internal class VoiceInstructionsTextPlayer(
     }
 
     private fun play(announcement: String) {
-        val bundle = Bundle().apply {
+        val currentBundle = BundleProvider.retrieveBundle()
+        val bundle = currentBundle.apply {
             putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, volumeLevel)
         }
         playerAttributes.applyOn(textToSpeech, bundle)

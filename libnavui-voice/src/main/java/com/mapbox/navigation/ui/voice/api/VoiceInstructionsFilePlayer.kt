@@ -2,13 +2,13 @@ package com.mapbox.navigation.ui.voice.api
 
 import android.content.Context
 import android.media.MediaPlayer
+import androidx.annotation.VisibleForTesting
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.IOException
 
@@ -25,10 +25,15 @@ internal class VoiceInstructionsFilePlayer(
     private val playerAttributes: VoiceInstructionsPlayerAttributes,
 ) : VoiceInstructionsPlayer {
 
-    private var mediaPlayer: MediaPlayer? = null
-    private var volumeLevel: Float = DEFAULT_VOLUME_LEVEL
+    @VisibleForTesting
+    internal var mediaPlayer: MediaPlayer? = null
+
+    @VisibleForTesting
+    internal var volumeLevel: Float = DEFAULT_VOLUME_LEVEL
     private var clientCallback: VoiceInstructionsPlayerCallback? = null
-    private var currentPlay: SpeechAnnouncement? = null
+
+    @VisibleForTesting
+    internal var currentPlay: SpeechAnnouncement? = null
 
     /**
      * Given [SpeechAnnouncement] the method will play the voice instruction.
@@ -88,9 +93,13 @@ internal class VoiceInstructionsFilePlayer(
 
     private fun play(instruction: File) {
         try {
-            FileInputStream(instruction).use { fis ->
-                mediaPlayer = MediaPlayer().apply {
-                    setDataSource(fis.fd)
+            val currentFileInputStream = FileInputStreamProvider.retrieveFileInputStream(
+                instruction
+            )
+            currentFileInputStream.use { fis ->
+                val currentMediaPlayer = MediaPlayerProvider.retrieveMediaPlayer()
+                mediaPlayer = currentMediaPlayer!!.apply {
+                    setDataSource(fis!!.fd)
                     playerAttributes.applyOn(this)
                     prepareAsync()
                 }
