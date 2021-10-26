@@ -27,13 +27,13 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
-class NavigationView: ConstraintLayout, LifecycleObserver {
+class NavigationView : ConstraintLayout, LifecycleObserver {
 
     private val mapView: MapView
     private val lifeCycleOwner: LifecycleOwner
     private val mapboxNavigation: MapboxNavigation
     private val navigationViewModel = NavigationViewModel()
-    private val navigationViewOptions: NavigationViewOptions
+    private var navigationViewOptions: NavigationViewOptions
     private val binding = MapboxLayoutDropInViewBinding.inflate(
         LayoutInflater.from(context),
         this
@@ -93,7 +93,7 @@ class NavigationView: ConstraintLayout, LifecycleObserver {
         check(mapView?.isAttachedToWindow != true) {
             "The provided Map View cannot be attached to a window"
         }
-        val a = context.obtainStyledAttributes(attrs, R.styleable.NavigationView, 0 ,0)
+        val a = context.obtainStyledAttributes(attrs, R.styleable.NavigationView, 0, 0)
         val attrsAccessToken = a.getString(R.styleable.NavigationView_accessToken)
         a.recycle()
         this.navigationViewOptions = navigationViewOptions
@@ -108,66 +108,45 @@ class NavigationView: ConstraintLayout, LifecycleObserver {
     }
 
     /**
-     * The function bases [DropInOptions] to decide which views will be rendered on top of the map
-     * view. The views provided via the [viewProvider] will be given preference. If null, default
-     * Mapbox designed views will be used.
+     * Creates references to view components. Views provided via the [viewProvider] will be given preference.
+     * If null, default Mapbox designed views will be used.
      */
     fun configure(viewProvider: ViewProvider) {
+        // add views
         binding.mapContainer.addView(mapView)
-        if (navigationViewOptions.renderManeuvers) {
-            maneuverView =
-                viewProvider.maneuverProvider?.invoke() ?: MapboxManeuverView(context)
-            binding.maneuverContainer.addView(maneuverView)
-        }
-        if (navigationViewOptions.renderSpeedLimit) {
-            speedLimitView =
-                viewProvider.speedLimitProvider?.invoke() ?: MapboxSpeedLimitView(context)
-            binding.speedLimitContainer.addView(speedLimitView)
-        }
-        if (navigationViewOptions.renderTripProgress) {
-            tripProgressView =
-                viewProvider.tripProgressProvider?.invoke() ?: MapboxTripProgressView(context)
-            binding.speedLimitContainer.addView(tripProgressView)
-        }
-        if (navigationViewOptions.renderVolumeButton) {
-            soundButtonView =
-                viewProvider.soundButtonProvider?.invoke() ?: MapboxSoundButton(context)
-            binding.volumeContainer.addView(soundButtonView)
-        }
-        if (navigationViewOptions.renderRecenterButton) {
-            recenterButtonView =
-                viewProvider.recenterButtonProvider?.invoke() ?: MapboxRecenterButton(context)
-            binding.recenterContainer.addView(recenterButtonView)
-        }
-        if (navigationViewOptions.renderRouteOverviewButton) {
-            routeOverviewButtonView = viewProvider.routeOverviewButtonProvider?.invoke()
-                ?: MapboxRouteOverviewButton(context)
-            binding.routeOverviewContainer.addView(routeOverviewButtonView)
-        }
+        maneuverView = viewProvider.maneuverProvider?.invoke() ?: MapboxManeuverView(context)
+        binding.maneuverContainer.addView(maneuverView)
+        speedLimitView = viewProvider.speedLimitProvider?.invoke() ?: MapboxSpeedLimitView(context)
+        binding.speedLimitContainer.addView(speedLimitView)
+        tripProgressView =
+            viewProvider.tripProgressProvider?.invoke() ?: MapboxTripProgressView(context)
+        binding.speedLimitContainer.addView(tripProgressView)
+        soundButtonView = viewProvider.soundButtonProvider?.invoke() ?: MapboxSoundButton(context)
+        binding.volumeContainer.addView(soundButtonView)
+        recenterButtonView =
+            viewProvider.recenterButtonProvider?.invoke() ?: MapboxRecenterButton(context)
+        binding.recenterContainer.addView(recenterButtonView)
+        routeOverviewButtonView =
+            viewProvider.routeOverviewButtonProvider?.invoke() ?: MapboxRouteOverviewButton(context)
+        binding.routeOverviewContainer.addView(routeOverviewButtonView)
+
+        // add lifecycle
         lifeCycleOwner.lifecycleScope.launch {
             actions().collect { navigationViewModel::processAction }
         }
         lifeCycleOwner.lifecycleScope.launch {
             navigationViewModel.viewStates().collect { navigationViewState ->
-                when (navigationViewState) {
-                    is NavigationViewState.UponEmpty -> {
-                        renderUponEmpty(state = navigationViewState)
-                    }
-                    is NavigationViewState.UponFreeDrive -> {
-                        renderUponFreeDrive(state = navigationViewState)
-                    }
-                    is NavigationViewState.UponRoutePreview -> {
-                        renderUponRoutePreview(state = navigationViewState)
-                    }
-                    is NavigationViewState.UponActiveNavigation -> {
-                        renderUponActiveNavigation(state = navigationViewState)
-                    }
-                    is NavigationViewState.UponArrival -> {
-                        renderUponArrival(state = navigationViewState)
-                    }
-                }
+                updateContainersVisibility(navigationViewState)
+                // todo update containers data
             }
         }
+
+        update(navigationViewOptions)
+    }
+
+    fun update(navigationViewOptions: NavigationViewOptions) {
+        this.navigationViewOptions = navigationViewOptions
+        // todo trigger relayout
     }
 
     @ExperimentalCoroutinesApi
@@ -180,54 +159,20 @@ class NavigationView: ConstraintLayout, LifecycleObserver {
         NavigationStateTransitionAction.ToEmpty(from = NavigationState.Empty)
     )
 
-    private fun renderUponEmpty(state: NavigationViewState) {
-        binding.volumeContainer.visibility = GONE
-        binding.recenterContainer.visibility = GONE
-        binding.maneuverContainer.visibility = GONE
-        binding.infoPanelContainer.visibility = GONE
-        binding.speedLimitContainer.visibility = GONE
-        binding.routeOverviewContainer.visibility = GONE
-        // Based on state populate the data on the views
+    private fun updateContainersVisibility(state: NavigationViewState) {
+        binding.volumeContainer.visibility = state.volumeContainerVisible.toVisibility()
+        binding.recenterContainer.visibility = state.recenterContainerVisible.toVisibility()
+        binding.maneuverContainer.visibility = state.maneuverContainerVisible.toVisibility()
+        binding.infoPanelContainer.visibility = state.infoPanelContainerVisible.toVisibility()
+        binding.speedLimitContainer.visibility = state.speedLimitContainerVisible.toVisibility()
+        binding.routeOverviewContainer.visibility =
+            state.routeOverviewContainerVisible.toVisibility()
     }
+}
 
-    private fun renderUponFreeDrive(state: NavigationViewState) {
-        binding.volumeContainer.visibility = GONE
-        binding.maneuverContainer.visibility = GONE
-        binding.recenterContainer.visibility = GONE
-        binding.infoPanelContainer.visibility = GONE
-        binding.speedLimitContainer.visibility = VISIBLE
-        binding.routeOverviewContainer.visibility = VISIBLE
-        // Based on state populate the data on the views
-    }
-
-    private fun renderUponRoutePreview(state: NavigationViewState) {
-        binding.volumeContainer.visibility = GONE
-        binding.maneuverContainer.visibility = GONE
-        binding.speedLimitContainer.visibility = GONE
-        binding.recenterContainer.visibility = VISIBLE
-        binding.infoPanelContainer.visibility = VISIBLE
-        binding.routeOverviewContainer.visibility = VISIBLE
-        // Based on state populate the data on the views
-    }
-
-    private fun renderUponActiveNavigation(state: NavigationViewState) {
-        binding.volumeContainer.visibility = VISIBLE
-        binding.recenterContainer.visibility = VISIBLE
-        binding.maneuverContainer.visibility = VISIBLE
-        binding.infoPanelContainer.visibility = VISIBLE
-        binding.speedLimitContainer.visibility = VISIBLE
-        binding.routeOverviewContainer.visibility = VISIBLE
-        // Based on state populate the data on the views
-    }
-
-    private fun renderUponArrival(state: NavigationViewState) {
-        binding.volumeContainer.visibility = VISIBLE
-        binding.recenterContainer.visibility = VISIBLE
-        binding.maneuverContainer.visibility = VISIBLE
-        binding.infoPanelContainer.visibility = VISIBLE
-        binding.speedLimitContainer.visibility = VISIBLE
-        binding.routeOverviewContainer.visibility = VISIBLE
-        // Based on state populate the data on the views
-    }
+private fun Boolean.toVisibility() = if (this) {
+    View.VISIBLE
+} else {
+    View.GONE
 }
 

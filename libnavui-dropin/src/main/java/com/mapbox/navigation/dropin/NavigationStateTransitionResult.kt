@@ -1,13 +1,25 @@
 package com.mapbox.navigation.dropin
 
 internal sealed class NavigationStateTransitionResult {
-    data class ToEmpty(val state: NavigationState): NavigationStateTransitionResult()
+    abstract val state: NavigationState
 
-    data class ToFreeDrive(val state: NavigationState): NavigationStateTransitionResult()
+    data class ToEmpty(
+        override val state: NavigationState = NavigationState.Empty
+    ) : NavigationStateTransitionResult()
 
-    data class ToRoutePreview(val state: NavigationState): NavigationStateTransitionResult()
+    data class ToFreeDrive(
+        override val state: NavigationState = NavigationState.FreeDrive
+    ) : NavigationStateTransitionResult()
 
-    data class ToActiveNavigation(val state: NavigationState): NavigationStateTransitionResult()
+    data class ToRoutePreview(
+        override val state: NavigationState = NavigationState.RoutePreview
+    ) : NavigationStateTransitionResult()
 
-    data class ToArrival(val state: NavigationState): NavigationStateTransitionResult()
+    data class ToActiveNavigation(
+        override val state: NavigationState = NavigationState.ActiveNavigation
+    ) : NavigationStateTransitionResult()
+
+    data class ToArrival(
+        override val state: NavigationState = NavigationState.Arrival
+    ) : NavigationStateTransitionResult()
 }
