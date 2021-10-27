@@ -17,9 +17,6 @@ import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
  */
 class MapboxSecondaryManeuver : AppCompatTextView {
 
-    private var defStyleAttr = 0
-    private var attrs: AttributeSet? = null
-
     /**
      *
      * @param context Context
@@ -46,10 +43,7 @@ class MapboxSecondaryManeuver : AppCompatTextView {
         context: Context,
         attrs: AttributeSet?,
         defStyleAttr: Int
-    ) : super(context, attrs, defStyleAttr) {
-        this.attrs = attrs
-        this.defStyleAttr = defStyleAttr
-    }
+    ) : super(context, attrs, defStyleAttr)
 
     private var leftDrawable = ContextCompat.getDrawable(
         context, R.drawable.mapbox_ic_exit_arrow_left
@@ -67,7 +61,7 @@ class MapboxSecondaryManeuver : AppCompatTextView {
      */
     @JvmOverloads
     fun render(maneuver: SecondaryManeuver?, roadShield: RoadShield? = null) {
-        val exitView = MapboxExitText(context, attrs, defStyleAttr)
+        val exitView = MapboxExitText(context)
         exitView.setExitStyle(exitBackground, leftDrawable, rightDrawable)
         val instruction = ManeuverInstructionGenerator.generateSecondary(
             context,
