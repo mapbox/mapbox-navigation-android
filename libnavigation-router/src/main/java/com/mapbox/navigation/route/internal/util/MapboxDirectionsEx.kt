@@ -1,5 +1,3 @@
-@file:JvmName("MapboxDirectionsEx")
-
 package com.mapbox.navigation.route.internal.util
 
 import com.mapbox.api.directions.v5.MapboxDirections

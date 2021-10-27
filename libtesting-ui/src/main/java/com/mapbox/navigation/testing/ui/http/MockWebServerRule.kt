@@ -21,7 +21,7 @@ class MockWebServerRule : TestWatcher() {
     /**
      * @see [MockWebServer.url]
      */
-    val baseUrl = webServer.url("").toString()
+    val baseUrl = webServer.url("").toString().dropLast(1) // drop the last `/`, RouteOptions::toUrl() will add it
 
     /**
      * Add [MockRequestHandler]s to this list for each request that should be handled.

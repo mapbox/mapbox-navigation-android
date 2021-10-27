@@ -36,6 +36,9 @@ import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.Router
 import com.mapbox.navigator.RouterError
+import com.mapbox.navigator.RouterFactory
+import com.mapbox.navigator.RouterInterface
+import com.mapbox.navigator.RouterType
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -69,6 +72,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override var roadObjectsStore: RoadObjectsStore? = null
     override lateinit var experimental: Experimental
     override lateinit var cache: CacheHandle
+    override lateinit var router: RouterInterface
     private var logger: Logger? = null
     private val nativeNavigatorRecreationObservers =
         CopyOnWriteArraySet<NativeNavigatorRecreationObserver>()
@@ -107,6 +111,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         roadObjectsStore = nativeComponents.navigator.roadObjectStore()
         experimental = nativeComponents.navigator.experimental
         cache = nativeComponents.cache
+        router = RouterFactory.build(RouterType.HYBRID, cache, historyRecorderHandle)
         this.logger = logger
         this.accessToken = accessToken
         return this

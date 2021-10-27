@@ -1,0 +1,128 @@
+{
+  "geometry": "",
+  "legs": [
+    {
+      "summary": "Fishburn Road",
+      "weight": 111.1,
+      "duration": 222.5,
+      "steps": [
+        {
+          "intersections": [
+            {
+              "out": 0,
+              "entry": [
+                true
+              ],
+              "bearings": [
+                82
+              ],
+              "location": [
+                -76.299169,
+                40.042522
+              ]
+            },
+            {
+              "out": 0,
+              "in": 1,
+              "entry": [
+                true,
+                false,
+                true
+              ],
+              "bearings": [
+                75,
+                255,
+                345
+              ],
+              "location": [
+                -76.298855,
+                40.042556
+              ]
+            },
+            {
+              "out": 0,
+              "in": 2,
+              "entry": [
+                true,
+                true,
+                false,
+                true
+              ],
+              "bearings": [
+                75,
+                165,
+                255,
+                345
+              ],
+              "location": [
+                -76.297812,
+                40.042673
+              ]
+            }
+          ],
+          "driving_side": "right",
+          "geometry": "s`_kkA`y|opCcAsReEcy@Eq@]oDa@gEEu@uKgwB",
+          "mode": "driving",
+          "maneuver": {
+            "bearing_after": 82,
+            "bearing_before": 0,
+            "location": [
+              -76.299169,
+              40.042522
+            ],
+            "modifier": "left",
+            "type": "depart",
+            "instruction": "Head east on East Fulton Street"
+          },
+          "weight": 63.8,
+          "duration": 50.8,
+          "name": "East Fulton Street",
+          "distance": 293.2,
+          "voiceInstructions": [
+            {
+              "distanceAlongGeometry": 293.2,
+              "announcement": "Head east on East Fulton Street, then turn right onto North Ann Street",
+              "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Head east on East Fulton Street, then turn right onto North Ann Street</prosody></amazon:effect></speak>"
+            },
+            {
+              "distanceAlongGeometry": 86.6,
+              "announcement": "Turn right onto North Ann Street, then turn left onto East Chestnut Street (PA 23 East)",
+              "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Turn right onto North Ann Street, then turn left onto East Chestnut Street (PA <say-as interpret-as=\"address\">23</say-as> East)</prosody></amazon:effect></speak>"
+            }
+          ],
+          "bannerInstructions": [
+            {
+              "distanceAlongGeometry": 293.2,
+              "primary": {
+                "type": "turn",
+                "modifier": "right",
+                "components": [
+                  {
+                    "text": "North",
+                    "type": "text",
+                    "abbr": "N",
+                    "abbr_priority": 1
+                  },
+                  {
+                    "text": "Ann Street",
+                    "type": "text",
+                    "abbr": "Ann St",
+                    "abbr_priority": 0
+                  }
+                ],
+                "text": "North Ann Street"
+              },
+              "secondary": null
+            }
+          ]
+        }
+      ],
+      "distance": 111222.7
+    }
+  ],
+  "weight_name": "routability",
+  "weight": 123.1,
+  "duration": 444.5,
+  "distance": 111222.7,
+  "voiceLocale": "en-US"
+}
