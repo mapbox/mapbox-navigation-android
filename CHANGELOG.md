@@ -2,6 +2,36 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.1.0-beta.1 - October 28, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
+- :warning: The Mapbox Electronic Horizon feature of the Mapbox Navigation SDK is in public beta and is subject to changes, including its pricing. Use of the feature is subject to the beta product restrictions in the Mapbox Terms of Service. Mapbox reserves the right to eliminate any free tier or free evaluation offers at any time and require customers to place an order to purchase the Mapbox Electronic Horizon feature, regardless of the level of use of the feature. [#4985](https://github.com/mapbox/mapbox-navigation-android/pull/4985)
+- Removed deprecated method from `RouteOptionsUpdater`. [#4970](https://github.com/mapbox/mapbox-navigation-android/pull/4970)
+- Added a new `Road` object that can be obtained thorough `LocationMatcherResult`. [#4972](https://github.com/mapbox/mapbox-navigation-android/pull/4972)
+- Added `MapboxRoadNameLabelApi` and `MapboxRoadNameLabelView` to support road name label feature. [#4974](https://github.com/mapbox/mapbox-navigation-android/pull/4974)
+- Fixed an issue where the route line's elements (the primary route, alternatives, or the destination symbol) might intermittently not render or not update. [#4983](https://github.com/mapbox/mapbox-navigation-android/pull/4983)
+- Added continuous route alternatives. [#4892](https://github.com/mapbox/mapbox-navigation-android/pull/4892)
+  - Known issues: Taking an alternative route triggers a reroute
+  - Known issues: onRouteAlternatives RouterOrigin is always Onboard even if it was requested Offboard
+- Moved `MapboxRouteLineApiExtensions` to a stable `com.mapbox.navigation.ui.maps.route.line` package. [#5001](https://github.com/mapbox/mapbox-navigation-android/pull/5001)
+- Fixed spread legacy `reason` when subscribing on routes updated via `RoutesObserver`. [#5006](https://github.com/mapbox/mapbox-navigation-android/pull/5006)
+- Removed unused `NavigationOption#isFromNavigationUi` option. [#5019](https://github.com/mapbox/mapbox-navigation-android/pull/5019)
+- Updated standalone components, so that they are no longer tied to `MapboxNavigation` lifecycle. Warning: when such a component is no longer in use, its `cancel` or equivalent function should be called in order to avoid leaks. [#5031](https://github.com/mapbox/mapbox-navigation-android/pull/5031)
+- Fixed clear `VoiceInstructionsTextPlayer` `currentPlay` when `shutdown`. [#5032](https://github.com/mapbox/mapbox-navigation-android/pull/5032)
+- Changed the `iconKeepUpright` parameter for the layer hosting the waypoints is set to `true` to address issue with some custom icons that may be intended to appear like 3D pins. [#5047](https://github.com/mapbox/mapbox-navigation-android/pull/5047)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.0.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0))
+- Mapbox Navigation Native `v79.0.0`
+- Mapbox Core Common `v20.0.0`
+- Mapbox Java `v6.0.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.0.0 - October 21, 2021
 
 Today, we are releasing Navigation SDK (Core & UI components) v2.0 🎉 🚗 🚀
