@@ -35,6 +35,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L
  * @param deviceProfile [DeviceProfile] defines how navigation data should be interpreted
  * @param eHorizonOptions [EHorizonOptions] defines configuration for the Electronic Horizon
  * @param routeRefreshOptions defines configuration for refreshing routes
+ * @param rerouteOptions defines configuration for reroute
  * @param routeAlternativesOptions defines configuration for observing alternatives while navigating
  * @param incidentsOptions defines configuration for live incidents
  * @param historyRecorderOptions defines configuration for recording navigation events
@@ -53,6 +54,7 @@ class NavigationOptions private constructor(
     val deviceProfile: DeviceProfile,
     val eHorizonOptions: EHorizonOptions,
     val routeRefreshOptions: RouteRefreshOptions,
+    val rerouteOptions: RerouteOptions,
     val routeAlternativesOptions: RouteAlternativesOptions,
     val incidentsOptions: IncidentsOptions,
     val historyRecorderOptions: HistoryRecorderOptions,
@@ -74,6 +76,7 @@ class NavigationOptions private constructor(
         deviceProfile(deviceProfile)
         eHorizonOptions(eHorizonOptions)
         routeRefreshOptions(routeRefreshOptions)
+        rerouteOptions(rerouteOptions)
         routeAlternativesOptions(routeAlternativesOptions)
         incidentsOptions(incidentsOptions)
         historyRecorderOptions(historyRecorderOptions)
@@ -101,6 +104,7 @@ class NavigationOptions private constructor(
         if (deviceProfile != other.deviceProfile) return false
         if (eHorizonOptions != other.eHorizonOptions) return false
         if (routeRefreshOptions != other.routeRefreshOptions) return false
+        if (rerouteOptions != other.rerouteOptions) return false
         if (routeAlternativesOptions != other.routeAlternativesOptions) return false
         if (incidentsOptions != other.incidentsOptions) return false
         if (historyRecorderOptions != other.historyRecorderOptions) return false
@@ -125,6 +129,7 @@ class NavigationOptions private constructor(
         result = 31 * result + deviceProfile.hashCode()
         result = 31 * result + eHorizonOptions.hashCode()
         result = 31 * result + routeRefreshOptions.hashCode()
+        result = 31 * result + rerouteOptions.hashCode()
         result = 31 * result + routeAlternativesOptions.hashCode()
         result = 31 * result + incidentsOptions.hashCode()
         result = 31 * result + historyRecorderOptions.hashCode()
@@ -149,6 +154,7 @@ class NavigationOptions private constructor(
             "deviceProfile=$deviceProfile, " +
             "eHorizonOptions=$eHorizonOptions, " +
             "routeRefreshOptions=$routeRefreshOptions, " +
+            "rerouteOptions=$rerouteOptions, " +
             "routeAlternativesOptions=$routeAlternativesOptions, " +
             "incidentsOptions=$incidentsOptions, " +
             "historyRecorderOptions=$historyRecorderOptions, " +
@@ -179,6 +185,7 @@ class NavigationOptions private constructor(
         private var deviceProfile: DeviceProfile = DeviceProfile.Builder().build()
         private var eHorizonOptions: EHorizonOptions = EHorizonOptions.Builder().build()
         private var routeRefreshOptions: RouteRefreshOptions = RouteRefreshOptions.Builder().build()
+        private var rerouteOptions: RerouteOptions = RerouteOptions.Builder().build()
         private var routeAlternativesOptions: RouteAlternativesOptions =
             RouteAlternativesOptions.Builder().build()
         private var incidentsOptions: IncidentsOptions = IncidentsOptions.Builder().build()
@@ -253,6 +260,12 @@ class NavigationOptions private constructor(
             apply { this.routeRefreshOptions = routeRefreshOptions }
 
         /**
+         * Defines configuration for reroute
+         */
+        fun rerouteOptions(rerouteOptions: RerouteOptions): Builder =
+            apply { this.rerouteOptions = rerouteOptions }
+
+        /**
          * Defines configuration for route refresh
          */
         fun routeAlternativesOptions(routeAlternativesOptions: RouteAlternativesOptions): Builder =
@@ -295,6 +308,7 @@ class NavigationOptions private constructor(
                 deviceProfile = deviceProfile,
                 eHorizonOptions = eHorizonOptions,
                 routeRefreshOptions = routeRefreshOptions,
+                rerouteOptions = rerouteOptions,
                 routeAlternativesOptions = routeAlternativesOptions,
                 incidentsOptions = incidentsOptions,
                 historyRecorderOptions = historyRecorderOptions,

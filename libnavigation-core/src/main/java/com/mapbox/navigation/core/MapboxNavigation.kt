@@ -440,6 +440,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             directionsSession,
             tripSession,
             routeOptionsProvider,
+            navigationOptions.rerouteOptions,
             threadController,
             logger
         )

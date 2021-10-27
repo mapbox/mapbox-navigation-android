@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.navigation.base.options.RerouteOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -24,6 +25,7 @@ internal class MapboxRerouteController(
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession,
     private val routeOptionsUpdater: RouteOptionsUpdater,
+    private val rerouteOptions: RerouteOptions,
     threadController: ThreadController,
     private val logger: Logger
 ) : RerouteController {
@@ -54,6 +56,43 @@ internal class MapboxRerouteController(
             observers.forEach { it.onRerouteStateChanged(field) }
         }
 
+    private companion object {
+        private const val TAG = "MbxRerouteController"
+
+        /**
+         * Max dangerous maneuvers radius meters. See [RouteOptions.avoidManeuverRadius]
+         */
+        private const val MAX_DANGEROUS_MANEUVERS_RADIUS = 1000
+
+        /**
+         * Apply reroute options. Speed must be provided as **m/s**
+         */
+        private fun RouteOptions?.applyRerouteOptions(
+            rerouteOptions: RerouteOptions,
+            speed: Float?
+        ): RouteOptions? {
+            if (this == null || speed == null) {
+                return this
+            }
+
+            val avoidManeuverRadius = rerouteOptions.avoidManeuverSeconds.let { seconds ->
+                if (seconds == 0) {
+                    0
+                } else {
+                    (speed / seconds).toInt()
+                }
+            }.let { meters ->
+                if (meters > MAX_DANGEROUS_MANEUVERS_RADIUS) {
+                    MAX_DANGEROUS_MANEUVERS_RADIUS
+                } else {
+                    meters
+                }
+            }
+
+            return toBuilder().avoidManeuverRadius(avoidManeuverRadius).build()
+        }
+    }
+
     override fun reroute(routesCallback: RerouteController.RoutesCallback) {
         interrupt()
         state = RerouteState.FetchingRoute
@@ -61,8 +100,15 @@ internal class MapboxRerouteController(
             Tag(TAG),
             Message("Fetching route")
         )
+
+        val routeOptions = directionsSession.getPrimaryRouteOptions()
+            ?.applyRerouteOptions(
+                rerouteOptions,
+                tripSession.locationMatcherResult?.enhancedLocation?.speed
+            )
+
         routeOptionsUpdater.update(
-            directionsSession.getPrimaryRouteOptions(),
+            routeOptions,
             tripSession.getRouteProgress(),
             tripSession.locationMatcherResult,
         )
@@ -148,9 +194,5 @@ internal class MapboxRerouteController(
                 }
             }
         )
-    }
-
-    private companion object {
-        private const val TAG = "MbxRerouteController"
     }
 }
