@@ -56,6 +56,8 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
 
     @Before
     fun setup() {
+        setupMockRequestHandlers(coordinates)
+
         mapboxNavigation = MapboxNavigationProvider.create(
             NavigationOptions.Builder(activity)
                 .accessToken(getMapboxAccessTokenFromResources(activity))
@@ -76,7 +78,6 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     @Test
     fun expect_route_refresh_to_update_traffic_annotations() {
         // Request a route.
-        setupMockRequestHandlers(coordinates)
         val routes = requestDirectionsRouteSync(coordinates).reversed()
 
         // Create an observer resource that captures the routes.
