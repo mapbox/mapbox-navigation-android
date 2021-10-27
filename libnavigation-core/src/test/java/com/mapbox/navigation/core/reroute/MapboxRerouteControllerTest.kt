@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.reroute
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
+import com.mapbox.navigation.base.options.RerouteOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.directions.session.DirectionsSession
@@ -43,6 +44,9 @@ class MapboxRerouteControllerTest {
     private lateinit var routeOptionsUpdater: RouteOptionsUpdater
 
     @MockK
+    private lateinit var rerouteOptions: RerouteOptions
+
+    @MockK
     private lateinit var logger: Logger
 
     @MockK
@@ -71,6 +75,7 @@ class MapboxRerouteControllerTest {
                 directionsSession,
                 tripSession,
                 routeOptionsUpdater,
+                rerouteOptions,
                 ThreadController(),
                 logger
             )
@@ -112,7 +117,7 @@ class MapboxRerouteControllerTest {
         rerouteController.reroute(routeCallback)
         routeRequestCallback.captured.onRoutesReady(mockk(), mockk())
 
-        verify(exactly = 1) {
+        verify(exactly = 2) {
             tripSession.locationMatcherResult
         }
         verify(exactly = 1) {
@@ -318,6 +323,52 @@ class MapboxRerouteControllerTest {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
         }
         verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
+    }
+
+    @Test
+    fun reroute_options_seconds_to_meters_radius() {
+        val routeRequestCallback = slot<RouterCallback>()
+        every {
+            directionsSession.requestRoutes(
+                routeOptionsFromSuccessResult,
+                capture(routeRequestCallback)
+            )
+        } returns 1L
+
+        listOf(
+            Triple(200f, 1, 200),
+            Triple(0f, 1, 0),
+            Triple(1000f, 1, 1000),
+            Triple(5000f, 1, 1000),
+            Triple(200f, 0, 0),
+        ).forEach { (speed, secondsRadius, expectedMetersRadius) ->
+            val mockRo = mockk<RouteOptions>()
+            val mockRoBuilder = mockk<RouteOptions.Builder>()
+            every { directionsSession.getPrimaryRouteOptions() } returns mockRo
+            every { mockRo.toBuilder() } returns mockRoBuilder
+            every { mockRoBuilder.avoidManeuverRadius(any()) } returns mockRoBuilder
+            every { mockRoBuilder.build() } returns mockRo
+            mockRouteOptionsResult(successFromResult)
+            addRerouteStateObserver()
+            every { rerouteOptions.avoidManeuverSeconds } returns secondsRadius
+            every {
+                tripSession.locationMatcherResult
+            } returns mockk {
+                every {
+                    enhancedLocation
+                } returns mockk {
+                    every { getSpeed() } returns speed
+                }
+            }
+
+            rerouteController.reroute(routeCallback)
+
+            verify(exactly = 1) {
+                mockRoBuilder.avoidManeuverRadius(expectedMetersRadius)
+            }
+        }
+
+        routeRequestCallback.captured.onRoutesReady(mockk(), mockk())
     }
 
     @Test

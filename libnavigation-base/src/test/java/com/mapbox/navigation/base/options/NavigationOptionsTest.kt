@@ -66,6 +66,7 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
             .timeFormatType(1)
             .eHorizonOptions(mockk())
             .routeRefreshOptions(mockk())
+            .rerouteOptions(mockk())
             .routeAlternativesOptions(mockk())
             .incidentsOptions(mockk())
             .historyRecorderOptions(
