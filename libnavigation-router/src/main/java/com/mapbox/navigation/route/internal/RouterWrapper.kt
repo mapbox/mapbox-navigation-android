@@ -6,7 +6,6 @@ package com.mapbox.navigation.route.internal
 
 import com.mapbox.annotation.module.MapboxModule
 import com.mapbox.annotation.module.MapboxModuleType
-import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.model.Message
@@ -16,6 +15,7 @@ import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.utils.parseDirectionsResponse
 import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
 import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -27,7 +27,6 @@ import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.RoutingProfile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
 import java.net.URL
 
 @MapboxModule(MapboxModuleType.NavigationRouter)
@@ -85,7 +84,9 @@ class RouterWrapper(
                 },
                 {
                     mainJobControl.scope.launch {
-                        val routes = parseDirectionsResponse(it, routeOptions)
+                        val routes = parseDirectionsResponse(it, routeOptions) {
+                            logI(TAG, Message("Response metadata: $it"))
+                        }
                         if (routes.isNullOrEmpty()) {
                             callback.onFailure(
                                 listOf(
@@ -193,33 +194,8 @@ class RouterWrapper(
         router.cancelAll()
     }
 
-    private suspend fun parseDirectionsResponse(
-        json: String,
-        options: RouteOptions?
-    ): List<DirectionsRoute> =
-        withContext(ThreadController.IODispatcher) {
-            val jsonObject = JSONObject(json)
-            val uuid: String? = if (jsonObject.has(UUID)) {
-                jsonObject.getString(UUID)
-            } else {
-                null
-            }
-
-            // TODO remove after https://github.com/mapbox/navigation-sdks/issues/1229
-            if (jsonObject.has(METADATA)) {
-                logI(TAG, Message("Response metadata: ${jsonObject.getString(METADATA)}"))
-            }
-
-            // TODO simplify when https://github.com/mapbox/mapbox-java/issues/1292 is finished
-            val response = DirectionsResponse.fromJson(json, options, uuid)
-
-            response.routes()
-        }
-
     private companion object {
         private val TAG = Tag("MbxRouterWrapper")
-        private const val UUID = "uuid"
-        private const val METADATA = "metadata"
         private const val ROUTES_LIST_EMPTY = "routes list is empty"
         private const val REQUEST_FAILURE = -1L
     }

@@ -115,7 +115,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
-        mapboxNavigation.unregisterRouteAlternativesObserver(requestAlternativesObserver)
+        mapboxNavigation.unregisterRouteAlternativesObserver(alternativesObserver)
     }
 
     override fun onDestroy() {
@@ -134,7 +134,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
-        mapboxNavigation.registerRouteAlternativesObserver(requestAlternativesObserver)
+        mapboxNavigation.registerRouteAlternativesObserver(alternativesObserver)
         mapboxReplayer.pushRealLocation(this, 0.0)
         mapboxReplayer.playbackSpeed(1.5)
         mapboxReplayer.play()
@@ -201,12 +201,11 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
     }
 
     /**
-     * Whenever alternatives have changed, request a new set of alternatives.
+     * Called whenever alternatives are available.
      */
-    private val requestAlternativesObserver =
-        RouteAlternativesObserver { _, _, _ ->
-            mapboxNavigation.requestAlternativeRoutes()
-        }
+    private val alternativesObserver = RouteAlternativesObserver { _, _, _ ->
+        // do nothing
+    }
 
     private fun findRoute(origin: Point?, destination: Point?) {
         val routeOptions = RouteOptions.builder()
