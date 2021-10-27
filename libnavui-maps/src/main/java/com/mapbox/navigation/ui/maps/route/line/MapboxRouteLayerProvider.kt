@@ -269,6 +269,7 @@ internal class MapboxRouteLayerProvider(
             .iconPitchAlignment(IconPitchAlignment.MAP)
             .iconAllowOverlap(true)
             .iconIgnorePlacement(true)
+            .iconKeepUpright(true)
     }
 
     private fun initializeRouteLayer(
