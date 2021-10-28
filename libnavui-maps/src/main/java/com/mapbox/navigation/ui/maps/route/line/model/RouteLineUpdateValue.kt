@@ -12,6 +12,34 @@ class RouteLineUpdateValue internal constructor(
 ) {
 
     /**
+     * @return a class with mutable values for replacing.
+     */
+    fun toMutableValue() = MutableRouteLineUpdateValue(
+        primaryRouteLineDynamicData,
+        alternativeRouteLinesDynamicData
+    )
+
+    /**
+     * Represents the mutable data for updating the appearance of the route lines.
+     *
+     * @param primaryRouteLineDynamicData the data describing the primary route line
+     * @param alternativeRouteLinesDynamicData the data describing alternative route lines
+     */
+    class MutableRouteLineUpdateValue internal constructor(
+        var primaryRouteLineDynamicData: RouteLineDynamicData,
+        var alternativeRouteLinesDynamicData: List<RouteLineDynamicData>
+    ) {
+
+        /**
+         * @return a RouteLineUpdateValue
+         */
+        fun toImmutableValue() = RouteLineUpdateValue(
+            primaryRouteLineDynamicData,
+            alternativeRouteLinesDynamicData
+        )
+    }
+
+    /**
      * Indicates whether some other object is "equal to" this one.
      */
     override fun equals(other: Any?): Boolean {

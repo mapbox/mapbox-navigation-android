@@ -16,6 +16,42 @@ class RouteLineDynamicData internal constructor(
 ) {
 
     /**
+     * @return a class with mutable values for replacing.
+     */
+    fun toMutableValue() = MutableRouteLineDynamicData(
+        baseExpressionProvider,
+        casingExpressionProvider,
+        trafficExpressionProvider,
+        restrictedSectionExpressionProvider
+    )
+
+    /**
+     * Provides a mutable representation of information needed to draw a route.
+     *
+     * @param baseExpressionProvider expression used to style the base of the line
+     * @param casingExpressionProvider expression used to style the case of the line
+     * @param trafficExpressionProvider expression used to style the congestion colors on the line
+     * @param restrictedSectionExpressionProvider expression used to style the restricted sections on the line
+     */
+    class MutableRouteLineDynamicData internal constructor(
+        var baseExpressionProvider: RouteLineExpressionProvider,
+        var casingExpressionProvider: RouteLineExpressionProvider,
+        var trafficExpressionProvider: RouteLineExpressionProvider?,
+        var restrictedSectionExpressionProvider: RouteLineExpressionProvider?
+    ) {
+
+        /**
+         * @return a RouteLineDynamicData
+         */
+        fun toImmutableValue() = RouteLineDynamicData(
+            baseExpressionProvider,
+            casingExpressionProvider,
+            trafficExpressionProvider,
+            restrictedSectionExpressionProvider
+        )
+    }
+
+    /**
      * Indicates whether some other object is "equal to" this one.
      */
     override fun equals(other: Any?): Boolean {
