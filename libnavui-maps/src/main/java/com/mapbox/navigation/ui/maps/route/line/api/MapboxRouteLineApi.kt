@@ -954,13 +954,15 @@ class MapboxRouteLineApi(
              * Add to the count of remaining points all of the remaining points on the current leg,
              * after the current step.
              */
-            val currentLegSteps = completeRoutePoints.nestedList[currentLegProgress.legIndex]
-            allRemainingPoints += if (currentStepProgress.stepIndex < currentLegSteps.size) {
-                currentLegSteps.slice(
-                    currentStepProgress.stepIndex + 1 until currentLegSteps.size - 1
-                ).flatten().size
-            } else {
-                0
+            if (currentLegProgress.legIndex < completeRoutePoints.nestedList.size) {
+                val currentLegSteps = completeRoutePoints.nestedList[currentLegProgress.legIndex]
+                allRemainingPoints += if (currentStepProgress.stepIndex < currentLegSteps.size) {
+                    currentLegSteps.slice(
+                        currentStepProgress.stepIndex + 1 until currentLegSteps.size - 1
+                    ).flatten().size
+                } else {
+                    0
+                }
             }
 
             /**

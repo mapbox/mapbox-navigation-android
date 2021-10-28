@@ -35,6 +35,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineGranularDistances
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.maps.route.line.model.RoutePoints
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
@@ -841,6 +842,57 @@ class MapboxRouteLineApiTest {
 
         verify { mockVanishingRouteLine.primaryRouteRemainingDistancesIndex = 6 }
     }
+
+    // This test is to address issue #4995. The test name doesn't accurately describe the condition.
+    // Although the cause of the error condition is unclear at this time the code can be modified
+    // to protect against such an exception occurring.
+    @Test
+    fun updateUpcomingRoutePointIndex_whenCompleteRoutePointsNotContainLegIndex() =
+        coroutineRule.runBlockingTest {
+            val realOptions = MapboxRouteLineOptions.Builder(ctx).build()
+            val route = getRoute()
+            val parsedRoutePoints = parseRoutePoints(route)
+            val mockVanishingRouteLine = mockk<VanishingRouteLine>(relaxUnitFun = true) {
+                every {
+                    primaryRoutePoints
+                } returns RoutePoints(listOf(), parsedRoutePoints!!.flatList)
+                every { vanishPointOffset } returns 0.0
+                every { primaryRouteLineGranularDistances } returns null
+            }
+            val options = mockk<MapboxRouteLineOptions> {
+                every { vanishingRouteLine } returns mockVanishingRouteLine
+                every { resourceProvider } returns realOptions.resourceProvider
+                every { displayRestrictedRoadSections } returns false
+                every {
+                    styleInactiveRouteLegsIndependently
+                } returns realOptions.styleInactiveRouteLegsIndependently
+                every { displaySoftGradientForTraffic } returns false
+                every { softGradientTransition } returns 30.0
+            }
+            val api = MapboxRouteLineApi(options)
+            val routeProgress = mockk<RouteProgress> {
+                every { currentLegProgress } returns mockk {
+                    every { legIndex } returns 0
+                    every { currentStepProgress } returns mockk {
+                        every { stepPoints } returns PolylineUtils.decode(
+                            route.legs()!![0].steps()!![2].geometry()!!,
+                            6
+                        )
+                        every { distanceTraveled } returns 0f
+                        every { step } returns mockk {
+                            every { distance() } returns route.legs()!![0].steps()!![2].distance()
+                        }
+                        every { stepIndex } returns 2
+                    }
+                }
+            }
+            api.updateVanishingPointState(RouteProgressState.TRACKING)
+            api.setRoutes(listOf(RouteLine(route, null)))
+
+            api.updateUpcomingRoutePointIndex(routeProgress)
+
+            verify { mockVanishingRouteLine.primaryRouteRemainingDistancesIndex = 6 }
+        }
 
     @Test
     fun updateUpcomingRoutePointIndex_whenPrimaryRoutePointsIsNull() =
