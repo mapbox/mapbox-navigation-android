@@ -2,9 +2,11 @@ package com.mapbox.navigation.core.telemetry.events
 
 import android.os.Build
 import android.os.Parcel
+import androidx.annotation.CallSuper
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
 import com.mapbox.android.telemetry.TelemetryUtils
+import com.mapbox.bindgen.Value
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.core.BuildConfig
 
@@ -93,4 +95,63 @@ internal abstract class NavigationEvent(
 
     override val metricName: String
         get() = getEventName()
+
+    @CallSuper
+    override fun toValue(): Value {
+        val fields = hashMapOf<String, Value>()
+
+        fields["version"] = version.toValue()
+        fields["operatingSystem"] = operatingSystem.toValue()
+        device?.let { fields["device"] = it.toValue() }
+        fields["sdkVersion"] = sdkVersion.toValue()
+        fields["created"] = created.toValue()
+        fields["volumeLevel"] = volumeLevel.toValue()
+        fields["batteryLevel"] = batteryLevel.toValue()
+        fields["screenBrightness"] = screenBrightness.toValue()
+        fields["batteryPluggedIn"] = batteryPluggedIn.toValue()
+        fields["connectivity"] = connectivity.toValue()
+        fields["audioType"] = audioType.toValue()
+        fields["applicationState"] = applicationState.toValue()
+        fields["event"] = event.toValue()
+
+        sdkIdentifier?.let { fields["sdkIdentifier"] = it.toValue() }
+
+        navigatorSessionIdentifier?.let { fields["navigatorSessionIdentifier"] = it.toValue() }
+        startTimestamp?.let { fields["startTimestamp"] = it.toValue() }
+        driverMode?.let { fields["driverMode"] = it.toValue() }
+        sessionIdentifier?.let { fields["sessionIdentifier"] = it.toValue() }
+        geometry?.let { fields["geometry"] = it.toValue() }
+        profile?.let { fields["profile"] = it.toValue() }
+        originalRequestIdentifier?.let { fields["originalRequestIdentifier"] = it.toValue() }
+        requestIdentifier?.let { fields["requestIdentifier"] = it.toValue() }
+        originalGeometry?.let { fields["originalGeometry"] = it.toValue() }
+        locationEngine?.let { fields["locationEngine"] = it.toValue() }
+        tripIdentifier?.let { fields["tripIdentifier"] = it.toValue() }
+        fields["lat"] = lat.toValue()
+        fields["lng"] = lng.toValue()
+        fields["simulation"] = simulation.toValue()
+        fields["absoluteDistanceToDestination"] = absoluteDistanceToDestination.toValue()
+        fields["percentTimeInPortrait"] = percentTimeInPortrait.toValue()
+        fields["percentTimeInForeground"] = percentTimeInForeground.toValue()
+        fields["distanceCompleted"] = distanceCompleted.toValue()
+        fields["distanceRemaining"] = distanceRemaining.toValue()
+        fields["durationRemaining"] = durationRemaining.toValue()
+        fields["eventVersion"] = eventVersion.toValue()
+        fields["estimatedDistance"] = estimatedDistance.toValue()
+        fields["estimatedDuration"] = estimatedDuration.toValue()
+        fields["rerouteCount"] = rerouteCount.toValue()
+        fields["originalEstimatedDistance"] = originalEstimatedDistance.toValue()
+        fields["originalEstimatedDuration"] = originalEstimatedDuration.toValue()
+        fields["stepCount"] = stepCount.toValue()
+        fields["originalStepCount"] = originalStepCount.toValue()
+        fields["legIndex"] = legIndex.toValue()
+        fields["legCount"] = legCount.toValue()
+        fields["stepIndex"] = stepIndex.toValue()
+        fields["voiceIndex"] = voiceIndex.toValue()
+        fields["bannerIndex"] = bannerIndex.toValue()
+        fields["totalStepCount"] = totalStepCount.toValue()
+        appMetadata?.let { fields["appMetadata"] = it.toValue() }
+
+        return Value.valueOf(fields)
+    }
 }
