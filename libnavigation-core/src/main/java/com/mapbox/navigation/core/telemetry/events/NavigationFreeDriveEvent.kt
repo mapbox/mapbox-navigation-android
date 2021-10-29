@@ -5,6 +5,7 @@ import android.os.Parcel
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
 import com.mapbox.android.telemetry.TelemetryUtils
+import com.mapbox.bindgen.Value
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 
@@ -54,6 +55,34 @@ internal class NavigationFreeDriveEvent(
         get() = NavigationMetrics.FREE_DRIVE
 
     override fun toJson(gson: Gson): String = gson.toJson(this)
+
+    override fun toValue(): Value {
+        val fields = hashMapOf<String, Value>()
+
+        fields["version"] = version.toValue()
+        fields["created"] = created.toValue()
+        fields["volumeLevel"] = volumeLevel.toValue()
+        fields["batteryLevel"] = batteryLevel.toValue()
+        fields["screenBrightness"] = screenBrightness.toValue()
+        fields["batteryPluggedIn"] = batteryPluggedIn.toValue()
+        fields["connectivity"] = connectivity.toValue()
+        fields["audioType"] = audioType.toValue()
+        fields["applicationState"] = applicationState.toValue()
+        fields["event"] = event.toValue()
+        fields["eventVersion"] = eventVersion.toValue()
+        locationEngine?.let { fields["locationEngine"] = it.toValue() }
+        fields["percentTimeInPortrait"] = percentTimeInPortrait.toValue()
+        fields["percentTimeInForeground"] = percentTimeInForeground.toValue()
+        fields["simulation"] = simulation.toValue()
+        navigatorSessionIdentifier?.let { fields["navigatorSessionIdentifier"] = it.toValue() }
+        startTimestamp?.let { fields["startTimestamp"] = it.toValue() }
+        sessionIdentifier?.let { fields["sessionIdentifier"] = it.toValue() }
+        location?.let { fields["location"] = it.toValue() }
+        eventType?.let { fields["eventType"] = it.toValue() }
+        appMetadata?.let { fields["appMetadata"] = it.toValue() }
+
+        return Value.valueOf(fields)
+    }
 
     override fun describeContents(): Int {
         return 0
