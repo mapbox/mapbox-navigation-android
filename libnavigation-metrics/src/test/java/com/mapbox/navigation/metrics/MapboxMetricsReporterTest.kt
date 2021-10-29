@@ -4,35 +4,77 @@ import android.os.Parcel
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
 import com.mapbox.android.telemetry.MapboxTelemetry
+import com.mapbox.bindgen.Value
+import com.mapbox.common.*
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 import com.mapbox.navigation.metrics.extensions.toTelemetryEvent
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
-import io.mockk.verify
+import io.mockk.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.Implementation
+import org.robolectric.annotation.Implements
+
+
+@Implements(EventsService::class)
+object ShadowEventsService {
+    @Implementation
+    open fun setEventsCollectionState(
+        enableCollection: Boolean,
+        callback: EventsServiceResponseCallback?
+    ) {}
+
+
+    @Implementation
+    open fun getEventsCollectionState(): Boolean {
+        return true
+    }
+}
 
 @ExperimentalCoroutinesApi
+@Config(shadows = [ShadowEventsService::class])
+@RunWith(RobolectricTestRunner::class)
 class MapboxMetricsReporterTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
+    private var eventsServiceMock = object : EventsServiceInterface {
+        override fun registerObserver(observer: EventsServiceObserver) {}
+
+        override fun unregisterObserver(observer: EventsServiceObserver) {}
+
+        override fun sendTurnstileEvent(
+            turnstileEvent: TurnstileEvent,
+            callback: EventsServiceResponseCallback?
+        ) {}
+
+        override fun sendEvent(
+            event: com.mapbox.common.Event,
+            callback: EventsServiceResponseCallback?
+        ) {}
+
+        override fun pauseEventsCollection() {}
+
+        override fun resumeEventsCollection() {}
+
+    }
+
     @Test
     fun telemetryEnabledWhenReporterInit() {
         val mapboxTelemetry = mockk<MapboxTelemetry>(relaxed = true)
+        val eventsService: EventsServiceInterface = mockk()
 
-        MapboxMetricsReporter.init(mapboxTelemetry, InternalJobControlFactory)
-
+        MapboxMetricsReporter.init(mapboxTelemetry, eventsServiceMock, InternalJobControlFactory)
         verify { mapboxTelemetry.enable() }
     }
 
@@ -93,8 +135,12 @@ class MapboxMetricsReporterTest {
 
     private fun initMetricsReporterWithTelemetry(): MapboxTelemetry {
         val mapboxTelemetry = mockk<MapboxTelemetry>(relaxed = true)
-        MapboxMetricsReporter.init(mapboxTelemetry, InternalJobControlFactory)
+        val eventsService: EventsServiceInterface = mockk()
 
+        mockkStatic(EventsService::class)
+        every { EventsService.setEventsCollectionState(any(), any()) } returns
+
+        MapboxMetricsReporter.init(mapboxTelemetry, eventsServiceMock, InternalJobControlFactory)
         return mapboxTelemetry
     }
 
@@ -115,5 +161,7 @@ class MapboxMetricsReporterTest {
         override fun describeContents(): Int = 0
 
         override fun toJson(gson: Gson): String = gson.toJson(this)
+
+        override fun toValue(): Value = Value.nullValue()
     }
 }

@@ -5,7 +5,7 @@ import android.location.Location
 import android.media.AudioManager
 import android.provider.Settings
 import android.text.TextUtils
-import com.mapbox.android.telemetry.TelemetryUtils
+import com.mapbox.common.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
