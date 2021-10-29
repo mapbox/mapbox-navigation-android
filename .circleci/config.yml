@@ -38,6 +38,7 @@ workflows:
               only:
                 - main
                 - release-v.*
+                - snapshot-1tap-common23
       - release:
           filters:
             tags:

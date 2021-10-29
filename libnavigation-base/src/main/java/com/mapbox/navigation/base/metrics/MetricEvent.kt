@@ -2,6 +2,7 @@ package com.mapbox.navigation.base.metrics
 
 import androidx.annotation.StringDef
 import com.google.gson.Gson
+import com.mapbox.bindgen.Value
 
 /**
  * An interface with types of metrics events that the SDK would send via Telemetry
@@ -40,6 +41,13 @@ interface MetricEvent {
      * @return String
      */
     fun toJson(gson: Gson): String
+
+    /**
+     * Present [MetricEvent] as [Value]
+     *
+     * @return Value
+     */
+    fun toValue(): Value
 }
 
 /**

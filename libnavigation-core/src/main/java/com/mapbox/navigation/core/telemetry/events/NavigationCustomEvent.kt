@@ -3,9 +3,11 @@ package com.mapbox.navigation.core.telemetry.events
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Parcel
+import androidx.annotation.CallSuper
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
 import com.mapbox.android.telemetry.TelemetryUtils
+import com.mapbox.bindgen.Value
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 
@@ -49,5 +51,30 @@ internal class NavigationCustomEvent : Event(), MetricEvent {
     }
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
+    }
+
+    @CallSuper
+    override fun toValue(): Value {
+        val fields = hashMapOf<String, Value>()
+
+        payload?.let { fields["payload"] = it.toValue() }
+        fields["version"] = version.toValue()
+        fields["customEventVersion"] = customEventVersion.toValue()
+        fields["event"] = event.toValue()
+        fields["created"] = created.toValue()
+        fields["createdMonotime"] = createdMonotime.toValue()
+        fields["operatingSystem"] = operatingSystem.toValue()
+        device?.let { fields["device"] = it.toValue() }
+        fields["driverMode"] = driverMode.toValue()
+        fields["driverModeId"] = driverModeId.toValue()
+        fields["driverModeStartTimestamp"] = driverModeStartTimestamp.toValue()
+        fields["driverModeStartTimestampMonotime"] = driverModeStartTimestampMonotime.toValue()
+        sdkIdentifier?.let { fields["sdkIdentifier"] = it.toValue() }
+        fields["eventVersion"] = eventVersion.toValue()
+        fields["simulation"] = simulation.toValue()
+        locationEngine?.let { fields["locationEngine"] = it.toValue() }
+        fields["lat"] = lat.toValue()
+        fields["lng"] = lng.toValue()
+        return Value.valueOf(fields)
     }
 }
