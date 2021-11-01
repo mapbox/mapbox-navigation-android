@@ -14,6 +14,34 @@ class RouteLineData internal constructor(
 ) {
 
     /**
+     * @return a class with mutable values for replacing.
+     */
+    fun toMutableValue() = MutableRouteLineData(
+        featureCollection,
+        dynamicData
+    )
+
+    /**
+     * Provides mutable information needed to draw a route.
+     *
+     * @param featureCollection the routes geometry
+     * @param dynamicData dynamic data to style the route line
+     */
+    class MutableRouteLineData internal constructor(
+        var featureCollection: FeatureCollection,
+        var dynamicData: RouteLineDynamicData
+    ) {
+
+        /**
+         * @return a RouteLineData
+         */
+        fun toImmutableValue() = RouteLineData(
+            featureCollection,
+            dynamicData
+        )
+    }
+
+    /**
      * Indicates whether some other object is "equal to" this one.
      */
     override fun equals(other: Any?): Boolean {

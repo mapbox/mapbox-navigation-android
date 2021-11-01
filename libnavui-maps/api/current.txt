@@ -874,6 +874,20 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public java.util.List<com.mapbox.geojson.FeatureCollection> getAlternativeRouteSourceSources();
     method public com.mapbox.geojson.FeatureCollection getPrimaryRouteSource();
     method public com.mapbox.geojson.FeatureCollection getWaypointsSource();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue.MutableRouteLineClearValue toMutableValue();
+    property public final java.util.List<com.mapbox.geojson.FeatureCollection> alternativeRouteSourceSources;
+    property public final com.mapbox.geojson.FeatureCollection primaryRouteSource;
+    property public final com.mapbox.geojson.FeatureCollection waypointsSource;
+  }
+
+  public static final class RouteLineClearValue.MutableRouteLineClearValue {
+    method public java.util.List<com.mapbox.geojson.FeatureCollection> getAlternativeRouteSourceSources();
+    method public com.mapbox.geojson.FeatureCollection getPrimaryRouteSource();
+    method public com.mapbox.geojson.FeatureCollection getWaypointsSource();
+    method public void setAlternativeRouteSourceSources(java.util.List<com.mapbox.geojson.FeatureCollection> p);
+    method public void setPrimaryRouteSource(com.mapbox.geojson.FeatureCollection p);
+    method public void setWaypointsSource(com.mapbox.geojson.FeatureCollection p);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue toImmutableValue();
     property public final java.util.List<com.mapbox.geojson.FeatureCollection> alternativeRouteSourceSources;
     property public final com.mapbox.geojson.FeatureCollection primaryRouteSource;
     property public final com.mapbox.geojson.FeatureCollection waypointsSource;
@@ -966,6 +980,17 @@ package com.mapbox.navigation.ui.maps.route.line.model {
   public final class RouteLineData {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData getDynamicData();
     method public com.mapbox.geojson.FeatureCollection getFeatureCollection();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineData.MutableRouteLineData toMutableValue();
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData dynamicData;
+    property public final com.mapbox.geojson.FeatureCollection featureCollection;
+  }
+
+  public static final class RouteLineData.MutableRouteLineData {
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData getDynamicData();
+    method public com.mapbox.geojson.FeatureCollection getFeatureCollection();
+    method public void setDynamicData(com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData p);
+    method public void setFeatureCollection(com.mapbox.geojson.FeatureCollection p);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineData toImmutableValue();
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData dynamicData;
     property public final com.mapbox.geojson.FeatureCollection featureCollection;
   }
@@ -986,6 +1011,23 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider getCasingExpressionProvider();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getRestrictedSectionExpressionProvider();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrafficExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData.MutableRouteLineDynamicData toMutableValue();
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider baseExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider casingExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? restrictedSectionExpressionProvider;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? trafficExpressionProvider;
+  }
+
+  public static final class RouteLineDynamicData.MutableRouteLineDynamicData {
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider getBaseExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider getCasingExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getRestrictedSectionExpressionProvider();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? getTrafficExpressionProvider();
+    method public void setBaseExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider p);
+    method public void setCasingExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider p);
+    method public void setRestrictedSectionExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? p);
+    method public void setTrafficExpressionProvider(com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? p);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData toImmutableValue();
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider baseExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider casingExpressionProvider;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvider? restrictedSectionExpressionProvider;
@@ -995,6 +1037,17 @@ package com.mapbox.navigation.ui.maps.route.line.model {
   public final class RouteLineError {
     method public String getErrorMessage();
     method public Throwable? getThrowable();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineError.MutableRouteLineError toMutableValue();
+    property public final String errorMessage;
+    property public final Throwable? throwable;
+  }
+
+  public static final class RouteLineError.MutableRouteLineError {
+    method public String getErrorMessage();
+    method public Throwable? getThrowable();
+    method public void setErrorMessage(String p);
+    method public void setThrowable(Throwable? p);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineError toImmutableValue();
     property public final String errorMessage;
     property public final Throwable? throwable;
   }
@@ -1096,6 +1149,17 @@ package com.mapbox.navigation.ui.maps.route.line.model {
   public final class RouteLineUpdateValue {
     method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData> getAlternativeRouteLinesDynamicData();
     method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData getPrimaryRouteLineDynamicData();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue.MutableRouteLineUpdateValue toMutableValue();
+    property public final java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData> alternativeRouteLinesDynamicData;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData primaryRouteLineDynamicData;
+  }
+
+  public static final class RouteLineUpdateValue.MutableRouteLineUpdateValue {
+    method public java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData> getAlternativeRouteLinesDynamicData();
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData getPrimaryRouteLineDynamicData();
+    method public void setAlternativeRouteLinesDynamicData(java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData> p);
+    method public void setPrimaryRouteLineDynamicData(com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData p);
+    method public com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue toImmutableValue();
     property public final java.util.List<com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData> alternativeRouteLinesDynamicData;
     property public final com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData primaryRouteLineDynamicData;
   }
