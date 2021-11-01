@@ -29,3 +29,40 @@ internal fun AppMetadata.toValue(): Value {
     sessionId?.let { fields["sessionId"] = it.toValue() }
     return Value.valueOf(fields)
 }
+
+internal fun NavigationStepData.toValue(): Value {
+    val fields = hashMapOf<String, Value>()
+
+    upcomingInstruction?.let { fields["upcomingInstruction"] = it.toValue() }
+    upcomingModifier?.let { fields["upcomingModifier"] = it.toValue() }
+    upcomingName?.let { fields["upcomingName"] = it.toValue() }
+    upcomingType?.let { fields["upcomingType"] = it.toValue() }
+    previousInstruction?.let { fields["previousInstruction"] = it.toValue() }
+    previousModifier?.let { fields["previousModifier"] = it.toValue() }
+    fields["previousName"] = previousName.toValue()
+    previousType?.let { fields["previousType"] = it.toValue() }
+    fields["distance"] = distance.toValue()
+    fields["duration"] = duration.toValue()
+    fields["distanceRemaining"] = distanceRemaining.toValue()
+    fields["durationRemaining"] = durationRemaining.toValue()
+
+    return Value.valueOf(fields)
+}
+
+/* FIXME: find the way to generalize following functions with compile-time check. */
+
+internal fun <T: String> Array<T>.toValue(): Value {
+    val values = mutableListOf<Value>()
+    for (item in this) {
+        values.add(item.toValue())
+    }
+    return Value.valueOf(values)
+}
+
+internal fun <T: TelemetryLocation> Array<T>.toValue(): Value {
+    val values = mutableListOf<Value>()
+    for (item in this) {
+        values.add(item.toValue())
+    }
+    return Value.valueOf(values)
+}

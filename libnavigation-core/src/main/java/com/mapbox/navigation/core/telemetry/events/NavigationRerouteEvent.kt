@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.telemetry.events
 
 import android.annotation.SuppressLint
+import com.mapbox.bindgen.Value
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 
 @SuppressLint("ParcelCreator")
@@ -23,4 +24,25 @@ internal class NavigationRerouteEvent(
     var screenshot: String? = null
 
     override fun getEventName(): String = NavigationMetrics.REROUTE
+
+    override fun toValue(): Value {
+        val value = super.toValue()
+
+        val fields = hashMapOf<String, Value>()
+        value.contents?.let { it as HashMap<String, Value>
+            fields.putAll(it)
+        }
+
+        fields["newDistanceRemaining"] = newDistanceRemaining.toValue()
+        fields["newDurationRemaining"] = newDurationRemaining.toValue()
+        fields["feedbackId"] = feedbackId.toValue()
+        newGeometry?.let { fields["newGeometry"] = it.toValue() }
+        fields["step"] = step.toValue()
+        fields["secondsSinceLastReroute"] = secondsSinceLastReroute.toValue()
+        locationsBefore?.let { fields["locationsBefore"] = it.toValue() }
+        locationsAfter?.let { fields["locationsAfter"] = it.toValue() }
+        screenshot?.let { fields["screenshot"] = it.toValue() }
+
+        return value
+    }
 }

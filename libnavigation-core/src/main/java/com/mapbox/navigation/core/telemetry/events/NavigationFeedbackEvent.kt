@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.telemetry.events
 
 import android.annotation.SuppressLint
+import com.mapbox.bindgen.Value
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 
 @SuppressLint("ParcelCreator")
@@ -24,4 +25,26 @@ internal class NavigationFeedbackEvent(
     var feedbackSubType: Array<String>? = emptyArray()
 
     override fun getEventName(): String = NavigationMetrics.FEEDBACK
+
+    override fun toValue(): Value {
+        val value = super.toValue()
+
+        val fields = hashMapOf<String, Value>()
+        value.contents?.let { it as HashMap<String, Value>
+            fields.putAll(it)
+        }
+
+        fields["userId"] = userId.toValue()
+        fields["feedbackId"] = feedbackId.toValue()
+        fields["step"] = step.toValue()
+        feedbackType?.let { fields["feedbackType"] = it.toValue() }
+        source?.let { fields["source"] = it.toValue() }
+        description?.let { fields["description"] = it.toValue() }
+        locationsBefore?.let { fields["locationsBefore"] = it.toValue() }
+        locationsAfter?.let { fields["locationsAfter"] = it.toValue() }
+        screenshot?.let { fields["screenshot"] = it.toValue() }
+        feedbackSubType?.let { fields["feedbackSubType"] = it.toValue() }
+
+        return value
+    }
 }
