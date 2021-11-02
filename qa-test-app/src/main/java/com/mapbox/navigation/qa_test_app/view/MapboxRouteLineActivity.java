@@ -185,7 +185,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
         message -> {
           Log.e(TAG, "predictive cache error: " + message);
         });
-    predictiveCacheController.createMapControllers(mapboxMap);
+    predictiveCacheController.createStyleMapControllers(mapboxMap);
   }
 
   @SuppressLint("MissingPermission")

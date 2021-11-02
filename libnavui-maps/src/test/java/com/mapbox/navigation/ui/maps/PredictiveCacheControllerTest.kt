@@ -167,7 +167,7 @@ class PredictiveCacheControllerTest {
             PredictiveCache.createMapsController(
                 mockedMapboxMap,
                 mockedTileStore,
-                any(),
+                any<String>(),
                 any()
             )
         }
@@ -273,7 +273,7 @@ class PredictiveCacheControllerTest {
             PredictiveCache.createMapsController(
                 mockedMapboxMap,
                 mockedTileStore,
-                any(),
+                any<String>(),
                 any()
             )
         }
@@ -351,7 +351,7 @@ class PredictiveCacheControllerTest {
             PredictiveCache.createMapsController(
                 mockedMapboxMap,
                 mockedTileStore,
-                any(),
+                any<String>(),
                 any()
             )
         }
@@ -454,11 +454,13 @@ class PredictiveCacheControllerTest {
             PredictiveCache.createMapsController(
                 mockedMapboxMap,
                 mockedTileStore,
-                any(),
+                any<String>(),
                 any()
             )
         }
-        verify(exactly = 1) { PredictiveCache.removeAllMapControllers(mockedMapboxMap) }
+        verify(exactly = 1) {
+            PredictiveCache.removeAllMapControllersFromTileVariants(mockedMapboxMap)
+        }
         verify(exactly = 0) { errorHandler.onError(any()) }
     }
 
@@ -496,7 +498,7 @@ class PredictiveCacheControllerTest {
 
         verify(exactly = 1) { errorHandler.onError(error) }
         verify(exactly = 0) {
-            PredictiveCache.createMapsController(any(), any(), any(), any())
+            PredictiveCache.createMapsController(any(), any(), any<String>(), any())
         }
     }
 }
