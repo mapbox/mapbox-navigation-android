@@ -9,6 +9,7 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.TileStore
+import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
@@ -369,7 +370,12 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      *
      * @return [PredictiveCacheController]
      */
-    override fun createMapsPredictiveCacheController(
+    @Deprecated(
+        "Use createMapsController(" +
+            "mapboxMap, tileStore, tilesetDescriptor, predictiveCacheLocationOptions" +
+            ") instead."
+    )
+    override fun createMapsPredictiveCacheControllerTileVariant(
         tileStore: TileStore,
         tileVariant: String,
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions
@@ -377,6 +383,26 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         navigator!!.createPredictiveCacheController(
             tileStore,
             createDefaultMapsPredictiveCacheControllerOptions(tileVariant),
+            predictiveCacheLocationOptions.toPredictiveLocationTrackerOptions()
+        )
+
+    /**
+     * Creates a Maps [PredictiveCacheController].
+     *
+     * @param tileStore Maps [TileStore]
+     * @param tilesetDescriptor Maps tilesetDescriptor
+     * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
+     *
+     * @return [PredictiveCacheController]
+     */
+    override fun createMapsPredictiveCacheController(
+        tileStore: TileStore,
+        tilesetDescriptor: TilesetDescriptor,
+        predictiveCacheLocationOptions: PredictiveCacheLocationOptions
+    ): PredictiveCacheController =
+        navigator!!.createPredictiveCacheController(
+            tileStore,
+            listOf(tilesetDescriptor),
             predictiveCacheLocationOptions.toPredictiveLocationTrackerOptions()
         )
 
