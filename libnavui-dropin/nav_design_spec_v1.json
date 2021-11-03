@@ -1,0 +1,45 @@
+{
+  "$version": 1,
+  "$root": {
+    "version": {
+      "type": "enum",
+      "values": [
+        1
+      ]
+    },
+    "name": {
+      "type": "string",
+      "doc": "A human-readable name for this system.",
+      "example": "Asia"
+    },
+    "metadata": {
+      "type": "*",
+      "doc": "Arbitrary properties useful to track with this system, but do not influence the design or behavior. Properties should be prefixed to avoid collisions, like 'mapbox:'."
+    },
+    "theme":  {
+      "type": "theme",
+      "doc": "App-level theme that defines colors for all UI elements."
+    }
+  },
+  "theme": {
+    "doc": "Value describing the set of building blocks used to generate UI elements.",
+    "color": {
+      "light": {
+        "type": "float",
+        "doc": "Background color anchor. 0 = black, 100 = white."
+      },
+      "contrast": {
+        "type": "float",
+        "doc": "Foreground color anchor. 0 = no contrast, 100 = maximum contrast."
+      },
+      "warmth": {
+        "type": "float",
+        "doc": "Background and foreground hue adjustment. 0 = blue (180°), 100 = red (360°). As warmth approaches 50, saturation is reduced to 0. Can be used to adjust highlight hues."
+      },
+      "saturation": {
+        "type": "float",
+        "doc": "Global saturation adjustment. 0 = no saturation, 100 = full saturation."
+      }
+    }
+  }
+}

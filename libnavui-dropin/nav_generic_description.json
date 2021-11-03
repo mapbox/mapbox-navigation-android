@@ -1,0 +1,72 @@
+{
+  "version": "1.3",
+  "name": "My system description",
+  "theme": {
+    "light": "50",
+    "contrast": "50",
+    "warmth": "90",
+    "saturation": "75.5",
+    "bg_container": {
+      "type": "inheritor",
+      "evaluation": [
+        {
+          "type": "value",
+          "value": ".light"
+        },
+        {
+          "type": "operator",
+          "value": "multiply"
+        },
+        {
+          "type": "value",
+          "value": ".warmth"
+        }
+      ]
+    }
+  },
+  "states": [
+    {
+      "type": "active_guidance",
+      "components_composition": [
+        {
+          "type": "recenter_button",
+          "icon": {
+            "uri": "mapbox://defaults.icon.recenter"
+          },
+          "background": {
+            "type": "inheritor",
+            "evaluation": [
+              {
+                "type": "value",
+                "value": "..theme.bg_container"
+              }
+            ]
+          }
+        },
+        {
+          "type": "speed_limit"
+        }
+      ]
+    },
+    {
+      "type": "arrival",
+      "components_composition": [
+        {
+          "type": "recenter_button",
+          "icon": {
+            "uri": "mapbox://defaults.icon.recenter"
+          },
+          "background": {
+            "type": "inheritor",
+            "evaluation": [
+              {
+                "type": "value",
+                "value": "..theme.bg_container"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
