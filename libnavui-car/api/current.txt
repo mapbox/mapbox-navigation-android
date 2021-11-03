@@ -1,0 +1,58 @@
+// Signature format: 3.0
+package com.mapbox.navigation.ui.car.map {
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class MapboxCarMap {
+    ctor public MapboxCarMap(com.mapbox.navigation.ui.car.map.MapboxCarOptions mapboxCarOptions, androidx.car.app.CarContext carContext, androidx.lifecycle.Lifecycle lifecycle);
+    method public void clearListeners();
+    method public com.mapbox.maps.EdgeInsets? getEdgeInsets();
+    method public com.mapbox.navigation.ui.car.map.MapboxCarMapSurface? getMapboxCarMapSurface();
+    method public android.graphics.Rect? getVisibleArea();
+    method public com.mapbox.navigation.ui.car.map.MapboxCarMap registerObserver(com.mapbox.navigation.ui.car.map.MapboxCarMapObserver mapboxCarMapObserver);
+    method public void unregisterObserver(com.mapbox.navigation.ui.car.map.MapboxCarMapObserver mapboxCarMapObserver);
+    method public void updateMapStyle(String mapStyle);
+    property public final com.mapbox.maps.EdgeInsets? edgeInsets;
+    property public final com.mapbox.navigation.ui.car.map.MapboxCarMapSurface? mapboxCarMapSurface;
+    property public final android.graphics.Rect? visibleArea;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public interface MapboxCarMapObserver {
+    method public default void detached(com.mapbox.navigation.ui.car.map.MapboxCarMapSurface? mapboxCarMapSurface);
+    method public default void loaded(com.mapbox.navigation.ui.car.map.MapboxCarMapSurface mapboxCarMapSurface);
+    method public default void visibleAreaChanged(android.graphics.Rect visibleArea, com.mapbox.maps.EdgeInsets edgeInsets);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class MapboxCarMapSurface {
+    method public androidx.car.app.CarContext getCarContext();
+    method public com.mapbox.maps.MapSurface getMapSurface();
+    method public com.mapbox.maps.Style getStyle();
+    method public androidx.car.app.SurfaceContainer getSurfaceContainer();
+    property public final androidx.car.app.CarContext carContext;
+    property public final com.mapbox.maps.MapSurface mapSurface;
+    property public final com.mapbox.maps.Style style;
+    property public final androidx.car.app.SurfaceContainer surfaceContainer;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class MapboxCarOptions {
+    method public String getMapDayStyle();
+    method public com.mapbox.maps.MapInitOptions getMapInitOptions();
+    method public String? getMapNightStyle();
+    method public boolean getReplayEnabled();
+    method public com.mapbox.navigation.ui.car.map.MapboxCarOptions.Builder toBuilder();
+    property public final String mapDayStyle;
+    property public final com.mapbox.maps.MapInitOptions mapInitOptions;
+    property public final String? mapNightStyle;
+    property public final boolean replayEnabled;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public static final class MapboxCarOptions.Builder {
+    ctor public MapboxCarOptions.Builder(com.mapbox.maps.MapInitOptions mapInitOptions);
+    method public com.mapbox.navigation.ui.car.map.MapboxCarOptions build();
+    method public com.mapbox.navigation.ui.car.map.MapboxCarOptions.Builder directionsLanguage(String directionsLanguage);
+    method public com.mapbox.navigation.ui.car.map.MapboxCarOptions.Builder mapDayStyle(String mapDayStyle);
+    method public com.mapbox.navigation.ui.car.map.MapboxCarOptions.Builder mapInitOptions(com.mapbox.maps.MapInitOptions mapInitOptions);
+    method public com.mapbox.navigation.ui.car.map.MapboxCarOptions.Builder mapNightStyle(String? mapNightStyle);
+    method public com.mapbox.navigation.ui.car.map.MapboxCarOptions.Builder replayEnabled(boolean replayEnabled);
+  }
+
+}
+

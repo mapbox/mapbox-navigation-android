@@ -3,6 +3,7 @@ ext {
 
   androidVersions = [
       minSdkVersion           : 21,
+      carMinSdkVersion        : 23,
       targetSdkVersion        : 30,
       compileSdkVersion       : 30
   ]
@@ -62,6 +63,7 @@ ext {
       barista                   : '3.2.0',
       svgParser                 : '1.4',
       androidStartup            : '1.0.0',
+      androidXCarApp            : '1.0.0',
   ]
   dependenciesList = [
       // mapbox
@@ -124,6 +126,7 @@ ext {
       androidXConstraintLayout  : "androidx.constraintlayout:constraintlayout:${version.constraintLayout}",
       androidXPreference        : "androidx.preference:preference-ktx:${version.androidXPreferenceVersion}",
       androidStartup            : "androidx.startup:startup-runtime:${version.androidStartup}",
+      androidXCarApp            : "androidx.car.app:app:${version.androidXCarApp}",
 
       // architecture
       lifecycleViewModelKtx     : "androidx.lifecycle:lifecycle-viewmodel-ktx:${version.lifecycleViewModelKtx}",

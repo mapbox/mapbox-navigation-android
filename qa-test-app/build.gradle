@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId "com.mapbox.navigation.qa_test_app"
-        minSdkVersion androidVersions.minSdkVersion
+        minSdkVersion androidVersions.carMinSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
         multiDexEnabled true
         versionCode gitVersionCode
@@ -92,6 +92,7 @@ android {
 dependencies {
     // Mapbox Navigation SDK
     implementation project(':libnavigation-android')
+    implementation project(':libnavui-car')
 
     // test
     androidTestImplementation project(':libtesting-ui')
@@ -110,6 +111,8 @@ dependencies {
     implementation dependenciesList.androidXAppCompat
     implementation dependenciesList.androidXCardView
     implementation dependenciesList.androidXConstraintLayout
+    implementation dependenciesList.androidXLifecycleLivedata
+    implementation dependenciesList.androidXLifecycleRuntime
 
     implementation dependenciesList.gmsLocation
 

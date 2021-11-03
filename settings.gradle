@@ -20,4 +20,5 @@ include ':examples',
         ':libnavui-voice',
         ':libnavui-speedlimit',
         ':libnavui-dropin',
+        ':libnavui-car',
         ':qa-test-app'

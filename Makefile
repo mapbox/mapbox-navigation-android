@@ -17,6 +17,7 @@ libnavui-resources \
 libnavui-voice \
 libnavigation-android \
 libnavui-speedlimit \
+libnavui-car \
 
 APPLICATION_MODULES = \
 qa-test-app \
@@ -163,6 +164,7 @@ ui-check-api: assemble-ui-release
 	./gradlew :libnavui-tripprogress:checkApi -PhidePackage=com.mapbox.navigation.ui.tripprogress.internal -PhideId=ReferencesHidden
 	./gradlew :libnavui-voice:checkApi -PhidePackage=com.mapbox.navigation.ui.voice.internal -PhideId=ReferencesHidden
 	./gradlew :libnavui-speedlimit:checkApi -PhidePackage=com.mapbox.navigation.ui.speedlimit.internal -PhideId=ReferencesHidden
+	./gradlew :libnavui-car:checkApi -PhidePackage=com.mapbox.navigation.ui.car.internal -PhideId=ReferencesHidden
 
 .PHONY: ui-update-api
 ui-update-api: assemble-ui-release
@@ -173,6 +175,7 @@ ui-update-api: assemble-ui-release
 	./gradlew :libnavui-tripprogress:updateApi -PhidePackage=com.mapbox.navigation.ui.tripprogress.internal
 	./gradlew :libnavui-voice:updateApi -PhidePackage=com.mapbox.navigation.ui.voice.internal
 	./gradlew :libnavui-speedlimit:updateApi -PhidePackage=com.mapbox.navigation.ui.speedlimit.internal
+	./gradlew :libnavui-car:updateApi -PhidePackage=com.mapbox.navigation.ui.car.internal
 
 .PHONY: update-metalava
 update-metalava:
