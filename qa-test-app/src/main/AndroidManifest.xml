@@ -22,6 +22,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".view.AppLifecycleActivity" />
         <activity android:name=".view.AlternativeRouteActivity" />
         <activity android:name=".view.MapboxRouteLineActivity" />
@@ -48,6 +49,20 @@
             android:name=".view.MapboxNavigationViewFragmentActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             />
+
+        <service
+            android:name=".car.MainCarAppService"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher"
+            android:foregroundServiceType="location">
+
+            <intent-filter>
+                <action android:name="androidx.car.app.CarAppService" />
+                <category android:name="androidx.car.app.category.NAVIGATION" />
+            </intent-filter>
+
+        </service>
     </application>
 
 </manifest>

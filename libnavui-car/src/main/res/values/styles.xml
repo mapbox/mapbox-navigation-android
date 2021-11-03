@@ -1,0 +1,9 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="CarAppTheme">
+        <item name="carColorPrimary">#56a8fb</item>
+        <item name="carColorPrimaryDark">#0077c2</item>
+        <item name="carColorSecondary">#ef5350</item>
+        <item name="carColorSecondaryDark">#b61827</item>
+    </style>
+</resources>

@@ -24,6 +24,7 @@ libnavui-status \
 
 NOT_RELEASED_UI_MODULES = \
 libnavui-dropin \
+libnavui-car \
 
 UI_MODULES = $(RELEASED_UI_MODULES)$(NOT_RELEASED_UI_MODULES)
 
@@ -168,6 +169,7 @@ ui-check-api: assemble-ui-release
 	./gradlew :libnavui-shield:checkApi -PhidePackage=com.mapbox.navigation.ui.shield.internal
 	./gradlew :libnavui-speedlimit:checkApi -PhidePackage=com.mapbox.navigation.ui.speedlimit.internal -PhideId=ReferencesHidden
 	./gradlew :libnavui-status:checkApi -PhidePackage=com.mapbox.navigation.ui.status.internal
+	./gradlew :libnavui-car:checkApi -PhidePackage=com.mapbox.navigation.ui.car.internal -PhideId=ReferencesHidden
 
 .PHONY: ui-update-api
 ui-update-api: assemble-ui-release
@@ -180,6 +182,7 @@ ui-update-api: assemble-ui-release
 	./gradlew :libnavui-shield:updateApi -PhidePackage=com.mapbox.navigation.ui.shield.internal
 	./gradlew :libnavui-speedlimit:updateApi -PhidePackage=com.mapbox.navigation.ui.speedlimit.internal
 	./gradlew :libnavui-status:updateApi -PhidePackage=com.mapbox.navigation.ui.status.internal
+	./gradlew :libnavui-car:updateApi -PhidePackage=com.mapbox.navigation.ui.car.internal
 
 .PHONY: update-metalava
 update-metalava:

@@ -5,6 +5,7 @@ ext {
       minSdkVersion           : 21,
       targetSdkVersion        : 31,
       compileSdkVersion       : 31,
+      carMinSdkVersion        : 23
   ]
 
   // Navigation Native CI can run SDK CI downstream with forced Navigation Native version
@@ -60,6 +61,7 @@ ext {
       barista                   : '4.2.0',
       svgParser                 : '1.4',
       androidStartup            : '1.0.0',
+      androidXCarApp            : '1.1.0',
   ]
   dependenciesList = [
       // mapbox
@@ -122,6 +124,7 @@ ext {
       androidStartup            : "androidx.startup:startup-runtime:${version.androidStartup}",
       androidXFragment          : "androidx.fragment:fragment-ktx:${version.androidXFragmentVersion}",
       androidXArchCoreTesting   : "androidx.arch.core:core-testing:${version.androidXArchCoreVersion}",
+      androidXCarApp            : "androidx.car.app:app:${version.androidXCarApp}",
 
       // lifecycle
       androidXLifecycleRuntime  : "androidx.lifecycle:lifecycle-runtime-ktx:${version.androidXLifecycle}",

@@ -22,4 +22,5 @@ include ':examples',
         ':libnavui-shield',
         ':libnavui-status',
         ':libnavui-dropin',
+        ':libnavui-car',
         ':qa-test-app'
