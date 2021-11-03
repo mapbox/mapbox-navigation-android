@@ -1,0 +1,59 @@
+{
+  "type": "Feature",
+  "id": "poi.773094129083",
+  "geometry": {
+    "coordinates": [
+      -122.273904,
+      37.800456
+    ],
+    "type": "Point"
+  },
+  "properties": {
+    "foursquare": "4a79c531f964a5209de71fe3",
+    "landmark": true,
+    "address": "801 Broadway",
+    "category": "coffee, cafe"
+  },
+  "text": "Starbucks",
+  "place_name": "Starbucks, 801 Broadway, Oakland, California 94607, United States",
+  "place_type": [
+    "poi"
+  ],
+  "center": [
+    -122.273904,
+    37.800456
+  ],
+  "context": [
+    {
+      "id": "neighborhood.8696440294299070",
+      "text": "Old Oakland"
+    },
+    {
+      "id": "postcode.1556247208801260",
+      "text": "94607"
+    },
+    {
+      "id": "place.8631031862973970",
+      "text": "Oakland",
+      "wikidata": "Q17042"
+    },
+    {
+      "id": "district.11187960009291250",
+      "text": "Alameda County",
+      "wikidata": "Q107146"
+    },
+    {
+      "id": "region.9803118085738010",
+      "text": "California",
+      "short_code": "US-CA",
+      "wikidata": "Q99"
+    },
+    {
+      "id": "country.19678805456372290",
+      "text": "United States",
+      "short_code": "us",
+      "wikidata": "Q30"
+    }
+  ],
+  "relevance": 1.0
+}
