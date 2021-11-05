@@ -16,18 +16,20 @@ class DirectionsRouteDiffProviderTest {
     @Test
     fun buildRouteDiffs() {
         val oldRoute = createDirectionsRoute(
-            createRouteLeg(57.14, 8.571, 42.85, 90, "low"),
-            createRouteLeg(142.8, 28.57, 71.42, 120, "unknown"),
-            createRouteLeg(85.71, 42.85, 57.14, 90, "unknown"),
-            createRouteLeg(71.42, 14.28, 85.71, 90, "low"),
+            createRouteLeg(57.14, 8.571, 42.85, 90, "low", 71),
+            createRouteLeg(142.8, 28.57, 71.42, 120, "unknown", 42),
+            createRouteLeg(85.71, 42.85, 57.14, 90, "unknown", 14),
+            createRouteLeg(71.42, 14.28, 85.71, 90, "low", 57),
+            createRouteLeg(42.85, 57.14, 28.57, 120, "low", 28),
         )
         val newRoute = createDirectionsRoute(
             mockk {
                 every { annotation() } returns null
             },
-            createRouteLeg(57.14, 14.28, 85.71, 120, "low"),
-            createRouteLeg(85.71, 42.85, 57.14, 90, "unknown"),
-            createRouteLeg(71.42, 28.57, 42.85, 120, "unknown"),
+            createRouteLeg(57.14, 14.28, 85.71, 120, "low", 42),
+            createRouteLeg(85.71, 42.85, 57.14, 90, "unknown", 14),
+            createRouteLeg(71.42, 28.57, 42.85, 120, "unknown", 57),
+            createRouteLeg(142.8, 57.14, 28.57, 90, "low", 71),
         )
 
         assertEquals(
@@ -35,6 +37,7 @@ class DirectionsRouteDiffProviderTest {
             listOf(
                 "Updated distance, duration, speed, congestion at leg 1",
                 "Updated duration, speed, maxSpeed, congestion at leg 3",
+                "Updated distance, maxSpeed, congestionNumeric at leg 4",
             ),
         )
     }
@@ -51,6 +54,7 @@ class DirectionsRouteDiffProviderTest {
         speed: Double,
         maxSpeed: Int,
         congestion: String,
+        congestionNumeric: Int,
     ): RouteLeg {
         return mockk {
             every { annotation() } returns mockk {
@@ -59,6 +63,7 @@ class DirectionsRouteDiffProviderTest {
                 every { speed() } returns listOf(speed)
                 every { maxspeed() } returns listOf(createMaxSpeed(maxSpeed))
                 every { congestion() } returns listOf(congestion)
+                every { congestionNumeric() } returns listOf(congestionNumeric)
             }
         }
     }

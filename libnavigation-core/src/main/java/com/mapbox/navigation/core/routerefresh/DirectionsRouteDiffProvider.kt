@@ -45,6 +45,9 @@ internal class DirectionsRouteDiffProvider {
         if (oldLegAnnotation?.congestion() != newLegAnnotation?.congestion()) {
             updatedAnnotations.add("congestion")
         }
+        if (oldLegAnnotation?.congestionNumeric() != newLegAnnotation?.congestionNumeric()) {
+            updatedAnnotations.add("congestionNumeric")
+        }
         return updatedAnnotations
     }
 }
