@@ -47,7 +47,7 @@ checkIfGithubTokensAreProvided() {
 
 checkIfTagExist() {
     pushd "${NAVIGATION_GIT_REPO}"
-    if [ $(git tag --points-at HEAD) = TAG ]; then
+    if [ "$(git tag --points-at HEAD)" = "$TAG" ]; then
         echo "tag ${TAG} exist"
     else
         echo "current commit is not point at tag ${TAG}"
