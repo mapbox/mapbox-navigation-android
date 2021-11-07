@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mainContent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#5499AA"
+    >
+
+  <com.mapbox.navigation.ui.shield.view.MapboxRouteShieldView
+      android:id="@+id/routeShieldView"
+      android:layout_width="124dp"
+      android:layout_height="124dp"
+      android:background="#FF21A5"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      />
+  <!--placeholder": [ 0, 4, 60, 42 ]
+  const x = bbox[0] + bbox[2] / 2;
+  const y = bbox[3];
+  const size = bbox[3] - bbox[1] + 3 -->
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -15,7 +15,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
@@ -42,11 +41,13 @@ import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityManeuverBinding
+import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.maneuver.api.RoadShieldCallback
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
+import com.mapbox.navigation.ui.maps.NavigationStyles.NAVIGATION_DAY_STYLE
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
@@ -57,6 +58,7 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import kotlinx.coroutines.CoroutineScope
@@ -82,6 +84,11 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val mapboxReplayer = MapboxReplayer()
     private val navigationLocationProvider = NavigationLocationProvider()
+    private val routeShieldApi: MapboxRouteShieldApi by lazy {
+        MapboxRouteShieldApi(
+            accessToken = getString(R.string.mapbox_access_token)
+        )
+    }
 
     /**
      * The data in the view is formatted by default mapbox distance formatting implementation.
@@ -175,6 +182,17 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
 
             val maneuvers = maneuverApi.getManeuvers(result.routes.first())
             renderManeuvers(maneuvers)
+
+            /*routeShieldApi.generateShield(
+                userId = "driverapp",
+                styleId = "ckw6z9kkd12sm14pire2bc1zb",
+                mapboxShield = MapboxShield.builder()
+                    .baseUrl("https://api.mapbox.com/styles/v1/")
+                    .displayRef("1")
+                    .textColor("black")
+                    .name("rectangle-yellow")
+                    .build()
+            )*/
         }
     }
 
@@ -199,7 +217,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
     @SuppressLint("MissingPermission")
     private fun initNavigation() {
         val navigationOptions = NavigationOptions.Builder(this)
-            .accessToken(getMapboxAccessTokenFromResources())
+            .accessToken(getString(R.string.mapbox_access_token_staging))
             .locationEngine(ReplayLocationEngine(mapboxReplayer))
             .build()
         mapboxNavigation = MapboxNavigationProvider.create(navigationOptions)
@@ -226,7 +244,11 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
 
     @SuppressLint("MissingPermission")
     private fun initStyle() {
-        mapboxMap.loadStyleUri(MAPBOX_STREETS) { style ->
+        mapboxMap.loadStyleUri(NAVIGATION_DAY_STYLE) { style ->
+            /*routeShieldApi.requestSprite(
+                userId = "driverapp",
+                styleId = "ckw6z9kkd12sm14pire2bc1zb"
+            ) { }*/
             routeLineView.initializeLayers(style)
             binding.mapView.gestures.addOnMapLongClickListener(this)
         }
@@ -249,6 +271,8 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
     private fun findRoute(origin: Point, destination: Point) {
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
+            .baseUrl("https://cloudfront-staging.tilestream.net")
+            .user("mapbox.tmp.valhalla-here")
             .applyLanguageAndVoiceUnitOptions(this)
             .coordinates(
                 origin = origin,
@@ -335,10 +359,12 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
     override fun onMapLongClick(point: Point): Boolean {
         ifNonNull(navigationLocationProvider.lastLocation) { currentLocation ->
             val originPoint = Point.fromLngLat(
-                currentLocation.longitude,
-                currentLocation.latitude
+                13.4083221757962, 52.51753938835026
             )
-            findRoute(originPoint, point)
+            val destination = Point.fromLngLat(
+                13.415748184047743, 52.52115443880706
+            )
+            findRoute(originPoint, destination)
         }
         return false
     }

@@ -10,6 +10,27 @@ import kotlin.jvm.Throws
 
 object SvgUtil {
 
+    fun renderAsBitmapWith(
+        stream: ByteArrayInputStream,
+        desiredWidth: Int,
+        desiredHeight: Int,
+        cssStyles: String? = null
+    ): Bitmap? {
+        return try {
+            val svg = SVG.getFromInputStream(stream)
+
+            svg.setDocumentWidth("100%")
+            svg.setDocumentHeight("100%")
+            if (svg.documentViewBox == null) {
+                null
+            } else {
+                renderBitmap(svg, desiredWidth, desiredHeight, cssStyles)
+            }
+        } catch (exception: Exception) {
+            null
+        }
+    }
+
     fun renderAsBitmapWithHeight(
         stream: ByteArrayInputStream,
         desiredHeight: Int,

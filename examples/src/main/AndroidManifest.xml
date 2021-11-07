@@ -101,7 +101,7 @@
     </activity>
 
     <activity
-        android:name="com.mapbox.navigation.examples.MainActivity">
+        android:name="com.mapbox.navigation.examples.TestActivity">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />

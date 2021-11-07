@@ -1,0 +1,73 @@
+// Signature format: 3.0
+package com.mapbox.navigation.ui.shield.api {
+
+  public final class MapboxRouteShieldApi {
+    ctor public MapboxRouteShieldApi(String accessToken, com.mapbox.navigation.ui.shield.model.MapboxRouteShieldOptions options = MapboxRouteShieldOptions.<init>().build());
+    ctor public MapboxRouteShieldApi(String accessToken);
+    method public void generateShield(String imageBaseUrl, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.shield.model.RouteShieldError,com.mapbox.navigation.ui.shield.model.RouteShield>> consumer);
+    method public void generateShield(String userId, String styleId, com.mapbox.api.directions.v5.models.MapboxShield mapboxShield, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.shield.model.RouteShieldError,com.mapbox.navigation.ui.shield.model.RouteShield>> consumer);
+    method public void generateShield(String? imageBaseUrl, String? userId, String? styleId, com.mapbox.api.directions.v5.models.MapboxShield? mapboxShield, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.shield.model.RouteShieldError,com.mapbox.navigation.ui.shield.model.RouteShield>> consumer);
+    method public void requestSprite(String userId, String styleId);
+  }
+
+}
+
+package com.mapbox.navigation.ui.shield.model {
+
+  public final class MapboxRouteShieldOptions {
+    method public String getShieldSvg();
+    method public com.mapbox.api.directions.v5.models.ShieldSpriteAttribute getSpriteAttributes();
+    method public com.mapbox.navigation.ui.shield.model.MapboxRouteShieldOptions.Builder toBuilder();
+    property public final String shieldSvg;
+    property public final com.mapbox.api.directions.v5.models.ShieldSpriteAttribute spriteAttributes;
+  }
+
+  public static final class MapboxRouteShieldOptions.Builder {
+    ctor public MapboxRouteShieldOptions.Builder();
+    method public com.mapbox.navigation.ui.shield.model.MapboxRouteShieldOptions build();
+    method public com.mapbox.navigation.ui.shield.model.MapboxRouteShieldOptions.Builder shieldSvg(String shieldSvg);
+    method public com.mapbox.navigation.ui.shield.model.MapboxRouteShieldOptions.Builder spriteAttributes(com.mapbox.api.directions.v5.models.ShieldSpriteAttribute spriteAttributes);
+  }
+
+  public final class RouteShield {
+    method public byte[] getShield();
+    method public com.mapbox.api.directions.v5.models.ShieldSprite? getSprite();
+    method public String? getUrl();
+    property public final byte[] shield;
+    property public final com.mapbox.api.directions.v5.models.ShieldSprite? sprite;
+    property public final String? url;
+  }
+
+  public final class RouteShieldError {
+    method public String? component1();
+    method public String? component2();
+    method public Throwable? component3();
+    method public com.mapbox.navigation.ui.shield.model.RouteShieldError copy(String? url, String? errorMessage, Throwable? throwable);
+    method public String? getErrorMessage();
+    method public Throwable? getThrowable();
+    method public String? getUrl();
+    property public final String? errorMessage;
+    property public final Throwable? throwable;
+    property public final String? url;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class RouteShieldErrorFactory {
+    method public static com.mapbox.navigation.ui.shield.model.RouteShieldError buildRouteShieldError(String? url, String errorMessage, Throwable? throwable);
+    field public static final com.mapbox.navigation.ui.shield.model.RouteShieldErrorFactory INSTANCE;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class RouteShieldFactory {
+    method public static com.mapbox.navigation.ui.shield.model.RouteShield buildRouteShield(String? url, byte[] shield, com.mapbox.api.directions.v5.models.ShieldSprite? sprite);
+    field public static final com.mapbox.navigation.ui.shield.model.RouteShieldFactory INSTANCE;
+  }
+
+}
+
+package com.mapbox.navigation.ui.shield.view {
+
+  public final class MapboxRouteShieldView {
+    ctor public MapboxRouteShieldView();
+  }
+
+}
+

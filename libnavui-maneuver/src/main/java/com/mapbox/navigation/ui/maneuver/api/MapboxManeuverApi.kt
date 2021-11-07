@@ -12,7 +12,6 @@ import com.mapbox.navigation.ui.maneuver.ManeuverAction
 import com.mapbox.navigation.ui.maneuver.ManeuverProcessor
 import com.mapbox.navigation.ui.maneuver.ManeuverResult
 import com.mapbox.navigation.ui.maneuver.ManeuverState
-import com.mapbox.navigation.ui.maneuver.RoadShieldContentManager
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.maneuver.model.ManeuverOptions
@@ -41,7 +40,7 @@ class MapboxManeuverApi internal constructor(
 
     private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
     private val maneuverState = ManeuverState()
-    private val roadShieldContentManager = RoadShieldContentManager()
+    //private val roadShieldContentManager = RoadShieldContentManager()
 
     /**
      * Mapbox Maneuver Api allows you to request [Maneuver] instructions given
@@ -154,7 +153,7 @@ class MapboxManeuverApi internal constructor(
         maneuvers: List<Maneuver>,
         callback: RoadShieldCallback
     ) {
-        mainJobController.scope.launch {
+        /*mainJobController.scope.launch {
             val result = roadShieldContentManager.getShields(
                 maneuvers
             )
@@ -163,16 +162,16 @@ class MapboxManeuverApi internal constructor(
                 result.shields,
                 result.errors
             )
-        }
+        }*/
     }
 
     /**
      * Invoke the function to cancel any job invoked through other APIs
      */
     fun cancel() {
-        roadShieldContentManager.cancelAll()
+        /*roadShieldContentManager.cancelAll()
         mainJobController.job.children.forEach {
             it.cancel()
-        }
+        }*/
     }
 }
