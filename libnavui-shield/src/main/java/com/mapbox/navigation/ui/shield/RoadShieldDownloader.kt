@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.maneuver
+package com.mapbox.navigation.ui.shield
 
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
@@ -11,7 +11,6 @@ import kotlin.coroutines.resume
 
 internal object RoadShieldDownloader {
 
-    private const val SVG_EXTENSION = ".svg"
     private const val USER_AGENT_KEY = "User-Agent"
     private const val USER_AGENT_VALUE = "MapboxJava/"
     private const val SDK_IDENTIFIER = "mapbox-navigation-ui-android"
@@ -20,10 +19,10 @@ internal object RoadShieldDownloader {
     private const val CODE_401 = 401L
     private const val CODE_404 = 404L
 
-    suspend fun downloadImage(imageUrl: String): Expected<String, ByteArray> =
+    suspend fun download(urlToDownload: String): Expected<String, ByteArray> =
         suspendCancellableCoroutine { continuation ->
-            val id = CommonSingletonModuleProvider.httpServiceInstance.request(
-                getHttpRequest(imageUrl)
+            val id = CommonSingletonModuleProvider.createHttpService().request(
+                getHttpRequest(urlToDownload)
             ) { response ->
                 when {
                     response.result.isValue -> {
@@ -76,9 +75,9 @@ internal object RoadShieldDownloader {
             }
         }
 
-    private fun getHttpRequest(imageUrl: String): HttpRequest {
+    private fun getHttpRequest(urlToDownload: String): HttpRequest {
         return HttpRequest.Builder()
-            .url(imageUrl.plus(SVG_EXTENSION))
+            .url(urlToDownload)
             .body(byteArrayOf())
             .headers(
                 hashMapOf(

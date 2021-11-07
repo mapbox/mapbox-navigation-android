@@ -10,6 +10,11 @@ import com.mapbox.navigation.ui.maneuver.model.SubManeuver
 /**
  * An interface that is triggered when road shields are available.
  */
+@Deprecated(
+    message = "The interface is only capable of delivering one shield for a maneuver even if it " +
+        "contains multiple",
+    replaceWith = ReplaceWith("RoadShieldsCallback")
+)
 fun interface RoadShieldCallback {
 
     /**
@@ -26,6 +31,11 @@ fun interface RoadShieldCallback {
      * [PrimaryManeuver.id], [SecondaryManeuver.id] or [SubManeuver.id].
      * You can use those IDs to associate the maneuver's banner with the error.
      */
+    @Deprecated(
+        message = "The method is only capable of delivering one shield for a maneuver even if it " +
+            "contains multiple",
+        replaceWith = ReplaceWith("onRoadShields(maneuvers, shields, errors)")
+    )
     fun onRoadShields(
         maneuvers: List<Maneuver>,
         shields: Map<String, RoadShield?>,

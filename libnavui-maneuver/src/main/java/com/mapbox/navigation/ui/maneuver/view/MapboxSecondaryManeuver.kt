@@ -8,6 +8,7 @@ import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.model.ManeuverInstructionGenerator
 import com.mapbox.navigation.ui.maneuver.model.RoadShield
 import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
+import com.mapbox.navigation.utils.internal.ifNonNull
 
 /**
  * Default view to render secondary banner instructions onto [MapboxManeuverView].
@@ -59,8 +60,23 @@ class MapboxSecondaryManeuver : AppCompatTextView {
      * Invoke the method to render secondary maneuver instructions
      * @param maneuver SecondaryManeuver
      */
+    @Deprecated(
+        message = "The method can only render one shield if an instruction has multiple shields",
+        replaceWith = ReplaceWith("renderManeuver(maneuver, roadShields)")
+    )
     @JvmOverloads
     fun render(maneuver: SecondaryManeuver?, roadShield: RoadShield? = null) {
+        val roadShields = ifNonNull(roadShield) {
+            listOf(it)
+        }
+        renderManeuver(maneuver, roadShields)
+    }
+
+    /**
+     * Invoke the method to render secondary maneuver instructions
+     * @param maneuver SecondaryManeuver
+     */
+    fun renderManeuver(maneuver: SecondaryManeuver?, roadShields: List<RoadShield>?) {
         val exitView = MapboxExitText(context)
         exitView.setExitStyle(exitBackground, leftDrawable, rightDrawable)
         val instruction = ManeuverInstructionGenerator.generateSecondary(
@@ -68,7 +84,7 @@ class MapboxSecondaryManeuver : AppCompatTextView {
             lineHeight,
             exitView,
             maneuver,
-            roadShield
+            roadShields
         )
         if (instruction.isNotEmpty()) {
             text = instruction

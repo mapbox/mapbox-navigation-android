@@ -1,11 +1,4 @@
 // Signature format: 3.0
-package com.mapbox.navigation.ui.maneuver {
-
-  public final class RoadShieldContentManagerKt {
-  }
-
-}
-
 package com.mapbox.navigation.ui.maneuver.api {
 
   public final class MapboxLaneIconsApi {
@@ -14,13 +7,17 @@ package com.mapbox.navigation.ui.maneuver.api {
   }
 
   public final class MapboxManeuverApi {
+    ctor public MapboxManeuverApi(com.mapbox.navigation.base.formatter.DistanceFormatter formatter, com.mapbox.navigation.ui.maneuver.model.ManeuverOptions maneuverOptions = ManeuverOptions.<init>().build(), com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi routeShieldApi = com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi());
     ctor public MapboxManeuverApi(com.mapbox.navigation.base.formatter.DistanceFormatter formatter, com.mapbox.navigation.ui.maneuver.model.ManeuverOptions maneuverOptions = ManeuverOptions.<init>().build());
     ctor public MapboxManeuverApi(com.mapbox.navigation.base.formatter.DistanceFormatter formatter);
     method public void cancel();
     method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> getManeuvers(com.mapbox.api.directions.v5.models.DirectionsRoute route, Integer? routeLegIndex = null);
     method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> getManeuvers(com.mapbox.api.directions.v5.models.DirectionsRoute route);
     method public com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> getManeuvers(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
-    method public void getRoadShields(java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver> maneuvers, com.mapbox.navigation.ui.maneuver.api.RoadShieldCallback callback);
+    method @Deprecated public void getRoadShields(java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver> maneuvers, com.mapbox.navigation.ui.maneuver.api.RoadShieldCallback callback);
+    method @Deprecated public void getRoadShields(String? userId, String? styleId, String? accessToken, java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver> maneuvers, com.mapbox.navigation.ui.maneuver.api.RoadShieldCallback callback);
+    method public void getRoadShields(java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver> maneuvers, com.mapbox.navigation.ui.maneuver.api.RoadShieldsCallback shieldCallback);
+    method public void getRoadShields(String? userId, String? styleId, String? accessToken, java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver> maneuvers, com.mapbox.navigation.ui.maneuver.api.RoadShieldsCallback shieldCallback);
   }
 
   public final class MapboxTurnIconsApi {
@@ -32,8 +29,12 @@ package com.mapbox.navigation.ui.maneuver.api {
     property public final com.mapbox.navigation.ui.maneuver.model.TurnIconResources turnIconResources;
   }
 
-  public fun interface RoadShieldCallback {
-    method public void onRoadShields(java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver> maneuvers, java.util.Map<java.lang.String,com.mapbox.navigation.ui.maneuver.model.RoadShield> shields, java.util.Map<java.lang.String,com.mapbox.navigation.ui.maneuver.model.RoadShieldError> errors);
+  @Deprecated public fun interface RoadShieldCallback {
+    method @Deprecated public void onRoadShields(java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver> maneuvers, java.util.Map<java.lang.String,com.mapbox.navigation.ui.maneuver.model.RoadShield> shields, java.util.Map<java.lang.String,com.mapbox.navigation.ui.maneuver.model.RoadShieldError> errors);
+  }
+
+  public fun interface RoadShieldsCallback {
+    method public void onRoadShields(java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver> maneuvers, java.util.Map<java.lang.String,? extends java.util.List<com.mapbox.navigation.ui.maneuver.model.RoadShield>> shields, java.util.Map<java.lang.String,? extends java.util.List<com.mapbox.navigation.ui.maneuver.model.RoadShieldError>> errors);
   }
 
 }
@@ -408,21 +409,27 @@ package com.mapbox.navigation.ui.maneuver.model {
   }
 
   public final class RoadShield {
+    ctor public RoadShield(String shieldUrl, byte[] shieldIcon, com.mapbox.api.directions.v5.models.MapboxShield? mapboxShield = null);
     ctor public RoadShield(String shieldUrl, byte[] shieldIcon);
     method public String component1();
     method public byte[] component2();
-    method public com.mapbox.navigation.ui.maneuver.model.RoadShield copy(String shieldUrl, byte[] shieldIcon);
+    method public com.mapbox.api.directions.v5.models.MapboxShield? component3();
+    method public com.mapbox.navigation.ui.maneuver.model.RoadShield copy(String shieldUrl, byte[] shieldIcon, com.mapbox.api.directions.v5.models.MapboxShield? mapboxShield);
+    method public com.mapbox.api.directions.v5.models.MapboxShield? getMapboxShield();
     method public byte[] getShieldIcon();
     method public String getShieldUrl();
     method public void setShieldIcon(byte[] p);
+    property public final com.mapbox.api.directions.v5.models.MapboxShield? mapboxShield;
     property public final byte[] shieldIcon;
     property public final String shieldUrl;
   }
 
   public final class RoadShieldComponentNode implements com.mapbox.navigation.ui.maneuver.model.ComponentNode {
+    method public com.mapbox.api.directions.v5.models.MapboxShield? getMapboxShield();
     method public String? getShieldUrl();
     method public String getText();
     method public com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode.Builder toBuilder();
+    property public final com.mapbox.api.directions.v5.models.MapboxShield? mapboxShield;
     property public final String? shieldUrl;
     property public final String text;
   }
@@ -430,6 +437,7 @@ package com.mapbox.navigation.ui.maneuver.model {
   public static final class RoadShieldComponentNode.Builder {
     ctor public RoadShieldComponentNode.Builder();
     method public com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode build();
+    method public com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode.Builder mapboxShield(com.mapbox.api.directions.v5.models.MapboxShield? mapboxShield);
     method public com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode.Builder shieldUrl(String? shieldUrl);
     method public com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode.Builder text(String text);
   }
@@ -842,15 +850,19 @@ package com.mapbox.navigation.ui.maneuver.view {
     method public boolean getUpcomingManeuverRenderingEnabled();
     method public void renderAddLanes(com.mapbox.navigation.ui.maneuver.model.Lane lane);
     method public void renderDistanceRemaining(com.mapbox.navigation.ui.maneuver.model.StepDistance stepDistance);
-    method public void renderManeuverShields(java.util.Map<java.lang.String,com.mapbox.navigation.ui.maneuver.model.RoadShield> shieldMap);
+    method @Deprecated public void renderManeuverShields(java.util.Map<java.lang.String,com.mapbox.navigation.ui.maneuver.model.RoadShield> shieldMap);
+    method public void renderManeuverWith(java.util.Map<java.lang.String,? extends java.util.List<com.mapbox.navigation.ui.maneuver.model.RoadShield>> shields);
     method public void renderManeuvers(com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.ui.maneuver.model.Maneuver>> maneuvers);
-    method public void renderPrimaryManeuver(com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver primary, com.mapbox.navigation.ui.maneuver.model.RoadShield? roadShield = null);
-    method public void renderPrimaryManeuver(com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver primary);
+    method public void renderPrimary(com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver primary, java.util.List<com.mapbox.navigation.ui.maneuver.model.RoadShield>? roadShields);
+    method @Deprecated public void renderPrimaryManeuver(com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver primary, com.mapbox.navigation.ui.maneuver.model.RoadShield? roadShield = null);
+    method @Deprecated public void renderPrimaryManeuver(com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver primary);
     method public void renderRemoveLanes();
-    method public void renderSecondaryManeuver(com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? secondary, com.mapbox.navigation.ui.maneuver.model.RoadShield? roadShield = null);
-    method public void renderSecondaryManeuver(com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? secondary);
-    method public void renderSubManeuver(com.mapbox.navigation.ui.maneuver.model.SubManeuver? sub, com.mapbox.navigation.ui.maneuver.model.RoadShield? roadShield = null);
-    method public void renderSubManeuver(com.mapbox.navigation.ui.maneuver.model.SubManeuver? sub);
+    method public void renderSecondary(com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? secondary, java.util.List<com.mapbox.navigation.ui.maneuver.model.RoadShield>? roadShields);
+    method @Deprecated public void renderSecondaryManeuver(com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? secondary, com.mapbox.navigation.ui.maneuver.model.RoadShield? roadShield = null);
+    method @Deprecated public void renderSecondaryManeuver(com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? secondary);
+    method public void renderSub(com.mapbox.navigation.ui.maneuver.model.SubManeuver? sub, java.util.List<com.mapbox.navigation.ui.maneuver.model.RoadShield>? roadShields);
+    method @Deprecated public void renderSubManeuver(com.mapbox.navigation.ui.maneuver.model.SubManeuver? sub, com.mapbox.navigation.ui.maneuver.model.RoadShield? roadShield = null);
+    method @Deprecated public void renderSubManeuver(com.mapbox.navigation.ui.maneuver.model.SubManeuver? sub);
     method public void setUpcomingManeuverRenderingEnabled(boolean value);
     method public void updatePrimaryManeuverTextAppearance(@StyleRes int style);
     method public void updatePrimaryManeuverTextVisibility(int visibility);
@@ -873,16 +885,18 @@ package com.mapbox.navigation.ui.maneuver.view {
     ctor public MapboxPrimaryManeuver(android.content.Context context);
     ctor public MapboxPrimaryManeuver(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxPrimaryManeuver(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    method public void render(com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver maneuver, com.mapbox.navigation.ui.maneuver.model.RoadShield? roadShield = null);
-    method public void render(com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver maneuver);
+    method @Deprecated public void render(com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver maneuver, com.mapbox.navigation.ui.maneuver.model.RoadShield? roadShield = null);
+    method @Deprecated public void render(com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver maneuver);
+    method public void renderManeuver(com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver maneuver, java.util.List<com.mapbox.navigation.ui.maneuver.model.RoadShield>? roadShields);
   }
 
   public final class MapboxSecondaryManeuver extends androidx.appcompat.widget.AppCompatTextView {
     ctor public MapboxSecondaryManeuver(android.content.Context context);
     ctor public MapboxSecondaryManeuver(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxSecondaryManeuver(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    method public void render(com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? maneuver, com.mapbox.navigation.ui.maneuver.model.RoadShield? roadShield = null);
-    method public void render(com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? maneuver);
+    method @Deprecated public void render(com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? maneuver, com.mapbox.navigation.ui.maneuver.model.RoadShield? roadShield = null);
+    method @Deprecated public void render(com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? maneuver);
+    method public void renderManeuver(com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? maneuver, java.util.List<com.mapbox.navigation.ui.maneuver.model.RoadShield>? roadShields);
   }
 
   public final class MapboxStepDistance extends androidx.appcompat.widget.AppCompatTextView {
@@ -897,8 +911,9 @@ package com.mapbox.navigation.ui.maneuver.view {
     ctor public MapboxSubManeuver(android.content.Context context);
     ctor public MapboxSubManeuver(android.content.Context context, android.util.AttributeSet? attrs);
     ctor public MapboxSubManeuver(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    method public void render(com.mapbox.navigation.ui.maneuver.model.SubManeuver? maneuver, com.mapbox.navigation.ui.maneuver.model.RoadShield? roadShield = null);
-    method public void render(com.mapbox.navigation.ui.maneuver.model.SubManeuver? maneuver);
+    method @Deprecated public void render(com.mapbox.navigation.ui.maneuver.model.SubManeuver? maneuver, com.mapbox.navigation.ui.maneuver.model.RoadShield? roadShield = null);
+    method @Deprecated public void render(com.mapbox.navigation.ui.maneuver.model.SubManeuver? maneuver);
+    method public void renderManeuver(com.mapbox.navigation.ui.maneuver.model.SubManeuver? maneuver, java.util.List<com.mapbox.navigation.ui.maneuver.model.RoadShield>? roadShields);
   }
 
   public final class MapboxTurnIconManeuver extends androidx.appcompat.widget.AppCompatImageView {
@@ -917,7 +932,8 @@ package com.mapbox.navigation.ui.maneuver.view {
     method public int getItemCount();
     method public void onBindViewHolder(com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder holder, int position);
     method public com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType);
-    method public void updateRoadShields(java.util.Map<java.lang.String,com.mapbox.navigation.ui.maneuver.model.RoadShield> shieldMap);
+    method @Deprecated public void updateRoadShields(java.util.Map<java.lang.String,com.mapbox.navigation.ui.maneuver.model.RoadShield> shieldMap);
+    method public void updateShields(java.util.Map<java.lang.String,? extends java.util.List<com.mapbox.navigation.ui.maneuver.model.RoadShield>> shields);
     method public void updateUpcomingManeuverStepDistanceTextAppearance(@StyleRes int style);
     method public void updateUpcomingPrimaryManeuverTextAppearance(@StyleRes int style);
     method public void updateUpcomingSecondaryManeuverTextAppearance(@StyleRes int style);

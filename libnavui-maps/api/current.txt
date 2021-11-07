@@ -4,7 +4,11 @@ package com.mapbox.navigation.ui.maps {
   public final class NavigationStyles {
     field public static final com.mapbox.navigation.ui.maps.NavigationStyles INSTANCE;
     field public static final String NAVIGATION_DAY_STYLE = "mapbox://styles/mapbox/navigation-day-v1";
+    field public static final String NAVIGATION_DAY_STYLE_ID = "navigation-day-v1";
+    field public static final String NAVIGATION_DAY_STYLE_USER_ID = "mapbox";
     field public static final String NAVIGATION_NIGHT_STYLE = "mapbox://styles/mapbox/navigation-night-v1";
+    field public static final String NAVIGATION_NIGHT_STYLE_ID = "navigation-night-v1";
+    field public static final String NAVIGATION_NIGHT_STYLE_USER_ID = "mapbox";
   }
 
   public final class PredictiveCacheController {

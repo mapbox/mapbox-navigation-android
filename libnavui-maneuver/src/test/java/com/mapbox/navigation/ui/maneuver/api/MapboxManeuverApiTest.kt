@@ -1,6 +1,8 @@
 package com.mapbox.navigation.ui.maneuver.api
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.MapboxShield
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -8,21 +10,26 @@ import com.mapbox.navigation.ui.maneuver.ManeuverAction
 import com.mapbox.navigation.ui.maneuver.ManeuverProcessor
 import com.mapbox.navigation.ui.maneuver.ManeuverResult
 import com.mapbox.navigation.ui.maneuver.ManeuverState
-import com.mapbox.navigation.ui.maneuver.RoadShieldContentManager
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverOptions
 import com.mapbox.navigation.ui.maneuver.model.RoadShield
+import com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode
 import com.mapbox.navigation.ui.maneuver.model.RoadShieldError
-import com.mapbox.navigation.ui.maneuver.model.RoadShieldResult
+import com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi
+import com.mapbox.navigation.ui.shield.internal.api.getRouteShieldsFromModels
+import com.mapbox.navigation.ui.shield.model.RouteShield
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkObject
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -35,7 +42,71 @@ class MapboxManeuverApiTest {
     var coroutineRule = MainCoroutineRule()
     private val maneuverOptions = mockk<ManeuverOptions>()
     private val distanceFormatter = mockk<DistanceFormatter>()
-    private val mapboxManeuverApi = MapboxManeuverApi(distanceFormatter, maneuverOptions)
+    private val routeShieldApi = mockk<MapboxRouteShieldApi>(relaxed = true)
+    private val mapboxManeuverApi = MapboxManeuverApi(
+        distanceFormatter,
+        maneuverOptions,
+        routeShieldApi
+    )
+
+    private val testManeuvers = listOf<Maneuver>(
+        mockk {
+            every { primary } returns mockk {
+                every { id } returns "primary_0"
+                every { componentList } returns listOf(
+                    mockk {
+                        every { node } returns mockk<RoadShieldComponentNode> {
+                            every { shieldUrl } returns "https://shield.mapbox.com/primary/url1"
+                            every { mapboxShield } returns null
+                            every { text } returns ""
+                        }
+                    },
+                    mockk {
+                        every { node } returns mockk<RoadShieldComponentNode> {
+                            every { shieldUrl } returns "https://shield.mapbox.com/primary/url2"
+                            every { mapboxShield } returns null
+                            every { text } returns ""
+                        }
+                    }
+                )
+            }
+            every { secondary } returns null
+            every { sub } returns null
+        },
+        mockk {
+            every { primary } returns mockk {
+                every { id } returns "primary_1"
+                every { componentList } returns listOf(
+                    mockk {
+                        every { node } returns mockk<RoadShieldComponentNode> {
+                            every { shieldUrl } returns null
+                            every { mapboxShield } returns MapboxShield.builder()
+                                .baseUrl("base")
+                                .name("name")
+                                .textColor("color")
+                                .displayRef("123")
+                                .build()
+                            every { text } returns ""
+                        }
+                    },
+                    mockk {
+                        every { node } returns mockk<RoadShieldComponentNode> {
+                            every { shieldUrl } returns null
+                            every { mapboxShield } returns MapboxShield.builder()
+                                .baseUrl("base")
+                                .name("name")
+                                .textColor("color")
+                                .displayRef("456")
+                                .build()
+                            every { text } returns ""
+                        }
+                    }
+                )
+            }
+            every { secondary } returns null
+            every { sub } returns null
+        }
+    )
 
     @Before
     fun setup() {
@@ -155,14 +226,23 @@ class MapboxManeuverApiTest {
     }
 
     @Test
-    fun `when roadShields is invoked returns success`() = coroutineRule.runBlockingTest {
-        val roadShieldContentManager = mockk<RoadShieldContentManager>()
-        val maneuver: Maneuver = mockk(relaxed = true)
-        val maneuverList = listOf(maneuver)
-        val roadShieldError = RoadShieldError("https://mapbox.com", "whatever")
-        coEvery {
-            roadShieldContentManager.getShields(maneuverList)
-        } returns RoadShieldResult(mapOf(), mapOf("1234abcd" to roadShieldError))
+    fun `when legacy roadShields is invoked returns success`() = coroutineRule.runBlockingTest {
+        mockkStatic(MapboxRouteShieldApi::getRouteShieldsFromModels)
+        coEvery { routeShieldApi.getRouteShieldsFromModels(any()) } returns listOf(
+            ExpectedFactory.createError(
+                mockk {
+                    every { url } returns "https://mapbox.com/url1"
+                    every { errorMessage } returns "whatever1"
+                }
+            ),
+            ExpectedFactory.createError(
+                mockk {
+                    every { url } returns "https://mapbox.com/url2"
+                    every { errorMessage } returns "whatever2"
+                }
+            )
+        )
+        val maneuverList = listOf(testManeuvers[0])
         val callback: RoadShieldCallback = mockk(relaxed = true)
         val maneuverSlot = slot<List<Maneuver>>()
         val shieldSlot = slot<Map<String, RoadShield?>>()
@@ -173,5 +253,152 @@ class MapboxManeuverApiTest {
         verify(exactly = 1) {
             callback.onRoadShields(capture(maneuverSlot), capture(shieldSlot), capture(errorSlot))
         }
+        assertEquals(1, errorSlot.captured.values.size)
+        unmockkStatic(MapboxRouteShieldApi::getRouteShieldsFromModels)
     }
+
+    @Test
+    fun `when legacy roadShields is invoked using new api returns success`() =
+        coroutineRule.runBlockingTest {
+            mockkStatic(MapboxRouteShieldApi::getRouteShieldsFromModels)
+            coEvery { routeShieldApi.getRouteShieldsFromModels(any()) } returns listOf(
+                ExpectedFactory.createError(
+                    mockk {
+                        every { url } returns "https://mapbox.com/url1"
+                        every { errorMessage } returns "whatever1"
+                    }
+                ),
+                ExpectedFactory.createError(
+                    mockk {
+                        every { url } returns "https://mapbox.com/url2"
+                        every { errorMessage } returns "whatever2"
+                    }
+                )
+            )
+            val maneuverList = listOf(testManeuvers[0])
+            val callback: RoadShieldsCallback = mockk(relaxed = true)
+            val maneuverSlot = slot<List<Maneuver>>()
+            val shieldSlot = slot<Map<String, List<RoadShield>>>()
+            val errorSlot = slot<Map<String, List<RoadShieldError>>>()
+
+            mapboxManeuverApi.getRoadShields(maneuverList, callback)
+
+            verify(exactly = 1) {
+                callback.onRoadShields(
+                    capture(maneuverSlot),
+                    capture(shieldSlot),
+                    capture(errorSlot)
+                )
+            }
+            assertEquals(2, errorSlot.captured["primary_0"]!!.size)
+            unmockkStatic(MapboxRouteShieldApi::getRouteShieldsFromModels)
+        }
+
+    @Test
+    fun `when mapbox roadShields is invoked returns success`() = coroutineRule.runBlockingTest {
+        val userId = "userId"
+        val styleId = "styleId"
+        val accessToken = "pk.123"
+        mockkStatic(MapboxRouteShieldApi::getRouteShieldsFromModels)
+        val mockByteArray = byteArrayOf(1)
+        coEvery { routeShieldApi.getRouteShieldsFromModels(any()) } returns listOf(
+            ExpectedFactory.createValue(
+                mockk {
+                    every { shield } returns mockk<RouteShield.MapboxDesignedShield> {
+                        every { url } returns "https://shield.mapbox.com/url1"
+                        every { byteArray } returns mockByteArray
+                        every { mapboxShield } returns mockk()
+                        every { shieldSprite } returns mockk()
+                    }
+                    every { origin } returns mockk {
+                        every { isFallback } returns false
+                        every { originalUrl } returns "https://shield.mapbox.com/url1"
+                        every { originalErrorMessage } returns ""
+                    }
+                }
+            )
+        )
+        val maneuverList = listOf(testManeuvers[1])
+        val callback: RoadShieldCallback = mockk(relaxed = true)
+        val maneuverSlot = slot<List<Maneuver>>()
+        val shieldSlot = slot<Map<String, RoadShield?>>()
+        val errorSlot = slot<Map<String, RoadShieldError>>()
+
+        mapboxManeuverApi.getRoadShields(userId, styleId, accessToken, maneuverList, callback)
+
+        verify(exactly = 1) {
+            callback.onRoadShields(capture(maneuverSlot), capture(shieldSlot), capture(errorSlot))
+        }
+        assertEquals(1, shieldSlot.captured.values.size)
+        assertEquals(mockByteArray, shieldSlot.captured.values.first()?.shieldIcon)
+        assertEquals(
+            "https://shield.mapbox.com/url1",
+            shieldSlot.captured.values.first()?.shieldUrl
+        )
+        unmockkStatic(MapboxRouteShieldApi::getRouteShieldsFromModels)
+    }
+
+    @Test
+    fun `when mapbox roadShields is invoked with new api returns success`() =
+        coroutineRule.runBlockingTest {
+            val userId = "userId"
+            val styleId = "styleId"
+            val accessToken = "pk.123"
+            mockkStatic(MapboxRouteShieldApi::getRouteShieldsFromModels)
+            val mockByteArray = byteArrayOf(1)
+            coEvery { routeShieldApi.getRouteShieldsFromModels(any()) } returns listOf(
+                ExpectedFactory.createValue(
+                    mockk {
+                        every { shield } returns mockk<RouteShield.MapboxDesignedShield> {
+                            every { url } returns "https://shield.mapbox.com/url1"
+                            every { byteArray } returns mockByteArray
+                            every { mapboxShield } returns mockk()
+                            every { shieldSprite } returns mockk()
+                        }
+                        every { origin } returns mockk {
+                            every { isFallback } returns false
+                            every { originalUrl } returns "https://shield.mapbox.com/url1"
+                            every { originalErrorMessage } returns ""
+                        }
+                    }
+                ),
+                ExpectedFactory.createValue(
+                    mockk {
+                        every { shield } returns mockk<RouteShield.MapboxDesignedShield> {
+                            every { url } returns "https://shield.mapbox.com/url2"
+                            every { byteArray } returns mockByteArray
+                            every { mapboxShield } returns mockk()
+                            every { shieldSprite } returns mockk()
+                        }
+                        every { origin } returns mockk {
+                            every { isFallback } returns false
+                            every { originalUrl } returns "https://shield.mapbox.com/url2"
+                            every { originalErrorMessage } returns ""
+                        }
+                    }
+                )
+            )
+            val maneuverList = listOf(testManeuvers[1])
+            val callback: RoadShieldsCallback = mockk(relaxed = true)
+            val maneuverSlot = slot<List<Maneuver>>()
+            val shieldSlot = slot<Map<String, List<RoadShield>>>()
+            val errorSlot = slot<Map<String, List<RoadShieldError>>>()
+
+            mapboxManeuverApi.getRoadShields(userId, styleId, accessToken, maneuverList, callback)
+
+            verify(exactly = 1) {
+                callback.onRoadShields(
+                    capture(maneuverSlot),
+                    capture(shieldSlot),
+                    capture(errorSlot)
+                )
+            }
+            assertEquals(2, shieldSlot.captured["primary_1"]!!.size)
+            assertEquals(mockByteArray, shieldSlot.captured.values.first()[0].shieldIcon)
+            assertEquals(
+                "https://shield.mapbox.com/url2",
+                shieldSlot.captured.values.first()[1].shieldUrl
+            )
+            unmockkStatic(MapboxRouteShieldApi::getRouteShieldsFromModels)
+        }
 }

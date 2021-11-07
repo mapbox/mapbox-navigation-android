@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maneuver.model
 
+import com.mapbox.api.directions.v5.models.MapboxShield
 import com.mapbox.navigation.testing.BuilderTest
 import org.junit.Test
 import kotlin.reflect.KClass
@@ -13,6 +14,15 @@ class RoadShieldComponentNodeTest : BuilderTest<RoadShieldComponentNode,
     override fun getFilledUpBuilder(): RoadShieldComponentNode.Builder {
         return RoadShieldComponentNode.Builder()
             .text("exit-number")
+            .mapboxShield(
+                MapboxShield
+                    .builder()
+                    .name("us-interstate")
+                    .textColor("black")
+                    .displayRef("880")
+                    .baseUrl("https://mapbox.test.com/v1")
+                    .build()
+            )
             .shieldUrl("https://api.mapbox.com/test_url")
     }
 
