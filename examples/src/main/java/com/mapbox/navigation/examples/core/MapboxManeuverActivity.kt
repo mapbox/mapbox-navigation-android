@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.model.Message
@@ -15,7 +16,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
@@ -43,10 +43,12 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityManeuverBinding
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
-import com.mapbox.navigation.ui.maneuver.api.RoadShieldCallback
+import com.mapbox.navigation.ui.maneuver.api.RoadShieldsCallback
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
+import com.mapbox.navigation.ui.maps.NavigationStyles.NAVIGATION_DAY_STYLE
+import com.mapbox.navigation.ui.maps.NavigationStyles.NAVIGATION_DAY_STYLE_ID
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
@@ -127,13 +129,15 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
 
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
-    private val roadShieldCallback = RoadShieldCallback { _, shields, errors ->
-        binding.maneuverView.renderManeuverShields(shields)
-        errors.forEach { (id, error) ->
-            LoggerProvider.logger.e(
-                Tag("MbxManeuverActivity"),
-                Message("id: $id -- error: ${error.url} - ${error.message}")
-            )
+    private val roadShieldCallback = RoadShieldsCallback { _, shieldResult, shieldErrors ->
+        binding.maneuverView.renderManeuverWith(shieldResult)
+        shieldErrors.forEach { (id, errors) ->
+            errors.forEach { error ->
+                LoggerProvider.logger.e(
+                    Tag("MbxManeuverActivity"),
+                    Message("id: $id -- error: ${error.url} - ${error.message}")
+                )
+            }
         }
     }
 
@@ -187,7 +191,13 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
                 binding.maneuverView.visibility = VISIBLE
             }
             binding.maneuverView.renderManeuvers(maneuvers)
-            maneuverApi.getRoadShields(it, roadShieldCallback)
+            maneuverApi.getRoadShields(
+                DirectionsCriteria.PROFILE_DEFAULT_USER,
+                NAVIGATION_DAY_STYLE_ID,
+                getMapboxAccessToken("mapbox_access_token"),
+                it,
+                roadShieldCallback
+            )
         }
     }
 
@@ -199,7 +209,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
     @SuppressLint("MissingPermission")
     private fun initNavigation() {
         val navigationOptions = NavigationOptions.Builder(this)
-            .accessToken(getMapboxAccessTokenFromResources())
+            .accessToken(getMapboxAccessToken("mapbox_access_token_signboard"))
             .locationEngine(ReplayLocationEngine(mapboxReplayer))
             .build()
         mapboxNavigation = MapboxNavigationProvider.create(navigationOptions)
@@ -222,24 +232,30 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
             }
         })
         mapboxNavigation.registerLocationObserver(locationObserver)
+        mapboxReplayer.pushRealLocation(this, 0.0)
     }
 
     @SuppressLint("MissingPermission")
     private fun initStyle() {
-        mapboxMap.loadStyleUri(MAPBOX_STREETS) { style ->
+        mapboxMap.loadStyleUri(NAVIGATION_DAY_STYLE) { style ->
             routeLineView.initializeLayers(style)
             binding.mapView.gestures.addOnMapLongClickListener(this)
         }
     }
 
-    private fun getMapboxAccessTokenFromResources(): String {
-        return getString(this.resources.getIdentifier("mapbox_access_token", "string", packageName))
+    private fun getMapboxAccessToken(resourceName: String): String {
+        val tokenResId = resources
+            .getIdentifier(resourceName, "string", packageName)
+        return if (tokenResId != 0) {
+            getString(tokenResId)
+        } else {
+            getString(this.resources.getIdentifier("mapbox_access_token", "string", packageName))
+        }
     }
 
     private fun startSimulation(route: DirectionsRoute) {
         mapboxReplayer.stop()
         mapboxReplayer.clearEvents()
-        mapboxReplayer.pushRealLocation(this, 0.0)
         val replayEvents = ReplayRouteMapper().mapDirectionsRouteGeometry(route)
         mapboxReplayer.pushEvents(replayEvents)
         mapboxReplayer.seekTo(replayEvents.first())
@@ -334,10 +350,12 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
 
     override fun onMapLongClick(point: Point): Boolean {
         ifNonNull(navigationLocationProvider.lastLocation) { currentLocation ->
+
             val originPoint = Point.fromLngLat(
                 currentLocation.longitude,
                 currentLocation.latitude
             )
+
             findRoute(originPoint, point)
         }
         return false

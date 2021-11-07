@@ -12,7 +12,7 @@ internal object ManeuverInstructionGenerator {
         desiredHeight: Int,
         exitView: MapboxExitText,
         maneuver: PrimaryManeuver,
-        roadShield: RoadShield? = null
+        roadShields: List<RoadShield>? = null
     ): SpannableStringBuilder {
         val instructionBuilder = SpannableStringBuilder()
         maneuver.componentList.forEach { component ->
@@ -31,11 +31,16 @@ internal object ManeuverInstructionGenerator {
                     )
                 }
                 is RoadShieldComponentNode -> {
+                    val shield = roadShields?.find {
+                        it.mapboxShield == node.mapboxShield
+                    } ?: roadShields?.find {
+                        it.shieldUrl == node.shieldUrl
+                    }
                     addShieldToBuilder(
                         node.text,
                         desiredHeight,
                         context.resources,
-                        roadShield,
+                        shield,
                         instructionBuilder
                     )
                 }
@@ -52,7 +57,7 @@ internal object ManeuverInstructionGenerator {
         desiredHeight: Int,
         exitView: MapboxExitText,
         maneuver: SecondaryManeuver?,
-        roadShield: RoadShield? = null
+        roadShields: List<RoadShield>? = null
     ): SpannableStringBuilder {
         val instructionBuilder = SpannableStringBuilder()
         maneuver?.componentList?.forEach { component ->
@@ -71,11 +76,16 @@ internal object ManeuverInstructionGenerator {
                     )
                 }
                 is RoadShieldComponentNode -> {
+                    val shield = roadShields?.find {
+                        it.mapboxShield == node.mapboxShield
+                    } ?: roadShields?.find {
+                        it.shieldUrl == node.shieldUrl
+                    }
                     addShieldToBuilder(
                         node.text,
                         desiredHeight,
                         context.resources,
-                        roadShield,
+                        shield,
                         instructionBuilder
                     )
                 }
@@ -92,7 +102,7 @@ internal object ManeuverInstructionGenerator {
         desiredHeight: Int,
         exitView: MapboxExitText,
         maneuver: SubManeuver?,
-        roadShield: RoadShield? = null
+        roadShields: List<RoadShield>? = null
     ): SpannableStringBuilder {
         val instructionBuilder = SpannableStringBuilder()
         maneuver?.componentList?.forEach { component ->
@@ -111,11 +121,16 @@ internal object ManeuverInstructionGenerator {
                     )
                 }
                 is RoadShieldComponentNode -> {
+                    val shield = roadShields?.find {
+                        it.mapboxShield == node.mapboxShield
+                    } ?: roadShields?.find {
+                        it.shieldUrl == node.shieldUrl
+                    }
                     addShieldToBuilder(
                         node.text,
                         desiredHeight,
                         context.resources,
-                        roadShield,
+                        shield,
                         instructionBuilder
                     )
                 }

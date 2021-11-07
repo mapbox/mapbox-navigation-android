@@ -29,9 +29,10 @@ dependencies {
     api project(":libnavigation-core")
     api project(":libnavui-maneuver")
     api project(":libnavui-maps")
+    api project(":libnavui-shield")
+    api project(":libnavui-speedlimit")
     api project(":libnavui-tripprogress")
     api project(":libnavui-voice")
-    api project(":libnavui-speedlimit")
 }
 
 apply from: "${rootDir}/gradle/track-public-apis.gradle"

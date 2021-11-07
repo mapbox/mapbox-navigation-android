@@ -286,6 +286,8 @@ class NavigatorMapperTest {
             every { layer } returns null
             every { roadName } returns navigationStatus.roadName
             every { shieldName } returns navigationStatus.shieldName
+            every { shields } returns navigationStatus.shields
+            every { imageBaseurl } returns navigationStatus.imageBaseurl
         }
         val road: Road = RoadFactory.buildRoadObject(navigationStatus)
         val tripStatus = TripStatus(
@@ -538,6 +540,8 @@ class NavigatorMapperTest {
         every { upcomingRouteAlerts } returns emptyList()
         every { roadName } returns "Central Avenue"
         every { shieldName } returns "I880"
+        every { imageBaseurl } returns "https://mapbox.shields.com/"
+        every { shields } returns listOf()
     }
 
     val routeAlertLocation: RouteAlertLocation = mockk()

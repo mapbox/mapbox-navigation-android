@@ -27,6 +27,7 @@ import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.StepDistance
 import com.mapbox.navigation.ui.maneuver.model.SubManeuver
 import com.mapbox.navigation.ui.maneuver.model.TurnIconResources
+import com.mapbox.navigation.utils.internal.ifNonNull
 
 /**
  * Default view to render a maneuver.
@@ -74,7 +75,7 @@ class MapboxManeuverView : ConstraintLayout {
     private val mainLayoutBinding = MapboxMainManeuverLayoutBinding.bind(binding.root)
     private val subLayoutBinding = MapboxSubManeuverLayoutBinding.bind(binding.root)
 
-    private val maneuverToRoadShield = mutableMapOf<String, RoadShield?>()
+    private val maneuverToRoadShields = mutableMapOf<String, List<RoadShield>>()
     private val currentlyRenderedManeuvers: MutableList<Maneuver> = mutableListOf()
 
     /**
@@ -161,8 +162,32 @@ class MapboxManeuverView : ConstraintLayout {
      *
      * @param shieldMap the map of maneuver IDs to available shields
      */
+    @Deprecated(
+        message = "The method can only render one shield if an instruction has multiple shields",
+        replaceWith = ReplaceWith("renderManeuverWith(shields)")
+    )
     fun renderManeuverShields(shieldMap: Map<String, RoadShield?>) {
-        maneuverToRoadShield.putAll(shieldMap)
+        val shields = hashMapOf<String, List<RoadShield>>()
+        shieldMap.forEach { entry ->
+            shields[entry.key] = ifNonNull(entry.value) { value ->
+                listOf(value)
+            } ?: listOf()
+        }
+        renderManeuverWith(shields)
+    }
+
+    /**
+     * Invoke the method to update rendered maneuvers with road shields.
+     *
+     * The provided shields are mapped to IDs of [PrimaryManeuver], [SecondaryManeuver], and [SubManeuver]
+     * and if a maneuver has already been rendered via [renderManeuvers], the respective shields' text will be changed to the shield icon.
+     *
+     * Invoking this method also caches all of the available shields. Whenever [renderManeuvers] is invoked, the cached shields are reused for rendering.
+     *
+     * @param shields the map of maneuver IDs to available list of shields
+     */
+    fun renderManeuverWith(shields: Map<String, List<RoadShield>>) {
+        maneuverToRoadShields.putAll(shields)
         renderManeuvers()
     }
 
@@ -307,29 +332,80 @@ class MapboxManeuverView : ConstraintLayout {
     /**
      * Invoke the method to render primary instructions on top of [MapboxManeuverView]
      * @param primary PrimaryManeuver
+     * @param roadShield shield if available otherwise null
      */
+    @Deprecated(
+        message = "The method can only render one shield if an instruction has multiple shields",
+        replaceWith = ReplaceWith("renderPrimary(primary, roadShields)")
+    )
     @JvmOverloads
     fun renderPrimaryManeuver(primary: PrimaryManeuver, roadShield: RoadShield? = null) {
-        mainLayoutBinding.primaryManeuverText.render(primary, roadShield)
+        val shields = ifNonNull(roadShield) {
+            listOf(it)
+        }
+        renderPrimary(primary, shields)
+    }
+
+    /**
+     * Invoke the method to render primary instructions on top of [MapboxManeuverView]
+     * @param primary PrimaryManeuver
+     * @param roadShields list of shields if available otherwise null
+     */
+    fun renderPrimary(primary: PrimaryManeuver, roadShields: List<RoadShield>?) {
+        mainLayoutBinding.primaryManeuverText.renderManeuver(primary, roadShields)
         mainLayoutBinding.maneuverIcon.renderPrimaryTurnIcon(primary)
     }
 
     /**
      * Invoke the method to render secondary instructions on top of [MapboxManeuverView]
      * @param secondary SecondaryManeuver?
+     * @param roadShield shield if available otherwise null
      */
+    @Deprecated(
+        message = "The method can only render one shield if an instruction has multiple shields",
+        replaceWith = ReplaceWith("renderSecondary(secondary, roadShields)")
+    )
     @JvmOverloads
     fun renderSecondaryManeuver(secondary: SecondaryManeuver?, roadShield: RoadShield? = null) {
-        mainLayoutBinding.secondaryManeuverText.render(secondary, roadShield)
+        val shields = ifNonNull(roadShield) {
+            listOf(it)
+        }
+        renderSecondary(secondary, shields)
+    }
+
+    /**
+     * Invoke the method to render secondary instructions on top of [MapboxManeuverView]
+     * @param secondary SecondaryManeuver?
+     * @param roadShields list of shields if available otherwise null
+     */
+    fun renderSecondary(secondary: SecondaryManeuver?, roadShields: List<RoadShield>?) {
+        mainLayoutBinding.secondaryManeuverText.renderManeuver(secondary, roadShields)
     }
 
     /**
      * Invoke the method to render sub instructions on top of [MapboxManeuverView]
      * @param sub SubManeuver?
+     * @param roadShield shield if available otherwise null
      */
+    @Deprecated(
+        message = "The method can only render one shield if an instruction has multiple shields",
+        replaceWith = ReplaceWith("renderSub(sub, roadShields)")
+    )
     @JvmOverloads
     fun renderSubManeuver(sub: SubManeuver?, roadShield: RoadShield? = null) {
-        subLayoutBinding.subManeuverText.render(sub, roadShield)
+        val shields = ifNonNull(roadShield) {
+            listOf(it)
+        }
+        renderSub(sub, shields)
+    }
+
+    /**
+     * Invoke the method to render sub instructions on top of [MapboxManeuverView]
+     * @param sub SubManeuver?
+     * @param roadShields list of shields if available otherwise null
+     */
+    fun renderSub(sub: SubManeuver?, roadShields: List<RoadShield>?) {
+        subLayoutBinding.subManeuverText.renderManeuver(sub, roadShields)
         subLayoutBinding.subManeuverIcon.renderSubTurnIcon(sub)
     }
 
@@ -358,8 +434,8 @@ class MapboxManeuverView : ConstraintLayout {
 
     private fun renderManeuvers() {
         if (currentlyRenderedManeuvers.isNotEmpty()) {
-            drawManeuver(currentlyRenderedManeuvers[0], maneuverToRoadShield)
-            upcomingManeuverAdapter.updateRoadShields(maneuverToRoadShield)
+            drawManeuver(currentlyRenderedManeuvers[0], maneuverToRoadShields)
+            upcomingManeuverAdapter.updateShields(maneuverToRoadShields)
             drawUpcomingManeuvers(currentlyRenderedManeuvers.drop(1))
         }
     }
@@ -433,7 +509,7 @@ class MapboxManeuverView : ConstraintLayout {
         upcomingManeuverAdapter.addUpcomingManeuvers(maneuvers)
     }
 
-    private fun drawManeuver(maneuver: Maneuver, shieldMap: Map<String, RoadShield?>) {
+    private fun drawManeuver(maneuver: Maneuver, shields: Map<String, List<RoadShield>?>) {
         val primary = maneuver.primary
         val secondary = maneuver.secondary
         val sub = maneuver.sub
@@ -444,11 +520,11 @@ class MapboxManeuverView : ConstraintLayout {
         val subId = sub?.id
         if (secondary?.componentList != null) {
             updateSecondaryManeuverVisibility(VISIBLE)
-            renderSecondaryManeuver(secondary, shieldMap[secondaryId])
+            renderSecondary(secondary, shields[secondaryId])
         } else {
             updateSecondaryManeuverVisibility(GONE)
         }
-        renderPrimaryManeuver(primary, shieldMap[primaryId])
+        renderPrimary(primary, shields[primaryId])
         renderDistanceRemaining(stepDistance)
         if (sub?.componentList != null || lane != null) {
             updateSubManeuverViewVisibility(VISIBLE)
@@ -456,9 +532,9 @@ class MapboxManeuverView : ConstraintLayout {
             updateSubManeuverViewVisibility(GONE)
         }
         if (sub?.componentList != null) {
-            renderSubManeuver(sub, shieldMap[subId])
+            renderSub(sub, shields[subId])
         } else {
-            renderSubManeuver(null)
+            renderSub(null, listOf())
         }
         when (lane != null) {
             true -> {

@@ -19,5 +19,6 @@ include ':examples',
         ':libnavui-resources',
         ':libnavui-voice',
         ':libnavui-speedlimit',
+        ':libnavui-shield',
         ':libnavui-dropin',
         ':qa-test-app'

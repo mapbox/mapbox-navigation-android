@@ -2,12 +2,14 @@ package com.mapbox.navigation.ui.maneuver.model
 
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerText
+import com.mapbox.api.directions.v5.models.MapboxShield
 
 /**
  * [ComponentNode] of the type [BannerComponents.ICON]
  * @property text String holds [BannerComponents.text] contained inside [BannerComponents]
  * of type [BannerComponents.ICON]
  * @property shieldUrl String holds the [BannerComponents.imageBaseUrl]
+ * @property mapboxShield holds info about [BannerComponents.mapboxShield]
  *
  * E.g.
  * For the given [BannerText]
@@ -23,6 +25,12 @@ import com.mapbox.api.directions.v5.models.BannerText
  *          }
  *          {
  *              "imageBaseURL": "https://mapbox-navigation-shields...",
+ *              "mapbox_shield": {
+ *                  "base_url": "https://api.mapbox.com/styles/v1/",
+ *                  "name": "us-interstate",
+ *                  "text_color": "black",
+ *                  "display_ref": "880"
+ *              }
  *              "type": "icon",
  *              "text": "I-880"
  *          },
@@ -44,7 +52,8 @@ import com.mapbox.api.directions.v5.models.BannerText
 
 class RoadShieldComponentNode private constructor(
     val text: String,
-    val shieldUrl: String? = null
+    val shieldUrl: String? = null,
+    val mapboxShield: MapboxShield? = null
 ) : ComponentNode {
 
     /**
@@ -54,6 +63,7 @@ class RoadShieldComponentNode private constructor(
         return Builder()
             .text(text)
             .shieldUrl(shieldUrl)
+            .mapboxShield(mapboxShield)
     }
 
     /**
@@ -67,6 +77,7 @@ class RoadShieldComponentNode private constructor(
 
         if (text != other.text) return false
         if (shieldUrl != other.shieldUrl) return false
+        if (mapboxShield != other.mapboxShield) return false
 
         return true
     }
@@ -77,6 +88,7 @@ class RoadShieldComponentNode private constructor(
     override fun hashCode(): Int {
         var result = text.hashCode()
         result = 31 * result + shieldUrl.hashCode()
+        result = 31 * result + mapboxShield.hashCode()
         return result
     }
 
@@ -84,7 +96,11 @@ class RoadShieldComponentNode private constructor(
      * Regenerate whenever a change is made
      */
     override fun toString(): String {
-        return "RoadShieldComponentNode(text='$text', shieldUrl=$shieldUrl)"
+        return "RoadShieldComponentNode(" +
+            "text='$text', " +
+            "shieldUrl=$shieldUrl, " +
+            "mapboxShield=$mapboxShield" +
+            ")"
     }
 
     /**
@@ -95,6 +111,7 @@ class RoadShieldComponentNode private constructor(
     class Builder {
         private var text: String = ""
         private var shieldUrl: String? = null
+        private var mapboxShield: MapboxShield? = null
 
         /**
          * apply text to the Builder.
@@ -113,13 +130,22 @@ class RoadShieldComponentNode private constructor(
             apply { this.shieldUrl = shieldUrl }
 
         /**
+         * apply mapboxShield to the Builder.
+         * @param mapboxShield String
+         * @return Builder
+         */
+        fun mapboxShield(mapboxShield: MapboxShield?): Builder =
+            apply { this.mapboxShield = mapboxShield }
+
+        /**
          * Build the [RoadShieldComponentNode]
          * @return RoadShieldComponentNode
          */
         fun build(): RoadShieldComponentNode {
             return RoadShieldComponentNode(
                 text,
-                shieldUrl
+                shieldUrl,
+                mapboxShield
             )
         }
     }

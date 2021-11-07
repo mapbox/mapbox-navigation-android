@@ -469,6 +469,7 @@ internal object ManeuverProcessor {
                         .Builder()
                         .text(component.text())
                         .shieldUrl(component.imageBaseUrl())
+                        .mapboxShield(component.mapboxShield())
                         .build()
                     componentList.add(Component(BannerComponents.ICON, roadShield))
                 }

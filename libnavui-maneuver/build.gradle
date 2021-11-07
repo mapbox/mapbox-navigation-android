@@ -39,8 +39,8 @@ android {
 }
 
 dependencies {
-    api project(":libnavui-base")
     implementation project(":libnavui-resources")
+    api project(":libnavui-shield")
 
     implementation dependenciesList.androidXAppCompat
     implementation dependenciesList.androidXCardView
