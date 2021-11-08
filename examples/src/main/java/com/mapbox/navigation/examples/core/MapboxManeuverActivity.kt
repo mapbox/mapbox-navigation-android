@@ -246,15 +246,15 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
         mapboxReplayer.play()
     }
 
-    private fun findRoute(origin: Point, waypoints: List<Point>?, destination: Point) {
+    private fun findRoute(origin: Point, destination: Point) {
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
             .coordinates(
                 origin = origin,
-                waypoints = waypoints,
                 destination = destination
             )
+            .layersList(listOf(mapboxNavigation.getZLevel(), null))
             .build()
         mapboxNavigation.requestRoutes(
             routeOptions,
@@ -338,7 +338,7 @@ class MapboxManeuverActivity : AppCompatActivity(), OnMapLongClickListener {
                 currentLocation.longitude,
                 currentLocation.latitude
             )
-            findRoute(originPoint, null, point)
+            findRoute(originPoint, point)
         }
         return false
     }

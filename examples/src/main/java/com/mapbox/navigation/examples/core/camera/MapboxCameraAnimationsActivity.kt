@@ -557,6 +557,7 @@ class MapboxCameraAnimationsActivity :
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
             .coordinatesList(listOf(origin, destination))
+            .layersList(listOf(mapboxNavigation.getZLevel(), null))
             .build()
 
         mapboxNavigation.requestRoutes(

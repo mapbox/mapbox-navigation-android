@@ -285,6 +285,7 @@ class FeedbackActivity : AppCompatActivity() {
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
                 .coordinatesList(listOf(origin, destination))
+                .layersList(listOf(mapboxNavigation.getZLevel(), null))
                 .alternatives(true)
                 .build(),
             object : RouterCallback {

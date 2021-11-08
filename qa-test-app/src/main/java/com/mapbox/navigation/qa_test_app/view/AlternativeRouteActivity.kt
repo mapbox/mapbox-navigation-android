@@ -220,6 +220,7 @@ class AlternativeRouteActivity : AppCompatActivity(), OnMapLongClickListener {
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
             .coordinatesList(listOf(origin, destination))
+            .layersList(listOf(mapboxNavigation.getZLevel(), null))
             .alternatives(true)
             .build()
         mapboxNavigation.requestRoutes(

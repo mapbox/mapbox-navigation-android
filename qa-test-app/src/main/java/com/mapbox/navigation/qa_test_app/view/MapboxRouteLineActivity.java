@@ -327,6 +327,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     RouteOptionsExtensions.applyLanguageAndVoiceUnitOptions(builder, this);
     RouteOptions routeOptions = builder
         .coordinatesList(Arrays.asList(origin, destination))
+        .layersList(Arrays.asList(mapboxNavigation.getZLevel(), null))
         .alternatives(true)
         .build();
 
