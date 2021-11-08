@@ -212,6 +212,7 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
             .coordinatesList(listOf(origin, destination))
+            .layersList(listOf(mapboxNavigation.getZLevel(), null))
             .alternatives(false)
             .build()
         routeRequestId = mapboxNavigation.requestRoutes(

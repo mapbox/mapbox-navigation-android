@@ -235,6 +235,7 @@ class MapboxCustomStyleActivity : AppCompatActivity(), OnMapLongClickListener {
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
                 .coordinatesList(listOf(origin, destination))
+                .layersList(listOf(mapboxNavigation.getZLevel(), null))
                 .alternatives(false)
                 .annotationsList(Collections.singletonList(DirectionsCriteria.ANNOTATION_MAXSPEED))
                 .build(),

@@ -478,13 +478,14 @@ class MapboxNavigationActivity : AppCompatActivity() {
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
                 .coordinatesList(listOf(origin, destination))
+                .layersList(listOf(mapboxNavigation.getZLevel(), null))
                 .build(),
             object : RouterCallback {
                 override fun onRoutesReady(
                     routes: List<DirectionsRoute>,
                     routerOrigin: RouterOrigin
                 ) {
-                    setRouteAndStartNavigation(routes.first(), routerOrigin)
+                    setRouteAndStartNavigation(routes.first())
                 }
 
                 override fun onFailure(
@@ -501,7 +502,7 @@ class MapboxNavigationActivity : AppCompatActivity() {
         )
     }
 
-    private fun setRouteAndStartNavigation(route: DirectionsRoute, routerOrigin: RouterOrigin) {
+    private fun setRouteAndStartNavigation(route: DirectionsRoute) {
         // set route
         mapboxNavigation.setRoutes(listOf(route))
 

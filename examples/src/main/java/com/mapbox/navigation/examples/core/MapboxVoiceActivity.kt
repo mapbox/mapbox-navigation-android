@@ -291,6 +291,7 @@ class MapboxVoiceActivity : AppCompatActivity(), OnMapLongClickListener {
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
             .coordinatesList(listOf(origin, destination))
+            .layersList(listOf(mapboxNavigation.getZLevel(), null))
             .voiceInstructions(true)
             .build()
         mapboxNavigation.requestRoutes(

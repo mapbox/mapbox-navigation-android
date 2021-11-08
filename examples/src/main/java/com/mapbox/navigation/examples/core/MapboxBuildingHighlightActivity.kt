@@ -268,10 +268,17 @@ class MapboxBuildingHighlightActivity : AppCompatActivity(), OnMapLongClickListe
     }
 
     private fun findRoute(origin: Point) {
+        val coordinates = waypointsController.coordinates(origin)
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(this)
-            .coordinatesList(waypointsController.coordinates(origin))
+            .coordinatesList(coordinates)
+            .layersList(
+                ArrayList<Int?>(coordinates.size).apply {
+                    add(mapboxNavigation.getZLevel())
+                    repeat(coordinates.size - 1) { add(null) }
+                },
+            )
             .build()
         mapboxNavigation.requestRoutes(
             routeOptions,
