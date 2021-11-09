@@ -7,7 +7,9 @@ import com.mapbox.bindgen.Value
 import com.mapbox.common.TileStore
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.OfflineManager
 import com.mapbox.maps.ResourceOptions
+import com.mapbox.maps.TilesetDescriptorOptions
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -20,6 +22,8 @@ private const val TAG = "MbxPredictiveCache"
 private const val MAPBOX_URL_PREFIX = "mapbox://"
 private const val VECTOR_SOURCE_TYPE = "vector"
 private const val RASTER_SOURCE_TYPE = "raster"
+private const val MIN_ZOOM = 0.toByte()
+private const val MAX_ZOOM = 16.toByte()
 
 /**
  * Predictive caching is a system that downloads necessary visual map and guidance data resources
@@ -77,7 +81,13 @@ class PredictiveCacheController @JvmOverloads constructor(
      * Source id's should look like "mapbox://mapbox.satellite", "mapbox://mapbox.mapbox-terrain-v2".
      * The system only supports source hosted on Mapbox Services which URL starts with "mapbox://".
      * If no ids are passed all available style sources will be cached.
+     *
+     * Note: This method does not handle correct styles with volatile sources and caches them.
+     * Use [createStyleMapControllers] instead.
      */
+    @Deprecated(
+        message = "Use createStyleMapControllers(map, styles) instead."
+    )
     @JvmOverloads
     fun createMapControllers(
         map: MapboxMap,
@@ -120,6 +130,50 @@ class PredictiveCacheController @JvmOverloads constructor(
     }
 
     /**
+     * Create cache controllers for a map instance.
+     * Call when a new map instance is available.
+     *
+     * @param map an instance of [MapboxMap]
+     * @param cacheCurrentMapStyle flag to indicate if the current map style should be cached
+     * or not. Current map style is cached by default and shouldn't be added to the list of styles.
+     * @param styles a list of Mapbox style URIs to cache.
+     * If no styles are passed current map's style will be cached.
+     * Only styles hosted on Mapbox Services are supported.
+     * Only non-volatile styles will be cached.
+     */
+    @JvmOverloads
+    fun createStyleMapControllers(
+        map: MapboxMap,
+        cacheCurrentMapStyle: Boolean = true,
+        styles: List<String> = emptyList()
+    ) {
+        val tileStore = map.getResourceOptions().tileStore
+        if (tileStore == null) {
+            handleError("TileStore instance not configured for the Map.")
+            return
+        }
+
+        mapListeners[map]?.let {
+            removeMapControllers(map)
+        }
+
+        styles.forEach { styleURI ->
+            createMapsController(styleURI, map, tileStore)
+        }
+
+        val onStyleLoadedListener = OnStyleLoadedListener {
+            if (cacheCurrentMapStyle) {
+                map.getStyle()?.styleURI?.let { styleURI ->
+                    createMapsController(styleURI, map, tileStore)
+                }
+            }
+        }
+
+        map.addOnStyleLoadedListener(onStyleLoadedListener)
+        mapListeners[map] = onStyleLoadedListener
+    }
+
+    /**
      * Remove the map instance. Call this whenever the [MapView] is destroyed
      * to avoid leaking references or downloading unnecessary resources.
      */
@@ -128,7 +182,8 @@ class PredictiveCacheController @JvmOverloads constructor(
             map.removeOnStyleLoadedListener(it)
             mapListeners.remove(map)
         }
-        PredictiveCache.removeAllMapControllers(map)
+        PredictiveCache.removeAllMapControllersFromTileVariants(map)
+        PredictiveCache.removeAllMapControllersFromDescriptors(map)
     }
 
     /**
@@ -142,6 +197,11 @@ class PredictiveCacheController @JvmOverloads constructor(
         }
         mapListeners.clear()
         PredictiveCache.clean()
+    }
+
+    private fun handleError(error: String?) {
+        LoggerProvider.logger.e(Tag(TAG), Message(error ?: "null"))
+        predictiveCacheControllerErrorHandler?.onError(error)
     }
 
     private fun traverseMapSources(
@@ -207,8 +267,35 @@ class PredictiveCacheController @JvmOverloads constructor(
             }
     }
 
-    private fun handleError(error: String?) {
-        LoggerProvider.logger.e(Tag(TAG), Message(error ?: "null"))
-        predictiveCacheControllerErrorHandler?.onError(error)
+    private fun createMapsController(
+        styleURI: String,
+        map: MapboxMap,
+        tileStore: TileStore
+    ) {
+        val offlineManager = OfflineManager(map.getResourceOptions())
+
+        if (!styleURI.startsWith(MAPBOX_URL_PREFIX)) {
+            val message =
+                """
+                    Style URI: "$styleURI" does not start with "$MAPBOX_URL_PREFIX".
+                    Only styles hosted on Mapbox Services are supported.
+                """.trimIndent()
+            handleError(message)
+        } else {
+            val descriptorOptions = TilesetDescriptorOptions.Builder()
+                .styleURI(styleURI)
+                .minZoom(MIN_ZOOM)
+                .maxZoom(MAX_ZOOM)
+                .build()
+
+            val tilesetDescriptor = offlineManager.createTilesetDescriptor(descriptorOptions)
+
+            PredictiveCache.createMapsController(
+                map,
+                tileStore,
+                tilesetDescriptor,
+                predictiveCacheLocationOptions
+            )
+        }
     }
 }
