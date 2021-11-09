@@ -36,6 +36,7 @@ class RouteRefreshCallbackMapperTest {
                         .annotation(
                             LegAnnotation.builder()
                                 .congestion(listOf("congestion5", "congestion10"))
+                                .congestionNumeric(listOf(23, 68))
                                 .distance(listOf(44.0, 55.0))
                                 .build()
                         )
@@ -50,6 +51,7 @@ class RouteRefreshCallbackMapperTest {
                                         "congestion1000"
                                     )
                                 )
+                                .congestionNumeric(listOf(3, 58, 99))
                                 .distance(listOf(1.0, 2.0, 3.0))
                                 .duration(listOf(4.0, 5.0, 6.0))
                                 .maxspeed(listOf(mockk(), mockk(), mockk()))
@@ -71,6 +73,7 @@ class RouteRefreshCallbackMapperTest {
                         .annotation(
                             LegAnnotation.builder()
                                 .congestion(listOf("congestion1", "congestion2"))
+                                .congestionNumeric(listOf(23, 88))
                                 .distance(listOf(11.0, 21.0))
                                 .build()
                         )
@@ -79,6 +82,7 @@ class RouteRefreshCallbackMapperTest {
                         .annotation(
                             LegAnnotation.builder()
                                 .congestion(listOf("congestion11", "congestion22", "congestion33"))
+                                .congestionNumeric(listOf(3, 18, 76))
                                 .distance(listOf(111.0, 211.0, 311.0))
                                 .build()
                         )

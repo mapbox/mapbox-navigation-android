@@ -30,6 +30,9 @@ internal object RouteRefreshCallbackMapper {
                     ?.speed(
                         validRouteAnnotations.annotationOfLeg(index)?.speed()
                     )
+                    ?.congestionNumeric(
+                        validRouteAnnotations.annotationOfLeg(index)?.congestionNumeric()
+                    )
                     ?.build()
                 updatedLegs.add(routeLeg.toBuilder().annotation(newAnnotation).build())
             }
