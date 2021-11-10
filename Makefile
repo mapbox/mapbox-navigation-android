@@ -17,7 +17,6 @@ libnavui-resources \
 libnavui-voice \
 libnavigation-android \
 libnavui-speedlimit \
-libnavui-dropin \
 
 APPLICATION_MODULES = \
 qa-test-app \
@@ -34,7 +33,8 @@ endef
 check-lint:
 	$(call run-gradle-tasks,$(CORE_MODULES),ktlint) \
 	&& $(call run-gradle-tasks,$(UI_MODULES),ktlint) \
-	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),ktlint)
+	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),ktlint) \
+	&& ./gradlew libnavui-dropin:ktlint
 
 .PHONY: license-verification
 license-verification:
@@ -53,12 +53,14 @@ javadoc-dokka:
 .PHONY: dependency-graphs
 dependency-graphs:
 	$(call run-gradle-tasks,$(CORE_MODULES),generateDependencyGraphMapboxLibraries) \
-	&& $(call run-gradle-tasks,$(UI_MODULES),generateDependencyGraphMapboxLibraries)
+	&& $(call run-gradle-tasks,$(UI_MODULES),generateDependencyGraphMapboxLibraries) \
+	&& ./gradlew libnavui-dropin:generateDependencyGraphMapboxLibraries
 
 .PHONY: dependency-updates
 dependency-updates:
 	$(call run-gradle-tasks,$(CORE_MODULES),dependencyUpdates) \
-	&& $(call run-gradle-tasks,$(UI_MODULES),dependencyUpdates)
+	&& $(call run-gradle-tasks,$(UI_MODULES),dependencyUpdates) \
+	&& ./gradlew libnavui-dropin:dependencyUpdates
 
 .PHONY: verify-common-sdk-version
 verify-common-sdk-version:
@@ -75,7 +77,8 @@ core-publish-local:
 
 .PHONY: ui-publish-local
 ui-publish-local:
-	$(call run-gradle-tasks,$(UI_MODULES),publishToMavenLocal)
+	$(call run-gradle-tasks,$(UI_MODULES),publishToMavenLocal) \
+	&& ./gradlew libnavui-dropin:publishToMavenLocal
 
 .PHONY: assemble-core-debug
 assemble-core-debug:
@@ -128,19 +131,23 @@ core-update-api: assemble-core-release
 
 .PHONY: assemble-ui-debug
 assemble-ui-debug:
-	$(call run-gradle-tasks,$(UI_MODULES),assembleDebug)
+	$(call run-gradle-tasks,$(UI_MODULES),assembleDebug) \
+	&& ./gradlew libnavui-dropin:assembleDebug
 
 .PHONY: assemble-ui-release
 assemble-ui-release:
-	$(call run-gradle-tasks,$(UI_MODULES),assembleRelease)
+	$(call run-gradle-tasks,$(UI_MODULES),assembleRelease) \
+	&& ./gradlew libnavui-dropin:assembleRelease
 
 .PHONY: ui-unit-tests
 ui-unit-tests:
-	$(call run-gradle-tasks,$(UI_MODULES),test)
+	$(call run-gradle-tasks,$(UI_MODULES),test) \
+	&& ./gradlew libnavui-dropin:test
 
 .PHONY: ui-unit-tests-jacoco
 ui-unit-tests-jacoco:
-	$(call run-gradle-tasks,$(UI_MODULES),jacocoTestReport)
+	$(call run-gradle-tasks,$(UI_MODULES),jacocoTestReport) \
+	&& ./gradlew libnavui-dropin:jacocoTestReport
 
 .PHONY: ui-upload-to-sdk-registry
 ui-upload-to-sdk-registry:
