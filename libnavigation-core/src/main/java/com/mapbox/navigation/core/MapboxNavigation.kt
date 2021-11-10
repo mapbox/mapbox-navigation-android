@@ -11,6 +11,7 @@ import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.annotation.module.MapboxModuleType
+import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.model.Message
@@ -93,6 +94,7 @@ import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
+import com.mapbox.navigation.utils.internal.toPoint
 import com.mapbox.navigator.ElectronicHorizonOptions
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.IncidentsOptions
@@ -590,6 +592,50 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routesRequestCallback: RouterCallback
     ): Long {
         return directionsSession.requestRoutes(routeOptions, routesRequestCallback)
+    }
+
+    fun requestRoutes(
+        routeOptionsBlock: RouteOptions.Builder.() -> Unit,
+        routesRequestCallback: RouterCallback
+    ): Long {
+        val options = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .applyLanguageAndVoiceUnitOptions(navigationOptions.applicationContext)
+            .apply(routeOptionsBlock)
+            .build()
+
+        val adjustedOptionsBuilder = options.toBuilder()
+
+        // provide enhanced location
+        // TODO should we swap out the first location or method signature should accept waypoints and we build coordinates list internally?
+        val enhancedLocation = tripSession.locationMatcherResult?.enhancedLocation
+        if (enhancedLocation != null) {
+            options.coordinatesList()[0] = enhancedLocation.toPoint()
+        }
+
+        // provide bearing from current location
+        val enhancedBearing = tripSession.locationMatcherResult
+            ?.enhancedLocation?.bearing?.toDouble()
+        if (enhancedBearing != null) {
+            val bearings = options.bearingsList()?.apply {
+                set(0, this[0].toBuilder().angle(enhancedBearing).build())
+            } ?: arrayOfNulls<Bearing>(options.coordinatesList().size).run {
+                set(0, Bearing.builder().angle(enhancedBearing).build())
+                toList()
+            }
+
+            adjustedOptionsBuilder
+                .bearingsList(bearings)
+        }
+
+        // TODO z-level
+
+        // TODO tests
+
+        // TODO if enhanced location is not available yet, should we wait for it?
+
+        val adjustedOptions = adjustedOptionsBuilder.build()
+        return directionsSession.requestRoutes(adjustedOptions, routesRequestCallback)
     }
 
     /**
