@@ -13,96 +13,114 @@
 
     <activity
         android:name=".MapboxNavigationActivity"
-        android:label="@string/title_navigation">
+        android:label="@string/title_navigation"
+        android:exported="false">
     </activity>
 
     <activity
         android:name=".MapboxRouteLineAndArrowActivity"
         android:label="@string/title_route_line"
-        android:screenOrientation="portrait">
+        android:screenOrientation="portrait"
+        android:exported="false">
     </activity>
 
     <activity
         android:name=".camera.MapboxCameraAnimationsActivity"
         android:label="@string/title_camera"
-        android:screenOrientation="portrait">
+        android:screenOrientation="portrait"
+        android:exported="false">
     </activity>
 
     <activity
         android:name=".MapboxSignboardActivity"
         android:label="@string/title_signboard"
-        android:screenOrientation="portrait">
+        android:screenOrientation="portrait"
+        android:exported="false">
     </activity>
 
     <activity
         android:name=".MapboxJunctionActivity"
         android:label="@string/title_junction"
-        android:screenOrientation="portrait">
+        android:screenOrientation="portrait"
+        android:exported="false">
     </activity>
 
     <activity
         android:name=".MapboxTripProgressActivity"
-        android:label="@string/title_trip_progress">
+        android:label="@string/title_trip_progress"
+        android:exported="false">
     </activity>
 
     <activity
         android:name=".MapboxManeuverActivity"
-        android:label="@string/title_maneuver">
+        android:label="@string/title_maneuver"
+        android:exported="false">
     </activity>
 
     <activity
         android:name=".MapboxVoiceActivity"
-        android:label="@string/title_voice">
+        android:label="@string/title_voice"
+        android:exported="false">
     </activity>
 
     <activity
         android:name=".replay.HistoryFilesActivity"
-        android:label="@string/title_replay" >
+        android:label="@string/title_replay"
+        android:exported="false">
     </activity>
 
     <activity
         android:name=".ReplayHistoryActivity"
-        android:label="@string/title_replay" >
+        android:label="@string/title_replay"
+        android:exported="false">
     </activity>
 
     <activity
         android:name=".MapboxCustomStyleActivity"
-        android:label="@string/title_custom_style" >
+        android:label="@string/title_custom_style"
+        android:exported="false">
     </activity>
 
     <activity
         android:name=".MapboxMultipleArrowActivity"
-        android:label="@string/title_multiple_arrows" >
+        android:label="@string/title_multiple_arrows"
+        android:exported="false">
     </activity>
 
     <activity
         android:name="com.mapbox.navigation.examples.util.RouteDrawingActivity"
-        android:label="@string/title_draw_utility" >
+        android:label="@string/title_draw_utility"
+        android:exported="false">
     </activity>
 
     <activity
         android:name=".IndependentRouteGenerationActivity"
-        android:label="@string/title_independent_route">
+        android:label="@string/title_independent_route"
+        android:exported="false">
     </activity>
 
     <activity
         android:name=".MapboxBuildingHighlightActivity"
-        android:label="@string/title_building_highlight">
+        android:label="@string/title_building_highlight"
+        android:exported="false">
     </activity>
 
     <activity
         android:name=".MultiLegRouteExampleActivity"
-        android:label="@string/title_multileg_route">
+        android:label="@string/title_multileg_route"
+        android:exported="false">
     </activity>
 
     <activity
         android:name=".MapboxDropInActivity"
         android:label="@string/title_drop_in"
-        android:screenOrientation="portrait">
+        android:screenOrientation="portrait"
+        android:exported="false">
     </activity>
 
     <activity
-        android:name="com.mapbox.navigation.examples.MainActivity">
+        android:name="com.mapbox.navigation.examples.MainActivity"
+        android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />

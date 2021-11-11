@@ -12,9 +12,9 @@ parameters:
 #---------- EXECUTORS ----------
 #-------------------------------
 executors:
-  ndk-r21e-latest-executor:
+  default-executor:
     docker:
-      - image: mbgl/android-ndk-r21e:latest
+      - image: mbgl/android-ndk-r22:latest
     working_directory: ~/code
     environment:
       MBX_CI_DOMAIN: o619qyc20d.execute-api.us-east-1.amazonaws.com
@@ -439,7 +439,7 @@ commands:
 #--------------------------
 jobs:
   prepare-and-assemble:
-    executor: ndk-r21e-latest-executor
+    executor: default-executor
     steps:
       - checkout
       - when:
@@ -468,7 +468,7 @@ jobs:
             - write-workspace
 
   unit-tests-core:
-    executor: ndk-r21e-latest-executor
+    executor: default-executor
     steps:
       - when:
           condition:
@@ -482,7 +482,7 @@ jobs:
       - run: exit 0
 
   unit-tests-ui:
-    executor: ndk-r21e-latest-executor
+    executor: default-executor
     steps:
       - when:
           condition:
@@ -498,7 +498,7 @@ jobs:
   #      - codecov
 
   static-analysis:
-    executor: ndk-r21e-latest-executor
+    executor: default-executor
     steps:
       - when:
           condition:
@@ -517,7 +517,7 @@ jobs:
       - run: exit 0
 
   publish-documentation:
-    executor: ndk-r21e-latest-executor
+    executor: default-executor
     steps:
       - checkout
       - prepare-mbx-ci
@@ -530,7 +530,7 @@ jobs:
             ./scripts/publish_api_docs_android.sh -p $GITHUB_WRITER_TOKEN -t $CIRCLE_TAG
 
   changelog-verification:
-    executor: ndk-r21e-latest-executor
+    executor: default-executor
     steps:
       - checkout
       - when:
@@ -544,7 +544,7 @@ jobs:
             - verify-changelog
 
   ui-robo-tests:
-    executor: ndk-r21e-latest-executor
+    executor: default-executor
     environment:
       JVM_OPTS: -Xmx3200m
       BUILDTYPE: Debug
@@ -572,7 +572,7 @@ jobs:
       - run: exit 0
 
   internal-instrumentation-tests:
-    executor: ndk-r21e-latest-executor
+    executor: default-executor
     environment:
       JVM_OPTS: -Xmx3200m
       BUILDTYPE: Debug
@@ -594,7 +594,7 @@ jobs:
       - run: exit 0
 
   instrumentation-tests:
-    executor: ndk-r21e-latest-executor
+    executor: default-executor
     environment:
       JVM_OPTS: -Xmx3200m
       BUILDTYPE: Debug
@@ -614,13 +614,13 @@ jobs:
       - run: exit 0
 
   mobile-metrics-benchmarks:
-    executor: ndk-r21e-latest-executor
+    executor: default-executor
     steps:
       - checkout
       - trigger-mobile-metrics
 
   release-snapshot:
-    executor: ndk-r21e-latest-executor
+    executor: default-executor
     steps:
       - checkout
       - generate-version-name
@@ -637,7 +637,7 @@ jobs:
       - trigger-mobile-metrics
 
   release:
-    executor: ndk-r21e-latest-executor
+    executor: default-executor
     steps:
       - checkout
       - generate-version-name
