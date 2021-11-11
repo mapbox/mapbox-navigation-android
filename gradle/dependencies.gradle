@@ -3,8 +3,8 @@ ext {
 
   androidVersions = [
       minSdkVersion           : 21,
-      targetSdkVersion        : 30,
-      compileSdkVersion       : 30
+      targetSdkVersion        : 31,
+      compileSdkVersion       : 31
   ]
 
   // Navigation Native CI can run SDK CI downstream with forced Navigation Native version
@@ -41,7 +41,7 @@ ext {
       mockito                   : '2.23.4',
       mockkVersion              : '1.10.0',
       butterknife               : '10.1.0',
-      leakCanaryVersion         : '2.3',
+      leakCanaryVersion         : '2.7',
       espressoVersion           : '3.1.0',
       commonsIO                 : '2.6',
       robolectric               : '4.3.1',

@@ -13,22 +13,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Mapboxnavigationandroid">
-        <activity android:name=".view.MainActivity">
+        <activity android:name=".view.MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".view.AlternativeRouteActivity"/>
-        <activity android:name=".view.MapboxRouteLineActivity"/>
-        <activity android:name=".view.util.RouteDrawingActivity"/>
-        <activity android:name=".view.RouteRestrictionsActivity"/>
-        <activity android:name=".view.RouteTrafficUpdateActivity"/>
-        <activity android:name=".view.InactiveRouteStylingActivity"/>
-        <activity android:name=".view.TrafficGradientActivity"/>
-        <activity android:name=".view.FeedbackActivity"/>
-        <activity android:name=".view.InactiveRouteStylingWithRestrictionsActivity"/>
+        <activity android:name=".view.AlternativeRouteActivity" android:exported="false"/>
+        <activity android:name=".view.MapboxRouteLineActivity" android:exported="false"/>
+        <activity android:name=".view.util.RouteDrawingActivity" android:exported="false"/>
+        <activity android:name=".view.RouteRestrictionsActivity" android:exported="false"/>
+        <activity android:name=".view.RouteTrafficUpdateActivity" android:exported="false"/>
+        <activity android:name=".view.InactiveRouteStylingActivity" android:exported="false"/>
+        <activity android:name=".view.TrafficGradientActivity" android:exported="false"/>
+        <activity android:name=".view.FeedbackActivity" android:exported="false"/>
+        <activity android:name=".view.InactiveRouteStylingWithRestrictionsActivity" android:exported="false"/>
     </application>
 
 </manifest>
