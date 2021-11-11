@@ -363,6 +363,11 @@ package com.mapbox.navigation.ui.maneuver.model {
     property public final Throwable? throwable;
   }
 
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class ManeuverErrorFactory {
+    method public static com.mapbox.navigation.ui.maneuver.model.ManeuverError buildManeuverError(String errorMessage, Throwable? throwable);
+    field public static final com.mapbox.navigation.ui.maneuver.model.ManeuverErrorFactory INSTANCE;
+  }
+
   @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class ManeuverFactory {
     method public static com.mapbox.navigation.ui.maneuver.model.Maneuver buildManeuver(com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver primary, com.mapbox.navigation.ui.maneuver.model.StepDistance stepDistance, com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver? secondary, com.mapbox.navigation.ui.maneuver.model.SubManeuver? sub, com.mapbox.navigation.ui.maneuver.model.Lane? lane, com.mapbox.geojson.Point point);
     field public static final com.mapbox.navigation.ui.maneuver.model.ManeuverFactory INSTANCE;

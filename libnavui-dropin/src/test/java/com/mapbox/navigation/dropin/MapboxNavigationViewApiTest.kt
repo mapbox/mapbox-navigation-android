@@ -9,8 +9,10 @@ import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class MapboxNavigationViewApiTest {
 
     @Test

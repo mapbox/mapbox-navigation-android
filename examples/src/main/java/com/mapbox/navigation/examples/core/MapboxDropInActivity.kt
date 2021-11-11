@@ -11,6 +11,7 @@ class MapboxDropInActivity : AppCompatActivity() {
     private lateinit var mapboxNavigationViewApi: MapboxNavigationViewApi
 
     private lateinit var binding: LayoutActivityDropInBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = LayoutActivityDropInBinding.inflate(layoutInflater)
