@@ -2,7 +2,6 @@ package com.mapbox.navigation.dropin
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.mapbox.navigation.dropin.viewmodel.MapboxNavigationViewModel
 
 internal class MapboxNavigationViewModelFactory(
     private val dropInUIMapboxNavigationFactory: DropInUIMapboxNavigationFactory

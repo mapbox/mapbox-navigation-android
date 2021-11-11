@@ -2,6 +2,7 @@ package com.mapbox.navigation.dropin.util
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.view.View
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineResult
@@ -27,5 +28,11 @@ internal object MapboxDropInUtils {
                 }
             }
         )
+    }
+
+    fun Boolean.toVisibility() = if (this) {
+        View.VISIBLE
+    } else {
+        View.GONE
     }
 }
