@@ -61,9 +61,9 @@ sealed class VoiceInstructionsPlayerAttributes {
 
         override fun configureTextToSpeech(): TextToSpeech.(Bundle) -> Unit {
             return { bundle ->
-                bundle.putString(
+                bundle.putInt(
                     TextToSpeech.Engine.KEY_PARAM_STREAM,
-                    options.streamType.toString()
+                    options.streamType
                 )
             }
         }
@@ -81,12 +81,13 @@ sealed class VoiceInstructionsPlayerAttributes {
     @RequiresApi(api = Build.VERSION_CODES.O)
     internal data class OreoAndLaterAttributes(
         override val options: VoiceInstructionsPlayerOptions,
+        val builder: AudioAttributes.Builder,
     ) : VoiceInstructionsPlayerAttributes() {
 
         /**
          * Specifies a collection of attributes describing information about an audio stream.
          */
-        private val audioAttributes: AudioAttributes = AudioAttributes.Builder()
+        private val audioAttributes: AudioAttributes = builder
             .let { builder ->
                 if (options.useLegacyApi) {
                     builder.buildLegacy()
