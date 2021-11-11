@@ -170,6 +170,22 @@ package com.mapbox.navigation.core.formatter {
 
 }
 
+package com.mapbox.navigation.core.geodeeplink {
+
+  public final class GeoDeeplink {
+    method public String? getPlaceQuery();
+    method public com.mapbox.geojson.Point? getPoint();
+    property public final String? placeQuery;
+    property public final com.mapbox.geojson.Point? point;
+  }
+
+  public final class GeoDeeplinkParser {
+    method public static com.mapbox.navigation.core.geodeeplink.GeoDeeplink? parse(String? geoDeeplink);
+    field public static final com.mapbox.navigation.core.geodeeplink.GeoDeeplinkParser INSTANCE;
+  }
+
+}
+
 package com.mapbox.navigation.core.history {
 
   public final class MapboxHistoryReader implements java.util.Iterator<com.mapbox.navigation.core.history.model.HistoryEvent> kotlin.jvm.internal.markers.KMappedMarker {
