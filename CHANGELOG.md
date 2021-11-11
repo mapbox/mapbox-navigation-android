@@ -3,6 +3,7 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
+- Add geo deeplink parser `GeoDeeplinkParser`. [#5103](https://github.com/mapbox/mapbox-navigation-android/pull/5103)
 
 ## Mapbox Navigation SDK 2.2.0-rc.1 - January 13, 2021
 
