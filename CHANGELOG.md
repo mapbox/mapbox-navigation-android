@@ -2,6 +2,25 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.1.0-rc.1 - October 28, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
+- Fixed an issue where `congestion numeric` traffic annotations where not refreshed correctly. [#5078](https://github.com/mapbox/mapbox-navigation-android/pull/5078)
+- Implemented predictive cache with `TilesetDescriptor` so that volatile sources are not loaded unexpectedly. [#5068](https://github.com/mapbox/mapbox-navigation-android/pull/5068)
+- Fixed an issue with TTS config on pre-Oreo devices. [#5082](https://github.com/mapbox/mapbox-navigation-android/pull/5082)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.0.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0))
+- Mapbox Navigation Native `v79.0.2`
+- Mapbox Core Common `v20.0.0`
+- Mapbox Java `v6.1.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.1.0))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.0.1 - November 10, 2021
 This is a patch release on top of `v2.0.0` which does not include changes introduced in `v2.1.0-beta.1` and later. The `v2.1.0-beta.2` remains the latest and most up-to-date release.
 
