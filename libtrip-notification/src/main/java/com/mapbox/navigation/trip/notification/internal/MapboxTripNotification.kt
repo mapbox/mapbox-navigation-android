@@ -89,6 +89,12 @@ class MapboxTripNotification constructor(
 
     private var notificationView: MapboxTripNotificationView
 
+    private val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    } else {
+        PendingIntent.FLAG_UPDATE_CURRENT
+    }
+
     init {
         applicationContext.getSystemService(Context.NOTIFICATION_SERVICE)
             ?.let { notificationService ->
@@ -220,7 +226,7 @@ class MapboxTripNotification constructor(
             applicationContext,
             0,
             intent,
-            PendingIntent.FLAG_IMMUTABLE
+            flags
         )
     }
 
@@ -237,7 +243,7 @@ class MapboxTripNotification constructor(
             applicationContext,
             0,
             endNavigationBtn,
-            PendingIntent.FLAG_IMMUTABLE
+            flags
         )
     }
 
