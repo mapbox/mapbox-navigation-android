@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maneuver.view
 import android.content.Context
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.api.MapboxLaneIconsApi
 import com.mapbox.navigation.ui.maneuver.model.LaneIcon
@@ -15,9 +16,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class MapboxLaneGuidanceTest {
 
     private val laneIconHelper = mockk<MapboxLaneIconsApi>()
@@ -41,7 +41,7 @@ class MapboxLaneGuidanceTest {
             .build()
         every {
             laneIconHelper.getTurnLane(any())
-        } returns(LaneIcon(R.drawable.mapbox_lane_turn, false))
+        } returns (LaneIcon(R.drawable.mapbox_lane_turn, false))
         val laneIcon = laneIconHelper.getTurnLane(laneIndicator)
 
         view.renderLane(laneIcon, wrapper)
@@ -62,7 +62,7 @@ class MapboxLaneGuidanceTest {
             .build()
         every {
             laneIconHelper.getTurnLane(any())
-        } returns(LaneIcon(R.drawable.mapbox_lane_turn, false))
+        } returns (LaneIcon(R.drawable.mapbox_lane_turn, false))
         val laneIcon = laneIconHelper.getTurnLane(laneIndicator)
 
         view.renderLane(laneIcon, wrapper)
@@ -83,7 +83,7 @@ class MapboxLaneGuidanceTest {
             .build()
         every {
             laneIconHelper.getTurnLane(any())
-        } returns(LaneIcon(R.drawable.mapbox_lane_turn, true))
+        } returns (LaneIcon(R.drawable.mapbox_lane_turn, true))
         val laneIcon = laneIconHelper.getTurnLane(laneIndicator)
 
         view.renderLane(laneIcon, wrapper)
@@ -104,7 +104,7 @@ class MapboxLaneGuidanceTest {
             .build()
         every {
             laneIconHelper.getTurnLane(any())
-        } returns(LaneIcon(R.drawable.mapbox_lane_turn, false))
+        } returns (LaneIcon(R.drawable.mapbox_lane_turn, false))
         val laneIcon = laneIconHelper.getTurnLane(laneIndicator)
 
         view.renderLane(laneIcon, wrapper)

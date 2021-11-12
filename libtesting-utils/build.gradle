@@ -22,4 +22,5 @@ dependencies {
     implementation dependenciesList.junit
     implementation dependenciesList.coroutinesTestAndroid
     implementation dependenciesList.kotlinReflect
+    api dependenciesList.robolectric
 }

@@ -30,6 +30,7 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.navigator.internal.NativeNavigatorRecreationObserver
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.BannerInstruction
@@ -72,12 +73,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class MapboxTripSessionTest {
 
@@ -1174,67 +1174,68 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun `enhancedLocation, locationMatcherResult, zLevel are updating while setting a route, routeProgress, bannerInstructions and offRoute state are skipped`() = runBlockingTest {
-        coEvery { navigator.setRoute(any(), any()) } coAnswers {
-            delay(100)
-            null
+    fun `enhancedLocation, locationMatcherResult, zLevel are updating while setting a route, routeProgress, bannerInstructions and offRoute state are skipped`() =
+        runBlockingTest {
+            coEvery { navigator.setRoute(any(), any()) } coAnswers {
+                delay(100)
+                null
+            }
+
+            val routeProgressObserver: RouteProgressObserver = mockk(relaxUnitFun = true)
+            val locationObserver: LocationObserver = mockk(relaxUnitFun = true)
+            val offRouteObserver: OffRouteObserver = mockk(relaxUnitFun = true)
+            val bannerInstructionsObserver: BannerInstructionsObserver = mockk(relaxUnitFun = true)
+            every { routeProgressObserver.onRouteProgressChanged(any()) } just Runs
+            every { locationObserver.onNewLocationMatcherResult(any()) } just Runs
+            every { offRouteObserver.onOffRouteStateChanged(any()) } just Runs
+            every { bannerInstructionsObserver.onNewBannerInstructions(any()) } just Runs
+
+            val leg: RouteLeg = mockk(relaxed = true)
+            val legs = listOf(leg)
+            val steps: List<LegStep> = mockk(relaxed = true)
+            every { navigationStatus.legIndex } returns 0
+            every { routes[0].legs() } returns legs
+            every { leg.steps() } returns steps
+
+            tripSession = buildTripSession()
+            tripSession.registerRouteProgressObserver(routeProgressObserver)
+            tripSession.registerLocationObserver(locationObserver)
+            tripSession.registerOffRouteObserver(offRouteObserver)
+            tripSession.registerBannerInstructionsObserver(bannerInstructionsObserver)
+            tripSession.start(true)
+            // it will notify offRouteObserver for the first time
+            tripSession.setRoutes(routes, legIndex, updateReason)
+
+            every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
+
+            // first status update
+            every { navigationStatus.layer } returns 100
+            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+            assertEquals(100, tripSession.zLevel)
+
+            // second status update
+            every { navigationStatus.layer } returns 200
+            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+            assertEquals(200, tripSession.zLevel)
+
+            // finish setRoute
+            coroutineRule.testDispatcher.advanceTimeBy(200)
+
+            // third status update
+            every { navigationStatus.layer } returns 300
+            navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
+            assertEquals(300, tripSession.zLevel)
+
+            // locationObserver is notified on each status update
+            verify(exactly = 3) { locationObserver.onNewLocationMatcherResult(any()) }
+
+            // routeProgressObserver and bannerInstructionsObserver are notified when setRoute is finished
+            verify(exactly = 1) { routeProgressObserver.onRouteProgressChanged(any()) }
+            verify(exactly = 1) { bannerInstructionsObserver.onNewBannerInstructions(any()) }
+            // offRouteObserver is notified twice:
+            // when setRoute starts, and on a new status when setRoute is finished
+            verify(exactly = 2) { offRouteObserver.onOffRouteStateChanged(any()) }
         }
-
-        val routeProgressObserver: RouteProgressObserver = mockk(relaxUnitFun = true)
-        val locationObserver: LocationObserver = mockk(relaxUnitFun = true)
-        val offRouteObserver: OffRouteObserver = mockk(relaxUnitFun = true)
-        val bannerInstructionsObserver: BannerInstructionsObserver = mockk(relaxUnitFun = true)
-        every { routeProgressObserver.onRouteProgressChanged(any()) } just Runs
-        every { locationObserver.onNewLocationMatcherResult(any()) } just Runs
-        every { offRouteObserver.onOffRouteStateChanged(any()) } just Runs
-        every { bannerInstructionsObserver.onNewBannerInstructions(any()) } just Runs
-
-        val leg: RouteLeg = mockk(relaxed = true)
-        val legs = listOf(leg)
-        val steps: List<LegStep> = mockk(relaxed = true)
-        every { navigationStatus.legIndex } returns 0
-        every { routes[0].legs() } returns legs
-        every { leg.steps() } returns steps
-
-        tripSession = buildTripSession()
-        tripSession.registerRouteProgressObserver(routeProgressObserver)
-        tripSession.registerLocationObserver(locationObserver)
-        tripSession.registerOffRouteObserver(offRouteObserver)
-        tripSession.registerBannerInstructionsObserver(bannerInstructionsObserver)
-        tripSession.start(true)
-        // it will notify offRouteObserver for the first time
-        tripSession.setRoutes(routes, legIndex, updateReason)
-
-        every { navigationStatus.routeState } returns RouteState.OFF_ROUTE
-
-        // first status update
-        every { navigationStatus.layer } returns 100
-        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
-        assertEquals(100, tripSession.zLevel)
-
-        // second status update
-        every { navigationStatus.layer } returns 200
-        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
-        assertEquals(200, tripSession.zLevel)
-
-        // finish setRoute
-        coroutineRule.testDispatcher.advanceTimeBy(200)
-
-        // third status update
-        every { navigationStatus.layer } returns 300
-        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
-        assertEquals(300, tripSession.zLevel)
-
-        // locationObserver is notified on each status update
-        verify(exactly = 3) { locationObserver.onNewLocationMatcherResult(any()) }
-
-        // routeProgressObserver and bannerInstructionsObserver are notified when setRoute is finished
-        verify(exactly = 1) { routeProgressObserver.onRouteProgressChanged(any()) }
-        verify(exactly = 1) { bannerInstructionsObserver.onNewBannerInstructions(any()) }
-        // offRouteObserver is notified twice:
-        // when setRoute starts, and on a new status when setRoute is finished
-        verify(exactly = 2) { offRouteObserver.onOffRouteStateChanged(any()) }
-    }
 
     @Test
     fun `zLevel is null before session is started`() {
@@ -1265,31 +1266,32 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun `updateLegIndexJob is cancelled and callback is fired when setRoute is called`() = runBlockingTest {
-        coEvery { navigator.setRoute(any(), any()) } coAnswers {
-            delay(100)
-            null
+    fun `updateLegIndexJob is cancelled and callback is fired when setRoute is called`() =
+        runBlockingTest {
+            coEvery { navigator.setRoute(any(), any()) } coAnswers {
+                delay(100)
+                null
+            }
+
+            coEvery { navigator.updateLegIndex(any()) } coAnswers {
+                delay(100) // doesn't affect test duration
+                true
+            }
+
+            tripSession = buildTripSession()
+            tripSession.start(true)
+
+            val legIndexUpdatedCallback: LegIndexUpdatedCallback = mockk(relaxed = true)
+            tripSession.updateLegIndex(1, legIndexUpdatedCallback)
+
+            tripSession.setRoutes(routes, legIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
+
+            verify(exactly = 1) {
+                legIndexUpdatedCallback.onLegIndexUpdatedCallback(false)
+            }
+
+            coroutineRule.testDispatcher.advanceTimeBy(200)
         }
-
-        coEvery { navigator.updateLegIndex(any()) } coAnswers {
-            delay(100) // doesn't affect test duration
-            true
-        }
-
-        tripSession = buildTripSession()
-        tripSession.start(true)
-
-        val legIndexUpdatedCallback: LegIndexUpdatedCallback = mockk(relaxed = true)
-        tripSession.updateLegIndex(1, legIndexUpdatedCallback)
-
-        tripSession.setRoutes(routes, legIndex, RoutesExtra.ROUTES_UPDATE_REASON_NEW)
-
-        verify(exactly = 1) {
-            legIndexUpdatedCallback.onLegIndexUpdatedCallback(false)
-        }
-
-        coroutineRule.testDispatcher.advanceTimeBy(200)
-    }
 
     @Test
     fun `updateRouteProgressJob is cancelled onStatus update`() = runBlockingTest {

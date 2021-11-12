@@ -3,14 +3,14 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.api
 import android.content.Context
 import android.content.res.AssetManager
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class MapboxExternalFileResolverTest {
 
     private lateinit var ctx: Context
@@ -72,7 +72,8 @@ class MapboxExternalFileResolverTest {
         assertNotNull(typeface)
     }
 
-    @Test fun `resolve font when font family file not available`() {
+    @Test
+    fun `resolve font when font family file not available`() {
         val mockFontFamily = "MyFontFamily"
         val mockFontStyle = "Normal"
         val mockFontWeight = 400

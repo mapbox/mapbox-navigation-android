@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -13,9 +14,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class MapboxRasterToBitmapParserTest {
 
     private lateinit var ctx: Context

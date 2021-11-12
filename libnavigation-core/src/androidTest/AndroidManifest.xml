@@ -11,6 +11,7 @@
     <application>
         <activity
             android:name=".tests.activity.TripServiceActivity"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"
+            android:exported="false"/>
     </application>
 </manifest>

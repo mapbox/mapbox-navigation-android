@@ -19,7 +19,8 @@
         </provider>
         <service
             android:name=".trip.service.NavigationNotificationService"
-            android:foregroundServiceType="location" />
+            android:foregroundServiceType="location"
+            android:exported="false"/>
 
         <meta-data
             android:name="com.mapbox.ManageSkuToken"

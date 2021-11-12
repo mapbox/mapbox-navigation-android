@@ -5,15 +5,15 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import java.io.File
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class MapboxHistoryRecorderTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()

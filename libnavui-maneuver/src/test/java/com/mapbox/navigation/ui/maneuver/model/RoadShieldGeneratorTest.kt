@@ -3,14 +3,14 @@ package com.mapbox.navigation.ui.maneuver.model
 import android.content.Context
 import android.text.style.ImageSpan
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class RoadShieldGeneratorTest {
 
     lateinit var ctx: Context

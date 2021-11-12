@@ -3,14 +3,14 @@ package com.mapbox.navigation.ui.utils.internal.extensions
 import android.content.Context
 import android.util.TypedValue
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import io.mockk.every
 import io.mockk.mockkStatic
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 class UnitsExTest {
 
     @Test

@@ -20,8 +20,8 @@
         android:theme="@style/AppTheme"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true">
-        <activity android:name=".activity.EmptyTestActivity" />
-        <activity android:name=".activity.BasicNavigationViewActivity" />
+        <activity android:name=".activity.EmptyTestActivity" android:exported="false"/>
+        <activity android:name=".activity.BasicNavigationViewActivity" android:exported="false"/>
     </application>
 
 </manifest>

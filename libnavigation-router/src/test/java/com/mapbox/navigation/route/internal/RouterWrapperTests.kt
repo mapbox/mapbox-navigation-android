@@ -18,6 +18,7 @@ import com.mapbox.navigation.route.internal.util.ACCESS_TOKEN_QUERY_PARAM
 import com.mapbox.navigation.route.internal.util.TestRouteFixtures
 import com.mapbox.navigation.route.internal.util.redactQueryParam
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.NavSDKRobolectricTestRunner
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouteRefreshOptions
 import com.mapbox.navigator.RouterError
@@ -43,12 +44,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
-@RunWith(RobolectricTestRunner::class)
+@RunWith(NavSDKRobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class RouterWrapperTests {
 

@@ -88,6 +88,7 @@ class MapboxTripNotification constructor(
     )
 
     private var notificationView: MapboxTripNotificationView
+
     init {
         applicationContext.getSystemService(Context.NOTIFICATION_SERVICE)
             ?.let { notificationService ->
@@ -215,7 +216,12 @@ class MapboxTripNotification constructor(
         val pm = applicationContext.packageManager
         val intent = pm.getLaunchIntentForPackage(applicationContext.packageName) ?: return null
         intent.setPackage(null)
-        return PendingIntent.getActivity(applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        return PendingIntent.getActivity(
+            applicationContext,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
     }
 
     /**
@@ -227,7 +233,12 @@ class MapboxTripNotification constructor(
      */
     private fun createPendingCloseIntent(applicationContext: Context): PendingIntent? {
         val endNavigationBtn = Intent(END_NAVIGATION_ACTION)
-        return PendingIntent.getBroadcast(applicationContext, 0, endNavigationBtn, PendingIntent.FLAG_IMMUTABLE)
+        return PendingIntent.getBroadcast(
+            applicationContext,
+            0,
+            endNavigationBtn,
+            PendingIntent.FLAG_IMMUTABLE
+        )
     }
 
     private fun createNotificationChannel() {
