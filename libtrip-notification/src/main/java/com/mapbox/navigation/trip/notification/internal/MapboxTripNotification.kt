@@ -103,6 +103,12 @@ class MapboxTripNotification constructor(
     private lateinit var notification: Notification
     private lateinit var notificationManager: NotificationManager
 
+    private val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    } else {
+        PendingIntent.FLAG_UPDATE_CURRENT
+    }
+
     init {
         applicationContext.getSystemService(Context.NOTIFICATION_SERVICE)
             ?.let { notificationService ->
@@ -289,7 +295,7 @@ class MapboxTripNotification constructor(
         val pm = applicationContext.packageManager
         val intent = pm.getLaunchIntentForPackage(applicationContext.packageName) ?: return null
         intent.setPackage(null)
-        return PendingIntent.getActivity(applicationContext, 0, intent, 0)
+        return PendingIntent.getActivity(applicationContext, 0, intent, flags)
     }
 
     /**
@@ -301,7 +307,7 @@ class MapboxTripNotification constructor(
      */
     private fun createPendingCloseIntent(applicationContext: Context): PendingIntent? {
         val endNavigationBtn = Intent(END_NAVIGATION_ACTION)
-        return PendingIntent.getBroadcast(applicationContext, 0, endNavigationBtn, 0)
+        return PendingIntent.getBroadcast(applicationContext, 0, endNavigationBtn, flags)
     }
 
     private fun createNotificationChannel() {
