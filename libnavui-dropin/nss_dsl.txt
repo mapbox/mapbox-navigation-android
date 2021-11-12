@@ -1,0 +1,18 @@
+val myDayDescription = NavigationSystem.loadDescription("default_description.json") {
+  theme {
+    color {
+      light = 75,
+      contrast = 50,
+      warmth = 90,
+      saturation = 75.5
+    }
+  }
+}
+
+val myNightDescription = myDayDescription.mutate {
+  theme {
+    color {
+      light = 25
+    }
+  }
+}
