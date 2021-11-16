@@ -678,6 +678,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.unregisterAllRoadObjectsOnRouteObservers()
         tripSession.unregisterAllEHorizonObservers()
         tripSession.unregisterAllFallbackVersionsObservers()
+        tripSession.unregisterAllNativeRouteProcessingListeners()
         routeAlternativesController.unregisterAll()
         routeRefreshController.stop()
         directionsSession.setRoutes(

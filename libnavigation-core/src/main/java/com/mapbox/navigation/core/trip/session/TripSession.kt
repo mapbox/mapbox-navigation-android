@@ -4,6 +4,7 @@ import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.trip.NativeRouteProcessingListener
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigator.FallbackVersionsObserver
@@ -68,4 +69,12 @@ internal interface TripSession {
     fun registerFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver)
     fun unregisterFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver)
     fun unregisterAllFallbackVersionsObservers()
+
+    fun registerNativeRouteProcessingListener(
+        nativeRouteProcessingListener: NativeRouteProcessingListener
+    )
+    fun unregisterNativeRouteProcessingListener(
+        nativeRouteProcessingListener: NativeRouteProcessingListener
+    )
+    fun unregisterAllNativeRouteProcessingListeners()
 }

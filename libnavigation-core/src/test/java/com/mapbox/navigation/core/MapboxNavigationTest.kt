@@ -870,6 +870,14 @@ class MapboxNavigationTest {
     }
 
     @Test
+    fun `unregisterAllNativeRouteProcessingListeners on destroy`() {
+        createMapboxNavigation()
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { tripSession.unregisterAllNativeRouteProcessingListeners() }
+    }
+
+    @Test
     fun `verify tile config tilesVersion and isFallback on init`() {
         threadController.cancelAllUICoroutines()
         val slot = slot<TilesConfig>()

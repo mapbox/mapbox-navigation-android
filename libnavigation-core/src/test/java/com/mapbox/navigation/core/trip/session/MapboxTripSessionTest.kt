@@ -22,6 +22,7 @@ import com.mapbox.navigation.core.navigator.mapToDirectionsApi
 import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
+import com.mapbox.navigation.core.trip.NativeRouteProcessingListener
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
@@ -1320,6 +1321,32 @@ class MapboxTripSessionTest {
         coroutineRule.testDispatcher.advanceTimeBy(200)
 
         verify(exactly = 1) { routeProgressObserver.onRouteProgressChanged(any()) }
+    }
+
+    @Test
+    fun `NativeRouteProcessingListeners called when route processing starts`() =
+        coroutineRule.runBlockingTest {
+            tripSession = buildTripSession()
+            val listener = mockk<NativeRouteProcessingListener>()
+            tripSession.registerNativeRouteProcessingListener(listener)
+            tripSession.start(true)
+            tripSession.setRoutes(routes, legIndex, updateReason)
+
+            verify(exactly = 1) { listener.onNativeRouteProcessingStarted() }
+        }
+
+    @Test
+    fun unregisterAllNativeRouteProcessingListeners() = coroutineRule.runBlockingTest {
+        tripSession = buildTripSession()
+        tripSession.start(true)
+        val listener = mockk<NativeRouteProcessingListener>()
+        tripSession.registerNativeRouteProcessingListener(listener)
+        tripSession.unregisterAllNativeRouteProcessingListeners()
+        tripSession.setRoutes(routes, legIndex, updateReason)
+
+        verify(exactly = 0) { listener.onNativeRouteProcessingStarted() }
+
+        tripSession.stop()
     }
 
     @After

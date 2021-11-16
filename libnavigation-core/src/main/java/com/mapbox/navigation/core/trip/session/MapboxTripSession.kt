@@ -23,6 +23,7 @@ import com.mapbox.navigation.core.navigator.mapToDirectionsApi
 import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
+import com.mapbox.navigation.core.trip.NativeRouteProcessingListener
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
@@ -58,12 +59,15 @@ internal class MapboxTripSession(
     private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl,
     private val threadController: ThreadController,
     private val logger: Logger,
-    private val eHorizonSubscriptionManager: EHorizonSubscriptionManager,
+    private val eHorizonSubscriptionManager: EHorizonSubscriptionManager
 ) : TripSession {
 
     private var updateRouteJob: Job? = null
     private var updateLegIndexJob: Job? = null
     private var updateRouteProgressJob: Job? = null
+
+    private val nativeRouteProcessingListeners =
+        CopyOnWriteArraySet<NativeRouteProcessingListener>()
 
     @VisibleForTesting
     internal var routes: List<DirectionsRoute> = emptyList()
@@ -92,6 +96,7 @@ internal class MapboxTripSession(
                 updateRouteProgressJob?.cancel()
 
                 threadController.getMainScopeAndRootJob().scope.launch {
+                    nativeRouteProcessingListeners.forEach { it.onNativeRouteProcessingStarted() }
                     navigator.setRoute(routes, legIndex)?.let {
                         roadObjects = getRouteInitInfo(it)?.roadObjects ?: emptyList()
                     }
@@ -575,6 +580,22 @@ internal class MapboxTripSession(
     override fun unregisterAllFallbackVersionsObservers() {
         fallbackVersionsObservers.clear()
         navigator.setFallbackVersionsObserver(null)
+    }
+
+    override fun registerNativeRouteProcessingListener(
+        nativeRouteProcessingListener: NativeRouteProcessingListener
+    ) {
+        nativeRouteProcessingListeners.add(nativeRouteProcessingListener)
+    }
+
+    override fun unregisterNativeRouteProcessingListener(
+        nativeRouteProcessingListener: NativeRouteProcessingListener
+    ) {
+        nativeRouteProcessingListeners.remove(nativeRouteProcessingListener)
+    }
+
+    override fun unregisterAllNativeRouteProcessingListeners() {
+        nativeRouteProcessingListeners.clear()
     }
 
     private fun updateLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
