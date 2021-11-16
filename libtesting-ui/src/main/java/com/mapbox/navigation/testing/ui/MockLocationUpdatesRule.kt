@@ -54,7 +54,7 @@ class MockLocationUpdatesRule : ExternalResource() {
             )
         } catch (ex: Exception) {
             // unstable
-            Log.w("MockLocationUpdatesRule", "addTestProvider failed")
+            Log.w("MockLocationUpdatesRule", "addTestProvider failed", ex)
         }
         locationManager.setTestProviderEnabled(mockProviderName, true)
     }
