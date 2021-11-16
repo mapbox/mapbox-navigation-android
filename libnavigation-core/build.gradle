@@ -54,6 +54,8 @@ dependencies {
     implementation dependenciesList.coroutinesAndroid
     implementation dependenciesList.androidStartup
 
+    api dependenciesList.androidXLifecycleRuntime
+
     testImplementation project(':libtesting-utils')
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
     testImplementation dependenciesList.commonsIO

@@ -46,8 +46,6 @@ ext {
       commonsIO                 : '2.6',
       robolectric               : '4.3.1',
       mockwebserver             : '4.9.0',
-      lifecycle                 : '2.2.0',
-      lifecycleViewModelKtx     : '2.2.0',
       gmsLocation               : '17.0.0',
       ktlint                    : '0.41.0',
       kotlinStdLib              : kotlinVersion,
@@ -115,9 +113,6 @@ ext {
       androidXAppCompat         : "androidx.appcompat:appcompat:${version.androidXAppCompatVersion}",
       androidXCore              : "androidx.core:core:${version.androidXCoreVersion}",
       androidXCoreKtx           : "androidx.core:core-ktx:${version.androidXCoreVersion}",
-      androidXLifecycleRuntime  : "androidx.lifecycle:lifecycle-runtime-ktx:${version.androidXLifecycle}",
-      androidXLifecycleLivedata : "androidx.lifecycle:lifecycle-livedata-ktx:${version.androidXLifecycle}",
-      androidXLifecycleViewmodel: "androidx.lifecycle:lifecycle-viewmodel-ktx:${version.androidXLifecycle}",
       materialDesign            : "com.google.android.material:material:${version.materialDesignVersion}",
       androidXRecyclerView      : "androidx.recyclerview:recyclerview:${version.recyclerViewVersion}",
       androidXCardView          : "androidx.cardview:cardview:${version.cardViewVersion}",
@@ -125,10 +120,10 @@ ext {
       androidXPreference        : "androidx.preference:preference-ktx:${version.androidXPreferenceVersion}",
       androidStartup            : "androidx.startup:startup-runtime:${version.androidStartup}",
 
-      // architecture
-      lifecycleViewModelKtx     : "androidx.lifecycle:lifecycle-viewmodel-ktx:${version.lifecycleViewModelKtx}",
-      lifecycleExtensions       : "androidx.lifecycle:lifecycle-extensions:${version.lifecycle}",
-      lifecycleCompiler         : "androidx.lifecycle:lifecycle-compiler:${version.lifecycle}",
+      // lifecycle
+      androidXLifecycleRuntime  : "androidx.lifecycle:lifecycle-runtime-ktx:${version.androidXLifecycle}",
+      androidXLifecycleLivedata : "androidx.lifecycle:lifecycle-livedata-ktx:${version.androidXLifecycle}",
+      androidXLifecycleViewmodel: "androidx.lifecycle:lifecycle-viewmodel-ktx:${version.androidXLifecycle}",
 
       // square crew
       leakCanaryDebug           : "com.squareup.leakcanary:leakcanary-android:${version.leakCanaryVersion}",
