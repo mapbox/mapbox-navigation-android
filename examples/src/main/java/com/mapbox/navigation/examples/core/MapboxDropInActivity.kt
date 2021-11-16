@@ -13,6 +13,6 @@ class MapboxDropInActivity : AppCompatActivity() {
         binding = LayoutActivityDropInBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.navigationView.configure(ViewProvider())
+        binding.navigationView.navigationViewApi.configureNavigationView(ViewProvider())
     }
 }
