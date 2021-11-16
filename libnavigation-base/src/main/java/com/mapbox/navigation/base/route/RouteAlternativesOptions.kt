@@ -1,6 +1,7 @@
 package com.mapbox.navigation.base.route
 
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigator.RouteAlternativesObserver
 import java.util.concurrent.TimeUnit
 
 /**

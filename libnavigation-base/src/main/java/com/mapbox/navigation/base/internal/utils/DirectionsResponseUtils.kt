@@ -31,5 +31,38 @@ suspend fun parseDirectionsResponse(
         response.routes()
     }
 
+suspend fun parseNativeDirectionsAlternative(
+    json: String,
+    options: RouteOptions?,
+): DirectionsRoute? =
+    withContext(Dispatchers.IO) {
+        val jsonObject = JSONObject(json)
+        val uuid: String? = if (jsonObject.has(UUID)) {
+            jsonObject.getString(UUID)
+        } else {
+            null
+        }
+
+        val jsonRoutes = jsonObject.getJSONArray("routes")
+        val jsonRoute: DirectionsRoute = jsonRoutes.let { routesArray ->
+            for (i in 0 until routesArray.length()) {
+                if (!routesArray.isNull(i)) {
+                    // TODO simplify after https://github.com/mapbox/mapbox-java/issues/1292
+                    return@let DirectionsRoute.fromJson(
+                        routesArray.getJSONObject(i).toString(),
+                        options,
+                        uuid
+                    ).run {
+                        toBuilder()
+                            .routeIndex(i.toString())
+                            .build()
+                    }
+                }
+            }
+            return@withContext null
+        }
+        return@withContext jsonRoute
+    }
+
 private const val UUID = "uuid"
 private const val METADATA = "metadata"
