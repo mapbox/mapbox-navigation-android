@@ -321,14 +321,26 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the Android Lifecycle Runtime.
+Mapbox Navigation uses portions of the Android Arch-Runtime.
 URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Android Lifecycle Kotlin Extensions (Kotlin extensions for 'lifecycle' artifact).
+URL: [https://developer.android.com/jetpack/androidx/releases/lifecycle#2.4.0](https://developer.android.com/jetpack/androidx/releases/lifecycle#2.4.0)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Android Lifecycle Runtime.
+URL: [https://developer.android.com/jetpack/androidx/releases/lifecycle#2.4.0](https://developer.android.com/jetpack/androidx/releases/lifecycle#2.4.0)
+License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Android Lifecycle-Common.
-URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
+URL: [https://developer.android.com/jetpack/androidx/releases/lifecycle#2.4.0](https://developer.android.com/jetpack/androidx/releases/lifecycle#2.4.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================

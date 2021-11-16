@@ -5,6 +5,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.utils.startActivity
 import com.mapbox.navigation.qa_test_app.view.AlternativeRouteActivity
+import com.mapbox.navigation.qa_test_app.view.AppLifecycleActivity
 import com.mapbox.navigation.qa_test_app.view.FeedbackActivity
 import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingActivity
 import com.mapbox.navigation.qa_test_app.view.InactiveRouteStylingWithRestrictionsActivity
@@ -20,6 +21,12 @@ object TestActivitySuite {
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     val testActivities = listOf(
+        TestActivityDescription(
+            "MapboxNavigation Lifecycle",
+            R.string.mapbox_navigation_app_lifecycle_description
+        ) { activity ->
+            activity.startActivity<AppLifecycleActivity>()
+        },
         TestActivityDescription(
             "Alternative Route Selection",
             R.string.alternative_route_selection_description
