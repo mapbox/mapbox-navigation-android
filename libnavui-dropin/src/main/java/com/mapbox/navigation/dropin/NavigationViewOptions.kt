@@ -1,26 +1,32 @@
 package com.mapbox.navigation.dropin
 
+import android.content.Context
 import com.mapbox.maps.Style
+import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import java.lang.IllegalArgumentException
 
 class NavigationViewOptions private constructor(
-    val enableVanishingRouteLine: Boolean,
+    val mapboxRouteLineOptions: MapboxRouteLineOptions,
+    val routeArrowOptions: RouteArrowOptions,
     val mapStyleUrlDarkTheme: String,
     val mapStyleUrlLightTheme: String,
     val darkTheme: DropInTheme,
     val lightTheme: DropInTheme,
 ) {
 
-    fun toBuilder(): Builder = Builder().apply {
-        enableVanishingRouteLine(enableVanishingRouteLine)
+    fun toBuilder(context: Context): Builder = Builder(context).apply {
+        mapboxRouteLineOptions(mapboxRouteLineOptions)
+        routeArrowOptions(routeArrowOptions)
         mapStyleUrlDarkTheme(mapStyleUrlDarkTheme)
         mapStyleUrlLightTheme(mapStyleUrlLightTheme)
         darkTheme(darkTheme)
         lightTheme(lightTheme)
     }
 
-    class Builder {
-        private var enableVanishingRouteLine: Boolean = true
+    class Builder(context: Context) {
+        private var mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(context).build()
+        private var routeArrowOptions = RouteArrowOptions.Builder(context).build()
         private var mapStyleUrlDarkTheme: String = Style.LIGHT
         private var mapStyleUrlLightTheme: String = Style.DARK
         private val lightColors = Colors(
@@ -48,8 +54,12 @@ class NavigationViewOptions private constructor(
         private var darkTheme: DropInTheme = DropInTheme.DarkTheme(darkColors, Typography())
         private var lightTheme: DropInTheme = DropInTheme.LightTheme(lightColors, Typography())
 
-        fun enableVanishingRouteLine(enableVanishingRouteLine: Boolean): Builder = apply {
-            this.enableVanishingRouteLine = enableVanishingRouteLine
+        fun mapboxRouteLineOptions(options: MapboxRouteLineOptions): Builder = apply {
+            this.mapboxRouteLineOptions = options
+        }
+
+        fun routeArrowOptions(options: RouteArrowOptions): Builder = apply {
+            this.routeArrowOptions = options
         }
 
         fun mapStyleUrlDarkTheme(mapStyleUrlDarkTheme: String): Builder {
@@ -77,7 +87,8 @@ class NavigationViewOptions private constructor(
         }
 
         fun build(): NavigationViewOptions = NavigationViewOptions(
-            enableVanishingRouteLine,
+            mapboxRouteLineOptions,
+            routeArrowOptions,
             mapStyleUrlDarkTheme,
             mapStyleUrlLightTheme,
             darkTheme,
