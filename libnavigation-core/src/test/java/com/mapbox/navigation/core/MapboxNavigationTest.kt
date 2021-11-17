@@ -180,7 +180,7 @@ class MapboxNavigationTest {
         } returns routeRefreshController
         mockkObject(RouteAlternativesControllerProvider)
         every {
-            RouteAlternativesControllerProvider.create(any(), any(), any())
+            RouteAlternativesControllerProvider.create(any(), any(), any(), any())
         } returns routeAlternativesController
 
         every { applicationContext.applicationContext } returns applicationContext

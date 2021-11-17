@@ -9,6 +9,7 @@ import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouteAlternativesControllerInterface
 import io.mockk.Runs
 import io.mockk.every
@@ -44,6 +45,7 @@ class RouteAlternativesControllerTest {
         options,
         navigator,
         tripSession,
+        ThreadController(),
     )
 
     @Test
@@ -108,7 +110,7 @@ class RouteAlternativesControllerTest {
     }
 
     @Test
-    fun `should broadcast alternative routes changes from nav-native`() {
+    fun `should broadcast alternative routes changes from nav-native`() = coroutineRule.runBlockingTest {
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
         every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
@@ -145,7 +147,7 @@ class RouteAlternativesControllerTest {
     }
 
     @Test
-    fun `should not broadcast current route with alternative`() {
+    fun `should not broadcast current route with alternative`() = coroutineRule.runBlockingTest {
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
         every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
@@ -185,7 +187,7 @@ class RouteAlternativesControllerTest {
     }
 
     @Test
-    fun `should set RouteOptions to alternative routes`() {
+    fun `should set RouteOptions to alternative routes`() = coroutineRule.runBlockingTest {
         val originalCoordinates = "-122.270375,37.801429;-122.271496, 37.799063"
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()

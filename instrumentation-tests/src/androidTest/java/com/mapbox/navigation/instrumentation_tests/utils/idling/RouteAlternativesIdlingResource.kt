@@ -1,5 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.utils.idling
 
+import android.os.Looper
 import androidx.test.espresso.IdlingResource
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -25,6 +26,7 @@ class RouteAlternativesIdlingResource(
         private set
     var alternatives: List<DirectionsRoute>? = null
         private set
+    var calledOnMainThread = true
 
     private var callback: IdlingResource.ResourceCallback? = null
 
@@ -50,6 +52,11 @@ class RouteAlternativesIdlingResource(
         alternatives: List<DirectionsRoute>,
         routerOrigin: RouterOrigin
     ) {
+        // Verify this happens on the main thread.
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            calledOnMainThread = false
+        }
+
         mapboxNavigation.unregisterRouteAlternativesObserver(this)
         this.routeProgress = routeProgress
         this.alternatives = alternatives
