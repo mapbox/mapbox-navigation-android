@@ -104,6 +104,7 @@ class RouteAlternativesTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cla
             Espresso.onIdle()
         }
         firstAlternative.unregister()
+        assertTrue(firstAlternative.calledOnMainThread)
 
         runOnMainSync {
             val countDownLatch = CountDownLatch(1)
