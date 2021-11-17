@@ -2,6 +2,23 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.0.2 - November 17, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
+- Add PedingIntent Android 12 flags support. [#5121](https://github.com/mapbox/mapbox-navigation-android/pull/5121)
+
+### Mapbox dependencies
+This release depends, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.0.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0))
+- Mapbox Navigation Native `v69.0.3`
+- Mapbox Core Common `v20.0.0`
+- Mapbox Java `v6.0.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.0.1 - November 10, 2021
 
 For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
