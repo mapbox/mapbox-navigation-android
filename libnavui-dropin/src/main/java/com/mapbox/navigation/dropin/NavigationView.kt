@@ -11,7 +11,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.use
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -21,6 +20,7 @@ import com.mapbox.maps.MapInitOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -155,7 +155,6 @@ class NavigationView : ConstraintLayout {
         }
         this.navigationViewOptions = navigationViewOptions
         this.lifeCycleOwner = context as? LifecycleOwner ?: throw LifeCycleOwnerNotFoundException()
-        this.lifeCycleOwner.lifecycle.addObserver(lifecycleObserver)
         this.lifeCycleOwner.lifecycle.addObserver(mapboxNavigationViewModel)
     }
 
@@ -165,7 +164,10 @@ class NavigationView : ConstraintLayout {
      */
     internal fun configure(viewProvider: ViewProvider) {
         // add views
-        binding.mapContainer.addView(mapView)
+        binding.mapContainer.addView(mapView).also {
+            mapView.getMapboxMap().addOnStyleLoadedListener(configurationOnStyleLoadListener)
+        }
+
         maneuverView = viewProvider.maneuverProvider?.invoke() ?: MapboxManeuverView(context)
         binding.maneuverContainer.addView(maneuverView)
         speedLimitView = viewProvider.speedLimitProvider?.invoke() ?: MapboxSpeedLimitView(context)
@@ -186,6 +188,46 @@ class NavigationView : ConstraintLayout {
         performActions()
 
         updateNavigationViewOptions(navigationViewOptions)
+    }
+
+    private val configurationOnStyleLoadListener = OnStyleLoadedListener {
+        removeConfigureOnStyleLoadListener()
+        mapView.location.setLocationProvider(navigationLocationProvider)
+        mapView.location.enabled = true
+
+        MapboxDropInUtils.getLastLocation(
+            this@NavigationView.context,
+            WeakReference<(Expected<Exception, LocationEngineResult>) -> Unit> { result ->
+                result.fold(
+                    {
+                        Log.e(TAG, "Error obtaining current location", it)
+                    },
+                    {
+                        it.lastLocation?.apply {
+                            cameraViewModel.consumeLocationUpdate(this)
+                            navigationLocationProvider.changePosition(this, listOf(), null, null)
+                            initLocationComponentPuck()
+                        }
+                    }
+                )
+            }
+        )
+    }
+
+    private fun initLocationComponentPuck() {
+        mapView.location.locationPuck = LocationPuck2D(
+            null,
+            ContextCompat.getDrawable(
+                this@NavigationView.context,
+                R.drawable.mapbox_navigation_puck_icon
+            ),
+            null,
+            null
+        )
+    }
+
+    private fun removeConfigureOnStyleLoadListener() {
+        mapView.getMapboxMap().removeOnStyleLoadedListener(configurationOnStyleLoadListener)
     }
 
     internal fun updateNavigationViewOptions(navigationViewOptions: NavigationViewOptions) {
@@ -348,39 +390,6 @@ class NavigationView : ConstraintLayout {
             state.routeOverviewContainerVisible.toVisibility()
     }
 
-    @VisibleForTesting
-    private val lifecycleObserver = object : DefaultLifecycleObserver {
-
-        override fun onCreate(owner: LifecycleOwner) {
-            super.onCreate(owner)
-            mapView.location.apply {
-                this.locationPuck = LocationPuck2D(
-                    bearingImage = ContextCompat.getDrawable(
-                        this@NavigationView.context,
-                        R.drawable.mapbox_navigation_puck_icon
-                    )
-                )
-                setLocationProvider(navigationLocationProvider)
-                enabled = true
-            }
-            MapboxDropInUtils.getLastLocation(
-                this@NavigationView.context,
-                WeakReference<(Expected<Exception, LocationEngineResult>) -> Unit> { result ->
-                    result.fold(
-                        {
-                            Log.e(TAG, "Error obtaining current location", it)
-                        },
-                        {
-                            it.lastLocation?.apply {
-                                cameraViewModel.consumeLocationUpdate(this)
-                            }
-                        }
-                    )
-                }
-            )
-        }
-    }
-
     internal fun addRouteProgressObserver(observer: RouteProgressObserver) {
         externalRouteProgressObservers.add(observer)
     }
@@ -427,10 +436,6 @@ class NavigationView : ConstraintLayout {
 
     internal fun removeTripSessionStateObserver(observer: TripSessionStateObserver) {
         externalTripSessionStateObservers.remove(observer)
-    }
-
-    internal fun getFoobar() {
-        // does nothing
     }
 
     private fun getTransitionOptions(

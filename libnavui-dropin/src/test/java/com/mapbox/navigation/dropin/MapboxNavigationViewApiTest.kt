@@ -157,11 +157,12 @@ class MapboxNavigationViewApiTest {
     @Test
     fun configureNavigationView() {
         val viewProvider = mockk<ViewProvider>()
+        val observer = mockk<NavigationViewInitializedObserver>()
         val navigationView = mockk<NavigationView>(relaxed = true)
         val api = MapboxNavigationViewApiImpl(navigationView)
 
-        api.configureNavigationView(viewProvider)
+        api.configureNavigationView(viewProvider, observer)
 
-        verify { navigationView.configure(viewProvider) }
+        verify { navigationView.configure(viewProvider, observer) }
     }
 }

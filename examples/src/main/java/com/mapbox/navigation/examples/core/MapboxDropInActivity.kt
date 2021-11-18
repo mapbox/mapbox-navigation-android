@@ -2,6 +2,7 @@ package com.mapbox.navigation.examples.core
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.navigation.dropin.NavigationViewInitializedObserver
 import com.mapbox.navigation.dropin.ViewProvider
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityDropInBinding
 
