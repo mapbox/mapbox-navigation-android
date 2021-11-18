@@ -73,14 +73,16 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Added `MapboxRoadNameLabelApi` and `MapboxRoadNameLabelView` to support road name label feature. [#4974](https://github.com/mapbox/mapbox-navigation-android/pull/4974)
 - Fixed an issue where the route line's elements (the primary route, alternatives, or the destination symbol) might intermittently not render or not update. [#4983](https://github.com/mapbox/mapbox-navigation-android/pull/4983)
 - Added continuous route alternatives. [#4892](https://github.com/mapbox/mapbox-navigation-android/pull/4892)
-  - Known issues: Taking an alternative route triggers a reroute
-  - Known issues: onRouteAlternatives RouterOrigin is always Onboard even if it was requested Offboard
 - Moved `MapboxRouteLineApiExtensions` to a stable `com.mapbox.navigation.ui.maps.route.line` package. [#5001](https://github.com/mapbox/mapbox-navigation-android/pull/5001)
 - Fixed spread legacy `reason` when subscribing on routes updated via `RoutesObserver`. [#5006](https://github.com/mapbox/mapbox-navigation-android/pull/5006)
 - Removed unused `NavigationOption#isFromNavigationUi` option. [#5019](https://github.com/mapbox/mapbox-navigation-android/pull/5019)
 - Updated standalone components, so that they are no longer tied to `MapboxNavigation` lifecycle. Warning: when such a component is no longer in use, its `cancel` or equivalent function should be called in order to avoid leaks. [#5031](https://github.com/mapbox/mapbox-navigation-android/pull/5031)
 - Fixed clear `VoiceInstructionsTextPlayer` `currentPlay` when `shutdown`. [#5032](https://github.com/mapbox/mapbox-navigation-android/pull/5032)
 - Changed the `iconKeepUpright` parameter for the layer hosting the waypoints is set to `true` to address issue with some custom icons that may be intended to appear like 3D pins. [#5047](https://github.com/mapbox/mapbox-navigation-android/pull/5047)
+
+#### Known issues
+- `RouteAlternativesObserver#onRouteAlternatives` always reports `RouterOrigin` as `Onboard` even if the results are coming from the offboard router. This is can be tracked in [#5127](https://github.com/mapbox/mapbox-navigation-android/issues/5127).
+- Taking an alternative route (by turning into it instead of selecting manually) triggers a reroute. This is can be tracked in [#5039](ttps://github.com/mapbox/mapbox-navigation-android/issues/5039).
 
 ### Mapbox dependencies
 This release depends, and has been tested with, the following Mapbox dependencies:
