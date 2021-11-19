@@ -121,6 +121,17 @@ class RouterWrapperTests {
             valueSlot.captured.invoke(this@mockk.value!!)
         }
     }
+    private val routerResultSuccessErroneousValue: Expected<RouterError, String> = mockk {
+        every { isValue } returns true
+        every { isError } returns false
+        every { value } returns "{\"message\":\"should be >= 1\",\"code\":\"InvalidInput\"}"
+        every { error } returns null
+
+        val valueSlot = slot<Expected.Transformer<String, Unit>>()
+        every { fold(any(), capture(valueSlot)) } answers {
+            valueSlot.captured.invoke(this@mockk.value!!)
+        }
+    }
     private val routerRefreshSuccess: Expected<RouterError, String> = mockk {
         every { isValue } returns true
         every { isError } returns false
@@ -195,39 +206,77 @@ class RouterWrapperTests {
     }
 
     @Test
-    fun `check callback called on success and contains original options`() = runBlockingTest {
-        routerWrapper.getRoute(routerOptions, routerCallback)
-        getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnboard)
+    fun `check callback called on success and contains original options`() =
+        coroutineRule.runBlockingTest {
+            routerWrapper.getRoute(routerOptions, routerCallback)
+            getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnboard)
 
-        verify { router.getRoute(routeUrl, any()) }
+            verify { router.getRoute(routeUrl, any()) }
 
-        val expected = DirectionsResponse.fromJson(
-            testRouteFixtures.loadTwoLegRoute(),
-            routerOptions,
-            UUID
-        ).routes()
+            val expected = DirectionsResponse.fromJson(
+                testRouteFixtures.loadTwoLegRoute(),
+                routerOptions,
+                UUID
+            ).routes()
 
-        verify(exactly = 1) { routerCallback.onRoutesReady(expected, Onboard) }
-    }
+            verify(exactly = 1) { routerCallback.onRoutesReady(expected, Onboard) }
+        }
 
     @Test
-    fun `check on failure is called on success response with no routes`() {
-        routerWrapper.getRoute(routerOptions, routerCallback)
-        getRouteSlot.captured.run(routerResultSuccessEmptyRoutes, nativeOriginOnboard)
+    fun `check on failure is called on success response with no routes`() =
+        coroutineRule.runBlockingTest {
+            routerWrapper.getRoute(routerOptions, routerCallback)
+            getRouteSlot.captured.run(routerResultSuccessEmptyRoutes, nativeOriginOnboard)
 
-        verify { router.getRoute(routeUrl, any()) }
+            verify { router.getRoute(routeUrl, any()) }
 
-        val expected = listOf(
-            RouterFailure(
+            val expected = RouterFailure(
                 url = routeUrl.toHttpUrlOrNull()!!.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM)
                     .toUrl(),
                 routerOrigin = Onboard,
-                message = ROUTES_LIST_EMPTY,
+                message = "failed for response: ${routerResultSuccessEmptyRoutes.value}",
+                throwable = IllegalStateException(
+                    "route response should contain at least one route"
+                )
             )
-        )
 
-        verify(exactly = 1) { routerCallback.onFailure(expected, routerOptions) }
-    }
+            val failures = slot<List<RouterFailure>>()
+            verify(exactly = 1) { routerCallback.onFailure(capture(failures), routerOptions) }
+            val failure: RouterFailure = failures.captured[0]
+            assertEquals(expected.message, failure.message)
+            assertEquals(expected.code, failure.code)
+            assertEquals(expected.routerOrigin, failure.routerOrigin)
+            assertEquals(expected.url, failure.url)
+            assertEquals(expected.throwable!!.message, failure.throwable!!.message)
+        }
+
+    @Test
+    fun `check on failure is called on erroneous success response`() =
+        coroutineRule.runBlockingTest {
+            routerWrapper.getRoute(routerOptions, routerCallback)
+            getRouteSlot.captured.run(routerResultSuccessErroneousValue, nativeOriginOnboard)
+
+            verify { router.getRoute(routeUrl, any()) }
+
+            val expected = RouterFailure(
+                url = routeUrl.toHttpUrlOrNull()!!.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM)
+                    .toUrl(),
+                routerOrigin = Onboard,
+                message = "failed for response: ${routerResultSuccessErroneousValue.value}",
+                throwable = IllegalStateException(
+                    """route response should contain "routes" array"""
+                )
+            )
+
+            val failures = slot<List<RouterFailure>>()
+            verify(exactly = 1) { routerCallback.onFailure(capture(failures), routerOptions) }
+            val failure: RouterFailure = failures.captured[0]
+            assertEquals(expected.message, failure.message)
+            assertEquals(expected.code, failure.code)
+            assertEquals(expected.routerOrigin, failure.routerOrigin)
+            assertEquals(expected.url, failure.url)
+            assertEquals(expected.throwable!!.message, failure.throwable!!.message)
+        }
 
     @Test
     fun `check callback called on cancel`() = coroutineRule.runBlockingTest {
@@ -433,6 +482,5 @@ class RouterWrapperTests {
         private val CANCELED_TYPE = RouterErrorType.REQUEST_CANCELLED
         private const val REQUEST_ID = 19L
         private const val UUID = "cjeacbr8s21bk47lggcvce7lv"
-        private const val ROUTES_LIST_EMPTY = "routes list is empty"
     }
 }

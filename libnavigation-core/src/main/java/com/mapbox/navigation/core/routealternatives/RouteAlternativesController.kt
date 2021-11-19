@@ -120,14 +120,26 @@ internal class RouteAlternativesController constructor(
     ) {
         val alternatives: List<DirectionsRoute> = runBlocking {
             routeAlternatives.mapIndexedNotNull { index, routeAlternative ->
-                val alternative = parseNativeDirectionsAlternative(
+                val expected = parseNativeDirectionsAlternative(
+                    ThreadController.IODispatcher,
                     routeAlternative.routeResponse,
                     routeProgress.route.routeOptions()
                 )
-                if (alternative == null) {
-                    logE(TAG, Message("null alternative at index $index"))
+                if (expected.isValue) {
+                    expected.value
+                } else {
+                    logE(
+                        TAG,
+                        Message(
+                            """
+                                    |unable to parse alternative at index $index;
+                                    |failure for response: ${routeAlternative.routeResponse}
+                                """.trimMargin()
+                        ),
+                        expected.error
+                    )
+                    null
                 }
-                alternative
             }
         }
         logI(TAG, Message("${alternatives.size} alternatives available"))
