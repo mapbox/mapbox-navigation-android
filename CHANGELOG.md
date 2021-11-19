@@ -2,6 +2,25 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.2.0-alpha.1 - November 19, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
+- Fixed an issue where route request failure (due to incorrect parameters) led to a parsing error and runtime crash instead of failure callback. [#5139](https://github.com/mapbox/mapbox-navigation-android/pull/5139)
+- Fixed an issue where reroute controller attempted to add request parameters unsuitable for the selected profile. [#5140](https://github.com/mapbox/mapbox-navigation-android/pull/5140)
+- Added `RerouteOptions` to define reroute params for default `RereouteController`. [#5056](https://github.com/mapbox/mapbox-navigation-android/pull/5056)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.1.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0))
+- Mapbox Navigation Native `v80.0.2`
+- Mapbox Core Common `v20.1.0`
+- Mapbox Java `v6.2.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.2.0-beta.1))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 1.6.2 - November 19, 2021
 This is a patch release on top of `v1.x` which does not include changes introduced in `v2.x` and later.
 
