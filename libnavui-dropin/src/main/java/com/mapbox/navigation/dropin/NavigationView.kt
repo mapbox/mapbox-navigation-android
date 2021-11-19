@@ -88,6 +88,8 @@ class NavigationView : ConstraintLayout {
         LayoutInflater.from(context),
         this
     )
+
+    @VisibleForTesting
     lateinit var navigationViewOptions: NavigationViewOptions
         private set
 
@@ -102,13 +104,19 @@ class NavigationView : ConstraintLayout {
     private val navigationLocationProvider = NavigationLocationProvider()
     @VisibleForTesting
     internal val externalRouteProgressObservers = CopyOnWriteArraySet<RouteProgressObserver>()
-    private val externalLocationObservers = CopyOnWriteArraySet<LocationObserver>()
-    private val externalRoutesObservers = CopyOnWriteArraySet<RoutesObserver>()
-    private val externalArrivalObservers = CopyOnWriteArraySet<ArrivalObserver>()
-    private val externalBannerInstructionObservers =
+    @VisibleForTesting
+    internal val externalLocationObservers = CopyOnWriteArraySet<LocationObserver>()
+    @VisibleForTesting
+    internal val externalRoutesObservers = CopyOnWriteArraySet<RoutesObserver>()
+    @VisibleForTesting
+    internal val externalArrivalObservers = CopyOnWriteArraySet<ArrivalObserver>()
+    @VisibleForTesting
+    internal val externalBannerInstructionObservers =
         CopyOnWriteArraySet<BannerInstructionsObserver>()
-    private val externalTripSessionStateObservers = CopyOnWriteArraySet<TripSessionStateObserver>()
-    private val externalVoiceInstructionsObservers =
+    @VisibleForTesting
+    internal val externalTripSessionStateObservers = CopyOnWriteArraySet<TripSessionStateObserver>()
+    @VisibleForTesting
+    internal val externalVoiceInstructionsObservers =
         CopyOnWriteArraySet<VoiceInstructionsObserver>()
 
     private val mapboxNavigationViewModel: MapboxNavigationViewModel by lazy {
@@ -402,7 +410,7 @@ class NavigationView : ConstraintLayout {
     }
 
     @VisibleForTesting
-    private val lifecycleObserver = object : DefaultLifecycleObserver {
+    internal val lifecycleObserver = object : DefaultLifecycleObserver {
 
         override fun onCreate(owner: LifecycleOwner) {
             super.onCreate(owner)
