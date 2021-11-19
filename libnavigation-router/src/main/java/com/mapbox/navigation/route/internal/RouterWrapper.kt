@@ -84,23 +84,30 @@ class RouterWrapper(
                 },
                 {
                     mainJobControl.scope.launch {
-                        val routes = parseDirectionsResponse(it, routeOptions) {
+                        parseDirectionsResponse(
+                            ThreadController.IODispatcher,
+                            it,
+                            routeOptions
+                        ) {
                             logI(TAG, Message("Response metadata: $it"))
-                        }
-                        if (routes.isNullOrEmpty()) {
-                            callback.onFailure(
-                                listOf(
-                                    RouterFailure(
-                                        urlWithoutToken,
-                                        origin.mapToSdkRouteOrigin(),
-                                        ROUTES_LIST_EMPTY
-                                    )
-                                ),
-                                routeOptions
-                            )
-                        } else {
-                            callback.onRoutesReady(routes, origin.mapToSdkRouteOrigin())
-                        }
+                        }.fold(
+                            { throwable ->
+                                callback.onFailure(
+                                    listOf(
+                                        RouterFailure(
+                                            urlWithoutToken,
+                                            origin.mapToSdkRouteOrigin(),
+                                            "failed for response: $it",
+                                            throwable = throwable
+                                        )
+                                    ),
+                                    routeOptions
+                                )
+                            },
+                            { routes ->
+                                callback.onRoutesReady(routes, origin.mapToSdkRouteOrigin())
+                            }
+                        )
                     }
                 }
             )
