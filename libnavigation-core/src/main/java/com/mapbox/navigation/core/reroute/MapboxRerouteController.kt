@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.reroute
 
 import androidx.annotation.MainThread
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
@@ -75,13 +76,21 @@ internal class MapboxRerouteController(
                 return this
             }
 
-            val avoidManeuverRadius = rerouteOptions.avoidManeuverSeconds
-                .takeIf { it != 0 }
-                ?.let { speed / it }?.toInt()
-                ?.takeIf { it >= 1 }
-                ?.coerceAtMost(MAX_DANGEROUS_MANEUVERS_RADIUS)
+            val builder = toBuilder()
 
-            return toBuilder().avoidManeuverRadius(avoidManeuverRadius).build()
+            if (this.profile() == DirectionsCriteria.PROFILE_DRIVING ||
+                this.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+            ) {
+                val avoidManeuverRadius = rerouteOptions.avoidManeuverSeconds
+                    .takeIf { it != 0 }
+                    ?.let { speed / it }?.toInt()
+                    ?.takeIf { it >= 1 }
+                    ?.coerceAtMost(MAX_DANGEROUS_MANEUVERS_RADIUS)
+
+                builder.avoidManeuverRadius(avoidManeuverRadius)
+            }
+
+            return builder.build()
         }
     }
 

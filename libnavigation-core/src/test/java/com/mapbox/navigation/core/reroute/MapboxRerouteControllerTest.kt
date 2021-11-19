@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.reroute
 
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
@@ -342,7 +343,9 @@ class MapboxRerouteControllerTest {
             Triple(5000f, 1, 1000),
             Triple(200f, 0, null),
         ).forEach { (speed, secondsRadius, expectedMetersRadius) ->
-            val mockRo = mockk<RouteOptions>()
+            val mockRo = mockk<RouteOptions> {
+                every { profile() } returns DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+            }
             val mockRoBuilder = mockk<RouteOptions.Builder>()
             every { directionsSession.getPrimaryRouteOptions() } returns mockRo
             every { mockRo.toBuilder() } returns mockRoBuilder
@@ -365,6 +368,59 @@ class MapboxRerouteControllerTest {
 
             verify(exactly = 1) {
                 mockRoBuilder.avoidManeuverRadius(expectedMetersRadius)
+            }
+        }
+
+        routeRequestCallback.captured.onRoutesReady(mockk(), mockk())
+    }
+
+    @Test
+    fun reroute_options_avoid_maneuvers_only_driving() {
+        val routeRequestCallback = slot<RouterCallback>()
+        every {
+            directionsSession.requestRoutes(
+                routeOptionsFromSuccessResult,
+                capture(routeRequestCallback)
+            )
+        } returns 1L
+
+        listOf(
+            Pair(DirectionsCriteria.PROFILE_CYCLING, false),
+            Pair(DirectionsCriteria.PROFILE_DRIVING, true),
+            Pair(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC, true),
+            Pair(DirectionsCriteria.PROFILE_WALKING, false),
+        ).forEach { (profile, result) ->
+            val mockRo = mockk<RouteOptions> {
+                every { profile() } returns profile
+            }
+            val mockRoBuilder = mockk<RouteOptions.Builder>()
+            every { directionsSession.getPrimaryRouteOptions() } returns mockRo
+            every { mockRo.toBuilder() } returns mockRoBuilder
+            every { mockRoBuilder.avoidManeuverRadius(any()) } returns mockRoBuilder
+            every { mockRoBuilder.build() } returns mockRo
+            mockRouteOptionsResult(successFromResult)
+            addRerouteStateObserver()
+            every { rerouteOptions.avoidManeuverSeconds } returns 1
+            every {
+                tripSession.locationMatcherResult
+            } returns mockk {
+                every {
+                    enhancedLocation
+                } returns mockk {
+                    every { speed } returns 200f
+                }
+            }
+
+            rerouteController.reroute(routeCallback)
+
+            verify(
+                exactly = if (result) {
+                    1
+                } else {
+                    0
+                }
+            ) {
+                mockRoBuilder.avoidManeuverRadius(any())
             }
         }
 

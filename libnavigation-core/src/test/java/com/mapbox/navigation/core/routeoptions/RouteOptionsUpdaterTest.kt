@@ -197,6 +197,42 @@ class RouteOptionsUpdaterTest {
     }
 
     @Test
+    fun `new options return without layer for profiles other than driving`() {
+        listOf(
+            Pair(DirectionsCriteria.PROFILE_CYCLING, false),
+            Pair(DirectionsCriteria.PROFILE_DRIVING, true),
+            Pair(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC, true),
+            Pair(DirectionsCriteria.PROFILE_WALKING, false),
+        ).forEach { (profile, result) ->
+            val routeOptions = provideRouteOptionsWithCoordinates()
+                .toBuilder()
+                .profile(profile)
+                .build()
+            val routeProgress: RouteProgress = mockk(relaxed = true) {
+                every { remainingWaypoints } returns 2
+            }
+
+            val newRouteOptions =
+                routeRefreshAdapter.update(routeOptions, routeProgress, locationMatcherResult)
+                    .let {
+                        assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
+                        return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
+                    }
+                    .routeOptions
+
+            val expectedLayers = if (result) {
+                listOf(DEFAULT_Z_LEVEL, null, null)
+            } else {
+                null
+            }
+            val actualLayers = newRouteOptions.layersList()
+
+            assertEquals("for $profile", expectedLayers, actualLayers)
+            MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(routeOptions, newRouteOptions)
+        }
+    }
+
+    @Test
     fun `new options return with current layer and previous layers`() {
         val routeOptions = provideRouteOptionsWithCoordinatesAndLayers()
         val routeProgress: RouteProgress = mockk(relaxed = true) {
