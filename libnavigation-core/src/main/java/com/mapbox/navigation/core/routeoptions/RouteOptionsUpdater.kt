@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.routeoptions
 
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.model.Message
@@ -134,16 +135,22 @@ class RouteOptionsUpdater {
                             coordinatesList.size - remainingWaypoints - 1
                         )
                     )
-                    .layersList(
-                        mutableListOf(locationMatcherResult.zLevel).apply {
-                            val legacyLayerList = routeOptions.layersList()
-                            if (legacyLayerList != null) {
-                                addAll(legacyLayerList.takeLast(remainingWaypoints))
-                            } else {
-                                repeat(remainingWaypoints) { add(null) }
-                            }
+            }
+
+            if (
+                routeOptions.profile() == DirectionsCriteria.PROFILE_DRIVING ||
+                routeOptions.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+            ) {
+                optionsBuilder.layersList(
+                    mutableListOf(locationMatcherResult.zLevel).apply {
+                        val legacyLayerList = routeOptions.layersList()
+                        if (legacyLayerList != null) {
+                            addAll(legacyLayerList.takeLast(remainingWaypoints))
+                        } else {
+                            repeat(remainingWaypoints) { add(null) }
                         }
-                    )
+                    }
+                )
             }
 
             optionsBuilder.arriveBy(null)
