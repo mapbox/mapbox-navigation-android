@@ -337,10 +337,10 @@ class MapboxRerouteControllerTest {
 
         listOf(
             Triple(200f, 1, 200),
-            Triple(0f, 1, 0),
+            Triple(0f, 1, null),
             Triple(1000f, 1, 1000),
             Triple(5000f, 1, 1000),
-            Triple(200f, 0, 0),
+            Triple(200f, 0, null),
         ).forEach { (speed, secondsRadius, expectedMetersRadius) ->
             val mockRo = mockk<RouteOptions>()
             val mockRoBuilder = mockk<RouteOptions.Builder>()

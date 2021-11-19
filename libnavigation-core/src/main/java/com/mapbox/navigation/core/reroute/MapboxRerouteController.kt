@@ -75,19 +75,11 @@ internal class MapboxRerouteController(
                 return this
             }
 
-            val avoidManeuverRadius = rerouteOptions.avoidManeuverSeconds.let { seconds ->
-                if (seconds == 0) {
-                    0
-                } else {
-                    (speed / seconds).toInt()
-                }
-            }.let { meters ->
-                if (meters > MAX_DANGEROUS_MANEUVERS_RADIUS) {
-                    MAX_DANGEROUS_MANEUVERS_RADIUS
-                } else {
-                    meters
-                }
-            }
+            val avoidManeuverRadius = rerouteOptions.avoidManeuverSeconds
+                .takeIf { it != 0 }
+                ?.let { speed / it }?.toInt()
+                ?.takeIf { it >= 1 }
+                ?.coerceAtMost(MAX_DANGEROUS_MANEUVERS_RADIUS)
 
             return toBuilder().avoidManeuverRadius(avoidManeuverRadius).build()
         }
