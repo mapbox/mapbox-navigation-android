@@ -276,9 +276,9 @@ commands:
             gcloud firebase test android run --type instrumentation \
               --app << parameters.module_wrapper >>/build/outputs/apk/<< parameters.variant >>/<< parameters.module_wrapper >>-<< parameters.variant >>.apk \
               --test << parameters.module_target >>/build/outputs/apk/androidTest/<< parameters.variant >>/<< parameters.module_target >>-<< parameters.variant >>-androidTest.apk \
-              --device model=athene,version=23,locale=fr,orientation=landscape \
-              --device model=sailfish,version=26,locale=es,orientation=portrait \
-              --device model=walleye,version=28,locale=de,orientation=landscape \
+              --device model=hammerhead,version=23,locale=fr,orientation=portrait \
+              --device model=flame,version=29,locale=en,orientation=portrait \
+              --device model=redfin,version=30,locale=de,orientation=landscape \
               --use-orchestrator \
               --timeout 10m
 
@@ -296,9 +296,9 @@ commands:
             gcloud firebase test android run --type instrumentation \
               --app instrumentation-tests/build/outputs/apk/<< parameters.variant >>/instrumentation-tests-<< parameters.variant >>.apk \
               --test instrumentation-tests/build/outputs/apk/androidTest/<< parameters.variant >>/instrumentation-tests-<< parameters.variant >>-androidTest.apk \
-              --device model=athene,version=23,locale=fr,orientation=landscape \
-              --device model=sailfish,version=26,locale=es,orientation=portrait \
-              --device model=walleye,version=28,locale=de,orientation=landscape \
+              --device model=hammerhead,version=23,locale=fr,orientation=portrait \
+              --device model=flame,version=29,locale=en,orientation=portrait \
+              --device model=redfin,version=30,locale=de,orientation=landscape \
               --use-orchestrator \
               --timeout 15m
 
@@ -314,10 +314,10 @@ commands:
           command: |
             gcloud firebase test android run --type robo \
               --app examples/build/outputs/apk/<< parameters.variant >>/examples-<< parameters.variant >>.apk \
-              --device model=hammerhead,version=21,locale=en,orientation=portrait  \
-              --device model=athene,version=23,locale=fr,orientation=landscape \
-              --device model=sailfish,version=26,locale=es,orientation=portrait \
-              --device model=walleye,version=28,locale=de,orientation=landscape \
+              --device model=flo,version=21,locale=en,orientation=portrait  \
+              --device model=hammerhead,version=23,locale=fr,orientation=landscape \
+              --device model=flame,version=29,locale=en,orientation=portrait \
+              --device model=redfin,version=30,locale=de,orientation=landscape \
               --timeout 5m
 
   publish-artifacts:
