@@ -7,14 +7,32 @@ This is a patch release on top of `v1.x` which does not include changes introduc
 
 ### Changelog
 #### Bug fixes and improvements
-- Added `PedingIntent` Android 12 flags support and fixed other Android 12 incompatibilities by upgrading transitive dependencies. [#5142](https://github.com/mapbox/mapbox-navigation-android/pull/5142)
+- Added `PendingIntent` Android 12 flags support and fixed other Android 12 incompatibilities by upgrading transitive dependencies. [#5142](https://github.com/mapbox/mapbox-navigation-android/pull/5142)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v9.7.1` ([release notes](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v9.7.1))
 - Mapbox Navigation Native `v32.0.0`
 - Mapbox Core Common `v9.2.0`
 - Mapbox Java `v5.9.0-alpha.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v5.9.0-alpha.1))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
+## Mapbox Navigation SDK 2.0.2 - November 18, 2021
+This is a patch release on top of `v2.0.x` which does not include changes introduced in `v2.1.x` and later.
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
+- Added `PedingIntent` Android 12 flags support. [#5121](https://github.com/mapbox/mapbox-navigation-android/pull/5121)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.0.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0))
+- Mapbox Navigation Native `v69.0.3`
+- Mapbox Core Common `v20.0.0`
+- Mapbox Java `v6.0.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.0.0))
 - Mapbox Android Core `v5.0.0`
 - Mapbox Android Telemetry `v8.1.0`
 
@@ -30,7 +48,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Fixed an issue with TTS config on pre-Oreo devices. [#5082](https://github.com/mapbox/mapbox-navigation-android/pull/5082)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0))
 - Mapbox Navigation Native `v79.0.2`
 - Mapbox Core Common `v20.0.0`
@@ -51,7 +69,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Fixed toll and motorway exclude params functionality for onboard router. [#5093](https://github.com/mapbox/mapbox-navigation-android/pull/5093)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0))
 - Mapbox Navigation Native `v69.0.3`
 - Mapbox Core Common `v20.0.0`
@@ -69,7 +87,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Fixed index out of bounds exception. [#5060](https://github.com/mapbox/mapbox-navigation-android/pull/5060)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0))
 - Mapbox Navigation Native `v79.0.0`
 - Mapbox Core Common `v20.0.0`
@@ -101,7 +119,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Taking an alternative route (by turning into it instead of selecting manually) triggers a reroute. This is can be tracked in [#5039](ttps://github.com/mapbox/mapbox-navigation-android/issues/5039).
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0))
 - Mapbox Navigation Native `v79.0.0`
 - Mapbox Core Common `v20.0.0`
@@ -121,7 +139,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Removed unused `NavigationOptions#isFromNavigationUi` option. [#5019](https://github.com/mapbox/mapbox-navigation-android/pull/5019)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0))
 - Mapbox Navigation Native `v69.0.2`
 - Mapbox Core Common `v20.0.0`
@@ -140,7 +158,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Fixed and issue where after reroute an additional waypoint was added to the new route (equal to the starting point of the original route). [#4999](https://github.com/mapbox/mapbox-navigation-android/pull/4999)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0))
 - Mapbox Navigation Native `v69.0.2`
 - Mapbox Core Common `v20.0.0`
@@ -158,7 +176,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Fixed an issue where the route line's elements (the primary route, alternatives, or the destination symbol) might intermittently not render or not update. [#4983](https://github.com/mapbox/mapbox-navigation-android/pull/4983)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0))
 - Mapbox Navigation Native `v69.0.1`
 - Mapbox Core Common `v20.0.0`
@@ -179,7 +197,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0))
 - Mapbox Navigation Native `v69.0.1`
 - Mapbox Core Common `v20.0.0`
@@ -204,7 +222,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Fixed stop session button no longer working when in Replay mode. [#4954](https://github.com/mapbox/mapbox-navigation-android/pull/4954)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0-rc.9` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.9))
 - Mapbox Navigation Native `v68.0.0`
 - Mapbox Core Common `v19.0.0`
@@ -232,7 +250,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Fixed stop session button no longer working when in Replay mode. [#4953](https://github.com/mapbox/mapbox-navigation-android/pull/4953)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0))
 - Mapbox Navigation Native `v78.0.0`
 - Mapbox Core Common `v20.0.0`
@@ -253,7 +271,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Fixed compatibility issues with 32-bit devices that could've resulted in incorrect location updates. [#4919](https://github.com/mapbox/mapbox-navigation-android/pull/4919)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0-rc.9` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.9))
 - Mapbox Navigation Native `v68.0.0`
 - Mapbox Core Common `v19.0.0`
@@ -271,7 +289,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Exposed a reusable route geometry cache via `DecodeUtils`. [#4784](https://github.com/mapbox/mapbox-navigation-android/pull/4784)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0-rc.8` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.8))
 - Mapbox Navigation Native `v66.0.3`
 - Mapbox Core Common `v18.0.0`
@@ -308,7 +326,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Fixed the issue with music volume not restored after stopping voice instructions playback [#4899](https://github.com/mapbox/mapbox-navigation-android/pull/4899)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0-rc.8` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.8))
 - Mapbox Navigation Native `v66.0.3`
 - Mapbox Core Common `v18.0.0`
@@ -327,7 +345,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Fixed native out of range crash [4869](https://github.com/mapbox/mapbox-navigation-android/pull/4869)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0-rc.8` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.8))
 - Mapbox Navigation Native `v66.0.3`
 - Mapbox Core Common `v18.0.0`
@@ -361,7 +379,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - :warning: Removed `MapboxNavigation#retrieveSsmlAnnouncementInstruction`. It did not work correctly and if you plan to introduce a voice cache manually, look for `LegStep#voiceInstructions` in the `RouteLeg` of a `DirectionsRoute`. [#4826](https://github.com/mapbox/mapbox-navigation-android/pull/4826)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0-rc.8` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.8))
 - Mapbox Navigation Native `v66.0.1`
 - Mapbox Core Common `v18.0.0`
@@ -388,7 +406,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Fixed a crash in `MapboxSpeechFileProvider` when OS clears the cache directory while an app is running. [#4790](https://github.com/mapbox/mapbox-navigation-android/pull/4790)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0-rc.7` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.7))
 - Mapbox Navigation Native `v65.0.2`
 - Mapbox Core Common `v17.1.0`
@@ -415,7 +433,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Fixed an issue where traffic line, or the whole route line, could sometimes disappear and required a significant camera zoom level change to show up again. [#4789](https://github.com/mapbox/mapbox-navigation-android/pull/4789)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0-rc.7` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.7))
 - Mapbox Navigation Native `v65.0.1`
 - Mapbox Core Common `v17.1.0`
@@ -441,7 +459,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Added logging of metadata for successful directions response. [#4761](https://github.com/mapbox/mapbox-navigation-android/pull/4761)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v10.0.0-rc.7` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.7))
 - Mapbox Navigation Native `v64.0.0`
 - Mapbox Core Common `v17.1.0`
@@ -459,7 +477,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Reduced memory footprint (both incremental and the peak). [#4740](https://github.com/mapbox/mapbox-navigation-android/pull/4740)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-beta.19` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.19))
 - Mapbox Navigation Native `v48.0.8`
@@ -508,7 +526,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Updated `PolygonDistanceInfo` and `SubGraphDistanceInfo` to include `entrances` and `exits`. [#4692](https://github.com/mapbox/mapbox-navigation-android/pull/4692)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-rc.6` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.6))
 - Mapbox Navigation Native `v62.0.0`
@@ -532,7 +550,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-rc.4` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.4))
 - Mapbox Navigation Native `v59.0.0`
@@ -571,7 +589,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Bug fix for invalid `FeatureCollection` objects derived from routes that have less than two coordinates. [#4638](https://github.com/mapbox/mapbox-navigation-android/pull/4638)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-rc.4` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.4))
 - Mapbox Navigation Native `v59.0.0`
@@ -597,7 +615,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Fixed a `ConcurrentModificationException` that could occasionally be thrown when `PredictiveCacheController` was used and the connectivity changed between online/offline. [#4605](https://github.com/mapbox/mapbox-navigation-android/pull/4605)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-rc.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.3))
 - Mapbox Navigation Native `v57.0.0`
@@ -615,7 +633,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Added ability to restore from "backwards snapping" issue: set `noRouteLength` to 150m. [#4610](https://github.com/mapbox/mapbox-navigation-android/pull/4610)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-beta.19` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.19))
 - Mapbox Navigation Native `v48.0.7`
@@ -640,7 +658,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Fixed an issue where navigation might crash with OutOfMemory error. [#4587](https://github.com/mapbox/mapbox-navigation-android/pull/4587)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-rc.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.3))
 - Mapbox Navigation Native `v56.0.0`
@@ -675,7 +693,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - :warning: `RouteProgress#bannerInstructions` does not become `null` and keeps its reference for as long as a step is active. Listen to `BannerInstructionsObserver` if you need a specific timing event when the banner first appears. [#4482](https://github.com/mapbox/mapbox-navigation-android/pull/4482)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-rc.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.2))
 - Mapbox Navigation Native `v55.0.0`
@@ -697,7 +715,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - :warning: Internal `setUnconditionalPollingPatience` and `setUnconditionalPollingInterval` have been moved to `InternalUtils` `object` and have to be called _before_ `MapboxNavigation` is instantiated to actually take effect. [#4419](https://github.com/mapbox/mapbox-navigation-android/pull/4419)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-rc.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.2))
 - Mapbox Navigation Native `v54.0.0`
@@ -718,7 +736,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Navigation SDK now respects the `NetworkConnectivity` settings and will not make resource request if the `setMapboxStackConnected` is set to `false`, it will use cached resources and immediately fallback to local generation of routes, even if connectivity is available. [#4529](https://github.com/mapbox/mapbox-navigation-android/pull/4529)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-beta.19` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.19))
 - Mapbox Navigation Native `v48.0.6`
@@ -737,7 +755,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 * Fixed missing `Gantry` objects in `ElectronicHorizon`. [#4518](https://github.com/mapbox/mapbox-navigation-android/pull/4518)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-rc.1))
 - Mapbox Navigation Native `v53.0.1`
@@ -764,7 +782,7 @@ When using this release, the merged Manifest comes with an unnecessary `WRITE_SE
 This permission declaration will be removed in future releases.
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-beta.20` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.20))
 - Mapbox Navigation Native `v51.0.0`
@@ -790,7 +808,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 :warning: `MapboxNavigation` history recording APIs `retrieveHistory`, `toggleHistory` and `addHistoryEvent` are no-op in this release. [#4478](https://github.com/mapbox/mapbox-navigation-android/pull/4478)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-beta.20` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.20))
 - Mapbox Navigation Native `v51.0.0`
@@ -809,7 +827,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 * Fixed an issue where the route refresh request wasn't respecting `RouteOptions#baseUrl`. [#4427](https://github.com/mapbox/mapbox-navigation-android/pull/4427)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-beta.19` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.19))
 - Mapbox Navigation Native `v48.0.5`
@@ -836,7 +854,7 @@ When using this release, the merged Manifest comes with an unnecessary `WRITE_SE
 This permission declaration will be removed in future releases.
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-beta.20` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.20))
 - Mapbox Navigation Native `v50.0.0`
@@ -877,7 +895,7 @@ When using this release, the merged Manifest comes with an unnecessary `WRITE_SE
 This permission declaration will be removed in future releases.
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-beta.20` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.20))
 - Mapbox Navigation Native `v50.0.0`
@@ -914,7 +932,7 @@ The extensions are very much recommended to be called when building the `RouteOp
 * `MapboxJunctionAPI` now returns `Bitmap` instead of `ByteArray`. ([#4335](https://github.com/mapbox/mapbox-navigation-android/pull/4335))
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-beta.19` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.19))
 - Mapbox Navigation Native `v49.0.1`
@@ -932,7 +950,7 @@ This release depends, and has been tested with, the following Mapbox dependencie
  * Bug fix for calculating mutli-leg routes with traffic congestion changes or restrictions at the first point of a route leg. [#4383](https://github.com/mapbox/mapbox-navigation-android/pull/4383)
 
  ### Mapbox dependencies
- This release depends, and has been tested with, the following Mapbox dependencies:
+ This release depends on, and has been tested with, the following Mapbox dependencies:
 
  - Mapbox Maps SDK `v10.0.0-beta.19` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.19))
  - Mapbox Navigation Native `v48.0.5`
@@ -954,7 +972,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 - Changed restricted roads to be represented as part of the traffic line and will vanish along with the rest of the line when the vanishing route line feature is enabled. [#4360](https://github.com/mapbox/mapbox-navigation-android/pull/4360)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-beta.19` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.19))
 - Mapbox Navigation Native `v48.0.5`
@@ -979,7 +997,7 @@ This release depends, and has been tested with, the following Mapbox dependencie
  * Fixed an issue where the user location was incorrectly positioned in the center of the screen in the following state when the pitch was zero, `maximizeViewableRouteGeometryWhenPitchZero` was set, and no other points were available for framing. Now the user location is correctly tied to the bottom edge of the padding if that's the only geometry to frame. The flag was also renamed to `maximizeViewableGeometryWhenPitchZero`. [#4343](https://github.com/mapbox/mapbox-navigation-android/pull/4343)
 
  ### Mapbox dependencies
- This release depends, and has been tested with, the following Mapbox dependencies:
+ This release depends on, and has been tested with, the following Mapbox dependencies:
 
  - Mapbox Maps SDK `v10.0.0-beta.18` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.18))
  - Mapbox Navigation Native `v48.0.5`
@@ -1007,7 +1025,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 * Introduced `MapboxNavigationViewportDataSourceOptions.overviewFrameOptions.geometrySimplification` which by default simplifies the route geometry used for overview framing by a factor of 25 to improve performance of frame generation, especially for longer routes. [#4286](https://github.com/mapbox/mapbox-navigation-android/pull/4286)
 
 ### Mapbox dependencies
-This release depends, and has been tested with, the following Mapbox dependencies:
+This release depends on, and has been tested with, the following Mapbox dependencies:
 
 - Mapbox Maps SDK `v10.0.0-beta.18` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.0-beta.18))
 - Mapbox Navigation Native `v48.0.4`
