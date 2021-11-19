@@ -342,8 +342,8 @@ commands:
               --app << parameters.module_wrapper >>/build/outputs/apk/<< parameters.variant >>/<< parameters.module_wrapper >>-<< parameters.variant >>.apk \
               --test << parameters.module_target >>/build/outputs/apk/androidTest/<< parameters.variant >>/<< parameters.module_target >>-<< parameters.variant >>-androidTest.apk \
               --device model=hammerhead,version=23,locale=fr,orientation=portrait \
-              --device model=star2lte,version=28,locale=de,orientation=landscape \
-              --device model=flame,version=30,locale=en,orientation=portrait \
+              --device model=flame,version=29,locale=de,orientation=landscape \
+              --device model=redfin,version=30,locale=en,orientation=portrait \
               --use-orchestrator \
               --timeout 10m
 
@@ -362,8 +362,8 @@ commands:
               --app instrumentation-tests/build/outputs/apk/<< parameters.variant >>/instrumentation-tests-<< parameters.variant >>.apk \
               --test instrumentation-tests/build/outputs/apk/androidTest/<< parameters.variant >>/instrumentation-tests-<< parameters.variant >>-androidTest.apk \
               --device model=hammerhead,version=23,locale=fr,orientation=portrait \
-              --device model=star2lte,version=28,locale=de,orientation=landscape \
-              --device model=flame,version=30,locale=en,orientation=portrait \
+              --device model=flame,version=29,locale=de,orientation=landscape \
+              --device model=redfin,version=30,locale=en,orientation=portrait \
               --use-orchestrator \
               --directories-to-pull=/sdcard/Download/mapbox_test \
               --timeout 15m
@@ -383,10 +383,10 @@ commands:
           command: |
             gcloud firebase test android run --type robo \
               --app << parameters.module_target >>/build/outputs/apk/<< parameters.variant >>/<< parameters.module_target >>-<< parameters.variant >>.apk \
-              --device model=hammerhead,version=21,locale=es,orientation=portrait  \
-              --device model=hammerhead,version=23,locale=fr,orientation=landscape \
-              --device model=star2lte,version=28,locale=de,orientation=landscape \
-              --device model=flame,version=30,locale=en,orientation=portrait \
+              --device model=flo,version=21,locale=es,orientation=portrait  \
+              --device model=hammerhead,version=23,locale=fr,orientation=portrait \
+              --device model=flame,version=29,locale=de,orientation=landscape \
+              --device model=redfin,version=30,locale=en,orientation=portrait \
               --timeout 5m
 
   publish-artifacts:
