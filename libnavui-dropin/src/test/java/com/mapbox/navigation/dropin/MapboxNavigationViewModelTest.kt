@@ -3,6 +3,7 @@ package com.mapbox.navigation.dropin
 import android.location.Location
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -15,6 +16,7 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
+import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.dropin.viewmodel.MapboxNavigationViewModel
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
@@ -27,7 +29,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
-class MapboxNavigationViewApiModelTest {
+class MapboxNavigationViewModelTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
@@ -249,6 +251,29 @@ class MapboxNavigationViewApiModelTest {
         }
 
         observerSlot.captured.onNewBannerInstructions(expected)
+        val result = def.await()
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun voiceInstructions() = coroutineRule.runBlockingTest {
+        val expected = mockk<VoiceInstructions>()
+        val lifecycleOwner = mockk<LifecycleOwner>()
+        val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        val factory = mockk<DropInUIMapboxNavigationFactory> {
+            every { getMapboxNavigation() } returns mockMapboxNavigation
+        }
+        val observerSlot = slot<VoiceInstructionsObserver>()
+        val viewModel = MapboxNavigationViewModel(factory).also {
+            it.onStart(lifecycleOwner)
+        }
+        verify { mockMapboxNavigation.registerVoiceInstructionsObserver(capture(observerSlot)) }
+        val def = async {
+            viewModel.voiceInstructions.first()
+        }
+
+        observerSlot.captured.onNewVoiceInstructions(expected)
         val result = def.await()
 
         assertEquals(expected, result)

@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -19,6 +20,7 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
+import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.dropin.DropInUIMapboxNavigationFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -60,6 +62,9 @@ internal class MapboxNavigationViewModel(
 
     private val _tripSessionStateUpdates: MutableSharedFlow<TripSessionState> = MutableSharedFlow()
     val tripSessionStateUpdates: Flow<TripSessionState> = _tripSessionStateUpdates
+
+    private val _voiceInstructions: MutableSharedFlow<VoiceInstructions> = MutableSharedFlow()
+    val voiceInstructions: Flow<VoiceInstructions> = _voiceInstructions
 
     @VisibleForTesting
     private val locationObserver = object : LocationObserver {
@@ -119,6 +124,12 @@ internal class MapboxNavigationViewModel(
         }
     }
 
+    private val voiceInstructionsObserver = VoiceInstructionsObserver { voiceInstructions ->
+        viewModelScope.launch {
+            _voiceInstructions.emit(voiceInstructions)
+        }
+    }
+
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
         mapboxNavigation.registerLocationObserver(locationObserver)
@@ -127,6 +138,7 @@ internal class MapboxNavigationViewModel(
         mapboxNavigation.registerArrivalObserver(arrivalObserver)
         mapboxNavigation.registerBannerInstructionsObserver(bannerInstructionsObserver)
         mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
+        mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
     }
 
     override fun onStop(owner: LifecycleOwner) {
@@ -137,6 +149,7 @@ internal class MapboxNavigationViewModel(
         mapboxNavigation.unregisterArrivalObserver(arrivalObserver)
         mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver)
         mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
+        mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
     }
 
     override fun onCleared() {
