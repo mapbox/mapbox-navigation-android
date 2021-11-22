@@ -277,8 +277,8 @@ commands:
               --app << parameters.module_wrapper >>/build/outputs/apk/<< parameters.variant >>/<< parameters.module_wrapper >>-<< parameters.variant >>.apk \
               --test << parameters.module_target >>/build/outputs/apk/androidTest/<< parameters.variant >>/<< parameters.module_target >>-<< parameters.variant >>-androidTest.apk \
               --device model=hammerhead,version=23,locale=fr,orientation=portrait \
-              --device model=flame,version=29,locale=en,orientation=portrait \
-              --device model=redfin,version=30,locale=de,orientation=landscape \
+              --device model=flame,version=29,locale=en,orientation=landscape \
+              --device model=redfin,version=30,locale=de,orientation=portrait \
               --use-orchestrator \
               --timeout 10m
 
@@ -297,8 +297,8 @@ commands:
               --app instrumentation-tests/build/outputs/apk/<< parameters.variant >>/instrumentation-tests-<< parameters.variant >>.apk \
               --test instrumentation-tests/build/outputs/apk/androidTest/<< parameters.variant >>/instrumentation-tests-<< parameters.variant >>-androidTest.apk \
               --device model=hammerhead,version=23,locale=fr,orientation=portrait \
-              --device model=flame,version=29,locale=en,orientation=portrait \
-              --device model=redfin,version=30,locale=de,orientation=landscape \
+              --device model=flame,version=29,locale=en,orientation=landscape \
+              --device model=redfin,version=30,locale=de,orientation=portrait \
               --use-orchestrator \
               --timeout 15m
 
@@ -315,9 +315,9 @@ commands:
             gcloud firebase test android run --type robo \
               --app examples/build/outputs/apk/<< parameters.variant >>/examples-<< parameters.variant >>.apk \
               --device model=flo,version=21,locale=en,orientation=portrait  \
-              --device model=hammerhead,version=23,locale=fr,orientation=landscape \
-              --device model=flame,version=29,locale=en,orientation=portrait \
-              --device model=redfin,version=30,locale=de,orientation=landscape \
+              --device model=hammerhead,version=23,locale=fr,orientation=portrait \
+              --device model=flame,version=29,locale=en,orientation=landscape \
+              --device model=redfin,version=30,locale=de,orientation=portrait \
               --timeout 5m
 
   publish-artifacts:
