@@ -29,6 +29,7 @@ import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
+import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.dropin.contract.ContainerVisibilityAction
 import com.mapbox.navigation.dropin.contract.NavigationStateAction
 import com.mapbox.navigation.dropin.databinding.MapboxLayoutDropInViewBinding
@@ -97,6 +98,8 @@ class NavigationView : ConstraintLayout {
     private val externalBannerInstructionObservers =
         CopyOnWriteArraySet<BannerInstructionsObserver>()
     private val externalTripSessionStateObservers = CopyOnWriteArraySet<TripSessionStateObserver>()
+    private val externalVoiceInstructionsObservers =
+        CopyOnWriteArraySet<VoiceInstructionsObserver>()
 
     private val mapboxNavigationViewModel: MapboxNavigationViewModel by lazy {
         ViewModelProvider(
@@ -336,6 +339,17 @@ class NavigationView : ConstraintLayout {
                 }
             }
         }
+
+        lifeCycleOwner.lifecycleScope.launch {
+            mapboxNavigationViewModel.voiceInstructions.collect { voiceInstructions ->
+                // view models that need voice instruction updates should be added here
+                lifeCycleOwner.lifecycleScope.launch {
+                    externalVoiceInstructionsObservers.forEach {
+                        it.onNewVoiceInstructions(voiceInstructions)
+                    }
+                }
+            }
+        }
     }
 
     private fun renderVisibility(state: ContainerVisibilityState) {
@@ -427,6 +441,14 @@ class NavigationView : ConstraintLayout {
 
     internal fun removeTripSessionStateObserver(observer: TripSessionStateObserver) {
         externalTripSessionStateObservers.remove(observer)
+    }
+
+    internal fun addVoiceInstructionObserver(observer: VoiceInstructionsObserver) {
+        externalVoiceInstructionsObservers.add(observer)
+    }
+
+    internal fun removeVoiceInstructionObserver(observer: VoiceInstructionsObserver) {
+        externalVoiceInstructionsObservers.remove(observer)
     }
 
     internal fun getFoobar() {

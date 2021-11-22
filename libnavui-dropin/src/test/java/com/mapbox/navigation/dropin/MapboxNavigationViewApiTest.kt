@@ -6,6 +6,7 @@ import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
+import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Test
@@ -134,7 +135,7 @@ class MapboxNavigationViewApiTest {
     }
 
     @Test
-    fun removeTripSessionStateObserver() {
+    fun removeVoiceInstructionsObserver() {
         val navigationView = mockk<NavigationView>(relaxed = true)
         val api = MapboxNavigationViewApiImpl(navigationView)
         val observer = mockk<TripSessionStateObserver>()
@@ -142,6 +143,28 @@ class MapboxNavigationViewApiTest {
         api.removeTripSessionStateObserver(observer)
 
         verify { navigationView.removeTripSessionStateObserver(observer) }
+    }
+
+    @Test
+    fun addVoiceInstructionsObserver() {
+        val navigationView = mockk<NavigationView>(relaxed = true)
+        val api = MapboxNavigationViewApiImpl(navigationView)
+        val observer = mockk<VoiceInstructionsObserver>()
+
+        api.addVoiceInstructionsObserver(observer)
+
+        verify { navigationView.addVoiceInstructionObserver(observer) }
+    }
+
+    @Test
+    fun removeTripSessionStateObserver() {
+        val navigationView = mockk<NavigationView>(relaxed = true)
+        val api = MapboxNavigationViewApiImpl(navigationView)
+        val observer = mockk<VoiceInstructionsObserver>()
+
+        api.removeVoiceInstructionsObserver(observer)
+
+        verify { navigationView.removeVoiceInstructionObserver(observer) }
     }
 
     @Test

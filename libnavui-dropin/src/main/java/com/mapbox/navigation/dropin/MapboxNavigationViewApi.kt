@@ -7,6 +7,7 @@ import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
+import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 
 interface MapboxNavigationViewApi {
     fun addRouteProgressObserver(observer: RouteProgressObserver)
@@ -21,6 +22,8 @@ interface MapboxNavigationViewApi {
     fun removeBannerInstructionsObserver(observer: BannerInstructionsObserver)
     fun addTripSessionStateObserver(observer: TripSessionStateObserver)
     fun removeTripSessionStateObserver(observer: TripSessionStateObserver)
+    fun addVoiceInstructionsObserver(observer: VoiceInstructionsObserver)
+    fun removeVoiceInstructionsObserver(observer: VoiceInstructionsObserver)
     fun update(navigationViewOptions: NavigationViewOptions)
     fun getMapView(): MapView
     fun configureNavigationView(viewProvider: ViewProvider)
@@ -75,6 +78,14 @@ internal class MapboxNavigationViewApiImpl(
 
     override fun removeTripSessionStateObserver(observer: TripSessionStateObserver) {
         navigationView.removeTripSessionStateObserver(observer)
+    }
+
+    override fun addVoiceInstructionsObserver(observer: VoiceInstructionsObserver) {
+        navigationView.addVoiceInstructionObserver(observer)
+    }
+
+    override fun removeVoiceInstructionsObserver(observer: VoiceInstructionsObserver) {
+        navigationView.removeVoiceInstructionObserver(observer)
     }
 
     override fun update(navigationViewOptions: NavigationViewOptions) {
