@@ -50,11 +50,11 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
-      - mobile-metrics-dry-run:
-          type: approval
-      - mobile-metrics-benchmarks:
-          requires:
-            - mobile-metrics-dry-run
+#      - mobile-metrics-dry-run:
+#          type: approval
+#      - mobile-metrics-benchmarks:
+#          requires:
+#            - mobile-metrics-dry-run
 
 #------------------------------
 #---------- COMMANDS ----------
@@ -343,13 +343,13 @@ commands:
           name: Generate documentation
           command: make javadoc-dokka
 
-  trigger-mobile-metrics:
-    steps:
-      - run:
-          name: Track metrics of the Navigation SDK
-          command: |
-            pip3 install requests
-            python3 scripts/trigger-mobile-metrics.py
+#  trigger-mobile-metrics:
+#    steps:
+#      - run:
+#          name: Track metrics of the Navigation SDK
+#          command: |
+#            pip3 install requests
+#            python3 scripts/trigger-mobile-metrics.py
 
   prepare-mbx-ci:
     steps:
@@ -454,11 +454,11 @@ jobs:
       - run-firebase-instrumentation:
           variant: "debug"
 
-  mobile-metrics-benchmarks:
-    executor: ndk-r21-latest-executor
-    steps:
-      - checkout
-      - trigger-mobile-metrics
+#  mobile-metrics-benchmarks:
+#    executor: ndk-r21-latest-executor
+#    steps:
+#      - checkout
+#      - trigger-mobile-metrics
 
   release-snapshot:
     executor: ndk-r21-latest-executor
@@ -475,7 +475,7 @@ jobs:
           artifact-type: "core"
       - publish-artifacts:
           artifact-type: "ui"
-      - trigger-mobile-metrics
+#      - trigger-mobile-metrics
 
   release:
     executor: ndk-r21-latest-executor
