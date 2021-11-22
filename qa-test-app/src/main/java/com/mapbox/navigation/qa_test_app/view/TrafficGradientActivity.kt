@@ -5,10 +5,10 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.Style
 import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.TrafficGradientActivityLayoutBinding
 import com.mapbox.navigation.qa_test_app.utils.Utils
+import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -88,7 +88,7 @@ class TrafficGradientActivity : AppCompatActivity() {
 
     private fun initStyle() {
         binding.mapView.getMapboxMap().loadStyleUri(
-            Style.MAPBOX_STREETS
+            NavigationStyles.NAVIGATION_DAY_STYLE
         ) { style ->
 
             val route = getRoute()

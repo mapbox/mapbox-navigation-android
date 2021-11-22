@@ -12,7 +12,6 @@ import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.annotation.annotations
@@ -47,6 +46,7 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityIndependentRouteGenerationBinding
 import com.mapbox.navigation.examples.util.RouteLineUtil
 import com.mapbox.navigation.examples.util.Utils
+import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.tripprogress.api.MapboxTripProgressApi
 import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
@@ -103,7 +103,7 @@ class IndependentRouteGenerationActivity : AppCompatActivity() {
 
     private fun initStyle() {
         mapboxMap.loadStyleUri(
-            Style.MAPBOX_STREETS
+            NavigationStyles.NAVIGATION_DAY_STYLE
         ) {
             binding.mapView.gestures.addOnMapLongClickListener(
                 mapLongClickListener

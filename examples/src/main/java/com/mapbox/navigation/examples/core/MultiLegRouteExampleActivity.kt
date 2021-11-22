@@ -38,6 +38,7 @@ import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.MultilegRouteExampleLayoutBinding
+import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
@@ -219,7 +220,7 @@ class MultiLegRouteExampleActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun initStyle() {
         mapboxMap.loadStyleUri(
-            Style.MAPBOX_STREETS,
+            NavigationStyles.NAVIGATION_DAY_STYLE,
             { style: Style ->
 
                 // Hard coding a location and a route for this example.

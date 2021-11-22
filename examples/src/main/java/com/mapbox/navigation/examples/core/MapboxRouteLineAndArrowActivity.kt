@@ -48,6 +48,7 @@ import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityRoutelineExampleBinding
+import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
@@ -347,7 +348,7 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
     @SuppressLint("MissingPermission")
     private fun initStyle() {
         mapboxMap.loadStyleUri(
-            Style.MAPBOX_STREETS,
+            NavigationStyles.NAVIGATION_DAY_STYLE,
             { style: Style ->
                 // Get the last known location and move the map to that location.
                 mapboxNavigation.navigationOptions.locationEngine.getLastLocation(

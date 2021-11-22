@@ -1,6 +1,14 @@
 // Signature format: 3.0
 package com.mapbox.navigation.ui.maps {
 
+  public final class NavigationStyles {
+    method public String getNAVIGATION_DAY_STYLE();
+    method public String getNAVIGATION_NIGHT_STYLE();
+    property public final String NAVIGATION_DAY_STYLE;
+    property public final String NAVIGATION_NIGHT_STYLE;
+    field public static final com.mapbox.navigation.ui.maps.NavigationStyles INSTANCE;
+  }
+
   public final class PredictiveCacheController {
     ctor public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions = PredictiveCacheLocationOptions.<init>().build(), com.mapbox.navigation.ui.maps.PredictiveCacheControllerErrorHandler? predictiveCacheControllerErrorHandler = null);
     ctor public PredictiveCacheController(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions = PredictiveCacheLocationOptions.<init>().build());

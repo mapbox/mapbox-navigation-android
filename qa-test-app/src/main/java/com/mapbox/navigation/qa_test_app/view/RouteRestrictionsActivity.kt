@@ -11,7 +11,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.camera
@@ -31,6 +30,7 @@ import com.mapbox.navigation.qa_test_app.R
 import com.mapbox.navigation.qa_test_app.databinding.RouteRestrictionsActivityLayoutBinding
 import com.mapbox.navigation.qa_test_app.utils.Utils
 import com.mapbox.navigation.qa_test_app.utils.Utils.getRouteOriginPoint
+import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
@@ -144,7 +144,7 @@ class RouteRestrictionsActivity : AppCompatActivity() {
 
     private fun initStyle() {
         binding.mapView.getMapboxMap().loadStyleUri(
-            Style.MAPBOX_STREETS
+            NavigationStyles.NAVIGATION_DAY_STYLE
         ) { style ->
 
             val route = getRoute()

@@ -36,6 +36,7 @@ import com.mapbox.navigation.examples.core.databinding.ActivityReplayHistoryLayo
 import com.mapbox.navigation.examples.core.replay.HistoryFileLoader
 import com.mapbox.navigation.examples.core.replay.HistoryFilesActivity
 import com.mapbox.navigation.examples.util.Utils
+import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
@@ -124,7 +125,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
             binding.mapView.getMapboxMap()
         )
         binding.mapView.getMapboxMap().loadStyleUri(
-            Style.MAPBOX_STREETS,
+            NavigationStyles.NAVIGATION_DAY_STYLE,
             { style: Style ->
                 locationComponent = binding.mapView.location.apply {
                     this.locationPuck = LocationPuck2D(
