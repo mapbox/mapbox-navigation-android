@@ -2,11 +2,9 @@
 package com.mapbox.navigation.ui.maps {
 
   public final class NavigationStyles {
-    method public String getNAVIGATION_DAY_STYLE();
-    method public String getNAVIGATION_NIGHT_STYLE();
-    property public final String NAVIGATION_DAY_STYLE;
-    property public final String NAVIGATION_NIGHT_STYLE;
     field public static final com.mapbox.navigation.ui.maps.NavigationStyles INSTANCE;
+    field public static final String NAVIGATION_DAY_STYLE = "mapbox://styles/mapbox/navigation-day-v1";
+    field public static final String NAVIGATION_NIGHT_STYLE = "mapbox://styles/mapbox/navigation-night-v1";
   }
 
   public final class PredictiveCacheController {
