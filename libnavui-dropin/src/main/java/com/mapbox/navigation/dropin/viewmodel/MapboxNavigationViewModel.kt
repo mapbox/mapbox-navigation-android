@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.viewmodel
 
+import android.content.Context
 import android.location.Location
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -7,7 +8,15 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
+import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -63,8 +72,44 @@ internal class MapboxNavigationViewModel(
     private val _tripSessionStateUpdates: MutableSharedFlow<TripSessionState> = MutableSharedFlow()
     val tripSessionStateUpdates: Flow<TripSessionState> = _tripSessionStateUpdates
 
+    private val _routeRequestFailures: MutableSharedFlow<List<RouterFailure>> = MutableSharedFlow()
+    val routeRequestFailures: Flow<List<RouterFailure>> = _routeRequestFailures
+
     private val _voiceInstructions: MutableSharedFlow<VoiceInstructions> = MutableSharedFlow()
     val voiceInstructions: Flow<VoiceInstructions> = _voiceInstructions
+
+    // This was added to facilitate getting a route into mapbox navigation so work could go forward.
+    // It may be temporary.
+    fun findRoute(origin: Point, destination: Point, context: Context) {
+        val routeOptions = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .applyLanguageAndVoiceUnitOptions(context)
+            .coordinatesList(listOf(origin, destination))
+            .layersList(listOf(mapboxNavigation.getZLevel(), null))
+            .alternatives(true)
+            .build()
+        mapboxNavigation.requestRoutes(
+            routeOptions,
+            object : RouterCallback {
+                override fun onRoutesReady(
+                    routes: List<DirectionsRoute>,
+                    routerOrigin: RouterOrigin
+                ) {
+                    mapboxNavigation.setRoutes(routes)
+                }
+
+                override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
+                    viewModelScope.launch {
+                        _routeRequestFailures.emit(reasons)
+                    }
+                }
+
+                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
+                    //
+                }
+            }
+        )
+    }
 
     @VisibleForTesting
     private val locationObserver = object : LocationObserver {

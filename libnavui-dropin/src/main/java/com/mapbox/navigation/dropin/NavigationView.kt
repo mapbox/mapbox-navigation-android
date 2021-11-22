@@ -17,10 +17,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.bindgen.Expected
+import com.mapbox.geojson.Point
 import com.mapbox.maps.MapInitOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
+import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -39,6 +43,8 @@ import com.mapbox.navigation.dropin.viewmodel.CameraViewModel
 import com.mapbox.navigation.dropin.viewmodel.ContainerVisibilityViewModel
 import com.mapbox.navigation.dropin.viewmodel.MapboxNavigationViewModel
 import com.mapbox.navigation.dropin.viewmodel.NavigationStateViewModel
+import com.mapbox.navigation.dropin.viewmodel.RouteArrowViewModel
+import com.mapbox.navigation.dropin.viewmodel.RouteLineViewModel
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
 import com.mapbox.navigation.ui.maps.camera.view.MapboxRecenterButton
 import com.mapbox.navigation.ui.maps.camera.view.MapboxRouteOverviewButton
@@ -79,7 +85,7 @@ class NavigationView : ConstraintLayout {
         LayoutInflater.from(context),
         this
     )
-    private var navigationViewOptions: NavigationViewOptions
+    private lateinit var navigationViewOptions: NavigationViewOptions
 
     private lateinit var accessToken: String
     private lateinit var maneuverView: View
@@ -110,11 +116,13 @@ class NavigationView : ConstraintLayout {
                     this.accessToken
                 )
             )
-        ).get(MapboxNavigationViewModel::class.java)
+        )[MapboxNavigationViewModel::class.java]
     }
+
     private val navigationStateViewModel: NavigationStateViewModel by lazy {
         ViewModelProvider(activity)[NavigationStateViewModel::class.java]
     }
+
     private val containerVisibilityViewModel: ContainerVisibilityViewModel by lazy {
         ViewModelProvider(activity)[ContainerVisibilityViewModel::class.java]
     }
@@ -123,12 +131,26 @@ class NavigationView : ConstraintLayout {
         ViewModelProvider(activity)[CameraViewModel::class.java]
     }
 
+    private val routeLineViewModel: RouteLineViewModel by lazy {
+        ViewModelProvider(
+            activity,
+            RouteLineViewModelFactory(navigationViewOptions.mapboxRouteLineOptions)
+        )[RouteLineViewModel::class.java]
+    }
+
+    private val routeArrowViewModel: RouteArrowViewModel by lazy {
+        ViewModelProvider(
+            activity,
+            RouteArrowViewModelFactory(navigationViewOptions.routeArrowOptions)
+        )[RouteArrowViewModel::class.java]
+    }
+
     constructor(context: Context, attrs: AttributeSet?) : this(
         context,
         attrs,
         null,
         MapInitOptions(context),
-        NavigationViewOptions.Builder().build()
+        NavigationViewOptions.Builder(context).build()
     )
 
     constructor(
@@ -136,7 +158,9 @@ class NavigationView : ConstraintLayout {
         attrs: AttributeSet?,
         accessToken: String?,
         mapInitializationOptions: MapInitOptions = MapInitOptions(context),
-        navigationViewOptions: NavigationViewOptions = NavigationViewOptions.Builder().build()
+        navigationViewOptions: NavigationViewOptions = NavigationViewOptions
+            .Builder(context)
+            .build()
     ) : super(context, attrs) {
         this.mapInitOptions = mapInitializationOptions
         if (accessToken != null) {
@@ -189,6 +213,10 @@ class NavigationView : ConstraintLayout {
         performActions()
 
         updateNavigationViewOptions(navigationViewOptions)
+
+        // This was added to facilitate getting a route into mapbox navigation so work could go forward.
+        // It may be temporary.
+        mapView.gestures.addOnMapLongClickListener(onMapLongClickListener)
     }
 
     internal fun updateNavigationViewOptions(navigationViewOptions: NavigationViewOptions) {
@@ -265,6 +293,10 @@ class NavigationView : ConstraintLayout {
         lifeCycleOwner.lifecycleScope.launch {
             mapboxNavigationViewModel.routeProgressUpdates.collect { routeProgress ->
                 // view models that need route progress updates should be added here
+                mapView.getMapboxMap().getStyle()?.let { style ->
+                    routeLineViewModel.routeProgressUpdated(routeProgress, style)
+                    routeArrowViewModel.routeProgressUpdated(routeProgress, style)
+                }
                 externalRouteProgressObservers.forEach {
                     lifeCycleOwner.lifecycleScope.launch {
                         it.onRouteProgressChanged(routeProgress)
@@ -276,6 +308,9 @@ class NavigationView : ConstraintLayout {
         lifeCycleOwner.lifecycleScope.launch {
             mapboxNavigationViewModel.routesUpdatedResults.collect { routesUpdatedResult ->
                 // view models that need route progress updates should be added here
+                mapView.getMapboxMap().getStyle()?.let { style ->
+                    routeLineViewModel.routesUpdated(routesUpdatedResult, style)
+                }
                 externalRoutesObservers.forEach {
                     lifeCycleOwner.lifecycleScope.launch {
                         it.onRoutesChanged(routesUpdatedResult)
@@ -376,6 +411,7 @@ class NavigationView : ConstraintLayout {
                 )
                 setLocationProvider(navigationLocationProvider)
                 enabled = true
+                this.addOnIndicatorPositionChangedListener(onPositionChangedListener)
             }
             MapboxDropInUtils.getLastLocation(
                 this@NavigationView.context,
@@ -386,6 +422,12 @@ class NavigationView : ConstraintLayout {
                         },
                         {
                             it.lastLocation?.apply {
+                                navigationLocationProvider.changePosition(
+                                    this,
+                                    listOf(),
+                                    null,
+                                    null
+                                )
                                 cameraViewModel.consumeLocationUpdate(this)
                             }
                         }
@@ -451,8 +493,10 @@ class NavigationView : ConstraintLayout {
         externalVoiceInstructionsObservers.remove(observer)
     }
 
-    internal fun getFoobar() {
-        // does nothing
+    internal val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
+        mapView.getMapboxMap().getStyle()?.let { style ->
+            routeLineViewModel.positionChanged(point, style)
+        }
     }
 
     private fun getTransitionOptions(
@@ -466,6 +510,22 @@ class NavigationView : ConstraintLayout {
             {
                 duration = 1000
             }
+        }
+    }
+
+    // This was added to facilitate getting a route into mapbox navigation so work could go forward.
+    // It may be temporary.
+    internal val onMapLongClickListener = OnMapLongClickListener { point ->
+        val currentLocation = navigationLocationProvider.lastLocation
+        if (currentLocation != null) {
+            val originPoint = Point.fromLngLat(
+                currentLocation.longitude,
+                currentLocation.latitude
+            )
+            mapboxNavigationViewModel.findRoute(originPoint, point, this@NavigationView.context)
+            true
+        } else {
+            false
         }
     }
 
