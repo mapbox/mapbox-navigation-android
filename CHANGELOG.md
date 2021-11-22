@@ -2,6 +2,22 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 1.6.2 - November 22, 2021
+This is a patch release on top of `v1.x` which does not include changes introduced in `v2.x` and later.
+
+### Changelog
+#### Bug fixes and improvements
+- Added `PendingIntent` Android 12 flags support and fixed other Android 12 incompatibilities by upgrading transitive dependencies. [#5142](https://github.com/mapbox/mapbox-navigation-android/pull/5142)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v9.7.1` ([release notes](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v9.7.1))
+- Mapbox Navigation Native `v32.0.0`
+- Mapbox Core Common `v9.2.0`
+- Mapbox Java `v5.9.0-alpha.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v5.9.0-alpha.1))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 1.6.1 - April 14, 2021
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
