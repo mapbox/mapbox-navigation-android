@@ -43,7 +43,7 @@ workflows:
             branches:
               only:
                 - main
-                - release-1.x
+                - release-v1.x
       - release:
           filters:
             tags:
@@ -351,6 +351,20 @@ commands:
             pip3 install requests
             python3 scripts/trigger-mobile-metrics.py
 
+  prepare-mbx-ci:
+    steps:
+      - run:
+          name: Install mbx-ci
+          command: |
+            curl -Ls https://mapbox-release-engineering.s3.amazonaws.com/mbx-ci/latest/mbx-ci-linux-amd64 > mbx-ci && chmod 755 ./mbx-ci
+
+  setup-aws-credentials:
+    steps:
+      - run:
+          name: Obtain AWS credentials
+          command: |
+            ./mbx-ci aws setup
+
 #--------------------------
 #---------- JOBS ----------
 #--------------------------
@@ -455,6 +469,8 @@ jobs:
       - assemble-ui-release
       - check-public-documentation
       - generate-documentation
+      - prepare-mbx-ci
+      - setup-aws-credentials
       - publish-artifacts:
           artifact-type: "core"
       - publish-artifacts:
@@ -470,6 +486,8 @@ jobs:
       - assemble-ui-release
       - check-public-documentation
       - generate-documentation
+      - prepare-mbx-ci
+      - setup-aws-credentials
       - publish-artifacts:
           artifact-type: "core"
       - publish-artifacts:
