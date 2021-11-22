@@ -10,6 +10,7 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityMultipleManeuverArrowBinding
+import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
@@ -114,7 +115,7 @@ class MapboxMultipleArrowActivity : AppCompatActivity() {
 
     private fun initStyle() {
         mapboxMap.loadStyleUri(
-            Style.MAPBOX_STREETS,
+            NavigationStyles.NAVIGATION_DAY_STYLE,
             object : Style.OnStyleLoaded {
                 override fun onStyleLoaded(style: Style) {
                     initListeners(style)

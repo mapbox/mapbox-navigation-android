@@ -19,7 +19,6 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapInitOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.ResourceOptions
-import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
@@ -28,6 +27,7 @@ import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.qa_test_app.R
+import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.clearRouteLine
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setRoutes
@@ -215,7 +215,7 @@ class RouteDrawingActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun initStyle() {
         mapView.getMapboxMap().loadStyleUri(
-            Style.MAPBOX_STREETS
+            NavigationStyles.NAVIGATION_DAY_STYLE
         ) {
             routeDrawingUtil = RouteDrawingUtil(mapView)
             initListeners()

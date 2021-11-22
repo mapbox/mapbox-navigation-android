@@ -66,6 +66,7 @@ import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.qa_test_app.R;
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer;
+import com.mapbox.navigation.ui.maps.NavigationStyles;
 import com.mapbox.navigation.ui.maps.PredictiveCacheController;
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider;
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi;
@@ -110,7 +111,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   private Button startNavigation;
   private ProgressBar routeLoading;
   private final List<String> mapStyles = Arrays.asList(
-      Style.MAPBOX_STREETS,
+      NavigationStyles.INSTANCE.getNAVIGATION_DAY_STYLE(),
       Style.OUTDOORS,
       Style.LIGHT,
       Style.SATELLITE_STREETS
