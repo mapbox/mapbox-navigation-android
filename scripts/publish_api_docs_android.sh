@@ -106,6 +106,10 @@ pushDocsToStaging() {
     git commit -m "Docs ${TAG}"
     git push origin HEAD --set-upstream
 
+    # workaround for https://github.com/mapbox/documentation/issues/668
+    git commit --allow-empty -m "trigger publisher"
+    git push origin HEAD
+
     popd > /dev/null
 }
 
