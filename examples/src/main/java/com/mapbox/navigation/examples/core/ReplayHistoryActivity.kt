@@ -191,7 +191,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
                     )
                     .build()
             )
-            .withRouteLineBelowLayerId("road-label")
+            .withRouteLineBelowLayerId("road-label-navigation")
             .withVanishingRouteLineEnabled(true)
             .build()
     }

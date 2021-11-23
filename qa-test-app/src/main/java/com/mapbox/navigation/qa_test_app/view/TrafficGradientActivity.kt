@@ -48,7 +48,7 @@ class TrafficGradientActivity : AppCompatActivity() {
         setContentView(binding.root)
         options = MapboxRouteLineOptions.Builder(this)
             .withRouteLineResources(routeLineResources)
-            .withRouteLineBelowLayerId("road-label")
+            .withRouteLineBelowLayerId("road-label-navigation")
             .build()
         routeLineApi = MapboxRouteLineApi(options)
         initGradientSelector()

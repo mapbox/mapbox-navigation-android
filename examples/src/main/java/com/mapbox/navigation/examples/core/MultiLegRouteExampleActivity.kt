@@ -105,7 +105,7 @@ class MultiLegRouteExampleActivity : AppCompatActivity() {
     private val options: MapboxRouteLineOptions by lazy {
         MapboxRouteLineOptions.Builder(this)
             .withRouteLineResources(routeLineResources)
-            .withRouteLineBelowLayerId("road-label")
+            .withRouteLineBelowLayerId("road-label-navigation")
             .styleInactiveRouteLegsIndependently(true) // This is the relevant option for this example
             .build()
     }
