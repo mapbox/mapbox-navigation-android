@@ -97,8 +97,7 @@
 
     <activity
         android:name=".MapboxDropInActivity"
-        android:label="@string/title_drop_in"
-        android:screenOrientation="portrait">
+        android:label="@string/title_drop_in">
     </activity>
 
     <activity

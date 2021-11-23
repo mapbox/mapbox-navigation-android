@@ -14,4 +14,12 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:accessToken="@string/mapbox_access_token" />
 
+    <Button
+        android:id="@+id/tempStartNavigation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="temporary start navigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

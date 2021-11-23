@@ -22,6 +22,17 @@ class RouteLineViewModel(
     private val _routeLineErrors: MutableSharedFlow<RouteLineError> = MutableSharedFlow()
     val routeLineErrors: Flow<RouteLineError> = _routeLineErrors
 
+    fun mapStyleUpdated(style: Style) {
+        routeLineView.initializeLayers(style)
+        routeLineApi.getRouteDrawData { result ->
+            routeLineView.renderRouteDrawData(style, result).also {
+                result.error?.let {
+                    viewModelScope.launch { _routeLineErrors.emit(it) }
+                }
+            }
+        }
+    }
+
     fun routesUpdated(update: RoutesUpdatedResult, style: Style) {
         update.routes.map {
             RouteLine(it, null)
