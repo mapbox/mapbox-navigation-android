@@ -89,7 +89,7 @@ class InactiveRouteStylingWithRestrictionsActivity : AppCompatActivity() {
     private val options: MapboxRouteLineOptions by lazy {
         MapboxRouteLineOptions.Builder(this)
             .withRouteLineResources(routeLineResources)
-            .withRouteLineBelowLayerId("road-label")
+            .withRouteLineBelowLayerId("road-label-navigation")
             .styleInactiveRouteLegsIndependently(true)
             .displayRestrictedRoadSections(true)
             .withVanishingRouteLineEnabled(true)

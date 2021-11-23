@@ -111,7 +111,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   private Button startNavigation;
   private ProgressBar routeLoading;
   private final List<String> mapStyles = Arrays.asList(
-      NavigationStyles.INSTANCE.getNAVIGATION_DAY_STYLE(),
+      NavigationStyles.NAVIGATION_DAY_STYLE,
       Style.OUTDOORS,
       Style.LIGHT,
       Style.SATELLITE_STREETS
