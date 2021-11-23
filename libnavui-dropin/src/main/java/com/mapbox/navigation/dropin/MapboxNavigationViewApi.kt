@@ -27,6 +27,8 @@ interface MapboxNavigationViewApi {
     fun update(navigationViewOptions: NavigationViewOptions)
     fun getMapView(): MapView
     fun configureNavigationView(viewProvider: ViewProvider)
+    fun getOptions(): NavigationViewOptions
+    fun temporaryStartNavigation()
 }
 
 internal class MapboxNavigationViewApiImpl(
@@ -98,5 +100,13 @@ internal class MapboxNavigationViewApiImpl(
 
     override fun configureNavigationView(viewProvider: ViewProvider) {
         navigationView.configure(viewProvider)
+    }
+
+    override fun temporaryStartNavigation() {
+        navigationView.temporaryStartNavigation()
+    }
+
+    override fun getOptions(): NavigationViewOptions {
+        return navigationView.navigationViewOptions
     }
 }

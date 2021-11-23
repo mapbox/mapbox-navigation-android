@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.viewmodel
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
 import androidx.annotation.VisibleForTesting
@@ -12,6 +13,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.route.RouterCallback
@@ -23,6 +25,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -77,6 +80,31 @@ internal class MapboxNavigationViewModel(
 
     private val _voiceInstructions: MutableSharedFlow<VoiceInstructions> = MutableSharedFlow()
     val voiceInstructions: Flow<VoiceInstructions> = _voiceInstructions
+
+    // This may be temporary. We need some way to start a trip session to further development.
+    // This is here because this class has a reference to MapboxNavigation
+    @SuppressLint("MissingPermission")
+    fun startTripSession() {
+        mapboxNavigation.startTripSession()
+    }
+
+    // This may be temporary. We need some way to start a trip session to further development.
+    // This is here because this class has a reference to MapboxNavigation
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    fun startSimulatedTripSession(location: Location) {
+        val event = ReplayRouteMapper.mapToUpdateLocation(0.0, location)
+        mapboxNavigation.mapboxReplayer.pushEvents(listOf(event))
+        mapboxNavigation.startReplayTripSession()
+        mapboxNavigation.mapboxReplayer.play()
+    }
+
+    // This may be temporary. We need some way to stop a trip session to further development.
+    // This is here because this class has a reference to MapboxNavigation
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    fun stopTripSession() {
+        mapboxNavigation.stopTripSession()
+        mapboxNavigation.mapboxReplayer.stop()
+    }
 
     // This was added to facilitate getting a route into mapbox navigation so work could go forward.
     // It may be temporary.
@@ -197,8 +225,12 @@ internal class MapboxNavigationViewModel(
         mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onCleared() {
         super.onCleared()
+        mapboxNavigation.mapboxReplayer.stop()
+        mapboxNavigation.mapboxReplayer.finish()
+        mapboxNavigation.stopTripSession()
         mapboxNavigation.onDestroy()
     }
 }

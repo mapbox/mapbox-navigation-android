@@ -13,6 +13,7 @@ class NavigationViewOptions private constructor(
     val mapStyleUrlLightTheme: String,
     val darkTheme: DropInTheme,
     val lightTheme: DropInTheme,
+    val useReplayEngine: Boolean
 ) {
 
     fun toBuilder(context: Context): Builder = Builder(context).apply {
@@ -22,10 +23,14 @@ class NavigationViewOptions private constructor(
         mapStyleUrlLightTheme(mapStyleUrlLightTheme)
         darkTheme(darkTheme)
         lightTheme(lightTheme)
+        useReplayEngine(useReplayEngine)
     }
 
     class Builder(context: Context) {
-        private var mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(context).build()
+        private var mapboxRouteLineOptions = MapboxRouteLineOptions.Builder(context)
+            .withRouteLineBelowLayerId("road-label")
+            .withVanishingRouteLineEnabled(true)
+            .build()
         private var routeArrowOptions = RouteArrowOptions.Builder(context).build()
         private var mapStyleUrlDarkTheme: String = Style.LIGHT
         private var mapStyleUrlLightTheme: String = Style.DARK
@@ -53,6 +58,7 @@ class NavigationViewOptions private constructor(
         )
         private var darkTheme: DropInTheme = DropInTheme.DarkTheme(darkColors, Typography())
         private var lightTheme: DropInTheme = DropInTheme.LightTheme(lightColors, Typography())
+        private var useReplayEngine = false
 
         fun mapboxRouteLineOptions(options: MapboxRouteLineOptions): Builder = apply {
             this.mapboxRouteLineOptions = options
@@ -86,13 +92,18 @@ class NavigationViewOptions private constructor(
             this.lightTheme = lightTheme
         }
 
+        fun useReplayEngine(useTheReplayEngine: Boolean): Builder = apply {
+            this.useReplayEngine = useTheReplayEngine
+        }
+
         fun build(): NavigationViewOptions = NavigationViewOptions(
             mapboxRouteLineOptions,
             routeArrowOptions,
             mapStyleUrlDarkTheme,
             mapStyleUrlLightTheme,
             darkTheme,
-            lightTheme
+            lightTheme,
+            useReplayEngine
         )
     }
 }

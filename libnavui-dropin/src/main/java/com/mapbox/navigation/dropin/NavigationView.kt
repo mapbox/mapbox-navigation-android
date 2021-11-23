@@ -22,6 +22,7 @@ import com.mapbox.maps.MapInitOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
@@ -78,14 +79,17 @@ class NavigationView : ConstraintLayout {
         }
     }
     private val mapView: MapView by lazy {
-        MapView(context, mapInitOptions)
+        MapView(context, mapInitOptions).also {
+            it.getMapboxMap().addOnStyleLoadedListener(onStyleLoadedListener)
+        }
     }
     private val lifeCycleOwner: LifecycleOwner
     private val binding = MapboxLayoutDropInViewBinding.inflate(
         LayoutInflater.from(context),
         this
     )
-    private lateinit var navigationViewOptions: NavigationViewOptions
+    lateinit var navigationViewOptions: NavigationViewOptions
+        private set
 
     private lateinit var accessToken: String
     private lateinit var maneuverView: View
@@ -112,7 +116,7 @@ class NavigationView : ConstraintLayout {
             activity,
             MapboxNavigationViewModelFactory(
                 DropInUIMapboxNavigationFactory(
-                    this.activity,
+                    this.activity.applicationContext,
                     this.accessToken
                 )
             )
@@ -499,6 +503,19 @@ class NavigationView : ConstraintLayout {
         }
     }
 
+    // this is temporary so that we can use the replay engine or otherwise start navigation
+    // for further development.
+    internal fun temporaryStartNavigation() {
+        when (navigationViewOptions.useReplayEngine) {
+            false -> mapboxNavigationViewModel.startTripSession()
+            true -> {
+                ifNonNull(navigationLocationProvider.lastLocation) { location ->
+                    mapboxNavigationViewModel.startSimulatedTripSession(location)
+                }
+            }
+        }
+    }
+
     private fun getTransitionOptions(
         locationMatcherResult: LocationMatcherResult
     ): (ValueAnimator.() -> Unit) {
@@ -526,6 +543,12 @@ class NavigationView : ConstraintLayout {
             true
         } else {
             false
+        }
+    }
+
+    private val onStyleLoadedListener = OnStyleLoadedListener {
+        mapView.getMapboxMap().getStyle { style ->
+            routeLineViewModel.mapStyleUpdated(style)
         }
     }
 

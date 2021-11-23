@@ -179,6 +179,55 @@ class RouteLineViewModelTest {
         verify { routeLineView.renderRouteLineUpdate(style, expectedResult) }
     }
 
+    @Test
+    fun mapStyleUpdated() {
+        val style = mockk<Style>()
+        val mockValue = mockk<RouteSetValue>()
+        val expectedResult: Expected<RouteLineError, RouteSetValue> =
+            ExpectedFactory.createValue(mockValue)
+        val callBackSlot =
+            slot<MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>>()
+        val routeLineApi = mockk<MapboxRouteLineApi>(relaxed = true) {
+            every { getRouteDrawData(capture(callBackSlot)) } answers {
+                callBackSlot.captured.accept(expectedResult)
+            }
+        }
+        val routeLineView = mockk<MapboxRouteLineView>(relaxed = true)
+        val viewModel = RouteLineViewModel(routeLineApi, routeLineView)
+
+        viewModel.mapStyleUpdated(style)
+
+        verify { routeLineView.initializeLayers(style) }
+        verify { routeLineView.renderRouteDrawData(style, expectedResult) }
+    }
+
+    @Test
+    fun mapStyleUpdated_error() = coroutineRule.runBlockingTest {
+        val style = mockk<Style>()
+        val mockValue = mockk<RouteLineError>()
+        val expectedResult: Expected<RouteLineError, RouteSetValue> =
+            ExpectedFactory.createError(mockValue)
+        val callBackSlot =
+            slot<MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>>()
+        val routeLineApi = mockk<MapboxRouteLineApi>(relaxed = true) {
+            every { getRouteDrawData(capture(callBackSlot)) } answers {
+                callBackSlot.captured.accept(expectedResult)
+            }
+        }
+        val routeLineView = mockk<MapboxRouteLineView>(relaxed = true)
+        val viewModel = RouteLineViewModel(routeLineApi, routeLineView)
+        val def = async {
+            viewModel.routeLineErrors.first()
+        }
+
+        viewModel.mapStyleUpdated(style)
+        val viewModelResult = def.await()
+
+        verify { routeLineView.initializeLayers(style) }
+        verify { routeLineView.renderRouteDrawData(style, expectedResult) }
+        assertEquals(expectedResult.error, viewModelResult)
+    }
+
     private fun getRoute(): DirectionsRoute {
         return loadRoute("short_route.json")
     }
