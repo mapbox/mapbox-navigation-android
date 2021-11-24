@@ -99,13 +99,7 @@ class NavigationView : ConstraintLayout {
     }
     private val mapView: MapView by lazy {
         MapView(context, mapInitOptions).also {
-            uiComponents.forEach { uiComponent ->
-                when (uiComponent) {
-                    is OnStyleLoadedListener -> {
-                        it.getMapboxMap().addOnStyleLoadedListener(uiComponent)
-                    }
-                }
-            }
+            it.getMapboxMap().addOnStyleLoadedListener(onStyleLoadedListener)
         }
     }
     // This was added to facilitate getting a route into mapbox navigation so work could go forward.
@@ -558,6 +552,16 @@ class NavigationView : ConstraintLayout {
             mapboxNavigationViewModel.tripSessionStateUpdates.collect { tripSessionState ->
                 externalTripSessionStateObservers.forEach {
                     it.onSessionStateChanged(tripSessionState)
+                }
+            }
+        }
+    }
+
+    private val onStyleLoadedListener = OnStyleLoadedListener { styleLoadedEventData ->
+        uiComponents.forEach { uiComponent ->
+            when (uiComponent) {
+                is OnStyleLoadedListener -> {
+                    uiComponent.onStyleLoaded(styleLoadedEventData)
                 }
             }
         }
