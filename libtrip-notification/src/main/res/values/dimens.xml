@@ -2,4 +2,5 @@
 <resources>
     <dimen name="mapbox_notification_maneuver_image_width">48dp</dimen>
     <dimen name="mapbox_notification_maneuver_image_height">48dp</dimen>
+    <dimen name="mapbox_notification_padding">8dp</dimen>
 </resources>
