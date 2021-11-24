@@ -11,33 +11,21 @@
 
     <include layout="@layout/mapbox_notification_navigation_collapsed" />
 
-    <LinearLayout
+    <TextView
         android:id="@+id/endNavigationBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="56dp"
         android:layout_marginLeft="56dp"
+        android:layout_marginTop="8dp"
         android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="8dp">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:src="@drawable/mapbox_ic_close" />
-
-        <TextView
-            android:id="@+id/endNavigationBtnText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            tools:text="@string/mapbox_end_navigation"
-            android:textAllCaps="true"
-            android:textColor="@android:color/white" />
-
-    </LinearLayout>
+        android:paddingBottom="@dimen/mapbox_notification_padding"
+        android:paddingEnd="@dimen/mapbox_notification_padding"
+        android:paddingStart="@dimen/mapbox_notification_padding"
+        android:drawablePadding="8dp"
+        android:drawableStart="@drawable/mapbox_ic_close"
+        android:textAllCaps="true"
+        android:textColor="@android:color/white"
+        tools:text="@string/mapbox_end_navigation" />
 
 </LinearLayout>

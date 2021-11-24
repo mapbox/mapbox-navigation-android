@@ -66,7 +66,7 @@ internal class MapboxTripNotificationView(
      */
     fun setEndNavigationButtonText(textResource: Int) {
         expandedView?.setTextViewText(
-            R.id.endNavigationBtnText,
+            R.id.endNavigationBtn,
             context.getString(textResource)
         )
     }
@@ -145,7 +145,7 @@ internal class MapboxTripNotificationView(
             setTextViewText(R.id.notificationDistanceText, "")
             setTextViewText(R.id.notificationArrivalText, "")
             setTextViewText(R.id.notificationInstructionText, "")
-            setTextViewText(R.id.endNavigationBtnText, "")
+            setTextViewText(R.id.endNavigationBtn, "")
             setViewVisibility(R.id.etaContent, View.GONE)
             setViewVisibility(R.id.notificationInstructionText, View.GONE)
             setViewVisibility(R.id.freeDriveText, View.GONE)
