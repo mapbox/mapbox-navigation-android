@@ -15,7 +15,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.verify
-import junit.framework.Assert.assertNotNull
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import java.util.Locale
@@ -86,7 +86,7 @@ class MapboxTripNotificationViewTest {
             it.setEndNavigationButtonText(R.string.mapbox_stop_session)
         }
 
-        verify { view.expandedView!!.setTextViewText(R.id.endNavigationBtnText, STOP_SESSION) }
+        verify { view.expandedView!!.setTextViewText(R.id.endNavigationBtn, STOP_SESSION) }
     }
 
     @Test
@@ -206,7 +206,7 @@ class MapboxTripNotificationViewTest {
                 R.drawable.mapbox_ic_navigation
             )
         }
-        verify { view.expandedView!!.setTextViewText(R.id.endNavigationBtnText, STOP_SESSION) }
+        verify { view.expandedView!!.setTextViewText(R.id.endNavigationBtn, STOP_SESSION) }
     }
 
     @Test
@@ -228,7 +228,7 @@ class MapboxTripNotificationViewTest {
         verify {
             view.expandedView!!.setViewVisibility(R.id.notificationInstructionText, View.VISIBLE)
         }
-        verify { view.expandedView!!.setTextViewText(R.id.endNavigationBtnText, END_NAVIGATION) }
+        verify { view.expandedView!!.setTextViewText(R.id.endNavigationBtn, END_NAVIGATION) }
     }
 
     private fun createContext(): Context {
