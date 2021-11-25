@@ -34,7 +34,7 @@ class SpeedLimitViewModelTest {
         val speedLimitApi = mockk<MapboxSpeedLimitApi>()
         val viewModel = SpeedLimitViewModel(speedLimitApi)
         val def = async {
-            viewModel.speedLimitState().drop(1).first()
+            viewModel.state.drop(1).first()
         }
 
         viewModel.consumeAction(flowOf(state))
@@ -69,7 +69,7 @@ class SpeedLimitViewModelTest {
         }
         val viewModel = SpeedLimitViewModel(speedLimitApi)
         val def = async {
-            viewModel.speedLimitState().drop(1).first()
+            viewModel.state.drop(1).first()
         }
 
         viewModel.consumeAction(flowOf(state))

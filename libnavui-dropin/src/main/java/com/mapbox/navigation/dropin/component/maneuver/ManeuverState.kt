@@ -8,7 +8,7 @@ import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.maneuver.model.ManeuverErrorFactory
 
-data class ManeuverState(
+internal data class ManeuverState(
     val isVisible: Boolean,
     val navigationState: NavigationState,
     val maneuver: Expected<ManeuverError, List<Maneuver>>

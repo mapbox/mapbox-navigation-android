@@ -6,7 +6,7 @@ import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 
-class RouteArrowViewModelFactory(
+internal class RouteArrowViewModelFactory(
     private val routeArrowOptions: RouteArrowOptions
 ) : ViewModelProvider.Factory {
 

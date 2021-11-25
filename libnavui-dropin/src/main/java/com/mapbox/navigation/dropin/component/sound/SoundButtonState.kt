@@ -2,7 +2,7 @@ package com.mapbox.navigation.dropin.component.sound
 
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 
-data class SoundButtonState(
+internal data class SoundButtonState(
     val isVisible: Boolean,
     val volume: Float,
     val isMute: Boolean,

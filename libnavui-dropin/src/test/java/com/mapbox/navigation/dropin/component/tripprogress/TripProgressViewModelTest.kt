@@ -26,7 +26,7 @@ class TripProgressViewModelTest {
         val tripProgressApi = mockk<MapboxTripProgressApi>()
         val viewModel = TripProgressViewModel(tripProgressApi)
         val def = async {
-            viewModel.tripProgressState().drop(1).first()
+            viewModel.state.drop(1).first()
         }
 
         viewModel.consumeAction(flowOf(state))

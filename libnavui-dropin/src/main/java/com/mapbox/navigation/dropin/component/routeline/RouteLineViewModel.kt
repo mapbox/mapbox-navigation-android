@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
-class RouteLineViewModel(
+internal class RouteLineViewModel(
     private val routeLineApi: MapboxRouteLineApi,
     private val routeLineView: MapboxRouteLineView
 ) : ViewModel() {

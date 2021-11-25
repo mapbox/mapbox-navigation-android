@@ -2,7 +2,7 @@ package com.mapbox.navigation.dropin.component.tripprogress
 
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 
-data class TripProgressState(
+internal data class TripProgressState(
     val isVisible: Boolean,
     val navigationState: NavigationState
 ) {

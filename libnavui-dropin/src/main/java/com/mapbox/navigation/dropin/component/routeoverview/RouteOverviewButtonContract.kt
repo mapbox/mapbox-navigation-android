@@ -13,7 +13,7 @@ sealed class RouteOverviewButtonAction {
     ) : RouteOverviewButtonAction()
 }
 
-sealed class RouteOverviewButtonResult {
+internal sealed class RouteOverviewButtonResult {
     data class OnNavigationState(
         val navigationState: NavigationState
     ) : RouteOverviewButtonResult()

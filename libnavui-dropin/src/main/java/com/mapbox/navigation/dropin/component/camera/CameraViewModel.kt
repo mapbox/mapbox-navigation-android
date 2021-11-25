@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
 // This might be temporary just to test some camera stuff
-class CameraViewModel : ViewModel() {
+internal class CameraViewModel : ViewModel() {
 
     // todo change this from a pair to a more explicit type
     private val _cameraUpdates: MutableSharedFlow<Pair<CameraOptions, MapAnimationOptions>> =

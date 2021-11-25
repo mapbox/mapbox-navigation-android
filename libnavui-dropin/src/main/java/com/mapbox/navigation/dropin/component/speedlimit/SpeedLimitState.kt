@@ -8,7 +8,7 @@ import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitError
 import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitErrorFactory
 import com.mapbox.navigation.ui.speedlimit.model.UpdateSpeedLimitValue
 
-data class SpeedLimitState(
+internal data class SpeedLimitState(
     val isVisible: Boolean,
     val navigationState: NavigationState,
     val speedLimit: Expected<UpdateSpeedLimitError, UpdateSpeedLimitValue>

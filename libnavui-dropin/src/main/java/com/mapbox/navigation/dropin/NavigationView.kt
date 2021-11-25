@@ -40,25 +40,31 @@ import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.dropin.component.UIComponent
 import com.mapbox.navigation.dropin.component.camera.CameraViewModel
-import com.mapbox.navigation.dropin.component.maneuver.ManeuverUIComponent
+import com.mapbox.navigation.dropin.component.maneuver.CustomManeuverUIComponent
 import com.mapbox.navigation.dropin.component.maneuver.ManeuverViewModel
+import com.mapbox.navigation.dropin.component.maneuver.MapboxManeuverUIComponent
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationStateAction
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationStateViewModel
-import com.mapbox.navigation.dropin.component.recenter.RecenterUIComponent
+import com.mapbox.navigation.dropin.component.recenter.CustomRecenterUIComponent
+import com.mapbox.navigation.dropin.component.recenter.MapboxRecenterUIComponent
 import com.mapbox.navigation.dropin.component.recenter.RecenterViewModel
-import com.mapbox.navigation.dropin.component.routearrow.RouteArrowUIComponent
+import com.mapbox.navigation.dropin.component.routearrow.MapboxRouteArrowUIComponent
 import com.mapbox.navigation.dropin.component.routearrow.RouteArrowViewModel
 import com.mapbox.navigation.dropin.component.routearrow.RouteArrowViewModelFactory
-import com.mapbox.navigation.dropin.component.routeline.RouteLineUIComponent
+import com.mapbox.navigation.dropin.component.routeline.MapboxRouteLineUIComponent
 import com.mapbox.navigation.dropin.component.routeline.RouteLineViewModel
 import com.mapbox.navigation.dropin.component.routeline.RouteLineViewModelFactory
-import com.mapbox.navigation.dropin.component.routeoverview.RouteOverviewUIComponent
+import com.mapbox.navigation.dropin.component.routeoverview.CustomRouteOverviewUIComponent
+import com.mapbox.navigation.dropin.component.routeoverview.MapboxRouteOverviewUIComponent
 import com.mapbox.navigation.dropin.component.routeoverview.RouteOverviewViewModel
-import com.mapbox.navigation.dropin.component.sound.SoundButtonUIComponent
+import com.mapbox.navigation.dropin.component.sound.CustomSoundButtonUIComponent
+import com.mapbox.navigation.dropin.component.sound.MapboxSoundButtonUIComponent
 import com.mapbox.navigation.dropin.component.sound.SoundButtonViewModel
-import com.mapbox.navigation.dropin.component.speedlimit.SpeedLimitUIComponent
+import com.mapbox.navigation.dropin.component.speedlimit.CustomSpeedLimitUIComponent
+import com.mapbox.navigation.dropin.component.speedlimit.MapboxSpeedLimitUIComponent
 import com.mapbox.navigation.dropin.component.speedlimit.SpeedLimitViewModel
-import com.mapbox.navigation.dropin.component.tripprogress.TripProgressUIComponent
+import com.mapbox.navigation.dropin.component.tripprogress.CustomTripProgressUIComponent
+import com.mapbox.navigation.dropin.component.tripprogress.MapboxTripProgressUIComponent
 import com.mapbox.navigation.dropin.component.tripprogress.TripProgressViewModel
 import com.mapbox.navigation.dropin.databinding.MapboxLayoutDropInViewBinding
 import com.mapbox.navigation.dropin.util.MapboxDropInUtils
@@ -106,7 +112,6 @@ class NavigationView : ConstraintLayout {
     var navigationViewOptions: NavigationViewOptions
         private set
 
-    @VisibleForTesting
     private val lifecycleObserver = object : DefaultLifecycleObserver {
         override fun onCreate(owner: LifecycleOwner) {
             super.onCreate(owner)
@@ -234,7 +239,7 @@ class NavigationView : ConstraintLayout {
             activity,
             RouteLineViewModelFactory(navigationViewOptions.mapboxRouteLineOptions)
         )[RouteLineViewModel::class.java]
-        val routeLineComponent = RouteLineUIComponent.MapboxRouteLineUIComponent(
+        val routeLineComponent = MapboxRouteLineUIComponent(
             view = mapView,
             viewModel = routeLineViewModel
         )
@@ -246,7 +251,7 @@ class NavigationView : ConstraintLayout {
             activity,
             RouteArrowViewModelFactory(navigationViewOptions.routeArrowOptions)
         )[RouteArrowViewModel::class.java]
-        val routeArrowUIComponent = RouteArrowUIComponent.MapboxRouteArrowUIComponent(
+        val routeArrowUIComponent = MapboxRouteArrowUIComponent(
             view = mapView,
             viewModel = routeArrowViewModel
         )
@@ -261,7 +266,7 @@ class NavigationView : ConstraintLayout {
                 activity,
                 ManeuverViewModel.Factory(navigationViewOptions.distanceFormatter)
             )[ManeuverViewModel::class.java]
-            ManeuverUIComponent.MapboxManeuverUIComponent(
+            MapboxManeuverUIComponent(
                 container = binding.maneuverContainer,
                 view = maneuverView,
                 viewModel = maneuverViewModel,
@@ -269,7 +274,7 @@ class NavigationView : ConstraintLayout {
             )
         } else {
             binding.maneuverContainer.addView(view)
-            ManeuverUIComponent.CustomManeuverUIComponent(
+            CustomManeuverUIComponent(
                 container = binding.maneuverContainer
             )
         }
@@ -281,7 +286,7 @@ class NavigationView : ConstraintLayout {
             val recenterButtonView = MapboxRecenterButton(context, null)
             binding.recenterContainer.addView(recenterButtonView)
             val recenterViewModel = ViewModelProvider(activity)[RecenterViewModel::class.java]
-            RecenterUIComponent.MapboxRecenterUIComponent(
+            MapboxRecenterUIComponent(
                 container = binding.recenterContainer,
                 view = recenterButtonView,
                 viewModel = recenterViewModel,
@@ -289,7 +294,7 @@ class NavigationView : ConstraintLayout {
             )
         } else {
             binding.recenterContainer.addView(view)
-            RecenterUIComponent.CustomRecenterUIComponent(
+            CustomRecenterUIComponent(
                 container = binding.recenterContainer
             )
         }
@@ -303,7 +308,7 @@ class NavigationView : ConstraintLayout {
             val routeOverviewViewModel = ViewModelProvider(
                 activity
             )[RouteOverviewViewModel::class.java]
-            RouteOverviewUIComponent.MapboxRouteOverviewUIComponent(
+            MapboxRouteOverviewUIComponent(
                 container = binding.routeOverviewContainer,
                 view = routeOverviewButtonView,
                 viewModel = routeOverviewViewModel,
@@ -311,7 +316,7 @@ class NavigationView : ConstraintLayout {
             )
         } else {
             binding.routeOverviewContainer.addView(view)
-            RouteOverviewUIComponent.CustomRouteOverviewUIComponent(
+            CustomRouteOverviewUIComponent(
                 container = binding.routeOverviewContainer
             )
         }
@@ -325,7 +330,7 @@ class NavigationView : ConstraintLayout {
             val soundButtonViewModel = ViewModelProvider(
                 activity
             )[SoundButtonViewModel::class.java]
-            SoundButtonUIComponent.MapboxSoundButtonUIComponent(
+            MapboxSoundButtonUIComponent(
                 container = binding.volumeContainer,
                 view = soundButtonView,
                 viewModel = soundButtonViewModel,
@@ -333,7 +338,7 @@ class NavigationView : ConstraintLayout {
             )
         } else {
             binding.volumeContainer.addView(view)
-            SoundButtonUIComponent.CustomSoundButtonUIComponent(
+            CustomSoundButtonUIComponent(
                 container = binding.volumeContainer
             )
         }
@@ -348,7 +353,7 @@ class NavigationView : ConstraintLayout {
                 activity,
                 SpeedLimitViewModel.Factory(navigationViewOptions.speedLimitFormatter)
             )[SpeedLimitViewModel::class.java]
-            SpeedLimitUIComponent.MapboxSpeedLimitUIComponent(
+            MapboxSpeedLimitUIComponent(
                 container = binding.speedLimitContainer,
                 view = speedLimitView,
                 viewModel = speedLimitViewModel,
@@ -356,7 +361,7 @@ class NavigationView : ConstraintLayout {
             )
         } else {
             binding.speedLimitContainer.addView(view)
-            SpeedLimitUIComponent.CustomSpeedLimitUIComponent(
+            CustomSpeedLimitUIComponent(
                 container = binding.speedLimitContainer
             )
         }
@@ -371,7 +376,7 @@ class NavigationView : ConstraintLayout {
                 activity,
                 TripProgressViewModel.Factory(navigationViewOptions.tripProgressUpdateFormatter)
             )[TripProgressViewModel::class.java]
-            TripProgressUIComponent.MapboxTripProgressUIComponent(
+            MapboxTripProgressUIComponent(
                 container = binding.infoPanelContainer,
                 view = tripProgressView,
                 viewModel = tripProgressViewModel,
@@ -379,7 +384,7 @@ class NavigationView : ConstraintLayout {
             )
         } else {
             binding.infoPanelContainer.addView(view)
-            TripProgressUIComponent.CustomTripProgressUIComponent(
+            CustomTripProgressUIComponent(
                 container = binding.infoPanelContainer
             )
         }
@@ -388,7 +393,7 @@ class NavigationView : ConstraintLayout {
 
     private fun observeNavigationState() {
         lifeCycleOwner.lifecycleScope.launch {
-            navigationStateViewModel.navigationState().collect { state ->
+            navigationStateViewModel.state.collect { state ->
                 uiComponents.forEach {
                     it.onNavigationStateChanged(state)
                 }
@@ -451,7 +456,7 @@ class NavigationView : ConstraintLayout {
 
     private fun observeRawLocation() {
         lifeCycleOwner.lifecycleScope.launch {
-            mapboxNavigationViewModel.rawLocationUpdates().collect { locationUpdate ->
+            mapboxNavigationViewModel.rawLocationUpdates.collect { locationUpdate ->
                 externalLocationObservers.forEach {
                     it.onNewRawLocation(locationUpdate)
                 }
@@ -552,7 +557,7 @@ class NavigationView : ConstraintLayout {
 
     private fun performActions() {
         lifeCycleOwner.lifecycleScope.launch {
-            navigationStateViewModel.processAction(
+            navigationStateViewModel.consumeAction(
                 flowOf(
                     NavigationStateAction.ToRoutePreview
                 )

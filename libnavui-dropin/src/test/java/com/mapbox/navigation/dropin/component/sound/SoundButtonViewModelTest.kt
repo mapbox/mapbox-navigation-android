@@ -24,7 +24,7 @@ class SoundButtonViewModelTest {
         val state = SoundButtonAction.UpdateNavigationState(NavigationState.ActiveNavigation)
         val viewModel = SoundButtonViewModel()
         val def = async {
-            viewModel.soundButtonState().drop(1).first()
+            viewModel.state.drop(1).first()
         }
 
         viewModel.consumeAction(flowOf(state))
@@ -41,7 +41,7 @@ class SoundButtonViewModelTest {
         val state = SoundButtonAction.UpdateVolume(4f)
         val viewModel = SoundButtonViewModel()
         val def = async {
-            viewModel.soundButtonState().drop(1).first()
+            viewModel.state.drop(1).first()
         }
 
         viewModel.consumeAction(flowOf(state))

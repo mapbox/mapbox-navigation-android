@@ -8,7 +8,7 @@ sealed class TripProgressAction {
     ) : TripProgressAction()
 }
 
-sealed class TripProgressResult {
+internal sealed class TripProgressResult {
     data class OnNavigationState(
         val navigationState: NavigationState
     ) : TripProgressResult()

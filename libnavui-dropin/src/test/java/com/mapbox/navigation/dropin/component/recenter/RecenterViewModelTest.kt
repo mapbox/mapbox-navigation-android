@@ -25,7 +25,7 @@ class RecenterViewModelTest {
         val state = RecenterButtonAction.UpdateNavigationState(NavigationState.ActiveNavigation)
         val viewModel = RecenterViewModel()
         val def = async {
-            viewModel.recenterState().drop(1).first()
+            viewModel.state.drop(1).first()
         }
 
         viewModel.consumeAction(flowOf(state))
@@ -41,7 +41,7 @@ class RecenterViewModelTest {
         val state = RecenterButtonAction.UpdateCameraState(NavigationCameraState.FOLLOWING)
         val viewModel = RecenterViewModel()
         val def = async {
-            viewModel.recenterState().drop(1).first()
+            viewModel.state.drop(1).first()
         }
 
         viewModel.consumeAction(flowOf(state))

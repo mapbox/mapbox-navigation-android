@@ -16,7 +16,7 @@ sealed class SpeedLimitAction {
     ) : SpeedLimitAction()
 }
 
-sealed class SpeedLimitResult {
+internal sealed class SpeedLimitResult {
     data class OnNavigationState(
         val navigationState: NavigationState
     ) : SpeedLimitResult()
