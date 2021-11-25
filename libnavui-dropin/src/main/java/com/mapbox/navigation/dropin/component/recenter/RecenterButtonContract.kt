@@ -13,7 +13,7 @@ sealed class RecenterButtonAction {
     ) : RecenterButtonAction()
 }
 
-sealed class RecenterButtonResult {
+internal sealed class RecenterButtonResult {
     data class OnNavigationState(
         val navigationState: NavigationState
     ) : RecenterButtonResult()

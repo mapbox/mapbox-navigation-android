@@ -26,7 +26,7 @@ class RouteOverviewViewModelTest {
             RouteOverviewButtonAction.UpdateNavigationState(NavigationState.ActiveNavigation)
         val viewModel = RouteOverviewViewModel()
         val def = async {
-            viewModel.routeOverviewState().drop(1).first()
+            viewModel.state.drop(1).first()
         }
 
         viewModel.consumeAction(flowOf(state))
@@ -43,7 +43,7 @@ class RouteOverviewViewModelTest {
             RouteOverviewButtonAction.UpdateCameraState(NavigationCameraState.FOLLOWING)
         val viewModel = RouteOverviewViewModel()
         val def = async {
-            viewModel.routeOverviewState().drop(1).first()
+            viewModel.state.drop(1).first()
         }
 
         viewModel.consumeAction(flowOf(state))

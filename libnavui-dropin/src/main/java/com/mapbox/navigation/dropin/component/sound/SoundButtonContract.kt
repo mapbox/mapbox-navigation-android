@@ -12,7 +12,7 @@ sealed class SoundButtonAction {
     ) : SoundButtonAction()
 }
 
-sealed class SoundButtonResult {
+internal sealed class SoundButtonResult {
     data class OnNavigationState(
         val navigationState: NavigationState
     ) : SoundButtonResult()

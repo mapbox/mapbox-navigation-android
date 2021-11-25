@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
-class RouteArrowViewModel(
+internal class RouteArrowViewModel(
     private val routeArrowApi: MapboxRouteArrowApi,
     private val routeArrowView: MapboxRouteArrowView
 ) : ViewModel() {

@@ -102,7 +102,7 @@ class MapboxNavigationViewModelTest {
 
         verify { mockMapboxNavigation.registerLocationObserver(capture(observerSlot)) }
         val def = async {
-            viewModel.rawLocationUpdates().first()
+            viewModel.rawLocationUpdates.first()
         }
 
         observerSlot.captured.onNewRawLocation(expected)

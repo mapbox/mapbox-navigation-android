@@ -22,10 +22,10 @@ class NavigationStateViewModelTest {
 
         val results = mutableListOf<NavigationState>()
         val job = launch {
-            viewModel.navigationState().toList(results)
+            viewModel.state.toList(results)
         }
         val expected = listOf(NavigationState.Empty)
-        viewModel.processAction(flowOf(action))
+        viewModel.consumeAction(flowOf(action))
 
         assertEquals(expected, results)
         job.cancel()
@@ -37,10 +37,10 @@ class NavigationStateViewModelTest {
 
         val results = mutableListOf<NavigationState>()
         val job = launch {
-            viewModel.navigationState().toList(results)
+            viewModel.state.toList(results)
         }
         val expected = listOf(NavigationState.Empty, NavigationState.FreeDrive)
-        viewModel.processAction(flowOf(action))
+        viewModel.consumeAction(flowOf(action))
 
         assertEquals(expected, results)
         job.cancel()
@@ -52,10 +52,10 @@ class NavigationStateViewModelTest {
 
         val results = mutableListOf<NavigationState>()
         val job = launch {
-            viewModel.navigationState().toList(results)
+            viewModel.state.toList(results)
         }
         val expected = listOf(NavigationState.Empty, NavigationState.RoutePreview)
-        viewModel.processAction(flowOf(action))
+        viewModel.consumeAction(flowOf(action))
 
         assertEquals(expected, results)
         job.cancel()
@@ -67,10 +67,10 @@ class NavigationStateViewModelTest {
 
         val results = mutableListOf<NavigationState>()
         val job = launch {
-            viewModel.navigationState().toList(results)
+            viewModel.state.toList(results)
         }
         val expected = listOf(NavigationState.Empty, NavigationState.ActiveNavigation)
-        viewModel.processAction(flowOf(action))
+        viewModel.consumeAction(flowOf(action))
 
         assertEquals(expected, results)
         job.cancel()
@@ -82,10 +82,10 @@ class NavigationStateViewModelTest {
 
         val results = mutableListOf<NavigationState>()
         val job = launch {
-            viewModel.navigationState().toList(results)
+            viewModel.state.toList(results)
         }
         val expected = listOf(NavigationState.Empty, NavigationState.Arrival)
-        viewModel.processAction(flowOf(action))
+        viewModel.consumeAction(flowOf(action))
 
         assertEquals(expected, results)
         job.cancel()

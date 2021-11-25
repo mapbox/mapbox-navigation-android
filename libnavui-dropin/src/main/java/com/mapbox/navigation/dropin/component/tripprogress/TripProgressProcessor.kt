@@ -2,7 +2,7 @@ package com.mapbox.navigation.dropin.component.tripprogress
 
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 
-sealed interface TripProgressProcessor {
+internal sealed interface TripProgressProcessor {
     fun process(): TripProgressResult
 
     data class ProcessNavigationState(

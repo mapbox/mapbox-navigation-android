@@ -12,43 +12,42 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.dropin.component.UIComponent
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 
-internal sealed interface RouteLineUIComponent : UIComponent {
+internal sealed interface RouteLineUIComponent : UIComponent
 
-    class MapboxRouteLineUIComponent(
-        val view: MapView,
-        val viewModel: RouteLineViewModel
-    ) : RouteLineUIComponent,
-        OnStyleLoadedListener,
-        RoutesObserver,
-        RouteProgressObserver,
-        OnIndicatorPositionChangedListener {
+internal class MapboxRouteLineUIComponent(
+    val view: MapView,
+    val viewModel: RouteLineViewModel
+) : RouteLineUIComponent,
+    OnStyleLoadedListener,
+    RoutesObserver,
+    RouteProgressObserver,
+    OnIndicatorPositionChangedListener {
 
-        override fun onNavigationStateChanged(state: NavigationState) {
-            // no impl
+    override fun onNavigationStateChanged(state: NavigationState) {
+        // no impl
+    }
+
+    override fun onStyleLoaded(eventData: StyleLoadedEventData) {
+        view.getMapboxMap().getStyle { style ->
+            viewModel.mapStyleUpdated(style)
         }
+    }
 
-        override fun onStyleLoaded(eventData: StyleLoadedEventData) {
-            view.getMapboxMap().getStyle { style ->
-                viewModel.mapStyleUpdated(style)
-            }
+    override fun onRoutesChanged(result: RoutesUpdatedResult) {
+        view.getMapboxMap().getStyle()?.let { style ->
+            viewModel.routesUpdated(result, style)
         }
+    }
 
-        override fun onRoutesChanged(result: RoutesUpdatedResult) {
-            view.getMapboxMap().getStyle()?.let { style ->
-                viewModel.routesUpdated(result, style)
-            }
+    override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+        view.getMapboxMap().getStyle()?.let { style ->
+            viewModel.routeProgressUpdated(routeProgress, style)
         }
+    }
 
-        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            view.getMapboxMap().getStyle()?.let { style ->
-                viewModel.routeProgressUpdated(routeProgress, style)
-            }
-        }
-
-        override fun onIndicatorPositionChanged(point: Point) {
-            view.getMapboxMap().getStyle()?.let { style ->
-                viewModel.positionChanged(point, style)
-            }
+    override fun onIndicatorPositionChanged(point: Point) {
+        view.getMapboxMap().getStyle()?.let { style ->
+            viewModel.positionChanged(point, style)
         }
     }
 }

@@ -31,7 +31,7 @@ class ManeuverViewModelTest {
         val state = ManeuverAction.UpdateNavigationState(NavigationState.ActiveNavigation)
         val viewModel = ManeuverViewModel(maneuverApi)
         val def = async {
-            viewModel.maneuverState().drop(1).first()
+            viewModel.state.drop(1).first()
         }
 
         viewModel.consumeAction(flowOf(state))
@@ -52,7 +52,7 @@ class ManeuverViewModelTest {
         val state = ManeuverAction.UpdateRouteProgress(routeProgress)
         val viewModel = ManeuverViewModel(maneuverApi)
         val def = async {
-            viewModel.maneuverState().drop(1).first()
+            viewModel.state.drop(1).first()
         }
 
         viewModel.consumeAction(flowOf(state))
