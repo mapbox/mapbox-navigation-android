@@ -7,12 +7,14 @@ internal data class RecenterState(
     val isVisible: Boolean,
     val navigationState: NavigationState,
     val cameraState: NavigationCameraState,
+    val cameraUpdatesInhibited: Boolean,
 ) {
     companion object {
         fun initial(): RecenterState = RecenterState(
             isVisible = false,
             navigationState = NavigationState.Empty,
-            cameraState = NavigationCameraState.IDLE
+            cameraState = NavigationCameraState.IDLE,
+            cameraUpdatesInhibited = false
         )
     }
 }

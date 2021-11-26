@@ -3,7 +3,6 @@ package com.mapbox.navigation.dropin.component.camera
 import android.location.Location
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
 import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.gestures.gestures
@@ -24,6 +23,7 @@ import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSou
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandler
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
+import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -47,6 +47,14 @@ internal class MapboxCameraUIComponent(
     private val _navigationCameraState = MutableStateFlow(NavigationCameraState.IDLE)
     val navigationCameraState: Flow<NavigationCameraState> = _navigationCameraState
 
+    private val _cameraUpdatesInhibited = MutableStateFlow(false)
+    val cameraUpdatesInhibited: Flow<Boolean> = _cameraUpdatesInhibited
+
+    // todo simplify passing flows from view model
+    /*val cameraUpdatesInhibited: Flow<Boolean> = viewModel.state.map {
+        it.hasUpdatesInhibited()
+    }*/
+
     private val viewportDataSource = MapboxNavigationViewportDataSource(
         mapView.getMapboxMap()
     )
@@ -57,6 +65,8 @@ internal class MapboxCameraUIComponent(
     )
     private val debugger = MapboxNavigationViewportDataSourceDebugger(mapView.context, mapView)
 
+    var first = true
+
     init {
         debugger.apply {
             viewportDataSource.debugger = this
@@ -66,11 +76,15 @@ internal class MapboxCameraUIComponent(
             enabled = true
         }
         navigationCamera.registerNavigationCameraStateChangeObserver {
-            if (it == NavigationCameraState.IDLE) {
-                val action = flowOf(CameraAction.OnTrackingBroken)
-                viewModel.consumeAction(action)
+            // todo find a better way to ignore the initial state of the underlying camera after configuration change
+            if (!first) {
+                if (it == NavigationCameraState.IDLE) {
+                    val action = flowOf(CameraAction.OnTrackingBroken)
+                    viewModel.consumeAction(action)
+                }
             }
-            viewModel.viewModelScope.launch {
+            first = false
+            lifecycleOwner.lifecycleScope.launch {
                 _navigationCameraState.emit(it)
             }
         }
@@ -88,6 +102,9 @@ internal class MapboxCameraUIComponent(
                 }
             ).apply { initialize() }
         )
+
+        viewModel.consumeAction(flowOf(CameraAction.OnCameraInitialized))
+
         observeCameraState()
     }
 
@@ -116,12 +133,12 @@ internal class MapboxCameraUIComponent(
     }
 
     override fun onRecenterButtonClicked() {
-        val action = flowOf(CameraAction.OnRecenterButtonCLicked)
+        val action = flowOf(CameraAction.OnRecenterButtonClicked)
         viewModel.consumeAction(action)
     }
 
     override fun onOverviewButtonClicked() {
-        val action = flowOf(CameraAction.OnOverviewButtonCLicked)
+        val action = flowOf(CameraAction.OnOverviewButtonClicked)
         viewModel.consumeAction(action)
     }
 
@@ -143,16 +160,41 @@ internal class MapboxCameraUIComponent(
                 }
                 viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed =
                     state.zoomUpdatesAllowed
+                viewportDataSource.followingPadding = state.followingPadding
+                viewportDataSource.overviewPadding = state.overviewPadding
                 viewportDataSource.evaluate()
 
+                val instantTransitionOptions = NavigationCameraTransitionOptions.Builder()
+                    .maxDuration(0L)
+                    .build()
                 when (state.targetCameraState) {
                     TargetCameraState.IDLE ->
                         navigationCamera.requestNavigationCameraToIdle()
-                    TargetCameraState.FOLLOWING ->
-                        navigationCamera.requestNavigationCameraToFollowing()
-                    TargetCameraState.OVERVIEW ->
-                        navigationCamera.requestNavigationCameraToOverview()
+                    TargetCameraState.FOLLOWING -> {
+                        if (state.resetFrame) {
+                            navigationCamera.requestNavigationCameraToFollowing(
+                                stateTransitionOptions = instantTransitionOptions
+                            )
+                        } else {
+                            navigationCamera.requestNavigationCameraToFollowing()
+                        }
+                    }
+                    TargetCameraState.OVERVIEW -> {
+                        if (state.resetFrame) {
+                            navigationCamera.requestNavigationCameraToOverview(
+                                stateTransitionOptions = instantTransitionOptions
+                            )
+                        } else {
+                            navigationCamera.requestNavigationCameraToOverview()
+                        }
+                    }
                 }
+
+                if (state.resetFrame) {
+                    navigationCamera.resetFrame()
+                }
+
+                _cameraUpdatesInhibited.emit(state.hasUpdatesInhibited())
             }
         }
     }

@@ -14,29 +14,34 @@ internal class RecenterViewModel : DropInViewModel<RecenterState, RecenterButton
             is RecenterButtonAction.UpdateNavigationState -> {
                 val visibilityResult = RecenterButtonProcessor.ProcessVisibilityState(
                     value.navigationState,
-                    accumulator.cameraState
-                ).process()
-                val navigationStateResult = RecenterButtonProcessor.ProcessNavigationState(
-                    value.navigationState
+                    accumulator.cameraState,
+                    accumulator.cameraUpdatesInhibited,
                 ).process()
                 accumulator.copy(
                     isVisible = visibilityResult.isVisible,
-                    navigationState = navigationStateResult.navigationState,
-                    cameraState = accumulator.cameraState
+                    navigationState = value.navigationState,
                 )
             }
             is RecenterButtonAction.UpdateCameraState -> {
                 val visibilityResult = RecenterButtonProcessor.ProcessVisibilityState(
                     accumulator.navigationState,
-                    value.cameraState
-                ).process()
-                val cameraStateResult = RecenterButtonProcessor.ProcessCameraState(
-                    value.cameraState
+                    value.cameraState,
+                    accumulator.cameraUpdatesInhibited,
                 ).process()
                 accumulator.copy(
                     isVisible = visibilityResult.isVisible,
-                    navigationState = accumulator.navigationState,
-                    cameraState = cameraStateResult.cameraState
+                    cameraState = value.cameraState,
+                )
+            }
+            is RecenterButtonAction.UpdateCameraUpdatesInhibitedState -> {
+                val visibilityResult = RecenterButtonProcessor.ProcessVisibilityState(
+                    accumulator.navigationState,
+                    accumulator.cameraState,
+                    value.cameraUpdatesInhibited,
+                ).process()
+                accumulator.copy(
+                    isVisible = visibilityResult.isVisible,
+                    cameraUpdatesInhibited = value.cameraUpdatesInhibited,
                 )
             }
         }

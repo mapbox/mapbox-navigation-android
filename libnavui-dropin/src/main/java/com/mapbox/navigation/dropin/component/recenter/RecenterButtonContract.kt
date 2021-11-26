@@ -11,17 +11,13 @@ sealed class RecenterButtonAction {
     data class UpdateCameraState(
         val cameraState: NavigationCameraState
     ) : RecenterButtonAction()
+
+    data class UpdateCameraUpdatesInhibitedState(
+        val cameraUpdatesInhibited: Boolean
+    ) : RecenterButtonAction()
 }
 
 internal sealed class RecenterButtonResult {
-    data class OnNavigationState(
-        val navigationState: NavigationState
-    ) : RecenterButtonResult()
-
-    data class OnCameraState(
-        val cameraState: NavigationCameraState
-    ) : RecenterButtonResult()
-
     data class OnVisibility(
         val isVisible: Boolean
     ) : RecenterButtonResult()

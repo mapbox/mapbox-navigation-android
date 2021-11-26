@@ -41,6 +41,7 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.dropin.component.UIComponent
+import com.mapbox.navigation.dropin.component.camera.CameraUpdatesInhibitedObserver
 import com.mapbox.navigation.dropin.component.camera.CameraViewModel
 import com.mapbox.navigation.dropin.component.camera.MapboxCameraUIComponent
 import com.mapbox.navigation.dropin.component.maneuver.CustomManeuverUIComponent
@@ -408,6 +409,16 @@ class NavigationView @JvmOverloads constructor(
                     when (uiComponent) {
                         is NavigationCameraStateChangedObserver ->
                             uiComponent.onNavigationCameraStateChanged(it)
+                    }
+                }
+            }
+        }
+        keepExecutingWhenStarted {
+            cameraComponent.cameraUpdatesInhibited.collect {
+                uiComponents.forEach { uiComponent ->
+                    when (uiComponent) {
+                        is CameraUpdatesInhibitedObserver ->
+                            uiComponent.cameraUpdatesInhibitedStatus(it)
                     }
                 }
             }

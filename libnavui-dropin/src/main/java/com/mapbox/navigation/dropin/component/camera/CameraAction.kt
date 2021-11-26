@@ -10,8 +10,9 @@ internal sealed class CameraAction {
     data class UpdateRouteProgress(val routeProgress: RouteProgress) : CameraAction()
     data class UpdateLocation(val locationMatcherResult: LocationMatcherResult) : CameraAction()
     data class UpdateRawLocation(val location: Location) : CameraAction()
-    object OnRecenterButtonCLicked : CameraAction()
-    object OnOverviewButtonCLicked : CameraAction()
+    object OnRecenterButtonClicked : CameraAction()
+    object OnOverviewButtonClicked : CameraAction()
     object OnTrackingBroken : CameraAction()
     object OnZoomGestureWhileTracking : CameraAction()
+    object OnCameraInitialized : CameraAction()
 }
