@@ -95,12 +95,14 @@ package com.mapbox.navigation.ui.voice.options {
   }
 
   public final class VoiceInstructionsPlayerOptions {
+    method public boolean getCheckIsLanguageAvailable();
     method public int getContentType();
     method public int getFocusGain();
     method public int getStreamType();
     method public int getUsage();
     method public boolean getUseLegacyApi();
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder toBuilder();
+    property public final boolean checkIsLanguageAvailable;
     property public final int contentType;
     property public final int focusGain;
     property public final int streamType;
@@ -111,6 +113,7 @@ package com.mapbox.navigation.ui.voice.options {
   public static final class VoiceInstructionsPlayerOptions.Builder {
     ctor public VoiceInstructionsPlayerOptions.Builder();
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions build();
+    method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder checkIsLanguageAvailable(boolean checkIsLanguageAvailable);
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder contentType(int contentType);
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder focusGain(int focusGain);
     method public com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions.Builder streamType(int streamType);

@@ -54,6 +54,13 @@ class VoiceInstructionsPlayerOptions private constructor(
      * @see <a href="https://developer.android.com/reference/android/media/AudioAttributes.Builder#setLegacyStreamType(int)">Legacy stream type documentation</a>
      */
     val useLegacyApi: Boolean,
+
+    /**
+     * Checks if the specified language as represented by the Locale is available and supported by TTS.
+     * Defaults to True
+     * @see <a href="https://developer.android.com/reference/android/speech/tts/TextToSpeech#isLanguageAvailable(java.util.Locale)">TextToSpeech documentation</a>
+     */
+    val checkIsLanguageAvailable: Boolean,
 ) {
 
     /**
@@ -65,6 +72,7 @@ class VoiceInstructionsPlayerOptions private constructor(
         usage(usage)
         contentType(contentType)
         useLegacyApi(useLegacyApi)
+        checkIsLanguageAvailable(checkIsLanguageAvailable)
     }
 
     /**
@@ -81,6 +89,7 @@ class VoiceInstructionsPlayerOptions private constructor(
         if (usage != other.usage) return false
         if (contentType != other.contentType) return false
         if (useLegacyApi != other.useLegacyApi) return false
+        if (checkIsLanguageAvailable != other.checkIsLanguageAvailable) return false
 
         return true
     }
@@ -94,6 +103,7 @@ class VoiceInstructionsPlayerOptions private constructor(
         result = 31 * result + usage
         result = 31 * result + contentType
         result = 31 * result + useLegacyApi.hashCode()
+        result = 31 * result + checkIsLanguageAvailable.hashCode()
         return result
     }
 
@@ -105,7 +115,8 @@ class VoiceInstructionsPlayerOptions private constructor(
             "streamType=$streamType, " +
             "usage=$usage, " +
             "contentType=$contentType, " +
-            "useLegacyApi=$useLegacyApi)"
+            "useLegacyApi=$useLegacyApi, " +
+            "checkIsLanguageAvailable=$checkIsLanguageAvailable)"
     }
 
     /**
@@ -118,6 +129,7 @@ class VoiceInstructionsPlayerOptions private constructor(
         private var usage: Int = AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE
         private var contentType: Int = AudioAttributes.CONTENT_TYPE_MUSIC
         private var useLegacyApi: Boolean = false
+        private var checkIsLanguageAvailable: Boolean = true
 
         /**
          * Specifies how audio focus will be requested.
@@ -175,13 +187,22 @@ class VoiceInstructionsPlayerOptions private constructor(
 
         /**
          * Specifies attributes as inferred from the legacy stream types.
-         * Defaults to false
+         * Defaults to False
          * Warning: When this value is true any other attributes such as
          * usage, content type, flags or haptic control will be ignored
          */
         fun useLegacyApi(useLegacyApi: Boolean): Builder =
             apply {
                 this.useLegacyApi = useLegacyApi
+            }
+
+        /**
+         * Checks if the specified language as represented by the Locale is available and supported by TTS.
+         * Defaults to True
+         */
+        fun checkIsLanguageAvailable(checkIsLanguageAvailable: Boolean): Builder =
+            apply {
+                this.checkIsLanguageAvailable = checkIsLanguageAvailable
             }
 
         /**
@@ -194,6 +215,7 @@ class VoiceInstructionsPlayerOptions private constructor(
                 usage = usage,
                 contentType = contentType,
                 useLegacyApi = useLegacyApi,
+                checkIsLanguageAvailable = checkIsLanguageAvailable,
             )
         }
 

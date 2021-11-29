@@ -22,6 +22,7 @@ class VoiceInstructionsPlayerOptionsTest :
             .usage(AudioAttributes.USAGE_MEDIA)
             .contentType(AudioAttributes.CONTENT_TYPE_MOVIE)
             .useLegacyApi(true)
+            .checkIsLanguageAvailable(false)
 
     @Test
     override fun trigger() {
