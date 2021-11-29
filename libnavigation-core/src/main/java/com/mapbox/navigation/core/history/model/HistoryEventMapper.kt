@@ -1,17 +1,17 @@
 package com.mapbox.navigation.core.history.model
 
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.core.navigator.toLocation
-import com.mapbox.navigation.navigator.internal.ActiveGuidanceOptionsMapper.mapToActiveGuidanceMode
-import com.mapbox.navigation.navigator.internal.ActiveGuidanceOptionsMapper.mapToGeometriesCriteria
 import com.mapbox.navigator.GetStatusHistoryRecord
 import com.mapbox.navigator.HistoryRecord
 import com.mapbox.navigator.HistoryRecordType
 import com.mapbox.navigator.PushHistoryRecord
 import com.mapbox.navigator.SetRouteHistoryRecord
 import com.mapbox.navigator.UpdateLocationHistoryRecord
-import com.mapbox.navigator.Waypoint
+import java.net.URL
 
 internal class HistoryEventMapper {
 
@@ -56,15 +56,22 @@ internal class HistoryEventMapper {
     private fun mapSetRoute(
         eventTimestamp: Double,
         setRoute: SetRouteHistoryRecord
-    ) = HistoryEventSetRoute(
-        eventTimestamp = eventTimestamp,
-        directionsRoute = mapDirectionsRoute(setRoute.routeResponse),
-        routeIndex = setRoute.routeIndex,
-        legIndex = setRoute.legIndex,
-        profile = mapToActiveGuidanceMode(setRoute.options.mode),
-        geometries = mapToGeometriesCriteria(setRoute.options.geometryEncoding),
-        waypoints = mapToWaypoints(setRoute.options.waypoints)
-    )
+    ): HistoryEventSetRoute {
+        val directionsRoute = mapDirectionsRoute(setRoute.routeResponse)
+        val routeOptions = getRouteOptions(
+            requestUrlString = setRoute.routeRequest,
+            route = directionsRoute
+        )
+        return HistoryEventSetRoute(
+            eventTimestamp = eventTimestamp,
+            directionsRoute = directionsRoute,
+            routeIndex = setRoute.routeIndex,
+            legIndex = setRoute.legIndex,
+            profile = mapToProfile(routeOptions),
+            geometries = mapToGeometry(routeOptions),
+            waypoints = mapToWaypoints(routeOptions)
+        )
+    }
 
     private fun mapDirectionsRoute(routeResponse: String?): DirectionsRoute? {
         return if (routeResponse.isNullOrEmpty() || routeResponse == "{}") {
@@ -81,15 +88,25 @@ internal class HistoryEventMapper {
         }
     }
 
-    private fun mapToWaypoints(
-        waypoints: List<Waypoint>
-    ): List<HistoryWaypoint> {
-        return waypoints.map { waypoint ->
+    private fun mapToWaypoints(routeOptions: RouteOptions?): List<HistoryWaypoint> {
+        val coordinatesList = routeOptions?.coordinatesList()
+        val waypointIndices = routeOptions?.waypointIndicesList()
+        return coordinatesList?.mapIndexed { index, coordinate ->
             HistoryWaypoint(
-                waypoint.coordinate,
-                waypoint.isSilent
+                point = coordinate,
+                isSilent = waypointIndices?.contains(index)?.not() == true
             )
-        }
+        } ?: emptyList()
+    }
+
+    @DirectionsCriteria.ProfileCriteria
+    private fun mapToProfile(routeOptions: RouteOptions?): String {
+        return routeOptions?.profile() ?: DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+    }
+
+    @DirectionsCriteria.GeometriesCriteria
+    private fun mapToGeometry(routeOptions: RouteOptions?): String {
+        return routeOptions?.geometries() ?: DirectionsCriteria.GEOMETRY_POLYLINE6
     }
 
     private fun mapPushHistoryRecord(
@@ -100,6 +117,20 @@ internal class HistoryEventMapper {
         pushHistoryRecord.type,
         pushHistoryRecord.properties
     )
+
+    private fun getRouteOptions(requestUrlString: String?, route: DirectionsRoute?): RouteOptions? {
+        return if (route != null) {
+            if (requestUrlString == null || requestUrlString.isBlank()) {
+                route.routeOptions() ?: throw IllegalArgumentException(
+                    "request URL or route options of set route event cannot be null or empty"
+                )
+            } else {
+                RouteOptions.fromUrl(URL(requestUrlString))
+            }
+        } else {
+            null
+        }
+    }
 
     private companion object {
         private const val NANOS_PER_SECOND = 1e-9

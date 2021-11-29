@@ -1,16 +1,16 @@
-package com.mapbox.navigation.core
+package com.mapbox.navigation.core.accounts
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.common.BillingServiceError
 import com.mapbox.common.BillingServiceErrorCode
+import com.mapbox.common.BillingServiceInterface
 import com.mapbox.common.BillingSessionStatus
 import com.mapbox.common.OnBillingServiceError
-import com.mapbox.common.SKUIdentifier
+import com.mapbox.common.SessionSKUIdentifier
+import com.mapbox.common.UserSKUIdentifier
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.core.accounts.BillingController
-import com.mapbox.navigation.core.accounts.BillingServiceWrapper
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.trip.session.NavigationSession
@@ -43,22 +43,24 @@ class BillingControllerTest {
     private val triggerBillingServiceErrorCallback = slot<OnBillingServiceError>()
     private val beginBillingServiceErrorCallback = slot<OnBillingServiceError>()
     private val resumeBillingServiceErrorCallback = slot<OnBillingServiceError>()
+    private val billingService = mockk<BillingServiceInterface>()
 
     private lateinit var billingController: BillingController
 
     @Before
     fun setup() {
-        mockkObject(BillingServiceWrapper)
+        mockkObject(BillingServiceProvider)
+        every { BillingServiceProvider.getInstance() } returns billingService
 
-        val stopSkuIdSlot = slot<SKUIdentifier>()
-        every { BillingServiceWrapper.stopBillingSession(capture(stopSkuIdSlot)) } answers {
+        val stopSkuIdSlot = slot<SessionSKUIdentifier>()
+        every { billingService.stopBillingSession(capture(stopSkuIdSlot)) } answers {
             every {
-                BillingServiceWrapper.getSessionStatus(stopSkuIdSlot.captured)
+                billingService.getSessionStatus(stopSkuIdSlot.captured)
             } returns BillingSessionStatus.NO_SESSION
         }
 
         every {
-            BillingServiceWrapper.triggerBillingEvent(
+            billingService.triggerUserBillingEvent(
                 any(),
                 any(),
                 any(),
@@ -66,9 +68,9 @@ class BillingControllerTest {
             )
         } just Runs
 
-        val beginSkuIdSlot = slot<SKUIdentifier>()
+        val beginSkuIdSlot = slot<SessionSKUIdentifier>()
         every {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 any(),
                 any(),
                 capture(beginSkuIdSlot),
@@ -77,31 +79,31 @@ class BillingControllerTest {
             )
         } answers {
             every {
-                BillingServiceWrapper.getSessionStatus(beginSkuIdSlot.captured)
+                billingService.getSessionStatus(beginSkuIdSlot.captured)
             } returns BillingSessionStatus.SESSION_ACTIVE
         }
 
-        val pauseSkuIdSlot = slot<SKUIdentifier>()
-        every { BillingServiceWrapper.pauseBillingSession(capture(pauseSkuIdSlot)) } answers {
+        val pauseSkuIdSlot = slot<SessionSKUIdentifier>()
+        every { billingService.pauseBillingSession(capture(pauseSkuIdSlot)) } answers {
             every {
-                BillingServiceWrapper.getSessionStatus(pauseSkuIdSlot.captured)
+                billingService.getSessionStatus(pauseSkuIdSlot.captured)
             } returns BillingSessionStatus.SESSION_PAUSED
         }
 
-        val resumeSkuIdSlot = slot<SKUIdentifier>()
+        val resumeSkuIdSlot = slot<SessionSKUIdentifier>()
         every {
-            BillingServiceWrapper.resumeBillingSession(
+            billingService.resumeBillingSession(
                 capture(resumeSkuIdSlot),
                 capture(resumeBillingServiceErrorCallback)
             )
         } answers {
             every {
-                BillingServiceWrapper.getSessionStatus(resumeSkuIdSlot.captured)
+                billingService.getSessionStatus(resumeSkuIdSlot.captured)
             } returns BillingSessionStatus.SESSION_ACTIVE
         }
 
         every {
-            BillingServiceWrapper.getSessionStatus(any())
+            billingService.getSessionStatus(any())
         } returns BillingSessionStatus.NO_SESSION
 
         val sessionStateObserverSlot = slot<NavigationSessionStateObserver>()
@@ -139,22 +141,22 @@ class BillingControllerTest {
     fun `when idle, do nothing`() {
         sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
 
-        verify(exactly = 0) { BillingServiceWrapper.stopBillingSession(any()) }
+        verify(exactly = 0) { billingService.stopBillingSession(any()) }
         verify(exactly = 0) {
-            BillingServiceWrapper.triggerBillingEvent(any(), any(), any(), any())
+            billingService.triggerUserBillingEvent(any(), any(), any(), any())
         }
         verify(exactly = 0) {
-            BillingServiceWrapper.beginBillingSession(any(), any(), any(), any(), any())
+            billingService.beginBillingSession(any(), any(), any(), any(), any())
         }
     }
 
     @Test(expected = IllegalStateException::class)
     fun `when both free drive and active guidance are active, throw an exception`() {
         every {
-            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_TRIP)
+            billingService.getSessionStatus(SessionSKUIdentifier.NAV2_SES_TRIP)
         } returns BillingSessionStatus.SESSION_ACTIVE
         every {
-            BillingServiceWrapper.getSessionStatus(SKUIdentifier.NAV2_SES_FDTRIP)
+            billingService.getSessionStatus(SessionSKUIdentifier.NAV2_SES_FDTRIP)
         } returns BillingSessionStatus.SESSION_ACTIVE
         sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
     }
@@ -166,20 +168,20 @@ class BillingControllerTest {
         sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
 
         verifyOrder {
-            BillingServiceWrapper.triggerBillingEvent(
+            billingService.triggerUserBillingEvent(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_MAU,
+                UserSKUIdentifier.NAV2_SES_MAU,
                 any()
             )
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_FDTRIP,
+                SessionSKUIdentifier.NAV2_SES_FDTRIP,
                 any(),
                 TimeUnit.HOURS.toMillis(1)
             )
-            BillingServiceWrapper.pauseBillingSession(SKUIdentifier.NAV2_SES_FDTRIP)
+            billingService.pauseBillingSession(SessionSKUIdentifier.NAV2_SES_FDTRIP)
         }
     }
 
@@ -192,20 +194,20 @@ class BillingControllerTest {
         sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.Idle)
 
         verifyOrder {
-            BillingServiceWrapper.triggerBillingEvent(
+            billingService.triggerUserBillingEvent(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_MAU,
+                UserSKUIdentifier.NAV2_SES_MAU,
                 any()
             )
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
-            BillingServiceWrapper.pauseBillingSession(SKUIdentifier.NAV2_SES_TRIP)
+            billingService.pauseBillingSession(SessionSKUIdentifier.NAV2_SES_TRIP)
         }
     }
 
@@ -220,18 +222,18 @@ class BillingControllerTest {
         )
 
         verifyOrder {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
-            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
-            BillingServiceWrapper.beginBillingSession(
+            billingService.stopBillingSession(SessionSKUIdentifier.NAV2_SES_TRIP)
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_FDTRIP,
+                SessionSKUIdentifier.NAV2_SES_FDTRIP,
                 any(),
                 TimeUnit.HOURS.toMillis(1)
             )
@@ -249,18 +251,18 @@ class BillingControllerTest {
         )
 
         verifyOrder {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_FDTRIP,
+                SessionSKUIdentifier.NAV2_SES_FDTRIP,
                 any(),
                 TimeUnit.HOURS.toMillis(1)
             )
-            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_FDTRIP)
-            BillingServiceWrapper.beginBillingSession(
+            billingService.stopBillingSession(SessionSKUIdentifier.NAV2_SES_FDTRIP)
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
@@ -275,15 +277,15 @@ class BillingControllerTest {
         sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.FreeDrive("1"))
 
         verifyOrder {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_FDTRIP,
+                SessionSKUIdentifier.NAV2_SES_FDTRIP,
                 any(),
                 TimeUnit.HOURS.toMillis(1)
             )
-            BillingServiceWrapper.pauseBillingSession(SKUIdentifier.NAV2_SES_FDTRIP)
-            BillingServiceWrapper.resumeBillingSession(SKUIdentifier.NAV2_SES_FDTRIP, any())
+            billingService.pauseBillingSession(SessionSKUIdentifier.NAV2_SES_FDTRIP)
+            billingService.resumeBillingSession(SessionSKUIdentifier.NAV2_SES_FDTRIP, any())
         }
     }
 
@@ -299,15 +301,15 @@ class BillingControllerTest {
         )
 
         verifyOrder {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
-            BillingServiceWrapper.pauseBillingSession(SKUIdentifier.NAV2_SES_TRIP)
-            BillingServiceWrapper.resumeBillingSession(SKUIdentifier.NAV2_SES_TRIP, any())
+            billingService.pauseBillingSession(SessionSKUIdentifier.NAV2_SES_TRIP)
+            billingService.resumeBillingSession(SessionSKUIdentifier.NAV2_SES_TRIP, any())
         }
     }
 
@@ -321,19 +323,19 @@ class BillingControllerTest {
         )
 
         verifyOrder {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_FDTRIP,
+                SessionSKUIdentifier.NAV2_SES_FDTRIP,
                 any(),
                 TimeUnit.HOURS.toMillis(1)
             )
-            BillingServiceWrapper.pauseBillingSession(SKUIdentifier.NAV2_SES_FDTRIP)
-            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_FDTRIP)
-            BillingServiceWrapper.beginBillingSession(
+            billingService.pauseBillingSession(SessionSKUIdentifier.NAV2_SES_FDTRIP)
+            billingService.stopBillingSession(SessionSKUIdentifier.NAV2_SES_FDTRIP)
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
@@ -350,19 +352,19 @@ class BillingControllerTest {
         sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.FreeDrive("1"))
 
         verifyOrder {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
-            BillingServiceWrapper.pauseBillingSession(SKUIdentifier.NAV2_SES_TRIP)
-            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
-            BillingServiceWrapper.beginBillingSession(
+            billingService.pauseBillingSession(SessionSKUIdentifier.NAV2_SES_TRIP)
+            billingService.stopBillingSession(SessionSKUIdentifier.NAV2_SES_TRIP)
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_FDTRIP,
+                SessionSKUIdentifier.NAV2_SES_FDTRIP,
                 any(),
                 TimeUnit.HOURS.toMillis(1)
             )
@@ -379,20 +381,20 @@ class BillingControllerTest {
             BillingServiceError(BillingServiceErrorCode.RESUME_FAILED, "failure")
         )
         verifyOrder {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_FDTRIP,
+                SessionSKUIdentifier.NAV2_SES_FDTRIP,
                 any(),
                 TimeUnit.HOURS.toMillis(1)
             )
-            BillingServiceWrapper.pauseBillingSession(SKUIdentifier.NAV2_SES_FDTRIP)
-            BillingServiceWrapper.resumeBillingSession(SKUIdentifier.NAV2_SES_FDTRIP, any())
-            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_FDTRIP)
-            BillingServiceWrapper.beginBillingSession(
+            billingService.pauseBillingSession(SessionSKUIdentifier.NAV2_SES_FDTRIP)
+            billingService.resumeBillingSession(SessionSKUIdentifier.NAV2_SES_FDTRIP, any())
+            billingService.stopBillingSession(SessionSKUIdentifier.NAV2_SES_FDTRIP)
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_FDTRIP,
+                SessionSKUIdentifier.NAV2_SES_FDTRIP,
                 any(),
                 TimeUnit.HOURS.toMillis(1)
             )
@@ -405,7 +407,7 @@ class BillingControllerTest {
         every { navigationSession.state } returns NavigationSessionState.Idle
         billingController.onExternalRouteSet(mockk())
         verify(exactly = 0) {
-            BillingServiceWrapper.beginBillingSession(any(), any(), any(), any(), any())
+            billingService.beginBillingSession(any(), any(), any(), any(), any())
         }
     }
 
@@ -415,10 +417,10 @@ class BillingControllerTest {
         every { navigationSession.state } returns NavigationSessionState.FreeDrive("1")
         billingController.onExternalRouteSet(mockk())
         verify(exactly = 0) {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
@@ -461,18 +463,18 @@ class BillingControllerTest {
         billingController.onExternalRouteSet(newRoute)
 
         verifyOrder {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
-            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
-            BillingServiceWrapper.beginBillingSession(
+            billingService.stopBillingSession(SessionSKUIdentifier.NAV2_SES_TRIP)
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
@@ -516,16 +518,16 @@ class BillingControllerTest {
         billingController.onExternalRouteSet(newRoute)
 
         verify(exactly = 1) {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
         }
         verify(exactly = 0) {
-            BillingServiceWrapper.stopBillingSession(any())
+            billingService.stopBillingSession(any())
         }
     }
 
@@ -567,16 +569,16 @@ class BillingControllerTest {
         billingController.onExternalRouteSet(newRoute)
 
         verify(exactly = 1) {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
         }
         verify(exactly = 0) {
-            BillingServiceWrapper.stopBillingSession(any())
+            billingService.stopBillingSession(any())
         }
     }
 
@@ -618,16 +620,16 @@ class BillingControllerTest {
         billingController.onExternalRouteSet(newRoute)
 
         verify(exactly = 1) {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
         }
         verify(exactly = 0) {
-            BillingServiceWrapper.stopBillingSession(any())
+            billingService.stopBillingSession(any())
         }
     }
 
@@ -668,18 +670,18 @@ class BillingControllerTest {
         billingController.onExternalRouteSet(newRoute)
 
         verifyOrder {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
-            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
-            BillingServiceWrapper.beginBillingSession(
+            billingService.stopBillingSession(SessionSKUIdentifier.NAV2_SES_TRIP)
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
@@ -723,18 +725,18 @@ class BillingControllerTest {
         billingController.onExternalRouteSet(newRoute)
 
         verifyOrder {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
-            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
-            BillingServiceWrapper.beginBillingSession(
+            billingService.stopBillingSession(SessionSKUIdentifier.NAV2_SES_TRIP)
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
@@ -779,16 +781,16 @@ class BillingControllerTest {
         billingController.onExternalRouteSet(newRoute)
 
         verify(exactly = 1) {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
         }
         verify(exactly = 0) {
-            BillingServiceWrapper.stopBillingSession(any())
+            billingService.stopBillingSession(any())
         }
     }
 
@@ -828,18 +830,18 @@ class BillingControllerTest {
         billingController.onExternalRouteSet(newRoute)
 
         verifyOrder {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
-            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
-            BillingServiceWrapper.beginBillingSession(
+            billingService.stopBillingSession(SessionSKUIdentifier.NAV2_SES_TRIP)
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
@@ -887,16 +889,16 @@ class BillingControllerTest {
         billingController.onExternalRouteSet(newRoute)
 
         verify(exactly = 1) {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
         }
         verify(exactly = 0) {
-            BillingServiceWrapper.stopBillingSession(any())
+            billingService.stopBillingSession(any())
         }
     }
 
@@ -939,23 +941,23 @@ class BillingControllerTest {
         billingController.onExternalRouteSet(newRoute)
 
         verifyOrder {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
-            BillingServiceWrapper.pauseBillingSession(SKUIdentifier.NAV2_SES_TRIP)
-            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
-            BillingServiceWrapper.beginBillingSession(
+            billingService.pauseBillingSession(SessionSKUIdentifier.NAV2_SES_TRIP)
+            billingService.stopBillingSession(SessionSKUIdentifier.NAV2_SES_TRIP)
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
-            BillingServiceWrapper.pauseBillingSession(SKUIdentifier.NAV2_SES_TRIP)
+            billingService.pauseBillingSession(SessionSKUIdentifier.NAV2_SES_TRIP)
         }
     }
 
@@ -982,10 +984,10 @@ class BillingControllerTest {
         arrivalObserver.onNextRouteLegStart(mockk())
 
         verify(exactly = 3) {
-            BillingServiceWrapper.beginBillingSession(
+            billingService.beginBillingSession(
                 accessToken,
                 "",
-                SKUIdentifier.NAV2_SES_TRIP,
+                SessionSKUIdentifier.NAV2_SES_TRIP,
                 any(),
                 0
             )
@@ -999,7 +1001,7 @@ class BillingControllerTest {
         billingController.onDestroy()
 
         verify {
-            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_FDTRIP)
+            billingService.stopBillingSession(SessionSKUIdentifier.NAV2_SES_FDTRIP)
         }
     }
 
@@ -1012,7 +1014,7 @@ class BillingControllerTest {
         billingController.onDestroy()
 
         verify {
-            BillingServiceWrapper.stopBillingSession(SKUIdentifier.NAV2_SES_TRIP)
+            billingService.stopBillingSession(SessionSKUIdentifier.NAV2_SES_TRIP)
         }
     }
 
@@ -1025,6 +1027,6 @@ class BillingControllerTest {
 
     @After
     fun cleanup() {
-        unmockkObject(BillingServiceWrapper)
+        unmockkObject(BillingServiceProvider)
     }
 }

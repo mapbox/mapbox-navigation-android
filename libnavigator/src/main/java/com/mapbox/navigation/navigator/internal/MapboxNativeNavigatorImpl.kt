@@ -39,6 +39,7 @@ import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterFactory
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.RouterType
+import com.mapbox.navigator.Routes
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -177,17 +178,21 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                     "The route set must include RouteOptions"
                 }
                 val routeOptions = routes[PRIMARY_ROUTE_INDEX].routeOptions()!!
-                val directionsResponse = mapToDirectionsResponse(routes, routeOptions)
-                navigator!!.setRoute(
-                    directionsResponse?.toJson(),
-                    PRIMARY_ROUTE_INDEX,
-                    legIndex,
-                    routeOptions.toUrl(accessToken).toString()
+                val directionsResponse = mapToDirectionsResponse(
+                    routes, routeOptions
+                )?.toJson() ?: "{}"
+                navigator!!.setRoutes(
+                    Routes(
+                        directionsResponse,
+                        PRIMARY_ROUTE_INDEX,
+                        legIndex,
+                        routeOptions.toUrl(accessToken).toString()
+                    )
                 ) {
                     continuation.resume(it.value)
                 }
             } else {
-                navigator!!.setRoute(null, 0, 0, null) {
+                navigator!!.setRoutes(null) {
                     continuation.resume(it.value)
                 }
             }

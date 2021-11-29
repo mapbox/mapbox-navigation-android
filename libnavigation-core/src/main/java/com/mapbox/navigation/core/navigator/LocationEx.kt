@@ -5,12 +5,43 @@ package com.mapbox.navigation.core.navigator
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigator.FixLocation
+import java.lang.reflect.Method
 import java.util.Date
 
 internal typealias FixLocationExtras = HashMap<String, Value>
+
+private val TAG = Tag("MbxLocationEx")
+private val setIsFromMockProviderMethod: Method? by lazy {
+    val printError: (Exception) -> Unit = {
+        LoggerProvider.logger.e(
+            TAG,
+            Message("Unable to find method for setting mock provider"),
+            it
+        )
+    }
+    try {
+        // the "setIsFromMockProvider" method is a "SystemApi" and not available publicly,
+        // so we're forced to make the best effort in setting
+        // the mock status back (for example from history recordings)
+        // but unfortunately cannot guarantee forward compatibility upfront
+        Location::class.java.getDeclaredMethod(
+            "setIsFromMockProvider",
+            Boolean::class.java
+        )
+    } catch (ex: NoSuchMethodException) {
+        printError(ex)
+        null
+    } catch (ex: SecurityException) {
+        printError(ex)
+        null
+    }
+}
 
 internal fun FixLocation.toLocation(): Location = Location(this.provider).also {
     it.latitude = coordinate.latitude()
@@ -29,6 +60,7 @@ internal fun FixLocation.toLocation(): Location = Location(this.provider).also {
         verticalAccuracy?.run { it.verticalAccuracyMeters = this }
     }
     it.extras = extras.toBundle()
+    setIsFromMockProviderMethod?.invoke(it, isMock)
 }
 
 internal fun Location.toFixLocation(): FixLocation {
@@ -54,7 +86,8 @@ internal fun Location.toFixLocation(): FixLocation {
         bearingAccuracy,
         speedAccuracy,
         verticalAccuracy,
-        extras?.toMap() ?: Bundle().toMap()
+        extras?.toMap() ?: Bundle().toMap(),
+        isFromMockProvider
     )
 }
 
