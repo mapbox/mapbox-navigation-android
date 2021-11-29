@@ -25,6 +25,7 @@ import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.instrumentation_tests.utils.MapboxNavigationRule
 import com.mapbox.navigation.instrumentation_tests.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoute
 import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoutesProvider
 import com.mapbox.navigation.instrumentation_tests.utils.runOnMainSync
 import com.mapbox.navigation.testing.ui.BaseTest
@@ -33,6 +34,7 @@ import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
 import org.junit.After
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
@@ -97,6 +99,12 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         routeCompleteIdlingResource.register()
 
+        val routeOptions = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .applyLanguageAndVoiceUnitOptions(activity)
+            .baseUrl(mockWebServerRule.baseUrl)
+            .coordinatesList(mockRoute.routeWaypoints).build()
+
         // execute
         runOnMainSync {
             mapboxNavigation.historyRecorder.startRecording()
@@ -105,11 +113,7 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         runOnMainSync {
             mapboxNavigation.startTripSession()
             mapboxNavigation.requestRoutes(
-                RouteOptions.builder()
-                    .applyDefaultNavigationOptions()
-                    .applyLanguageAndVoiceUnitOptions(activity)
-                    .baseUrl(mockWebServerRule.baseUrl)
-                    .coordinatesList(mockRoute.routeWaypoints).build(),
+                routeOptions,
                 object : RouterCallback {
                     override fun onRoutesReady(
                         routes: List<DirectionsRoute>,
@@ -148,10 +152,79 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         countDownLatch.await()
 
         assertNotNull(filePath)
-        verifyHistoryEvents(filePath!!)
+        verifyHistoryEvents(filePath!!, mockRoute, routeOptions)
     }
 
-    private fun verifyHistoryEvents(filePath: String) {
+    @Test
+    fun verify_history_files_are_recorded_and_readable_with_silent_waypoints() {
+        // prepare
+        val mockRoute = MockRoutesProvider.dc_very_short_two_legs_with_silent_waypoint(activity)
+        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+        routeCompleteIdlingResource.register()
+
+        val routeOptions = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .applyLanguageAndVoiceUnitOptions(activity)
+            .baseUrl(mockWebServerRule.baseUrl)
+            .coordinatesList(mockRoute.routeWaypoints)
+            .waypointIndicesList(listOf(0, 2))
+            .build()
+
+        // execute
+        runOnMainSync {
+            mapboxNavigation.historyRecorder.startRecording()
+            mapboxNavigation.historyRecorder.pushHistory(CUSTOM_EVENT_TYPE, CUSTOM_EVENT_PROPERTIES)
+        }
+        runOnMainSync {
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.requestRoutes(
+                routeOptions,
+                object : RouterCallback {
+                    override fun onRoutesReady(
+                        routes: List<DirectionsRoute>,
+                        routerOrigin: RouterOrigin
+                    ) {
+                        mapboxNavigation.setRoutes(routes)
+                        mockLocationReplayerRule.playRoute(routes[0])
+                    }
+
+                    override fun onFailure(
+                        reasons: List<RouterFailure>,
+                        routeOptions: RouteOptions
+                    ) {
+                        // no impl
+                    }
+
+                    override fun onCanceled(
+                        routeOptions: RouteOptions,
+                        routerOrigin: RouterOrigin
+                    ) {
+                        // no impl
+                    }
+                }
+            )
+        }
+
+        Espresso.onIdle()
+        routeCompleteIdlingResource.unregister()
+
+        var filePath: String? = null
+        val countDownLatch = CountDownLatch(1)
+        mapboxNavigation.historyRecorder.stopRecording { filePathFromNative ->
+            filePath = filePathFromNative
+            countDownLatch.countDown()
+        }
+        countDownLatch.await()
+
+        assertNotNull(filePath)
+        verifyHistoryEvents(filePath!!, mockRoute, routeOptions)
+    }
+
+    private fun verifyHistoryEvents(
+        filePath: String,
+        mockRoute: MockRoute,
+        routeOptions: RouteOptions
+    ) {
         val historyReader = MapboxHistoryReader(filePath)
 
         // Verify hasNext
@@ -171,13 +244,11 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         val firstLocation = historyEvents
             .find { it is HistoryEventUpdateLocation } as HistoryEventUpdateLocation
         assertEquals(
-            "-77.031991 == ${firstLocation.location.longitude}",
-            -77.031991, firstLocation.location.longitude,
+            mockRoute.routeWaypoints.first().longitude(), firstLocation.location.longitude,
             0.00001
         )
         assertEquals(
-            "38.894721 == ${firstLocation.location.latitude}",
-            38.894721, firstLocation.location.latitude,
+            mockRoute.routeWaypoints.first().latitude(), firstLocation.location.latitude,
             0.00001
         )
 
@@ -185,11 +256,39 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         val setRouteEvent = historyEvents.find {
             it is HistoryEventSetRoute && it.directionsRoute != null
         } as HistoryEventSetRoute
-        assertEquals(24.001, setRouteEvent.directionsRoute!!.duration(), 0.001)
+        assertEquals(
+            mockRoute.routeResponse.routes().first().duration(),
+            setRouteEvent.directionsRoute!!.duration(),
+            0.001
+        )
         assertEquals(setRouteEvent.legIndex, 0)
         assertEquals(setRouteEvent.routeIndex, 0)
-        assertEquals(DirectionsCriteria.GEOMETRY_POLYLINE6, setRouteEvent.geometries)
-        assertEquals(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC, setRouteEvent.profile)
+        assertEquals(
+            routeOptions.geometries(),
+            setRouteEvent.geometries
+        )
+        assertEquals(
+            routeOptions.profile(),
+            setRouteEvent.profile
+        )
+        val waypointIndices = routeOptions.waypointIndicesList()
+        if (waypointIndices == null) {
+            assertTrue(setRouteEvent.waypoints.none { it.isSilent })
+        } else {
+            setRouteEvent.waypoints.forEachIndexed { index, waypoint ->
+                if (waypointIndices.contains(index)) {
+                    assertFalse(
+                        "waypoint at index $index shouldn't be silent",
+                        waypoint.isSilent
+                    )
+                } else {
+                    assertTrue(
+                        "waypoint at index $index should be silent",
+                        waypoint.isSilent
+                    )
+                }
+            }
+        }
 
         // Verify get status event as non-zero timestamp
         val getStatus = historyEvents

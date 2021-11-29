@@ -15,6 +15,7 @@ import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.StepManeuver
+import com.mapbox.common.BillingServiceInterface
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.metrics.MetricEvent
@@ -24,10 +25,12 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState.TRACKING
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.accounts.BillingServiceProvider
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.internal.utils.toTelemetryLocation
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
@@ -121,6 +124,19 @@ class MapboxNavigationTelemetryTest {
         private const val SDK_IDENTIFIER = "mapbox-navigation-android"
         private const val ACTIVE_GUIDANCE_SESSION_ID = "active-guidance-session-id"
         private const val FREE_DRIVE_SESSION_ID = "free-drive-session-id"
+
+        /**
+         * Since [MapboxNavigationAccounts] is a singleton, it will effectively obtain
+         * an instance of [BillingServiceInterface] from the mocked [BillingServiceProvider]
+         * only once when initializing the first test.
+         *
+         * That instance of returned [BillingServiceInterface] has to have only one mock
+         * as well, otherwise, tests following the first one will try to interact with a different
+         * mock than [MapboxNavigationAccounts] singleton uses.
+         *
+         * To ensure that there's only one mock, we're storing it in a companion object.
+         */
+        private val billingService = mockk<BillingServiceInterface>(relaxed = true)
     }
 
     @get:Rule
@@ -162,6 +178,8 @@ class MapboxNavigationTelemetryTest {
 
     @Before
     fun setup() {
+        mockkObject(BillingServiceProvider)
+        every { BillingServiceProvider.getInstance() } returns billingService
         every {
             mapboxNavigation.registerRouteProgressObserver(capture(routeProgressObserverSlot))
         } just runs
@@ -184,6 +202,7 @@ class MapboxNavigationTelemetryTest {
     @After
     fun cleanUp() {
         unmockkObject(MapboxMetricsReporter)
+        unmockkObject(BillingServiceProvider)
     }
 
     @Test

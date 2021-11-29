@@ -40,6 +40,8 @@ fun interface RouteAlternativesObserver {
      *
      * @param routeProgress the current route's progress.
      * @param alternatives list of alternative routes, can be empty.
+     * @param routerOrigin reports the source of all the new alternative routes in the list.
+     * If there are no new routes, reports the source that returned the latest additions.
      */
     fun onRouteAlternatives(
         routeProgress: RouteProgress,

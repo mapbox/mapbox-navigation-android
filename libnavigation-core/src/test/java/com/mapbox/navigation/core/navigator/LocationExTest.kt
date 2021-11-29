@@ -30,6 +30,10 @@ class LocationExTest {
             verticalAccuracyMeters = VERTICAL_ACCURACY
             extras = Bundle()
         }
+        Location::class.java.getDeclaredMethod(
+            "setIsFromMockProvider",
+            Boolean::class.java
+        ).invoke(location, IS_MOCK)
 
         location.toFixLocation().run {
             assertEquals(LATITUDE, coordinate.latitude(), .0)
@@ -45,6 +49,7 @@ class LocationExTest {
             assertEquals(SPEED_ACCURACY, speedAccuracy!!, .0f)
             assertEquals(VERTICAL_ACCURACY, verticalAccuracy!!, .0f)
             assertEquals(EMPTY_EXTRAS, extras.toMap())
+            assertEquals(IS_MOCK, isMock)
         }
     }
 
@@ -62,7 +67,8 @@ class LocationExTest {
             BEARING_ACCURACY,
             SPEED_ACCURACY,
             VERTICAL_ACCURACY,
-            EMPTY_EXTRAS
+            EMPTY_EXTRAS,
+            IS_MOCK,
         )
 
         fixLocation.toLocation().run {
@@ -79,6 +85,7 @@ class LocationExTest {
             assertEquals(SPEED_ACCURACY, speedAccuracyMetersPerSecond, .0f)
             assertEquals(VERTICAL_ACCURACY, verticalAccuracyMeters, .0f)
             assertEquals(EMPTY_BUNDLE.toString(), EMPTY_EXTRAS.toBundle().toString())
+            assertEquals(IS_MOCK, isFromMockProvider)
         }
     }
 
@@ -96,7 +103,8 @@ class LocationExTest {
             NULL_VALUE,
             NULL_VALUE,
             NULL_VALUE,
-            EMPTY_EXTRAS
+            EMPTY_EXTRAS,
+            IS_MOCK,
         )
 
         fixLocation.toLocation().run {
@@ -116,6 +124,7 @@ class LocationExTest {
             assertEquals(ZERO_VALUE, speedAccuracyMetersPerSecond, .0f)
             assertEquals(ZERO_VALUE, verticalAccuracyMeters, .0f)
             assertEquals(EMPTY_BUNDLE.toString(), extras.toString())
+            assertEquals(IS_MOCK, isFromMockProvider)
         }
     }
 
@@ -137,5 +146,6 @@ class LocationExTest {
         private const val VERTICAL_ACCURACY = 70f
         private val EMPTY_EXTRAS = FixLocationExtras()
         private val EMPTY_BUNDLE = Bundle()
+        private const val IS_MOCK = true
     }
 }

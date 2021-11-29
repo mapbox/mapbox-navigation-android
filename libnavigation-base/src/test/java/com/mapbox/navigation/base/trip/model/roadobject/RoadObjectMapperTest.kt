@@ -20,6 +20,7 @@ import com.mapbox.navigation.base.trip.model.roadobject.tunnel.Tunnel
 import com.mapbox.navigation.base.trip.model.roadobject.tunnel.TunnelInfo
 import com.mapbox.navigator.IncidentCongestionDescription
 import com.mapbox.navigator.MatchedRoadObjectLocation
+import com.mapbox.navigator.OpenLRStandard
 import com.mapbox.navigator.RoadObject
 import com.mapbox.navigator.RoadObjectMetadata
 import com.mapbox.navigator.RoadObjectProvider
@@ -233,7 +234,7 @@ class RoadObjectMapperTest {
         type = com.mapbox.navigator.RoadObjectType.INCIDENT,
         incidentInfo = com.mapbox.navigator.IncidentInfo(
             INCIDENT_ID,
-            INCIDENT_OPEN_LR,
+            com.mapbox.navigator.OpenLR(OpenLRStandard.TOM_TOM, INCIDENT_OPEN_LR),
             com.mapbox.navigator.IncidentType.CONSTRUCTION,
             INCIDENT_CREATION_TIME,
             INCIDENT_START_TIME,

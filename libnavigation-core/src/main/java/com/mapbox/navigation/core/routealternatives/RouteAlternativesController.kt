@@ -11,6 +11,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.NativeRouteProcessingListener
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.navigator.internal.mapToSdkRouteOrigin
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
@@ -40,6 +41,8 @@ internal class RouteAlternativesController constructor(
      */
     private var inhibitNextUpdate = false
 
+    private var lastUpdateOrigin: RouterOrigin = RouterOrigin.Onboard
+
     private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
 
     private val nativeRouteAlternativesController = navigator.createRouteAlternativesController()
@@ -47,11 +50,10 @@ internal class RouteAlternativesController constructor(
             setRouteAlternativesOptions(
                 com.mapbox.navigator.RouteAlternativesOptions(
                     options.intervalMillis * SECONDS_PER_MILLIS,
-                    MIN_TIME_BEFORE_MANEUVER_SECONDS,
-                    LOOK_AHEAD_SECONDS
+                    MIN_TIME_BEFORE_MANEUVER_SECONDS
                 )
             )
-            enableEmptyAlternativesRefresh(true)
+            enableOnEmptyAlternativesRequest(true)
         }
 
     private val observers = CopyOnWriteArraySet<RouteAlternativesObserver>()
@@ -91,7 +93,8 @@ internal class RouteAlternativesController constructor(
 
     private val nativeObserver = object : com.mapbox.navigator.RouteAlternativesObserver {
         override fun onRouteAlternativesChanged(
-            routeAlternatives: List<RouteAlternative>
+            routeAlternatives: List<RouteAlternative>,
+            removed: List<RouteAlternative>
         ): List<Int> {
             if (inhibitNextUpdate) {
                 logD(TAG, Message("update skipped because alternatives were reset with #setRoutes"))
@@ -102,7 +105,7 @@ internal class RouteAlternativesController constructor(
             val routeProgress = tripSession.getRouteProgress()
                 ?: return emptyList()
 
-            onRouteAlternativesChanged(routeProgress, routeAlternatives)
+            onRouteAlternativesChanged(routeProgress, routeAlternatives, removed)
 
             // This is supposed to be able to filter alternatives
             // but at this point we're not filtering anything.
@@ -116,13 +119,14 @@ internal class RouteAlternativesController constructor(
 
     private fun onRouteAlternativesChanged(
         routeProgress: RouteProgress,
-        routeAlternatives: List<RouteAlternative>
+        nativeAlternatives: List<RouteAlternative>,
+        removed: List<RouteAlternative>
     ) {
         val alternatives: List<DirectionsRoute> = runBlocking {
-            routeAlternatives.mapIndexedNotNull { index, routeAlternative ->
+            nativeAlternatives.mapIndexedNotNull { index, routeAlternative ->
                 val expected = parseNativeDirectionsAlternative(
                     ThreadController.IODispatcher,
-                    routeAlternative.routeResponse,
+                    routeAlternative.route.response,
                     routeProgress.route.routeOptions()
                 )
                 if (expected.isValue) {
@@ -133,7 +137,7 @@ internal class RouteAlternativesController constructor(
                         Message(
                             """
                                     |unable to parse alternative at index $index;
-                                    |failure for response: ${routeAlternative.routeResponse}
+                                    |failure for response: ${routeAlternative.route.response}
                                 """.trimMargin()
                         ),
                         expected.error
@@ -145,19 +149,21 @@ internal class RouteAlternativesController constructor(
         logI(TAG, Message("${alternatives.size} alternatives available"))
 
         mainJobControl.scope.launch {
-            // Notify the listeners.
-            // TODO https://github.com/mapbox/mapbox-navigation-native/issues/4409
-            // There is no way to determine if the route was Onboard or Offboard
+            val origin = nativeAlternatives.find {
+                // looking for the first new route,
+                // assuming all new routes come from the same request
+                it.isNew
+            }?.route?.routerOrigin?.mapToSdkRouteOrigin() ?: lastUpdateOrigin
             observers.forEach {
-                it.onRouteAlternatives(routeProgress, alternatives, RouterOrigin.Onboard)
+                it.onRouteAlternatives(routeProgress, alternatives, origin)
             }
+            lastUpdateOrigin = origin
         }
     }
 
     private companion object {
         private val TAG = Tag("MbxRouteAlternativesController")
         private const val MIN_TIME_BEFORE_MANEUVER_SECONDS = 1.0
-        private const val LOOK_AHEAD_SECONDS = 1.0
         private const val SECONDS_PER_MILLIS = 0.001
     }
 }
