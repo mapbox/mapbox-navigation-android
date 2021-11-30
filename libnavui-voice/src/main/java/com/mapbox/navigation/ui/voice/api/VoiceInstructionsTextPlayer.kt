@@ -102,9 +102,13 @@ internal class VoiceInstructionsTextPlayer(
         volumeLevel = DEFAULT_VOLUME_LEVEL
     }
 
-    private fun initializeWithLanguage(language: Locale) {
-        isLanguageSupported =
+    @VisibleForTesting
+    internal fun initializeWithLanguage(language: Locale) {
+        isLanguageSupported = if (playerAttributes.options.checkIsLanguageAvailable) {
             textToSpeech.isLanguageAvailable(language) == TextToSpeech.LANG_AVAILABLE
+        } else {
+            true
+        }
         if (!isLanguageSupported) {
             LoggerProvider.logger.e(Tag(TAG), Message(LANGUAGE_NOT_SUPPORTED))
             return
