@@ -1,14 +1,26 @@
 package com.mapbox.navigation.dropin
 
 import android.content.Context
-import com.mapbox.maps.Style
+import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
+import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter
+import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
+import com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter
+import com.mapbox.navigation.ui.tripprogress.model.TimeRemainingFormatter
+import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter
 import java.lang.IllegalArgumentException
 
 class NavigationViewOptions private constructor(
     val mapboxRouteLineOptions: MapboxRouteLineOptions,
     val routeArrowOptions: RouteArrowOptions,
+    val distanceFormatterOptions: DistanceFormatterOptions,
+    val distanceFormatter: DistanceFormatter,
+    val tripProgressUpdateFormatter: TripProgressUpdateFormatter,
+    val speedLimitFormatter: SpeedLimitFormatter,
     val mapStyleUrlDarkTheme: String,
     val mapStyleUrlLightTheme: String,
     val darkTheme: DropInTheme,
@@ -19,6 +31,10 @@ class NavigationViewOptions private constructor(
     fun toBuilder(context: Context): Builder = Builder(context).apply {
         mapboxRouteLineOptions(mapboxRouteLineOptions)
         routeArrowOptions(routeArrowOptions)
+        distanceFormatterOptions(distanceFormatterOptions)
+        distanceFormatter(distanceFormatter)
+        tripProgressUpdateFormatter(tripProgressUpdateFormatter)
+        speedLimitFormatter(speedLimitFormatter)
         mapStyleUrlDarkTheme(mapStyleUrlDarkTheme)
         mapStyleUrlLightTheme(mapStyleUrlLightTheme)
         darkTheme(darkTheme)
@@ -32,8 +48,17 @@ class NavigationViewOptions private constructor(
             .withVanishingRouteLineEnabled(true)
             .build()
         private var routeArrowOptions = RouteArrowOptions.Builder(context).build()
-        private var mapStyleUrlDarkTheme: String = Style.LIGHT
-        private var mapStyleUrlLightTheme: String = Style.DARK
+        private var distanceFormatterOptions = DistanceFormatterOptions.Builder(context).build()
+        private var tripProgressUpdateFormatter = TripProgressUpdateFormatter.Builder(context)
+            .distanceRemainingFormatter(DistanceRemainingFormatter(distanceFormatterOptions))
+            .timeRemainingFormatter(TimeRemainingFormatter(context))
+            .estimatedTimeToArrivalFormatter(EstimatedTimeToArrivalFormatter(context))
+            .build()
+        private var distanceFormatter: DistanceFormatter =
+            MapboxDistanceFormatter(distanceFormatterOptions)
+        private var speedLimitFormatter = SpeedLimitFormatter(context)
+        private var mapStyleUrlDarkTheme: String = NavigationStyles.NAVIGATION_NIGHT_STYLE
+        private var mapStyleUrlLightTheme: String = NavigationStyles.NAVIGATION_DAY_STYLE
         private val lightColors = Colors(
             light = 100,
             warmth = 100,
@@ -68,6 +93,22 @@ class NavigationViewOptions private constructor(
             this.routeArrowOptions = options
         }
 
+        fun distanceFormatterOptions(options: DistanceFormatterOptions): Builder = apply {
+            this.distanceFormatterOptions = options
+        }
+
+        fun tripProgressUpdateFormatter(formatter: TripProgressUpdateFormatter): Builder = apply {
+            this.tripProgressUpdateFormatter = formatter
+        }
+
+        fun distanceFormatter(formatter: DistanceFormatter): Builder = apply {
+            this.distanceFormatter = formatter
+        }
+
+        fun speedLimitFormatter(formatter: SpeedLimitFormatter): Builder = apply {
+            this.speedLimitFormatter = formatter
+        }
+
         fun mapStyleUrlDarkTheme(mapStyleUrlDarkTheme: String): Builder {
             if (mapStyleUrlDarkTheme.isEmpty()) {
                 throw IllegalArgumentException("Style url $mapStyleUrlDarkTheme cannot be empty")
@@ -99,6 +140,10 @@ class NavigationViewOptions private constructor(
         fun build(): NavigationViewOptions = NavigationViewOptions(
             mapboxRouteLineOptions,
             routeArrowOptions,
+            distanceFormatterOptions,
+            distanceFormatter,
+            tripProgressUpdateFormatter,
+            speedLimitFormatter,
             mapStyleUrlDarkTheme,
             mapStyleUrlLightTheme,
             darkTheme,

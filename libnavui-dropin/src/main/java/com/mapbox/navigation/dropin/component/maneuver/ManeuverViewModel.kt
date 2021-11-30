@@ -15,10 +15,9 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ManeuverViewModel(
-    private val distanceFormatter: DistanceFormatter
+    private val maneuverApi: MapboxManeuverApi
 ) : ViewModel() {
 
-    private val maneuverApi = MapboxManeuverApi(distanceFormatter)
     private val _maneuverState: MutableStateFlow<ManeuverState> =
         MutableStateFlow(ManeuverState.initial())
 
@@ -68,10 +67,10 @@ class ManeuverViewModel(
             }
         }
 
-    class Factory(private val formatter: DistanceFormatter) : ViewModelProvider.Factory {
+    class Factory(private val distanceFormatter: DistanceFormatter) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ManeuverViewModel(formatter) as T
+            return ManeuverViewModel(MapboxManeuverApi(distanceFormatter)) as T
         }
     }
 }

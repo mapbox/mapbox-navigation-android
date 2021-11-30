@@ -15,10 +15,8 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SpeedLimitViewModel(
-    speedLimitFormatter: SpeedLimitFormatter
+    private val speedLimitApi: MapboxSpeedLimitApi
 ) : ViewModel() {
-
-    private val speedLimitApi = MapboxSpeedLimitApi(speedLimitFormatter)
     private val _speedLimitState: MutableStateFlow<SpeedLimitState> = MutableStateFlow(
         SpeedLimitState.initial()
     )
@@ -67,7 +65,7 @@ class SpeedLimitViewModel(
     class Factory(private val formatter: SpeedLimitFormatter) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return SpeedLimitViewModel(formatter) as T
+            return SpeedLimitViewModel(MapboxSpeedLimitApi(formatter)) as T
         }
     }
 }

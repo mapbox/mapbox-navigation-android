@@ -15,10 +15,9 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TripProgressViewModel(
-    private val formatter: TripProgressUpdateFormatter
+    private val tripProgressApi: MapboxTripProgressApi
 ) : ViewModel() {
 
-    private val tripProgressApi = MapboxTripProgressApi(formatter)
     private val _tripProgressState: MutableStateFlow<TripProgressState> =
         MutableStateFlow(TripProgressState.initial())
 
@@ -51,10 +50,11 @@ class TripProgressViewModel(
             }
         }
 
-    class Factory(private val formatter: TripProgressUpdateFormatter) : ViewModelProvider.Factory {
+    class Factory(private val tripProgressFormatter: TripProgressUpdateFormatter) :
+        ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return TripProgressViewModel(formatter) as T
+            return TripProgressViewModel(MapboxTripProgressApi(tripProgressFormatter)) as T
         }
     }
 }
