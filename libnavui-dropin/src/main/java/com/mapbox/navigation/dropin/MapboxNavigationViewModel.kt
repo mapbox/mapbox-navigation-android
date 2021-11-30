@@ -91,8 +91,16 @@ internal class MapboxNavigationViewModel(
     // This is here because this class has a reference to MapboxNavigation
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun startSimulatedTripSession(location: Location) {
-        val event = ReplayRouteMapper.mapToUpdateLocation(0.0, location)
-        mapboxNavigation.mapboxReplayer.pushEvents(listOf(event))
+        stopTripSession()
+        mapboxNavigation.mapboxReplayer.clearEvents()
+
+        val events = if (mapboxNavigation.getRoutes().isEmpty()) {
+            listOf(ReplayRouteMapper.mapToUpdateLocation(0.0, location))
+        } else {
+            ReplayRouteMapper().mapDirectionsRouteGeometry(mapboxNavigation.getRoutes().first())
+        }
+
+        mapboxNavigation.mapboxReplayer.pushEvents(events)
         mapboxNavigation.startReplayTripSession()
         mapboxNavigation.mapboxReplayer.play()
     }
