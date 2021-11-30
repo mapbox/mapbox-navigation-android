@@ -27,10 +27,8 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -65,12 +63,7 @@ import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
 import com.mapbox.navigation.ui.maps.camera.view.MapboxRecenterButton
 import com.mapbox.navigation.ui.maps.camera.view.MapboxRouteOverviewButton
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
-import com.mapbox.navigation.ui.speedlimit.model.SpeedLimitFormatter
 import com.mapbox.navigation.ui.speedlimit.view.MapboxSpeedLimitView
-import com.mapbox.navigation.ui.tripprogress.model.DistanceRemainingFormatter
-import com.mapbox.navigation.ui.tripprogress.model.EstimatedTimeToArrivalFormatter
-import com.mapbox.navigation.ui.tripprogress.model.TimeRemainingFormatter
-import com.mapbox.navigation.ui.tripprogress.model.TripProgressUpdateFormatter
 import com.mapbox.navigation.ui.tripprogress.view.MapboxTripProgressView
 import com.mapbox.navigation.ui.voice.view.MapboxSoundButton
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -172,19 +165,6 @@ class NavigationView : ConstraintLayout {
     // --------------------------------------------------------
     // View Model and dependency definitions
     // --------------------------------------------------------
-    private val distanceFormatter = MapboxDistanceFormatter(
-        DistanceFormatterOptions.Builder(context).build()
-    )
-    private val tripProgressFormatter: TripProgressUpdateFormatter by lazy {
-        val distanceFormatterOptions =
-            DistanceFormatterOptions.Builder(context).build()
-        TripProgressUpdateFormatter.Builder(context)
-            .distanceRemainingFormatter(DistanceRemainingFormatter(distanceFormatterOptions))
-            .timeRemainingFormatter(TimeRemainingFormatter(context))
-            .estimatedTimeToArrivalFormatter(EstimatedTimeToArrivalFormatter(context))
-            .build()
-    }
-    private val speedLimitFormatter = SpeedLimitFormatter(context)
     private val mapboxNavigationViewModel: MapboxNavigationViewModel by lazy {
         ViewModelProvider(
             activity,
@@ -295,7 +275,7 @@ class NavigationView : ConstraintLayout {
             binding.maneuverContainer.addView(maneuverView)
             val maneuverViewModel = ViewModelProvider(
                 activity,
-                ManeuverViewModel.Factory(distanceFormatter)
+                ManeuverViewModel.Factory(navigationViewOptions.distanceFormatter)
             )[ManeuverViewModel::class.java]
             ManeuverUIComponent.MapboxManeuverUIComponent(
                 container = binding.maneuverContainer,
@@ -382,7 +362,7 @@ class NavigationView : ConstraintLayout {
             binding.speedLimitContainer.addView(speedLimitView)
             val speedLimitViewModel = ViewModelProvider(
                 activity,
-                SpeedLimitViewModel.Factory(speedLimitFormatter)
+                SpeedLimitViewModel.Factory(navigationViewOptions.speedLimitFormatter)
             )[SpeedLimitViewModel::class.java]
             SpeedLimitUIComponent.MapboxSpeedLimitUIComponent(
                 container = binding.speedLimitContainer,
@@ -405,7 +385,7 @@ class NavigationView : ConstraintLayout {
             binding.infoPanelContainer.addView(tripProgressView)
             val tripProgressViewModel = ViewModelProvider(
                 activity,
-                TripProgressViewModel.Factory(tripProgressFormatter)
+                TripProgressViewModel.Factory(navigationViewOptions.tripProgressUpdateFormatter)
             )[TripProgressViewModel::class.java]
             TripProgressUIComponent.MapboxTripProgressUIComponent(
                 container = binding.infoPanelContainer,
