@@ -717,6 +717,7 @@ class MapboxNavigationTelemetryTest {
 
         val departEvent = events[1] as NavigationDepartEvent
         checkOriginalParams(departEvent, originalRoute)
+        assertEquals(0, departEvent.distanceCompleted)
     }
 
     @Test
@@ -733,6 +734,7 @@ class MapboxNavigationTelemetryTest {
 
         val rerouteEvent = events[2] as NavigationRerouteEvent
         checkOriginalParams(rerouteEvent, anotherRoute)
+        assertEquals(routeProgress.distanceTraveled.toInt(), rerouteEvent.distanceCompleted)
     }
 
     @Test
@@ -1449,7 +1451,6 @@ class MapboxNavigationTelemetryTest {
         )
         assertEquals(routeProgress.distanceRemaining.toInt(), event.distanceRemaining)
         assertEquals(routeProgress.durationRemaining.toInt(), event.durationRemaining)
-        assertEquals(routeProgress.distanceTraveled.toInt(), event.distanceCompleted)
         assertEquals(currentRoute.geometry(), event.geometry)
         assertEquals(currentRoute.routeOptions()?.profile(), event.profile)
         assertEquals(currentRoute.routeIndex()?.toInt(), event.legIndex)
