@@ -82,8 +82,33 @@ internal class RouteAlternativesController constructor(
         }
     }
 
-    fun triggerAlternativeRequest() {
-        nativeRouteAlternativesController.refreshImmediately()
+    fun triggerAlternativeRequest(listener: RouteAlternativesRequestCallback?) {
+        nativeRouteAlternativesController.refreshImmediately { expected ->
+            val routeProgress = tripSession.getRouteProgress()
+                ?: run {
+                    listener?.onRouteAlternativesAborted(
+                        """
+                            |Route progress not available, ignoring alternatives update.
+                            |Continuous alternatives are only available in active guidance.
+                        """.trimMargin()
+                    )
+                    return@refreshImmediately
+                }
+
+            expected.fold(
+                { error ->
+                    listener?.onRouteAlternativesAborted(error)
+                },
+                { value ->
+                    processRouteAlternatives(
+                        routeProgress,
+                        value
+                    ) { progress, alternatives, origin ->
+                        listener?.onRouteAlternativeRequestFinished(progress, alternatives, origin)
+                    }
+                }
+            )
+        }
     }
 
     fun unregisterAll() {
@@ -105,7 +130,14 @@ internal class RouteAlternativesController constructor(
             val routeProgress = tripSession.getRouteProgress()
                 ?: return emptyList()
 
-            onRouteAlternativesChanged(routeProgress, routeAlternatives, removed)
+            processRouteAlternatives(
+                routeProgress,
+                routeAlternatives
+            ) { progress, alternatives, origin ->
+                observers.forEach {
+                    it.onRouteAlternatives(progress, alternatives, origin)
+                }
+            }
 
             // This is supposed to be able to filter alternatives
             // but at this point we're not filtering anything.
@@ -117,10 +149,13 @@ internal class RouteAlternativesController constructor(
         }
     }
 
-    private fun onRouteAlternativesChanged(
+    /**
+     * @param block invoked with results (on the main thread)
+     */
+    private fun processRouteAlternatives(
         routeProgress: RouteProgress,
         nativeAlternatives: List<RouteAlternative>,
-        removed: List<RouteAlternative>
+        block: (RouteProgress, List<DirectionsRoute>, RouterOrigin) -> Unit,
     ) {
         val alternatives: List<DirectionsRoute> = runBlocking {
             nativeAlternatives.mapIndexedNotNull { index, routeAlternative ->
@@ -154,9 +189,7 @@ internal class RouteAlternativesController constructor(
                 // assuming all new routes come from the same request
                 it.isNew
             }?.route?.routerOrigin?.mapToSdkRouteOrigin() ?: lastUpdateOrigin
-            observers.forEach {
-                it.onRouteAlternatives(routeProgress, alternatives, origin)
-            }
+            block(routeProgress, alternatives, origin)
             lastUpdateOrigin = origin
         }
     }

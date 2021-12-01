@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.routealternatives
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -464,4 +465,99 @@ class RouteAlternativesControllerTest {
             }
             assertEquals(RouterOrigin.Offboard, routerOriginSlot.captured)
         }
+
+    @Test
+    fun `should notify callback when on-demand alternatives refresh finishes`() {
+        val routeAlternativesController = createRouteAlternativesController()
+        val nativeObserver = slot<com.mapbox.navigator.RefreshAlternativesCallback>()
+        val alternative: RouteAlternative = mockk {
+            every { route.response } returns FileUtils.loadJsonFixture(
+                "route_alternative_from_native.json"
+            )
+            every { route.routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
+            every { isNew } returns true
+        }
+        val expected = ExpectedFactory.createValue<String, List<RouteAlternative>>(
+            listOf(alternative)
+        )
+        every { controllerInterface.refreshImmediately(capture(nativeObserver)) } answers {
+            nativeObserver.captured.run(expected)
+        }
+        every { tripSession.getRouteProgress() } returns mockk {
+            every { route } returns mockk(relaxed = true)
+        }
+
+        val callback = mockk<RouteAlternativesRequestCallback>(relaxUnitFun = true)
+        routeAlternativesController.triggerAlternativeRequest(callback)
+
+        val routeProgressSlot = slot<RouteProgress>()
+        val alternativesSlot = slot<List<DirectionsRoute>>()
+        val routerOriginSlot = slot<RouterOrigin>()
+        verify(exactly = 1) {
+            callback.onRouteAlternativeRequestFinished(
+                capture(routeProgressSlot),
+                capture(alternativesSlot),
+                capture(routerOriginSlot)
+            )
+        }
+        assertEquals("1", alternativesSlot.captured[0].routeIndex())
+        assertEquals(
+            "FYenNs6nfVvkDQgvLWnYcZvn2nvekWStF7nM0JV0X_IBAlsXWvomuA==",
+            alternativesSlot.captured[0].requestUuid()
+        )
+    }
+
+    @Test
+    fun `should notify callback when on-demand alternatives refresh fails - no progress`() {
+        val routeAlternativesController = createRouteAlternativesController()
+        val nativeObserver = slot<com.mapbox.navigator.RefreshAlternativesCallback>()
+        val alternative: RouteAlternative = mockk {
+            every { route.response } returns FileUtils.loadJsonFixture(
+                "route_alternative_from_native.json"
+            )
+            every { route.routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
+            every { isNew } returns true
+        }
+        val expected = ExpectedFactory.createValue<String, List<RouteAlternative>>(
+            listOf(alternative)
+        )
+        every { controllerInterface.refreshImmediately(capture(nativeObserver)) } answers {
+            nativeObserver.captured.run(expected)
+        }
+        every { tripSession.getRouteProgress() } returns null
+
+        val callback = mockk<RouteAlternativesRequestCallback>(relaxUnitFun = true)
+        routeAlternativesController.triggerAlternativeRequest(callback)
+
+        verify(exactly = 1) {
+            callback.onRouteAlternativesAborted(
+                """
+                    |Route progress not available, ignoring alternatives update.
+                    |Continuous alternatives are only available in active guidance.
+                """.trimMargin(),
+            )
+        }
+    }
+
+    @Test
+    fun `should notify callback when on-demand alternatives refresh fails - NN failure`() {
+        val routeAlternativesController = createRouteAlternativesController()
+        val nativeObserver = slot<com.mapbox.navigator.RefreshAlternativesCallback>()
+        val expected = ExpectedFactory.createError<String, List<RouteAlternative>>(
+            "error"
+        )
+        every { controllerInterface.refreshImmediately(capture(nativeObserver)) } answers {
+            nativeObserver.captured.run(expected)
+        }
+        every { tripSession.getRouteProgress() } returns mockk {
+            every { route } returns mockk(relaxed = true)
+        }
+
+        val callback = mockk<RouteAlternativesRequestCallback>(relaxUnitFun = true)
+        routeAlternativesController.triggerAlternativeRequest(callback)
+
+        verify(exactly = 1) {
+            callback.onRouteAlternativesAborted("error")
+        }
+    }
 }
