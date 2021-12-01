@@ -14,10 +14,9 @@ import android.graphics.Matrix
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.text.SpannableString
+import android.text.SpannableStringBuilder
 import android.text.TextUtils
 import android.text.format.DateFormat
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.mapbox.annotation.module.MapboxModule
@@ -119,7 +118,6 @@ class MapboxTripNotification constructor(
         pendingDismissalIntent = createPendingDismissalIntent(applicationContext)
         notificationView = MapboxTripNotificationView(applicationContext)
 
-        notificationView.buildRemoteViews(pendingCloseIntent)
         createNotificationChannel()
     }
 
@@ -132,7 +130,10 @@ class MapboxTripNotification constructor(
      */
     override fun getNotification(): Notification {
         if (!::notification.isInitialized) {
-            this.notification = getNotificationBuilder().build()
+            val builder = getNotificationBuilder()
+                .setContentTitle(applicationContext.getString(R.string.mapbox_navigation_is_starting))
+                .addAction(0, "✕ ${applicationContext.getString(R.string.mapbox_stop_session).uppercase()}", pendingCloseIntent)
+            this.notification = builder.build()
         }
         return this.notification
     }
@@ -159,9 +160,9 @@ class MapboxTripNotification constructor(
             // RemoteView has an internal mActions, which stores every change and cannot be cleared.
             // As we set new bitmaps, the mActions parcelable size will grow and eventually cause a crash.
             // buildRemoteViews() will rebuild the RemoteViews and clear the stored mActions.
-            notificationView.buildRemoteViews(pendingCloseIntent)
-            updateNotificationViews(state)
-            notification = getNotificationBuilder().build()
+            val builder = getNotificationBuilder()
+            updateNotificationViews(state, builder)
+            notification = builder.build()
             notificationManager.notify(NOTIFICATION_ID, notification)
         }
     }
@@ -174,8 +175,6 @@ class MapboxTripNotification constructor(
     override fun onTripSessionStarted() {
         registerReceivers()
         notificationActionButtonChannel = Channel(1)
-        notificationView.setVisibility(VISIBLE)
-        notificationView.setEndNavigationButtonText(R.string.mapbox_stop_session)
         state = State.STARTED
     }
 
@@ -195,7 +194,6 @@ class MapboxTripNotification constructor(
             currentManeuverModifier = null
             currentInstructionText = null
             currentDistanceText = null
-            notificationView.resetView()
             unregisterReceivers()
             try {
                 notificationActionButtonChannel.cancel()
@@ -243,9 +241,8 @@ class MapboxTripNotification constructor(
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setSmallIcon(R.drawable.mapbox_ic_navigation)
-            .setCustomContentView(notificationView.collapsedView)
-            .setCustomBigContentView(notificationView.expandedView)
             .setOngoing(true)
+            .setShowWhen(false)
 
         if (Build.VERSION.SDK_INT >= 31) {
             val color = ContextCompat.getColor(applicationContext, R.color.mapbox_notification_blue)
@@ -307,32 +304,37 @@ class MapboxTripNotification constructor(
         }
     }
 
-    private fun updateNotificationViews(state: TripNotificationState) {
-        notificationView.setVisibility(GONE)
-
+    private fun updateNotificationViews(state: TripNotificationState, builder: NotificationCompat.Builder) {
         when (state) {
-            is TripNotificationState.TripNotificationFreeState -> setFreeDriveMode(true)
+            is TripNotificationState.TripNotificationFreeState -> {
+                setFreeDriveMode(builder)
+                builder.addAction(0, "✕ ${applicationContext.getString(R.string.mapbox_stop_session)}".uppercase(), pendingCloseIntent)
+            }
             is TripNotificationState.TripNotificationData -> {
                 updateDistanceText(state.distanceRemaining)
                 updateViewsWithArrival(state.durationRemaining)
-                updateInstructionText(state.bannerInstructions)
-                updateManeuverImage(state.bannerInstructions, state.drivingSide)
-                setFreeDriveMode(false)
+                val titleBuilder = SpannableStringBuilder()
+                currentFormattedDistance?.let { titleBuilder.append(it) }
+                titleBuilder.append(" • ")
+                builder.setContentTitle(titleBuilder)
+                currentFormattedTime?.let { titleBuilder.append(it) }
+
+                updateInstructionText(state.bannerInstructions, builder)
+                updateManeuverImage(state.bannerInstructions, state.drivingSide, builder)
+                builder.addAction(0, "✕ ${applicationContext.getString(R.string.mapbox_end_navigation).uppercase()}", pendingCloseIntent)
             }
         }
     }
 
-    private fun setFreeDriveMode(isFreeDriveMode: Boolean) {
-        notificationView.setFreeDriveMode(isFreeDriveMode)
-        updateCurrentManeuverToDefault(isFreeDriveMode)
+    private fun setFreeDriveMode(builder: NotificationCompat.Builder) {
+        notificationView.setFreeDriveMode(builder)
+        updateCurrentManeuverToDefault()
     }
 
-    private fun updateCurrentManeuverToDefault(isFreeDriveMode: Boolean) {
-        if (isFreeDriveMode) {
-            currentManeuverType = null
-            currentManeuverModifier = null
-            currentRoundaboutAngle = null
-        }
+    private fun updateCurrentManeuverToDefault() {
+        currentManeuverType = null
+        currentManeuverModifier = null
+        currentRoundaboutAngle = null
     }
 
     private fun isDistanceTextChanged(distanceRemaining: Double?): Boolean {
@@ -344,7 +346,6 @@ class MapboxTripNotification constructor(
             currentDistanceText = distanceRemaining
             currentFormattedDistance = distanceFormatter.formatDistance(distanceRemaining)
         }
-        currentFormattedDistance?.let { notificationView.updateDistanceText(it) }
     }
 
     private fun generateArrivalTime(
@@ -365,18 +366,20 @@ class MapboxTripNotification constructor(
 
     private fun updateViewsWithArrival(durationRemaining: Double?) {
         generateArrivalTime(durationRemaining)?.let { currentFormattedTime = it }
-        currentFormattedTime?.let { notificationView.updateArrivalTime(it) }
     }
 
     private fun isInstructionTextChanged(primaryText: String): Boolean {
         return currentInstructionText.isNullOrEmpty() || currentInstructionText != primaryText
     }
 
-    private fun updateInstructionText(bannerInstructions: BannerInstructions?) {
+    private fun updateInstructionText(
+        bannerInstructions: BannerInstructions?,
+        builder: NotificationCompat.Builder
+    ) {
         bannerInstructions?.primary()?.text()
             ?.takeIf { isInstructionTextChanged(it) }
             ?.let { currentInstructionText = it }
-        currentInstructionText?.let { notificationView.updateInstructionText(it) }
+        currentInstructionText?.let { builder.setContentText(it) }
     }
 
     private fun isManeuverStateChanged(bannerInstruction: BannerInstructions): Boolean {
@@ -393,7 +396,7 @@ class MapboxTripNotification constructor(
             currentRoundaboutAngle != previousRoundaboutAngle
     }
 
-    private fun updateManeuverImage(bannerInstructions: BannerInstructions?, drivingSide: String?) {
+    private fun updateManeuverImage(bannerInstructions: BannerInstructions?, drivingSide: String?, builder: NotificationCompat.Builder) {
         if (bannerInstructions != null && isManeuverStateChanged(bannerInstructions)) {
             turnIconHelper.retrieveTurnIcon(
                 currentManeuverType,
@@ -407,7 +410,7 @@ class MapboxTripNotification constructor(
                     ?.let { currentManeuverImage = it }
             }
         }
-        currentManeuverImage?.let { notificationView.updateImage(it) }
+        currentManeuverImage?.let { builder.setLargeIcon(it) }
     }
 
     private fun getManeuverBitmap(drawable: Drawable, shouldFlipIcon: Boolean): Bitmap? {
