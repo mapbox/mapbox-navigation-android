@@ -54,6 +54,7 @@ import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesObserver
+import com.mapbox.navigation.core.routealternatives.RouteAlternativesRequestCallback
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
@@ -656,8 +657,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * [MapboxNavigation.setRoutes()] call and [Router] implementation.
      * @see [registerRouteAlternativesObserver]
      */
-    fun requestAlternativeRoutes() {
-        routeAlternativesController.triggerAlternativeRequest()
+    @JvmOverloads
+    fun requestAlternativeRoutes(callback: RouteAlternativesRequestCallback? = null) {
+        routeAlternativesController.triggerAlternativeRequest(callback)
     }
 
     /**

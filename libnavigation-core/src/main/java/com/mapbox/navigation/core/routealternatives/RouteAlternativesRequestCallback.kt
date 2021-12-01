@@ -1,32 +1,28 @@
 package com.mapbox.navigation.core.routealternatives
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 
 /**
- * Interface definition for an observer that is notified whenever
- * the Navigation SDK checks for alternative routes to the destination change.
+ * Interface definition for a callback that is notified whenever alternatives routes are refreshed on demand.
  *
- * @see [RouteAlternativesOptions] to control the callback interval.
+ * See [MapboxNavigation.requestAlternativeRoutes].
  */
-fun interface RouteAlternativesObserver {
+interface RouteAlternativesRequestCallback {
+
     /**
-     * Invoked whenever available alternative routes to the destination change.
-     *
-     * This callback if invoked whenever new alternatives are available (addition to the list),
-     * or when a fork between an alternative and the current primary route has been passed (removal from the list).
+     * Invoked when on-demand alternative routes request finishes.
      *
      * The [alternatives] list always represent all available, up-to-date, alternatives for the current route.
      *
      * The alternatives are not automatically added to [MapboxNavigation],
      * you need to add them manually to trigger [RoutesObserver], for example:
      * ```kotlin
-     * mapboxNavigation.registerRouteAlternativesObserver(
-     *     RouteAlternativesObserver { routeProgress, alternatives, routerOrigin ->
+     * mapboxNavigation.requestAlternativeRoutes(
+     *     RouteAlternativesRequestListener { routeProgress, alternatives, routerOrigin ->
      *         val newRoutes = mutableListOf<DirectionsRoute>().apply {
      *             add(mapboxNavigation.getRoutes().first())
      *             addAll(alternatives)
@@ -43,9 +39,16 @@ fun interface RouteAlternativesObserver {
      * @param routerOrigin reports the source of all the new alternative routes in the list.
      * If there are no new routes, reports the source that returned the latest additions.
      */
-    fun onRouteAlternatives(
+    fun onRouteAlternativeRequestFinished(
         routeProgress: RouteProgress,
         alternatives: List<DirectionsRoute>,
         routerOrigin: RouterOrigin
+    )
+
+    /**
+     * Invoked when the request fails or is canceled.
+     */
+    fun onRouteAlternativesAborted(
+        message: String
     )
 }
