@@ -7,4 +7,8 @@ jacoco {
 tasks.withType(Test) {
   // needed to capture coverage from Robolectric tests
   jacoco.includeNoLocationClasses = true
+
+  // required to run on Java 9+
+  // refs https://github.com/gradle/gradle/issues/5184#issuecomment-457865951
+  jacoco.excludes = ['jdk.internal.*']
 }

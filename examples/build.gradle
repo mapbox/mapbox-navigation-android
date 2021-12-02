@@ -71,11 +71,6 @@ android {
         }
     }
 
-    dexOptions {
-        maxProcessCount 8
-        javaMaxHeapSize "2g"
-        preDexLibraries true
-    }
 
     lintOptions {
         abortOnError false
@@ -92,6 +87,9 @@ task downloadUnstrippedNativeLibsDir(type: com.mapbox.gradle.NativeDownloadTask)
             dependenciesList.mapboxNavigator,
             dependenciesList.mapboxCommonNative
     ]
+    sdkRegistryToken = project.hasProperty('SDK_REGISTRY_TOKEN')
+            ? project.property('SDK_REGISTRY_TOKEN')
+            : System.getenv('SDK_REGISTRY_TOKEN')
 }
 
 dependencies {

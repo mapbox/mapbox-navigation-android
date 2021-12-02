@@ -65,12 +65,6 @@ android {
         }
     }
 
-    dexOptions {
-        maxProcessCount 8
-        javaMaxHeapSize "2g"
-        preDexLibraries true
-    }
-
     lintOptions {
         abortOnError false
     }
