@@ -23,7 +23,7 @@ buildscript {
     classpath pluginDependencies.jacoco
     classpath pluginDependencies.googleServices
     classpath pluginDependencies.license
-    classpath pluginDependencies.mapboxSdkVersions
+    classpath files("mapbox-android-sdk-versions-1.1.1-SNAPSHOT.jar")
     classpath pluginDependencies.mapboxSdkRegistry
     classpath pluginDependencies.mapboxAccessToken
     classpath pluginDependencies.mapboxNativeDownload

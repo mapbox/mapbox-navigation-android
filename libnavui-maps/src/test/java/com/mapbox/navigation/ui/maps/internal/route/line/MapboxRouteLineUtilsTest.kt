@@ -60,7 +60,6 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteStyleDescriptor
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.mockk.slot
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import org.junit.Assert
@@ -448,10 +447,10 @@ class MapboxRouteLineUtilsTest {
             .withRouteLineBelowLayerId(LocationComponentConstants.MODEL_LAYER)
             .displayRestrictedRoadSections(true)
             .build()
-        val waypointSourceValueSlot = slot<Value>()
-        val primaryRouteSourceValueSlot = slot<Value>()
-        val alternativeRoute1SourceValueSlot = slot<Value>()
-        val alternativeRoute2SourceValueSlot = slot<Value>()
+        val waypointSourceValueSlots = mutableListOf<Value>()
+        val primaryRouteSourceValueSlots = mutableListOf<Value>()
+        val alternativeRoute1SourceValueSlots = mutableListOf<Value>()
+        val alternativeRoute2SourceValueSlots = mutableListOf<Value>()
         val addStyleLayerSlots = mutableListOf<Value>()
         val addStyleLayerPositionSlots = mutableListOf<LayerPosition>()
         val mockLayer = mockk<StyleObjectInfo> {
@@ -519,121 +518,121 @@ class MapboxRouteLineUtilsTest {
 
         verify {
             style.addStyleSource(
-                WAYPOINT_SOURCE_ID, capture(waypointSourceValueSlot)
+                WAYPOINT_SOURCE_ID, capture(waypointSourceValueSlots),
             )
         }
         assertEquals(
             "geojson",
-            (waypointSourceValueSlot.captured.contents as HashMap<String, Value>)["type"]!!.contents
+            (waypointSourceValueSlots.last().contents as HashMap<String, Value>)["type"]!!.contents,
         )
         assertEquals(
             16L,
-            (waypointSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]!!
+            (waypointSourceValueSlots.last().contents as HashMap<String, Value>)["maxzoom"]!!
                 .contents
         )
         assertEquals(
             "",
-            (waypointSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]!!.contents
+            (waypointSourceValueSlots.last().contents as HashMap<String, Value>)["data"]!!.contents,
         )
         assertEquals(
             DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            (waypointSourceValueSlot.captured.contents as HashMap<String, Value>)
+            (waypointSourceValueSlots.last().contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
         verify {
             style.addStyleSource(
                 PRIMARY_ROUTE_SOURCE_ID,
-                capture(primaryRouteSourceValueSlot)
+                capture(primaryRouteSourceValueSlots),
             )
         }
         assertEquals(
             "geojson",
-            (primaryRouteSourceValueSlot.captured.contents as HashMap<String, Value>)["type"]
+            (primaryRouteSourceValueSlots.last().contents as HashMap<String, Value>)["type"]
             !!.contents
         )
         assertEquals(
             16L,
-            (primaryRouteSourceValueSlot.captured.contents as HashMap<String, Value>)["maxzoom"]
+            (primaryRouteSourceValueSlots.last().contents as HashMap<String, Value>)["maxzoom"]
             !!.contents
         )
         assertEquals(
             true,
-            (primaryRouteSourceValueSlot.captured.contents as HashMap<String, Value>)["lineMetrics"]
+            (primaryRouteSourceValueSlots.last().contents as HashMap<String, Value>)["lineMetrics"]
             !!.contents
         )
         assertEquals(
             "",
-            (primaryRouteSourceValueSlot.captured.contents as HashMap<String, Value>)["data"]
+            (primaryRouteSourceValueSlots.last().contents as HashMap<String, Value>)["data"]
             !!.contents
         )
         assertEquals(
             DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            (primaryRouteSourceValueSlot.captured.contents as HashMap<String, Value>)
+            (primaryRouteSourceValueSlots.last().contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
         verify {
             style.addStyleSource(
                 ALTERNATIVE_ROUTE1_SOURCE_ID,
-                capture(alternativeRoute1SourceValueSlot)
+                capture(alternativeRoute1SourceValueSlots),
             )
         }
         assertEquals(
             "geojson",
-            (alternativeRoute1SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (alternativeRoute1SourceValueSlots.last().contents as HashMap<String, Value>)
             ["type"]!!.contents
         )
         assertEquals(
             16L,
-            (alternativeRoute1SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (alternativeRoute1SourceValueSlots.last().contents as HashMap<String, Value>)
             ["maxzoom"]!!.contents
         )
         assertEquals(
             true,
-            (alternativeRoute1SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (alternativeRoute1SourceValueSlots.last().contents as HashMap<String, Value>)
             ["lineMetrics"]!!.contents
         )
         assertEquals(
             "",
-            (alternativeRoute1SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (alternativeRoute1SourceValueSlots.last().contents as HashMap<String, Value>)
             ["data"]!!.contents
         )
         assertEquals(
             DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            (alternativeRoute1SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (alternativeRoute1SourceValueSlots.last().contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
         verify {
             style.addStyleSource(
                 ALTERNATIVE_ROUTE2_SOURCE_ID,
-                capture(alternativeRoute2SourceValueSlot)
+                capture(alternativeRoute2SourceValueSlots),
             )
         }
         assertEquals(
             "geojson",
-            (alternativeRoute2SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (alternativeRoute2SourceValueSlots.last().contents as HashMap<String, Value>)
             ["type"]!!.contents
         )
         assertEquals(
             16L,
-            (alternativeRoute2SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (alternativeRoute2SourceValueSlots.last().contents as HashMap<String, Value>)
             ["maxzoom"]!!.contents
         )
         assertEquals(
             true,
-            (alternativeRoute2SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (alternativeRoute2SourceValueSlots.last().contents as HashMap<String, Value>)
             ["lineMetrics"]!!.contents
         )
         assertEquals(
             "",
-            (alternativeRoute2SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (alternativeRoute2SourceValueSlots.last().contents as HashMap<String, Value>)
             ["data"]!!.contents
         )
         assertEquals(
             DEFAULT_ROUTE_SOURCES_TOLERANCE,
-            (alternativeRoute2SourceValueSlot.captured.contents as HashMap<String, Value>)
+            (alternativeRoute2SourceValueSlots.last().contents as HashMap<String, Value>)
             ["tolerance"]!!.contents
         )
 
