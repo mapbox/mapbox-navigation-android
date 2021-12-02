@@ -9,6 +9,7 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 ### Changelog
 #### Bug fixes and improvements
 - Fixed an issue where reroute controller attempted to add request parameters unsuitable for the selected profile. [#5141](https://github.com/mapbox/mapbox-navigation-android/pull/5141)
+- Fixed billing issue when upgrading Mapbox Navigation SDK from v1 to v2. [#5177](https://github.com/mapbox/mapbox-navigation-android/pull/5177)
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
