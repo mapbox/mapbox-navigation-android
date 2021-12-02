@@ -1,10 +1,13 @@
 package com.mapbox.navigation.dropin.component.routeline
 
+import com.mapbox.android.gestures.Utils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
+import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
+import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.testing.FileUtils
@@ -12,13 +15,17 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
+import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
+import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -228,6 +235,46 @@ class RouteLineViewModelTest {
         verify { routeLineView.initializeLayers(style) }
         verify { routeLineView.renderRouteDrawData(style, expectedResult) }
         assertEquals(expectedResult.error, viewModelResult)
+    }
+
+    @Test
+    fun routeResets() = coroutineRule.runBlockingTest {
+        mockkStatic(Utils::class)
+        every { Utils.dpToPx(30f) } returns 30f
+        val style = mockk<Style>()
+        val map = mockk<MapboxMap> {
+            every { getStyle() } returns style
+        }
+        val initialPrimaryRoute = getRoute()
+        val initialAltRoute = loadRoute("multileg_route.json")
+        val initialRoutes = listOf(initialPrimaryRoute, initialAltRoute)
+        val closestRouteValue = mockk<ClosestRouteValue> {
+            every { route } returns initialAltRoute
+        }
+        val callBackSlot =
+            slot<MapboxNavigationConsumer<Expected<RouteNotFound, ClosestRouteValue>>>()
+        val routeLineApi = mockk<MapboxRouteLineApi>(relaxed = true) {
+            every { findClosestRoute(any(), any(), any(), capture(callBackSlot)) } answers {
+                callBackSlot.captured.accept(ExpectedFactory.createValue(closestRouteValue))
+            }
+            every { getRoutes() } returns initialRoutes
+        }
+        val routeLineView = mockk<MapboxRouteLineView> {
+            every { getPrimaryRouteVisibility(style) } returns Visibility.VISIBLE
+            every { getAlternativeRoutesVisibility(style) } returns Visibility.VISIBLE
+        }
+        val viewModel = RouteLineViewModel(routeLineApi, routeLineView)
+        val def = async {
+            viewModel.routeResets.first()
+        }
+
+        viewModel.mapClick(Point.fromLngLat(-122.444359, 37.736351), map)
+        val viewModelResult = def.await()
+
+        assertEquals(2, viewModelResult.size)
+        assertEquals(initialAltRoute, viewModelResult.first())
+        assertEquals(initialPrimaryRoute, viewModelResult[1])
+        unmockkStatic(Utils::class)
     }
 
     private fun getRoute(): DirectionsRoute {
