@@ -14,6 +14,9 @@ import com.mapbox.navigation.core.infra.factories.createVoiceInstruction
 import com.mapbox.navigation.core.infra.recorders.RouteProgressObserverRecorder
 import com.mapbox.navigation.core.infra.recorders.VoiceInstructionsObserverRecorder
 import com.mapbox.navigation.core.trip.service.TripService
+import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.Companion.LONGITUDE_FOR_VOICE_INSTRUCTION_1
+import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.Companion.LONGITUDE_FOR_VOICE_INSTRUCTION_2
+import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.Companion.LONGITUDE_FOR_VOICE_INSTRUCTION_NULL
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -43,49 +46,7 @@ class MapboxTripSessionNoSetupTest {
         val voiceInstructionsObserver = VoiceInstructionsObserverRecorder()
         val routeProgressObserver = RouteProgressObserverRecorder()
         val nativeNavigator = mockk<MapboxNativeNavigator>(relaxed = true)
-        val navigatorObserverImplSlot = slot<NavigatorObserver>()
-        every {
-            nativeNavigator.addNavigatorObserver(capture(navigatorObserverImplSlot))
-        } returns Unit
-        coEvery {
-            nativeNavigator.setRoute(any(), any())
-        } returns null
-        coEvery {
-            nativeNavigator.updateLocation(match { it.coordinate.longitude() == 1.0 })
-        } answers {
-            navigatorObserverImplSlot.captured.onStatus(
-                NavigationStatusOrigin.LOCATION_UPDATE,
-                createNavigationStatus(
-                    location = firstArg(),
-                    voiceInstruction = createVoiceInstruction("1")
-                )
-            )
-            true
-        }
-        coEvery {
-            nativeNavigator.updateLocation(match { it.coordinate.longitude() == 1.5 })
-        } answers {
-            navigatorObserverImplSlot.captured.onStatus(
-                NavigationStatusOrigin.LOCATION_UPDATE,
-                createNavigationStatus(
-                    location = firstArg(),
-                    voiceInstruction = null
-                )
-            )
-            true
-        }
-        coEvery {
-            nativeNavigator.updateLocation(match { it.coordinate.longitude() == 2.0 })
-        } answers {
-            navigatorObserverImplSlot.captured.onStatus(
-                NavigationStatusOrigin.LOCATION_UPDATE,
-                createNavigationStatus(
-                    location = firstArg(),
-                    voiceInstruction = createVoiceInstruction("2")
-                )
-            )
-            true
-        }
+        StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
         val locationEngine = TestLocationEngine.create()
         val tripSession = buildTripSession(
             nativeNavigator = nativeNavigator,
@@ -100,9 +61,9 @@ class MapboxTripSessionNoSetupTest {
             RoutesExtra.ROUTES_UPDATE_REASON_NEW
         )
         // act
-        locationEngine.updateLocation(createLocation(longitude = 1.0))
-        locationEngine.updateLocation(createLocation(longitude = 1.5))
-        locationEngine.updateLocation(createLocation(longitude = 2.0))
+        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
+        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL))
+        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2))
         // assert
         val announcementsFromVoiceInstructionObserver = voiceInstructionsObserver.records
             .takeLast(3) // take only events triggered by location updates
@@ -118,49 +79,7 @@ class MapboxTripSessionNoSetupTest {
     fun addingVoiceInstructionsObserversInTheMiddleOfNavigation() {
         // arrange
         val nativeNavigator = mockk<MapboxNativeNavigator>(relaxed = true)
-        val navigatorObserverImplSlot = slot<NavigatorObserver>()
-        every {
-            nativeNavigator.addNavigatorObserver(capture(navigatorObserverImplSlot))
-        } returns Unit
-        coEvery {
-            nativeNavigator.setRoute(any(), any())
-        } returns null
-        coEvery {
-            nativeNavigator.updateLocation(match { it.coordinate.longitude() == 1.0 })
-        } answers {
-            navigatorObserverImplSlot.captured.onStatus(
-                NavigationStatusOrigin.LOCATION_UPDATE,
-                createNavigationStatus(
-                    location = firstArg(),
-                    voiceInstruction = createVoiceInstruction("1")
-                )
-            )
-            true
-        }
-        coEvery {
-            nativeNavigator.updateLocation(match { it.coordinate.longitude() == 1.5 })
-        } answers {
-            navigatorObserverImplSlot.captured.onStatus(
-                NavigationStatusOrigin.LOCATION_UPDATE,
-                createNavigationStatus(
-                    location = firstArg(),
-                    voiceInstruction = null
-                )
-            )
-            true
-        }
-        coEvery {
-            nativeNavigator.updateLocation(match { it.coordinate.longitude() == 2.0 })
-        } answers {
-            navigatorObserverImplSlot.captured.onStatus(
-                NavigationStatusOrigin.LOCATION_UPDATE,
-                createNavigationStatus(
-                    location = firstArg(),
-                    voiceInstruction = createVoiceInstruction("2")
-                )
-            )
-            true
-        }
+        StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
         val locationEngine = TestLocationEngine.create()
         val tripSession = buildTripSession(
             nativeNavigator = nativeNavigator,
@@ -172,16 +91,17 @@ class MapboxTripSessionNoSetupTest {
             0,
             RoutesExtra.ROUTES_UPDATE_REASON_NEW
         )
-        locationEngine.updateLocation(createLocation(longitude = 1.0))
+        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         val routeProgressObserver = RouteProgressObserverRecorder()
         tripSession.registerRouteProgressObserver(routeProgressObserver)
         // act
         val voiceInstructionsObserver = VoiceInstructionsObserverRecorder()
         tripSession.registerVoiceInstructionsObserver(voiceInstructionsObserver)
-        locationEngine.updateLocation(createLocation(longitude = 1.5))
-        locationEngine.updateLocation(createLocation(longitude = 2.0))
+        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL))
+        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2))
         // assert
         val voiceInstructionsAnnouncements = voiceInstructionsObserver.records
+            .takeLast(2) // take only events triggered by location updates
             .map { it.announcement() }
         assertEquals(listOf("1", "2"), voiceInstructionsAnnouncements)
     }
@@ -190,49 +110,7 @@ class MapboxTripSessionNoSetupTest {
     fun noVoiceInstructionFallbackForFreshRoute() {
         // arrange
         val nativeNavigator = mockk<MapboxNativeNavigator>(relaxed = true)
-        val navigatorObserverImplSlot = slot<NavigatorObserver>()
-        every {
-            nativeNavigator.addNavigatorObserver(capture(navigatorObserverImplSlot))
-        } returns Unit
-        coEvery {
-            nativeNavigator.setRoute(any(), any())
-        } returns null
-        coEvery {
-            nativeNavigator.updateLocation(match { it.coordinate.longitude() == 1.0 })
-        } answers {
-            navigatorObserverImplSlot.captured.onStatus(
-                NavigationStatusOrigin.LOCATION_UPDATE,
-                createNavigationStatus(
-                    location = firstArg(),
-                    voiceInstruction = createVoiceInstruction("1")
-                )
-            )
-            true
-        }
-        coEvery {
-            nativeNavigator.updateLocation(match { it.coordinate.longitude() == 1.5 })
-        } answers {
-            navigatorObserverImplSlot.captured.onStatus(
-                NavigationStatusOrigin.LOCATION_UPDATE,
-                createNavigationStatus(
-                    location = firstArg(),
-                    voiceInstruction = null
-                )
-            )
-            true
-        }
-        coEvery {
-            nativeNavigator.updateLocation(match { it.coordinate.longitude() == 2.0 })
-        } answers {
-            navigatorObserverImplSlot.captured.onStatus(
-                NavigationStatusOrigin.LOCATION_UPDATE,
-                createNavigationStatus(
-                    location = firstArg(),
-                    voiceInstruction = createVoiceInstruction("2")
-                )
-            )
-            true
-        }
+        StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
         val locationEngine = TestLocationEngine.create()
         val tripSession = buildTripSession(
             nativeNavigator = nativeNavigator,
@@ -246,15 +124,15 @@ class MapboxTripSessionNoSetupTest {
             0,
             ROUTES_UPDATE_REASON_NEW
         )
-        locationEngine.updateLocation(createLocation(longitude = 1.0))
+        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         // act
         tripSession.setRoutes(
             listOf(createDirectionsRoute()),
             0,
             ROUTES_UPDATE_REASON_NEW
         )
-        locationEngine.updateLocation(createLocation(longitude = 1.5))
-        locationEngine.updateLocation(createLocation(longitude = 2.0))
+        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL))
+        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2))
         // assert
         val voiceInstructionsAnnouncements = routeProgressObserver.records
             .takeLast(2) // take only events triggered by location updates
@@ -266,50 +144,8 @@ class MapboxTripSessionNoSetupTest {
     fun noVoiceInstructionFallbackAfterLegIndexUpdate() {
         // arrange
         val nativeNavigator = mockk<MapboxNativeNavigator>(relaxed = true)
+        StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
         coEvery { nativeNavigator.updateLegIndex(any()) } returns true
-        val navigatorObserverImplSlot = slot<NavigatorObserver>()
-        every {
-            nativeNavigator.addNavigatorObserver(capture(navigatorObserverImplSlot))
-        } returns Unit
-        coEvery {
-            nativeNavigator.setRoute(any(), any())
-        } returns null
-        coEvery {
-            nativeNavigator.updateLocation(match { it.coordinate.longitude() == 1.0 })
-        } answers {
-            navigatorObserverImplSlot.captured.onStatus(
-                NavigationStatusOrigin.LOCATION_UPDATE,
-                createNavigationStatus(
-                    location = firstArg(),
-                    voiceInstruction = createVoiceInstruction("1")
-                )
-            )
-            true
-        }
-        coEvery {
-            nativeNavigator.updateLocation(match { it.coordinate.longitude() == 1.5 })
-        } answers {
-            navigatorObserverImplSlot.captured.onStatus(
-                NavigationStatusOrigin.LOCATION_UPDATE,
-                createNavigationStatus(
-                    location = firstArg(),
-                    voiceInstruction = null
-                )
-            )
-            true
-        }
-        coEvery {
-            nativeNavigator.updateLocation(match { it.coordinate.longitude() == 2.0 })
-        } answers {
-            navigatorObserverImplSlot.captured.onStatus(
-                NavigationStatusOrigin.LOCATION_UPDATE,
-                createNavigationStatus(
-                    location = firstArg(),
-                    voiceInstruction = createVoiceInstruction("2")
-                )
-            )
-            true
-        }
         val locationEngine = TestLocationEngine.create()
         val tripSession = buildTripSession(
             nativeNavigator = nativeNavigator,
@@ -323,11 +159,11 @@ class MapboxTripSessionNoSetupTest {
             0,
             ROUTES_UPDATE_REASON_NEW
         )
-        locationEngine.updateLocation(createLocation(longitude = 1.0))
+        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         // act
         tripSession.updateLegIndex(1) { }
-        locationEngine.updateLocation(createLocation(longitude = 1.5))
-        locationEngine.updateLocation(createLocation(longitude = 2.0))
+        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL))
+        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2))
         // assert
         val voiceInstructionsAnnouncements = routeProgressObserver.records
             .takeLast(2) // take only events triggered by location updates
@@ -340,49 +176,7 @@ class MapboxTripSessionNoSetupTest {
         // arrange
         val nativeNavigator = mockk<MapboxNativeNavigator>(relaxed = true)
         coEvery { nativeNavigator.updateLegIndex(any()) } returns false
-        val navigatorObserverImplSlot = slot<NavigatorObserver>()
-        every {
-            nativeNavigator.addNavigatorObserver(capture(navigatorObserverImplSlot))
-        } returns Unit
-        coEvery {
-            nativeNavigator.setRoute(any(), any())
-        } returns null
-        coEvery {
-            nativeNavigator.updateLocation(match { it.coordinate.longitude() == 1.0 })
-        } answers {
-            navigatorObserverImplSlot.captured.onStatus(
-                NavigationStatusOrigin.LOCATION_UPDATE,
-                createNavigationStatus(
-                    location = firstArg(),
-                    voiceInstruction = createVoiceInstruction("1")
-                )
-            )
-            true
-        }
-        coEvery {
-            nativeNavigator.updateLocation(match { it.coordinate.longitude() == 1.5 })
-        } answers {
-            navigatorObserverImplSlot.captured.onStatus(
-                NavigationStatusOrigin.LOCATION_UPDATE,
-                createNavigationStatus(
-                    location = firstArg(),
-                    voiceInstruction = null
-                )
-            )
-            true
-        }
-        coEvery {
-            nativeNavigator.updateLocation(match { it.coordinate.longitude() == 2.0 })
-        } answers {
-            navigatorObserverImplSlot.captured.onStatus(
-                NavigationStatusOrigin.LOCATION_UPDATE,
-                createNavigationStatus(
-                    location = firstArg(),
-                    voiceInstruction = createVoiceInstruction("2")
-                )
-            )
-            true
-        }
+        StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
         val locationEngine = TestLocationEngine.create()
         val tripSession = buildTripSession(
             nativeNavigator = nativeNavigator,
@@ -396,11 +190,11 @@ class MapboxTripSessionNoSetupTest {
             0,
             ROUTES_UPDATE_REASON_NEW
         )
-        locationEngine.updateLocation(createLocation(longitude = 1.0))
+        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         // act
         tripSession.updateLegIndex(1) { }
-        locationEngine.updateLocation(createLocation(longitude = 1.5))
-        locationEngine.updateLocation(createLocation(longitude = 2.0))
+        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL))
+        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2))
         // assert
         val voiceInstructionsAnnouncements = routeProgressObserver.records
             .takeLast(2) // take only events triggered by location updates
@@ -435,4 +229,65 @@ private fun buildTripSession(
         logger = mockk(relaxed = true),
         eHorizonSubscriptionManager = mockk(relaxed = true),
     )
+}
+
+class StatusWithVoiceInstructionUpdateUtil {
+    companion object {
+
+        const val LONGITUDE_FOR_VOICE_INSTRUCTION_1 = 1.0
+        const val LONGITUDE_FOR_VOICE_INSTRUCTION_NULL = 1.5
+        const val LONGITUDE_FOR_VOICE_INSTRUCTION_2 = 2.0
+
+        fun triggerStatusUpdatesOnLocationUpdate(nativeNavigator: MapboxNativeNavigator) {
+            coEvery {
+                nativeNavigator.setRoute(any(), any())
+            } returns null
+            val navigatorObserverImplSlot = slot<NavigatorObserver>()
+            every {
+                nativeNavigator.addNavigatorObserver(capture(navigatorObserverImplSlot))
+            } returns Unit
+            coEvery {
+                nativeNavigator.updateLocation(
+                    match { it.coordinate.longitude() == LONGITUDE_FOR_VOICE_INSTRUCTION_1 }
+                )
+            } answers {
+                navigatorObserverImplSlot.captured.onStatus(
+                    NavigationStatusOrigin.LOCATION_UPDATE,
+                    createNavigationStatus(
+                        location = firstArg(),
+                        voiceInstruction = createVoiceInstruction("1")
+                    )
+                )
+                true
+            }
+            coEvery {
+                nativeNavigator.updateLocation(
+                    match { it.coordinate.longitude() == LONGITUDE_FOR_VOICE_INSTRUCTION_NULL }
+                )
+            } answers {
+                navigatorObserverImplSlot.captured.onStatus(
+                    NavigationStatusOrigin.LOCATION_UPDATE,
+                    createNavigationStatus(
+                        location = firstArg(),
+                        voiceInstruction = null
+                    )
+                )
+                true
+            }
+            coEvery {
+                nativeNavigator.updateLocation(
+                    match { it.coordinate.longitude() == LONGITUDE_FOR_VOICE_INSTRUCTION_2 }
+                )
+            } answers {
+                navigatorObserverImplSlot.captured.onStatus(
+                    NavigationStatusOrigin.LOCATION_UPDATE,
+                    createNavigationStatus(
+                        location = firstArg(),
+                        voiceInstruction = createVoiceInstruction("2")
+                    )
+                )
+                true
+            }
+        }
+    }
 }
