@@ -333,6 +333,38 @@ class MapboxHistoryTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         assertEquals(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC, setRouteEvent.profile)
     }
 
+    @Test
+    fun verify_identifying_events_can_be_found() {
+        mapboxNavigation.startTripSession()
+        val firstJson = """{"identifier":"first"}"""
+        val secondJson = """{"identifier":"second"}"""
+        val thirdJson = """{"identifier":"third"}"""
+
+        val firstFile = startAndStopRecording(firstJson)
+        val secondFile = startAndStopRecording(secondJson)
+        val thirdFile = startAndStopRecording(thirdJson)
+
+        fun String.findCustomEvent() = MapboxHistoryReader(this).asSequence()
+            .filterIsInstance(HistoryEventPushHistoryRecord::class.java)
+            .last()
+        assertEquals(firstJson, firstFile.findCustomEvent().properties)
+        assertEquals(secondJson, secondFile.findCustomEvent().properties)
+        assertEquals(thirdJson, thirdFile.findCustomEvent().properties)
+    }
+
+    private fun startAndStopRecording(eventJson: String): String {
+        mapboxNavigation.historyRecorder.startRecording()
+        mapboxNavigation.historyRecorder.pushHistory(CUSTOM_EVENT_TYPE, eventJson)
+        var filePath: String? = null
+        val countDownLatch = CountDownLatch(1)
+        mapboxNavigation.historyRecorder.stopRecording { filePathFromNative ->
+            filePath = filePathFromNative
+            countDownLatch.countDown()
+        }
+        countDownLatch.await()
+        return filePath!!
+    }
+
     private fun historyReaderFromAssetFile(
         name: String
     ): MapboxHistoryReader {
