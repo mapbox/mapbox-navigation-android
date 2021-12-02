@@ -403,17 +403,17 @@ class RouteAlternativesControllerTest {
             )
         )
 
-        val routeProgressSlot = slot<RouteProgress>()
-        val alternativesSlot = slot<List<DirectionsRoute>>()
-        val routerOriginSlot = slot<RouterOrigin>()
+        val routeProgressSlots = mutableListOf<RouteProgress>()
+        val alternativesSlots = mutableListOf<List<DirectionsRoute>>()
+        val routerOriginSlots = mutableListOf<RouterOrigin>()
         verify(exactly = 2) {
             observer.onRouteAlternatives(
-                capture(routeProgressSlot),
-                capture(alternativesSlot),
-                capture(routerOriginSlot)
+                capture(routeProgressSlots),
+                capture(alternativesSlots),
+                capture(routerOriginSlots),
             )
         }
-        assertEquals(RouterOrigin.Offboard, routerOriginSlot.captured)
+        assertEquals(RouterOrigin.Offboard, routerOriginSlots.last())
     }
 
     @Test
@@ -453,17 +453,17 @@ class RouteAlternativesControllerTest {
                 )
             )
 
-            val routeProgressSlot = slot<RouteProgress>()
-            val alternativesSlot = slot<List<DirectionsRoute>>()
-            val routerOriginSlot = slot<RouterOrigin>()
+            val routeProgressSlots = mutableListOf<RouteProgress>()
+            val alternativesSlots = mutableListOf<List<DirectionsRoute>>()
+            val routerOriginSlots = mutableListOf<RouterOrigin>()
             verify(exactly = 2) {
                 observer.onRouteAlternatives(
-                    capture(routeProgressSlot),
-                    capture(alternativesSlot),
-                    capture(routerOriginSlot)
+                    capture(routeProgressSlots),
+                    capture(alternativesSlots),
+                    capture(routerOriginSlots),
                 )
             }
-            assertEquals(RouterOrigin.Offboard, routerOriginSlot.captured)
+            assertEquals(RouterOrigin.Offboard, routerOriginSlots.last())
         }
 
     @Test
