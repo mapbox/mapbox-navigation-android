@@ -8,6 +8,7 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import com.mapbox.navigation.testing.ui.utils.executeShellCommandBlocking
 import org.junit.rules.ExternalResource
 import java.util.Date
 
@@ -27,17 +28,11 @@ class MockLocationUpdatesRule : ExternalResource() {
     }
 
     override fun before() {
-        with(instrumentation.uiAutomation) {
-            val result = executeShellCommand(
-                "appops set " +
-                    appContext.packageName +
-                    " android:mock_location allow"
-            )
-            result.close()
-            // gives the adb command chance to process
-            // and avoids occasional issues with registering the mock provider
-            Thread.sleep(1000)
-        }
+        instrumentation.uiAutomation.executeShellCommandBlocking(
+            "appops set " +
+                appContext.packageName +
+                " android:mock_location allow"
+        )
 
         try {
             locationManager.addTestProvider(
