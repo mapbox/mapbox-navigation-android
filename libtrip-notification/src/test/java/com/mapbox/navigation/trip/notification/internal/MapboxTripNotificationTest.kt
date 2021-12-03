@@ -16,7 +16,6 @@ import android.widget.RemoteViews
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.navigation.base.formatter.DistanceFormatter
-import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
 import com.mapbox.navigation.base.internal.time.TimeFormatter
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -34,6 +33,7 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -157,6 +157,7 @@ class MapboxTripNotificationTest {
         verify(exactly = 1) { mockedContext.registerReceiver(any(), any()) }
     }
 
+    @ExperimentalCoroutinesApi
     @Test
     fun whenTripStoppedThenCleanupIsDone() {
         val notificationManager =
@@ -242,8 +243,8 @@ class MapboxTripNotificationTest {
         mockUpdateNotificationAndroidInteractions()
         val suffix = "this is nice formatting"
         mockTimeFormatter(suffix)
-        val result = String.format(FORMAT_STRING, suffix + duration.toDouble().toString())
-        val state = TripNotificationStateFactory.buildTripNotificationState(
+        val result = String.format(FORMAT_STRING, suffix + duration.toString())
+        val state = buildTripNotificationState(
             null,
             distance,
             duration,
@@ -257,7 +258,7 @@ class MapboxTripNotificationTest {
     }
 
     @Test
-    fun whenUpdateNotificationCalledTwiceWithSameDataThenRemoteViewAreNotUpdatedTwice() {
+    fun whenUpdateNotificationCalledTwiceWithSameDataThenRemoteViewUpdatedTwice() {
         val state = mockk<TripNotificationState.TripNotificationData>(relaxed = true)
         val primaryText = { "Primary Text" }
         val bannerText = mockBannerText(state, primaryText)
@@ -272,8 +273,8 @@ class MapboxTripNotificationTest {
         notification.updateNotification(state)
 
         verify(exactly = 2) { bannerText.text() }
-        verify(exactly = 1) { collapsedViews.setTextViewText(any(), primaryText()) }
-        verify(exactly = 1) { expandedViews.setTextViewText(any(), primaryText()) }
+        verify(exactly = 2) { collapsedViews.setTextViewText(any(), primaryText()) }
+        verify(exactly = 2) { expandedViews.setTextViewText(any(), primaryText()) }
         assertEquals(notification.currentManeuverType, MANEUVER_TYPE)
         assertEquals(notification.currentManeuverModifier, MANEUVER_MODIFIER)
     }
@@ -412,7 +413,7 @@ class MapboxTripNotificationTest {
             expandedViews.setViewVisibility(R.id.freeDriveText, any())
         }
         verify(exactly = 2) {
-            expandedViews.setTextViewText(R.id.endNavigationBtnText, STOP_SESSION)
+            expandedViews.setTextViewText(R.id.endNavigationBtn, STOP_SESSION)
         }
     }
 
