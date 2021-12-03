@@ -3,7 +3,7 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Mapbox Navigation SDK 2.0.3 - December 2, 2021
-Mapbox Navigation SDK v2.0.3 was released prematurely with an unresolved billing issue. We deleted this versions from the Maven repository and we’re preparing the v2.0.4 release with additional fixes.
+Mapbox Navigation SDK v2.0.3 was released prematurely with an unresolved billing issue. We deleted this version from the Maven repository and we’re preparing the v2.0.4 release with additional fixes.
 
 We strongly recommend not to release your application with v2.0.3. More information will be available in [this announcement](https://github.com/mapbox/mapbox-navigation-android/discussions/5213).
 
