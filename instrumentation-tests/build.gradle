@@ -35,6 +35,7 @@ android {
 dependencies {
     // Mapbox Navigation SDK
     implementation project(':libnavigation-android')
+    implementation project(':libnavui-dropin')
 
     // test
     androidTestImplementation project(':libtesting-ui')
