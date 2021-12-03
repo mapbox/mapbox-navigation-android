@@ -34,7 +34,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - pg-cp-5191
       - release:
           filters:
             tags:
