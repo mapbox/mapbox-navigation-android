@@ -3,8 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigationCollapsedNotificationLayout"
     android:layout_width="match_parent"
-    android:layout_height="64dp"
-    android:background="@color/mapbox_notification_blue">
+    android:layout_height="wrap_content"
+    android:background="@color/mapbox_notification_blue"
+    android:padding="@dimen/mapbox_notification_padding">
 
     <ImageView
         android:id="@+id/maneuverImage"
@@ -13,10 +14,8 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
+        android:contentDescription="@null"
         android:cropToPadding="true"
         android:padding="8dp" />
 
