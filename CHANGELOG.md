@@ -2,6 +2,33 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.2.0-alpha.1 - December 3, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
+- Added a new object `NavigationStyles` that exposes links to default navigation day and night styles. [#5153](https://github.com/mapbox/mapbox-navigation-android/pull/5153)
+- Fixed notification appearance on Android 12.[#5159](https://github.com/mapbox/mapbox-navigation-android/pull/5159)
+- Add checkIsLanguageAvailable flag to VoiceInstructionsPlayerOptions. [#5166](https://github.com/mapbox/mapbox-navigation-android/pull/5166)
+- Fixed an issue where the origin of new alternative routes was always reported as `Onboard`. [#5167](https://github.com/mapbox/mapbox-navigation-android/pull/5167)
+- Added support for `include` route request parameter for onboard router. [#5167](https://github.com/mapbox/mapbox-navigation-android/pull/5167)
+- Added support for `exclude_cash_only_tolls` route request parameter for onboard router. [#5167](https://github.com/mapbox/mapbox-navigation-android/pull/5167)
+- Fixed issue where off-route might not have been detected on complex overpass roads. [#5167](https://github.com/mapbox/mapbox-navigation-android/pull/5167)
+- Fixed an issue where toll and motorway route exclusions were not respected for onboard router. [#5167](https://github.com/mapbox/mapbox-navigation-android/pull/5167)
+- Fixed an issue where `IncidentInfo#id` might've been incorrect when the incident was part of the route response.[#5167](https://github.com/mapbox/mapbox-navigation-android/pull/5167)
+- Added support for `ShieldSprites`, `ShieldSprite` and `ShieldSpriteAttribute` for mapbox designed route shields.[#5184](https://github.com/mapbox/mapbox-navigation-android/pull/5184)
+- Exposed a callback for `MapboxNavigation#requestAlternativeRoutes` to track progress of the on-demand alternative routes request.[#5189](https://github.com/mapbox/mapbox-navigation-android/pull/5189)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.2.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.2.0-beta.1))
+- Mapbox Navigation Native `v81.0.0`
+- Mapbox Core Common `v21.0.0-rc.1`
+- Mapbox Java `v6.2.0-beta.2` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.2.0-beta.2))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.1.0 - December 2, 2021
 Mapbox Navigation SDK v2.1.0 was released prematurely with an unresolved billing issue. We deleted this versions from the Maven repository and we’re preparing the v2.1.1 release with additional fixes.
 
