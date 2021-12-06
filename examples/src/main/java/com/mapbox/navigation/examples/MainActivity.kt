@@ -10,21 +10,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.permissions.PermissionsListener
-import com.mapbox.navigation.examples.core.IndependentRouteGenerationActivity
-import com.mapbox.navigation.examples.core.MapboxBuildingHighlightActivity
-import com.mapbox.navigation.examples.core.MapboxCustomStyleActivity
-import com.mapbox.navigation.examples.core.MapboxDropInActivity
-import com.mapbox.navigation.examples.core.MapboxJunctionActivity
-import com.mapbox.navigation.examples.core.MapboxManeuverActivity
-import com.mapbox.navigation.examples.core.MapboxMultipleArrowActivity
-import com.mapbox.navigation.examples.core.MapboxNavigationActivity
-import com.mapbox.navigation.examples.core.MapboxRouteLineAndArrowActivity
-import com.mapbox.navigation.examples.core.MapboxSignboardActivity
-import com.mapbox.navigation.examples.core.MapboxTripProgressActivity
-import com.mapbox.navigation.examples.core.MapboxVoiceActivity
-import com.mapbox.navigation.examples.core.MultiLegRouteExampleActivity
-import com.mapbox.navigation.examples.core.R
-import com.mapbox.navigation.examples.core.ReplayHistoryActivity
+import com.mapbox.navigation.examples.core.*
 import com.mapbox.navigation.examples.core.camera.MapboxCameraAnimationsActivity
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityMainBinding
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper
@@ -65,6 +51,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
 
     private fun buildSampleList(): List<SampleItem> {
         return listOf(
+            SampleItem(
+                "OpenLR example",
+                "TBD",
+                DecodeOpenLRActivity::class.java
+            ),
             SampleItem(
                 getString(R.string.title_navigation),
                 getString(R.string.description_navigation),

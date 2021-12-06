@@ -126,4 +126,8 @@ dependencies {
 
     // Crashlytics
     implementation dependenciesList.firebaseCrashlyticsNdk
+
+    implementation ('org.openlr:binary:1.4.3') {
+        exclude group: "colt", module: "colt"
+    }
 }
