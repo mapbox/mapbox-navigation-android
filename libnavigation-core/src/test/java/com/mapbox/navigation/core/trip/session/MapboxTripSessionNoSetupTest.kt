@@ -62,7 +62,9 @@ class MapboxTripSessionNoSetupTest {
         )
         // act
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
-        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL))
+        locationEngine.updateLocation(
+            createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL)
+        )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2))
         // assert
         val announcementsFromVoiceInstructionObserver = voiceInstructionsObserver.records
@@ -97,7 +99,9 @@ class MapboxTripSessionNoSetupTest {
         // act
         val voiceInstructionsObserver = VoiceInstructionsObserverRecorder()
         tripSession.registerVoiceInstructionsObserver(voiceInstructionsObserver)
-        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL))
+        locationEngine.updateLocation(
+            createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL)
+        )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2))
         // assert
         val voiceInstructionsAnnouncements = voiceInstructionsObserver.records
@@ -131,7 +135,9 @@ class MapboxTripSessionNoSetupTest {
             0,
             ROUTES_UPDATE_REASON_NEW
         )
-        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL))
+        locationEngine.updateLocation(
+            createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL)
+        )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2))
         // assert
         val voiceInstructionsAnnouncements = routeProgressObserver.records
@@ -162,7 +168,9 @@ class MapboxTripSessionNoSetupTest {
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         // act
         tripSession.updateLegIndex(1) { }
-        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL))
+        locationEngine.updateLocation(
+            createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL)
+        )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2))
         // assert
         val voiceInstructionsAnnouncements = routeProgressObserver.records
@@ -193,7 +201,9 @@ class MapboxTripSessionNoSetupTest {
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
         // act
         tripSession.updateLegIndex(1) { }
-        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL))
+        locationEngine.updateLocation(
+            createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_NULL)
+        )
         locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_2))
         // assert
         val voiceInstructionsAnnouncements = routeProgressObserver.records
