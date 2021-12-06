@@ -87,7 +87,8 @@ internal fun Location.toFixLocation(): FixLocation {
         speedAccuracy,
         verticalAccuracy,
         extras?.toMap() ?: Bundle().toMap(),
-        isFromMockProvider
+        isFromMockProvider,
+        false
     )
 }
 
