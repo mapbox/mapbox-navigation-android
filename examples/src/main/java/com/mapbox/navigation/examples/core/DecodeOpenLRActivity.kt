@@ -243,8 +243,8 @@ class DecodeOpenLRActivity : AppCompatActivity() {
     }
 
     private fun decodeRoute() {
-        //buildViaMapMatching()
-        buildUsingLrps()
+        buildViaMapMatching()
+        //buildUsingLrps()
     }
 
     private fun buildUsingLrps() {
