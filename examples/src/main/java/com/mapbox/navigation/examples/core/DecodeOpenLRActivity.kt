@@ -1,7 +1,6 @@
 package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
-import android.location.Location
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
@@ -22,7 +21,6 @@ import com.mapbox.maps.OfflineManager
 import com.mapbox.maps.ResourceOptions
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.animation.camera
-import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
@@ -36,12 +34,9 @@ import com.mapbox.navigation.base.trip.model.eh.OpenLRStandard.TOM_TOM
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.trip.session.LocationMatcherResult
-import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.examples.core.databinding.MapboxActivityOpenLrBinding
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
-import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -51,26 +46,10 @@ import openlr.LocationReferencePoint
 import openlr.binary.OpenLRBinaryDecoder
 import openlr.binary.impl.LocationReferenceBinaryImpl
 
-private val OPEN_LR_TO_DECODE = "C/uS0iXwhRpzC/73/cAbbwQAOv86G2kAACD/+htpBAFe/8UbaQYCNf+xG2kFAYH/YxttKfQX/SgbdTzsC/9FG3ol+tAGJBtvJwA="
+private const val DEFAULT_OPEN_LR = "C/uS0iXwhRpzC/73/cAbbwQAOv86G2kAACD/+htpBAFe/8UbaQYCNf+xG2kFAYH/YxttKfQX/SgbdTzsC/9FG3ol+tAGJBtvJwA="
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DecodeOpenLRActivity : AppCompatActivity() {
-
-    private val navigationLocationProvider = NavigationLocationProvider()
-
-    private val locationObserver = object : LocationObserver {
-
-        override fun onNewRawLocation(rawLocation: Location) {
-        }
-
-        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
-            val enhancedLocation = locationMatcherResult.enhancedLocation
-            navigationLocationProvider.changePosition(
-                enhancedLocation,
-                locationMatcherResult.keyPoints,
-            )
-        }
-    }
 
     private lateinit var binding: MapboxActivityOpenLrBinding
 
@@ -154,7 +133,7 @@ class DecodeOpenLRActivity : AppCompatActivity() {
         setContentView(binding.root)
         val mapboxToken = getString(R.string.mapbox_access_token)
 
-        val tilesPath = filesDir.path + "/test123"
+        val tilesPath = filesDir.path + "/exampleTiles"
         tileStore = TileStore.create(tilesPath).apply {
             setOption(
                 TileStoreOptions.MAPBOX_ACCESS_TOKEN,
@@ -177,11 +156,6 @@ class DecodeOpenLRActivity : AppCompatActivity() {
         binding.mapViewContainer.addView(mapView)
         mapboxMap = mapView.getMapboxMap()
         offlineManager = OfflineManager(resourceOptions)
-
-        mapView.location.apply {
-            setLocationProvider(navigationLocationProvider)
-            enabled = true
-        }
 
         // initialize Mapbox Navigation
         mapboxNavigation = MapboxNavigationProvider.create(
@@ -217,9 +191,12 @@ class DecodeOpenLRActivity : AppCompatActivity() {
         mapboxMap.loadStyleUri(Style.MAPBOX_STREETS)
 
         binding.decodeButton.setOnClickListener {
+            mapboxNavigation.setRoutes(emptyList())
             binding.decodeButton.hide()
-            decodeRoute()
+            buildViaMapMatching(binding.openLrInput.text.toString())
         }
+
+        binding.openLrInput.setText(DEFAULT_OPEN_LR)
     }
 
     override fun onStart() {
@@ -236,10 +213,6 @@ class DecodeOpenLRActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         mapboxNavigation.onDestroy()
-    }
-
-    private fun decodeRoute() {
-        buildViaMapMatching(OPEN_LR_TO_DECODE)
     }
 
     private fun buildViaMapMatching(openlr: String) {
@@ -357,13 +330,14 @@ class DecodeOpenLRActivity : AppCompatActivity() {
                 ) {
                     mapboxNavigation.setRoutes(routes)
                     navigationCamera.requestNavigationCameraToOverview()
+                    binding.decodeButton.show()
                 }
 
                 override fun onFailure(
                     reasons: List<RouterFailure>,
                     routeOptions: RouteOptions
                 ) {
-                    // no impl
+                    binding.decodeButton.show()
                 }
 
                 override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
