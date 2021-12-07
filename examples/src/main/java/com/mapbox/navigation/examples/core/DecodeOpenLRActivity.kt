@@ -148,8 +148,6 @@ class DecodeOpenLRActivity : AppCompatActivity() {
         }
     }
 
-    private val tilesVersion = "2021_11_27-03_00_00"
-
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -181,7 +179,6 @@ class DecodeOpenLRActivity : AppCompatActivity() {
         mapboxMap = mapView.getMapboxMap()
         offlineManager = OfflineManager(resourceOptions)
 
-
         mapView.location.apply {
             setLocationProvider(navigationLocationProvider)
             enabled = true
@@ -194,7 +191,6 @@ class DecodeOpenLRActivity : AppCompatActivity() {
                 .routingTilesOptions(
                     RoutingTilesOptions.Builder()
                         .tileStore(tileStore)
-                        .tilesVersion(tilesVersion)
                         .build()
                 )
                 .build()
@@ -253,7 +249,7 @@ class DecodeOpenLRActivity : AppCompatActivity() {
 
         val tilesPolygon = createPolygonFor(getLrpFromOpenLR(openlr))
 
-        val navigationDescription = mapboxNavigation.tilesetDescriptorFactory.getSpecificVersion(tilesVersion)
+        val navigationDescription = mapboxNavigation.tilesetDescriptorFactory.getLatest()
         tileStore.loadTileRegion(
             openlr,
             TileRegionLoadOptions.Builder()
