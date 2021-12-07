@@ -49,6 +49,8 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
+import com.mapbox.turf.TurfConstants
+import com.mapbox.turf.TurfMeasurement
 import openlr.binary.ByteArray
 import openlr.binary.OpenLRBinaryDecoder
 import openlr.binary.impl.LocationReferenceBinaryImpl
@@ -268,7 +270,7 @@ class DecodeOpenLRActivity : AppCompatActivity() {
         buildRoute(points, bearings)
     }
 
-    private fun buildRoute(points: List<Point>, bearings: List<Bearing>? = null) {
+    private fun buildRoute(points: List<Point>, bearings: List<Bearing?>? = null) {
         mapboxNavigation.requestRoutes(
             RouteOptions.builder()
                 .applyDefaultNavigationOptions()
@@ -343,6 +345,7 @@ class DecodeOpenLRActivity : AppCompatActivity() {
                     val shape = roadObject.location.shape as? LineString
                     if (shape != null) {
                         val points = shape.coordinates()
+                        //val bearings = calculateBearings(points)
                         buildRoute(points)
                     } else {
                         Log.e("DecodeOpenLRActivity", "matched road object isn't a line")
@@ -355,50 +358,71 @@ class DecodeOpenLRActivity : AppCompatActivity() {
                 listOf(
                     MatchableOpenLr("open-lr-example", openlr, TOM_TOM)
                 ),
-                useOnlyPreloadedTiles = false
+                useOnlyPreloadedTiles = true
             )
 
         }
+    }
+
+    private fun calculateBearings(points: List<Point>): MutableList<Bearing?> {
+        val bearings = mutableListOf<Bearing?>()
+        for (i in points.indices) {
+            val bearing = if (i == points.size - 1) {
+                null
+            } else {
+                val decimalDegrees = TurfMeasurement.bearing(points[i], points[i + 1])
+                val normalizedDegrees = if (decimalDegrees > 0) {
+                    decimalDegrees
+                } else 360.0 + decimalDegrees
+                Bearing.builder()
+                    .angle(normalizedDegrees)
+                    .degrees(10.0)
+                    .build()
+
+            }
+            bearings.add(bearing)
+        }
+        return bearings
     }
 }
 
 
 private val BERLIN = "{\n" +
-        "  \"type\": \"FeatureCollection\",\n" +
-        "  \"features\": [\n" +
-        "    {\n" +
-        "      \"type\": \"Feature\",\n" +
-        "      \"properties\": {},\n" +
-        "      \"geometry\": {\n" +
-        "        \"type\": \"Polygon\",\n" +
-        "        \"coordinates\": [\n" +
-        "          [\n" +
-        "            [\n" +
-        "              13.121795654296875,\n" +
-        "              52.32526831457077\n" +
-        "            ],\n" +
-        "            [\n" +
-        "              13.77685546875,\n" +
-        "              52.32526831457077\n" +
-        "            ],\n" +
-        "            [\n" +
-        "              13.77685546875,\n" +
-        "              52.65222859561964\n" +
-        "            ],\n" +
-        "            [\n" +
-        "              13.121795654296875,\n" +
-        "              52.65222859561964\n" +
-        "            ],\n" +
-        "            [\n" +
-        "              13.121795654296875,\n" +
-        "              52.32526831457077\n" +
-        "            ]\n" +
-        "          ]\n" +
-        "        ]\n" +
-        "      }\n" +
-        "    }\n" +
-        "  ]\n" +
-        "}"
+    "  \"type\": \"FeatureCollection\",\n" +
+    "  \"features\": [\n" +
+    "    {\n" +
+    "      \"type\": \"Feature\",\n" +
+    "      \"properties\": {},\n" +
+    "      \"geometry\": {\n" +
+    "        \"type\": \"Polygon\",\n" +
+    "        \"coordinates\": [\n" +
+    "          [\n" +
+    "            [\n" +
+    "              13.121795654296875,\n" +
+    "              52.32526831457077\n" +
+    "            ],\n" +
+    "            [\n" +
+    "              13.77685546875,\n" +
+    "              52.32526831457077\n" +
+    "            ],\n" +
+    "            [\n" +
+    "              13.77685546875,\n" +
+    "              52.65222859561964\n" +
+    "            ],\n" +
+    "            [\n" +
+    "              13.121795654296875,\n" +
+    "              52.65222859561964\n" +
+    "            ],\n" +
+    "            [\n" +
+    "              13.121795654296875,\n" +
+    "              52.32526831457077\n" +
+    "            ]\n" +
+    "          ]\n" +
+    "        ]\n" +
+    "      }\n" +
+    "    }\n" +
+    "  ]\n" +
+    "}"
 
 private val DUBLIN = "{\n" +
     "  \"type\": \"FeatureCollection\",\n" +
