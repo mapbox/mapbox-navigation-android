@@ -36,7 +36,6 @@ import com.mapbox.navigation.base.trip.model.eh.OpenLRStandard.TOM_TOM
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.examples.core.databinding.MapboxActivityOpenLrBinding
@@ -47,12 +46,12 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
-import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import openlr.LocationReferencePoint
-import openlr.binary.ByteArray
 import openlr.binary.OpenLRBinaryDecoder
 import openlr.binary.impl.LocationReferenceBinaryImpl
+
+private val OPEN_LR_TO_DECODE = "C/uS0iXwhRpzC/73/cAbbwQAOv86G2kAACD/+htpBAFe/8UbaQYCNf+xG2kFAYH/YxttKfQX/SgbdTzsC/9FG3ol+tAGJBtvJwA="
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class DecodeOpenLRActivity : AppCompatActivity() {
@@ -240,13 +239,10 @@ class DecodeOpenLRActivity : AppCompatActivity() {
     }
 
     private fun decodeRoute() {
-        buildViaMapMatching()
+        buildViaMapMatching(OPEN_LR_TO_DECODE)
     }
 
-    private fun buildViaMapMatching() {
-        val openlr = "C/uS0iXwhRpzC/73/cAbbwQAOv86G2kAACD/+htpBAFe/8UbaQYCNf+xG2kFAYH/YxttKfQX/SgbdTzsC/9FG3ol+tAGJBtvJwA="
-        //"CwmQ9SVWJS2qBAD9/14tCQ=="
-
+    private fun buildViaMapMatching(openlr: String) {
         val tilesPolygon = createPolygonFor(getLrpFromOpenLR(openlr))
 
         val navigationDescription = mapboxNavigation.tilesetDescriptorFactory.getLatest()
@@ -272,7 +268,7 @@ class DecodeOpenLRActivity : AppCompatActivity() {
                     val roadObject = result.value!!
                     val shape = roadObject.location.shape as? LineString
                     if (shape != null) {
-                        val points = shape.coordinates()
+                        val points = shape.coordinates().minimizeCoordinatesCountTo(25)
                         //val bearings = calculateBearings(points)
                         buildRoute(points)
                     } else {
@@ -290,6 +286,20 @@ class DecodeOpenLRActivity : AppCompatActivity() {
             )
 
         }
+    }
+
+    private fun List<Point>.minimizeCoordinatesCountTo(coordinatesCount: Int): List<Point> {
+        val points = this
+        if (points.size < coordinatesCount) {
+            return points
+        }
+        val result = mutableListOf<Point>()
+        result.add(points.first())
+        val pickingInterval = (points.size - 2) / (coordinatesCount - 2)
+        for (i in points.indices step pickingInterval) {
+            result.add(points[i])
+        }
+        return result
     }
 
     private fun calculateBearings(points: List<Point>): MutableList<Bearing?> {
@@ -337,7 +347,7 @@ class DecodeOpenLRActivity : AppCompatActivity() {
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
                 .coordinatesList(points)
-                //.waypointIndicesList(listOf(0, points.size - 1))
+                .waypointIndicesList(listOf(0, points.size - 1))
                 .bearingsList(bearings)
                 .build(),
             object : RouterCallback {
