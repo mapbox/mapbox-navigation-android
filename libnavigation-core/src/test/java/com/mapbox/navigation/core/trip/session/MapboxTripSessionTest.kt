@@ -776,28 +776,6 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun voiceInstructionsFollowRouteProgress() = coroutineRule.runBlockingTest {
-        val voiceInstructionsObserver: VoiceInstructionsObserver = mockk(relaxUnitFun = true)
-        val voiceInstructions: VoiceInstructions = mockk()
-        val routeProgressObserver: RouteProgressObserver = mockk(relaxUnitFun = true)
-        every { routeProgress.voiceInstructions } returns voiceInstructions
-
-        tripSession = buildTripSession()
-        tripSession.start(true)
-        tripSession.registerVoiceInstructionsObserver(voiceInstructionsObserver)
-        tripSession.registerRouteProgressObserver(routeProgressObserver)
-
-        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
-
-        every { routeProgress.voiceInstructions } returns null
-
-        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
-
-        verify(exactly = 1) { voiceInstructionsObserver.onNewVoiceInstructions(any()) }
-        verify(exactly = 2) { routeProgressObserver.onRouteProgressChanged(any()) }
-    }
-
-    @Test
     fun `road objects observer gets successfully called`() = coroutineRule.runBlockingTest {
         val roadObjectsObserver: RoadObjectsOnRouteObserver = mockk(relaxUnitFun = true)
         val roadObjects: List<UpcomingRoadObject> = listOf(mockk())
