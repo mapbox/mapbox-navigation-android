@@ -14,9 +14,7 @@ import com.mapbox.common.TileDataDomain
 import com.mapbox.common.TileRegionLoadOptions
 import com.mapbox.common.TileStore
 import com.mapbox.common.TileStoreOptions
-import com.mapbox.geojson.FeatureCollection
-import com.mapbox.geojson.LineString
-import com.mapbox.geojson.Point
+import com.mapbox.geojson.*
 import com.mapbox.maps.MapInitOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
@@ -51,6 +49,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLine
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
+import openlr.LocationReferencePoint
 import openlr.binary.ByteArray
 import openlr.binary.OpenLRBinaryDecoder
 import openlr.binary.impl.LocationReferenceBinaryImpl
@@ -246,86 +245,19 @@ class DecodeOpenLRActivity : AppCompatActivity() {
 
     private fun decodeRoute() {
         buildViaMapMatching()
-        //buildUsingLrps()
-    }
-
-    private fun buildUsingLrps() {
-        val openlrText =
-            "C/uS0iXwhRpzC/73/cAbbwQAOv86G2kAACD/+htpBAFe/8UbaQYCNf+xG2kFAYH/YxttKfQX/SgbdTzsC/9FG3ol+tAGJBtvJwA="
-        //"C1ZAJBE5bxNQ//RGDFITQA4A5wHdE2nk/w=="
-
-        val binaryDecoder = OpenLRBinaryDecoder()
-        val byteArray = openlr.binary.ByteArray(Base64.decode(openlrText, Base64.DEFAULT))
-        val locationReferenceBinary = LocationReferenceBinaryImpl("", byteArray)
-        val rawLocationReference = binaryDecoder.decodeData(locationReferenceBinary)
-
-        val referencePoints = rawLocationReference.locationReferencePoints
-        val points = referencePoints.map {
-            Point.fromLngLat(it.longitudeDeg, it.latitudeDeg)
-        }
-        val bearings = referencePoints.map {
-            Bearing.builder().angle(it.bearing).degrees(10.0).build()
-        }
-
-        buildRoute(points, bearings)
-    }
-
-    private fun buildRoute(points: List<Point>, bearings: List<Bearing?>? = null) {
-        mapboxNavigation.requestRoutes(
-            RouteOptions.builder()
-                .applyDefaultNavigationOptions()
-                .applyLanguageAndVoiceUnitOptions(this)
-                .coordinatesList(points)
-                //.waypointIndicesList(listOf(0, points.size - 1))
-                .bearingsList(bearings)
-                .build(),
-            object : RouterCallback {
-                override fun onRoutesReady(
-                    routes: List<DirectionsRoute>,
-                    routerOrigin: RouterOrigin
-                ) {
-                    mapboxNavigation.setRoutes(routes)
-                    navigationCamera.requestNavigationCameraToOverview()
-                }
-
-                override fun onFailure(
-                    reasons: List<RouterFailure>,
-                    routeOptions: RouteOptions
-                ) {
-                    // no impl
-                }
-
-                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
-                    // no impl
-                }
-            }
-        )
     }
 
     private fun buildViaMapMatching() {
-//        mapboxNavigation.apply {
-//            registerLocationObserver(locationObserver)
-//            startReplayTripSession()
-//            mapboxReplayer.pushEvents(
-//                listOf(
-//                    ReplayRouteMapper.mapToUpdateLocation(
-//                        eventTimestamp = 0.0,
-//                        point = Point.fromLngLat(13.453621004080377, 52.504042844412695)
-//                    )
-//                )
-//            )
-//            mapboxReplayer.playFirstLocation()
-//        }
-
         val openlr = "C/uS0iXwhRpzC/73/cAbbwQAOv86G2kAACD/+htpBAFe/8UbaQYCNf+xG2kFAYH/YxttKfQX/SgbdTzsC/9FG3ol+tAGJBtvJwA="
         //"CwmQ9SVWJS2qBAD9/14tCQ=="
 
+        val tilesPolygon = createPolygonFor(getLrpFromOpenLR(openlr))
+
         val navigationDescription = mapboxNavigation.tilesetDescriptorFactory.getSpecificVersion(tilesVersion)
-        // map matching doesn't work with loaded tiles, only with ambient cache
         tileStore.loadTileRegion(
-            "dublin",
+            openlr,
             TileRegionLoadOptions.Builder()
-                .geometry(FeatureCollection.fromJson(DUBLIN).features()!![0].geometry())
+                .geometry(tilesPolygon.geometry())
                 .descriptors(listOf(navigationDescription))
                 .build(),
             {
@@ -384,79 +316,54 @@ class DecodeOpenLRActivity : AppCompatActivity() {
         }
         return bearings
     }
+
+    private fun getLrpFromOpenLR(openLRText: String): List<LocationReferencePoint> {
+        val binaryDecoder = OpenLRBinaryDecoder()
+        val byteArray = openlr.binary.ByteArray(Base64.decode(openLRText, Base64.DEFAULT))
+        val locationReferenceBinary = LocationReferenceBinaryImpl("", byteArray)
+        val rawLocationReference = binaryDecoder.decodeData(locationReferenceBinary)
+
+        return rawLocationReference.locationReferencePoints
+    }
+
+    private fun createPolygonFor(lrps: List<LocationReferencePoint>): Feature =
+        TurfMeasurement.bboxPolygon(
+            TurfMeasurement.bbox(
+                LineString.fromLngLats(
+                    lrps.map { Point.fromLngLat(it.longitudeDeg, it.latitudeDeg) }
+                )
+            )
+        )
+
+    private fun buildRoute(points: List<Point>, bearings: List<Bearing?>? = null) {
+        mapboxNavigation.requestRoutes(
+            RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .applyLanguageAndVoiceUnitOptions(this)
+                .coordinatesList(points)
+                //.waypointIndicesList(listOf(0, points.size - 1))
+                .bearingsList(bearings)
+                .build(),
+            object : RouterCallback {
+                override fun onRoutesReady(
+                    routes: List<DirectionsRoute>,
+                    routerOrigin: RouterOrigin
+                ) {
+                    mapboxNavigation.setRoutes(routes)
+                    navigationCamera.requestNavigationCameraToOverview()
+                }
+
+                override fun onFailure(
+                    reasons: List<RouterFailure>,
+                    routeOptions: RouteOptions
+                ) {
+                    // no impl
+                }
+
+                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
+                    // no impl
+                }
+            }
+        )
+    }
 }
-
-
-private val BERLIN = "{\n" +
-    "  \"type\": \"FeatureCollection\",\n" +
-    "  \"features\": [\n" +
-    "    {\n" +
-    "      \"type\": \"Feature\",\n" +
-    "      \"properties\": {},\n" +
-    "      \"geometry\": {\n" +
-    "        \"type\": \"Polygon\",\n" +
-    "        \"coordinates\": [\n" +
-    "          [\n" +
-    "            [\n" +
-    "              13.121795654296875,\n" +
-    "              52.32526831457077\n" +
-    "            ],\n" +
-    "            [\n" +
-    "              13.77685546875,\n" +
-    "              52.32526831457077\n" +
-    "            ],\n" +
-    "            [\n" +
-    "              13.77685546875,\n" +
-    "              52.65222859561964\n" +
-    "            ],\n" +
-    "            [\n" +
-    "              13.121795654296875,\n" +
-    "              52.65222859561964\n" +
-    "            ],\n" +
-    "            [\n" +
-    "              13.121795654296875,\n" +
-    "              52.32526831457077\n" +
-    "            ]\n" +
-    "          ]\n" +
-    "        ]\n" +
-    "      }\n" +
-    "    }\n" +
-    "  ]\n" +
-    "}"
-
-private val DUBLIN = "{\n" +
-    "  \"type\": \"FeatureCollection\",\n" +
-    "  \"features\": [\n" +
-    "    {\n" +
-    "      \"type\": \"Feature\",\n" +
-    "      \"properties\": {},\n" +
-    "      \"geometry\": {\n" +
-    "        \"type\": \"Polygon\",\n" +
-    "        \"coordinates\": [\n" +
-    "          [\n" +
-    "            [\n" +
-    "              -6.646728515625,\n" +
-    "              53.131941982174034\n" +
-    "            ],\n" +
-    "            [\n" +
-    "              -5.7073974609375,\n" +
-    "              53.131941982174034\n" +
-    "            ],\n" +
-    "            [\n" +
-    "              -5.7073974609375,\n" +
-    "              53.563151688426984\n" +
-    "            ],\n" +
-    "            [\n" +
-    "              -6.646728515625,\n" +
-    "              53.563151688426984\n" +
-    "            ],\n" +
-    "            [\n" +
-    "              -6.646728515625,\n" +
-    "              53.131941982174034\n" +
-    "            ]\n" +
-    "          ]\n" +
-    "        ]\n" +
-    "      }\n" +
-    "    }\n" +
-    "  ]\n" +
-    "}"
