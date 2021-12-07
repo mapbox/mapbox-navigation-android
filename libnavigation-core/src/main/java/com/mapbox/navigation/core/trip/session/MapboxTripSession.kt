@@ -313,7 +313,7 @@ internal class MapboxTripSession(
                     lastVoiceInstruction
                 )
                 updateRouteProgress(routeProgress, triggerObserver)
-
+                triggerVoiceInstructionEvent(routeProgress, status)
                 isOffRoute = tripStatus.navigationStatus.routeState == RouteState.OFF_ROUTE
             }
         }
@@ -622,13 +622,14 @@ internal class MapboxTripSession(
                     }
                 }
             }
-            triggerVoiceInstructionEvent(progress)
         }
     }
 
-    private fun triggerVoiceInstructionEvent(progress: RouteProgress) {
+    private fun triggerVoiceInstructionEvent(progress: RouteProgress?, status: NavigationStatus) {
+        if (progress == null) return
         val voiceInstructions = progress.voiceInstructions
-        if (voiceInstructions != null && lastVoiceInstruction != voiceInstructions) {
+        val navigatorTriggeredNewInstruction = status.voiceInstruction != null
+        if (voiceInstructions != null && navigatorTriggeredNewInstruction) {
             voiceInstructionsObservers.forEach {
                 it.onNewVoiceInstructions(voiceInstructions)
             }

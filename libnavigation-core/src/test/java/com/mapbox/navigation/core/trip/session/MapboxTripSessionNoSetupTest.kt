@@ -211,6 +211,34 @@ class MapboxTripSessionNoSetupTest {
             .map { it.voiceInstructions?.announcement() }
         assertEquals(listOf("1", "2"), voiceInstructionsAnnouncements)
     }
+
+    @Test
+    fun newVoiceInstructionsTriggerEvenIfTheyAreTheSameAsPreviousOne() {
+        // arrange
+        val nativeNavigator = mockk<MapboxNativeNavigator>(relaxed = true)
+        StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
+        val locationEngine = TestLocationEngine.create()
+        val tripSession = buildTripSession(
+            nativeNavigator = nativeNavigator,
+            locationEngine = locationEngine
+        )
+        val voiceInstructionObserver = VoiceInstructionsObserverRecorder()
+        tripSession.registerVoiceInstructionsObserver(voiceInstructionObserver)
+        tripSession.start(true)
+        tripSession.setRoutes(
+            listOf(createDirectionsRoute()),
+            0,
+            ROUTES_UPDATE_REASON_NEW
+        )
+        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
+        // act
+        locationEngine.updateLocation(createLocation(longitude = LONGITUDE_FOR_VOICE_INSTRUCTION_1))
+        // assert
+        val newVoiceInstructions = voiceInstructionObserver.records
+            .takeLast(2) // take only events triggered by location updates
+            .map { it.announcement() }
+        assertEquals(listOf("1", "1"), newVoiceInstructions)
+    }
 }
 
 private fun buildTripSession(
