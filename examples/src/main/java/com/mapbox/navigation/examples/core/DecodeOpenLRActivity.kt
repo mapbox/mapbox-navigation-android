@@ -274,7 +274,7 @@ class DecodeOpenLRActivity : AppCompatActivity() {
                 .applyDefaultNavigationOptions()
                 .applyLanguageAndVoiceUnitOptions(this)
                 .coordinatesList(points)
-                .waypointIndicesList(listOf(0, points.size - 1))
+                //.waypointIndicesList(listOf(0, points.size - 1))
                 .bearingsList(bearings)
                 .build(),
             object : RouterCallback {
@@ -301,27 +301,29 @@ class DecodeOpenLRActivity : AppCompatActivity() {
     }
 
     private fun buildViaMapMatching() {
-        mapboxNavigation.apply {
-            registerLocationObserver(locationObserver)
-            startReplayTripSession()
-            mapboxReplayer.pushEvents(
-                listOf(
-                    ReplayRouteMapper.mapToUpdateLocation(
-                        eventTimestamp = 0.0,
-                        point = Point.fromLngLat(13.453621004080377, 52.504042844412695)
-                    )
-                )
-            )
-            mapboxReplayer.playFirstLocation()
-        }
+//        mapboxNavigation.apply {
+//            registerLocationObserver(locationObserver)
+//            startReplayTripSession()
+//            mapboxReplayer.pushEvents(
+//                listOf(
+//                    ReplayRouteMapper.mapToUpdateLocation(
+//                        eventTimestamp = 0.0,
+//                        point = Point.fromLngLat(13.453621004080377, 52.504042844412695)
+//                    )
+//                )
+//            )
+//            mapboxReplayer.playFirstLocation()
+//        }
 
-        val openlr = "CwmQ9SVWJS2qBAD9/14tCQ=="
+        val openlr = "C/uS0iXwhRpzC/73/cAbbwQAOv86G2kAACD/+htpBAFe/8UbaQYCNf+xG2kFAYH/YxttKfQX/SgbdTzsC/9FG3ol+tAGJBtvJwA="
+        //"CwmQ9SVWJS2qBAD9/14tCQ=="
+
         val navigationDescription = mapboxNavigation.tilesetDescriptorFactory.getSpecificVersion(tilesVersion)
         // map matching doesn't work with loaded tiles, only with ambient cache
         tileStore.loadTileRegion(
-            "berlin",
+            "dublin",
             TileRegionLoadOptions.Builder()
-                .geometry(FeatureCollection.fromJson(BERLIN).features()!![0].geometry())
+                .geometry(FeatureCollection.fromJson(DUBLIN).features()!![0].geometry())
                 .descriptors(listOf(navigationDescription))
                 .build(),
             {
@@ -397,3 +399,40 @@ private val BERLIN = "{\n" +
         "    }\n" +
         "  ]\n" +
         "}"
+
+private val DUBLIN = "{\n" +
+    "  \"type\": \"FeatureCollection\",\n" +
+    "  \"features\": [\n" +
+    "    {\n" +
+    "      \"type\": \"Feature\",\n" +
+    "      \"properties\": {},\n" +
+    "      \"geometry\": {\n" +
+    "        \"type\": \"Polygon\",\n" +
+    "        \"coordinates\": [\n" +
+    "          [\n" +
+    "            [\n" +
+    "              -6.646728515625,\n" +
+    "              53.131941982174034\n" +
+    "            ],\n" +
+    "            [\n" +
+    "              -5.7073974609375,\n" +
+    "              53.131941982174034\n" +
+    "            ],\n" +
+    "            [\n" +
+    "              -5.7073974609375,\n" +
+    "              53.563151688426984\n" +
+    "            ],\n" +
+    "            [\n" +
+    "              -6.646728515625,\n" +
+    "              53.563151688426984\n" +
+    "            ],\n" +
+    "            [\n" +
+    "              -6.646728515625,\n" +
+    "              53.131941982174034\n" +
+    "            ]\n" +
+    "          ]\n" +
+    "        ]\n" +
+    "      }\n" +
+    "    }\n" +
+    "  ]\n" +
+    "}"
