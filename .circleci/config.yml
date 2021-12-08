@@ -41,14 +41,14 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
-      - publish-documentation:
-          requires:
-            - release
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
+#      - publish-documentation:
+#          requires:
+#            - release
+#          filters:
+#            tags:
+#              only: /^v.*/
+#            branches:
+#              ignore: /.*/
   default:
     jobs:
       - prepare-and-assemble
@@ -623,8 +623,8 @@ jobs:
       - generate-version-name
       - assemble-core-release
       - assemble-ui-release
-      - check-public-documentation
-      - generate-documentation
+#      - check-public-documentation
+#      - generate-documentation
       - prepare-mbx-ci
       - setup-aws-credentials
       - publish-artifacts
@@ -637,8 +637,8 @@ jobs:
       - generate-version-name
       - assemble-core-release
       - assemble-ui-release
-      - check-public-documentation
-      - generate-documentation
+#      - check-public-documentation
+#      - generate-documentation
       - prepare-mbx-ci
       - setup-aws-credentials
       - publish-artifacts

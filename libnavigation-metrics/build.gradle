@@ -51,5 +51,5 @@ dokkaHtml {
 }
 
 apply from: "${rootDir}/gradle/track-public-apis.gradle"
-apply from: "${rootDir}/gradle/publish.gradle"
+// apply from: "${rootDir}/gradle/publish.gradle"
 apply from: "${rootDir}/gradle/jacoco.gradle"
