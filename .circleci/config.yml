@@ -524,7 +524,7 @@ jobs:
       - run:
           name: Publish API docs Android
           command: |
-            GITHUB_WRITER_TOKEN=$(./mbx-ci github writer token)
+            GITHUB_WRITER_TOKEN=$(./mbx-ci github writer public token)
             git remote set-url origin "https://x-access-token:$GITHUB_WRITER_TOKEN@github.com/mapbox/mapbox-navigation-android"
             git config --global user.email no-reply@mapbox.com && git config --global user.name mapbox-ci
             ./scripts/publish_api_docs_android.sh -p $GITHUB_WRITER_TOKEN -t $CIRCLE_TAG
