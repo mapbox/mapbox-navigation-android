@@ -1,0 +1,90 @@
+// Example of Navigation System Specification
+{
+  "$version": 1.3,
+  "$root": {
+    "name": {
+      "type": "string",
+      "doc": "A human-readable name for this system.",
+      "example": "My Navigation System Description"
+    },
+    "theme": {
+      "required": true,
+      "type": "theme",
+      "doc": "App-level theme that defines colors for all UI elements."
+    }
+  },
+  "theme": {
+    "doc": "Value describing the set of building blocks used to generate UI elements.",
+    "color": {
+      "light": {
+        "required": true,
+        "type": "float",
+        "default": 40.1,
+        "doc": "Background color anchor. 0 = black, 100 = white."
+      },
+      "contrast": {
+        "required": true,
+        "type": "float",
+        "default": 63.0,
+        "doc": "Foreground color anchor. 0 = no contrast, 100 = maximum contrast."
+      },
+      "bg_container": {
+        "required": true,
+        "type": "color",
+        "default": {
+          "type": "inheritor",
+          "evaluation": [
+            {
+              "type": "value",
+              "value": {
+                "type": "ref",
+                "value": ".light"
+              }
+            },
+            {
+              "type": "operator",
+              "value": "multiply"
+            },
+            {
+              "type": "value",
+              "value": {
+                "type": "ref",
+                "value": ".contrast"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
+// Example of a default Mapbox Auto Navigation System Description
+{
+  "version": "1.3",
+  "name": "Mapbox Auto Description",
+  "theme": {
+    "light": 50.0
+  }
+}
+
+// Example of a developer modifying the default description using a DSL
+val myAutoDescription = NavigationSystem.loadDescription(NavigationDescriptions.AUTO) {
+  theme {
+    color {
+      light = 75.0
+    }
+  }
+}
+
+{
+  "theme": {
+    "bg_container": {
+      "required": true,
+      "type": "color",
+      "alias": [
+        "background_container"
+      ]
+    }
+  }
+}
