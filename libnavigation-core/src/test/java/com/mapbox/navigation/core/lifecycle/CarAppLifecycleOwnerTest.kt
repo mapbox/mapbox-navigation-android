@@ -3,6 +3,9 @@
 package com.mapbox.navigation.core.lifecycle
 
 import android.app.Activity
+import androidx.core.app.ComponentActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -137,7 +140,7 @@ class CarAppLifecycleOwnerTest {
 
     @Test
     @Suppress("MaxLineLength")
-    fun `verify orientation switching does not stop the app lifecycle`() {
+    fun `activityLifecycleCallbacks verify orientation switching does not stop the app lifecycle`() {
         carAppLifecycleOwner.activityLifecycleCallbacks.apply {
             val activityA: Activity = mockActivity()
             every { activityA.isChangingConfigurations } returns false
@@ -164,7 +167,7 @@ class CarAppLifecycleOwnerTest {
 
     @Test
     @Suppress("MaxLineLength")
-    fun `verify backgrounded orientation switching does not stop the app lifecycle`() {
+    fun `activityLifecycleCallbacks verify backgrounded orientation switching does not stop the app lifecycle`() {
         carAppLifecycleOwner.activityLifecycleCallbacks.apply {
             val activityA: Activity = mockActivity()
             every { activityA.isChangingConfigurations } returns false
@@ -174,6 +177,102 @@ class CarAppLifecycleOwnerTest {
             val activityB: Activity = mockActivity()
             every { activityB.isChangingConfigurations } returns false
             onActivityCreated(activityB, mockk())
+        }
+
+        verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
+        verify(exactly = 1) { testLifecycleObserver.onStart(any()) }
+        verify(exactly = 0) { testLifecycleObserver.onResume(any()) }
+        verify(exactly = 0) { testLifecycleObserver.onStop(any()) }
+        verify(exactly = 0) { testLifecycleObserver.onDestroy(any()) }
+    }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `startedReferenceCounter verify Activity orientation switching does not stop the app lifecycle`() {
+        carAppLifecycleOwner.startedReferenceCounter.apply {
+            val activityA: ComponentActivity = mockComponentActivity()
+            every { activityA.isChangingConfigurations } returns false
+            onCreate(activityA)
+            onStart(activityA)
+            onResume(activityA)
+            every { activityA.isChangingConfigurations } returns true
+            onPause(activityA)
+            onStop(activityA)
+            onDestroy(activityA)
+            val activityB: ComponentActivity = mockComponentActivity()
+            every { activityB.isChangingConfigurations } returns false
+            onCreate(activityB)
+            onStart(activityB)
+            onResume(activityB)
+        }
+
+        verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
+        verify(exactly = 1) { testLifecycleObserver.onStart(any()) }
+        verify(exactly = 1) { testLifecycleObserver.onResume(any()) }
+        verify(exactly = 0) { testLifecycleObserver.onStop(any()) }
+        verify(exactly = 0) { testLifecycleObserver.onDestroy(any()) }
+    }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `startedReferenceCounter verify Activity backgrounded orientation switching does not stop the app lifecycle`() {
+        carAppLifecycleOwner.startedReferenceCounter.apply {
+            val activityA: ComponentActivity = mockComponentActivity()
+            every { activityA.isChangingConfigurations } returns false
+            onCreate(activityA)
+            every { activityA.isChangingConfigurations } returns true
+            onDestroy(activityA)
+            val activityB: ComponentActivity = mockComponentActivity()
+            every { activityB.isChangingConfigurations } returns false
+            onCreate(activityB)
+        }
+
+        verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
+        verify(exactly = 1) { testLifecycleObserver.onStart(any()) }
+        verify(exactly = 0) { testLifecycleObserver.onResume(any()) }
+        verify(exactly = 0) { testLifecycleObserver.onStop(any()) }
+        verify(exactly = 0) { testLifecycleObserver.onDestroy(any()) }
+    }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `startedReferenceCounter verify Fragment orientation switching does not stop the app lifecycle`() {
+        carAppLifecycleOwner.startedReferenceCounter.apply {
+            val parentActivityA = mockActivity(false)
+            val fragmentA: Fragment = mockk { every { activity } returns parentActivityA }
+            onCreate(fragmentA)
+            onStart(fragmentA)
+            onResume(fragmentA)
+            every { parentActivityA.isChangingConfigurations } returns true
+            onPause(fragmentA)
+            onStop(fragmentA)
+            onDestroy(fragmentA)
+            val parentActivityB = mockActivity(false)
+            val fragmentB: Fragment = mockk { every { activity } returns parentActivityB }
+            onCreate(fragmentB)
+            onStart(fragmentB)
+            onResume(fragmentB)
+        }
+
+        verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
+        verify(exactly = 1) { testLifecycleObserver.onStart(any()) }
+        verify(exactly = 1) { testLifecycleObserver.onResume(any()) }
+        verify(exactly = 0) { testLifecycleObserver.onStop(any()) }
+        verify(exactly = 0) { testLifecycleObserver.onDestroy(any()) }
+    }
+
+    @Test
+    @Suppress("MaxLineLength")
+    fun `startedReferenceCounter verify Fragment backgrounded orientation switching does not stop the app lifecycle`() {
+        carAppLifecycleOwner.startedReferenceCounter.apply {
+            val parentActivityA = mockActivity(false)
+            val fragmentA: Fragment = mockk { every { activity } returns parentActivityA }
+            onCreate(fragmentA)
+            every { parentActivityA.isChangingConfigurations } returns true
+            onDestroy(fragmentA)
+            val activityB: ComponentActivity = mockComponentActivity()
+            every { activityB.isChangingConfigurations } returns false
+            onCreate(activityB)
         }
 
         verify(exactly = 1) { testLifecycleObserver.onCreate(any()) }
@@ -300,7 +399,10 @@ class CarAppLifecycleOwnerTest {
         override fun getLifecycle(): Lifecycle = lifecycleRegistry
     }
 
-    private fun mockActivity(isChangingConfig: Boolean = false): Activity = mockk {
+    private fun mockActivity(isChangingConfig: Boolean = false): FragmentActivity = mockk {
         every { isChangingConfigurations } returns isChangingConfig
     }
+
+    private fun mockComponentActivity(isChangingConfig: Boolean = false): ComponentActivity =
+        mockk { every { isChangingConfigurations } returns isChangingConfig }
 }

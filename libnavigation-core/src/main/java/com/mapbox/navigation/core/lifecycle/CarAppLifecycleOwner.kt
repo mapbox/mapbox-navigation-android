@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.os.Bundle
 import androidx.annotation.VisibleForTesting
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -34,36 +35,56 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
     @VisibleForTesting
     internal val startedReferenceCounter = object : DefaultLifecycleObserver {
         override fun onCreate(owner: LifecycleOwner) {
-            lifecycleCreated++
-            logger.i(TAG, Message("LifecycleOwner ($owner) onCreate"))
-            if (activitiesCreated == 0 && lifecycleCreated > 0 && lifecycleForegrounded == 0) {
-                changeState(Lifecycle.State.STARTED)
+            if (createdChangingConfiguration > 0) {
+                createdChangingConfiguration--
+            } else {
+                lifecycleCreated++
+                logger.i(TAG, Message("LifecycleOwner ($owner) onCreate"))
+                if (activitiesCreated == 0 && lifecycleCreated > 0 && lifecycleForegrounded == 0) {
+                    changeState(Lifecycle.State.STARTED)
+                }
             }
         }
 
         override fun onStart(owner: LifecycleOwner) {
-            lifecycleForegrounded++
-            logger.i(TAG, Message("LifecycleOwner ($owner) onStart"))
-            if (activitiesCreated == 0 && lifecycleForegrounded > 0) {
-                changeState(Lifecycle.State.RESUMED)
+            if (foregroundedChangingConfiguration > 0) {
+                foregroundedChangingConfiguration--
+            } else {
+                lifecycleForegrounded++
+                logger.i(TAG, Message("LifecycleOwner ($owner) onStart"))
+                if (activitiesCreated == 0 && lifecycleForegrounded > 0) {
+                    changeState(Lifecycle.State.RESUMED)
+                }
             }
         }
 
         override fun onStop(owner: LifecycleOwner) {
-            lifecycleForegrounded--
-            logger.i(TAG, Message("LifecycleOwner ($owner) onStop"))
-            if (activitiesForegrounded == 0 && lifecycleForegrounded == 0) {
-                changeState(Lifecycle.State.STARTED)
+            if (owner.isChangingConfigurations()) {
+                foregroundedChangingConfiguration++
+            } else {
+                lifecycleForegrounded--
+                logger.i(TAG, Message("LifecycleOwner ($owner) onStop"))
+                if (activitiesForegrounded == 0 && lifecycleForegrounded == 0) {
+                    changeState(Lifecycle.State.STARTED)
+                }
             }
         }
 
         override fun onDestroy(owner: LifecycleOwner) {
-            lifecycleCreated--
-            logger.i(TAG, Message("LifecycleOwner ($owner) onDestroy"))
-            if (activitiesForegrounded == 0 && lifecycleForegrounded == 0) {
-                changeState(Lifecycle.State.CREATED)
+            if (owner.isChangingConfigurations()) {
+                createdChangingConfiguration++
+            } else {
+                lifecycleCreated--
+                logger.i(TAG, Message("LifecycleOwner ($owner) onDestroy"))
+                if (activitiesForegrounded == 0 && lifecycleForegrounded == 0) {
+                    changeState(Lifecycle.State.CREATED)
+                }
             }
         }
+
+        private fun LifecycleOwner.isChangingConfigurations(): Boolean =
+            (this is Activity && this.isChangingConfigurations) ||
+                (this is Fragment && this.activity?.isChangingConfigurations == true)
     }
 
     @VisibleForTesting
@@ -160,15 +181,18 @@ internal class CarAppLifecycleOwner : LifecycleOwner {
         lifecycleOwner.lifecycle.removeObserver(startedReferenceCounter)
         val currentState = lifecycleOwner.lifecycle.currentState
         if (currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            startedReferenceCounter.onPause(MapboxNavigationApp.lifecycleOwner)
+            startedReferenceCounter.onPause(lifecycleOwner)
         }
         if (currentState.isAtLeast(Lifecycle.State.STARTED)) {
-            startedReferenceCounter.onStop(MapboxNavigationApp.lifecycleOwner)
+            startedReferenceCounter.onStop(lifecycleOwner)
         }
         if (currentState.isAtLeast(Lifecycle.State.CREATED)) {
-            startedReferenceCounter.onDestroy(MapboxNavigationApp.lifecycleOwner)
+            startedReferenceCounter.onDestroy(lifecycleOwner)
         }
     }
+
+    fun isConfigurationChanging(): Boolean =
+        createdChangingConfiguration > 0 || foregroundedChangingConfiguration > 0
 
     private companion object {
         private val TAG = Tag("MbxCarAppLifecycleOwner")

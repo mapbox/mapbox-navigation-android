@@ -31,6 +31,7 @@ ext {
       androidXAppCompatVersion  : '1.3.1',
       androidXPreferenceVersion : '1.1.0',
       androidXAnnotationVersion : '1.2.0',
+      androidXFragmentVersion   : '1.4.0',
       cardViewVersion           : '1.0.0',
       recyclerViewVersion       : '1.1.0',
       materialDesignVersion     : '1.1.0',
@@ -119,6 +120,7 @@ ext {
       androidXConstraintLayout  : "androidx.constraintlayout:constraintlayout:${version.constraintLayout}",
       androidXPreference        : "androidx.preference:preference-ktx:${version.androidXPreferenceVersion}",
       androidStartup            : "androidx.startup:startup-runtime:${version.androidStartup}",
+      androidXFragment          : "androidx.fragment:fragment-ktx:${version.androidXFragmentVersion}",
 
       // lifecycle
       androidXLifecycleRuntime  : "androidx.lifecycle:lifecycle-runtime-ktx:${version.androidXLifecycle}",

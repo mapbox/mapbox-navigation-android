@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.lifecycle
 
+import android.app.Activity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -66,6 +67,9 @@ object MapboxNavigationApp {
 
     /**
      * Call [MapboxNavigationApp.setup] to provide the application with [NavigationOptions].
+     *
+     * This call is a no-op if an attached activity is changing configurations
+     * [Activity.isChangingConfigurations].
      */
     fun setup(navigationOptions: NavigationOptions) = apply {
         mapboxNavigationAppDelegate.setup(navigationOptions)

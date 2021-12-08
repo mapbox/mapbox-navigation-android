@@ -19,6 +19,10 @@ internal class MapboxNavigationAppDelegate {
     val lifecycleOwner: LifecycleOwner = carAppLifecycleOwner
 
     fun setup(navigationOptions: NavigationOptions) = apply {
+        if (carAppLifecycleOwner.isConfigurationChanging()) {
+            return this
+        }
+
         mapboxNavigationOwner.setup(navigationOptions)
         if (isSetup) {
             disable()
