@@ -7,13 +7,13 @@ interface AudioFocusDelegate {
 
     /**
      * Request audio focus. Send a request to obtain the audio focus
-     * @return true on successful focus change request.
+     * @param callback invoked when a delegate processed audio request
      */
-    fun requestFocus(): Boolean
+    fun requestFocus(callback: AudioFocusRequestCallback)
 
     /**
      * Abandon audio focus. Causes the previous focus owner, if any, to receive focus.
-     * @return true on successful focus change request.
+     * @param callback invoked when a delegate processed audio request
      */
-    fun abandonFocus(): Boolean
+    fun abandonFocus(callback: AudioFocusRequestCallback)
 }

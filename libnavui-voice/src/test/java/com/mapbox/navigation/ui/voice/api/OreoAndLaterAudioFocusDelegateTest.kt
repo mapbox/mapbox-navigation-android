@@ -42,7 +42,10 @@ class OreoAndLaterAudioFocusDelegateTest {
         )
         val slotAudioFocusRequest = slot<AudioFocusRequest>()
 
-        oreoAndLaterAudioFocusDelegate.requestFocus()
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        oreoAndLaterAudioFocusDelegate.requestFocus(mockCallback)
 
         verify(exactly = 1) {
             mockedAudioManager.requestAudioFocus(capture(slotAudioFocusRequest))
@@ -79,7 +82,10 @@ class OreoAndLaterAudioFocusDelegateTest {
         )
         val slotAudioFocusRequest = slot<AudioFocusRequest>()
 
-        oreoAndLaterAudioFocusDelegate.requestFocus()
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        oreoAndLaterAudioFocusDelegate.requestFocus(mockCallback)
 
         verify(exactly = 1) {
             mockedAudioManager.requestAudioFocus(capture(slotAudioFocusRequest))
@@ -117,9 +123,14 @@ class OreoAndLaterAudioFocusDelegateTest {
             mockedAudioManager.requestAudioFocus(any())
         } returns AUDIOFOCUS_REQUEST_GRANTED
 
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        oreoAndLaterAudioFocusDelegate.requestFocus(mockCallback)
+
         assertEquals(
             true,
-            oreoAndLaterAudioFocusDelegate.requestFocus(),
+            slotResult.captured,
         )
 
         verify(exactly = 1) {
@@ -154,9 +165,14 @@ class OreoAndLaterAudioFocusDelegateTest {
             mockedAudioManager.requestAudioFocus(any())
         } returns AUDIOFOCUS_REQUEST_FAILED
 
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        oreoAndLaterAudioFocusDelegate.requestFocus(mockCallback)
+
         assertEquals(
             false,
-            oreoAndLaterAudioFocusDelegate.requestFocus(),
+            slotResult.captured,
         )
 
         verify(exactly = 1) {
@@ -191,9 +207,14 @@ class OreoAndLaterAudioFocusDelegateTest {
             mockedAudioManager.requestAudioFocus(any())
         } returns AUDIOFOCUS_REQUEST_DELAYED
 
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        oreoAndLaterAudioFocusDelegate.requestFocus(mockCallback)
+
         assertEquals(
             true,
-            oreoAndLaterAudioFocusDelegate.requestFocus(),
+            slotResult.captured,
         )
 
         verify(exactly = 1) {
@@ -229,9 +250,14 @@ class OreoAndLaterAudioFocusDelegateTest {
             mockedAudioManager.abandonAudioFocusRequest(any())
         } returns AUDIOFOCUS_REQUEST_GRANTED
 
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        oreoAndLaterAudioFocusDelegate.abandonFocus(mockCallback)
+
         assertEquals(
             true,
-            oreoAndLaterAudioFocusDelegate.abandonFocus(),
+            slotResult.captured,
         )
 
         verify(exactly = 1) {
@@ -267,9 +293,14 @@ class OreoAndLaterAudioFocusDelegateTest {
             mockedAudioManager.abandonAudioFocusRequest(any())
         } returns AUDIOFOCUS_REQUEST_FAILED
 
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        oreoAndLaterAudioFocusDelegate.abandonFocus(mockCallback)
+
         assertEquals(
             false,
-            oreoAndLaterAudioFocusDelegate.abandonFocus(),
+            slotResult.captured,
         )
 
         verify(exactly = 1) {

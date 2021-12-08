@@ -4,6 +4,7 @@ import android.media.AudioManager
 import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -32,7 +33,10 @@ class PreOreoAudioFocusDelegateTest {
             mockedPlayerAttributes,
         )
 
-        preOreoAudioFocusDelegate.requestFocus()
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        preOreoAudioFocusDelegate.requestFocus(mockCallback)
 
         verify(exactly = 1) {
             mockedAudioManager.requestAudioFocus(
@@ -73,9 +77,13 @@ class PreOreoAudioFocusDelegateTest {
             mockedPlayerAttributes,
         )
 
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        preOreoAudioFocusDelegate.requestFocus(mockCallback)
         assertEquals(
             true,
-            preOreoAudioFocusDelegate.requestFocus(),
+            slotResult.captured,
         )
 
         verify(exactly = 1) {
@@ -117,9 +125,14 @@ class PreOreoAudioFocusDelegateTest {
             mockedPlayerAttributes,
         )
 
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        preOreoAudioFocusDelegate.requestFocus(mockCallback)
+
         assertEquals(
-            preOreoAudioFocusDelegate.requestFocus(),
-            false
+            false,
+            slotResult.captured
         )
 
         verify(exactly = 1) {
@@ -161,9 +174,14 @@ class PreOreoAudioFocusDelegateTest {
             mockedPlayerAttributes,
         )
 
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        preOreoAudioFocusDelegate.requestFocus(mockCallback)
+
         assertEquals(
-            preOreoAudioFocusDelegate.requestFocus(),
-            true
+            true,
+            slotResult.captured,
         )
 
         verify(exactly = 1) {
@@ -180,7 +198,10 @@ class PreOreoAudioFocusDelegateTest {
         val mockedAudioManager: AudioManager = mockk(relaxed = true)
         val preOreoAudioFocusDelegate = PreOreoAudioFocusDelegate(mockedAudioManager, mockk())
 
-        preOreoAudioFocusDelegate.abandonFocus()
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        preOreoAudioFocusDelegate.abandonFocus(mockCallback)
 
         verify(exactly = 1) {
             mockedAudioManager.abandonAudioFocus(null)
@@ -197,9 +218,14 @@ class PreOreoAudioFocusDelegateTest {
 
         val preOreoAudioFocusDelegate = PreOreoAudioFocusDelegate(mockedAudioManager, mockk())
 
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        preOreoAudioFocusDelegate.abandonFocus(mockCallback)
+
         assertEquals(
-            preOreoAudioFocusDelegate.abandonFocus(),
-            true
+            true,
+            slotResult.captured,
         )
         verify(exactly = 1) {
             mockedAudioManager.abandonAudioFocus(null)
@@ -216,9 +242,14 @@ class PreOreoAudioFocusDelegateTest {
 
         val preOreoAudioFocusDelegate = PreOreoAudioFocusDelegate(mockedAudioManager, mockk())
 
+        val slotResult = slot<Boolean>()
+        val mockCallback: AudioFocusRequestCallback = mockk()
+        every { mockCallback.invoke(capture(slotResult)) } returns Unit
+        preOreoAudioFocusDelegate.abandonFocus(mockCallback)
+
         assertEquals(
-            preOreoAudioFocusDelegate.abandonFocus(),
-            false
+            false,
+            slotResult.captured,
         )
         verify(exactly = 1) {
             mockedAudioManager.abandonAudioFocus(null)

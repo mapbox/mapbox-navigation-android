@@ -47,12 +47,13 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
         )
     private val localCallback: VoiceInstructionsPlayerCallback =
         VoiceInstructionsPlayerCallback {
-            audioFocusDelegate.abandonFocus()
-            val currentPlayCallback = playCallbackQueue.poll()
-            val currentAnnouncement = currentPlayCallback.announcement
-            val currentClientCallback = currentPlayCallback.consumer
-            currentClientCallback.accept(currentAnnouncement)
-            play()
+            audioFocusDelegate.abandonFocus {
+                val currentPlayCallback = playCallbackQueue.poll()
+                val currentAnnouncement = currentPlayCallback.announcement
+                val currentClientCallback = currentPlayCallback.consumer
+                currentClientCallback.accept(currentAnnouncement)
+                play()
+            }
         }
 
     /**
@@ -113,19 +114,28 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
         if (playCallbackQueue.isNotEmpty()) {
             val currentPlayCallback = playCallbackQueue.peek()
             val currentPlay = currentPlayCallback.announcement
-            if (audioFocusDelegate.requestFocus()) {
-                currentPlay.file?.let {
-                    filePlayer.play(currentPlay, localCallback)
-                } ?: textPlayer.play(currentPlay, localCallback)
-            } else {
-                localCallback.onDone(currentPlay)
+            audioFocusDelegate.requestFocus { result ->
+                if (result) {
+                    when (currentPlay.file) {
+                        null -> {
+                            textPlayer.play(currentPlay, localCallback)
+                        }
+                        else -> {
+                            filePlayer.play(currentPlay, localCallback)
+                        }
+                    }
+                } else {
+                    localCallback.onDone(currentPlay)
+                }
             }
         }
     }
 
     private fun finalize() {
         playCallbackQueue.clear()
-        audioFocusDelegate.abandonFocus()
+        audioFocusDelegate.abandonFocus {
+            // Do nothing
+        }
     }
 
     private companion object {

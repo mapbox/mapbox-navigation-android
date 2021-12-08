@@ -2,8 +2,12 @@
 package com.mapbox.navigation.ui.voice.api {
 
   public interface AudioFocusDelegate {
-    method public boolean abandonFocus();
-    method public boolean requestFocus();
+    method public void abandonFocus(com.mapbox.navigation.ui.voice.api.AudioFocusRequestCallback callback);
+    method public void requestFocus(com.mapbox.navigation.ui.voice.api.AudioFocusRequestCallback callback);
+  }
+
+  public fun interface AudioFocusRequestCallback {
+    method public operator void invoke(boolean result);
   }
 
   public final class MapboxSpeechApi {
