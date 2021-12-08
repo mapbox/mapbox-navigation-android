@@ -164,7 +164,7 @@ ext {
       googleServices       : '4.3.3',
       mapboxSdkVersions    : '1.1.3',
       dokka                : '1.4.20',
-      mapboxSdkRegistry    : '0.4.0',
+      mapboxSdkRegistry    : '0.7.0',
       mapboxAccessToken    : '0.2.1',
       mapboxNativeDownload : '0.2.2',
       firebaseCrashlytics  : '2.5.1'
