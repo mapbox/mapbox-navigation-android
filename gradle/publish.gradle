@@ -75,6 +75,7 @@ registry {
     override = snapshot ? true : false
     dryRun = false
     publish = true
+    publishMessage = "cc @mapbox/navigation-android"
     publications = ["release"]
 }
 
