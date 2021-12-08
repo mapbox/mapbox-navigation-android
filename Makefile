@@ -17,6 +17,7 @@ libnavui-resources \
 libnavui-voice \
 libnavigation-android \
 libnavui-speedlimit \
+libnavui-dropin \
 
 APPLICATION_MODULES = \
 qa-test-app \
@@ -33,8 +34,7 @@ endef
 check-lint:
 	$(call run-gradle-tasks,$(CORE_MODULES),ktlint) \
 	&& $(call run-gradle-tasks,$(UI_MODULES),ktlint) \
-	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),ktlint) \
-	&& ./gradlew libnavui-dropin:ktlint
+	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),ktlint)
 
 .PHONY: license-verification
 license-verification:
@@ -54,13 +54,11 @@ javadoc-dokka:
 dependency-graphs:
 	$(call run-gradle-tasks,$(CORE_MODULES),generateDependencyGraphMapboxLibraries) \
 	&& $(call run-gradle-tasks,$(UI_MODULES),generateDependencyGraphMapboxLibraries) \
-	&& ./gradlew libnavui-dropin:generateDependencyGraphMapboxLibraries
 
 .PHONY: dependency-updates
 dependency-updates:
 	$(call run-gradle-tasks,$(CORE_MODULES),dependencyUpdates) \
 	&& $(call run-gradle-tasks,$(UI_MODULES),dependencyUpdates) \
-	&& ./gradlew libnavui-dropin:dependencyUpdates
 
 .PHONY: verify-common-sdk-version
 verify-common-sdk-version:
@@ -70,15 +68,6 @@ verify-common-sdk-version:
 dex-count:
 	./gradlew countDebugDexMethods
 	./gradlew countReleaseDexMethods
-
-.PHONY: core-publish-local
-core-publish-local:
-	$(call run-gradle-tasks,$(CORE_MODULES),publishToMavenLocal)
-
-.PHONY: ui-publish-local
-ui-publish-local:
-	$(call run-gradle-tasks,$(UI_MODULES),publishToMavenLocal) \
-	&& ./gradlew libnavui-dropin:publishToMavenLocal
 
 .PHONY: assemble-core-debug
 assemble-core-debug:
@@ -95,15 +84,6 @@ core-unit-tests:
 .PHONY: core-unit-tests-jacoco
 core-unit-tests-jacoco:
 	$(call run-gradle-tasks,$(CORE_MODULES),jacocoTestReport)
-
-.PHONY: core-upload-to-sdk-registry
-core-upload-to-sdk-registry:
-	$(call run-gradle-tasks,$(CORE_MODULES),mapboxSDKRegistryUpload)
-
-.PHONY: publish-to-sdk-registry
-publish-to-sdk-registry:
-	python3 -m pip install git-pull-request
-	./gradlew mapboxSDKRegistryPublishAll
 
 .PHONY: core-dependency-graph
 core-dependency-graph:
@@ -131,27 +111,36 @@ core-update-api: assemble-core-release
 
 .PHONY: assemble-ui-debug
 assemble-ui-debug:
-	$(call run-gradle-tasks,$(UI_MODULES),assembleDebug) \
-	&& ./gradlew libnavui-dropin:assembleDebug
+	$(call run-gradle-tasks,$(UI_MODULES),assembleDebug)
 
 .PHONY: assemble-ui-release
 assemble-ui-release:
-	$(call run-gradle-tasks,$(UI_MODULES),assembleRelease) \
-	&& ./gradlew libnavui-dropin:assembleRelease
+	$(call run-gradle-tasks,$(UI_MODULES),assembleRelease)
 
 .PHONY: ui-unit-tests
 ui-unit-tests:
-	$(call run-gradle-tasks,$(UI_MODULES),test) \
-	&& ./gradlew libnavui-dropin:test
+	$(call run-gradle-tasks,$(UI_MODULES),test)
 
 .PHONY: ui-unit-tests-jacoco
 ui-unit-tests-jacoco:
-	$(call run-gradle-tasks,$(UI_MODULES),jacocoTestReport) \
-	&& ./gradlew libnavui-dropin:jacocoTestReport
+	$(call run-gradle-tasks,$(UI_MODULES),jacocoTestReport)
 
-.PHONY: ui-upload-to-sdk-registry
-ui-upload-to-sdk-registry:
-	$(call run-gradle-tasks,$(UI_MODULES),mapboxSDKRegistryUpload)
+.PHONY: publish-local
+core-publish-local:
+	./gradlew publishToMavenLocal
+
+.PHONY: upload-to-sdk-registry
+upload-to-sdk-registry:
+	./gradlew mapboxSDKRegistryUpload
+
+.PHONY: publish-to-sdk-registry
+publish-to-sdk-registry:
+	if [ -z "$(GITHUB_TOKEN)" ]; then \
+		echo "GITHUB_TOKEN env variable has to be set"; \
+	else \
+		python3 -m pip install git-pull-request; \
+		./gradlew mapboxSDKRegistryPublishAll; \
+	fi
 
 .PHONY: ui-check-api
 ui-check-api: assemble-ui-release

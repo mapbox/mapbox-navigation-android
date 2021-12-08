@@ -390,15 +390,14 @@ commands:
               --timeout 5m
 
   publish-artifacts:
-    parameters:
-      artifact-type:
-        description: core or ui
-        type: string
     steps:
       - deploy:
           name: Upload Navigation SDK to SDK Registry
           command: |
-            make << parameters.artifact-type >>-upload-to-sdk-registry
+            export GITHUB_TOKEN=$(./mbx-ci github writer token)
+            git config --global user.email no-reply@mapbox.com && git config --global user.name mapbox-ci
+            make upload-to-sdk-registry
+            make publish-to-sdk-registry
 
   check-public-documentation:
     steps:
@@ -630,10 +629,7 @@ jobs:
       - generate-documentation
       - prepare-mbx-ci
       - setup-aws-credentials
-      - publish-artifacts:
-          artifact-type: "core"
-      - publish-artifacts:
-          artifact-type: "ui"
+      - publish-artifacts
       - trigger-mobile-metrics
 
   release:
@@ -647,7 +643,4 @@ jobs:
       - generate-documentation
       - prepare-mbx-ci
       - setup-aws-credentials
-      - publish-artifacts:
-          artifact-type: "core"
-      - publish-artifacts:
-          artifact-type: "ui"
+      - publish-artifacts
