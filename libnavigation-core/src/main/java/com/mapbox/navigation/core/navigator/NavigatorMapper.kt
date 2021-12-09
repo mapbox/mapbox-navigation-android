@@ -63,7 +63,7 @@ internal fun getRouteProgressFrom(
     remainingWaypoints: Int,
     bannerInstructions: BannerInstructions?,
     instructionIndex: Int?,
-    lastVoiceInstruction: VoiceInstructions?
+    lastVoiceInstruction: VoiceInstructions?,
 ): RouteProgress? {
     return status.getRouteProgress(
         directionsRoute,
