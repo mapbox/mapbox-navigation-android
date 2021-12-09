@@ -15,6 +15,7 @@ import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.BuildConfig
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
@@ -93,18 +94,31 @@ private data class SessionMetadata(
  * @param timeOfReroute time of reroute. Unit is **time in millis**.
  * @param timeSinceLastReroute time since last reroute. Unit is **millis**.
  * @param driverModeArrivalTime arrival time of driver mode
+ * @param currentDistanceTraveled for the active session
  */
 private data class DynamicSessionValues(
     var rerouteCount: Int = 0,
     var timeOfReroute: Long = 0L,
     var timeSinceLastReroute: Int = 0,
     var driverModeArrivalTime: Date? = null,
+    var currentDistanceTraveled: Int = 0,
+    var accumulatedDistanceTraveled: Int = 0,
 ) {
     fun reset() {
         rerouteCount = 0
         timeOfReroute = 0
         timeSinceLastReroute = 0
         driverModeArrivalTime = null
+        currentDistanceTraveled = 0
+        accumulatedDistanceTraveled = 0
+    }
+
+    fun accumulateDistanceTraveled(distance: Int) {
+        accumulatedDistanceTraveled += distance
+    }
+
+    fun resetCurrentDistanceTraveled() {
+        currentDistanceTraveled = 0
     }
 }
 
@@ -289,6 +303,16 @@ internal object MapboxNavigationTelemetry {
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         this.routeData.routeProgress = routeProgress
+        val dynamicValues = getSessionMetadataIfTelemetryRunning()?.dynamicValues
+        if (routeProgress.currentState == RouteProgressState.OFF_ROUTE) {
+            dynamicValues?.accumulateDistanceTraveled(
+                routeProgress.distanceTraveled.toInt()
+            )
+            dynamicValues?.resetCurrentDistanceTraveled()
+        } else {
+            dynamicValues?.currentDistanceTraveled =
+                routeProgress.distanceTraveled.toInt()
+        }
     }
 
     private val onRouteDataChanged: () -> Unit = {
@@ -480,6 +504,8 @@ internal object MapboxNavigationTelemetry {
                 this.feedbackSubType = feedbackSubType
                 this.locationsBefore = feedbackMetadata.locationsBeforeEvent
                 this.locationsAfter = feedbackMetadata.locationsAfterEvent
+                val distanceTraveled =
+                    getSessionMetadataIfTelemetryRunning()?.dynamicValues.retrieveDistanceTraveled()
                 populate(
                     this@MapboxNavigationTelemetry.sdkIdentifier,
                     null,
@@ -493,6 +519,7 @@ internal object MapboxNavigationTelemetry {
                     feedbackMetadata.driverMode,
                     feedbackMetadata.driverModeStartTime,
                     feedbackMetadata.rerouteCount,
+                    distanceTraveled,
                     feedbackMetadata.eventVersion,
                     feedbackMetadata.appMetadata,
                 )
@@ -727,6 +754,7 @@ internal object MapboxNavigationTelemetry {
     }
 
     private fun NavigationEvent.populateWithLocalVars(sessionMetadata: SessionMetadata?) {
+        val distanceTraveled = sessionMetadata?.dynamicValues.retrieveDistanceTraveled()
         this.populate(
             this@MapboxNavigationTelemetry.sdkIdentifier,
             routeData.originalRoute,
@@ -740,9 +768,16 @@ internal object MapboxNavigationTelemetry {
             sessionMetadata?.telemetryNavSessionState?.getModeName(),
             sessionMetadata?.driverModeStartTime?.let { generateCreateDateFormatted(it) },
             sessionMetadata?.dynamicValues?.rerouteCount,
+            distanceTraveled,
             EVENT_VERSION,
             createAppMetadata()
         )
+    }
+
+    private fun DynamicSessionValues?.retrieveDistanceTraveled(): Int {
+        val currentDistanceTraveled = this?.currentDistanceTraveled ?: 0
+        val accumulatedDistanceTraveled = this?.accumulatedDistanceTraveled ?: 0
+        return currentDistanceTraveled + accumulatedDistanceTraveled
     }
 
     private fun NavigationFreeDriveEvent.populate(
