@@ -95,7 +95,7 @@ class NavigatorMapperTest {
             remainingWaypoints = 1,
             bannerInstructions,
             instructionIndex = 1,
-            lastVoiceInstruction = null
+            lastVoiceInstruction = null,
         )
 
         assertEquals(expected, result)
