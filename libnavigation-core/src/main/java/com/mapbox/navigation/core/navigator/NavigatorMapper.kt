@@ -62,13 +62,15 @@ internal fun getRouteProgressFrom(
     status: NavigationStatus,
     remainingWaypoints: Int,
     bannerInstructions: BannerInstructions?,
-    instructionIndex: Int?
+    instructionIndex: Int?,
+    lastVoiceInstruction: VoiceInstructions?,
 ): RouteProgress? {
     return status.getRouteProgress(
         directionsRoute,
         remainingWaypoints,
         bannerInstructions,
-        instructionIndex
+        instructionIndex,
+        lastVoiceInstruction,
     )
 }
 
@@ -86,7 +88,8 @@ private fun NavigationStatus.getRouteProgress(
     route: DirectionsRoute?,
     remainingWaypoints: Int,
     bannerInstructions: BannerInstructions?,
-    instructionIndex: Int?
+    instructionIndex: Int?,
+    lastVoiceInstruction: VoiceInstructions?,
 ): RouteProgress? {
     if (routeState == RouteState.INVALID) {
         return null
@@ -192,7 +195,7 @@ private fun NavigationStatus.getRouteProgress(
         return buildRouteProgressObject(
             route,
             bannerInstructions,
-            voiceInstruction?.mapToDirectionsApi(),
+            voiceInstruction?.mapToDirectionsApi() ?: lastVoiceInstruction,
             routeProgressCurrentState,
             routeLegProgress,
             routeProgressUpcomingStepPoints,

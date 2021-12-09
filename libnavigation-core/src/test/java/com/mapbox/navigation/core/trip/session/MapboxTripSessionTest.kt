@@ -158,7 +158,9 @@ class MapboxTripSessionTest {
         every { routeProgress.bannerInstructions } returns null
         every { routeProgress.voiceInstructions } returns null
         every { routeProgress.currentLegProgress } returns mockk(relaxed = true)
-        every { getRouteProgressFrom(any(), any(), any(), any(), any()) } returns routeProgress
+        every {
+            getRouteProgressFrom(any(), any(), any(), any(), any(), any())
+        } returns routeProgress
         every { routes[0].requestUuid() } returns "uuid"
 
         every {
@@ -353,7 +355,7 @@ class MapboxTripSessionTest {
 
     @Test
     fun routeProgressObserverNotCalledWhenInFreeDrive() = coroutineRule.runBlockingTest {
-        every { getRouteProgressFrom(any(), any(), any(), any(), any()) } returns null
+        every { getRouteProgressFrom(any(), any(), any(), any(), any(), any()) } returns null
         tripSession = buildTripSession()
         tripSession.start(true)
         val observer: RouteProgressObserver = mockk(relaxUnitFun = true)
@@ -537,7 +539,7 @@ class MapboxTripSessionTest {
         every { navigationStatus.bannerInstruction } returns null
         navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
 
-        verify { getRouteProgressFrom(routes[0], navigationStatus, any(), banner, 0) }
+        verify { getRouteProgressFrom(routes[0], navigationStatus, any(), banner, 0, any()) }
         tripSession.stop()
     }
 

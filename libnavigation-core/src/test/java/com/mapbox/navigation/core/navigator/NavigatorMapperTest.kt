@@ -94,7 +94,8 @@ class NavigatorMapperTest {
             navigationStatus,
             remainingWaypoints = 1,
             bannerInstructions,
-            instructionIndex = 1
+            instructionIndex = 1,
+            lastVoiceInstruction = null,
         )
 
         assertEquals(expected, result)
@@ -366,7 +367,8 @@ class NavigatorMapperTest {
             navigationStatus,
             mockk(relaxed = true),
             mockk(relaxed = true),
-            0
+            0,
+            mockk(relaxed = true),
         )
 
         assertNull(routeProgress)
@@ -381,7 +383,8 @@ class NavigatorMapperTest {
             navigationStatus,
             mockk(relaxed = true),
             mockk(relaxed = true),
-            0
+            0,
+            mockk(relaxed = true),
         )
 
         assertNull(routeProgress)
@@ -394,7 +397,8 @@ class NavigatorMapperTest {
             navigationStatus,
             mockk(relaxed = true),
             mockk(relaxed = true),
-            0
+            0,
+            mockk(relaxed = true),
         )
 
         assertNotNull(routeProgress)
@@ -408,7 +412,8 @@ class NavigatorMapperTest {
             navigationStatus,
             mockk(relaxed = true),
             mockk(relaxed = true),
-            0
+            0,
+            lastVoiceInstruction = mockk(relaxed = true),
         )
 
         assertTrue(routeProgress!!.stale)
@@ -422,7 +427,8 @@ class NavigatorMapperTest {
             navigationStatus,
             mockk(relaxed = true),
             mockk(relaxed = true),
-            0
+            0,
+            lastVoiceInstruction = mockk(relaxed = true),
         )
 
         assertFalse(routeProgress!!.stale)
@@ -459,7 +465,8 @@ class NavigatorMapperTest {
             navigationStatus,
             mockk(relaxed = true),
             mockk(relaxed = true),
-            0
+            0,
+            mockk(relaxed = true),
         )
         val upcomingRouteAlerts = routeProgress!!.upcomingRoadObjects
 

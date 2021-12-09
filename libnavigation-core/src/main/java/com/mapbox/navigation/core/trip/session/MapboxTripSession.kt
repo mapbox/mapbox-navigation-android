@@ -83,7 +83,7 @@ internal class MapboxTripSession(
     ) {
 
         isOffRoute = false
-        invalidateLatestBannerInstructionEvent()
+        invalidateLatestInstructions()
         roadObjects = emptyList()
         routeProgress = null
 
@@ -140,6 +140,7 @@ internal class MapboxTripSession(
     private val fallbackVersionsObservers = CopyOnWriteArraySet<FallbackVersionsObserver>()
 
     private val bannerInstructionEvent = BannerInstructionEvent()
+    private var lastVoiceInstruction: VoiceInstructions? = null
 
     private var state: TripSessionState = TripSessionState.STOPPED
         set(value) {
@@ -308,10 +309,11 @@ internal class MapboxTripSession(
                     tripStatus.navigationStatus,
                     remainingWaypoints,
                     bannerInstructionEvent.latestBannerInstructions,
-                    bannerInstructionEvent.latestInstructionIndex
+                    bannerInstructionEvent.latestInstructionIndex,
+                    lastVoiceInstruction
                 )
                 updateRouteProgress(routeProgress, triggerObserver)
-
+                triggerVoiceInstructionEvent(routeProgress, status)
                 isOffRoute = tripStatus.navigationStatus.routeState == RouteState.OFF_ROUTE
             }
         }
@@ -522,7 +524,7 @@ internal class MapboxTripSession(
             try {
                 legIndexUpdated = navigator.updateLegIndex(legIndex)
                 if (legIndexUpdated) {
-                    invalidateLatestBannerInstructionEvent()
+                    invalidateLatestInstructions()
                 }
             } finally {
                 callback.onLegIndexUpdatedCallback(legIndexUpdated)
@@ -620,11 +622,17 @@ internal class MapboxTripSession(
                     }
                 }
             }
-            checkVoiceInstructionEvent(progress.voiceInstructions) { voiceInstruction ->
-                voiceInstructionsObservers.forEach {
-                    it.onNewVoiceInstructions(voiceInstruction)
-                }
+        }
+    }
+
+    private fun triggerVoiceInstructionEvent(progress: RouteProgress?, status: NavigationStatus) {
+        val voiceInstructions = progress?.voiceInstructions
+        val navigatorTriggeredNewInstruction = status.voiceInstruction != null
+        if (voiceInstructions != null && navigatorTriggeredNewInstruction) {
+            voiceInstructionsObservers.forEach {
+                it.onNewVoiceInstructions(voiceInstructions)
             }
+            lastVoiceInstruction = progress.voiceInstructions
         }
     }
 
@@ -636,8 +644,9 @@ internal class MapboxTripSession(
         }
     }
 
-    private fun invalidateLatestBannerInstructionEvent() {
+    private fun invalidateLatestInstructions() {
         bannerInstructionEvent.invalidateLatestBannerInstructions()
+        lastVoiceInstruction = null
     }
 
     private fun checkBannerInstructionEvent(
