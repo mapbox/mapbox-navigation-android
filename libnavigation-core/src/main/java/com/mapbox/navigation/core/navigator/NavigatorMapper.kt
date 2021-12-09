@@ -89,7 +89,7 @@ private fun NavigationStatus.getRouteProgress(
     remainingWaypoints: Int,
     bannerInstructions: BannerInstructions?,
     instructionIndex: Int?,
-    lastVoiceInstruction: VoiceInstructions?
+    lastVoiceInstruction: VoiceInstructions?,
 ): RouteProgress? {
     if (routeState == RouteState.INVALID) {
         return null
