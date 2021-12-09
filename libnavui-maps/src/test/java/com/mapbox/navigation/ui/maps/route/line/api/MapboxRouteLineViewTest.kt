@@ -265,123 +265,123 @@ class MapboxRouteLineViewTest {
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
 
-    @Test
-    fun renderDrawRouteState() = coroutineRule.runBlockingTest {
-        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
-        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
-        mockkObject(MapboxRouteLineUtils)
-        val options = MapboxRouteLineOptions.Builder(ctx).build()
-        val primaryRouteFeatureCollection =
-            FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
-        val alternativeRoute1FeatureCollection =
-            FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
-        val alternativeRoute2FeatureCollection =
-            FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
-        val waypointsFeatureCollection = FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
-        val trafficLineExp = mockk<Expression>()
-        val routeLineExp = mockk<Expression>()
-        val casingLineEx = mockk<Expression>()
-        val alternativeRoute1Expression = mockk<Expression>()
-        val alternativeRoute2Expression = mockk<Expression>()
-        val restrictedRouteExpression = mockk<Expression>()
-        val primaryRouteTrafficLayer = mockk<LineLayer>(relaxed = true)
-        val primaryRouteLayer = mockk<LineLayer>(relaxed = true)
-        val primaryRouteCasingLayer = mockk<LineLayer>(relaxed = true)
-        val altRouteTrafficLayer1 = mockk<LineLayer>(relaxed = true)
-        val altRouteTrafficLayer2 = mockk<LineLayer>(relaxed = true)
-        val restrictedRouteLayer = mockk<LineLayer>(relaxed = true)
-        val topLevelLayer = mockk<LineLayer>(relaxed = true)
-        val primaryRouteSource = mockk<GeoJsonSource>(relaxed = true)
-        val altRoute1Source = mockk<GeoJsonSource>(relaxed = true)
-        val altRoute2Source = mockk<GeoJsonSource>(relaxed = true)
-        val wayPointSource = mockk<GeoJsonSource>(relaxed = true)
-
-        val state: Expected<RouteLineError, RouteSetValue> = ExpectedFactory.createValue(
-            RouteSetValue(
-                primaryRouteLineData = RouteLineData(
-                    primaryRouteFeatureCollection,
-                    RouteLineDynamicData(
-                        { routeLineExp },
-                        { casingLineEx },
-                        { trafficLineExp },
-                        { restrictedRouteExpression }
-                    )
-                ),
-                alternativeRouteLinesData = listOf(
-                    RouteLineData(
-                        alternativeRoute1FeatureCollection,
-                        RouteLineDynamicData(
-                            { throw UnsupportedOperationException() },
-                            { throw UnsupportedOperationException() },
-                            { alternativeRoute1Expression },
-                            { throw UnsupportedOperationException() }
-                        )
-                    ),
-                    RouteLineData(
-                        alternativeRoute2FeatureCollection,
-                        RouteLineDynamicData(
-                            { throw UnsupportedOperationException() },
-                            { throw UnsupportedOperationException() },
-                            { alternativeRoute2Expression },
-                            { throw UnsupportedOperationException() }
-                        )
-                    )
-                ),
-                waypointsFeatureCollection
-            )
-        )
-        val style = mockk<Style>(relaxed = true) {
-            every {
-                getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
-            } returns primaryRouteTrafficLayer
-            every {
-                getLayer(PRIMARY_ROUTE_LAYER_ID)
-            } returns primaryRouteLayer
-            every {
-                getLayer(PRIMARY_ROUTE_CASING_LAYER_ID)
-            } returns primaryRouteCasingLayer
-            every {
-                getLayer(ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
-            } returns altRouteTrafficLayer1
-            every {
-                getLayer(ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
-            } returns altRouteTrafficLayer2
-            every {
-                getLayer(RESTRICTED_ROAD_LAYER_ID)
-            } returns restrictedRouteLayer
-            every {
-                getLayer(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
-            } returns topLevelLayer
-            every { getSource(PRIMARY_ROUTE_SOURCE_ID) } returns primaryRouteSource
-            every { getSource(ALTERNATIVE_ROUTE1_SOURCE_ID) } returns altRoute1Source
-            every { getSource(ALTERNATIVE_ROUTE2_SOURCE_ID) } returns altRoute2Source
-            every { getSource(WAYPOINT_SOURCE_ID) } returns wayPointSource
-        }.also {
-            mockCheckForLayerInitialization(it)
-        }
-
-        pauseDispatcher {
-            MapboxRouteLineView(options).renderRouteDrawData(style, state)
-            verify { MapboxRouteLineUtils.initializeLayers(style, options) }
-        }
-
-        verify { primaryRouteTrafficLayer.lineGradient(Expression.color(Color.TRANSPARENT)) }
-        verify { altRouteTrafficLayer1.lineGradient(Expression.color(Color.TRANSPARENT)) }
-        verify { altRouteTrafficLayer2.lineGradient(Expression.color(Color.TRANSPARENT)) }
-        verify { primaryRouteTrafficLayer.lineGradient(trafficLineExp) }
-        verify { primaryRouteLayer.lineGradient(routeLineExp) }
-        verify { primaryRouteCasingLayer.lineGradient(casingLineEx) }
-        verify { altRouteTrafficLayer1.lineGradient(alternativeRoute1Expression) }
-        verify { altRouteTrafficLayer2.lineGradient(alternativeRoute2Expression) }
-        verify { primaryRouteSource.featureCollection(primaryRouteFeatureCollection) }
-        verify { altRoute1Source.featureCollection(alternativeRoute1FeatureCollection) }
-        verify { altRoute2Source.featureCollection(alternativeRoute2FeatureCollection) }
-        verify { wayPointSource.featureCollection(waypointsFeatureCollection) }
-        verify { restrictedRouteLayer.lineGradient(restrictedRouteExpression) }
-        unmockkObject(MapboxRouteLineUtils)
-        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
-        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
-    }
+//    @Test
+//    fun renderDrawRouteState() = coroutineRule.runBlockingTest {
+//        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+//        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+//        mockkObject(MapboxRouteLineUtils)
+//        val options = MapboxRouteLineOptions.Builder(ctx).build()
+//        val primaryRouteFeatureCollection =
+//            FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
+//        val alternativeRoute1FeatureCollection =
+//            FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
+//        val alternativeRoute2FeatureCollection =
+//            FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
+//        val waypointsFeatureCollection = FeatureCollection.fromFeatures(listOf(getEmptyFeature()))
+//        val trafficLineExp = mockk<Expression>()
+//        val routeLineExp = mockk<Expression>()
+//        val casingLineEx = mockk<Expression>()
+//        val alternativeRoute1Expression = mockk<Expression>()
+//        val alternativeRoute2Expression = mockk<Expression>()
+//        val restrictedRouteExpression = mockk<Expression>()
+//        val primaryRouteTrafficLayer = mockk<LineLayer>(relaxed = true)
+//        val primaryRouteLayer = mockk<LineLayer>(relaxed = true)
+//        val primaryRouteCasingLayer = mockk<LineLayer>(relaxed = true)
+//        val altRouteTrafficLayer1 = mockk<LineLayer>(relaxed = true)
+//        val altRouteTrafficLayer2 = mockk<LineLayer>(relaxed = true)
+//        val restrictedRouteLayer = mockk<LineLayer>(relaxed = true)
+//        val topLevelLayer = mockk<LineLayer>(relaxed = true)
+//        val primaryRouteSource = mockk<GeoJsonSource>(relaxed = true)
+//        val altRoute1Source = mockk<GeoJsonSource>(relaxed = true)
+//        val altRoute2Source = mockk<GeoJsonSource>(relaxed = true)
+//        val wayPointSource = mockk<GeoJsonSource>(relaxed = true)
+//
+//        val state: Expected<RouteLineError, RouteSetValue> = ExpectedFactory.createValue(
+//            RouteSetValue(
+//                primaryRouteLineData = RouteLineData(
+//                    primaryRouteFeatureCollection,
+//                    RouteLineDynamicData(
+//                        { routeLineExp },
+//                        { casingLineEx },
+//                        { trafficLineExp },
+//                        { restrictedRouteExpression }
+//                    )
+//                ),
+//                alternativeRouteLinesData = listOf(
+//                    RouteLineData(
+//                        alternativeRoute1FeatureCollection,
+//                        RouteLineDynamicData(
+//                            { throw UnsupportedOperationException() },
+//                            { throw UnsupportedOperationException() },
+//                            { alternativeRoute1Expression },
+//                            { throw UnsupportedOperationException() }
+//                        )
+//                    ),
+//                    RouteLineData(
+//                        alternativeRoute2FeatureCollection,
+//                        RouteLineDynamicData(
+//                            { throw UnsupportedOperationException() },
+//                            { throw UnsupportedOperationException() },
+//                            { alternativeRoute2Expression },
+//                            { throw UnsupportedOperationException() }
+//                        )
+//                    )
+//                ),
+//                waypointsFeatureCollection
+//            )
+//        )
+//        val style = mockk<Style>(relaxed = true) {
+//            every {
+//                getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+//            } returns primaryRouteTrafficLayer
+//            every {
+//                getLayer(PRIMARY_ROUTE_LAYER_ID)
+//            } returns primaryRouteLayer
+//            every {
+//                getLayer(PRIMARY_ROUTE_CASING_LAYER_ID)
+//            } returns primaryRouteCasingLayer
+//            every {
+//                getLayer(ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
+//            } returns altRouteTrafficLayer1
+//            every {
+//                getLayer(ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+//            } returns altRouteTrafficLayer2
+//            every {
+//                getLayer(RESTRICTED_ROAD_LAYER_ID)
+//            } returns restrictedRouteLayer
+//            every {
+//                getLayer(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+//            } returns topLevelLayer
+//            every { getSource(PRIMARY_ROUTE_SOURCE_ID) } returns primaryRouteSource
+//            every { getSource(ALTERNATIVE_ROUTE1_SOURCE_ID) } returns altRoute1Source
+//            every { getSource(ALTERNATIVE_ROUTE2_SOURCE_ID) } returns altRoute2Source
+//            every { getSource(WAYPOINT_SOURCE_ID) } returns wayPointSource
+//        }.also {
+//            mockCheckForLayerInitialization(it)
+//        }
+//
+//        pauseDispatcher {
+//            MapboxRouteLineView(options).renderRouteDrawData(style, state)
+//            verify { MapboxRouteLineUtils.initializeLayers(style, options) }
+//        }
+//
+//        verify { primaryRouteTrafficLayer.lineGradient(Expression.color(Color.TRANSPARENT)) }
+//        verify { altRouteTrafficLayer1.lineGradient(Expression.color(Color.TRANSPARENT)) }
+//        verify { altRouteTrafficLayer2.lineGradient(Expression.color(Color.TRANSPARENT)) }
+//        verify { primaryRouteTrafficLayer.lineGradient(trafficLineExp) }
+//        verify { primaryRouteLayer.lineGradient(routeLineExp) }
+//        verify { primaryRouteCasingLayer.lineGradient(casingLineEx) }
+//        verify { altRouteTrafficLayer1.lineGradient(alternativeRoute1Expression) }
+//        verify { altRouteTrafficLayer2.lineGradient(alternativeRoute2Expression) }
+//        verify { primaryRouteSource.featureCollection(primaryRouteFeatureCollection) }
+//        verify { altRoute1Source.featureCollection(alternativeRoute1FeatureCollection) }
+//        verify { altRoute2Source.featureCollection(alternativeRoute2FeatureCollection) }
+//        verify { wayPointSource.featureCollection(waypointsFeatureCollection) }
+//        verify { restrictedRouteLayer.lineGradient(restrictedRouteExpression) }
+//        unmockkObject(MapboxRouteLineUtils)
+//        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+//        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+//    }
 
     @Test
     fun showPrimaryRoute() {
