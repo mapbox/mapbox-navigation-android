@@ -428,7 +428,7 @@ class NavigatorMapperTest {
             mockk(relaxed = true),
             mockk(relaxed = true),
             0,
-            lastVoiceInstruction = mockk(relaxed = true)
+            lastVoiceInstruction = mockk(relaxed = true),
         )
 
         assertFalse(routeProgress!!.stale)
