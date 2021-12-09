@@ -28,6 +28,7 @@ import com.mapbox.navigation.utils.internal.logD
  * @param driverModeStartTime driver mode start time.
  * Use [TelemetryUtils.generateCreateDateFormatted]
  * @param rerouteCount reroute count
+ * @param distanceTraveled accumulated for the session
  * @param eventVersion events version [MapboxNavigationTelemetry.EVENT_VERSION]
  * @param appMetadata use [MapboxNavigationTelemetry.createAppMetadata]
  */
@@ -44,6 +45,7 @@ internal fun NavigationEvent.populate(
     @FeedbackEvent.DriverMode driverMode: String?,
     driverModeStartTime: String?,
     rerouteCount: Int?,
+    distanceTraveled: Int,
     eventVersion: Int,
     appMetadata: AppMetadata?,
 ) {
@@ -56,7 +58,7 @@ internal fun NavigationEvent.populate(
 
         distanceRemaining = routeProgressNonNull.distanceRemaining.toInt()
         durationRemaining = routeProgressNonNull.durationRemaining.toInt()
-        distanceCompleted = routeProgressNonNull.distanceTraveled.toInt()
+        distanceCompleted = distanceTraveled
 
         routeProgressNonNull.route.let {
             geometry = it.geometry()
