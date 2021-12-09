@@ -626,8 +626,7 @@ internal class MapboxTripSession(
     }
 
     private fun triggerVoiceInstructionEvent(progress: RouteProgress?, status: NavigationStatus) {
-        if (progress == null) return
-        val voiceInstructions = progress.voiceInstructions
+        val voiceInstructions = progress?.voiceInstructions
         val navigatorTriggeredNewInstruction = status.voiceInstruction != null
         if (voiceInstructions != null && navigatorTriggeredNewInstruction) {
             voiceInstructionsObservers.forEach {

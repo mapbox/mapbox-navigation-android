@@ -86,9 +86,11 @@ fun createBannerInstruction(): BannerInstruction {
     )
 }
 
-fun createBannerSection(): BannerSection {
+fun createBannerSection(
+    text: String = "testText",
+): BannerSection {
     return BannerSection(
-        "test",
+        text,
         null,
         null,
         null,
@@ -97,9 +99,12 @@ fun createBannerSection(): BannerSection {
     )
 }
 
-// Add default parameters if you define properties
-fun createFixedLocation() = FixLocation(
-    Point.fromLngLat(0.0, 0.0),
+// Add more default parameters if you define properties
+fun createFixedLocation(
+    longitude: Double = 0.0,
+    latitude: Double = 0.0,
+) = FixLocation(
+    Point.fromLngLat(longitude, latitude),
     0,
     Date.from(Instant.ofEpochMilli(20)),
     null,

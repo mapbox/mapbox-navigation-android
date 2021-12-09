@@ -14,18 +14,18 @@ import com.mapbox.navigation.core.infra.factories.createVoiceInstruction
 import com.mapbox.navigation.core.infra.recorders.RouteProgressObserverRecorder
 import com.mapbox.navigation.core.infra.recorders.VoiceInstructionsObserverRecorder
 import com.mapbox.navigation.core.trip.service.TripService
-import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.Companion.LONGITUDE_FOR_VOICE_INSTRUCTION_1
-import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.Companion.LONGITUDE_FOR_VOICE_INSTRUCTION_2
-import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.Companion.LONGITUDE_FOR_VOICE_INSTRUCTION_NULL
+import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.LONGITUDE_FOR_VOICE_INSTRUCTION_1
+import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.LONGITUDE_FOR_VOICE_INSTRUCTION_2
+import com.mapbox.navigation.core.trip.session.StatusWithVoiceInstructionUpdateUtil.LONGITUDE_FOR_VOICE_INSTRUCTION_NULL
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.spyk
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.CoroutineScope
@@ -269,63 +269,70 @@ private fun buildTripSession(
     )
 }
 
-class StatusWithVoiceInstructionUpdateUtil {
-    companion object {
+object StatusWithVoiceInstructionUpdateUtil {
 
-        const val LONGITUDE_FOR_VOICE_INSTRUCTION_1 = 1.0
-        const val LONGITUDE_FOR_VOICE_INSTRUCTION_NULL = 1.5
-        const val LONGITUDE_FOR_VOICE_INSTRUCTION_2 = 2.0
+    const val LONGITUDE_FOR_VOICE_INSTRUCTION_1 = 1.0
+    const val LONGITUDE_FOR_VOICE_INSTRUCTION_NULL = 1.5
+    const val LONGITUDE_FOR_VOICE_INSTRUCTION_2 = 2.0
 
-        fun triggerStatusUpdatesOnLocationUpdate(nativeNavigator: MapboxNativeNavigator) {
-            coEvery {
-                nativeNavigator.setRoute(any(), any())
-            } returns null
-            val navigatorObserverImplSlot = slot<NavigatorObserver>()
-            every {
-                nativeNavigator.addNavigatorObserver(capture(navigatorObserverImplSlot))
-            } returns Unit
-            coEvery {
-                nativeNavigator.updateLocation(
-                    match { it.coordinate.longitude() == LONGITUDE_FOR_VOICE_INSTRUCTION_1 }
+    fun triggerStatusUpdatesOnLocationUpdate(nativeNavigator: MapboxNativeNavigator) {
+        coEvery {
+            nativeNavigator.setRoute(any(), any())
+        } returns null
+        val navigatorObservers = mutableListOf<NavigatorObserver>()
+        every {
+            nativeNavigator.addNavigatorObserver(capture(navigatorObservers))
+        } returns Unit
+        coEvery {
+            nativeNavigator.updateLocation(
+                match { it.coordinate.longitude() == LONGITUDE_FOR_VOICE_INSTRUCTION_1 }
+            )
+        } answers {
+            navigatorObservers.onStatus(
+                NavigationStatusOrigin.LOCATION_UPDATE,
+                createNavigationStatus(
+                    location = firstArg(),
+                    voiceInstruction = createVoiceInstruction("1")
                 )
-            } answers {
-                navigatorObserverImplSlot.captured.onStatus(
-                    NavigationStatusOrigin.LOCATION_UPDATE,
-                    createNavigationStatus(
-                        location = firstArg(),
-                        voiceInstruction = createVoiceInstruction("1")
-                    )
+            )
+            true
+        }
+        coEvery {
+            nativeNavigator.updateLocation(
+                match { it.coordinate.longitude() == LONGITUDE_FOR_VOICE_INSTRUCTION_NULL }
+            )
+        } answers {
+            navigatorObservers.onStatus(
+                NavigationStatusOrigin.LOCATION_UPDATE,
+                createNavigationStatus(
+                    location = firstArg(),
+                    voiceInstruction = null
                 )
-                true
-            }
-            coEvery {
-                nativeNavigator.updateLocation(
-                    match { it.coordinate.longitude() == LONGITUDE_FOR_VOICE_INSTRUCTION_NULL }
+            )
+            true
+        }
+        coEvery {
+            nativeNavigator.updateLocation(
+                match { it.coordinate.longitude() == LONGITUDE_FOR_VOICE_INSTRUCTION_2 }
+            )
+        } answers {
+            navigatorObservers.onStatus(
+                NavigationStatusOrigin.LOCATION_UPDATE,
+                createNavigationStatus(
+                    location = firstArg(),
+                    voiceInstruction = createVoiceInstruction("2")
                 )
-            } answers {
-                navigatorObserverImplSlot.captured.onStatus(
-                    NavigationStatusOrigin.LOCATION_UPDATE,
-                    createNavigationStatus(
-                        location = firstArg(),
-                        voiceInstruction = null
-                    )
-                )
-                true
-            }
-            coEvery {
-                nativeNavigator.updateLocation(
-                    match { it.coordinate.longitude() == LONGITUDE_FOR_VOICE_INSTRUCTION_2 }
-                )
-            } answers {
-                navigatorObserverImplSlot.captured.onStatus(
-                    NavigationStatusOrigin.LOCATION_UPDATE,
-                    createNavigationStatus(
-                        location = firstArg(),
-                        voiceInstruction = createVoiceInstruction("2")
-                    )
-                )
-                true
-            }
+            )
+            true
+        }
+    }
+
+    private fun List<NavigatorObserver>.onStatus(
+        statusOrigin: NavigationStatusOrigin,
+        status: NavigationStatus,
+    ) {
+        this.forEach {
+            it.onStatus(statusOrigin, status)
         }
     }
 }
