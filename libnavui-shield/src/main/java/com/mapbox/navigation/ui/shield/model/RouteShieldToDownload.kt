@@ -4,16 +4,16 @@ import com.mapbox.api.directions.v5.models.MapboxShield
 import com.mapbox.api.directions.v5.models.ShieldSprite
 
 internal sealed class RouteShieldToDownload(
-    val url: String
+    val url: String?
 ) {
     class MapboxDesign(
-        url: String,
-        val shieldSprite: ShieldSprite,
-        val mapboxShield: MapboxShield,
+        url: String?,
+        val shieldSprite: ShieldSprite?,
+        val mapboxShield: MapboxShield?,
         val legacy: MapboxLegacy? = null
     ) : RouteShieldToDownload(url)
 
     class MapboxLegacy(
-        url: String
+        url: String?
     ) : RouteShieldToDownload(url)
 }

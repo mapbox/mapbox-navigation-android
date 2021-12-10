@@ -45,13 +45,12 @@ class MapboxRouteShieldApi @JvmOverloads constructor(
         private const val MAXIMUM_DISPLAY_REF_LENGTH = 6
     }
 
-    private val contentManager = RoadShieldContentManager(options)
+    private val contentManager = RoadShieldContentManager()
     private val mainJob = InternalJobControlFactory.createMainScopeJobControl()
 
     fun getRouteShields(
         bannerInstructions: List<BannerInstructions>,
-        callback: RouteShieldCallback,
-        fallbackToGeneric: Boolean = true
+        callback: RouteShieldCallback
     ) {
         val routeShieldToDownload = mutableListOf<RouteShieldToDownload>()
         bannerInstructions.forEach { bannerInstruction ->
@@ -62,13 +61,7 @@ class MapboxRouteShieldApi @JvmOverloads constructor(
                 if (component.type() == BannerComponents.ICON) {
                     val legacyShieldUrl = component.imageBaseUrl()
                     routeShieldToDownload.add(
-                        RouteShieldToDownload(
-                            mapboxShield = null,
-                            shieldSprite = null,
-                            mapboxShieldUrl = null,
-                            text = component.text(),
-                            legacyShieldUrl = legacyShieldUrl
-                        )
+                        RouteShieldToDownload.MapboxLegacy(url = legacyShieldUrl)
                     )
                 }
             }
@@ -76,13 +69,7 @@ class MapboxRouteShieldApi @JvmOverloads constructor(
                 if (component.type() == BannerComponents.ICON) {
                     val legacyShieldUrl = component.imageBaseUrl()
                     routeShieldToDownload.add(
-                        RouteShieldToDownload(
-                            mapboxShield = null,
-                            shieldSprite = null,
-                            mapboxShieldUrl = null,
-                            text = component.text(),
-                            legacyShieldUrl = legacyShieldUrl
-                        )
+                        RouteShieldToDownload.MapboxLegacy(url = legacyShieldUrl)
                     )
                 }
             }
@@ -90,13 +77,7 @@ class MapboxRouteShieldApi @JvmOverloads constructor(
                 if (component.type() == BannerComponents.ICON) {
                     val legacyShieldUrl = component.imageBaseUrl()
                     routeShieldToDownload.add(
-                        RouteShieldToDownload(
-                            mapboxShield = null,
-                            shieldSprite = null,
-                            mapboxShieldUrl = null,
-                            text = component.text(),
-                            legacyShieldUrl = legacyShieldUrl
-                        )
+                        RouteShieldToDownload.MapboxLegacy(url = legacyShieldUrl)
                     )
                 }
             }
@@ -106,10 +87,9 @@ class MapboxRouteShieldApi @JvmOverloads constructor(
                 val result = contentManager.getShields(
                     accessToken = accessToken,
                     fallbackToLegacy = false,
-                    fallbackToGeneric = fallbackToGeneric,
                     shieldsToDownload = routeShieldToDownload
                 )
-                callback.onRoadShields(shields = result.shields, errors = result.errors)
+                callback.onRoadShields(shields = result)
             }
         }
     }
@@ -119,8 +99,7 @@ class MapboxRouteShieldApi @JvmOverloads constructor(
         styleId: String,
         bannerInstructions: List<BannerInstructions>,
         callback: RouteShieldCallback,
-        fallbackToLegacy: Boolean,
-        fallbackToGeneric: Boolean
+        fallbackToLegacy: Boolean
     ) {
         requestSprite(userId = userId, styleId = styleId) { routeSprite ->
             val routeShieldToDownload = mutableListOf<RouteShieldToDownload>()
@@ -140,12 +119,11 @@ class MapboxRouteShieldApi @JvmOverloads constructor(
                             displayRef = mapboxShield?.displayRef()
                         )
                         routeShieldToDownload.add(
-                            RouteShieldToDownload(
-                                text = component.text(),
+                            RouteShieldToDownload.MapboxDesign(
                                 shieldSprite = shieldSprite,
                                 mapboxShield = mapboxShield,
-                                mapboxShieldUrl = mapboxShieldUrl,
-                                legacyShieldUrl = legacyShieldUrl
+                                url = mapboxShieldUrl,
+                                legacy = RouteShieldToDownload.MapboxLegacy(url = legacyShieldUrl)
                             )
                         )
                     }
@@ -162,12 +140,11 @@ class MapboxRouteShieldApi @JvmOverloads constructor(
                             displayRef = mapboxShield?.displayRef()
                         )
                         routeShieldToDownload.add(
-                            RouteShieldToDownload(
-                                text = component.text(),
+                            RouteShieldToDownload.MapboxDesign(
                                 shieldSprite = shieldSprite,
                                 mapboxShield = mapboxShield,
-                                mapboxShieldUrl = mapboxShieldUrl,
-                                legacyShieldUrl = legacyShieldUrl
+                                url = mapboxShieldUrl,
+                                legacy = RouteShieldToDownload.MapboxLegacy(url = legacyShieldUrl)
                             )
                         )
                     }
@@ -184,12 +161,11 @@ class MapboxRouteShieldApi @JvmOverloads constructor(
                             displayRef = mapboxShield?.displayRef()
                         )
                         routeShieldToDownload.add(
-                            RouteShieldToDownload(
-                                text = component.text(),
+                            RouteShieldToDownload.MapboxDesign(
                                 shieldSprite = shieldSprite,
                                 mapboxShield = mapboxShield,
-                                mapboxShieldUrl = mapboxShieldUrl,
-                                legacyShieldUrl = legacyShieldUrl
+                                url = mapboxShieldUrl,
+                                legacy = RouteShieldToDownload.MapboxLegacy(url = legacyShieldUrl)
                             )
                         )
                     }
@@ -200,10 +176,9 @@ class MapboxRouteShieldApi @JvmOverloads constructor(
                     val result = contentManager.getShields(
                         accessToken = accessToken,
                         fallbackToLegacy = fallbackToLegacy,
-                        fallbackToGeneric = fallbackToGeneric,
                         shieldsToDownload = routeShieldToDownload
                     )
-                    callback.onRoadShields(shields = result.shields, errors = result.errors)
+                    callback.onRoadShields(shields = result)
                 }
             }
         }
