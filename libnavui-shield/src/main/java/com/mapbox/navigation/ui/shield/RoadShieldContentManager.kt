@@ -14,7 +14,6 @@ import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import okhttp3.internal.wait
 import java.util.*
 import kotlin.coroutines.resume
 
@@ -85,6 +84,7 @@ class RoadShieldContentManager {
 
     private val byteArrayCache = hashMapOf<String, ByteArray>()
     private val resultMap = hashMapOf<String, Expected<RouteShieldError, RouteShieldResult>>()
+    private val ongoingRequestList = mutableSetOf<String>()
 
     private val mainJob = InternalJobControlFactory.createMainScopeJobControl()
     private val awaitingCallbacks = mutableListOf<() -> Boolean>()
@@ -112,6 +112,31 @@ class RoadShieldContentManager {
         mainJob.job.children.forEach { it.cancel() }
     }
 
+    private suspend fun retrieveByteArrayOrWaitIfDownloading(url: String): ByteArray? {
+        return byteArrayCache[url] ?: run {
+            if (ongoingRequestList.contains(url)) {
+                suspendCancellableCoroutine { continuation ->
+                    val callback = {
+                        check(!continuation.isCancelled)
+                        byteArrayCache[url]?.let {
+                            continuation.resume(it)
+                            true
+                        } ?: false
+                    }
+                    if (callback()) {
+                        return@suspendCancellableCoroutine
+                    }
+                    awaitingCallbacks.add(callback)
+                    continuation.invokeOnCancellation {
+                        awaitingCallbacks.remove(callback)
+                    }
+                }
+            } else {
+                null
+            }
+        }
+    }
+
     private fun prepareShields(
         accessToken: String,
         fallbackToLegacy: Boolean = true,
@@ -123,38 +148,42 @@ class RoadShieldContentManager {
                 when (toDownload) {
                     is RouteShieldToDownload.MapboxDesign -> {
                         var message: String? = null
-                        val designByteArray = byteArrayCache[toDownload.url] ?: run {
-                            val placeholder =
-                                toDownload.shieldSprite.spriteAttributes().placeholder()
-                            if (!placeholder.isNullOrEmpty()) {
-                                val requestUrl =
-                                    toDownload.url.plus(REQUEST_ACCESS_TOKEN).plus(accessToken)
-                                val result = RoadShieldDownloader.downloadImage(requestUrl)
-                                val array = if (result.isValue) {
-                                    val svgJson = String(result.value!!)
-                                    val svg = appendTextToShield(
-                                        text = toDownload.mapboxShield.displayRef(),
-                                        shieldSvg = ShieldSvg.fromJson(svgJson).svg(),
-                                        spriteAttr = toDownload.shieldSprite.spriteAttributes()
-                                    ).toByteArray()
-                                    byteArrayCache[toDownload.url] = svg
-                                    svg
-                                } else {
-                                    message = """
+                        val designByteArray = retrieveByteArrayOrWaitIfDownloading(toDownload.url)
+                            ?: run {
+                                val placeholder =
+                                    toDownload.shieldSprite.spriteAttributes().placeholder()
+                                if (!placeholder.isNullOrEmpty()) {
+                                    val requestUrl =
+                                        toDownload.url.plus(REQUEST_ACCESS_TOKEN)
+                                            .plus(accessToken)
+                                    ongoingRequestList.add(requestUrl)
+                                    val result = RoadShieldDownloader.downloadImage(requestUrl)
+                                    invalidate()
+                                    val array = if (result.isValue) {
+                                        val svgJson = String(result.value!!)
+                                        val svg = appendTextToShield(
+                                            text = toDownload.mapboxShield.displayRef(),
+                                            shieldSvg = ShieldSvg.fromJson(svgJson).svg(),
+                                            spriteAttr = toDownload.shieldSprite.spriteAttributes()
+                                        ).toByteArray()
+                                        byteArrayCache[toDownload.url] = svg
+                                        svg
+                                    } else {
+                                        message = """
                                         For mapbox shield url: ${toDownload.url} an error was
                                         received with message: ${result.error}.
                                     """.trimIndent()
-                                    null
-                                }
-                                array
-                            } else {
-                                message = """
+                                        null
+                                    }
+                                    array
+                                } else {
+                                    message = """
                                     For mapbox shield url: ${toDownload.url} an error was
                                     received: missing placeholder in ${toDownload.shieldSprite}.
                                 """.trimIndent()
-                                null
+                                    null
+                                }
                             }
-                        }
 
                         if (designByteArray != null) {
                             val shieldResult = RouteShieldResult(
@@ -176,23 +205,27 @@ class RoadShieldContentManager {
                             val legacyShield = toDownload.legacy
                             if (legacyShield != null) {
                                 val legacyByteArray =
-                                    byteArrayCache[legacyShield.url] ?: run {
-                                        val requestUrl = legacyShield.url.plus(SVG_EXTENSION)
-                                        val result = RoadShieldDownloader.downloadImage(requestUrl)
-                                        val array = if (result.isValue) {
-                                            byteArrayCache[legacyShield.url] =
-                                                result.value!!
-                                            result.value
-                                        } else {
-                                            val legacyMessage = """
+                                    retrieveByteArrayOrWaitIfDownloading(toDownload.url)
+                                        ?: run {
+                                            val requestUrl = legacyShield.url.plus(SVG_EXTENSION)
+                                            ongoingRequestList.add(requestUrl)
+                                            val result =
+                                                RoadShieldDownloader.downloadImage(requestUrl)
+                                            invalidate()
+                                            val array = if (result.isValue) {
+                                                byteArrayCache[legacyShield.url] =
+                                                    result.value!!
+                                                result.value
+                                            } else {
+                                                val legacyMessage = """
                                             For mapbox shield url: ${legacyShield.url} an error was
                                             received with message: ${result.error}.
                                         """.trimIndent()
-                                            message += legacyMessage
-                                            null
+                                                message += legacyMessage
+                                                null
+                                            }
+                                            array
                                         }
-                                        array
-                                    }
                                 if (legacyByteArray != null) {
                                     val shieldResult = RouteShieldResult(
                                         RouteShield.MapboxLegacyShield(
@@ -230,22 +263,25 @@ class RoadShieldContentManager {
                     }
                     is RouteShieldToDownload.MapboxLegacy -> {
                         var message: String? = null
-                        val legacyByteArray = byteArrayCache[toDownload.url] ?: run {
-                            val requestUrl = toDownload.url.plus(SVG_EXTENSION)
-                            val result = RoadShieldDownloader.downloadImage(requestUrl)
-                            val array = if (result.isValue) {
-                                byteArrayCache[toDownload.url] = result.value!!
-                                result.value
-                            } else {
-                                val legacyMessage = """
+                        val legacyByteArray = retrieveByteArrayOrWaitIfDownloading(toDownload.url)
+                            ?: run {
+                                val requestUrl = toDownload.url.plus(SVG_EXTENSION)
+                                ongoingRequestList.add(requestUrl)
+                                val result = RoadShieldDownloader.downloadImage(requestUrl)
+                                invalidate()
+                                val array = if (result.isValue) {
+                                    byteArrayCache[toDownload.url] = result.value!!
+                                    result.value
+                                } else {
+                                    val legacyMessage = """
                                             For mapbox shield url: ${toDownload.url} an error was
                                             received with message: ${result.error}.
                                         """.trimIndent()
-                                message += legacyMessage
-                                null
+                                    message += legacyMessage
+                                    null
+                                }
+                                array
                             }
-                            array
-                        }
                         if (legacyByteArray != null) {
                             val shieldResult = RouteShieldResult(
                                 RouteShield.MapboxLegacyShield(
