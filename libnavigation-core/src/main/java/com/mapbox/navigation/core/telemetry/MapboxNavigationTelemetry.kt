@@ -31,6 +31,7 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.START
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.STOP
+import com.mapbox.navigation.core.telemetry.events.MetricsDirectionsRoute
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
 import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationCancelEvent
@@ -425,7 +426,8 @@ internal object MapboxNavigationTelemetry {
                 lifecycleMonitor?.obtainForegroundPercentage(),
                 EVENT_VERSION,
                 PhoneState.newInstance(applicationContext),
-                NavigationStepData(MetricsRouteProgress(routeData.routeProgress)),
+                MetricsDirectionsRoute(routeData.originalRoute),
+                MetricsRouteProgress(routeData.routeProgress),
                 createAppMetadata(),
                 locationsCollector
             )
@@ -495,7 +497,7 @@ internal object MapboxNavigationTelemetry {
             log("post user feedback with feedback metadata")
             val feedbackEvent = NavigationFeedbackEvent(
                 feedbackMetadata.phoneState,
-                feedbackMetadata.navigationStepData,
+                NavigationStepData(feedbackMetadata.metricsRouteProgress),
             ).apply {
                 this.feedbackType = feedbackType
                 this.source = feedbackSource
@@ -508,8 +510,8 @@ internal object MapboxNavigationTelemetry {
                     getSessionMetadataIfTelemetryRunning()?.dynamicValues.retrieveDistanceTraveled()
                 populate(
                     this@MapboxNavigationTelemetry.sdkIdentifier,
-                    null,
-                    null,
+                    feedbackMetadata.metricsDirectionsRoute,
+                    feedbackMetadata.metricsRouteProgress,
                     feedbackMetadata.lastLocation,
                     feedbackMetadata.locationEngineNameExternal,
                     feedbackMetadata.percentTimeInPortrait,
@@ -757,8 +759,8 @@ internal object MapboxNavigationTelemetry {
         val distanceTraveled = sessionMetadata?.dynamicValues.retrieveDistanceTraveled()
         this.populate(
             this@MapboxNavigationTelemetry.sdkIdentifier,
-            routeData.originalRoute,
-            routeData.routeProgress,
+            MetricsDirectionsRoute(routeData.originalRoute),
+            MetricsRouteProgress(routeData.routeProgress),
             locationsCollector.lastLocation?.toPoint(),
             locationEngineNameExternal,
             lifecycleMonitor?.obtainPortraitPercentage(),

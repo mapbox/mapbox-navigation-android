@@ -4,19 +4,30 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.telemetry.obtainRouteDestination
+import com.mapbox.navigation.core.telemetry.obtainStepCount
 import com.mapbox.navigation.utils.internal.ifNonNull
 
 internal class MetricsRouteProgress(routeProgress: RouteProgress?) {
 
     private companion object {
+        private const val DEFAULT_PROFILE = "driving"
         private val DEFAULT_POINT = Point.fromLngLat(0.0, 0.0)
     }
 
+    var directionsRouteGeometry: String? = null
+        private set
+    var directionsRouteRequestIdentifier: String? = null
+        private set
+    var directionsRouteStepCount: Int = 0
+        private set
+    var directionsRouteIndex: Int = 0
+        private set
     var directionsRouteDistance: Int = 0
         private set
     var directionsRouteDuration: Int = 0
         private set
-    var directionsRouteProfile: String = ""
+    var directionsRouteProfile: String = DEFAULT_PROFILE
         private set
     var directionsRouteDestination: Point = DEFAULT_POINT
         private set
@@ -87,7 +98,7 @@ internal class MetricsRouteProgress(routeProgress: RouteProgress?) {
     }
 
     private fun initDefaultValues() {
-        directionsRouteProfile = ""
+        directionsRouteProfile = DEFAULT_PROFILE
         directionsRouteDestination = DEFAULT_POINT
         currentStepName = ""
         upcomingStepInstruction = ""
@@ -101,10 +112,14 @@ internal class MetricsRouteProgress(routeProgress: RouteProgress?) {
     }
 
     private fun obtainRouteData(route: DirectionsRoute) {
+        directionsRouteGeometry = route.geometry()
+        directionsRouteRequestIdentifier = route.requestUuid()
+        directionsRouteStepCount = obtainStepCount(route)
+        directionsRouteIndex = route.routeIndex()?.toInt() ?: 0
         directionsRouteDistance = route.distance().toInt()
         directionsRouteDuration = route.duration().toInt()
-        directionsRouteProfile = route.routeOptions()?.profile() ?: ""
-        directionsRouteDestination = retrieveRouteDestination(route)
+        directionsRouteProfile = route.routeOptions()?.profile() ?: DEFAULT_PROFILE
+        directionsRouteDestination = obtainRouteDestination(route)
     }
 
     private fun obtainLegData(legProgress: RouteLegProgress) {
@@ -135,7 +150,94 @@ internal class MetricsRouteProgress(routeProgress: RouteProgress?) {
         previousStepName = currentStepName
     }
 
-    private fun retrieveRouteDestination(route: DirectionsRoute): Point =
-        route.legs()?.lastOrNull()?.steps()?.lastOrNull()?.maneuver()?.location()
-            ?: DEFAULT_POINT
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MetricsRouteProgress
+
+        if (directionsRouteDistance != other.directionsRouteDistance) return false
+        if (directionsRouteDuration != other.directionsRouteDuration) return false
+        if (directionsRouteProfile != other.directionsRouteProfile) return false
+        if (directionsRouteDestination != other.directionsRouteDestination) return false
+        if (distanceRemaining != other.distanceRemaining) return false
+        if (durationRemaining != other.durationRemaining) return false
+        if (distanceTraveled != other.distanceTraveled) return false
+        if (currentStepDistance != other.currentStepDistance) return false
+        if (currentStepDuration != other.currentStepDuration) return false
+        if (currentStepDistanceRemaining != other.currentStepDistanceRemaining) return false
+        if (currentStepDurationRemaining != other.currentStepDurationRemaining) return false
+        if (currentStepName != other.currentStepName) return false
+        if (upcomingStepInstruction != other.upcomingStepInstruction) return false
+        if (upcomingStepModifier != other.upcomingStepModifier) return false
+        if (upcomingStepType != other.upcomingStepType) return false
+        if (upcomingStepName != other.upcomingStepName) return false
+        if (previousStepInstruction != other.previousStepInstruction) return false
+        if (previousStepModifier != other.previousStepModifier) return false
+        if (previousStepType != other.previousStepType) return false
+        if (previousStepName != other.previousStepName) return false
+        if (legIndex != other.legIndex) return false
+        if (legCount != other.legCount) return false
+        if (stepIndex != other.stepIndex) return false
+        if (stepCount != other.stepCount) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = directionsRouteDistance
+        result = 31 * result + directionsRouteDuration
+        result = 31 * result + directionsRouteProfile.hashCode()
+        result = 31 * result + directionsRouteDestination.hashCode()
+        result = 31 * result + distanceRemaining
+        result = 31 * result + durationRemaining
+        result = 31 * result + distanceTraveled
+        result = 31 * result + currentStepDistance
+        result = 31 * result + currentStepDuration
+        result = 31 * result + currentStepDistanceRemaining
+        result = 31 * result + currentStepDurationRemaining
+        result = 31 * result + currentStepName.hashCode()
+        result = 31 * result + upcomingStepInstruction.hashCode()
+        result = 31 * result + upcomingStepModifier.hashCode()
+        result = 31 * result + upcomingStepType.hashCode()
+        result = 31 * result + upcomingStepName.hashCode()
+        result = 31 * result + previousStepInstruction.hashCode()
+        result = 31 * result + previousStepModifier.hashCode()
+        result = 31 * result + previousStepType.hashCode()
+        result = 31 * result + previousStepName.hashCode()
+        result = 31 * result + legIndex
+        result = 31 * result + legCount
+        result = 31 * result + stepIndex
+        result = 31 * result + stepCount
+        return result
+    }
+
+    override fun toString(): String {
+        return "MetricsRouteProgress(" +
+            "directionsRouteDistance=$directionsRouteDistance, " +
+            "directionsRouteDuration=$directionsRouteDuration, " +
+            "directionsRouteProfile='$directionsRouteProfile', " +
+            "directionsRouteDestination=$directionsRouteDestination, " +
+            "distanceRemaining=$distanceRemaining, " +
+            "durationRemaining=$durationRemaining, " +
+            "distanceTraveled=$distanceTraveled, " +
+            "currentStepDistance=$currentStepDistance, " +
+            "currentStepDuration=$currentStepDuration, " +
+            "currentStepDistanceRemaining=$currentStepDistanceRemaining, " +
+            "currentStepDurationRemaining=$currentStepDurationRemaining, " +
+            "currentStepName='$currentStepName', " +
+            "upcomingStepInstruction=$upcomingStepInstruction, " +
+            "upcomingStepModifier=$upcomingStepModifier, " +
+            "upcomingStepType=$upcomingStepType, " +
+            "upcomingStepName=$upcomingStepName, " +
+            "previousStepInstruction=$previousStepInstruction, " +
+            "previousStepModifier=$previousStepModifier, " +
+            "previousStepType=$previousStepType, " +
+            "previousStepName='$previousStepName', " +
+            "legIndex=$legIndex, " +
+            "legCount=$legCount, " +
+            "stepIndex=$stepIndex, " +
+            "stepCount=$stepCount" +
+            ")"
+    }
 }

@@ -105,18 +105,34 @@
       "verticalAccuracy": 0.0
     }
   ],
-  "navigationStepData": {
-    "distance": 354,
-    "distanceRemaining": 285,
+  "metricsDirectionsRoute": {
+    "distance": 744,
     "duration": 52,
-    "durationRemaining": 42,
-    "previousInstruction": "Drive south on улица Толбухина.",
-    "previousName": "улица Толбухина",
-    "previousType": "depart",
-    "upcomingInstruction": "Turn left onto проспект Независимости.",
-    "upcomingModifier": "left",
-    "upcomingName": "проспект Независимости",
-    "upcomingType": "end of road"
+    "stepCount": 65
+  },
+  "metricsRouteProgress": {
+    "currentStepDistance": 354,
+    "currentStepDistanceRemaining": 285,
+    "currentStepDuration": 52,
+    "currentStepDurationRemaining": 42,
+    "directionsRouteDistance": 821,
+    "directionsRouteDuration": 27,
+    "directionsRouteIndex": 5,
+    "directionsRouteStepCount": 20,
+    "distanceRemaining": 141,
+    "distanceTraveled": 338,
+    "durationRemaining": 35,
+    "legCount": 7,
+    "legIndex": 2,
+    "previousStepInstruction": "Drive south on улица Толбухина.",
+    "previousStepName": "улица Толбухина",
+    "previousStepType": "depart",
+    "stepCount": 83,
+    "stepIndex": 56,
+    "upcomingStepInstruction": "Turn left onto проспект Независимости.",
+    "upcomingStepModifier": "left",
+    "upcomingStepName": "проспект Независимости",
+    "upcomingStepType": "end of road"
   },
   "percentTimeInForeground": 100,
   "percentTimeInPortrait": 100,

@@ -1,15 +1,14 @@
 package com.mapbox.navigation.core.telemetry
 
 import com.mapbox.android.telemetry.TelemetryUtils
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
+import com.mapbox.navigation.core.telemetry.events.MetricsDirectionsRoute
+import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
 import com.mapbox.navigation.core.telemetry.events.NavigationEvent
-import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
 
 /**
@@ -34,8 +33,8 @@ import com.mapbox.navigation.utils.internal.logD
  */
 internal fun NavigationEvent.populate(
     sdkIdentifier: String,
-    originalRoute: DirectionsRoute?,
-    routeProgress: RouteProgress?,
+    originalRoute: MetricsDirectionsRoute,
+    routeProgress: MetricsRouteProgress,
     lastLocation: Point?,
     locationEngineNameExternal: String?,
     percentTimeInPortrait: Int?,
@@ -53,38 +52,30 @@ internal fun NavigationEvent.populate(
 
     this.sdkIdentifier = sdkIdentifier
 
-    ifNonNull(routeProgress) { routeProgressNonNull ->
-        stepIndex = routeProgressNonNull.currentLegProgress?.currentStepProgress?.stepIndex ?: 0
+    stepIndex = routeProgress.stepIndex
 
-        distanceRemaining = routeProgressNonNull.distanceRemaining.toInt()
-        durationRemaining = routeProgressNonNull.durationRemaining.toInt()
-        distanceCompleted = distanceTraveled
+    distanceRemaining = routeProgress.distanceRemaining
+    durationRemaining = routeProgress.durationRemaining
+    distanceCompleted = distanceTraveled
 
-        routeProgressNonNull.route.let {
-            geometry = it.geometry()
-            profile = it.routeOptions()?.profile()
-            requestIdentifier = it.requestUuid()
-            stepCount = obtainStepCount(it)
-            legIndex = it.routeIndex()?.toInt() ?: 0
-            legCount = it.legs()?.size ?: 0
+    geometry = routeProgress.directionsRouteGeometry
+    profile = routeProgress.directionsRouteProfile
+    requestIdentifier = routeProgress.directionsRouteRequestIdentifier
+    stepCount = routeProgress.directionsRouteStepCount
+    legIndex = routeProgress.directionsRouteIndex
+    legCount = routeProgress.legCount
 
-            absoluteDistanceToDestination = obtainAbsoluteDistance(
-                lastLocation,
-                obtainRouteDestination(it)
-            )
-            estimatedDistance = it.distance().toInt()
-            estimatedDuration = it.duration().toInt()
-            totalStepCount = obtainStepCount(it)
-        }
-    }
+    absoluteDistanceToDestination =
+        obtainAbsoluteDistance(lastLocation, routeProgress.directionsRouteDestination)
+    estimatedDistance = routeProgress.directionsRouteDistance
+    estimatedDuration = routeProgress.directionsRouteDuration
+    totalStepCount = routeProgress.directionsRouteStepCount
 
-    ifNonNull(originalRoute) { orininalRouteNonNull ->
-        originalStepCount = obtainStepCount(orininalRouteNonNull)
-        originalEstimatedDistance = orininalRouteNonNull.distance().toInt()
-        originalEstimatedDuration = orininalRouteNonNull.duration().toInt()
-        originalRequestIdentifier = orininalRouteNonNull.requestUuid()
-        originalGeometry = orininalRouteNonNull.geometry()
-    }
+    originalStepCount = originalRoute.stepCount
+    originalEstimatedDistance = originalRoute.distance
+    originalEstimatedDuration = originalRoute.duration
+    originalRequestIdentifier = originalRoute.requestIdentifier
+    originalGeometry = originalRoute.geometry
 
     locationEngine = locationEngineNameExternal
     tripIdentifier = navObtainUniversalTelemetryTripId()

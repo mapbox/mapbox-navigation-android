@@ -38,6 +38,7 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.START
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.STOP
+import com.mapbox.navigation.core.telemetry.events.MetricsDirectionsRoute
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
 import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationCancelEvent
@@ -46,7 +47,6 @@ import com.mapbox.navigation.core.telemetry.events.NavigationEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationFeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationFreeDriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationRerouteEvent
-import com.mapbox.navigation.core.telemetry.events.NavigationStepData
 import com.mapbox.navigation.core.telemetry.events.PhoneState
 import com.mapbox.navigation.core.telemetry.events.TelemetryLocation
 import com.mapbox.navigation.core.testutil.ifCaptured
@@ -72,10 +72,8 @@ import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotSame
 import junit.framework.TestCase.assertSame
 import junit.framework.TestCase.assertTrue
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -142,8 +140,6 @@ class MapboxNavigationTelemetryTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
-    private val parentJob = SupervisorJob()
-    private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
 
     private val context: Context = mockk(relaxed = true)
     private val applicationContext: Context = mockk(relaxed = true)
@@ -681,7 +677,8 @@ class MapboxNavigationTelemetryTest {
             eventVersion = eventVersion,
             lastLocation = lastLocation,
             phoneState = phoneState,
-            navigationStepData = NavigationStepData(MetricsRouteProgress(null)),
+            metricsDirectionsRoute = MetricsDirectionsRoute(directionsRoute = null),
+            metricsRouteProgress = MetricsRouteProgress(routeProgress = null),
             appMetadata = appMetadata,
         )
         baseMock()
@@ -1412,7 +1409,8 @@ class MapboxNavigationTelemetryTest {
             phoneState = PhoneState(
                 1, 2, 3, true, "connectivity", "audioType", "appState", "01-01-2000", "5", "6"
             ),
-            navigationStepData = NavigationStepData(MetricsRouteProgress(null)),
+            metricsDirectionsRoute = MetricsDirectionsRoute(directionsRoute = null),
+            metricsRouteProgress = MetricsRouteProgress(routeProgress = null),
         )
     ) {
         MapboxNavigationTelemetry.postUserFeedback(
