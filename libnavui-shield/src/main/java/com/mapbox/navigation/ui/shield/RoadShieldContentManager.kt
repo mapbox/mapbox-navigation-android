@@ -1,17 +1,22 @@
 package com.mapbox.navigation.ui.shield
 
-import com.mapbox.api.directions.v5.models.MapboxShield
-import com.mapbox.api.directions.v5.models.ShieldSprite
 import com.mapbox.api.directions.v5.models.ShieldSpriteAttribute
 import com.mapbox.api.directions.v5.models.ShieldSvg
 import com.mapbox.base.common.logger.model.Tag
-import com.mapbox.navigation.ui.shield.model.MapboxRouteShieldOptions
+import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.ui.shield.model.RouteShield
+import com.mapbox.navigation.ui.shield.model.RouteShieldError
+import com.mapbox.navigation.ui.shield.model.RouteShieldOrigin
 import com.mapbox.navigation.ui.shield.model.RouteShieldResult
 import com.mapbox.navigation.ui.shield.model.RouteShieldToDownload
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import okhttp3.internal.wait
 import java.util.*
+import kotlin.coroutines.resume
 
 /**
  * Sample instruction
@@ -70,7 +75,7 @@ import java.util.*
 // TODO: Introduce a wrapper for maneuver
 // TODO: Before falling back to legacy check if it already exists
 // TODO: Introduce a RouteShieldError. Treat fallback as success but remove it from success before you download it next time
-class RoadShieldContentManager(val options: MapboxRouteShieldOptions) {
+class RoadShieldContentManager {
     companion object {
         private const val SVG_EXTENSION = ".svg"
         private const val CANCELED_MESSAGE = "canceled"
@@ -78,9 +83,8 @@ class RoadShieldContentManager(val options: MapboxRouteShieldOptions) {
         private const val REQUEST_ACCESS_TOKEN = "?access_token="
     }
 
-    private val shieldDownloadSuccess = hashMapOf<String, RouteShield.Success>()
-    private val shieldDownloadFailure = hashMapOf<String, RouteShield.Failure>()
-    private val requestedShields = mutableListOf<String>()
+    private val byteArrayCache = hashMapOf<String, ByteArray>()
+    private val resultMap = hashMapOf<String, Expected<RouteShieldError, RouteShieldResult>>()
 
     private val mainJob = InternalJobControlFactory.createMainScopeJobControl()
     private val awaitingCallbacks = mutableListOf<() -> Boolean>()
@@ -88,439 +92,189 @@ class RoadShieldContentManager(val options: MapboxRouteShieldOptions) {
     internal suspend fun getShields(
         accessToken: String,
         fallbackToLegacy: Boolean = true,
-        fallbackToGeneric: Boolean = true,
         shieldsToDownload: List<RouteShieldToDownload>
-    ): RouteShieldResult {
-        clearFailuresFor(shieldsToDownload)
-        mainJob.scope.launch {
-            prepareShields(
-                accessToken = accessToken,
-                fallbackToLegacy = fallbackToLegacy,
-                fallbackToGeneric = fallbackToGeneric,
-                shieldsToDownload = shieldsToDownload
-            )
-        }
+    ): List<Expected<RouteShieldError, RouteShieldResult>> {
+        val requestIds = prepareShields(
+            accessToken = accessToken,
+            fallbackToLegacy = fallbackToLegacy,
+            shieldsToDownload = shieldsToDownload
+        )
 
-        return RouteShieldResult(shieldDownloadSuccess, shieldDownloadFailure)
-        /*return try {
-            waitForShields(shieldsToDownload)
+        return try {
+            waitForShields(requestIds)
         } catch (ex: CancellationException) {
-            RouteShieldResult(shieldDownloadSuccess, shieldDownloadFailure)
-        }*/
+            listOf()
+        }
     }
 
     internal fun cancelAll() {
-        requestedShields.clear()
+        resultMap.clear()
         mainJob.job.children.forEach { it.cancel() }
-    }
-
-    private fun clearFailuresFor(list: List<RouteShieldToDownload>) {
-        /*list.forEach { shieldToDownload ->
-            val routeShield = shieldDownloadFailure.find { failed ->
-                failed.url == shieldToDownload.mapboxShieldUrl
-                    || failed.url == shieldToDownload.legacyShieldUrl
-            }
-            shieldDownloadFailure.remove(routeShield)
-        }*/
     }
 
     private fun prepareShields(
         accessToken: String,
         fallbackToLegacy: Boolean = true,
-        fallbackToGeneric: Boolean = true,
         shieldsToDownload: List<RouteShieldToDownload>
-    ) {
-        shieldsToDownload.forEach { toDownload ->
-            val legacyUrl = toDownload.legacyShieldUrl
-            val mapboxShield = toDownload.mapboxShield
-            val mapboxShieldUrl = toDownload.mapboxShieldUrl
-            when {
-                /*mapboxShield != null -> {
-                    if (!requestedShields.contains(mapboxShieldUrl)) {
-                        val isUnavailable = shieldDownloadSuccess.find {
-                            if (it is RouteShield.Success.MapboxDesignedShield) {
-                                it.url == mapboxShieldUrl
-                            } else {
-                                false
-                            }
-                        } == null
-                        if (isUnavailable) {
-                            requestedShields.add(mapboxShieldUrl!!)
-                            val shieldSprite = toDownload.shieldSprite
-                            if (shieldSprite != null) {
-                                val placeholder = shieldSprite.spriteAttributes().placeholder()
-                                if (!placeholder.isNullOrEmpty()) {
-                                    uponAbleToMakeRequest(
-                                        legacyUrl = legacyUrl,
-                                        accessToken = accessToken,
-                                        mapboxShield = mapboxShield,
-                                        shieldSprite = shieldSprite,
-                                        mapboxShieldUrl = mapboxShieldUrl,
-                                        fallbackToLegacy = fallbackToLegacy,
-                                        fallbackToGeneric = fallbackToGeneric
-                                    )
+    ): Set<String> {
+        return shieldsToDownload.map { toDownload ->
+            val requestId = UUID.randomUUID().toString()
+            mainJob.scope.launch {
+                when (toDownload) {
+                    is RouteShieldToDownload.MapboxDesign -> {
+                        var message: String? = null
+                        val designByteArray = byteArrayCache[toDownload.url] ?: run {
+                            val placeholder =
+                                toDownload.shieldSprite.spriteAttributes().placeholder()
+                            if (!placeholder.isNullOrEmpty()) {
+                                val requestUrl =
+                                    toDownload.url.plus(REQUEST_ACCESS_TOKEN).plus(accessToken)
+                                val result = RoadShieldDownloader.downloadImage(requestUrl)
+                                val array = if (result.isValue) {
+                                    val svgJson = String(result.value!!)
+                                    val svg = appendTextToShield(
+                                        text = toDownload.mapboxShield.displayRef(),
+                                        shieldSvg = ShieldSvg.fromJson(svgJson).svg(),
+                                        spriteAttr = toDownload.shieldSprite.spriteAttributes()
+                                    ).toByteArray()
+                                    byteArrayCache[toDownload.url] = svg
+                                    svg
                                 } else {
-                                    uponNoSpritePlaceholder(
-                                        legacyUrl = legacyUrl,
-                                        mapboxShield = mapboxShield,
-                                        shieldSprite = shieldSprite,
-                                        mapboxShieldUrl = mapboxShieldUrl,
-                                        fallbackToLegacy = fallbackToLegacy,
-                                        fallbackToGeneric = fallbackToGeneric
-                                    )
+                                    message = """
+                                        For mapbox shield url: ${toDownload.url} an error was
+                                        received with message: ${result.error}.
+                                    """.trimIndent()
+                                    null
                                 }
+                                array
                             } else {
-                                uponNoShieldSprite(
-                                    legacyUrl = legacyUrl,
-                                    mapboxShield = mapboxShield,
-                                    mapboxShieldUrl = mapboxShieldUrl,
-                                    fallbackToLegacy = fallbackToLegacy,
-                                    fallbackToGeneric = fallbackToGeneric
-                                )
+                                message = """
+                                    For mapbox shield url: ${toDownload.url} an error was
+                                    received: missing placeholder in ${toDownload.shieldSprite}.
+                                """.trimIndent()
+                                null
                             }
-                            requestedShields.remove(mapboxShieldUrl)
+                        }
+
+                        if (designByteArray != null) {
+                            val shieldResult = RouteShieldResult(
+                                RouteShield.MapboxDesignedShield(
+                                    toDownload.url,
+                                    designByteArray,
+                                    toDownload.mapboxShield,
+                                    toDownload.shieldSprite
+                                ),
+                                RouteShieldOrigin(
+                                    isFallback = false,
+                                    toDownload.url,
+                                    message
+                                )
+                            )
+                            resultMap[requestId] = ExpectedFactory.createValue(shieldResult)
+                            invalidate()
+                        } else if (fallbackToLegacy) {
+                            val legacyShield = toDownload.legacy
+                            if (legacyShield != null) {
+                                val legacyByteArray =
+                                    byteArrayCache[legacyShield.url] ?: run {
+                                        val requestUrl = legacyShield.url.plus(SVG_EXTENSION)
+                                        val result = RoadShieldDownloader.downloadImage(requestUrl)
+                                        val array = if (result.isValue) {
+                                            byteArrayCache[legacyShield.url] =
+                                                result.value!!
+                                            result.value
+                                        } else {
+                                            val legacyMessage = """
+                                            For mapbox shield url: ${legacyShield.url} an error was
+                                            received with message: ${result.error}.
+                                        """.trimIndent()
+                                            message += legacyMessage
+                                            null
+                                        }
+                                        array
+                                    }
+                                if (legacyByteArray != null) {
+                                    val shieldResult = RouteShieldResult(
+                                        RouteShield.MapboxLegacyShield(
+                                            legacyShield.url,
+                                            legacyByteArray,
+                                        ),
+                                        RouteShieldOrigin(
+                                            isFallback = true,
+                                            toDownload.url,
+                                            message
+                                        )
+                                    )
+                                    resultMap[requestId] =
+                                        ExpectedFactory.createValue(shieldResult)
+                                    invalidate()
+                                } else {
+                                    resultMap[requestId] = ExpectedFactory.createError(
+                                        RouteShieldError(
+                                            toDownload.url,
+                                            message
+                                        )
+                                    )
+                                    invalidate()
+                                }
+                            }
+                        } else {
+                            resultMap[requestId] = ExpectedFactory.createError(
+                                RouteShieldError(
+                                    toDownload.url,
+                                    message
+                                )
+                            )
                             invalidate()
                         }
                     }
-                }*/
-                legacyUrl != null -> {
-                    val isAvailableInFailure = shieldDownloadFailure.entries.find {
-                        it.value.url == toDownload.legacyShieldUrl
-                    }
-                    val isAvailableInSuccess = shieldDownloadSuccess.entries.find {
-                        if (it.value is RouteShield.Success.MapboxLegacyShield) {
-                            (it.value as RouteShield.Success.MapboxLegacyShield).url == toDownload.legacyShieldUrl
-                        } else {
-                            false
+                    is RouteShieldToDownload.MapboxLegacy -> {
+                        var message: String? = null
+                        val legacyByteArray = byteArrayCache[toDownload.url] ?: run {
+                            val requestUrl = toDownload.url.plus(SVG_EXTENSION)
+                            val result = RoadShieldDownloader.downloadImage(requestUrl)
+                            val array = if (result.isValue) {
+                                byteArrayCache[toDownload.url] = result.value!!
+                                result.value
+                            } else {
+                                val legacyMessage = """
+                                            For mapbox shield url: ${toDownload.url} an error was
+                                            received with message: ${result.error}.
+                                        """.trimIndent()
+                                message += legacyMessage
+                                null
+                            }
+                            array
                         }
-                    }
-                    if (isAvailableInSuccess != null) {
-                        val isFallback =
-                            (isAvailableInSuccess.value as RouteShield.Success.MapboxLegacyShield).isFromFallback
-                        if (isFallback) {
-                            requestLegacyOrFallback(
-                                text = mapboxShield?.displayRef(),
-                                legacyUrl,
-                                fallbackToGeneric,
-                                isAvailableInSuccess,
-                                isAvailableInFailure
+                        if (legacyByteArray != null) {
+                            val shieldResult = RouteShieldResult(
+                                RouteShield.MapboxLegacyShield(
+                                    toDownload.url,
+                                    legacyByteArray,
+                                ),
+                                RouteShieldOrigin(
+                                    isFallback = false,
+                                    toDownload.url,
+                                    message
+                                )
                             )
+                            resultMap[requestId] =
+                                ExpectedFactory.createValue(shieldResult)
+                            invalidate()
                         } else {
-                            requestLegacyOrFallback(legacyUrl, fallbackToGeneric, null, isAvailableInFailure)
+                            resultMap[requestId] = ExpectedFactory.createError(
+                                RouteShieldError(
+                                    toDownload.url,
+                                    message
+                                )
+                            )
+                            invalidate()
                         }
                     }
                 }
             }
-        }
-    }
-
-    private fun requestGeneric(text: String): RouteShield.Success {
-        val sprite = ShieldSprite
-            .builder()
-            .spriteName("default-shield")
-            .spriteAttributes(options.spriteAttributes)
-            .build()
-        return getGenericShield(text = text, sprite = sprite)
-    }
-
-    private fun requestLegacyOrFallback(
-        text: String,
-        legacyUrl: String,
-        fallbackToGeneric: Boolean,
-        wasAvailableAsFallback: Map.Entry<String,RouteShield.Success>?,
-        isAvailableInFailure: Map.Entry<String,RouteShield.Failure>?
-    ) {
-        val requestId = UUID.randomUUID().toString()
-        mainJob.scope.launch {
-            val urlWithSvgExtension = legacyUrl.plus(SVG_EXTENSION)
-            RoadShieldDownloader.downloadImage(urlWithSvgExtension).fold(
-                {
-                    when (fallbackToGeneric) {
-                        true -> {
-                            val generic = requestGeneric(text = text) as RouteShield.Success.GenericShield
-                            val shield = RouteShield.Success.MapboxLegacyShield(
-                                legacyUrl,
-                                generic.shield,
-                                true,
-                                generic.sprite
-                            )
-                            if (isAvailableInFailure != null) {
-                                shieldDownloadFailure.remove(isAvailableInFailure.key)
-                            }
-                            if (wasAvailableAsFallback != null) {
-                                shieldDownloadSuccess.remove(wasAvailableAsFallback.key)
-                            }
-                            shieldDownloadSuccess[requestId] = shield
-                        }
-                        false -> {
-                            if ((isAvailableInFailure != null &&
-                                    isAvailableInFailure.value.message != it) ||
-                                isAvailableInFailure == null) {
-                                shieldDownloadFailure[requestId] = it
-                            }
-                        }
-                    }
-                },
-                {
-                    if (isAvailableInFailure != null) {
-                        shieldDownloadFailure.remove(isAvailableInFailure.key)
-                    }
-                    if (wasAvailableAsFallback != null) {
-                        shieldDownloadSuccess.remove(wasAvailableAsFallback.key)
-                    }
-                    shieldDownloadSuccess[requestId] = RouteShield.Success.MapboxLegacyShield(
-                        legacyUrl, it, false, null
-                    )
-                }
-            )
-        }
-    }
-
-    /*private fun uponNoShieldSprite(
-        legacyUrl: String?,
-        mapboxShieldUrl: String,
-        fallbackToLegacy: Boolean,
-        fallbackToGeneric: Boolean,
-        mapboxShield: MapboxShield
-    ) {
-        if (legacyUrl != null && fallbackToLegacy) {
-            requestLegacyOrGeneric(
-                text = mapboxShield.displayRef(),
-                legacyUrl = legacyUrl,
-                valueFun = { shield -> shieldDownloadFailure.add(shield) },
-                errorFun = { shield -> shieldDownloadFailure.add(shield) },
-                fallbackToGeneric = fallbackToGeneric
-            )
-        } else if (fallbackToGeneric) {
-            val shield = requestGeneric(text = mapboxShield.displayRef())
-            shieldDownloadSuccess.add(shield)
-        } else {
-            shieldDownloadFailure.add(
-                RouteShield.Failure(
-                    url = mapboxShieldUrl,
-                    message = """
-                        Shield sprite for $mapboxShield is null. Hence the request for 
-                        $mapboxShieldUrl was not made.
-                        """.trimIndent()
-                )
-            )
-        }
-    }
-
-    private fun uponNoSpritePlaceholder(
-        legacyUrl: String?,
-        mapboxShieldUrl: String,
-        fallbackToLegacy: Boolean,
-        fallbackToGeneric: Boolean,
-        mapboxShield: MapboxShield,
-        shieldSprite: ShieldSprite
-    ) {
-        if (legacyUrl != null && fallbackToLegacy) {
-            requestLegacyOrGeneric(
-                text = mapboxShield.displayRef(),
-                legacyUrl = legacyUrl,
-                valueFun = { shield -> shieldDownloadFailure.add(shield) },
-                errorFun = { shield -> shieldDownloadFailure.add(shield) },
-                fallbackToGeneric = fallbackToGeneric
-            )
-        } else if (fallbackToGeneric) {
-            val shield = requestGeneric(text = mapboxShield.displayRef())
-            shieldDownloadSuccess.add(shield)
-        } else {
-            shieldDownloadFailure.add(
-                RouteShield.Failure(
-                    url = mapboxShieldUrl,
-                    message = """
-                        Mapbox shield($mapboxShield) referring to shield sprite($shieldSprite) 
-                        has empty or null placeholder value. Hence the request for $mapboxShieldUrl 
-                        was not made.
-                        """.trimIndent()
-                )
-            )
-        }
-    }
-
-    private fun uponAbleToMakeRequest(
-        legacyUrl: String?,
-        accessToken: String,
-        mapboxShieldUrl: String,
-        fallbackToLegacy: Boolean,
-        fallbackToGeneric: Boolean,
-        mapboxShield: MapboxShield,
-        shieldSprite: ShieldSprite
-    ) {
-        if (legacyUrl != null && fallbackToLegacy) {
-            requestMapboxShieldOrLegacy(
-                shieldUrl = mapboxShieldUrl,
-                legacyUrl = legacyUrl,
-                sprite = shieldSprite,
-                accessToken = accessToken,
-                mapboxShield = mapboxShield,
-                fallbackToLegacy = fallbackToLegacy,
-                fallbackToGeneric = fallbackToGeneric,
-                valueFun = { shield -> shieldDownloadSuccess.add(shield) },
-                errorFun = { shield -> shieldDownloadFailure.add(shield) }
-            )
-        } else if (fallbackToGeneric) {
-            requestMapboxShieldOrGeneric(
-                url = mapboxShieldUrl,
-                sprite = shieldSprite,
-                accessToken = accessToken,
-                mapboxShield = mapboxShield,
-                fallbackToGeneric = fallbackToGeneric,
-                valueFun = { shield -> shieldDownloadSuccess.add(shield) },
-                errorFun = { shield -> shieldDownloadFailure.add(shield) }
-            )
-        }
-        // what happens if legacy url is null and fallbackTogeneric + fallbacktolegacy are false
-    }*/
-
-    private fun requestMapboxShieldOrGeneric(
-        url: String,
-        accessToken: String,
-        sprite: ShieldSprite,
-        mapboxShield: MapboxShield,
-        fallbackToGeneric: Boolean,
-        valueFun: (RouteShield.Success) -> Unit,
-        errorFun: (RouteShield.Failure) -> Unit
-    ) {
-        mainJob.scope.launch {
-            val requestUrl = url.plus(REQUEST_ACCESS_TOKEN).plus(accessToken)
-            RoadShieldDownloader.downloadImage(requestUrl).fold(
-                {
-                    when (fallbackToGeneric) {
-                        true -> {
-                            val generic = requestGeneric(text = mapboxShield.displayRef())
-                            valueFun(
-                                RouteShield.Success.MapboxDesignedShield(
-                                    url = url,
-                                    shield = generic.shield,
-                                    isFromFallback = true,
-                                    mapboxShield = mapboxShield,
-                                    shieldSprite = generic.sprite
-                                )
-                            )
-                        }
-                        false -> {
-                            errorFun(RouteShield.Failure(url = url, message = it))
-                        }
-                    }
-                },
-                {
-                    val svgJson = String(it)
-                    val svg = appendTextToShield(
-                        text = mapboxShield.displayRef(),
-                        shieldSvg = ShieldSvg.fromJson(svgJson).svg(),
-                        spriteAttr = sprite.spriteAttributes()
-                    ).toByteArray()
-                    val shield = getMapboxShield(
-                        shield = svg,
-                        url = url,
-                        sprite = sprite,
-                        mapboxShield = mapboxShield,
-                        isFromFallback = false
-                    )
-                    valueFun(shield)
-                }
-            )
-        }
-    }
-
-    private fun requestMapboxShieldOrLegacy(
-        shieldUrl: String,
-        legacyUrl: String,
-        accessToken: String,
-        sprite: ShieldSprite,
-        fallbackToLegacy: Boolean,
-        fallbackToGeneric: Boolean,
-        mapboxShield: MapboxShield,
-        valueFun: (RouteShield.Success) -> Unit,
-        errorFun: (RouteShield.Failure) -> Unit
-    ) {
-        mainJob.scope.launch {
-            val requestUrl = shieldUrl.plus(REQUEST_ACCESS_TOKEN).plus(accessToken)
-            RoadShieldDownloader.downloadImage(requestUrl).fold(
-                {
-                    when (fallbackToLegacy) {
-                        true -> {
-                            val message = """
-                                For mapbox shield url: $shieldUrl an error was received with 
-                                message: $it Invoking a network request for legacy url :$legacyUrl 
-                                as fallback. 
-                            """.trimIndent()
-                            requestLegacyOrGeneric(
-                                text = mapboxShield.displayRef(),
-                                legacyUrl = legacyUrl,
-                                valueFun = valueFun,
-                                errorFun = errorFun,
-                                fallbackToGeneric = fallbackToGeneric
-                            )
-                        }
-                        false -> {
-                            errorFun(RouteShield.Failure(shieldUrl, it))
-                        }
-                    }
-                },
-                {
-                    val svgJson = String(it)
-                    val svg = appendTextToShield(
-                        text = mapboxShield.displayRef(),
-                        shieldSvg = ShieldSvg.fromJson(svgJson).svg(),
-                        spriteAttr = sprite.spriteAttributes()
-                    ).toByteArray()
-                    val shield = getMapboxShield(
-                        shield = svg,
-                        url = shieldUrl,
-                        sprite = sprite,
-                        mapboxShield = mapboxShield,
-                        isFromFallback = false
-                    )
-                    valueFun(shield)
-                }
-            )
-        }
-    }
-
-    private fun getGenericShield(
-        text: String,
-        sprite: ShieldSprite? = null,
-    ): RouteShield.Success.GenericShield {
-        return RouteShield.Success.GenericShield(
-            shield = appendTextToShield(
-                text, options.shieldSvg, sprite!!.spriteAttributes()
-            ).toByteArray(),
-            sprite = sprite,
-        )
-    }
-
-    private fun getLegacyShield(
-        url: String,
-        shield: ByteArray,
-        isFromFallback: Boolean,
-        sprite: ShieldSprite?
-    ): RouteShield.Success.MapboxLegacyShield {
-        return RouteShield.Success.MapboxLegacyShield(
-            url = url,
-            shield = shield,
-            isFromFallback = isFromFallback,
-            shieldSprite = sprite
-        )
-    }
-
-    private fun getMapboxShield(
-        shield: ByteArray,
-        url: String,
-        sprite: ShieldSprite?,
-        isFromFallback: Boolean,
-        mapboxShield: MapboxShield
-    ): RouteShield.Success.MapboxDesignedShield {
-        return RouteShield.Success.MapboxDesignedShield(
-            url = url,
-            shield = shield,
-            shieldSprite = sprite,
-            mapboxShield = mapboxShield,
-            isFromFallback = isFromFallback
-        )
+            requestId
+        }.toSet()
     }
 
     private fun appendTextToShield(
@@ -547,25 +301,17 @@ class RoadShieldContentManager(val options: MapboxRouteShieldOptions) {
     }
 
     private suspend fun waitForShields(
-        shieldsToDownload: List<RouteShieldToDownload>
-    )/*: RouteShieldResult*/ {
-        /*return suspendCancellableCoroutine { continuation ->
+        requestIds: Set<String>
+    ): List<Expected<RouteShieldError, RouteShieldResult>> {
+        return suspendCancellableCoroutine { continuation ->
             val callback = {
                 check(!continuation.isCancelled)
-                if (shieldsToDownload.all { toDownload ->
-                        shieldDownloadSuccess.any {
-                            it.url == toDownload.legacyShieldUrl ||
-                                it.url == toDownload.mapboxShieldUrl
-                        } ||
-                            shieldDownloadFailure.any {
-                                it.url == toDownload.legacyShieldUrl ||
-                                    it.url == toDownload.mapboxShieldUrl
-                            }
+                if (requestIds.all { requestId -> resultMap.containsKey(requestId) }) {
+                    val returnList = mutableListOf<Expected<RouteShieldError, RouteShieldResult>>()
+                    requestIds.forEach {
+                        returnList.add(resultMap.remove(it)!!)
                     }
-                ) {
-                    continuation.resume(
-                        RouteShieldResult(shieldDownloadSuccess, shieldDownloadFailure)
-                    )
+                    continuation.resume(returnList)
                     true
                 } else {
                     false
@@ -578,6 +324,6 @@ class RoadShieldContentManager(val options: MapboxRouteShieldOptions) {
             continuation.invokeOnCancellation {
                 awaitingCallbacks.remove(callback)
             }
-        }*/
+        }
     }
 }

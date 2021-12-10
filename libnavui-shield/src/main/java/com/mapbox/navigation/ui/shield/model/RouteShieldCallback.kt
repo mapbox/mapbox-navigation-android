@@ -1,9 +1,10 @@
 package com.mapbox.navigation.ui.shield.model
 
+import com.mapbox.bindgen.Expected
+
 fun interface RouteShieldCallback {
 
     fun onRoadShields(
-        shields: List<RouteShield>,
-        errors: List<RouteShield>
+        shields: List<Expected<RouteShieldError, RouteShieldResult>>
     )
 }

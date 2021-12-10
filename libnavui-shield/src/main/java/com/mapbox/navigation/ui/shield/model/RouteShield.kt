@@ -40,7 +40,6 @@ sealed class RouteShield {
     class MapboxDesignedShield internal constructor(
         val url: String,
         val shield: ByteArray,
-        val isFromFallback: Boolean,
         val mapboxShield: MapboxShield,
         val shieldSprite: ShieldSprite?
     ) : RouteShield() {
@@ -53,7 +52,6 @@ sealed class RouteShield {
 
             if (url != other.url) return false
             if (!shield.contentEquals(other.shield)) return false
-            if (isFromFallback != other.isFromFallback) return false
             if (mapboxShield != other.mapboxShield) return false
             if (shieldSprite != other.shieldSprite) return false
 
@@ -63,7 +61,6 @@ sealed class RouteShield {
         override fun hashCode(): Int {
             var result = url.hashCode()
             result = 31 * result + shield.contentHashCode()
-            result = 31 * result + isFromFallback.hashCode()
             result = 31 * result + mapboxShield.hashCode()
             result = 31 * result + (shieldSprite?.hashCode() ?: 0)
             return result
@@ -73,11 +70,9 @@ sealed class RouteShield {
             return "MapboxDesignedShield(" +
                 "url='$url', " +
                 "shield=${shield.contentToString()}, " +
-                "isFromFallback=$isFromFallback, " +
                 "mapboxShield=$mapboxShield, " +
                 "shieldSprite=$shieldSprite" +
                 ")"
         }
-
     }
 }
