@@ -26,7 +26,10 @@ dependencies {
     api dependenciesList.mapboxSdkDirectionsModels
     api dependenciesList.mapboxSdkServicesCore
     // Navigator
-    implementation dependenciesList.mapboxNavigator
+    implementation(dependenciesList.mapboxNavigator) {
+        exclude group: "com.mapbox.common"
+    }
+    implementation dependenciesList.mapboxCommonNative
 
     implementation dependenciesList.androidXAnnotation
     implementation dependenciesList.coroutinesAndroid

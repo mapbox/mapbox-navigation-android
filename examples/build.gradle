@@ -98,6 +98,8 @@ dependencies {
     // Mapbox Navigation SDK
     implementation project(':libnavigation-android')
     implementation project(':libnavui-dropin')
+    implementation dependenciesList.mapboxCommonNative
+    implementation("com.mapbox.common:okhttp:21.0.0-7fde18e062c3f5c885bc519f6627702898d3b948-SNAPSHOT")
 
     // test
     androidTestImplementation project(':libtesting-ui')

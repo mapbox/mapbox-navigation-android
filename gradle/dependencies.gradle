@@ -22,7 +22,7 @@ ext {
       mapboxEvents              : '8.1.0',
       mapboxCore                : '5.0.0',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
-      mapboxCommonNative        : '21.0.0-rc.1',
+      mapboxCommonNative        : '21.0.0-7fde18e062c3f5c885bc519f6627702898d3b948-SNAPSHOT',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxBaseAndroid         : '0.5.0',

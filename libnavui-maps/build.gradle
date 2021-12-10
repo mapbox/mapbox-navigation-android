@@ -41,7 +41,9 @@ dependencies {
     api project(":libnavui-base")
     implementation project(":libnavui-resources")
 
-    api dependenciesList.mapboxMapSdk
+    api(dependenciesList.mapboxMapSdk) {
+        exclude group: "com.mapbox.common"
+    }
     api dependenciesList.mapboxSdkTurf
 
     implementation dependenciesList.androidXAppCompat

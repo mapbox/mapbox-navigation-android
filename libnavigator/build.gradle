@@ -31,7 +31,9 @@ dependencies {
     api dependenciesList.mapboxSdkGeoJSON
 
     // Navigator
-    api dependenciesList.mapboxNavigator
+    api(dependenciesList.mapboxNavigator) {
+        exclude group: "com.mapbox.common"
+    }
 
     implementation dependenciesList.mapboxAndroidCommon
 
