@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.shield.model
 
+import com.mapbox.bindgen.Expected
+
 data class RouteShieldResult(
-    val shields: List<RouteShield>,
-    val errors: List<RouteShield>
+    val shields: Expected<List<RouteShieldError>, List<RouteShield>>
 )
