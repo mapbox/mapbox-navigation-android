@@ -31,7 +31,8 @@ class FeedbackMetadataWrapper internal constructor(
     private val percentTimeInForeground: Int?,
     private val eventVersion: Int,
     private val phoneState: PhoneState,
-    private val navigationStepData: NavigationStepData,
+    private val metricsDirectionsRoute: MetricsDirectionsRoute,
+    private val metricsRouteProgress: MetricsRouteProgress,
     private val appMetadata: AppMetadata?,
     private val locationsCollector: LocationsCollector,
 ) {
@@ -73,7 +74,8 @@ class FeedbackMetadataWrapper internal constructor(
             percentTimeInForeground,
             eventVersion,
             phoneState,
-            navigationStepData,
+            metricsDirectionsRoute,
+            metricsRouteProgress,
             appMetadata,
         )
     }
@@ -102,7 +104,8 @@ class FeedbackMetadata internal constructor(
     internal val percentTimeInForeground: Int? = null,
     internal val eventVersion: Int,
     internal val phoneState: PhoneState,
-    internal val navigationStepData: NavigationStepData,
+    internal val metricsDirectionsRoute: MetricsDirectionsRoute,
+    internal val metricsRouteProgress: MetricsRouteProgress,
     internal val appMetadata: AppMetadata? = null,
 ) {
 
@@ -144,7 +147,8 @@ class FeedbackMetadata internal constructor(
         if (percentTimeInForeground != other.percentTimeInForeground) return false
         if (eventVersion != other.eventVersion) return false
         if (phoneState != other.phoneState) return false
-        if (navigationStepData != other.navigationStepData) return false
+        if (metricsDirectionsRoute != other.metricsDirectionsRoute) return false
+        if (metricsRouteProgress != other.metricsRouteProgress) return false
         if (appMetadata != other.appMetadata) return false
 
         return true
@@ -167,7 +171,8 @@ class FeedbackMetadata internal constructor(
         result = 31 * result + percentTimeInForeground.hashCode()
         result = 31 * result + eventVersion.hashCode()
         result = 31 * result + phoneState.hashCode()
-        result = 31 * result + navigationStepData.hashCode()
+        result = 31 * result + metricsDirectionsRoute.hashCode()
+        result = 31 * result + metricsRouteProgress.hashCode()
         result = 31 * result + appMetadata.hashCode()
         return result
     }
@@ -190,7 +195,8 @@ class FeedbackMetadata internal constructor(
             "percentTimeInForeground=$percentTimeInForeground, " +
             "eventVersion=$eventVersion, " +
             "phoneState=$phoneState, " +
-            "navigationStepData=$navigationStepData, " +
+            "metricsDirectionsRoute=$metricsDirectionsRoute, " +
+            "metricsRouteProgress=$metricsRouteProgress, " +
             "appMetadata=$appMetadata" +
             ")"
 }
