@@ -96,6 +96,9 @@ fun MapboxRouteShieldApi.getRouteShieldsFrom(
         primaryManeuverComponents.forEach { component ->
             if (component.node is RoadShieldComponentNode) {
                 val toDownload = RouteShieldToDownload.MapboxDesign(
+                    userId = userId,
+                    styleId = styleId,
+                    accessToken = accessToken,
                     mapboxShield = component.node.mapboxShield,
                     legacy = RouteShieldToDownload.MapboxLegacy(component.node.shieldUrl)
                 )

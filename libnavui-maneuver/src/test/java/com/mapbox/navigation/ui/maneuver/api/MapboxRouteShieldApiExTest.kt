@@ -2,27 +2,21 @@ package com.mapbox.navigation.ui.maneuver.api
 
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.common.HttpResponseCallback
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maneuver.model.Maneuver
 import com.mapbox.navigation.ui.maneuver.model.RoadShield
 import com.mapbox.navigation.ui.maneuver.model.RoadShieldComponentNode
 import com.mapbox.navigation.ui.maneuver.model.RoadShieldError
-import com.mapbox.navigation.ui.maneuver.model.RoadShieldResult
 import com.mapbox.navigation.ui.maneuver.model.TextComponentNode
 import com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi
 import com.mapbox.navigation.ui.shield.model.*
-import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -191,7 +185,7 @@ class MapboxRouteShieldApiExTest {
                     origin = RouteShieldOrigin(
                         false,
                         "https://shield.mapbox.com/primary_3",
-                        errorMessage = ""
+                        originalErrorMessage = ""
                     )
                 )
             ),
@@ -204,7 +198,7 @@ class MapboxRouteShieldApiExTest {
                     origin = RouteShieldOrigin(
                         false,
                         "https://shield.mapbox.com/secondary_3",
-                        errorMessage = ""
+                        originalErrorMessage = ""
                     )
                 )
             ),
@@ -217,7 +211,7 @@ class MapboxRouteShieldApiExTest {
                     origin = RouteShieldOrigin(
                         false,
                         "https://shield.mapbox.com/sub_3",
-                        errorMessage = ""
+                        originalErrorMessage = ""
                     )
                 )
             )
@@ -264,7 +258,7 @@ class MapboxRouteShieldApiExTest {
                     origin = RouteShieldOrigin(
                         false,
                         "https://shield.mapbox.com/secondary_3",
-                        errorMessage = ""
+                        originalErrorMessage = ""
                     )
                 )
             ),
@@ -277,7 +271,7 @@ class MapboxRouteShieldApiExTest {
                     origin = RouteShieldOrigin(
                         false,
                         "https://shield.mapbox.com/sub_3",
-                        errorMessage = ""
+                        originalErrorMessage = ""
                     )
                 )
             )
