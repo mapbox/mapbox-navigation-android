@@ -113,7 +113,7 @@ class MapboxNavigationAppDelegateTest {
     }
 
     @Test
-    fun `verify setup will recreate mapboxNavigation and notify observers`() {
+    fun `verify multiple setup calls are ignored`() {
         mapboxNavigationApp.setup(navigationOptions)
         val firstObserver = mockk<MapboxNavigationObserver>(relaxUnitFun = true)
         val secondObserver = mockk<MapboxNavigationObserver>(relaxUnitFun = true)
@@ -122,18 +122,14 @@ class MapboxNavigationAppDelegateTest {
 
         val testLifecycleOwner = CarAppLifecycleOwnerTest.TestLifecycleOwner()
         mapboxNavigationApp.attach(testLifecycleOwner)
-
+        mapboxNavigationApp.setup(navigationOptions)
         testLifecycleOwner.lifecycleRegistry.currentState = Lifecycle.State.RESUMED
         mapboxNavigationApp.setup(navigationOptions)
 
-        verifyOrder {
-            firstObserver.onAttached(any())
-            secondObserver.onAttached(any())
-            firstObserver.onDetached(any())
-            secondObserver.onDetached(any())
-            firstObserver.onAttached(any())
-            secondObserver.onAttached(any())
-        }
+        verify(exactly = 1) { firstObserver.onAttached(any()) }
+        verify(exactly = 1) { secondObserver.onAttached(any()) }
+        verify(exactly = 0) { firstObserver.onDetached(any()) }
+        verify(exactly = 0) { secondObserver.onDetached(any()) }
     }
 
     @Test

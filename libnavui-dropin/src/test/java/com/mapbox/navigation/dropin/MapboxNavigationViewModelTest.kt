@@ -1,15 +1,17 @@
 package com.mapbox.navigation.dropin
 
 import android.location.Location
-import androidx.lifecycle.LifecycleOwner
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -20,31 +22,50 @@ import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.slot
+import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
+import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxNavigationViewModelTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
-    @Test
-    fun onStart() {
-        val lifecycleOwner = mockk< LifecycleOwner>()
-        val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val factory = mockk<DropInUIMapboxNavigationFactory> {
-            every { getMapboxNavigation() } returns mockMapboxNavigation
-        }
-        val viewModel = MapboxNavigationViewModel(factory)
+    private val mapboxNavigationObserver = slot<MapboxNavigationObserver>()
+    private lateinit var viewModel: MapboxNavigationViewModel
 
-        viewModel.onStart(lifecycleOwner)
+    @Before
+    fun setup() {
+        mockkObject(MapboxNavigationApp)
+        every {
+            MapboxNavigationApp.setup(any())
+        } returns MapboxNavigationApp
+        every {
+            MapboxNavigationApp.registerObserver(capture(mapboxNavigationObserver))
+        } returns MapboxNavigationApp
+
+        viewModel = MapboxNavigationViewModel()
+    }
+
+    @After
+    fun teardown() {
+        unmockkAll()
+    }
+
+    @Test
+    fun `verify MapboxNavigation is registered onAttached`() {
+        val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        mapboxNavigationObserver.captured.onAttached(mockMapboxNavigation)
 
         verify { mockMapboxNavigation.registerLocationObserver(any()) }
         verify { mockMapboxNavigation.registerRouteProgressObserver(any()) }
@@ -55,15 +76,9 @@ class MapboxNavigationViewModelTest {
     }
 
     @Test
-    fun onStop() {
-        val lifecycleOwner = mockk< LifecycleOwner>()
+    fun `verify MapboxNavigation is unregistered onDetached`() {
         val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val factory = mockk<DropInUIMapboxNavigationFactory> {
-            every { getMapboxNavigation() } returns mockMapboxNavigation
-        }
-        val viewModel = MapboxNavigationViewModel(factory)
-
-        viewModel.onStop(lifecycleOwner)
+        mapboxNavigationObserver.captured.onDetached(mockMapboxNavigation)
 
         verify { mockMapboxNavigation.unregisterLocationObserver(any()) }
         verify { mockMapboxNavigation.unregisterRouteProgressObserver(any()) }
@@ -77,14 +92,9 @@ class MapboxNavigationViewModelTest {
     fun rawLocationUpdates() = coroutineRule.runBlockingTest {
         val expected = mockk<Location>()
         val observerSlot = slot<LocationObserver>()
-        val lifecycleOwner = mockk< LifecycleOwner>()
         val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val factory = mockk<DropInUIMapboxNavigationFactory> {
-            every { getMapboxNavigation() } returns mockMapboxNavigation
-        }
-        val viewModel = MapboxNavigationViewModel(factory).also {
-            it.onStart(lifecycleOwner)
-        }
+        mapboxNavigationObserver.captured.onAttached(mockMapboxNavigation)
+
         verify { mockMapboxNavigation.registerLocationObserver(capture(observerSlot)) }
         val def = async {
             viewModel.rawLocationUpdates().first()
@@ -98,15 +108,10 @@ class MapboxNavigationViewModelTest {
 
     @Test
     fun newLocationMatcherResults() = coroutineRule.runBlockingTest {
-        val lifecycleOwner = mockk< LifecycleOwner>()
         val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val factory = mockk<DropInUIMapboxNavigationFactory> {
-            every { getMapboxNavigation() } returns mockMapboxNavigation
-        }
         val observerSlot = slot<LocationObserver>()
-        val viewModel = MapboxNavigationViewModel(factory).also {
-            it.onStart(lifecycleOwner)
-        }
+        mapboxNavigationObserver.captured.onAttached(mockMapboxNavigation)
+
         verify { mockMapboxNavigation.registerLocationObserver(capture(observerSlot)) }
         val def = async {
             viewModel.newLocationMatcherResults.first()
@@ -122,15 +127,10 @@ class MapboxNavigationViewModelTest {
     @Test
     fun routeProgressUpdates() = coroutineRule.runBlockingTest {
         val expected = mockk<RouteProgress>()
-        val lifecycleOwner = mockk<LifecycleOwner>()
         val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val factory = mockk<DropInUIMapboxNavigationFactory> {
-            every { getMapboxNavigation() } returns mockMapboxNavigation
-        }
         val observerSlot = slot<RouteProgressObserver>()
-        val viewModel = MapboxNavigationViewModel(factory).also {
-            it.onStart(lifecycleOwner)
-        }
+        mapboxNavigationObserver.captured.onAttached(mockMapboxNavigation)
+
         verify { mockMapboxNavigation.registerRouteProgressObserver(capture(observerSlot)) }
         val def = async {
             viewModel.routeProgressUpdates.first()
@@ -145,15 +145,10 @@ class MapboxNavigationViewModelTest {
     @Test
     fun routesUpdatedResults() = coroutineRule.runBlockingTest {
         val expected = mockk<RoutesUpdatedResult>()
-        val lifecycleOwner = mockk<LifecycleOwner>()
         val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val factory = mockk<DropInUIMapboxNavigationFactory> {
-            every { getMapboxNavigation() } returns mockMapboxNavigation
-        }
         val observerSlot = slot<RoutesObserver>()
-        val viewModel = MapboxNavigationViewModel(factory).also {
-            it.onStart(lifecycleOwner)
-        }
+        mapboxNavigationObserver.captured.onAttached(mockMapboxNavigation)
+
         verify { mockMapboxNavigation.registerRoutesObserver(capture(observerSlot)) }
         val def = async {
             viewModel.routesUpdatedResults.first()
@@ -168,15 +163,10 @@ class MapboxNavigationViewModelTest {
     @Test
     fun finalDestinationArrivals() = coroutineRule.runBlockingTest {
         val expected = mockk<RouteProgress>()
-        val lifecycleOwner = mockk<LifecycleOwner>()
         val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val factory = mockk<DropInUIMapboxNavigationFactory> {
-            every { getMapboxNavigation() } returns mockMapboxNavigation
-        }
         val observerSlot = slot<ArrivalObserver>()
-        val viewModel = MapboxNavigationViewModel(factory).also {
-            it.onStart(lifecycleOwner)
-        }
+        mapboxNavigationObserver.captured.onAttached(mockMapboxNavigation)
+
         verify { mockMapboxNavigation.registerArrivalObserver(capture(observerSlot)) }
         val def = async {
             viewModel.finalDestinationArrivals.first()
@@ -191,15 +181,10 @@ class MapboxNavigationViewModelTest {
     @Test
     fun nextRouteLegStartUpdates() = coroutineRule.runBlockingTest {
         val expected = mockk<RouteLegProgress>()
-        val lifecycleOwner = mockk<LifecycleOwner>()
         val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val factory = mockk<DropInUIMapboxNavigationFactory> {
-            every { getMapboxNavigation() } returns mockMapboxNavigation
-        }
         val observerSlot = slot<ArrivalObserver>()
-        val viewModel = MapboxNavigationViewModel(factory).also {
-            it.onStart(lifecycleOwner)
-        }
+        mapboxNavigationObserver.captured.onAttached(mockMapboxNavigation)
+
         verify { mockMapboxNavigation.registerArrivalObserver(capture(observerSlot)) }
         val def = async {
             viewModel.nextRouteLegStartUpdates.first()
@@ -214,15 +199,10 @@ class MapboxNavigationViewModelTest {
     @Test
     fun wayPointArrivals() = coroutineRule.runBlockingTest {
         val expected = mockk<RouteProgress>()
-        val lifecycleOwner = mockk<LifecycleOwner>()
         val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val factory = mockk<DropInUIMapboxNavigationFactory> {
-            every { getMapboxNavigation() } returns mockMapboxNavigation
-        }
         val observerSlot = slot<ArrivalObserver>()
-        val viewModel = MapboxNavigationViewModel(factory).also {
-            it.onStart(lifecycleOwner)
-        }
+        mapboxNavigationObserver.captured.onAttached(mockMapboxNavigation)
+
         verify { mockMapboxNavigation.registerArrivalObserver(capture(observerSlot)) }
         val def = async {
             viewModel.wayPointArrivals.first()
@@ -237,15 +217,10 @@ class MapboxNavigationViewModelTest {
     @Test
     fun bannerInstructions() = coroutineRule.runBlockingTest {
         val expected = mockk<BannerInstructions>()
-        val lifecycleOwner = mockk<LifecycleOwner>()
         val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val factory = mockk<DropInUIMapboxNavigationFactory> {
-            every { getMapboxNavigation() } returns mockMapboxNavigation
-        }
+        mapboxNavigationObserver.captured.onAttached(mockMapboxNavigation)
+
         val observerSlot = slot<BannerInstructionsObserver>()
-        val viewModel = MapboxNavigationViewModel(factory).also {
-            it.onStart(lifecycleOwner)
-        }
         verify { mockMapboxNavigation.registerBannerInstructionsObserver(capture(observerSlot)) }
         val def = async {
             viewModel.bannerInstructions.first()
@@ -260,15 +235,10 @@ class MapboxNavigationViewModelTest {
     @Test
     fun voiceInstructions() = coroutineRule.runBlockingTest {
         val expected = mockk<VoiceInstructions>()
-        val lifecycleOwner = mockk<LifecycleOwner>()
         val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val factory = mockk<DropInUIMapboxNavigationFactory> {
-            every { getMapboxNavigation() } returns mockMapboxNavigation
-        }
+        mapboxNavigationObserver.captured.onAttached(mockMapboxNavigation)
+
         val observerSlot = slot<VoiceInstructionsObserver>()
-        val viewModel = MapboxNavigationViewModel(factory).also {
-            it.onStart(lifecycleOwner)
-        }
         verify { mockMapboxNavigation.registerVoiceInstructionsObserver(capture(observerSlot)) }
         val def = async {
             viewModel.voiceInstructions.first()
@@ -283,15 +253,9 @@ class MapboxNavigationViewModelTest {
     @Test
     fun tripSessionStateUpdates() = coroutineRule.runBlockingTest {
         val expected = mockk<TripSessionState>()
-        val lifecycleOwner = mockk<LifecycleOwner>()
         val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
-        val factory = mockk<DropInUIMapboxNavigationFactory> {
-            every { getMapboxNavigation() } returns mockMapboxNavigation
-        }
+        mapboxNavigationObserver.captured.onAttached(mockMapboxNavigation)
         val observerSlot = slot<TripSessionStateObserver>()
-        val viewModel = MapboxNavigationViewModel(factory).also {
-            it.onStart(lifecycleOwner)
-        }
         verify { mockMapboxNavigation.registerTripSessionStateObserver(capture(observerSlot)) }
         val def = async {
             viewModel.tripSessionStateUpdates.first()
