@@ -1,5 +1,8 @@
 package com.mapbox.navigation.dropin
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
@@ -188,6 +191,46 @@ class MapboxNavigationViewApiTest {
         api.configureNavigationView(viewProvider)
 
         verify { navigationView.configure(viewProvider) }
+    }
+
+    @Test
+    fun setRoutes() {
+        val routes = listOf<DirectionsRoute>()
+        val navigationView = mockk<NavigationView>(relaxed = true)
+        val api = MapboxNavigationViewApiImpl(navigationView)
+
+        api.setRoutes(routes)
+
+        verify { navigationView.setRoutes(routes) }
+    }
+
+    @Test
+    fun fetchAndSetRoute() {
+        val points = listOf<Point>()
+        val navigationView = mockk<NavigationView>(relaxed = true)
+        val api = MapboxNavigationViewApiImpl(navigationView)
+
+        api.fetchAndSetRoute(points)
+
+        verify { navigationView.fetchAndSetRoute(points) }
+    }
+
+    @Test
+    fun fetchAndSetRouteWithOptions() {
+        val points = listOf(
+            Point.fromLngLat(14.75, 55.19),
+            Point.fromLngLat(12.54, 55.68)
+        )
+        val options = RouteOptions.builder()
+            .profile("foobar")
+            .coordinatesList(points)
+            .build()
+        val navigationView = mockk<NavigationView>(relaxed = true)
+        val api = MapboxNavigationViewApiImpl(navigationView)
+
+        api.fetchAndSetRoute(options)
+
+        verify { navigationView.fetchAndSetRoute(options) }
     }
 
     @Test

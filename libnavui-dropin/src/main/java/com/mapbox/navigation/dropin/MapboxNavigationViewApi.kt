@@ -3,7 +3,9 @@ package com.mapbox.navigation.dropin
 import android.location.Location
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.arrival.ArrivalObserver
@@ -34,6 +36,9 @@ interface MapboxNavigationViewApi {
     fun getMapView(): MapView
     fun configureNavigationView(viewProvider: ViewProvider)
     fun getOptions(): NavigationViewOptions
+    fun setRoutes(routes: List<DirectionsRoute>)
+    fun fetchAndSetRoute(points: List<Point>)
+    fun fetchAndSetRoute(routeOptions: RouteOptions)
     fun temporaryStartNavigation()
 }
 
@@ -161,11 +166,49 @@ internal class MapboxNavigationViewApiImpl(
         navigationView.configure(viewProvider)
     }
 
+    /**
+     * A temporary method to start a navigation session.
+     */
     override fun temporaryStartNavigation() {
         navigationView.temporaryStartNavigation()
     }
 
+    /**
+     * @return the NavigationViewOptions
+     */
     override fun getOptions(): NavigationViewOptions {
         return navigationView.navigationViewOptions
+    }
+
+    /**
+     * Sets the routes for [MapboxNavigation] and supporting components. See the documentation
+     * for [MapboxNavigation::setRoutes] for more information.
+     *
+     * @param routes the routes to use.
+     */
+    override fun setRoutes(routes: List<DirectionsRoute>) {
+        navigationView.setRoutes(routes)
+    }
+
+    /**
+     * Using the points provided an request will be made to fetch one or more routes. The
+     * route(s) returned will be set on [MapboxNavigation]. The first point in the list
+     * will be considered the origin and the last point in the list will be considered the
+     * destination. Any additional points will be used as waypoints.
+     *
+     * @param points the points to be used for fetching a route
+     */
+    override fun fetchAndSetRoute(points: List<Point>) {
+        navigationView.fetchAndSetRoute(points)
+    }
+
+    /**
+     * Using the [RouteOptions] provided an request will be made to fetch one or more routes. The
+     * route(s) returned will be set on [MapboxNavigation].
+     *
+     * @param routeOptions the options to be used when fetching the route(s).
+     */
+    override fun fetchAndSetRoute(routeOptions: RouteOptions) {
+        navigationView.fetchAndSetRoute(routeOptions)
     }
 }
