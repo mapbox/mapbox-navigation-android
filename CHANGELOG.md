@@ -2,6 +2,24 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 2.1.1 - December 13, 2021
+
+For details on how v2 differs from v1 and guidance on migrating from v1 of the Mapbox Navigation SDK for Android to the v2 public preview, see [2.0 Navigation SDK Migration Guide](https://github.com/mapbox/mapbox-navigation-android/wiki/2.0-Navigation-SDK-Migration-Guide).
+
+### Changelog
+#### Bug fixes and improvements
+- Fixed billing issue when upgrading Mapbox Maps SDK from v9 to v10. [#5263](https://github.com/mapbox/mapbox-navigation-android/pull/5263)
+- Fixed notification appearance on Android 12. [#5159](https://github.com/mapbox/mapbox-navigation-android/pull/5159)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.0.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v10.0.2))
+- Mapbox Navigation Native `v79.0.3`
+- Mapbox Core Common `v20.0.3`
+- Mapbox Java `v6.1.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v6.1.0))
+- Mapbox Android Core `v5.0.0`
+- Mapbox Android Telemetry `v8.1.0`
+
 ## Mapbox Navigation SDK 2.1.0 - December 2, 2021
 Mapbox Navigation SDK v2.1.0 was released prematurely with an unresolved billing issue. We deleted this version from the Maven repository and we’re preparing the v2.1.1 release with additional fixes.
 
