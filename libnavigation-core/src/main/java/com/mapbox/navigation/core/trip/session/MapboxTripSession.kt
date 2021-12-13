@@ -29,6 +29,7 @@ import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
+import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -43,6 +44,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
+import kotlin.math.max
 
 /**
  * Default implementation of [TripSession]
@@ -74,6 +76,7 @@ internal class MapboxTripSession(
 
     private companion object {
         private val TAG = Tag("MbxTripSession")
+        private const val MIN_NEXT_WAYPOINT_INDEX = 1
     }
 
     override fun setRoutes(
@@ -276,11 +279,6 @@ internal class MapboxTripSession(
                 return
             }
 
-            val remainingWaypoints =
-                ifNonNull(tripStatus.route?.routeOptions()?.coordinatesList()?.size) {
-                    it - tripStatus.navigationStatus.nextWaypointIndex
-                } ?: 0
-
             updateRouteProgressJob?.cancel()
             updateRouteProgressJob = mainJobController.scope.launch {
                 var triggerObserver = false
@@ -304,6 +302,7 @@ internal class MapboxTripSession(
                         nativeBannerInstruction?.index
                     )
                 }
+                val remainingWaypoints = calculateRemainingWaypoints(tripStatus)
                 val routeProgress = getRouteProgressFrom(
                     tripStatus.route,
                     tripStatus.navigationStatus,
@@ -316,6 +315,18 @@ internal class MapboxTripSession(
                 triggerVoiceInstructionEvent(routeProgress, status)
                 isOffRoute = tripStatus.navigationStatus.routeState == RouteState.OFF_ROUTE
             }
+        }
+
+        private fun calculateRemainingWaypoints(tripStatus: TripStatus): Int {
+            val routeCoordinates = tripStatus.route?.routeOptions()?.coordinatesList()
+            return if (routeCoordinates != null) {
+                val waypointsCount = routeCoordinates.size
+                val nextWaypointIndex = max(
+                    MIN_NEXT_WAYPOINT_INDEX,
+                    tripStatus.navigationStatus.nextWaypointIndex
+                )
+                return waypointsCount - nextWaypointIndex
+            } else 0
         }
     }
 

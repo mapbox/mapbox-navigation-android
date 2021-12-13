@@ -23,6 +23,7 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
+import com.mapbox.navigator.RouteState
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -45,7 +46,7 @@ class MapboxTripSessionNoSetupTest {
         // arrange
         val voiceInstructionsObserver = VoiceInstructionsObserverRecorder()
         val routeProgressObserver = RouteProgressObserverRecorder()
-        val nativeNavigator = mockk<MapboxNativeNavigator>(relaxed = true)
+        val nativeNavigator = createNativeNavigatorMock()
         StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
         val locationEngine = TestLocationEngine.create()
         val tripSession = buildTripSession(
@@ -80,7 +81,7 @@ class MapboxTripSessionNoSetupTest {
     @Test
     fun addingVoiceInstructionsObserversInTheMiddleOfNavigation() {
         // arrange
-        val nativeNavigator = mockk<MapboxNativeNavigator>(relaxed = true)
+        val nativeNavigator = createNativeNavigatorMock()
         StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
         val locationEngine = TestLocationEngine.create()
         val tripSession = buildTripSession(
@@ -113,7 +114,7 @@ class MapboxTripSessionNoSetupTest {
     @Test
     fun noVoiceInstructionFallbackForFreshRoute() {
         // arrange
-        val nativeNavigator = mockk<MapboxNativeNavigator>(relaxed = true)
+        val nativeNavigator = createNativeNavigatorMock()
         StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
         val locationEngine = TestLocationEngine.create()
         val tripSession = buildTripSession(
@@ -149,7 +150,7 @@ class MapboxTripSessionNoSetupTest {
     @Test
     fun noVoiceInstructionFallbackAfterLegIndexUpdate() {
         // arrange
-        val nativeNavigator = mockk<MapboxNativeNavigator>(relaxed = true)
+        val nativeNavigator = createNativeNavigatorMock()
         StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
         coEvery { nativeNavigator.updateLegIndex(any()) } returns true
         val locationEngine = TestLocationEngine.create()
@@ -182,7 +183,7 @@ class MapboxTripSessionNoSetupTest {
     @Test
     fun voiceInstructionFallbackAfterUnsuccessfulLegIndexUpdate() {
         // arrange
-        val nativeNavigator = mockk<MapboxNativeNavigator>(relaxed = true)
+        val nativeNavigator = createNativeNavigatorMock()
         coEvery { nativeNavigator.updateLegIndex(any()) } returns false
         StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
         val locationEngine = TestLocationEngine.create()
@@ -215,7 +216,7 @@ class MapboxTripSessionNoSetupTest {
     @Test
     fun newVoiceInstructionsTriggerEvenIfTheyAreTheSameAsPreviousOne() {
         // arrange
-        val nativeNavigator = mockk<MapboxNativeNavigator>(relaxed = true)
+        val nativeNavigator = createNativeNavigatorMock()
         StatusWithVoiceInstructionUpdateUtil.triggerStatusUpdatesOnLocationUpdate(nativeNavigator)
         val locationEngine = TestLocationEngine.create()
         val tripSession = buildTripSession(
@@ -238,6 +239,29 @@ class MapboxTripSessionNoSetupTest {
             .takeLast(2) // take only events triggered by location updates
             .map { it.announcement() }
         assertEquals(listOf("1", "1"), newVoiceInstructions)
+    }
+
+    @Test
+    fun `fallback to the next waypoint index 1 when navigator makes mistake returning 0`() {
+        // arrange
+        val nativeNavigator = createNativeNavigatorMock()
+        coEvery {
+            nativeNavigator.setRoute(any(), any())
+        } returns null
+        val navigatorObservers = recordNavigatorObservers(nativeNavigator)
+        val tripSession = buildTripSession(
+            nativeNavigator = nativeNavigator,
+        )
+        tripSession.start(false)
+        tripSession.setRoutes(listOf(createDirectionsRoute()), 0, ROUTES_UPDATE_REASON_NEW)
+        // act
+        navigatorObservers.onStatus(
+            NavigationStatusOrigin.UNCONDITIONAL,
+            createNavigationStatus(nextWaypointIndex = 0, routeState = RouteState.OFF_ROUTE)
+        )
+        // assert
+        val remainingWaypoints = tripSession.getRouteProgress()?.remainingWaypoints
+        assertEquals(1, remainingWaypoints)
     }
 }
 
@@ -276,13 +300,7 @@ object StatusWithVoiceInstructionUpdateUtil {
     const val LONGITUDE_FOR_VOICE_INSTRUCTION_2 = 2.0
 
     fun triggerStatusUpdatesOnLocationUpdate(nativeNavigator: MapboxNativeNavigator) {
-        coEvery {
-            nativeNavigator.setRoute(any(), any())
-        } returns null
-        val navigatorObservers = mutableListOf<NavigatorObserver>()
-        every {
-            nativeNavigator.addNavigatorObserver(capture(navigatorObservers))
-        } returns Unit
+        val navigatorObservers = recordNavigatorObservers(nativeNavigator)
         coEvery {
             nativeNavigator.updateLocation(
                 match { it.coordinate.longitude() == LONGITUDE_FOR_VOICE_INSTRUCTION_1 }
@@ -326,13 +344,31 @@ object StatusWithVoiceInstructionUpdateUtil {
             true
         }
     }
+}
 
-    private fun List<NavigatorObserver>.onStatus(
-        statusOrigin: NavigationStatusOrigin,
-        status: NavigationStatus,
-    ) {
-        this.forEach {
-            it.onStatus(statusOrigin, status)
-        }
+private fun createNativeNavigatorMock(): MapboxNativeNavigator {
+    val nativeNavigator = mockk<MapboxNativeNavigator>(relaxed = true)
+    coEvery {
+        nativeNavigator.setRoute(any(), any())
+    } returns mockk(relaxed = true)
+    return nativeNavigator
+}
+
+private fun recordNavigatorObservers(
+    nativeNavigator: MapboxNativeNavigator
+): List<NavigatorObserver> {
+    val navigatorObservers = mutableListOf<NavigatorObserver>()
+    every {
+        nativeNavigator.addNavigatorObserver(capture(navigatorObservers))
+    } returns Unit
+    return navigatorObservers
+}
+
+private fun List<NavigatorObserver>.onStatus(
+    statusOrigin: NavigationStatusOrigin,
+    status: NavigationStatus,
+) {
+    this.forEach {
+        it.onStatus(statusOrigin, status)
     }
 }
