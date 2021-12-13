@@ -4,7 +4,6 @@ import android.graphics.drawable.VectorDrawable
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.navigation.ui.shield.RoadShieldContentManager
-import com.mapbox.navigation.ui.shield.model.MapboxRouteShieldOptions
 import com.mapbox.navigation.ui.shield.model.RouteShieldCallback
 import com.mapbox.navigation.ui.shield.model.RouteShieldToDownload
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
@@ -26,18 +25,16 @@ import kotlinx.coroutines.launch
  * @property options MapboxRouteShieldOptions used to specify the default shields in case shield
  * url is unavailable or failure to download the shields.
  */
-class MapboxRouteShieldApi @JvmOverloads constructor(
-    private val options: MapboxRouteShieldOptions = MapboxRouteShieldOptions.Builder().build()
-) {
+class MapboxRouteShieldApi {
 
     private val contentManager = RoadShieldContentManager()
     private val mainJob = InternalJobControlFactory.createMainScopeJobControl()
 
-    fun getRouteShields(
+    fun getRouteShieldsFrom(
         bannerInstructions: List<BannerInstructions>,
         callback: RouteShieldCallback
     ) {
-        val routeShieldToDownload = mutableListOf<RouteShieldToDownload>()
+        val routeShieldToDownload = mutableListOf<RouteShieldToDownload.MapboxLegacy>()
         bannerInstructions.forEach { bannerInstruction ->
             val primaryBannerComponents = bannerInstruction.primary().components()
             val secondaryBannerComponents = bannerInstruction.secondary()?.components()
@@ -67,29 +64,36 @@ class MapboxRouteShieldApi @JvmOverloads constructor(
                 }
             }
         }
+        getLegacyRouteShields(routeShieldToDownload, callback)
+    }
+
+    fun getLegacyRouteShields(
+        shieldsToDownload: List<RouteShieldToDownload.MapboxLegacy>,
+        callback: RouteShieldCallback
+    ) {
         mainJob.scope.launch {
-            if (routeShieldToDownload.isNotEmpty()) {
+            if (shieldsToDownload.isNotEmpty()) {
                 val result = contentManager.getShields(
                     userId = null,
                     styleId = null,
                     accessToken = null,
                     fallbackToLegacy = false,
-                    shieldsToDownload = routeShieldToDownload
+                    shieldsToDownload = shieldsToDownload
                 )
                 callback.onRoadShields(shields = result)
             }
         }
     }
 
-    fun getRouteShields(
+    fun getRouteShieldsFrom(
         userId: String,
         styleId: String,
         accessToken: String,
+        fallbackToLegacy: Boolean,
         bannerInstructions: List<BannerInstructions>,
-        callback: RouteShieldCallback,
-        fallbackToLegacy: Boolean
+        callback: RouteShieldCallback
     ) {
-        val routeShieldToDownload = mutableListOf<RouteShieldToDownload>()
+        val routeShieldToDownload = mutableListOf<RouteShieldToDownload.MapboxDesign>()
         bannerInstructions.forEach { bannerInstruction ->
             val primaryBannerComponents = bannerInstruction.primary().components()
             val secondaryBannerComponents = bannerInstruction.secondary()?.components()
@@ -131,14 +135,32 @@ class MapboxRouteShieldApi @JvmOverloads constructor(
                 }
             }
         }
+        getMapboxDesignedRouteShields(
+            userId,
+            styleId,
+            accessToken,
+            fallbackToLegacy,
+            routeShieldToDownload,
+            callback
+        )
+    }
+
+    fun getMapboxDesignedRouteShields(
+        userId: String,
+        styleId: String,
+        accessToken: String,
+        fallbackToLegacy: Boolean,
+        shieldsToDownload: List<RouteShieldToDownload.MapboxDesign>,
+        callback: RouteShieldCallback
+    ) {
         mainJob.scope.launch {
-            if (routeShieldToDownload.isNotEmpty()) {
+            if (shieldsToDownload.isNotEmpty()) {
                 val result = contentManager.getShields(
                     userId = userId,
                     styleId = styleId,
                     accessToken = accessToken,
                     fallbackToLegacy = fallbackToLegacy,
-                    shieldsToDownload = routeShieldToDownload
+                    shieldsToDownload = shieldsToDownload
                 )
                 callback.onRoadShields(shields = result)
             }

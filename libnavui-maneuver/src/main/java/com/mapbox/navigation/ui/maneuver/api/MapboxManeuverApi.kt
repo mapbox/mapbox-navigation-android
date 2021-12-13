@@ -22,6 +22,7 @@ import com.mapbox.navigation.ui.maneuver.model.RoadShieldError
 import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.SubManeuver
 import com.mapbox.navigation.ui.maneuver.view.MapboxManeuverView
+import com.mapbox.navigation.ui.shield.api.MapboxRouteShieldApi
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.launch
 
@@ -35,7 +36,8 @@ import kotlinx.coroutines.launch
 class MapboxManeuverApi internal constructor(
     private val distanceFormatter: DistanceFormatter,
     private val maneuverOptions: ManeuverOptions,
-    private val processor: ManeuverProcessor
+    private val processor: ManeuverProcessor,
+    private val routeShieldApi: MapboxRouteShieldApi
 ) {
 
     private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
@@ -50,11 +52,13 @@ class MapboxManeuverApi internal constructor(
     @JvmOverloads
     constructor(
         formatter: DistanceFormatter,
+        routeShieldApi: MapboxRouteShieldApi = MapboxRouteShieldApi(),
         maneuverOptions: ManeuverOptions = ManeuverOptions.Builder().build()
     ) : this(
         formatter,
         maneuverOptions,
-        ManeuverProcessor
+        ManeuverProcessor,
+        routeShieldApi
     )
 
     /**
@@ -153,16 +157,7 @@ class MapboxManeuverApi internal constructor(
         maneuvers: List<Maneuver>,
         callback: RoadShieldCallback
     ) {
-        /*mainJobController.scope.launch {
-            val result = roadShieldContentManager.getShields(
-                maneuvers
-            )
-            callback.onRoadShields(
-                maneuvers,
-                result.shields,
-                result.errors
-            )
-        }*/
+        routeShieldApi.getRouteShieldsFrom(maneuvers, callback)
     }
 
     /**

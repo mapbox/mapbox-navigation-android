@@ -7,7 +7,7 @@ import com.mapbox.api.directions.v5.models.ShieldSprite
  * Data structure that holds information about route shield.
  */
 sealed class RouteShield {
-    class MapboxLegacyShield internal constructor(
+    class MapboxLegacyShield constructor(
         val url: String,
         val shield: ByteArray,
     ) : RouteShield() {

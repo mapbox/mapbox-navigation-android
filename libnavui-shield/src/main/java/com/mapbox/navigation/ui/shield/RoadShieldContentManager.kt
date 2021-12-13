@@ -102,6 +102,7 @@ class RoadShieldContentManager {
         } else {
             ShieldSprites.builder().sprites(emptyList()).build()
         }
+        // TODO: The call to prepareShields should only happen after you have the value for shieldSprites. In case of legacy it will always have empty list.
         val requestIds = prepareShields(
             userId = userId,
             styleId = styleId,
@@ -289,9 +290,10 @@ class RoadShieldContentManager {
         if (designByteArray != null) {
             val shieldResult = RouteShieldResult(
                 RouteShield.MapboxDesignedShield(
-                    mapboxShieldUrl!!, // byteArray could only be non null if this url was non null
+                    // TODO: To confirm if what I have deduced is correct
+                    mapboxShieldUrl!!, // designByteArray could only be non null if mapboxShieldUrl was non null
                     designByteArray,
-                    mapboxShield!!, // byteArray could only be non null if this mapboxShield was non null
+                    mapboxShield!!, // designByteArray could only be non null if mapboxShield was non null
                     sprite
                 ),
                 RouteShieldOrigin(
@@ -332,6 +334,7 @@ class RoadShieldContentManager {
             }
             if (legacyByteArray != null) {
                 val shieldResult = RouteShieldResult(
+                    // TODO: To confirm if what I have deduced is correct
                     RouteShield.MapboxLegacyShield(shield = legacyByteArray, url = legacy.url!!), // legacyByteArray could only be non null if this legacyShield was non null
                     RouteShieldOrigin(isFallback = true, mapboxShieldUrl, message)
                 )
@@ -377,6 +380,7 @@ class RoadShieldContentManager {
         }
         if (shield != null) {
             val shieldResult = RouteShieldResult(
+                // TODO: To confirm if what I have deduced is correct
                 shield = RouteShield.MapboxLegacyShield(shield = shield, url = url!!), // shield could only be non null if this url was non null
                 origin = RouteShieldOrigin(isFallback = false, originalUrl = url, errorMessage = message)
             )
