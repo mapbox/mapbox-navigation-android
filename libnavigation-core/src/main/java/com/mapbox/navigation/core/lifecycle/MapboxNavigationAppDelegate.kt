@@ -2,9 +2,12 @@ package com.mapbox.navigation.core.lifecycle
 
 import android.app.Application
 import androidx.lifecycle.LifecycleOwner
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.utils.internal.logI
 
 /**
  * This is a testable version of [MapboxNavigationApp]. Please refer to the singleton
@@ -12,21 +15,33 @@ import com.mapbox.navigation.core.MapboxNavigation
  */
 @ExperimentalPreviewMapboxNavigationAPI
 internal class MapboxNavigationAppDelegate {
-    private val mapboxNavigationOwner = MapboxNavigationOwner()
-    private val carAppLifecycleOwner = CarAppLifecycleOwner()
+    private val mapboxNavigationOwner by lazy { MapboxNavigationOwner() }
+    private val carAppLifecycleOwner by lazy { CarAppLifecycleOwner() }
     private var isSetup = false
 
-    val lifecycleOwner: LifecycleOwner = carAppLifecycleOwner
+    val lifecycleOwner: LifecycleOwner by lazy { carAppLifecycleOwner }
 
     fun setup(navigationOptions: NavigationOptions) = apply {
         if (carAppLifecycleOwner.isConfigurationChanging()) {
             return this
         }
 
-        mapboxNavigationOwner.setup(navigationOptions)
         if (isSetup) {
-            disable()
+            logI(
+                TAG,
+                Message(
+                    """
+                MapboxNavigationApp.setup was ignored because it has already been setup.
+                If you want to use new NavigationOptions, you must first call
+                MapboxNavigationApp.disable() and then call MapboxNavigationApp.setup(..).
+                Calling setup multiple times, is harmless otherwise.
+                    """.trimIndent()
+                )
+            )
+            return this
         }
+
+        mapboxNavigationOwner.setup(navigationOptions)
         carAppLifecycleOwner.lifecycle.addObserver(mapboxNavigationOwner.carAppLifecycleObserver)
         isSetup = true
     }
@@ -59,4 +74,8 @@ internal class MapboxNavigationAppDelegate {
     }
 
     fun current(): MapboxNavigation? = mapboxNavigationOwner.current()
+
+    private companion object {
+        private val TAG = Tag("MbxMapboxNavigationApp")
+    }
 }

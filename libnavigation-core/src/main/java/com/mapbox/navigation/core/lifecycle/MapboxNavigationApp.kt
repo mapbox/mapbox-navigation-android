@@ -63,7 +63,7 @@ object MapboxNavigationApp {
      * app is in foreground. When both the car and app have been closed, the lifecycle
      * is stopped. The lifecycle is never destroyed.
      */
-    val lifecycleOwner: LifecycleOwner = mapboxNavigationAppDelegate.lifecycleOwner
+    val lifecycleOwner: LifecycleOwner by lazy { mapboxNavigationAppDelegate.lifecycleOwner }
 
     /**
      * Call [MapboxNavigationApp.setup] to provide the application with [NavigationOptions].

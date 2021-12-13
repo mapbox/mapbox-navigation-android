@@ -27,8 +27,11 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -166,15 +169,7 @@ class NavigationView : ConstraintLayout {
     // View Model and dependency definitions
     // --------------------------------------------------------
     private val mapboxNavigationViewModel: MapboxNavigationViewModel by lazy {
-        ViewModelProvider(
-            activity,
-            MapboxNavigationViewModelFactory(
-                DropInUIMapboxNavigationFactory(
-                    this.activity.applicationContext,
-                    this.accessToken
-                )
-            )
-        )[MapboxNavigationViewModel::class.java]
+        ViewModelProvider(activity)[MapboxNavigationViewModel::class.java]
     }
 
     private val navigationStateViewModel: NavigationStateViewModel by lazy {
@@ -187,8 +182,6 @@ class NavigationView : ConstraintLayout {
 
     private val mapInitOptions: MapInitOptions
     private val navigationLocationProvider = NavigationLocationProvider()
-
-    private lateinit var accessToken: String
 
     @VisibleForTesting
     internal val externalRouteProgressObservers = CopyOnWriteArraySet<RouteProgressObserver>()
@@ -211,38 +204,43 @@ class NavigationView : ConstraintLayout {
         NavigationViewOptions.Builder(context).build()
     )
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     @JvmOverloads
     constructor(
         context: Context,
         attrs: AttributeSet? = null,
-        accessToken: String?,
+        navigationOptions: NavigationOptions?,
         mapInitializationOptions: MapInitOptions = MapInitOptions(context),
         navigationViewOptions: NavigationViewOptions = NavigationViewOptions
             .Builder(context)
             .build()
     ) : super(context, attrs) {
         this.mapInitOptions = mapInitializationOptions
-        if (accessToken != null) {
-            this.accessToken = accessToken
-        } else {
-            val attrsAccessToken = context.obtainStyledAttributes(
-                attrs,
-                R.styleable.NavigationView,
-                0,
-                0
-            ).use {
-                it.getString(R.styleable.NavigationView_accessToken)
-            }
-            ifNonNull(attrsAccessToken) { token ->
-                this.accessToken = token
-            } ?: throw IllegalStateException(
-                "Access token must be provided through xml attributes or constructor injection."
-            )
-        }
         this.navigationViewOptions = navigationViewOptions
         this.lifeCycleOwner = context as? LifecycleOwner ?: throw LifeCycleOwnerNotFoundException()
         this.lifeCycleOwner.lifecycle.addObserver(lifecycleObserver)
-        this.lifeCycleOwner.lifecycle.addObserver(mapboxNavigationViewModel)
+
+        val loadedNavigationOptions = navigationOptions
+            ?: NavigationOptions.Builder(context.applicationContext)
+                .accessToken(styledAccessToken(attrs))
+                .build()
+        MapboxNavigationApp.setup(loadedNavigationOptions)
+            .attach(lifeCycleOwner)
+    }
+
+    private fun styledAccessToken(attrs: AttributeSet?): String {
+        val attrsAccessToken = context.obtainStyledAttributes(
+            attrs,
+            R.styleable.NavigationView,
+            0,
+            0
+        ).use {
+            it.getString(R.styleable.NavigationView_accessToken)
+        }
+        checkNotNull(attrsAccessToken) {
+            "Access token must be provided through xml attributes or constructor injection."
+        }
+        return attrsAccessToken
     }
 
     private fun bindRouteLine() {

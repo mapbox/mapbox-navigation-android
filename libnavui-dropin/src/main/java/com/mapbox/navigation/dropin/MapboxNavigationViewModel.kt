@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mapbox.api.directions.v5.models.BannerInstructions
@@ -25,6 +23,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -37,13 +37,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
-internal class MapboxNavigationViewModel(
-    private val dropInUIMapboxNavigationFactory: DropInUIMapboxNavigationFactory
-) : ViewModel(), DefaultLifecycleObserver {
-
-    private val mapboxNavigation: MapboxNavigation by lazy {
-        dropInUIMapboxNavigationFactory.getMapboxNavigation()
-    }
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+internal class MapboxNavigationViewModel : ViewModel() {
 
     private val _rawLocationUpdates: MutableSharedFlow<Location> = MutableSharedFlow()
     fun rawLocationUpdates(): Flow<Location> = _rawLocationUpdates
@@ -84,14 +79,14 @@ internal class MapboxNavigationViewModel(
     // This is here because this class has a reference to MapboxNavigation
     @SuppressLint("MissingPermission")
     fun startTripSession() {
-        mapboxNavigation.startTripSession()
+        MapboxNavigationApp.current()?.startTripSession()
     }
 
     // This may be temporary. We need some way to start a trip session to further development.
     // This is here because this class has a reference to MapboxNavigation
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun startSimulatedTripSession(location: Location) {
         stopTripSession()
+        val mapboxNavigation = MapboxNavigationApp.current() ?: return
         mapboxNavigation.mapboxReplayer.clearEvents()
 
         val events = if (mapboxNavigation.getRoutes().isEmpty()) {
@@ -107,8 +102,8 @@ internal class MapboxNavigationViewModel(
 
     // This may be temporary. We need some way to stop a trip session to further development.
     // This is here because this class has a reference to MapboxNavigation
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun stopTripSession() {
+        val mapboxNavigation = MapboxNavigationApp.current() ?: return
         mapboxNavigation.stopTripSession()
         mapboxNavigation.mapboxReplayer.stop()
     }
@@ -116,6 +111,8 @@ internal class MapboxNavigationViewModel(
     // This was added to facilitate getting a route into mapbox navigation so work could go forward.
     // It may be temporary.
     fun findRoute(origin: Point, destination: Point, context: Context) {
+        val mapboxNavigation = MapboxNavigationApp.current() ?: return
+
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .applyLanguageAndVoiceUnitOptions(context)
@@ -210,34 +207,35 @@ internal class MapboxNavigationViewModel(
         }
     }
 
-    override fun onStart(owner: LifecycleOwner) {
-        super.onStart(owner)
-        mapboxNavigation.registerLocationObserver(locationObserver)
-        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.registerRoutesObserver(routesObserver)
-        mapboxNavigation.registerArrivalObserver(arrivalObserver)
-        mapboxNavigation.registerBannerInstructionsObserver(bannerInstructionsObserver)
-        mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
-        mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
+    private val mapboxNavigationObserver = object : MapboxNavigationObserver {
+        override fun onAttached(mapboxNavigation: MapboxNavigation) {
+            mapboxNavigation.registerLocationObserver(locationObserver)
+            mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+            mapboxNavigation.registerRoutesObserver(routesObserver)
+            mapboxNavigation.registerArrivalObserver(arrivalObserver)
+            mapboxNavigation.registerBannerInstructionsObserver(bannerInstructionsObserver)
+            mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
+            mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
+        }
+
+        override fun onDetached(mapboxNavigation: MapboxNavigation) {
+            mapboxNavigation.unregisterLocationObserver(locationObserver)
+            mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+            mapboxNavigation.unregisterRoutesObserver(routesObserver)
+            mapboxNavigation.unregisterArrivalObserver(arrivalObserver)
+            mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver)
+            mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
+            mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
+        }
     }
 
-    override fun onStop(owner: LifecycleOwner) {
-        super.onStop(owner)
-        mapboxNavigation.unregisterLocationObserver(locationObserver)
-        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.unregisterRoutesObserver(routesObserver)
-        mapboxNavigation.unregisterArrivalObserver(arrivalObserver)
-        mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver)
-        mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
-        mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
+    init {
+        MapboxNavigationApp.registerObserver(mapboxNavigationObserver)
     }
 
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onCleared() {
         super.onCleared()
-        mapboxNavigation.mapboxReplayer.stop()
-        mapboxNavigation.mapboxReplayer.finish()
-        mapboxNavigation.stopTripSession()
-        mapboxNavigation.onDestroy()
+
+        MapboxNavigationApp.unregisterObserver(mapboxNavigationObserver)
     }
 }

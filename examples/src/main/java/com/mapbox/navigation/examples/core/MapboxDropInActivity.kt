@@ -2,6 +2,7 @@ package com.mapbox.navigation.examples.core
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.MapboxNavigationViewApi
 import com.mapbox.navigation.dropin.ViewProvider
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityDropInBinding
@@ -12,6 +13,7 @@ class MapboxDropInActivity : AppCompatActivity() {
 
     private lateinit var binding: LayoutActivityDropInBinding
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = LayoutActivityDropInBinding.inflate(layoutInflater)
