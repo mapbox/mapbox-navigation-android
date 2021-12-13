@@ -3,10 +3,10 @@ package com.mapbox.navigation.core.trip.service
 import androidx.test.espresso.Espresso.onIdle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.By
+import com.adevinta.android.barista.interaction.BaristaClickInteractions.clickOn
 import com.mapbox.navigation.core.test.R
 import com.mapbox.navigation.core.tests.activity.TripServiceActivity
 import com.mapbox.navigation.testing.ui.NotificationTest
-import com.schibsted.spain.barista.interaction.BaristaClickInteractions.clickOn
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
