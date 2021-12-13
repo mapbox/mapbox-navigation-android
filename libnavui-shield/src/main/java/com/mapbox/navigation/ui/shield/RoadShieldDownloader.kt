@@ -19,7 +19,7 @@ internal object RoadShieldDownloader {
     private const val CODE_401 = 401L
     private const val CODE_404 = 404L
 
-    suspend fun downloadImage(imageUrl: String): Expected<String, ByteArray> =
+    suspend fun download(imageUrl: String): Expected<String, ByteArray> =
         suspendCancellableCoroutine { continuation ->
             val id = CommonSingletonModuleProvider.createHttpService().request(
                 getHttpRequest(imageUrl)
