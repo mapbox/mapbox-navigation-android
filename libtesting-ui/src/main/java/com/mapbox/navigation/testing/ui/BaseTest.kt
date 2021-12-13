@@ -3,14 +3,14 @@ package com.mapbox.navigation.testing.ui
 import android.Manifest
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.ActivityTestRule
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.uiautomator.UiDevice
+import com.adevinta.android.barista.rule.cleardata.ClearDatabaseRule
+import com.adevinta.android.barista.rule.cleardata.ClearFilesRule
+import com.adevinta.android.barista.rule.cleardata.ClearPreferencesRule
 import com.mapbox.navigation.testing.ui.http.MockWebServerRule
-import com.schibsted.spain.barista.rule.cleardata.ClearDatabaseRule
-import com.schibsted.spain.barista.rule.cleardata.ClearFilesRule
-import com.schibsted.spain.barista.rule.cleardata.ClearPreferencesRule
 import org.junit.Before
 import org.junit.ClassRule
 import org.junit.Rule
@@ -31,7 +31,7 @@ abstract class BaseTest<A : AppCompatActivity>(activityClass: Class<A>) {
     )
 
     @get:Rule
-    val activityRule = ActivityTestRule(activityClass)
+    val activityRule = ActivityScenarioRule(activityClass)
 
     @get:Rule
     val mockWebServerRule = MockWebServerRule()
@@ -52,10 +52,16 @@ abstract class BaseTest<A : AppCompatActivity>(activityClass: Class<A>) {
     @get:Rule
     val clearFilesRule = ClearFilesRule()
 
-    protected val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+    protected val uiDevice: UiDevice =
+        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
-    val activity: A
-        get() = activityRule.activity
+    private lateinit var _activity: A
+    val activity: A get() = _activity
+
+    @Before
+    fun initializeActivity() {
+        activityRule.scenario.onActivity { _activity = it }
+    }
 
     @Before
     fun runSetupMockLocation() {

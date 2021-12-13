@@ -46,7 +46,7 @@ open class NotificationTest<A : AppCompatActivity>(activityClass: Class<A>) :
      */
     private fun UiDevice.scrollUp() {
         val screenSize = Point()
-        activityRule.activity.windowManager.defaultDisplay.getRealSize(screenSize)
+        activity.windowManager.defaultDisplay.getRealSize(screenSize)
         this.drag(
             screenSize.x / 2,
             screenSize.y / 2,

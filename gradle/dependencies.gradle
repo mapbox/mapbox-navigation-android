@@ -3,7 +3,7 @@ ext {
 
   androidVersions = [
       minSdkVersion           : 21,
-      targetSdkVersion        : 30,
+      targetSdkVersion        : 31,
       compileSdkVersion       : 31,
   ]
 
@@ -41,9 +41,7 @@ ext {
       constraintLayout          : '1.1.3',
       mockito                   : '2.23.4',
       mockkVersion              : '1.12.1',
-      butterknife               : '10.1.0',
       leakCanaryVersion         : '2.7',
-      espressoVersion           : '3.1.0',
       commonsIO                 : '2.6',
       robolectric               : '4.7.3',
       mockwebserver             : '4.9.0',
@@ -56,9 +54,9 @@ ext {
       coroutinesAndroid         : '1.5.1',
       okhttp                    : '4.9.0',
       okio                      : '2.10.0',
-      androidxTestJunit         : '1.1.1',
-      androidxTest              : '1.3.0',
-      barista                   : '3.2.0',
+      androidxTestJunit         : '1.1.3',
+      androidxTest              : '1.4.0',
+      barista                   : '4.2.0',
       svgParser                 : '1.4',
       androidStartup            : '1.0.0',
   ]
@@ -105,10 +103,6 @@ ext {
       autoValuesParcel          : "com.ryanharter.auto.value:auto-value-parcel:${version.autoValueParcel}",
       autoValuesParcelAdapter   : "com.ryanharter.auto.value:auto-value-parcel-adapter:${version.autoValueParcel}",
 
-      // butterknife
-      butterKnife               : "com.jakewharton:butterknife:${version.butterknife}",
-      butterKnifeProcessor      : "com.jakewharton:butterknife-compiler:${version.butterknife}",
-
       // support
       androidXAnnotation        : "androidx.annotation:annotation:${version.androidXAnnotationVersion}",
       androidXAppCompat         : "androidx.appcompat:appcompat:${version.androidXAppCompatVersion}",
@@ -134,11 +128,8 @@ ext {
       testRunner                : "androidx.test:runner:${version.androidxTest}",
       testOrchestrator          : "androidx.test:orchestrator:${version.androidxTest}",
       testRules                 : "androidx.test:rules:${version.androidxTest}",
-      testEspressoCore          : "androidx.test.espresso:espresso-core:${version.espressoVersion}",
-      testEspressoContrib       : "androidx.test.espresso:espresso-contrib:${version.espressoVersion}",
-      testEspressoIntents       : "androidx.test.espresso:espresso-intents:${version.espressoVersion}",
       androidxTestJunit         : "androidx.test.ext:junit:${version.androidxTestJunit}",
-      barista                   : "com.schibsted.spain:barista:${version.barista}",
+      barista                   : "com.adevinta.android:barista:${version.barista}",
 
       // unit test
       junit                     : "junit:junit:${version.junit}",
