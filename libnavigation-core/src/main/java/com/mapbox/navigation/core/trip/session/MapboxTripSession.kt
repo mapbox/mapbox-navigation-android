@@ -321,6 +321,7 @@ internal class MapboxTripSession(
             val routeCoordinates = tripStatus.route?.routeOptions()?.coordinatesList()
             return if (routeCoordinates != null) {
                 val waypointsCount = routeCoordinates.size
+                // TODO: get rid of the workaround https://github.com/mapbox/mapbox-navigation-android/issues/5275
                 val nextWaypointIndex = max(
                     MIN_NEXT_WAYPOINT_INDEX,
                     tripStatus.navigationStatus.nextWaypointIndex
