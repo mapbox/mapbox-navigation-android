@@ -12,6 +12,7 @@ import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -537,9 +538,64 @@ class MapboxReplayerTest {
             assertEquals(105.0, timeCapture[25].first.eventTimestamp, 0.0)
         }
 
-    /**
-     * Helpers for moving the simulation clock
-     */
+    @Test
+    fun `is not playing when not started`() {
+        assertFalse(mapboxReplayer.isPlaying())
+    }
+
+    @Test
+    fun `is playing when started`() = coroutineRule.runBlockingTest {
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1580777612.853),
+                ReplayEventUpdateLocation(
+                    1580777612.89,
+                    ReplayEventLocation(
+                        lat = 49.2492411,
+                        lon = 8.8512315,
+                        provider = "fused",
+                        time = 1580777612.892,
+                        altitude = 212.4732666015625,
+                        accuracyHorizontal = 4.288000106811523,
+                        bearing = 243.31265258789063,
+                        speed = 0.5585000514984131
+                    )
+                )
+            )
+        )
+
+        mapboxReplayer.play()
+        advanceTimeMillis(5000)
+        assertTrue(mapboxReplayer.isPlaying())
+        mapboxReplayer.finish()
+    }
+
+    @Test
+    fun `is not playing when stopped`() = coroutineRule.runBlockingTest {
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1580777612.853),
+                ReplayEventUpdateLocation(
+                    1580777612.89,
+                    ReplayEventLocation(
+                        lat = 49.2492411,
+                        lon = 8.8512315,
+                        provider = "fused",
+                        time = 1580777612.892,
+                        altitude = 212.4732666015625,
+                        accuracyHorizontal = 4.288000106811523,
+                        bearing = 243.31265258789063,
+                        speed = 0.5585000514984131
+                    )
+                )
+            )
+        )
+
+        mapboxReplayer.play()
+        advanceTimeMillis(5000)
+        mapboxReplayer.finish()
+        assertFalse(mapboxReplayer.isPlaying())
+    }
 
     @Before
     fun setup() {
@@ -552,6 +608,9 @@ class MapboxReplayerTest {
         unmockkObject(SystemClock.elapsedRealtimeNanos())
     }
 
+    /**
+     * Helpers for moving the simulation clock
+     */
     private fun advanceTimeMillis(advanceMillis: Long) {
         deviceElapsedTimeNanos += TimeUnit.MILLISECONDS.toNanos(advanceMillis)
         every { SystemClock.elapsedRealtimeNanos() } returns deviceElapsedTimeNanos

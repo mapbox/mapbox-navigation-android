@@ -24,6 +24,15 @@ class MapboxReplayer {
     private val replayEventsObservers: MutableSet<ReplayEventsObserver> = mutableSetOf()
 
     /**
+     * Returns whether the replay is active an playing provided events.
+     *
+     * @see play
+     * @see stop
+     * @see clearEvents
+     */
+    fun isPlaying() = replayEventSimulator.isPlaying()
+
+    /**
      * Appends events to be replayed. Notice the basis of your [ReplayEventBase.eventTimestamp].
      * When they are drastically different, you may need to [seekTo] events.
      *

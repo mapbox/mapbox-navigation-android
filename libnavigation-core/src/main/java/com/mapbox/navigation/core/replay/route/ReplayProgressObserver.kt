@@ -11,21 +11,22 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
  * This class will feed locations to your [MapboxReplayer] and simulate
  * your active route for you.
  */
-class ReplayProgressObserver(
+class ReplayProgressObserver @JvmOverloads constructor(
     /**
      * As navigation receives [RouteProgress], this will push events to your
      * replay history player to be played.
      */
-    private val mapboxReplayer: MapboxReplayer
+    private val mapboxReplayer: MapboxReplayer,
+    private val replayRouteMapper: ReplayRouteMapper = ReplayRouteMapper()
 ) : RouteProgressObserver {
 
-    private val replayRouteMapper = ReplayRouteMapper()
     private var currentRouteLeg: RouteLeg? = null
 
     /**
      * @param options allow you to control the driver and car behavior.
      * @return [ReplayProgressObserver]
      */
+    @Deprecated("Provide a mapper through construct and change its options when needed.")
     fun updateOptions(options: ReplayRouteOptions): ReplayProgressObserver {
         replayRouteMapper.options = options
         return this
@@ -49,8 +50,13 @@ class ReplayProgressObserver(
         if (routeProgressRouteLeg != null) {
             val replayEvents = replayRouteMapper.mapRouteLegGeometry(routeProgressRouteLeg)
             if (replayEvents.isNotEmpty()) {
+                val wasPlaying = mapboxReplayer.isPlaying()
+                mapboxReplayer.clearEvents()
                 mapboxReplayer.pushEvents(replayEvents)
                 mapboxReplayer.seekTo(replayEvents.first())
+                if (wasPlaying) {
+                    mapboxReplayer.play()
+                }
             }
         }
     }

@@ -22,6 +22,7 @@ internal class ReplayEventSimulator(
 ) {
 
     private val jobControl = InternalJobControlFactory.createMainScopeJobControl()
+    private var simulatorJob: Job? = null
 
     // The pivot will move forward through the events with time.
     private var historyTimeOffset: Double = 0.0
@@ -30,9 +31,9 @@ internal class ReplayEventSimulator(
 
     private var pivotIndex = 0
 
-    fun launchSimulator(replayEventsCallback: (List<ReplayEventBase>) -> Unit): Job {
+    fun launchSimulator(replayEventsCallback: (List<ReplayEventBase>) -> Unit) {
         resetSimulatorClock()
-        return jobControl.scope.launch {
+        simulatorJob = jobControl.scope.launch {
             while (isActive) {
                 if (isDonePlayingEvents()) {
                     delay(IS_DONE_PLAYING_EVENTS_DELAY_MILLIS)
@@ -60,6 +61,8 @@ internal class ReplayEventSimulator(
     fun stopSimulator() {
         jobControl.job.cancelChildren()
     }
+
+    fun isPlaying() = simulatorJob?.isActive == true
 
     fun seekTo(indexOfEvent: Int) {
         historyTimeOffset = replayEvents.events[indexOfEvent].eventTimestamp
