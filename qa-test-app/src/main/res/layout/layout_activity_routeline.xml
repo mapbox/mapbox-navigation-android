@@ -32,9 +32,20 @@
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="24dp"
         android:tint="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/startNavigation"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_layers_24dp"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/toggleTrafficVisibilityButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/startNavigation"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="Toggle Traffic Visibility"
+        android:visibility="invisible"/>
 
     <ProgressBar
         android:id="@+id/routeLoadingProgressBar"

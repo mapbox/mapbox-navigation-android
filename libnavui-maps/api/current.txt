@@ -795,9 +795,11 @@ package com.mapbox.navigation.ui.maps.route.line.api {
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getAlternativeRoutesVisibility(com.mapbox.maps.Style style);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions getOptions();
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getPrimaryRouteVisibility(com.mapbox.maps.Style style);
+    method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getTrafficVisibility(com.mapbox.maps.Style style);
     method public void hideAlternativeRoutes(com.mapbox.maps.Style style);
     method public void hideOriginAndDestinationPoints(com.mapbox.maps.Style style);
     method public void hidePrimaryRoute(com.mapbox.maps.Style style);
+    method public void hideTraffic(com.mapbox.maps.Style style);
     method public void initializeLayers(com.mapbox.maps.Style style);
     method public void renderClearRouteLineValue(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue> clearRouteLineValue);
     method public void renderRouteDrawData(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue> routeDrawData);
@@ -806,6 +808,7 @@ package com.mapbox.navigation.ui.maps.route.line.api {
     method public void showAlternativeRoutes(com.mapbox.maps.Style style);
     method public void showOriginAndDestinationPoints(com.mapbox.maps.Style style);
     method public void showPrimaryRoute(com.mapbox.maps.Style style);
+    method public void showTraffic(com.mapbox.maps.Style style);
     property public final com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions options;
   }
 
