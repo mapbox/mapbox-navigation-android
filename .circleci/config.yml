@@ -389,14 +389,20 @@ commands:
               --device model=redfin,version=30,locale=en,orientation=portrait \
               --timeout 5m
 
-  publish-artifacts:
+  upload-artifacts:
     steps:
       - deploy:
           name: Upload Navigation SDK to SDK Registry
           command: |
-            export GITHUB_TOKEN=$(./mbx-ci github writer public token)
-            git config --global user.email no-reply@mapbox.com && git config --global user.name mapbox-ci
             make upload-to-sdk-registry
+
+  publish-artifacts:
+    steps:
+      - deploy:
+          name: Publish stable artifacts in SDK Registry
+          command: |
+            export GITHUB_TOKEN=$(./mbx-ci github writer private token)
+            git config --global user.email no-reply@mapbox.com && git config --global user.name mapbox-ci
             make publish-to-sdk-registry
 
   check-public-documentation:
@@ -629,7 +635,7 @@ jobs:
       - generate-documentation
       - prepare-mbx-ci
       - setup-aws-credentials
-      - publish-artifacts
+      - upload-artifacts
       - trigger-mobile-metrics
 
   release:
@@ -643,4 +649,5 @@ jobs:
       - generate-documentation
       - prepare-mbx-ci
       - setup-aws-credentials
+      - upload-artifacts
       - publish-artifacts
