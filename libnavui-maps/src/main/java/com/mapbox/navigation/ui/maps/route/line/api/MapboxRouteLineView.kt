@@ -389,6 +389,65 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
     }
 
     /**
+     * Hides the layers used for the traffic line(s).
+     *
+     * @param style an instance of the [Style]
+     */
+    fun hideTraffic(style: Style) {
+        jobControl.scope.launch(Dispatchers.Main) {
+            mutex.withLock {
+                updateLayerVisibility(
+                    style,
+                    RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID, Visibility.NONE
+                )
+                updateLayerVisibility(
+                    style,
+                    RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID, Visibility.NONE
+                )
+                updateLayerVisibility(
+                    style,
+                    RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID, Visibility.NONE
+                )
+            }
+        }
+    }
+
+    /**
+     * Shows the layers used for the traffic line(s).
+     *
+     * @param style an instance of the [Style]
+     */
+    fun showTraffic(style: Style) {
+        jobControl.scope.launch(Dispatchers.Main) {
+            mutex.withLock {
+                updateLayerVisibility(
+                    style,
+                    RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID, Visibility.VISIBLE
+                )
+                updateLayerVisibility(
+                    style,
+                    RouteLayerConstants.ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID, Visibility.VISIBLE
+                )
+                updateLayerVisibility(
+                    style,
+                    RouteLayerConstants.ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID, Visibility.VISIBLE
+                )
+            }
+        }
+    }
+
+    /**
+     * Returns the visibility of the primary route map traffic layer.
+     *
+     * @param style an instance of the Style
+     *
+     * @return the visibility value returned by the map.
+     */
+    fun getTrafficVisibility(style: Style): Visibility? {
+        return getLayerVisibility(style, RouteLayerConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+    }
+
+    /**
      * Returns the visibility of the primary route map layer.
      *
      * @param style an instance of the Style

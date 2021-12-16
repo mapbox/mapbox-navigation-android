@@ -109,6 +109,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
   private final MapboxReplayer mapboxReplayer = new MapboxReplayer();
   private MapboxNavigation mapboxNavigation;
   private Button startNavigation;
+  private Button toggleTrafficVisibilityButton;
   private ProgressBar routeLoading;
   private final List<String> mapStyles = Arrays.asList(
       NavigationStyles.NAVIGATION_DAY_STYLE,
@@ -142,6 +143,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
 
     mapView = findViewById(R.id.mapView);
     startNavigation = findViewById(R.id.startNavigation);
+    toggleTrafficVisibilityButton = findViewById(R.id.toggleTrafficVisibilityButton);
     routeLoading = findViewById(R.id.routeLoadingProgressBar);
     mapboxMap = mapView.getMapboxMap();
     navigationLocationProvider = new NavigationLocationProvider();
@@ -199,44 +201,55 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
     });
 
 
-    ((FloatingActionButton) findViewById(R.id.fabToggleStyle)).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        if (mapboxMap.getStyle() == null) {
-          return;
+    ((FloatingActionButton) findViewById(R.id.fabToggleStyle)).setOnClickListener(view -> {
+      if (mapboxMap.getStyle() == null) {
+        return;
+      }
+
+      Visibility primaryRouteLineVisibility = mapboxRouteLineView.getPrimaryRouteVisibility(mapboxMap.getStyle());
+      Visibility alternativeRouteLineVisibility = mapboxRouteLineView.getAlternativeRoutesVisibility(mapboxMap.getStyle());
+      Visibility arrowVisibility = routeArrowView.getVisibility(mapboxMap.getStyle());
+
+      Collections.shuffle(mapStyles);
+      String style = mapStyles.get(0);
+      Log.e(TAG, "*** Chosen map style is " + style);
+      mapboxMap.loadStyleUri(style, style1 -> {
+        if (primaryRouteLineVisibility == Visibility.NONE) {
+          mapboxRouteLineView.hidePrimaryRoute(style1);
+        } else {
+          mapboxRouteLineView.showPrimaryRoute(style1);
         }
 
-        Visibility primaryRouteLineVisibility = mapboxRouteLineView.getPrimaryRouteVisibility(mapboxMap.getStyle());
-        Visibility alternativeRouteLineVisibility = mapboxRouteLineView.getAlternativeRoutesVisibility(mapboxMap.getStyle());
-        Visibility arrowVisibility = routeArrowView.getVisibility(mapboxMap.getStyle());
+        if (alternativeRouteLineVisibility == Visibility.NONE) {
+          mapboxRouteLineView.hideAlternativeRoutes(style1);
+        } else {
+          mapboxRouteLineView.showAlternativeRoutes(style1);
+        }
 
-        Collections.shuffle(mapStyles);
-        String style = mapStyles.get(0);
-        Log.e(TAG, "*** Chosen map style is " + style);
-        mapboxMap.loadStyleUri(style, style1 -> {
-          if (primaryRouteLineVisibility == Visibility.NONE) {
-            mapboxRouteLineView.hidePrimaryRoute(style1);
-          } else {
-            mapboxRouteLineView.showPrimaryRoute(style1);
-          }
+        ArrowVisibilityChangeValue arrowVisibilityState;
+        if (arrowVisibility == Visibility.NONE) {
+          arrowVisibilityState = routeArrow.hideManeuverArrow();
+        } else {
+          arrowVisibilityState = routeArrow.showManeuverArrow();
+        }
+        routeArrowView.render(style1, arrowVisibilityState);
 
-          if (alternativeRouteLineVisibility == Visibility.NONE) {
-            mapboxRouteLineView.hideAlternativeRoutes(style1);
-          } else {
-            mapboxRouteLineView.showAlternativeRoutes(style1);
-          }
+        ArrowAddedValue redrawState = routeArrow.redraw();
+        routeArrowView.render(style1, redrawState);
+      }, null);
+    });
 
-          ArrowVisibilityChangeValue arrowVisibilityState;
-          if (arrowVisibility == Visibility.NONE) {
-            arrowVisibilityState = routeArrow.hideManeuverArrow();
-          } else {
-            arrowVisibilityState = routeArrow.showManeuverArrow();
-          }
-          routeArrowView.render(style1, arrowVisibilityState);
+    toggleTrafficVisibilityButton.setOnClickListener(view -> {
+      if (mapboxMap.getStyle() == null) {
+        return;
+      }
 
-          ArrowAddedValue redrawState = routeArrow.redraw();
-          routeArrowView.render(style1, redrawState);
-        }, null);
+      Visibility trafficLineVisibility =
+              mapboxRouteLineView.getTrafficVisibility(mapboxMap.getStyle());
+      if (trafficLineVisibility != null && trafficLineVisibility == Visibility.VISIBLE) {
+        mapboxRouteLineView.hideTraffic(mapboxMap.getStyle());
+      } else {
+        mapboxRouteLineView.showTraffic(mapboxMap.getStyle());
       }
     });
 
@@ -347,6 +360,7 @@ public class MapboxRouteLineActivity extends AppCompatActivity implements OnMapL
       if (!routes.isEmpty()) {
         routeLoading.setVisibility(View.INVISIBLE);
         startNavigation.setVisibility(View.VISIBLE);
+        toggleTrafficVisibilityButton.setVisibility(View.VISIBLE);
       }
     }
 

@@ -541,6 +541,82 @@ class MapboxRouteLineViewTest {
     }
 
     @Test
+    fun hideTraffic() {
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        mockkObject(MapboxRouteLineUtils)
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val primaryRouteTraffic = mockk<LineLayer>(relaxed = true)
+        val altRouteTraffic1 = mockk<LineLayer>(relaxed = true)
+        val altRouteTraffic2 = mockk<LineLayer>(relaxed = true)
+        val style = mockk<Style> {
+            every {
+                getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+            } returns primaryRouteTraffic
+            every {
+                getLayer(ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
+            } returns altRouteTraffic1
+            every {
+                getLayer(ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+            } returns altRouteTraffic2
+        }
+
+        MapboxRouteLineView(options).hideTraffic(style)
+
+        verify { primaryRouteTraffic.visibility(Visibility.NONE) }
+        verify { altRouteTraffic1.visibility(Visibility.NONE) }
+        verify { altRouteTraffic2.visibility(Visibility.NONE) }
+        unmockkObject(MapboxRouteLineUtils)
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+    }
+
+    @Test
+    fun showTraffic() {
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        mockkObject(MapboxRouteLineUtils)
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val primaryRouteTraffic = mockk<LineLayer>(relaxed = true)
+        val altRouteTraffic1 = mockk<LineLayer>(relaxed = true)
+        val altRouteTraffic2 = mockk<LineLayer>(relaxed = true)
+        val style = mockk<Style> {
+            every {
+                getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)
+            } returns primaryRouteTraffic
+            every {
+                getLayer(ALTERNATIVE_ROUTE1_TRAFFIC_LAYER_ID)
+            } returns altRouteTraffic1
+            every {
+                getLayer(ALTERNATIVE_ROUTE2_TRAFFIC_LAYER_ID)
+            } returns altRouteTraffic2
+        }
+
+        MapboxRouteLineView(options).showTraffic(style)
+
+        verify { primaryRouteTraffic.visibility(Visibility.VISIBLE) }
+        verify { altRouteTraffic1.visibility(Visibility.VISIBLE) }
+        verify { altRouteTraffic2.visibility(Visibility.VISIBLE) }
+        unmockkObject(MapboxRouteLineUtils)
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+    }
+
+    @Test
+    fun getTrafficVisibility() {
+        mockkObject(MapboxRouteLineUtils)
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val style = mockk<Style>()
+        every {
+            MapboxRouteLineUtils.getLayerVisibility(
+                style,
+                PRIMARY_ROUTE_TRAFFIC_LAYER_ID
+            )
+        } returns Visibility.VISIBLE
+
+        val result = MapboxRouteLineView(options).getTrafficVisibility(style)
+
+        assertEquals(Visibility.VISIBLE, result)
+        unmockkObject(MapboxRouteLineUtils)
+    }
+
+    @Test
     fun showOriginAndDestinationPoints() {
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkObject(MapboxRouteLineUtils)
