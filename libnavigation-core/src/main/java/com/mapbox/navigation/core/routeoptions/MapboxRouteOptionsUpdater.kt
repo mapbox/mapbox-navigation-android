@@ -103,7 +103,7 @@ class MapboxRouteOptionsUpdater(
                         )
                     )
             }
-        } catch (e: RuntimeException) {
+        } catch (e: Exception) {
             throw RuntimeException(
                 "${e.localizedMessage}\n" +
                     "routeOptions=[$routeOptions]\n" +
