@@ -41,7 +41,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - vv-more-info-for-rerouting-crash-1.4
       - release:
           filters:
             tags:
