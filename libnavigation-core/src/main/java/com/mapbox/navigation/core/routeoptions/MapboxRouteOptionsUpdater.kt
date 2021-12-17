@@ -43,6 +43,15 @@ class MapboxRouteOptionsUpdater(
         val coordinates = routeOptions.coordinates()
         val remainingWaypoints = routeProgress.remainingWaypoints
 
+        if (coordinates.size <= remainingWaypoints) {
+            val msg = "Cannot combine routeOptions with routeProgress. Inconsistent data." +
+                "coordinates: $coordinates, " +
+                "remainingWaypoints $remainingWaypoints, " +
+                "coordinates ${routeProgress.route.routeOptions()?.coordinates()}"
+            logger?.e(Tag("MapboxRouteOptionsUpdater"), Message(msg))
+            return RouteOptionsUpdater.RouteOptionsResult.Error(Throwable(msg))
+        }
+
         try {
             routeProgress.currentLegProgress?.legIndex?.let { index ->
                 optionsBuilder

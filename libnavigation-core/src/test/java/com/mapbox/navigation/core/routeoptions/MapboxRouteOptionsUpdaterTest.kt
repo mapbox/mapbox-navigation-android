@@ -129,6 +129,24 @@ class MapboxRouteOptionsUpdaterTest {
     }
 
     @Test
+    fun `inconsistent route options and route progress`() {
+        val routeOptions = provideDefaultRouteOptionsBuilder()
+            .coordinates(
+                listOf(
+                    Point.fromLngLat(1.0, 1.0),
+                    Point.fromLngLat(2.0, 2.0)
+                )
+            )
+            .build()
+        val routeProgress: RouteProgress = mockk(relaxed = true) {
+            every { remainingWaypoints } returns 3
+        }
+
+        val updateResult = routeRefreshAdapter.update(routeOptions, routeProgress, location)
+        assertTrue(updateResult is RouteOptionsUpdater.RouteOptionsResult.Error)
+    }
+
+    @Test
     fun no_options_on_invalid_input() {
         val invalidInput = mutableListOf<Triple<RouteOptions?, RouteProgress?, Location?>>()
         invalidInput.add(Triple(null, mockk(), mockk()))
