@@ -7,30 +7,32 @@
     tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/soundButtonText"
-        android:layout_height="@dimen/mapbox_button_size"
+        android:id="@+id/buttonText"
         android:layout_width="@dimen/mapbox_button_size"
-        android:paddingStart="20dp"
-        android:paddingEnd="4dp"
+        android:layout_height="@dimen/mapbox_button_size"
+        android:background="@drawable/mapbox_bg_circle"
         android:elevation="0dp"
-        android:textSize="14sp"
-        android:textAllCaps="true"
-        android:maxLines="1"
         android:ellipsize="end"
         android:gravity="start|center_vertical"
-        app:layout_constraintEnd_toEndOf="@id/soundButtonIcon"
-        app:layout_constraintTop_toTopOf="@id/soundButtonIcon"
-        app:layout_constraintBottom_toBottomOf="@id/soundButtonIcon"
-        android:background="@drawable/mapbox_bg_circle"
-        android:textColor="@color/colorOnSurface" />
+        android:maxLines="1"
+        android:paddingStart="20dp"
+        android:paddingEnd="4dp"
+        android:textAllCaps="true"
+        android:textColor="@color/colorOnSurface"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@id/buttonIcon"
+        app:layout_constraintEnd_toEndOf="@id/buttonIcon"
+        app:layout_constraintTop_toTopOf="@id/buttonIcon" />
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/soundButtonIcon"
+        android:id="@+id/buttonIcon"
         android:layout_width="@dimen/mapbox_button_size"
         android:layout_height="@dimen/mapbox_button_size"
-        app:elevation="0dp"
-        android:padding="16dp"
         android:background="@drawable/mapbox_bg_circle"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:contentDescription="@null"
+        android:padding="16dp"
+        app:elevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </merge>

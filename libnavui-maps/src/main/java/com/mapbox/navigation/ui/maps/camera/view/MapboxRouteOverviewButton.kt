@@ -2,31 +2,25 @@ package com.mapbox.navigation.ui.maps.camera.view
 
 import android.content.Context
 import android.content.res.TypedArray
-import android.os.Handler
-import android.os.Looper
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
 import androidx.annotation.StyleRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.mapbox.navigation.ui.maps.R
-import com.mapbox.navigation.ui.maps.databinding.MapboxRouteOverviewLayoutBinding
-import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
-import com.mapbox.navigation.ui.utils.internal.extensions.play
-import com.mapbox.navigation.ui.utils.internal.extensions.slideWidth
+import com.mapbox.navigation.ui.resources.databinding.ExtendableButtonLayoutBinding
+import com.mapbox.navigation.ui.utils.internal.ExtendableButtonHelper
 
 /**
  * Default view to allow user to switch to route overview mode.
  */
 class MapboxRouteOverviewButton : ConstraintLayout {
 
-    private val shrunkWidth = context.resources.getDimensionPixelSize(R.dimen.mapbox_button_size)
-    private var isAnimationRunning = false
-    private val binding = MapboxRouteOverviewLayoutBinding.inflate(
-        LayoutInflater.from(context),
-        this
+    private val binding = ExtendableButtonLayoutBinding.inflate(LayoutInflater.from(context), this)
+    private val helper = ExtendableButtonHelper(
+        binding.buttonText,
+        context.resources.getDimensionPixelSize(R.dimen.mapbox_button_size),
+        context.resources.getDimension(R.dimen.mapbox_routeOverviewButton_minExtendedWidth),
     )
-    private val mainHandler = Handler(Looper.getMainLooper())
 
     /**
      *
@@ -83,30 +77,8 @@ class MapboxRouteOverviewButton : ConstraintLayout {
         duration: Long,
         text: String = context.getString(R.string.mapbox_route_overview),
     ) {
-        if (!isAnimationRunning) {
-            isAnimationRunning = true
-            val extendedWidth = (binding.routeOverviewText.measureTextWidth(text) + shrunkWidth)
-                .coerceAtLeast(MIN_EXTENDED_WIDTH * context.resources.displayMetrics.density)
-            getAnimator(shrunkWidth, extendedWidth.toInt()).play(
-                doOnStart = {
-                    binding.routeOverviewText.text = text
-                    binding.routeOverviewText.visibility = View.VISIBLE
-                    mainHandler.postDelayed(
-                        {
-                            getAnimator(extendedWidth.toInt(), shrunkWidth).play(
-                                doOnStart = {
-                                    binding.routeOverviewText.text = null
-                                },
-                                doOnEnd = {
-                                    binding.routeOverviewText.visibility = View.INVISIBLE
-                                    isAnimationRunning = false
-                                }
-                            )
-                        },
-                        duration
-                    )
-                }
-            )
+        if (!helper.isAnimationRunning) {
+            helper.showTextAndExtend(text, duration)
         }
     }
 
@@ -124,25 +96,17 @@ class MapboxRouteOverviewButton : ConstraintLayout {
     private fun applyAttributes(typedArray: TypedArray) {
         typedArray.getDrawable(
             R.styleable.MapboxRouteOverviewButton_overviewButtonDrawable
-        ).also { binding.routeOverviewIcon.setImageDrawable(it) }
+        ).also { binding.buttonIcon.setImageDrawable(it) }
 
         typedArray.getDrawable(
             R.styleable.MapboxRouteOverviewButton_overviewButtonBackground,
         )?.let { background ->
-            binding.routeOverviewIcon.background = background
-            binding.routeOverviewText.background = background
+            binding.buttonIcon.background = background
+            binding.buttonText.background = background
         }
 
         typedArray.getColorStateList(
             R.styleable.MapboxRouteOverviewButton_overviewButtonTextColor,
-        )?.let { binding.routeOverviewText.setTextColor(it) }
-    }
-
-    private fun getAnimator(from: Int, to: Int) =
-        binding.routeOverviewText.slideWidth(from, to, SLIDE_DURATION)
-
-    private companion object {
-        private const val SLIDE_DURATION = 300L
-        private const val MIN_EXTENDED_WIDTH = 165
+        )?.let { binding.buttonText.setTextColor(it) }
     }
 }
