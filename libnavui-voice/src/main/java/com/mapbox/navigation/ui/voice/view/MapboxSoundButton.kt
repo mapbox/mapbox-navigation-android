@@ -11,7 +11,6 @@ import android.view.View
 import androidx.annotation.StyleRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import com.mapbox.navigation.ui.utils.internal.extensions.afterMeasured
 import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
 import com.mapbox.navigation.ui.utils.internal.extensions.play
 import com.mapbox.navigation.ui.utils.internal.extensions.slideWidth
@@ -23,7 +22,7 @@ import com.mapbox.navigation.ui.voice.databinding.MapboxSoundButtonLayoutBinding
  */
 class MapboxSoundButton : ConstraintLayout {
 
-    private var shrunkWidth = 0
+    private val shrunkWidth = context.resources.getDimensionPixelSize(R.dimen.mapbox_button_size)
     private var muteDrawable: Drawable? = null
     private var unmuteDrawable: Drawable? = null
     private val binding = MapboxSoundButtonLayoutBinding.inflate(
@@ -97,13 +96,6 @@ class MapboxSoundButton : ConstraintLayout {
 
         typedArray.getColorStateList(R.styleable.MapboxSoundButton_soundButtonTextColor)
             ?.let { binding.soundButtonText.setTextColor(it) }
-    }
-
-    override fun onFinishInflate() {
-        super.onFinishInflate()
-        binding.soundButtonText.afterMeasured {
-            shrunkWidth = width
-        }
     }
 
     /**

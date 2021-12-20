@@ -11,7 +11,6 @@ import androidx.annotation.StyleRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.databinding.MapboxRouteOverviewLayoutBinding
-import com.mapbox.navigation.ui.utils.internal.extensions.afterMeasured
 import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
 import com.mapbox.navigation.ui.utils.internal.extensions.play
 import com.mapbox.navigation.ui.utils.internal.extensions.slideWidth
@@ -21,7 +20,7 @@ import com.mapbox.navigation.ui.utils.internal.extensions.slideWidth
  */
 class MapboxRouteOverviewButton : ConstraintLayout {
 
-    private var shrunkWidth = 0
+    private val shrunkWidth = context.resources.getDimensionPixelSize(R.dimen.mapbox_button_size)
     private var isAnimationRunning = false
     private val binding = MapboxRouteOverviewLayoutBinding.inflate(
         LayoutInflater.from(context),
@@ -59,13 +58,6 @@ class MapboxRouteOverviewButton : ConstraintLayout {
         defStyleAttr: Int
     ) : super(context, attrs, defStyleAttr) {
         initAttributes(attrs)
-    }
-
-    override fun onFinishInflate() {
-        super.onFinishInflate()
-        binding.routeOverviewText.afterMeasured {
-            shrunkWidth = width
-        }
     }
 
     /**
