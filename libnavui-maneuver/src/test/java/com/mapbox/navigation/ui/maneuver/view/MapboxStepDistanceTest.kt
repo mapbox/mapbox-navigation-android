@@ -3,10 +3,12 @@ package com.mapbox.navigation.ui.maneuver.view
 import android.content.Context
 import android.text.SpannableString
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.ui.maneuver.model.StepDistance
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,5 +41,38 @@ class MapboxStepDistanceTest {
         val actual = view.text
 
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun equalsTest() {
+        val mockDistanceFormatter = mockk<DistanceFormatter>()
+        val stepDistance1 = StepDistance(mockDistanceFormatter, 5.5, 6.6)
+        val stepDistance2 = StepDistance(mockDistanceFormatter, 5.5, 6.6)
+
+        val areEqual = stepDistance1 == stepDistance2
+
+        assertTrue(areEqual)
+    }
+
+    @Test
+    fun equals_whenTotalDistanceNotEqual() {
+        val mockDistanceFormatter = mockk<DistanceFormatter>()
+        val stepDistance1 = StepDistance(mockDistanceFormatter, 5.5, 6.6)
+        val stepDistance2 = StepDistance(mockDistanceFormatter, 4.4, 6.6)
+
+        val areEqual = stepDistance1 != stepDistance2
+
+        assertTrue(areEqual)
+    }
+
+    @Test
+    fun equals_whenDistanceRemainingNotEqual() {
+        val mockDistanceFormatter = mockk<DistanceFormatter>()
+        val stepDistance1 = StepDistance(mockDistanceFormatter, 5.5, 6.6)
+        val stepDistance2 = StepDistance(mockDistanceFormatter, 5.5, 3.3)
+
+        val areEqual = stepDistance1 != stepDistance2
+
+        assertTrue(areEqual)
     }
 }
