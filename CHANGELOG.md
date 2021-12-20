@@ -9,7 +9,11 @@ For details on how v2 differs from v1 and guidance on migrating from v1 of the M
 ### Changelog
 #### Features
 - Added support for Mapbox designed route shields. [#5145](https://github.com/mapbox/mapbox-navigation-android/pull/5145)
-- Added methods `MapboxRouteLineView` to change the visibility of the route traffic layers. [#5283](https://github.com/mapbox/mapbox-navigation-android/pull/5283)
+    - To access the newly introduced `MapboxRouteShieldApi` independently of the `MapboxManeuverApi`, add the dependency to your project:
+      ```
+      implementation "com.mapbox.navigation:ui-shields:{nav_sdk_version}"
+      ```
+- Added methods in `MapboxRouteLineView` to change the visibility of the route traffic layers. [#5283](https://github.com/mapbox/mapbox-navigation-android/pull/5283)
 #### Bug fixes and improvements
 - Fixed: crashes and waypoints accumulation during rerouting. [#5261](https://github.com/mapbox/mapbox-navigation-android/pull/5261)
 - Added `MapboxDistanceUtil` which moves some of the implementation from `MapboxDistanceFormatter` so that the calculation of the distance rounding and the accompanying text is separated from the SpannableString construction done in  `MapboxDistanceFormatter`. [#5182](https://github.com/mapbox/mapbox-navigation-android/pull/5182)
