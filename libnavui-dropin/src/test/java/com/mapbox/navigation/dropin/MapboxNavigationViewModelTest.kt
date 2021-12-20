@@ -2,8 +2,13 @@ package com.mapbox.navigation.dropin
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.route.RouterCallback
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -265,5 +270,84 @@ class MapboxNavigationViewModelTest {
         val result = def.await()
 
         assertEquals(expected, result)
+    }
+
+    @Test
+    fun setRoutes() {
+        val routes = listOf<DirectionsRoute>()
+        val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        every { MapboxNavigationApp.current() } returns mockMapboxNavigation
+
+        viewModel.setRoutes(routes)
+
+        verify { mockMapboxNavigation.setRoutes(routes) }
+    }
+
+    @Test
+    fun fetchAndSetRoute() {
+        val points = listOf(
+            Point.fromLngLat(14.75, 55.19),
+            Point.fromLngLat(12.54, 55.68)
+        )
+        val options = RouteOptions.builder()
+            .profile("foobar")
+            .coordinatesList(points)
+            .layersList(listOf(1))
+            .build()
+        val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        every { MapboxNavigationApp.current() } returns mockMapboxNavigation
+
+        viewModel.fetchAndSetRoute(options)
+
+        verify { mockMapboxNavigation.requestRoutes(options, any()) }
+    }
+
+    @Test
+    fun fetchAndSetRoute_withRouteOptionsLayerListUpdate() {
+        val points = listOf(
+            Point.fromLngLat(14.75, 55.19),
+            Point.fromLngLat(12.54, 55.68)
+        )
+        val options = RouteOptions.builder()
+            .profile("foobar")
+            .coordinatesList(points)
+            .build()
+        val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true) {
+            every { getZLevel() } returns 99
+        }
+        every { MapboxNavigationApp.current() } returns mockMapboxNavigation
+        val optionsSlot = slot<RouteOptions>()
+
+        viewModel.fetchAndSetRoute(options)
+
+        verify { mockMapboxNavigation.requestRoutes(capture(optionsSlot), any()) }
+        assertEquals(99, optionsSlot.captured.layersList()!!.first())
+    }
+
+    @Test
+    fun fetchAndSetRoute_onRoutesReady() {
+        val points = listOf(
+            Point.fromLngLat(14.75, 55.19),
+            Point.fromLngLat(12.54, 55.68)
+        )
+        val options = RouteOptions.builder()
+            .profile("foobar")
+            .coordinatesList(points)
+            .layersList(listOf(1))
+            .build()
+        val routes = listOf<DirectionsRoute>()
+        val callbackSlot = slot<RouterCallback>()
+        val mockMapboxNavigation = mockk<MapboxNavigation>(relaxed = true) {
+            every { requestRoutes(options, capture(callbackSlot)) } answers {
+                callbackSlot.captured.onRoutesReady(routes, mockk<RouterOrigin>())
+                0L
+            }
+        }
+        every { MapboxNavigationApp.current() } returns mockMapboxNavigation
+
+        viewModel.fetchAndSetRoute(options)
+
+        verify { mockMapboxNavigation.requestRoutes(options, any()) }
+        verify { mockMapboxNavigation.setRoutes(routes) }
     }
 }

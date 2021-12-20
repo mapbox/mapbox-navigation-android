@@ -1,7 +1,6 @@
 package com.mapbox.navigation.dropin
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.location.Location
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
@@ -10,10 +9,7 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
-import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.route.RouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -108,20 +104,22 @@ internal class MapboxNavigationViewModel : ViewModel() {
         mapboxNavigation.mapboxReplayer.stop()
     }
 
-    // This was added to facilitate getting a route into mapbox navigation so work could go forward.
-    // It may be temporary.
-    fun findRoute(origin: Point, destination: Point, context: Context) {
-        val mapboxNavigation = MapboxNavigationApp.current() ?: return
+    fun setRoutes(routes: List<DirectionsRoute>) {
+        MapboxNavigationApp.current()?.setRoutes(routes)
+    }
 
-        val routeOptions = RouteOptions.builder()
-            .applyDefaultNavigationOptions()
-            .applyLanguageAndVoiceUnitOptions(context)
-            .coordinatesList(listOf(origin, destination))
-            .layersList(listOf(mapboxNavigation.getZLevel(), null))
-            .alternatives(true)
-            .build()
+    fun fetchAndSetRoute(routeOptions: RouteOptions) {
+        val mapboxNavigation = MapboxNavigationApp.current() ?: return
+        val updatedRouteOptions = if (routeOptions.layersList()?.isEmpty() != false) {
+            routeOptions.toBuilder()
+                .layersList(listOf(mapboxNavigation.getZLevel(), null))
+                .build()
+        } else {
+            routeOptions
+        }
+
         mapboxNavigation.requestRoutes(
-            routeOptions,
+            updatedRouteOptions,
             object : RouterCallback {
                 override fun onRoutesReady(
                     routes: List<DirectionsRoute>,

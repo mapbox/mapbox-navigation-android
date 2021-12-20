@@ -1,6 +1,5 @@
 package com.mapbox.navigation.dropin
 
-import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
@@ -16,6 +15,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapInitOptions
@@ -23,17 +24,16 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
-import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
-import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
-import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
@@ -98,21 +98,7 @@ class NavigationView : ConstraintLayout {
             it.getMapboxMap().addOnStyleLoadedListener(onStyleLoadedListener)
         }
     }
-    // This was added to facilitate getting a route into mapbox navigation so work could go forward.
-    // It may be temporary.
-    private val onMapLongClickListener = OnMapLongClickListener { point ->
-        val currentLocation = navigationLocationProvider.lastLocation
-        if (currentLocation != null) {
-            val originPoint = Point.fromLngLat(
-                currentLocation.longitude,
-                currentLocation.latitude
-            )
-            mapboxNavigationViewModel.findRoute(originPoint, point, this@NavigationView.context)
-            true
-        } else {
-            false
-        }
-    }
+
     private val binding = MapboxLayoutDropInViewBinding.inflate(
         LayoutInflater.from(context),
         this
@@ -595,10 +581,6 @@ class NavigationView : ConstraintLayout {
         performActions()
 
         updateNavigationViewOptions(navigationViewOptions)
-
-        // This was added to facilitate getting a route into mapbox navigation so work could go forward.
-        // It may be temporary.
-        mapView.gestures.addOnMapLongClickListener(onMapLongClickListener)
     }
 
     internal fun addRouteProgressObserver(observer: RouteProgressObserver) {
@@ -670,18 +652,23 @@ class NavigationView : ConstraintLayout {
         }
     }
 
-    private fun getTransitionOptions(
-        locationMatcherResult: LocationMatcherResult
-    ): (ValueAnimator.() -> Unit) {
-        return if (locationMatcherResult.isTeleport) {
-            {
-                duration = 0
-            }
-        } else {
-            {
-                duration = 1000
-            }
-        }
+    internal fun setRoutes(routes: List<DirectionsRoute>) {
+        mapboxNavigationViewModel.setRoutes(routes)
+    }
+
+    internal fun fetchAndSetRoute(points: List<Point>) {
+        val routeOptions = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .applyLanguageAndVoiceUnitOptions(context)
+            .coordinatesList(points)
+            .alternatives(true)
+            .build()
+
+        fetchAndSetRoute(routeOptions)
+    }
+
+    internal fun fetchAndSetRoute(routeOptions: RouteOptions) {
+        mapboxNavigationViewModel.fetchAndSetRoute(routeOptions)
     }
 
     companion object {
