@@ -23,10 +23,18 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro"
     }
+
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
     implementation dependenciesList.kotlinStdLib
+
+    // androidX
+    implementation dependenciesList.androidXConstraintLayout
+    implementation dependenciesList.androidXAppCompat
 }
 
 apply from: "${rootDir}/gradle/track-public-apis.gradle"

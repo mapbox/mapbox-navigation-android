@@ -35,7 +35,7 @@ class MapboxRouteOverviewButtonTest {
     @Test
     fun `constructor with context`() {
         val view = MapboxRouteOverviewButton(ctx)
-        val expectedDrawable = view.findViewById<ImageView>(R.id.routeOverviewIcon)
+        val expectedDrawable = view.findViewById<ImageView>(R.id.buttonIcon)
 
         assertNull(expectedDrawable.drawable)
     }
@@ -43,7 +43,7 @@ class MapboxRouteOverviewButtonTest {
     @Test
     fun `constructor with context and attr`() {
         val view = MapboxRouteOverviewButton(ctx, null)
-        val expectedDrawable = view.findViewById<ImageView>(R.id.routeOverviewIcon)
+        val expectedDrawable = view.findViewById<ImageView>(R.id.buttonIcon)
 
         assertNotNull(expectedDrawable.drawable)
     }
@@ -51,7 +51,7 @@ class MapboxRouteOverviewButtonTest {
     @Test
     fun `constructor with context attr and defStyleAttr`() {
         val view = MapboxRouteOverviewButton(ctx, null, 0)
-        val expectedDrawable = view.findViewById<ImageView>(R.id.routeOverviewIcon)
+        val expectedDrawable = view.findViewById<ImageView>(R.id.buttonIcon)
 
         assertNotNull(expectedDrawable.drawable)
     }
@@ -59,7 +59,7 @@ class MapboxRouteOverviewButtonTest {
     @Test
     fun `update style`() {
         val view = MapboxRouteOverviewButton(ctx)
-        val expectedDrawable = view.findViewById<ImageView>(R.id.routeOverviewIcon)
+        val expectedDrawable = view.findViewById<ImageView>(R.id.buttonIcon)
 
         view.updateStyle(R.style.MapboxStyleRouteOverview)
 
@@ -69,7 +69,7 @@ class MapboxRouteOverviewButtonTest {
     @Test
     fun `overview and extend`() {
         val view = MapboxRouteOverviewButton(ctx)
-        val routeOverviewText = view.findViewById<AppCompatTextView>(R.id.routeOverviewText)
+        val routeOverviewText = view.findViewById<AppCompatTextView>(R.id.buttonText)
 
         view.showTextAndExtend(2000L)
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
@@ -81,7 +81,7 @@ class MapboxRouteOverviewButtonTest {
     @Test
     fun `overview and extend with text`() {
         val view = MapboxRouteOverviewButton(ctx)
-        val routeOverviewText = view.findViewById<AppCompatTextView>(R.id.routeOverviewText)
+        val routeOverviewText = view.findViewById<AppCompatTextView>(R.id.buttonText)
 
         view.showTextAndExtend(2000L, customText)
 

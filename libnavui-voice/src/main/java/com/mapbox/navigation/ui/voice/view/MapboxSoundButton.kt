@@ -3,33 +3,28 @@ package com.mapbox.navigation.ui.voice.view
 import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.drawable.Drawable
-import android.os.Handler
-import android.os.Looper
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
 import androidx.annotation.StyleRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
-import com.mapbox.navigation.ui.utils.internal.extensions.play
-import com.mapbox.navigation.ui.utils.internal.extensions.slideWidth
+import com.mapbox.navigation.ui.resources.databinding.ExtendableButtonLayoutBinding
+import com.mapbox.navigation.ui.utils.internal.ExtendableButtonHelper
 import com.mapbox.navigation.ui.voice.R
-import com.mapbox.navigation.ui.voice.databinding.MapboxSoundButtonLayoutBinding
 
 /**
  * Default view to allow user to mute or unmute voice instructions.
  */
 class MapboxSoundButton : ConstraintLayout {
 
-    private val shrunkWidth = context.resources.getDimensionPixelSize(R.dimen.mapbox_button_size)
     private var muteDrawable: Drawable? = null
     private var unmuteDrawable: Drawable? = null
-    private val binding = MapboxSoundButtonLayoutBinding.inflate(
-        LayoutInflater.from(context),
-        this
+    private val binding = ExtendableButtonLayoutBinding.inflate(LayoutInflater.from(context), this)
+    private val helper = ExtendableButtonHelper(
+        binding.buttonText,
+        context.resources.getDimensionPixelSize(R.dimen.mapbox_button_size),
+        context.resources.getDimension(R.dimen.mapbox_soundButton_minExtendedWidth),
     )
-    private val mainHandler = Handler(Looper.getMainLooper())
 
     /**
      *
@@ -90,12 +85,12 @@ class MapboxSoundButton : ConstraintLayout {
 
         val background = typedArray.getDrawable(R.styleable.MapboxSoundButton_soundButtonBackground)
         if (background != null) {
-            binding.soundButtonIcon.background = background
-            binding.soundButtonText.background = background
+            binding.buttonIcon.background = background
+            binding.buttonText.background = background
         }
 
         typedArray.getColorStateList(R.styleable.MapboxSoundButton_soundButtonTextColor)
-            ?.let { binding.soundButtonText.setTextColor(it) }
+            ?.let { binding.buttonText.setTextColor(it) }
     }
 
     /**
@@ -116,7 +111,7 @@ class MapboxSoundButton : ConstraintLayout {
      * @return `true` representing that view is in muted state.
      */
     fun mute(): Boolean {
-        binding.soundButtonIcon.setImageDrawable(muteDrawable)
+        binding.buttonIcon.setImageDrawable(muteDrawable)
         return true
     }
 
@@ -125,7 +120,7 @@ class MapboxSoundButton : ConstraintLayout {
      * @return `false` representing that view is in unmuted state.
      */
     fun unmute(): Boolean {
-        binding.soundButtonIcon.setImageDrawable(unmuteDrawable)
+        binding.buttonIcon.setImageDrawable(unmuteDrawable)
         return false
     }
 
@@ -158,35 +153,7 @@ class MapboxSoundButton : ConstraintLayout {
     }
 
     private fun showTextWithAnimation(text: String, duration: Long) {
-        val extendedWidth = (binding.soundButtonText.measureTextWidth(text) + shrunkWidth)
-            .coerceAtLeast(MIN_EXTENDED_WIDTH * context.resources.displayMetrics.density)
-        mainHandler.removeCallbacksAndMessages(null)
-        getAnimator(shrunkWidth, extendedWidth.toInt()).play(
-            doOnStart = {
-                binding.soundButtonText.text = text
-                binding.soundButtonText.visibility = View.VISIBLE
-                mainHandler.postDelayed(
-                    {
-                        getAnimator(extendedWidth.toInt(), shrunkWidth).play(
-                            doOnStart = {
-                                binding.soundButtonText.text = null
-                            },
-                            doOnEnd = {
-                                binding.soundButtonText.visibility = View.INVISIBLE
-                            }
-                        )
-                    },
-                    duration
-                )
-            }
-        )
-    }
-
-    private fun getAnimator(from: Int, to: Int) =
-        binding.soundButtonText.slideWidth(from, to, SLIDE_DURATION)
-
-    private companion object {
-        private const val SLIDE_DURATION = 300L
-        private const val MIN_EXTENDED_WIDTH = 165
+        helper.removeDelayedAnimations()
+        helper.showTextAndExtend(text, duration)
     }
 }

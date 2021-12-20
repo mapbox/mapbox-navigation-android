@@ -35,7 +35,7 @@ class MapboxRecenterButtonTest {
     @Test
     fun `constructor with context`() {
         val view = MapboxRecenterButton(ctx)
-        val expectedDrawable = view.findViewById<ImageView>(R.id.recenterIcon)
+        val expectedDrawable = view.findViewById<ImageView>(R.id.buttonIcon)
 
         assertNull(expectedDrawable.drawable)
     }
@@ -43,7 +43,7 @@ class MapboxRecenterButtonTest {
     @Test
     fun `constructor with context and attr`() {
         val view = MapboxRecenterButton(ctx, null)
-        val expectedDrawable = view.findViewById<ImageView>(R.id.recenterIcon)
+        val expectedDrawable = view.findViewById<ImageView>(R.id.buttonIcon)
 
         assertNotNull(expectedDrawable.drawable)
     }
@@ -51,7 +51,7 @@ class MapboxRecenterButtonTest {
     @Test
     fun `constructor with context attr and defStyleAttr`() {
         val view = MapboxRecenterButton(ctx, null, 0)
-        val expectedDrawable = view.findViewById<ImageView>(R.id.recenterIcon)
+        val expectedDrawable = view.findViewById<ImageView>(R.id.buttonIcon)
 
         assertNotNull(expectedDrawable.drawable)
     }
@@ -59,7 +59,7 @@ class MapboxRecenterButtonTest {
     @Test
     fun `update style`() {
         val view = MapboxRecenterButton(ctx)
-        val expectedDrawable = view.findViewById<ImageView>(R.id.recenterIcon)
+        val expectedDrawable = view.findViewById<ImageView>(R.id.buttonIcon)
 
         view.updateStyle(R.style.MapboxStyleRecenter)
 
@@ -69,7 +69,7 @@ class MapboxRecenterButtonTest {
     @Test
     fun `recenter and extend`() {
         val view = MapboxRecenterButton(ctx)
-        val recenterText = view.findViewById<AppCompatTextView>(R.id.recenterText)
+        val recenterText = view.findViewById<AppCompatTextView>(R.id.buttonText)
 
         view.showTextAndExtend(0)
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
@@ -81,7 +81,7 @@ class MapboxRecenterButtonTest {
     @Test
     fun `recenter and extend with text`() {
         val view = MapboxRecenterButton(ctx)
-        val recenterText = view.findViewById<AppCompatTextView>(R.id.recenterText)
+        val recenterText = view.findViewById<AppCompatTextView>(R.id.buttonText)
 
         view.showTextAndExtend(0, customText)
 

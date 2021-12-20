@@ -37,7 +37,7 @@ class MapboxSoundButtonTest {
     @Test
     fun `constructor with context`() {
         val view = MapboxSoundButton(ctx)
-        val expectedDrawable = view.findViewById<ImageView>(R.id.soundButtonIcon)
+        val expectedDrawable = view.findViewById<ImageView>(R.id.buttonIcon)
 
         assertNull(expectedDrawable.drawable)
     }
@@ -45,7 +45,7 @@ class MapboxSoundButtonTest {
     @Test
     fun `constructor with context and attr`() {
         val view = MapboxSoundButton(ctx, null)
-        val expectedDrawable = view.findViewById<ImageView>(R.id.soundButtonIcon)
+        val expectedDrawable = view.findViewById<ImageView>(R.id.buttonIcon)
 
         view.unmute()
 
@@ -55,7 +55,7 @@ class MapboxSoundButtonTest {
     @Test
     fun `constructor with context attr and defStyleAttr`() {
         val view = MapboxSoundButton(ctx, null, 0)
-        val expectedDrawable = view.findViewById<ImageView>(R.id.soundButtonIcon)
+        val expectedDrawable = view.findViewById<ImageView>(R.id.buttonIcon)
 
         view.mute()
 
@@ -65,7 +65,7 @@ class MapboxSoundButtonTest {
     @Test
     fun `update style`() {
         val view = MapboxSoundButton(ctx)
-        val expectedDrawable = view.findViewById<ImageView>(R.id.soundButtonIcon)
+        val expectedDrawable = view.findViewById<ImageView>(R.id.buttonIcon)
 
         view.updateStyle(R.style.MapboxStyleSound)
 
@@ -89,7 +89,7 @@ class MapboxSoundButtonTest {
     @Test
     fun `mute and extend`() {
         val view = MapboxSoundButton(ctx)
-        val soundButtonText = view.findViewById<AppCompatTextView>(R.id.soundButtonText)
+        val soundButtonText = view.findViewById<AppCompatTextView>(R.id.buttonText)
 
         assertTrue(view.muteAndExtend(0))
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
@@ -101,7 +101,7 @@ class MapboxSoundButtonTest {
     @Test
     fun `mute and extend with text`() {
         val view = MapboxSoundButton(ctx)
-        val soundButtonText = view.findViewById<AppCompatTextView>(R.id.soundButtonText)
+        val soundButtonText = view.findViewById<AppCompatTextView>(R.id.buttonText)
 
         view.muteAndExtend(0, customText)
 
@@ -112,7 +112,7 @@ class MapboxSoundButtonTest {
     @Test
     fun `mute and unmute and extend multiple times is allowed`() {
         val view = MapboxSoundButton(ctx)
-        val soundButtonText = view.findViewById<AppCompatTextView>(R.id.soundButtonText)
+        val soundButtonText = view.findViewById<AppCompatTextView>(R.id.buttonText)
 
         assertTrue(view.muteAndExtend(100))
         assertTrue(view.muteAndExtend(100))
@@ -129,7 +129,7 @@ class MapboxSoundButtonTest {
     @Test
     fun `unmute and extend`() {
         val view = MapboxSoundButton(ctx)
-        val soundButtonText = view.findViewById<AppCompatTextView>(R.id.soundButtonText)
+        val soundButtonText = view.findViewById<AppCompatTextView>(R.id.buttonText)
 
         assertFalse(view.unmuteAndExtend(0))
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
@@ -141,7 +141,7 @@ class MapboxSoundButtonTest {
     @Test
     fun `unmute and extend with text`() {
         val view = MapboxSoundButton(ctx)
-        val soundButtonText = view.findViewById<AppCompatTextView>(R.id.soundButtonText)
+        val soundButtonText = view.findViewById<AppCompatTextView>(R.id.buttonText)
 
         view.unmuteAndExtend(0, customText)
 

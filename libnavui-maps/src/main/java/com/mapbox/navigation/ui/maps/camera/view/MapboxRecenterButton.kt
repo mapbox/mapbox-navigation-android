@@ -2,31 +2,24 @@ package com.mapbox.navigation.ui.maps.camera.view
 
 import android.content.Context
 import android.content.res.TypedArray
-import android.os.Handler
-import android.os.Looper
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
 import androidx.annotation.StyleRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.mapbox.navigation.ui.maps.R
-import com.mapbox.navigation.ui.maps.databinding.MapboxRecenterLayoutBinding
-import com.mapbox.navigation.ui.utils.internal.extensions.measureTextWidth
-import com.mapbox.navigation.ui.utils.internal.extensions.play
-import com.mapbox.navigation.ui.utils.internal.extensions.slideWidth
+import com.mapbox.navigation.ui.resources.databinding.ExtendableButtonLayoutBinding
+import com.mapbox.navigation.ui.utils.internal.ExtendableButtonHelper
 
 /**
  * Default view to allow user to switch to route overview mode.
  */
 class MapboxRecenterButton : ConstraintLayout {
 
-    private val shrunkWidth = context.resources.getDimensionPixelSize(R.dimen.mapbox_button_size)
-    private var isAnimationRunning = false
-    private val mainHandler = Handler(Looper.getMainLooper())
-    private val binding = MapboxRecenterLayoutBinding.inflate(
-        LayoutInflater.from(context),
-        this,
-        true
+    private val binding = ExtendableButtonLayoutBinding.inflate(LayoutInflater.from(context), this)
+    private val helper = ExtendableButtonHelper(
+        binding.buttonText,
+        context.resources.getDimensionPixelSize(R.dimen.mapbox_button_size),
+        context.resources.getDimension(R.dimen.mapbox_recenterButton_minExtendedWidth),
     )
 
     /**
@@ -84,30 +77,8 @@ class MapboxRecenterButton : ConstraintLayout {
         duration: Long,
         text: String = context.getString(R.string.mapbox_recenter),
     ) {
-        if (!isAnimationRunning) {
-            isAnimationRunning = true
-            val extendedWidth = (binding.recenterText.measureTextWidth(text) + shrunkWidth)
-                .coerceAtLeast(MIN_EXTENDED_WIDTH * context.resources.displayMetrics.density)
-            getAnimator(shrunkWidth, extendedWidth.toInt()).play(
-                doOnStart = {
-                    binding.recenterText.text = text
-                    binding.recenterText.visibility = View.VISIBLE
-                    mainHandler.postDelayed(
-                        {
-                            getAnimator(extendedWidth.toInt(), shrunkWidth).play(
-                                doOnStart = {
-                                    binding.recenterText.text = null
-                                },
-                                doOnEnd = {
-                                    binding.recenterText.visibility = View.INVISIBLE
-                                    isAnimationRunning = false
-                                }
-                            )
-                        },
-                        duration
-                    )
-                }
-            )
+        if (!helper.isAnimationRunning) {
+            helper.showTextAndExtend(text, duration)
         }
     }
 
@@ -125,25 +96,17 @@ class MapboxRecenterButton : ConstraintLayout {
     private fun applyAttributes(typedArray: TypedArray) {
         typedArray.getDrawable(
             R.styleable.MapboxRecenterButton_recenterButtonDrawable
-        ).also { binding.recenterIcon.setImageDrawable(it) }
+        ).also { binding.buttonIcon.setImageDrawable(it) }
 
         typedArray.getDrawable(
             R.styleable.MapboxRecenterButton_recenterButtonBackground,
         )?.let { background ->
-            binding.recenterIcon.background = background
-            binding.recenterText.background = background
+            binding.buttonIcon.background = background
+            binding.buttonText.background = background
         }
 
         typedArray.getColorStateList(
             R.styleable.MapboxRecenterButton_recenterButtonTextColor,
-        )?.let { binding.recenterText.setTextColor(it) }
-    }
-
-    private fun getAnimator(from: Int, to: Int) =
-        binding.recenterText.slideWidth(from, to, SLIDE_DURATION)
-
-    private companion object {
-        private const val SLIDE_DURATION = 300L
-        private const val MIN_EXTENDED_WIDTH = 150
+        )?.let { binding.buttonText.setTextColor(it) }
     }
 }
