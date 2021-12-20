@@ -8,8 +8,8 @@
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/soundButtonText"
-        android:layout_height="56dp"
-        android:layout_width="56dp"
+        android:layout_height="@dimen/mapbox_button_size"
+        android:layout_width="@dimen/mapbox_button_size"
         android:paddingStart="20dp"
         android:paddingEnd="4dp"
         android:elevation="0dp"
@@ -26,8 +26,8 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/soundButtonIcon"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:layout_width="@dimen/mapbox_button_size"
+        android:layout_height="@dimen/mapbox_button_size"
         app:elevation="0dp"
         android:padding="16dp"
         android:background="@drawable/mapbox_bg_circle"

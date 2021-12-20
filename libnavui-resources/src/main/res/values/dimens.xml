@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="mapbox_button_size">56dp</dimen>
+</resources>
