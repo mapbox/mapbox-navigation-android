@@ -134,7 +134,7 @@ commands:
           name: Install python dependencies
           command: python3 -m pip install requests
       - run:
-          name: Verify that a changelog entry is present in the PR description
+          name: Verify that a changelog entry is present in CHANGELOG.md
           command: |
             MBX_CI_GITHUB_TOKEN=$(./mbx-ci github reader token)
             if [[ -n "$CIRCLE_PULL_REQUEST" ]]; then
