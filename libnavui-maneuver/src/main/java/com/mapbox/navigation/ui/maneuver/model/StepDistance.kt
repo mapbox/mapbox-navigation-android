@@ -27,6 +27,7 @@ class StepDistance internal constructor(
         other as StepDistance
 
         if (totalDistance.notEqualDelta(other.totalDistance)) return false
+        if (distanceRemaining.notEqualDelta(other.distanceRemaining)) return false
 
         return true
     }
@@ -35,7 +36,9 @@ class StepDistance internal constructor(
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        return totalDistance.hashCode()
+        var result = totalDistance.hashCode()
+        result = 31 * result + distanceRemaining.hashCode()
+        return result
     }
 
     private fun Double?.notEqualDelta(other: Double?): Boolean {
