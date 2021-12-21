@@ -597,41 +597,37 @@ class ViewportDataSourceProcessorTest {
     @Test
     fun `test getMapAnchoredPaddingFromUserPadding - invalid horizontally`() {
         val mapSize = Size(1000f, 1000f)
+        val expected = EdgeInsets(0.0, 0.0, 0.0, 0.0)
 
         val padding1 = EdgeInsets(0.0, 1100.0, 0.0, 0.0)
-        val expected1 = EdgeInsets(500.0, 500.0, 500.0, 500.0)
         val actual1 = getMapAnchoredPaddingFromUserPadding(mapSize, padding1)
-        assertEquals(expected1, actual1)
+        assertEquals(expected, actual1)
 
         val padding2 = EdgeInsets(0.0, 0.0, 0.0, 1100.0)
-        val expected2 = EdgeInsets(500.0, 500.0, 500.0, 500.0)
         val actual2 = getMapAnchoredPaddingFromUserPadding(mapSize, padding2)
-        assertEquals(expected2, actual2)
+        assertEquals(expected, actual2)
 
         val padding3 = EdgeInsets(0.0, 600.0, 0.0, 600.0)
-        val expected3 = EdgeInsets(500.0, 500.0, 500.0, 500.0)
         val actual3 = getMapAnchoredPaddingFromUserPadding(mapSize, padding3)
-        assertEquals(expected3, actual3)
+        assertEquals(expected, actual3)
     }
 
     @Test
     fun `test getMapAnchoredPaddingFromUserPadding - invalid vertically`() {
         val mapSize = Size(1000f, 1000f)
+        val expected = EdgeInsets(0.0, 0.0, 0.0, 0.0)
 
         val padding1 = EdgeInsets(1100.0, 0.0, 0.0, 0.0)
-        val expected1 = EdgeInsets(500.0, 500.0, 500.0, 500.0)
         val actual1 = getMapAnchoredPaddingFromUserPadding(mapSize, padding1)
-        assertEquals(expected1, actual1)
+        assertEquals(expected, actual1)
 
         val padding2 = EdgeInsets(0.0, 0.0, 1100.0, 0.0)
-        val expected2 = EdgeInsets(500.0, 500.0, 500.0, 500.0)
         val actual2 = getMapAnchoredPaddingFromUserPadding(mapSize, padding2)
-        assertEquals(expected2, actual2)
+        assertEquals(expected, actual2)
 
         val padding3 = EdgeInsets(600.0, 0.0, 600.0, 0.0)
-        val expected3 = EdgeInsets(500.0, 500.0, 500.0, 500.0)
         val actual3 = getMapAnchoredPaddingFromUserPadding(mapSize, padding3)
-        assertEquals(expected3, actual3)
+        assertEquals(expected, actual3)
     }
 
     @Test

@@ -322,21 +322,18 @@ internal object ViewportDataSourceProcessor {
                 top + bottom > mapSize.height ||
                 left + right > mapSize.width
             ) {
+                val fallbackPadding = EdgeInsets(0.0, 0.0, 0.0, 0.0)
                 LoggerProvider.logger.e(
                     Tag(TAG),
                     Message(
-                        """Provided following padding does fit the map size:
+                        """Provided following padding does not fit the map size:
                         |mapSize: $mapSize
                         |padding: $padding
+                        |Using an empty fallback padding instead: $padding
                     """.trimMargin()
                     )
                 )
-                return EdgeInsets(
-                    mapSize.height / 2.0,
-                    mapSize.width / 2.0,
-                    mapSize.height / 2.0,
-                    mapSize.width / 2.0,
-                )
+                return fallbackPadding
             }
         }
 
