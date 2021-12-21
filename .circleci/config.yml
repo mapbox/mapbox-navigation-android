@@ -136,6 +136,7 @@ commands:
       - run:
           name: Verify that a changelog entry is present in CHANGELOG.md
           command: |
+            echo $CIRCLE_PULL_REQUEST
             MBX_CI_GITHUB_TOKEN=$(./mbx-ci github reader public token)
             if [[ -n "$CIRCLE_PULL_REQUEST" ]]; then
               python3 scripts/validate-changelog.py ${CIRCLE_PULL_REQUEST##*/} ${MBX_CI_GITHUB_TOKEN}
