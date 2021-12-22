@@ -114,7 +114,7 @@ commands:
     steps:
       - run:
           name: Check codestyle
-          command: make check-lint
+          command: make check-kotlin-lint
 
   verify-license:
     steps:
