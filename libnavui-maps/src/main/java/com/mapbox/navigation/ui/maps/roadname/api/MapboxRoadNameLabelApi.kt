@@ -1,14 +1,14 @@
 package com.mapbox.navigation.ui.maps.roadname.api
 
 import com.mapbox.navigation.base.road.model.Road
-import com.mapbox.navigation.ui.maps.roadname.RoadNameAction
-import com.mapbox.navigation.ui.maps.roadname.RoadNameProcessor
-import com.mapbox.navigation.ui.maps.roadname.RoadNameResult
 import com.mapbox.navigation.ui.maps.roadname.model.RoadLabel
 
 /**
  * The API allows you to generate data to be rendered as a part of road name labels.
  */
+@Deprecated(
+    message = "The API will not be supported and will be removed."
+)
 class MapboxRoadNameLabelApi {
 
     /**
@@ -17,9 +17,13 @@ class MapboxRoadNameLabelApi {
      * @param road Road
      * @return RoadLabel
      */
+    @Deprecated(
+        message = "The API is redundant. To render road name instantiate the MapboxRoadNameView " +
+            "and invoke renderRoadName by passing Road object that can be obtained via location " +
+            "observer using onNewLocationMatcherResult. The method will not be supported and " +
+            "will be removed."
+    )
     fun getRoadNameLabel(road: Road): RoadLabel {
-        val action = RoadNameAction.GetRoadNameLabel(road)
-        val result = RoadNameProcessor.process(action) as RoadNameResult.RoadNameLabel
-        return RoadLabel(result.name, result.shield, result.shieldName)
+        return RoadLabel(road.name, null, road.shieldName)
     }
 }

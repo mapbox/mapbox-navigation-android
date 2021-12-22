@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.res.Resources
 import android.text.SpannableStringBuilder
 import com.mapbox.navigation.ui.maneuver.view.MapboxExitText
-import com.mapbox.navigation.ui.shield.internal.model.getRefLen
 import com.mapbox.navigation.ui.shield.model.RouteShield
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
 
@@ -182,14 +181,11 @@ internal object ManeuverInstructionGenerator {
             when (it) {
                 is RouteShield.MapboxDesignedShield -> {
                     ifNonNull(node.mapboxShield) { mbxShield ->
-                        val shieldName = mbxShield.name()
-                        val displayRefLength = mbxShield.getRefLen()
-                        val shieldRequested = shieldName.plus("-$displayRefLength")
-                        it.url.contains(shieldRequested)
+                        it.compareWith(other = mbxShield)
                     } ?: false
                 }
                 is RouteShield.MapboxLegacyShield -> {
-                    it.initialUrl == node.shieldUrl
+                    it.compareWith(node.shieldUrl)
                 }
             }
         }
