@@ -82,9 +82,8 @@ internal class MapboxRerouteController(
                 this.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
             ) {
                 val avoidManeuverRadius = rerouteOptions.avoidManeuverSeconds
-                    .takeIf { it != 0 }
-                    ?.let { speed / it }?.toInt()
-                    ?.takeIf { it >= 1 }
+                    .let { speed * it }.toInt()
+                    .takeIf { it >= 1 }
                     ?.coerceAtMost(MAX_DANGEROUS_MANEUVERS_RADIUS)
 
                 builder.avoidManeuverRadius(avoidManeuverRadius)
