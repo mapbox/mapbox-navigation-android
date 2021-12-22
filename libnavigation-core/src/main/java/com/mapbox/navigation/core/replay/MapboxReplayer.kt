@@ -1,6 +1,9 @@
 package com.mapbox.navigation.core.replay
 
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
+import androidx.annotation.RequiresPermission
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
@@ -128,6 +131,7 @@ class MapboxReplayer {
      * When initializing or testing an app, it is needed and useful to push a device location.
      * This helper function can be used to push the actual location into the replayer.
      */
+    @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
     fun pushRealLocation(context: Context, eventTimestamp: Double) {
         LocationEngineProvider.getBestLocationEngine(context.applicationContext)
             .getLastLocation(

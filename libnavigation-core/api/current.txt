@@ -306,7 +306,7 @@ package com.mapbox.navigation.core.replay {
     method public void playFirstLocation();
     method public void playbackSpeed(double scale);
     method public com.mapbox.navigation.core.replay.MapboxReplayer pushEvents(java.util.List<? extends com.mapbox.navigation.core.replay.history.ReplayEventBase> events);
-    method public void pushRealLocation(android.content.Context context, double eventTimestamp);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void pushRealLocation(android.content.Context context, double eventTimestamp);
     method public void registerObserver(com.mapbox.navigation.core.replay.history.ReplayEventsObserver observer);
     method public void seekTo(double replayTime);
     method public void seekTo(com.mapbox.navigation.core.replay.history.ReplayEventBase replayEvent);
