@@ -12,6 +12,7 @@ import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import java.util.Date
+import java.util.concurrent.CopyOnWriteArrayList
 
 private typealias EngineCallback = LocationEngineCallback<LocationEngineResult>
 
@@ -22,7 +23,7 @@ class ReplayLocationEngine(
     mapboxReplayer: MapboxReplayer
 ) : LocationEngine, ReplayEventsObserver {
 
-    private val registeredCallbacks: MutableList<EngineCallback> = mutableListOf()
+    private val registeredCallbacks: MutableList<EngineCallback> = CopyOnWriteArrayList()
     private val lastLocationCallbacks: MutableList<EngineCallback> = mutableListOf()
     private var lastLocationEngineResult: LocationEngineResult? = null
 
