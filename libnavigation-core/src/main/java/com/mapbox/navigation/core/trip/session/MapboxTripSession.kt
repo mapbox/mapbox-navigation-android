@@ -40,6 +40,7 @@ import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.RouteState
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
@@ -246,7 +247,7 @@ internal class MapboxTripSession(
 
         this.rawLocation = rawLocation
         locationObservers.forEach { it.onNewRawLocation(rawLocation) }
-        mainJobController.scope.launch {
+        mainJobController.scope.launch(start = CoroutineStart.UNDISPATCHED) {
             navigator.updateLocation(rawLocation.toFixLocation())
         }
     }
