@@ -2,7 +2,8 @@
 
     <!-- Time formatting -->
     <plurals name="mapbox_number_of_days">
-        <item quantity="other">kun</item>
+        <item quantity="one">kun</item>
+        <item quantity="other">kunlar</item>
     </plurals>
     <!-- Hour -->
     <string name="mapbox_unit_hr">soat</string>
