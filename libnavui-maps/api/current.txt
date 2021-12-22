@@ -594,36 +594,44 @@ package com.mapbox.navigation.ui.maps.location {
 
 package com.mapbox.navigation.ui.maps.roadname.api {
 
-  public final class MapboxRoadNameLabelApi {
-    ctor public MapboxRoadNameLabelApi();
-    method public com.mapbox.navigation.ui.maps.roadname.model.RoadLabel getRoadNameLabel(com.mapbox.navigation.base.road.model.Road road);
+  @Deprecated public final class MapboxRoadNameLabelApi {
+    ctor @Deprecated public MapboxRoadNameLabelApi();
+    method @Deprecated public com.mapbox.navigation.ui.maps.roadname.model.RoadLabel getRoadNameLabel(com.mapbox.navigation.base.road.model.Road road);
   }
 
 }
 
 package com.mapbox.navigation.ui.maps.roadname.model {
 
-  public final class RoadLabel {
-    method public String? getRoadName();
-    method public byte[]? getShield();
-    method public String? getShieldName();
-    property public final String? roadName;
-    property public final byte[]? shield;
-    property public final String? shieldName;
+  @Deprecated public final class RoadLabel {
+    method @Deprecated public String? getRoadName();
+    method @Deprecated public byte[]? getShield();
+    method @Deprecated public String? getShieldName();
+    property @Deprecated public final String? roadName;
+    property @Deprecated public final byte[]? shield;
+    property @Deprecated public final String? shieldName;
   }
 
 }
 
 package com.mapbox.navigation.ui.maps.roadname.view {
 
-  public final class MapboxRoadNameLabelView extends android.widget.LinearLayout {
-    ctor public MapboxRoadNameLabelView(android.content.Context context);
-    ctor public MapboxRoadNameLabelView(android.content.Context context, android.util.AttributeSet? attrs);
-    ctor public MapboxRoadNameLabelView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
-    method public void render(com.mapbox.navigation.ui.maps.roadname.model.RoadLabel roadLabel);
-    method public void showRoadName(boolean show);
-    method public void showShieldIcon(boolean show);
-    method public void updateRoadNameTextAppearance(@StyleRes int style);
+  @Deprecated public final class MapboxRoadNameLabelView extends android.widget.LinearLayout {
+    ctor @Deprecated public MapboxRoadNameLabelView(android.content.Context context);
+    ctor @Deprecated public MapboxRoadNameLabelView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor @Deprecated public MapboxRoadNameLabelView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method @Deprecated public void render(com.mapbox.navigation.ui.maps.roadname.model.RoadLabel roadLabel);
+    method @Deprecated public void showRoadName(boolean show);
+    method @Deprecated public void showShieldIcon(boolean show);
+    method @Deprecated public void updateRoadNameTextAppearance(@StyleRes int style);
+  }
+
+  public final class MapboxRoadNameView extends androidx.appcompat.widget.AppCompatTextView {
+    ctor public MapboxRoadNameView(android.content.Context context);
+    ctor public MapboxRoadNameView(android.content.Context context, android.util.AttributeSet? attrs);
+    ctor public MapboxRoadNameView(android.content.Context context, android.util.AttributeSet? attrs, int defStyleAttr);
+    method public void renderRoadName(com.mapbox.navigation.base.road.model.Road road);
+    method public void renderRoadNameWith(java.util.List<? extends com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.shield.model.RouteShieldError,com.mapbox.navigation.ui.shield.model.RouteShieldResult>> expectedShields);
   }
 
 }

@@ -10,11 +10,6 @@ package com.mapbox.navigation.ui.shield.api {
     method public void getRouteShields(com.mapbox.navigation.base.road.model.Road road, String? userId, String? styleId, String? accessToken, com.mapbox.navigation.ui.shield.model.RouteShieldCallback callback);
   }
 
-  public final class RouteShieldExKt {
-    method public static android.graphics.Bitmap? toBitmap(com.mapbox.navigation.ui.shield.model.RouteShield.MapboxDesignedShield, android.content.res.Resources resources, Integer? desiredHeight = null);
-    method public static android.graphics.Bitmap? toBitmap(com.mapbox.navigation.ui.shield.model.RouteShield.MapboxLegacyShield, android.content.res.Resources resources, Integer? desiredHeight = null);
-  }
-
 }
 
 package com.mapbox.navigation.ui.shield.model {
@@ -22,19 +17,24 @@ package com.mapbox.navigation.ui.shield.model {
   public abstract sealed class RouteShield {
     method public final byte[] getByteArray();
     method public final String getUrl();
+    method public abstract android.graphics.Bitmap? toBitmap(android.content.res.Resources resources, Integer? desiredHeight = null);
     property public final byte[] byteArray;
     property public final String url;
   }
 
   public static final class RouteShield.MapboxDesignedShield extends com.mapbox.navigation.ui.shield.model.RouteShield {
+    method public boolean compareWith(com.mapbox.api.directions.v5.models.MapboxShield? other);
     method public com.mapbox.api.directions.v5.models.MapboxShield getMapboxShield();
     method public com.mapbox.api.directions.v5.models.ShieldSprite getShieldSprite();
+    method public android.graphics.Bitmap? toBitmap(android.content.res.Resources resources, Integer? desiredHeight);
     property public final com.mapbox.api.directions.v5.models.MapboxShield mapboxShield;
     property public final com.mapbox.api.directions.v5.models.ShieldSprite shieldSprite;
   }
 
   public static final class RouteShield.MapboxLegacyShield extends com.mapbox.navigation.ui.shield.model.RouteShield {
+    method public boolean compareWith(String? other);
     method public String getInitialUrl();
+    method public android.graphics.Bitmap? toBitmap(android.content.res.Resources resources, Integer? desiredHeight);
     property public final String initialUrl;
   }
 

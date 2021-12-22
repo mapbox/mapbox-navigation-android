@@ -3,6 +3,7 @@
 Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
+- Deprecated `MapboxRoadNameLabelView` and introduced `MapboxRoadNameView` to render mapbox designed shields in the current road name label. [#5310](https://github.com/mapbox/mapbox-navigation-android/pull/5310)
 
 ## Mapbox Navigation SDK 2.1.2 - January 18, 2022
 
