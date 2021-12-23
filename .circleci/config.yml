@@ -26,59 +26,9 @@ executors:
 #-------------------------------
 workflows:
   version: 2
-  release-workflow:
-    when:
-      not: << pipeline.parameters.mapbox_navigation_native_upstream >>
-    jobs:
-      - release-snapshot:
-          filters:
-            branches:
-              only:
-                - main
-      - release:
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
-      - publish-documentation:
-          requires:
-            - release
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
   default:
     jobs:
       - prepare-and-assemble
-      - changelog-verification:
-          filters:
-            branches:
-              ignore: /^(main|release-.*)/
-      - static-analysis:
-          requires:
-            - prepare-and-assemble
-      - unit-tests-core:
-          requires:
-            - prepare-and-assemble
-      - unit-tests-ui:
-          requires:
-            - prepare-and-assemble
-      - ui-robo-tests:
-          requires:
-            - prepare-and-assemble
-      - internal-instrumentation-tests:
-          requires:
-            - prepare-and-assemble
-      - instrumentation-tests:
-          requires:
-            - prepare-and-assemble
-      - mobile-metrics-dry-run:
-          type: approval
-      - mobile-metrics-benchmarks:
-          requires:
-            - mobile-metrics-dry-run
 
 #------------------------------
 #---------- COMMANDS ----------
@@ -447,30 +397,9 @@ jobs:
     executor: ndk-r22-latest-executor
     steps:
       - checkout
-      - when:
-          condition:
-            not:
-              matches:
-                pattern: "^add-changelog.*"
-                value: << pipeline.git.branch >>
-          steps:
-            - restore-gradle-cache
-            - assemble-core-debug
-            - assemble-ui-debug
-            - assemble-core-release
-            - assemble-ui-release
-            - assemble-module:
-                module_target: "instrumentation-tests"
-                variant: "Debug"
-                inject_token: true
-            - assemble-instrumentation-test:
-                module_target: "instrumentation-tests"
-            - assemble-module:
-                module_target: "app-tests-wrapper"
-                variant: "Debug"
-            - assemble-instrumentation-test:
-                module_target: "libnavigation-core"
-            - write-workspace
+      - run:
+          name: Generate documentation
+          command: make javadoc-dokka
 
   unit-tests-core:
     executor: ndk-r22-latest-executor
