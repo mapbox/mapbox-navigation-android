@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <!-- usesCleartextTraffic is a workaround for Android security requirement when using mocked
     web server and local host possible to resolve with and additional keystore and key generator
@@ -22,6 +23,7 @@
         android:usesCleartextTraffic="true">
         <activity android:name=".activity.EmptyTestActivity" />
         <activity android:name=".activity.BasicNavigationViewActivity" />
+        <activity android:name=".activity.NavigationViewTestActivity" />
     </application>
 
 </manifest>
