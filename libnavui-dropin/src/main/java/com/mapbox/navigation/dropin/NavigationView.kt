@@ -109,7 +109,7 @@ class NavigationView : ConstraintLayout {
         LayoutInflater.from(context),
         this
     )
-    var navigationViewOptions: NavigationViewOptions
+    lateinit var navigationViewOptions: NavigationViewOptions
         private set
 
     private val lifecycleObserver = object : DefaultLifecycleObserver {
@@ -161,6 +161,13 @@ class NavigationView : ConstraintLayout {
     // --------------------------------------------------------
     private val mapboxNavigationViewModel: MapboxNavigationViewModel by lazy {
         ViewModelProvider(activity)[MapboxNavigationViewModel::class.java]
+    }
+
+    private val routeLineViewModel: RouteLineViewModel by lazy {
+        ViewModelProvider(
+            activity,
+            RouteLineViewModelFactory(navigationViewOptions.mapboxRouteLineOptions)
+        )[RouteLineViewModel::class.java]
     }
 
     private val navigationStateViewModel: NavigationStateViewModel by lazy {
@@ -416,6 +423,14 @@ class NavigationView : ConstraintLayout {
         }
     }
 
+    private fun observeRouteResets() {
+        lifeCycleOwner.lifecycleScope.launch {
+            routeLineViewModel.routeResets.collect { routes ->
+                mapboxNavigationViewModel.setRoutes(routes)
+            }
+        }
+    }
+
     private fun observeRouteProgress() {
         lifeCycleOwner.lifecycleScope.launch {
             mapboxNavigationViewModel.routeProgressUpdates.collect { routeProgress ->
@@ -548,6 +563,7 @@ class NavigationView : ConstraintLayout {
         observeLocationMatcherResults()
         observeFinalDestinationArrivals()
         observeNavigationState()
+        observeRouteResets()
         lifeCycleOwner.lifecycleScope.launch {
             cameraViewModel.cameraUpdates.collect {
                 mapView.camera.easeTo(it.first, it.second)

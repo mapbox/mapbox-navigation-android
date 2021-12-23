@@ -4,6 +4,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
 import com.mapbox.maps.extension.observable.eventdata.StyleLoadedEventData
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
+import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -21,14 +22,15 @@ internal class MapboxRouteLineUIComponent(
     OnStyleLoadedListener,
     RoutesObserver,
     RouteProgressObserver,
-    OnIndicatorPositionChangedListener {
+    OnIndicatorPositionChangedListener,
+    OnMapClickListener {
 
     override fun onNavigationStateChanged(state: NavigationState) {
         // no impl
     }
 
     override fun onStyleLoaded(eventData: StyleLoadedEventData) {
-        view.getMapboxMap().getStyle { style ->
+        view.getMapboxMap().getStyle()?.let { style ->
             viewModel.mapStyleUpdated(style)
         }
     }
@@ -49,5 +51,10 @@ internal class MapboxRouteLineUIComponent(
         view.getMapboxMap().getStyle()?.let { style ->
             viewModel.positionChanged(point, style)
         }
+    }
+
+    override fun onMapClick(point: Point): Boolean {
+        viewModel.mapClick(point, view.getMapboxMap())
+        return false
     }
 }
