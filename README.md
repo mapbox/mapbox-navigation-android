@@ -6,26 +6,20 @@
   <a href="https://circleci.com/gh/mapbox/mapbox-navigation-android">
     <img src="https://circleci.com/gh/mapbox/mapbox-navigation-android.svg?style=shield&circle-token=:circle-token">
   </a>
-  <a href="https://codecov.io/gh/mapbox/mapbox-navigation-android">
-    <img src="https://codecov.io/gh/mapbox/mapbox-navigation-android/branch/main/graph/badge.svg">
-  </a>
 </p>
 
 When your users want to get from one location to another, don’t push them out of your application into a generic map application. Instead, keep them engaged with your application 100% of the time with in-app turn-by-turn navigation.
 
-The Mapbox Navigation SDK for Android is built on top of [the Mapbox Directions API](https://www.mapbox.com/directions) and contains logic needed to get timed navigation instructions.
+The Mapbox Navigation SDK for Android is built on top of [the Mapbox Directions API](https://www.mapbox.com/directions) and [the Mapbox Maps SDK](https://www.mapbox.com/maps) to provide tools needed to build a complete navigation experience.
 
-The Mapbox Navigation SDK is a precise and flexible platform which enables your users to explore the world's streets. We are designing new maps specifically for navigation that highlight traffic conditions and helpful landmarks. The calculations use the user's current location and compare it to the current route that the user's traversing to provide critical information at any given moment. _You control the entire experience, from the time your user chooses a destination to when they arrive._
+The Mapbox Navigation SDK is a precise and flexible platform which enables your users to explore the world's streets. We are designing new maps specifically for navigation that highlight traffic conditions and helpful landmarks. The calculations are based on the user's current location and compare it to the current route that the user's traversing to provide critical information at any given moment. _You control the entire experience, from the time your user chooses a destination to when they arrive._
 
 ## Getting Started
+Refer to the [full documentation pages](https://docs.mapbox.com/android/navigation/) for [installation](https://docs.mapbox.com/android/navigation/guides/get-started/install/) and usage instructions.
 
-**NOTE:** On June 3rd, 2020, Mapbox released the `1.0` version of the Navigation SDK. The Mapbox team recommends that you build your navigation project with a `1.0` version or higher.
+For the latest version and changelog visit [CHANGELOG](./CHANGELOG.md) or [releases](https://github.com/mapbox/mapbox-navigation-android/releases) pages.
 
-[Here are `1.0` installation instructions](https://docs.mapbox.com/android/beta/navigation/overview/#installation) and full documentation can be found along the sidebar sections of https://docs.mapbox.com/android/beta/navigation/overview.
-
-Along with the full documentation, [this migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) can help you transition your project from a "legacy" version of the Navigation SDK (`0.42.6` or below) to a `1.0` version or higher.
-
-Please see [this documentation link](https://docs.mapbox.com/android/navigation/overview/) if you're looking for information on the "legacy" pre-`1.0.0` Navigation SDK and you don't plan on migrating your project to `1.0.0` or higher.
+Along with the full documentation, [this migration guide](https://docs.mapbox.com/android/navigation/guides/migrate-to-v2/) can help you transition your project from version `v1` of the Navigation SDK to `v2` or higher.
 
 ## Getting Help
 
@@ -39,27 +33,29 @@ You can use a `-SNAPSHOT` release if you want to test recent bug fixes or featur
 
 ##### `1.0.0`+ versions of the Navigation SDK:
 
-To access SNAPSHOT builds follow the [installation instructions](https://docs.mapbox.com/android/beta/navigation/overview/#installation) but replace the repository url and the version name:
+To access `SNAPSHOT` builds follow the [installation instructions](https://docs.mapbox.com/android/navigation/guides/get-started/install/) and then:
+1. Provide the below additional snapshot repository reference, next to the existing release repository reference:
 ```groovy
-allprojects {
-   repositories {
-     maven {
-       url 'https://api.mapbox.com/downloads/v2/snapshots/maven'
-       authentication {
-         basic(BasicAuthentication)
-       }
-       credentials {
-         username = "mapbox"
-         password = "{secret Mapbox token with DOWNLOADS:READ scope}"
-       }
-     }
-   }
-}
-
-dependencies {
-   implementation 'com.mapbox.navigation:ui:1.2.0-SNAPSHOT'
+maven {
+    url 'https://api.mapbox.com/downloads/v2/snapshots/maven'
+    authentication {
+        basic(BasicAuthentication)
+    }
+    credentials {
+        username = "mapbox"
+        password = "{secret Mapbox token with DOWNLOADS:READ scope, the same as the token used for the release repository}"
+    }
 }
 ```
+
+2. Append `-SNAPSHOT` to the target version:
+```groovy
+dependencies {
+  implementation "com.mapbox.navigation:android:X.Y.Z-SNAPSHOT"
+}
+```
+
+You can find the latest snapshot version reference in [gradle.properties](./gradle.properties).
 
 ## <a name="sample-code">Sample code
 
