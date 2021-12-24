@@ -6,7 +6,6 @@
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
     android:padding="16dp"
-    android:background="@color/mapbox_trip_progress_view_background_color"
     android:gravity="center">
 
   <TextView
