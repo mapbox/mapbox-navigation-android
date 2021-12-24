@@ -395,6 +395,7 @@ commands:
 jobs:
   prepare-and-assemble:
     executor: ndk-r22-latest-executor
+    resource_class: medium+
     steps:
       - checkout
       - run:
