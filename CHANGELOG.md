@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ## Unreleased
 - Fixed an issue where calculation of dangerous maneuver avoidance (`RerouteOptions#avoidManeuverSeconds`) during a reroute was resulting in much smaller radius than expected. [#5307](https://github.com/mapbox/mapbox-navigation-android/pull/5307)
+- Fixed a crash when `ReplayLocationEngine`'s location callback removes itself during getting a location update. [#5305](https://github.com/mapbox/mapbox-navigation-android/pull/5305)
 
 ## Mapbox Navigation SDK 2.2.0-beta.1 - December 17, 2021
 
