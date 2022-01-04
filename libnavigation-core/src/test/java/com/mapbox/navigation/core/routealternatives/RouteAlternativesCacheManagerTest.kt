@@ -80,6 +80,19 @@ class RouteAlternativesCacheManagerTest {
         assertFalse(routeAlternativesCacheManager.areAlternatives(alternatives))
     }
 
+    @Test
+    fun cacheRetainedWhenOneIsFull() {
+        val alternatives = listOf(mockFirstRoute, mockFirstRoute)
+
+        nextState(NavigationSessionState.ActiveGuidance("-1"))
+        routeAlternativesCacheManager.push(alternatives)
+        for (i in 0 until RouteAlternativesCacheManager.CACHE_SIZE) {
+            routeAlternativesCacheManager.push(emptyList())
+        }
+
+        assertFalse(routeAlternativesCacheManager.areAlternatives(alternatives))
+    }
+
     private fun nextState(navSessionState: NavigationSessionState) {
         navSessionObserverSlot.captured.onNavigationSessionStateChanged(navSessionState)
     }
