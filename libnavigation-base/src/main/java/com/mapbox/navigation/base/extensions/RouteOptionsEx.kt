@@ -11,28 +11,63 @@ import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import java.util.Locale
 
 /**
- * Applies the [RouteOptions] that are required for the route request to execute
+ * Applies the [RouteOptions] that are required for the route request for the selected profile to execute
  * or otherwise recommended for the Navigation SDK and all of its features to provide the best car navigation experience.
+ * See also [https://docs.mapbox.com/api/navigation/directions/](https://docs.mapbox.com/api/navigation/directions/).
+ *
+ * Default profile is [DirectionsCriteria.PROFILE_DRIVING_TRAFFIC].
+ *
+ * @see DirectionsCriteria.ProfileCriteria
  */
-fun RouteOptions.Builder.applyDefaultNavigationOptions(): RouteOptions.Builder = apply {
-    profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+@JvmOverloads
+fun RouteOptions.Builder.applyDefaultNavigationOptions(
+    @DirectionsCriteria.ProfileCriteria profile: String =
+        DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+): RouteOptions.Builder = apply {
+    val defaultAnnotations = listOf(
+        DirectionsCriteria.ANNOTATION_SPEED,
+        DirectionsCriteria.ANNOTATION_DURATION,
+        DirectionsCriteria.ANNOTATION_DISTANCE,
+    )
+
+    when (profile) {
+        DirectionsCriteria.PROFILE_DRIVING_TRAFFIC -> {
+            annotationsList(
+                mutableListOf(
+                    DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC,
+                    DirectionsCriteria.ANNOTATION_MAXSPEED,
+                    DirectionsCriteria.ANNOTATION_CLOSURE,
+                ).apply { addAll(defaultAnnotations) }
+            )
+            continueStraight(true)
+            enableRefresh(true)
+        }
+        DirectionsCriteria.PROFILE_DRIVING -> {
+            annotationsList(
+                mutableListOf(
+                    DirectionsCriteria.ANNOTATION_MAXSPEED,
+                ).apply { addAll(defaultAnnotations) }
+            )
+            continueStraight(true)
+            enableRefresh(false)
+        }
+        DirectionsCriteria.PROFILE_CYCLING,
+        DirectionsCriteria.PROFILE_WALKING -> {
+            annotationsList(defaultAnnotations)
+            continueStraight(false)
+            enableRefresh(false)
+        }
+        else -> throw IllegalArgumentException(
+            "Unknown profile [$profile]. It must be one [DirectionsCriteria.ProfileCriteria]"
+        )
+    }
+
+    profile(profile)
     overview(DirectionsCriteria.OVERVIEW_FULL)
     steps(true)
-    continueStraight(true)
     roundaboutExits(true)
-    annotationsList(
-        listOf(
-            DirectionsCriteria.ANNOTATION_CONGESTION_NUMERIC,
-            DirectionsCriteria.ANNOTATION_MAXSPEED,
-            DirectionsCriteria.ANNOTATION_SPEED,
-            DirectionsCriteria.ANNOTATION_DURATION,
-            DirectionsCriteria.ANNOTATION_DISTANCE,
-            DirectionsCriteria.ANNOTATION_CLOSURE
-        )
-    )
     voiceInstructions(true)
     bannerInstructions(true)
-    enableRefresh(true)
 }
 
 /**
