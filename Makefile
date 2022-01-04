@@ -31,11 +31,17 @@ define run-gradle-tasks
 	done
 endef
 
-.PHONY: check-lint
-check-lint:
+.PHONY: check-kotlin-lint
+check-kotlin-lint:
 	$(call run-gradle-tasks,$(CORE_MODULES),ktlint) \
 	&& $(call run-gradle-tasks,$(UI_MODULES),ktlint) \
 	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),ktlint)
+
+.PHONY: check-android-lint
+check-android-lint:
+	$(call run-gradle-tasks,$(CORE_MODULES),lint) \
+	&& $(call run-gradle-tasks,$(UI_MODULES),lint) \
+	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),lint)
 
 .PHONY: license-verification
 license-verification:

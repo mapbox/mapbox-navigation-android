@@ -1,8 +1,8 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Time formatting -->
     <plurals name="mapbox_number_of_days">
-        <item quantity="one">jour</item>
+        <item quantity="one" tools:ignore="ImpliedQuantity">jour</item>
         <item quantity="other">jours</item>
     </plurals>
     <!-- Hour -->

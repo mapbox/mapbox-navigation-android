@@ -114,7 +114,13 @@ commands:
     steps:
       - run:
           name: Check codestyle
-          command: make check-lint
+          command: make check-kotlin-lint
+
+  run-android-lint:
+    steps:
+      - run:
+          name: Run Android lint
+          command: make check-android-lint
 
   verify-license:
     steps:
@@ -514,6 +520,7 @@ jobs:
           steps:
             - read-workspace
             - verify-codestyle
+            - run-android-lint
             - verify-license
             - verify-common-sdk-version
             - check-api-core

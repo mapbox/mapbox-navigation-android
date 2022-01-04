@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!--
+        The NullSafeMutableLiveData rule fails with index out of bounds exception analysing the MapboxNavigationSDK.kt.
+        Try removing the line after updating androidx.lifecycle libraries
+        -->
+    <issue id="NullSafeMutableLiveData" severity="ignore" />
+</lint>
