@@ -7,6 +7,8 @@ Mapbox welcomes participation and contributions from everyone.
 - Fixed a crash when `ReplayLocationEngine`'s location callback removes itself during getting a location update. [#5305](https://github.com/mapbox/mapbox-navigation-android/pull/5305)
 - Fixed `MapboxTripProgressView` landscape layout to handle `tripProgressViewBackgroundColor` attribute. [#5318](https://github.com/mapbox/mapbox-navigation-android/pull/5318)
 - Fixed an issue where the `onPause` is not called when the app is backgrounded and the implementation is using `MapboxNavigationApp.attachAllActivities`. [#5329](https://github.com/mapbox/mapbox-navigation-android/pull/5329)
+- Fixed a crash when use non-`driving-traffic` profile with extension `RouteOptions.Builder#applyDefaultNavigationOptions`. [#5322](https://github.com/mapbox/mapbox-navigation-android/pull/5322)
+- Refactored extension `RouteOptions.Builder#applyDefaultNavigationOptions`, might be set profile param explicitly. [#5322](https://github.com/mapbox/mapbox-navigation-android/pull/5322)
 
 ## Mapbox Navigation SDK 2.2.0-beta.1 - December 17, 2021
 
