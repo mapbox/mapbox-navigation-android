@@ -3,9 +3,9 @@ package com.mapbox.navigation.ui.maneuver.view
 import android.content.Context
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
-import androidx.core.content.ContextCompat
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.model.ManeuverInstructionGenerator
+import com.mapbox.navigation.ui.maneuver.model.ManeuverPrimaryOptions
 import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.RoadShield
 import com.mapbox.navigation.ui.maneuver.model.toRouteShield
@@ -20,12 +20,14 @@ import com.mapbox.navigation.utils.internal.ifNonNull
  */
 class MapboxPrimaryManeuver : AppCompatTextView {
 
+    private var options = ManeuverPrimaryOptions.Builder().build()
+
     /**
      *
      * @param context Context
      * @constructor
      */
-    constructor(context: Context) : super(context)
+    constructor(context: Context) : this(context, null)
 
     /**
      *
@@ -33,7 +35,11 @@ class MapboxPrimaryManeuver : AppCompatTextView {
      * @param attrs AttributeSet?
      * @constructor
      */
-    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+    constructor(context: Context, attrs: AttributeSet?) : this(
+        context,
+        attrs,
+        R.style.MapboxStylePrimaryManeuver
+    )
 
     /**
      *
@@ -45,18 +51,11 @@ class MapboxPrimaryManeuver : AppCompatTextView {
     constructor(
         context: Context,
         attrs: AttributeSet?,
-        defStyleAttr: Int
-    ) : super(context, attrs, defStyleAttr)
-
-    private var leftDrawable = ContextCompat.getDrawable(
-        context, R.drawable.mapbox_ic_exit_arrow_left
-    )
-    private var rightDrawable = ContextCompat.getDrawable(
-        context, R.drawable.mapbox_ic_exit_arrow_right
-    )
-    private var exitBackground = ContextCompat.getDrawable(
-        context, R.drawable.mapbox_exit_board_background
-    )
+        defStyleAttr: Int,
+        options: ManeuverPrimaryOptions = ManeuverPrimaryOptions.Builder().build()
+    ) : super(context, attrs, defStyleAttr) {
+        this.options = options
+    }
 
     /**
      * Invoke the method to render primary maneuver instructions
@@ -80,7 +79,9 @@ class MapboxPrimaryManeuver : AppCompatTextView {
      */
     fun renderManeuver(maneuver: PrimaryManeuver, routeShields: Set<RouteShield>?) {
         val exitView = MapboxExitText(context)
-        exitView.setExitStyle(exitBackground, leftDrawable, rightDrawable)
+        exitView.updateTextAppearance(options.exitOptions.textAppearance)
+        // TODO: write when to check the type and pass MUTCD or VIENNA when the data is available
+        exitView.updateExitProperties(options.exitOptions.viennaExitProperties)
         val instruction = ManeuverInstructionGenerator.generatePrimary(
             context,
             lineHeight,
@@ -91,5 +92,14 @@ class MapboxPrimaryManeuver : AppCompatTextView {
         if (instruction.isNotEmpty()) {
             text = instruction
         }
+    }
+
+    /**
+     * Invoke method to change the styling of [MapboxPrimaryManeuver] at runtime
+     *
+     * @param options to apply
+     */
+    fun updateOptions(options: ManeuverPrimaryOptions) {
+        this.options = options
     }
 }
