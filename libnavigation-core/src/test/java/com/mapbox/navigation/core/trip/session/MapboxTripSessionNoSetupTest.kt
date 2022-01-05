@@ -1,8 +1,11 @@
 package com.mapbox.navigation.core.trip.session
 
 import android.content.Context
+import android.location.Location
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.android.core.location.LocationEngine
+import com.mapbox.android.core.location.LocationEngineCallback
+import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_NEW
@@ -29,6 +32,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -263,10 +267,41 @@ class MapboxTripSessionNoSetupTest {
         val remainingWaypoints = tripSession.getRouteProgress()?.remainingWaypoints
         assertEquals(1, remainingWaypoints)
     }
+
+    @Test
+    fun `location updates doesn't change state when trip session is stopped`() {
+        val testLocationEngine = TestLocationEngine.create()
+        val tripSession = buildTripSession(
+            locationEngine = testLocationEngine,
+        )
+
+        tripSession.start(false)
+        tripSession.stop()
+        testLocationEngine.updateLocation(createLocation())
+
+        assertNull(tripSession.getRawLocation())
+    }
+
+    @Test
+    fun `trip session works with a synchronous location update`() {
+        val testLocation = createLocation(latitude = 99.0)
+        val locationEngineMock = mockk<LocationEngine>(relaxed = true)
+        triggerLocationEngineUpdateOnSubscribe(locationEngineMock, testLocation)
+        val nativeNavigator = createNativeNavigatorMock()
+        triggerStatusUpdateOnEachLocationUpdate(nativeNavigator)
+        val tripSession = buildTripSession(
+            locationEngine = locationEngineMock,
+            nativeNavigator = nativeNavigator,
+        )
+
+        tripSession.start(false)
+
+        assertEquals(testLocation, tripSession.getRawLocation())
+    }
 }
 
 private fun buildTripSession(
-    nativeNavigator: MapboxNativeNavigator = mockk(relaxed = true),
+    nativeNavigator: MapboxNativeNavigator = createNativeNavigatorMock(),
     locationEngine: LocationEngine = TestLocationEngine.create()
 ): MapboxTripSession {
     val context: Context = ApplicationProvider.getApplicationContext()
@@ -370,5 +405,36 @@ private fun List<NavigatorObserver>.onStatus(
 ) {
     this.forEach {
         it.onStatus(statusOrigin, status)
+    }
+}
+
+private fun triggerStatusUpdateOnEachLocationUpdate(
+    nativeNavigator: MapboxNativeNavigator,
+) {
+    val navigatorObservers = recordNavigatorObservers(nativeNavigator)
+    coEvery {
+        nativeNavigator.updateLocation(any())
+    } answers {
+        navigatorObservers.onStatus(
+            NavigationStatusOrigin.LOCATION_UPDATE,
+            createNavigationStatus(
+                location = firstArg(),
+                voiceInstruction = null
+            )
+        )
+        true
+    }
+}
+
+private fun triggerLocationEngineUpdateOnSubscribe(
+    locationEngineMock: LocationEngine,
+    location: Location
+) {
+    every {
+        locationEngineMock.requestLocationUpdates(any(), any(), any())
+    } answers {
+        secondArg<LocationEngineCallback<LocationEngineResult>>().onSuccess(
+            LocationEngineResult.create(location)
+        )
     }
 }
