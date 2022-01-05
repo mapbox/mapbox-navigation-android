@@ -3,9 +3,9 @@ package com.mapbox.navigation.ui.maneuver.view
 import android.content.Context
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
-import androidx.core.content.ContextCompat
 import com.mapbox.navigation.ui.maneuver.R
 import com.mapbox.navigation.ui.maneuver.model.ManeuverInstructionGenerator
+import com.mapbox.navigation.ui.maneuver.model.ManeuverSecondaryOptions
 import com.mapbox.navigation.ui.maneuver.model.RoadShield
 import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.toRouteShield
@@ -20,12 +20,14 @@ import com.mapbox.navigation.utils.internal.ifNonNull
  */
 class MapboxSecondaryManeuver : AppCompatTextView {
 
+    private var options = ManeuverSecondaryOptions.Builder().build()
+
     /**
      *
      * @param context Context
      * @constructor
      */
-    constructor(context: Context) : super(context)
+    constructor(context: Context) : this(context, null)
 
     /**
      *
@@ -33,7 +35,11 @@ class MapboxSecondaryManeuver : AppCompatTextView {
      * @param attrs AttributeSet?
      * @constructor
      */
-    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+    constructor(context: Context, attrs: AttributeSet?) : this(
+        context,
+        attrs,
+        R.style.MapboxStyleSecondaryManeuver
+    )
 
     /**
      *
@@ -45,18 +51,11 @@ class MapboxSecondaryManeuver : AppCompatTextView {
     constructor(
         context: Context,
         attrs: AttributeSet?,
-        defStyleAttr: Int
-    ) : super(context, attrs, defStyleAttr)
-
-    private var leftDrawable = ContextCompat.getDrawable(
-        context, R.drawable.mapbox_ic_exit_arrow_left
-    )
-    private var rightDrawable = ContextCompat.getDrawable(
-        context, R.drawable.mapbox_ic_exit_arrow_right
-    )
-    private var exitBackground = ContextCompat.getDrawable(
-        context, R.drawable.mapbox_exit_board_background
-    )
+        defStyleAttr: Int,
+        options: ManeuverSecondaryOptions = ManeuverSecondaryOptions.Builder().build()
+    ) : super(context, attrs, defStyleAttr) {
+        this.options = options
+    }
 
     /**
      * Invoke the method to render secondary maneuver instructions
@@ -80,7 +79,9 @@ class MapboxSecondaryManeuver : AppCompatTextView {
      */
     fun renderManeuver(maneuver: SecondaryManeuver?, routeShields: Set<RouteShield>?) {
         val exitView = MapboxExitText(context)
-        exitView.setExitStyle(exitBackground, leftDrawable, rightDrawable)
+        exitView.updateTextAppearance(options.exitOptions.textAppearance)
+        // TODO: write when to check the type and pass MUTCD or VIENNA when the data is available
+        exitView.updateExitProperties(options.exitOptions.mutcdExitProperties)
         val instruction = ManeuverInstructionGenerator.generateSecondary(
             context,
             lineHeight,
@@ -91,5 +92,14 @@ class MapboxSecondaryManeuver : AppCompatTextView {
         if (instruction.isNotEmpty()) {
             text = instruction
         }
+    }
+
+    /**
+     * Invoke method to change the styling of [MapboxSecondaryManeuver] at runtime
+     *
+     * @param options to apply
+     */
+    fun updateOptions(options: ManeuverSecondaryOptions) {
+        this.options = options
     }
 }

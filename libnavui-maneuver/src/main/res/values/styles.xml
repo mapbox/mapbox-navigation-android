@@ -24,6 +24,27 @@
     <item name="android:ellipsize">end</item>
   </style>
 
+  <style name="MapboxStyleExitTextForPrimary">
+    <item name="android:textSize">30sp</item>
+    <item name="android:includeFontPadding">false</item>
+    <item name="android:textStyle">bold</item>
+    <item name="android:textColor">@color/mapbox_exit_text_color</item>
+  </style>
+
+  <style name="MapboxStyleExitTextForSecondary">
+    <item name="android:textSize">24sp</item>
+    <item name="android:includeFontPadding">false</item>
+    <item name="android:textStyle">bold</item>
+    <item name="android:textColor">@color/mapbox_exit_text_color</item>
+  </style>
+
+  <style name="MapboxStyleExitTextForSub">
+    <item name="android:textSize">18sp</item>
+    <item name="android:includeFontPadding">false</item>
+    <item name="android:textStyle">bold</item>
+    <item name="android:textColor">@color/mapbox_exit_text_color</item>
+  </style>
+
   <style name="MapboxStyleStepDistance">
     <item name="android:textColor">@color/mapbox_step_distance_text_color</item>
     <item name="android:textSize">22sp</item>
