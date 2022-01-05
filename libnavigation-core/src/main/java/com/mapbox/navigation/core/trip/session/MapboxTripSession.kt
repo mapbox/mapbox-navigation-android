@@ -77,7 +77,7 @@ internal class MapboxTripSession(
 
     private companion object {
         private val TAG = Tag("MbxTripSession")
-        private const val MIN_NEXT_WAYPOINT_INDEX = 1
+        private const val INDEX_OF_INITIAL_LEG_TARGET = 1
     }
 
     override fun setRoutes(
@@ -322,14 +322,26 @@ internal class MapboxTripSession(
             val routeCoordinates = tripStatus.route?.routeOptions()?.coordinatesList()
             return if (routeCoordinates != null) {
                 val waypointsCount = routeCoordinates.size
-                // TODO: get rid of the workaround https://github.com/mapbox/mapbox-navigation-android/issues/5275
-                val nextWaypointIndex = max(
-                    MIN_NEXT_WAYPOINT_INDEX,
+                val nextWaypointIndex = normalizeNextWaypointIndex(
                     tripStatus.navigationStatus.nextWaypointIndex
                 )
                 return waypointsCount - nextWaypointIndex
             } else 0
         }
+
+        /**
+         * On the Android side, we always start navigation from the current position.
+         * So we expect that the next waypoint index will not be less than 1.
+         * But the native part considers the origin as a usual waypoint.
+         * It can return the next waypoint index 0. Be careful, this case isn't easy to reproduce.
+         *
+         * For example, nextWaypointIndex=0 leads to an incorrect rerouting.
+         * We don't want to get to an initial position even it hasn't been reached yet.
+         */
+        private fun normalizeNextWaypointIndex(nextWaypointIndex: Int) = max(
+            INDEX_OF_INITIAL_LEG_TARGET,
+            nextWaypointIndex
+        )
     }
 
     /**
