@@ -243,8 +243,6 @@ internal class MapboxTripSession(
     }
 
     private fun updateRawLocation(rawLocation: Location) {
-        if (state != TripSessionState.STARTED) return
-
         this.rawLocation = rawLocation
         locationObservers.forEach { it.onNewRawLocation(rawLocation) }
         mainJobController.scope.launch(start = CoroutineStart.UNDISPATCHED) {
