@@ -4,6 +4,7 @@ import android.content.res.Resources
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ImageSpan
+import com.mapbox.navigation.ui.shield.model.RouteShield
 import com.mapbox.navigation.ui.utils.internal.SvgUtil
 import com.mapbox.navigation.ui.utils.internal.extensions.drawableWithHeight
 import java.io.ByteArrayInputStream
@@ -14,10 +15,10 @@ internal object RoadShieldGenerator {
         shieldText: String,
         desiredHeight: Int,
         resources: Resources,
-        roadShield: RoadShield? = null
+        routeShield: RouteShield? = null
     ): SpannableStringBuilder {
         val roadShieldBuilder = SpannableStringBuilder(shieldText)
-        val shieldIcon = roadShield?.shieldIcon
+        val shieldIcon = routeShield?.byteArray
         if (shieldIcon != null && shieldIcon.isNotEmpty()) {
             val stream = ByteArrayInputStream(shieldIcon)
             val svgBitmap = SvgUtil.renderAsBitmapWithHeight(stream, desiredHeight)

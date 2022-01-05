@@ -12,6 +12,7 @@ Mapbox welcomes participation and contributions from everyone.
 - Exposed a new API `MapboxManeuverView.updateLaneGuidanceIconStyle` that would allow changing the style of `MapboxLaneGuidanceAdapter` at runtime. [#5334](https://github.com/mapbox/mapbox-navigation-android/pull/5334)
 - Fixed a crash when `MapboxNavigationViewportDataSourceDebugger.enabled` is repeatedly set to true. [#5347](https://github.com/mapbox/mapbox-navigation-android/pull/5347)
 - Implemented vanishing route line feature from 1.x for exposing an option to adjust/limit the frequency of the vanishing route line updates. The MapboxRouteLineOptions.vanishingRouteLineUpdateIntervalNano can reduce the frequency of vanishing route line updates when the value of the option increases. [#5344](https://github.com/mapbox/mapbox-navigation-android/pull/5344)
+- Fixed `RoadShield` by reverting the breaking changes and use the new shield callback. [#5302](https://github.com/mapbox/mapbox-navigation-android/pull/5302)
 
 ## Mapbox Navigation SDK 2.0.5 - January 7, 2022
 This is a patch release on top of `v2.0.x` which does not include changes introduced in `v2.1.x` and later.

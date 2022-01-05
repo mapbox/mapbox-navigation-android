@@ -34,6 +34,8 @@ package com.mapbox.navigation.ui.shield.model {
   }
 
   public static final class RouteShield.MapboxLegacyShield extends com.mapbox.navigation.ui.shield.model.RouteShield {
+    method public String getInitialUrl();
+    property public final String initialUrl;
   }
 
   public fun interface RouteShieldCallback {
@@ -45,6 +47,12 @@ package com.mapbox.navigation.ui.shield.model {
     method public String getUrl();
     property public final String errorMessage;
     property public final String url;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class RouteShieldFactory {
+    method public static com.mapbox.navigation.ui.shield.model.RouteShield.MapboxLegacyShield buildRouteShield(String downloadUrl, byte[] byteArray, String initialUrl);
+    method public static com.mapbox.navigation.ui.shield.model.RouteShield.MapboxDesignedShield buildRouteShield(String downloadUrl, byte[] byteArray, com.mapbox.api.directions.v5.models.MapboxShield mapboxShield, com.mapbox.api.directions.v5.models.ShieldSprite shieldSprite);
+    field public static final com.mapbox.navigation.ui.shield.model.RouteShieldFactory INSTANCE;
   }
 
   public final class RouteShieldOrigin {

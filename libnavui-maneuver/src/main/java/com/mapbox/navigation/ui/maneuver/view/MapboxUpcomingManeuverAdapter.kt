@@ -18,7 +18,9 @@ import com.mapbox.navigation.ui.maneuver.model.PrimaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.RoadShield
 import com.mapbox.navigation.ui.maneuver.model.SecondaryManeuver
 import com.mapbox.navigation.ui.maneuver.model.StepDistance
+import com.mapbox.navigation.ui.maneuver.model.toRouteShield
 import com.mapbox.navigation.ui.maneuver.view.MapboxUpcomingManeuverAdapter.MapboxUpcomingManeuverViewHolder
+import com.mapbox.navigation.ui.shield.model.RouteShield
 import com.mapbox.navigation.utils.internal.ifNonNull
 
 /**
@@ -37,7 +39,7 @@ class MapboxUpcomingManeuverAdapter(
     @StyleRes private var secondaryManeuverAppearance: Int? = null
     private val inflater = LayoutInflater.from(context)
     private val upcomingManeuverList = mutableListOf<Maneuver>()
-    private val maneuverShieldMap = mutableMapOf<String, List<RoadShield>>()
+    private val routeShields = mutableSetOf<RouteShield>()
 
     /**
      * Binds the given View to the position.
@@ -78,29 +80,24 @@ class MapboxUpcomingManeuverAdapter(
      * @param shieldMap Map<String, RoadShield?>
      */
     @Deprecated(
-        message = "The method can only render one shield if an instruction has multiple shields",
+        message = "The method may or may not render multiple shields for a given instruction",
         replaceWith = ReplaceWith("updateShields(shields)")
     )
     fun updateRoadShields(shieldMap: Map<String, RoadShield?>) {
-        val shields = hashMapOf<String, List<RoadShield>>()
-        shieldMap.forEach {
-            val value = it.value
-            shields[it.key] = if (value != null) {
-                listOf(value)
-            } else {
-                listOf()
+        shieldMap.forEach { entry ->
+            ifNonNull(entry.value) { value ->
+                routeShields.add(value.toRouteShield())
             }
         }
-        updateShields(shields)
     }
 
     /**
-     * Given a [Map] of id to list of [RoadShield], the function maintains a map of id to list of
-     * [RoadShield] that is used to render the shield on the view
-     * @param shields Map<String, List<RoadShield>>
+     * Given a set of [RoadShield], the function maintains a set of [RoadShield] that is used to
+     * render the shield on the view
+     * @param shields Set<RoadShield>
      */
-    fun updateShields(shields: Map<String, List<RoadShield>>) {
-        maneuverShieldMap.putAll(shields)
+    fun updateShields(shields: Set<RouteShield>) {
+        routeShields.addAll(shields)
     }
 
     /**
@@ -159,10 +156,8 @@ class MapboxUpcomingManeuverAdapter(
             val primary = maneuver.primary
             val secondary = maneuver.secondary
             val stepDistance = maneuver.stepDistance
-            val primaryId = primary.id
-            val secondaryId = secondary?.id
-            drawPrimaryManeuver(primary, maneuverShieldMap[primaryId])
-            drawSecondaryManeuver(secondary, maneuverShieldMap[secondaryId])
+            drawPrimaryManeuver(primary, routeShields)
+            drawSecondaryManeuver(secondary, routeShields)
             drawTotalStepDistance(stepDistance)
             updateStepDistanceTextAppearance()
             updateUpcomingPrimaryManeuverTextAppearance()
@@ -187,8 +182,8 @@ class MapboxUpcomingManeuverAdapter(
             }
         }
 
-        private fun drawPrimaryManeuver(primary: PrimaryManeuver, roadShields: List<RoadShield>?) {
-            viewBinding.primaryManeuverText.renderManeuver(primary, roadShields)
+        private fun drawPrimaryManeuver(primary: PrimaryManeuver, routeShields: Set<RouteShield>?) {
+            viewBinding.primaryManeuverText.renderManeuver(primary, routeShields)
             viewBinding.maneuverIcon.renderPrimaryTurnIcon(primary)
         }
 
@@ -198,11 +193,11 @@ class MapboxUpcomingManeuverAdapter(
 
         private fun drawSecondaryManeuver(
             secondary: SecondaryManeuver?,
-            roadShields: List<RoadShield>?
+            routeShields: Set<RouteShield>?
         ) {
             if (secondary != null) {
                 viewBinding.secondaryManeuverText.visibility = VISIBLE
-                viewBinding.secondaryManeuverText.renderManeuver(secondary, roadShields)
+                viewBinding.secondaryManeuverText.renderManeuver(secondary, routeShields)
                 updateConstraintsToHaveSecondary()
                 viewBinding.primaryManeuverText.maxLines = 1
             } else {

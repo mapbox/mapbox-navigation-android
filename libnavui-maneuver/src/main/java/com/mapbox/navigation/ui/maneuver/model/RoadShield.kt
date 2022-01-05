@@ -1,17 +1,16 @@
 package com.mapbox.navigation.ui.maneuver.model
 
-import com.mapbox.api.directions.v5.models.MapboxShield
-
 /**
  * Data structure  that holds information about road shield.
  * @property shieldUrl String
  * @property shieldIcon ByteArray
- * @property mapboxShield MapboxShield
  */
-data class RoadShield @JvmOverloads constructor(
+@Deprecated(
+    message = "The data class is incapable of delivering Mapbox designed route shields."
+)
+data class RoadShield constructor(
     val shieldUrl: String,
-    var shieldIcon: ByteArray,
-    val mapboxShield: MapboxShield? = null
+    var shieldIcon: ByteArray
 ) {
 
     /**
@@ -25,7 +24,6 @@ data class RoadShield @JvmOverloads constructor(
 
         if (shieldUrl != other.shieldUrl) return false
         if (!shieldIcon.contentEquals(other.shieldIcon)) return false
-        if (mapboxShield != other.mapboxShield) return false
 
         return true
     }
@@ -36,7 +34,6 @@ data class RoadShield @JvmOverloads constructor(
     override fun hashCode(): Int {
         var result = shieldUrl.hashCode()
         result = 31 * result + shieldIcon.contentHashCode()
-        result = 31 * result + (mapboxShield?.hashCode() ?: 0)
         return result
     }
 
@@ -47,7 +44,6 @@ data class RoadShield @JvmOverloads constructor(
         return "RoadShield(" +
             "shieldUrl='$shieldUrl', " +
             "shieldIcon=${shieldIcon.contentToString()}, " +
-            "mapboxShield=$mapboxShield" +
             ")"
     }
 }
