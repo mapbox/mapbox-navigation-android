@@ -242,7 +242,7 @@ class MapboxTripSessionNoSetupTest {
     }
 
     @Test
-    fun `fallback to the next waypoint index 1 when navigator makes mistake returning 0`() {
+    fun `fallback to the next waypoint index 1 when navigator doesn't think we reached it and returns 0`() {
         // arrange
         val nativeNavigator = createNativeNavigatorMock()
         coEvery {
