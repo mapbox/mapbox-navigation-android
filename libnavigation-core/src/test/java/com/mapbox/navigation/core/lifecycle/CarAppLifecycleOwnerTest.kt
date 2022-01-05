@@ -38,11 +38,55 @@ class CarAppLifecycleOwnerTest {
             val activity: Activity = mockActivity()
             onActivityCreated(activity, mockk())
             onActivityStarted(activity)
+            onActivityResumed(activity)
         }
 
         verifyOrder {
             testLifecycleObserver.onCreate(any())
             testLifecycleObserver.onStart(any())
+            testLifecycleObserver.onResume(any())
+        }
+    }
+
+    @Test
+    fun `verify order when the app is foregrounded and backgrounded`() {
+        carAppLifecycleOwner.activityLifecycleCallbacks.apply {
+            val activity: Activity = mockActivity()
+            onActivityCreated(activity, mockk())
+            onActivityStarted(activity)
+            onActivityResumed(activity)
+            onActivityPaused(activity)
+            onActivityStopped(activity)
+            onActivityStarted(activity)
+            onActivityResumed(activity)
+        }
+
+        verifyOrder {
+            testLifecycleObserver.onCreate(any())
+            testLifecycleObserver.onStart(any())
+            testLifecycleObserver.onResume(any())
+            testLifecycleObserver.onPause(any())
+            testLifecycleObserver.onResume(any())
+        }
+    }
+
+    @Test
+    fun `verify order when the lifecycle is backgrounded and foregrounded`() {
+        carAppLifecycleOwner.startedReferenceCounter.apply {
+            onCreate(carAppLifecycleOwner)
+            onStart(carAppLifecycleOwner)
+            onResume(carAppLifecycleOwner)
+            onPause(carAppLifecycleOwner)
+            onStop(carAppLifecycleOwner)
+            onStart(carAppLifecycleOwner)
+            onResume(carAppLifecycleOwner)
+        }
+
+        verifyOrder {
+            testLifecycleObserver.onCreate(any())
+            testLifecycleObserver.onStart(any())
+            testLifecycleObserver.onResume(any())
+            testLifecycleObserver.onPause(any())
             testLifecycleObserver.onResume(any())
         }
     }
