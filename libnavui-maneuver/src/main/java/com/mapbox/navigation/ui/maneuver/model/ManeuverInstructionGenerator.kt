@@ -9,6 +9,9 @@ import com.mapbox.navigation.ui.utils.internal.ifNonNull
 
 internal object ManeuverInstructionGenerator {
 
+    private const val MINIMUM_DISPLAY_REF_LENGTH = 2
+    private const val MAXIMUM_DISPLAY_REF_LENGTH = 6
+
     fun generatePrimary(
         context: Context,
         desiredHeight: Int,
